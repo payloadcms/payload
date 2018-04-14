@@ -19,6 +19,6 @@ module.exports = function (app) {
   //  /payload/<model-name>/?arg1=blah&arg2=blah
 
   return {
-    views: `${__dirname}\\views`
+    views: path.join(__dirname, 'views')
   }
 }
