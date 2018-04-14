@@ -1,4 +1,5 @@
-var path = require('path');
+'use strict';
+
 var payload = require('./payload');
 
 const express = require('express');
@@ -12,4 +13,4 @@ app.get('/', (req, res) => res.render('index',
     title: 'Index'
   }));
 
-app.listen(3000, () => console.log('Example app listening on port 3000!'))
+app.listen(3000, () => console.log('Example app listening on http://localhost:3000'))
