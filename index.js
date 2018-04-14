@@ -1,13 +1,14 @@
 'use strict';
 
-var payload = require('./payload');
-
 const express = require('express');
 const app = express();
 app.set('view engine', 'pug');
 
-var payloadBootstrap = payload(app);
-app.set('views', [__dirname + '/views', payloadBootstrap.views]);
+const Payload = require('./payload');
+let payload = new Payload(app);
+
+app.set('views', [`${__dirname}/views`, payload.views]);
+
 app.get('/', (req, res) => res.render('index',
   {
     title: 'Index'
