@@ -5,7 +5,7 @@ const app = express();
 app.set('view engine', 'pug');
 
 const Payload = require('./payload');
-let payload = new Payload(app);
+const payload = new Payload(app);
 
 app.set('views', [`${__dirname}/views`, payload.views]);
 

@@ -14,9 +14,14 @@ class Payload {
 
 let mountDefaultViews = function (app) {
   fs.readdir(path.join(__dirname, 'views'), (err, files) => {
-    files.forEach((file, index) => {
+    if (err) {
+      console.log("[Payload] Unable to load views");
+      return;
+    }
+
+    files.forEach((file) => {
       let fileNoExtension = file.replace(/\.[^/.]+$/, "");
-      console.log(`Mounting ${file}`);
+      console.log(`[Payload] Mounting ${file}...`);
       app.get(`/payload/${fileNoExtension}`, function (req, res) {
         res.render(fileNoExtension,
           {
