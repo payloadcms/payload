@@ -1,6 +1,9 @@
+/* eslint-disable no-magic-numbers */
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
+
+const request = require('supertest');
 
 const Payload = require('../');
 
@@ -12,10 +15,34 @@ function initBasicPayload() {
   });
 }
 
+function getConfiguredExpress() {
+  let expressApp = express();
+  expressApp.set('view engine', 'pug'); //TODO: Reactify
+  return expressApp;
+}
+
 describe('Basic Payload Tests', () => {
   test('Instantiate Payload', () => {
     const payload = initBasicPayload();
     expect(payload).toBeDefined();
+  });
+
+  test('Mount Admin view', (done) => {
+    const expressApp = getConfiguredExpress();
+    const payload = new Payload({
+      express: expressApp,
+      mongoose: mongoose,
+      baseURL: 'base123'
+    });
+
+    expressApp.set('views', payload.views);
+    let server = expressApp.listen(3000, () => { console.log('Example app listening on http://localhost:3000');});
+
+    request(expressApp).get('/payload/admin').then((response) => {
+      expect(response.statusCode).toEqual(200);
+      server.close();
+      done();
+    });
   });
 
   test('Create new collection', () => {
