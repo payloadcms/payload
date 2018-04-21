@@ -2,12 +2,29 @@
 
 const express = require('express');
 const app = express();
+const mongoose = require('mongoose');
 app.set('view engine', 'pug');
 
 // Get Payload class
 const Payload = require('./payload');
 // Initialize class
-const payload = new Payload(app);
+const payload = new Payload({
+  express: app,
+  mongoose,
+  baseURL: 'base123'
+});
+
+// Sample collection creation
+let coolCollection = payload.newCollection('cool');
+coolCollection.add({
+  test: { testProp: 'one', testProp2: 'two' }
+});
+coolCollection.register();
+
+// Retrieve collection
+let retrievedCollection = payload.getCollection('cool');
+console.log(`Retrieved ${retrievedCollection.key} collection`);
+console.log(`testProp: ${coolCollection.fields.test.testProp}`);
 
 // Must add payload views here
 app.set('views', [`${__dirname}/views`, payload.views]);

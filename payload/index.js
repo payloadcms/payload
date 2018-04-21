@@ -1,42 +1,43 @@
 const path = require('path');
-let fs = require('fs');
+const Collection = require('./Collection');
 
 class Payload {
 
-  constructor(app) {
-    this.app = app;
+  constructor(options) {
+    this.app = options.express;
+    this.mongoose = options.mongoose;
+    this.baseURL = options.baseURL;
+
     this.views = path.join(__dirname, 'views');
 
-    mountInternalModel(this.app, path.join(__dirname, 'models'), 'User');
-    mountDefaultViews(this.app);
-  }
-}
+    this.collections = {};
 
-let mountDefaultViews = function (app) {
-  fs.readdir(path.join(__dirname, 'views'), (err, files) => {
-    if (err) {
-      console.log("[Payload] Unable to load views");
+    this.app.get(`/payload/admin`, function (req, res) {
+      res.render('admin',
+        {
+          title: 'Payload Admin'
+        })
+    });
+  }
+
+  newCollection(key) {
+    if (key in this.collections)
+    {
+      console.log(`${key} already exists in collections`);
       return;
     }
 
-    files.forEach((file) => {
-      let fileNoExtension = file.replace(/\.[^/.]+$/, "");
-      console.log(`[Payload] Mounting ${file}...`);
-      app.get(`/payload/${fileNoExtension}`, function (req, res) {
-        res.render(fileNoExtension,
-          {
-            title: `Payload ${fileNoExtension}`
-          })
-      });
-    });
-  });
-};
+    return new Collection(this, key);
+  }
 
-let mountInternalModel = function (app, directory, modelName) {
-  app.get(`/payload/${modelName}`, function (req, res) {
-    const User = require(path.join(directory, modelName));
-    res.send(JSON.stringify(new User("John Doe", 22, "john@doe.com")));
-  });
-};
+  getCollection(key) {
+    if (!(key in this.collections)) {
+      console.log(`${key} does not exist in collections or has not been registered yet`);
+      return;
+    }
+
+    return this.collections[key];
+  }
+}
 
 module.exports = Payload;
