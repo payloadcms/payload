@@ -31,6 +31,20 @@ describe('Basic Payload Tests', () => {
     let retrieved = payload.getCollection('key');
     expect(retrieved).toBeDefined();
   });
+
+  test('Throw on attempt to create collection already existing', () => {
+    const payload = initBasicPayload();
+    let collection = payload.newCollection('key');
+    collection.register();
+    let duplicateCollection = payload.newCollection('key');
+    expect(duplicateCollection.toString()).toEqual('Error: key already exists in collections');
+  });
+
+  test('Throw on attempt to retrieve non-existent collection', () => {
+    const payload = initBasicPayload();
+    let collection = payload.getCollection('key');
+    expect(collection.toString()).toEqual('Error: key does not exist or has not been registered yet');
+  });
 });
 
 describe('Collection tests', () => {
