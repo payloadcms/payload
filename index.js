@@ -34,4 +34,4 @@ app.get('/', (req, res) => res.render('index',
     title: 'Index'
   }));
 
-app.listen(3000, () => console.log('Example app listening on http://localhost:3000'))
+app.listen(3000, () => console.log('Example app listening on http://localhost:3000'));

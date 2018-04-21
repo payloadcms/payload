@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node ./node_modules/jest/bin/jest.js"
   },
   "author": "",
   "license": "ISC",
@@ -15,6 +15,7 @@
     "pug": "^2.0.3"
   },
   "devDependencies": {
-    "eslint": "^4.19.1"
+    "eslint": "^4.19.1",
+    "jest": "^22.4.3"
   }
 }

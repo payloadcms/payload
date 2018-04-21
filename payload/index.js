@@ -4,7 +4,7 @@ const Collection = require('./Collection');
 class Payload {
 
   constructor(options) {
-    this.app = options.express;
+    this.express = options.express;
     this.mongoose = options.mongoose;
     this.baseURL = options.baseURL;
 
@@ -12,7 +12,7 @@ class Payload {
 
     this.collections = {};
 
-    this.app.get(`/payload/admin`, function (req, res) {
+    this.express.get(`/payload/admin`, function (req, res) {
       res.render('admin',
         {
           title: 'Payload Admin'
