@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "node ./node_modules/jest/bin/jest.js"
+    "test": "node ./node_modules/jest/bin/jest.js",
+    "watch": "node ./node_modules/nodemon/bin/nodemon.js --watch payload"
   },
   "author": "",
   "license": "ISC",
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "eslint": "^4.19.1",
-    "jest": "^22.4.3"
+    "jest": "^22.4.3",
+    "nodemon": "^1.17.3"
   }
 }
