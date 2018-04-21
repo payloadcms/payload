@@ -2,7 +2,6 @@ const path = require('path');
 const Collection = require('./Collection');
 
 class Payload {
-
   constructor(options) {
     this.express = options.express;
     this.mongoose = options.mongoose;
@@ -12,19 +11,17 @@ class Payload {
 
     this.collections = {};
 
-    this.express.get(`/payload/admin`, function (req, res) {
+    this.express.get('/payload/admin', (req, res) => {
       res.render('admin',
         {
           title: 'Payload Admin'
-        })
+        });
     });
   }
 
   newCollection(key) {
-    if (key in this.collections)
-    {
-      console.log(`${key} already exists in collections`);
-      return;
+    if (key in this.collections) {
+      throw Error(`${key} already exists in collections`);
     }
 
     return new Collection(this, key);
@@ -32,8 +29,7 @@ class Payload {
 
   getCollection(key) {
     if (!(key in this.collections)) {
-      console.log(`${key} does not exist in collections or has not been registered yet`);
-      return;
+      throw Error(`${key} does not exist in collections or has not been registered yet`);
     }
 
     return this.collections[key];

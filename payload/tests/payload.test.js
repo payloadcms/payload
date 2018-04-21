@@ -4,6 +4,14 @@ const mongoose = require('mongoose');
 
 const Payload = require('../');
 
+function initBasicPayload() {
+  return new Payload({
+    express: app,
+    mongoose: mongoose,
+    baseURL: 'base123'
+  });
+}
+
 describe('Basic Payload Tests', () => {
   test('Instantiate Payload', () => {
     const payload = initBasicPayload();
@@ -35,11 +43,3 @@ describe('Collection tests', () => {
     expect(collection.fields.test.testProp).toBe('firstProp');
   });
 });
-
-function initBasicPayload() {
-  return new Payload({
-    express: app,
-    mongoose,
-    baseURL: 'base123'
-  });
-}
