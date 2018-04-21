@@ -1,10 +1,11 @@
 {
-  "name": "payload",
+  "name": "payload-tester",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "test": "node ./node_modules/jest/bin/jest.js",
     "watch": "node ./node_modules/nodemon/bin/nodemon.js --watch payload"
   },
   "author": "",
