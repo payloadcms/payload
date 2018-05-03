@@ -1,11 +1,12 @@
 {
-  "name": "payload",
+  "name": "payload-tester",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "watch": "node ./node_modules/nodemon/bin/nodemon.js --watch payload"
+    "test": "node ./node_modules/jest/bin/jest.js",
+    "cov": "node ./node_modules/jest/bin/jest.js --coverage"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +18,7 @@
   "devDependencies": {
     "eslint": "^4.19.1",
     "jest": "^22.4.3",
-    "nodemon": "^1.17.3"
+    "nodemon": "^1.17.3",
+    "supertest": "^3.0.0"
   }
 }
