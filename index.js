@@ -1,37 +1,41 @@
-'use strict';
+const path = require('path');
+const Collection = require('./Collection');
 
-const express = require('express');
-const app = express();
-const mongoose = require('mongoose');
-app.set('view engine', 'pug');
+class Payload {
+  constructor(options) {
+    this.express = options.express;
+    this.mongoose = options.mongoose;
+    this.baseURL = options.baseURL;
 
-// Get Payload class
-const Payload = require('./payload');
-// Initialize class
-const payload = new Payload({
-  express: app,
-  mongoose,
-  baseURL: 'base123'
-});
+    this.views = path.join(__dirname, 'views');
 
-// Sample collection creation
-let coolCollection = payload.newCollection('cool');
-coolCollection.add({
-  test: { testProp: 'one', testProp2: 'two' }
-});
-coolCollection.register();
+    this.collections = {};
 
-// Retrieve collection
-let retrievedCollection = payload.getCollection('cool');
-console.log(`Retrieved ${retrievedCollection.key} collection`);
-console.log(`testProp: ${coolCollection.fields.test.testProp}`);
+    this.express.get('/payload/admin', (req, res) => {
+      res.render('admin',
+        {
+          title: 'Payload Admin'
+        });
+    });
+  }
 
-// Must add payload views here
-app.set('views', [`${__dirname}/views`, payload.views]);
+  newCollection(key) {
+    if (key in this.collections) {
+      //TODO: Have discussion about how errors should be handled
+      return new Error(`${key} already exists in collections`);
+    }
 
-app.get('/', (req, res) => res.render('index',
-  {
-    title: 'Index'
-  }));
+    return new Collection(this, key);
+  }
 
-app.listen(3000, () => console.log('Example app listening on http://localhost:3000'));
+  getCollection(key) {
+    if (!(key in this.collections)) {
+      //TODO: Have discussion about how errors should be handled
+      return new Error(`${key} does not exist or has not been registered yet`);
+    }
+
+    return this.collections[key];
+  }
+}
+
+module.exports = Payload;
