@@ -21,7 +21,7 @@ class Payload {
 
   newCollection(key) {
     if (key in this.collections) {
-      //TODO: Have discussion about how errors should be handled
+      // TODO: Have discussion about how errors should be handled
       return new Error(`${key} already exists in collections`);
     }
 
@@ -30,7 +30,7 @@ class Payload {
 
   getCollection(key) {
     if (!(key in this.collections)) {
-      //TODO: Have discussion about how errors should be handled
+      // TODO: Have discussion about how errors should be handled
       return new Error(`${key} does not exist or has not been registered yet`);
     }
 
