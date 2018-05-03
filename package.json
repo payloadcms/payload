@@ -10,14 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.3",
-    "mongoose": "^5.0.15",
     "pug": "^2.0.3"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
     "jest": "^22.4.3",
     "nodemon": "^1.17.3",
-    "supertest": "^3.0.0"
+    "supertest": "^3.0.0",
+    "express": "^4.16.3",
+    "mongoose": "^5.0.15"
   }
 }
