@@ -33,4 +33,4 @@ app.set('views', [`${__dirname}/views`, payload.views]);
 ## Development
 
 - `npm test` to run test suite
-- `npm run watch` to run nodemon on the `payload` directory
+- `npm run cov` to test suite with coverage
