@@ -13,7 +13,7 @@ payload init
 
 This command should build out whatever is necessary for Payload to function, but specifically, it should place a configuration file of some type so that Payload can read from it while being used at the command line.  The configuration file, let's say, `payload.config.js`, will contain a default set of options for Payload but it can be customized by the user.
 
-```
+```js
 // payload.config.js
 
 export default {
@@ -38,7 +38,7 @@ I think it might be best to have models defined somewhere that can be checked in
 
 That file would contain all the required configuration for an admin UI to be generated and routes to be automatically opened up, written in a Payload-specific format.
 
-```
+```js
 // Example ./scaffold/Pages.js
 
 export default {
@@ -137,7 +137,7 @@ In addition to client-side files, there would also be routes generated within th
 
 To make loading all admin routes super easy to the end user, we would include one `/admin/routes.js` file that's auto-generated and just points to all the generated admin routes.  A note, this would function exactly the same for Models and API routes.
 
-```
+```js
 // /admin/index.js
 
 require(./pages)
@@ -163,7 +163,7 @@ For now, let's assume that the user has an `index.js` file that functions as an 
 That file will already pull in copies of the user's own Express and Mongoose instances, and we'll also use it to define all configurations in place for Payload as well as the rest of their app.
 
 **Example user index.js:**
-```
+```js
 const express = require('express'),
 	  mongoose = require('mongoose'),
 	  PayloadCMS = require('payload'),
