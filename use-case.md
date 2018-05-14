@@ -22,7 +22,8 @@ export default {
 	modelsDir: './models',
 	apiDir: './api',
 	adminDir: './admin'
-	foo: 'bar'
+	foo: 'bar',
+	mongoURL: 'mongodb://localhost/payload'
 }
 ```
 
@@ -174,7 +175,7 @@ const express = require('express'),
 
 // Before initializing Payload, we should connect to Mongoose on our own
 // The reason would be so that we impose as little as possible on the user
-mongoose.connect('mongodb://localhost/payload')
+mongoose.connect(payloadOptions.mongooseURL)
 
 // If needed, Payload might require passing it the user's instances of Express and Mongoose.  Not sure about this one, because we are going to be dynamically building out routes and etc further down the page.
 const dependencies = {
