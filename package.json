@@ -6,7 +6,7 @@
   "scripts": {
     "test": "node ./node_modules/jest/bin/jest.js",
     "start": "webpack-dev-server --mode development --config config/webpack.base.config.js --open --hot --history-api-fallback",
-    "prebuild": "webpack --mode production --config config/webpack.prod.config.js --env.NODE_ENV=production --progress",
+    "preprod": "webpack --mode production --config config/webpack.prod.config.js --env.NODE_ENV=production --progress",
     "prod": "node server",
     "cov": "node ./node_modules/jest/bin/jest.js --coverage"
   },
@@ -23,6 +23,7 @@
     "@babel/preset-react": "^7.0.0-beta.54",
     "@babel/preset-stage-2": "^7.0.0-beta.54",
     "babel-loader": "^8.0.0-beta.4",
+    "css-hot-loader": "^1.4.0",
     "css-loader": "^1.0.0",
     "eslint": "^4.19.1",
     "express": "^4.16.3",

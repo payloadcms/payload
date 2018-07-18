@@ -4,12 +4,12 @@ import { render } from 'react-dom';
 import './testStyles.scss';
 
 const App = () => {
-    return (
-        <div>
-            <h3>Payload</h3>
-            <p>Yay</p>
-        </div>
-    )
+  return (
+    <div>
+      <h3>Payload</h3>
+      <p>Yay</p>
+    </div>
+  )
 }
 
 render(<App />, document.getElementById('app'));
