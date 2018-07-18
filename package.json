@@ -5,19 +5,41 @@
   "main": "index.js",
   "scripts": {
     "test": "node ./node_modules/jest/bin/jest.js",
+    "start": "webpack-dev-server --mode development --config config/webpack.base.config.js --open --hot --history-api-fallback",
+    "prebuild": "webpack --mode production --config config/webpack.prod.config.js --env.NODE_ENV=production --progress",
+    "prod": "node server",
     "cov": "node ./node_modules/jest/bin/jest.js --coverage"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "pug": "^2.0.3"
+    "pug": "^2.0.3",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.0.0-beta.54",
+    "@babel/preset-env": "^7.0.0-beta.54",
+    "@babel/preset-react": "^7.0.0-beta.54",
+    "@babel/preset-stage-2": "^7.0.0-beta.54",
+    "babel-loader": "^8.0.0-beta.4",
+    "css-loader": "^1.0.0",
     "eslint": "^4.19.1",
-    "jest": "^22.4.3",
-    "nodemon": "^1.17.3",
-    "supertest": "^3.0.0",
     "express": "^4.16.3",
-    "mongoose": "^5.0.15"
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "html-webpack-plugin": "^3.2.0",
+    "jest": "^22.4.3",
+    "mongoose": "^5.0.15",
+    "node-sass": "^4.9.2",
+    "nodemon": "^1.17.3",
+    "optimize-css-assets-webpack-plugin": "^5.0.0",
+    "sass-loader": "^7.0.3",
+    "style-loader": "^0.21.0",
+    "supertest": "^3.0.0",
+    "uglifyjs-webpack-plugin": "^1.2.7",
+    "webpack": "^4.16.1",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.4",
+    "webpack-merge": "^4.1.3"
   }
 }
