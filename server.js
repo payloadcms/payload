@@ -13,7 +13,7 @@ app.get('/*', (req, res, next) => {
 });
 
 /** Get port from environment and store in Express. */
-const port = process.env.PORT || '8000';
+const port = process.env.PORT || '8080';
 app.set('port', port);
 
 /** Create HTTP server. */
@@ -21,4 +21,3 @@ const server = http.createServer(app);
 
 /** Listen on provided port, on all network interfaces. */
 server.listen(port, () => {return console.log(`Server Running on port ${port}`)});
-
