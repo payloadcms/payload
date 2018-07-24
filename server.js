@@ -20,4 +20,6 @@ app.set('port', port);
 const server = http.createServer(app);
 
 /** Listen on provided port, on all network interfaces. */
-server.listen(port, () => {return console.log(`Server Running on port ${port}`)});
+server.listen(port, () => {
+  console.log(`Server Running on port ${port}`)
+;});
