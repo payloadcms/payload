@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 
-import Sidebar from '../../src/client/components/Sidebar';
+import Sidebar from 'Payload/client/components/Sidebar';
 
 import './testStyles.css';
 
