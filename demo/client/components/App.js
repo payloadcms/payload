@@ -7,7 +7,6 @@ import 'payload/client/scss/app.css';
 
 class App extends Component {
   render() {
-
     return (
       <div>
         <React.Fragment>
@@ -16,7 +15,7 @@ class App extends Component {
           </Switch>
         </React.Fragment>
       </div>
-    )
+    );
   }
 }
 

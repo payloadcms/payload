@@ -148,7 +148,7 @@ module.exports = exports = {
     "consistent-this": [ WARN, "self" ],
     "eol-last": WARN,
     "func-names": WARN,
-    "func-style": [ WARN, "declaration" ],
+    "func-style": ["error", "declaration", { "allowArrowFunctions": true }],
     "id-length": [ WARN, { "min": 2, "max": 32 } ],
     "indent": [ WARN, 2 ],
     "jsx-quotes": [ WARN, "prefer-double" ],
@@ -156,7 +156,7 @@ module.exports = exports = {
     // "linebreak-style": [ WARN, "unix" ],
     "lines-around-comment": [ WARN, { "beforeBlockComment": true } ],
     "max-depth": [ WARN, 8 ],
-    "max-len": [ WARN, 132 ],
+    "max-len": OFF,
     "max-nested-callbacks": [ WARN, 8 ],
     "max-params": [ WARN, 8 ],
     "new-cap": WARN,
@@ -181,7 +181,7 @@ module.exports = exports = {
     "no-unneeded-ternary": WARN,
     "object-curly-spacing": [ WARN, "always" ],
     "one-var": OFF,
-    "operator-assignment": [ WARN, "never" ],
+    "operator-assignment": OFF,
     "operator-linebreak": OFF,
     "padded-blocks": [ WARN, "never" ],
     "quote-props": [ WARN, "consistent-as-needed" ],
@@ -196,5 +196,9 @@ module.exports = exports = {
     "space-return-throw-case": OFF,
     "space-unary-ops": ERROR,
     "spaced-comment": [ WARN, "always" ],
-    "wrap-regex": WARN
+    "wrap-regex": WARN,
+
+    // React-specific overridesf
+    "react/display-name": OFF,
+    "react/prop-types": OFF
 }};

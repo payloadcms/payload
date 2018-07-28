@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
 
-export default props => {
+export default () => {
   return (
     <h1>Login</h1>
-  )
-}
+  );
+};
