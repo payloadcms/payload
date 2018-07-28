@@ -7,16 +7,15 @@
     "test": "node ./node_modules/jest/bin/jest.js",
     "cov": "node ./node_modules/jest/bin/jest.js --coverage",
 
-    "demo:build-css": "node-sass-chokidar demo/ -o demo/",
-    "demo:watch-css": "npm run demo:build-css && node-sass-chokidar demo/ -o demo/ --watch --recursive",
-    "demo:webpack": "webpack-dev-server --mode development --config config/webpack.demo.config.js --open --hot --history-api-fallback",
-    "demo": "npm-run-all -p watch-css demo:watch-css demo:webpack",
+    "build-demo-css": "node-sass-chokidar --include-path ./src/client/scss demo/ -o demo/",
+    "watch-demo-css": "npm run build-demo-css && node-sass-chokidar --include-path ./src/client/scss demo/ -o demo/ --watch --recursive",
 
-    "build-css": "node-sass-chokidar src/ -o src/",
-    "watch-css": "npm run demo:build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
-    "dev": "webpack-dev-server --mode development --config config/webpack.base.config.js --open --hot --history-api-fallback",
-    "prebuild": "webpack --mode production --config config/webpack.prod.config.js --env.NODE_ENV=production --progress",
-    "build": "node server"
+    "build-module-css": "node-sass-chokidar --include-path ./src/client/scss src/ -o src/",
+    "watch-module-css": "npm run build-demo-css && node-sass-chokidar --include-path ./src/client/scss src/ -o src/ --watch --recursive",
+
+    "webpack": "webpack-dev-server --mode development --config config/webpack.demo.config.js --open --hot --history-api-fallback",
+
+    "dev": "npm-run-all -p watch-module-css watch-demo-css webpack"
   },
   "author": "",
   "license": "ISC",
@@ -27,7 +26,8 @@
     "pug": "^2.0.3",
     "react": "^16.4.1",
     "react-document-meta": "^3.0.0-beta.2",
-    "react-dom": "^16.4.1"
+    "react-dom": "^16.4.1",
+    "react-router-dom": "^4.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.54",

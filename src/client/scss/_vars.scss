@@ -1,0 +1,86 @@
+//////////////////////////////
+// BASELINE GRID
+//////////////////////////////
+
+$body           : 18px;
+$base-px        : 36px;
+$base           : ($base-px / $body) + rem; // This computes to 30px in rem
+
+@function rem($multiplier) {
+	@return ($base-px / $body) * $multiplier + rem;
+}
+
+/////////////////////////////
+// BREAKPOINTS
+/////////////////////////////
+
+$mobile-width   : 750px;
+$tablet-width   : 1024px;
+$content-width  : 1280px;
+$frame-width    : 1680px;
+$mobile-height  : 400px;
+$tablet-height  : 700px;
+$desktop-height : 900px;
+
+//////////////////////////////
+// FONTS
+//////////////////////////////
+
+$font-body  : 'calibre-web';
+$font-brand : 'noe-display-web';
+$font-label : 'gt-pressura-web';
+
+//////////////////////////////
+// COLORS
+//////////////////////////////
+
+$green      : #3bffaa;
+$dark-green : #0FCE84;
+
+$light-gray : #f5f5f5;
+$gray       : #B1B1B1;
+$black      : rgb(80, 80, 80);
+
+$pink       : #ff8efc;
+$yellow     : #fff93b;
+
+//////////////////////////////
+// STYLE
+//////////////////////////////
+
+$radius-sm    : 5px;
+$radius-lrg   : 10px;
+$stroke-width : 1px;
+
+%shadow {
+	box-shadow: 0 22px 65px rgba(0,0,0,.07);
+}
+
+%inputShadow {
+	box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
+				0 2px 20px 0 rgba(0,2,4,.04);
+
+	&:hover {
+		box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
+					0 5px 20px 0 rgba(0,2,4,.06);
+	}
+
+	&:active, &:focus {
+		box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
+					0 10px 20px 0 rgba(0,2,4,.08);
+	}
+}
+
+//////////////////////////////
+// UTILITIES
+//////////////////////////////
+
+@mixin color-svg($color) {
+	.stroke {
+		stroke: $color;
+	}
+
+	.fill {
+		fill: $color;
+	}
+}

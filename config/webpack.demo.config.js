@@ -1,7 +1,6 @@
 const merge = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const baseConfig = require('./webpack.base.config');
-const optConfig = require('./webpack.opt.config');
 const path = require('path');
 
 const demoConfig = {
@@ -14,7 +13,7 @@ const demoConfig = {
   ],
   resolve: {
     alias: {
-      Payload: path.resolve(__dirname, '../src')
+      payload: path.resolve(__dirname, '../src')
     }
   }
 };
@@ -24,4 +23,4 @@ const demoConfig = {
 // as module demo / development will feature a different index.html entry point
 module.exports = merge.strategy({
   plugins: 'replace'
-})(baseConfig, optConfig, demoConfig);
+})(baseConfig, demoConfig);

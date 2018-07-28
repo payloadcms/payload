@@ -1,18 +1,16 @@
 import React from 'react';
 import { render } from 'react-dom';
 
-import Sidebar from 'Payload/client/components/Sidebar';
+import App from 'payload/client/components/App';
 
 import './testStyles.css';
 
-const App = () => {
+const Index = () => {
   return (
     <div>
-      <Sidebar />
-      <h3>Payload</h3>
-      <p>Yay test</p>
+      <App/>
     </div>
   )
 }
 
-render(<App />, document.getElementById('app'));
+render(<Index />, document.getElementById('app'));
