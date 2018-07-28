@@ -1,0 +1,33 @@
+@import '_vars';
+@import '_structure';
+@import '_type';
+
+form {
+	.status {
+		@extend %label;
+		height: auto;
+		max-height: 0;
+		opacity: 0;
+		margin-bottom: 0;
+		transition: max-height 300ms ease-out, 
+			opacity 300ms ease, 
+			margin-bottom 300ms ease,
+			padding 300ms ease;
+		background: $green;
+		color: $black;
+		font-weight: bold;
+		padding: 0;
+		border-radius: $radius-sm;
+
+		&.open {
+			padding: rem(.5);
+			max-height: 400px;
+			opacity: 1;
+			margin-bottom: rem(.5);
+		}
+
+		&.error {
+			background: $pink;
+		}
+	}
+}

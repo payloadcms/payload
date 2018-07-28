@@ -1,7 +1,7 @@
 const OFF = 0, WARN = 1, ERROR = 2;
 
 module.exports = exports = {
-  "extends": "eslint:recommended",
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
   "env": {
     "browser": true,
     "commonjs": true,

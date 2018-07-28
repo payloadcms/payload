@@ -1,0 +1,64 @@
+@import '_vars';
+@import '_type';
+
+.btn {
+    @extend %label;
+    background-color: $green;
+    border: 0;
+    padding: rem(.5) rem(.75);
+    line-height: rem(.5);
+    border-radius: $radius-sm;
+    cursor: pointer;
+
+    &.btn-icon {
+        width: rem(1.5);
+        height: rem(1.5);
+
+        svg {
+            width: rem(.75);
+            height: rem(.75);
+        }
+    }
+
+    &.btn-secondary {
+        border: $stroke-width solid $dark-green;
+        color: $dark-green;
+        background: none;
+
+        &.btn-icon {
+            @include color-svg($dark-green);
+            padding: 0;
+        }
+
+        &:hover {
+            background: $green;
+            border-color: $green;
+            color: $black;
+
+            &.btn-icon {
+                @include color-svg($black);
+            }
+        }
+    }
+
+    &.btn-small {
+        padding: rem(.25) rem(.5);
+    }
+
+    &.btn-text {
+        background: none;
+        padding: 0;
+        border-radius: 0;
+        border-bottom: 1px solid $black;
+
+        &:hover {
+            color: $dark-green;
+            border-bottom-color: $dark-green;
+        }
+    }
+
+
+    &:focus, &:active {
+        outline: none;
+    }
+}

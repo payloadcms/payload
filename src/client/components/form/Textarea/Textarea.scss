@@ -1,0 +1,74 @@
+@import '_vars';
+@import '_queries';
+@import '_structure';
+
+.interact.textarea {
+	margin-bottom: rem(1);
+	position: relative;
+
+	label {
+		display: block;
+
+		.required {
+			color: $pink;
+			margin-left: rem(.25);
+		}
+	}
+
+	.tooltip{
+		left: auto;
+		right: 0;
+		transform: none;
+		background-color: $pink;
+
+		span {
+			border-top-color: $pink;
+		}
+	}
+
+	textarea {
+		font-family: $font-body;
+		width: 100%;
+		border: 2px solid $yellow;
+		background: transparent;
+		color: $yellow;
+		border-radius: 0;
+		font-size: rem(.65);
+		line-height: rem(1);
+		padding: rem(.5) rem(.75);
+		display: block;
+
+		&::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+		  color: $yellow;
+		}
+		&::-moz-placeholder { /* Firefox 19+ */
+		  color: $yellow;
+		}
+		&:-ms-input-placeholder { /* IE 10+ */
+		  color: $yellow;
+		}
+		&:-moz-placeholder { /* Firefox 18- */
+		  color: $yellow;
+		}
+
+		&:hover {
+			background-color: rgba($yellow, .1);
+		}
+
+		&:focus,
+		&:active {
+			background-color: rgba($yellow, .2);
+			outline: 0;
+		}
+	}
+
+	&.error {
+		textarea {
+			border: 2px solid $pink;
+		}
+	}
+
+	@include mid-break {
+		margin-bottom: rem(.5);
+	}
+}
