@@ -1,0 +1,116 @@
+@import '_queries';
+@import '_vars';
+
+/////////////////////////////
+// PADDING
+/////////////////////////////
+
+@mixin pad {
+  padding: $base;
+
+  @include mid-break {
+    padding: rem(.75);
+  }
+
+  @include small-break {
+    padding: rem(.5);
+  }
+}
+
+@mixin pad-x2 {
+  padding: rem(2) rem(2) rem(1);
+
+  @include mid-break {
+    padding: rem(1) rem(1) 0;
+  }
+}
+
+/////////////////////////////
+// VERTICAL PADDING
+/////////////////////////////
+
+@mixin pad-vert {
+  padding-top: $base;
+
+  @include mid-break {
+    padding-top: rem(.5);
+  }
+}
+
+@mixin pad-vert-x2 {
+  padding-top: rem(2);
+  padding-bottom: $base;
+
+  @include mid-break {
+    padding-top: $base;
+    padding-bottom: 0;
+  }
+}
+
+@mixin pad-vert-x3 {
+  padding-top: rem(3);
+  padding-bottom: rem(2);
+
+  @include mid-break {
+    padding-top: rem(2);
+    padding-bottom: $base;
+  }
+}
+
+@mixin pad-vert-x4 {
+  padding-top: rem(4);
+  padding-bottom: rem(3);
+
+  @include mid-break {
+    padding-top: rem(2);
+    padding-bottom: $base;
+  }
+}
+
+/////////////////////////////
+// MARGIN
+/////////////////////////////
+
+@mixin m {
+  margin-bottom: $base;
+
+  @include small-break {
+    margin-bottom: rem(.75);
+  }
+}
+
+@mixin m-x2 {
+  margin-bottom: rem(2);
+
+  @include mid-break {
+    margin-bottom: $base;
+  }
+
+  @include small-break {
+    margin-bottom: rem(.75);
+  }
+}
+
+@mixin m-x3 {
+  margin-bottom: rem(3);
+
+  @include mid-break {
+    margin-bottom: rem(2);
+  }
+
+  @include small-break {
+    margin-bottom: rem(1);
+  }
+}
+
+@mixin m-x4 {
+  margin-bottom: rem(4);
+
+  @include mid-break {
+    margin-bottom: rem(3);
+  }
+
+  @include small-break {
+    margin-bottom: rem(2);
+  }
+}

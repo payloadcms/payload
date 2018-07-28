@@ -1,0 +1,21 @@
+/////////////////////////////
+// MEDIA QUERIES
+/////////////////////////////
+
+@mixin small-break {
+  @media (max-width: #{$mobile-width}) {
+    @content;
+  }
+}
+
+@mixin mid-break {
+  @media (max-height: #{$desktop-height}), (max-width: #{$tablet-width}) {
+    @content;
+  }
+}
+
+@mixin large-break {
+  @media (max-width: #{$content-width}) {
+    @content;
+  }
+}

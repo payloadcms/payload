@@ -1,0 +1,39 @@
+@import '_structure';
+
+/////////////////////////////
+// GRID
+/////////////////////////////
+
+// Gutter
+$gutter : rem(.5);
+$cols   : 12;
+
+/////////////////////////////
+// ROWS
+/////////////////////////////
+
+@mixin row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -#{$gutter};
+  margin-left: -#{$gutter};
+}
+
+/////////////////////////////
+// COLUMN SETUP
+/////////////////////////////
+
+@mixin gutter {
+  margin-left: $gutter;
+  margin-right: $gutter;
+}
+
+@mixin col($col) {
+  @include gutter;
+  width: calc(#{$col / $cols * 100 + %} - #{rem(1.01)});
+}
+
+@mixin push($col) {
+  margin-right: $gutter;
+  margin-left: calc(#{$col / $cols * 100 + %} + #{$gutter});
+}

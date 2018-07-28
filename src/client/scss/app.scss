@@ -1,10 +1,97 @@
+@import '_fonts';
 @import '_vars';
+@import '_type';
+@import '_grid';
+
+/////////////////////////////
+// GLOBAL STYLES
+/////////////////////////////
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
 
 body {
-	background: purple;
-	color: white;
+  font-family: $font-body;
+  font-weight: 400;
+  color: $black;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+}
 
-	h1 {
-		color: black;
-	}
+html {
+  font-size: $body;
+    line-height: rem(1);
+    font-size: 20px;
+
+  @include mid-break {
+    font-size: 18px;
+    line-height: rem(1);
+  }
+
+  @include small-break {
+    font-size: 16px;
+    line-height: rem(.8)
+  }
+}
+
+::selection {
+  background: $green;
+  color: $black;
+}
+
+::-moz-selection {
+  background: $green;
+  color: $black;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+h1 {
+  @extend %h1;
+}
+
+h2 {
+    @extend %h2;
+}
+
+h3 {
+    @extend %h3;
+}
+
+h4 {
+    @extend %h4;
+}
+
+h5 {
+    @extend %h5;
+}
+
+p {
+    margin: 0 0 rem(.5);
+}
+
+ul {
+  padding-left: $base;
+    margin: 0 0 $base;
+}
+
+a {
+  text-decoration: none;
+  color: $black;
+  border-bottom: 1px solid $black;
+
+  &:hover {
+    color: $dark-green;
+    border-bottom: 1px solid $dark-green;
+  }
 }
