@@ -9,6 +9,7 @@ const Index = () => {
   return (
     <div>
       <App/>
+      <Iridescence />
     </div>
   )
 }
