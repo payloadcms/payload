@@ -7,3 +7,11 @@ insert_final_newline = true
 [*.js]
 indent_style = space
 indent_size = 2
+
+[*.html]
+indent_style = space
+indent_size = 2
+
+[*.scss]
+indent_style = space
+indent_size = 2

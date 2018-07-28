@@ -182,7 +182,7 @@ module.exports = exports = {
     "object-curly-spacing": [ WARN, "always" ],
     "one-var": OFF,
     "operator-assignment": [ WARN, "never" ],
-    "operator-linebreak": [ WARN, "after" ],
+    "operator-linebreak": OFF,
     "padded-blocks": [ WARN, "never" ],
     "quote-props": [ WARN, "consistent-as-needed" ],
     "quotes": [ WARN, "single" ],
