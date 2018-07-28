@@ -2,7 +2,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const autoprefixer = require('autoprefixer');
 
 module.exports = {
-  entry: './src/index.js',
+  entry: './demo/client/index.js',
   module: {
     rules: [
       {
@@ -46,8 +46,13 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/client/index.html',
+      template: './demo/client/index.html',
       filename: './index.html'
     })
-  ]
+  ],
+  resolve: {
+    alias: {
+      payload: path.resolve(__dirname, '../src')
+    }
+  }
 };
