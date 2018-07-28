@@ -1,0 +1,45 @@
+@import '_vars';
+@import '_structure';
+@import '_queries';
+
+
+@mixin formInput () {
+    @extend %inputShadow;
+    font-family: $font-brand;
+    width: 100%;
+    border: 1px solid $light-gray;
+    background: white;
+    color: $black;
+    border-radius: 0;
+    font-size: rem(.65);
+    height: rem(1.75);
+    line-height: rem(1.75);
+    padding: 0 rem(.75);
+    -webkit-appearance: none;
+
+    &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+      color: $black;
+    }
+    &::-moz-placeholder { /* Firefox 19+ */
+      color: $black;
+    }
+    &:-ms-input-placeholder { /* IE 10+ */
+      color: $black;
+    }
+    &:-moz-placeholder { /* Firefox 18- */
+      color: $black;
+    }
+
+    &:hover {
+        
+    }
+
+    &:focus,
+    &:active {
+        outline: 0;
+    }
+
+    @include small-break {
+        margin-bottom: rem(.5);
+    }
+}
