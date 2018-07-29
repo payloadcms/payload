@@ -11,7 +11,12 @@ module.exports = exports = {
   },
   "parserOptions": {
     "sourceType": "module",
-    "ecmaVersion": 6
+    "ecmaVersion": 6,
+    "ecmaFeatures": {
+      "spread": true,
+      "destructuring": true,
+      "experimentalObjectRestSpread": true,
+    },
   },
   "rules": {
     // Possible Errors (overrides from recommended set)
@@ -56,7 +61,7 @@ module.exports = exports = {
     "no-labels": WARN,
     "no-lone-blocks": WARN,
     "no-loop-func": ERROR,
-    "no-magic-numbers": WARN,
+    "no-magic-numbers": [ WARN, { "ignore": [0] } ],
     "no-multi-spaces": ERROR,
     "no-multi-str": WARN,
     "no-native-reassign": ERROR,
@@ -120,8 +125,8 @@ module.exports = exports = {
     "no-sync": WARN,
 
     // ECMAScript 6 support
-    "arrow-body-style": [ ERROR, "always" ],
-    "arrow-parens": [ ERROR, "always" ],
+    "arrow-body-style": OFF,
+    "arrow-parens": OFF,
     "arrow-spacing": [ ERROR, { "before": true, "after": true }],
     "constructor-super": ERROR,
     "generator-star-spacing": [ ERROR, "before" ],
@@ -131,7 +136,7 @@ module.exports = exports = {
     "no-dupe-class-members": ERROR,
     "no-this-before-super": ERROR,
     "no-var": WARN,
-    "object-shorthand": [ WARN, "never" ],
+    "object-shorthand": OFF,
     "prefer-arrow-callback": WARN,
     "prefer-spread": WARN,
     "prefer-template": WARN,
@@ -140,7 +145,7 @@ module.exports = exports = {
     // Stylistic - everything here is a warning because of style.
     "array-bracket-spacing": [ WARN, "always" ],
     "block-spacing": [ WARN, "always" ],
-    "brace-style": [ WARN, "1tbs", { "allowSingleLine": false } ],
+    "brace-style": [ WARN, "1tbs", { "allowSingleLine": true } ],
     "camelcase": WARN,
     "comma-spacing": [ WARN, { "before": false, "after": true } ],
     "comma-style": [ WARN, "last" ],
@@ -149,7 +154,7 @@ module.exports = exports = {
     "eol-last": WARN,
     "func-names": WARN,
     "func-style": ["error", "declaration", { "allowArrowFunctions": true }],
-    "id-length": [ WARN, { "min": 2, "max": 32 } ],
+    "id-length": [ WARN, { "min": 0, "max": 32 } ],
     "indent": [ WARN, 2 ],
     "jsx-quotes": [ WARN, "prefer-double" ],
     "keyword-spacing": [ WARN, { "before": true, "after": true} ],

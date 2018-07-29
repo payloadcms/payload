@@ -1,0 +1,15 @@
+@import '_vars';
+
+.content-block {
+  max-width: $content-width;
+  margin-left: auto;
+  margin-right: auto;
+
+  &.narrow {
+    max-width: $mobile-width;
+  }
+
+  &.wide {
+    max-width: $frame-width;
+  }
+}

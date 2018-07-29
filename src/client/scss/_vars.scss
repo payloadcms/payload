@@ -14,7 +14,7 @@ $base           : ($base-px / $body) + rem; // This computes to 30px in rem
 // BREAKPOINTS
 /////////////////////////////
 
-$mobile-width   : 750px;
+$mobile-width   : 500px;
 $tablet-width   : 1024px;
 $content-width  : 1280px;
 $frame-width    : 1680px;

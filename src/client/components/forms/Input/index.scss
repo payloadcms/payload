@@ -4,7 +4,8 @@
 @import '_form';
 
 .interact.text,
-.interact.email {
+.interact.email,
+.interact.password {
 	margin-bottom: rem(1);
 	position: relative;
 
@@ -18,7 +19,7 @@
 		}
 	}
 
-	.tooltip{
+	.tooltip {
 		left: auto;
 		right: 0;
 		transform: none;
