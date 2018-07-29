@@ -1,17 +1,13 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import store from 'payload/client/store';
-import App from './components/App';
+import App from 'payload/client/components/App';
+import Routes from './components/routes';
 
 const Index = () => {
   return (
-    <Provider store={store}>
-      <Router>
-        <App />
-      </Router>
-    </Provider>
+    <App>
+      <Routes />
+    </App>
   );
 };
 
