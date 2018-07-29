@@ -18,7 +18,7 @@ export default () => {
         <Input type="email" label="Email Address" id="email" required />
         <Input type="password" label="Password" id="password" required />
         <Button type="submit">
-          Subscribe Now
+          Log In
         </Button>
       </Form>
     </ContentBlock>
