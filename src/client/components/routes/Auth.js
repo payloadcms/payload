@@ -1,13 +1,12 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Route } from 'react-router-dom';
-import Login from 'payload/client/components/views/Login';
+import Login from '../views/Login';
 
-class AuthRoutes extends Component {
-  render() {
-    return (
-      <Route exact path="/" component={Login} />
-    );
-  }
-}
-
-export default AuthRoutes;
+export default () => {
+  return (
+    <React.Fragment>
+      <Route path="/login" exact component={Login} />
+      <Route path="/forgot" component={ () => { return <h1>Forgot Password</h1>; } } />
+    </React.Fragment>
+  );
+};

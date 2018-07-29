@@ -10,12 +10,12 @@ class App extends Component {
   render() {
     return (
       <Provider store={store}>
-        <Router>
-          <React.Fragment>
-            <MeasureScroll />
+        <React.Fragment>
+          <MeasureScroll />
+          <Router>
             {this.props.children}
-          </React.Fragment>
-        </Router>
+          </Router>
+        </React.Fragment>
       </Provider>
     );
   }
