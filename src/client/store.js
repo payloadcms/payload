@@ -1,9 +1,10 @@
 import { createStore, combineReducers } from 'redux';
-
-import common from './reducers/common';
+import common from 'payload/client/reducers/common';
+import collections from 'payload/client/reducers/collections';
 
 const reducer = combineReducers({
-  common
+  common,
+  collections
 });
 
 const store = createStore(reducer);

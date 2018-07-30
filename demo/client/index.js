@@ -1,27 +1,11 @@
-import React, { Component } from 'react';
-import { BrowserRouter as Router, Link } from 'react-router-dom';
+import React from 'react';
 import { render } from 'react-dom';
-import { Provider } from 'react-redux';
-import MeasureScroll from 'payload/client/components/utilities/MeasureScroll';
-import store from 'payload/client/store';
-import Routes from './components/routes';
+import App from 'payload/client/components/App';
 
-import 'payload/client/scss/app.css';
+const Index = () => {
+  return (
+    <App />
+  );
+};
 
-class App extends Component {
-  render() {
-    return (
-      <Provider store={store}>
-        <Router>
-          <React.Fragment>
-            <MeasureScroll />
-            <Routes />
-            <Link to="/">Dashboard</Link>
-          </React.Fragment>
-        </Router>
-      </Provider>
-    );
-  }
-}
-
-render(<App />, document.getElementById('app'));
+render(<Index />, document.getElementById('app'));
