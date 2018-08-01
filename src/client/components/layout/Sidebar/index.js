@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { NavLink, Link } from 'react-router-dom';
 import Icon from 'demo/client/components/graphics/Icon';
-import Label from '../../type/Label';
+import Arrow from 'payload/client/components/graphics/Arrow';
+import Label from 'payload/client/components/type/Label';
 
 import './index.css';
 
@@ -21,9 +23,15 @@ class Sidebar extends Component {
         <nav>
           {this.props.collections.map((collection, i) => {
             const href = `/collections/${collection.attrs.slug}`;
+            const classes = this.props.location.pathname.indexOf(href) > -1
+              ? 'active'
+              : undefined;
 
             return (
-              <NavLink activeClassName="active" key={i} to={href}>{collection.attrs.plural}</NavLink>
+              <Link className={classes} key={i} to={href}>
+                <Arrow />
+                {collection.attrs.plural}
+              </Link>
             );
           })}
         </nav>
@@ -37,4 +45,4 @@ class Sidebar extends Component {
   }
 }
 
-export default connect(mapStateToProps)(Sidebar);
+export default withRouter(connect(mapStateToProps)(Sidebar));

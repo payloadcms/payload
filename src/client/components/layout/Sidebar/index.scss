@@ -21,10 +21,31 @@
 
   nav {
     margin: rem(.25) 0 $base;
+
     a {
-      display: block;
+      position: relative;
+      display: flex;
       padding: rem(.33) 0;
       border-bottom: 0;
+
+      svg {
+        opacity: 0;
+        position: absolute;
+        top: 50%;
+        left: - rem(.5);
+        transform: translateY(-50%);
+        width: rem(.3);
+        height: rem(.3);
+      }
+
+      &.active {
+        padding-left: rem(.6);
+
+        svg {
+          opacity: 1;
+          left: 0;
+        }
+      }
     }
   }
 }
