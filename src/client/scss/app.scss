@@ -27,7 +27,7 @@ html {
   line-height: rem(1);
   font-size: 20px;
 
-/*  @include mid-break {
+  @include mid-break {
     font-size: 18px;
     line-height: rem(1);
   }
@@ -35,7 +35,7 @@ html {
   @include small-break {
     font-size: 16px;
     line-height: rem(.8)
-  }*/
+  }
 }
 
 ::selection {

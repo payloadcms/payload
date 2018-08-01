@@ -6,70 +6,70 @@
 /////////////////////////////
 
 %h1, %h2, %h3, %h4, %h5 {
-    font-family: $font-brand;
-    font-weight: 700;
-    color: lighten($black, 4%);
+  font-family: $font-brand;
+  font-weight: 700;
+  color: lighten($black, 4%);
 }
 
 %jumbo {
-    font-size: rem(2.5);
-    line-height: 1;
-    margin: 0 0 rem(2);
+  font-size: rem(2.5);
+  line-height: 1;
+  margin: 0 0 rem(2);
 }
 
 %h1 {
   margin: 0 0 rem(1.5);
-    font-size: rem(2);
-    line-height: rem(2);
-    letter-spacing: rem(.025);
+  font-size: rem(1);
+  line-height: rem(1);
 
-    @include small-break {
-        font-size: rem(1.25);
-        line-height: rem(1.25);
-    }
+  @include small-break {
+    letter-spacing: rem(0);
+    font-size: rem(1.25);
+    line-height: rem(1.25);
+  }
 }
 
 %h2 {
-    margin: 0 0 rem(1);
-    font-size: rem(1.5);
-    line-height: rem(1.75);
-    letter-spacing: rem(.02);
+  margin: 0 0 rem(1);
+  font-size: rem(1.5);
+  line-height: rem(1.75);
+  letter-spacing: rem(.02);
 
-    @include small-break {
-        font-size: rem(.85);
-        line-height: rem(.85);
-    }
+  @include small-break {
+    font-size: rem(.85);
+    line-height: rem(.85);
+  }
 }
 
 %h3 {
-    margin: 0 0 rem(1);
-    font-size: rem(1);
-    line-height: 1.25;
-    font-weight: 500;
+  margin: 0 0 rem(1);
+  font-size: rem(1);
+  line-height: 1.25;
+  font-weight: 500;
 
-    @include small-break {
-        font-size: rem(.65);
-        line-height: rem(.75);
-    }
+  @include small-break {
+    font-size: rem(.65);
+    line-height: rem(.75);
+  }
 }
 
 %h4 {
-    margin: 0 0 $base;
-    font-size: rem(.75);
-    line-height: 1.5;
+  margin: 0 0 $base;
+  font-size: rem(.75);
+  line-height: 1.5;
 }
 
 %h5 {
-    margin: 0;
-    font-size: rem(.5);
-    line-height: 1.5;
-    font-weight: 700;
+  margin: 0;
+  font-size: rem(.5);
+  line-height: 1.5;
+  font-weight: 700;
 }
 
 %small {
-    margin: 0;
-    font-size: rem(.4);
-    line-height: 1.5;
+  margin: 0;
+  font-size: rem(.4);
+  line-height: 1.5;
 }
 
 /////////////////////////////
@@ -77,39 +77,39 @@
 /////////////////////////////
 
 %label {
-    text-transform: uppercase;
-    letter-spacing: rem(.1);
-    font-size: rem(.275);
-    font-family: $font-label;
-    -webkit-font-smoothing: auto;
+  text-transform: uppercase;
+  letter-spacing: rem(.1);
+  font-size: rem(.275);
+  font-family: $font-label;
+  -webkit-font-smoothing: auto;
 
-    @include mid-break {
-        font-size: rem(.375);
-        letter-spacing: rem(.05);
-    }
+  @include mid-break {
+    font-size: rem(.375);
+    letter-spacing: rem(.05);
+  }
 }
 
 %large-body {
-    font-size: rem(.6);
+  font-size: rem(.6);
+  line-height: rem(1);
+  letter-spacing: rem(.02);
+
+  @include mid-break {
+    font-size: rem(.7);
     line-height: rem(1);
-    letter-spacing: rem(.02);
+  }
 
-    @include mid-break {
-        font-size: rem(.7);
-        line-height: rem(1);
-    }
-
-    @include small-break {
-        font-size: rem(.55);
-        line-height: rem(.75);
-    }
+  @include small-break {
+    font-size: rem(.55);
+    line-height: rem(.75);
+  }
 }
 
 %code {
-    font-size: rem(.4);
-    color: $gray;
+  font-size: rem(.4);
+  color: $gray;
 
-    span {
-        color: $black;
-    }
+  span {
+    color: $black;
+  }
 }
