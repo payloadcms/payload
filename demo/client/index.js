@@ -5,7 +5,6 @@ import { Route, Switch, Link } from 'react-router-dom';
 import Sidebar from 'payload/client/components/layout/Sidebar';
 import Dashboard from 'payload/client/components/views/Dashboard';
 import Login from 'payload/client/components/views/Login';
-import AdminTemplate from 'payload/client/components/layout/AdminTemplate';
 import App from 'payload/client/components/App';
 
 import collections from '../collections';
