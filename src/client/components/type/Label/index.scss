@@ -1,0 +1,5 @@
+@import '_styles';
+
+label {
+    @extend %label;
+}

@@ -1,6 +1,6 @@
 import React from 'react';
 import ContentBlock from 'payload/client/components/layout/ContentBlock';
-import Logo from 'payload/client/components/graphics/Logo';
+import Logo from 'demo/client/components/graphics/Logo';
 import Form from 'payload/client/components/forms/Form';
 import Input from 'payload/client/components/forms/Input';
 import Button from 'payload/client/components/controls/Button';

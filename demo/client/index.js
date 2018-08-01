@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { Route, Switch, Link } from 'react-router-dom';
 
-import Sidebar from 'payload/client/components/layout/Sidebar';
+import DefaultTemplate from 'payload/client/components/layout/DefaultTemplate';
 import Dashboard from 'payload/client/components/views/Dashboard';
 import Login from 'payload/client/components/views/Login';
 import App from 'payload/client/components/App';
@@ -18,8 +18,7 @@ const Index = () => {
         <Route path="/forgot" component={ () => { return <h1>Forgot Password</h1>; } } />
         <Route path="/" render={() => {
           return (
-            <div className="default-view">
-              <Sidebar />
+            <DefaultTemplate>
               <Route path="/" exact component={Dashboard} />
               {collections.map((collection) => {
                 const collectionsPath = 'collections';
@@ -31,7 +30,7 @@ const Index = () => {
                   </React.Fragment>
                 );
               })}
-            </div>
+            </DefaultTemplate>
           );
         }} />
       </Switch>

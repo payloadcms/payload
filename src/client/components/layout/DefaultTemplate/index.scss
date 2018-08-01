@@ -1,0 +1,10 @@
+@import '_styles';
+
+.default-template {
+  margin-left: rem(6);
+  padding: rem(1);
+
+  .emblem {
+    width: $base;
+  }
+}

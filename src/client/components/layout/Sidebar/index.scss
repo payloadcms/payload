@@ -1,8 +1,13 @@
-@import '_vars';
+@import '_styles';
 
 .sidebar {
+  position: fixed;
+  left: 0;
+  width: rem(6);
+  padding: rem(1);
 
-  .emblem {
-    width: 100px;
+  .icon-wrap {
+    @include m;
+    width: $base;
   }
 }

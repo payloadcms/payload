@@ -1,6 +1,4 @@
-@import '_vars';
-@import '_structure';
-@import '_type';
+@import '_styles';
 
 form {
 	.status {
@@ -9,8 +7,8 @@ form {
 		max-height: 0;
 		opacity: 0;
 		margin-bottom: 0;
-		transition: max-height 300ms ease-out, 
-			opacity 300ms ease, 
+		transition: max-height 300ms ease-out,
+			opacity 300ms ease,
 			margin-bottom 300ms ease,
 			padding 300ms ease;
 		background: $green;
