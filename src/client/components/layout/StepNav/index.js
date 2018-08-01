@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import Label from '../../type/Label';
+import Label from 'payload/client/components/type/Label';
+import Arrow from 'payload/client/components/graphics/Arrow';
 
 import './index.css';
 
@@ -16,7 +17,7 @@ class StepNav extends Component {
     return (
       <nav className="current-view-nav">
         {this.props.nav.length > 0
-          ? <Link to="/">{dashboardLabel}</Link>
+          ? <Link to="/">{dashboardLabel}<Arrow /></Link>
           : dashboardLabel
         }
         {this.props.nav.map((item, i) => {
@@ -24,7 +25,7 @@ class StepNav extends Component {
 
           const Step = this.props.nav.length === i + 1
             ? StepLabel
-            : <Link to={item.url} key={i}>{StepLabel}</Link>;
+            : <Link to={item.url} key={i}>{StepLabel}<Arrow /></Link>;
 
           return Step;
         })}

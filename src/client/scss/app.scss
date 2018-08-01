@@ -93,3 +93,18 @@ a {
     border-bottom: 1px solid $dark-green;
   }
 }
+
+.icon {
+  @include color-svg($black);
+
+
+  path, line, polyline {
+    vector-effect: non-scaling-stroke;
+    shape-rendering:crispEdges;
+    fill: none;
+  }
+
+  .stroke {
+    stroke-width: $stroke-width;
+  }
+}
