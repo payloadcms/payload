@@ -10,4 +10,17 @@
     @include m;
     width: $base;
   }
+
+  label {
+    color: $gray;
+  }
+
+  nav {
+    margin: rem(.5) 0;
+    a {
+      display: block;
+      padding: rem(.33) 0;
+      border-bottom: 0;
+    }
+  }
 }

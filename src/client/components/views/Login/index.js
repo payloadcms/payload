@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import ContentBlock from 'payload/client/components/layout/ContentBlock';
 import Logo from 'demo/client/components/graphics/Logo';
 import Form from 'payload/client/components/forms/Form';
@@ -21,6 +22,7 @@ export default () => {
           Log In
         </Button>
       </Form>
+      <Link to="/">To Dashboard</Link>
     </ContentBlock>
   );
 };
