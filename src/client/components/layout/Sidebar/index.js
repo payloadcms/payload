@@ -21,8 +21,8 @@ class Sidebar extends Component {
         </Link>
         <Label>Collections</Label>
         <nav>
-          {this.props.collections.map((collection, i) => {
-            const href = `/collections/${collection.attrs.slug}`;
+          {Object.keys(this.props.collections).map((key, i) => {
+            const href = `/collections/${key}`;
             const classes = this.props.location.pathname.indexOf(href) > -1
               ? 'active'
               : undefined;
@@ -30,7 +30,7 @@ class Sidebar extends Component {
             return (
               <Link className={classes} key={i} to={href}>
                 <Arrow />
-                {collection.attrs.plural}
+                {this.props.collections[key].attrs.plural}
               </Link>
             );
           })}

@@ -2,12 +2,12 @@ import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 
 export default props => {
-  return props.collections.map((collection) => {
+  return Object.keys(props.collections).map((key, i) => {
     return (
-      <Switch key={collection.attrs.slug}>
-        <Route path={`/collections/${collection.attrs.slug}/add-new`} exact component={collection.components.add} />
-        <Route path={`/collections/${collection.attrs.slug}`} exact component={collection.components.archive} />
-        <Route path={`/collections/${collection.attrs.slug}/:id`} component={collection.components.edit} />
+      <Switch key={i}>
+        <Route path={`/collections/${key}/add-new`} exact component={props.collections[key].components.add} />
+        <Route path={`/collections/${key}`} exact component={props.collections[key].components.archive} />
+        <Route path={`/collections/${key}/:id`} component={props.collections[key].components.edit} />
       </Switch>
     );
   });

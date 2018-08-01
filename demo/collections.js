@@ -6,10 +6,9 @@ import OrdersAdd from './client/components/collections/Orders/Add';
 import OrdersArchive from './client/components/collections/Orders/Archive';
 import OrdersEdit from './client/components/collections/Orders/Edit';
 
-export default [
-  {
+export default {
+  pages: {
     attrs: {
-      slug: 'pages',
       label: 'Pages',
       singular: 'Page',
       plural: 'Pages',
@@ -56,9 +55,8 @@ export default [
     }
   },
 
-  {
+  orders: {
     attrs: {
-      slug: 'orders',
       label: 'Orders',
       singular: 'Order',
       plural: 'Orders',
@@ -104,4 +102,4 @@ export default [
       edit: OrdersEdit
     }
   },
-];
+};
