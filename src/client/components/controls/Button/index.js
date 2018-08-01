@@ -1,28 +1,49 @@
-import React, { Component } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 import './Button.css';
 
-class Button extends Component {
-  render() {
-    let classes = this.props.className ? `btn ${this.props.className}` : 'btn';
+export default props => {
+  let classes = props.className ? `btn ${props.className}` : 'btn';
 
-    if (this.props.type) {
-      classes += ` btn-${this.props.type}`;
-    }
+  if (props.type) {
+    classes += ` btn-${props.type}`;
+  }
 
-    if (this.props.size) {
-      classes += ` btn-${this.props.size}`;
-    }
+  if (props.size) {
+    classes += ` btn-${props.size}`;
+  }
 
-    if (this.props.icon) {
-      classes += ' btn-icon';
-    }
+  if (props.icon) {
+    classes += ' btn-icon';
+  }
+
+  const buttonProps = {
+    className: classes,
+    onClick: props.onClick,
+    ...props
+  };
+
+  switch (props.el) {
+  case 'link':
     return (
-      <button className={classes} onClick={this.props.onClick}>
-        {this.props.children}
+      <Link {...buttonProps} to={props.url}>
+        {props.children}
+      </Link>
+    );
+
+  case 'anchor':
+    return (
+      <a {...buttonProps} href={props.url}>
+        {props.children}
+      </a>
+    );
+
+  default:
+    return (
+      <button {...buttonProps}>
+        {props.children}
       </button>
     );
   }
-}
-
-export default Button;
+};

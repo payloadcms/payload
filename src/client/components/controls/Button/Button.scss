@@ -31,7 +31,7 @@
 
         &:hover {
             background: $green;
-            border-color: $green;
+            border: $stroke-width solid $green;
             color: $black;
 
             &.btn-icon {
@@ -41,7 +41,7 @@
     }
 
     &.btn-small {
-        padding: rem(.25) rem(.5);
+        padding: rem(0) rem(.25) rem(.05);
     }
 
     &.btn-text {
@@ -56,6 +56,9 @@
         }
     }
 
+    &:hover {
+      border: 0;
+    }
 
     &:focus, &:active {
         outline: none;

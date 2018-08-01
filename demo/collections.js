@@ -1,6 +1,8 @@
+import PagesAdd from './client/components/collections/Pages/Add';
 import PagesArchive from './client/components/collections/Pages/Archive';
 import PagesEdit from './client/components/collections/Pages/Edit';
 
+import OrdersAdd from './client/components/collections/Orders/Add';
 import OrdersArchive from './client/components/collections/Orders/Archive';
 import OrdersEdit from './client/components/collections/Orders/Edit';
 
@@ -48,6 +50,7 @@ export default [
     },
 
     components: {
+      add: PagesAdd,
       archive: PagesArchive,
       edit: PagesEdit
     }
@@ -96,6 +99,7 @@ export default [
     },
 
     components: {
+      add: OrdersAdd,
       archive: OrdersArchive,
       edit: OrdersEdit
     }
