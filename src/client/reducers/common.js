@@ -5,7 +5,8 @@ const defaultState = {
   windowHeight: 900,
   viewWidth: false,
   viewHeight: false,
-  modalState: false
+  modalState: false,
+  stepNav: []
 };
 
 export default (state = defaultState, action) => {
@@ -44,6 +45,13 @@ export default (state = defaultState, action) => {
     return {
       ...state,
       modalStatus: action.payload
+    };
+
+  case 'SET_STEP_NAV':
+
+    return {
+      ...state,
+      stepNav: action.payload
     };
 
   default:

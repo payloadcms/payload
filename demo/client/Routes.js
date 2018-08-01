@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Route, Switch, Link, withRouter } from 'react-router-dom';
+import { Route, Switch, withRouter } from 'react-router-dom';
 
 import DefaultTemplate from 'payload/client/components/layout/DefaultTemplate';
 import Dashboard from 'payload/client/components/views/Dashboard';
@@ -21,11 +21,10 @@ class Routes extends Component {
             <DefaultTemplate>
               <Route path="/" exact component={Dashboard} />
               {this.props.collections.map((collection) => {
-
                 return (
-                  <React.Fragment key={collection.slug}>
-                    <Route path={`/collections/${collection.slug}`} exact component={collection.archive} />
-                    <Route path={`/collections/${collection.slug}/:id`} component={collection.edit} />
+                  <React.Fragment key={collection.attrs.slug}>
+                    <Route path={`/collections/${collection.attrs.slug}`} exact component={collection.components.archive} />
+                    <Route path={`/collections/${collection.attrs.slug}/:id`} component={collection.components.edit} />
                   </React.Fragment>
                 );
               })}

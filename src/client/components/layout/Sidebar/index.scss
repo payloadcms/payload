@@ -8,8 +8,11 @@
   padding: rem(1);
 
   .icon-wrap {
-    @include m;
-    width: $base;
+    margin: 0 0 rem(.5);
+
+    > * {
+      height: $base;
+    }
   }
 
   label {
@@ -17,7 +20,7 @@
   }
 
   nav {
-    margin: rem(.5) 0;
+    margin: rem(.25) 0 $base;
     a {
       display: block;
       padding: rem(.33) 0;

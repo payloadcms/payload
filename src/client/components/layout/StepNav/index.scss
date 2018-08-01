@@ -1,0 +1,22 @@
+@import '_styles';
+
+.current-view-nav {
+  @include m;
+  display: flex;
+
+  * {
+    display: block;
+  }
+
+  a {
+    border: 0;
+  }
+
+  > * {
+    margin-right: rem(.25);
+  }
+
+  > label {
+    color: $gray;
+  }
+}
