@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
+import CollectionArchive from 'payload/client/components/views/CollectionArchive';
 
 class OrdersArchive extends Component {
   render() {
     return (
-      <div>
+      <CollectionArchive collection="Orders">
         <h1>Orders</h1>
-      </div>
+      </CollectionArchive>
     );
   }
 }

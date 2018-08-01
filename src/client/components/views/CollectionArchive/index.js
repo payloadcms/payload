@@ -1,22 +1,18 @@
 import React, { Component } from 'react';
 import SetStepNav from 'payload/client/components/utilities/SetStepNav';
 
-class CollectionEdit extends Component {
+class CollectionArchive extends Component {
   constructor(props) {
     super(props);
   }
 
   render() {
     return (
-      <article className="collection-edit">
+      <article className="collection-archive">
         <SetStepNav nav={ [
           {
-            url: `/collections/${this.props.collection}`,
+            url: '/collections',
             label: this.props.collection
-          },
-          {
-            url: `/collections/${this.props.collection}/${this.props.id}`,
-            label: this.props.id
           }
         ] } />
         {this.props.children}
@@ -25,4 +21,4 @@ class CollectionEdit extends Component {
   }
 }
 
-export default CollectionEdit;
+export default CollectionArchive;

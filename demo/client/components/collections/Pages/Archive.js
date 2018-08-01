@@ -1,18 +1,12 @@
 import React, { Component } from 'react';
-import SetStepNav from 'payload/client/components/utilities/SetStepNav';
+import CollectionArchive from 'payload/client/components/views/CollectionArchive';
 
 class PagesArchive extends Component {
   render() {
     return (
-      <div>
-        <SetStepNav nav={ [
-          {
-            url: '/collections/pages',
-            label: 'Pages'
-          }
-        ] } />
+      <CollectionArchive collection="Pages">
         <h1>Pages</h1>
-      </div>
+      </CollectionArchive>
     );
   }
 }

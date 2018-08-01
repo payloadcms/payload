@@ -9,11 +9,12 @@
   }
 
   a {
-    border: 0;
-  }
-
-  > * {
     margin-right: rem(.25);
+    border: 0;
+
+    label {
+      cursor: pointer;
+    }
   }
 
   > label {
