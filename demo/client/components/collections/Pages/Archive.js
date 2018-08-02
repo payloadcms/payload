@@ -1,13 +1,31 @@
 import React, { Component } from 'react';
-import ViewArchive from 'payload/client/components/views/collections/Archive';
+import { connect } from 'react-redux';
 
-class PagesArchive extends Component {
+import ArchiveView from 'payload/client/components/views/collections/Archive';
+import HeadingButton from 'payload/client/components/layout/HeadingButton';
+
+const mapStateToProps = state => ({
+  collections: state.collections.all
+});
+
+class Archive extends Component {
+  constructor(props) {
+    super(props);
+    this.slug = 'pages';
+    this.collection = this.props.collections[this.slug];
+  }
+
   render() {
     return (
-      <ViewArchive slug="pages">
-      </ViewArchive>
+      <ArchiveView slug={this.slug} collection={this.collection}>
+        <HeadingButton
+          heading={this.collection.attrs.label}
+          buttonLabel="Add New"
+          buttonUrl={`/collections/${this.slug}/add-new`}
+          buttonType="link" />
+      </ArchiveView>
     );
   }
 }
 
-export default PagesArchive;
+export default connect(mapStateToProps)(Archive);

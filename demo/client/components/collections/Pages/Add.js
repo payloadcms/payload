@@ -1,10 +1,26 @@
-import React from 'react';
-import ViewAdd from 'payload/client/components/views/collections/Add';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
-export default () => {
-  return (
-    <ViewAdd slug="pages">
-      <h1>Add New</h1>
-    </ViewAdd>
-  );
-};
+import AddView from 'payload/client/components/views/collections/Add';
+
+const mapStateToProps = state => ({
+  collections: state.collections.all
+});
+
+class Add extends Component {
+  constructor(props) {
+    super(props);
+    this.slug = 'pages';
+    this.collection = this.props.collections[this.slug];
+  }
+
+  render() {
+    return (
+      <AddView slug={this.slug} collection={this.collection}>
+        <h1>Add New {this.collection.attrs.singular}</h1>
+      </AddView>
+    );
+  }
+}
+
+export default connect(mapStateToProps)(Add);

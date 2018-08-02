@@ -1,14 +1,29 @@
 import React, { Component } from 'react';
-import ViewEdit from 'payload/client/components/views/collections/Edit';
+import { connect } from 'react-redux';
 
-class OrdersEdit extends Component {
+import EditView from 'payload/client/components/views/collections/Edit';
+
+const mapStateToProps = state => ({
+  collections: state.collections.all
+});
+
+class Edit extends Component {
+  constructor(props) {
+    super(props);
+    this.slug = 'orders';
+    this.collection = this.props.collections[this.slug];
+  }
+
   render() {
     return (
-      <ViewEdit slug="orders" id={this.props.match.params.id}>
-        <h1>Edit Order {this.props.match.params.id}</h1>
-      </ViewEdit>
+      <EditView
+        id={this.props.match.params.id}
+        slug={this.slug}
+        collection={this.collection}>
+        <h1>Edit {this.collection.attrs.singular} {this.props.match.params.id}</h1>
+      </EditView>
     );
   }
 }
 
-export default OrdersEdit;
+export default connect(mapStateToProps)(Edit);
