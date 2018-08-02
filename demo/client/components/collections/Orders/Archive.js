@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 import ArchiveView from 'payload/client/components/views/collections/Archive';
-import HeadingButton from 'payload/client/components/layout/HeadingButton';
+import HeadingButton from 'payload/client/components/modules/HeadingButton';
+import Filter from 'payload/client/components/modules/Filter';
 
 const mapStateToProps = state => ({
   collections: state.collections.all
@@ -23,6 +24,7 @@ class Archive extends Component {
           buttonLabel="Add New"
           buttonUrl={`/collections/${this.slug}/add-new`}
           buttonType="link" />
+        <Filter />
       </ArchiveView>
     );
   }

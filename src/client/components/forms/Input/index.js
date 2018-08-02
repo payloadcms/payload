@@ -47,7 +47,7 @@ class Input extends Component {
       ? () => <span className="required">*</span>
       : () => null;
 
-    const Error = !this.props.valid
+    const Error = this.props.valid === false
       ? () => <Tooltip className="error-message">{this.errors[this.props.type]}</Tooltip>
       : () => null;
 
@@ -56,7 +56,7 @@ class Input extends Component {
       : () => null;
 
     let className = `interact ${this.props.type}`;
-    className = this.props.valid
+    className = this.props.valid !== false
       ? className
       : `${className} error`;
 

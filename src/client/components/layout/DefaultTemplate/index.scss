@@ -1,8 +1,13 @@
 @import '_styles';
 
 .default-template {
+  padding: rem(1) rem(1) rem(1) 0;
   margin-left: rem(6);
-  padding: rem(1);
+
+  .wrap {
+    max-width: $tablet-width;
+    margin: 0 auto;
+  }
 
   .emblem {
     width: $base;

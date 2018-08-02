@@ -18,20 +18,24 @@
     -webkit-appearance: none;
 
     &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
-      color: $black;
+      color: $gray;
+      font-weight: normal;
     }
     &::-moz-placeholder { /* Firefox 19+ */
-      color: $black;
+      color: $gray;
+      font-weight: normal;
     }
     &:-ms-input-placeholder { /* IE 10+ */
-      color: $black;
+      color: $gray;
+      font-weight: normal;
     }
     &:-moz-placeholder { /* Firefox 18- */
-      color: $black;
+      color: $gray;
+      font-weight: normal;
     }
 
     &:hover {
-        
+
     }
 
     &:focus,

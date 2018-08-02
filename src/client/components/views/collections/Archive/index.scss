@@ -1,0 +1,7 @@
+@import '_styles';
+
+.collection-archive {
+  .heading-button {
+    @include m;
+  }
+}

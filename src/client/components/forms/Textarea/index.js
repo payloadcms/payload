@@ -28,12 +28,12 @@ class Textarea extends Component {
       ? () => <span className="required">*</span>
       : () => null;
 
-    let Error = !this.props.valid
+    let Error = this.props.valid === false
       ? () => <Tooltip className="error-message">{this.errors.text}</Tooltip>
       : () => null;
 
     let className = 'interact textarea';
-    className = this.props.valid ? className : `${className} error`;
+    className = this.props.valid !== false ? className : `${className} error`;
 
     let style = this.props.style
       ? this.props.style
