@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
-import collections from 'demo/collections';
+import collections from 'local/collections';
 
 const mapDispatchToProps = dispatch => ({
   loadCollections: collections => dispatch({ type: 'LOAD_COLLECTIONS', payload: collections }),

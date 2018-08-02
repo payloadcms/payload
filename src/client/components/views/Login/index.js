@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import ContentBlock from 'payload/client/components/layout/ContentBlock';
-import Logo from 'demo/client/components/graphics/Logo';
+import Logo from 'local/client/components/graphics/Logo';
 import Form from 'payload/client/components/forms/Form';
 import Input from 'payload/client/components/forms/Input';
 import Button from 'payload/client/components/controls/Button';
@@ -14,11 +14,10 @@ export default () => {
       <Logo />
       <Form
         method="POST"
-        action="https://payloadcms.us18.list-manage.com/subscribe/post?u=f43c9eb62d4ce02e552a1fa9f&amp;id=e11798f237"
-        redirect="/sessions/confirmation">
-        <Input type="email" label="Email Address" id="email" required />
-        <Input type="password" label="Password" id="password" required />
-        <Button type="submit">
+        action="http://localhost:8080">
+        <Input data-fillable type="email" label="Email Address" id="email" required />
+        <Input data-fillable type="password" label="Password" id="password" required />
+        <Button data-submit type="submit">
           Log In
         </Button>
       </Form>

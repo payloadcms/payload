@@ -30,9 +30,9 @@
         }
 
         &:hover {
-            background: $green;
-            border: $stroke-width solid $green;
-            color: $black;
+            background: $dark-green;
+            border: $stroke-width solid $dark-green;
+            color: white;
 
             &.btn-icon {
                 @include color-svg($black);
@@ -41,7 +41,9 @@
     }
 
     &.btn-small {
-        padding: rem(0) rem(.25) rem(.05);
+        padding: rem(0) rem(.25) rem(.04);
+        border-radius: 3px;
+        font-size: rem(.3);
     }
 
     &.btn-text {

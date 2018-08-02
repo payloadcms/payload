@@ -1,9 +1,16 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import SetStepNav from 'payload/client/components/utilities/SetStepNav';
+
+const mapStateToProps = state => ({
+  collections: state.collections.all
+});
 
 class CollectionAdd extends Component {
   constructor(props) {
     super(props);
+
+    this.collection = this.props.collections[this.props.slug];
   }
 
   render() {
@@ -11,11 +18,10 @@ class CollectionAdd extends Component {
       <article className="collection-add">
         <SetStepNav nav={ [
           {
-            url: `/collections/${this.props.collection}`,
-            label: this.props.collection
+            url: `/collections/${this.props.slug}`,
+            label: this.collection.attrs.label
           },
           {
-            url: `/collections/${this.props.collection}/add-new`,
             label: `Add New`
           }
         ] } />
@@ -25,4 +31,4 @@ class CollectionAdd extends Component {
   }
 }
 
-export default CollectionAdd;
+export default connect(mapStateToProps)(CollectionAdd);

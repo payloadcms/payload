@@ -1,10 +1,10 @@
 import React from 'react';
-import CollectionAdd from 'payload/client/components/views/CollectionAdd';
+import ViewAdd from 'payload/client/components/views/collections/Add';
 
 export default () => {
   return (
-    <CollectionAdd collection="Orders">
+    <ViewAdd slug="orders">
       <h1>Add New</h1>
-    </CollectionAdd>
+    </ViewAdd>
   );
 };

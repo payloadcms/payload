@@ -1,17 +1,11 @@
 import React, { Component } from 'react';
-import CollectionArchive from 'payload/client/components/views/CollectionArchive';
-import HeadingButton from 'payload/client/components/layout/HeadingButton';
+import ViewArchive from 'payload/client/components/views/collections/Archive';
 
 class PagesArchive extends Component {
   render() {
     return (
-      <CollectionArchive collection="Pages">
-        <HeadingButton
-          heading="Pages"
-          buttonLabel="Add New"
-          buttonUrl="/collections/pages/add-new"
-          buttonType="link" />
-      </CollectionArchive>
+      <ViewArchive slug="pages">
+      </ViewArchive>
     );
   }
 }

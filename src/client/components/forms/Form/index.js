@@ -28,7 +28,7 @@ class Form extends Component {
     let fields = {};
 
     React.Children.map(this.props.children, (child) => {
-      if (typeof child.type === 'function') {
+      if (child.props['data-fillable']) {
         fields[child.props.id] = {
           value: child.props.value ? child.props.value : '',
           required: child.props.required
@@ -131,7 +131,7 @@ class Form extends Component {
 
   renderChildren() {
     let children = React.Children.map(this.props.children, (child) => {
-      if (typeof child.type === 'function') {
+      if (child.props['data-fillable']) {
         // Initialize validation as true - only show error class if error after blur
         let valid = true;
 
@@ -151,7 +151,7 @@ class Form extends Component {
         });
       }
 
-      if (child.type === 'button') {
+      if (child.props['data-submit']) {
         return React.cloneElement(child, {
           disabled: this.state.processing || child.props.disabled === 'disabled' ? 'disabled' : false,
           children: this.state.processing ? 'Processing...' : child.props.children

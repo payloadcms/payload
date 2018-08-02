@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { NavLink, Link } from 'react-router-dom';
-import Icon from 'demo/client/components/graphics/Icon';
+import Icon from 'local/client/components/graphics/Icon';
 import Arrow from 'payload/client/components/graphics/Arrow';
 import Label from 'payload/client/components/type/Label';
 

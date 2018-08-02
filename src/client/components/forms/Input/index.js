@@ -22,6 +22,9 @@ class Input extends Component {
     case 'text':
       return this.el.value.length > 0;
 
+    case 'password':
+      return this.el.value.length > 0;
+
     case 'email':
       return emailTest.test(this.el.value);
 

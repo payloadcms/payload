@@ -88,7 +88,7 @@ module.exports = {
   resolve: {
     alias: {
       payload: path.resolve(__dirname, '../src'),
-      demo: path.resolve(__dirname, '../demo')
+      local: path.resolve(__dirname, '../demo')
     }
   }
 };
