@@ -28,8 +28,8 @@ class Form extends Component {
     let fields = {};
 
     React.Children.map(this.props.children, (child) => {
-      if (child.props['data-fillable']) {
-        fields[child.props.id] = {
+      if (child.props.name) {
+        fields[child.props.name] = {
           value: child.props.value ? child.props.value : '',
           required: child.props.required
         };
@@ -41,7 +41,7 @@ class Form extends Component {
 
   handleChange(e) {
     let newState = { ...this.state };
-    newState.fields[e.target.id].value = e.target.value;
+    newState.fields[e.target.name].value = e.target.value;
     this.setState(newState);
   }
 
@@ -131,27 +131,27 @@ class Form extends Component {
 
   renderChildren() {
     let children = React.Children.map(this.props.children, (child) => {
-      if (child.props['data-fillable']) {
+      if (child.props.name) {
         // Initialize validation as true - only show error class if error after blur
         let valid = true;
 
         // If a valid value has been passed from field, set valid equal to that
-        if (typeof this.state.fields[child.props.id].valid !== 'undefined') {
-          valid = this.state.fields[child.props.id].valid;
+        if (typeof this.state.fields[child.props.name].valid !== 'undefined') {
+          valid = this.state.fields[child.props.name].valid;
         }
 
         return React.cloneElement(child, {
           ref: (el) => {
-            this.childRefs[child.props.id] = el;
+            this.childRefs[child.props.name] = el;
           },
           change: this.handleChange,
           validate: this.validate,
           valid: valid,
-          value: this.state.fields[child.props.id].value
+          value: this.state.fields[child.props.name].value
         });
       }
 
-      if (child.props['data-submit']) {
+      if (child.props.type === 'submit') {
         return React.cloneElement(child, {
           disabled: this.state.processing || child.props.disabled === 'disabled' ? 'disabled' : false,
           children: this.state.processing ? 'Processing...' : child.props.children

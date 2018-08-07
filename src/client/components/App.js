@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Link } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import MeasureWindow from 'payload/client/components/utilities/MeasureWindow';
 import MeasureScroll from 'payload/client/components/utilities/MeasureScroll';

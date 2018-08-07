@@ -15,9 +15,9 @@ export default () => {
       <Form
         method="POST"
         action="http://localhost:8080">
-        <Input data-fillable type="email" label="Email Address" id="email" required />
-        <Input data-fillable type="password" label="Password" id="password" required />
-        <Button data-submit type="submit">
+        <Input type="email" label="Email Address" name="email" required />
+        <Input type="password" label="Password" name="password" required />
+        <Button type="submit">
           Log In
         </Button>
       </Form>

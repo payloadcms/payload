@@ -52,7 +52,7 @@ class Input extends Component {
       : () => null;
 
     const Label = this.props.label
-      ? () => <label htmlFor={this.props.id}>{this.props.label}<Required /></label>
+      ? () => <label htmlFor={this.props.id ? this.props.id : this.props.name}>{this.props.label}<Required /></label>
       : () => null;
 
     let className = `interact ${this.props.type}`;
@@ -71,8 +71,8 @@ class Input extends Component {
           onChange={this.props.change}
           onFocus={this.props.onFocus}
           type={this.props.type}
-          id={this.props.id}
-          name={this.props.name ? this.props.name : this.props.id}
+          id={this.props.id ? this.props.id : this.props.name}
+          name={this.props.name}
           value={this.props.value} />
       </div>
     );

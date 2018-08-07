@@ -1,7 +1,3 @@
-import OrdersAdd from '../client/components/collections/Orders/Add';
-import OrdersArchive from '../client/components/collections/Orders/Archive';
-import OrdersEdit from '../client/components/collections/Orders/Edit';
-
 export default {
   orders: {
     attrs: {
@@ -42,12 +38,6 @@ export default {
           }
         }
       }
-    },
-
-    components: {
-      add: OrdersAdd,
-      archive: OrdersArchive,
-      edit: OrdersEdit
     }
   },
 };

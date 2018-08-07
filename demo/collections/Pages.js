@@ -1,7 +1,3 @@
-import PagesAdd from '../client/components/collections/Pages/Add';
-import PagesArchive from '../client/components/collections/Pages/Archive';
-import PagesEdit from '../client/components/collections/Pages/Edit';
-
 export default {
   pages: {
     attrs: {
@@ -42,12 +38,6 @@ export default {
           }
         }
       }
-    },
-
-    components: {
-      add: PagesAdd,
-      archive: PagesArchive,
-      edit: PagesEdit
     }
   }
 };
