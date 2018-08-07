@@ -8,16 +8,29 @@
     position: absolute;
     padding-top: rem(.75);
     padding-bottom: rem(.75);
-    background: rgba(white, .95);
     width: 100%;
 
     &.stuck {
+      @include default-template-width;
       position: fixed;
+      left: 0;
       top: 0;
-      padding-left: rem(1);
-      padding-right: rem(1);
-      max-width: calc(#{$content-width} + #{rem(2)});
-      transform: translateX(-#{rem(1)});
+    }
+
+    &:before {
+      content: ' ';
+      background: rgba(white, .95);
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      right: - rem(1);
+      bottom: 0;
+      left: - rem(1);
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 2;
     }
   }
 }

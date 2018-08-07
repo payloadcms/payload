@@ -1,13 +1,7 @@
 @import '_styles';
 
 .default-template {
-  padding: rem(1) rem(1) rem(1) 0;
-  margin-left: rem(6);
-
-  .wrap {
-    max-width: $content-width;
-    margin: 0 auto;
-  }
+  @include default-template-width;
 
   .emblem {
     width: $base;

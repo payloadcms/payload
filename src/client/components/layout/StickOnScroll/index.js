@@ -44,7 +44,9 @@ class StickOnScroll extends Component {
         <div
           className={`stick${this.state.stuck ? ' stuck' : ''}`}
           ref={(el) => { this.stick = el; } }>
-          {this.props.children}
+          <div className="wrap">
+            {this.props.children}
+          </div>
         </div>
         <div
           className="spacer"

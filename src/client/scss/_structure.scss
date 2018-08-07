@@ -2,6 +2,21 @@
 @import '_vars';
 
 /////////////////////////////
+// STRUCTURE
+/////////////////////////////
+
+@mixin default-template-width {
+  padding: rem(1) rem(1) rem(1) 0;
+  margin-left: rem(6);
+  width: calc(100% - #{rem(6)});
+
+  .wrap {
+    max-width: $content-width;
+    margin: 0 auto;
+  }
+}
+
+/////////////////////////////
 // PADDING
 /////////////////////////////
 
