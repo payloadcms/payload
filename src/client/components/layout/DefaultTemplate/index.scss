@@ -2,8 +2,5 @@
 
 .default-template {
   @include default-template-width;
-
-  .emblem {
-    width: $base;
-  }
+  padding-top: rem(1);
 }

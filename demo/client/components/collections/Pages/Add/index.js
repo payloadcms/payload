@@ -34,7 +34,7 @@ class Add extends Component {
           <APIUrl url={this.state.apiUrl} />
           <div className="controls">
             <Button type="secondary">Preview</Button>
-            <Button>Publish</Button>
+            <Button>Save</Button>
           </div>
         </StickOnScroll>
         <Form method="POST" action="#">
