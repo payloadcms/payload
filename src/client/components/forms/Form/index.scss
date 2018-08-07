@@ -1,8 +1,15 @@
 @import '_styles';
 
 form {
+  display: flex;
+  flex-wrap: wrap;
+
+  > * {
+    width: 100%;
+  }
+
 	.status {
-		@extend %label;
+		@extend %uppercase-label;
 		height: auto;
 		max-height: 0;
 		opacity: 0;

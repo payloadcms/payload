@@ -16,6 +16,7 @@
   }
 
   label {
+    @extend %uppercase-label;
     color: $gray;
   }
 

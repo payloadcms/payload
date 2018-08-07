@@ -28,4 +28,8 @@
   > label {
     color: $gray;
   }
+
+  label {
+    @extend %uppercase-label;
+  }
 }

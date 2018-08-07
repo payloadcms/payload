@@ -1,9 +1,9 @@
 @import '_styles';
 
 .btn {
-    @extend %label;
+    @extend %uppercase-label;
     background-color: $green;
-    border: 0;
+    border: 1px solid $green;
     padding: rem(.5) rem(.75);
     line-height: rem(.5);
     border-radius: $radius-sm;
@@ -59,7 +59,9 @@
     }
 
     &:hover {
-      border: 0;
+      border: 1px solid $dark-green;
+      background: $dark-green;
+      color: white;
     }
 
     &:focus, &:active {

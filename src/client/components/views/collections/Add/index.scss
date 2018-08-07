@@ -1,0 +1,18 @@
+@import '_styles';
+
+.collection-add {
+  header {
+    h1 {
+      margin: 0;
+    }
+  }
+
+  .stick-on-scroll .stick {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .controls > *:last-child {
+    margin-left: rem(1);
+  }
+}

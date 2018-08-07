@@ -2,6 +2,7 @@
 
 .field-group {
   @extend %shadow;
+  margin: rem(1) 0;
 
   header,
   .content {

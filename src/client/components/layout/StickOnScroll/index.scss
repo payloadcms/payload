@@ -1,0 +1,23 @@
+@import '_styles';
+
+.stick-on-scroll {
+  position: relative;
+
+  .stick {
+    z-index: 1;
+    position: absolute;
+    padding-top: rem(.75);
+    padding-bottom: rem(.75);
+    background: rgba(white, .95);
+    width: 100%;
+
+    &.stuck {
+      position: fixed;
+      top: 0;
+      padding-left: rem(1);
+      padding-right: rem(1);
+      max-width: calc(#{$content-width} + #{rem(2)});
+      transform: translateX(-#{rem(1)});
+    }
+  }
+}

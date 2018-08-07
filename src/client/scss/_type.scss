@@ -18,7 +18,7 @@
 }
 
 %h1 {
-  margin: 0 0 rem(1.5);
+  margin: 0 0 rem(1);
   font-size: rem(1);
   line-height: rem(1);
 
@@ -32,7 +32,7 @@
 %h2 {
   margin: 0 0 rem(1);
   font-size: rem(.7);
-  line-height: rem(1);
+  line-height: rem(.75);
   letter-spacing: 0;
 
   @include small-break {
@@ -76,7 +76,7 @@
 // TYPE STYLES
 /////////////////////////////
 
-%label {
+%uppercase-label {
   text-transform: uppercase;
   letter-spacing: rem(.1);
   font-size: rem(.3);

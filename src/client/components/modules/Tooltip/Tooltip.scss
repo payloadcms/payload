@@ -3,7 +3,7 @@
 @import '_structure';
 
 .tooltip {
-	@extend %label;
+	@extend %uppercase-label;
 	background-color: $green;
 	position: absolute;
 	top: - rem(.5);
