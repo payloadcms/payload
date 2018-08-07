@@ -28,7 +28,7 @@
 	}
 
 	input {
-		@include formInput();
+		@include formInput;
 	}
 
 	&.error {

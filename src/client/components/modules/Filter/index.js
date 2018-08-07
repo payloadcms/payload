@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Input from 'payload/client/components/forms/Input';
+import Input from 'payload/client/components/field-types/Input';
 
 class Filter extends Component {
   render() {

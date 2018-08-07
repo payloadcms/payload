@@ -2,7 +2,6 @@
 @import '_structure';
 @import '_queries';
 
-
 @mixin formInput () {
     @extend %inputShadow;
     font-family: $font-brand;
@@ -11,7 +10,7 @@
     background: white;
     color: $black;
     border-radius: 0;
-    font-size: rem(.65);
+    font-size: rem(.5);
     height: rem(1.75);
     line-height: rem(1.75);
     padding: 0 rem(.75);
