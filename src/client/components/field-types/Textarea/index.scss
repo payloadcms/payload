@@ -1,0 +1,42 @@
+@import '_styles';
+
+.interact.textarea {
+  margin-bottom: rem(.5);
+  position: relative;
+
+  label {
+    display: flex;
+
+    .required {
+      color: $pink;
+      margin-left: rem(.25);
+      margin-right: auto;
+    }
+  }
+
+  .tooltip {
+    left: auto;
+    right: 0;
+    transform: none;
+    background-color: $pink;
+
+    span {
+      border-top-color: $pink;
+    }
+  }
+
+  textarea {
+    @include formInput();
+    min-height: rem(3);
+  }
+
+  &.error {
+    input {
+      border: 2px solid $pink;
+    }
+  }
+
+  @include small-break {
+    margin-bottom: rem(.5);
+  }
+}

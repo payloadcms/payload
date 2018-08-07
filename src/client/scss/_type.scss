@@ -31,9 +31,9 @@
 
 %h2 {
   margin: 0 0 rem(1);
-  font-size: rem(1.5);
-  line-height: rem(1.75);
-  letter-spacing: rem(.02);
+  font-size: rem(.8);
+  line-height: rem(1);
+  letter-spacing: 0;
 
   @include small-break {
     font-size: rem(.85);

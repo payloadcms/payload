@@ -1,0 +1,18 @@
+@import '_styles';
+
+.field-group {
+  @extend %shadow;
+
+  header,
+  .content {
+    @include pad;
+  }
+
+  header {
+    border-bottom: 1px solid $light-gray;
+
+    * {
+      margin-bottom: 0;
+    }
+  }
+}

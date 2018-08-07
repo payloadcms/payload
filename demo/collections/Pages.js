@@ -7,13 +7,13 @@ export default {
     },
 
     fields: {
+      title: {
+        type: 'string',
+        maxLength: 100
+      },
       metaInfo: {
         type: 'group',
         fields: {
-          title: {
-            type: 'string',
-            maxLength: 100
-          },
           description: { type: 'textarea',
             wysiwyg: false,
             height: 100
