@@ -1,5 +1,5 @@
 import React from 'react';
-import SetStepNav from 'payload/client/components/utilities/SetStepNav';
+import { SetStepNav } from 'payload/components';
 
 export default props => {
   return (

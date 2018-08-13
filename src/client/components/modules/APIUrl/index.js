@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Label from 'payload/client/components/type/Label';
+import { Label } from 'payload/components';
 
 export default props => {
   return (

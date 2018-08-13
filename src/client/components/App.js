@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import MeasureWindow from 'payload/client/components/utilities/MeasureWindow';
-import MeasureScroll from 'payload/client/components/utilities/MeasureScroll';
-import LoadContent from 'payload/client/components/utilities/LoadContent';
+import { MeasureWindow } from 'payload/components';
+import { MeasureScroll } from 'payload/components';
+import { LoadContent } from 'payload/components';
 
-import 'payload/client/scss/app.css';
+import '../scss/app.css';
 
 class App extends Component {
   render() {

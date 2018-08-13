@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Tooltip from '../../modules/Tooltip';
+import { Tooltip } from 'payload/components';
 
 import './index.css';
 

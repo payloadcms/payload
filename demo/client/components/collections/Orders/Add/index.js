@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import AddView from 'payload/client/components/views/collections/Add';
+import { AddView } from 'payload/components';
 
 const mapStateToProps = state => ({
   collections: state.collections.all

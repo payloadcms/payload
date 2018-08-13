@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import ajax from '../../../ajax';
+import { ajax } from 'payload';
 
 import './index.css';
 

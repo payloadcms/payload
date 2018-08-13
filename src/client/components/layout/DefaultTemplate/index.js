@@ -1,6 +1,6 @@
 import React from 'react';
-import Sidebar from '../Sidebar';
-import StepNav from '../../modules/StepNav';
+import { Sidebar } from 'payload/components';
+import { StepNav } from 'payload/components';
 
 import './index.css';
 

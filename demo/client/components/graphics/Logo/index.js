@@ -1,11 +1,11 @@
 import React from 'react';
 
-import PayloadLogo from 'payload/client/components/graphics/PayloadLogo';
+import { PayloadLogo } from 'payload/components';
 
-export default props => {
+export default () => {
   return (
     <div className="logo-wrap">
       <PayloadLogo />
     </div>
   );
-}
+};

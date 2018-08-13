@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import SetStepNav from 'payload/client/components/utilities/SetStepNav';
+import { SetStepNav } from 'payload/components';
 
 import './index.css';
 

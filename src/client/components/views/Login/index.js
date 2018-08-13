@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import ContentBlock from 'payload/client/components/layout/ContentBlock';
+import { ContentBlock } from 'payload/components';
+import { Form } from 'payload/components';
+import { Input } from 'payload/components';
+import { Button } from 'payload/components';
+
 import Logo from 'local/client/components/graphics/Logo';
-import Form from 'payload/client/components/forms/Form';
-import Input from 'payload/client/components/field-types/Input';
-import Button from 'payload/client/components/controls/Button';
 
 import './index.css';
 

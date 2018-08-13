@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import EditView from 'payload/client/components/views/collections/Edit';
+import { EditView } from 'payload/components';
 
 const mapStateToProps = state => ({
   collections: state.collections.all

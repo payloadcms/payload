@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Route, Switch, withRouter } from 'react-router-dom';
 
-import CollectionRoutes from 'payload/client/components/routes/Collections';
-import DefaultTemplate from 'payload/client/components/layout/DefaultTemplate';
-import Dashboard from 'payload/client/components/views/Dashboard';
-import Login from 'payload/client/components/views/Login';
+import { CollectionRoutes } from 'payload/components';
+import { DefaultTemplate } from 'payload/components';
+import { Dashboard } from 'payload/components';
+import { Login } from 'payload/components';
 
 const mapStateToProps = state => ({
   collections: state.collections.all

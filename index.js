@@ -1,1 +1,5 @@
-export * from './src/client/Components';
+import ajax from './src/client/ajax';
+
+export {
+  ajax
+};

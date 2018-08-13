@@ -18,4 +18,4 @@ export default {
     Archive: PagesArchive,
     Edit: PagesEdit
   }
-}
+};

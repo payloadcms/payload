@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import Label from 'payload/client/components/type/Label';
-import Arrow from 'payload/client/components/graphics/Arrow';
+import { Label } from 'payload/components';
+import { Arrow } from 'payload/components';
 
 import './index.css';
 

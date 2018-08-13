@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from 'payload/client/components/controls/Button';
+import { Button } from 'payload/components';
 
 import './index.css';
 
