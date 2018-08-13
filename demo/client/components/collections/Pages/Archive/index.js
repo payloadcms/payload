@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { ArchiveView } from 'payload/components';
-import { HeadingButton } from 'payload/components';
-import { Filter } from 'payload/components';
+import { ArchiveView, HeadingButton, Filter } from 'payload/components';
 
 const mapStateToProps = state => ({
   collections: state.collections.all

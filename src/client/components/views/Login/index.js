@@ -1,9 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ContentBlock } from 'payload/components';
-import { Form } from 'payload/components';
-import { Input } from 'payload/components';
-import { Button } from 'payload/components';
+import { ContentBlock, Form, Input, Button } from 'payload/components';
 
 import Logo from 'local/client/components/graphics/Logo';
 

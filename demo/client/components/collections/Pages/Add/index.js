@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-
-import { AddView } from 'payload/components';
-import { StickOnScroll } from 'payload/components';
-import { APIUrl } from 'payload/components';
-import { Button } from 'payload/components';
-import { Form } from 'payload/components';
-import { Input } from 'payload/components';
-import { Textarea } from 'payload/components';
-import { Group } from 'payload/components';
+import {
+  AddView,
+  StickOnScroll,
+  APIUrl,
+  Button,
+  Form,
+  Input,
+  Textarea,
+  Group
+} from 'payload/components';
 
 const mapStateToProps = state => ({
   collections: state.collections.all

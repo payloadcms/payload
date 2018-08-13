@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { MeasureWindow } from 'payload/components';
-import { MeasureScroll } from 'payload/components';
-import { LoadContent } from 'payload/components';
+import { MeasureWindow, MeasureScroll, LoadContent } from 'payload/components';
 
 import '../scss/app.css';
 
