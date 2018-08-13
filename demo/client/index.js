@@ -1,16 +1,21 @@
 import React from 'react';
 import { render } from 'react-dom';
 
-import App from 'payload/client/components/App';
+import { Test, Test2 } from 'payload';
 
-import Routes from './Routes';
-import store from './store';
+// import App from 'payload/client/components/App';
+
+// import Routes from './Routes';
+// import store from './store';
+
+console.log(Test);
 
 const Index = () => {
   return (
-    <App store={store}>
-      <Routes />
-    </App>
+    <React.Fragment>
+      <Test />
+      <Test2 />
+    </React.Fragment>
   );
 };
 
