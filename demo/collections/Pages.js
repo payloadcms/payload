@@ -3,9 +3,8 @@ export default {
     attrs: {
       label: 'Pages',
       singular: 'Page',
-      plural: 'Pages',
+      plural: 'Pages'
     },
-
     fields: {
       title: {
         type: 'string',
@@ -14,11 +13,14 @@ export default {
       metaInfo: {
         type: 'group',
         fields: {
-          description: { type: 'textarea',
+          description: {
+            type: 'textarea',
             wysiwyg: false,
             height: 100
           },
-          keywords: { type: 'text' }
+          keywords: {
+            type: 'text'
+          }
         }
       },
       content: {
@@ -31,7 +33,7 @@ export default {
           },
           flexibleContentExample: {
             type: 'flex',
-            availableLayouts: [
+            availableComponents: [
               'layout1',
               'layout5'
             ]

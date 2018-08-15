@@ -1,6 +1,5 @@
 import { createStore, combineReducers } from 'redux';
-import { common } from 'payload/redux';
-import { collections } from 'payload/redux';
+import { common, collections } from 'payload/redux';
 
 const reducer = combineReducers({
   common,
