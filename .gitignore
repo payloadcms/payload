@@ -221,3 +221,4 @@ $RECYCLE.BIN/
 # Ignores compiled CSS
 src/**/*.css
 demo**/*.css
+dist
