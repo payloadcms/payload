@@ -17,18 +17,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "babel-cli": "^6.26.0",
     "file-loader": "^1.1.11",
     "react": "^16.4.1",
     "react-document-meta": "^3.0.0-beta.2",
     "react-dom": "^16.4.1",
+    "react-redux": "^5.0.7",
     "react-router-dom": "^4.3.1",
+    "redux": "^4.0.0",
     "superagent": "^3.8.3",
     "superagent-promise": "^1.1.0",
     "url-loader": "^1.0.1"
   },
   "devDependencies": {
-    "@babel/cli": "^7.0.0-beta.55",
+    "@babel/cli": "^7.0.0-rc.1",
     "@babel/core": "^7.0.0-beta.54",
     "@babel/preset-env": "^7.0.0-beta.54",
     "@babel/preset-react": "^7.0.0-beta.54",
