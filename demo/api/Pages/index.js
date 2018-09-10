@@ -1,5 +1,16 @@
-import { Payload } from 'payload';
+var app = require('../../server');
 
-payload.get('/pages', (req, res) => {
-  const filtered = payload.filter(req);
+app.get('/pages', (req, res) => {
+
+  // var filtered = payload.filter(req);
+
+  // if (payload.auth) {
+    res.sendStatus(200);
+  // }
+
+  res.sendStatus(401);
+});
+
+app.post('/pages', (req, res) => {
+  res.sendStatus(200);
 });

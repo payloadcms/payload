@@ -1,0 +1,2 @@
+require('./Orders');
+require('./Pages');
