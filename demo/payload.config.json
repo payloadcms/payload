@@ -1,0 +1,15 @@
+{
+  "port": 3000,
+  "adminURL": "/payload-login",
+  "dir": {
+    "api": "./api",
+    "models": "./models",
+    "admin": "./client"
+  },
+  "routes": {
+    "api": "/api",
+    "admin": "/admin"
+  },
+  "foo": "bar",
+  "mongoURL": "mongodb://localhost/payload"
+}

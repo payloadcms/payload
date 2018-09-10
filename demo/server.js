@@ -1,17 +1,17 @@
 var mongoose = require('mongoose');
 var express = require('express');
+var payloadConfig = require('./payload.config');
 
-mongoose.connect('mongodb://localhost/payload-demo');
+mongoose.connect(payloadConfig.mongoURL);
 
 var app = module.exports = express();
-var port = 3000;
 
 app.get('/test', (req, res) => {
   res.sendStatus(200);
 });
 
-require('./api');
+require(payloadConfig.dir.api);
 
-app.listen(port, (error) => {
-  console.log("listening on " + port + "...");
+app.listen(payloadConfig.port, (error) => {
+  console.log("listening on " + payloadConfig.port + "...");
 })
