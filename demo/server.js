@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var express = require('express');
+var Payload = require('../dist');
 var payloadConfig = require('./payload.config');
 
 mongoose.connect(payloadConfig.mongoURL);

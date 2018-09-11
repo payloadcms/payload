@@ -4,11 +4,15 @@
   "description": "",
   "main": "index.js",
   "nodemonConfig": {
-    "ignore": ["src/client/*", "demo/client/*"]
+    "ignore": [
+      "src/client/*",
+      "demo/client/*"
+    ]
   },
   "scripts": {
     "test": "node ./node_modules/jest/bin/jest.js src/tests",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
+    "core:watch": "./node_modules/.bin/babel src --out-dir dist --source-maps --watch",
     "core:build": "./node_modules/.bin/babel src --out-dir dist --source-maps",
     "build-demo-css": "node-sass-chokidar --include-path ./src/client/scss demo/ -o demo/",
     "watch-demo-css": "npm run build-demo-css && node-sass-chokidar --include-path ./src/client/scss demo/ -o demo/ --watch --recursive",
@@ -21,7 +25,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^6.0.0",
     "file-loader": "^1.1.11",
+    "ignore-styles": "^5.0.1",
     "react": "^16.4.1",
     "react-document-meta": "^3.0.0-beta.2",
     "react-dom": "^16.4.1",
@@ -33,15 +39,12 @@
     "url-loader": "^1.0.1"
   },
   "devDependencies": {
-    "@babel/cli": "^7.0.0-rc.1",
-    "@babel/core": "^7.0.0-beta.54",
-    "@babel/preset-env": "^7.0.0-beta.54",
-    "@babel/preset-react": "^7.0.0-beta.54",
-    "@babel/preset-stage-2": "^7.0.0-beta.54",
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
     "autoprefixer": "^9.0.1",
-    "babel-core": "^7.0.0-0",
-    "babel-jest": "^23.4.0",
-    "babel-loader": "^8.0.0-beta.4",
+    "babel-loader": "^8.0.2",
     "css-loader": "^1.0.0",
     "eslint": "^4.19.1",
     "eslint-plugin-react": "^7.10.0",
