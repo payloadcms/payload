@@ -20,7 +20,7 @@ class Edit extends Component {
         id={this.props.match.params.id}
         slug={this.slug}
         collection={this.collection}>
-        <h1>Edit {this.collection.attrs.singular} {this.props.match.params.id}</h1>
+        <h1>Edit Order {this.props.match.params.id}</h1>
       </EditView>
     );
   }

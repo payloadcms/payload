@@ -30,7 +30,7 @@ class Sidebar extends Component {
             return (
               <Link className={classes} key={i} to={href}>
                 <Arrow />
-                {this.props.collections[key].attrs.plural}
+                {this.props.collections[key].plural}
               </Link>
             );
           })}

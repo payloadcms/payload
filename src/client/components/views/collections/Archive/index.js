@@ -8,7 +8,7 @@ export default props => {
     <article className="collection-archive">
       <SetStepNav nav={ [
         {
-          label: props.collection.attrs.label
+          label: props.collection.label
         }
       ] } />
       {props.children}

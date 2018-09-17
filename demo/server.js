@@ -1,11 +1,11 @@
-var mongoose = require('mongoose');
-var express = require('express');
-var Payload = require('../dist');
-var payloadConfig = require('./payload.config');
+const mongoose = require('mongoose');
+const express = require('express');
+const Payload = require('../dist');
+const payloadConfig = require('./payload.config');
 
 mongoose.connect(payloadConfig.mongoURL);
 
-var app = module.exports = express();
+const app = module.exports = express();
 
 app.get('/test', (req, res) => {
   res.sendStatus(200);
@@ -13,6 +13,6 @@ app.get('/test', (req, res) => {
 
 require(payloadConfig.dir.api);
 
-app.listen(payloadConfig.port, (error) => {
-  console.log("listening on " + payloadConfig.port + "...");
-})
+app.listen(payloadConfig.port, () => {
+  console.log(`listening on ${payloadConfig.port}...`);
+});

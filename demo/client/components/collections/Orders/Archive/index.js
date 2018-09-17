@@ -18,7 +18,7 @@ class Archive extends Component {
     return (
       <ArchiveView slug={this.slug} collection={this.collection}>
         <HeadingButton
-          heading={this.collection.attrs.label}
+          heading="Orders"
           buttonLabel="Add New"
           buttonUrl={`/collections/${this.slug}/add-new`}
           buttonType="link" />

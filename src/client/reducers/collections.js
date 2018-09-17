@@ -8,7 +8,9 @@ export default (state = defaultState, action) => {
 
     return {
       ...state,
-      all: action.payload
+      all: {
+        [action.payload.slug]: action.payload
+      }
     };
 
   default:

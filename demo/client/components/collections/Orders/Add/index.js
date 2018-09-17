@@ -17,7 +17,7 @@ class Add extends Component {
   render() {
     return (
       <AddView slug={this.slug} collection={this.collection}>
-        <h1>Add New {this.collection.attrs.singular}</h1>
+        <h1>Add New Order</h1>
       </AddView>
     );
   }

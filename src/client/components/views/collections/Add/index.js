@@ -9,7 +9,7 @@ export default props => {
       <SetStepNav nav={ [
         {
           url: `/collections/${props.slug}`,
-          label: props.collection.attrs.label
+          label: props.collection.label
         },
         {
           label: 'Add New'

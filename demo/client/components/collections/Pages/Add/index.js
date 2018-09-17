@@ -29,7 +29,7 @@ class Add extends Component {
     return (
       <AddView slug={this.slug} collection={this.collection}>
         <header>
-          <h1>Add New {this.collection.attrs.singular}</h1>
+          <h1>Add New Page</h1>
         </header>
         <StickOnScroll>
           <APIUrl url={this.state.apiUrl} />
