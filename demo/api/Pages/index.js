@@ -1,16 +1,18 @@
-var app = require('../../server');
+const app = require('../../server');
+const mongoose = require('mongoose');
+const Page = mongoose.model('Page');
 
 app.get('/pages', (req, res) => {
-
-  // var filtered = payload.filter(req);
-
-  // if (payload.auth) {
-    res.sendStatus(200);
-  // }
-
-  res.sendStatus(401);
+  Page.find((err, pages, next) => {
+    if (err) { return next(err); }
+    return res.json(pages);
+  });
 });
 
 app.post('/pages', (req, res) => {
-  res.sendStatus(200);
+  const newPage = new Page(req.body);
+  newPage.save((err, page, next) => {
+    if (err) { return next(err); }
+    return res.json(page);
+  });
 });

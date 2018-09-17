@@ -1,16 +1,8 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-var PostSchema = new mongoose.Schema({
+const PageSchema = new mongoose.Schema({
   title: String,
-  link: String,
-  author: String,
-  upvotes: {type: Number, default: 0},
-  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }]
+  content: String
 });
 
-PostSchema.methods.upvote = function(cb) {
-  this.upvotes += 1;
-  this.save(cb);
-};
-
-mongoose.model('Post', PostSchema);
+mongoose.model('Page', PageSchema);

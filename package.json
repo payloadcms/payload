@@ -25,6 +25,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.18.3",
     "dotenv": "^6.0.0",
     "file-loader": "^1.1.11",
     "ignore-styles": "^5.0.1",
