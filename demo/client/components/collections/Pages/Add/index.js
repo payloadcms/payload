@@ -19,7 +19,9 @@ class Add extends Component {
   constructor(props) {
     super(props);
     this.slug = 'pages';
-    this.collection = this.props.collections[this.slug];
+    this.collection = this.props.collections.find(collection => {
+      return collection.slug === this.slug;
+    });;
     this.state = {
       apiUrl: 'https://site.com/page?slug=about-us'
     };

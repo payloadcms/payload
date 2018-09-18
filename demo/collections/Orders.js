@@ -3,8 +3,9 @@ export default {
   label: 'Orders',
   singular: 'Order',
   plural: 'Orders',
-  fields: {
-    metaInfo: {
+  fields: [
+    {
+      name: 'metaInfo',
       type: 'group',
       fields: {
         title: {
@@ -18,22 +19,25 @@ export default {
         keywords: { type: 'text' }
       }
     },
-    content: {
+    {
+      name: 'content',
       type: 'group',
-      fields: {
-        exampleField1: {
+      fields: [
+        {
+          name: 'exampleField1',
           type: 'textarea',
           wysiwyg: true,
           height: 400
         },
-        flexibleContentExample: {
+        {
+          name: 'flexibleContentExample',
           type: 'flex',
           availableLayouts: [
             'layout1',
             'layout5'
           ]
         }
-      }
+      ]
     }
-  }
+  ]
 };

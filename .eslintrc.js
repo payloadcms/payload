@@ -83,7 +83,7 @@ module.exports = exports = {
     "no-void": WARN,
     // Produce warnings when something is commented as TODO or FIXME
     "no-warning-comments": [ WARN, {
-      "terms": [ "TODO", "FIXME" ],
+      "terms": [ "FIXME" ],
       "location": "start"
     }],
     "no-with": WARN,

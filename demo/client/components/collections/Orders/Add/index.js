@@ -11,7 +11,9 @@ class Add extends Component {
   constructor(props) {
     super(props);
     this.slug = 'orders';
-    this.collection = this.props.collections[this.slug];
+    this.collection = this.props.collections.find(collection => {
+      return collection.slug === this.slug;
+    });
   }
 
   render() {

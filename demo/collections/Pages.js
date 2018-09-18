@@ -15,5 +15,11 @@ export default {
       label: 'Content',
       type: 'textarea'
     }
+  ],
+  relationships: [
+    {
+      relation: 'orders',
+      type: 'hasMany'
+    }
   ]
 };
