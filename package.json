@@ -19,7 +19,7 @@
     "build-module-css": "node-sass-chokidar --include-path ./src/client/scss src/ -o src/",
     "watch-module-css": "npm run build-demo-css && node-sass-chokidar --include-path ./src/client/scss src/ -o src/ --watch --recursive",
     "webpack": "webpack-dev-server --mode development --config config/webpack.dev.config.js --open --hot --history-api-fallback",
-    "demo-server": "nodemon demo/server.js",
+    "demo-server": "nodemon demo/app.js",
     "dev": "npm-run-all -p watch-module-css watch-demo-css webpack demo-server"
   },
   "author": "",
