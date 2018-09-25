@@ -120,6 +120,7 @@ class Form extends Component {
 
     return (
       <form
+        noValidate
         onSubmit={this.submit}
         method={this.props.method}
         action={this.props.action}
