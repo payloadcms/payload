@@ -18,6 +18,8 @@ import EditView from './src/client/components/views/collections/Edit';
 import StickOnScroll from './src/client/components/layout/StickOnScroll';
 import APIUrl from './src/client/components/modules/APIUrl';
 import Form from './src/client/components/forms/Form';
+import { FormConsumer } from './src/client/components/forms/Form';
+import FormSubmit from './src/client/components/forms/Submit';
 import PayloadIcon from './src/client/components/graphics/PayloadIcon';
 import PayloadLogo from './src/client/components/graphics/PayloadLogo';
 import Tooltip from './src/client/components/modules/Tooltip';
@@ -49,6 +51,8 @@ export {
   StickOnScroll,
   APIUrl,
   Form,
+  FormConsumer,
+  FormSubmit,
   PayloadIcon,
   PayloadLogo,
   Tooltip,

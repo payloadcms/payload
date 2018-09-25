@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Tooltip } from 'payload/components';
+import { FormConsumer, Tooltip } from 'payload/components';
 
 import './index.css';
 
@@ -14,12 +14,12 @@ class Textarea extends Component {
     this.validate = this.validate.bind(this);
   }
 
-  validate() {
+  validate(value) {
     switch (this.props.type) {
     case 'honeypot':
-      return this.el.value.length === 0;
+      return value.length === 0;
     default:
-      return this.el.value.length > 0;
+      return value.length > 0;
     }
   }
 
@@ -49,21 +49,28 @@ class Textarea extends Component {
       className = 'interact';
     }
 
+    const validate = this.props.required ? this.validate : () => true;
+
     return (
-      <div className={className} style={style}>
-        <Error />
-        <Label />
-        <textarea
-          ref={el => { this.el = el; } }
-          onBlur={this.validate}
-          onFocus={this.props.onFocus}
-          onChange={this.props.change}
-          id={this.props.id ? this.props.id : this.props.name}
-          name={this.props.name}
-          rows={this.props.rows ? this.props.rows : '5'}
-          value={this.props.value}>
-        </textarea>
-      </div>
+      <FormConsumer>
+        {context => {
+          return (
+            <div className={className} style={style}>
+              <Error />
+              <Label />
+              <textarea
+                value={context.fields[this.props.name] ? context.fields[this.props.name].value : ''}
+                onChange={(e) => { context.handleChange(e, validate) }}
+                disabled={this.props.disabled}
+                placeholder={this.props.placeholder}
+                type={this.props.type}
+                id={this.props.id ? this.props.id : this.props.name}
+                name={this.props.name}>
+              </textarea>
+            </div>
+          )
+        }}
+      </FormConsumer>
     );
   }
 }

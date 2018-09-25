@@ -24,6 +24,7 @@ class Button extends Component {
     this.buttonProps = {
       className: classes,
       onClick: this.props.onClick,
+      disabled: this.props.disabled,
       ...this.props
     };
   }

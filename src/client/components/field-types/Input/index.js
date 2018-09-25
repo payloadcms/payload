@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Tooltip } from 'payload/components';
+import { FormConsumer, Tooltip } from 'payload/components';
 
 import './index.css';
 
@@ -15,30 +15,24 @@ class Input extends Component {
     this.validate = this.validate.bind(this);
   }
 
-  validate() {
+  validate(value) {
     let emailTest = /\S+@\S+\.\S+/;
 
     switch (this.props.type) {
     case 'text':
-      return this.el.value.length > 0;
+      return value.length > 0;
 
     case 'password':
-      return this.el.value.length > 0;
+      return value.length > 0;
 
     case 'email':
-      return emailTest.test(this.el.value);
+      return emailTest.test(value);
 
     case 'hidden':
       return true;
 
     default:
       return false;
-    }
-  }
-
-  componentDidUpdate() {
-    if (this.props.autoFocus) {
-      this.el.focus();
     }
   }
 
@@ -60,21 +54,27 @@ class Input extends Component {
       ? className
       : `${className} error`;
 
+    const validate = this.props.required ? this.validate : () => true;
+
     return (
-      <div className={className} style={this.props.style}>
-        <Error />
-        <Label />
-        <input
-          ref={el => { this.el = el; } }
-          disabled={this.props.disabled}
-          placeholder={this.props.placeholder}
-          onChange={this.props.change}
-          onFocus={this.props.onFocus}
-          type={this.props.type}
-          id={this.props.id ? this.props.id : this.props.name}
-          name={this.props.name}
-          value={this.props.value} />
-      </div>
+      <FormConsumer>
+        {context => {
+          return (
+            <div className={className} style={this.props.style}>
+              <Error />
+              <Label />
+              <input
+                value={context.fields[this.props.name] ? context.fields[this.props.name].value : ''}
+                onChange={(e) => { context.handleChange(e, validate) }}
+                disabled={this.props.disabled}
+                placeholder={this.props.placeholder}
+                type={this.props.type}
+                id={this.props.id ? this.props.id : this.props.name}
+                name={this.props.name} />
+            </div>
+          )
+        }}
+      </FormConsumer>
     );
   }
 }
