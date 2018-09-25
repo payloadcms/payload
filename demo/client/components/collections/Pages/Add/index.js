@@ -34,7 +34,7 @@ class Add extends Component {
         <header>
           <h1>Add New Page</h1>
         </header>
-        <Form method="POST" action="#">
+        <Form method="POST" action="http://localhost:3000/pages">
           <StickOnScroll>
             <APIUrl url={this.state.apiUrl} />
             <div className="controls">
@@ -43,8 +43,8 @@ class Add extends Component {
             </div>
           </StickOnScroll>
           <Input type="text" label="Page Title" name="title" required />
-          <Group heading="Meta Information">
-            <Textarea name="description" label="Meta Description" wysiwyg={false} height={100} />
+          <Group heading="Sample Group">
+            <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} />
           </Group>
         </Form>
       </AddView>

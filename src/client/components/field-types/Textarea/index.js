@@ -11,7 +11,12 @@ class Textarea extends Component {
       text: 'Please fill in the field'
     };
 
+    this.state = {
+      init: false
+    };
+
     this.validate = this.validate.bind(this);
+    this.sendField = this.sendField.bind(this);
   }
 
   validate(value) {
@@ -23,12 +28,39 @@ class Textarea extends Component {
     }
   }
 
+  sendField(value) {
+    return {
+      name: this.props.name,
+      value: value,
+      valid: this.props.required
+        ? this.validate(value)
+        : true
+    }
+  }
+
+  componentDidMount() {
+    this.props.context.setValue(
+      this.sendField(
+        this.props.value ? this.props.value : ''
+      )
+    );
+
+    this.setState({
+      init: true
+    })
+  }
+
   render() {
+
+    const valid = this.props.context.fields[this.props.name]
+      ? this.props.context.fields[this.props.name].valid
+      : true;
+
     const Required = this.props.required
       ? () => <span className="required">*</span>
       : () => null;
 
-    const Error = this.props.valid === false
+    const Error = valid === false && this.props.context.submitted
       ? () => <Tooltip className="error-message">{this.errors.text}</Tooltip>
       : () => null;
 
@@ -49,15 +81,23 @@ class Textarea extends Component {
       className = 'interact';
     }
 
-    const validate = this.props.required ? this.validate : () => true;
+    const initialValue = this.props.value ? this.props.value : '';
 
     return (
       <div className={className} style={style}>
         <Error />
         <Label />
         <textarea
-          value={this.props.context.fields[this.props.name] ? this.props.context.fields[this.props.name].value : ''}
-          onChange={(e) => { this.props.context.handleChange(e, validate) }}
+          value={
+            this.props.context.fields[this.props.name]
+              ? this.props.context.fields[this.props.name].value
+              : initialValue
+          }
+          onChange={
+            (e) => {
+              this.props.context.setValue(this.sendField(e.target.value))
+            }
+          }
           disabled={this.props.disabled}
           placeholder={this.props.placeholder}
           type={this.props.type}

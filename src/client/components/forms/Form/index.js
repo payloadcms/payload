@@ -12,29 +12,32 @@ class Form extends Component {
     this.state = {
       fields: {},
       status: undefined,
+      submitted: false,
       processing: false
     };
 
     this.submit = this.submit.bind(this);
+    this.setValue = this.setValue.bind(this);
   }
 
-  handleChange(e, validate) {
-    let valid = validate(e.target.value);
-
-    this.setState({
+  setValue(field) {
+    this.setState(prevState => ({
+      ...prevState,
       fields: {
-        ...this.state.fields,
-        [e.target.name]: {
-          value: e.target.value,
-          valid: valid
+        ...prevState.fields,
+        [field.name]: {
+          value: field.value,
+          valid: field.valid
         }
       }
-    });
+    }));
   }
 
   submit(e) {
 
-    e.preventDefault();
+    this.setState({
+      submitted: true
+    });
 
     let isValid = true;
 
@@ -123,9 +126,10 @@ class Form extends Component {
         className={this.props.className}>
         <Status />
         <FormContext.Provider value={{
-          handleChange: this.handleChange.bind(this),
+          setValue: this.setValue.bind(this),
           fields: this.state.fields,
-          processing: this.state.processing
+          processing: this.state.processing,
+          submitted: this.state.submitted
         }}>
           {this.props.children}
         </FormContext.Provider>

@@ -12,7 +12,12 @@ class Input extends Component {
       email: 'Please enter a valid email'
     };
 
+    this.state = {
+      init: false
+    };
+
     this.validate = this.validate.bind(this);
+    this.sendField = this.sendField.bind(this);
   }
 
   validate(value) {
@@ -36,16 +41,40 @@ class Input extends Component {
     }
   }
 
-  componentDidMount() {
+  sendField(value) {
 
+    return {
+      name: this.props.name,
+      value: value,
+      valid: this.props.required
+        ? this.validate(value)
+        : true
+    };
+  }
+
+  componentDidMount() {
+    this.props.context.setValue(
+      this.sendField(
+        this.props.value ? this.props.value : ''
+      )
+    );
+
+    this.setState({
+      init: true
+    })
   }
 
   render() {
+
+    const valid = this.props.context.fields[this.props.name]
+      ? this.props.context.fields[this.props.name].valid
+      : true;
+
     const Required = this.props.required
       ? () => <span className="required">*</span>
       : () => null;
 
-    const Error = this.props.valid === false
+    const Error = valid === false && this.props.context.submitted
       ? () => <Tooltip className="error-message">{this.errors[this.props.type]}</Tooltip>
       : () => null;
 
@@ -58,15 +87,23 @@ class Input extends Component {
       ? className
       : `${className} error`;
 
-    const validate = this.props.required ? this.validate : () => true;
+    const initialValue = this.props.value ? this.props.value : '';
 
     return (
       <div className={className} style={this.props.style}>
         <Error />
         <Label />
         <input
-          value={this.props.context.fields[this.props.name] ? this.props.context.fields[this.props.name].value : ''}
-          onChange={(e) => { this.props.context.handleChange(e, validate) }}
+          value={
+            this.props.context.fields[this.props.name]
+              ? this.props.context.fields[this.props.name].value
+              : initialValue
+          }
+          onChange={
+            (e) => {
+              this.props.context.setValue(this.sendField(e.target.value))
+            }
+          }
           disabled={this.props.disabled}
           placeholder={this.props.placeholder}
           type={this.props.type}
