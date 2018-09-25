@@ -22,7 +22,7 @@ class Add extends Component {
     this.slug = 'pages';
     this.collection = this.props.collections.find(collection => {
       return collection.slug === this.slug;
-    });;
+    });
     this.state = {
       apiUrl: 'https://site.com/page?slug=about-us'
     };

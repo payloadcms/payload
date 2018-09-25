@@ -42,7 +42,6 @@ class Input extends Component {
   }
 
   sendField(value) {
-
     return {
       name: this.props.name,
       value: value,
@@ -61,11 +60,10 @@ class Input extends Component {
 
     this.setState({
       init: true
-    })
+    });
   }
 
   render() {
-
     const valid = this.props.context.fields[this.props.name]
       ? this.props.context.fields[this.props.name].valid
       : true;
@@ -101,7 +99,7 @@ class Input extends Component {
           }
           onChange={
             (e) => {
-              this.props.context.setValue(this.sendField(e.target.value))
+              this.props.context.setValue(this.sendField(e.target.value));
             }
           }
           disabled={this.props.disabled}

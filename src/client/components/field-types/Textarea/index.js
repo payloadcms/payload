@@ -35,7 +35,7 @@ class Textarea extends Component {
       valid: this.props.required
         ? this.validate(value)
         : true
-    }
+    };
   }
 
   componentDidMount() {
@@ -47,11 +47,10 @@ class Textarea extends Component {
 
     this.setState({
       init: true
-    })
+    });
   }
 
   render() {
-
     const valid = this.props.context.fields[this.props.name]
       ? this.props.context.fields[this.props.name].valid
       : true;
@@ -60,7 +59,7 @@ class Textarea extends Component {
       ? () => <span className="required">*</span>
       : () => null;
 
-    const Error = valid === false && this.props.context.submitted
+    let Error = valid === false && this.props.context.submitted
       ? () => <Tooltip className="error-message">{this.errors.text}</Tooltip>
       : () => null;
 
@@ -95,7 +94,7 @@ class Textarea extends Component {
           }
           onChange={
             (e) => {
-              this.props.context.setValue(this.sendField(e.target.value))
+              this.props.context.setValue(this.sendField(e.target.value));
             }
           }
           disabled={this.props.disabled}

@@ -34,7 +34,6 @@ class Form extends Component {
   }
 
   submit(e) {
-
     this.setState({
       submitted: true
     });
