@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FormConsumer, Tooltip } from 'payload/components';
+import { FormContext, Tooltip } from 'payload/components';
 
 import './index.css';
 
@@ -52,27 +52,27 @@ class Textarea extends Component {
     const validate = this.props.required ? this.validate : () => true;
 
     return (
-      <FormConsumer>
-        {context => {
-          return (
-            <div className={className} style={style}>
-              <Error />
-              <Label />
-              <textarea
-                value={context.fields[this.props.name] ? context.fields[this.props.name].value : ''}
-                onChange={(e) => { context.handleChange(e, validate) }}
-                disabled={this.props.disabled}
-                placeholder={this.props.placeholder}
-                type={this.props.type}
-                id={this.props.id ? this.props.id : this.props.name}
-                name={this.props.name}>
-              </textarea>
-            </div>
-          )
-        }}
-      </FormConsumer>
+      <div className={className} style={style}>
+        <Error />
+        <Label />
+        <textarea
+          value={this.props.context.fields[this.props.name] ? this.props.context.fields[this.props.name].value : ''}
+          onChange={(e) => { this.props.context.handleChange(e, validate) }}
+          disabled={this.props.disabled}
+          placeholder={this.props.placeholder}
+          type={this.props.type}
+          id={this.props.id ? this.props.id : this.props.name}
+          name={this.props.name}>
+        </textarea>
+      </div>
     );
   }
 }
 
-export default Textarea;
+export default props => {
+  return (
+    <FormContext.Consumer>
+      {context => <Textarea {...props} context={context} />}
+    </FormContext.Consumer>
+  );
+};

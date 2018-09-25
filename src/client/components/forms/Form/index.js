@@ -3,7 +3,7 @@ import { ajax } from 'payload';
 
 import './index.css';
 
-const FormContext = createContext({});
+export const FormContext = createContext({});
 
 class Form extends Component {
   constructor(props) {
@@ -133,13 +133,5 @@ class Form extends Component {
     );
   }
 }
-
-export const FormConsumer = (props => {
-  return (
-    <FormContext.Consumer>
-      {props.children}
-    </FormContext.Consumer>
-  );
-});
 
 export default Form;

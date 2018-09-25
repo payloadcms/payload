@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FormConsumer, Tooltip } from 'payload/components';
+import { Tooltip, FormContext } from 'payload/components';
 
 import './index.css';
 
@@ -36,6 +36,10 @@ class Input extends Component {
     }
   }
 
+  componentDidMount() {
+
+  }
+
   render() {
     const Required = this.props.required
       ? () => <span className="required">*</span>
@@ -57,26 +61,26 @@ class Input extends Component {
     const validate = this.props.required ? this.validate : () => true;
 
     return (
-      <FormConsumer>
-        {context => {
-          return (
-            <div className={className} style={this.props.style}>
-              <Error />
-              <Label />
-              <input
-                value={context.fields[this.props.name] ? context.fields[this.props.name].value : ''}
-                onChange={(e) => { context.handleChange(e, validate) }}
-                disabled={this.props.disabled}
-                placeholder={this.props.placeholder}
-                type={this.props.type}
-                id={this.props.id ? this.props.id : this.props.name}
-                name={this.props.name} />
-            </div>
-          )
-        }}
-      </FormConsumer>
+      <div className={className} style={this.props.style}>
+        <Error />
+        <Label />
+        <input
+          value={this.props.context.fields[this.props.name] ? this.props.context.fields[this.props.name].value : ''}
+          onChange={(e) => { this.props.context.handleChange(e, validate) }}
+          disabled={this.props.disabled}
+          placeholder={this.props.placeholder}
+          type={this.props.type}
+          id={this.props.id ? this.props.id : this.props.name}
+          name={this.props.name} />
+      </div>
     );
   }
 }
 
-export default Input;
+export default props => {
+  return (
+    <FormContext.Consumer>
+      {context => <Input {...props} context={context} />}
+    </FormContext.Consumer>
+  );
+};

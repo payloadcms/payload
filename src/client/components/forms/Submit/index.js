@@ -1,20 +1,21 @@
 import React, { Component } from 'react';
-import { FormConsumer, Button } from 'payload/components';
+import { FormContext, Button } from 'payload/components';
 
 class FormSubmit extends Component {
   render() {
     return (
-      <FormConsumer>
-        {context => {
-          return (
-            <Button disabled={context.processing ? 'disabled' : ''}>
-              {this.props.children}
-            </Button>
-          )
-        }}
-      </FormConsumer>
+      <Button disabled={this.props.context.processing ? 'disabled' : ''}>
+        {this.props.children}
+      </Button>
     );
   }
 }
 
-export default FormSubmit;
+export default props => {
+  return (
+    <FormContext.Consumer>
+      {context => <FormSubmit {...props} context={context} />}
+    </FormContext.Consumer>
+  );
+};
+

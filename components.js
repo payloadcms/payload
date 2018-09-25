@@ -1,65 +1,30 @@
-import App from './src/client/components/App';
-import Button from './src/client/components/controls/Button';
-import Group from './src/client/components/field-types/Group';
-import Input from './src/client/components/field-types/Input';
-import Textarea from './src/client/components/field-types/Textarea';
-import MeasureWindow from './src/client/components/utilities/MeasureWindow';
-import MeasureScroll from './src/client/components/utilities/MeasureScroll';
-import LoadContent from './src/client/components/utilities/LoadContent';
-import Dashboard from './src/client/components/views/Dashboard';
-import CollectionRoutes from './src/client/components/routes/Collections';
-import DefaultTemplate from './src/client/components/layout/DefaultTemplate';
-import Login from './src/client/components/views/Login';
-import AddView from './src/client/components/views/collections/Add';
-import ArchiveView from './src/client/components/views/collections/Archive';
-import HeadingButton from './src/client/components/modules/HeadingButton';
-import Filter from './src/client/components/modules/Filter';
-import EditView from './src/client/components/views/collections/Edit';
-import StickOnScroll from './src/client/components/layout/StickOnScroll';
-import APIUrl from './src/client/components/modules/APIUrl';
-import Form from './src/client/components/forms/Form';
-import { FormConsumer } from './src/client/components/forms/Form';
-import FormSubmit from './src/client/components/forms/Submit';
-import PayloadIcon from './src/client/components/graphics/PayloadIcon';
-import PayloadLogo from './src/client/components/graphics/PayloadLogo';
-import Tooltip from './src/client/components/modules/Tooltip';
-import Sidebar from './src/client/components/layout/Sidebar';
-import StepNav from './src/client/components/modules/StepNav';
-import Arrow from './src/client/components/graphics/Arrow';
-import Label from './src/client/components/type/Label';
-import SetStepNav from './src/client/components/utilities/SetStepNav';
-import ContentBlock from './src/client/components/layout/ContentBlock';
-
-export {
-  App,
-  Button,
-  Group,
-  Input,
-  Textarea,
-  MeasureWindow,
-  MeasureScroll,
-  LoadContent,
-  Dashboard,
-  CollectionRoutes,
-  DefaultTemplate,
-  Login,
-  AddView,
-  ArchiveView,
-  HeadingButton,
-  Filter,
-  EditView,
-  StickOnScroll,
-  APIUrl,
-  Form,
-  FormConsumer,
-  FormSubmit,
-  PayloadIcon,
-  PayloadLogo,
-  Tooltip,
-  Sidebar,
-  StepNav,
-  Arrow,
-  Label,
-  SetStepNav,
-  ContentBlock
-};
+export { default as App } from './src/client/components/App';
+export { default as Button } from './src/client/components/controls/Button';
+export { default as MeasureWindow } from './src/client/components/utilities/MeasureWindow';
+export { default as MeasureScroll } from './src/client/components/utilities/MeasureScroll';
+export { default as LoadContent } from './src/client/components/utilities/LoadContent';
+export { default as Dashboard } from './src/client/components/views/Dashboard';
+export { default as CollectionRoutes } from './src/client/components/routes/Collections';
+export { default as DefaultTemplate } from './src/client/components/layout/DefaultTemplate';
+export { default as Login } from './src/client/components/views/Login';
+export { default as AddView } from './src/client/components/views/collections/Add';
+export { default as ArchiveView } from './src/client/components/views/collections/Archive';
+export { default as HeadingButton } from './src/client/components/modules/HeadingButton';
+export { default as Filter } from './src/client/components/modules/Filter';
+export { default as EditView } from './src/client/components/views/collections/Edit';
+export { default as StickOnScroll } from './src/client/components/layout/StickOnScroll';
+export { default as APIUrl } from './src/client/components/modules/APIUrl';
+export { default as Form, FormContext } from './src/client/components/forms/Form';
+export { default as FormSubmit } from './src/client/components/forms/Submit';
+export { default as Group } from './src/client/components/field-types/Group';
+export { default as Input } from './src/client/components/field-types/Input';
+export { default as Textarea } from './src/client/components/field-types/Textarea';
+export { default as PayloadIcon } from './src/client/components/graphics/PayloadIcon';
+export { default as PayloadLogo } from './src/client/components/graphics/PayloadLogo';
+export { default as Tooltip } from './src/client/components/modules/Tooltip';
+export { default as Sidebar } from './src/client/components/layout/Sidebar';
+export { default as StepNav } from './src/client/components/modules/StepNav';
+export { default as Arrow } from './src/client/components/graphics/Arrow';
+export { default as Label } from './src/client/components/type/Label';
+export { default as SetStepNav } from './src/client/components/utilities/SetStepNav';
+export { default as ContentBlock } from './src/client/components/layout/ContentBlock';
