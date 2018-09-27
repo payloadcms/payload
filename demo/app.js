@@ -6,6 +6,13 @@ const payloadConfig = require('./payload.config');
 
 const routes = require(payloadConfig.dir.server);
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
+  res.header('Access-Control-Allow-Headers',
+    'Origin X-Requested-With, Content-Type, Accept');
+  next();
+});
+
 mongoose.connect(payloadConfig.mongoURL, { useNewUrlParser: true }, (err) => {
   if (err) {
     console.log('Unable to connect to the Mongo server. Please start the server. Error:', err);
