@@ -1,1 +1,1 @@
-export { Payload } from './lib/payload';
+export { init } from './lib/payload';

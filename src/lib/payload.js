@@ -1,33 +1,18 @@
-/**
- * Module dependencies.
- */
+import routes from './routes/index.route';
+import passport from 'passport';
+import User from './models/user.model';
 
-const api = require('./api');
+// class Payload {
+export function init(app, mongoose, options) {
+  // baseURL = options.baseURL;
 
-class Payload {
-  constructor(options) {
-    this.express = options.express;
-    this.mongoose = options.mongoose;
-    this.baseURL = options.baseURL;
-    this.models = [];
+  // configure passport for Auth
+  app.use(passport.initialize());
+  app.use(passport.session());
 
-    // TODO: Investigate creating an API controller to encapsulate
-    this.express.get('/api', (req, res) => {
-      // TODO: Possible return basic API info and/or HATEOAS info to other routes
-      res.status(200).send({ models: this.models });
-    });
-  }
+  passport.use(User.createStrategy());
+  passport.serializeUser(User.serializeUser());
+  passport.deserializeUser(User.deserializeUser());
 
-  loadModel(modelName) {
-    console.log(`Loading ${modelName} model...`);
-
-    // TODO: Require file, validate schema, mount routes instead of just adding to array
-    let model = { [modelName]: {} };
-    if (!this.models[modelName]) {
-      this.models.push(model);
-      console.log(`${modelName} Loaded.`);
-    }
-  }
+  app.use(routes);
 }
-
-export { Payload };
