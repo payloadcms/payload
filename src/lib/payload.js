@@ -2,11 +2,8 @@ import routes from './routes/index.route';
 import passport from 'passport';
 import User from './models/user.model';
 
-// class Payload {
-export function init(app, mongoose, options) {
-  // baseURL = options.baseURL;
+export function init(app) {
 
-  // configure passport for Auth
   app.use(passport.initialize());
   app.use(passport.session());
 

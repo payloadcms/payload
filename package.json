@@ -57,7 +57,7 @@
     "babel-loader": "^8.0.2",
     "css-loader": "^1.0.0",
     "eslint": "^4.19.1",
-    "eslint-plugin-react": "^7.10.0",
+    "eslint-plugin-react": "^7.11.1",
     "express": "^4.16.3",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "html-webpack-plugin": "^3.2.0",
