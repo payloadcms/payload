@@ -4,6 +4,7 @@ const path = require('path');
 
 module.exports = {
   entry: './demo/client/index.js',
+  devtool: 'source-map',
   module: {
     rules: [
       {

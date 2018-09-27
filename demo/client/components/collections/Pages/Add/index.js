@@ -8,7 +8,8 @@ import {
   Form,
   Input,
   Textarea,
-  Group
+  Group,
+  FormSubmit
 } from 'payload/components';
 
 const mapStateToProps = state => ({
@@ -33,27 +34,17 @@ class Add extends Component {
         <header>
           <h1>Add New Page</h1>
         </header>
-        <StickOnScroll>
-          <APIUrl url={this.state.apiUrl} />
-          <div className="controls">
-            <Button type="secondary">Preview</Button>
-            <Button>Save</Button>
-          </div>
-        </StickOnScroll>
-        <Form method="POST" action="#">
-          <Input type="email" label="Page Title" name="title" required />
-          <Group heading="Meta Information">
-            <Textarea name="description" label="Meta Description" wysiwyg={false} height={100} />
-            <Input type="text" label="Meta Keywords" name="keywords" required />
-          </Group>
-          <Input type="email" label="Page Title" name="title" required />
-          <Group heading="Meta Information">
-            <Textarea name="description" label="Meta Description" wysiwyg={false} height={100} />
-            <Input type="text" label="Meta Keywords" name="keywords" required />
-          </Group>
-          <Group heading="Meta Information">
-            <Textarea name="description" label="Meta Description" wysiwyg={false} height={100} />
-            <Input type="text" label="Meta Keywords" name="keywords" required />
+        <Form method="POST" action="http://localhost:3000/pages">
+          <StickOnScroll>
+            <APIUrl url={this.state.apiUrl} />
+            <div className="controls">
+              <Button type="secondary">Preview</Button>
+              <FormSubmit>Save</FormSubmit>
+            </div>
+          </StickOnScroll>
+          <Input type="text" label="Page Title" name="title" required />
+          <Group heading="Sample Group">
+            <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} />
           </Group>
         </Form>
       </AddView>
