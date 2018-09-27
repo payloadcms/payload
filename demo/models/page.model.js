@@ -5,4 +5,4 @@ const PageSchema = new mongoose.Schema({
   content: String
 });
 
-mongoose.model('Page', PageSchema);
+module.exports = mongoose.model('page', PageSchema);
