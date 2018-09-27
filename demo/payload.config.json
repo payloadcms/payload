@@ -2,7 +2,7 @@
   "port": 3000,
   "adminURL": "/payload-login",
   "dir": {
-    "api": "./api",
+    "server": "./server/routes/index.route",
     "models": "./models",
     "admin": "./client"
   },
