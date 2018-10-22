@@ -1,7 +1,17 @@
+@import '_styles';
+
 .login {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
   .logo-wrap {
     display: block;
-    margin: 0 auto;
+    margin: 0 auto rem(1);
     max-width: 200px;
+
+    svg {
+      width: 100%;
+    }
   }
 }

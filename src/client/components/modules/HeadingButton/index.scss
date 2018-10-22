@@ -4,6 +4,11 @@
   display: flex;
   align-items: center;
 
+  .btn {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
   h1 {
     margin: 0 rem(.5) 0 0;
   }

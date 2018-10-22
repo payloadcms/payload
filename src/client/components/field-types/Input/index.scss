@@ -33,7 +33,7 @@
 
 	&.error {
 		input {
-			border: 2px solid $pink;
+      background-color: lighten($pink, 15%);
 		}
 	}
 

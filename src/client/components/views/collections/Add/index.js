@@ -3,7 +3,7 @@ import { SetStepNav } from 'payload/components';
 
 import './index.css';
 
-export default props => {
+const Add = props => {
   return (
     <article className={`collection-add collection-${props.slug}`}>
       <SetStepNav nav={ [
@@ -19,3 +19,5 @@ export default props => {
     </article>
   );
 };
+
+export default Add;

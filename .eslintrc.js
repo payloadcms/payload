@@ -202,7 +202,7 @@ module.exports = exports = {
   //   "padded-blocks": [WARN, "never"],
   //   "quote-props": [WARN, "consistent-as-needed"],
     quotes: [WARN, "single"],
-    "semi-spacing": [WARN, { before: false, after: true }]
+    "semi-spacing": [WARN, { before: false, after: true }],
   //   semi: [ERROR, "always"],
   //   "sort-vars": OFF,
   //   "space-before-blocks": [WARN, "always"],
@@ -216,6 +216,6 @@ module.exports = exports = {
   //
   //   // React-specific overridesf
   //   "react/display-name": OFF,
-  //   "react/prop-types": OFF
+    "react/prop-types": OFF
   }
 };

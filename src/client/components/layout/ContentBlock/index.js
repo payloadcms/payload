@@ -2,7 +2,7 @@ import React from 'react';
 
 import './index.css';
 
-export default (props) => {
+const ContentBlock = (props) => {
   let classes = props.className
     ? `content-block ${props.className}`
     : 'content-block';
@@ -12,8 +12,10 @@ export default (props) => {
     : classes;
 
   return (
-    <section className={classes}>
+    <section className={classes} style={props.style}>
       {props.children}
     </section>
   );
 };
+
+export default ContentBlock;

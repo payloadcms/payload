@@ -1,7 +1,7 @@
 import React from 'react';
 import { SetStepNav } from 'payload/components';
 
-export default props => {
+const Edit = props => {
   return (
     <article className="collection-edit">
       <SetStepNav nav={ [
@@ -18,3 +18,5 @@ export default props => {
     </article>
   );
 };
+
+export default Edit;

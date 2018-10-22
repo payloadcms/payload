@@ -9,7 +9,8 @@ class Input extends Component {
 
     this.errors = {
       text: 'Please fill in the field',
-      email: 'Please enter a valid email'
+      email: 'Please enter a valid email',
+      password: 'Please enter a password'
     };
 
     this.state = {
@@ -64,15 +65,18 @@ class Input extends Component {
   }
 
   render() {
+
     const valid = this.props.context.fields[this.props.name]
       ? this.props.context.fields[this.props.name].valid
       : true;
+
+    const showError = valid === false && this.props.context.submitted;
 
     const Required = this.props.required
       ? () => <span className="required">*</span>
       : () => null;
 
-    const Error = valid === false && this.props.context.submitted
+    const Error = showError
       ? () => <Tooltip className="error-message">{this.errors[this.props.type]}</Tooltip>
       : () => null;
 
@@ -81,9 +85,7 @@ class Input extends Component {
       : () => null;
 
     let className = `interact ${this.props.type}`;
-    className = this.props.valid !== false
-      ? className
-      : `${className} error`;
+    className = !showError ? className : `${className} error`;
 
     const initialValue = this.props.value ? this.props.value : '';
 
@@ -112,10 +114,12 @@ class Input extends Component {
   }
 }
 
-export default props => {
+const ContextInput = props => {
   return (
     <FormContext.Consumer>
       {context => <Input {...props} context={context} />}
     </FormContext.Consumer>
   );
 };
+
+export default ContextInput;

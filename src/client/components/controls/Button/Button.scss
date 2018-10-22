@@ -7,6 +7,8 @@
     padding: rem(.5) rem(.75);
     line-height: rem(.5);
     border-radius: $radius-sm;
+    margin-top: rem(1);
+    margin-bottom: rem(1);
     cursor: pointer;
 
     &.btn-icon {
