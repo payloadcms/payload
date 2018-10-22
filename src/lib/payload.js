@@ -3,7 +3,6 @@ import passport from 'passport';
 import User from './models/user.model';
 
 export function init(app) {
-
   app.use(passport.initialize());
   app.use(passport.session());
 
