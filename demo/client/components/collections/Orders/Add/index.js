@@ -10,6 +10,7 @@ import {
   Textarea,
   Group
 } from 'payload/components';
+import payloadConfig from '../../../../../payload.config.json';
 
 const mapStateToProps = state => ({
   collections: state.collections.all
@@ -40,7 +41,7 @@ class Add extends Component {
             <Button>Save</Button>
           </div>
         </StickOnScroll>
-        <Form method="POST" action="#">
+        <Form method="POST" action={`${payloadConfig.serverUrl}/orders`}>
           <Input type="email" label="Order Title" name="title" required />
           <Group heading="Meta Information">
             <Textarea name="description" label="Meta Description" wysiwyg={false} height={100} />

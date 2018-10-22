@@ -11,6 +11,7 @@ import {
   Group,
   FormSubmit
 } from 'payload/components';
+import payloadConfig from '../../../../../payload.config.json';
 
 const mapStateToProps = state => ({
   collections: state.collections.all
@@ -34,7 +35,7 @@ class Add extends Component {
         <header>
           <h1>Add New Page</h1>
         </header>
-        <Form method="POST" action="http://localhost:3000/pages">
+        <Form method="POST" action={`${payloadConfig.serverUrl}/pages`}>
           <StickOnScroll>
             <APIUrl url={this.state.apiUrl} />
             <div className="controls">
