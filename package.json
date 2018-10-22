@@ -5,7 +5,7 @@
   "main": "index.js",
   "nodemonConfig": {
     "ignore": [
-      "src/client/*",
+      "src/*",
       "demo/client/*"
     ]
   },
@@ -14,10 +14,10 @@
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
     "core:watch": "./node_modules/.bin/babel src --out-dir dist --source-maps --watch",
     "core:build": "./node_modules/.bin/babel src --out-dir dist --source-maps",
-    "build-demo-css": "node-sass-chokidar --include-path ./src/client/scss demo/ -o demo/",
-    "watch-demo-css": "npm run build-demo-css && node-sass-chokidar --include-path ./src/client/scss demo/ -o demo/ --watch --recursive",
-    "build-module-css": "node-sass-chokidar --include-path ./src/client/scss src/ -o src/",
-    "watch-module-css": "npm run build-demo-css && node-sass-chokidar --include-path ./src/client/scss src/ -o src/ --watch --recursive",
+    "build-demo-css": "node-sass-chokidar --include-path ./src/scss demo/ -o demo/",
+    "watch-demo-css": "npm run build-demo-css && node-sass-chokidar --include-path ./src/scss demo/ -o demo/ --watch --recursive",
+    "build-module-css": "node-sass-chokidar --include-path ./src/scss src/ -o src/",
+    "watch-module-css": "npm run build-demo-css && node-sass-chokidar --include-path ./src/scss src/ -o src/ --watch --recursive",
     "webpack": "webpack-dev-server --mode development --config config/webpack.dev.config.js --open --hot --history-api-fallback",
     "demo-server": "nodemon demo/app.js",
     "dev": "npm-run-all -p watch-module-css watch-demo-css webpack demo-server"

@@ -13,8 +13,15 @@ mongoose.connect(payloadConfig.mongoURL, { useNewUrlParser: true }, (err) => {
   }
 });
 
+const authRoutes = require('./Auth/Auth.routes');
+router.use('', authRoutes);
+
 const pageRoutes = require('./Page/Page.routes');
 router.use('/pages', pageRoutes);
+
+// Not scaffolded, but this is how it works
+// const orderRoutes = require('./Order/Order.routes');
+// router.use('/orders', orderRoutes);
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));

@@ -1,7 +1,7 @@
-import httpStatus from 'http-status';
-import passport from 'passport';
-import APIError from '../helpers/APIError';
-import User from '../models/user.model';
+const httpStatus = require('http-status');
+const passport = require('passport');
+const APIError = require('../../dist/lib/helpers/APIError');
+const User = require('../User/User.model');
 
 /**
  * Returns passport login response (cookie) when valid username and password is provided
@@ -65,4 +65,9 @@ function checkAuth(req, res, next) {
   next();
 }
 
-export default { login, register, me, checkAuth };
+module.exports = {
+  login,
+  register,
+  me,
+  checkAuth
+};

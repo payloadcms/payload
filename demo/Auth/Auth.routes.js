@@ -1,8 +1,8 @@
-import express from 'express';
-import validate from 'express-validation';
-import passport from 'passport';
-import paramValidation from './auth.validations';
-import authCtrl from '../../controllers/auth.controller';
+const express = require('express');
+const validate = require('express-validation');
+const passport = require('passport');
+const paramValidation = require('./Auth.validations');
+const authCtrl = require('./Auth.controller');
 
 const router = express.Router(); // eslint-disable-line new-cap
 

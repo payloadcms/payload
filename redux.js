@@ -1,5 +1,5 @@
-import common from './src/client/reducers/common';
-import collections from './src/client/reducers/collections';
+import common from './src/reducers/common';
+import collections from './src/reducers/collections';
 
 export {
   common,

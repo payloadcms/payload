@@ -1,4 +1,4 @@
-import ajax from './src/client/ajax';
+import ajax from './src/ajax';
 
 export {
   ajax
