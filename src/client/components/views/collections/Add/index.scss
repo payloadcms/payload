@@ -12,7 +12,15 @@
     justify-content: space-between;
   }
 
-  .controls > *:last-child {
-    margin-left: rem(1);
+  .controls {
+
+    .btn {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    > *:last-child {
+      margin-left: rem(1);
+    }
   }
 }
