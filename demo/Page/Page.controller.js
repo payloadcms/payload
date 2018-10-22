@@ -1,4 +1,4 @@
-const page = require('../../models/page.model');
+const Page = require('./Page.model');
 
 const pageController = {
   get: (req, res, next) => {
@@ -12,7 +12,7 @@ const pageController = {
 
   post: (req, res, next) => {
 
-    const newPage = new page(req.body);
+    const newPage = new Page(req.body);
 
     newPage.save((err, page, next) => {
       if (err) {

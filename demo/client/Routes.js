@@ -7,6 +7,14 @@ import { DefaultTemplate } from 'payload/components';
 import { Dashboard } from 'payload/components';
 import { Login } from 'payload/components';
 
+import pageViews from '../Page/components';
+import orderViews from '../Order/components';
+
+const modelViews = {
+  orders: orderViews,
+  pages: pageViews
+};
+
 const mapStateToProps = state => ({
   collections: state.collections.all
 });
@@ -21,7 +29,7 @@ class Routes extends Component {
           return (
             <DefaultTemplate>
               <Route path="/" exact component={Dashboard} />
-              <CollectionRoutes collections={this.props.collections} />
+              <CollectionRoutes collections={this.props.collections} modelViews={modelViews} />
             </DefaultTemplate>
           );
         }} />

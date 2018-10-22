@@ -10,7 +10,7 @@ import {
   Textarea,
   Group
 } from 'payload/components';
-import payloadConfig from '../../../../../payload.config.json';
+import payloadConfig from '../../../payload.config.json';
 
 const mapStateToProps = state => ({
   collections: state.collections.all

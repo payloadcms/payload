@@ -1,9 +1,15 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
-import collections from 'local/collections';
+import Page from 'local/Page/Page.config';
+import Order from 'local/Order/Order.config';
+
+const collections = [
+  Page,
+  Order
+];
 
 const mapDispatchToProps = dispatch => ({
-  loadCollections: collections => dispatch({ type: 'LOAD_COLLECTIONS', payload: collections }),
+  loadCollections: data => dispatch({ type: 'LOAD_COLLECTIONS', payload: data }),
 });
 
 class LoadContent extends Component {
