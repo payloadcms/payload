@@ -6,7 +6,7 @@ export default {
   fields: [
     {
       name: 'title',
-      label: 'Title',
+      label: 'Page Title',
       type: 'string',
       maxLength: 100
     },
