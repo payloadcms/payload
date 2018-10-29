@@ -7,8 +7,8 @@ import { DefaultTemplate } from 'payload/components';
 import { Dashboard } from 'payload/components';
 import { Login } from 'payload/components';
 
-import pageViews from '../Page/components';
-import orderViews from '../Order/components';
+import pageViews from '../../Page/components';
+import orderViews from '../../Order/components';
 
 const modelViews = {
   orders: orderViews,

@@ -1,1 +1,1 @@
-export { init } from './lib/payload';
+export { default as ajax } from './ajax';

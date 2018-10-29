@@ -2,11 +2,6 @@
   "port": 3000,
   "serverUrl": "http://localhost:3000",
   "adminURL": "/payload-login",
-  "dir": {
-    "server": "./server/routes/index.route",
-    "models": "./models",
-    "admin": "./client"
-  },
   "routes": {
     "api": "/api",
     "admin": "/admin"
