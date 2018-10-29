@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 const passport = require('passport');
-const APIError = require('../../dist/lib/helpers/APIError');
+const APIError = require('../../src/lib/helpers/APIError');
 const User = require('../User/User.model');
 
 /**

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const httpStatus = require('http-status');
 const passportLocalMongoose = require('passport-local-mongoose');
-const APIError = require('../../dist/lib/helpers/APIError');
+const APIError = require('../../src/lib/helpers/APIError');
 
 /**
  * User Schema

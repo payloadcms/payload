@@ -1,4 +1,3 @@
-const payload = require('../dist');
 const mongoose = require('mongoose');
 const express = require('express');
 const payloadConfig = require('./payload.config');
@@ -32,8 +31,6 @@ app.use((req, res, next) => {
     'Origin X-Requested-With, Content-Type, Accept');
   next();
 });
-
-payload.init(app);
 
 app.listen(payloadConfig.port, () => {
   console.log(`listening on ${payloadConfig.port}...`);

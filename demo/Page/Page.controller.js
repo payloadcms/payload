@@ -1,8 +1,8 @@
 const Page = require('./Page.model');
 
 const pageController = {
-  get: (req, res, next) => {
-    page.find((err, pages, next) => {
+  get: (req, res) => {
+    Page.find((err, pages, next) => {
       if (err) {
         return next(err);
       }
@@ -10,10 +10,8 @@ const pageController = {
     });
   },
 
-  post: (req, res, next) => {
-
+  post: (req, res) => {
     const newPage = new Page(req.body);
-
     newPage.save((err, page, next) => {
       if (err) {
         return next(err);

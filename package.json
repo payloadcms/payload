@@ -12,8 +12,6 @@
   "scripts": {
     "test": "node ./node_modules/jest/bin/jest.js src/tests",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
-    "core:watch": "./node_modules/.bin/babel src --out-dir dist --source-maps --watch",
-    "core:build": "./node_modules/.bin/babel src --out-dir dist --source-maps",
     "build-demo-css": "node-sass-chokidar --include-path ./src/scss demo/ -o demo/",
     "watch-demo-css": "npm run build-demo-css && node-sass-chokidar --include-path ./src/scss demo/ -o demo/ --watch --recursive",
     "build-module-css": "node-sass-chokidar --include-path ./src/scss src/ -o src/",
