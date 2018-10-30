@@ -1,17 +1,16 @@
 const express = require('express');
-const validate = require('express-validation');
 const passport = require('passport');
-const paramValidation = require('./Auth.validations');
+const authValidate = require('../../src/auth/validate');
 const authCtrl = require('./Auth.controller');
 
-const router = express.Router(); // eslint-disable-line new-cap
+const router = new express.Router();
 
 router
   .route('/login')
-  .post(validate(paramValidation.login), passport.authenticate('local'), authCtrl.login);
+  .post(authValidate.login, passport.authenticate('local'), authCtrl.login);
 
 router
   .route('/register')
-  .post(validate(paramValidation.register), authCtrl.register);
+  .post(authValidate.register, authCtrl.register);
 
 module.exports = router;

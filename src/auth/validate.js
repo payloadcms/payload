@@ -1,18 +1,16 @@
+const validate = require('express-validation');
 const Joi = require('joi');
 
 module.exports = {
-  // POST /auth/register
-  register: {
-    body: {
-      email: Joi.string().email().required(),
-    },
-  },
-
-  // POST /auth/login
-  login: {
+  login: validate({
     body: {
       email: Joi.string().email().required(),
       password: Joi.string().required(),
     },
-  },
+  }),
+  register: validate({
+    body: {
+      email: Joi.string().email().required(),
+    },
+  })
 };
