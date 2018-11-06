@@ -55,11 +55,13 @@ class Textarea extends Component {
       ? this.props.context.fields[this.props.name].valid
       : true;
 
+    const showError = valid === false && this.props.context.submitted;
+
     const Required = this.props.required
       ? () => <span className="required">*</span>
       : () => null;
 
-    let Error = valid === false && this.props.context.submitted
+    let Error = showError
       ? () => <Tooltip className="error-message">{this.errors.text}</Tooltip>
       : () => null;
 
@@ -68,7 +70,7 @@ class Textarea extends Component {
       : () => null;
 
     let className = 'interact textarea';
-    className = this.props.valid !== false ? className : `${className} error`;
+    className = !showError ? className : `${className} error`;
 
     let style = this.props.style
       ? this.props.style
