@@ -12,6 +12,13 @@ mongoose.connect(payloadConfig.mongoURL, { useNewUrlParser: true }, (err) => {
   }
 });
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
+  res.header('Access-Control-Allow-Headers',
+    'Origin X-Requested-With, Content-Type, Accept');
+  next();
+});
+
 const authRoutes = require('./Auth/Auth.routes');
 router.use('', authRoutes);
 
@@ -25,12 +32,6 @@ router.use('/pages', pageRoutes);
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(router);
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
-  res.header('Access-Control-Allow-Headers',
-    'Origin X-Requested-With, Content-Type, Accept');
-  next();
-});
 
 app.listen(payloadConfig.port, () => {
   console.log(`listening on ${payloadConfig.port}...`);
