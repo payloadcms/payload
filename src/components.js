@@ -11,7 +11,7 @@ export { default as ArchiveView } from './components/views/collections/Archive';
 export { default as HeadingButton } from './components/modules/HeadingButton';
 export { default as Filter } from './components/modules/Filter';
 export { default as EditView } from './components/views/collections/Edit';
-export { default as StickOnScroll } from './components/layout/StickOnScroll';
+export { default as Sticky } from './components/layout/Sticky';
 export { default as APIUrl } from './components/modules/APIUrl';
 export { default as Form, FormContext } from './components/forms/Form';
 export { default as FormSubmit } from './components/forms/Submit';

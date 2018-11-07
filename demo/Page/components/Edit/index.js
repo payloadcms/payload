@@ -1,7 +1,17 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-
-import { EditView } from 'payload/components';
+import {
+  AddView,
+  Sticky,
+  APIUrl,
+  Button,
+  Form,
+  Input,
+  Textarea,
+  Group,
+  FormSubmit
+} from 'payload/components';
+import payloadConfig from '../../../payload.config.json';
 
 const mapStateToProps = state => ({
   collections: state.collections.all
@@ -14,16 +24,37 @@ class Edit extends Component {
     this.collection = this.props.collections.find(collection => {
       return collection.slug === this.slug;
     });
+    this.state = {
+      apiUrl: 'https://site.com/page?slug=about-us'
+    };
   }
 
   render() {
+    console.log(this.props);
     return (
-      <EditView
-        id={this.props.match.params.id}
-        slug={this.slug}
-        collection={this.collection}>
-        <h1>Edit Page {this.props.match.params.id}</h1>
-      </EditView>
+      <AddView slug={this.slug} collection={this.collection}>
+        <header>
+          {this.props.action === 'edit' &&
+            <h1>Edit Page</h1>
+          }
+          {this.props.action === 'create' &&
+            <h1>Create New Page</h1>
+          }
+        </header>
+        <Form method="POST" action={`${payloadConfig.serverUrl}/pages`}>
+          <Sticky>
+            <APIUrl url={this.state.apiUrl} />
+            <div className="controls">
+              <Button type="secondary">Preview</Button>
+              <FormSubmit>Save</FormSubmit>
+            </div>
+          </Sticky>
+          <Input type="text" label="Page Title" name="title" required />
+          <Group heading="Sample Group">
+            <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} />
+          </Group>
+        </Form>
+      </AddView>
     );
   }
 }
