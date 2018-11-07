@@ -1,0 +1,99 @@
+{
+	"info": {
+		"_postman_id": "b25a1d07-a6f9-4fda-a1ee-36a630f1b8db",
+		"name": "Payload",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Public Domain Check",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"domain\": \"http://localhost:8000\"}"
+				},
+				"url": {
+					"raw": "https://jyiixvked0.execute-api.us-east-1.amazonaws.com/dev/call",
+					"protocol": "https",
+					"host": [
+						"jyiixvked0",
+						"execute-api",
+						"us-east-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"call"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Page",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"title\": \"sup dog\",\n\t\"content\": \"some shit\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/pages",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"pages"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Post Page",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"title\": \"sup dog\",\n\t\"content\": \"some shit\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/pages",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"pages"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		}
+	]
+}
