@@ -22,7 +22,7 @@ class Archive extends Component {
         <HeadingButton
           heading="Pages"
           buttonLabel="Add New"
-          buttonUrl={`/collections/${this.slug}/add-new`}
+          buttonUrl={`/collections/${this.slug}/create`}
           buttonType="link" />
         <Filter />
       </ArchiveView>

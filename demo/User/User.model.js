@@ -8,7 +8,6 @@ const APIError = require('../../src/lib/helpers/APIError');
  */
 const UserSchema = new mongoose.Schema({
   email: { type: String, unique: true },
-  push: { type: String, unique: true },
   createdAt: { type: Date, default: Date.now },
   role: { type: String, enum: [ 'user', 'agent', 'admin' ], default: 'user' },
 });

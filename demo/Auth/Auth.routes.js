@@ -9,8 +9,4 @@ router
   .route('/login')
   .post(authValidate.login, passport.authenticate('local'), authCtrl.login);
 
-router
-  .route('/register')
-  .post(authValidate.register, authCtrl.register);
-
 module.exports = router;

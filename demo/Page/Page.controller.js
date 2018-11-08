@@ -19,7 +19,6 @@ const pageController = {
       return res.json(page);
     });
   },
-
 };
 
 module.exports = pageController;

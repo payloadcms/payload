@@ -1,1 +1,3 @@
-export { default as ajax } from './ajax';
+module.exports = app => {
+
+}

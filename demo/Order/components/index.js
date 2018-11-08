@@ -1,9 +1,7 @@
-import OrderAdd from './Add';
-import OrderArchive from './Archive';
-import OrderEdit from './Edit';
+import Archive from './Archive';
+import Edit from './Edit';
 
 export default {
-  Add: OrderAdd,
-  Archive: OrderArchive,
-  Edit: OrderEdit
+  Archive: Archive,
+  Edit: Edit
 };

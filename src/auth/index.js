@@ -13,25 +13,6 @@ module.exports = User => ({
     res.json(req.user),
 
   /**
-   * Returns User when succesfully registered
-   * @param req
-   * @param res
-   * @param next
-   * @returns {*}
-   */
-  register: (req, res, next) => {
-    User.register(new User({ email: req.body.email }), req.body.password, (err, user) => {
-      if (err) {
-        const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
-        return next(error);
-      }
-      passport.authenticate('local')(req, res, () => {
-        res.json({ user });
-      });
-    });
-  },
-
-  /**
    * Returns User if user session is still open
    * @param req
    * @param res

@@ -71,7 +71,7 @@ class Form extends Component {
 
       // Make the API call from the action
       ajax.requests[this.props.method](this.props.action, data).then(
-        (res) => {
+        res => {
           // Provide form data to the redirected page
           if (this.props.redirect) {
             this.props.history.push(this.props.redirect, data);

@@ -21,7 +21,7 @@ const Login = props => {
         <Logo />
         <Form
           method="POST"
-          action="http://localhost:3000/auth/login">
+          action="http://localhost:3000/login">
           <Input type="email" label="Email Address" name="email" required />
           <Input type="password" label="Password" name="password" required />
           <FormSubmit>Login</FormSubmit>

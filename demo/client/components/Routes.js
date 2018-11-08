@@ -6,6 +6,7 @@ import { CollectionRoutes } from 'payload/components';
 import { DefaultTemplate } from 'payload/components';
 import { Dashboard } from 'payload/components';
 import { Login } from 'payload/components';
+import { CreateUser } from 'payload/components';
 
 import pageViews from '../../Page/components';
 import orderViews from '../../Order/components';
@@ -27,10 +28,13 @@ class Routes extends Component {
         <Route path="/forgot" component={ () => { return <h1>Forgot Password</h1>; } } />
         <Route path="/" render={() => {
           return (
-            <DefaultTemplate>
-              <Route path="/" exact component={Dashboard} />
-              <CollectionRoutes collections={this.props.collections} modelViews={modelViews} />
-            </DefaultTemplate>
+            <React.Fragment>
+              <DefaultTemplate>
+                <Route path="/create-user" component={CreateUser} />
+                <Route path="/" exact component={Dashboard} />
+                <CollectionRoutes collections={this.props.collections} modelViews={modelViews} />
+              </DefaultTemplate>
+            </React.Fragment>
           );
         }} />
       </Switch>

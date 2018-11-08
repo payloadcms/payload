@@ -1,6 +1,8 @@
 import React from 'react';
 import { SetStepNav } from 'payload/components';
 
+import './index.css';
+
 const Edit = props => {
   return (
     <article className="collection-edit">

@@ -6,7 +6,7 @@ export { default as Dashboard } from './components/views/Dashboard';
 export { default as CollectionRoutes } from './components/routes/Collections';
 export { default as DefaultTemplate } from './components/layout/DefaultTemplate';
 export { default as Login } from './components/views/Login';
-export { default as AddView } from './components/views/collections/Add';
+export { default as CreateUser } from './components/views/CreateUser';
 export { default as ArchiveView } from './components/views/collections/Archive';
 export { default as HeadingButton } from './components/modules/HeadingButton';
 export { default as Filter } from './components/modules/Filter';

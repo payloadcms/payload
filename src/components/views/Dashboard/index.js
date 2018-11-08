@@ -4,12 +4,14 @@ import { SetStepNav } from 'payload/components';
 
 import './index.css';
 
-export default () => {
+const Dashboard = () => {
   return (
     <article className="dashboard">
       <SetStepNav nav={ [] } />
       <h1>Dashboard</h1>
       <Link to="/login">Login</Link>
+      <br />
+      <Link to="/create-user">Create User</Link>
       <br />
       <Link to="/collections/pages">Pages Archive</Link>
       <br />
@@ -17,3 +19,5 @@ export default () => {
     </article>
   );
 };
+
+export default Dashboard;

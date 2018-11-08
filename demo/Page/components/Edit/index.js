@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import {
-  AddView,
+  EditView,
   Sticky,
   APIUrl,
   Button,
@@ -30,9 +30,8 @@ class Edit extends Component {
   }
 
   render() {
-    console.log(this.props);
     return (
-      <AddView slug={this.slug} collection={this.collection}>
+      <EditView slug={this.slug} collection={this.collection}>
         <header>
           {this.props.action === 'edit' &&
             <h1>Edit Page</h1>
@@ -53,8 +52,16 @@ class Edit extends Component {
           <Group heading="Sample Group">
             <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} />
           </Group>
+          <Input type="text" label="Page Title" name="title" required />
+          <Group heading="Sample Group">
+            <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} />
+          </Group>
+          <Input type="text" label="Page Title" name="title" required />
+          <Group heading="Sample Group">
+            <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} />
+          </Group>
         </Form>
-      </AddView>
+      </EditView>
     );
   }
 }

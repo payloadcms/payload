@@ -11,6 +11,10 @@ const ContentBlock = (props) => {
     ? `${classes} ${props.width}`
     : classes;
 
+  classes = props.align
+    ? `${classes} align-${props.align}`
+    : classes;
+
   return (
     <section className={classes} style={props.style}>
       {props.children}
