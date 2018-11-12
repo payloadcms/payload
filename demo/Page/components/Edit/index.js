@@ -31,7 +31,7 @@ class Edit extends Component {
 
   render() {
     return (
-      <EditView slug={this.slug} collection={this.collection}>
+      <EditView slug={this.slug} action={this.props.action} collection={this.collection}>
         <header>
           {this.props.action === 'edit' &&
             <h1>Edit Page</h1>
