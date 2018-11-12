@@ -1,5 +1,5 @@
 import React, { Component, createContext } from 'react';
-import { ajax } from 'payload';
+import ajax from 'payload/ajax';
 
 import './index.css';
 
