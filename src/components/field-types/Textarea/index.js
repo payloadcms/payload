@@ -50,6 +50,12 @@ class Textarea extends Component {
     });
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.valueOverride !== this.props.valueOverride) {
+      this.sendField(this.props.valueOverride);
+    }
+  }
+
   render() {
     const valid = this.props.context.fields[this.props.name]
       ? this.props.context.fields[this.props.name].valid
@@ -82,21 +88,28 @@ class Textarea extends Component {
       className = 'interact';
     }
 
-    const initialValue = this.props.value ? this.props.value : '';
+    const initialValue = this.props.value
+      ? this.props.value
+      : '';
+
+    const contextValue = this.props.context.fields[this.props.name]
+      ? this.props.context.fields[this.props.name].value
+      : initialValue;
+
+    const value = this.props.valueOverride
+      ? this.props.valueOverride
+      : contextValue;
 
     return (
       <div className={className} style={style}>
         <Error />
         <Label />
         <textarea
-          value={
-            this.props.context.fields[this.props.name]
-              ? this.props.context.fields[this.props.name].value
-              : initialValue
-          }
+          value={ value }
           onChange={
             (e) => {
               this.props.context.setValue(this.sendField(e.target.value));
+              this.props.onChange && this.props.onChange(e);
             }
           }
           disabled={this.props.disabled}

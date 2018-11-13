@@ -43,25 +43,27 @@ class Input extends Component {
   }
 
   sendField(value) {
-    return {
+    this.props.context.setValue({
       name: this.props.name,
       value: value,
       valid: this.props.required
         ? this.validate(value)
         : true
-    };
+    })
   }
 
   componentDidMount() {
-    this.props.context.setValue(
-      this.sendField(
-        this.props.value ? this.props.value : ''
-      )
-    );
+    this.sendField(this.props.value ? this.props.value : '');
 
     this.setState({
       init: true
     });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.valueOverride !== this.props.valueOverride) {
+      this.sendField(this.props.valueOverride);
+    }
   }
 
   render() {
@@ -87,22 +89,28 @@ class Input extends Component {
     let className = `interact ${this.props.type}`;
     className = !showError ? className : `${className} error`;
 
-    const initialValue = this.props.value ? this.props.value : '';
+    const initialValue = this.props.value
+      ? this.props.value
+      : '';
+
+    const contextValue = this.props.context.fields[this.props.name]
+      ? this.props.context.fields[this.props.name].value
+      : initialValue;
+
+    const value = this.props.valueOverride
+      ? this.props.valueOverride
+      : contextValue;
 
     return (
       <div className={className} style={this.props.style}>
         <Error />
         <Label />
         <input
-          value={
-            this.props.context.fields[this.props.name]
-              ? this.props.context.fields[this.props.name].value
-              : initialValue
-          }
+          value={value}
           onChange={
-            (e) => {
-              this.props.context.setValue(this.sendField(e.target.value));
-              this.props.onChange(e);
+            e => {
+              this.sendField(e.target.value);
+              this.props.onChange && this.props.onChange(e);
             }
           }
           disabled={this.props.disabled}

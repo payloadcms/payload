@@ -41,7 +41,7 @@ class Archive extends Component {
               const slug = row[this.state.collection.uid];
               return (
                 <li key={i}>
-                  <Link to={`/${this.state.collection.slug}/${slug}`}>
+                  <Link to={`/collections/${this.state.collection.slug}/${slug}`}>
                     {row.title}
                   </Link>
                 </li>
