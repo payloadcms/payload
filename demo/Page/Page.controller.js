@@ -2,10 +2,7 @@ const Page = require('./Page.model');
 
 const pageController = {
   get: (req, res) => {
-    Page.find((err, pages, next) => {
-      if (err) {
-        return next(err);
-      }
+    Page.apiQuery(req.query, (err, pages) => {
       return res.json(pages);
     });
   },
