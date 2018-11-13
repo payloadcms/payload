@@ -6,10 +6,10 @@ const superagent = superagentPromise(_superagent, global.Promise);
 const responseBody = res => res.body;
 
 const requests = {
-  GET: url =>
+  get: url =>
     superagent.get(`${url}`).then(responseBody),
 
-  POST: (url, body) =>
+  post: (url, body) =>
     superagent.post(`${url}`, body).then(responseBody)
 };
 

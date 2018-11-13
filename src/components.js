@@ -1,6 +1,7 @@
 export { default as App } from './components/App';
 export { default as Button } from './components/controls/Button';
 export { default as MeasureWindow } from './components/utilities/MeasureWindow';
+export { default as LoadCollections } from './components/utilities/LoadCollections';
 export { default as MeasureScroll } from './components/utilities/MeasureScroll';
 export { default as Dashboard } from './components/views/Dashboard';
 export { default as CollectionRoutes } from './components/routes/Collections';

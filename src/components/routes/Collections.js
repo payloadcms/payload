@@ -1,23 +1,18 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 
-export default props => {
+const CollectionRoutes = props => {
   return props.collections.map((collection, i) => {
     if (collection) {
 
-      const Edit = props.modelViews[collection.slug].Edit;
+      const Edit = props.views[collection.slug].Edit;
+      const Archive = props.views[collection.slug].Archive;
 
       return (
         <Switch key={i}>
-          <Route path={`/collections/${collection.slug}/create`} exact
-            render={ routeProps => <Edit {...routeProps} action="create" /> } />
-
-          <Route path={`/collections/${collection.slug}/:id`}
-            render={ routeProps => <Edit {...routeProps} action="edit" /> } />
-
-          <Route path={`/collections/${collection.slug}`} exact
-            component={props.modelViews[collection.slug].Archive} />
-
+          <Route path={`/collections/${collection.slug}/create`} exact component={Edit} />
+          <Route path={`/collections/${collection.slug}/:slug`} component={Edit} />
+          <Route path={`/collections/${collection.slug}`} exact component={Archive} />
         </Switch>
       );
     }
@@ -25,3 +20,5 @@ export default props => {
     return null;
   });
 };
+
+export default CollectionRoutes;

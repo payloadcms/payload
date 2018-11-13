@@ -2,14 +2,28 @@ import React from 'react';
 import { render } from 'react-dom';
 import { App } from 'payload/components';
 import Routes from './components/Routes';
-import Content from './components/Content';
 import store from './store';
+
+import Page from '../Page/Page.config';
+import pageViews from '../Page/components';
+
+import Order from '../Order/Order.config';
+import orderViews from '../Order/components';
+
+const views = {
+  orders: orderViews,
+  pages: pageViews
+};
+
+const collections = [
+  Page,
+  Order
+];
 
 const Index = () => {
   return (
-    <App store={store}>
-      <Routes />
-      <Content />
+    <App store={store} collections={collections}>
+      <Routes views={views} collections={collections} />
     </App>
   );
 };

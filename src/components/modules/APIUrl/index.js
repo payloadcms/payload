@@ -2,11 +2,16 @@ import React from 'react';
 
 import { Label } from 'payload/components';
 
-export default props => {
+const APIUrl = props => {
+
+  const apiUrl = `${props.serverUrl}/${props.collectionSlug}?slug=${props.slug ? `${props.slug}` : ''}`;
+
   return (
     <div className="api-url">
       <Label className="uppercase">API URL&nbsp;&mdash;&nbsp;Edit</Label>
-      <div><a href={props.url}>{props.url}</a></div>
+      <div><a href={apiUrl}>{apiUrl}</a></div>
     </div>
   );
 };
+
+export default APIUrl;

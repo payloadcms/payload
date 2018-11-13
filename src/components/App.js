@@ -1,24 +1,23 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { MeasureWindow, MeasureScroll } from 'payload/components';
+import { MeasureWindow, MeasureScroll, LoadCollections } from 'payload/components';
 
 import '../scss/app.css';
 
-class App extends Component {
-  render() {
-    return (
-      <Provider store={this.props.store}>
-        <Router>
-          <React.Fragment>
-            <MeasureScroll />
-            <MeasureWindow />
-            {this.props.children}
-          </React.Fragment>
-        </Router>
-      </Provider>
-    );
-  }
+const App = props => {
+  return (
+    <Provider store={props.store}>
+      <Router>
+        <React.Fragment>
+          <LoadCollections collections={props.collections} />
+          <MeasureScroll />
+          <MeasureWindow />
+          {props.children}
+        </React.Fragment>
+      </Router>
+    </Provider>
+  );
 }
 
 export default App;

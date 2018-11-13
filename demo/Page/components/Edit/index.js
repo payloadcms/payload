@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import {
   EditView,
   Sticky,
@@ -11,59 +10,44 @@ import {
   Group,
   FormSubmit
 } from 'payload/components';
+
+import Page from '../../Page.config';
 import payloadConfig from '../../../payload.config.json';
 
-const mapStateToProps = state => ({
-  collections: state.collections.all
-});
-
 class Edit extends Component {
+
   constructor(props) {
     super(props);
-    this.slug = 'pages';
-    this.collection = this.props.collections.find(collection => {
-      return collection.slug === this.slug;
-    });
+    this.collection = Page;
     this.state = {
-      apiUrl: 'https://site.com/page?slug=about-us'
-    };
+      collection: this.collection,
+      data: false,
+      isEditing: this.props.match.params.slug ? true : false
+    }
   }
 
   render() {
-    return (
-      <EditView slug={this.slug} action={this.props.action} collection={this.collection}>
-        <header>
-          {this.props.action === 'edit' &&
-            <h1>Edit Page</h1>
-          }
-          {this.props.action === 'create' &&
-            <h1>Create New Page</h1>
-          }
-        </header>
-        <Form method="POST" action={`${payloadConfig.serverUrl}/pages`}>
-          <Sticky>
-            <APIUrl url={this.state.apiUrl} />
-            <div className="controls">
-              <Button type="secondary">Preview</Button>
-              <FormSubmit>Save</FormSubmit>
-            </div>
-          </Sticky>
-          <Input type="text" label="Page Title" name="title" required />
-          <Group heading="Sample Group">
-            <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} />
-          </Group>
-          <Input type="text" label="Page Title" name="title" required />
-          <Group heading="Sample Group">
-            <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} />
-          </Group>
-          <Input type="text" label="Page Title" name="title" required />
-          <Group heading="Sample Group">
-            <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} />
-          </Group>
-        </Form>
-      </EditView>
-    );
+      return (
+        <EditView isEditing={this.state.isEditing} data={this.state.data}
+          collection={this.state.collection} slug={this.props.match.params.slug}>
+          <Form method="post" action={`${payloadConfig.serverUrl}/${this.state.collection.slug}`}>
+            <Sticky>
+              <APIUrl serverUrl={payloadConfig.serverUrl}
+                collectionSlug={this.state.collection.slug} slug={this.props.match.params.slug} />
+              <div className="controls">
+                <Button type="secondary">Preview</Button>
+                <FormSubmit>Save</FormSubmit>
+              </div>
+            </Sticky>
+            <Input type="text" label="Page Title" name="title" required />
+            <Group heading="Sample Group">
+              <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} />
+            </Group>
+          </Form>
+        </EditView>
+      );
+
   }
 }
 
-export default connect(mapStateToProps)(Edit);
+export default Edit;

@@ -1,45 +1,33 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React from 'react';
 import { Route, Switch, withRouter } from 'react-router-dom';
 
-import { CollectionRoutes } from 'payload/components';
-import { DefaultTemplate } from 'payload/components';
-import { Dashboard } from 'payload/components';
-import { Login } from 'payload/components';
-import { CreateUser } from 'payload/components';
+import Logo from '../components/graphics/Logo';
+import Icon from '../components/graphics/Icon';
 
-import pageViews from '../../Page/components';
-import orderViews from '../../Order/components';
+import {
+  CollectionRoutes,
+  DefaultTemplate,
+  Dashboard,
+  Login,
+  CreateUser
+} from 'payload/components';
 
-const modelViews = {
-  orders: orderViews,
-  pages: pageViews
-};
-
-const mapStateToProps = state => ({
-  collections: state.collections.all
-});
-
-class Routes extends Component {
-  render() {
-    return (
-      <Switch location={this.props.location}>
-        <Route path="/login" component={Login} />
-        <Route path="/forgot" component={ () => { return <h1>Forgot Password</h1>; } } />
-        <Route path="/" render={() => {
-          return (
-            <React.Fragment>
-              <DefaultTemplate>
-                <Route path="/create-user" component={CreateUser} />
-                <Route path="/" exact component={Dashboard} />
-                <CollectionRoutes collections={this.props.collections} modelViews={modelViews} />
-              </DefaultTemplate>
-            </React.Fragment>
-          );
-        }} />
-      </Switch>
-    );
-  }
+const Routes = props => {
+  return (
+    <Switch>
+      <Route path="/login" render={ routeProps => <Login logo={Logo} {...routeProps} />} />
+      <Route path="/forgot" component={ () => { return <h1>Forgot Password</h1>; } } />
+      <Route path="/" render={routeProps => {
+        return (
+          <DefaultTemplate {...routeProps} icon={Icon}>
+            <Route path="/create-user" component={CreateUser} />
+            <Route path="/" exact component={Dashboard} />
+            <CollectionRoutes collections={props.collections} views={props.views} />
+          </DefaultTemplate>
+        );
+      }} />
+    </Switch>
+  );
 }
 
-export default withRouter(connect(mapStateToProps)(Routes));
+export default withRouter(Routes);

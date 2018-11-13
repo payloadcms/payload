@@ -3,14 +3,16 @@ import { Sidebar, StepNav } from 'payload/components';
 
 import './index.css';
 
-export default props => {
+const DefaultTemplate = props => {
   return (
     <div className="default-template">
       <div className="wrap">
-        <Sidebar />
+        <Sidebar icon={props.icon} collections={props.collections} />
         <StepNav />
         {props.children}
       </div>
     </div>
   );
 };
+
+export default DefaultTemplate;

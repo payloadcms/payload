@@ -3,8 +3,6 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { ContentBlock, Form, Input, FormSubmit } from 'payload/components';
 
-import Logo from 'local/client/components/graphics/Logo';
-
 import './index.css';
 
 const mapStateToProps = state => ({
@@ -13,6 +11,7 @@ const mapStateToProps = state => ({
 
 const Login = props => {
 
+  const Logo = props.logo;
   const minHeight = props.windowHeight;
 
   return (

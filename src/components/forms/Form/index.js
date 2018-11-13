@@ -1,5 +1,5 @@
 import React, { Component, createContext } from 'react';
-import ajax from 'payload/ajax';
+import api from 'payload/api';
 
 import './index.css';
 
@@ -70,7 +70,7 @@ class Form extends Component {
       });
 
       // Make the API call from the action
-      ajax.requests[this.props.method](this.props.action, data).then(
+      api.requests[this.props.method.toLowerCase()](this.props.action, data).then(
         res => {
           // Provide form data to the redirected page
           if (this.props.redirect) {
