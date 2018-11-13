@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Label } from 'payload/components';
+import { Label, Input } from 'payload/components';
 
 const APIUrl = props => {
 
@@ -10,6 +10,7 @@ const APIUrl = props => {
     <div className="api-url">
       <Label className="uppercase">API URL&nbsp;&mdash;&nbsp;Edit</Label>
       <div><a href={apiUrl}>{apiUrl}</a></div>
+      <Input type="hidden" name="slug" value={props.slug} />
     </div>
   );
 };

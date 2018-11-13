@@ -5,19 +5,21 @@ import './index.css';
 
 const Edit = props => {
 
+  const isEditing = props.slug ? true : false;
+
   const nav = [{
       url: `/collections/${props.collection.slug}`,
       label: props.collection.label
   }];
 
-  if (!props.isEditing) {
-    nav.push({
-      label: 'Create New'
-    })
-  } else {
+  if (isEditing) {
     nav.push({
       url: `/collections/${props.collectionSlug}/${props.slug}`,
       label: props.slug
+    })
+  } else {
+    nav.push({
+      label: 'Create New'
     })
   }
 
@@ -25,10 +27,10 @@ const Edit = props => {
     <article className="collection-edit">
       <SetStepNav nav={ nav } />
       <header>
-        {props.isEditing &&
+        {isEditing &&
           <h1>Edit Page {}</h1>
         }
-        {!props.isEditing &&
+        {!isEditing &&
           <h1>Create New Page</h1>
         }
       </header>

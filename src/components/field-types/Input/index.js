@@ -102,6 +102,7 @@ class Input extends Component {
           onChange={
             (e) => {
               this.props.context.setValue(this.sendField(e.target.value));
+              this.props.onChange(e);
             }
           }
           disabled={this.props.disabled}
