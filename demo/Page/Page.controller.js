@@ -7,6 +7,12 @@ const pageController = {
     });
   },
 
+  getById: (req, res) => {
+    Page.findById(req.params.id, (err, pages) => {
+      return res.json(pages);
+    });
+  },
+
   post: (req, res) => {
     const newPage = new Page(req.body);
     newPage.save((err, page, next) => {

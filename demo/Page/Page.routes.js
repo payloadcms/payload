@@ -5,9 +5,15 @@ const pagePolicy = require('./Page.policy');
 const router = express.Router(); // eslint-disable-line new-cap
 
 router
-  .route('') // TODO: not sure how to incorporate url params like `:pageId`
+  .route('')
   .all(pagePolicy.all)
   .get(pagePolicy.get, pageController.get)
   .post(pagePolicy.post, pageController.post);
+
+router
+  .route('/:id')
+  .get(pagePolicy.getById, pageController.getById);
+
+
 
 module.exports = router;
