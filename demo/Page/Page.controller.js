@@ -7,8 +7,11 @@ const pageController = {
     });
   },
 
-  getById: (req, res) => {
+  getById: (req, res, next) => {
     Page.findById(req.params.id, (err, pages) => {
+      if (err) {
+        return res.send(404);
+      }
       return res.json(pages);
     });
   },
