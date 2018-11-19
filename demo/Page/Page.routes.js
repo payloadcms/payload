@@ -12,7 +12,10 @@ router
 
 router
   .route('/:id')
-  .get(pagePolicy.findById, pageController.findById);
+  .get(pagePolicy.findById, pageController.findById)
+  // DR: I considered calling this method postById but that is awkward, though I am concerned that we have a put that is hit using HTTP POST
+  .post(pagePolicy.put, pageController.put)
+  .delete(pagePolicy.delete, pageController.delete);
 
 
 

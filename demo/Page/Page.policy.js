@@ -8,7 +8,7 @@ const pagePolicy = {
     if (admin === 1) {
       next();
     } else {
-      res.send(401, 'You are not authorized to view this resource');
+      res.send(401, 'You are not authorized to view this resource'); // TODO: internationlization
     }
   },
 
@@ -22,6 +22,14 @@ const pagePolicy = {
   },
 
   findById: (req, res, next) => {
+    next();
+  },
+
+  put: (req, res, next) => {
+    next();
+  },
+
+  delete: (req, res, next) => {
     next();
   },
 };
