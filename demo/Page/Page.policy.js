@@ -21,7 +21,7 @@ const pagePolicy = {
     next();
   },
 
-  getById: (req, res, next) => {
+  findById: (req, res, next) => {
     next();
   },
 };

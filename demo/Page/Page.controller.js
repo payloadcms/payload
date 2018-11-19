@@ -7,7 +7,7 @@ const pageController = {
     });
   },
 
-  getById: (req, res, next) => {
+  findById: (req, res) => {
     Page.findById(req.params.id, (err, pages) => {
       if (err) {
         return res.send(404);

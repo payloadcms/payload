@@ -12,7 +12,7 @@ router
 
 router
   .route('/:id')
-  .get(pagePolicy.getById, pageController.getById);
+  .get(pagePolicy.findById, pageController.findById);
 
 
 
