@@ -1,47 +1,64 @@
 const Page = require('./Page.model');
+const httpStatus = require('http-status');
 
 const pageController = {
-  get: (req, res) => {
+  query(req, res) {
     Page.apiQuery(req.query, (err, pages) => {
-      return res.json(pages);
-    });
-  },
-
-  findById: (req, res) => {
-    Page.findById(req.params.id, (err, pages) => {
       if (err) {
-        return res.send(404);
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
       }
       return res.json(pages);
     });
   },
 
-  post: (req, res) => {
-    const newPage = new Page(req.body);
-    newPage.save((err, page, next) => {
+  find(req, res) {
+    Page.findById(req.params.id, (err, doc) => {
       if (err) {
-        return next(err);
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
       }
-      return res.json(page);
+
+      if (!doc) {
+        return res.status(httpStatus.NOT_FOUND).send('Not Found');
+      }
+
+      return res.json(doc);
     });
   },
 
-  put: (req, res) => {
-    // TODO: discuss if we want the update to work like this where the ID is sent in params.id or something else?
-    req.body.id = req.params.id;
-    Page.findOneAndUpdate(req.params.id, req.body, (err, doc) => {
+  post(req, res) {
+    Page.create(req.body, (err, doc) => {
       if (err) {
-        return res.send(500, {error: err});
+        return res.send(httpStatus.INTERNAL_SERVER_ERROR, {error: err});
       }
       return res.json(doc);
     });
   },
 
-  delete: (req, res) => {
-    Page.findOneAndRemove(req.params.id, (err) => {
+  update(req, res) {
+    Page.findOneAndUpdate({_id: req.params.id}, req.body, {new: true}, (err, doc) => {
+      console.log(new Date().toISOString());
       if (err) {
-        return res.send(500, {error: err});
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
       }
+
+      if (!doc) {
+        return res.status(httpStatus.NOT_FOUND).send('Not Found');
+      }
+
+      return res.json(doc);
+    });
+  },
+
+  delete(req, res) {
+    Page.findOneAndDelete({_id: req.params.id}, (err, doc) => {
+      if (err) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
+      }
+
+      if (!doc) {
+        return res.status(httpStatus.NOT_FOUND).send('Not Found');
+      }
+
       return res.send();
     });
   },

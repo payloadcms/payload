@@ -12,7 +12,7 @@ const pagePolicy = {
     }
   },
 
-  get: (req, res, next) => {
+  query: (req, res, next) => {
     // res.send(401);
     next();
   },
@@ -21,11 +21,11 @@ const pagePolicy = {
     next();
   },
 
-  findById: (req, res, next) => {
+  find: (req, res, next) => {
     next();
   },
 
-  put: (req, res, next) => {
+  update: (req, res, next) => {
     next();
   },
 

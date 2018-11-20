@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const mongooseStringQuery = require('mongoose-string-query')
+const mongooseStringQuery = require('mongoose-string-query');
 
 const PageSchema = new mongoose.Schema({
   title: String,
