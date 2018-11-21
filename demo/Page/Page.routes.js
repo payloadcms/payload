@@ -6,7 +6,6 @@ const router = express.Router(); // eslint-disable-line new-cap
 
 router
   .route('')
-  .all(pagePolicy.all)
   .get(pagePolicy.query, pageController.query)
   .post(pagePolicy.post, pageController.post);
 
