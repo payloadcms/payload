@@ -36,7 +36,6 @@ const pageController = {
 
   update(req, res) {
     Page.findOneAndUpdate({_id: req.params.id}, req.body, {new: true}, (err, doc) => {
-      console.log(new Date().toISOString());
       if (err) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
       }
