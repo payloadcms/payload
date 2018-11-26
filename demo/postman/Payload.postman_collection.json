@@ -1,13 +1,16 @@
 {
+	"variables": [],
 	"info": {
-		"_postman_id": "b25a1d07-a6f9-4fda-a1ee-36a630f1b8db",
 		"name": "Payload",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"_postman_id": "2ea79fc9-1b0a-1b6c-d7e6-6f8cf8d73cb9",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
 	"item": [
 		{
 			"name": "Public Domain Check",
 			"request": {
+				"url": "https://jyiixvked0.execute-api.us-east-1.amazonaws.com/dev/call",
 				"method": "POST",
 				"header": [
 					{
@@ -19,27 +22,14 @@
 					"mode": "raw",
 					"raw": "{\"domain\": \"http://localhost:8000\"}"
 				},
-				"url": {
-					"raw": "https://jyiixvked0.execute-api.us-east-1.amazonaws.com/dev/call",
-					"protocol": "https",
-					"host": [
-						"jyiixvked0",
-						"execute-api",
-						"us-east-1",
-						"amazonaws",
-						"com"
-					],
-					"path": [
-						"dev",
-						"call"
-					]
-				}
+				"description": ""
 			},
 			"response": []
 		},
 		{
 			"name": "Get Page",
 			"request": {
+				"url": "http://localhost:3000/pages",
 				"method": "GET",
 				"header": [
 					{
@@ -51,17 +41,6 @@
 					"mode": "raw",
 					"raw": "{\n\t\"title\": \"sup dog\",\n\t\"content\": \"some shit\"\n}"
 				},
-				"url": {
-					"raw": "http://localhost:3000/pages",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"pages"
-					]
-				},
 				"description": "\t"
 			},
 			"response": []
@@ -69,6 +48,7 @@
 		{
 			"name": "Post Page",
 			"request": {
+				"url": "http://localhost:3000/pages",
 				"method": "POST",
 				"header": [
 					{
@@ -80,18 +60,49 @@
 					"mode": "raw",
 					"raw": "{\n\t\"title\": \"sup dog\",\n\t\"content\": \"some shit\"\n}"
 				},
-				"url": {
-					"raw": "http://localhost:3000/pages",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"pages"
-					]
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Post",
+			"request": {
+				"url": "http://localhost:3000/pages/5bf498411a69cf1b718c730b",
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"description": "Deletes a post with a specific _id"
+			},
+			"response": []
+		},
+		{
+			"name": "Update Page",
+			"request": {
+				"url": "http://localhost:3000/pages/5bf498411a69cf1b718c730b",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"title\": \"hey dog\",\n\t\"content\": \"updated shit\"\n}"
 				},
 				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Find Page",
+			"request": {
+				"url": "http://localhost:3000/pages/5bf498411a69cf1b718c730b",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
 			},
 			"response": []
 		}
