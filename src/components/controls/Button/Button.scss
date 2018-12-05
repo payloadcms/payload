@@ -2,8 +2,8 @@
 
 .btn {
     @extend %uppercase-label;
-    background-color: $green;
-    border: 1px solid $green;
+    background-color: $primary;
+    border: 1px solid $primary;
     padding: rem(.5) rem(.75);
     line-height: rem(.5);
     border-radius: $radius-sm;
@@ -22,18 +22,18 @@
     }
 
     &.btn-secondary {
-        border: $stroke-width solid $dark-green;
-        color: $dark-green;
+        border: $stroke-width solid $primary;
+        color: $primary;
         background: none;
 
         &.btn-icon {
-            @include color-svg($dark-green);
+            @include color-svg($primary);
             padding: 0;
         }
 
         &:hover {
-            background: $dark-green;
-            border: $stroke-width solid $dark-green;
+            background: $primary;
+            border: $stroke-width solid $primary;
             color: white;
 
             &.btn-icon {
@@ -55,14 +55,14 @@
         border-bottom: 1px solid $black;
 
         &:hover {
-            color: $dark-green;
-            border-bottom-color: $dark-green;
+            color: $primary;
+            border-bottom-color: $primary;
         }
     }
 
     &:hover {
-      border: 1px solid $dark-green;
-      background: $dark-green;
+      border: 1px solid $primary;
+      background: $primary;
       color: white;
     }
 

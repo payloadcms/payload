@@ -39,12 +39,12 @@ html {
 }
 
 ::selection {
-  background: $green;
+  background: $primary;
   color: $black;
 }
 
 ::-moz-selection {
-  background: $green;
+  background: $primary;
   color: $black;
 }
 
@@ -89,8 +89,8 @@ a {
   border-bottom: 1px solid $black;
 
   &:hover {
-    color: $dark-green;
-    border-bottom: 1px solid $dark-green;
+    color: $primary;
+    border-bottom: 1px solid $primary;
   }
 }
 

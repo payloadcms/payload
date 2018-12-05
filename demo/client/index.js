@@ -10,6 +10,8 @@ import pageViews from '../Page/components';
 import Order from '../Order/Order.config';
 import orderViews from '../Order/components';
 
+import './scss/styles.css';
+
 const views = {
   orders: orderViews,
   pages: pageViews

@@ -4,7 +4,7 @@
 
 .tooltip {
 	@extend %uppercase-label;
-	background-color: $green;
+	background-color: $primary;
   position: absolute;
   z-index: 2;
 	top: - rem(.5);
@@ -22,6 +22,6 @@
 		height: 0;
 		width: 0;
 		border: 10px solid transparent;
-		border-top-color: $green;
+		border-top-color: $primary;
 	}
 }

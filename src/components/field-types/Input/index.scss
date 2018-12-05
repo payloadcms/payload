@@ -10,7 +10,7 @@
 		display: flex;
 
 		.required {
-			color: $pink;
+			color: $error;
 			margin-left: rem(.25);
 			margin-right: auto;
 		}
@@ -20,10 +20,10 @@
 		left: auto;
 		right: 0;
 		transform: none;
-		background-color: $pink;
+		background-color: $error;
 
 		span {
-			border-top-color: $pink;
+			border-top-color: $error;
 		}
 	}
 
@@ -33,7 +33,7 @@
 
 	&.error {
 		input {
-      background-color: lighten($pink, 15%);
+      background-color: lighten($error, 15%);
 		}
 	}
 
