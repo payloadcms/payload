@@ -86,7 +86,7 @@ $stroke-width : 1px;
 }
 
 //////////////////////////////
-// IMPORT PAYLOAD STYLES
+// IMPORT OVERRIDES
 //////////////////////////////
 
-@import '~payload/scss/app.css';
+@import '~local/client/scss/overrides';
