@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { FormContext, Tooltip } from 'payload/components';
 
-import './index.css';
+import './index.scss';
 
 class Textarea extends Component {
   constructor() {
@@ -123,10 +123,12 @@ class Textarea extends Component {
   }
 }
 
-export default props => {
+const ContextTextarea = props => {
   return (
     <FormContext.Consumer>
       {context => <Textarea {...props} context={context} />}
     </FormContext.Consumer>
   );
 };
+
+export default ContextTextarea;

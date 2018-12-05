@@ -1,7 +1,7 @@
 import React from 'react';
 import { Sidebar, StepNav } from 'payload/components';
 
-import './index.css';
+import './index.scss';
 
 const DefaultTemplate = props => {
   return (

@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { ContentBlock, Form, Input, FormSubmit } from 'payload/components';
 
-import './index.css';
+import './index.scss';
 
 const mapStateToProps = state => ({
   windowHeight: state.common.windowHeight

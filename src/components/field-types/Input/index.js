@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Tooltip, FormContext } from 'payload/components';
 
-import './index.css';
+import './index.scss';
 
 class Input extends Component {
   constructor() {

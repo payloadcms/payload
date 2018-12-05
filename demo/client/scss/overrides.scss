@@ -22,7 +22,7 @@ $font-label : 'gt-pressura-web';
 // COLORS
 //////////////////////////////
 
-$primary    : #3bffaa;
+$primary    : red;
 
 $light-gray : #f5f5f5;
 $gray       : #afafaf;
@@ -71,9 +71,3 @@ $stroke-width : 1px;
 		fill: $color;
 	}
 }
-
-//////////////////////////////
-// IMPORT PAYLOAD STYLES
-//////////////////////////////
-
-@import '~payload/scss/app.css';

@@ -1,6 +1,6 @@
-@import '_vars';
-@import '_structure';
-@import '_queries';
+@import 'vars';
+@import 'structure';
+@import 'queries';
 
 @mixin formInput () {
     @extend %inputShadow;

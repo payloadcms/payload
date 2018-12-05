@@ -12,13 +12,9 @@
   "scripts": {
     "test": "node ./node_modules/jest/bin/jest.js src/tests",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
-    "build-demo-css": "node-sass-chokidar --include-path ./src/scss demo/ -o demo/",
-    "watch-demo-css": "npm run build-demo-css && node-sass-chokidar --include-path ./src/scss demo/ -o demo/ --watch --recursive",
-    "build-module-css": "node-sass-chokidar --include-path ./src/scss src/ -o src/",
-    "watch-module-css": "npm run build-demo-css && node-sass-chokidar --include-path ./src/scss src/ -o src/ --watch --recursive",
     "webpack": "webpack-dev-server --mode development --config config/webpack.dev.config.js --open --hot --history-api-fallback",
     "demo-server": "nodemon demo/app.js",
-    "dev": "npm-run-all -p watch-module-css watch-demo-css webpack demo-server"
+    "dev": "npm-run-all -p webpack demo-server"
   },
   "author": "",
   "license": "ISC",
@@ -42,7 +38,8 @@
     "redux": "^4.0.0",
     "superagent": "^3.8.3",
     "superagent-promise": "^1.1.0",
-    "url-loader": "^1.0.1"
+    "url-loader": "^1.0.1",
+    "postcss-preset-env": "6.0.6"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0",
@@ -70,7 +67,7 @@
     "optimize-css-assets-webpack-plugin": "^5.0.0",
     "postcss-flexbugs-fixes": "^3.3.1",
     "postcss-loader": "^2.1.6",
-    "sass-loader": "^7.0.3",
+    "sass-loader": "7.1.0",
     "style-loader": "^0.21.0",
     "supertest": "^3.1.0",
     "uglifyjs-webpack-plugin": "^1.2.7",

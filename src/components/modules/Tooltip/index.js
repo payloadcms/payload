@@ -1,8 +1,8 @@
 import React from 'react';
 
-import './Tooltip.css';
+import './index.scss';
 
-export default (props) => {
+const Tooltip = (props) => {
   let className = props.className ? `tooltip ${props.className}` : 'tooltip';
 
   return (
@@ -12,3 +12,5 @@ export default (props) => {
     </aside>
   );
 };
+
+export default Tooltip;

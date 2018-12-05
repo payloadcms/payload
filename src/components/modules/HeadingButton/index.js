@@ -1,9 +1,9 @@
 import React from 'react';
 import { Button } from 'payload/components';
 
-import './index.css';
+import './index.scss';
 
-export default props => {
+const HeadingButton = props => {
   return (
     <header className="heading-button">
       <h1>{props.heading}</h1>
@@ -11,3 +11,5 @@ export default props => {
     </header>
   );
 };
+
+export default HeadingButton;

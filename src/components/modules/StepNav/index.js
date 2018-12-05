@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Label, Arrow } from 'payload/components';
 
-import './index.css';
+import './index.scss';
 
 const mapStateToProps = state => ({
   nav: state.common.stepNav

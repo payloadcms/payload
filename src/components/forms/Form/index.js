@@ -1,7 +1,7 @@
 import React, { Component, createContext } from 'react';
 import api from 'payload/api';
 
-import './index.css';
+import './index.scss';
 
 export const FormContext = createContext({});
 

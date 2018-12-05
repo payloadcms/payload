@@ -1,6 +1,4 @@
-@import '_vars';
-@import '_type';
-@import '_structure';
+@import '~payload/scss/styles';
 
 .tooltip {
 	@extend %uppercase-label;

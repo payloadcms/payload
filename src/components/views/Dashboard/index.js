@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { SetStepNav } from 'payload/components';
 
-import './index.css';
+import './index.scss';
 
 const Dashboard = () => {
   return (

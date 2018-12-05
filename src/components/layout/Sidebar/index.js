@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { NavLink, Link } from 'react-router-dom';
 import { Arrow, Label } from 'payload/components';
 
-import './index.css';
+import './index.scss';
 
 const mapStateToProps = state => ({
   collections: state.collections.all

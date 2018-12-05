@@ -1,18 +1,20 @@
 import React from 'react';
 
-import './index.css';
+import './index.scss';
 
-export default props => {
-  const Heading = props.heading
-    ? () => <header><h2>{props.heading}</h2></header>
-    : () => null;
-
+const Group = props => {
   return (
     <section className="field-group">
-      <Heading />
+      {props.heading &&
+        <header>
+          <h2>{props.heading}</h2>
+        </header>
+      }
       <div className="content">
         {props.children}
       </div>
     </section>
   );
 };
+
+export default Group;

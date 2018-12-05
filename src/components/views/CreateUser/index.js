@@ -1,7 +1,7 @@
 import React from 'react';
 import { ContentBlock, Form, Input, FormSubmit, SetStepNav } from 'payload/components';
 
-import './index.css';
+import './index.scss';
 
 const CreateUser = () => {
 

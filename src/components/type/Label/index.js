@@ -1,8 +1,8 @@
 import React from 'react';
 
-import './index.css';
+import './index.scss';
 
-export default props => {
+const Label = props => {
   let classes = props.className ? props.className : undefined;
 
   return (
@@ -11,3 +11,5 @@ export default props => {
     </label>
   );
 };
+
+export default Label;
