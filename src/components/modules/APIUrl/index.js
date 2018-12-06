@@ -8,7 +8,7 @@ const APIUrl = props => {
 
   return (
     <div className="api-url">
-      <Label className="uppercase">API URL&nbsp;&mdash;&nbsp;Edit</Label>
+      <Label className="uppercase">API URL</Label>
       <div><a href={apiUrl}>{apiUrl}</a></div>
       <Input type="hidden" name="slug" valueOverride={props.slug} />
     </div>

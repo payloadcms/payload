@@ -1,0 +1,28 @@
+@import '~payload/scss/styles';
+
+table {
+  width: 100%;
+
+  th {
+    @extend %uppercase-label;
+    font-weight: normal;
+    text-align: left;
+  }
+
+  td, th {
+    padding: rem(.5);
+  }
+
+  tbody {
+    @extend %inputShadow;
+    border-radius: $radius-sm;
+  }
+
+  tr:nth-child(even) {
+    background: $light-gray;
+  }
+
+  .no-data {
+    color: $gray;
+  }
+}
