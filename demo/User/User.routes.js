@@ -1,6 +1,6 @@
-const express = require('express');
-const userController = require('./User.controller');
-const userValidate = require('./User.validate');
+import express from 'express';
+import userController from './User.controller';
+import userValidate from './User.validate';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
@@ -8,4 +8,4 @@ router
   .route('') // TODO: not sure how to incorporate url params like `:pageId`
   .post(userValidate.post, userController.post);
 
-module.exports = router;
+export default router;

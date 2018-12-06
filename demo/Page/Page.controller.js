@@ -1,8 +1,7 @@
-const config = require('./Page.config');
-const Page = require('./Page.model');
-const httpStatus = require('http-status');
-
-const toKebabCase = string => string.replace(/([a-z])([A-Z])/g, '$1-$2').replace(/\s+/g, '-').toLowerCase();
+import config from './Page.config';
+import Page from './Page.model';
+import httpStatus from 'http-status';
+import toKebabCase from '../../src/lib/helpers/toKebabCase';
 
 const pageController = {
   query(req, res) {
@@ -71,4 +70,4 @@ const pageController = {
   },
 };
 
-module.exports = pageController;
+export default pageController;

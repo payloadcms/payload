@@ -1,7 +1,7 @@
-const express = require('express');
-const passport = require('passport');
-const authValidate = require('../../src/auth/validate');
-const authCtrl = require('./Auth.controller');
+import express from 'express';
+import passport from 'passport';
+import authValidate from '../../src/auth/validate';
+import authCtrl from './Auth.controller';
 
 const router = new express.Router();
 
@@ -9,4 +9,4 @@ router
   .route('/login')
   .post(authValidate.login, passport.authenticate('local'), authCtrl.login);
 
-module.exports = router;
+export default router;

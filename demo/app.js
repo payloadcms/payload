@@ -1,9 +1,15 @@
-const express = require('express');
-const payload = require('../src');
-const User = require('./User/User.model');
-const payloadConfig = require('./payload.config');
+import express from 'express';
+import payload from '../src';
+import User from './User/User.model';
+import payloadConfig from './payload.config';
+
+import authRoutes from './Auth/Auth.routes';
+import userRoutes from './User/User.routes';
+import pageRoutes from './Page/Page.routes';
+
 const router = express.Router({}); // eslint-disable-line new-cap
-const app = module.exports = express();
+
+export const app =  express();
 
 payload.init({
   config: payloadConfig,
@@ -12,18 +18,9 @@ payload.init({
   router: router
 });
 
-const authRoutes = require('./Auth/Auth.routes');
 router.use('', authRoutes);
-
-const userRoutes = require('./User/User.routes');
 router.use('/users', userRoutes);
-
-const pageRoutes = require('./Page/Page.routes');
 router.use('/pages', pageRoutes);
-
-// Not scaffolded, but this is how it works
-// const orderRoutes = require('./Order/Order.routes');
-// router.use('/orders', orderRoutes);
 
 app.listen(payloadConfig.port, () => {
   console.log(`listening on ${payloadConfig.port}...`);

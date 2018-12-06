@@ -1,4 +1,4 @@
-const Page = require('./Page.model');
+import Page from './Page.model';
 
 const pagePolicy = {
 
@@ -24,4 +24,4 @@ const pagePolicy = {
   },
 };
 
-module.exports = pagePolicy;
+export default pagePolicy;
