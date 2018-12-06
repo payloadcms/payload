@@ -7,6 +7,7 @@ class SearchableTable extends Component {
     super(props);
 
     this.state = {
+      rows: this.structureRows(this.props.data),
       columns: [{
         key: 'title',
         label: 'Title'
@@ -18,6 +19,20 @@ class SearchableTable extends Component {
         label: 'Published On'
       }]
     }
+  }
+
+  structureRows = () => {
+    if (this.props.data) {
+      return this.props.data.map(row => {
+         if (columns) {
+          const columnKeys = this.state.columns.map(col => col.key);
+          return getPropSubset(columnKeys, row);
+        }
+         return {};
+      })
+    }
+
+    return [];
   }
 
   render() {

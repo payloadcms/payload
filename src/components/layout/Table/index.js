@@ -20,7 +20,10 @@ const Table = props => {
                   {props.columns.map((col, i) => {
                     return (
                       <td key={i}>
-                        {row[col.key] ? row[col.key] : <span className="no-data" dangerouslySetInnerHTML={{__html: '&mdash;'}} />}
+                        {row[col.key]
+                          ? row[col.key]
+                          : <span className="no-data" dangerouslySetInnerHTML={{__html: '&mdash;'}} />
+                        }
                       </td>
                     )
                   })}
@@ -32,9 +35,7 @@ const Table = props => {
     )
   }
 
-  return (
-    <h1>Has no rows</h1>
-  )
+  return null;
 }
 
 export default Table;
