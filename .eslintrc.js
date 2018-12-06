@@ -3,7 +3,11 @@ const OFF = 0,
   ERROR = 2;
 
 module.exports = exports = {
+  parser: "babel-eslint",
   extends: ["eslint:recommended", "plugin:react/recommended"],
+  plugins: [
+    "babel"
+  ],
   env: {
     browser: true,
     commonjs: true,
@@ -216,6 +220,7 @@ module.exports = exports = {
   //
   //   // React-specific overridesf
   //   "react/display-name": OFF,
-    "react/prop-types": OFF
+    "react/prop-types": OFF,
+    "babel/semi": OFF
   }
 };

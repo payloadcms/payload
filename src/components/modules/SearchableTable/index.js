@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import { Filter, Table } from 'payload/components'
 
 class SearchableTable extends Component {
@@ -24,15 +25,23 @@ class SearchableTable extends Component {
   structureRows = () => {
     if (this.props.data) {
       return this.props.data.map(row => {
-         if (columns) {
-          const columnKeys = this.state.columns.map(col => col.key);
-          return getPropSubset(columnKeys, row);
-        }
-         return {};
+          const formattedRow = {...row};
+
+          // Link the first column
+          formattedRow[this.state.columns[0].key] = <Link to={'/'}>{row[this.state.columns[0].key]}</Link>
+          return formattedRow;
       })
     }
 
     return [];
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.data !== this.props.data) {
+      this.setState({
+        rows: this.structureRows(this.props.data)
+      })
+    }
   }
 
   render() {
@@ -40,7 +49,7 @@ class SearchableTable extends Component {
     return (
       <React.Fragment>
         <Filter />
-        <Table rows={this.props.data} columns={this.state.columns} />
+        <Table rows={this.state.rows} columns={this.state.columns} />
       </React.Fragment>
     )
   }
