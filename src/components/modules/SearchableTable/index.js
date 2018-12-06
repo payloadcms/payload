@@ -27,8 +27,10 @@ class SearchableTable extends Component {
       return this.props.data.map(row => {
           const formattedRow = {...row};
 
+          const url = `/${this.props.collection.slug}/${row.slug}`;
+
           // Link the first column
-          formattedRow[this.state.columns[0].key] = <Link to={'/'}>{row[this.state.columns[0].key]}</Link>
+          formattedRow[this.state.columns[0].key] = <Link to={url}>{row[this.state.columns[0].key]}</Link>
           return formattedRow;
       })
     }

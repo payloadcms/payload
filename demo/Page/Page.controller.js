@@ -1,5 +1,8 @@
+const config = require('./Page.config');
 const Page = require('./Page.model');
 const httpStatus = require('http-status');
+
+const toKebabCase = string => string.replace(/([a-z])([A-Z])/g, '$1-$2').replace(/\s+/g, '-').toLowerCase();
 
 const pageController = {
   query(req, res) {
@@ -26,7 +29,12 @@ const pageController = {
   },
 
   post(req, res) {
-    Page.create(req.body, (err, doc) => {
+    const page = {
+      ...req.body,
+      slug: toKebabCase(req.body[config.uid])
+    }
+
+    Page.create(page, (err, doc) => {
       if (err) {
         return res.send(httpStatus.INTERNAL_SERVER_ERROR, {error: err});
       }
