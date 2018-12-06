@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {
+  withEditData,
   EditView,
   Sticky,
   APIUrl,
@@ -13,7 +14,7 @@ import {
 import { toKebabCase } from 'payload/utils';
 
 import Page from '../../Page.config';
-import payloadConfig from '../../../payload.config.json';
+import config from '../../../payload.config.json';
 
 class Edit extends Component {
 
@@ -35,10 +36,10 @@ class Edit extends Component {
 
   render() {
     return (
-      <EditView data={this.state.data} collection={this.collection} slug={this.props.match.params.slug}>
-        <Form method="post" action={`${payloadConfig.serverUrl}/${this.collection.slug}`}>
+      <EditView collection={this.collection}>
+        <Form method="post" action={`${config.serverUrl}/${this.collection.slug}`}>
           <Sticky>
-            <APIUrl serverUrl={payloadConfig.serverUrl}
+            <APIUrl serverUrl={config.serverUrl}
               collectionSlug={this.collection.slug} slug={this.state.slug} />
             <div className="controls">
               <Button type="secondary">Preview</Button>
@@ -55,4 +56,4 @@ class Edit extends Component {
   }
 }
 
-export default Edit;
+export default withEditData(Edit, Page, config);

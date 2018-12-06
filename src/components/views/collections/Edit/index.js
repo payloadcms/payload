@@ -3,7 +3,7 @@ import { SetStepNav } from 'payload/components';
 
 import './index.scss';
 
-const Edit = props => {
+const EditView = props => {
 
   const isEditing = props.slug ? true : false;
 
@@ -39,4 +39,4 @@ const Edit = props => {
   );
 };
 
-export default Edit;
+export default EditView;

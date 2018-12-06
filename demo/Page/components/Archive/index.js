@@ -1,57 +1,28 @@
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import { ArchiveView, HeadingButton, Filter } from 'payload/components';
-import api from 'payload/api';
+import React from 'react';
+import {
+  withArchiveData,
+  ArchiveView,
+  HeadingButton,
+  SearchableTable,
+} from 'payload/components';
 
-import payloadConfig from '../../../payload.config.json';
 import Page from '../../Page.config';
+import config from '../../../payload.config.json';
 
-class Archive extends Component {
-  constructor(props) {
-    super(props);
-    this.collection = Page;
+const collection = Page;
 
-    this.state = {
-      collection: this.collection,
-      data: false
-    }
-  }
+const Archive = props => {
 
-  componentDidMount() {
-    api.requests.get(`${payloadConfig.serverUrl}/${this.state.collection.slug}`).then(
-      res =>
-        this.setState({ data: res }),
-      err =>
-        console.warn(err)
-    )
-  }
-
-  render() {
-    return (
-      <ArchiveView slug={this.state.collection.slug} collection={this.state.collection}>
-        <HeadingButton
-          heading="Pages"
-          buttonLabel="Add New"
-          buttonUrl={`/collections/${this.state.collection.slug}/create`}
-          buttonType="link" />
-        <Filter />
-        {this.state.data &&
-          <ul>
-            {this.state.data.map((row, i) => {
-              const slug = row[this.state.collection.uid];
-              return (
-                <li key={i}>
-                  <Link to={`/collections/${this.state.collection.slug}/${slug}`}>
-                    {row.title}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        }
-      </ArchiveView>
-    );
-  }
+  return (
+    <ArchiveView collection={collection}>
+      <HeadingButton
+        heading="Pages"
+        buttonLabel="Add New"
+        buttonUrl={`/collections/${collection.slug}/create`}
+        buttonType="link" />
+      <SearchableTable data={props.data} collection={collection} />
+    </ArchiveView>
+  );
 }
 
-export default Archive;
+export default withArchiveData(Archive, collection, config);
