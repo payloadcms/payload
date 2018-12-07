@@ -28,12 +28,8 @@ const pageController = {
   },
 
   post(req, res) {
-    const page = {
-      ...req.body,
-      slug: toKebabCase(req.body[config.uid])
-    }
 
-    Page.create(page, (err, doc) => {
+    Page.create(req.body, (err, doc) => {
       if (err) {
         return res.send(httpStatus.INTERNAL_SERVER_ERROR, {error: err});
       }

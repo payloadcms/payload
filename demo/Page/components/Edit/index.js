@@ -53,9 +53,9 @@ class Edit extends Component {
               <FormSubmit>Save</FormSubmit>
             </div>
           </Sticky>
-          <Input onChange={this.updateSlug} type="text" label="Page Title" value={initialData.title} name="title" required />
+          <Input onChange={this.updateSlug} type="text" label="Page Title" initialValue={initialData.title} name="title" required />
           <Group heading="Sample Group">
-            <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} value={initialData.content} />
+            <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} initialValue={initialData.content} />
           </Group>
         </Form>
       </EditView>

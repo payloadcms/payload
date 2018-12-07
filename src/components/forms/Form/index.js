@@ -12,7 +12,7 @@ class Form extends Component {
 
     this.state = {
       fields: {},
-      status: undefined,
+      status: null,
       submitted: false,
       processing: false
     };
@@ -104,6 +104,7 @@ class Form extends Component {
   }
 
   render() {
+
     let Status = () => {
       return null;
     };

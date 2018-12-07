@@ -53,7 +53,9 @@ class Input extends Component {
   }
 
   componentDidMount() {
-    this.sendField(this.props.value ? this.props.value : '');
+    this.sendField(
+      this.props.value ? this.props.value : ''
+    );
 
     this.setState({
       init: true
@@ -63,6 +65,10 @@ class Input extends Component {
   componentDidUpdate(prevProps) {
     if (prevProps.valueOverride !== this.props.valueOverride) {
       this.sendField(this.props.valueOverride);
+    }
+
+    if (prevProps.initialValue !== this.props.initialValue) {
+      this.sendField(this.props.initialValue);
     }
   }
 
@@ -89,8 +95,8 @@ class Input extends Component {
     let className = `interact ${this.props.type}`;
     className = !showError ? className : `${className} error`;
 
-    const initialValue = this.props.value
-      ? this.props.value
+    const initialValue = this.props.initialValue
+      ? this.props.initialValue
       : '';
 
     const contextValue = (this.props.context.fields[this.props.name] && this.props.context.fields[this.props.name].value)

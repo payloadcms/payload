@@ -29,21 +29,19 @@ class Textarea extends Component {
   }
 
   sendField(value) {
-    return {
+    this.props.context.setValue({
       name: this.props.name,
       value: value,
       valid: this.props.required
         ? this.validate(value)
         : true
-    };
+    });
   }
 
   componentDidMount() {
-    this.props.context.setValue(
-      this.sendField(
-        this.props.value ? this.props.value : ''
-      )
-    );
+    this.sendField(
+      this.props.value ? this.props.value : ''
+    )
 
     this.setState({
       init: true
@@ -53,6 +51,10 @@ class Textarea extends Component {
   componentDidUpdate(prevProps) {
     if (prevProps.valueOverride !== this.props.valueOverride) {
       this.sendField(this.props.valueOverride);
+    }
+
+    if (prevProps.initialValue !== this.props.initialValue) {
+      this.sendField(this.props.initialValue);
     }
   }
 
@@ -88,8 +90,8 @@ class Textarea extends Component {
       className = 'interact';
     }
 
-    const initialValue = this.props.value
-      ? this.props.value
+    const initialValue = this.props.initialValue
+      ? this.props.initialValue
       : '';
 
     const contextValue = (this.props.context.fields[this.props.name] && this.props.context.fields[this.props.name].value)
@@ -107,8 +109,8 @@ class Textarea extends Component {
         <textarea
           value={ value }
           onChange={
-            (e) => {
-              this.props.context.setValue(this.sendField(e.target.value));
+            e => {
+              this.sendField(e.target.value);
               this.props.onChange && this.props.onChange(e);
             }
           }
