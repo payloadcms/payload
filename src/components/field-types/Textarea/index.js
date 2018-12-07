@@ -3,9 +3,7 @@ import { fieldType } from 'payload/components';
 
 import './index.scss';
 
-const errors = {
-  text: 'Please fill in the field'
-};
+const error = 'Please fill in the textarea';
 
 const validate = value => value.length > 0;
 
@@ -27,4 +25,4 @@ const Textarea = props => {
   );
 }
 
-export default fieldType(Textarea, 'textarea', validate, errors);
+export default fieldType(Textarea, 'textarea', validate, error);

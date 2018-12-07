@@ -61,8 +61,8 @@ const fieldType = (PassedComponent, slug, validate, errors) => {
         <PassedComponent {...this.props}
         className={className}
         value={value}
-        Label={<Label {...this.props} />}
-        Error={<Error showError={showError} />}
+        label={<Label {...this.props} />}
+        error={<Error showError={showError} type={this.props.type} />}
         onChange={e => {
           this.sendField(e.target.value);
           this.props.onChange && this.props.onChange(e);
@@ -90,7 +90,9 @@ const fieldType = (PassedComponent, slug, validate, errors) => {
     if (props.showError) {
       return (
         <Tooltip className="error-message">
-          {errors[this.props.type]}
+          {props.type && errors[props.type]}
+
+          {!props.type && errors}
         </Tooltip>
       )
     }
