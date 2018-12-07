@@ -35,6 +35,9 @@ class Edit extends Component {
   }
 
   render() {
+
+    const initialData = this.props.data ? this.props.data : {};
+
     return (
       <EditView data={this.props.data} collection={this.collection} slug={this.state.slug} uid={this.state.uid}>
         <Form method="post" action={`${config.serverUrl}/${this.collection.slug}`}>
@@ -46,9 +49,9 @@ class Edit extends Component {
               <FormSubmit>Save</FormSubmit>
             </div>
           </Sticky>
-          <Input onChange={this.updateSlug} type="text" label="Page Title" name="title" required />
+          <Input onChange={this.updateSlug} type="text" label="Page Title" value={initialData.title} name="title" required />
           <Group heading="Sample Group">
-            <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} />
+            <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} value={initialData.content} />
           </Group>
         </Form>
       </EditView>

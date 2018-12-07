@@ -93,7 +93,7 @@ class Input extends Component {
       ? this.props.value
       : '';
 
-    const contextValue = this.props.context.fields[this.props.name]
+    const contextValue = (this.props.context.fields[this.props.name] && this.props.context.fields[this.props.name].value)
       ? this.props.context.fields[this.props.name].value
       : initialValue;
 
