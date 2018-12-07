@@ -10,7 +10,10 @@ const requests = {
     superagent.get(`${url}`).then(responseBody),
 
   post: (url, body) =>
-    superagent.post(`${url}`, body).then(responseBody)
+    superagent.post(`${url}`, body).then(responseBody),
+
+  put: (url, body) =>
+    superagent.put(`${url}`, body).then(responseBody)
 };
 
 export default {

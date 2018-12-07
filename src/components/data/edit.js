@@ -19,7 +19,10 @@ const withEditData = (PassedComponent, collection, config) => {
       if (slug) {
         api.requests.get(`${config.serverUrl}/${collection.slug}/${slug}`).then(
           res => this.setState({ data: res }),
-          err => console.warn(err)
+          err => {
+            console.warn(err);
+            this.props.history.push('/not-found');
+          }
         )
       }
     }

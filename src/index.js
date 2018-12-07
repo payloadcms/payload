@@ -1,6 +1,7 @@
-const mongoose = require('mongoose');
-const passport = require('passport');
-const express = require('express');
+import mongoose from 'mongoose';
+import passport from 'passport';
+import express from 'express';
+import methodOverride from 'method-override';
 
 module.exports = {
   init: options => {
@@ -24,10 +25,13 @@ module.exports = {
       res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
       res.header('Access-Control-Allow-Headers',
         'Origin X-Requested-With, Content-Type, Accept');
+      res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
+
       next();
     });
 
     options.app.use(express.json());
+    options.app.use(methodOverride('X-HTTP-Method-Override'))
     options.app.use(express.urlencoded({extended: true}));
     options.app.use(options.router);
   }

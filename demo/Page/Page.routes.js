@@ -15,6 +15,4 @@ router
   .put(pagePolicy.update, pageController.update)
   .delete(pagePolicy.delete, pageController.delete);
 
-
-
 export default router;

@@ -1,4 +1,5 @@
 import React, { Component, createContext } from 'react';
+import { Input } from 'payload/components';
 import api from 'payload/api';
 
 import './index.scss';
@@ -119,11 +120,11 @@ class Form extends Component {
 
     return (
       <form
-        noValidate
-        onSubmit={this.submit}
-        method={this.props.method}
-        action={this.props.action}
-        className={this.props.className}>
+      noValidate
+      onSubmit={this.submit}
+      method={this.props.method}
+      action={this.props.action}
+      className={this.props.className}>
         <Status />
         <FormContext.Provider value={{
           setValue: this.setValue.bind(this),

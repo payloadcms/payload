@@ -42,7 +42,7 @@ const pageController = {
   },
 
   update(req, res) {
-    Page.findOneAndUpdate({_id: req.params.id}, req.body, {new: true}, (err, doc) => {
+    Page.findOneAndUpdate({slug: req.params.slug}, req.body, {new: true}, (err, doc) => {
       if (err) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
       }
@@ -56,7 +56,7 @@ const pageController = {
   },
 
   delete(req, res) {
-    Page.findOneAndDelete({_id: req.params.id}, (err, doc) => {
+    Page.findOneAndDelete({slug: req.params.slug}, (err, doc) => {
       if (err) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
       }
