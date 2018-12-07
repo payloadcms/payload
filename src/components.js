@@ -8,6 +8,7 @@ export { default as withArchiveData } from './components/data/archive';
 export { default as withEditData } from './components/data/edit';
 
 // Field Types
+export { default as fieldType } from './components/field-types/fieldType';
 export { default as Group } from './components/field-types/Group';
 export { default as Input } from './components/field-types/Input';
 export { default as Textarea } from './components/field-types/Textarea';

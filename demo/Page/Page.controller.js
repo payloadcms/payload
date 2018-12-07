@@ -1,7 +1,5 @@
-import config from './Page.config';
 import Page from './Page.model';
 import httpStatus from 'http-status';
-import toKebabCase from '../../src/lib/helpers/toKebabCase';
 
 const pageController = {
   query(req, res) {

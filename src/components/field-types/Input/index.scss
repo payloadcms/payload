@@ -1,8 +1,6 @@
 @import '~payload/scss/styles';
 
-.interact.text,
-.interact.email,
-.interact.password {
+.field-type.input {
 	margin-bottom: rem(.5);
 	position: relative;
 
