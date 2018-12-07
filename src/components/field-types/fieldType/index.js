@@ -52,29 +52,21 @@ const fieldType = (PassedComponent, slug, validate, errors) => {
 
       let className = `field-type ${slug}${showError ? ' error' : ''}`;
 
-      const initialValue = this.props.initialValue
-        ? this.props.initialValue
-        : '';
+      let value = this.props.context.fields[this.props.name] ? this.props.context.fields[this.props.name].value : '';
 
-      const contextValue = (this.props.context.fields[this.props.name] && this.props.context.fields[this.props.name].value)
-        ? this.props.context.fields[this.props.name].value
-        : initialValue;
-
-      const value = this.props.valueOverride
-        ? this.props.valueOverride
-        : contextValue;
+      // If valueOverride present, field is being controlled by state outside form
+      value = this.props.valueOverride ? this.props.valueOverride : value;
 
       return (
         <PassedComponent {...this.props}
         className={className}
         value={value}
+        Label={<Label {...this.props} />}
+        Error={<Error showError={showError} />}
         onChange={e => {
           this.sendField(e.target.value);
           this.props.onChange && this.props.onChange(e);
-        }}
-        Label={<Label {...this.props} />}
-        Error={<Error showError={showError} />}
-         />
+        }} />
       )
     }
   }
