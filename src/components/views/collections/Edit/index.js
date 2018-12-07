@@ -5,7 +5,7 @@ import './index.scss';
 
 const EditView = props => {
 
-  const isEditing = props.slug ? true : false;
+  const isEditing = props.uid ? true : false;
 
   const nav = [{
       url: `/collections/${props.collection.slug}`,

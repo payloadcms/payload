@@ -23,6 +23,7 @@ class Edit extends Component {
     this.collection = Page;
 
     this.state = {
+      uid: this.props.match.params.slug,
       slug: this.props.match.params.slug
     }
 
@@ -35,7 +36,7 @@ class Edit extends Component {
 
   render() {
     return (
-      <EditView data={this.props.data} collection={this.collection} slug={this.state.slug}>
+      <EditView data={this.props.data} collection={this.collection} slug={this.state.slug} uid={this.state.uid}>
         <Form method="post" action={`${config.serverUrl}/${this.collection.slug}`}>
           <Sticky>
             <APIUrl serverUrl={config.serverUrl}
