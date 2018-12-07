@@ -15,10 +15,8 @@ const withArchiveData = (PassedComponent, collection, config) => {
 
     componentDidMount() {
       api.requests.get(`${config.serverUrl}/${collection.slug}`).then(
-        res =>
-          this.setState({ data: res }),
-        err =>
-          console.warn(err)
+        res => this.setState({ data: res }),
+        err => console.warn(err)
       )
     }
 

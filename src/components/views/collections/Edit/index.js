@@ -28,10 +28,14 @@ const EditView = props => {
       <SetStepNav nav={ nav } />
       <header>
         {isEditing &&
-          <h1>Edit Page {}</h1>
+          <h1>
+            Edit {props.collection.singular} {props.data &&
+              props.data[props.collection.uid]
+            }
+          </h1>
         }
         {!isEditing &&
-          <h1>Create New Page</h1>
+          <h1>Create New {props.collection.singular}</h1>
         }
       </header>
       {props.children}

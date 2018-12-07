@@ -14,7 +14,7 @@ const pageController = {
   },
 
   find(req, res) {
-    Page.findById(req.params.id, (err, doc) => {
+    Page.findOne({ 'slug': req.params.slug }, (err, doc) => {
       if (err) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
       }

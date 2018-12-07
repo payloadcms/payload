@@ -23,7 +23,6 @@ class Edit extends Component {
     this.collection = Page;
 
     this.state = {
-      data: false,
       slug: this.props.match.params.slug
     }
 
@@ -36,7 +35,7 @@ class Edit extends Component {
 
   render() {
     return (
-      <EditView collection={this.collection}>
+      <EditView data={this.props.data} collection={this.collection} slug={this.state.slug}>
         <Form method="post" action={`${config.serverUrl}/${this.collection.slug}`}>
           <Sticky>
             <APIUrl serverUrl={config.serverUrl}

@@ -10,7 +10,7 @@ router
   .post(pagePolicy.post, pageController.post);
 
 router
-  .route('/:id')
+  .route('/:slug')
   .get(pagePolicy.find, pageController.find)
   .put(pagePolicy.update, pageController.update)
   .delete(pagePolicy.delete, pageController.delete);

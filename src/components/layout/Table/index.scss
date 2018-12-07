@@ -15,7 +15,7 @@ table {
   }
 
   tbody {
-    @extend %inputShadow;
+    @extend %shadow-sm;
   }
 
   tr:nth-child(even) {
