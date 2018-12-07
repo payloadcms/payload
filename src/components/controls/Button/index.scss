@@ -34,7 +34,7 @@
         &:hover {
             background: $primary;
             border: $stroke-width solid $primary;
-            color: white;
+            color: $black;
 
             &.btn-icon {
                 @include color-svg($black);
@@ -63,7 +63,7 @@
     &:hover {
       border: 1px solid $primary;
       background: $primary;
-      color: white;
+      color: $black;
     }
 
     &:focus, &:active {

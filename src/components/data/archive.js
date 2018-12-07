@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import api from 'payload/api';
 
-const withArchiveData = (PassedComponent, collection, config) => {
+const withArchiveData = PassedComponent => {
 
   class ArchiveData extends Component {
 
@@ -14,7 +14,7 @@ const withArchiveData = (PassedComponent, collection, config) => {
     }
 
     componentDidMount() {
-      api.requests.get(`${config.serverUrl}/${collection.slug}`).then(
+      api.requests.get(`${this.props.config.serverUrl}/${this.props.collection.slug}`).then(
         res => this.setState({ data: res }),
         err => console.warn(err)
       )

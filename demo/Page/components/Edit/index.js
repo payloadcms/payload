@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
   withEditData,
   EditView,
-  Sticky,
+  StickyAction,
   APIUrl,
   Button,
   Form,
@@ -13,28 +13,22 @@ import {
 } from 'payload/components';
 import { toKebabCase } from 'payload/utils';
 
-import Page from '../../Page.config';
-import config from '../../../payload.config.json';
-
 class Edit extends Component {
 
   constructor(props) {
     super(props);
-    this.collection = Page;
 
     const uid = this.props.match.params.slug;
 
     this.state = {
       uid: uid,
       slug: uid,
-      action: `${config.serverUrl}/${this.collection.slug}${uid ? `/${uid}` : ''}`,
+      action: `${this.props.config.serverUrl}/${this.props.collection.slug}${uid ? `/${uid}` : ''}`,
       method: uid ? 'put' : 'post'
     }
-
-    this.updateSlug = this.updateSlug.bind(this);
   }
 
-  updateSlug(e) {
+  updateSlug = e => {
     this.setState({ slug: toKebabCase(e.target.value) });
   }
 
@@ -43,16 +37,18 @@ class Edit extends Component {
     const initialData = this.props.data ? this.props.data : {};
 
     return (
-      <EditView data={this.props.data} collection={this.collection} slug={this.state.slug} uid={this.state.uid}>
+      <EditView data={this.props.data} collection={this.props.collection} slug={this.state.slug} uid={this.state.uid}>
         <Form method={this.state.method} action={this.state.action}>
-          <Sticky>
-            <APIUrl serverUrl={config.serverUrl}
-              collectionSlug={this.collection.slug} slug={this.state.slug} />
-            <div className="controls">
+          <StickyAction content={
+            <APIUrl serverUrl={this.props.config.serverUrl}
+            collectionSlug={this.props.collection.slug} slug={this.state.slug} />
+          } action={
+            <React.Fragment>
               <Button type="secondary">Preview</Button>
               <FormSubmit>Save</FormSubmit>
-            </div>
-          </Sticky>
+            </React.Fragment>
+          } />
+          <Input type="hidden" name="slug" valueOverride={this.state.slug} />
           <Input onChange={this.updateSlug} type="text" label="Page Title" initialValue={initialData.title} name="title" required />
           <Group heading="Sample Group">
             <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} initialValue={initialData.content} />
@@ -63,4 +59,4 @@ class Edit extends Component {
   }
 }
 
-export default withEditData(Edit, Page, config);
+export default withEditData(Edit);

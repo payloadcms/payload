@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import api from 'payload/api';
 
-const withEditData = (PassedComponent, collection, config) => {
+const withEditData = PassedComponent => {
 
   class EditData extends Component {
     constructor(props) {
@@ -17,7 +17,7 @@ const withEditData = (PassedComponent, collection, config) => {
       const slug = this.props.match.params.slug;
 
       if (slug) {
-        api.requests.get(`${config.serverUrl}/${collection.slug}/${slug}`).then(
+        api.requests.get(`${this.props.config.serverUrl}/${this.props.collection.slug}/${slug}`).then(
           res => this.setState({ data: res }),
           err => {
             console.warn(err);

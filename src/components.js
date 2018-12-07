@@ -30,6 +30,7 @@ export { default as ContentBlock } from './components/layout/ContentBlock';
 export { default as Table } from './components/layout/Table';
 
 // Modules
+export { default as StickyAction } from './components/modules/StickyAction';
 export { default as HeadingButton } from './components/modules/HeadingButton';
 export { default as Filter } from './components/modules/Filter';
 export { default as APIUrl } from './components/modules/APIUrl';

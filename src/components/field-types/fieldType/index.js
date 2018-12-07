@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { FormContext, Tooltip } from 'payload/components';
 
+import './index.scss';
+
 const fieldType = (PassedComponent, slug, validate, errors) => {
 
   class FieldType extends Component {
@@ -24,9 +26,9 @@ const fieldType = (PassedComponent, slug, validate, errors) => {
     }
 
     componentDidMount() {
-      this.sendField(
-        this.props.value ? this.props.value : ''
-      )
+      let value = this.props.value ? this.props.value : '';
+      value = this.props.valueOverride ? this.props.valueOverride : value;
+      this.sendField(value);
 
       this.setState({
         init: true

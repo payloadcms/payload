@@ -1,24 +1,10 @@
 @import '~payload/scss/styles';
 
 .sticky {
-  @include m;
   z-index: 10;
   padding-top: rem(.75);
   padding-bottom: rem(.75);
   width: 100%;
   position: sticky;
   top: 0;
-  display: flex;
-  justify-content: space-between;
-
-  &:before {
-    content: ' ';
-    background: rgba(white, .95);
-    position: absolute;
-    z-index: -1;
-    top: 0;
-    right: - rem(1);
-    bottom: 0;
-    left: - rem(1);
-  }
 }

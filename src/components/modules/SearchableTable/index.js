@@ -13,8 +13,8 @@ class SearchableTable extends Component {
         key: 'title',
         label: 'Title'
       }, {
-        key: 'status',
-        label: 'Status'
+        key: '_id',
+        label: 'ID'
       }, {
         key: 'published',
         label: 'Published On'

@@ -10,9 +10,14 @@ const CollectionRoutes = props => {
 
       return (
         <Switch key={i}>
-          <Route path={`/collections/${collection.slug}/create`} exact component={Edit} />
-          <Route path={`/collections/${collection.slug}/:slug`} component={Edit} />
-          <Route path={`/collections/${collection.slug}`} exact component={Archive} />
+          <Route path={`/collections/${collection.slug}/create`} exact
+          render={routeProps => <Edit {...routeProps} collection={collection} config={props.config} />} />
+
+          <Route path={`/collections/${collection.slug}/:slug`}
+          render={routeProps => <Edit {...routeProps} collection={collection} config={props.config} />} />
+
+          <Route path={`/collections/${collection.slug}`} exact
+          render={routeProps => <Archive {...routeProps} collection={collection} config={props.config} />} />
         </Switch>
       );
     }
