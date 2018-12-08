@@ -1,5 +1,5 @@
 import React, { Component, createContext } from 'react';
-import { Input } from 'payload/components';
+import { Input, Status } from 'payload/components';
 import api from 'payload/api';
 
 import './index.scss';
@@ -16,12 +16,9 @@ class Form extends Component {
       submitted: false,
       processing: false
     };
-
-    this.submit = this.submit.bind(this);
-    this.setValue = this.setValue.bind(this);
   }
 
-  setValue(field) {
+  setValue = field => {
     this.setState(prevState => ({
       ...prevState,
       fields: {
@@ -34,7 +31,7 @@ class Form extends Component {
     }));
   }
 
-  submit(e) {
+  submit = e => {
     this.setState({
       submitted: true
     });
@@ -73,13 +70,14 @@ class Form extends Component {
       // Make the API call from the action
       api.requests[this.props.method.toLowerCase()](this.props.action, data).then(
         res => {
+          console.log(res);
           // Provide form data to the redirected page
           if (this.props.redirect) {
             this.props.history.push(this.props.redirect, data);
           } else {
             this.setState({
               status: {
-                message: res.msg,
+                message: res.message,
                 type: 'success'
               },
               processing: false
@@ -105,20 +103,6 @@ class Form extends Component {
 
   render() {
 
-    let Status = () => {
-      return null;
-    };
-
-    if (this.state.status && !this.state.redirect) {
-      Status = () => {
-        return (
-          <div className={`status open ${this.state.status.type}`}>
-            {this.state.status.message}
-          </div>
-        );
-      };
-    }
-
     return (
       <form
       noValidate
@@ -126,7 +110,11 @@ class Form extends Component {
       method={this.props.method}
       action={this.props.action}
       className={this.props.className}>
-        <Status />
+        {this.state.status && !this.state.redirect &&
+          <Status open={true}
+          type={this.state.status.type}
+          message={this.state.status.message} />
+        }
         <FormContext.Provider value={{
           setValue: this.setValue.bind(this),
           fields: this.state.fields,

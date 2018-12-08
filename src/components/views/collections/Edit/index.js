@@ -29,7 +29,7 @@ const EditView = props => {
       <header>
         {isEditing &&
           <h1>
-            Edit {props.collection.singular} {props.data &&
+            Edit {props.data &&
               props.data[props.collection.uid]
             }
           </h1>

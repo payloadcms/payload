@@ -21,6 +21,7 @@ export { default as FormSubmit } from './components/forms/Submit';
 export { default as PayloadIcon } from './components/graphics/PayloadIcon';
 export { default as PayloadLogo } from './components/graphics/PayloadLogo';
 export { default as Arrow } from './components/graphics/Arrow';
+export { default as Close } from './components/graphics/Close';
 
 // Layout
 export { default as DefaultTemplate } from './components/layout/DefaultTemplate';
@@ -30,6 +31,7 @@ export { default as ContentBlock } from './components/layout/ContentBlock';
 export { default as Table } from './components/layout/Table';
 
 // Modules
+export { default as Status } from './components/modules/Status';
 export { default as StickyAction } from './components/modules/StickyAction';
 export { default as HeadingButton } from './components/modules/HeadingButton';
 export { default as Filter } from './components/modules/Filter';

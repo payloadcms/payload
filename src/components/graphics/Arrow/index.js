@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default props => {
+const Arrow = props => {
   return (
     <svg className="icon arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 199.35">
       <line className="stroke" stroke={props.color} x1="12.5" y1="99.8" x2="192.8" y2="99.8"/>
@@ -8,3 +8,5 @@ export default props => {
     </svg>
   );
 };
+
+export default Arrow;

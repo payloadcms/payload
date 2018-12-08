@@ -31,7 +31,9 @@ const pageController = {
       if (err) {
         return res.send(httpStatus.INTERNAL_SERVER_ERROR, {error: err});
       }
-      return res.json(doc);
+      return res.json({
+        message: 'Page created successfully'
+      });
     });
   },
 
@@ -45,7 +47,9 @@ const pageController = {
         return res.status(httpStatus.NOT_FOUND).send('Not Found');
       }
 
-      return res.json(doc);
+      return res.json({
+        message: 'Page updated successfully'
+      });
     });
   },
 
