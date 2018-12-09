@@ -14,7 +14,26 @@ export default {
     {
       name: 'content',
       label: 'Content',
-      type: 'textarea'
+      type: 'textarea',
+      height: 100
+    },
+    {
+      label: 'Meta Information',
+      type: 'group',
+      fields: [
+        {
+          name: 'metaTitle',
+          type: 'string',
+          maxLength: 100,
+          label: 'Meta Title'
+        },
+        {
+          name: 'metaDesc',
+          type: 'textarea',
+          label: 'Meta Description',
+          height: 100
+        }
+      ]
     }
   ],
   relationships: [

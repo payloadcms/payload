@@ -5,7 +5,7 @@ import './index.scss';
 
 const EditView = props => {
 
-  const isEditing = props.uid ? true : false;
+  const isEditing = props.slug ? true : false;
 
   const nav = [{
       url: `/collections/${props.collection.slug}`,
@@ -14,8 +14,8 @@ const EditView = props => {
 
   if (isEditing) {
     nav.push({
-      url: `/collections/${props.collectionSlug}/${props.slug}`,
-      label: props.slug
+      url: `/collections/${props.collection.slug}/${props.slug}`,
+      label: props.data ? props.data[props.collection.uid] : ''
     })
   } else {
     nav.push({

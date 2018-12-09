@@ -28,7 +28,7 @@ class Edit extends Component {
     }
   }
 
-  updateSlug = e => {
+  setSlug = e => {
     this.setState({ slug: toKebabCase(e.target.value) });
   }
 
@@ -49,9 +49,11 @@ class Edit extends Component {
             </React.Fragment>
           } />
           <Input type="hidden" name="slug" valueOverride={this.state.slug} />
-          <Input onChange={this.updateSlug} type="text" label="Page Title" initialValue={initialData.title} name="title" required />
-          <Group heading="Sample Group">
-            <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} initialValue={initialData.content} />
+          <Input onChange={this.setSlug} type="text" label="Page Title" initialValue={initialData.title} name="title" required />
+          <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} initialValue={initialData.content} />
+          <Group heading="Meta Information">
+            <Input type="text" label="Meta Title" initialValue={initialData.metaTitle} name="metaTitle" required />
+            <Textarea required name="metaDesc" label="Meta Description" wysiwyg={false} height={100} initialValue={initialData.metaDesc} />
           </Group>
         </Form>
       </EditView>
