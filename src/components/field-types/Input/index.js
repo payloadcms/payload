@@ -32,7 +32,10 @@ const validate = (value, type) => {
 
 const Input = props => {
   return (
-    <div className={props.className} style={props.style}>
+    <div className={props.className} style={{
+      ...props.style,
+      width: props.width ? `${props.width}%` : null
+    }}>
       {props.error}
       {props.label}
       <input

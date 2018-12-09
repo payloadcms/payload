@@ -1,6 +1,7 @@
 @import '~payload/scss/styles';
 
 .sticky.action {
+  @include gutter;
   display: flex;
   justify-content: space-between;
 

@@ -25,7 +25,15 @@ export default {
           name: 'metaTitle',
           type: 'string',
           maxLength: 100,
-          label: 'Meta Title'
+          label: 'Meta Title',
+          width: 50
+        },
+        {
+          name: 'metaKeywords',
+          type: 'string',
+          maxLength: 100,
+          label: 'Meta Keywords',
+          width: 50
         },
         {
           name: 'metaDesc',

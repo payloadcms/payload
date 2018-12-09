@@ -1,8 +1,7 @@
 @import '~payload/scss/styles';
 
 form {
-  display: flex;
-  flex-wrap: wrap;
+  @include row;
 
   > * {
     width: 100%;

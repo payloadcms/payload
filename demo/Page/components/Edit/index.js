@@ -37,7 +37,7 @@ class Edit extends Component {
     const initialData = this.props.data ? this.props.data : {};
 
     return (
-      <EditView data={this.props.data} collection={this.props.collection} slug={this.state.slug} uid={this.state.uid}>
+      <EditView data={this.props.data} collection={this.props.collection}>
         <Form method={this.state.method} action={this.state.action}>
           <StickyAction content={
             <APIUrl serverUrl={this.props.config.serverUrl}
@@ -52,7 +52,8 @@ class Edit extends Component {
           <Input onChange={this.setSlug} type="text" label="Page Title" initialValue={initialData.title} name="title" required />
           <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} initialValue={initialData.content} />
           <Group heading="Meta Information">
-            <Input type="text" label="Meta Title" initialValue={initialData.metaTitle} name="metaTitle" required />
+            <Input type="text" label="Meta Title" initialValue={initialData.metaTitle} name="metaTitle" width={50} required />
+            <Input type="text" label="Meta Keywords" initialValue={initialData.metaTitle} name="metaKeywords" width={50} required />
             <Textarea required name="metaDesc" label="Meta Description" wysiwyg={false} height={100} initialValue={initialData.metaDesc} />
           </Group>
         </Form>

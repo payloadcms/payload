@@ -1,8 +1,10 @@
 @import '~payload/scss/styles';
 
 .field-type {
+  @include gutter;
   margin-bottom: rem(.5);
   position: relative;
+  width: 100%;
 
   label {
     display: flex;
