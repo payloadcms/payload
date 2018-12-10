@@ -27,6 +27,7 @@ const fieldType = (PassedComponent, type, validate, errors) => {
 
     componentDidMount() {
       let value = this.props.value ? this.props.value : '';
+      value = this.props.initialValue ? this.props.initialValue : value;
       value = this.props.valueOverride ? this.props.valueOverride : value;
       this.sendField(value);
 

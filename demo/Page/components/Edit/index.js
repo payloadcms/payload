@@ -37,7 +37,14 @@ class Edit extends Component {
   render() {
 
     const initialData = this.props.data ? this.props.data : {};
-    const fields = convertArrayToObject(this.props.collection.fields, 'name');
+
+    const sampleRepeaterValue = [
+      {
+        content: 'here\'s some test content'
+      },{
+        content: 'here\'s some more test content'
+      }
+    ];
 
     return (
       <EditView data={this.props.data} collection={this.props.collection}>
@@ -72,7 +79,7 @@ class Edit extends Component {
           <Repeater
           name="slides"
           label="Slides"
-          initialValue={initialData['slides']}>
+          initialValue={sampleRepeaterValue}>
             <Textarea name="content" label="Content" />
           </Repeater>
 
