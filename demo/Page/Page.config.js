@@ -8,14 +8,28 @@ export default {
     {
       name: 'title',
       label: 'Page Title',
-      type: 'string',
-      maxLength: 100
+      type: 'input',
+      maxLength: 100,
+      required: true
     },
     {
       name: 'content',
       label: 'Content',
       type: 'textarea',
-      height: 100
+      height: 100,
+      required: true
+    },
+    {
+      name: 'slides',
+      label: 'Slides',
+      type: 'repeater',
+      fields: [
+        {
+          name: 'content',
+          type: 'textarea',
+          label: 'Content'
+        }
+      ]
     },
     {
       label: 'Meta Information',
@@ -23,14 +37,14 @@ export default {
       fields: [
         {
           name: 'metaTitle',
-          type: 'string',
+          type: 'input',
           maxLength: 100,
           label: 'Meta Title',
           width: 50
         },
         {
           name: 'metaKeywords',
-          type: 'string',
+          type: 'input',
           maxLength: 100,
           label: 'Meta Keywords',
           width: 50

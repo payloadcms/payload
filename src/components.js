@@ -10,8 +10,12 @@ export { default as withEditData } from './components/data/edit';
 // Field Types
 export { default as fieldType } from './components/field-types/fieldType';
 export { default as Group } from './components/field-types/Group';
+export { default as Repeater } from './components/field-types/Repeater';
 export { default as Input } from './components/field-types/Input';
+export { default as Email } from './components/field-types/Email';
+export { default as Password } from './components/field-types/Password';
 export { default as Textarea } from './components/field-types/Textarea';
+export { default as HiddenInput } from './components/field-types/HiddenInput';
 
 // Forms
 export { default as Form, FormContext } from './components/forms/Form';
@@ -29,6 +33,7 @@ export { default as Sticky } from './components/layout/Sticky';
 export { default as Sidebar } from './components/layout/Sidebar';
 export { default as ContentBlock } from './components/layout/ContentBlock';
 export { default as Table } from './components/layout/Table';
+export { default as Section } from './components/layout/Section';
 
 // Modules
 export { default as Status } from './components/modules/Status';

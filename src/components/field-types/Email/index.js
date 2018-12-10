@@ -3,11 +3,11 @@ import { fieldType } from 'payload/components';
 
 import './index.scss';
 
-const error = 'Please fill in the field';
+const error = 'Please enter a valid email';
 
-const validate = value => value.length > 0;
+const validate = value => /\S+@\S+\.\S+/.test(value);
 
-const Input = props => {
+const Email = props => {
   return (
     <div className={props.className} style={{
       ...props.style,
@@ -20,11 +20,11 @@ const Input = props => {
         onChange={props.onChange}
         disabled={props.disabled}
         placeholder={props.placeholder}
-        type="text"
+        type="email"
         id={props.id ? props.id : props.name}
         name={props.name} />
     </div>
   );
 }
 
-export default fieldType(Input, 'input', validate, error);
+export default fieldType(Email, 'email', validate, error);

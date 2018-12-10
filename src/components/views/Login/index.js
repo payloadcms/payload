@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { ContentBlock, Form, Input, FormSubmit } from 'payload/components';
+import { ContentBlock, Form, Email, Password, FormSubmit } from 'payload/components';
 
 import './index.scss';
 
@@ -21,8 +21,8 @@ const Login = props => {
         <Form
           method="POST"
           action="http://localhost:3000/login">
-          <Input type="email" label="Email Address" name="email" required />
-          <Input type="password" label="Password" name="password" required />
+          <Email label="Email Address" name="email" required />
+          <Password error="password" label="Password" name="password" required />
           <FormSubmit>Login</FormSubmit>
         </Form>
         <Link to="/">To Dashboard</Link>

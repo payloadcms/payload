@@ -7,11 +7,13 @@ import {
   Button,
   Form,
   Input,
+  HiddenInput,
   Textarea,
   Group,
-  FormSubmit
+  FormSubmit,
+  Repeater
 } from 'payload/components';
-import { toKebabCase } from 'payload/utils';
+import { toKebabCase, convertArrayToObject } from 'payload/utils';
 
 class Edit extends Component {
 
@@ -35,6 +37,7 @@ class Edit extends Component {
   render() {
 
     const initialData = this.props.data ? this.props.data : {};
+    const fields = convertArrayToObject(this.props.collection.fields, 'name');
 
     return (
       <EditView data={this.props.data} collection={this.props.collection}>
@@ -48,13 +51,45 @@ class Edit extends Component {
               <FormSubmit>Save</FormSubmit>
             </React.Fragment>
           } />
-          <Input type="hidden" name="slug" valueOverride={this.state.slug} />
-          <Input onChange={this.setSlug} type="text" label="Page Title" initialValue={initialData.title} name="title" required />
-          <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} initialValue={initialData.content} />
-          <Group heading="Meta Information">
-            <Input type="text" label="Meta Title" initialValue={initialData.metaTitle} name="metaTitle" width={50} required />
-            <Input type="text" label="Meta Keywords" initialValue={initialData.metaTitle} name="metaKeywords" width={50} required />
-            <Textarea required name="metaDesc" label="Meta Description" wysiwyg={false} height={100} initialValue={initialData.metaDesc} />
+
+          <HiddenInput
+          name="slug"
+          valueOverride={this.state.slug} />
+
+          <Input name="title"
+          onChange={this.setSlug}
+          label="Page Title"
+          maxLength={100}
+          initialValue={initialData['title']}
+          required/>
+
+          <Textarea name="content"
+          label="Content"
+          initialValue={initialData['content']}
+          height={100}
+          required />
+
+          <Repeater
+          name="slides"
+          label="Slides"
+          initialValue={initialData['slides']}>
+            <Textarea name="content" label="Content" />
+          </Repeater>
+
+          <Group label="Meta Information">
+            <Input name="metaTitle"
+            maxLength={100}
+            label="Meta Title"
+            width={50} />
+
+            <Input name="metaKeywords"
+            maxLength={100}
+            label="Meta Keywords"
+            width={50} />
+
+            <Textarea name="metaDesc"
+            label="Meta Description"
+            height={100} />
           </Group>
         </Form>
       </EditView>

@@ -6,4 +6,8 @@ form {
   > * {
     width: 100%;
   }
+
+  > .btn {
+    @include gutter;
+  }
 }

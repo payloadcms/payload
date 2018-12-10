@@ -5,7 +5,7 @@ class Filter extends Component {
   render() {
     return (
       <Form className="filter">
-        <Input placeholder="Search" type="text" name="keywords" />
+        <Input placeholder="Search" name="keywords" />
       </Form>
     );
   }

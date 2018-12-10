@@ -3,11 +3,14 @@ import { fieldType } from 'payload/components';
 
 import './index.scss';
 
-const error = 'Please fill in the field';
+const errors = {
+  password: 'Please enter a password',
+  confirm: 'Please ensure that both passwords match'
+};
 
 const validate = value => value.length > 0;
 
-const Input = props => {
+const Password = props => {
   return (
     <div className={props.className} style={{
       ...props.style,
@@ -20,11 +23,11 @@ const Input = props => {
         onChange={props.onChange}
         disabled={props.disabled}
         placeholder={props.placeholder}
-        type="text"
+        type="password"
         id={props.id ? props.id : props.name}
         name={props.name} />
     </div>
   );
 }
 
-export default fieldType(Input, 'input', validate, error);
+export default fieldType(Password, 'password', validate, errors);

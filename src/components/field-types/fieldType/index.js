@@ -3,7 +3,7 @@ import { FormContext, Tooltip } from 'payload/components';
 
 import './index.scss';
 
-const fieldType = (PassedComponent, slug, validate, errors) => {
+const fieldType = (PassedComponent, type, validate, errors) => {
 
   class FieldType extends Component {
 
@@ -19,7 +19,7 @@ const fieldType = (PassedComponent, slug, validate, errors) => {
       this.props.context.setValue({
         name: this.props.name,
         value: value,
-        valid: this.props.required
+        valid: this.props.required && validate
           ? validate(value, this.props.type)
           : true
       });
@@ -52,7 +52,7 @@ const fieldType = (PassedComponent, slug, validate, errors) => {
 
       const showError = valid === false && this.props.context.submitted;
 
-      let className = `field-type ${slug}${showError ? ' error' : ''}`;
+      let className = `field-type ${type}${showError ? ' error' : ''}`;
 
       let value = this.props.context.fields[this.props.name] ? this.props.context.fields[this.props.name].value : '';
 
@@ -92,9 +92,9 @@ const fieldType = (PassedComponent, slug, validate, errors) => {
     if (props.showError) {
       return (
         <Tooltip className="error-message">
-          {props.type && errors[props.type]}
+          {props.error && errors[props.error]}
 
-          {!props.type && errors}
+          {!props.error && errors}
         </Tooltip>
       )
     }
