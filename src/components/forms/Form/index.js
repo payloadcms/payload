@@ -70,7 +70,6 @@ class Form extends Component {
       // Make the API call from the action
       api.requests[this.props.method.toLowerCase()](this.props.action, data).then(
         res => {
-          console.log(res);
           // Provide form data to the redirected page
           if (this.props.redirect) {
             this.props.history.push(this.props.redirect, data);
@@ -84,11 +83,11 @@ class Form extends Component {
             });
           }
         },
-        (error) => {
+        error => {
           console.log(error);
           this.setState({
             status: {
-              message: 'Sorry, there was a problem with your request.',
+              message: error.message,
               type: 'error'
             },
             processing: false
