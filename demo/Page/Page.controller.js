@@ -27,10 +27,6 @@ const pageController = {
 
   post(req, res) {
 
-    console.log(req.body);
-
-    return res.send(200);
-
     Page.create(req.body, (err, doc) => {
       if (err) {
         return res.send(httpStatus.INTERNAL_SERVER_ERROR, {error: err});

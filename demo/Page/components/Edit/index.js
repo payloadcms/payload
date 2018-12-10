@@ -13,7 +13,7 @@ import {
   FormSubmit,
   Repeater
 } from 'payload/components';
-import { toKebabCase, convertArrayToObject } from 'payload/utils';
+import { toKebabCase } from 'payload/utils';
 
 class Edit extends Component {
 
