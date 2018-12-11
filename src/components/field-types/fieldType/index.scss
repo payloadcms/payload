@@ -1,0 +1,33 @@
+@import '~payload/scss/styles';
+
+.field-type {
+  @include gutter;
+  margin-bottom: rem(.5);
+  position: relative;
+  width: 100%;
+
+  label {
+    display: flex;
+
+    .required {
+      color: $error;
+      margin-left: rem(.25);
+      margin-right: auto;
+    }
+  }
+
+  .tooltip {
+    left: auto;
+    right: 0;
+    transform: none;
+    background-color: $error;
+
+    span {
+      border-top-color: $error;
+    }
+  }
+
+  @include small-break {
+    margin-bottom: rem(.5);
+  }
+}

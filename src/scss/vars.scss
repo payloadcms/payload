@@ -10,7 +10,6 @@ $mobile-height  : 400px;
 $tablet-height  : 700px;
 $desktop-height : 900px;
 
-
 //////////////////////////////
 // BASELINE GRID
 //////////////////////////////
@@ -35,13 +34,13 @@ $font-label : 'gt-pressura-web';
 // COLORS
 //////////////////////////////
 
-$primary    : #3bffaa;
+$primary    : #1ff99a;
 
 $light-gray : #f5f5f5;
 $gray       : #afafaf;
 $black      : rgb(60, 60, 60);
 
-$error      : #ff8efc;
+$error      : #fd7373;
 $warning    : #fff93b;
 
 //////////////////////////////
@@ -52,13 +51,17 @@ $radius-sm    : 5px;
 $radius-lrg   : 10px;
 $stroke-width : 1px;
 
+%shadow-sm {
+	box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
+				0 2px 20px 0 rgba(0,2,4,.04);
+}
+
 %shadow {
 	box-shadow: 0 22px 65px rgba(0,0,0,.07);
 }
 
 %inputShadow {
-	box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
-				0 2px 20px 0 rgba(0,2,4,.04);
+  @extend %shadow-sm;
 
 	&:hover {
 		box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),

@@ -1,19 +1,11 @@
 import React from 'react';
-
-import './index.scss';
+import { Section } from 'payload/components';
 
 const Group = props => {
   return (
-    <section className="field-group">
-      {props.heading &&
-        <header>
-          <h2>{props.heading}</h2>
-        </header>
-      }
-      <div className="content">
-        {props.children}
-      </div>
-    </section>
+    <Section heading={props.label} className="field-group">
+      {props.children}
+    </Section>
   );
 };
 

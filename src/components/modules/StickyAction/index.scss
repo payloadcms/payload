@@ -1,0 +1,38 @@
+@import '~payload/scss/styles';
+
+.sticky.action {
+  @include gutter;
+  display: flex;
+  justify-content: space-between;
+
+  > .content {
+    flex-grow: 1;
+    min-width: 0;
+    padding-right: rem(1);
+  }
+
+  .controls {
+    flex-shrink: 0;
+    display: flex;
+
+    .btn {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    > *:last-child {
+      margin-left: rem(1);
+    }
+  }
+
+  &:before {
+    content: ' ';
+    background: rgba(white, .95);
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    right: - rem(1);
+    bottom: 0;
+    left: - rem(1);
+  }
+}

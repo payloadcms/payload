@@ -1,5 +1,5 @@
-const Page = require('./Page.model');
-const httpStatus = require('http-status');
+import Page from './Page.model';
+import httpStatus from 'http-status';
 
 const pageController = {
   query(req, res) {
@@ -12,7 +12,7 @@ const pageController = {
   },
 
   find(req, res) {
-    Page.findById(req.params.id, (err, doc) => {
+    Page.findOne({ 'slug': req.params.slug }, (err, doc) => {
       if (err) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
       }
@@ -26,16 +26,19 @@ const pageController = {
   },
 
   post(req, res) {
+
     Page.create(req.body, (err, doc) => {
       if (err) {
         return res.send(httpStatus.INTERNAL_SERVER_ERROR, {error: err});
       }
-      return res.json(doc);
+      return res.json({
+        message: 'Page created successfully'
+      });
     });
   },
 
   update(req, res) {
-    Page.findOneAndUpdate({_id: req.params.id}, req.body, {new: true}, (err, doc) => {
+    Page.findOneAndUpdate({slug: req.params.slug}, req.body, {new: true}, (err, doc) => {
       if (err) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
       }
@@ -44,12 +47,14 @@ const pageController = {
         return res.status(httpStatus.NOT_FOUND).send('Not Found');
       }
 
-      return res.json(doc);
+      return res.json({
+        message: 'Page updated successfully'
+      });
     });
   },
 
   delete(req, res) {
-    Page.findOneAndDelete({_id: req.params.id}, (err, doc) => {
+    Page.findOneAndDelete({slug: req.params.slug}, (err, doc) => {
       if (err) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
       }
@@ -63,4 +68,4 @@ const pageController = {
   },
 };
 
-module.exports = pageController;
+export default pageController;

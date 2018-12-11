@@ -1,16 +1,16 @@
 import React from 'react';
+import { Label } from 'payload/components';
 
-import { Label, Input } from 'payload/components';
+import './index.scss';
 
 const APIUrl = props => {
 
-  const apiUrl = `${props.serverUrl}/${props.collectionSlug}?slug=${props.slug ? `${props.slug}` : ''}`;
+  const apiUrl = `${props.serverUrl}/${props.collectionSlug}/${props.slug ? `${props.slug}` : ''}`;
 
   return (
     <div className="api-url">
-      <Label className="uppercase">API URL&nbsp;&mdash;&nbsp;Edit</Label>
-      <div><a href={apiUrl}>{apiUrl}</a></div>
-      <Input type="hidden" name="slug" valueOverride={props.slug} />
+      <Label className="uppercase">API URL</Label>
+      <div className="url"><a href={apiUrl} rel="noopener noreferrer" target="_blank">{apiUrl}</a></div>
     </div>
   );
 };

@@ -1,0 +1,33 @@
+@import '~payload/scss/styles';
+
+.status {
+  @extend %uppercase-label;
+  background: $primary;
+  color: $black;
+  font-weight: bold;
+  border-radius: $radius-sm;
+  padding: rem(.5);
+  margin-top: rem(.5);
+  margin-bottom: rem(.5);
+  display: flex;
+  justify-content: space-between;
+
+  button {
+    @extend %btn-reset;
+    cursor: pointer;
+
+    svg {
+      @include color-svg($black);
+      width: rem(.35);
+      height: rem(.35);
+    }
+
+    &:hover {
+      opacity: .5;
+    }
+  }
+
+  &.error {
+    background: $error;
+  }
+}

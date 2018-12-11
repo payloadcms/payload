@@ -1,0 +1,9 @@
+@import '~payload/scss/styles';
+
+form > .form-submit {
+  @include gutter;
+
+  .btn {
+    width: 100%;
+  }
+}

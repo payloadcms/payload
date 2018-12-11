@@ -4,8 +4,8 @@ import { Form, Input } from 'payload/components';
 class Filter extends Component {
   render() {
     return (
-      <Form>
-        <Input placeholder="Search" type="text" name="keywords" />
+      <Form className="filter">
+        <Input placeholder="Search" name="keywords" />
       </Form>
     );
   }

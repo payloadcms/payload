@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const httpStatus = require('http-status');
-const passportLocalMongoose = require('passport-local-mongoose');
-const APIError = require('../../src/lib/helpers/APIError');
+import mongoose from 'mongoose';
+import httpStatus from 'http-status';
+import passportLocalMongoose from 'passport-local-mongoose';
+import APIError from '../../src/lib/helpers/APIError';
 
 /**
  * User Schema
@@ -66,4 +66,4 @@ UserSchema.plugin(passportLocalMongoose, { usernameField: 'email' });
 /**
  * @typedef User
  */
-module.exports = mongoose.model('User', UserSchema);
+export default mongoose.model('User', UserSchema);

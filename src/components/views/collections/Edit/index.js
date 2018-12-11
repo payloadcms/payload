@@ -3,10 +3,9 @@ import { SetStepNav } from 'payload/components';
 
 import './index.scss';
 
-const Edit = props => {
+const EditView = props => {
 
-  const isEditing = props.slug ? true : false;
-
+  const isEditing = props.data && props.data.slug ? true : false;
   const nav = [{
       url: `/collections/${props.collection.slug}`,
       label: props.collection.label
@@ -14,8 +13,8 @@ const Edit = props => {
 
   if (isEditing) {
     nav.push({
-      url: `/collections/${props.collectionSlug}/${props.slug}`,
-      label: props.slug
+      url: `/collections/${props.collection.slug}/${props.data.slug}`,
+      label: props.data ? props.data[props.collection.uid] : ''
     })
   } else {
     nav.push({
@@ -28,10 +27,14 @@ const Edit = props => {
       <SetStepNav nav={ nav } />
       <header>
         {isEditing &&
-          <h1>Edit Page {}</h1>
+          <h1>
+            Edit {props.data &&
+              props.data[props.collection.uid]
+            }
+          </h1>
         }
         {!isEditing &&
-          <h1>Create New Page</h1>
+          <h1>Create New {props.collection.singular}</h1>
         }
       </header>
       {props.children}
@@ -39,4 +42,4 @@ const Edit = props => {
   );
 };
 
-export default Edit;
+export default EditView;

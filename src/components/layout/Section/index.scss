@@ -1,8 +1,8 @@
 @import '~payload/scss/styles';
 
-.field-group {
+section.section {
   @extend %shadow;
-  margin: rem(1) 0;
+  margin: rem(1) rem(.5);
 
   header,
   .content {
@@ -15,5 +15,10 @@
     * {
       margin-bottom: 0;
     }
+  }
+
+  .content {
+    display: flex;
+    flex-wrap: wrap;
   }
 }

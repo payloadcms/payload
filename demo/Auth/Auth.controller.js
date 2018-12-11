@@ -1,10 +1,12 @@
-const User = require('../User/User.model');
-const auth = require('../../src/auth')(User);
+import User from '../User/User.model';
+import auth from '../../src/auth';
+
+const Auth = auth(User);
 
 const authController = {
-  login: auth.login,
-  me: auth.me,
-  check: auth.check
+  login: Auth.login,
+  me: Auth.me,
+  check: Auth.check
 }
 
-module.exports = authController;
+export default authController;

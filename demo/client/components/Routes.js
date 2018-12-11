@@ -1,9 +1,5 @@
 import React from 'react';
 import { Route, Switch, withRouter } from 'react-router-dom';
-
-import Logo from '../components/graphics/Logo';
-import Icon from '../components/graphics/Icon';
-
 import {
   CollectionRoutes,
   DefaultTemplate,
@@ -11,6 +7,9 @@ import {
   Login,
   CreateUser
 } from 'payload/components';
+import Logo from '../components/graphics/Logo';
+import Icon from '../components/graphics/Icon';
+import config from '../../payload.config.json';
 
 const Routes = props => {
   return (
@@ -22,7 +21,7 @@ const Routes = props => {
           <DefaultTemplate {...routeProps} icon={Icon}>
             <Route path="/create-user" component={CreateUser} />
             <Route path="/" exact component={Dashboard} />
-            <CollectionRoutes collections={props.collections} views={props.views} />
+            <CollectionRoutes collections={props.collections} views={props.views} config={config} />
           </DefaultTemplate>
         );
       }} />

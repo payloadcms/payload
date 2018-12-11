@@ -1,5 +1,5 @@
 import React from 'react';
-import { ContentBlock, Form, Input, FormSubmit, SetStepNav } from 'payload/components';
+import { ContentBlock, Form, Email, Password, FormSubmit, SetStepNav } from 'payload/components';
 
 import './index.scss';
 
@@ -16,8 +16,8 @@ const CreateUser = () => {
       <Form
         method="POST"
         action="http://localhost:3000/users">
-        <Input type="email" label="Email Address" name="email" required />
-        <Input type="password" label="Password" name="password" required />
+        <Email label="Email Address" name="email" required />
+        <Password error="password" label="Password" name="password" required />
         <FormSubmit>Create</FormSubmit>
       </Form>
     </ContentBlock>

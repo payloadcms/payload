@@ -1,31 +1,8 @@
 @import '~payload/scss/styles';
 
-.interact.text,
-.interact.email,
-.interact.password {
+.field-type.input {
 	margin-bottom: rem(.5);
 	position: relative;
-
-	label {
-		display: flex;
-
-		.required {
-			color: $error;
-			margin-left: rem(.25);
-			margin-right: auto;
-		}
-	}
-
-	.tooltip {
-		left: auto;
-		right: 0;
-		transform: none;
-		background-color: $error;
-
-		span {
-			border-top-color: $error;
-		}
-	}
 
 	input {
 		@include formInput;
@@ -33,11 +10,7 @@
 
 	&.error {
 		input {
-      background-color: lighten($error, 15%);
+      background-color: lighten($error, 20%);
 		}
-	}
-
-	@include small-break {
-		margin-bottom: rem(.5);
 	}
 }

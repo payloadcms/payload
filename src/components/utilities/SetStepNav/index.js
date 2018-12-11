@@ -10,6 +10,12 @@ class SetStepNav extends Component {
     this.props.set(this.props.nav);
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.nav !== this.props.nav) {
+      this.props.set(this.props.nav);
+    }
+  }
+
   render() { return null; }
 }
 

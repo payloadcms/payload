@@ -6,7 +6,6 @@
 
 // Gutter
 $gutter : rem(.5);
-$cols   : 12;
 
 /////////////////////////////
 // ROWS
@@ -20,20 +19,10 @@ $cols   : 12;
 }
 
 /////////////////////////////
-// COLUMN SETUP
+// GUTTER SETUP
 /////////////////////////////
 
 @mixin gutter {
-  margin-left: $gutter;
-  margin-right: $gutter;
-}
-
-@mixin col($col) {
-  @include gutter;
-  width: calc(#{$col / $cols * 100 + %} - #{rem(1.01)});
-}
-
-@mixin push($col) {
-  margin-right: $gutter;
-  margin-left: calc(#{$col / $cols * 100 + %} + #{$gutter});
+  padding-left: $gutter;
+  padding-right: $gutter;
 }

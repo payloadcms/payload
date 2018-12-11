@@ -6,8 +6,8 @@
 /////////////////////////////
 
 @mixin default-template-width {
-  padding-left: rem(1);
-  padding-right: rem(1);
+  padding-left: $base;
+  padding-right: $base;
   margin-left: rem(6);
   width: calc(100% - #{rem(6)});
 

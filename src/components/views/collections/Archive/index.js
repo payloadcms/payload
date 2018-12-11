@@ -3,7 +3,7 @@ import { SetStepNav } from 'payload/components';
 
 import './index.scss';
 
-const Archive = props => {
+const ArchiveView = props => {
   return (
     <article className="collection-archive">
       <SetStepNav nav={ [
@@ -13,7 +13,7 @@ const Archive = props => {
       ] } />
       {props.children}
     </article>
-  );
-};
+  )
+}
 
-export default Archive;
+export default ArchiveView;

@@ -1,6 +1,6 @@
-const express = require('express');
-const pageController = require('./Page.controller');
-const pagePolicy = require('./Page.policy');
+import express from 'express';
+import pageController from './Page.controller';
+import pagePolicy from './Page.policy';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
@@ -10,11 +10,9 @@ router
   .post(pagePolicy.post, pageController.post);
 
 router
-  .route('/:id')
+  .route('/:slug')
   .get(pagePolicy.find, pageController.find)
   .put(pagePolicy.update, pageController.update)
   .delete(pagePolicy.delete, pageController.delete);
 
-
-
-module.exports = router;
+export default router;

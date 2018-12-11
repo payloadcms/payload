@@ -1,8 +1,10 @@
-const User = require('./User.model');
-const user = require('../../src/user')(User);
+import User from './User.model';
+import payloadUser from '../../src/user';
+
+const user = payloadUser(User);
 
 const userController = {
   post: user.post,
 };
 
-module.exports = userController;
+export default userController;

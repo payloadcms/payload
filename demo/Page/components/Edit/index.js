@@ -1,53 +1,102 @@
 import React, { Component } from 'react';
 import {
+  withEditData,
   EditView,
-  Sticky,
+  StickyAction,
   APIUrl,
   Button,
   Form,
   Input,
+  HiddenInput,
   Textarea,
   Group,
-  FormSubmit
+  FormSubmit,
+  Repeater
 } from 'payload/components';
 import { toKebabCase } from 'payload/utils';
-
-import Page from '../../Page.config';
-import payloadConfig from '../../../payload.config.json';
 
 class Edit extends Component {
 
   constructor(props) {
     super(props);
-    this.collection = Page;
+
+    const uid = this.props.match.params.slug;
 
     this.state = {
-      data: false,
-      slug: this.props.match.params.slug
+      uid: uid,
+      slug: uid,
+      action: `${this.props.config.serverUrl}/${this.props.collection.slug}${uid ? `/${uid}` : ''}`,
+      method: uid ? 'put' : 'post'
     }
-
-    this.updateSlug = this.updateSlug.bind(this);
   }
 
-  updateSlug(e) {
+  setSlug = e => {
     this.setState({ slug: toKebabCase(e.target.value) });
   }
 
   render() {
+
+    const initialData = this.props.data ? this.props.data : {};
+
+    const sampleRepeaterValue = [
+      {
+        content: 'here\'s some test content'
+      },{
+        content: 'here\'s some more test content'
+      }
+    ];
+
     return (
-      <EditView data={this.state.data} collection={this.collection} slug={this.props.match.params.slug}>
-        <Form method="post" action={`${payloadConfig.serverUrl}/${this.collection.slug}`}>
-          <Sticky>
-            <APIUrl serverUrl={payloadConfig.serverUrl}
-              collectionSlug={this.collection.slug} slug={this.state.slug} />
-            <div className="controls">
+      <EditView data={this.props.data} collection={this.props.collection}>
+        <Form method={this.state.method} action={this.state.action}>
+          <StickyAction content={
+            <APIUrl serverUrl={this.props.config.serverUrl}
+            collectionSlug={this.props.collection.slug} slug={this.state.slug} />
+          } action={
+            <React.Fragment>
               <Button type="secondary">Preview</Button>
               <FormSubmit>Save</FormSubmit>
-            </div>
-          </Sticky>
-          <Input onChange={this.updateSlug} type="text" label="Page Title" name="title" required />
-          <Group heading="Sample Group">
-            <Textarea required name="content" label="Page Content" wysiwyg={false} height={100} />
+            </React.Fragment>
+          } />
+
+          <HiddenInput
+          name="slug"
+          valueOverride={this.state.slug} />
+
+          <Input name="title"
+          onChange={this.setSlug}
+          label="Page Title"
+          maxLength={100}
+          initialValue={initialData['title']}
+          required/>
+
+          <Textarea name="content"
+          label="Content"
+          initialValue={initialData['content']}
+          height={100}
+          required />
+
+          <Repeater
+          name="slides"
+          label="Slides"
+          initialValue={sampleRepeaterValue}>
+            <Textarea name="content" label="Content" />
+          </Repeater>
+
+          <Group label="Meta Information">
+            <Input name="metaTitle"
+            maxLength={100}
+            label="Meta Title"
+            width={50} />
+
+            <Input name="metaKeywords"
+            maxLength={100}
+            label="Meta Keywords"
+            width={50} />
+
+            <Textarea name="metaDesc"
+            label="Meta Description"
+            height={100} />
           </Group>
         </Form>
       </EditView>
@@ -55,4 +104,4 @@ class Edit extends Component {
   }
 }
 
-export default Edit;
+export default withEditData(Edit);

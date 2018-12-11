@@ -1,38 +1,13 @@
 @import '~payload/scss/styles';
 
 form {
-  display: flex;
-  flex-wrap: wrap;
+  @include row;
 
   > * {
     width: 100%;
   }
 
-	.status {
-		@extend %uppercase-label;
-		height: auto;
-		max-height: 0;
-		opacity: 0;
-		margin-bottom: 0;
-		transition: max-height 300ms ease-out,
-			opacity 300ms ease,
-			margin-bottom 300ms ease,
-			padding 300ms ease;
-		background: $primary;
-		color: $black;
-		font-weight: bold;
-		padding: 0;
-		border-radius: $radius-sm;
-
-		&.open {
-			padding: rem(.5);
-			max-height: 400px;
-			opacity: 1;
-			margin-bottom: rem(.5);
-		}
-
-		&.error {
-			background: $error;
-		}
-	}
+  > .btn {
+    @include gutter;
+  }
 }

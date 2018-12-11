@@ -1,4 +1,5 @@
 import React, { Component, createContext } from 'react';
+import { Input, Status } from 'payload/components';
 import api from 'payload/api';
 
 import './index.scss';
@@ -11,16 +12,13 @@ class Form extends Component {
 
     this.state = {
       fields: {},
-      status: undefined,
+      status: null,
       submitted: false,
       processing: false
     };
-
-    this.submit = this.submit.bind(this);
-    this.setValue = this.setValue.bind(this);
   }
 
-  setValue(field) {
+  setValue = field => {
     this.setState(prevState => ({
       ...prevState,
       fields: {
@@ -33,7 +31,7 @@ class Form extends Component {
     }));
   }
 
-  submit(e) {
+  submit = e => {
     this.setState({
       submitted: true
     });
@@ -78,18 +76,18 @@ class Form extends Component {
           } else {
             this.setState({
               status: {
-                message: res.msg,
+                message: res.message,
                 type: 'success'
               },
               processing: false
             });
           }
         },
-        (error) => {
+        error => {
           console.log(error);
           this.setState({
             status: {
-              message: 'Sorry, there was a problem with your request.',
+              message: error.message,
               type: 'error'
             },
             processing: false
@@ -103,28 +101,19 @@ class Form extends Component {
   }
 
   render() {
-    let Status = () => {
-      return null;
-    };
-
-    if (this.state.status && !this.state.redirect) {
-      Status = () => {
-        return (
-          <div className={`status open ${this.state.status.type}`}>
-            {this.state.status.message}
-          </div>
-        );
-      };
-    }
 
     return (
       <form
-        noValidate
-        onSubmit={this.submit}
-        method={this.props.method}
-        action={this.props.action}
-        className={this.props.className}>
-        <Status />
+      noValidate
+      onSubmit={this.submit}
+      method={this.props.method}
+      action={this.props.action}
+      className={this.props.className}>
+        {this.state.status && !this.state.redirect &&
+          <Status open={true}
+          type={this.state.status.type}
+          message={this.state.status.message} />
+        }
         <FormContext.Provider value={{
           setValue: this.setValue.bind(this),
           fields: this.state.fields,
