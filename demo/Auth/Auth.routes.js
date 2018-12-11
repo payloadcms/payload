@@ -7,6 +7,10 @@ const router = new express.Router();
 
 router
   .route('/login')
-  .post(authValidate.login, passport.authenticate('local'), authCtrl.login);
+  .post(authValidate.login, authCtrl.login);
+
+router
+  .route('/me')
+  .post(passport.authenticate('jwt', { session: false }), authCtrl.me);
 
 export default router;

@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import passport from 'passport';
 import express from 'express';
 import methodOverride from 'method-override';
+import jwtStrategy from './auth/jwt';
 
 module.exports = {
   init: options => {
@@ -18,6 +19,7 @@ module.exports = {
     options.app.use(passport.session());
 
     passport.use(options.user.createStrategy());
+    passport.use(jwtStrategy);
     passport.serializeUser(options.user.serializeUser());
     passport.deserializeUser(options.user.deserializeUser());
 

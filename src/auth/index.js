@@ -1,16 +1,31 @@
-const httpStatus = require('http-status');
-const passport = require('passport');
-const APIError = require('../lib/helpers/APIError');
+import jwt from 'jsonwebtoken';
+import httpStatus from 'http-status';
+import APIError from '../lib/helpers/APIError';
 
-module.exports = User => ({
+export default User => ({
   /**
    * Returns passport login response (cookie) when valid username and password is provided
    * @param req
    * @param res
    * @returns {*}
    */
-  login: (req, res) =>
-    res.json(req.user),
+  login: (req, res) => {
+    let { email, password } = req.body;
+    //This lookup would normally be done using a database
+    if (email === 'james@jamestest.com') {
+      if (password === 'test123') { //the password compare would normally be done using bcrypt.
+        let opts = {};
+        opts.expiresIn = 120;  //token expires in 2min
+        const secret = 'SECRET_KEY'; //normally stored in process.env.secret
+        const token = jwt.sign({ email }, secret, opts);
+        return res.status(200).json({
+          message: 'Auth Passed',
+          token
+        })
+      }
+    }
+    return res.status(401).json({ message: 'Auth Failed' });
+  },
 
   /**
    * Returns User if user session is still open
@@ -19,13 +34,8 @@ module.exports = User => ({
    * @param next
    * @returns {*}
    */
-  me: (req, res, next) => {
-    if (!req.user) {
-      const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
-      next(error);
-    }
-
-    res.json(req.user);
+  me: (req, res) => {
+    return res.status(200).send('YAY! this is a protected Route')
   },
 
   /**
