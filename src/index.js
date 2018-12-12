@@ -19,7 +19,7 @@ module.exports = {
     options.app.use(passport.session());
 
     passport.use(options.user.createStrategy());
-    passport.use(jwtStrategy);
+    passport.use(jwtStrategy(options.user));
     passport.serializeUser(options.user.serializeUser());
     passport.deserializeUser(options.user.deserializeUser());
 
