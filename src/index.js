@@ -14,12 +14,12 @@ module.exports = {
       }
     });
 
-    // configure passport for Auth
+    // Configure passport for Auth
     options.app.use(passport.initialize());
     options.app.use(passport.session());
 
     passport.use(options.user.createStrategy());
-    passport.use(jwtStrategy(options.user));
+    passport.use(jwtStrategy());
     passport.serializeUser(options.user.serializeUser());
     passport.deserializeUser(options.user.deserializeUser());
 

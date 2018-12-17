@@ -17,7 +17,7 @@ module.exports = User => ({
         return next(error);
       }
       passport.authenticate('local')(req, res, () => {
-        res.json({ user });
+        res.json({ email: user.email, role: user.role, createdAt: user.createdAt });
       });
     });
   }
