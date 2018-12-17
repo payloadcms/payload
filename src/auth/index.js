@@ -10,21 +10,27 @@ export default User => ({
    * @returns {*}
    */
   login: (req, res) => {
-    let { email, password } = req.body;
-    //This lookup would normally be done using a database
-    if (email === 'james@jamestest.com') {
-      if (password === 'test123') { //the password compare would normally be done using bcrypt.
+    let { email, password} = req.body;
+    console.log(email);
+    console.log(password);
+
+    User.findByUsername(email, (err, user) => {
+      if (err || !user) return res.status(401).json({ message: 'Auth Failed' });
+
+      user.authenticate(password, (authErr, model, passwordError) => {
+        if (authErr || passwordError) return res.status(401).json({ message: 'Auth Failed' });
+
+        console.log('Correct password. Generating token.');
         let opts = {};
-        opts.expiresIn = 120;  //token expires in 2min
-        const secret = 'SECRET_KEY'; //normally stored in process.env.secret
+        opts.expiresIn = process.env.tokenExpiration || 1200;  // 20min default expiration
+        const secret = process.env.secret || 'SECRET_KEY';
         const token = jwt.sign({ email }, secret, opts);
         return res.status(200).json({
           message: 'Auth Passed',
           token
-        })
-      }
-    }
-    return res.status(401).json({ message: 'Auth Failed' });
+        });
+      })
+    });
   },
 
   /**

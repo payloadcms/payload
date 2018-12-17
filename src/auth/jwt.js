@@ -3,17 +3,11 @@ import passportJwt from 'passport-jwt';
 const JwtStrategy = passportJwt.Strategy;
 const ExtractJwt = passportJwt.ExtractJwt;
 
-const opts = {}
-opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = 'SECRET_KEY'; //normally store this in process.env.secret
+const opts = {};
+opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('JWT');
+opts.secretOrKey = process.env.secret || 'SECRET_KEY';
 
-export default User => new JwtStrategy(opts, (jwtPayload, done) => {
-
-  // Access to User model
-  console.log(User);
-
-  if (jwtPayload.email === 'james@jamestest.com') {
-      return done(null, true)
-  }
-  return done(null, false)
+export default () => new JwtStrategy(opts, (jwtPayload, done) => {
+  console.log(`Token authenticated for user: ${jwtPayload.email}`);
+  return done(null, true);
 })
