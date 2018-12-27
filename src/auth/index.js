@@ -41,7 +41,7 @@ export default User => ({
    * @returns {*}
    */
   me: (req, res) => {
-    return res.status(200).send('YAY! this is a protected Route')
+    return res.status(200).send('YAY! this is a protected Route');
   },
 
   /**
