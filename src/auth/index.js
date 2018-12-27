@@ -22,7 +22,7 @@ export default User => ({
 
         console.log('Correct password. Generating token.');
         let opts = {};
-        opts.expiresIn = process.env.tokenExpiration || 1200;  // 20min default expiration
+        opts.expiresIn = process.env.tokenExpiration || 7200;  // 20min default expiration
         const secret = process.env.secret || 'SECRET_KEY';
         const token = jwt.sign({ email }, secret, opts);
         return res.status(200).json({
@@ -37,11 +37,10 @@ export default User => ({
    * Returns User if user session is still open
    * @param req
    * @param res
-   * @param next
    * @returns {*}
    */
   me: (req, res) => {
-    return res.status(200).send('YAY! this is a protected Route');
+    return res.status(200).send(req.user);
   },
 
   /**
