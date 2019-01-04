@@ -6,8 +6,7 @@ const Auth = auth(User);
 const authController = {
   login: Auth.login,
   me: Auth.me,
-  role: Auth.role,
   check: Auth.check
-}
+};
 
 export default authController;
