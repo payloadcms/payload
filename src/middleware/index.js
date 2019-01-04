@@ -1,12 +1,11 @@
-const middleware = {
-  role: (role) => {
+  export function role(role) {
     return function (req, res, next) {
-      if (role !== req.user.role) res.send(401, 'Not correct role.');
+      if (role !== req.user.role) res.send(401, 'Role not authorized.');
       else next();
     }
-  },
+  }
 
-  atLeastRole: (roleList, permittedRole) => {
+  export function atLeastRole(roleList, permittedRole) {
     return function(req, res, next) {
       let actualRoleIndex = roleList.indexOf(req.user.role);
       if (actualRoleIndex === -1) res.status(400).send('Invalid role.');
@@ -19,6 +18,5 @@ const middleware = {
       res.status(401).send('Role not authorized.');
     }
   }
-};
 
-export default middleware;
+export default { role, atLeastRole };
