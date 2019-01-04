@@ -19,7 +19,7 @@ describe('Payload Role Middleware', () => {
 
     middleware.role('user')(req, res, next);
 
-    expect(next.mock.calls.length).toBe(1);
+    expect(next).toHaveBeenCalledTimes(1);
     expect(res.status).not.toHaveBeenCalled();
   });
 
@@ -32,7 +32,7 @@ describe('Payload Role Middleware', () => {
 
     middleware.role('admin')(req, res, next);
 
-    expect(next.mock.calls.length).toBe(0);
+    expect(next).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalled();
     expect(res.send).toHaveBeenCalled();
   });
@@ -51,7 +51,7 @@ describe('Payload Role Middleware', () => {
 
     middleware.atLeastRole(roleList, 'user')(req, res, next);
 
-    expect(next.mock.calls.length).toBe(1);
+    expect(next).toHaveBeenCalledTimes(1);
   });
 
   it('At least role - permitted', () => {
@@ -68,7 +68,7 @@ describe('Payload Role Middleware', () => {
 
     middleware.atLeastRole(roleList, 'viewer')(req, res, next);
 
-    expect(next.mock.calls.length).toBe(1);
+    expect(next).toHaveBeenCalledTimes(1);
   });
 
   it('At least role - unauthorized', () => {
@@ -85,7 +85,7 @@ describe('Payload Role Middleware', () => {
 
     middleware.atLeastRole(roleList, 'admin')(req, res, next);
 
-    expect(next.mock.calls.length).toBe(0);
+    expect(next).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(401);
   });
 
@@ -103,7 +103,7 @@ describe('Payload Role Middleware', () => {
 
     middleware.atLeastRole(roleList, 'invalid')(req, res, next);
 
-    expect(next.mock.calls.length).toBe(0);
+    expect(next).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(500);
   })
 });
