@@ -12,6 +12,8 @@
   "roles": [
     "admin",
     "editor",
+    "moderator",
+    "user",
     "viewer"
   ]
 

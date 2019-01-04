@@ -3,6 +3,7 @@ import passport from 'passport';
 import authValidate from '../../src/auth/validate';
 import middleware from '../../src/middleware';
 import authCtrl from './Auth.controller';
+import payloadConfig from '../payload.config';
 
 const router = new express.Router();
 
@@ -14,14 +15,18 @@ router
   .route('/me')
   .post(passport.authenticate('jwt', { session: false }), authCtrl.me);
 
-router
-  .route('/role/:role')
-  .get(passport.authenticate('jwt', { session: false }), middleware.role, authCtrl.me);
+payloadConfig.roles.forEach((role) => {
+  router
+    .route(`/role/${role}/only`)
+    .get(passport.authenticate('jwt', { session: false }), middleware.role(role), authCtrl.me);
+});
 
-// TODO: Find a way to do "middleware.role('admin')", can't figure this out currently
-// router
-//   .route('/adminonly')
-//   .get(passport.authenticate('jwt', { session: false }), , authCtrl.me);
-
+payloadConfig.roles.forEach((role) => {
+  router
+    .route(`/role/${role}/atleast`)
+    .get(passport.authenticate('jwt', { session: false }),
+      middleware.atLeastRole(payloadConfig.roles, role),
+      authCtrl.me);
+});
 
 export default router;

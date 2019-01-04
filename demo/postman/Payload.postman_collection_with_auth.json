@@ -1,10 +1,206 @@
 {
 	"info": {
-		"_postman_id": "3f22b498-9ba6-4570-8db1-9eb4adcf6731",
 		"name": "Payload",
+		"_postman_id": "027b80cb-1244-c4b7-01f4-2a0ccf32e0a3",
+		"description": "",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
+		{
+			"name": "Roles",
+			"description": "",
+			"item": [
+				{
+					"name": "At Least",
+					"description": "",
+					"item": [
+						{
+							"name": "Role - At least admin",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "JWT {{token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:3000/role/admin/atleast",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"role",
+										"admin",
+										"atleast"
+									]
+								},
+								"description": "\tThis is to test that the JWT comes through properly.  "
+							},
+							"response": []
+						},
+						{
+							"name": "Role - At least viewer",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "JWT {{token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:3000/role/viewer/atleast",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"role",
+										"viewer",
+										"atleast"
+									]
+								},
+								"description": "\tThis is to test that the JWT comes through properly.  "
+							},
+							"response": []
+						},
+						{
+							"name": "Role - At least user",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "JWT {{token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:3000/role/user/atleast",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"role",
+										"user",
+										"atleast"
+									]
+								},
+								"description": "\tThis is to test that the JWT comes through properly.  "
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Exact",
+					"description": "",
+					"item": [
+						{
+							"name": "Role - Admin only",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "JWT {{token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:3000/role/admin/only",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"role",
+										"admin",
+										"only"
+									]
+								},
+								"description": "\tThis is to test that the JWT comes through properly.  "
+							},
+							"response": []
+						},
+						{
+							"name": "Role - User only",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "JWT {{token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:3000/role/user/only",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"role",
+										"user",
+										"only"
+									]
+								},
+								"description": "\tThis is to test that the JWT comes through properly.  "
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				}
+			]
+		},
 		{
 			"name": "Public Domain Check",
 			"request": {
@@ -107,7 +303,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"email\": \"test@test.com\",\n\t\"password\": \"test123\"\n}"
+					"raw": "{\n\t\"title\": \"sup dog\",\n\t\"content\": \"some shit\"\n}"
 				},
 				"url": {
 					"raw": "http://localhost:3000/users",
@@ -196,40 +392,6 @@
 					]
 				},
 				"description": "\tThis is to test that the JWT comes through properly.  "
-			},
-			"response": []
-		},
-		{
-			"name": "Role",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "JWT {{token}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://localhost:3000/role/user",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"role",
-						"user"
-					]
-				},
-				"description": "Authenticate against user's role"
 			},
 			"response": []
 		}
