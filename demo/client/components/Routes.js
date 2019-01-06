@@ -1,4 +1,5 @@
 import React from 'react';
+import Cookies from 'universal-cookie';
 import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
 import {
   CollectionRoutes,
@@ -11,14 +12,15 @@ import Logo from '../components/graphics/Logo';
 import Icon from '../components/graphics/Icon';
 import config from '../../payload.config.json';
 
+const cookies = new Cookies();
+
 const Routes = props => {
   return (
     <Switch>
       <Route path="/login" render={routeProps => <Login logo={Logo} {...routeProps} />} />
       <Route path="/forgot" component={() => { return <h1>Forgot Password</h1>; }} />
       <Route path="/" render={routeProps => {
-
-        if (true) {
+        if (cookies.get('token')) {
           return (
             <DefaultTemplate {...routeProps} icon={Icon}>
               <Route path="/create-user" component={CreateUser} />
@@ -27,7 +29,6 @@ const Routes = props => {
             </DefaultTemplate>
           );
         }
-
         return <Redirect to="/login" />
       }} />
     </Switch>
