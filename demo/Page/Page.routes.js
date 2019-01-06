@@ -1,4 +1,5 @@
 import express from 'express';
+import passport from 'passport';
 import pageController from './Page.controller';
 import pagePolicy from './Page.policy';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Switch, withRouter } from 'react-router-dom';
+import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
 import {
   CollectionRoutes,
   DefaultTemplate,
@@ -14,16 +14,21 @@ import config from '../../payload.config.json';
 const Routes = props => {
   return (
     <Switch>
-      <Route path="/login" render={ routeProps => <Login logo={Logo} {...routeProps} />} />
-      <Route path="/forgot" component={ () => { return <h1>Forgot Password</h1>; } } />
+      <Route path="/login" render={routeProps => <Login logo={Logo} {...routeProps} />} />
+      <Route path="/forgot" component={() => { return <h1>Forgot Password</h1>; }} />
       <Route path="/" render={routeProps => {
-        return (
-          <DefaultTemplate {...routeProps} icon={Icon}>
-            <Route path="/create-user" component={CreateUser} />
-            <Route path="/" exact component={Dashboard} />
-            <CollectionRoutes collections={props.collections} views={props.views} config={config} />
-          </DefaultTemplate>
-        );
+
+        if (true) {
+          return (
+            <DefaultTemplate {...routeProps} icon={Icon}>
+              <Route path="/create-user" component={CreateUser} />
+              <Route path="/" exact component={Dashboard} />
+              <CollectionRoutes collections={props.collections} views={props.views} config={config} />
+            </DefaultTemplate>
+          );
+        }
+
+        return <Redirect to="/login" />
       }} />
     </Switch>
   );

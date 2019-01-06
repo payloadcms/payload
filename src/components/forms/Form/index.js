@@ -1,5 +1,6 @@
 import React, { Component, createContext } from 'react';
-import { Input, Status } from 'payload/components';
+import { withRouter } from 'react-router-dom';
+import { Status } from 'payload/components';
 import api from 'payload/api';
 
 import './index.scss';
@@ -48,12 +49,12 @@ class Form extends Component {
     if (!isValid) {
       e.preventDefault();
 
-    // If submit handler comes through via props, run that
+      // If submit handler comes through via props, run that
     } else if (this.props.onSubmit) {
       e.preventDefault();
       this.props.onSubmit(this.state.fields);
 
-    // If form is AJAX, fetch data
+      // If form is AJAX, fetch data
     } else if (this.props.ajax !== false) {
       e.preventDefault();
       let data = {};
@@ -70,6 +71,10 @@ class Form extends Component {
       // Make the API call from the action
       api.requests[this.props.method.toLowerCase()](this.props.action, data).then(
         res => {
+
+          // If prop handleAjaxResponse is passed, pass it the response
+          this.props.handleAjaxResponse && this.props.handleAjaxResponse(res);
+
           // Provide form data to the redirected page
           if (this.props.redirect) {
             this.props.history.push(this.props.redirect, data);
@@ -104,15 +109,15 @@ class Form extends Component {
 
     return (
       <form
-      noValidate
-      onSubmit={this.submit}
-      method={this.props.method}
-      action={this.props.action}
-      className={this.props.className}>
+        noValidate
+        onSubmit={this.submit}
+        method={this.props.method}
+        action={this.props.action}
+        className={this.props.className}>
         {this.state.status && !this.state.redirect &&
           <Status open={true}
-          type={this.state.status.type}
-          message={this.state.status.message} />
+            type={this.state.status.type}
+            message={this.state.status.message} />
         }
         <FormContext.Provider value={{
           setValue: this.setValue.bind(this),
@@ -127,4 +132,4 @@ class Form extends Component {
   }
 }
 
-export default Form;
+export default withRouter(Form);

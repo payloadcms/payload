@@ -42,6 +42,7 @@
     "redux": "^4.0.0",
     "superagent": "^3.8.3",
     "superagent-promise": "^1.1.0",
+    "universal-cookie": "^3.0.7",
     "url-loader": "^1.0.1"
   },
   "devDependencies": {

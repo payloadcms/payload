@@ -10,9 +10,7 @@ export default User => ({
    * @returns {*}
    */
   login: (req, res) => {
-    let { email, password} = req.body;
-    console.log(email);
-    console.log(password);
+    let { email, password } = req.body;
 
     User.findByUsername(email, (err, user) => {
       if (err || !user) return res.status(401).json({ message: 'Auth Failed' });
