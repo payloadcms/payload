@@ -17,16 +17,8 @@ router
 
 payloadConfig.roles.forEach((role) => {
   router
-    .route(`/role/${role}/only`)
+    .route(`/role/${role}`)
     .get(passport.authenticate('jwt', { session: false }), middleware.role(role), authCtrl.me);
-});
-
-payloadConfig.roles.forEach((role) => {
-  router
-    .route(`/role/${role}/atleast`)
-    .get(passport.authenticate('jwt', { session: false }),
-      middleware.atLeastRole(payloadConfig.roles, role),
-      authCtrl.me);
 });
 
 export default router;

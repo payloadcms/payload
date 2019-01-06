@@ -5,18 +5,4 @@ export function role(role) {
   }
 }
 
-export function atLeastRole(roleList, permittedRole) {
-  return function(req, res, next) {
-    let actualRoleIndex = roleList.indexOf(req.user.role);
-    if (actualRoleIndex === -1) res.status(400).send('Invalid role.');
-
-    let permittedRoleIndex = roleList.indexOf(permittedRole);
-    if (permittedRoleIndex === -1) res.status(500).send();
-
-    if (actualRoleIndex <= permittedRoleIndex) next();
-
-    res.status(401).send('Role not authorized.');
-  }
-}
-
-export default { role, atLeastRole };
+export default { role };
