@@ -7,5 +7,14 @@
     "admin": "/admin"
   },
   "foo": "bar",
-  "mongoURL": "mongodb://localhost/payload"
+  "mongoURL": "mongodb://localhost/payload",
+  "userModel": "./User/User.model",
+  "roles": [
+    "admin",
+    "editor",
+    "moderator",
+    "user",
+    "viewer"
+  ]
+
 }
