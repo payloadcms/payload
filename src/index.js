@@ -4,6 +4,8 @@ import express from 'express';
 import methodOverride from 'method-override';
 import jwtStrategy from './auth/jwt';
 import User from '../demo/User/User.model';
+import fileUpload from 'express-fileupload';
+import assetRoutes from './routes/assets.routes'
 
 module.exports = {
   init: options => {
@@ -14,6 +16,8 @@ module.exports = {
         console.log('Connected to Mongo server successfully!');
       }
     });
+
+    options.app.use(fileUpload());
 
     // Configure passport for Auth
     options.app.use(passport.initialize());
@@ -32,6 +36,8 @@ module.exports = {
 
       next();
     });
+
+    options.router.use('/assets', assetRoutes);
 
     options.app.use(express.json());
     options.app.use(methodOverride('X-HTTP-Method-Override'))
