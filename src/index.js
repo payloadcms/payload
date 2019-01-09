@@ -37,7 +37,7 @@ module.exports = {
       next();
     });
 
-    options.router.use('/assets', assetRoutes);
+    options.router.use('/upload', assetRoutes);
 
     options.app.use(express.json());
     options.app.use(methodOverride('X-HTTP-Method-Override'))

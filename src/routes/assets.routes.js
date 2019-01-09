@@ -1,7 +1,16 @@
 import express from 'express';
 import passport from 'passport';
+import mkdirp from 'mkdirp';
 
 const router = new express.Router();
+
+const classifyFile = (file) => {
+  console.log(`File mimetype: ${file.mimetype}`);
+  if (file.mimetype.split('/')[0] === 'image') {
+    // TODO: Perform image specific operations
+    console.log('File classified as an image.');
+  }
+};
 
 const assetCtrl = {
   upload: (req, res) => {
@@ -9,16 +18,17 @@ const assetCtrl = {
       return res.status(400).send('No files were uploaded.');
     }
 
-    console.log(JSON.stringify(req));
+    mkdirp('./uploads', (err) => {
+      if (err) console.error(err);
+    });
 
-    for (let file of req.files) {
-      // TODO: Classify file
-      file.mv('/static/test/asdf.jpg', (err) => {
-        if (err)
-          return res.status(500).send(err);
-        res.send('File uploaded.');
-      })
-    }
+
+    req.files.file.mv(`./uploads/${req.files.file.name}`, (err) => {
+      if (err) return res.status(500).send(err);
+
+      classifyFile(req.files.file);
+      res.send('File uploaded.');
+    })
   }
 };
 
