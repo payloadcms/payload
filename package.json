@@ -21,6 +21,7 @@
   "dependencies": {
     "body-parser": "^1.18.3",
     "dotenv": "^6.0.0",
+    "express-fileupload": "^1.1.1-alpha.1",
     "express-validation": "^1.0.2",
     "file-loader": "^1.1.11",
     "http-status": "^1.2.0",
@@ -28,6 +29,7 @@
     "joi": "^13.6.0",
     "jsonwebtoken": "^8.4.0",
     "method-override": "^3.0.0",
+    "mkdirp": "^0.5.1",
     "mongoose-string-query": "^0.2.5",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
