@@ -5,7 +5,7 @@ import methodOverride from 'method-override';
 import jwtStrategy from './auth/jwt';
 import User from '../demo/User/User.model';
 import fileUpload from 'express-fileupload';
-import assetRoutes from './routes/assets.routes'
+import assetRoutes from './routes/uploads.routes'
 
 module.exports = {
   init: options => {
