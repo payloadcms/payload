@@ -15,6 +15,9 @@
     "moderator",
     "user",
     "viewer"
-  ]
-
+  ],
+  "localization": {
+    "languages": ["en", "es"],
+    "defaultLanguage": "en"
+  }
 }

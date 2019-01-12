@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import mongooseIntl from 'mongoose-intl';
 import passport from 'passport';
 import express from 'express';
 import methodOverride from 'method-override';
@@ -39,9 +40,12 @@ module.exports = {
 
     options.router.use('/upload', assetRoutes);
 
+    // TODO: This doesn't seem to work, had to add it to the model instead of having a global plugin
+    mongoose.plugin(mongooseIntl, options.config.localization);
+
     options.app.use(express.json());
-    options.app.use(methodOverride('X-HTTP-Method-Override'))
-    options.app.use(express.urlencoded({ extended: true }));
+    options.app.use(methodOverride('X-HTTP-Method-Override'));
+    options.app.use(express.urlencoded({extended: true}));
     options.app.use(options.router);
   }
 };

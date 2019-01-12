@@ -12,6 +12,7 @@ const pageController = {
   },
 
   find(req, res) {
+
     Page.findOne({ 'slug': req.params.slug }, (err, doc) => {
       if (err) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
@@ -21,12 +22,15 @@ const pageController = {
         return res.status(httpStatus.NOT_FOUND).send('Not Found');
       }
 
+      if (req.query.lang) {
+        doc.setLanguage(req.query.lang);
+      }
+
       return res.json(doc);
     });
   },
 
   post(req, res) {
-
     Page.create(req.body, (err, doc) => {
       if (err) {
         return res.send(httpStatus.INTERNAL_SERVER_ERROR, {error: err});

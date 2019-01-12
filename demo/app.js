@@ -9,7 +9,7 @@ import pageRoutes from './Page/Page.routes';
 
 const router = express.Router({}); // eslint-disable-line new-cap
 
-export const app =  express();
+export const app = express();
 
 payload.init({
   config: payloadConfig,
