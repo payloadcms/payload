@@ -8,22 +8,24 @@ const classifyFile = (file) => {
   }
 };
 
-function upload(req, res) {
-  if (Object.keys(req.files).length === 0) {
-    return res.status(400).send('No files were uploaded.');
-  }
+function upload(req, res, next, config) {
+    if (Object.keys(req.files).length === 0) {
+      return res.status(400).send('No files were uploaded.');
+    }
 
-  mkdirp('./uploads', (err) => {
-    if (err) console.error(err);
-  });
+    mkdirp(config.staticDir, (err) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Upload failed.');
+      }
+    });
 
+    req.files.file.mv(`${config.staticDir}/${req.files.file.name}`, (err) => {
+      if (err) return res.status(500).send(err);
 
-  req.files.file.mv(`./uploads/${req.files.file.name}`, (err) => {
-    if (err) return res.status(500).send(err);
-
-    classifyFile(req.files.file);
-    res.send('File uploaded.');
-  })
+      classifyFile(req.files.file);
+      res.send('File uploaded.');
+    })
 }
 
 export default { upload };
