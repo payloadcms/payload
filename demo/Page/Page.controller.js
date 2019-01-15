@@ -10,7 +10,7 @@ const pageController = {
       if (err) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
       }
-      return res.json(pages.map(page => page.toJSON({virtuals: !!req.query.lang})));
+      return res.json(pages.map(page => page.toJSON({virtuals: !!req.language})));
     });
   },
 

@@ -110,5 +110,13 @@ describe('Payload Middleware', () => {
       expect(next).toHaveBeenCalledTimes(1);
       expect(req.language).toEqual(localization.defaultLanguage);
     });
+
+    it('Supports language all', () => {
+      req.query.lang = 'all';
+      language(localization)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(req.language).toBeUndefined();
+    });
   });
 });
