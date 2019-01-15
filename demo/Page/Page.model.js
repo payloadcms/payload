@@ -10,15 +10,10 @@ const PageSchema = new mongoose.Schema({
     metaTitle: String,
     metaDesc: String
   }
-  , {
-  toJSON: {
-    virtuals: true,
-  }}
 );
 
 PageSchema.plugin(mongooseStringQuery);
 
-// TODO: This should be able to be done as a global mongoose plugin
 PageSchema.plugin(mongooseIntl, payloadConfig.localization);
 
 module.exports = mongoose.model('Page', PageSchema);

@@ -3,17 +3,20 @@ import httpStatus from 'http-status';
 
 const pageController = {
   query(req, res) {
+    if (req.query.lang) {
+      Page.setDefaultLanguage(req.query.lang);
+    }
     Page.apiQuery(req.query, (err, pages) => {
       if (err) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
       }
-      return res.json(pages);
+      return res.json(pages.map(page => page.toJSON({virtuals: !!req.query.lang})));
     });
   },
 
   find(req, res) {
 
-    Page.findOne({ 'slug': req.params.slug }, (err, doc) => {
+    Page.findOne({'slug': req.params.slug}, (err, doc) => {
       if (err) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
       }
@@ -22,8 +25,9 @@ const pageController = {
         return res.status(httpStatus.NOT_FOUND).send('Not Found');
       }
 
-      if (req.query.lang) {
-        doc.setLanguage(req.query.lang);
+      if (req.language) {
+        doc.setLanguage(req.language);
+        return res.json(doc.toJSON({virtuals: true}));
       }
 
       return res.json(doc);

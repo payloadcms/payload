@@ -19,6 +19,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "accept-language-parser": "^1.5.0",
     "body-parser": "^1.18.3",
     "dotenv": "^6.0.0",
     "express-fileupload": "^1.1.1-alpha.1",

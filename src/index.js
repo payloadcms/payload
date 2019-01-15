@@ -7,6 +7,8 @@ import jwtStrategy from './auth/jwt';
 import User from '../demo/User/User.model';
 import fileUpload from 'express-fileupload';
 import assetRoutes from './routes/uploads.routes'
+import config from '../demo/payload.config';
+import language from './middleware/language';
 
 module.exports = {
   init: options => {
@@ -34,14 +36,14 @@ module.exports = {
       res.header('Access-Control-Allow-Headers',
         'Origin X-Requested-With, Content-Type, Accept, Authorization');
       res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
+      res.header('Content-Language', options.config.localization.language);
 
       next();
     });
 
     options.router.use('/upload', assetRoutes);
 
-    // TODO: This doesn't seem to work, had to add it to the model instead of having a global plugin
-    mongoose.plugin(mongooseIntl, options.config.localization);
+    options.app.use(language(config.localization));
 
     options.app.use(express.json());
     options.app.use(methodOverride('X-HTTP-Method-Override'));
