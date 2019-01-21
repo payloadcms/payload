@@ -1,5 +1,8 @@
 export { default as App } from './components/App';
 
+// Redux
+export { default as LoadGlobals } from './components/LoadGlobals';
+
 // Controls
 export { default as Button } from './components/controls/Button';
 

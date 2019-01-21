@@ -4,6 +4,8 @@ import { App } from 'payload/components';
 import Routes from './components/Routes';
 import store from './store';
 
+import config from '../payload.config.json';
+
 import Page from '../Page/Page.config';
 import pageViews from '../Page/components';
 
@@ -22,7 +24,7 @@ const collections = [
 
 const Index = () => {
   return (
-    <App store={store} collections={collections}>
+    <App store={store} collections={collections} config={config}>
       <Routes views={views} collections={collections} />
     </App>
   );

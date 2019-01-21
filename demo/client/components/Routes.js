@@ -10,7 +10,6 @@ import {
 } from 'payload/components';
 import Logo from '../components/graphics/Logo';
 import Icon from '../components/graphics/Icon';
-import config from '../../payload.config.json';
 
 const cookies = new Cookies();
 
@@ -25,7 +24,7 @@ const Routes = props => {
             <DefaultTemplate {...routeProps} icon={Icon}>
               <Route path="/create-user" component={CreateUser} />
               <Route path="/" exact component={Dashboard} />
-              <CollectionRoutes collections={props.collections} views={props.views} config={config} />
+              <CollectionRoutes collections={props.collections} views={props.views} />
             </DefaultTemplate>
           );
         }

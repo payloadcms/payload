@@ -7,8 +7,8 @@ const EditView = props => {
 
   const isEditing = props.data && props.data.slug ? true : false;
   const nav = [{
-      url: `/collections/${props.collection.slug}`,
-      label: props.collection.label
+    url: `/collections/${props.collection.slug}`,
+    label: props.collection.label
   }];
 
   if (isEditing) {
@@ -24,7 +24,7 @@ const EditView = props => {
 
   return (
     <article className="collection-edit">
-      <SetStepNav nav={ nav } />
+      <SetStepNav nav={nav} />
       <header>
         {isEditing &&
           <h1>

@@ -6,56 +6,64 @@ const defaultState = {
   viewWidth: false,
   viewHeight: false,
   modalState: false,
-  stepNav: []
+  stepNav: [],
+  config: null
 };
 
 export default (state = defaultState, action) => {
   switch (action.type) {
-  case 'TOGGLE_MENU':
-    return {
-      ...state,
-      menuStatus: !state.menuStatus
-    };
+    case 'TOGGLE_MENU':
+      return {
+        ...state,
+        menuStatus: !state.menuStatus
+      };
 
-  case 'UPDATE_SCROLL':
+    case 'UPDATE_SCROLL':
 
-    return {
-      ...state,
-      scrollPos: action.payload
-    };
+      return {
+        ...state,
+        scrollPos: action.payload
+      };
 
-  case 'SET_WINDOW_SIZE':
+    case 'SET_WINDOW_SIZE':
 
-    return {
-      ...state,
-      windowWidth: action.payload.width,
-      windowHeight: action.payload.height
-    };
+      return {
+        ...state,
+        windowWidth: action.payload.width,
+        windowHeight: action.payload.height
+      };
 
-  case 'SET_VIEW_SIZE':
+    case 'SET_VIEW_SIZE':
 
-    return {
-      ...state,
-      viewWidth: action.payload.width,
-      viewHeight: action.payload.height
-    };
+      return {
+        ...state,
+        viewWidth: action.payload.width,
+        viewHeight: action.payload.height
+      };
 
-  case 'SET_MODAL':
+    case 'SET_MODAL':
 
-    return {
-      ...state,
-      modalStatus: action.payload
-    };
+      return {
+        ...state,
+        modalStatus: action.payload
+      };
 
-  case 'SET_STEP_NAV':
+    case 'SET_STEP_NAV':
 
-    return {
-      ...state,
-      stepNav: action.payload
-    };
+      return {
+        ...state,
+        stepNav: action.payload
+      };
 
-  default:
-      //
+    case 'LOAD_CONFIG':
+
+      return {
+        ...state,
+        config: action.payload
+      };
+
+    default:
+    //
   }
 
   return state;

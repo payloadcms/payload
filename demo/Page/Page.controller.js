@@ -8,17 +8,17 @@ const pageController = {
     }
     Page.apiQuery(req.query, (err, pages) => {
       if (err) {
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
       }
-      return res.json(pages.map(page => page.toJSON({virtuals: !!req.language})));
+      return res.json(pages.map(page => page.toJSON({ virtuals: !!req.language })));
     });
   },
 
   find(req, res) {
 
-    Page.findOne({'slug': req.params.slug}, (err, doc) => {
+    Page.findOne({ 'slug': req.params.slug }, (err, doc) => {
       if (err) {
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
       }
 
       if (!doc) {
@@ -27,7 +27,7 @@ const pageController = {
 
       if (req.language) {
         doc.setLanguage(req.language);
-        return res.json(doc.toJSON({virtuals: true}));
+        return res.json(doc.toJSON({ virtuals: true }));
       }
 
       return res.json(doc);
@@ -35,9 +35,9 @@ const pageController = {
   },
 
   post(req, res) {
-    Page.create(req.body, (err, doc) => {
+    Page.create(req.body, err => {
       if (err) {
-        return res.send(httpStatus.INTERNAL_SERVER_ERROR, {error: err});
+        return res.send(httpStatus.INTERNAL_SERVER_ERROR, { error: err });
       }
       return res.json({
         message: 'Page created successfully'
@@ -46,9 +46,9 @@ const pageController = {
   },
 
   update(req, res) {
-    Page.findOneAndUpdate({slug: req.params.slug}, req.body, {new: true}, (err, doc) => {
+    Page.findOneAndUpdate({ slug: req.params.slug }, req.body, { new: true }, (err, doc) => {
       if (err) {
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
       }
 
       if (!doc) {
@@ -62,9 +62,9 @@ const pageController = {
   },
 
   delete(req, res) {
-    Page.findOneAndDelete({slug: req.params.slug}, (err, doc) => {
+    Page.findOneAndDelete({ slug: req.params.slug }, (err, doc) => {
       if (err) {
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
       }
 
       if (!doc) {
