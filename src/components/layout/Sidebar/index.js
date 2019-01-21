@@ -6,8 +6,8 @@ import { Arrow, Label } from 'payload/components';
 
 import './index.scss';
 
-const mapStateToProps = state => ({
-  collections: state.collections.all
+const mapState = state => ({
+  collections: state.common.collections
 });
 
 const Sidebar = props => {
@@ -21,7 +21,7 @@ const Sidebar = props => {
       </Link>
       <Label>Collections</Label>
       <nav>
-        {props.collections.map((item, i) => {
+        {props.collections && props.collections.map((item, i) => {
           const href = `/collections/${item.slug}`;
           const classes = props.location.pathname.indexOf(href) > -1
             ? 'active'
@@ -44,4 +44,4 @@ const Sidebar = props => {
   );
 }
 
-export default withRouter(connect(mapStateToProps)(Sidebar));
+export default withRouter(connect(mapState)(Sidebar));

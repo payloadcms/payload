@@ -1,8 +1,5 @@
 export { default as App } from './components/App';
 
-// Redux
-export { default as LoadGlobals } from './components/LoadGlobals';
-
 // Controls
 export { default as Button } from './components/controls/Button';
 
@@ -56,9 +53,9 @@ export { default as Label } from './components/type/Label';
 
 // Utilities
 export { default as MeasureWindow } from './components/utilities/MeasureWindow';
-export { default as LoadCollections } from './components/utilities/LoadCollections';
 export { default as MeasureScroll } from './components/utilities/MeasureScroll';
 export { default as SetStepNav } from './components/utilities/SetStepNav';
+export { default as LoadGlobals } from './components/utilities/LoadGlobals';
 
 // Views
 export { default as Dashboard } from './components/views/Dashboard';

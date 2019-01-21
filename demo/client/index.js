@@ -25,7 +25,7 @@ const collections = [
 const Index = () => {
   return (
     <App store={store} collections={collections} config={config}>
-      <Routes views={views} collections={collections} />
+      <Routes views={views} />
     </App>
   );
 };

@@ -24,7 +24,7 @@ const Routes = props => {
             <DefaultTemplate {...routeProps} icon={Icon}>
               <Route path="/create-user" component={CreateUser} />
               <Route path="/" exact component={Dashboard} />
-              <CollectionRoutes collections={props.collections} views={props.views} />
+              <CollectionRoutes views={props.views} />
             </DefaultTemplate>
           );
         }

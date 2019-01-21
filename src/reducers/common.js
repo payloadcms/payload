@@ -7,7 +7,8 @@ const defaultState = {
   viewHeight: false,
   modalState: false,
   stepNav: [],
-  config: null
+  config: null,
+  collections: null
 };
 
 export default (state = defaultState, action) => {
@@ -55,11 +56,12 @@ export default (state = defaultState, action) => {
         stepNav: action.payload
       };
 
-    case 'LOAD_CONFIG':
+    case 'LOAD_GLOBALS':
 
       return {
         ...state,
-        config: action.payload
+        config: action.payload.config,
+        collections: action.payload.collections
       };
 
     default:

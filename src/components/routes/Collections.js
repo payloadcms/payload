@@ -3,12 +3,13 @@ import { connect } from 'react-redux';
 import { Switch, Route, withRouter } from 'react-router-dom';
 
 const mapState = state => ({
-  config: state.common.config
+  config: state.common.config,
+  collections: state.common.collections
 })
 
 const CollectionRoutes = props => {
 
-  if (props.config) {
+  if (props.config && props.collections) {
     return props.collections.map((collection, i) => {
       if (collection) {
 
