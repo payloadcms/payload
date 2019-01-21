@@ -7,6 +7,7 @@ const defaultState = {
   viewHeight: false,
   modalState: false,
   stepNav: [],
+  locale: null,
   config: null,
   collections: null
 };
@@ -63,6 +64,13 @@ export default (state = defaultState, action) => {
         config: action.payload.config,
         collections: action.payload.collections
       };
+
+    case 'SET_LOCALE':
+      console.log(action.payload);
+      return {
+        ...state,
+        locale: action.payload
+      }
 
     default:
     //

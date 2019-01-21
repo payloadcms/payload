@@ -37,6 +37,7 @@
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^5.0.1",
     "postcss-preset-env": "6.0.6",
+    "qs": "^6.6.0",
     "react": "^16.4.1",
     "react-document-meta": "^3.0.0-beta.2",
     "react-dom": "^16.4.1",

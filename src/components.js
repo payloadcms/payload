@@ -44,6 +44,7 @@ export { default as APIUrl } from './components/modules/APIUrl';
 export { default as StepNav } from './components/modules/StepNav';
 export { default as Tooltip } from './components/modules/Tooltip';
 export { default as SearchableTable } from './components/modules/SearchableTable';
+export { default as Localizer } from './components/modules/Localizer';
 
 // Routes
 export { default as CollectionRoutes } from './components/routes/Collections';
@@ -56,6 +57,7 @@ export { default as MeasureWindow } from './components/utilities/MeasureWindow';
 export { default as MeasureScroll } from './components/utilities/MeasureScroll';
 export { default as SetStepNav } from './components/utilities/SetStepNav';
 export { default as LoadGlobals } from './components/utilities/LoadGlobals';
+export { default as SetLocale } from './components/utilities/SetLocale';
 
 // Views
 export { default as Dashboard } from './components/views/Dashboard';

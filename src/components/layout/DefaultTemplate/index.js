@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sidebar, StepNav } from 'payload/components';
+import { Sidebar, StepNav, Localizer } from 'payload/components';
 
 import './index.scss';
 
@@ -8,7 +8,10 @@ const DefaultTemplate = props => {
     <div className="default-template">
       <div className="wrap">
         <Sidebar icon={props.icon} collections={props.collections} />
-        <StepNav />
+        <div className="eyebrow">
+          <StepNav />
+          <Localizer />
+        </div>
         {props.children}
       </div>
     </div>
