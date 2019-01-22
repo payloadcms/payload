@@ -13,7 +13,7 @@ const Textarea = props => {
       {props.error}
       {props.label}
       <textarea
-        value={ props.value }
+        value={props.value || ''}
         onChange={props.onChange}
         disabled={props.disabled}
         placeholder={props.placeholder}

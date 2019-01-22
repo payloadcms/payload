@@ -1,6 +1,7 @@
 import Cookies from 'universal-cookie';
 import superagentPromise from 'superagent-promise';
 import _superagent from 'superagent';
+import qs from 'qs';
 
 const cookies = new Cookies();
 const superagent = superagentPromise(_superagent, global.Promise);
@@ -12,8 +13,10 @@ const setJwt = () => {
 }
 
 const requests = {
-  get: url =>
-    superagent.get(`${url}`).set(setJwt()).then(responseBody),
+  get: (url, params) => {
+    const query = qs.stringify(params, { addQueryPrefix: true });
+    return superagent.get(`${url}${query}`).set(setJwt()).then(responseBody);
+  },
 
   post: (url, body) =>
     superagent.post(`${url}`, body).set(setJwt()).then(responseBody),

@@ -19,7 +19,7 @@ const Password = props => {
       {props.error}
       {props.label}
       <input
-        value={props.value}
+        value={props.value || ''}
         onChange={props.onChange}
         disabled={props.disabled}
         placeholder={props.placeholder}

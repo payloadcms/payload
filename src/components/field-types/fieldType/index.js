@@ -20,7 +20,7 @@ const fieldType = (PassedComponent, type, validate, errors) => {
         name: this.props.name,
         value: value,
         valid: this.props.required && validate
-          ? validate(value, this.props.type)
+          ? validate(value || '', this.props.type)
           : true
       });
     }
@@ -48,8 +48,8 @@ const fieldType = (PassedComponent, type, validate, errors) => {
 
     render() {
       const valid = this.props.context.fields[this.props.name]
-      ? this.props.context.fields[this.props.name].valid
-      : true;
+        ? this.props.context.fields[this.props.name].valid
+        : true;
 
       const showError = valid === false && this.props.context.submitted;
 
@@ -62,14 +62,14 @@ const fieldType = (PassedComponent, type, validate, errors) => {
 
       return (
         <PassedComponent {...this.props}
-        className={className}
-        value={value}
-        label={<Label {...this.props} />}
-        error={<Error showError={showError} type={this.props.type} />}
-        onChange={e => {
-          this.sendField(e.target.value);
-          this.props.onChange && this.props.onChange(e);
-        }} />
+          className={className}
+          value={value}
+          label={<Label {...this.props} />}
+          error={<Error showError={showError} type={this.props.type} />}
+          onChange={e => {
+            this.sendField(e.target.value);
+            this.props.onChange && this.props.onChange(e);
+          }} />
       )
     }
   }

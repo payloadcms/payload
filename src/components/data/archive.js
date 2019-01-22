@@ -1,5 +1,10 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import api from 'payload/api';
+
+const mapState = state => ({
+  locale: state.common.locale
+})
 
 const withArchiveData = PassedComponent => {
 
@@ -13,11 +18,25 @@ const withArchiveData = PassedComponent => {
       }
     }
 
-    componentDidMount() {
-      api.requests.get(`${this.props.config.serverUrl}/${this.props.collection.slug}`).then(
+    fetchData = () => {
+      const params = {
+        lang: this.props.locale
+      };
+
+      api.requests.get(`${this.props.config.serverUrl}/${this.props.collection.slug}`, params).then(
         res => this.setState({ data: res }),
         err => console.warn(err)
       )
+    }
+
+    componentDidMount() {
+      this.fetchData();
+    }
+
+    componentDidUpdate(prevProps) {
+      if (prevProps.locale !== this.props.locale) {
+        this.fetchData();
+      }
     }
 
     render() {
@@ -25,7 +44,7 @@ const withArchiveData = PassedComponent => {
     }
   }
 
-  return ArchiveData;
+  return connect(mapState)(ArchiveData);
 }
 
 export default withArchiveData;

@@ -12,11 +12,15 @@ const mapState = state => ({
 const Localizer = props => {
   const { languages } = props.config.localization;
 
+  if (languages.length <= 1) return null;
+
   return (
     <div className="localizer">
       <span>{props.locale}</span>
       <ul>
         {languages.map((lang, i) => {
+
+          if (lang === props.locale) return null;
 
           const newParams = {
             ...props.searchParams,

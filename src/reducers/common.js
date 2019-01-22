@@ -67,7 +67,6 @@ export default (state = defaultState, action) => {
       };
 
     case 'SET_LOCALE':
-      console.log(action.payload);
       return {
         ...state,
         locale: action.payload
