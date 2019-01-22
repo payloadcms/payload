@@ -12,14 +12,23 @@ const mapDispatch = dispatch => ({
 
 class SetLocale extends Component {
 
+  constructor() {
+    super();
+
+    this.state = {
+      init: false
+    }
+  }
+
   setLocale = () => {
     const { searchParams, config, setLocale } = this.props;
 
     if (searchParams) {
       if (searchParams.lang && config.localization.languages.indexOf(searchParams.lang) > -1) {
         setLocale(searchParams.lang);
-      } else {
+      } else if (!this.state.init) {
         setLocale(config.localization.defaultLanguage);
+        this.setState({ init: true });
       }
     }
   }
