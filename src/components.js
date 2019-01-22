@@ -58,6 +58,7 @@ export { default as MeasureScroll } from './components/utilities/MeasureScroll';
 export { default as SetStepNav } from './components/utilities/SetStepNav';
 export { default as LoadGlobals } from './components/utilities/LoadGlobals';
 export { default as SetLocale } from './components/utilities/SetLocale';
+export { default as SetSearchParams } from './components/utilities/SetSearchParams';
 
 // Views
 export { default as Dashboard } from './components/views/Dashboard';

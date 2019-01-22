@@ -1,10 +1,9 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import qs from 'qs';
 
 const mapState = state => ({
-  config: state.common.config
+  config: state.common.config,
+  searchParams: state.common.searchParams
 })
 
 const mapDispatch = dispatch => ({
@@ -14,15 +13,14 @@ const mapDispatch = dispatch => ({
 class SetLocale extends Component {
 
   setLocale = () => {
-    const params = qs.parse(
-      this.props.location.search,
-      { ignoreQueryPrefix: true }
-    );
+    const { searchParams, config, setLocale } = this.props;
 
-    if (params.lang && this.props.config.localization.languages[params.lang]) {
-      this.props.setLocale(params.lang);
-    } else {
-      this.props.setLocale(this.props.config.localization.defaultLanguage);
+    if (searchParams) {
+      if (searchParams.lang && config.localization.languages.indexOf(searchParams.lang) > -1) {
+        setLocale(searchParams.lang);
+      } else {
+        setLocale(config.localization.defaultLanguage);
+      }
     }
   }
 
@@ -31,7 +29,7 @@ class SetLocale extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.location.search !== this.props.location.search) {
+    if (prevProps.searchParams !== this.props.searchParams) {
       this.setLocale();
     }
   }
@@ -41,4 +39,4 @@ class SetLocale extends Component {
   }
 }
 
-export default withRouter(connect(mapState, mapDispatch)(SetLocale));
+export default connect(mapState, mapDispatch)(SetLocale);

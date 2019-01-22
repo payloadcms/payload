@@ -9,7 +9,8 @@ const defaultState = {
   stepNav: [],
   locale: null,
   config: null,
-  collections: null
+  collections: null,
+  searchParams: null
 };
 
 export default (state = defaultState, action) => {
@@ -70,6 +71,12 @@ export default (state = defaultState, action) => {
       return {
         ...state,
         locale: action.payload
+      }
+
+    case 'SET_SEARCH_PARAMS':
+      return {
+        ...state,
+        searchParams: action.payload
       }
 
     default:

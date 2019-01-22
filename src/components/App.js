@@ -1,7 +1,7 @@
 import React from 'react';
 import { Provider, connect } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { LoadGlobals, MeasureWindow, MeasureScroll, SetLocale } from 'payload/components';
+import { LoadGlobals, MeasureWindow, MeasureScroll, SetLocale, SetSearchParams } from 'payload/components';
 
 import '../scss/app.scss';
 
@@ -30,6 +30,7 @@ const AppWithGlobals = connect(mapState)(props => {
       <Router>
         <React.Fragment>
           <SetLocale />
+          <SetSearchParams />
           {props.children}
         </React.Fragment>
       </Router>
