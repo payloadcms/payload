@@ -24,5 +24,19 @@
     "defaultLanguage": "en"
   },
   "staticUrl": "/uploads",
-  "staticDir": "demo/uploads"
+  "staticDir": "demo/uploads",
+  "imageSizes": [
+    {
+      "name": "tablet",
+      "width": 640,
+      "height": 480,
+      "crop": "left top"
+    },
+    {
+      "name": "mobile",
+      "width": 320,
+      "height": 240,
+      "crop": "left top"
+    }
+  ]
 }
