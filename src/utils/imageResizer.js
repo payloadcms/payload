@@ -4,7 +4,7 @@ import sizeOf from 'image-size';
 function getOutputImageName(sourceImage, size) {
   let extension = sourceImage.split('.').pop();
   let filenameWithoutExtension = sourceImage.substr(0, sourceImage.lastIndexOf('.')) || sourceImage;
-  return `${filenameWithoutExtension}-${size.name}.${extension}`;
+  return `${filenameWithoutExtension}-${size.width}x${size.height}.${extension}`;
 }
 
 export function resize(config, file) {
@@ -16,12 +16,12 @@ export function resize(config, file) {
         console.log(`${size.width} is greater than actual width ${dimensions.width}`);
         continue;
       }
-      let outputImage = getOutputImageName(sourceImage, size);
+      let outputImageName = getOutputImageName(sourceImage, size);
       sharp(sourceImage)
         .resize(size.width, size.height, {
           position: size.crop || 'centre'
         })
-        .toFile(outputImage, (err) => {
+        .toFile(outputImageName, (err) => {
           if (err) console.log('Error writing resized file', err);
           console.log(`Resized image from ${dimensions.width}x${dimensions.height} to ${size.width}x${size.height}`);
         });

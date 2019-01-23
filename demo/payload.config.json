@@ -37,6 +37,11 @@
       "width": 320,
       "height": 240,
       "crop": "left top"
+    },
+    {
+      "name": "icon",
+      "width": 16,
+      "height": 16
     }
   ]
 }
