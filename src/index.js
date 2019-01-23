@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import mongooseIntl from 'mongoose-intl';
 import passport from 'passport';
 import express from 'express';
 import methodOverride from 'method-override';
@@ -21,6 +20,8 @@ module.exports = {
     });
 
     options.app.use(fileUpload());
+    const staticUrl = options.config.staticUrl ? options.config.staticUrl : `/${options.config.staticDir}`;
+    options.app.use(staticUrl, express.static(options.config.staticDir));
 
     // Configure passport for Auth
     options.app.use(passport.initialize());
@@ -41,7 +42,7 @@ module.exports = {
       next();
     });
 
-    options.router.use('/upload', assetRoutes);
+    options.router.use('/upload', assetRoutes(options.config));
 
     options.app.use(language(config.localization));
 

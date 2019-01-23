@@ -1,27 +1,26 @@
 import mkdirp from 'mkdirp';
+import { resize } from '../../src/utils/imageResizer';
 
-const classifyFile = (file) => {
-  console.log(`File mimetype: ${file.mimetype}`);
-  if (file.mimetype.split('/')[0] === 'image') {
-    // TODO: Perform image specific operations
-    console.log('File classified as an image.');
-  }
-};
 
-function upload(req, res) {
+function upload(req, res, next, config) {
   if (Object.keys(req.files).length === 0) {
     return res.status(400).send('No files were uploaded.');
   }
 
-  mkdirp('./uploads', (err) => {
-    if (err) console.error(err);
+  mkdirp(config.staticDir, (err) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Upload failed.');
+    }
   });
 
-
-  req.files.file.mv(`./uploads/${req.files.file.name}`, (err) => {
+  let outputFilepath = `${config.staticDir}/${req.files.file.name}`;
+  req.files.file.mv(outputFilepath, (err) => {
     if (err) return res.status(500).send(err);
 
-    classifyFile(req.files.file);
+    if (req.files.file.mimetype.split('/')[0] === 'image') {
+      resize(config, req.files.file);
+    }
     res.send('File uploaded.');
   })
 }
