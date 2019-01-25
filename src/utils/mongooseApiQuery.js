@@ -1,9 +1,11 @@
+import {paramParser} from './paramParser';
+
 export default function apiQueryPlugin(schema) {
 
   schema.statics.apiQuery = function (rawParams, cb) {
     console.log(rawParams);
     const model = this;
-    const params = model.apiQueryParams(rawParams);
+    const params = paramParser(this, rawParams);
 
     let // Create the Mongoose Query object.
       query = model
@@ -11,7 +13,8 @@ export default function apiQueryPlugin(schema) {
         .limit(params.per_page)
         .skip((params.page - 1) * params.per_page);
 
-    if (params.sort) query = query.sort(params.sort);
+    if (params.sort)
+      query = query.sort(params.sort);
 
     if (cb) {
       query.exec(cb);
@@ -64,7 +67,6 @@ export default function apiQueryPlugin(schema) {
         }
 
       } else if (typeof schema === 'undefined') {
-        console.log('schema undefined, lckey: '+ lcKey);
         paramType = 'String';
 
       } else if (typeof schema.paths[lcKey] === 'undefined') {
@@ -74,7 +76,6 @@ export default function apiQueryPlugin(schema) {
       } else if (schema.paths[lcKey].constructor.name === 'SchemaBoolean') {
         paramType = 'Boolean';
       } else if (schema.paths[lcKey].constructor.name === 'SchemaString') {
-        console.log('schema string');
         paramType = 'String';
       } else if (schema.paths[lcKey].constructor.name === 'SchemaNumber') {
         paramType = 'Number';
