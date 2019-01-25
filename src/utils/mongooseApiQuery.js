@@ -64,6 +64,7 @@ export default function apiQueryPlugin(schema) {
         }
 
       } else if (typeof schema === 'undefined') {
+        console.log('schema undefined, lckey: '+ lcKey);
         paramType = 'String';
 
       } else if (typeof schema.paths[lcKey] === 'undefined') {
@@ -73,6 +74,7 @@ export default function apiQueryPlugin(schema) {
       } else if (schema.paths[lcKey].constructor.name === 'SchemaBoolean') {
         paramType = 'Boolean';
       } else if (schema.paths[lcKey].constructor.name === 'SchemaString') {
+        console.log('schema string');
         paramType = 'String';
       } else if (schema.paths[lcKey].constructor.name === 'SchemaNumber') {
         paramType = 'Number';
@@ -82,6 +84,8 @@ export default function apiQueryPlugin(schema) {
       else if (schema.paths[lcKey].constructor.name === 'SchemaArray') {
         paramType = 'Array';
       }
+
+      console.log('Param Type: ' + paramType);
 
       if (paramType === 'Boolean') {
         addSearchParam(convertToBoolean(val));
@@ -158,6 +162,7 @@ export default function apiQueryPlugin(schema) {
     };
 
     const parseParam = (key, val) => {
+      console.log(key, val);
       const lcKey = key;
       let operator = val.match(/\{(.*)\}/);
       val = val.replace(/\{(.*)\}/, '');
@@ -168,7 +173,7 @@ export default function apiQueryPlugin(schema) {
         return;
       } else if (lcKey === 'page') {
         page = val;
-      } else if (lcKey === 'per_page') {
+      } else if (lcKey === 'per_page' || lcKey === 'limit') {
         per_page = parseInt(val);
       } else if (lcKey === 'sort_by') {
         const parts = val.split(',');
@@ -192,14 +197,16 @@ export default function apiQueryPlugin(schema) {
       }
     }
 
-    console.log(searchParams);
-
-    return {
+    let returnVal = {
       searchParams,
       page,
       per_page,
       sort
     };
+
+    console.log(returnVal);
+
+    return returnVal;
   };
 
 }

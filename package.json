@@ -92,6 +92,7 @@
     "testURL": "http://localhost/",
     "transform": {
       "^.+\\.(j|t)s$": "babel-jest"
-    }
+    },
+    "testEnvironment": "node"
   }
 }
