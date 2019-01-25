@@ -1,6 +1,7 @@
 export default function apiQueryPlugin(schema) {
 
   schema.statics.apiQuery = function (rawParams, cb) {
+    console.log(rawParams);
     const model = this;
     const params = model.apiQueryParams(rawParams);
 
@@ -23,15 +24,11 @@ export default function apiQueryPlugin(schema) {
     const model = this;
 
     const convertToBoolean = str => {
-      if (str.toLowerCase() === 'true' ||
+      return str.toLowerCase() === 'true' ||
         str.toLowerCase() === 't' ||
         str.toLowerCase() === 'yes' ||
         str.toLowerCase() === 'y' ||
-        str === '1') {
-        return true;
-      } else {
-        return false;
-      }
+        str === '1';
     };
 
     //changed
@@ -44,7 +41,7 @@ export default function apiQueryPlugin(schema) {
 
     const parseSchemaForKey = (schema, keyPrefix, lcKey, val, operator) => {
 
-      let paramType = false;
+      let paramType;
 
       const addSearchParam = val => {
         const key = keyPrefix + lcKey;
@@ -105,7 +102,7 @@ export default function apiQueryPlugin(schema) {
             operator === 'lt' ||
             operator === 'lte' ||
             operator === 'ne') {
-            var newParam = {};
+            let newParam = {};
             newParam[`$${operator}`] = val;
             addSearchParam(newParam);
           } else {//changed
@@ -128,7 +125,7 @@ export default function apiQueryPlugin(schema) {
             operator === 'gte' ||
             operator === 'lt' ||
             operator === 'lte') {
-            var newParam = {};
+            let newParam = {};
             newParam[`$${operator}`] = val;
             addSearchParam(newParam);
           } else {
@@ -163,7 +160,7 @@ export default function apiQueryPlugin(schema) {
     const parseParam = (key, val) => {
       const lcKey = key;
       let operator = val.match(/\{(.*)\}/);
-      var val = val.replace(/\{(.*)\}/, '');
+      val = val.replace(/\{(.*)\}/, '');
 
       if (operator) operator = operator[1];
 
@@ -194,6 +191,8 @@ export default function apiQueryPlugin(schema) {
         }
       }
     }
+
+    console.log(searchParams);
 
     return {
       searchParams,
