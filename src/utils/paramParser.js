@@ -113,27 +113,17 @@ export function paramParser(model, rawParams) {
       } else if (operator === 'ne' || operator === 'not') {
         const neregex = new RegExp(val, 'i');
         addSearchParam({'$not': neregex});
-      } else if (operator === 'exact') {
-        addSearchParam(val);
-      } else {
+      } else if (operator === 'like') {
         addSearchParam({$regex: val, $options: '-i'});
+      } else {
+        addSearchParam(val);
       }
-    } else if (paramType === 'Near') {
-      // divide by 69 to convert miles to degrees
-      const latlng = val.split(',');
-      const distObj = {$near: [parseFloat(latlng[0]), parseFloat(latlng[1])]};
-      if (typeof latlng[2] !== 'undefined') {
-        distObj.$maxDistance = parseFloat(latlng[2]) / 69;
-      }
-      addSearchParam(distObj);
     } else if (paramType === 'ObjectId') {
       addSearchParam(val);
     } else if (paramType === 'Array') {
       addSearchParam(val);
       console.log(lcKey)
-
     }
-
   };
 
   const parseParam = (key, val) => {
@@ -161,7 +151,8 @@ export function paramParser(model, rawParams) {
 
   // Construct searchParams
   for (const key in rawParams) {
-    const separatedParams = rawParams[key].match(/\{\w+\}(.[^\{\}]*)/g);
+    const separatedParams = rawParams[key]
+      .match(/{\w+}(.[^{}]*)/g);
 
     if (separatedParams === null) {
       parseParam(key, rawParams[key]);
