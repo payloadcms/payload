@@ -42,6 +42,11 @@ describe('Param Parser', () => {
       let parsed = paramParser(Page, {likes: '{gte}50{lt}100'});
       expect(parsed.searchParams).toEqual({likes: {'$gte': '50', '$lt': '100'}});
     });
+
+    it('Like', () => {
+      let parsed = paramParser(Page, {title: '{like}This'});
+      expect(parsed.searchParams).toEqual({title: { '$regex': 'This', '$options': '-i' }});
+    })
   });
 
   describe('Include', () => {
@@ -55,7 +60,20 @@ describe('Param Parser', () => {
       expect(parsed.searchParams)
         .toEqual({'$or':[{_id: 'SomeId'},{_id: 'SomeSecondId'}]});
     });
-  })
+  });
+
+  describe('Exclude', () => {
+    it('Exclude Single', () => {
+      let parsed = paramParser(Page, {exclude: 'SomeId'});
+      expect(parsed.searchParams).toEqual({_id: { '$ne': 'SomeId'}});
+    });
+
+    it('Exclude Multiple', () => {
+      let parsed = paramParser(Page, {exclude: 'SomeId,SomeSecondId'});
+      expect(parsed.searchParams)
+        .toEqual({'$and':[{_id: { '$ne': 'SomeId'}},{_id: { '$ne': 'SomeSecondId'}}]});
+    });
+  });
 
   describe('Pagination / Limits', () => {
     it('Page number', () => {

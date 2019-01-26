@@ -70,6 +70,13 @@ function parseParam(key, val, model, query) {
       query = addSearchParam(query, '$or', orArray);
     } else
       query.searchParams['_id'] = val;
+  } else if (lcKey === 'exclude') {
+    if (val.match(',')) {
+      let andArray = [];
+      val.split(',').map(id => andArray.push({_id: {$ne: id}}));
+      query = addSearchParam(query, '$and', andArray);
+    } else
+      query.searchParams['_id'] = {$ne: val};
   } else {
     query = parseSchemaForKey(model.schema, query, '', lcKey, val, operator);
   }
