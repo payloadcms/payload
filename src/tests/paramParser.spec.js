@@ -15,7 +15,7 @@ const PageSchema = new Schema({
 
 const Page = mongoose.model('Page', PageSchema);
 
-describe('param parser', () => {
+describe('Param Parser', () => {
 
   describe('Parameter Parsing', () => {
     it('No params', () => {
@@ -66,13 +66,18 @@ describe('param parser', () => {
     })
   });
 
-  describe('Sorting', () => {
-    it('Sort ascending', () => {
+  describe('Ordering/Sorting', () => {
+    it('Order by ascending (default)', () => {
       let parsed = paramParser(Page, {sort_by: 'title'});
       expect(parsed).toEqual({searchParams: {}, page: 1, per_page: 100, sort: {title: 1}});
     });
 
-    it('Sort descending', () => {
+    it('Order by  ascending', () => {
+      let parsed = paramParser(Page, {sort_by: 'title,asc'});
+      expect(parsed).toEqual({searchParams: {}, page: 1, per_page: 100, sort: {title: 1}});
+    });
+
+    it('Order by descending', () => {
       let parsed = paramParser(Page, {sort_by: 'title,desc'});
       expect(parsed).toEqual({searchParams: {}, page: 1, per_page: 100, sort: {title: 'desc'}});
     })

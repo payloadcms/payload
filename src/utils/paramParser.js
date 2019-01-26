@@ -48,10 +48,10 @@ function parseParam(key, val, model, query) {
     query.page = val;
   } else if (lcKey === 'per_page' || lcKey === 'limit') {
     query.per_page = parseInt(val);
-  } else if (lcKey === 'sort_by') {
+  } else if (lcKey === 'sort_by' || lcKey === 'order_by') {
     const parts = val.split(',');
     query.sort = {};
-    query.sort[parts[0]] = parts.length > 1 ? parts[1] : 1;
+    query.sort[parts[0]] = parts[1] === 'asc' || parts.length <= 1 ? 1 : parts[1];
   } else {
     query = parseSchemaForKey(model.schema, query, '', lcKey, val, operator);
   }
@@ -82,11 +82,8 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator) {
 
   } else if (typeof schema === 'undefined') {
     paramType = 'String';
-
   } else if (typeof schema.paths[lcKey] === 'undefined') {
     // nada, not found
-  } else if (operator === 'near') {
-    paramType = 'Near';
   } else if (schema.paths[lcKey].constructor.name === 'SchemaBoolean') {
     paramType = 'Boolean';
   } else if (schema.paths[lcKey].constructor.name === 'SchemaString') {
