@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 import {paramParser} from '../utils/paramParser';
@@ -17,6 +18,11 @@ const Page = mongoose.model('Page', PageSchema);
 describe('param parser', () => {
 
   describe('Parameter Parsing', () => {
+    it('No params', () => {
+      let parsed = paramParser(Page, {});
+      expect(parsed).toEqual({});
+    });
+
     it('Property Equals', () => {
       let parsed = paramParser(Page, {title: 'This is my title'});
       expect(parsed.searchParams).toEqual({title: 'This is my title'});

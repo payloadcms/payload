@@ -1,34 +1,89 @@
+/* eslint-disable no-use-before-define */
 export function paramParser(model, rawParams) {
 
-  const convertToBoolean = str => {
-    return str.toLowerCase() === 'true' ||
-      str.toLowerCase() === 't' ||
-      str.toLowerCase() === 'yes' ||
-      str.toLowerCase() === 'y' ||
-      str === '1';
-  };
-
-  //changed
   const searchParams = {};
+  const searchPageSort = {
+    page: 1,
+    per_page: 100,
+    sort: false
+  };
+  let search = {};
 
-  let query;
-  let page = 1;
-  let per_page = 100;
-  let sort = false;
+  // Construct searchParams
+  for (const key in rawParams) {
+    const separatedParams = rawParams[key]
+      .match(/{\w+}(.[^{}]*)/g);
 
-  const parseSchemaForKey = (schema, keyPrefix, lcKey, val, operator) => {
+    if (separatedParams === null) {
+      console.log('separated params null');
+      search = parseParam(key, rawParams[key], model, searchParams, searchPageSort);
+    } else {
+      for (let i = 0; i < separatedParams.length; ++i) {
+        search = parseParam(key, separatedParams[i], model, searchParams, searchPageSort);
+      }
+    }
+  }
+
+  console.log(search, 'searchparams');
+
+  // let returnVal = {
+  //   searchParams,
+  //   ...searchPageSort
+  // };
+  //
+  // console.log(returnVal);
+
+  return search;
+}
+
+function convertToBoolean(str) {
+  return str.toLowerCase() === 'true' ||
+    str.toLowerCase() === 't' ||
+    str.toLowerCase() === 'yes' ||
+    str.toLowerCase() === 'y' ||
+    str === '1';
+}
+
+function parseParam (key, val, model, searchParams, searchPageSort) {
+  console.log(key, val);
+  const lcKey = key;
+  let operator = val.match(/\{(.*)\}/);
+  val = val.replace(/\{(.*)\}/, '');
+
+  if (operator) operator = operator[1];
+
+  if (val === '') {
+    // return;
+  } else if (lcKey === 'page') {
+    searchPageSort.page = val;
+  } else if (lcKey === 'per_page' || lcKey === 'limit') {
+    searchPageSort.per_page = parseInt(val);
+  } else if (lcKey === 'sort_by') {
+    const parts = val.split(',');
+    searchPageSort.sort = {};
+    searchPageSort.sort[parts[0]] = parts.length > 1 ? parts[1] : 1;
+  } else {
+    searchParams = parseSchemaForKey(model.schema, searchParams, '', lcKey, val, operator);
+  }
+  return {
+    searchParams,
+    ...searchPageSort
+  };
+}
+
+function parseSchemaForKey(schema, searchParams, keyPrefix, lcKey, val, operator)  {
 
     let paramType;
 
-    const addSearchParam = val => {
+    const addSearchParam = value => {
       const key = keyPrefix + lcKey;
 
       if (typeof searchParams[key] !== 'undefined') {
-        for (let i in val) {
-          searchParams[key][i] = val[i];
+        for (let i in value) {
+          searchParams[key][i] = value[i];
         }
       } else {
-        searchParams[key] = val;
+        searchParams[key] = value;
       }
     };
 
@@ -55,7 +110,7 @@ export function paramParser(model, rawParams) {
       paramType = 'Number';
     } else if (schema.paths[lcKey].constructor.name === 'ObjectId') {
       paramType = 'ObjectId';
-    }//changed
+    }
     else if (schema.paths[lcKey].constructor.name === 'SchemaArray') {
       paramType = 'Array';
     }
@@ -82,9 +137,9 @@ export function paramParser(model, rawParams) {
           operator === 'lte' ||
           operator === 'ne') {
           let newParam = {};
-          newParam[`$${operator}`] = val;
+          newParam['$' + operator] = val;
           addSearchParam(newParam);
-        } else {//changed
+        } else {
           addSearchParam(parseInt(val));
         }
       }
@@ -105,7 +160,7 @@ export function paramParser(model, rawParams) {
           operator === 'lt' ||
           operator === 'lte') {
           let newParam = {};
-          newParam[`$${operator}`] = val;
+          newParam['$' + operator] = val;
           addSearchParam(newParam);
         } else {
           addSearchParam(val);
@@ -124,53 +179,5 @@ export function paramParser(model, rawParams) {
       addSearchParam(val);
       console.log(lcKey)
     }
-  };
-
-  const parseParam = (key, val) => {
-    console.log(key, val);
-    const lcKey = key;
-    let operator = val.match(/\{(.*)\}/);
-    val = val.replace(/\{(.*)\}/, '');
-
-    if (operator) operator = operator[1];
-
-    if (val === '') {
-      return;
-    } else if (lcKey === 'page') {
-      page = val;
-    } else if (lcKey === 'per_page' || lcKey === 'limit') {
-      per_page = parseInt(val);
-    } else if (lcKey === 'sort_by') {
-      const parts = val.split(',');
-      sort = {};
-      sort[parts[0]] = parts.length > 1 ? parts[1] : 1;
-    } else {
-      parseSchemaForKey(model.schema, '', lcKey, val, operator);
-    }
-  };
-
-  // Construct searchParams
-  for (const key in rawParams) {
-    const separatedParams = rawParams[key]
-      .match(/{\w+}(.[^{}]*)/g);
-
-    if (separatedParams === null) {
-      parseParam(key, rawParams[key]);
-    } else {
-      for (let i = 0; i < separatedParams.length; ++i) {
-        parseParam(key, separatedParams[i]);
-      }
-    }
+    return searchParams;
   }
-
-  let returnVal = {
-    searchParams,
-    page,
-    per_page,
-    sort
-  };
-
-  console.log(returnVal);
-
-  return returnVal;
-}
