@@ -3,7 +3,6 @@ import {paramParser} from './paramParser';
 export default function apiQueryPlugin(schema) {
 
   schema.statics.apiQuery = function (rawParams, cb) {
-    console.log(rawParams);
     const model = this;
     const params = paramParser(this, rawParams);
 
