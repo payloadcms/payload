@@ -35,6 +35,17 @@ function convertToBoolean(str) {
     str === '1';
 }
 
+function addSearchParam(query, key, value) {
+  if (typeof query.searchParams[key] !== 'undefined') {
+    for (let i in value) {
+      query.searchParams[key][i] = value[i];
+    }
+  } else {
+    query.searchParams[key] = value;
+  }
+  return query;
+}
+
 function parseParam(key, val, model, query) {
   const lcKey = key;
   let operator = val.match(/\{(.*)\}/);
@@ -52,6 +63,13 @@ function parseParam(key, val, model, query) {
     const parts = val.split(',');
     query.sort = {};
     query.sort[parts[0]] = parts[1] === 'asc' || parts.length <= 1 ? 1 : parts[1];
+  } else if (lcKey === 'include') {
+    if (val.match(',')) {
+      let orArray = [];
+      val.split(',').map(id => orArray.push({_id: id}));
+      query = addSearchParam(query, '$or', orArray);
+    } else
+      query.searchParams['_id'] = val;
   } else {
     query = parseSchemaForKey(model.schema, query, '', lcKey, val, operator);
   }
@@ -60,17 +78,7 @@ function parseParam(key, val, model, query) {
 
 function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator) {
   let paramType;
-  const addSearchParam = value => {
-    const key = keyPrefix + lcKey;
-
-    if (typeof query.searchParams[key] !== 'undefined') {
-      for (let i in value) {
-        query.searchParams[key][i] = value[i];
-      }
-    } else {
-      query.searchParams[key] = value;
-    }
-  };
+  const key = keyPrefix + lcKey;
 
   let matches = lcKey.match(/(.+)\.(.+)/);
   if (matches) {
@@ -97,17 +105,17 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator) {
   }
 
   if (paramType === 'Boolean') {
-    addSearchParam(convertToBoolean(val));
+    addSearchParam(query, key, convertToBoolean(val));
   } else if (paramType === 'Number') {
     if (val.match(/([0-9]+,?)/) && val.match(',')) {
       if (operator === 'all') {
-        addSearchParam({$all: val.split(',')});
+        addSearchParam(query, key, {$all: val.split(',')});
       } else if (operator === 'nin') {
-        addSearchParam({$nin: val.split(',')});
+        addSearchParam(query, key, {$nin: val.split(',')});
       } else if (operator === 'mod') {
-        addSearchParam({$mod: [val.split(',')[0], val.split(',')[1]]});
+        addSearchParam(query, key, {$mod: [val.split(',')[0], val.split(',')[1]]});
       } else {
-        addSearchParam({$in: val.split(',')});
+        addSearchParam(query, key, {$in: val.split(',')});
       }
     } else if (val.match(/([0-9]+)/)) {
       if (operator === 'gt' ||
@@ -117,9 +125,9 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator) {
         operator === 'ne') {
         let newParam = {};
         newParam['$' + operator] = val;
-        addSearchParam(newParam);
+        addSearchParam(query, key, newParam);
       } else {
-        addSearchParam(parseInt(val));
+        addSearchParam(query, key, parseInt(val));
       }
     }
   } else if (paramType === 'String') {
@@ -127,11 +135,11 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator) {
       const options = val.split(',').map(str => new RegExp(str, 'i'));
 
       if (operator === 'all') {
-        addSearchParam({$all: options});
+        addSearchParam(query, key, {$all: options});
       } else if (operator === 'nin') {
-        addSearchParam({$nin: options});
+        addSearchParam(query, key, {$nin: options});
       } else {
-        addSearchParam({$in: options});
+        addSearchParam(query, key, {$in: options});
       }
     } else if (val.match(/([0-9]+)/)) {
       if (operator === 'gt' ||
@@ -140,22 +148,22 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator) {
         operator === 'lte') {
         let newParam = {};
         newParam['$' + operator] = val;
-        addSearchParam(newParam);
+        addSearchParam(query, key, newParam);
       } else {
-        addSearchParam(val);
+        addSearchParam(query, key, val);
       }
     } else if (operator === 'ne' || operator === 'not') {
       const neregex = new RegExp(val, 'i');
-      addSearchParam({'$not': neregex});
+      addSearchParam(query, key, {'$not': neregex});
     } else if (operator === 'like') {
-      addSearchParam({$regex: val, $options: '-i'});
+      addSearchParam(query, key, {$regex: val, $options: '-i'});
     } else {
-      addSearchParam(val);
+      addSearchParam(query, key, val);
     }
   } else if (paramType === 'ObjectId') {
-    addSearchParam(val);
+    addSearchParam(query, key, val);
   } else if (paramType === 'Array') {
-    addSearchParam(val);
+    addSearchParam(query, key, val);
   }
   return query;
 }

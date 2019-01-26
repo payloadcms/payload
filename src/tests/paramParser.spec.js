@@ -44,6 +44,19 @@ describe('Param Parser', () => {
     });
   });
 
+  describe('Include', () => {
+    it('Include Single', () => {
+      let parsed = paramParser(Page, {include: 'SomeId'});
+      expect(parsed.searchParams).toEqual({_id: 'SomeId'});
+    });
+
+    it('Include Multiple', () => {
+      let parsed = paramParser(Page, {include: 'SomeId,SomeSecondId'});
+      expect(parsed.searchParams)
+        .toEqual({'$or':[{_id: 'SomeId'},{_id: 'SomeSecondId'}]});
+    });
+  })
+
   describe('Pagination / Limits', () => {
     it('Page number', () => {
       let parsed = paramParser(Page, {page: '2'});
