@@ -1,13 +1,12 @@
-/* eslint-disable no-use-before-define */
+/* eslint-disable no-use-before-define,camelcase */
 export function paramParser(model, rawParams) {
 
-  const searchParams = {};
-  const searchPageSort = {
+  let query = {
+    searchParams: {},
     page: 1,
     per_page: 100,
     sort: false
   };
-  let search = {};
 
   // Construct searchParams
   for (const key in rawParams) {
@@ -16,24 +15,16 @@ export function paramParser(model, rawParams) {
 
     if (separatedParams === null) {
       console.log('separated params null');
-      search = parseParam(key, rawParams[key], model, searchParams, searchPageSort);
+      query = parseParam(key, rawParams[key], model, query);
     } else {
       for (let i = 0; i < separatedParams.length; ++i) {
-        search = parseParam(key, separatedParams[i], model, searchParams, searchPageSort);
+        query = parseParam(key, separatedParams[i], model, query);
       }
     }
   }
 
-  console.log(search, 'searchparams');
-
-  // let returnVal = {
-  //   searchParams,
-  //   ...searchPageSort
-  // };
-  //
-  // console.log(returnVal);
-
-  return search;
+  console.log(query, 'query object');
+  return query;
 }
 
 function convertToBoolean(str) {
@@ -44,7 +35,7 @@ function convertToBoolean(str) {
     str === '1';
 }
 
-function parseParam (key, val, model, searchParams, searchPageSort) {
+function parseParam (key, val, model, query) {
   console.log(key, val);
   const lcKey = key;
   let operator = val.match(/\{(.*)\}/);
@@ -53,37 +44,34 @@ function parseParam (key, val, model, searchParams, searchPageSort) {
   if (operator) operator = operator[1];
 
   if (val === '') {
-    // return;
+    return {};
   } else if (lcKey === 'page') {
-    searchPageSort.page = val;
+    query.page = val;
   } else if (lcKey === 'per_page' || lcKey === 'limit') {
-    searchPageSort.per_page = parseInt(val);
+    query.per_page = parseInt(val);
   } else if (lcKey === 'sort_by') {
     const parts = val.split(',');
-    searchPageSort.sort = {};
-    searchPageSort.sort[parts[0]] = parts.length > 1 ? parts[1] : 1;
+    query.sort = {};
+    query.sort[parts[0]] = parts.length > 1 ? parts[1] : 1;
   } else {
-    searchParams = parseSchemaForKey(model.schema, searchParams, '', lcKey, val, operator);
+    query = parseSchemaForKey(model.schema, query, '', lcKey, val, operator);
   }
-  return {
-    searchParams,
-    ...searchPageSort
-  };
+  return query;
 }
 
-function parseSchemaForKey(schema, searchParams, keyPrefix, lcKey, val, operator)  {
+function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator)  {
 
     let paramType;
 
     const addSearchParam = value => {
       const key = keyPrefix + lcKey;
 
-      if (typeof searchParams[key] !== 'undefined') {
+      if (typeof query.searchParams[key] !== 'undefined') {
         for (let i in value) {
-          searchParams[key][i] = value[i];
+          query.searchParams[key][i] = value[i];
         }
       } else {
-        searchParams[key] = value;
+        query.searchParams[key] = value;
       }
     };
 
@@ -179,5 +167,5 @@ function parseSchemaForKey(schema, searchParams, keyPrefix, lcKey, val, operator
       addSearchParam(val);
       console.log(lcKey)
     }
-    return searchParams;
+    return query;
   }

@@ -20,7 +20,7 @@ describe('param parser', () => {
   describe('Parameter Parsing', () => {
     it('No params', () => {
       let parsed = paramParser(Page, {});
-      expect(parsed).toEqual({});
+      expect(parsed).toEqual({ searchParams: {}, page: 1, per_page: 100, sort: false});
     });
 
     it('Property Equals', () => {
