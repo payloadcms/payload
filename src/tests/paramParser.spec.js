@@ -3,16 +3,20 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 import {paramParser} from '../utils/paramParser';
 
-const PageSchema = new Schema({
-    title: {type: String},
-    content: {type: String},
-    slug: {type: String, unique: true, required: true},
-    metaTitle: String,
-    metaDesc: String,
-    likes: {type: Number}
-  }
-);
+const AuthorSchema = new Schema({
+  name: String,
+  publish_count: Number
+});
 
+const PageSchema = new Schema({
+  title: {type: String},
+  author: AuthorSchema,
+  content: {type: String},
+  slug: {type: String, unique: true, required: true},
+  metaTitle: String,
+  metaDesc: String,
+  likes: {type: Number}
+});
 const Page = mongoose.model('Page', PageSchema);
 
 describe('Param Parser', () => {
@@ -46,7 +50,20 @@ describe('Param Parser', () => {
     it('Like', () => {
       let parsed = paramParser(Page, {title: '{like}This'});
       expect(parsed.searchParams).toEqual({title: { '$regex': 'This', '$options': '-i' }});
+    });
+
+    describe('SubSchemas', () => {
+      it('Parse subschema for String', () => {
+        let parsed = paramParser(Page, { 'author.name': 'Jane'});
+        expect(parsed.searchParams).toEqual({'author.name': 'Jane'})
+      });
+
+      it('Parse subschema for Number', () => {
+        let parsed = paramParser(Page, { 'author.publish_count': '7'});
+        expect(parsed.searchParams).toEqual({'author.publish_count': '7'})
+      })
     })
+
   });
 
   describe('Include', () => {

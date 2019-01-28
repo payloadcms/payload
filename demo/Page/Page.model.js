@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import mongooseStringQuery from 'mongoose-string-query';
+import mongooseApiQuery from '../../src/utils/mongooseApiQuery';
 import mongooseIntl from 'mongoose-intl';
 import payloadConfig from '.././payload.config';
 
@@ -12,7 +12,7 @@ const PageSchema = new mongoose.Schema({
   }
 );
 
-PageSchema.plugin(mongooseStringQuery);
+PageSchema.plugin(mongooseApiQuery);
 
 PageSchema.plugin(mongooseIntl, payloadConfig.localization);
 

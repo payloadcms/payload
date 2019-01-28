@@ -89,12 +89,15 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator) {
 
   let matches = lcKey.match(/(.+)\.(.+)/);
   if (matches) {
-    // parse subschema
+    // Parse SubSchema
     if (schema.paths[matches[1]].constructor.name === 'DocumentArray' ||
       schema.paths[matches[1]].constructor.name === 'Mixed') {
       parseSchemaForKey(schema.paths[matches[1]].schema, `${matches[1]}.`, matches[2], val, operator)
     }
-
+    else if (schema.paths[matches[1]].constructor.name === 'SchemaType'){
+      // This wasn't handled in the original package but seems to work
+      paramType = schema.paths[matches[1]].schema.paths.name.instance;
+    }
   } else if (typeof schema === 'undefined') {
     paramType = 'String';
   } else if (typeof schema.paths[lcKey] === 'undefined') {
