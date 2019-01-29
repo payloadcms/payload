@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import passport from 'passport';
 import express from 'express';
+import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 import jwtStrategy from './auth/jwt';
 import User from '../demo/User/User.model';
@@ -49,6 +50,7 @@ module.exports = {
     options.app.use(express.json());
     options.app.use(methodOverride('X-HTTP-Method-Override'));
     options.app.use(express.urlencoded({extended: true}));
+    options.app.use(bodyParser.urlencoded({ extended: true }));
     options.app.use(options.router);
   }
 };
