@@ -8,7 +8,7 @@ import User from '../demo/User/User.model';
 import fileUpload from 'express-fileupload';
 import assetRoutes from './routes/uploads.routes'
 import config from '../demo/payload.config';
-import language from './middleware/language';
+import language from './middleware/locale';
 
 module.exports = {
   init: options => {

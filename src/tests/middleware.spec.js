@@ -1,6 +1,6 @@
 import middleware from '../middleware';
 import mockExpress from 'jest-mock-express';
-import language from '../middleware/language';
+import locale from '../middleware/locale';
 
 let res = null;
 let next = null;
@@ -41,7 +41,7 @@ describe('Payload Middleware', () => {
 
   });
 
-  describe('Payload Language Middleware', () => {
+  describe('Payload Locale Middleware', () => {
 
     let req, localization;
 
@@ -58,65 +58,65 @@ describe('Payload Middleware', () => {
     });
 
     it('Supports query params', () => {
-      req.query.lang = 'es';
+      req.query.locale = 'es';
 
-      language(localization)(req, res, next);
+      locale(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
-      expect(req.language).toEqual(req.query.lang);
+      expect(req.locale).toEqual(req.query.locale);
     });
 
     it('Supports query param fallback to default', () => {
       req.query.lang = 'pt';
 
-      language(localization)(req, res, next);
+      locale(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
-      expect(req.language).toEqual(localization.defaultLanguage);
+      expect(req.locale).toEqual(localization.defaultLanguage);
     });
 
-    it('Supports accept language header', () => {
+    it('Supports accept-language header', () => {
       req.headers['accept-language'] = 'es,fr;';
 
-      language(localization)(req, res, next);
+      locale(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
-      expect(req.language).toEqual('es');
+      expect(req.locale).toEqual('es');
     });
 
-    it('Supports accept language header fallback', () => {
-      req.query.lang = 'pt';
+    it('Supports accept-language header fallback', () => {
+      req.query.locale = 'pt';
       req.headers['accept-language'] = 'fr;';
 
-      language(localization)(req, res, next);
+      locale(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
-      expect(req.language).toEqual(localization.defaultLanguage);
+      expect(req.locale).toEqual(localization.defaultLanguage);
     });
 
     it('Query param takes precedence over header', () => {
-      req.query.lang = 'es';
+      req.query.locale = 'es';
       req.headers['accept-language'] = 'en;';
 
-      language(localization)(req, res, next);
+      locale(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
-      expect(req.language).toEqual('es');
+      expect(req.locale).toEqual('es');
     });
 
     it('Supports default language', () => {
-      language(localization)(req, res, next);
+      locale(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
-      expect(req.language).toEqual(localization.defaultLanguage);
+      expect(req.locale).toEqual(localization.defaultLanguage);
     });
 
     it('Supports language all', () => {
-      req.query.lang = 'all';
-      language(localization)(req, res, next);
+      req.query.locale = '*';
+      locale(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
-      expect(req.language).toBeUndefined();
+      expect(req.locale).toBeUndefined();
     });
   });
 });

@@ -3,14 +3,14 @@ import httpStatus from 'http-status';
 
 const pageController = {
   query(req, res) {
-    if (req.query.lang) {
-      Page.setDefaultLanguage(req.query.lang);
+    if (req.query.locale) {
+      Page.setDefaultLanguage(req.query.locale);
     }
     Page.apiQuery(req.query, (err, pages) => {
       if (err) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
       }
-      return res.json(pages.map(page => page.toJSON({ virtuals: !!req.language })));
+      return res.json(pages.map(page => page.toJSON({ virtuals: !!req.locale })));
     });
   },
 
@@ -24,8 +24,8 @@ const pageController = {
         return res.status(httpStatus.NOT_FOUND).send('Not Found');
       }
 
-      if (req.language) {
-        doc.setLanguage(req.language);
+      if (req.locale) {
+        doc.setLanguage(req.locale);
         return res.json(doc.toJSON({ virtuals: true }));
       }
 
