@@ -8,7 +8,7 @@ import User from '../demo/User/User.model';
 import fileUpload from 'express-fileupload';
 import assetRoutes from './routes/uploads.routes'
 import config from '../demo/payload.config';
-import language from './middleware/locale';
+import locale from './middleware/locale';
 
 module.exports = {
   init: options => {
@@ -38,19 +38,18 @@ module.exports = {
       res.header('Access-Control-Allow-Headers',
         'Origin X-Requested-With, Content-Type, Accept, Authorization');
       res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
-      res.header('Content-Language', options.config.localization.language);
+      res.header('Content-Language', options.config.localization.locale);
 
       next();
     });
 
     options.router.use('/upload', assetRoutes(options.config));
 
-    options.app.use(language(config.localization));
-
     options.app.use(express.json());
     options.app.use(methodOverride('X-HTTP-Method-Override'));
     options.app.use(express.urlencoded({extended: true}));
     options.app.use(bodyParser.urlencoded({ extended: true }));
+    options.app.use(locale(config.localization));
     options.app.use(options.router);
   }
 };

@@ -8,14 +8,20 @@ import languageParser from 'accept-language-parser';
  */
 export default function locale(localization) {
   return function (req, res, next) {
-    let query;
+    let setLocale;
     if (req.query.locale) {
-      query = localization.languages.find(locale => locale === req.query.locale);
-      if (query) {
-        req.locale = query;
+      setLocale = localization.languages.find(search => search === req.query.locale);
+      if (setLocale) {
+        req.locale = setLocale;
       }
       if (req.query.locale === '*' || req.query.locale === 'all')
         return next();
+    }
+    if (req.body.locale){
+      setLocale = localization.languages.find(search => search === req.body.locale);
+      if (setLocale) {
+        req.locale = setLocale;
+      }
     }
     if (!req.locale && req.headers['accept-language'])
       req.locale = languageParser.pick(localization.languages, req.headers['accept-language']);

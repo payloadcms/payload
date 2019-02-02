@@ -48,7 +48,8 @@ describe('Payload Middleware', () => {
     beforeEach(() => {
       req = {
         query: {},
-        headers: {}
+        headers: {},
+        body: {}
       };
       localization = {
         languages: ['en', 'es'],
@@ -67,7 +68,7 @@ describe('Payload Middleware', () => {
     });
 
     it('Supports query param fallback to default', () => {
-      req.query.lang = 'pt';
+      req.query.locale = 'pt';
 
       locale(localization)(req, res, next);
 
@@ -117,6 +118,15 @@ describe('Payload Middleware', () => {
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(req.locale).toBeUndefined();
+    });
+
+    it('Supports locale in body on post', () => {
+      req.body = {locale: 'es'};
+      req.method = 'post';
+      locale(localization)(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(req.locale).toEqual('es');
     });
   });
 });
