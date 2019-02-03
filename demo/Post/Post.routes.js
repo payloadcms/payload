@@ -1,7 +1,10 @@
 import express from 'express';
-import postPolicy from './Post.policy';
+import {query, create, find} from '../../src/requestHandlers'; // payload implementations
+
+import update from '../shared/requestHandlers/update'; // application implementations
+import {destroy} from './Post.requestHandler'; // model specific implementations
 import Post from './Post.model';
-import requestHandler from '../../src/requestHandlers';
+import postPolicy from './Post.policy';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
@@ -14,13 +17,13 @@ router.all('', (req, res, next) => {
 
 router
   .route('')
-  .get(postPolicy.query, requestHandler.query)
-  .post(postPolicy.post, requestHandler.post);
+  .get(postPolicy.query, query)
+  .post(postPolicy.post, create);
 
 router
   .route('/:id')
-  .get(postPolicy.find, requestHandler.find)
-  .put(postPolicy.update, requestHandler.update)
-  .delete(postPolicy.delete, requestHandler.delete);
+  .get(postPolicy.find, find)
+  .put(postPolicy.update, update)
+  .delete(postPolicy.delete, destroy);
 
 export default router;
