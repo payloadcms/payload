@@ -15,7 +15,8 @@ payload.init({
   config: payloadConfig,
   app: app,
   user: User,
-  router: router
+  router: router,
+  cors: ['http://localhost:8081']
 });
 
 router.use('', authRoutes);

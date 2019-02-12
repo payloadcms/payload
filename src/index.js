@@ -33,21 +33,26 @@ module.exports = {
     passport.serializeUser(options.user.serializeUser());
     passport.deserializeUser(options.user.deserializeUser());
 
-    options.app.use((req, res, next) => {
-      res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
-      res.header('Access-Control-Allow-Headers',
-        'Origin X-Requested-With, Content-Type, Accept, Authorization');
-      res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
-      res.header('Content-Language', options.config.localization.locale);
+    if (options.cors) {
+      options.app.use((req, res, next) => {
+        if (options.cors.indexOf(req.headers.origin) > -1) {
+          res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+          res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
+        }
 
-      next();
-    });
+        res.header('Access-Control-Allow-Headers',
+          'Origin X-Requested-With, Content-Type, Accept, Authorization');
+        res.header('Content-Language', options.config.localization.locale);
+
+        next();
+      });
+    }
 
     options.router.use('/upload', assetRoutes(options.config));
 
     options.app.use(express.json());
     options.app.use(methodOverride('X-HTTP-Method-Override'));
-    options.app.use(express.urlencoded({extended: true}));
+    options.app.use(express.urlencoded({ extended: true }));
     options.app.use(bodyParser.urlencoded({ extended: true }));
     options.app.use(locale(config.localization));
     options.app.use(options.router);
