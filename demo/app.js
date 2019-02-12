@@ -23,6 +23,8 @@ router.use('', authRoutes);
 router.use('/users', userRoutes);
 router.use('/pages', pageRoutes);
 
+
+
 app.listen(payloadConfig.port, () => {
   console.log(`listening on ${payloadConfig.port}...`);
 });
