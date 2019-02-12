@@ -17,16 +17,16 @@ const Table = props => {
           {props.rows.map((row, i) => {
             return (
               <tr key={i}>
-                  {props.columns.map((col, i) => {
-                    return (
-                      <td key={i}>
-                        {row[col.key]
-                          ? row[col.key]
-                          : <span className="no-data" dangerouslySetInnerHTML={{__html: '&mdash;'}} />
-                        }
-                      </td>
-                    )
-                  })}
+                {props.columns.map((col, i) => {
+                  return (
+                    <td key={i}>
+                      {row[col.key]
+                        ? row[col.key]
+                        : <span className="no-data" dangerouslySetInnerHTML={{ __html: '&mdash;' }} />
+                      }
+                    </td>
+                  )
+                })}
               </tr>
             )
           })}

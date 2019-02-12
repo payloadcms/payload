@@ -6,7 +6,6 @@ import payloadConfig from './payload.config';
 import authRoutes from './Auth/Auth.routes';
 import userRoutes from './User/User.routes';
 import pageRoutes from './Page/Page.routes';
-import postRoutes from './Post/Post.routes';
 
 const router = express.Router({}); // eslint-disable-line new-cap
 
@@ -22,7 +21,6 @@ payload.init({
 router.use('', authRoutes);
 router.use('/users', userRoutes);
 router.use('/pages', pageRoutes);
-router.use('/posts', postRoutes);
 
 app.listen(payloadConfig.port, () => {
   console.log(`listening on ${payloadConfig.port}...`);

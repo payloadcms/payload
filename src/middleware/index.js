@@ -1,8 +1,7 @@
-export function role(role) {
-  return function (req, res, next) {
-    if (role !== req.user.role) res.status(401).send('Role not authorized.');
-    else next();
-  }
-}
+import role from './role';
+import bindModel from './bindModel';
 
-export default { role };
+export default {
+  bindModel,
+  role
+};

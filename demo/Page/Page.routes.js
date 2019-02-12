@@ -1,19 +1,18 @@
 import express from 'express';
-import passport from 'passport';
-import pageController from './Page.controller';
+import { query, create, find, destroy, update } from '../../src/requestHandlers';
 import pagePolicy from './Page.policy';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
 router
   .route('')
-  .get(pagePolicy.query, pageController.query)
-  .post(pagePolicy.post, pageController.post);
+  .get(pagePolicy.query, query)
+  .post(pagePolicy.create, create);
 
 router
   .route('/:id')
-  .get(pagePolicy.find, pageController.find)
-  .put(pagePolicy.update, pageController.update)
-  .delete(pagePolicy.delete, pageController.delete);
+  .get(pagePolicy.find, find)
+  .put(pagePolicy.update, update)
+  .delete(pagePolicy.destroy, destroy);
 
 export default router;

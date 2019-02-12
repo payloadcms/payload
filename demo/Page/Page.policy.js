@@ -6,7 +6,7 @@ const pagePolicy = {
     next();
   },
 
-  post(req, res, next) {
+  create(req, res, next) {
     // TODO: how to get current authenticated user?
     next();
   },
@@ -19,7 +19,7 @@ const pagePolicy = {
     next();
   },
 
-  delete(req, res, next) {
+  destroy(req, res, next) {
     next();
   },
 };
