@@ -24,10 +24,12 @@ class Status extends Component {
     if (this.state.open) {
       return (
         <div className={`status ${this.props.type}`}>
-          {this.props.message}
-          <button className="close" onClick={() => this.setState({ open: false} )}>
-            <Close />
-          </button>
+          <div className="status-wrap">
+            {this.props.message}
+            <button className="close" onClick={() => this.setState({ open: false })}>
+              <Close />
+            </button>
+          </div>
         </div>
       )
     }

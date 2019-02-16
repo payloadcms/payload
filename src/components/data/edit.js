@@ -14,7 +14,7 @@ const withEditData = PassedComponent => {
       super(props);
 
       this.state = {
-        data: null
+        data: {}
       }
     }
 

@@ -14,7 +14,7 @@ const withArchiveData = PassedComponent => {
       super(props);
 
       this.state = {
-        data: null
+        data: []
       }
     }
 

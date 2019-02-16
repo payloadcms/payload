@@ -4,6 +4,7 @@
   @include gutter;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 
   > .content {
     flex-grow: 1;
