@@ -60,6 +60,10 @@ class Edit extends Component {
           } />
 
           <HiddenInput
+            name="locale"
+            valueOverride={this.props.locale} />
+
+          <HiddenInput
             name="slug"
             valueOverride={this.state.slug} />
 
