@@ -25,13 +25,13 @@ class SearchableTable extends Component {
   structureRows = () => {
     if (this.props.data) {
       return this.props.data.map(row => {
-          const formattedRow = {...row};
+        const formattedRow = { ...row };
 
-          const url = `/collections/${this.props.collection.slug}/${row.slug}`;
+        const url = `/collections/${this.props.collection.slug}/${row._id}`;
 
-          // Link the first column
-          formattedRow[this.state.columns[0].key] = <Link to={url}>{row[this.state.columns[0].key]}</Link>
-          return formattedRow;
+        // Link the first column
+        formattedRow[this.state.columns[0].key] = <Link to={url}>{row[this.state.columns[0].key]}</Link>
+        return formattedRow;
       })
     }
 

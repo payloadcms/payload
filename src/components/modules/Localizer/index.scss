@@ -1,0 +1,48 @@
+@import '~payload/scss/styles';
+
+.localizer {
+  position: relative;
+
+  .current-locale {
+    @extend %uppercase-label;
+    @extend %btn-reset;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+
+    &:active,
+    &:focus {
+      outline: none;
+    }
+
+    svg {
+      transform: rotate(90deg);
+      width: rem(.25);
+      height: rem(.25);
+      margin-right: rem(.375);
+    }
+  }
+
+  ul {
+    @extend %uppercase-label;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  &.active {
+    svg {
+      transform: rotate(-90deg);
+    }
+
+    ul {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+}

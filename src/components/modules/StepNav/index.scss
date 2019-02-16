@@ -1,7 +1,6 @@
 @import '~payload/scss/styles';
 
-.current-view-nav {
-  @include m;
+.step-nav {
   display: flex;
 
   * {
@@ -16,8 +15,8 @@
 
     svg {
       margin-left: rem(.35);
-      width: rem(.3);
-      height: rem(.3);
+      width: rem(.25);
+      height: rem(.25);
     }
 
     label {
@@ -29,7 +28,7 @@
     color: $gray;
   }
 
-  label {
+  span {
     @extend %uppercase-label;
   }
 }

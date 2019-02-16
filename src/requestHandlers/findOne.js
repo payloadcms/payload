@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 const findOne = (req, res) => {
   req.model.setDefaultLanguage(req.locale);
 
-  req.model.findOne({ slug: { en: req.params.slug } }, (err, doc) => {
+  req.model.findOne({ _id: req.params._id }, (err, doc) => {
     if (err)
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
 

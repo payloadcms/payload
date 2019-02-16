@@ -15,7 +15,7 @@ router
   .post(pagePolicy.create, create);
 
 router
-  .route('/:slug')
+  .route('/:_id')
   .get(pagePolicy.read, findOne)
   .put(pagePolicy.update, update)
   .delete(pagePolicy.destroy, destroy);

@@ -3,4 +3,11 @@
 .default-template {
   @include default-template-width;
   padding-top: rem(1);
+
+  .eyebrow {
+    @include m;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 }
