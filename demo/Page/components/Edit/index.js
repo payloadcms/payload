@@ -17,7 +17,6 @@ import {
 const Edit = props => {
 
   const { id } = props.match.params;
-
   const { data, collection, config, locale } = props;
 
   const sampleRepeaterValue = [
@@ -39,14 +38,6 @@ const Edit = props => {
             <FormSubmit>Save</FormSubmit>
           </React.Fragment>
         } />
-
-        <HiddenInput
-          name="locale"
-          valueOverride={locale} />
-
-        <HiddenInput
-          name="slug"
-          valueOverride={id} />
 
         <Input name="title"
           label="Page Title"

@@ -8,7 +8,6 @@ const PageSchema = new mongoose.Schema({
   ...schemaBaseFields,
   title: { type: String, intl: true, unique: true },
   content: { type: String, intl: true },
-  slug: { type: String, intl: true, unique: true, required: true },
   metaTitle: String,
   metaDesc: String
 },
