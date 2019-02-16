@@ -1,11 +1,16 @@
 import React, { Component, createContext } from 'react';
 import { withRouter } from 'react-router-dom';
-import { Status } from 'payload/components';
+import { connect } from 'react-redux';
+import { Status, HiddenInput } from 'payload/components';
 import api from 'payload/api';
 
 import './index.scss';
 
 export const FormContext = createContext({});
+
+const mapState = state => ({
+  searchParams: state.common.searchParams
+})
 
 class Form extends Component {
   constructor(props) {
@@ -125,6 +130,9 @@ class Form extends Component {
           processing: this.state.processing,
           submitted: this.state.submitted
         }}>
+          <HiddenInput
+            name="locale"
+            valueOverride={this.props.searchParams.locale} />
           {this.props.children}
         </FormContext.Provider>
       </form>
@@ -132,4 +140,4 @@ class Form extends Component {
   }
 }
 
-export default withRouter(Form);
+export default withRouter(connect(mapState)(Form));

@@ -7,7 +7,6 @@ import {
   Button,
   Form,
   Input,
-  HiddenInput,
   Textarea,
   Group,
   FormSubmit,

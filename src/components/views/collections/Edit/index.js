@@ -28,7 +28,7 @@ const EditView = props => {
         {props.isEditing &&
           <h1>
             Edit {props.data &&
-              props.data[props.collection.entrySlug]
+              props.data[props.collection.useAsTitle]
             }
           </h1>
         }
