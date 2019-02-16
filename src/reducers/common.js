@@ -10,7 +10,7 @@ const defaultState = {
   locale: null,
   config: null,
   collections: null,
-  searchParams: null
+  searchParams: {}
 };
 
 export default (state = defaultState, action) => {

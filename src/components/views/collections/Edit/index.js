@@ -27,8 +27,8 @@ const EditView = props => {
       <header>
         {props.isEditing &&
           <h1>
-            Edit {props.data &&
-              props.data[props.collection.useAsTitle]
+            Edit {Object.keys(props.data).length > 0 &&
+              (props.data[props.collection.useAsTitle] ? props.data[props.collection.useAsTitle] : '[Untitled]')
             }
           </h1>
         }

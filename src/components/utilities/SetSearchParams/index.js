@@ -15,7 +15,7 @@ class SetSearchParams extends Component {
       { ignoreQueryPrefix: true }
     );
 
-    this.props.setParams(params);
+    this.props.setParams(params ? params : {});
   }
 
   componentDidMount() {
