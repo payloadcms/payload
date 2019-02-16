@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-import mongooseApiQuery from '../../src/utils/mongooseApiQuery';
+import buildQuery from '../../src/plugins/buildQuery';
+import paginate from '../../src/plugins/paginate';
 import mongooseIntl from 'mongoose-intl';
 import payloadConfig from '.././payload.config';
 import { schemaBaseFields } from '../../src/helpers/mongoose/schemaBaseFields';
@@ -15,12 +16,13 @@ const PageSchema = new mongoose.Schema({
   { timestamps: true }
 );
 
-PageSchema.plugin(mongooseApiQuery);
+PageSchema.plugin(paginate);
+PageSchema.plugin(buildQuery);
 
 const formattedIntl = {
   defaultLanguage: payloadConfig.localization.defaultLocale,
   languages: payloadConfig.localization.locales
-}
+};
 
 PageSchema.plugin(mongooseIntl, formattedIntl);
 
