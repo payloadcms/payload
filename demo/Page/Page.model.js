@@ -5,13 +5,13 @@ import payloadConfig from '.././payload.config';
 import { schemaBaseFields } from '../../src/helpers/mongoose/schemaBaseFields';
 
 const PageSchema = new mongoose.Schema({
-    ...schemaBaseFields,
-    title: {type: String, intl: true},
-    content: {type: String, intl: true},
-    slug: {type: String, unique: true, required: true},
-    metaTitle: String,
-    metaDesc: String
-  },
+  ...schemaBaseFields,
+  title: { type: String, intl: true, unique: true },
+  content: { type: String, intl: true },
+  slug: { type: String, intl: true, unique: true, required: true },
+  metaTitle: String,
+  metaDesc: String
+},
   { timestamps: true }
 );
 

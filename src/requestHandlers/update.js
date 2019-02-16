@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 
 const update = (req, res) => {
   req.model.setDefaultLanguage(req.locale);
-  req.model.findOne({ _id: req.params.id }, '', {}, (err, doc) => {
+  req.model.findOne({ slug: req.params.slug }, '', {}, (err, doc) => {
     if (!doc)
       return res.status(httpStatus.NOT_FOUND).send('Not Found');
 

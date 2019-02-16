@@ -20,8 +20,9 @@ const withEditData = PassedComponent => {
 
     fetchData = () => {
       const slug = this.props.match.params.slug;
+
       const params = {
-        lang: this.props.locale
+        locale: this.props.locale
       };
 
       if (slug) {
