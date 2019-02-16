@@ -21,6 +21,14 @@
       height: rem(.25);
       margin-right: rem(.375);
     }
+
+    &:hover {
+      color: $primary;
+
+      svg {
+        @include color-svg($primary);
+      }
+    }
   }
 
   ul {

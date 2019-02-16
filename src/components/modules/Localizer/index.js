@@ -49,7 +49,7 @@ class Localizer extends Component {
 
             return (
               <li key={i}>
-                <Link to={{ search }}>
+                <Link to={{ search }} onClick={this.toggleActive}>
                   {locale}
                 </Link>
               </li>
