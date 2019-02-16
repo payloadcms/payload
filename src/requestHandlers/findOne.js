@@ -1,7 +1,9 @@
 import httpStatus from 'http-status';
 
-const find = (req, res) => {
-  req.model.findById(req.params.id, (err, doc) => {
+const findOne = (req, res) => {
+  req.model.setDefaultLanguage(req.locale);
+
+  req.model.findOne({ slug: { en: req.params.slug } }, (err, doc) => {
     if (err)
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
 
@@ -17,4 +19,4 @@ const find = (req, res) => {
   });
 };
 
-export default find;
+export default findOne;

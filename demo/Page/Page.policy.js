@@ -2,16 +2,12 @@ import Page from './Page.model';
 
 const pagePolicy = {
 
-  query(req, res, next) {
+  read(req, res, next) {
     next();
   },
 
   create(req, res, next) {
     // TODO: how to get current authenticated user?
-    next();
-  },
-
-  find(req, res, next) {
     next();
   },
 

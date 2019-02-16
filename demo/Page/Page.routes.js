@@ -1,6 +1,6 @@
 import express from 'express';
 import bindModel from '../../src/middleware/bindModel';
-import { query, create, find, destroy, update } from '../../src/requestHandlers';
+import { query, create, findOne, destroy, update } from '../../src/requestHandlers';
 
 import Page from './Page.model';
 import pagePolicy from './Page.policy';
@@ -11,12 +11,12 @@ router.all('*', bindModel(Page));
 
 router
   .route('')
-  .get(pagePolicy.query, query)
+  .get(pagePolicy.read, query)
   .post(pagePolicy.create, create);
 
 router
-  .route('/:id')
-  .get(pagePolicy.find, bindModel(Page), find)
+  .route('/:slug')
+  .get(pagePolicy.read, findOne)
   .put(pagePolicy.update, update)
   .delete(pagePolicy.destroy, destroy);
 
