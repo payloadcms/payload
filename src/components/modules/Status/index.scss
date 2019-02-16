@@ -2,15 +2,17 @@
 
 .status {
   @include gutter;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 
-  .status-wrap {
+  li {
     @extend %uppercase-label;
     background: $primary;
     color: $black;
     font-weight: bold;
     border-radius: $radius-sm;
     padding: rem(.5);
-    margin-top: rem(.5);
     margin-bottom: rem(.5);
     display: flex;
     justify-content: space-between;
@@ -32,6 +34,9 @@
   }
 
   &.error {
-    background: $error;
+
+    .status-wrap {
+      background: $error;
+    }
   }
 }

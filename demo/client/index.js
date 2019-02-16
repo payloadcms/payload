@@ -17,10 +17,10 @@ const views = {
   pages: pageViews
 };
 
-const collections = [
-  Page,
-  Order
-];
+const collections = {
+  orders: Order,
+  pages: Page
+}
 
 const Index = () => {
   return (

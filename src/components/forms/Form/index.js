@@ -1,11 +1,20 @@
 import React, { Component, createContext } from 'react';
 import { withRouter } from 'react-router-dom';
-import { Status } from 'payload/components';
+import { connect } from 'react-redux';
+import { HiddenInput } from 'payload/components';
 import api from 'payload/api';
 
 import './index.scss';
 
 export const FormContext = createContext({});
+
+const mapState = state => ({
+  searchParams: state.common.searchParams
+})
+
+const mapDispatch = dispatch => ({
+  addStatus: status => dispatch({ type: 'ADD_STATUS', payload: status })
+})
 
 class Form extends Component {
   constructor(props) {
@@ -79,24 +88,20 @@ class Form extends Component {
           if (this.props.redirect) {
             this.props.history.push(this.props.redirect, data);
           } else {
-            this.setState({
-              status: {
-                message: res.message,
-                type: 'success'
-              },
-              processing: false
-            });
+            this.setState({ processing: false });
+            this.props.addStatus({
+              message: res.message,
+              type: 'success'
+            })
           }
         },
         error => {
           console.log(error);
-          this.setState({
-            status: {
-              message: error.message,
-              type: 'error'
-            },
-            processing: false
-          });
+          this.setState({ processing: false });
+          this.props.addStatus({
+            message: error.message,
+            type: 'error'
+          })
         }
       );
     }
@@ -114,17 +119,15 @@ class Form extends Component {
         method={this.props.method}
         action={this.props.action}
         className={this.props.className}>
-        {this.state.status && !this.state.redirect &&
-          <Status open={true}
-            type={this.state.status.type}
-            message={this.state.status.message} />
-        }
         <FormContext.Provider value={{
           setValue: this.setValue.bind(this),
           fields: this.state.fields,
           processing: this.state.processing,
           submitted: this.state.submitted
         }}>
+          <HiddenInput
+            name="locale"
+            valueOverride={this.props.searchParams.locale} />
           {this.props.children}
         </FormContext.Provider>
       </form>
@@ -132,4 +135,4 @@ class Form extends Component {
   }
 }
 
-export default withRouter(Form);
+export default withRouter(connect(mapState, mapDispatch)(Form));

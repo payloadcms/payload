@@ -3,7 +3,7 @@ export default {
   label: 'Pages',
   singular: 'Page',
   plural: 'Pages',
-  entrySlug: 'title',
+  useAsTitle: 'title',
   fields: [
     {
       name: 'title',

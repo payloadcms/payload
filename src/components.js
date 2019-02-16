@@ -37,7 +37,7 @@ export { default as Section } from './components/layout/Section';
 
 // Modules
 export { default as Status } from './components/modules/Status';
-export { default as StickyAction } from './components/modules/StickyAction';
+export { default as StickyHeader } from './components/modules/StickyHeader';
 export { default as HeadingButton } from './components/modules/HeadingButton';
 export { default as Filter } from './components/modules/Filter';
 export { default as APIUrl } from './components/modules/APIUrl';

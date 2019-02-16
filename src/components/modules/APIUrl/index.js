@@ -1,17 +1,31 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 
 import './index.scss';
 
+const mapState = state => ({
+  locale: state.common.locale,
+  config: state.common.config
+})
+
 const APIUrl = props => {
 
-  const apiUrl = `${props.serverUrl}/${props.collectionSlug}/${props.slug ? `${props.slug}` : ''}`;
+  const { collectionSlug, id } = props.match.params;
+
+  const apiUrl = `${props.config.serverUrl}/${collectionSlug}/${id}`;
 
   return (
     <div className="api-url">
       <span className="uppercase-label">API URL</span>
-      <div className="url"><a href={apiUrl} rel="noopener noreferrer" target="_blank">{apiUrl}</a></div>
+      {id &&
+        <div className="url"><a href={apiUrl} rel="noopener noreferrer" target="_blank">{apiUrl}</a></div>
+      }
+      {!id &&
+        <div>&mdash;</div>
+      }
     </div>
   );
 };
 
-export default APIUrl;
+export default withRouter(connect(mapState)(APIUrl));

@@ -42,14 +42,14 @@ class Localizer extends Component {
 
             const newParams = {
               ...this.props.searchParams,
-              locale: locale
+              locale
             };
 
             const search = qs.stringify(newParams);
 
             return (
               <li key={i}>
-                <Link to={{ search }}>
+                <Link to={{ search }} onClick={this.toggleActive}>
                   {locale}
                 </Link>
               </li>

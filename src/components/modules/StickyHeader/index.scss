@@ -1,12 +1,15 @@
 @import '~payload/scss/styles';
 
-.sticky.action {
+.sticky-header {
   @include gutter;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 
-  > .content {
+  .sticky-header-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .content {
     flex-grow: 1;
     min-width: 0;
     padding-right: rem(1);
