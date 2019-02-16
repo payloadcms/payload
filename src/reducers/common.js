@@ -1,5 +1,4 @@
 const defaultState = {
-  menuStatus: false,
   scrollPos: 0,
   windowWidth: 1400,
   windowHeight: 900,
@@ -10,16 +9,12 @@ const defaultState = {
   locale: null,
   config: null,
   collections: null,
-  searchParams: {}
+  searchParams: {},
+  status: []
 };
 
 export default (state = defaultState, action) => {
   switch (action.type) {
-    case 'TOGGLE_MENU':
-      return {
-        ...state,
-        menuStatus: !state.menuStatus
-      };
 
     case 'UPDATE_SCROLL':
 
@@ -77,6 +72,24 @@ export default (state = defaultState, action) => {
         ...state,
         searchParams: action.payload
       }
+
+    case 'ADD_STATUS':
+      return {
+        ...state,
+        status: [
+          action.payload,
+          ...state.status
+        ]
+      };
+
+    case 'REMOVE_STATUS': {
+      const newStatus = [...state.status];
+      newStatus.splice(action.payload, 1);
+      return {
+        ...state,
+        status: newStatus
+      };
+    }
 
     default:
     //

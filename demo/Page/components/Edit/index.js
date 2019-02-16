@@ -2,7 +2,7 @@ import React from 'react';
 import {
   withEditData,
   EditView,
-  StickyAction,
+  StickyHeader,
   APIUrl,
   Button,
   Form,
@@ -16,7 +16,7 @@ import {
 const Edit = props => {
 
   const { id } = props.match.params;
-  const { data, collection, config, locale } = props;
+  const { data, collection, config } = props;
 
   const sampleRepeaterValue = [
     {
@@ -29,14 +29,15 @@ const Edit = props => {
   return (
     <EditView data={data} collection={collection} isEditing={id ? true : false}>
       <Form method={id ? 'put' : 'post'} action={`${config.serverUrl}/${collection.slug}${id ? `/${id}` : ''}`}>
-        <StickyAction content={
-          <APIUrl />
-        } action={
-          <React.Fragment>
-            <Button type="secondary">Preview</Button>
-            <FormSubmit>Save</FormSubmit>
-          </React.Fragment>
-        } />
+        <StickyHeader showStatus={true}
+          content={
+            <APIUrl />
+          } action={
+            <React.Fragment>
+              <Button type="secondary">Preview</Button>
+              <FormSubmit>Save</FormSubmit>
+            </React.Fragment>
+          } />
 
         <Input name="title"
           label="Page Title"

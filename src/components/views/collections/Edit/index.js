@@ -12,8 +12,8 @@ const EditView = props => {
 
   if (props.isEditing) {
     nav.push({
-      url: `/collections/${props.collection.slug}/${props.data.slug}`,
-      label: props.data ? props.data[props.collection.entrySlug] : ''
+      url: `/collections/${props.collection.slug}/${props.data._id}`,
+      label: props.data ? props.data[props.collection.useAsTitle] : ''
     })
   } else {
     nav.push({
