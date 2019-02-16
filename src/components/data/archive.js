@@ -20,7 +20,7 @@ const withArchiveData = PassedComponent => {
 
     fetchData = () => {
       const params = {
-        lang: this.props.locale
+        locale: this.props.locale
       };
 
       api.requests.get(`${this.props.config.serverUrl}/${this.props.collection.slug}`, params).then(

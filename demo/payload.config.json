@@ -17,11 +17,11 @@
     "viewer"
   ],
   "localization": {
-    "languages": [
+    "locales": [
       "en",
       "es"
     ],
-    "defaultLanguage": "en"
+    "defaultLocale": "en"
   },
   "staticUrl": "/uploads",
   "staticDir": "demo/uploads",

@@ -26,9 +26,9 @@ class Localizer extends Component {
     this.setState({ active: !this.state.active })
 
   render() {
-    const { languages } = this.props.config.localization;
+    const { locales } = this.props.config.localization;
 
-    if (languages.length <= 1) return null;
+    if (locales.length <= 1) return null;
 
     return (
       <div className={`localizer${this.state.active ? ' active' : ''}`}>
@@ -36,13 +36,13 @@ class Localizer extends Component {
           <Arrow />{this.props.locale}
         </button>
         <ul>
-          {languages.map((lang, i) => {
+          {locales.map((locale, i) => {
 
-            if (lang === this.props.locale) return null;
+            if (locale === this.props.locale) return null;
 
             const newParams = {
               ...this.props.searchParams,
-              lang: lang
+              locale: locale
             };
 
             const search = qs.stringify(newParams);
@@ -50,7 +50,7 @@ class Localizer extends Component {
             return (
               <li key={i}>
                 <Link to={{ search }}>
-                  {lang}
+                  {locale}
                 </Link>
               </li>
             );
