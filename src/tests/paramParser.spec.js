@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
-import {paramParser} from '../utils/paramParser';
+import {paramParser} from '../plugins/paramParser';
 
 const AuthorSchema = new Schema({
   name: String,

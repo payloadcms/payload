@@ -1,11 +1,26 @@
-/* eslint-disable no-use-before-define,camelcase */
-export function paramParser(model, rawParams) {
-  console.log('raw params', rawParams);
+/* eslint-disable no-use-before-define */
+
+export default function buildQuery(schema) {
+
+  schema.statics.apiQuery = function (rawParams) {
+    const model = this;
+    const params = paramParser(this, rawParams);
+
+    // Create the Mongoose Query object.
+    let query = model
+      .find(params.searchParams);
+
+    if (params.sort)
+      query = query.sort(params.sort);
+
+    return query;
+  };
+}
+
+function paramParser(model, rawParams) {
 
   let query = {
     searchParams: {},
-    page: 1,
-    per_page: 100,
     sort: false
   };
 
@@ -23,7 +38,6 @@ export function paramParser(model, rawParams) {
     }
   }
 
-  console.log('query object', query);
   return query;
 }
 
@@ -55,10 +69,6 @@ function parseParam(key, val, model, query) {
 
   if (val === '') {
     return {};
-  } else if (lcKey === 'page') {
-    query.page = val;
-  } else if (lcKey === 'per_page' || lcKey === 'limit') {
-    query.per_page = parseInt(val);
   } else if (lcKey === 'sort_by' || lcKey === 'order_by') {
     const parts = val.split(',');
     query.sort = {};
