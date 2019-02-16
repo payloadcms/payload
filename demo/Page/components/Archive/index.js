@@ -14,7 +14,7 @@ const Archive = props => {
         buttonLabel="Add New"
         buttonUrl={`/collections/${props.collection.slug}/create`}
         buttonType="link" />
-      <SearchableTable data={props.data} collection={props.collection} />
+      <SearchableTable data={props.data.docs} collection={props.collection} />
     </ArchiveView>
   );
 }
