@@ -16,6 +16,12 @@ const PageSchema = new mongoose.Schema({
 );
 
 PageSchema.plugin(mongooseApiQuery);
-PageSchema.plugin(mongooseIntl, payloadConfig.localization);
+
+const formattedIntl = {
+  defaultLanguage: payloadConfig.localization.defaultLocale,
+  languages: payloadConfig.localization.locales
+}
+
+PageSchema.plugin(mongooseIntl, formattedIntl);
 
 module.exports = mongoose.model('Page', PageSchema);
