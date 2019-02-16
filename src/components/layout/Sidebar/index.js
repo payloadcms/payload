@@ -2,7 +2,7 @@ import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { NavLink, Link } from 'react-router-dom';
-import { Arrow, Label } from 'payload/components';
+import { Arrow } from 'payload/components';
 
 import './index.scss';
 
@@ -19,7 +19,7 @@ const Sidebar = props => {
       <Link to="/">
         <Icon />
       </Link>
-      <Label>Collections</Label>
+      <span className="uppercase-label">Collections</span>
       <nav>
         {props.collections && props.collections.map((item, i) => {
           const href = `/collections/${item.slug}`;
@@ -35,7 +35,7 @@ const Sidebar = props => {
           );
         })}
       </nav>
-      <Label>Globals</Label>
+      <span className="uppercase-label">Globals</span>
       <nav>
         <NavLink activeClassName="active" to="/components">Components</NavLink>
         <NavLink activeClassName="active" to="/settings">Settings</NavLink>

@@ -15,7 +15,7 @@
     }
   }
 
-  label {
+  .uppercase-label {
     @extend %uppercase-label;
     color: $gray;
   }

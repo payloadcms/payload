@@ -49,9 +49,6 @@ export { default as Localizer } from './components/modules/Localizer';
 // Routes
 export { default as CollectionRoutes } from './components/routes/Collections';
 
-// Type
-export { default as Label } from './components/type/Label';
-
 // Utilities
 export { default as MeasureWindow } from './components/utilities/MeasureWindow';
 export { default as MeasureScroll } from './components/utilities/MeasureScroll';

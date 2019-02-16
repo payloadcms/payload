@@ -1,6 +1,13 @@
+@import '~payload/scss/styles';
+
+
 .api-url {
   .url {
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .uppercase-label {
+    @extend %uppercase-label;
   }
 }
