@@ -9,28 +9,30 @@ const mapState = state => ({
 
 const CollectionRoutes = props => {
 
-  return props.collections.map((collection, i) => {
-    if (collection) {
+  return (
+    <Switch>
+      <Route path={'/collections/:collectionSlug/create'} exact
+        render={routeProps => {
+          const { collectionSlug } = routeProps.match.params;
+          const Edit = props.views[collectionSlug].Edit;
+          return <Edit {...routeProps} collection={props.collections[collectionSlug]} config={props.config} />;
+        }} />
 
-      const Edit = props.views[collection.slug].Edit;
-      const Archive = props.views[collection.slug].Archive;
+      <Route path={'/collections/:collectionSlug/:id'} exact
+        render={routeProps => {
+          const { collectionSlug } = routeProps.match.params;
+          const Edit = props.views[routeProps.match.params.collectionSlug].Edit;
+          return <Edit {...routeProps} collection={props.collections[collectionSlug]} config={props.config} />;
+        }} />
 
-      return (
-        <Switch key={i}>
-          <Route path={`/collections/${collection.slug}/create`} exact
-            render={routeProps => <Edit {...routeProps} collection={collection} config={props.config} />} />
-
-          <Route path={`/collections/${collection.slug}/:slug`}
-            render={routeProps => <Edit {...routeProps} collection={collection} config={props.config} />} />
-
-          <Route path={`/collections/${collection.slug}`} exact
-            render={routeProps => <Archive {...routeProps} collection={collection} config={props.config} />} />
-        </Switch>
-      );
-    }
-
-    return null;
-  });
+      <Route path={'/collections/:collectionSlug'} exact
+        render={routeProps => {
+          const { collectionSlug } = routeProps.match.params;
+          const Archive = props.views[routeProps.match.params.collectionSlug].Archive;
+          return <Archive {...routeProps} collection={props.collections[collectionSlug]} config={props.config} />;
+        }} />
+    </Switch>
+  );
 };
 
 export default withRouter(connect(mapState)(CollectionRoutes));

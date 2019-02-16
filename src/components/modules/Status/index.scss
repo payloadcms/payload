@@ -32,6 +32,9 @@
   }
 
   &.error {
-    background: $error;
+
+    .status-wrap {
+      background: $error;
+    }
   }
 }

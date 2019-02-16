@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   withEditData,
   EditView,
@@ -13,99 +13,78 @@ import {
   FormSubmit,
   Repeater
 } from 'payload/components';
-import { toKebabCase } from 'payload/utils';
 
-class Edit extends Component {
+const Edit = props => {
 
-  constructor(props) {
-    super(props);
+  const { id } = props.match.params;
 
-    const entrySlug = this.props.match.params.slug;
+  const { data, collection, config, locale } = props;
 
-    this.state = {
-      uid: entrySlug,
-      slug: entrySlug,
-      action: `${this.props.config.serverUrl}/${this.props.collection.slug}${entrySlug ? `/${entrySlug}` : ''}`,
-      method: entrySlug ? 'put' : 'post'
+  const sampleRepeaterValue = [
+    {
+      content: 'here\'s some test content'
+    }, {
+      content: 'here\'s some more test content'
     }
-  }
+  ];
 
-  setSlug = e => {
-    this.setState({ slug: toKebabCase(e.target.value) });
-  }
+  return (
+    <EditView data={data} collection={collection} isEditing={id ? true : false}>
+      <Form method={id ? 'put' : 'post'} action={`${config.serverUrl}/${collection.slug}${id ? `/${id}` : ''}`}>
+        <StickyAction content={
+          <APIUrl />
+        } action={
+          <React.Fragment>
+            <Button type="secondary">Preview</Button>
+            <FormSubmit>Save</FormSubmit>
+          </React.Fragment>
+        } />
 
-  render() {
+        <HiddenInput
+          name="locale"
+          valueOverride={locale} />
 
-    const initialData = this.props.data ? this.props.data : {};
+        <HiddenInput
+          name="slug"
+          valueOverride={id} />
 
-    const sampleRepeaterValue = [
-      {
-        content: 'here\'s some test content'
-      }, {
-        content: 'here\'s some more test content'
-      }
-    ];
+        <Input name="title"
+          label="Page Title"
+          maxLength={100}
+          initialValue={data['title']}
+          required />
 
-    return (
-      <EditView data={this.props.data} collection={this.props.collection} isEditing={this.props.match.params.slug ? true : false}>
-        <Form method={this.state.method} action={this.state.action}>
-          <StickyAction content={
-            <APIUrl serverUrl={this.props.config.serverUrl}
-              collectionSlug={this.props.collection.slug} slug={this.state.slug} />
-          } action={
-            <React.Fragment>
-              <Button type="secondary">Preview</Button>
-              <FormSubmit>Save</FormSubmit>
-            </React.Fragment>
-          } />
+        <Textarea name="content"
+          label="Content"
+          initialValue={data['content']}
+          height={100}
+          required />
 
-          <HiddenInput
-            name="locale"
-            valueOverride={this.props.locale} />
+        <Repeater
+          name="slides"
+          label="Slides"
+          initialValue={sampleRepeaterValue}>
+          <Textarea name="content" label="Content" />
+        </Repeater>
 
-          <HiddenInput
-            name="slug"
-            valueOverride={this.state.slug} />
-
-          <Input name="title"
-            onChange={this.setSlug}
-            label="Page Title"
+        <Group label="Meta Information">
+          <Input name="metaTitle"
             maxLength={100}
-            initialValue={initialData['title']}
-            required />
+            label="Meta Title"
+            width={50} />
 
-          <Textarea name="content"
-            label="Content"
-            initialValue={initialData['content']}
-            height={100}
-            required />
+          <Input name="metaKeywords"
+            maxLength={100}
+            label="Meta Keywords"
+            width={50} />
 
-          <Repeater
-            name="slides"
-            label="Slides"
-            initialValue={sampleRepeaterValue}>
-            <Textarea name="content" label="Content" />
-          </Repeater>
-
-          <Group label="Meta Information">
-            <Input name="metaTitle"
-              maxLength={100}
-              label="Meta Title"
-              width={50} />
-
-            <Input name="metaKeywords"
-              maxLength={100}
-              label="Meta Keywords"
-              width={50} />
-
-            <Textarea name="metaDesc"
-              label="Meta Description"
-              height={100} />
-          </Group>
-        </Form>
-      </EditView>
-    );
-  }
+          <Textarea name="metaDesc"
+            label="Meta Description"
+            height={100} />
+        </Group>
+      </Form>
+    </EditView>
+  );
 }
 
 export default withEditData(Edit);

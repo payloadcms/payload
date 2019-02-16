@@ -19,14 +19,14 @@ const withEditData = PassedComponent => {
     }
 
     fetchData = () => {
-      const slug = this.props.match.params.slug;
+      const { id } = this.props.match.params;
 
       const params = {
         locale: this.props.locale
       };
 
-      if (slug) {
-        api.requests.get(`${this.props.config.serverUrl}/${this.props.collection.slug}/${slug}`, params).then(
+      if (id) {
+        api.requests.get(`${this.props.config.serverUrl}/${this.props.collection.slug}/${id}`, params).then(
           res => this.setState({ data: res }),
           err => {
             console.warn(err);

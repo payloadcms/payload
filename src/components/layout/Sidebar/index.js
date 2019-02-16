@@ -21,8 +21,8 @@ const Sidebar = props => {
       </Link>
       <span className="uppercase-label">Collections</span>
       <nav>
-        {props.collections && props.collections.map((item, i) => {
-          const href = `/collections/${item.slug}`;
+        {props.collections && Object.keys(props.collections).map((key, i) => {
+          const href = `/collections/${props.collections[key].slug}`;
           const classes = props.location.pathname.indexOf(href) > -1
             ? 'active'
             : undefined;
@@ -30,7 +30,7 @@ const Sidebar = props => {
           return (
             <Link className={classes} key={i} to={href}>
               <Arrow />
-              {props.collections[i].plural}
+              {props.collections[key].plural}
             </Link>
           );
         })}
