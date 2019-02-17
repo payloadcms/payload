@@ -18,6 +18,11 @@ const Edit = props => {
   const { id } = props.match.params;
   const { data, collection, config } = props;
 
+  function get(attribute) {
+    // TODO: if the app is not using localization this will need to be revisited
+    return data[attribute] && props.locale && data[attribute][props.locale] ? data[attribute][props.locale] : '';
+  }
+
   const sampleRepeaterValue = [
     {
       content: 'here\'s some test content'
@@ -42,12 +47,12 @@ const Edit = props => {
         <Input name="title"
           label="Page Title"
           maxLength={100}
-          initialValue={data['title']}
+          initialValue={get('title')}
           required />
 
         <Textarea name="content"
           label="Content"
-          initialValue={data['content']}
+          initialValue={get('content')}
           height={100}
           required />
 

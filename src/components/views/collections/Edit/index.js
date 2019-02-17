@@ -5,6 +5,15 @@ import './index.scss';
 
 const EditView = props => {
 
+  function title() {
+    // TODO: this doesn't work because props.locale is missing
+    // TODO: if the app is not using localization this will need to be revisited
+    if (Object.keys(props.data).length > 0 && props.locale) {
+      return props.data[props.collection.useAsTitle] ? props.data[props.collection.useAsTitle]['en'] || props.data[props.collection.useAsTitle] : '[Untitled]';
+    }
+    return '[Untitled]';
+  }
+
   const nav = [{
     url: `/collections/${props.collection.slug}`,
     label: props.collection.label
@@ -13,7 +22,7 @@ const EditView = props => {
   if (props.isEditing) {
     nav.push({
       url: `/collections/${props.collection.slug}/${props.data._id}`,
-      label: props.data ? props.data[props.collection.useAsTitle] : ''
+      label: props.data ? title() : ''
     })
   } else {
     nav.push({
@@ -27,9 +36,7 @@ const EditView = props => {
       <header>
         {props.isEditing &&
           <h1>
-            Edit {Object.keys(props.data).length > 0 &&
-              (props.data[props.collection.useAsTitle] ? props.data[props.collection.useAsTitle] : '[Untitled]')
-            }
+            Edit {title()}
           </h1>
         }
         {!props.isEditing &&
