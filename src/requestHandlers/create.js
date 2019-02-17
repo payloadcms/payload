@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 
 const create = (req, res) => {
-  req.model.setDefaultLanguage(req.locale);
+  req.model.setDefaultLocale(req.locale);
   req.model.create(req.body, (err, result) => {
     if (err)
       return res.send(httpStatus.INTERNAL_SERVER_ERROR, { error: err });

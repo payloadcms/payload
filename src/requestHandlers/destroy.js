@@ -1,7 +1,6 @@
 import httpStatus from 'http-status';
 
 const destroy = (req, res) => {
-  req.model.setDefaultLanguage(req.locale);
   req.model.findOneAndDelete({ _id: req.params._id }, (err, doc) => {
     if (err)
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });

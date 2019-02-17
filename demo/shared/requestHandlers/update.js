@@ -2,7 +2,7 @@ import httpStatus from '../../../src/requestHandlers';
 
 export default (req, res) => {
   // do something custom specific to this app
-  req.model.setDefaultLanguage(req.locale);
+  req.model.setDefaultLocale(req.locale);
   req.model.findOne({_id: req.params.id}, '', {}, (err, doc) => {
     if (!doc)
       return res.status(httpStatus.NOT_FOUND).send('Not Found');

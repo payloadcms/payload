@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import buildQuery from '../../src/plugins/buildQuery';
 import paginate from '../../src/plugins/paginate';
-import mongooseIntl from 'mongoose-intl';
+import internationalization from '../../src/plugins/internationalization';
 import payloadConfig from '.././payload.config';
 import { schemaBaseFields } from '../../src/helpers/mongoose/schemaBaseFields';
 
@@ -9,6 +9,7 @@ const PageSchema = new mongoose.Schema({
   ...schemaBaseFields,
   title: { type: String, intl: true, unique: true },
   content: { type: String, intl: true },
+  //slug: { type: String, intl: true, unique: true, required: true },
   metaTitle: String,
   metaDesc: String
 },
@@ -17,12 +18,6 @@ const PageSchema = new mongoose.Schema({
 
 PageSchema.plugin(paginate);
 PageSchema.plugin(buildQuery);
-
-const formattedIntl = {
-  defaultLanguage: payloadConfig.localization.defaultLocale,
-  languages: payloadConfig.localization.locales
-};
-
-PageSchema.plugin(mongooseIntl, formattedIntl);
+PageSchema.plugin(internationalization, payloadConfig.localization);
 
 module.exports = mongoose.model('Page', PageSchema);

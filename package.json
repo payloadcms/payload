@@ -31,7 +31,6 @@
     "joi": "^13.6.0",
     "jsonwebtoken": "^8.4.0",
     "method-override": "^3.0.0",
-    "mongoose-intl": "^3.1.0",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",

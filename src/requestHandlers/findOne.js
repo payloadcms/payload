@@ -1,8 +1,6 @@
 import httpStatus from 'http-status';
 
 const findOne = (req, res) => {
-  // req.model.setDefaultLanguage(req.locale);
-
   req.model.findOne({ _id: req.params._id }, (err, doc) => {
     if (err)
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
@@ -11,7 +9,7 @@ const findOne = (req, res) => {
       return res.status(httpStatus.NOT_FOUND).send('Not Found');
 
     if (req.locale) {
-      doc.setLanguage(req.locale);
+      doc.setLocale(req.locale);
       return res.json(doc.toJSON({ virtuals: true }));
     }
 

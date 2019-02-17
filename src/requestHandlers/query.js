@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 
 const query = (req, res) => {
   if (req.query.locale) {
-    req.model.setDefaultLanguage(req.query.locale);
+    req.model.setDefaultLocale(req.query.locale);
   }
 
   req.model.paginate(req.model.apiQuery(req.query), req.query, (err, result) => {

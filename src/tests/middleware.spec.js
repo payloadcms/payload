@@ -52,8 +52,8 @@ describe('Payload Middleware', () => {
         body: {}
       };
       localization = {
-        languages: ['en', 'es'],
-        defaultLanguage: 'en'
+        locales: ['en', 'es'],
+        defaultLocale: 'en'
       };
 
     });
@@ -73,7 +73,7 @@ describe('Payload Middleware', () => {
       locale(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
-      expect(req.locale).toEqual(localization.defaultLanguage);
+      expect(req.locale).toEqual(localization.defaultLocale);
     });
 
     it('Supports accept-language header', () => {
@@ -92,7 +92,7 @@ describe('Payload Middleware', () => {
       locale(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
-      expect(req.locale).toEqual(localization.defaultLanguage);
+      expect(req.locale).toEqual(localization.defaultLocale);
     });
 
     it('Query param takes precedence over header', () => {
@@ -105,14 +105,14 @@ describe('Payload Middleware', () => {
       expect(req.locale).toEqual('es');
     });
 
-    it('Supports default language', () => {
+    it('Supports default locale', () => {
       locale(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
-      expect(req.locale).toEqual(localization.defaultLanguage);
+      expect(req.locale).toEqual(localization.defaultLocale);
     });
 
-    it('Supports language all', () => {
+    it('Supports locale all', () => {
       req.query.locale = '*';
       locale(localization)(req, res, next);
 
