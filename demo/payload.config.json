@@ -21,7 +21,8 @@
       "en",
       "es"
     ],
-    "defaultLocale": "en"
+    "defaultLocale": "en",
+    "fallback": true
   },
   "staticUrl": "/uploads",
   "staticDir": "demo/uploads",

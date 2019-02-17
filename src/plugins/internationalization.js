@@ -60,18 +60,9 @@ export default function internationalization(schema, options) {
           return localeSubDoc;
         }
 
-        if (localeSubDoc.hasOwnProperty(locale)) {
-          return localeSubDoc[locale];
-        }
-
-        // are there any other locales defined?
-        for (let prop in localeSubDoc) {
-          if (localeSubDoc.hasOwnProperty(prop)) {
-            // TODO: find a different lang to return
-            return null; // some other locales exist, but the required is not - return null value
-          }
-        }
-        return void 0; // no locales defined - the entire field is undefined
+        return localeSubDoc[locale]
+          || pluginOptions.fallback ? localeSubDoc[options.defaultLocale] : null
+          || null;
       })
       .set(function (value) {
         // multiple locales are set as an object
@@ -112,9 +103,7 @@ export default function internationalization(schema, options) {
       if (schemaType.options.requiredAll) {
         localeOptions.required = schemaType.options.requiredAll;
       }
-      // the use of this inside of a function caused an issue when changed to an arrow function
-      // this object will not be scoped inside an arrow function but then I don't understand what is set here
-      // if not lost at the end
+
       this[locale] = localeOptions;
     }, intlObject[key]);
 
@@ -141,6 +130,9 @@ export default function internationalization(schema, options) {
     },
     unsetLocale: function () {
       delete this.docLocale;
+    },
+    setFallback: function(fallback = true) {
+      pluginOptions.fallback = fallback;
     }
   });
 
