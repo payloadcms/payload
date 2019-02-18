@@ -125,17 +125,17 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator) {
   }
 
   if (paramType === 'Boolean') {
-    addSearchParam(query, key, convertToBoolean(val));
+    query = addSearchParam(query, key, convertToBoolean(val));
   } else if (paramType === 'Number') {
     if (val.match(/([0-9]+,?)/) && val.match(',')) {
       if (operator === 'all') {
-        addSearchParam(query, key, {$all: val.split(',')});
+        query = addSearchParam(query, key, {$all: val.split(',')});
       } else if (operator === 'nin') {
-        addSearchParam(query, key, {$nin: val.split(',')});
+        query = addSearchParam(query, key, {$nin: val.split(',')});
       } else if (operator === 'mod') {
-        addSearchParam(query, key, {$mod: [val.split(',')[0], val.split(',')[1]]});
+        query = addSearchParam(query, key, {$mod: [val.split(',')[0], val.split(',')[1]]});
       } else {
-        addSearchParam(query, key, {$in: val.split(',')});
+        query = addSearchParam(query, key, {$in: val.split(',')});
       }
     } else if (val.match(/([0-9]+)/)) {
       if (operator === 'gt' ||
@@ -145,9 +145,9 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator) {
         operator === 'ne') {
         let newParam = {};
         newParam['$' + operator] = val;
-        addSearchParam(query, key, newParam);
+        query = addSearchParam(query, key, newParam);
       } else {
-        addSearchParam(query, key, parseInt(val));
+        query = addSearchParam(query, key, parseInt(val));
       }
     }
   } else if (paramType === 'String') {
@@ -155,11 +155,11 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator) {
       const options = val.split(',').map(str => new RegExp(str, 'i'));
 
       if (operator === 'all') {
-        addSearchParam(query, key, {$all: options});
+        query = addSearchParam(query, key, {$all: options});
       } else if (operator === 'nin') {
-        addSearchParam(query, key, {$nin: options});
+        query = addSearchParam(query, key, {$nin: options});
       } else {
-        addSearchParam(query, key, {$in: options});
+        query = addSearchParam(query, key, {$in: options});
       }
     } else if (val.match(/([0-9]+)/)) {
       if (operator === 'gt' ||
@@ -168,22 +168,22 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator) {
         operator === 'lte') {
         let newParam = {};
         newParam['$' + operator] = val;
-        addSearchParam(query, key, newParam);
+        query = addSearchParam(query, key, newParam);
       } else {
-        addSearchParam(query, key, val);
+        query = addSearchParam(query, key, val);
       }
     } else if (operator === 'ne' || operator === 'not') {
       const neregex = new RegExp(val, 'i');
-      addSearchParam(query, key, {'$not': neregex});
+      query = addSearchParam(query, key, {'$not': neregex});
     } else if (operator === 'like') {
-      addSearchParam(query, key, {$regex: val, $options: '-i'});
+      query = addSearchParam(query, key, {$regex: val, $options: '-i'});
     } else {
-      addSearchParam(query, key, val);
+      query = addSearchParam(query, key, val);
     }
   } else if (paramType === 'ObjectId') {
-    addSearchParam(query, key, val);
+    query = addSearchParam(query, key, val);
   } else if (paramType === 'Array') {
-    addSearchParam(query, key, val);
+    query = addSearchParam(query, key, val);
   }
   return query;
 }
