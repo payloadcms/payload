@@ -9,7 +9,7 @@ const findOne = (req, res) => {
       return res.status(httpStatus.NOT_FOUND).send('Not Found');
 
     if (req.locale) {
-      doc.setLocale(req.locale);
+      doc.setLocale(req.locale, req.query['fallback-code']);
       return res.json(doc.toJSON({ virtuals: true }));
     }
 

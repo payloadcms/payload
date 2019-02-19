@@ -60,9 +60,29 @@ export default function internationalization(schema, options) {
           return localeSubDoc;
         }
 
-        return localeSubDoc[locale]
-          || pluginOptions.fallback ? localeSubDoc[options.defaultLocale] : null
-          || null;
+        let value = localeSubDoc[locale];
+
+        // If there is no value to return, AKA no translation in locale, handle fallbacks
+        if (!value) {
+
+          // If user specified fallback code as null, send back null
+          if (this.fallbackCode === 'null' || (this.fallbackCode && !localeSubDoc[this.fallbackCode])) {
+            return null;
+
+            // If user specified fallback code AND record exists, return that
+          } else if (localeSubDoc[this.fallbackCode]) {
+            return localeSubDoc[this.fallbackCode];
+
+            // Otherwise, check if there is a default fallback value and if so, send that
+            ///////////////////////////////////////////////////////////////////////////////////////////////
+            // NOTE - JM removed pluginOptions.fallback as it was undefined, and never being set...
+            ///////////////////////////////////////////////////////////////////////////////////////////////
+          } else if (options.fallback && localeSubDoc[options.defaultLocale]) {
+            return localeSubDoc[options.defaultLocale];
+          }
+        }
+
+        return value;
       })
       .set(function (value) {
         // multiple locales are set as an object
@@ -123,15 +143,17 @@ export default function internationalization(schema, options) {
     getLocale: function () {
       return this.docLocale || this.schema.options.mongooseIntl.defaultLocale;
     },
-    setLocale: function (locale) {
-      if (locale && this.getLocales().indexOf(locale) !== -1) {
+    setLocale: function (locale, fallbackCode) {
+      const locales = this.getLocales();
+      if (locale && locales.indexOf(locale) !== -1) {
         this.docLocale = locale;
       }
+      this.fallbackCode = fallbackCode;
     },
     unsetLocale: function () {
       delete this.docLocale;
     },
-    setFallback: function(fallback = true) {
+    setFallback: function (fallback = true) {
       pluginOptions.fallback = fallback;
     }
   });
