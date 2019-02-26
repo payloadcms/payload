@@ -20,9 +20,9 @@ const withEditData = PassedComponent => {
 
     fetchData = () => {
       const { id } = this.props.match.params;
+
       const params = {
-        // TODO: if the app is not using localization this will need to be revisited
-        locale: 'all'
+        locale: this.props.locale
       };
 
       if (id) {
