@@ -22,7 +22,8 @@ const withEditData = PassedComponent => {
       const { id } = this.props.match.params;
 
       const params = {
-        locale: this.props.locale
+        locale: this.props.locale,
+        'fallback-locale': 'null'
       };
 
       if (id) {

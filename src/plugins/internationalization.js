@@ -82,6 +82,8 @@ export default function internationalization(schema, options) {
         return value;
       })
       .set(function (value) {
+
+        console.log(value, path);
         // multiple locales are set as an object
         if (typeof value === 'object') {
           let locales = this.schema.options.mongooseIntl.locales;
