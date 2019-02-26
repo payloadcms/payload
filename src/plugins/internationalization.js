@@ -66,17 +66,14 @@ export default function internationalization(schema, options) {
         if (!value) {
 
           // If user specified fallback code as null, send back null
-          if (this.fallbackCode === 'null' || (this.fallbackCode && !localeSubDoc[this.fallbackCode])) {
+          if (this.fallbackLocale === 'null' || (this.fallbackLocale && !localeSubDoc[this.fallbackLocale])) {
             return null;
 
             // If user specified fallback code AND record exists, return that
-          } else if (localeSubDoc[this.fallbackCode]) {
-            return localeSubDoc[this.fallbackCode];
+          } else if (localeSubDoc[this.fallbackLocale]) {
+            return localeSubDoc[this.fallbackLocale];
 
             // Otherwise, check if there is a default fallback value and if so, send that
-            ///////////////////////////////////////////////////////////////////////////////////////////////
-            // NOTE - JM removed pluginOptions.fallback as it was undefined, and never being set...
-            ///////////////////////////////////////////////////////////////////////////////////////////////
           } else if (options.fallback && localeSubDoc[options.defaultLocale]) {
             return localeSubDoc[options.defaultLocale];
           }
@@ -143,12 +140,12 @@ export default function internationalization(schema, options) {
     getLocale: function () {
       return this.docLocale || this.schema.options.mongooseIntl.defaultLocale;
     },
-    setLocale: function (locale, fallbackCode) {
+    setLocale: function (locale, fallbackLocale) {
       const locales = this.getLocales();
       if (locale && locales.indexOf(locale) !== -1) {
         this.docLocale = locale;
       }
-      this.fallbackCode = fallbackCode;
+      this.fallbackLocale = fallbackLocale;
     },
     unsetLocale: function () {
       delete this.docLocale;
