@@ -92,28 +92,6 @@ describe('Param Parser', () => {
     });
   });
 
-  describe('Pagination / Limits', () => {
-    it('Page number', () => {
-      let parsed = paramParser(Page, {page: '2'});
-      expect(parsed).toEqual({searchParams: {}, page: '2', per_page: 100, sort: false});
-    });
-
-    it('Page number with per page', () => {
-      let parsed = paramParser(Page, {page: '2', per_page: '1'});
-      expect(parsed).toEqual({searchParams: {}, page: '2', per_page: 1, sort: false});
-    });
-
-    it('Per page', () => {
-      let parsed = paramParser(Page, {per_page: '1'});
-      expect(parsed).toEqual({searchParams: {}, page: 1, per_page: 1, sort: false});
-    });
-
-    it('Limit', () => {
-      let parsed = paramParser(Page, {limit: '1'});
-      expect(parsed).toEqual({searchParams: {}, page: 1, per_page: 1, sort: false});
-    })
-  });
-
   describe('Ordering/Sorting', () => {
     it('Order by ascending (default)', () => {
       let parsed = paramParser(Page, {sort_by: 'title'});
