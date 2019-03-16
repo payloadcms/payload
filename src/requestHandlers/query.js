@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 const query = (req, res) => {
   console.log('inside query');
 
-  req.model.apiQuery(req.query, (err, result) => {
+  req.model.apiQuery(req.query, req.locale, (err, result) => {
     if (err) {
       console.log('api query error', err);
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });

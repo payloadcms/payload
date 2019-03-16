@@ -103,7 +103,7 @@ export default function internationalization(schema, options) {
 
     // intl option is not needed for the current path any more,
     // and is unwanted for all child locale-properties
-    delete schemaType.options.intl;
+    // delete schemaType.options.intl; // This was removed to allow viewing inside query parser
 
     let intlObject = {};
     intlObject[key] = {};

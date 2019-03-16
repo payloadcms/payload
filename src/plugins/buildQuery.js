@@ -2,9 +2,9 @@
 
 export default function buildQuery(schema) {
 
-  schema.statics.apiQuery = function (rawParams, cb) {
+  schema.statics.apiQuery = function (rawParams, locale, cb) {
     const model = this;
-    const params = paramParser(this, rawParams);
+    const params = paramParser(this, rawParams, locale);
     console.log('parsed params', params);
 
     // Create the Mongoose Query object.
@@ -24,7 +24,7 @@ export default function buildQuery(schema) {
   };
 }
 
-function paramParser(model, rawParams) {
+function paramParser(model, rawParams, locale) {
 
   let query = {
     searchParams: {},
@@ -37,7 +37,7 @@ function paramParser(model, rawParams) {
       .match(/{\w+}(.[^{}]*)/g);
 
     if (separatedParams === null) {
-      query = parseParam(key, rawParams[key], model, query);
+      query = parseParam(key, rawParams[key], model, query, locale);
     } else {
       for (let i = 0; i < separatedParams.length; ++i) {
         query = parseParam(key, separatedParams[i], model, query);
@@ -67,7 +67,7 @@ function addSearchParam(query, key, value) {
   return query;
 }
 
-function parseParam(key, val, model, query) {
+function parseParam(key, val, model, query, locale) {
   const lcKey = key;
   let operator = val.match(/\{(.*)\}/);
   val = val.replace(/\{(.*)\}/, '');
@@ -94,13 +94,16 @@ function parseParam(key, val, model, query) {
       query = addSearchParam(query, '$and', andArray);
     } else
       query.searchParams['_id'] = { $ne: val };
-  } else {
-    query = parseSchemaForKey(model.schema, query, '', lcKey, val, operator);
+  } else if (lcKey === 'locale') {
+    // Do nothing
+  }
+   else {
+    query = parseSchemaForKey(model.schema, query, '', lcKey, val, operator, locale);
   }
   return query;
 }
 
-function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator) {
+function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator, locale) {
   let paramType;
   const key = keyPrefix + lcKey;
 
@@ -113,6 +116,10 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator) {
     } else if (schema.paths[matches[1]].constructor.name === 'SchemaType') {
       // This wasn't handled in the original package but seems to work
       paramType = schema.paths[matches[1]].schema.paths.name.instance;
+    }
+  } else if (typeof schema === 'object' ) {
+    if (schema.obj[lcKey].intl) {
+      query = addSearchParam(query, `${key}.${locale}`, val);
     }
   } else if (typeof schema === 'undefined') {
     paramType = 'String';
