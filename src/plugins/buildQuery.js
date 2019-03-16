@@ -17,7 +17,7 @@ export default function buildQuery(schema) {
   };
 }
 
-function paramParser(model, rawParams, locale) {
+export function paramParser(model, rawParams, locale) {
 
   let query = {
     searchParams: {},
@@ -112,8 +112,8 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator, local
   } else if (typeof schema === 'object') {
     if (schema.obj[lcKey].intl) {
       key = `${key}.${locale}`;
-      paramType = 'String'
     }
+    paramType = schema.obj[lcKey].name || schema.obj[lcKey].type.name;
   } else if (typeof schema === 'undefined') {
     paramType = 'String';
   } else if (typeof schema.paths[lcKey] === 'undefined') {
