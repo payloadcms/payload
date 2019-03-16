@@ -5,13 +5,10 @@ export default function buildQuery(schema) {
   schema.statics.apiQuery = function (rawParams, locale, cb) {
     const model = this;
     const params = paramParser(this, rawParams, locale);
-    console.log('parsed params', params);
 
     // Create the Mongoose Query object.
     let query = model
       .find(params.searchParams);
-
-    console.log('after query find');
 
     if (params.sort)
       query = query.sort(params.sort);
@@ -40,7 +37,7 @@ function paramParser(model, rawParams, locale) {
       query = parseParam(key, rawParams[key], model, query, locale);
     } else {
       for (let i = 0; i < separatedParams.length; ++i) {
-        query = parseParam(key, separatedParams[i], model, query);
+        query = parseParam(key, separatedParams[i], model, query, locale);
       }
     }
   }
@@ -105,7 +102,7 @@ function parseParam(key, val, model, query, locale) {
 
 function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator, locale) {
   let paramType;
-  const key = keyPrefix + lcKey;
+  let key = keyPrefix + lcKey;
 
   let matches = lcKey.match(/(.+)\.(.+)/);
   if (matches) {
@@ -119,7 +116,8 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator, local
     }
   } else if (typeof schema === 'object' ) {
     if (schema.obj[lcKey].intl) {
-      query = addSearchParam(query, `${key}.${locale}`, val);
+      key = `${key}.${locale}`;
+      paramType = 'String'
     }
   } else if (typeof schema === 'undefined') {
     paramType = 'String';
