@@ -22,28 +22,28 @@ function paginate(query, options, callback) {
   options = Object.assign({}, paginate.options, options);
   options.customLabels = options.customLabels ? options.customLabels : {};
 
-  var defaultLimit = 10;
+  let defaultLimit = 10;
 
-  var select = options.select;
-  var sort = options.sort;
-  var collation = options.collation || {};
-  var populate = options.populate;
-  var lean = options.lean || false;
-  var leanWithId = options.hasOwnProperty('leanWithId') ? options.leanWithId : true;
-  var limit = options.hasOwnProperty('limit') ? parseInt(options.limit) : defaultLimit;
-  var skip;
-  var offset;
-  var page;
+  let select = options.select;
+  let sort = options.sort;
+  let collation = options.collation || {};
+  let populate = options.populate;
+  let lean = options.lean || false;
+  let leanWithId = options.hasOwnProperty('leanWithId') ? options.leanWithId : true;
+  let limit = options.hasOwnProperty('limit') ? parseInt(options.limit) : defaultLimit;
+  let skip;
+  let offset;
+  let page;
 
   // Custom Labels
-  var labelTotal = options.customLabels.totalDocs ? options.customLabels.totalDocs : 'totalDocs';
-  var labelLimit = options.customLabels.limit ? options.customLabels.limit : 'limit';
-  var labelPage = options.customLabels.page ? options.customLabels.page : 'page';
-  var labelTotalPages = options.customLabels.totalPages ? options.customLabels.totalPages : 'totalPages';
-  var labelDocs = options.customLabels.docs ? options.customLabels.docs : 'docs';
-  var labelNextPage = options.customLabels.nextPage ? options.customLabels.nextPage : 'nextPage';
-  var labelPrevPage = options.customLabels.prevPage ? options.customLabels.prevPage : 'prevPage';
-  var labelPagingCounter = options.customLabels.pagingCounter ? options.customLabels.pagingCounter : 'pagingCounter';
+  let labelTotal = options.customLabels.totalDocs ? options.customLabels.totalDocs : 'totalDocs';
+  let labelLimit = options.customLabels.limit ? options.customLabels.limit : 'limit';
+  let labelPage = options.customLabels.page ? options.customLabels.page : 'page';
+  let labelTotalPages = options.customLabels.totalPages ? options.customLabels.totalPages : 'totalPages';
+  let labelDocs = options.customLabels.docs ? options.customLabels.docs : 'docs';
+  let labelNextPage = options.customLabels.nextPage ? options.customLabels.nextPage : 'nextPage';
+  let labelPrevPage = options.customLabels.prevPage ? options.customLabels.prevPage : 'prevPage';
+  let labelPagingCounter = options.customLabels.pagingCounter ? options.customLabels.pagingCounter : 'pagingCounter';
 
   if (options.hasOwnProperty('offset')) {
     offset = parseInt(options.offset);
@@ -78,7 +78,7 @@ function paginate(query, options, callback) {
     model.populate(populate);
   }
 
-  var docs = model.exec();
+  let docs = model.exec();
 
   if (lean && leanWithId) {
     docs = docs.then(function (docs) {
@@ -92,7 +92,7 @@ function paginate(query, options, callback) {
   return Promise.all([count, docs])
     .then(function (values) {
 
-      var result = {
+      let result = {
         [labelDocs]: values[1],
         [labelTotal]: values[0],
         [labelLimit]: limit

@@ -6,18 +6,14 @@ export default function buildQuery(schema) {
     const model = this;
     const params = paramParser(this, rawParams, locale);
 
-    // Create the Mongoose Query object.
-    let query = model
-      .find(params.searchParams);
-
-    if (params.sort)
-      query = query.sort(params.sort);
 
     if (cb) {
-      query.exec(cb);
-    } else {
-      return query;
+      model
+        .find(params.searchParams)
+        .exec(cb);
     }
+
+    return params.searchParams;
   };
 }
 
@@ -93,8 +89,7 @@ function parseParam(key, val, model, query, locale) {
       query.searchParams['_id'] = { $ne: val };
   } else if (lcKey === 'locale') {
     // Do nothing
-  }
-   else {
+  } else {
     query = parseSchemaForKey(model.schema, query, '', lcKey, val, operator, locale);
   }
   return query;
@@ -114,7 +109,7 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator, local
       // This wasn't handled in the original package but seems to work
       paramType = schema.paths[matches[1]].schema.paths.name.instance;
     }
-  } else if (typeof schema === 'object' ) {
+  } else if (typeof schema === 'object') {
     if (schema.obj[lcKey].intl) {
       key = `${key}.${locale}`;
       paramType = 'String'

@@ -16,7 +16,7 @@ const PageSchema = new mongoose.Schema({
   { timestamps: true }
 );
 
-// PageSchema.plugin(paginate);
+PageSchema.plugin(paginate);
 PageSchema.plugin(buildQuery);
 PageSchema.plugin(internationalization, payloadConfig.localization);
 
