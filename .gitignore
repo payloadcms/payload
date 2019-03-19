@@ -1,6 +1,7 @@
 coverage
 package-lock.json
 dist
+.idea
 
 # Created by https://www.gitignore.io/api/node,macos,windows,webstorm,sublimetext,visualstudiocode
 
