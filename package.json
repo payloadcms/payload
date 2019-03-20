@@ -10,7 +10,8 @@
     ]
   },
   "scripts": {
-    "test": "node ./node_modules/jest/bin/jest.js src/tests",
+    "test": "jest --config src/tests/jest.config.js",
+    "test:int": "jest --config src/tests/jest.config.integration.js",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
     "webpack": "webpack-dev-server --mode development --config config/webpack.dev.config.js --open --hot --history-api-fallback",
     "demo-server": "nodemon demo/init.js",
@@ -56,6 +57,7 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.0.0",
     "autoprefixer": "^9.0.1",
+    "axios": "^0.18.0",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.4",
@@ -66,6 +68,7 @@
     "eslint-plugin-react": "^7.11.1",
     "express": "^4.16.4",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "faker": "^4.1.0",
     "html-webpack-plugin": "^3.2.0",
     "jest": "^23.6.0",
     "jest-mock-express": "^0.1.1",
@@ -85,13 +88,5 @@
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.5",
     "webpack-merge": "^4.1.3"
-  },
-  "jest": {
-    "verbose": true,
-    "testURL": "http://localhost/",
-    "transform": {
-      "^.+\\.(j|t)s$": "babel-jest"
-    },
-    "testEnvironment": "node"
   }
 }

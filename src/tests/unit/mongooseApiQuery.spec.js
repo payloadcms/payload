@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
-import mongooseApiQuery from '../plugins/buildQuery';
+import mongooseApiQuery from '../../plugins/buildQuery';
 
 const TestUserSchema = new Schema({
     name: {type: String},

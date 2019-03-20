@@ -1,6 +1,6 @@
-import middleware from '../middleware';
+import middleware from '../../middleware';
 import mockExpress from 'jest-mock-express';
-import locale from '../middleware/locale';
+import locale from '../../middleware/locale';
 
 let res = null;
 let next = null;
