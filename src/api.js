@@ -10,7 +10,7 @@ const responseBody = res => res.body;
 const setJwt = () => {
   const jwt = cookies.get('token');
   return jwt ? { 'Authorization': `JWT ${jwt}` } : {}
-}
+};
 
 const requests = {
   get: (url, params) => {

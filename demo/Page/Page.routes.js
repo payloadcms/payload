@@ -5,19 +5,19 @@ import { query, create, findOne, destroy, update } from '../../src/requestHandle
 import Page from './Page.model';
 import pagePolicy from './Page.policy';
 
-const router = express.Router(); // eslint-disable-line new-cap
+const pageRoutes = express.Router(); // eslint-disable-line new-cap
 
-router.all('*', bindModel(Page));
+pageRoutes.all('*', bindModel(Page));
 
-router
+pageRoutes
   .route('')
   .get(pagePolicy.read, query)
   .post(pagePolicy.create, create);
 
-router
+pageRoutes
   .route('/:_id')
   .get(pagePolicy.read, findOne)
   .put(pagePolicy.update, update)
   .delete(pagePolicy.destroy, destroy);
 
-export default router;
+export { pageRoutes };

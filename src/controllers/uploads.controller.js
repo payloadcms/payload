@@ -21,7 +21,7 @@ function upload(req, res, next, config) {
     if (req.files.file.mimetype.split('/')[0] === 'image') {
       resize(config, req.files.file);
     }
-    res.send('File uploaded.');
+    res.status(200).send('File uploaded.');
   })
 }
 

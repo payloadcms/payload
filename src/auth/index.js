@@ -18,7 +18,6 @@ export default User => ({
       user.authenticate(password, (authErr, model, passwordError) => {
         if (authErr || passwordError) return res.status(401).json({ message: 'Auth Failed' });
 
-        console.log('Correct password. Generating token.');
         let opts = {};
         opts.expiresIn = process.env.tokenExpiration || 7200;  // 20min default expiration
         const secret = process.env.secret || 'SECRET_KEY';

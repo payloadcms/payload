@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
-import { schemaBaseFields } from '../../helpers/mongoose/schemaBaseFields';
-import paginate from '../../plugins/paginate';
-import buildQuery from '../../plugins/buildQuery';
-import internationalization from '../../plugins/internationalization';
+import { schemaBaseFields } from '../../../helpers/mongoose/schemaBaseFields';
+import paginate from '../../../plugins/paginate';
+import buildQuery from '../../../plugins/buildQuery';
+import internationalization from '../../../plugins/internationalization';
 
 const IntlSchema = new mongoose.Schema({
     ...schemaBaseFields,

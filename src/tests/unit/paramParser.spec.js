@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 import { intlModel } from './testModels/IntlModel';
-import { paramParser } from '../plugins/buildQuery';
+import { paramParser } from '../../plugins/buildQuery';
 
 const AuthorSchema = new Schema({
   name: String,
