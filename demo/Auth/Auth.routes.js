@@ -5,20 +5,20 @@ import middleware from '../../src/middleware';
 import authCtrl from './Auth.controller';
 import payloadConfig from '../payload.config';
 
-const router = new express.Router();
+const authRoutes = express.Router();
 
-router
+authRoutes
   .route('/login')
   .post(authValidate.login, authCtrl.login);
 
-router
+authRoutes
   .route('/me')
   .post(passport.authenticate('jwt', { session: false }), authCtrl.me);
 
 payloadConfig.roles.forEach((role) => {
-  router
+  authRoutes
     .route(`/role/${role}`)
     .get(passport.authenticate('jwt', { session: false }), middleware.role(role), authCtrl.me);
 });
 
-export default router;
+export { authRoutes };
