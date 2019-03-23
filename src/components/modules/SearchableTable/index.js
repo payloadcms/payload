@@ -16,8 +16,9 @@ class SearchableTable extends Component {
         key: '_id',
         label: 'ID'
       }, {
-        key: 'published',
-        label: 'Published On'
+        key: 'createdAt',
+        label: 'Created At',
+        handler: time => new Date(time).toDateString()
       }]
     }
   }

@@ -37,8 +37,18 @@ const Sidebar = props => {
       </nav>
       <span className="uppercase-label">Globals</span>
       <nav>
-        <NavLink activeClassName="active" to="/components">Components</NavLink>
-        <NavLink activeClassName="active" to="/settings">Settings</NavLink>
+        <NavLink activeClassName="active" to="/media-library">
+          <Arrow />
+          Media Library
+        </NavLink>
+        <NavLink activeClassName="active" to="/components">
+          <Arrow />
+          Components
+        </NavLink>
+        <NavLink activeClassName="active" to="/settings">
+          <Arrow />
+          Settings
+        </NavLink>
       </nav>
     </aside>
   );

@@ -64,5 +64,6 @@ export { default as SetSearchParams } from './components/utilities/SetSearchPara
 export { default as Dashboard } from './components/views/Dashboard';
 export { default as Login } from './components/views/Login';
 export { default as CreateUser } from './components/views/CreateUser';
+export { default as MediaLibrary } from './components/views/MediaLibrary';
 export { default as ListView } from './components/views/collections/List';
 export { default as EditView } from './components/views/collections/Edit';
