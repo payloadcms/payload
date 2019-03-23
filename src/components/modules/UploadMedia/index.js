@@ -129,6 +129,21 @@ class UploadMediaForm extends Component {
     }
   }
 
+  componentDidMount() {
+    this.inputRef.current.addEventListener('change', e => {
+      this.props.setSelectingFile(false);
+
+      // If there are files, submit the form
+      if (this.inputRef.current.files[0]) {
+        this.handleSubmit();
+      }
+    }, false);
+  }
+
+  componentWillUnmount() {
+    this.inputRef.current.removeEventListener('change');
+  }
+
   handleSubmit = () => {
     const data = new FormData(this.formRef.current);
     api.requests.post(`${this.props.config.serverUrl}/upload`, data).then(
