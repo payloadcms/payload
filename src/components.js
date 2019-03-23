@@ -36,6 +36,9 @@ export { default as ContentBlock } from './components/layout/ContentBlock';
 export { default as Table } from './components/layout/Table';
 export { default as Section } from './components/layout/Section';
 
+// Modals
+export { default as asModal } from './components/modals/asModal';
+
 // Modules
 export { default as Status } from './components/modules/Status';
 export { default as StickyHeader } from './components/modules/StickyHeader';
@@ -46,7 +49,7 @@ export { default as StepNav } from './components/modules/StepNav';
 export { default as Tooltip } from './components/modules/Tooltip';
 export { default as SearchableTable } from './components/modules/SearchableTable';
 export { default as Localizer } from './components/modules/Localizer';
-export { default as DragAndDrop } from './components/modules/DragAndDrop';
+export { default as UploadMedia } from './components/modules/UploadMedia';
 
 
 // Routes

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { fieldType, DragAndDrop } from 'payload/components';
+import { fieldType, UploadMedia } from 'payload/components';
 
 import './index.scss';
 
@@ -39,11 +39,11 @@ class Media extends Component {
           ref={this.inputRef}
           value={this.props.value || ''}
           onChange={this.props.onChange}
-          type="file"
+          type="hidden"
           id={this.props.id ? this.props.id : this.props.name}
           name={this.props.name} />
         {!this.props.value &&
-          <DragAndDrop handleDrop={this.handleDrop} handleSelectFile={this.handleSelectFile} />
+          <UploadMedia handleDrop={this.handleDrop} handleSelectFile={this.handleSelectFile} />
         }
       </div>
     )

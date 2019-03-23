@@ -33,7 +33,7 @@ class Button extends Component {
     switch (this.props.el) {
       case 'link':
         return (
-          <Link {...this.buttonProps} to={this.props.url}>
+          <Link {...this.buttonProps} to={this.props.to ? this.props.to : this.props.url}>
             {this.props.children}
           </Link>
         );
