@@ -1,22 +1,22 @@
 import React from 'react';
 import {
-  withArchiveData,
-  ArchiveView,
+  withListData,
+  ListView,
   HeadingButton,
   SearchableTable,
 } from 'payload/components';
 
-const Archive = props => {
+const List = props => {
   return (
-    <ArchiveView collection={props.collection}>
+    <ListView collection={props.collection}>
       <HeadingButton
         heading="Pages"
         buttonLabel="Add New"
         buttonUrl={`/collections/${props.collection.slug}/create`}
         buttonType="link" />
       <SearchableTable data={props.data.docs} collection={props.collection} />
-    </ArchiveView>
+    </ListView>
   );
 }
 
-export default withArchiveData(Archive);
+export default withListData(List);

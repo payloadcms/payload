@@ -1,7 +1,7 @@
-import Archive from './Archive';
+import List from './List';
 import Edit from './Edit';
 
 export default {
-  Archive: Archive,
+  List: List,
   Edit: Edit
 };

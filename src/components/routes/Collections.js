@@ -28,8 +28,8 @@ const CollectionRoutes = props => {
       <Route path={'/collections/:collectionSlug'} exact
         render={routeProps => {
           const { collectionSlug } = routeProps.match.params;
-          const Archive = props.views[routeProps.match.params.collectionSlug].Archive;
-          return <Archive {...routeProps} collection={props.collections[collectionSlug]} config={props.config} />;
+          const List = props.views[routeProps.match.params.collectionSlug].List;
+          return <List {...routeProps} collection={props.collections[collectionSlug]} config={props.config} />;
         }} />
     </Switch>
   );

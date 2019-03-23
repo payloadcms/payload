@@ -4,7 +4,7 @@ export { default as App } from './components/App';
 export { default as Button } from './components/controls/Button';
 
 // Data
-export { default as withArchiveData } from './components/data/archive';
+export { default as withListData } from './components/data/list';
 export { default as withEditData } from './components/data/edit';
 
 // Field Types
@@ -61,5 +61,5 @@ export { default as SetSearchParams } from './components/utilities/SetSearchPara
 export { default as Dashboard } from './components/views/Dashboard';
 export { default as Login } from './components/views/Login';
 export { default as CreateUser } from './components/views/CreateUser';
-export { default as ArchiveView } from './components/views/collections/Archive';
+export { default as ListView } from './components/views/collections/List';
 export { default as EditView } from './components/views/collections/Edit';

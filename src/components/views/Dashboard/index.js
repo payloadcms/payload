@@ -13,7 +13,7 @@ const Dashboard = () => {
       <br />
       <Link to="/create-user">Create User</Link>
       <br />
-      <Link to="/collections/pages">Pages Archive</Link>
+      <Link to="/collections/pages">Pages List</Link>
       <br />
       <Link to="/collections/pages/test123">Edit Page</Link>
     </article>

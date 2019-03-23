@@ -6,9 +6,9 @@ const mapState = state => ({
   locale: state.common.locale
 })
 
-const withArchiveData = PassedComponent => {
+const withListData = PassedComponent => {
 
-  class ArchiveData extends Component {
+  class ListData extends Component {
 
     constructor(props) {
       super(props);
@@ -44,7 +44,7 @@ const withArchiveData = PassedComponent => {
     }
   }
 
-  return connect(mapState)(ArchiveData);
+  return connect(mapState)(ListData);
 }
 
-export default withArchiveData;
+export default withListData;
