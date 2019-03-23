@@ -12,6 +12,7 @@ export { default as fieldType } from './components/field-types/fieldType';
 export { default as Group } from './components/field-types/Group';
 export { default as Repeater } from './components/field-types/Repeater';
 export { default as Input } from './components/field-types/Input';
+export { default as Media } from './components/field-types/Media';
 export { default as Email } from './components/field-types/Email';
 export { default as Password } from './components/field-types/Password';
 export { default as Textarea } from './components/field-types/Textarea';
@@ -45,6 +46,8 @@ export { default as StepNav } from './components/modules/StepNav';
 export { default as Tooltip } from './components/modules/Tooltip';
 export { default as SearchableTable } from './components/modules/SearchableTable';
 export { default as Localizer } from './components/modules/Localizer';
+export { default as DragAndDrop } from './components/modules/DragAndDrop';
+
 
 // Routes
 export { default as CollectionRoutes } from './components/routes/Collections';

@@ -22,35 +22,35 @@ class Button extends Component {
     }
 
     this.buttonProps = {
+      ...this.props,
       className: classes,
       onClick: this.props.onClick,
-      disabled: this.props.disabled,
-      ...this.props
+      disabled: this.props.disabled
     };
   }
 
   render() {
     switch (this.props.el) {
-    case 'link':
-      return (
-        <Link {...this.buttonProps} to={this.props.url}>
-          {this.props.children}
-        </Link>
-      );
+      case 'link':
+        return (
+          <Link {...this.buttonProps} to={this.props.url}>
+            {this.props.children}
+          </Link>
+        );
 
-    case 'anchor':
-      return (
-        <a {...this.buttonProps} href={this.props.url}>
-          {this.props.children}
-        </a>
-      );
+      case 'anchor':
+        return (
+          <a {...this.buttonProps} href={this.props.url}>
+            {this.props.children}
+          </a>
+        );
 
-    default:
-      return (
-        <button {...this.buttonProps}>
-          {this.props.children}
-        </button>
-      );
+      default:
+        return (
+          <button {...this.buttonProps}>
+            {this.props.children}
+          </button>
+        );
     }
   }
 }

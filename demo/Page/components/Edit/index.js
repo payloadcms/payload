@@ -8,6 +8,7 @@ import {
   Form,
   Input,
   Textarea,
+  Media,
   Group,
   FormSubmit,
   Repeater
@@ -48,6 +49,12 @@ const Edit = props => {
         <Textarea name="content"
           label="Content"
           initialValue={data['content']}
+          height={100}
+          required />
+
+        <Media name="image"
+          label="Image"
+          initialValue={data['image']}
           height={100}
           required />
 

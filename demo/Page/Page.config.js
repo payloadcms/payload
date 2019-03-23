@@ -20,6 +20,12 @@ export default {
       required: true
     },
     {
+      name: 'image',
+      label: 'Image',
+      type: 'media',
+      required: true
+    },
+    {
       name: 'slides',
       label: 'Slides',
       type: 'repeater',
