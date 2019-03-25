@@ -25,7 +25,6 @@
     "dotenv": "^6.0.0",
     "express-fileupload": "^1.1.1-alpha.1",
     "express-validation": "^1.0.2",
-    "file-loader": "^1.1.11",
     "http-status": "^1.2.0",
     "ignore-styles": "^5.0.1",
     "image-size": "^0.7.1",
