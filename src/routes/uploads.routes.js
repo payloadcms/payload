@@ -2,7 +2,7 @@ import express from 'express';
 import passport from 'passport';
 import uploadsCtrl from '../controllers/uploads.controller';
 
-const router = new express.Router();
+const router = express.Router();
 const uploadRouter = config => {
   router
     .route('')
