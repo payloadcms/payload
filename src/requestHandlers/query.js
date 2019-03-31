@@ -9,7 +9,7 @@ const query = (req, res) => {
     return res.json({
       ...result,
       docs: result.docs.map(doc => {
-        if (req.locale) {
+        if (req.locale && doc.setLocale) {
           doc.setLocale(req.locale, req.query['fallback-locale']);
         }
 
