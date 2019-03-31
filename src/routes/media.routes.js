@@ -6,7 +6,7 @@ import bindModel from '../middleware/bindModel';
 import Media from '../models/Media.model';
 
 const router = express.Router();
-const mediaRouter = config => {
+const mediaRoutes = config => {
 
   router.all('*', bindModel(Media));
 
@@ -26,4 +26,4 @@ const mediaRouter = config => {
   return router;
 };
 
-export default mediaRouter;
+export default mediaRoutes;

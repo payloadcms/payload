@@ -24,8 +24,8 @@
     "defaultLocale": "en",
     "fallback": true
   },
-  "staticUrl": "/uploads",
-  "staticDir": "demo/uploads",
+  "staticUrl": "/media",
+  "staticDir": "demo/media",
   "imageSizes": [
     {
       "name": "tablet",
