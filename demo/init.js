@@ -1,5 +1,5 @@
 require('@babel/register')({
-  ignore: [ /(node_modules)/ ]
+  ignore: [/(node_modules)/]
 });
 
 require('./app');

@@ -9,6 +9,8 @@ import fileUpload from 'express-fileupload';
 import assetRoutes from './routes/uploads.routes'
 import config from '../demo/payload.config';
 import locale from './middleware/locale';
+import expressGraphQL from 'express-graphql';
+import schema from '../demo/graphql';
 
 module.exports = {
   init: options => {
@@ -56,5 +58,13 @@ module.exports = {
     options.app.use(bodyParser.urlencoded({ extended: true }));
     options.app.use(locale(config.localization));
     options.app.use(options.router);
+
+    options.app.use(
+      '/graphql',
+      expressGraphQL({
+        schema,
+        graphiql: true
+      })
+    );
   }
 };
