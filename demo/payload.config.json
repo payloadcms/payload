@@ -44,5 +44,9 @@
       "width": 16,
       "height": 16
     }
-  ]
+  ],
+  "graphQL": {
+    "path": "/graphql",
+    "graphiql": true
+  }
 }
