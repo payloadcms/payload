@@ -1,13 +1,12 @@
 
 const create = query => {
-  console.log(query);
   return new Promise((resolve, reject) => {
-    query.model.create(query.input, (err, doc) => {
+    query.Model.create(query.input, (err, doc) => {
+      console.log(err,doc);
       if (err || !doc) {
-        return reject({message: 'not found'})
+        return reject({message: err})
       }
-      let result = doc;
-      resolve(result);
+      resolve(doc);
     });
   });
 };

@@ -25,7 +25,7 @@ export default {
       return await find(query);
     }
   },
-  Mutations: {
+  Mutation: {
     createPage: async (parent, args) => {
 
       const query = {

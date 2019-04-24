@@ -1,5 +1,5 @@
 export default `
-  type PageInput {
+  input PageInput {
     title: String!
     content: String
     metaTitle: String
