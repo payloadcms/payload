@@ -1,4 +1,11 @@
 export default `
+  type PageInput {
+    title: String!
+    content: String
+    metaTitle: String
+    metaDesc: String
+  }
+
   type Page {
     id: String
     title: String
@@ -11,10 +18,10 @@ export default `
 
   type Query {
     page(id: String!, locale: String): Page
-    pages: [Page]
+    pages(locale: String): [Page]
   }
 
   type Mutation {
-    addPage(title: String, content: String): Page
+    createPage(input: PageInput): Page
   }
 `;

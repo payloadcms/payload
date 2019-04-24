@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 
 const query = (req, res) => {
 
-  req.model.paginate(req.model.apiQuery(req.query, req.locale), req.query, (err, result) => {
+  req.model.paginate(req.model.apiQuery(req.find, req.locale), req.find, (err, result) => {
     if (err) {
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
     }
@@ -10,7 +10,7 @@ const query = (req, res) => {
       ...result,
       docs: result.docs.map(doc => {
         if (req.locale) {
-          doc.setLocale(req.locale, req.query['fallback-locale']);
+          doc.setLocale(req.locale, req.find['fallback-locale']);
         }
 
         return doc.toJSON({ virtuals: true })
