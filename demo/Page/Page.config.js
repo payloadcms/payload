@@ -20,6 +20,13 @@ export default {
       required: true
     },
     {
+      name: 'categories',
+      label: 'Categories',
+      type: 'relationship',
+      relationType: 'reference',
+      relationTo: 'Category',
+    },
+    {
       name: 'slides',
       label: 'Slides',
       type: 'repeater',
@@ -56,12 +63,6 @@ export default {
           height: 100
         }
       ]
-    }
-  ],
-  relationships: [
-    {
-      relation: 'orders',
-      type: 'hasMany'
     }
   ]
 };

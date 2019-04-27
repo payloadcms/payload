@@ -3,9 +3,10 @@ import payload from '../src';
 
 import User from './User/User.model';
 import payloadConfig from './payload.config';
-import { authRoutes } from './Auth/Auth.routes';
-import { userRoutes } from './User/User.routes';
-import { pageRoutes } from './Page/Page.routes';
+import {authRoutes} from './Auth/Auth.routes';
+import {userRoutes} from './User/User.routes';
+import {pageRoutes} from './Page/Page.routes';
+import {categoryRoutes} from './Category/Category.routes';
 import schema from '../demo/graphql';
 
 const router = express.Router({}); // eslint-disable-line new-cap
@@ -32,6 +33,7 @@ if (process.env.NODE_ENV !== 'production') {
 router.use('/', authRoutes);
 router.use('/users', userRoutes);
 router.use('/pages', pageRoutes);
+router.use('/categories', categoryRoutes);
 
 app.listen(payloadConfig.port, () => {
   console.log(`listening on ${payloadConfig.port}...`);
