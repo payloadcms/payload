@@ -6,7 +6,8 @@ import methodOverride from 'method-override';
 import jwtStrategy from './auth/jwt';
 import User from '../demo/User/User.model';
 import fileUpload from 'express-fileupload';
-import assetRoutes from './routes/uploads.routes'
+import mediaRoutes from './routes/Media.routes';
+import config from '../demo/payload.config';
 import locale from './middleware/locale';
 import expressGraphQL from 'express-graphql';
 
@@ -48,7 +49,7 @@ module.exports = {
       });
     }
 
-    options.router.use('/upload', assetRoutes(options.config));
+    options.router.use(options.config.staticUrl, mediaRoutes(options.config));
 
     options.app.use(express.json());
     options.app.use(methodOverride('X-HTTP-Method-Override'));

@@ -1,6 +1,6 @@
 import mkdirp from 'mkdirp';
 import { resize } from '../../src/utils/imageResizer';
-
+import Media from '../models/Media.model';
 
 function upload(req, res, next, config) {
   if (Object.keys(req.files).length === 0) {
@@ -21,7 +21,23 @@ function upload(req, res, next, config) {
     if (req.files.file.mimetype.split('/')[0] === 'image') {
       resize(config, req.files.file);
     }
-    res.status(200).send('File uploaded.');
+
+    Media.create({
+      name: req.files.file.name,
+      filename: req.files.file.name
+    }, (err, result) => {
+      if (err)
+        return res.status(500).json({ error: err });
+
+      return res.status(201)
+        .json({
+          message: 'success',
+          result: {
+            id: result.id,
+            name: result.name
+          }
+        });
+    });
   })
 }
 
