@@ -7,8 +7,8 @@ const findOne = (req, res) => {
     Model: req.model,
     id: req.params._id,
     locale: req.locale,
-    fallback: req.find['fallback-locale']
-  }
+    fallback: req.query['fallback-locale']
+  };
 
   modelById(query)
     .then(doc => res.json(doc))
