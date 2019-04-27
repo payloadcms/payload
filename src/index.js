@@ -9,6 +9,7 @@ import fileUpload from 'express-fileupload';
 import mediaRoutes from './routes/Media.routes';
 import config from '../demo/payload.config';
 import locale from './middleware/locale';
+import expressGraphQL from 'express-graphql';
 
 module.exports = {
   init: options => {
@@ -54,7 +55,17 @@ module.exports = {
     options.app.use(methodOverride('X-HTTP-Method-Override'));
     options.app.use(express.urlencoded({ extended: true }));
     options.app.use(bodyParser.urlencoded({ extended: true }));
-    options.app.use(locale(config.localization));
+    options.app.use(locale(options.config.localization));
     options.app.use(options.router);
+
+    if (options.config.graphQL && options.graphQLSchema) {
+      options.app.use(
+        options.config.graphQL.path,
+        expressGraphQL({
+          schema: options.graphQLSchema,
+          graphiql: options.config.graphQL.graphiql,
+        })
+      );
+    }
   }
 };
