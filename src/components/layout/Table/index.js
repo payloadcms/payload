@@ -18,10 +18,11 @@ const Table = props => {
             return (
               <tr key={i}>
                 {props.columns.map((col, i) => {
+                  const value = col.handler ? col.handler(row[col.key]) : row[col.key];
                   return (
                     <td key={i}>
-                      {row[col.key]
-                        ? row[col.key]
+                      {value
+                        ? value
                         : <span className="no-data" dangerouslySetInnerHTML={{ __html: '&mdash;' }} />
                       }
                     </td>

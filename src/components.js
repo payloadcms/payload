@@ -12,6 +12,7 @@ export { default as fieldType } from './components/field-types/fieldType';
 export { default as Group } from './components/field-types/Group';
 export { default as Repeater } from './components/field-types/Repeater';
 export { default as Input } from './components/field-types/Input';
+export { default as Media } from './components/field-types/Media';
 export { default as Email } from './components/field-types/Email';
 export { default as Password } from './components/field-types/Password';
 export { default as Textarea } from './components/field-types/Textarea';
@@ -35,6 +36,9 @@ export { default as ContentBlock } from './components/layout/ContentBlock';
 export { default as Table } from './components/layout/Table';
 export { default as Section } from './components/layout/Section';
 
+// Modals
+export { default as asModal } from './components/modals/asModal';
+
 // Modules
 export { default as Status } from './components/modules/Status';
 export { default as StickyHeader } from './components/modules/StickyHeader';
@@ -45,6 +49,8 @@ export { default as StepNav } from './components/modules/StepNav';
 export { default as Tooltip } from './components/modules/Tooltip';
 export { default as SearchableTable } from './components/modules/SearchableTable';
 export { default as Localizer } from './components/modules/Localizer';
+export { default as UploadMedia } from './components/modules/UploadMedia';
+
 
 // Routes
 export { default as CollectionRoutes } from './components/routes/Collections';
@@ -61,5 +67,6 @@ export { default as SetSearchParams } from './components/utilities/SetSearchPara
 export { default as Dashboard } from './components/views/Dashboard';
 export { default as Login } from './components/views/Login';
 export { default as CreateUser } from './components/views/CreateUser';
+export { default as MediaLibrary } from './components/views/MediaLibrary';
 export { default as ListView } from './components/views/collections/List';
 export { default as EditView } from './components/views/collections/Edit';

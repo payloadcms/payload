@@ -1,0 +1,21 @@
+@import '~payload/scss/styles';
+
+.modal {
+	transform: translateZ(0);
+	opacity: 0;
+	visibility: hidden;
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: -1;
+  height: 100vh;
+  background-color: rgba(white, .96);
+
+	&.open {
+		opacity: 1;
+		visibility: visible;
+		z-index: $z-modal;
+	}
+}

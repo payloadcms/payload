@@ -11,16 +11,6 @@
     margin-bottom: rem(1);
     cursor: pointer;
 
-    &.btn-icon {
-        width: rem(1.5);
-        height: rem(1.5);
-
-        svg {
-            width: rem(.75);
-            height: rem(.75);
-        }
-    }
-
     &.btn-secondary {
         border: $stroke-width solid $primary;
         color: $primary;
@@ -58,6 +48,25 @@
             color: $primary;
             border-bottom-color: $primary;
         }
+    }
+
+    &.btn-icon {
+      background: none;
+      padding: 0;
+      border-radius: 0;
+      border: 0;
+      width: rem(1.5);
+      height: rem(1.5);
+
+      svg {
+          width: rem(.75);
+          height: rem(.75);
+      }
+
+      &:hover {
+        background: none;
+        border: 0;
+      }
     }
 
     &:hover {

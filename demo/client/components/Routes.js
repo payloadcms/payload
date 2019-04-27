@@ -6,7 +6,8 @@ import {
   DefaultTemplate,
   Dashboard,
   Login,
-  CreateUser
+  CreateUser,
+  MediaLibrary
 } from 'payload/components';
 import Logo from '../components/graphics/Logo';
 import Icon from '../components/graphics/Icon';
@@ -22,6 +23,7 @@ const Routes = props => {
         if (cookies.get('token')) {
           return (
             <DefaultTemplate {...routeProps} icon={Icon}>
+              <Route path="/media-library" component={MediaLibrary} />
               <Route path="/create-user" component={CreateUser} />
               <Route path="/" exact component={Dashboard} />
               <CollectionRoutes views={props.views} />

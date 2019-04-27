@@ -20,6 +20,22 @@ export default {
       required: true
     },
     {
+      name: 'image',
+      label: 'Image',
+      type: 'media',
+      required: true
+    },
+    {
+      name: 'author',
+      label: 'Written by:',
+      type: 'reference',
+      reference: {
+        to: 'Author',
+        nested: true,
+        relationship: 'oneToMany'
+      }
+    },
+    {
       name: 'slides',
       label: 'Slides',
       type: 'repeater',
