@@ -1,0 +1,22 @@
+@import '~payload/scss/styles';
+
+.upload-media {
+  padding: rem(1);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  border: $stroke-width solid $primary;
+
+  &.dragging {
+    background: rgba($primary, .1);
+  }
+
+  .or {
+    @extend %uppercase-label;
+    display: block;
+  }
+
+  .btn {
+    margin: rem(.125) 0 0;
+  }
+}

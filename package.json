@@ -37,6 +37,7 @@
     "merge-graphql-schemas": "^1.5.8",
     "method-override": "^3.0.0",
     "mongoose-autopopulate": "^0.9.1",
+    "mkdirp": "^0.5.1",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",

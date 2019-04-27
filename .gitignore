@@ -223,4 +223,6 @@ $RECYCLE.BIN/
 src/**/*.css
 demo**/*.css
 dist
+
+# Ignore demo/uploads
 demo/uploads

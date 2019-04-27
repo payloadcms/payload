@@ -1,7 +1,8 @@
 {
   "ignore": [
     ".git",
-    "node_modules/**/node_modules"
+    "node_modules/**/node_modules",
+    "src/components"
   ],
   "watch": [
     "demo/",
