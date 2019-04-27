@@ -1,7 +1,7 @@
-const modelById = query => {
+const modelById = (query, options)=> {
 
   return new Promise((resolve, reject) => {
-    query.Model.findOne({ _id: query.id }, (err, doc) => {
+    query.Model.findOne({ _id: query.id }, {}, options, (err, doc) => {
 
       if (err || !doc) {
         return reject({ message: 'not found' })
@@ -14,7 +14,7 @@ const modelById = query => {
         const json = doc.toJSON({ virtuals: true });
         result = json;
       }
-
+      console.log(options);
       resolve(result);
     })
   })
