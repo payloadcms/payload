@@ -14,7 +14,6 @@ const modelById = (query, options)=> {
         const json = doc.toJSON({ virtuals: true });
         result = json;
       }
-      console.log(options);
       resolve(result);
     })
   })
