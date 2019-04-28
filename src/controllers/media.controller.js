@@ -1,8 +1,7 @@
 import mkdirp from 'mkdirp';
-import { resize } from '../../src/utils/imageResizer';
-import Media from '../models/Media.model';
+import { resize } from '../utils/imageResizer';
 
-function upload(req, res, next, config) {
+function upload(req, res, next, mediaModel, config) {
   if (Object.keys(req.files).length === 0) {
     return res.status(400).send('No files were uploaded.');
   }
@@ -22,20 +21,21 @@ function upload(req, res, next, config) {
       resize(config, req.files.file);
     }
 
-    Media.create({
-      name: req.files.file.name,
+    mediaModel.create({
+      name: req.body.name,
+      caption: req.body.caption,
+      description: req.body.description,
       filename: req.files.file.name
-    }, (err, result) => {
-      if (err)
-        return res.status(500).json({ error: err });
+    }, (mediaCreateError, result) => {
+      if (mediaCreateError)
+        return res.status(500).json({ error: mediaCreateError });
 
       return res.status(201)
         .json({
-          message: 'success',
-          result: {
-            id: result.id,
-            name: result.name
-          }
+          id: result.id,
+          name: result.name,
+          description: result.description,
+          filename: result.filename
         });
     });
   })
