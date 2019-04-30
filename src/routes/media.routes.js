@@ -1,6 +1,6 @@
 import express from 'express';
 import passport from 'passport';
-import mediaCtrl from '../controllers/media.controller';
+import { upload, update } from '../controllers/media.controller';
 import { query } from '../requestHandlers';
 import bindModel from '../middleware/bindModel';
 import mediaModelLoader from '../models/Media.model';
@@ -15,14 +15,14 @@ const mediaRoutes = config => {
     .route('')
     .post(
       passport.authenticate('jwt', { session: false }),
-      (req, res, next) => mediaCtrl.upload(req, res, next, mediaModel, config)
+      (req, res, next) => upload(req, res, next, config)
     );
 
   router
-    .route(':id')
+    .route('/:_id')
     .put(
       passport.authenticate('jwt', { session: false }),
-      (req, res, next) => mediaCtrl.upload(req, res, next, mediaModel, config)
+      (req, res, next) => update(req, res, next, config)
     );
 
   router.route('')

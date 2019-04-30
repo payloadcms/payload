@@ -7,7 +7,7 @@ function getOutputImageName(sourceImage, size) {
   return `${filenameWithoutExtension}-${size.width}x${size.height}.${extension}`;
 }
 
-export function resize(config, file) {
+export function resizeAndSave(config, file) {
   let sourceImage = `${config.staticDir}/${file.name}`;
 
   sizeOf(sourceImage, (err, dimensions) => {

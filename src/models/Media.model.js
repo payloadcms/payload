@@ -5,11 +5,13 @@ import internationalization from '../plugins/internationalization';
 
 const mediaModelLoader = (config) => {
   const MediaSchema = new mongoose.Schema({
-    name: { type: String, intl: true},
-    caption: { type: String, intl: true},
-    description: { type: String, intl: true},
-    filename: { type: String},
-  });
+      name: { type: String, intl: true },
+      caption: { type: String, intl: true },
+      description: { type: String, intl: true },
+      filename: { type: String }
+    },
+    { timestamps: true }
+  );
 
   MediaSchema.plugin(paginate);
   MediaSchema.plugin(buildQuery);
