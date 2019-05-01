@@ -13,9 +13,10 @@ const findOne = (req, res) => {
   if (res) {
     modelById(query)
       .then(doc => res.json(doc))
-      .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err }));
+      .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR)
+        .json({ error: err }));
   }
-  return modelById(query);
+  return modelById(query, true);
 };
 
 export default findOne;
