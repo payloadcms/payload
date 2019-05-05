@@ -8,7 +8,12 @@ const mediaModelLoader = (config) => {
       name: { type: String, intl: true },
       caption: { type: String, intl: true },
       description: { type: String, intl: true },
-      filename: { type: String }
+      filename: { type: String },
+      sizes: [{
+        height: { type: Number},
+        width: { type: Number},
+        _id: false
+      }]
     },
     { timestamps: true }
   );

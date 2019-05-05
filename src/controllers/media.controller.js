@@ -19,7 +19,7 @@ export async function update(req, res, next, config) {
     let outputFilepath = `${config.staticDir}/${req.files.file.name}`;
     let moveError = await req.files.file.mv(outputFilepath);
     if (moveError) return res.status(500).send(moveError);
-    resizeAndSave(config, req.files.file);
+    doc['sizes'] = await resizeAndSave(config, req.files.file);
   }
 
   doc.save((saveError) => {
@@ -48,13 +48,14 @@ export async function upload(req, res, next, config) {
   let outputFilepath = `${config.staticDir}/${req.files.file.name}`;
   let moveError = await req.files.file.mv(outputFilepath);
   if (moveError) return res.status(500).send(moveError);
-  resizeAndSave(config, req.files.file);
+  let outputSizes = await resizeAndSave(config, req.files.file);
 
   req.model.create({
     name: req.body.name,
     caption: req.body.caption,
     description: req.body.description,
-    filename: req.files.file.name
+    filename: req.files.file.name,
+    sizes: outputSizes
   }, (mediaCreateError, result) => {
     if (mediaCreateError)
       return res.status(500).json({ error: mediaCreateError });

@@ -1,5 +1,6 @@
 import sharp from 'sharp';
-import sizeOf from 'image-size';
+const { promisify } = require('util');
+const sizeOf = promisify(require('image-size'));
 
 function getOutputImageName(sourceImage, size) {
   let extension = sourceImage.split('.').pop();
@@ -7,25 +8,27 @@ function getOutputImageName(sourceImage, size) {
   return `${filenameWithoutExtension}-${size.width}x${size.height}.${extension}`;
 }
 
-export function resizeAndSave(config, file) {
+export async function resizeAndSave(config, file) {
   let sourceImage = `${config.staticDir}/${file.name}`;
 
-  sizeOf(sourceImage, (err, dimensions) => {
-    for (let size of config.imageSizes) {
-      if (size.width > dimensions.width) {
-        console.log(`${size.width} is greater than actual width ${dimensions.width}`);
+  let outputSizes = [];
+  try {
+    const dimensions = await sizeOf(sourceImage);
+    for (let desiredSize of config.imageSizes) {
+      if (desiredSize.width > dimensions.width) {
         continue;
       }
-      let outputImageName = getOutputImageName(sourceImage, size);
-      sharp(sourceImage)
-        .resize(size.width, size.height, {
-          position: size.crop || 'centre'
+      let outputImageName = getOutputImageName(sourceImage, desiredSize);
+      await sharp(sourceImage)
+        .resize(desiredSize.width, desiredSize.height, {
+          position: desiredSize.crop || 'centre'
         })
-        .toFile(outputImageName, (err) => {
-          if (err) console.log('Error writing resized file', err);
-          console.log(`Resized image from ${dimensions.width}x${dimensions.height} to ${size.width}x${size.height}`);
-        });
-
+        .toFile(outputImageName);
+      outputSizes.push({ height: desiredSize.height, width: desiredSize.width });
     }
-  });
+  } catch (e) {
+    console.log('error in resize and save', e.message);
+  }
+
+  return outputSizes;
 }
