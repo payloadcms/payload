@@ -10,9 +10,13 @@ const findOne = (req, res) => {
     fallback: req.query['fallback-locale']
   };
 
-  modelById(query)
-    .then(doc => res.json(doc))
-    .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err }));
+  if (res) {
+    modelById(query)
+      .then(doc => res.json(doc))
+      .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR)
+        .json({ error: err }));
+  }
+  return modelById(query, true);
 };
 
 export default findOne;
