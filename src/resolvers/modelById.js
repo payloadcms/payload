@@ -1,4 +1,4 @@
-const modelById = (query, options)=> {
+const modelById = (query, options) => {
 
   return new Promise((resolve, reject) => {
     query.Model.findOne({ _id: query.id }, {}, options, (err, doc) => {
@@ -11,10 +11,12 @@ const modelById = (query, options)=> {
 
       if (query.locale) {
         doc.setLocale(query.locale, query.fallback);
-        const json = doc.toJSON({ virtuals: true });
-        result = json;
+        result = doc.toJSON({ virtuals: true });
       }
-      resolve(result);
+
+      resolve(options.returnRawDoc
+        ? doc
+        : result);
     })
   })
 };
