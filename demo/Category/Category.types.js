@@ -1,17 +1,13 @@
 export default `
   input CategoryInput {
     title: String!
-    content: String
-    metaTitle: String
-    metaDesc: String
+    description: String
   }
 
   type Category {
     id: String
     title: String
-    content: String
-    metaTitle: String
-    metaDesc: String
+    description: String
     createdAt: String
     updatedAt: String
   }
