@@ -152,11 +152,11 @@ export default function internationalization(schema, options) {
         const isArrayOfReferences = schemaType.options.type && schemaType.options.type[0];
         const isReference = schemaType.options.ref;
         if (isArrayOfReferences) {
-          this[path].forEach(doc => doc.setLocale(locale, fallbackLocale));
+          this[path].forEach(doc => doc.setLocale && doc.setLocale(locale, fallbackLocale));
         }
 
         if (isReference) {
-          this[path].setLocale(locale, fallbackLocale);
+          this[path].setLocale && this[path].setLocale(locale, fallbackLocale);
         }
       })
     },
