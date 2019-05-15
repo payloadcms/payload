@@ -19,6 +19,7 @@ export default function internationalization(schema, options) {
   }
 
   schema.eachPath((path, schemaType) => {
+
     if (schemaType.schema) { // propagate plugin initialization for sub-documents schemas
       schemaType.schema.plugin(internationalization, pluginOptions);
       return;
@@ -51,6 +52,7 @@ export default function internationalization(schema, options) {
 
     schema.virtual(path)
       .get(function () {
+
         // embedded and sub-documents will use locale methods from the top level document
         let owner = this.ownerDocument ? this.ownerDocument() : this,
           locale = owner.getLocale(),

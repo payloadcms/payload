@@ -1,10 +1,16 @@
-export function createAutopopulateOptions(depth) {
-  const autopopulateOptions = {};
-  if (typeof depth != 'undefined') {
+export function createAutopopulateOptions({ depth, locale, fallback }) {
+  const autopopulateOptions = {
+    locale,
+    fallback
+  };
+
+  if (typeof depth !== 'undefined') {
     autopopulateOptions.maxDepth = depth;
     if (depth === '0') {
       autopopulateOptions.autopopulate = false;
     }
   }
-  return autopopulateOptions;
+  return {
+    autopopulate: autopopulateOptions
+  };
 }

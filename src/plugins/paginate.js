@@ -60,7 +60,7 @@ function paginate(dbQuery, options, callback) {
   }
 
   const count = this.countDocuments(dbQuery).exec();
-  const model = this.find(dbQuery, {}, {...createAutopopulateOptions(options.depth)});
+  const model = this.find(dbQuery, {}, { ...createAutopopulateOptions({ depth: options.depth, locale: options.locale }) });
   model.select(select);
   model.sort(sort);
   model.lean(lean);
@@ -82,8 +82,8 @@ function paginate(dbQuery, options, callback) {
   let docs = model.exec();
 
   if (lean && leanWithId) {
-    docs = docs.then(function (docs) {
-      docs.forEach(function (doc) {
+    docs = docs.then((docs) => {
+      docs.forEach((doc) => {
         doc.id = String(doc._id);
       });
       return docs;
@@ -91,7 +91,7 @@ function paginate(dbQuery, options, callback) {
   }
 
   return Promise.all([count, docs])
-    .then(function (values) {
+    .then((values) => {
 
       let result = {
         [labelDocs]: values[1],
@@ -137,7 +137,7 @@ function paginate(dbQuery, options, callback) {
       } else {
         return Promise.resolve(result);
       }
-    }).catch(function (reject) {
+    }).catch((reject) => {
       if (typeof callback === 'function') {
         return callback(reject);
       } else {

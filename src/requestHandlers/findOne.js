@@ -8,9 +8,11 @@ const findOne = (req, res) => {
     Model: req.model,
     id: req.params._id,
     locale: req.locale,
-    fallback: req.query['fallback-locale']
+    fallback: req.query['fallback-locale'],
+    depth: req.query.depth
   };
-  modelById(query, { ...createAutopopulateOptions(req.query.depth) })
+
+  modelById(query, createAutopopulateOptions(query))
     .then(doc => res.json(doc))
     .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err }));
 };
