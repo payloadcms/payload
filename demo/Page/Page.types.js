@@ -14,6 +14,7 @@ export default `
     metaDesc: String
     createdAt: String
     updatedAt: String
+    categories: [Category]
   }
 
   type Query {
