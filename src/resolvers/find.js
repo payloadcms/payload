@@ -10,7 +10,7 @@ const find = query => {
       let result = docs;
 
       if (query.locale) {
-        query.Model.setDefaultLocale(query.locale, query.fallback);
+        docs.setLocale(query.locale, query.fallback);
         const json = docs.toJSON({ virtuals: true });
         result = json;
       }
