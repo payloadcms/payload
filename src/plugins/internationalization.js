@@ -67,13 +67,15 @@ export default function internationalization(schema, options) {
         // If there is no value to return, AKA no translation in locale, handle fallbacks
         if (!value) {
 
+          const fallback = this.getFallbackLocale();
+
           // If user specified fallback code as null, send back null
-          if (this.fallbackLocale === 'null' || (this.fallbackLocale && !localeSubDoc[this.fallbackLocale])) {
+          if (fallback === 'null' || (fallback && !localeSubDoc[fallback])) {
             return null;
 
             // If user specified fallback code AND record exists, return that
-          } else if (localeSubDoc[this.fallbackLocale]) {
-            return localeSubDoc[this.fallbackLocale];
+          } else if (localeSubDoc[fallback]) {
+            return localeSubDoc[fallback];
 
             // Otherwise, check if there is a default fallback value and if so, send that
           } else if (options.fallback && localeSubDoc[options.defaultLocale]) {
@@ -136,6 +138,9 @@ export default function internationalization(schema, options) {
 
   // document methods to set the locale for each model instance (document)
   schema.method({
+    getFallbackLocale: function () {
+      return this.fallbackLocale || this.schema.options.mongooseIntl.fallbackLocale;
+    },
     getLocales: function () {
       return this.schema.options.mongooseIntl.locales;
     },
@@ -144,6 +149,7 @@ export default function internationalization(schema, options) {
     },
     setLocale: function (locale, fallbackLocale) {
       const locales = this.getLocales();
+
       if (locale && locales.indexOf(locale) !== -1) {
         this.docLocale = locale;
       }
@@ -165,22 +171,29 @@ export default function internationalization(schema, options) {
     getDefaultLocale: function () {
       return this.schema.options.mongooseIntl.defaultLocale;
     },
-    setDefaultLocale: function (locale) {
+    setDefaultLocale: function (locale, fallback) {
 
-      let updateLocale = function (schema, locale) {
+      let updateLocale = function (schema, locale, fallback) {
         schema.options.mongooseIntl.defaultLocale = locale.slice(0);
+        schema.options.mongooseIntl.fallbackLocale = fallback;
 
         // default locale change for sub-documents schemas
         schema.eachPath((path, schemaType) => {
           if (schemaType.schema) {
-            updateLocale(schemaType.schema, locale);
+            updateLocale(schemaType.schema, locale, fallback);
+          }
+          if (schemaType.options.type && schemaType.options.type[0]) {
+            const schemaName = schemaType.options.type[0].ref;
+            const referencedSchema = mongoose.model(schemaName).schema;
+            if (referencedSchema.options.mongooseIntl.defaultLocale !== locale) {
+              updateLocale(referencedSchema, locale, fallback);
+            }
           }
         });
-
       };
 
       if (locale && this.getLocales().indexOf(locale) !== -1) {
-        updateLocale(this.schema, locale);
+        updateLocale(this.schema, locale, fallback);
       }
     }
   });
@@ -210,4 +223,3 @@ export default function internationalization(schema, options) {
     }
   });
 }
-

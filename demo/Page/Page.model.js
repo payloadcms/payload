@@ -9,7 +9,7 @@ import { schemaBaseFields } from '../../src/helpers/mongoose/schemaBaseFields';
 
 const PageSchema = new mongoose.Schema({
   ...schemaBaseFields,
-  title: { type: String, intl: true, unique: true },
+  title: { type: String, intl: true },
   content: { type: String, intl: true },
   //slug: { type: String, intl: true, unique: true, required: true },
   metaTitle: String,
@@ -19,6 +19,11 @@ const PageSchema = new mongoose.Schema({
     ref: 'Category',
     autopopulate: true
   }],
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    autopopulate: true
+  }
 },
   { timestamps: true }
 );
@@ -28,8 +33,8 @@ PageSchema.plugin(buildQuery);
 PageSchema.plugin(internationalization, payloadConfig.localization);
 PageSchema.plugin(autopopulate);
 
-PageSchema.post('find', function (results) {
-  results.forEach(doc => doc.setLocale(this.options.autopopulate.locale))
-});
+// PageSchema.post('find', function (results) {
+//   results.forEach(doc => doc.setLocale(this.options.autopopulate.locale))
+// });
 
 module.exports = mongoose.model('Page', PageSchema);

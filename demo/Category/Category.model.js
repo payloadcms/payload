@@ -24,10 +24,10 @@ CategorySchema.plugin(buildQuery);
 CategorySchema.plugin(internationalization, payloadConfig.localization);
 CategorySchema.plugin(autopopulate);
 
-CategorySchema.post('find', function (results) {
-  results.forEach(doc => {
-    doc.setLocale(this.options.autopopulate.locale)
-  })
-});
+// CategorySchema.post('find', function (results) {
+//   results.forEach(doc => {
+//     doc.setLocale(this.options.autopopulate.locale)
+//   })
+// });
 
 module.exports = mongoose.model('Category', CategorySchema);
