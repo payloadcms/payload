@@ -6,7 +6,6 @@ export default function buildQuery(schema) {
     const model = this;
     const params = paramParser(this, rawParams, locale);
 
-
     if (cb) {
       model
         .find(params.searchParams)
@@ -109,7 +108,7 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator, local
       // This wasn't handled in the original package but seems to work
       paramType = schema.paths[matches[1]].schema.paths.name.instance;
     }
-  } else if (typeof schema === 'object') {
+  } else if (schema.obj[lcKey] && typeof schema === 'object') {
     if (schema.obj[lcKey].intl) {
       key = `${key}.${locale}`;
     }

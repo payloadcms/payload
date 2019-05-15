@@ -125,7 +125,7 @@ module.exports = exports = {
   //   "no-undefined": OFF,
     "no-unused-vars": WARN,
     // Disallow hoisting - let & const don't allow hoisting anyhow
-    "no-use-before-define": ERROR,
+    "no-use-before-define": OFF,
 
   //   // Node.js and CommonJS
   //   "callback-return": [WARN, ["callback", "next"]],

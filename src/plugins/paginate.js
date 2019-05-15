@@ -1,5 +1,7 @@
+import { createAutopopulateOptions } from '../helpers/mongoose/createAutopopulateOptions';
+
 /**
- * @param {Object}              [query={}]
+ * @param {Object}              [dbQuery={}]
  * @param {Object}              [options={}]
  * @param {Object|String}       [options.select]
  * @param {Object|String}       [options.sort]
@@ -9,16 +11,16 @@
  * @param {Boolean}             [options.lean=false]
  * @param {Boolean}             [options.leanWithId=true]
  * @param {Number}              [options.offset=0] - Use offset or page to set skip position
- * @param {Number}              [options.page=1]
+ * @param {Number}              [options.page=1]o
  * @param {Number}              [options.limit=10]
+ * @param {Number}              [options.depth=10]
  * @param {Function}            [callback]
  *
  * @returns {Promise}
  */
 
-function paginate(query, options, callback) {
-
-  query = query || {};
+function paginate(dbQuery, options, callback) {
+  dbQuery = dbQuery || {};
   options = Object.assign({}, paginate.options, options);
   options.customLabels = options.customLabels ? options.customLabels : {};
 
@@ -57,9 +59,8 @@ function paginate(query, options, callback) {
     skip = offset;
   }
 
-  const count = this.countDocuments(query).exec();
-
-  const model = this.find(query);
+  const count = this.countDocuments(dbQuery).exec();
+  const model = this.find(dbQuery, {}, { ...createAutopopulateOptions({ depth: options.depth, locale: options.locale }) });
   model.select(select);
   model.sort(sort);
   model.lean(lean);
@@ -81,8 +82,8 @@ function paginate(query, options, callback) {
   let docs = model.exec();
 
   if (lean && leanWithId) {
-    docs = docs.then(function (docs) {
-      docs.forEach(function (doc) {
+    docs = docs.then((docs) => {
+      docs.forEach((doc) => {
         doc.id = String(doc._id);
       });
       return docs;
@@ -90,7 +91,7 @@ function paginate(query, options, callback) {
   }
 
   return Promise.all([count, docs])
-    .then(function (values) {
+    .then((values) => {
 
       let result = {
         [labelDocs]: values[1],
@@ -136,7 +137,7 @@ function paginate(query, options, callback) {
       } else {
         return Promise.resolve(result);
       }
-    }).catch(function (reject) {
+    }).catch((reject) => {
       if (typeof callback === 'function') {
         return callback(reject);
       } else {

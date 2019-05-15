@@ -1,12 +1,17 @@
 import mkdirp from 'mkdirp';
 import { resizeAndSave } from '../utils/imageResizer';
-import httpStatus from '../requestHandlers/update';
-import findOne from '../requestHandlers/findOne';
+import httpStatus from 'http-status';
+import modelById from '../resolvers/modelById';
 
 export async function update(req, res, next, config) {
   req.model.setDefaultLocale(req.locale);
 
-  let doc = await findOne(req);
+  const query = {
+    Model: req.model,
+    id: req.params._id,
+    locale: req.locale,
+  };
+  let doc = await modelById(query, { returnRawDoc: true });
   if (!doc)
     return res.status(httpStatus.NOT_FOUND).send('Not Found');
 

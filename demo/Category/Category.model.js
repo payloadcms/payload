@@ -6,30 +6,28 @@ import internationalization from '../../src/plugins/internationalization';
 import payloadConfig from '.././payload.config';
 import { schemaBaseFields } from '../../src/helpers/mongoose/schemaBaseFields';
 
-
-const PageSchema = new mongoose.Schema({
+const CategorySchema = new mongoose.Schema({
   ...schemaBaseFields,
   title: { type: String, intl: true, unique: true },
-  content: { type: String, intl: true },
-  //slug: { type: String, intl: true, unique: true, required: true },
-  metaTitle: String,
-  metaDesc: String,
-  categories: [{
+  description: { type: String, intl: true },
+  pages: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Category',
+    ref: 'Page',
     autopopulate: true
   }],
 },
   { timestamps: true }
 );
 
-PageSchema.plugin(paginate);
-PageSchema.plugin(buildQuery);
-PageSchema.plugin(internationalization, payloadConfig.localization);
-PageSchema.plugin(autopopulate);
+CategorySchema.plugin(paginate);
+CategorySchema.plugin(buildQuery);
+CategorySchema.plugin(internationalization, payloadConfig.localization);
+CategorySchema.plugin(autopopulate);
 
-PageSchema.post('find', function (results) {
-  results.forEach(doc => doc.setLocale(this.options.autopopulate.locale))
+CategorySchema.post('find', function (results) {
+  results.forEach(doc => {
+    doc.setLocale(this.options.autopopulate.locale)
+  })
 });
 
-module.exports = mongoose.model('Page', PageSchema);
+module.exports = mongoose.model('Category', CategorySchema);

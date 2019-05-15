@@ -20,6 +20,13 @@ export default {
       required: true
     },
     {
+      name: 'categories',
+      label: 'Categories',
+      type: 'relationship',
+      relationType: 'reference',
+      relationTo: 'Category',
+    },
+    {
       name: 'image',
       label: 'Image',
       type: 'media',
@@ -72,12 +79,6 @@ export default {
           height: 100
         }
       ]
-    }
-  ],
-  relationships: [
-    {
-      relation: 'orders',
-      type: 'hasMany'
     }
   ]
 };
