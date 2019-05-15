@@ -50,8 +50,15 @@ module.exports = function (schema) {
       return;
     }
 
+    let maxDepth = options.maxDepth;
+
+    if (options.autopopulate && options.autopopulate.maxDepth) {
+      maxDepth = options.autopopulate.maxDepth;
+    }
+
     const depth = options._depth != null ? options._depth : 0;
-    if (options.maxDepth > 0 && depth >= options.maxDepth) {
+
+    if (options.maxDepth > 0 && depth >= maxDepth) {
       return;
     }
 

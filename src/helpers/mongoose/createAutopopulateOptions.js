@@ -4,7 +4,7 @@ export function createAutopopulateOptions({ depth, locale, fallback }) {
     fallback
   };
 
-  if (typeof depth != 'undefined') {
+  if (typeof depth !== 'undefined') {
     autopopulateOptions.maxDepth = depth;
     if (depth === '0') {
       autopopulateOptions.autopopulate = false;

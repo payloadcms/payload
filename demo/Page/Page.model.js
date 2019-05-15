@@ -28,4 +28,8 @@ PageSchema.plugin(buildQuery);
 PageSchema.plugin(internationalization, payloadConfig.localization);
 PageSchema.plugin(autopopulate);
 
+PageSchema.post('find', function (results) {
+  results.forEach(doc => doc.setLocale(this.options.autopopulate.locale))
+});
+
 module.exports = mongoose.model('Page', PageSchema);
