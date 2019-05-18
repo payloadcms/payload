@@ -6,7 +6,7 @@ import methodOverride from 'method-override';
 import jwtStrategy from './auth/jwt';
 import User from '../demo/User/User.model';
 import fileUpload from 'express-fileupload';
-import mediaRoutes from './routes/Media.routes';
+import mediaRoutes from './routes/media.routes';
 import config from '../demo/payload.config';
 import locale from './middleware/locale';
 import expressGraphQL from 'express-graphql';
