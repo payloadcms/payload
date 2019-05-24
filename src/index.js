@@ -7,6 +7,7 @@ import jwtStrategy from './auth/jwt';
 import User from '../demo/User/User.model';
 import fileUpload from 'express-fileupload';
 import mediaRoutes from './routes/media.routes';
+import emailRoutes from './routes/email.routes';
 import config from '../demo/payload.config';
 import locale from './middleware/locale';
 import expressGraphQL from 'express-graphql';
@@ -57,6 +58,8 @@ module.exports = {
     options.app.use(bodyParser.urlencoded({ extended: true }));
     options.app.use(locale(options.config.localization));
     options.app.use(options.router);
+
+    options.router.use('/forgot', emailRoutes(options.config.email));
 
     if (options.config.graphQL && options.graphQLSchema) {
       options.app.use(

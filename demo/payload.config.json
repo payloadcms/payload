@@ -45,6 +45,14 @@
       "height": 16
     }
   ],
+  "email": {
+    "provider": "smtp",
+    "host": "smtp.ethereal.email",
+    "port": 587,
+    "secure": false,
+    "fromName": "John Doe",
+    "fromAddress": "john.doe@payloadcms.com"
+  },
   "graphQL": {
     "path": "/graphql",
     "graphiql": true
