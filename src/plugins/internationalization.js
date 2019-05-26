@@ -155,7 +155,7 @@ export default function internationalization(schema, options) {
           this[path].forEach(doc => doc.setLocale && doc.setLocale(locale, fallbackLocale));
         }
 
-        if (isReference) {
+        if (isReference && this[path]) {
           this[path].setLocale && this[path].setLocale(locale, fallbackLocale);
         }
       })
