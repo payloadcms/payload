@@ -9,29 +9,49 @@ const emailRoutes = emailConfig => {
     .route('')
     .post(
       passport.authenticate('jwt', { session: false }),
-      (req, res, next) => smtpEmailHandler(req, res, next, emailConfig)
+      (req, res, next) => getEmailHandler(req, res, next, emailConfig)
     );
 
   return router;
 };
 
+const getEmailHandler = (req, res, next, emailConfig) => {
+  switch (emailConfig.provider) {
+    case 'mock':
+      return mockEmailHandler(req, res, next, emailConfig);
+    case 'smtp':
+      return smtpEmailHandler(req, res, next, emailConfig);
+    default:
+      throw new Error('Invalid e-mail configuration');
+  }
+};
+
+const mockEmailHandler = async (req, res, next, emailConfig) => {
+  let testAccount = await nodemailer.createTestAccount();
+  process.env.EMAIL_USER = testAccount.user;
+  process.env.EMAIL_PASS = testAccount.pass;
+  emailConfig.host = 'smtp.ethereal.email';
+  emailConfig.port = 587;
+  emailConfig.secure = false;
+  emailConfig.fromName = 'John Doe';
+  emailConfig.fromAddress = 'john.doe@payloadcms.com';
+  return smtpEmailHandler(req, res, next, emailConfig);
+};
+
 const smtpEmailHandler = async (req, res, next, emailConfig) => {
   try {
-    let testAccount = await nodemailer.createTestAccount();
-
-    // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
       host: emailConfig.host,
       port: emailConfig.port,
       secure: emailConfig.secure, // true for 465, false for other ports
       auth: {
-        user: testAccount.user, // generated ethereal user
-        pass: testAccount.pass // generated ethereal password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
       }
     });
 
     // send mail with defined transport object
-    let info = await transporter.sendMail({
+    await transporter.sendMail({
       from: `"${emailConfig.fromName}" <${emailConfig.fromAddress}>`,
       to: req.body.toAddress,
       subject: req.body.subject || 'Password Reset',
