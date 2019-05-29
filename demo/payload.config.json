@@ -46,12 +46,7 @@
     }
   ],
   "email": {
-    "provider": "mock",
-    "host": "smtp.ethereal.email",
-    "port": 587,
-    "secure": false,
-    "fromName": "John Doe",
-    "fromAddress": "john.doe@payloadcms.com"
+    "provider": "mock"
   },
   "graphQL": {
     "path": "/graphql",

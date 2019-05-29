@@ -1,29 +1,135 @@
 import express from 'express';
 import passport from 'passport';
 import * as nodemailer from 'nodemailer';
+import * as crypto from 'crypto';
 
 const router = express.Router();
-const emailRoutes = emailConfig => {
+const emailRoutes = (emailConfig, User) => {
+
+  const validateForgotRequestBody = (req, res, next) => {
+    if (req.body.hasOwnProperty('userEmail')) {
+      next();
+    } else {
+      return res.status(400).json({
+        message: 'Missing userEmail in request body'
+      })
+    }
+  };
 
   router
-    .route('')
+    .route('/forgot')
     .post(
       passport.authenticate('jwt', { session: false }),
-      (req, res, next) => getEmailHandler(req, res, next, emailConfig)
+      (req, res, next) => validateForgotRequestBody(req, res, next),
+      (req, res, next) => getEmailHandler(req, res, next, emailConfig, User)
+    );
+
+  router
+    .route('/reset/:token')
+    .post(
+      (req, res) => resetTokenHandler(req, res, User)
+    );
+
+  router
+    .route('/reset')
+    .post(
+      (req, res) => resetPasswordHandler(req, res, User)
     );
 
   return router;
 };
 
-const getEmailHandler = (req, res, next, emailConfig) => {
-  switch (emailConfig.provider) {
-    case 'mock':
-      return mockEmailHandler(req, res, next, emailConfig);
-    case 'smtp':
-      return smtpEmailHandler(req, res, next, emailConfig);
-    default:
-      throw new Error('Invalid e-mail configuration');
+const getEmailHandler = async (req, res, next, emailConfig, User) => {
+  let emailHandler;
+
+  try {
+
+    switch (emailConfig.provider) {
+      case 'mock':
+        emailHandler = await mockEmailHandler(req, res, next, emailConfig);
+        break;
+      case 'smtp':
+        emailHandler = smtpEmailHandler(req, res, next, emailConfig);
+        break;
+    }
+
+    const generateToken = () => new Promise(resolve =>
+      crypto.randomBytes(20, (err, buffer) =>
+        resolve(buffer.toString('hex'))
+      ));
+
+    let token = await generateToken();
+
+    User.findOne({ email: req.body.userEmail }, (err, user) => {
+      if (!user) {
+        const message = `No account with email ${req.body.userEmail} address exists.`;
+        return res.status(400).json({ message: message })
+      }
+
+      user.resetPasswordToken = token;
+      user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+      user.save(async (saveError) => {
+        if (saveError) {
+          const message = 'Error saving temporary reset token';
+          console.error(message, saveError);
+          res.status(500).json({ message });
+        }
+        console.log('Temporary reset token created and saved to DB');
+
+
+        const emailText = `You are receiving this because you (or someone else) have requested the reset of the password for your account.
+                           Please click on the following link, or paste this into your browser to complete the process:
+                           ${req.protocol}://${req.headers.host}/reset/${token}
+                           If you did not request this, please ignore this email and your password will remain unchanged.`;
+
+        await emailHandler.sendMail({
+          from: `"${emailConfig.fromName}" <${emailConfig.fromAddress}>`,
+          to: req.body.userEmail,
+          subject: req.body.subject || 'Password Reset',
+          text: emailText,
+        });
+        res.sendStatus(200);
+
+      });
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: false, error: 'Unable to send e-mail' });
   }
+};
+
+const resetTokenHandler = (req, res, User) => {
+  User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
+    if (!user) {
+      const message = 'Password reset token is invalid or has expired.';
+      console.error(err);
+      return res.status(400).json({ message });
+    }
+
+    res.status(200).json({ message: 'Password reset token is valid', user: user.email });
+  });
+};
+
+const resetPasswordHandler = (req, res, User) => {
+  User.findOne({ resetPasswordToken: req.body.token, resetPasswordExpires: { $gt: Date.now() } }, async (err, user) => {
+    if (!user) {
+      const message = 'Password reset token is invalid or has expired.';
+      console.error(message);
+      return res.status(400).json({ message });
+    }
+
+    await user.setPassword(req.body.password);
+    user.resetPasswordExpires = Date.now();
+    await user.save(saveError => {
+      if (saveError) {
+        const message = 'Error setting new user password';
+        console.error(message);
+        return res.status(500).json({ message });
+      }
+
+      return res.status(200).json({ message: 'Password successfully reset' });
+    });
+  })
 };
 
 const mockEmailHandler = async (req, res, next, emailConfig) => {
@@ -38,32 +144,16 @@ const mockEmailHandler = async (req, res, next, emailConfig) => {
   return smtpEmailHandler(req, res, next, emailConfig);
 };
 
-const smtpEmailHandler = async (req, res, next, emailConfig) => {
-  try {
-    let transporter = nodemailer.createTransport({
-      host: emailConfig.host,
-      port: emailConfig.port,
-      secure: emailConfig.secure, // true for 465, false for other ports
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
-
-    // send mail with defined transport object
-    await transporter.sendMail({
-      from: `"${emailConfig.fromName}" <${emailConfig.fromAddress}>`,
-      to: req.body.toAddress,
-      subject: req.body.subject || 'Password Reset',
-      text: req.body.text || '',
-    });
-
-    res.sendStatus(200);
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({success: false, error: 'Unable to send e-mail'});
-  }
-
+const smtpEmailHandler = (req, res, next, emailConfig) => {
+  return nodemailer.createTransport({
+    host: emailConfig.host,
+    port: emailConfig.port,
+    secure: emailConfig.secure, // true for 465, false for other ports
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+  });
 };
 
 export default emailRoutes;

@@ -59,7 +59,7 @@ module.exports = {
     options.app.use(locale(options.config.localization));
     options.app.use(options.router);
 
-    options.router.use('/forgot', emailRoutes(options.config.email));
+    options.router.use('', emailRoutes(options.config.email, User));
 
     if (options.config.graphQL && options.graphQLSchema) {
       options.app.use(
