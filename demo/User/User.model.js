@@ -11,7 +11,7 @@ const UserSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   role: { type: String, enum: [ 'user', 'agent', 'admin' ], default: 'user' },
   resetPasswordToken: String,
-  resetPasswordExpires: Date
+  resetPasswordExpiration: Date
 });
 
 /**

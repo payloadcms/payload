@@ -15,35 +15,44 @@ const emailRoutes = (emailConfig, User) => {
       })
     }
   };
+  const validateResetPasswordBody = (req, res, next) => {
+    if (req.body.hasOwnProperty('token') && req.body.hasOwnProperty('password')) {
+      next();
+    } else {
+      return res.status(400).json({
+        message: 'Invalid request body'
+      })
+    }
+  };
 
   router
     .route('/forgot')
     .post(
       passport.authenticate('jwt', { session: false }),
       (req, res, next) => validateForgotRequestBody(req, res, next),
-      (req, res, next) => getEmailHandler(req, res, next, emailConfig, User)
+      (req, res, next) => sendResetEmail(req, res, next, emailConfig, User)
     );
 
   router
     .route('/reset/:token')
-    .post(
-      (req, res) => resetTokenHandler(req, res, User)
+    .get(
+      (req, res) => checkTokenValidity(req, res, User)
     );
 
   router
     .route('/reset')
     .post(
-      (req, res) => resetPasswordHandler(req, res, User)
+      (req, res, next) => validateResetPasswordBody(req, res, next),
+      (req, res) => resetPassword(req, res, User)
     );
 
   return router;
 };
 
-const getEmailHandler = async (req, res, next, emailConfig, User) => {
+const sendResetEmail = async (req, res, next, emailConfig, User) => {
   let emailHandler;
 
   try {
-
     switch (emailConfig.provider) {
       case 'mock':
         emailHandler = await mockEmailHandler(req, res, next, emailConfig);
@@ -67,7 +76,7 @@ const getEmailHandler = async (req, res, next, emailConfig, User) => {
       }
 
       user.resetPasswordToken = token;
-      user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+      user.resetPasswordExpiration = Date.now() + 3600000; // 1 hour
       user.save(async (saveError) => {
         if (saveError) {
           const message = 'Error saving temporary reset token';
@@ -98,38 +107,52 @@ const getEmailHandler = async (req, res, next, emailConfig, User) => {
   }
 };
 
-const resetTokenHandler = (req, res, User) => {
-  User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
-    if (!user) {
-      const message = 'Password reset token is invalid or has expired.';
-      console.error(err);
-      return res.status(400).json({ message });
-    }
-
-    res.status(200).json({ message: 'Password reset token is valid', user: user.email });
-  });
-};
-
-const resetPasswordHandler = (req, res, User) => {
-  User.findOne({ resetPasswordToken: req.body.token, resetPasswordExpires: { $gt: Date.now() } }, async (err, user) => {
-    if (!user) {
-      const message = 'Password reset token is invalid or has expired.';
-      console.error(message);
-      return res.status(400).json({ message });
-    }
-
-    await user.setPassword(req.body.password);
-    user.resetPasswordExpires = Date.now();
-    await user.save(saveError => {
-      if (saveError) {
-        const message = 'Error setting new user password';
-        console.error(message);
-        return res.status(500).json({ message });
+const checkTokenValidity = (req, res, User) => {
+  User.findOne(
+    {
+      resetPasswordToken: req.params.token,
+      resetPasswordExpiration: { $gt: Date.now() }
+    },
+    (err, user) => {
+      if (!user) {
+        const message = 'Password reset token is invalid or has expired.';
+        console.error(err);
+        return res.status(400).json({ message });
       }
 
-      return res.status(200).json({ message: 'Password successfully reset' });
+      res.status(200).json({ message: 'Password reset token is valid', user: user.email });
     });
-  })
+};
+
+const resetPassword = (req, res, User) => {
+  User.findOne(
+    {
+      resetPasswordToken: req.body.token,
+      resetPasswordExpiration: { $gt: Date.now() }
+    },
+    async (err, user) => {
+      if (!user) {
+        const message = 'Password reset token is invalid or has expired.';
+        console.error(message);
+        return res.status(400).json({ message });
+      }
+
+      const errorMessage = 'Error setting new user password';
+      try {
+        await user.setPassword(req.body.password);
+        user.resetPasswordExpiration = Date.now();
+        await user.save(saveError => {
+          if (saveError) {
+            console.error(errorMessage);
+            return res.status(500).json({ message: errorMessage });
+          }
+
+          return res.status(200).json({ message: 'Password successfully reset' });
+        });
+      } catch (e) {
+        return res.status(500).json({ message: errorMessage });
+      }
+    })
 };
 
 const mockEmailHandler = async (req, res, next, emailConfig) => {
