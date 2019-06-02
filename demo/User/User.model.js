@@ -2,11 +2,13 @@ import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import passportLocalMongoose from 'passport-local-mongoose';
 import APIError from '../../src/lib/helpers/APIError';
+import { userBaseFields } from '../../src/helpers/mongoose/schemaBaseFields';
 
 /**
  * User Schema
  */
 const UserSchema = new mongoose.Schema({
+  ...userBaseFields,
   email: { type: String, unique: true },
   createdAt: { type: Date, default: Date.now },
   role: { type: String, enum: [ 'user', 'agent', 'admin' ], default: 'user' },

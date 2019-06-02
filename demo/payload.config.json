@@ -45,6 +45,9 @@
       "height": 16
     }
   ],
+  "email": {
+    "provider": "mock"
+  },
   "graphQL": {
     "path": "/graphql",
     "graphiql": true

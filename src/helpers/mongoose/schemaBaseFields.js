@@ -3,4 +3,9 @@ const schemaBaseFields = {
   publishedAt: Date
 };
 
-export { schemaBaseFields }
+const userBaseFields = {
+  resetPasswordToken: String,
+  resetPasswordExpiration: Date
+};
+
+export { schemaBaseFields, userBaseFields }
