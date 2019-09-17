@@ -8,12 +8,21 @@ import User from '../demo/User/User.model';
 import fileUpload from 'express-fileupload';
 import mediaRoutes from './routes/media.routes';
 import emailRoutes from './routes/email.routes';
-import config from '../demo/payload.config';
+import autopopulate from './plugins/autopopulate';
+import paginate from './plugins/paginate';
+import buildQuery from './plugins/buildQuery';
+import internationalization from './plugins/internationalization';
+import bindModel from './middleware/bindModel';
 import locale from './middleware/locale';
-import expressGraphQL from 'express-graphql';
+import { query, create, findOne, destroy, update } from './requestHandlers';
+import { schemaBaseFields } from './helpers/mongoose/schemaBaseFields';
+import fieldToSchemaMap from './helpers/mongoose/fieldToSchemaMap';
 
-module.exports = {
-  init: options => {
+class Payload {
+
+  models = {};
+
+  constructor(options) {
     mongoose.connect(options.config.mongoURL, { useNewUrlParser: true }, (err) => {
       if (err) {
         console.log('Unable to connect to the Mongo server. Please start the server. Error:', err);
@@ -59,16 +68,37 @@ module.exports = {
     options.app.use(locale(options.config.localization));
     options.app.use(options.router);
 
-    options.router.use('', emailRoutes(options.config.email, User));
+    // TODO: Build safe config before initializing models and routes
 
-    if (options.config.graphQL && options.graphQLSchema) {
-      options.app.use(
-        options.config.graphQL.path,
-        expressGraphQL({
-          schema: options.graphQLSchema,
-          graphiql: options.config.graphQL.graphiql,
-        })
-      );
-    }
+    options.models && options.models.forEach(config => {
+
+      const Schema = new mongoose.Schema({ ...schemaBaseFields }, { timestamps: true });
+      Schema.plugin(paginate);
+      Schema.plugin(buildQuery);
+      Schema.plugin(internationalization, options.config.localization);
+      Schema.plugin(autopopulate);
+
+      config.fields.forEach(field => {
+        const fieldSchema = fieldToSchemaMap[field.type];
+        if (fieldSchema) Schema[field.name] = fieldSchema(field);
+      });
+
+      const model = mongoose.model(config.labels.singular, Schema);
+      this.models[config.labels.singular] = model;
+      options.router.all(`/${config.slug}*`, bindModel(model));
+
+      options.router.route(`/${config.slug}`)
+        .get(config.policies.read, query)
+        .post(config.policies.create, create);
+
+      options.router.route(`/${config.slug}/:id`)
+        .get(config.policies.read, findOne)
+        .put(config.policies.update, update)
+        .delete(config.policies.destroy, destroy);
+    });
+
+    options.router.use('', emailRoutes(options.config.email, User));
   }
-};
+}
+
+module.exports = Payload;

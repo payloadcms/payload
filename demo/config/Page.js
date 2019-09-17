@@ -1,16 +1,31 @@
 export default {
   slug: 'pages',
-  label: 'Pages',
-  singular: 'Page',
-  plural: 'Pages',
+  labels: {
+    singular: 'Page',
+    plural: 'Pages',
+  },
   useAsTitle: 'title',
+  policies: {
+    create: (req, res, next) => {
+      return next();
+    },
+    read: (req, res, next) => {
+      return next();
+    },
+    update: (req, res, next) => {
+      return next();
+    },
+    destroy: (req, res, next) => {
+      return next();
+    },
+  },
   fields: [
     {
       name: 'title',
       label: 'Page Title',
       type: 'input',
       maxLength: 100,
-      required: true
+      required: true,
     },
     {
       name: 'content',

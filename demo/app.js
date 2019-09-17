@@ -1,24 +1,24 @@
 import express from 'express';
-import payload from '../src';
+import Payload from '../src';
 
 import User from './User/User.model';
 import payloadConfig from './payload.config';
-import {authRoutes} from './Auth/Auth.routes';
-import {userRoutes} from './User/User.routes';
-import {pageRoutes} from './Page/Page.routes';
-import {categoryRoutes} from './Category/Category.routes';
-import schema from '../demo/graphql';
+import { authRoutes } from './Auth/Auth.routes';
+import { userRoutes } from './User/User.routes';
+import Page from './config/Page';
 
 const router = express.Router({}); // eslint-disable-line new-cap
 
 export const app = express();
 
-payload.init({
+new Payload({
+  models: [
+    Page,
+  ],
   config: payloadConfig,
   app: app,
   user: User,
   router: router,
-  graphQLSchema: schema,
   cors: ['http://localhost:8080', 'http://localhost:8081']
 });
 
@@ -32,8 +32,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 router.use('/', authRoutes);
 router.use('/users', userRoutes);
-router.use('/pages', pageRoutes);
-router.use('/categories', categoryRoutes);
 
 app.listen(payloadConfig.port, () => {
   console.log(`listening on ${payloadConfig.port}...`);
