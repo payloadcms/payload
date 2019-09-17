@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 
 const update = (req, res) => {
   req.model.setDefaultLocale(req.locale); // TODO - move to middleware
-  req.model.findOne({ _id: req.params._id }, '', {}, (err, doc) => {
+  req.model.findOne({ _id: req.params.id }, '', {}, (err, doc) => {
     if (!doc)
       return res.status(httpStatus.NOT_FOUND).send('Not Found');
 
