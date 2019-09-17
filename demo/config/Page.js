@@ -24,6 +24,8 @@ export default {
       name: 'title',
       label: 'Page Title',
       type: 'input',
+      unique: true,
+      localized: true,
       maxLength: 100,
       required: true,
     },

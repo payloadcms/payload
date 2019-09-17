@@ -72,18 +72,22 @@ class Payload {
 
     options.models && options.models.forEach(config => {
 
-      const Schema = new mongoose.Schema({ ...schemaBaseFields }, { timestamps: true });
+      const fields = { ...schemaBaseFields };
+
+      config.fields.forEach(field => {
+        const fieldSchema = fieldToSchemaMap[field.type];
+        if (fieldSchema) fields[field.name] = fieldSchema(field);
+      });
+
+      const Schema = new mongoose.Schema(fields, { timestamps: true });
+
       Schema.plugin(paginate);
       Schema.plugin(buildQuery);
       Schema.plugin(internationalization, options.config.localization);
       Schema.plugin(autopopulate);
 
-      config.fields.forEach(field => {
-        const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) Schema[field.name] = fieldSchema(field);
-      });
-
       const model = mongoose.model(config.labels.singular, Schema);
+
       this.models[config.labels.singular] = model;
       options.router.all(`/${config.slug}*`, bindModel(model));
 
