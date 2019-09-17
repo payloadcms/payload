@@ -6,6 +6,7 @@ import payloadConfig from './payload.config';
 import { authRoutes } from './Auth/Auth.routes';
 import { userRoutes } from './User/User.routes';
 import Page from './config/Page';
+import Category from './config/Category';
 
 const router = express.Router({}); // eslint-disable-line new-cap
 
@@ -14,6 +15,7 @@ export const app = express();
 new Payload({
   models: [
     Page,
+    Category
   ],
   config: payloadConfig,
   app: app,

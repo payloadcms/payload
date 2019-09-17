@@ -33,6 +33,7 @@
     "http-status": "^1.2.0",
     "ignore-styles": "^5.0.1",
     "image-size": "^0.7.1",
+    "joi": "^14.3.1",
     "jsonwebtoken": "^8.4.0",
     "merge-graphql-schemas": "^1.5.8",
     "method-override": "^3.0.0",
