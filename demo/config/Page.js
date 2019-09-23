@@ -33,6 +33,7 @@ export default {
       name: 'content',
       label: 'Content',
       type: 'textarea',
+      localized: true,
       height: 100,
       required: true
     },
