@@ -100,7 +100,7 @@ class Payload {
       if (config.auth) {
         passport.use(model.createStrategy());
         if (config.auth.strategy === 'jwt') {
-          passport.use(jwtStrategy(Schema));
+          passport.use(jwtStrategy(model));
           passport.serializeUser(model.serializeUser());
           passport.deserializeUser(model.deserializeUser());
         }
