@@ -4,12 +4,12 @@ import * as faker from 'faker';
 describe('API', () => {
   let token = null;
   beforeAll(async () => {
-    // const loginResponse = await axios.post('http://localhost:3000/login', {
-    //   email: 'test@test.com',
-    //   password: 'test123'
-    // });
-    // token = loginResponse.data.token;
-    // expect(loginResponse.status).toBe(200);
+    const loginResponse = await axios.post('http://localhost:3000/login', {
+      email: 'test@test.com',
+      password: 'test123'
+    });
+    token = loginResponse.data.token;
+    expect(loginResponse.status).toBe(200);
   });
 
   it('should allow create user', async () => {
