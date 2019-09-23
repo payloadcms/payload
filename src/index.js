@@ -6,7 +6,7 @@ import methodOverride from 'method-override';
 import jwtStrategy from './auth/jwt';
 import fileUpload from 'express-fileupload';
 import mediaRoutes from './routes/media.routes';
-import emailRoutes from './routes/email.routes';
+import emailRoutes from './auth/passwordResets/email.routes';
 import autopopulate from './plugins/autopopulate';
 import paginate from './plugins/paginate';
 import buildQuery from './plugins/buildQuery';

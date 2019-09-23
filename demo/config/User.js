@@ -1,4 +1,3 @@
-// import passwordResetConfig from '../../src/auth/passwordResets/passwordReset.config';
 import passportLocalMongoose from 'passport-local-mongoose';
 import payloadConfig from '../payload.config';
 import APIError from '../../src/lib/helpers/APIError';
@@ -36,7 +35,7 @@ export default {
   // Should the user have insight as to how that will I cannot decide if this is a good pattern or not
   plugins: [{plugin: passportLocalMongoose, options: {usernameField: 'email'}}],
   statics: {
-  // TODO: I don't see anywhere that these are being used
+  // TODO: I grabbed these from the demo/Users/User.model.js, but I don't see anywhere that these are being used
     /**
      * Get user
      * @param {ObjectId} id - The objectId of user.
