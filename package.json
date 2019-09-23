@@ -15,6 +15,7 @@
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
     "webpack": "webpack-dev-server --mode development --config config/webpack.dev.config.js --open --hot --history-api-fallback",
     "demo-server": "nodemon demo/init.js",
+    "debug": "nodemon --inspect ./demo/init.js",
     "dev": "npm-run-all -p webpack demo-server"
   },
   "author": "",

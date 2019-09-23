@@ -1,27 +1,24 @@
 import express from 'express';
 import Payload from '../src';
-
-import User from './User/User.model';
 import payloadConfig from './payload.config';
-import { authRoutes } from './Auth/Auth.routes';
-import { userRoutes } from './User/User.routes';
+// import { authRoutes } from './Auth/Auth.routes';
+// import { userRoutes } from './User/User.routes';
+import User from './config/User';
 import Page from './config/Page';
 import Category from './config/Category';
-
 const router = express.Router({}); // eslint-disable-line new-cap
 
 export const app = express();
 
 new Payload({
   models: [
+    User,
     Page,
-    Category
+    Category,
   ],
   config: payloadConfig,
   app: app,
-  user: User,
   router: router,
-  cors: ['http://localhost:8080', 'http://localhost:8081']
 });
 
 if (process.env.NODE_ENV !== 'production') {
@@ -32,8 +29,8 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-router.use('/', authRoutes);
-router.use('/users', userRoutes);
+// router.use('/', authRoutes);
+// router.use('/users', userRoutes);
 
 app.listen(payloadConfig.port, () => {
   console.log(`listening on ${payloadConfig.port}...`);

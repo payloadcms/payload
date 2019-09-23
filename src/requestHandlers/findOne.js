@@ -6,7 +6,7 @@ const findOne = (req, res) => {
 
   const query = {
     Model: req.model,
-    id: req.params._id,
+    id: req.params.id,
     locale: req.locale,
     fallback: req.query['fallback-locale'],
     depth: req.query.depth

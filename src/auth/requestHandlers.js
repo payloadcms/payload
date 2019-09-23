@@ -1,8 +1,29 @@
 import jwt from 'jsonwebtoken';
+const passport = require('passport');
 import httpStatus from 'http-status';
 import APIError from '../lib/helpers/APIError';
 
 export default User => ({
+  /**
+   * Returns User when succesfully registered
+   * @param req
+   * @param res
+   * @param next
+   * @returns {*}
+   */
+  register: (req, res, next) => {
+    User.register(new User({ email: req.body.email }), req.body.password, (err, user) => {
+      console.log(err, user);
+      if (err) {
+        const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
+        return next(error);
+      }
+      passport.authenticate('local')(req, res, () => {
+        res.json({ email: user.email, role: user.role, createdAt: user.createdAt });
+      });
+    });
+  },
+
   /**
    * Returns passport login response (cookie) when valid username and password is provided
    * @param req

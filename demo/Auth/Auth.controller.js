@@ -1,5 +1,5 @@
 import User from '../User/User.model';
-import auth from '../../src/auth';
+import auth from '../../src/auth/requestHandlers';
 
 const Auth = auth(User);
 

@@ -4,7 +4,7 @@ import { App } from 'payload/components';
 import Routes from './components/Routes';
 import store from './store';
 
-import config from '../payload.config.json';
+import config from '../payload.config.js';
 
 import Page from '../Page/Page.config';
 import pageViews from '../Page/components';

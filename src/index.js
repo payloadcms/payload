@@ -4,7 +4,6 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 import jwtStrategy from './auth/jwt';
-import User from '../demo/User/User.model';
 import fileUpload from 'express-fileupload';
 import mediaRoutes from './routes/media.routes';
 import emailRoutes from './routes/email.routes';
@@ -17,6 +16,11 @@ import locale from './middleware/locale';
 import { query, create, findOne, destroy, update } from './requestHandlers';
 import { schemaBaseFields } from './helpers/mongoose/schemaBaseFields';
 import fieldToSchemaMap from './helpers/mongoose/fieldToSchemaMap';
+import authValidate from './auth/validate';
+import authRequestHandlers from './auth/requestHandlers';
+import middleware from './middleware';
+import passwordResetConfig from './auth/passwordResets/passwordReset.config';
+import passportLocalMongoose from 'passport-local-mongoose';
 
 class Payload {
 
@@ -39,14 +43,9 @@ class Payload {
     options.app.use(passport.initialize());
     options.app.use(passport.session());
 
-    passport.use(options.user.createStrategy());
-    passport.use(jwtStrategy(User));
-    passport.serializeUser(options.user.serializeUser());
-    passport.deserializeUser(options.user.deserializeUser());
-
-    if (options.cors) {
+    if (options.config.cors) {
       options.app.use((req, res, next) => {
-        if (options.cors.indexOf(req.headers.origin) > -1) {
+        if (options.config.cors.indexOf(req.headers.origin) > -1) {
           res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
           res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
         }
@@ -71,22 +70,68 @@ class Payload {
     // TODO: Build safe config before initializing models and routes
 
     options.models && options.models.forEach(config => {
-
+      // TODO: consider making schemaBaseFields a mongoose plugin for consistency
       const fields = { ...schemaBaseFields };
+
+      if (config.auth && config.auth.passwordResets) {
+        config.fields.push(...passwordResetConfig.fields);
+      }
 
       config.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];
         if (fieldSchema) fields[field.name] = fieldSchema(field);
       });
 
-      const Schema = new mongoose.Schema(fields, { timestamps: true });
+      const Schema = new mongoose.Schema(fields, { timestamps: config.timestamps });
 
       Schema.plugin(paginate);
       Schema.plugin(buildQuery);
       Schema.plugin(internationalization, options.config.localization);
       Schema.plugin(autopopulate);
 
+      if (config.plugins) {
+        config.plugins.forEach(plugin => {
+          Schema.plugin(plugin.plugin, plugin.options);
+        });
+      }
       const model = mongoose.model(config.labels.singular, Schema);
+
+      // register passport with model
+      if (config.auth) {
+        passport.use(model.createStrategy());
+        if (config.auth.strategy === 'jwt') {
+          passport.use(jwtStrategy(Schema));
+          passport.serializeUser(model.serializeUser());
+          passport.deserializeUser(model.deserializeUser());
+        }
+
+        let auth = authRequestHandlers(model);
+
+        options.router
+          .route('/login')
+          .post(authValidate.login, auth.login);
+
+        options.router
+          .route('/me')
+          .post(passport.authenticate(config.auth.strategy, { session: false }), auth.me);
+
+        options.config.roles.forEach((role) => {
+          options.router
+            .route(`/role/${role}`)
+            .get(passport.authenticate(config.auth.strategy, { session: false }), middleware.role(role), auth.me);
+        });
+
+        // password resets
+        if (config.auth.passwordResets) {
+          options.router.use('', emailRoutes(options.config.email, model));
+        }
+
+        if (config.auth.registration) {
+          options.router
+            .route('/' + config.slug + '/register') // TODO: not sure how to incorporate url params like `:pageId`
+            .post(config.auth.registrationValidation, auth.register);
+        }
+      }
 
       this.models[config.labels.singular] = model;
       options.router.all(`/${config.slug}*`, bindModel(model));
@@ -100,8 +145,6 @@ class Payload {
         .put(config.policies.update, update)
         .delete(config.policies.destroy, destroy);
     });
-
-    options.router.use('', emailRoutes(options.config.email, User));
   }
 }
 

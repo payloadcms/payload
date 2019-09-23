@@ -35,5 +35,6 @@ export default {
       height: 100,
       required: true
     },
-  ]
+  ],
+  timestamps: true
 };

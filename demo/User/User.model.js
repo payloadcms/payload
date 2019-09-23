@@ -2,16 +2,16 @@ import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import passportLocalMongoose from 'passport-local-mongoose';
 import APIError from '../../src/lib/helpers/APIError';
-import { userBaseFields } from '../../src/helpers/mongoose/schemaBaseFields';
+// import { userBaseFields } from '../../src/helpers/mongoose/schemaBaseFields';
 
 /**
  * User Schema
  */
 const UserSchema = new mongoose.Schema({
-  ...userBaseFields,
-  email: { type: String, unique: true },
-  createdAt: { type: Date, default: Date.now },
-  role: { type: String, enum: [ 'user', 'agent', 'admin' ], default: 'user' },
+  // ...userBaseFields,
+  // email: { type: String, unique: true },
+  // createdAt: { type: Date, default: Date.now },
+  // role: { type: String, enum: [ 'user', 'agent', 'admin' ], default: 'user' },
 });
 
 /**
@@ -54,9 +54,9 @@ UserSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<User[]>}
    */
-  list({ skip = 0, limit = 50 } = {}) {
+  list({skip = 0, limit = 50} = {}) {
     return this.find()
-      .sort({ createdAt: -1 })
+      .sort({createdAt: -1})
       .skip(skip)
       .limit(limit)
       .exec();

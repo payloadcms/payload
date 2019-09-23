@@ -97,5 +97,6 @@ export default {
         }
       ]
     }
-  ]
+  ],
+  timestamps: true
 };
