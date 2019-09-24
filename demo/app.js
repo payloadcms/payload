@@ -1,8 +1,6 @@
 import express from 'express';
 import Payload from '../src';
 import payloadConfig from './payload.config';
-// import { authRoutes } from './Auth/Auth.routes';
-// import { userRoutes } from './User/User.routes';
 import User from './config/User';
 import Page from './config/Page';
 import Category from './config/Category';
@@ -28,9 +26,6 @@ if (process.env.NODE_ENV !== 'production') {
     next();
   });
 }
-
-// router.use('/', authRoutes);
-// router.use('/users', userRoutes);
 
 app.listen(payloadConfig.port, () => {
   console.log(`listening on ${payloadConfig.port}...`);
