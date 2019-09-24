@@ -6,7 +6,6 @@ import languageParser from 'accept-language-parser';
  * @param localization
  * @returns {Function}
  */
-
 export default function locale(localization) {
   return function (req, res, next) {
     let setLocale;

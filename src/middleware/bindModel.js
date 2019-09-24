@@ -3,6 +3,6 @@ const bindModel = model => {
     req.model = model;
     next();
   };
-}
+};
 
 export default bindModel;

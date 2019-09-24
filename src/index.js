@@ -11,16 +11,14 @@ import autopopulate from './plugins/autopopulate';
 import paginate from './plugins/paginate';
 import buildQuery from './plugins/buildQuery';
 import internationalization from './plugins/internationalization';
-import bindModel from './middleware/bindModel';
-import locale from './middleware/locale';
+import { bindModel, locale, checkRole } from './middleware';
 import { query, create, findOne, destroy, update } from './requestHandlers';
 import { schemaBaseFields } from './helpers/mongoose/schemaBaseFields';
 import fieldToSchemaMap from './helpers/mongoose/fieldToSchemaMap';
 import authValidate from './auth/validate';
 import authRequestHandlers from './auth/requestHandlers';
-import middleware from './middleware';
 import passwordResetConfig from './auth/passwordResets/passwordReset.config';
-import passportLocalMongoose from 'passport-local-mongoose';
+import validateConfig from './lib/validateConfig';
 
 class Payload {
 
@@ -70,6 +68,7 @@ class Payload {
     // TODO: Build safe config before initializing models and routes
 
     options.models && options.models.forEach(config => {
+      validateConfig(config, this.models);
       // TODO: consider making schemaBaseFields a mongoose plugin for consistency
       const fields = { ...schemaBaseFields };
 
@@ -118,7 +117,7 @@ class Payload {
         options.config.roles.forEach((role) => {
           options.router
             .route(`/role/${role}`)
-            .get(passport.authenticate(config.auth.strategy, { session: false }), middleware.role(role), auth.me);
+            .get(passport.authenticate(config.auth.strategy, { session: false }), checkRole(role), auth.me);
         });
 
         // password resets
