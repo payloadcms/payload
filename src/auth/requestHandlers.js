@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-const passport = require('passport');
+import passport from 'passport';
 import httpStatus from 'http-status';
 import APIError from '../lib/helpers/APIError';
 
@@ -13,7 +13,6 @@ export default User => ({
    */
   register: (req, res, next) => {
     User.register(new User({ email: req.body.email }), req.body.password, (err, user) => {
-      console.log(err, user);
       if (err) {
         const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
         return next(error);
