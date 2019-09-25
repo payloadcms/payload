@@ -19,7 +19,7 @@ describe('Payload Middleware', () => {
         }
       };
 
-      middleware.role('user')(req, res, next);
+      middleware.checkRole('user')(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(res.status).not.toHaveBeenCalled();
@@ -32,7 +32,7 @@ describe('Payload Middleware', () => {
         }
       };
 
-      middleware.role('admin')(req, res, next);
+      middleware.checkRole('admin')(req, res, next);
 
       expect(next).not.toHaveBeenCalled();
       expect(res.status).toHaveBeenCalled();

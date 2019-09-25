@@ -1,3 +1,5 @@
-export {default as bindModel} from './bindModel';
-export {default as checkRole} from './checkRole';
-export {default as locale} from './locale';
+import bindModel from './bindModel';
+import checkRole from './checkRole';
+import locale from './locale';
+
+export default { bindModel, checkRole, locale };
