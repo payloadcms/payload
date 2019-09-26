@@ -1,6 +1,5 @@
-import middleware from '../../middleware';
+import { checkRole, locale} from '../../middleware';
 import mockExpress from 'jest-mock-express';
-import locale from '../../middleware/locale';
 
 let res = null;
 let next = null;
@@ -19,7 +18,7 @@ describe('Payload Middleware', () => {
         }
       };
 
-      middleware.checkRole('user')(req, res, next);
+      checkRole('user')(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(res.status).not.toHaveBeenCalled();
@@ -32,7 +31,7 @@ describe('Payload Middleware', () => {
         }
       };
 
-      middleware.checkRole('admin')(req, res, next);
+      checkRole('admin')(req, res, next);
 
       expect(next).not.toHaveBeenCalled();
       expect(res.status).toHaveBeenCalled();
