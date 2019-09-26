@@ -38,6 +38,33 @@ describe('Payload Middleware', () => {
       expect(res.send).toHaveBeenCalled();
     });
 
+    it('Roles handle array - authorized', () => {
+      const req = {
+        user: {
+          role: 'user'
+        }
+      };
+
+      checkRole('admin', 'user')(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(res.status).not.toHaveBeenCalled();
+    });
+
+    it('Roles handle array - unauthorized', () => {
+      const req = {
+        user: {
+          role: 'user'
+        }
+      };
+
+      checkRole('admin', 'owner')(req, res, next);
+
+      expect(next).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalled();
+      expect(res.send).toHaveBeenCalled();
+    });
+
   });
 
   describe('Payload Locale Middleware', () => {

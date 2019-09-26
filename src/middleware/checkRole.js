@@ -1,6 +1,11 @@
-export default function checkRole(role) {
+/**
+ * authorize a request by comparing the current user with one or more roles
+ * @param roles
+ * @returns {Function}
+ */
+export default function checkRole(...roles) {
   return function (req, res, next) {
-    if (role !== req.user.role) res.status(401).send('Role not authorized.');
+    if (!roles.some(role => role === req.user.role)) res.status(401).send('Role not authorized.');
     else next();
   }
 }
