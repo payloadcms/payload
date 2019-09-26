@@ -97,14 +97,14 @@ function parseParam(key, val, model, query, locale) {
 function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator, locale) {
   let paramType;
   let key = keyPrefix + lcKey;
-
   let matches = lcKey.match(/(.+)\.(.+)/);
   if (matches) {
     // Parse SubSchema
     if (schema.paths[matches[1]].constructor.name === 'DocumentArray' ||
       schema.paths[matches[1]].constructor.name === 'Mixed') {
       parseSchemaForKey(schema.paths[matches[1]].schema, `${matches[1]}.`, matches[2], val, operator)
-    } else if (schema.paths[matches[1]].constructor.name === 'SchemaType') {
+    } else if (schema.paths[matches[1]].constructor.name === 'SchemaType' ||
+      schema.paths[matches[1]].constructor.name === 'SingleNestedPath') {
       // This wasn't handled in the original package but seems to work
       paramType = schema.paths[matches[1]].schema.paths.name.instance;
     }
