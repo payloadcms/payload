@@ -56,7 +56,7 @@ export default function internationalization(schema, options) {
         // embedded and sub-documents will use locale methods from the top level document
         let owner = this.ownerDocument ? this.ownerDocument() : this,
           locale = owner.getLocale(),
-          localeSubDoc = this.getValue(path);
+          localeSubDoc = this.$__getValue(path);
 
         if (localeSubDoc === null || localeSubDoc === void 0) {
           return localeSubDoc;
