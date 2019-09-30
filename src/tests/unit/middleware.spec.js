@@ -1,4 +1,5 @@
-import { checkRole, locale} from '../../middleware';
+import localizationMiddleware from '../../localization/localization.middleware';
+import checkRoleMiddleware from '../../auth/checkRole.middleware';
 import mockExpress from 'jest-mock-express';
 
 let res = null;
@@ -18,7 +19,7 @@ describe('Payload Middleware', () => {
         }
       };
 
-      checkRole('user')(req, res, next);
+      checkRoleMiddleware('user')(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(res.status).not.toHaveBeenCalled();
@@ -31,7 +32,7 @@ describe('Payload Middleware', () => {
         }
       };
 
-      checkRole('admin')(req, res, next);
+      checkRoleMiddleware('admin')(req, res, next);
 
       expect(next).not.toHaveBeenCalled();
       expect(res.status).toHaveBeenCalled();
@@ -45,7 +46,7 @@ describe('Payload Middleware', () => {
         }
       };
 
-      checkRole('admin', 'user')(req, res, next);
+      checkRoleMiddleware('admin', 'user')(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(res.status).not.toHaveBeenCalled();
@@ -58,7 +59,7 @@ describe('Payload Middleware', () => {
         }
       };
 
-      checkRole('admin', 'owner')(req, res, next);
+      checkRoleMiddleware('admin', 'owner')(req, res, next);
 
       expect(next).not.toHaveBeenCalled();
       expect(res.status).toHaveBeenCalled();
@@ -87,7 +88,7 @@ describe('Payload Middleware', () => {
     it('Supports query params', () => {
       req.query.locale = 'es';
 
-      locale(localization)(req, res, next);
+      localizationMiddleware(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(req.locale).toEqual(req.query.locale);
@@ -96,7 +97,7 @@ describe('Payload Middleware', () => {
     it('Supports query param fallback to default', () => {
       req.query.locale = 'pt';
 
-      locale(localization)(req, res, next);
+      localizationMiddleware(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(req.locale).toEqual(localization.defaultLocale);
@@ -105,7 +106,7 @@ describe('Payload Middleware', () => {
     it('Supports accept-language header', () => {
       req.headers['accept-language'] = 'es,fr;';
 
-      locale(localization)(req, res, next);
+      localizationMiddleware(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(req.locale).toEqual('es');
@@ -115,7 +116,7 @@ describe('Payload Middleware', () => {
       req.query.locale = 'pt';
       req.headers['accept-language'] = 'fr;';
 
-      locale(localization)(req, res, next);
+      localizationMiddleware(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(req.locale).toEqual(localization.defaultLocale);
@@ -125,14 +126,14 @@ describe('Payload Middleware', () => {
       req.query.locale = 'es';
       req.headers['accept-language'] = 'en;';
 
-      locale(localization)(req, res, next);
+      localizationMiddleware(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(req.locale).toEqual('es');
     });
 
     it('Supports default locale', () => {
-      locale(localization)(req, res, next);
+      localizationMiddleware(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(req.locale).toEqual(localization.defaultLocale);
@@ -140,7 +141,7 @@ describe('Payload Middleware', () => {
 
     it('Supports locale all', () => {
       req.query.locale = '*';
-      locale(localization)(req, res, next);
+      localizationMiddleware(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(req.locale).toBeUndefined();
@@ -149,7 +150,7 @@ describe('Payload Middleware', () => {
     it('Supports locale in body on post', () => {
       req.body = {locale: 'es'};
       req.method = 'post';
-      locale(localization)(req, res, next);
+      localizationMiddleware(localization)(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(req.locale).toEqual('es');

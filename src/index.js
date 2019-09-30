@@ -5,20 +5,22 @@ import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 import jwtStrategy from './auth/jwt';
 import fileUpload from 'express-fileupload';
-import mediaRoutes from './routes/media.routes';
+import mediaRoutes from './media/media.routes';
 import emailRoutes from './auth/passwordResets/email.routes';
-import autopopulate from './plugins/autopopulate';
-import paginate from './plugins/paginate';
-import buildQuery from './plugins/buildQuery';
-import internationalization from './plugins/internationalization';
-import { bindModel, locale, checkRole } from './middleware';
-import { query, create, findOne, destroy, update } from './requestHandlers';
-import { schemaBaseFields } from './helpers/mongoose/schemaBaseFields';
-import fieldToSchemaMap from './helpers/mongoose/fieldToSchemaMap';
+import autopopulate from './mongoose/autopopulate.plugin';
+import paginate from './mongoose/paginate.plugin';
+import buildQueryPlugin from './mongoose/buildQuery.plugin';
+import localizationPlugin from './localization/localization.plugin';
+import bindModelMiddleware from './mongoose/bindModel.middleware';
+import localizationMiddleware from './localization/localization.middleware';
+import checkRoleMiddleware from './auth/checkRole.middleware';
+import { query, create, findOne, destroy, update } from './mongoose/requestHandlers';
+import { schemaBaseFields } from './mongoose/schemaBaseFields';
+import fieldToSchemaMap from './mongoose/fieldToSchemaMap';
 import authValidate from './auth/validate';
 import authRequestHandlers from './auth/requestHandlers';
 import passwordResetConfig from './auth/passwordResets/passwordReset.config';
-import validateConfig from './lib/validateConfig';
+import validateConfig from './utilities/validateConfig';
 
 class Payload {
 
@@ -62,7 +64,7 @@ class Payload {
     options.app.use(methodOverride('X-HTTP-Method-Override'));
     options.app.use(express.urlencoded({ extended: true }));
     options.app.use(bodyParser.urlencoded({ extended: true }));
-    options.app.use(locale(options.config.localization));
+    options.app.use(localizationMiddleware(options.config.localization));
     options.app.use(options.router);
 
     // TODO: Build safe config before initializing models and routes
@@ -84,8 +86,8 @@ class Payload {
       const Schema = new mongoose.Schema(fields, { timestamps: config.timestamps });
 
       Schema.plugin(paginate);
-      Schema.plugin(buildQuery);
-      Schema.plugin(internationalization, options.config.localization);
+      Schema.plugin(buildQueryPlugin);
+      Schema.plugin(localizationPlugin, options.config.localization);
       Schema.plugin(autopopulate);
 
       if (config.plugins) {
@@ -117,7 +119,7 @@ class Payload {
         options.config.roles.forEach((role) => {
           options.router
             .route(`/role/${role}`)
-            .get(passport.authenticate(config.auth.strategy, { session: false }), checkRole(role), auth.me);
+            .get(passport.authenticate(config.auth.strategy, { session: false }), checkRoleMiddleware(role), auth.me);
         });
 
         // password resets
@@ -133,7 +135,7 @@ class Payload {
       }
 
       this.models[config.labels.singular] = model;
-      options.router.all(`/${config.slug}*`, bindModel(model));
+      options.router.all(`/${config.slug}*`, bindModelMiddleware(model));
 
       options.router.route(`/${config.slug}`)
         .get(config.policies.read, query)

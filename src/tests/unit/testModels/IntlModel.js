@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
-import { schemaBaseFields } from '../../../helpers/mongoose/schemaBaseFields';
-import paginate from '../../../plugins/paginate';
-import buildQuery from '../../../plugins/buildQuery';
-import internationalization from '../../../plugins/internationalization';
+import { schemaBaseFields } from '../../../mongoose/schemaBaseFields';
+import paginate from '../../../mongoose/paginate.plugin';
+import buildQueryPlugin from '../../../mongoose/buildQuery.plugin';
+import localizationPlugin from '../../../localization/localization.plugin';
 
 const IntlSchema = new mongoose.Schema({
     ...schemaBaseFields,
@@ -15,8 +15,8 @@ const IntlSchema = new mongoose.Schema({
 );
 
 IntlSchema.plugin(paginate);
-IntlSchema.plugin(buildQuery);
-IntlSchema.plugin(internationalization, {
+IntlSchema.plugin(buildQueryPlugin);
+IntlSchema.plugin(localizationPlugin, {
   locales: [
     'en',
     'es'
