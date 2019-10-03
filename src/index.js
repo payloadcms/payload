@@ -27,7 +27,10 @@ class Payload {
   models = {};
 
   constructor(options) {
-    mongoose.connect(options.config.mongoURL, { useNewUrlParser: true }, (err) => {
+    mongoose.connect(options.config.mongoURL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }, (err) => {
       if (err) {
         console.log('Unable to connect to the Mongo server. Please start the server. Error:', err);
       } else {
@@ -129,7 +132,7 @@ class Payload {
 
         if (config.auth.registration) {
           options.router
-            .route('/' + config.slug + '/register') // TODO: not sure how to incorporate url params like `:pageId`
+            .route(`${config.slug}/register`) // TODO: not sure how to incorporate url params like `:pageId`
             .post(config.auth.registrationValidation, auth.register);
         }
       }

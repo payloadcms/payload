@@ -1,5 +1,5 @@
-const validate = require('express-validation');
-const Joi = require('joi');
+import validate from 'express-validation';
+import Joi from 'joi';
 
 module.exports = {
   login: validate({
