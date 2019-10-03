@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import passport from 'passport';
 import httpStatus from 'http-status';
-import APIError from '../lib/helpers/APIError';
+import APIError from '../errors/APIError';
 
 export default User => ({
   /**
