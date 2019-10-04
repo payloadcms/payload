@@ -6,8 +6,8 @@ export default function localizationPlugin(schema, options) {
   }
 
   // plugin options to be set under schema options
-  schema.options.mongooseIntl = {};
-  const pluginOptions = schema.options.mongooseIntl;
+  schema.options.localization = {};
+  const pluginOptions = schema.options.localization;
 
   pluginOptions.locales = options.locales.slice(0);
 
@@ -86,7 +86,7 @@ export default function localizationPlugin(schema, options) {
       .set(function (value) {
         // multiple locales are set as an object
         if (typeof value === 'object') {
-          let locales = this.schema.options.mongooseIntl.locales;
+          let locales = this.schema.options.localization.locales;
           locales.forEach(locale => {
             if (!value[locale]) {
               return;
@@ -137,10 +137,10 @@ export default function localizationPlugin(schema, options) {
   // document methods to set the locale for each model instance (document)
   schema.method({
     getLocales: function () {
-      return this.schema.options.mongooseIntl.locales;
+      return this.schema.options.localization.locales;
     },
     getLocale: function () {
-      return this.docLocale || this.schema.options.mongooseIntl.defaultLocale;
+      return this.docLocale || this.schema.options.localization.defaultLocale;
     },
     setLocale: function (locale, fallbackLocale) {
       const locales = this.getLocales();
@@ -171,15 +171,15 @@ export default function localizationPlugin(schema, options) {
   // model methods to set the locale for the current schema
   schema.static({
     getLocales: function () {
-      return this.schema.options.mongooseIntl.locales;
+      return this.schema.options.localization.locales;
     },
     getDefaultLocale: function () {
-      return this.schema.options.mongooseIntl.defaultLocale;
+      return this.schema.options.localization.defaultLocale;
     },
     setDefaultLocale: function (locale) {
 
       let updateLocale = function (schema, locale) {
-        schema.options.mongooseIntl.defaultLocale = locale.slice(0);
+        schema.options.localization.defaultLocale = locale.slice(0);
 
         // default locale change for sub-documents schemas
         schema.eachPath((path, schemaType) => {
