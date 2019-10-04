@@ -21,6 +21,7 @@ import authValidate from './auth/validate';
 import authRequestHandlers from './auth/requestHandlers';
 import passwordResetConfig from './auth/passwordResets/passwordReset.config';
 import validateConfig from './utilities/validateConfig';
+import setModelLocaleMiddleware from './mongoose/setModelLocale.middleware';
 
 class Payload {
 
@@ -138,7 +139,10 @@ class Payload {
       }
 
       this.models[config.labels.singular] = model;
-      options.router.all(`/${config.slug}*`, bindModelMiddleware(model));
+      options.router.all(`/${config.slug}*`,
+        bindModelMiddleware(model),
+        setModelLocaleMiddleware()
+      );
 
       options.router.route(`/${config.slug}`)
         .get(config.policies.read, query)
