@@ -1,8 +1,8 @@
-import validate from 'express-validation';
-import Joi from 'joi';
+const validate = require('express-validation');
+const Joi = require('joi');
 
 // TODO: move field specific validations to the config
-export default {
+module.exports = {
   post: validate({
     body: {
       email: Joi.string().email().required(),

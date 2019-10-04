@@ -2,10 +2,12 @@ import React from 'react';
 
 import { PayloadLogo } from 'payload/components';
 
-export default () => {
+const Logo = () => {
   return (
     <div className="logo-wrap">
       <PayloadLogo />
     </div>
   );
 };
+
+export default Logo;

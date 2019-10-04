@@ -69,7 +69,8 @@ class Payload {
 
     // TODO: Build safe config before initializing models and routes
 
-    options.models && options.models.forEach(config => {
+    options.config.models && Object.keys(options.config.models).forEach(key => {
+      const config = options.config.models[key];
       validateConfig(config, this.models);
       // TODO: consider making schemaBaseFields a mongoose plugin for consistency
       const fields = { ...schemaBaseFields };

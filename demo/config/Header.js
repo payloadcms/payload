@@ -1,10 +1,8 @@
 module.exports = {
-  slug: 'pages',
+  slug: 'header',
   labels: {
-    singular: 'Page',
-    plural: 'Pages',
+    singular: 'Header',
   },
-  useAsTitle: 'title',
   policies: {
     create: (req, res, next) => {
       return next();
@@ -99,5 +97,4 @@ module.exports = {
       ]
     }
   ],
-  timestamps: true
 };
