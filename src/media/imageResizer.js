@@ -1,6 +1,7 @@
 import sharp from 'sharp';
-const { promisify } = require('util');
-const sizeOf = promisify(require('image-size'));
+import { promisify } from 'util';
+import imageSize from 'image-size';
+const sizeOf = promisify(imageSize);
 
 function getOutputImageName(sourceImage, size) {
   let extension = sourceImage.split('.').pop();

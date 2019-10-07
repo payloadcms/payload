@@ -1,7 +1,3 @@
-'use strict';
-
-const mongoose = require('mongoose');
-
 module.exports = function (schema) {
   const pathsToPopulate = [];
 
