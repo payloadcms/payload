@@ -7,7 +7,6 @@ const defaultState = {
   stepNav: [],
   locale: null,
   config: null,
-  collections: null,
   searchParams: {},
   status: []
 };
@@ -45,12 +44,11 @@ export default (state = defaultState, action) => {
         stepNav: action.payload
       };
 
-    case 'LOAD_GLOBALS':
+    case 'LOAD_CONFIG':
 
       return {
         ...state,
-        config: action.payload.config,
-        collections: action.payload.collections
+        config: action.payload
       };
 
     case 'SET_LOCALE':

@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   slug: 'pages',
   labels: {
     singular: 'Page',

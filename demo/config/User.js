@@ -1,8 +1,8 @@
-import passportLocalMongoose from 'passport-local-mongoose';
-import payloadConfig from '../payload.config';
-import userValidate from '../User/User.validate';
+const passportLocalMongoose = require('passport-local-mongoose');
+const payloadConfig = require('../payload.config');
+const userValidate = require('../User/User.validate');
 
-export default {
+module.exports = {
   slug: 'users',
   labels: {
     singular: 'User',
@@ -29,7 +29,7 @@ export default {
     registration: true,
     registrationValidation: userValidate.post,
   },
-  plugins: [{plugin: passportLocalMongoose, options: {usernameField: 'email'}}],
+  plugins: [{ plugin: passportLocalMongoose, options: { usernameField: 'email' } }],
   fields: [
     {
       name: 'email',

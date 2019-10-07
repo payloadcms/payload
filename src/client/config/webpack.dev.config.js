@@ -37,7 +37,7 @@ const getStyleLoaders = (cssOptions, preProcessor) => {
 };
 
 module.exports = {
-  entry: './demo/client/index.js',
+  entry: '../components/index.js',
   devtool: 'source-map',
   module: {
     rules: [
@@ -57,7 +57,7 @@ module.exports = {
           // smaller than specified limit in bytes as data URLs to avoid requests.
           // A missing `test` is equivalent to a match.
           {
-            test: [ /\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/ ],
+            test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
             loader: require.resolve('url-loader'),
             options: {
               limit: 10000,
@@ -81,7 +81,7 @@ module.exports = {
             // its runtime that would otherwise processed through "file" loader.
             // Also exclude `html` and `json` extensions so they get processed
             // by webpacks internal loaders.
-            exclude: [ /\.(js|jsx|mjs)$/, /\.html$/, /\.json$/ ],
+            exclude: [/\.(js|jsx|mjs)$/, /\.html$/, /\.json$/],
             loader: require.resolve('file-loader'),
             options: {
               name: 'static/media/[name].[hash:8].[ext]',
@@ -93,14 +93,14 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './demo/client/index.html',
-      filename: './index.html'
+      template: '../../../demo/client/index.html',
+      filename: '../index.html'
     })
   ],
   resolve: {
     alias: {
-      payload: path.resolve(__dirname, '../src/'),
-      local: path.resolve(__dirname, '../demo/')
+      payload: path.resolve(__dirname, '../../../'),
+      local: path.resolve(__dirname, '../../../demo/')
     }
   }
 };

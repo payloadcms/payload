@@ -1,4 +1,13 @@
-export default {
+const User = require('./config/User');
+const Page = require('./config/Page');
+const Category = require('./config/Category');
+
+module.exports = {
+  models: {
+    User,
+    Page,
+    Category,
+  },
   port: 3000,
   serverUrl: 'http://localhost:3000',
   cors: ['http://localhost', 'http://localhost:8080', 'http://localhost:8081'],

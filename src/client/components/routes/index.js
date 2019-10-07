@@ -7,22 +7,20 @@ import {
   Dashboard,
   Login,
   CreateUser,
-  MediaLibrary
+  MediaLibrary,
 } from 'payload/components';
-import Logo from '../components/graphics/Logo';
-import Icon from '../components/graphics/Icon';
 
 const cookies = new Cookies();
 
 const Routes = props => {
   return (
     <Switch>
-      <Route path="/login" render={routeProps => <Login logo={Logo} {...routeProps} />} />
+      <Route path="/login" render={routeProps => <Login {...routeProps} />} />
       <Route path="/forgot" component={() => { return <h1>Forgot Password</h1>; }} />
       <Route path="/" render={routeProps => {
         if (cookies.get('token')) {
           return (
-            <DefaultTemplate {...routeProps} icon={Icon}>
+            <DefaultTemplate {...routeProps}>
               <Route path="/media-library" component={MediaLibrary} />
               <Route path="/create-user" component={CreateUser} />
               <Route path="/" exact component={Dashboard} />

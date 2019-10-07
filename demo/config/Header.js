@@ -1,11 +1,8 @@
 module.exports = {
-  slug: 'categories',
-  label: 'Categories',
+  slug: 'header',
   labels: {
-    singular: 'Category',
-    plural: 'Categories',
+    singular: 'Header',
   },
-  useAsTitle: 'title',
   policies: {
     create: (req, res, next) => {
       return next();
@@ -22,19 +19,18 @@ module.exports = {
   },
   fields: [
     {
-      name: 'title',
-      label: 'Category Title',
+      name: 'siteTitle',
+      label: 'Site Title',
       type: 'input',
+      localized: true,
       maxLength: 100,
-      required: true
+      required: true,
     },
     {
-      name: 'description',
-      label: 'Description',
-      type: 'textarea',
-      height: 100,
+      name: 'logo',
+      label: 'Logo',
+      type: 'media',
       required: true
     },
   ],
-  timestamps: true
 };
