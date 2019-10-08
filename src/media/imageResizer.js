@@ -22,7 +22,7 @@ export async function resizeAndSave(config, file) {
       let outputImageName = getOutputImageName(sourceImage, desiredSize);
       await sharp(sourceImage)
         .resize(desiredSize.width, desiredSize.height, {
-          position: desiredSize.crop || 'centre'
+          position: desiredSize.crop || 'centre' // would it make sense for this to be set by the uploader?
         })
         .toFile(outputImageName);
       outputSizes.push({ height: desiredSize.height, width: desiredSize.width });

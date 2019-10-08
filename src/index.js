@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 import jwtStrategy from './auth/jwt';
 import fileUpload from 'express-fileupload';
-import mediaRoutes from './media/media.routes';
+// import mediaRoutes from './media/media.routes';
 import emailRoutes from './auth/passwordResets/email.routes';
 import autopopulate from './mongoose/autopopulate.plugin';
 import paginate from './mongoose/paginate.plugin';
@@ -15,17 +15,21 @@ import bindModelMiddleware from './mongoose/bindModel.middleware';
 import localizationMiddleware from './localization/localization.middleware';
 import checkRoleMiddleware from './auth/checkRole.middleware';
 import { query, create, findOne, destroy, update } from './mongoose/requestHandlers';
+import { upsert, fetch } from './mongoose/requestHandlers/globals';
 import { schemaBaseFields } from './mongoose/schemaBaseFields';
 import fieldToSchemaMap from './mongoose/fieldToSchemaMap';
 import authValidate from './auth/validate';
 import authRequestHandlers from './auth/requestHandlers';
 import passwordResetConfig from './auth/passwordResets/passwordReset.config';
-import validateConfig from './utilities/validateConfig';
+import mediaConfig from './media/media.config';
+import validateCollection from './utilities/validateCollection';
+import validateGlobal from './utilities/validateGlobal';
 import setModelLocaleMiddleware from './mongoose/setModelLocale.middleware';
 
 class Payload {
 
-  models = {};
+  collections = {};
+  globals = {};
 
   constructor(options) {
     mongoose.connect(options.config.mongoURL, {
@@ -62,8 +66,6 @@ class Payload {
       });
     }
 
-    options.router.use(options.config.staticUrl, mediaRoutes(options.config));
-
     options.app.use(express.json());
     options.app.use(methodOverride('X-HTTP-Method-Override'));
     options.app.use(express.urlencoded({ extended: true }));
@@ -73,14 +75,20 @@ class Payload {
 
     // TODO: Build safe config before initializing models and routes
 
-    options.config.models && Object.keys(options.config.models).forEach(key => {
-      const config = options.config.models[key];
-      validateConfig(config, this.models);
-      // TODO: consider making schemaBaseFields a mongoose plugin for consistency
+    options.config.collections && Object.values(options.config.collections).forEach(config => {
+      validateCollection(config, this.collections);
+      this.collections[config.labels.singular] = config;
       const fields = { ...schemaBaseFields };
 
+      // authentication
       if (config.auth && config.auth.passwordResets) {
         config.fields.push(...passwordResetConfig.fields);
+      }
+
+      // media
+      // TODO: finish this idea
+      if (config.media && config.media.static) {
+        config.fields.push(...mediaConfig.fields);
       }
 
       config.fields.forEach(field => {
@@ -139,7 +147,6 @@ class Payload {
         }
       }
 
-      this.models[config.labels.singular] = model;
       options.router.all(`/${config.slug}*`,
         bindModelMiddleware(model),
         setModelLocaleMiddleware()
@@ -154,6 +161,52 @@ class Payload {
         .put(config.policies.update, update)
         .delete(config.policies.destroy, destroy);
     });
+
+    let globalSchema = {};
+    const globalFields = {};
+    let globalModel;
+    options.config.globals && Object.keys(options.config.globals).forEach(key => {
+      const config = options.config.globals[key];
+      validateGlobal(config, this.globals);
+      this.globals[config.label] = config;
+
+      if (config.media) {
+        // TODO: handle media the same way as on a collection
+      }
+
+      config.fields.forEach(field => {
+        const fieldSchema = fieldToSchemaMap[field.type];
+        // TODO: missing Header on the heirarchy, want to have some nice subdocs
+        if (fieldSchema) globalFields[field.name] = fieldSchema(field);
+      });
+    });
+
+    globalSchema = new mongoose.Schema(globalFields, { timestamps: false });
+
+    if (options.config.globals) {
+     globalModel = mongoose.model(
+       'global',
+       new mongoose.Schema({globalSchema, timestamps: false})
+         .plugin(localizationPlugin, options.config.localization)
+         .plugin(autopopulate)
+     );
+    }
+
+    options.router.all('/globals*',
+      bindModelMiddleware(globalModel),
+      setModelLocaleMiddleware()
+    );
+
+    options.router.route('/globals')
+      .get(fetch)
+      .post(upsert)
+      .put(upsert);
+
+    options.router.route('/globals/:key')
+      .get(fetch)
+      .post(upsert)
+      .put(upsert);
+
   }
 }
 

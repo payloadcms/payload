@@ -1,13 +1,11 @@
 import mongoose from 'mongoose';
 
 const formatBaseSchema = field => {
-  const schema = {};
-
-  if (field.localized === true) schema.intl = true;
-  if (field.unique === true) schema.unique = true;
-  if (field.default) schema.default = field.default;
-
-  return schema;
+  return {
+    localized: field.localized || false,
+    unique: field.unique || false,
+    default: field.default || undefined,
+  };
 };
 
 const fieldToSchemaMap = {

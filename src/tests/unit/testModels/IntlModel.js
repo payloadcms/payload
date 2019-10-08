@@ -6,8 +6,8 @@ import localizationPlugin from '../../../localization/localization.plugin';
 
 const IntlSchema = new mongoose.Schema({
     ...schemaBaseFields,
-    title: { type: String, intl: true, unique: true },
-    content: { type: String, intl: true },
+    title: { type: String, localized: true, unique: true },
+    content: { type: String, localized: true },
     metaTitle: String,
     metaDesc: String
   },

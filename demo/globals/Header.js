@@ -1,8 +1,6 @@
 module.exports = {
   slug: 'header',
-  labels: {
-    singular: 'Header',
-  },
+  label: 'Header',
   policies: {
     create: (req, res, next) => {
       return next();
@@ -32,5 +30,17 @@ module.exports = {
       type: 'media',
       required: true
     },
+    {
+      name: 'settings',
+      type: 'json',
+      value: {
+        property1: process.env.production,
+        property2: 'some string',
+        property3: () => {
+          console.log('Header.settings.property3 called');
+          return 1 + 1;
+        }
+      }
+    }
   ],
 };
