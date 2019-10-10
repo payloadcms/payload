@@ -181,8 +181,6 @@ class Payload {
         if (fieldSchema) globalFields[config.slug][field.name] = fieldSchema(field);
       });
       globalSchemaGroups[config.slug] = new mongoose.Schema(globalFields[config.slug], { _id : false });
-      globalSchemaGroups[config.slug].plugin(localizationPlugin, options.config.localization);
-      globalSchemaGroups[config.slug].plugin(autopopulate);
   });
 
     if (options.config.globals) {
