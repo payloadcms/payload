@@ -202,6 +202,7 @@ class Payload {
       .post(upsert)
       .put(upsert);
 
+    // TODO: set these up to interact with subdocs of global
     options.router.route('/globals/:key')
       .get(fetch)
       .post(upsert)
