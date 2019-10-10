@@ -1,7 +1,5 @@
-const User = require('./collections/User');
-const Page = require('./collections/Page');
-const Category = require('./collections/Category');
-const Globals = require('./globals');
+const collections = require('./collections');
+const globals = require('./globals');
 
 module.exports = {
   port: 3000,
@@ -13,12 +11,8 @@ module.exports = {
     admin: '/admin'
   },
   mongoURL: 'mongodb://localhost/payload',
-  collections: {
-    User,
-    Page,
-    Category,
-  },
-  globals: Globals,
+  collections: collections,
+  globals: globals,
   roles: [
     'admin',
     'editor',

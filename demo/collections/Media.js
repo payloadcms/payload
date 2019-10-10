@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   slug: 'media',
   labels: {
     singular: 'Media',
@@ -48,4 +48,4 @@ export default {
     // users could have fields if they want, not required
   ],
   timestamps: true
-}
+};
