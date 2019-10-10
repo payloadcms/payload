@@ -162,13 +162,15 @@ class Payload {
         .delete(config.policies.destroy, destroy);
     });
 
-    let globalSchema = {};
+    // Begin code for globals
+    let globalSchemaGroups = {};
     const globalFields = {};
     let globalModel;
     options.config.globals && Object.keys(options.config.globals).forEach(key => {
       const config = options.config.globals[key];
       validateGlobal(config, this.globals);
       this.globals[config.label] = config;
+      globalFields[config.slug] = {};
 
       if (config.media) {
         // TODO: handle media the same way as on a collection
@@ -176,17 +178,15 @@ class Payload {
 
       config.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];
-        // TODO: missing Header on the heirarchy, want to have some nice subdocs
-        if (fieldSchema) globalFields[field.name] = fieldSchema(field);
+        if (fieldSchema) globalFields[config.slug][field.name] = fieldSchema(field);
       });
+      globalSchemaGroups[config.slug] = new mongoose.Schema(globalFields[config.slug], { _id : false });
     });
-
-    globalSchema = new mongoose.Schema(globalFields, { timestamps: false });
 
     if (options.config.globals) {
      globalModel = mongoose.model(
        'global',
-       new mongoose.Schema({globalSchema, timestamps: false})
+       new mongoose.Schema({...globalSchemaGroups, timestamps: false})
          .plugin(localizationPlugin, options.config.localization)
          .plugin(autopopulate)
      );

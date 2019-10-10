@@ -17,7 +17,7 @@ module.exports = {
   },
   fields: [
     {
-      name: 'siteTitle',
+      name: 'title',
       label: 'Site Title',
       type: 'input',
       localized: true,
@@ -34,7 +34,7 @@ module.exports = {
       name: 'settings',
       type: 'json',
       value: {
-        property1: process.env.production,
+        property1: process.env.production || false,
         property2: 'some string',
         property3: () => {
           console.log('Header.settings.property3 called');

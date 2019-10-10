@@ -1,7 +1,7 @@
 const User = require('./collections/User');
 const Page = require('./collections/Page');
 const Category = require('./collections/Category');
-const Header = require('./globals/Header');
+const Globals = require('./globals');
 
 module.exports = {
   port: 3000,
@@ -18,9 +18,7 @@ module.exports = {
     Page,
     Category,
   },
-  globals: {
-    Header
-  },
+  globals: Globals,
   roles: [
     'admin',
     'editor',

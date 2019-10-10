@@ -15,9 +15,9 @@ const upsert = (req, res) => {
       });
     } else {
       Object.keys(req.body).forEach(e => {
+        console.log(req.body, e);
         doc[e] = req.body[e];
       });
-
       doc.save((err) => {
         if (err)
           return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: err});
