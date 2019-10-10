@@ -25,12 +25,12 @@ export default function localizationPlugin(schema, options) {
       return;
     }
 
-    if (!schemaType.options.intl) {
+    if (!schemaType.options.localized) {
       return;
     }
 
     if (!(schemaType instanceof mongoose.Schema.Types.String)) {
-      throw new mongoose.Error('intl can only be used on type String');
+      throw new mongoose.Error('localization can only be used on type String');
     }
 
     let pathArray = path.split('.'),
@@ -102,12 +102,12 @@ export default function localizationPlugin(schema, options) {
       });
 
 
-    // intl option is not needed for the current path any more,
+    // localized option is not needed for the current path any more,
     // and is unwanted for all child locale-properties
-    // delete schemaType.options.intl; // This was removed to allow viewing inside query parser
+    // delete schemaType.options.localized; // This was removed to allow viewing inside query parser
 
-    let intlObject = {};
-    intlObject[key] = {};
+    let localizedObject = {};
+    localizedObject[key] = {};
     pluginOptions.locales.forEach(function (locale) {
       let localeOptions = Object.assign({}, schemaType.options);
       if (locale !== options.defaultLocale) {
@@ -124,14 +124,14 @@ export default function localizationPlugin(schema, options) {
       }
 
       this[locale] = localeOptions;
-    }, intlObject[key]);
+    }, localizedObject[key]);
 
-    // intlObject example:
+    // localizedObject example:
     // { fieldName: {
     //     en: '',
     //     de: ''
     // }}
-    schema.add(intlObject, prefix);
+    schema.add(localizedObject, prefix);
   });
 
   // document methods to set the locale for each model instance (document)

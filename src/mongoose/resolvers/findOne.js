@@ -1,17 +1,17 @@
 const find = query => {
 
   return new Promise((resolve, reject) => {
-    query.Model.find({}, (err, docs) => {
+    query.Model.findOne({}, (err, doc) => {
 
-      if (err || !docs) {
+      if (err || !doc) {
         return reject({ message: 'not found' })
       }
 
-      let result = docs;
+      let result = doc;
 
       if (query.locale) {
-        docs.setLocale(query.locale, query.fallback);
-        const json = docs.toJSON({ virtuals: true });
+        doc.setLocale(query.locale, query.fallback);
+        const json = doc.toJSON({ virtuals: true });
         result = json;
       }
 
