@@ -192,12 +192,10 @@ class Payload {
      );
     }
 
-    options.router.all('/globals*',
+    options.router.all('/globals',
       bindModelMiddleware(globalModel),
       setModelLocaleMiddleware()
-    );
-
-    options.router.route('/globals')
+    ).route('/globals')
       .get(fetch)
       .post(upsert)
       .put(upsert);
