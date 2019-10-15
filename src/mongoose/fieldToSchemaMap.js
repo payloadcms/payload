@@ -9,16 +9,14 @@ const formatBaseSchema = field => {
 };
 
 const fieldToSchemaMap = {
+  number: field => {
+    return {...formatBaseSchema(field), type: Number};
+  },
   input: field => {
-    const schema = formatBaseSchema(field);
-    schema.type = String;
-    return schema;
+    return {...formatBaseSchema(field), type: String};
   },
   textarea: field => {
-    return {
-      ...formatBaseSchema(field),
-      type: String,
-    };
+    return {...formatBaseSchema(field), type: String};
   },
   relationship: field => {
     return [{
@@ -29,14 +27,21 @@ const fieldToSchemaMap = {
     }];
   },
   repeater: field => {
-    return field.fields.map(subField => fieldToSchemaMap[subField.type](subField));
+    const schema = {};
+    if (field.id === false) {
+      schema._id = false;
+    }
+    field.fields.forEach(subField => {
+      schema[subField.name] = fieldToSchemaMap[subField.type](subField);
+    });
+    return [schema];
   },
   enum: field => {
     return {...formatBaseSchema(field),
       type: String,
       enum: field.enum,
     };
-  }
+  },
 };
 
 export default fieldToSchemaMap;
