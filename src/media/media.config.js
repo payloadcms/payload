@@ -1,21 +1,21 @@
 export default {
-  fields: [{
-    name: 'filename',
-    type: 'input',
-  },
+  fields: [
+    {
+      name: 'filename',
+      type: 'input',
+    },
     {
       name: 'sizes',
       type: 'repeater',
+      id: false,
       fields: [
         {
           name: 'height',
           type: 'number',
-          label: 'Height'
         },
         {
           name: 'width',
           type: 'number',
-          label: 'Width'
         },
       ]
     }

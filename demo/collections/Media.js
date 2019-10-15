@@ -24,6 +24,7 @@ module.exports = {
     staticDir: 'demo/media',
     type: 'image',
     accept: ['.jpg', '.jpeg', '.png'],
+    // TODO: discuss if some sizes are required, what if not resizing?
     imageSizes: [
       {
         name: 'tablet',

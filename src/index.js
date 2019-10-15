@@ -5,7 +5,8 @@ import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 import jwtStrategy from './auth/jwt';
 import fileUpload from 'express-fileupload';
-// import mediaRoutes from './media/media.routes';
+import {upload as uploadMedia, update as updateMedia} from './media/requestHandlers';
+import mediaConfig from './media/media.config';
 import emailRoutes from './auth/passwordResets/email.routes';
 import autopopulate from './mongoose/autopopulate.plugin';
 import paginate from './mongoose/paginate.plugin';
@@ -21,7 +22,6 @@ import fieldToSchemaMap from './mongoose/fieldToSchemaMap';
 import authValidate from './auth/validate';
 import authRequestHandlers from './auth/requestHandlers';
 import passwordResetConfig from './auth/passwordResets/passwordReset.config';
-import mediaConfig from './media/media.config';
 import validateCollection from './utilities/validateCollection';
 import validateGlobal from './utilities/validateGlobal';
 import setModelLocaleMiddleware from './mongoose/setModelLocale.middleware';
@@ -43,7 +43,7 @@ class Payload {
       }
     });
 
-    options.app.use(fileUpload());
+    options.app.use(fileUpload({}));
     const staticUrl = options.config.staticUrl ? options.config.staticUrl : `/${options.config.staticDir}`;
     options.app.use(staticUrl, express.static(options.config.staticDir));
 
@@ -86,8 +86,7 @@ class Payload {
       }
 
       // media
-      // TODO: finish this idea
-      if (config.media && config.media.static) {
+      if (config.media) {
         config.fields.push(...mediaConfig.fields);
       }
 
@@ -152,13 +151,18 @@ class Payload {
         setModelLocaleMiddleware()
       );
 
+      // TODO: this feels sloppy, need to discuss media enabled collection handlers
+      let createHandler = config.media ? (req, res, next) => uploadMedia(req, res, next, config.media) : create;
+      let updateHandler = config.media ? (req, res, next) => updateMedia(req, res, next, config.media) : update;
+      // TODO: Do we need a delete?
+
       options.router.route(`/${config.slug}`)
         .get(config.policies.read, query)
-        .post(config.policies.create, create);
+        .post(config.policies.create, createHandler);
 
       options.router.route(`/${config.slug}/:id`)
         .get(config.policies.read, findOne)
-        .put(config.policies.update, update)
+        .put(config.policies.update, updateHandler)
         .delete(config.policies.destroy, destroy);
     });
 
@@ -171,10 +175,6 @@ class Payload {
       validateGlobal(config, this.globals);
       this.globals[config.label] = config;
       globalFields[config.slug] = {};
-
-      if (config.media) {
-        // TODO: handle media the same way as on a collection
-      }
 
       config.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];

@@ -3,42 +3,42 @@ import { resizeAndSave } from './imageResizer';
 import httpStatus from 'http-status';
 import modelById from '../mongoose/resolvers/modelById';
 
-export async function update(req, res, next, config) {
-  req.model.setDefaultLocale(req.locale);
+const update = async (req, res, next, config) => {
+    req.model.setDefaultLocale(req.locale);
 
-  const query = {
-    Model: req.model,
-    id: req.params._id,
-    locale: req.locale,
-  };
-  let doc = await modelById(query, { returnRawDoc: true });
-  if (!doc)
-    return res.status(httpStatus.NOT_FOUND).send('Not Found');
+    const query = {
+      Model: req.model,
+      id: req.params._id,
+      locale: req.locale,
+    };
+    let doc = await modelById(query, {returnRawDoc: true});
+    if (!doc)
+      return res.status(httpStatus.NOT_FOUND).send('Not Found');
 
-  Object.keys(req.body).forEach(e => {
-    doc[e] = req.body[e];
-  });
-
-  if (req.files && req.files.file) {
-    doc['filename'] = req.files.file.name;
-    let outputFilepath = `${config.staticDir}/${req.files.file.name}`;
-    let moveError = await req.files.file.mv(outputFilepath);
-    if (moveError) return res.status(500).send(moveError);
-    doc['sizes'] = await resizeAndSave(config, req.files.file);
-  }
-
-  doc.save((saveError) => {
-    if (saveError)
-      return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: saveError });
-
-    return res.json({
-      message: 'success',
-      result: doc.toJSON({ virtuals: true })
+    Object.keys(req.body).forEach(e => {
+      doc[e] = req.body[e];
     });
-  });
-}
 
-export async function upload(req, res, next, config) {
+    if (req.files && req.files.file) {
+      doc['filename'] = req.files.file.name;
+      let outputFilepath = `${config.staticDir}/${req.files.file.name}`;
+      let moveError = await req.files.file.mv(outputFilepath);
+      if (moveError) return res.status(500).send(moveError);
+      doc['sizes'] = await resizeAndSave(config, req.files.file);
+    }
+
+    doc.save((saveError) => {
+      if (saveError)
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({error: saveError});
+
+      return res.json({
+        message: 'success',
+        result: doc.toJSON({virtuals: true})
+      });
+    });
+  };
+
+const upload = async (req, res, next, config) => {
   if (!req.files || Object.keys(req.files).length === 0) {
     return res.status(400).send('No files were uploaded.');
   }
@@ -63,12 +63,14 @@ export async function upload(req, res, next, config) {
     sizes: outputSizes
   }, (mediaCreateError, result) => {
     if (mediaCreateError)
-      return res.status(500).json({ error: mediaCreateError });
+      return res.status(500).json({error: mediaCreateError});
 
     return res.status(201)
       .json({
         message: 'success',
-        result: result.toJSON({ virtuals: true })
+        result: result.toJSON({virtuals: true})
       });
   });
-}
+};
+
+export {update, upload};

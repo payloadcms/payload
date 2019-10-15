@@ -64,6 +64,7 @@ module.exports = {
       name: 'slides',
       label: 'Slides',
       type: 'repeater',
+      id: false,
       fields: [
         {
           name: 'content',
