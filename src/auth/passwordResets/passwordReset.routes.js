@@ -6,25 +6,6 @@ import * as crypto from 'crypto';
 const router = express.Router();
 const passwordResetRoutes = (emailConfig, User) => {
 
-  const validateForgotRequestBody = (req, res, next) => {
-    if (req.body.hasOwnProperty('userEmail')) {
-      next();
-    } else {
-      return res.status(400).json({
-        message: 'Missing userEmail in request body'
-      })
-    }
-  };
-  const validateResetPasswordBody = (req, res, next) => {
-    if (req.body.hasOwnProperty('token') && req.body.hasOwnProperty('password')) {
-      next();
-    } else {
-      return res.status(400).json({
-        message: 'Invalid request body'
-      })
-    }
-  };
-
   router
     .route('/forgot')
     .post(
@@ -36,6 +17,7 @@ const passwordResetRoutes = (emailConfig, User) => {
   router
     .route('/reset/:token')
     .get(
+      // Front-end can prefill the form then make a call to /reset
       (req, res) => checkTokenValidity(req, res, User)
     );
 
@@ -124,6 +106,26 @@ const checkTokenValidity = (req, res, User) => {
 
       res.status(200).json({ message: 'Password reset token is valid', user: user.email });
     });
+};
+
+const validateForgotRequestBody = (req, res, next) => {
+  if (req.body.hasOwnProperty('userEmail')) {
+    next();
+  } else {
+    return res.status(400).json({
+      message: 'Missing userEmail in request body'
+    })
+  }
+};
+
+const validateResetPasswordBody = (req, res, next) => {
+  if (req.body.hasOwnProperty('token') && req.body.hasOwnProperty('password')) {
+    next();
+  } else {
+    return res.status(400).json({
+      message: 'Invalid request body'
+    })
+  }
 };
 
 const resetPassword = (req, res, User) => {
