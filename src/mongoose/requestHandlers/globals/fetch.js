@@ -11,7 +11,15 @@ const fetch = (req, res) => {
   };
 
   findOne(query, createAutopopulateOptions(query))
-    .then(doc => res.json(doc))
+    .then(doc => {
+      if (doc[req.params.key]) {
+        return res.json(doc[req.params.key]);
+      } else if (req.params.key) {
+        return res.status(httpStatus.NOT_FOUND)
+          .json({error:'not found'});
+      }
+      return res.json(doc);
+    })
     .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err }));
 };
 
