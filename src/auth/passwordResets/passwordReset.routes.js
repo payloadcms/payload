@@ -4,7 +4,7 @@ import * as nodemailer from 'nodemailer';
 import * as crypto from 'crypto';
 
 const router = express.Router();
-const emailRoutes = (emailConfig, User) => {
+const passwordResetRoutes = (emailConfig, User) => {
 
   const validateForgotRequestBody = (req, res, next) => {
     if (req.body.hasOwnProperty('userEmail')) {
@@ -60,6 +60,8 @@ const sendResetEmail = async (req, res, next, emailConfig, User) => {
       case 'smtp':
         emailHandler = smtpEmailHandler(req, res, next, emailConfig);
         break;
+      default:
+        emailHandler = await mockEmailHandler(req, res, next, emailConfig);
     }
 
     const generateToken = () => new Promise(resolve =>
@@ -179,4 +181,4 @@ const smtpEmailHandler = (req, res, next, emailConfig) => {
   });
 };
 
-export default emailRoutes;
+export default passwordResetRoutes;

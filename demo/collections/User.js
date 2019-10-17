@@ -40,6 +40,18 @@ module.exports = {
       required: true
     },
     {
+      name: 'resetPasswordToken',
+      label: 'ResetPasswordToken',
+      type: 'textarea',
+      hidden: true
+    },
+    {
+      name: 'resetPasswordExpires',
+      label: 'ResetPasswordExpires',
+      type: 'date',
+      hidden: true
+    },
+    {
       name: 'role',
       type: 'enum',
       enum: payloadConfig.roles,
