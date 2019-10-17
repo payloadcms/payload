@@ -1,8 +1,6 @@
 module.exports = {
   slug: 'header',
-  labels: {
-    singular: 'Header',
-  },
+  label: 'Header',
   policies: {
     create: (req, res, next) => {
       return next();
@@ -19,7 +17,7 @@ module.exports = {
   },
   fields: [
     {
-      name: 'siteTitle',
+      name: 'title',
       label: 'Site Title',
       type: 'input',
       localized: true,
@@ -32,5 +30,19 @@ module.exports = {
       type: 'media',
       required: true
     },
+    {
+      // TODO: this is some proof of concept parts that are not done.
+      // My thinking is that a creator could set up global values that are exposed in the API, but not available to change in the payload UI
+      name: 'settings',
+      type: 'json',
+      value: {
+        property1: process.env.production || false,
+        property2: 'some string',
+        property3: () => {
+          console.log('Header.settings.property3 called');
+          return 1 + 1;
+        }
+      }
+    }
   ],
 };

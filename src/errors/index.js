@@ -1,2 +1,5 @@
 export { PayloadError } from './PayloadError';
-export { DuplicateModelNameError } from './DuplicateModelNameError';
+export { DuplicateCollectionLabelError } from './DuplicateCollectionLabelError';
+export { DuplicateGlobalLabelError } from './DuplicateGlobalLabelError';
+export { MissingCollectionLabelError } from './MissingCollectionLabelError';
+export { MissingGlobalLabelError } from './MissingGlobalLabelError';

@@ -109,7 +109,7 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator, local
       paramType = schema.paths[matches[1]].schema.paths.name.instance;
     }
   } else if (schema.obj[lcKey] && typeof schema === 'object') {
-    if (schema.obj[lcKey].intl) {
+    if (schema.obj[lcKey].localized) {
       key = `${key}.${locale}`;
     }
     paramType = schema.obj[lcKey].name || schema.obj[lcKey].type.name;

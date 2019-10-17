@@ -1,13 +1,7 @@
-const User = require('./config/User');
-const Page = require('./config/Page');
-const Category = require('./config/Category');
+const collections = require('./collections');
+const globals = require('./globals');
 
 module.exports = {
-  models: {
-    User,
-    Page,
-    Category,
-  },
   port: 3000,
   serverUrl: 'http://localhost:3000',
   cors: ['http://localhost', 'http://localhost:8080', 'http://localhost:8081'],
@@ -17,6 +11,8 @@ module.exports = {
     admin: '/admin'
   },
   mongoURL: 'mongodb://localhost/payload',
+  collections: collections,
+  globals: globals,
   roles: [
     'admin',
     'editor',
@@ -34,25 +30,6 @@ module.exports = {
   },
   staticUrl: '/media',
   staticDir: 'demo/media',
-  imageSizes: [
-    {
-      name: 'tablet',
-      width: 640,
-      height: 480,
-      crop: 'left top'
-    },
-    {
-      name: 'mobile',
-      width: 320,
-      height: 240,
-      crop: 'left top'
-    },
-    {
-      name: 'icon',
-      width: 16,
-      height: 16
-    }
-  ],
   email: {
     provider: 'mock'
   },
