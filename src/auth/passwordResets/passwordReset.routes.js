@@ -15,13 +15,6 @@ const passwordResetRoutes = (emailConfig, User) => {
     );
 
   router
-    .route('/reset/:token')
-    .get(
-      // Front-end can prefill the form then make a call to /reset
-      (req, res) => checkTokenValidity(req, res, User)
-    );
-
-  router
     .route('/reset')
     .post(
       (req, res, next) => validateResetPasswordBody(req, res, next),
@@ -89,23 +82,6 @@ const sendResetEmail = async (req, res, next, emailConfig, User) => {
     console.error(e);
     res.status(500).json({ success: false, error: 'Unable to send e-mail' });
   }
-};
-
-const checkTokenValidity = (req, res, User) => {
-  User.findOne(
-    {
-      resetPasswordToken: req.params.token,
-      resetPasswordExpiration: { $gt: Date.now() }
-    },
-    (err, user) => {
-      if (!user) {
-        const message = 'Password reset token is invalid or has expired.';
-        console.error(err);
-        return res.status(400).json({ message });
-      }
-
-      res.status(200).json({ message: 'Password reset token is valid', user: user.email });
-    });
 };
 
 const validateForgotRequestBody = (req, res, next) => {
