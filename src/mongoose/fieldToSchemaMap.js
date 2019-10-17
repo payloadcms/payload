@@ -5,6 +5,7 @@ const formatBaseSchema = field => {
     localized: field.localized || false,
     unique: field.unique || false,
     default: field.default || undefined,
+    hidden: field.hidden || false
   };
 };
 
@@ -17,6 +18,12 @@ const fieldToSchemaMap = {
   },
   textarea: field => {
     return {...formatBaseSchema(field), type: String};
+  },
+  date: field => {
+    return {
+      ...formatBaseSchema(field),
+      type: Date
+    }
   },
   relationship: field => {
     return [{

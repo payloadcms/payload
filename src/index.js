@@ -7,7 +7,7 @@ import jwtStrategy from './auth/jwt';
 import fileUpload from 'express-fileupload';
 import {upload as uploadMedia, update as updateMedia} from './media/requestHandlers';
 import mediaConfig from './media/media.config';
-import emailRoutes from './auth/passwordResets/email.routes';
+import passwordResetRoutes from './auth/passwordResets/passwordReset.routes';
 import autopopulate from './mongoose/autopopulate.plugin';
 import paginate from './mongoose/paginate.plugin';
 import buildQueryPlugin from './mongoose/buildQuery.plugin';
@@ -136,7 +136,7 @@ class Payload {
 
         // password resets
         if (config.auth.passwordResets) {
-          options.router.use('', emailRoutes(options.config.email, model));
+          options.router.use('', passwordResetRoutes(options.config.email, model));
         }
 
         if (config.auth.registration) {

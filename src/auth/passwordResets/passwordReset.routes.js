@@ -4,26 +4,7 @@ import * as nodemailer from 'nodemailer';
 import * as crypto from 'crypto';
 
 const router = express.Router();
-const emailRoutes = (emailConfig, User) => {
-
-  const validateForgotRequestBody = (req, res, next) => {
-    if (req.body.hasOwnProperty('userEmail')) {
-      next();
-    } else {
-      return res.status(400).json({
-        message: 'Missing userEmail in request body'
-      })
-    }
-  };
-  const validateResetPasswordBody = (req, res, next) => {
-    if (req.body.hasOwnProperty('token') && req.body.hasOwnProperty('password')) {
-      next();
-    } else {
-      return res.status(400).json({
-        message: 'Invalid request body'
-      })
-    }
-  };
+const passwordResetRoutes = (emailConfig, User) => {
 
   router
     .route('/forgot')
@@ -31,12 +12,6 @@ const emailRoutes = (emailConfig, User) => {
       passport.authenticate('jwt', { session: false }),
       (req, res, next) => validateForgotRequestBody(req, res, next),
       (req, res, next) => sendResetEmail(req, res, next, emailConfig, User)
-    );
-
-  router
-    .route('/reset/:token')
-    .get(
-      (req, res) => checkTokenValidity(req, res, User)
     );
 
   router
@@ -60,6 +35,8 @@ const sendResetEmail = async (req, res, next, emailConfig, User) => {
       case 'smtp':
         emailHandler = smtpEmailHandler(req, res, next, emailConfig);
         break;
+      default:
+        emailHandler = await mockEmailHandler(req, res, next, emailConfig);
     }
 
     const generateToken = () => new Promise(resolve =>
@@ -107,21 +84,24 @@ const sendResetEmail = async (req, res, next, emailConfig, User) => {
   }
 };
 
-const checkTokenValidity = (req, res, User) => {
-  User.findOne(
-    {
-      resetPasswordToken: req.params.token,
-      resetPasswordExpiration: { $gt: Date.now() }
-    },
-    (err, user) => {
-      if (!user) {
-        const message = 'Password reset token is invalid or has expired.';
-        console.error(err);
-        return res.status(400).json({ message });
-      }
+const validateForgotRequestBody = (req, res, next) => {
+  if (req.body.hasOwnProperty('userEmail')) {
+    next();
+  } else {
+    return res.status(400).json({
+      message: 'Missing userEmail in request body'
+    })
+  }
+};
 
-      res.status(200).json({ message: 'Password reset token is valid', user: user.email });
-    });
+const validateResetPasswordBody = (req, res, next) => {
+  if (req.body.hasOwnProperty('token') && req.body.hasOwnProperty('password')) {
+    next();
+  } else {
+    return res.status(400).json({
+      message: 'Invalid request body'
+    })
+  }
 };
 
 const resetPassword = (req, res, User) => {
@@ -179,4 +159,4 @@ const smtpEmailHandler = (req, res, next, emailConfig) => {
   });
 };
 
-export default emailRoutes;
+export default passwordResetRoutes;
