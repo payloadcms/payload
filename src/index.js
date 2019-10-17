@@ -118,6 +118,10 @@ class Payload {
 
         options.router.use('', initRoutes(model));
         options.router.use('', authRoutes(config, model));
+
+        options.router.use('/config',
+          passport.authenticate(config.auth.strategy, { session: false }),
+          (req, res) => { res.json(options.config) });
       }
 
       options.router.all(`/${config.slug}*`,
