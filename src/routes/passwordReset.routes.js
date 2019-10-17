@@ -1,5 +1,5 @@
 import express from 'express';
-import passport from 'passport';
+import passport from 'passport/lib';
 import * as nodemailer from 'nodemailer';
 import * as crypto from 'crypto';
 

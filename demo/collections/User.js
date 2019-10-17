@@ -23,6 +23,13 @@ module.exports = {
       return next();
     },
   },
+  roles: [
+    'admin',
+    'editor',
+    'moderator',
+    'user',
+    'viewer'
+  ],
   auth: {
     strategy: 'jwt',
     passwordResets: true,

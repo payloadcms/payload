@@ -7,24 +7,22 @@ import jwtStrategy from './auth/jwt';
 import fileUpload from 'express-fileupload';
 import {upload as uploadMedia, update as updateMedia} from './media/requestHandlers';
 import mediaConfig from './media/media.config';
-import passwordResetRoutes from './auth/passwordResets/passwordReset.routes';
+import initRoutes from './routes/init.routes';
 import autopopulate from './mongoose/autopopulate.plugin';
 import paginate from './mongoose/paginate.plugin';
 import buildQueryPlugin from './mongoose/buildQuery.plugin';
 import localizationPlugin from './localization/localization.plugin';
 import bindModelMiddleware from './mongoose/bindModel.middleware';
 import localizationMiddleware from './localization/localization.middleware';
-import checkRoleMiddleware from './auth/checkRole.middleware';
 import { query, create, findOne, destroy, update } from './mongoose/requestHandlers';
 import { upsert, fetch } from './mongoose/requestHandlers/globals';
 import { schemaBaseFields } from './mongoose/schemaBaseFields';
 import fieldToSchemaMap from './mongoose/fieldToSchemaMap';
-import authValidate from './auth/validate';
-import authRequestHandlers from './auth/requestHandlers';
 import passwordResetConfig from './auth/passwordResets/passwordReset.config';
 import validateCollection from './utilities/validateCollection';
 import validateGlobal from './utilities/validateGlobal';
 import setModelLocaleMiddleware from './mongoose/setModelLocale.middleware';
+import authRoutes from './routes/auth.routes';
 
 class Payload {
 
@@ -118,32 +116,12 @@ class Payload {
           passport.deserializeUser(model.deserializeUser());
         }
 
-        let auth = authRequestHandlers(model);
+        options.router.use('', initRoutes(model));
+        options.router.use('', authRoutes(config, model));
 
-        options.router
-          .route('/login')
-          .post(authValidate.login, auth.login);
-
-        options.router
-          .route('/me')
-          .post(passport.authenticate(config.auth.strategy, { session: false }), auth.me);
-
-        options.config.roles.forEach((role) => {
-          options.router
-            .route(`/role/${role}`)
-            .get(passport.authenticate(config.auth.strategy, { session: false }), checkRoleMiddleware(role), auth.me);
-        });
-
-        // password resets
-        if (config.auth.passwordResets) {
-          options.router.use('', passwordResetRoutes(options.config.email, model));
-        }
-
-        if (config.auth.registration) {
-          options.router
-            .route(`${config.slug}/register`) // TODO: not sure how to incorporate url params like `:pageId`
-            .post(config.auth.registrationValidation, auth.register);
-        }
+        options.router.use('/config',
+          passport.authenticate(config.auth.strategy, { session: false }),
+          (req, res) => { res.json(options.config) });
       }
 
       options.router.all(`/${config.slug}*`,
