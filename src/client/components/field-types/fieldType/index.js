@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FormContext, Tooltip } from 'payload/components';
+import { FormContext } from '../../forms/Form'
 
 import './index.scss';
 

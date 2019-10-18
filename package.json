@@ -14,7 +14,7 @@
     "test:int": "jest --config src/tests/jest.config.integration.js",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
     "webpack": "webpack-dev-server --mode development --config src/client/config/webpack.dev.config.js --open --hot --history-api-fallback",
-    "demo-server": "nodemon demo/init.js",
+    "demo-server": "demo/init.js",
     "debug": "nodemon --inspect ./demo/init.js",
     "dev": "npm-run-all -p webpack demo-server"
   },
@@ -25,6 +25,7 @@
     "accept-language-parser": "^1.5.0",
     "babel-jest": "^24.9.0",
     "body-parser": "^1.19.0",
+    "connect-history-api-fallback": "^1.6.0",
     "dotenv": "^6.0.0",
     "express-fileupload": "^1.1.5",
     "express-graphql": "^0.7.1",

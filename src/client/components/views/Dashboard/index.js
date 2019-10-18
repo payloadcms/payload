@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { SetStepNav } from 'payload/components';
+import SetStepNav from '../../utilities/SetStepNav';
 
 import './index.scss';
 
 const Dashboard = () => {
   return (
     <article className="dashboard">
-      <SetStepNav nav={ [] } />
+      <SetStepNav nav={[]} />
       <h1>Dashboard</h1>
       <Link to="/login">Login</Link>
       <br />

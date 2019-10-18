@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Arrow } from 'payload/components';
+import Arrow from '../../graphics/Arrow';
 
 import './index.scss';
 

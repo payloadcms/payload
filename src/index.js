@@ -48,27 +48,6 @@ class Payload {
       }
     });
 
-    const webpackDevConfig = getWebpackDevConfig(options.config);
-
-    const compiler = webpack(webpackDevConfig);
-
-    options.app.use(webpackDevMiddleware(compiler, {
-      publicPath: webpackDevConfig.output.publicPath,
-    }));
-
-    options.app.get(options.config.routes.admin, (req, res, next) => {
-      compiler.outputFileSystem.readFile(path.join(__dirname, 'index.html'), (err, result) => {
-        if (err) {
-          return next(err)
-        }
-        res.set('content-type', 'text/html')
-        res.send(result)
-        res.end()
-      })
-    })
-
-    options.app.use(webpackHotMiddleware(compiler));
-
     options.app.use(fileUpload({}));
     const staticUrl = options.config.staticUrl ? options.config.staticUrl : `/${options.config.staticDir}`;
     options.app.use(staticUrl, express.static(options.config.staticDir));
@@ -225,6 +204,16 @@ class Payload {
       .get(fetch)
       .post(upsert)
       .put(upsert);
+
+    const webpackDevConfig = getWebpackDevConfig(options.config);
+
+    const compiler = webpack(webpackDevConfig);
+
+    options.app.use(webpackDevMiddleware(compiler, {
+      publicPath: options.config.routes.admin,
+    }));
+
+    options.app.use(webpackHotMiddleware(compiler));
   }
 }
 

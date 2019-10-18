@@ -1,8 +1,8 @@
 import React, { Component, createContext } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { HiddenInput } from 'payload/components';
-import api from 'payload/api';
+import HiddenInput from '../../field-types/HiddenInput';
+import api from '../../../api';
 
 import './index.scss';
 

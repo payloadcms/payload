@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
@@ -14,12 +14,14 @@ const Index = () => {
   return (
     <Provider store={store}>
       <Router>
-        <MeasureScroll />
-        <MeasureWindow />
-        <LoadConfig />
-        <SetLocale />
-        <SetSearchParams />
-        <Routes />
+        <Fragment>
+          <MeasureScroll />
+          <MeasureWindow />
+          <LoadConfig />
+          <SetLocale />
+          <SetSearchParams />
+          <Routes />
+        </Fragment>
       </Router>
     </Provider>
   );

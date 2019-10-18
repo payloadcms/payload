@@ -13,7 +13,7 @@ const cookies = new Cookies();
 const Routes = props => {
   return (
     <Switch>
-      <Route path="/login" render={routeProps => <Login {...routeProps} />} />
+      <Route path={'/admin/login'} render={routeProps => <Login {...routeProps} />} />
       <Route path="/forgot" component={() => { return <h1>Forgot Password</h1>; }} />
       <Route path="/" render={routeProps => {
         if (cookies.get('token')) {
@@ -26,7 +26,7 @@ const Routes = props => {
             </DefaultTemplate>
           );
         }
-        return <Redirect to="/login" />
+        return <Redirect to="/admin/login" />
       }} />
     </Switch>
   );

@@ -23,7 +23,7 @@ class SetLocale extends Component {
   setLocale = () => {
     const { searchParams, config, setLocale } = this.props;
 
-    if (searchParams) {
+    if (searchParams && config) {
       if (searchParams.locale && config.localization.locales.indexOf(searchParams.locale) > -1) {
         setLocale(searchParams.locale);
       } else if (!this.state.init) {
