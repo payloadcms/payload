@@ -43,9 +43,12 @@ module.exports = (config) => {
       main: ['webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000', './src/client/components/index.js'],
     },
     output: {
-      path: path.join(__dirname, 'build'),
-      publicPath: config.routes.admin,
+      path: '/',
+      publicPath: '/static',
       filename: '[name].js'
+    },
+    devServer: {
+      historyApiFallback: true,
     },
     devtool: 'source-map',
     mode: 'development',

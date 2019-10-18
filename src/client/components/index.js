@@ -10,6 +10,8 @@ import MeasureScroll from './utilities/MeasureScroll';
 import SetLocale from './utilities/SetLocale';
 import SetSearchParams from './utilities/SetSearchParams';
 
+import '../scss/app.scss';
+
 const Index = () => {
   return (
     <Provider store={store}>
