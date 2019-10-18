@@ -1,14 +1,12 @@
 import React from 'react';
 import Cookies from 'universal-cookie';
 import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
-import {
-  CollectionRoutes,
-  DefaultTemplate,
-  Dashboard,
-  Login,
-  CreateUser,
-  MediaLibrary,
-} from 'payload/components';
+import CollectionRoutes from './Collections';
+import DefaultTemplate from '../layout/DefaultTemplate';
+import Dashboard from '../views/Dashboard';
+import Login from '../views/Login';
+import CreateUser from '../views/CreateUser';
+import MediaLibrary from '../views/MediaLibrary';
 
 const cookies = new Cookies();
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { NavLink, Link } from 'react-router-dom';
-import { Arrow } from 'payload/components';
+import Arrow from '../../graphics/Arrow';
 
 import './index.scss';
 

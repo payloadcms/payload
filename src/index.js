@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 import jwtStrategy from './auth/jwt';
 import fileUpload from 'express-fileupload';
-import {upload as uploadMedia, update as updateMedia} from './media/requestHandlers';
+import { upload as uploadMedia, update as updateMedia } from './media/requestHandlers';
 import mediaConfig from './media/media.config';
 import passwordResetRoutes from './auth/passwordResets/passwordReset.routes';
 import autopopulate from './mongoose/autopopulate.plugin';
@@ -25,6 +25,11 @@ import passwordResetConfig from './auth/passwordResets/passwordReset.config';
 import validateCollection from './utilities/validateCollection';
 import validateGlobal from './utilities/validateGlobal';
 import setModelLocaleMiddleware from './mongoose/setModelLocale.middleware';
+import path from 'path';
+import webpack from 'webpack';
+import getWebpackDevConfig from './client/config/getWebpackDevConfig';
+import webpackDevMiddleware from 'webpack-dev-middleware';
+import webpackHotMiddleware from 'webpack-hot-middleware';
 
 class Payload {
 
@@ -42,6 +47,27 @@ class Payload {
         console.log('Connected to Mongo server successfully!');
       }
     });
+
+    const webpackDevConfig = getWebpackDevConfig(options.config);
+
+    const compiler = webpack(webpackDevConfig);
+
+    options.app.use(webpackDevMiddleware(compiler, {
+      publicPath: webpackDevConfig.output.publicPath,
+    }));
+
+    options.app.get(options.config.routes.admin, (req, res, next) => {
+      compiler.outputFileSystem.readFile(path.join(__dirname, 'index.html'), (err, result) => {
+        if (err) {
+          return next(err)
+        }
+        res.set('content-type', 'text/html')
+        res.send(result)
+        res.end()
+      })
+    })
+
+    options.app.use(webpackHotMiddleware(compiler));
 
     options.app.use(fileUpload({}));
     const staticUrl = options.config.staticUrl ? options.config.staticUrl : `/${options.config.staticDir}`;
@@ -180,16 +206,16 @@ class Payload {
         const fieldSchema = fieldToSchemaMap[field.type];
         if (fieldSchema) globalFields[config.slug][field.name] = fieldSchema(field);
       });
-      globalSchemaGroups[config.slug] = new mongoose.Schema(globalFields[config.slug], { _id : false });
-  });
+      globalSchemaGroups[config.slug] = new mongoose.Schema(globalFields[config.slug], { _id: false });
+    });
 
     if (options.config.globals) {
-     globalModel = mongoose.model(
-       'global',
-       new mongoose.Schema({...globalSchemaGroups, timestamps: false})
-         .plugin(localizationPlugin, options.config.localization)
-         .plugin(autopopulate)
-     );
+      globalModel = mongoose.model(
+        'global',
+        new mongoose.Schema({ ...globalSchemaGroups, timestamps: false })
+          .plugin(localizationPlugin, options.config.localization)
+          .plugin(autopopulate)
+      );
     }
 
     options.router.all('/globals',

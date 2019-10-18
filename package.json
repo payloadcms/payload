@@ -13,7 +13,7 @@
     "test": "jest --config src/tests/jest.config.js",
     "test:int": "jest --config src/tests/jest.config.integration.js",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
-    "webpack": "webpack-dev-server --mode development --config src/config/webpack.dev.config.js --open --hot --history-api-fallback",
+    "webpack": "webpack-dev-server --mode development --config src/client/config/webpack.dev.config.js --open --hot --history-api-fallback",
     "demo-server": "nodemon demo/init.js",
     "debug": "nodemon --inspect ./demo/init.js",
     "dev": "npm-run-all -p webpack demo-server"
@@ -98,7 +98,9 @@
     "uglifyjs-webpack-plugin": "^1.2.7",
     "webpack": "^4.41.0",
     "webpack-cli": "^3.3.9",
+    "webpack-dev-middleware": "^3.7.2",
     "webpack-dev-server": "^3.8.1",
+    "webpack-hot-middleware": "^2.25.0",
     "webpack-merge": "^4.2.2"
   }
 }
