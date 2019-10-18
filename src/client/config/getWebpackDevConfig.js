@@ -110,7 +110,6 @@ module.exports = (config) => {
         filename: './index.html'
       }),
       new webpack.HotModuleReplacementPlugin(),
-      new webpack.NoEmitOnErrorsPlugin()
     ],
     resolve: {
       alias: {

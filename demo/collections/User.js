@@ -6,7 +6,7 @@ module.exports = {
   slug: 'users',
   labels: {
     singular: 'User',
-    plural: 'users',
+    plural: 'Users',
   },
   useAsTitle: 'email',
   policies: {
@@ -23,6 +23,13 @@ module.exports = {
       return next();
     },
   },
+  roles: [
+    'admin',
+    'editor',
+    'moderator',
+    'user',
+    'viewer'
+  ],
   auth: {
     strategy: 'jwt',
     passwordResets: true,

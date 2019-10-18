@@ -26,7 +26,9 @@ class Localizer extends Component {
     this.setState({ active: !this.state.active })
 
   render() {
-    const { locales } = this.props.config.localization;
+    let locales = [];
+
+    if (this.props.config && this.props.config.localization) locales = this.props.config.localization.locales;
 
     if (locales.length <= 1) return null;
 

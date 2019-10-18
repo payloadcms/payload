@@ -18,13 +18,6 @@ module.exports = {
   mongoURL: 'mongodb://localhost/payload',
   collections: collections,
   globals: globals,
-  roles: [
-    'admin',
-    'editor',
-    'moderator',
-    'user',
-    'viewer'
-  ],
   localization: {
     locales: [
       'en',

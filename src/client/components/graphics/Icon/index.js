@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { PayloadIcon } from 'payload/components';
+import PayloadIcon from '../PayloadIcon';
 
 const Icon = () => {
   return (
