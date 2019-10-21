@@ -19,6 +19,15 @@ const fieldToSchemaMap = {
   textarea: field => {
     return {...formatBaseSchema(field), type: String};
   },
+  WYSIWYG: field => {
+    return {...formatBaseSchema(field), type: String};
+  },
+  code: field => {
+    return {...formatBaseSchema(field), type: String};
+  },
+  boolean: field => {
+    return {...formatBaseSchema(field), type: Boolean};
+  },
   date: field => {
     return {
       ...formatBaseSchema(field),
