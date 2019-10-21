@@ -9,13 +9,13 @@ function getOutputImageName(sourceImage, size) {
   return `${filenameWithoutExtension}-${size.width}x${size.height}.${extension}`;
 }
 
-export async function resizeAndSave(config, file) {
+export async function resizeAndSave(config, uploadConfig, file) {
   let sourceImage = `${config.staticDir}/${file.name}`;
 
   let outputSizes = [];
   try {
     const dimensions = await sizeOf(sourceImage);
-    for (let desiredSize of config.imageSizes) {
+    for (let desiredSize of uploadConfig.imageSizes) {
       if (desiredSize.width > dimensions.width) {
         continue;
       }
@@ -25,7 +25,11 @@ export async function resizeAndSave(config, file) {
           position: desiredSize.crop || 'centre' // would it make sense for this to be set by the uploader?
         })
         .toFile(outputImageName);
-      outputSizes.push({ height: desiredSize.height, width: desiredSize.width });
+      outputSizes.push({
+        name: desiredSize.name,
+        height: desiredSize.height,
+        width: desiredSize.width
+      });
     }
   } catch (e) {
     console.log('error in resize and save', e.message);

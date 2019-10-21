@@ -21,8 +21,42 @@ module.exports = {
     defaultLocale: 'en',
     fallback: true
   },
-  staticUrl: '/media',
-  staticDir: 'demo/media',
+  // uploads: false, // To disable upload routes otherwise defaults will be use and if set to an object
+  uploads: {
+    image: {
+      imageSizes: [
+        {
+          name: 'tablet',
+          width: 640,
+          height: 480,
+          crop: 'left top' // would it make sense for this to be set by the uploader?
+        },
+        {
+          name: 'mobile',
+          width: 320,
+          height: 240,
+          crop: 'left top'
+        },
+        { // Is the icon size required for the admin dashboard to work?
+          name: 'icon',
+          width: 16,
+          height: 16
+        }
+      ]
+    },
+    profile: {
+      imageSizes: [
+        {
+          name: 'full',
+          width: 640,
+          height: 480,
+          crop: 'center'
+        }
+      ]
+    },
+  },
+  staticUrl: '/uploads',
+  staticDir: 'demo/upload',
   email: {
     provider: 'mock'
   },

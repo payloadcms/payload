@@ -3,11 +3,10 @@ import passport from 'passport';
 import express from 'express';
 import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
-import jwtStrategy from './auth/jwt';
 import fileUpload from 'express-fileupload';
-import {upload as uploadMedia, update as updateMedia} from './media/requestHandlers';
-import mediaConfig from './media/media.config';
+import jwtStrategy from './auth/jwt';
 import initRoutes from './routes/init.routes';
+import uploadRoutes from './uploads/upload.routes';
 import autopopulate from './mongoose/autopopulate.plugin';
 import paginate from './mongoose/paginate.plugin';
 import buildQueryPlugin from './mongoose/buildQuery.plugin';
@@ -41,10 +40,6 @@ class Payload {
       }
     });
 
-    options.app.use(fileUpload({}));
-    const staticUrl = options.config.staticUrl ? options.config.staticUrl : `/${options.config.staticDir}`;
-    options.app.use(staticUrl, express.static(options.config.staticDir));
-
     // Configure passport for Auth
     options.app.use(passport.initialize());
     options.app.use(passport.session());
@@ -64,28 +59,33 @@ class Payload {
       });
     }
 
+    if (!options.config.uploads === false) {
+      options.app.use(fileUpload());
+
+      options.router.use('', uploadRoutes(options.config)
+      );
+    }
+
     options.app.use(express.json());
     options.app.use(methodOverride('X-HTTP-Method-Override'));
-    options.app.use(express.urlencoded({ extended: true }));
-    options.app.use(bodyParser.urlencoded({ extended: true }));
+    options.app.use(express.urlencoded({extended: true}));
+    options.app.use(bodyParser.urlencoded({extended: true}));
     options.app.use(localizationMiddleware(options.config.localization));
     options.app.use(options.router);
+
+    const staticUrl = options.config.staticUrl ? options.config.staticUrl : `/${options.config.staticDir}`;
+    options.app.use(staticUrl, express.static(options.config.staticDir));
 
     // TODO: Build safe config before initializing models and routes
 
     options.config.collections && Object.values(options.config.collections).forEach(config => {
       validateCollection(config, this.collections);
       this.collections[config.labels.singular] = config;
-      const fields = { ...schemaBaseFields };
+      const fields = {...schemaBaseFields};
 
       // authentication
       if (config.auth && config.auth.passwordResets) {
         config.fields.push(...passwordResetConfig.fields);
-      }
-
-      // media
-      if (config.media) {
-        config.fields.push(...mediaConfig.fields);
       }
 
       config.fields.forEach(field => {
@@ -93,7 +93,7 @@ class Payload {
         if (fieldSchema) fields[field.name] = fieldSchema(field);
       });
 
-      const Schema = new mongoose.Schema(fields, { timestamps: config.timestamps });
+      const Schema = new mongoose.Schema(fields, {timestamps: config.timestamps});
 
       Schema.plugin(paginate);
       Schema.plugin(buildQueryPlugin);
@@ -129,18 +129,13 @@ class Payload {
         setModelLocaleMiddleware()
       );
 
-      // TODO: this feels sloppy, need to discuss media enabled collection handlers
-      let createHandler = config.media ? (req, res, next) => uploadMedia(req, res, next, config.media) : create;
-      let updateHandler = config.media ? (req, res, next) => updateMedia(req, res, next, config.media) : update;
-      // TODO: Do we need a delete?
-
       options.router.route(`/${config.slug}`)
         .get(config.policies.read, query)
-        .post(config.policies.create, createHandler);
+        .post(config.policies.create, create);
 
       options.router.route(`/${config.slug}/:id`)
         .get(config.policies.read, findOne)
-        .put(config.policies.update, updateHandler)
+        .put(config.policies.update, update)
         .delete(config.policies.destroy, destroy);
     });
 
@@ -158,16 +153,16 @@ class Payload {
         const fieldSchema = fieldToSchemaMap[field.type];
         if (fieldSchema) globalFields[config.slug][field.name] = fieldSchema(field);
       });
-      globalSchemaGroups[config.slug] = new mongoose.Schema(globalFields[config.slug], { _id : false });
-  });
+      globalSchemaGroups[config.slug] = new mongoose.Schema(globalFields[config.slug], {_id: false});
+    });
 
     if (options.config.globals) {
-     globalModel = mongoose.model(
-       'global',
-       new mongoose.Schema({...globalSchemaGroups, timestamps: false})
-         .plugin(localizationPlugin, options.config.localization)
-         .plugin(autopopulate)
-     );
+      globalModel = mongoose.model(
+        'global',
+        new mongoose.Schema({...globalSchemaGroups, timestamps: false})
+          .plugin(localizationPlugin, options.config.localization)
+          .plugin(autopopulate)
+      );
     }
 
     options.router.all('/globals*',
@@ -179,7 +174,8 @@ class Payload {
       .route('/globals')
       .get(fetch);
 
-    options.router.route('/globals/:key')
+    options.router
+      .route('/globals/:key')
       .get(fetch)
       .post(upsert)
       .put(upsert);
