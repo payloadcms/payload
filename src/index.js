@@ -78,7 +78,6 @@ class Payload {
 
     options.config.contentBlocks && Object.values(options.config.contentBlocks).forEach(config => {
       // TODO: any kind of validation for blocks?
-      this.contentBlocks[config.slug] = config;
       const fields = {};
 
       config.fields.forEach(field => {
@@ -86,7 +85,9 @@ class Payload {
         if (fieldSchema) fields[field.name] = fieldSchema(field);
       });
 
-      this.contentBlocks[config.slug] = new mongoose.Schema(fields);
+      this.contentBlocks[config.slug] = new mongoose.Schema(fields)
+        .plugin(localizationPlugin, options.config.localization)
+        .plugin(autopopulate);
     });
 
     // TODO: Build safe config before initializing models and routes
@@ -117,16 +118,16 @@ class Payload {
 
       const Schema = new mongoose.Schema(fields, {timestamps: config.timestamps});
 
-      Object.values(flexibleSchema).forEach(flexible => {
-        flexible.blocks.forEach(blockType => {
-          Schema.path(flexible.name).discriminator(blockType.slug, this.contentBlocks[blockType])
-        });
-      });
-
       Schema.plugin(paginate);
       Schema.plugin(buildQueryPlugin);
       Schema.plugin(localizationPlugin, options.config.localization);
       Schema.plugin(autopopulate);
+
+      Object.values(flexibleSchema).forEach(flexible => {
+        flexible.blocks.forEach(blockType => {
+          Schema.path(flexible.name).discriminator(blockType, this.contentBlocks[blockType])
+        });
+      });
 
       if (config.plugins) {
         config.plugins.forEach(plugin => {

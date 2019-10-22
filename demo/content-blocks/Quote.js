@@ -11,7 +11,7 @@ module.exports = {
     },
     {
       name: 'quote',
-      label: 'Description',
+      label: 'Quote',
       type: 'textarea',
       height: 100,
       required: true
