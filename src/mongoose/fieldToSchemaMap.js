@@ -49,6 +49,9 @@ const fieldToSchemaMap = {
       enum: field.enum,
     };
   },
+  flexible: (field, flexibleSchema) => {
+    return field.hasMany ? [flexibleSchema] : flexibleSchema;
+  },
 };
 
 export default fieldToSchemaMap;

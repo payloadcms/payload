@@ -14,9 +14,9 @@ import buildQueryPlugin from './mongoose/buildQuery.plugin';
 import localizationPlugin from './localization/localization.plugin';
 import bindModelMiddleware from './mongoose/bindModel.middleware';
 import localizationMiddleware from './localization/localization.middleware';
-import { query, create, findOne, destroy, update } from './mongoose/requestHandlers';
-import { upsert, fetch } from './mongoose/requestHandlers/globals';
-import { schemaBaseFields } from './mongoose/schemaBaseFields';
+import {query, create, findOne, destroy, update} from './mongoose/requestHandlers';
+import {upsert, fetch} from './mongoose/requestHandlers/globals';
+import {schemaBaseFields} from './mongoose/schemaBaseFields';
 import fieldToSchemaMap from './mongoose/fieldToSchemaMap';
 import passwordResetConfig from './auth/passwordResets/passwordReset.config';
 import validateCollection from './utilities/validateCollection';
@@ -27,6 +27,7 @@ import authRoutes from './routes/auth.routes';
 class Payload {
 
   collections = {};
+  contentBlocks = {};
   globals = {};
 
   constructor(options) {
@@ -71,12 +72,29 @@ class Payload {
     options.app.use(localizationMiddleware(options.config.localization));
     options.app.use(options.router);
 
+    // build schema for content-blocks
+    const blockSchema = new mongoose.Schema({},
+      {discriminatorKey: 'blockType', _id: false});
+
+    options.config.contentBlocks && Object.values(options.config.contentBlocks).forEach(config => {
+      // TODO: any kind of validation for blocks?
+      this.contentBlocks[config.slug] = config;
+      const fields = {};
+
+      config.fields.forEach(field => {
+        const fieldSchema = fieldToSchemaMap[field.type];
+        if (fieldSchema) fields[field.name] = fieldSchema(field);
+      });
+
+      this.contentBlocks[config.slug] = new mongoose.Schema(fields);
+    });
+
     // TODO: Build safe config before initializing models and routes
 
     options.config.collections && Object.values(options.config.collections).forEach(config => {
       validateCollection(config, this.collections);
       this.collections[config.labels.singular] = config;
-      const fields = { ...schemaBaseFields };
+      const fields = {...schemaBaseFields};
 
       // authentication
       if (config.auth && config.auth.passwordResets) {
@@ -88,12 +106,22 @@ class Payload {
         config.fields.push(...mediaConfig.fields);
       }
 
+      const flexibleSchema = {};
       config.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) fields[field.name] = fieldSchema(field);
+        if (fieldSchema) fields[field.name] = fieldSchema(field, blockSchema);
+        if (field.type === 'flexible') {
+          flexibleSchema[field.name] = field;
+        }
       });
 
-      const Schema = new mongoose.Schema(fields, { timestamps: config.timestamps });
+      const Schema = new mongoose.Schema(fields, {timestamps: config.timestamps});
+
+      Object.values(flexibleSchema).forEach(flexible => {
+        flexible.blocks.forEach(blockType => {
+          Schema.path(flexible.name).discriminator(blockType.slug, this.contentBlocks[blockType])
+        });
+      });
 
       Schema.plugin(paginate);
       Schema.plugin(buildQueryPlugin);
@@ -120,8 +148,10 @@ class Payload {
         options.router.use('', authRoutes(config, model));
 
         options.router.use('/config',
-          passport.authenticate(config.auth.strategy, { session: false }),
-          (req, res) => { res.json(options.config) });
+          passport.authenticate(config.auth.strategy, {session: false}),
+          (req, res) => {
+            res.json(options.config)
+          });
       }
 
       options.router.all(`/${config.slug}*`,
@@ -158,16 +188,16 @@ class Payload {
         const fieldSchema = fieldToSchemaMap[field.type];
         if (fieldSchema) globalFields[config.slug][field.name] = fieldSchema(field);
       });
-      globalSchemaGroups[config.slug] = new mongoose.Schema(globalFields[config.slug], { _id : false });
-  });
+      globalSchemaGroups[config.slug] = new mongoose.Schema(globalFields[config.slug], {_id: false});
+    });
 
     if (options.config.globals) {
-     globalModel = mongoose.model(
-       'global',
-       new mongoose.Schema({...globalSchemaGroups, timestamps: false})
-         .plugin(localizationPlugin, options.config.localization)
-         .plugin(autopopulate)
-     );
+      globalModel = mongoose.model(
+        'global',
+        new mongoose.Schema({...globalSchemaGroups, timestamps: false})
+          .plugin(localizationPlugin, options.config.localization)
+          .plugin(autopopulate)
+      );
     }
 
     options.router.all('/globals*',

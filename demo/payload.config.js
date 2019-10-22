@@ -1,5 +1,6 @@
 const collections = require('./collections');
 const globals = require('./globals');
+const contentBlocks = require('./content-blocks');
 
 module.exports = {
   port: 3000,
@@ -13,6 +14,7 @@ module.exports = {
   mongoURL: 'mongodb://localhost/payload',
   collections: collections,
   globals: globals,
+  contentBlocks: contentBlocks,
   localization: {
     locales: [
       'en',

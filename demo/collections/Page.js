@@ -74,6 +74,13 @@ module.exports = {
       ]
     },
     {
+      name: 'flexible',
+      label: 'Flexible Content Blocks',
+      type: 'flexible',
+      blocks: ['quote'],
+      hasMany: true,
+    },
+    {
       label: 'Meta Information',
       type: 'group',
       fields: [
