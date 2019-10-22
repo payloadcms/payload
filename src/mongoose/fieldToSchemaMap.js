@@ -35,12 +35,13 @@ const fieldToSchemaMap = {
     }
   },
   relationship: field => {
-    return [{
+    const schema = {
       ...formatBaseSchema(field),
       type: mongoose.Schema.Types.ObjectId,
       autopopulate: true,
       ref: field.relationTo,
-    }];
+    };
+    return field.hasMany ? [schema] : schema;
   },
   repeater: field => {
     const schema = {};
