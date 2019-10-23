@@ -3,8 +3,8 @@ module.exports = {
   label: 'CTA',
   fields: [
     {
-      name: 'title',
-      label: 'Title',
+      name: 'label',
+      label: 'Label',
       type: 'input',
       localized: true,
       maxLength: 100,
