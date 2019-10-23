@@ -80,14 +80,24 @@ class Payload {
       // TODO: any kind of validation for blocks?
       const fields = {};
 
+      const flexibleSchema = {};
       config.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];
         if (fieldSchema) fields[field.name] = fieldSchema(field, blockSchema);
+        if (field.type === 'flexible') {
+          flexibleSchema[field.name] = field;
+        }
       });
 
       this.contentBlocks[config.slug] = new mongoose.Schema(fields)
         .plugin(localizationPlugin, options.config.localization)
         .plugin(autopopulate);
+
+      Object.values(flexibleSchema).forEach(flexible => {
+        flexible.blocks.forEach(blockType => {
+          this.contentBlocks[config.slug].path(flexible.name).discriminator(blockType, this.contentBlocks[blockType])
+        });
+      });
     });
 
     // TODO: Build safe config before initializing models and routes
