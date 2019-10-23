@@ -59,7 +59,7 @@ class Payload {
       });
     }
 
-    if (!options.config.uploads === false) {
+    if (options.config.uploads) {
       options.app.use(fileUpload());
 
       options.router.use('', uploadRoutes(options.config)
