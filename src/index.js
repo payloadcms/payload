@@ -82,7 +82,7 @@ class Payload {
 
       config.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) fields[field.name] = fieldSchema(field);
+        if (fieldSchema) fields[field.name] = fieldSchema(field, blockSchema);
       });
 
       this.contentBlocks[config.slug] = new mongoose.Schema(fields)
@@ -187,7 +187,7 @@ class Payload {
 
       config.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) globalFields[config.slug][field.name] = fieldSchema(field);
+        if (fieldSchema) globalFields[config.slug][field.name] = fieldSchema(field, blockSchema);
       });
       globalSchemaGroups[config.slug] = new mongoose.Schema(globalFields[config.slug], {_id: false});
     });

@@ -31,6 +31,13 @@ module.exports = {
       required: true
     },
     {
+      name: 'flexible',
+      label: 'Global Flexible Block',
+      type: 'flexible',
+      blocks: ['quote', 'cta'],
+      hasMany: true,
+    },
+    {
       // TODO: this is some proof of concept parts that are not done.
       // My thinking is that a creator could set up global values that are exposed in the API, but not available to change in the payload UI
       name: 'settings',
