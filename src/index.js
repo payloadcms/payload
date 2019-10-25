@@ -6,21 +6,11 @@ import methodOverride from 'method-override';
 import jwtStrategy from './auth/jwt';
 import fileUpload from 'express-fileupload';
 import {upload as uploadMedia, update as updateMedia} from './media/requestHandlers';
-import mediaConfig from './media/media.config';
 import initRoutes from './routes/init.routes';
-import autopopulate from './mongoose/autopopulate.plugin';
-import paginate from './mongoose/paginate.plugin';
-import buildQueryPlugin from './mongoose/buildQuery.plugin';
-import localizationPlugin from './localization/localization.plugin';
 import bindModelMiddleware from './mongoose/bindModel.middleware';
 import localizationMiddleware from './localization/localization.middleware';
 import {query, create, findOne, destroy, update} from './mongoose/requestHandlers';
 import {upsert, fetch} from './mongoose/requestHandlers/globals';
-import {schemaBaseFields} from './mongoose/schema/schemaBaseFields';
-import fieldToSchemaMap from './mongoose/schema/fieldToSchemaMap';
-import passwordResetConfig from './auth/passwordResets/passwordReset.config';
-import validateCollection from './utilities/validateCollection';
-import validateGlobal from './utilities/validateGlobal';
 import setModelLocaleMiddleware from './mongoose/setModelLocale.middleware';
 import authRoutes from './routes/auth.routes';
 import SchemaLoader from './mongoose/schema/schemaLoader';
@@ -117,8 +107,6 @@ class Payload {
           .put(config.policies.update, updateHandler)
           .delete(config.policies.destroy, destroy);
       });
-
-
 
     options.router.all('/globals*',
       bindModelMiddleware(this.schemaLoader.globalModel),
