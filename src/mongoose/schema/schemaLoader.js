@@ -5,7 +5,6 @@ import autopopulate from '../autopopulate.plugin';
 import validateCollection from '../../utilities/validateCollection';
 import {schemaBaseFields} from './schemaBaseFields';
 import passwordResetConfig from '../../auth/passwordResets/passwordReset.config';
-import mediaConfig from '../../media/media.config';
 import paginate from '../paginate.plugin';
 import buildQueryPlugin from '../buildQuery.plugin';
 import validateGlobal from '../../utilities/validateGlobal';
@@ -26,13 +25,66 @@ class SchemaLoader {
    * @param config.contentBlocks
    */
   constructor(config) {
+    this.blockSchema = new mongoose.Schema({},
+      {discriminatorKey: 'blockType', _id: false});
+
     this.blockSchemaLoader(config);
     this.collectionSchemaLoader(config);
     this.globalSchemaLoader(config);
   }
 
+  blockSchemaLoader = config => {
+    Object.values(config.contentBlocks).forEach(blockConfig => {
+      // TODO: any kind of validation for blocks?
+      const fields = {};
+
+      const flexibleSchema = {};
+      blockConfig.fields.forEach(field => {
+        const fieldSchema = fieldToSchemaMap[field.type];
+        if (fieldSchema) fields[field.name] = fieldSchema(field, this.blockSchema);
+        if (field.type === 'flexible') {
+          flexibleSchema[field.name] = field;
+        }
+      });
+      // TODO: instead of making the model with all the fields, create a separate model
+      // replace block schema with a ref to the new model type
+
+      const Schema = new mongoose.Schema(fields)
+        .plugin(localizationPlugin, config.localization)
+        .plugin(autopopulate);
+
+      const Model = mongoose.model(blockConfig.slug, Schema);
+
+      const RefSchema = new mongoose.Schema(
+        {
+          relation: {
+            type: mongoose.Schema.Types.ObjectId,
+            autopopulate: true,
+            ref: blockConfig.slug,
+          }
+        }
+      );
+
+      Object.values(flexibleSchema).forEach(flexible => {
+        flexible.blocks.forEach(blockType => {
+          Schema
+            .path(flexible.name)
+            .discriminator(blockType, RefSchema)
+        });
+      });
+
+      this.contentBlocks[blockConfig.slug] = {
+        config: blockConfig,
+        schema: Schema,
+        refSchema: RefSchema,
+        model: Model
+      };
+    });
+  };
+
   collectionSchemaLoader = config => {
     Object.values(config.collections).forEach(collectionConfig => {
+
       validateCollection(collectionConfig, this.collections);
       this.collections[collectionConfig.labels.singular] = collectionConfig;
       const fields = {...schemaBaseFields};
@@ -60,7 +112,8 @@ class SchemaLoader {
 
       Object.values(flexibleSchema).forEach(flexible => {
         flexible.blocks.forEach(blockType => {
-          Schema.path(flexible.name).discriminator(blockType, this.contentBlocks[blockType])
+          Schema.path(flexible.name)
+            .discriminator(blockType, this.contentBlocks[blockType].refSchema)
         });
       });
 
@@ -74,35 +127,6 @@ class SchemaLoader {
         config: collectionConfig,
         model: mongoose.model(collectionConfig.labels.singular, Schema)
       };
-    });
-  };
-
-  blockSchemaLoader = config => {
-    this.blockSchema = new mongoose.Schema({},
-      {discriminatorKey: 'blockType', _id: false});
-
-    Object.values(config.contentBlocks).forEach(blockConfig => {
-      // TODO: any kind of validation for blocks?
-      const fields = {};
-
-      const flexibleSchema = {};
-      blockConfig.fields.forEach(field => {
-        const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) fields[field.name] = fieldSchema(field, this.blockSchema);
-        if (field.type === 'flexible') {
-          flexibleSchema[field.name] = field;
-        }
-      });
-
-      this.contentBlocks[blockConfig.slug] = new mongoose.Schema(fields)
-        .plugin(localizationPlugin, config.localization)
-        .plugin(autopopulate);
-
-      Object.values(flexibleSchema).forEach(flexible => {
-        flexible.blocks.forEach(blockType => {
-          this.contentBlocks[blockConfig.slug].path(flexible.name).discriminator(blockType, this.contentBlocks[blockType])
-        });
-      });
     });
   };
 
