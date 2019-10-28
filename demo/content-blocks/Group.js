@@ -1,6 +1,20 @@
 module.exports = {
   slug: 'group',
   label: 'Group',
+  policies: {
+    create: (req, res, next) => {
+      return next();
+    },
+    read: (req, res, next) => {
+      return next();
+    },
+    update: (req, res, next) => {
+      return next();
+    },
+    destroy: (req, res, next) => {
+      return next();
+    },
+  },
   fields: [
     {
       name: 'nested',

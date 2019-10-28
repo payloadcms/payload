@@ -63,12 +63,32 @@ class Payload {
     options.app.use(localizationMiddleware(options.config.localization));
     options.app.use(options.router);
 
+    Object.values(this.schemaLoader.contentBlocks)
+      .forEach(block => {
+        const config = block.config;
+        const model = block.model;
+
+        options.router.all(`/${config.slug}*`,
+          bindModelMiddleware(model),
+          setModelLocaleMiddleware()
+        );
+
+        options.router.route(`/${config.slug}`)
+          .get(config.policies.read, query)
+          .post(config.policies.create, create);
+
+        options.router.route(`/${config.slug}/:id`)
+          .get(config.policies.read, findOne)
+          .put(config.policies.update, update)
+          .delete(config.policies.destroy, destroy);
+      });
 
     Object.values(this.schemaLoader.collections)
       .forEach(collection => {
         const config = collection.config;
         const model = collection.model;
-
+// console.log(config.slug, model.schema.tree);
+// console.log(model.schema.tree.flexible && model.schema.tree.flexible[0].discriminators || 'na');
         // register passport with model
         if (config.auth) {
           passport.use(model.createStrategy());

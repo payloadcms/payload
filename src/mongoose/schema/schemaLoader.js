@@ -27,7 +27,7 @@ class SchemaLoader {
   constructor(config) {
     this.blockSchema = new mongoose.Schema({},
       {discriminatorKey: 'blockType', _id: false});
-
+this.blockSchema.plugin(autopopulate);
     this.blockSchemaLoader(config);
     this.collectionSchemaLoader(config);
     this.globalSchemaLoader(config);
@@ -50,7 +50,9 @@ class SchemaLoader {
       // replace block schema with a ref to the new model type
 
       const Schema = new mongoose.Schema(fields)
-        .plugin(localizationPlugin, config.localization)
+        .plugin(paginate)
+        .plugin(buildQueryPlugin)
+        // .plugin(localizationPlugin, config.localization)
         .plugin(autopopulate);
 
       const Model = mongoose.model(blockConfig.slug, Schema);
@@ -64,6 +66,7 @@ class SchemaLoader {
           }
         }
       );
+      RefSchema.plugin(autopopulate);
 
       Object.values(flexibleSchema).forEach(flexible => {
         flexible.blocks.forEach(blockType => {
@@ -113,7 +116,7 @@ class SchemaLoader {
       Object.values(flexibleSchema).forEach(flexible => {
         flexible.blocks.forEach(blockType => {
           Schema.path(flexible.name)
-            .discriminator(blockType, this.contentBlocks[blockType].refSchema)
+            .discriminator(blockType, this.contentBlocks[blockType].refSchema);
         });
       });
 
@@ -154,11 +157,6 @@ class SchemaLoader {
       );
     }
   };
-
-  flexibleSchemaLoader = () => {
-    // TODO: move reusable parts from block, collection and global schema functions
-    return {};
-  }
 }
 
 module.exports = SchemaLoader;
