@@ -10,7 +10,7 @@ const modelById = (query, options) => {
       let result = doc;
 
       if (query.locale) {
-        doc.setLocale(query.locale, query.fallback);
+        doc.setLocale && doc.setLocale(query.locale, query.fallback);
         result = doc.toJSON({ virtuals: true });
       }
 

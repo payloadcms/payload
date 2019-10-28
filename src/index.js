@@ -66,7 +66,7 @@ class Payload {
     Object.values(this.schemaLoader.contentBlocks)
       .forEach(block => {
         const config = block.config;
-        const model = block.model;
+        const model = block.Model;
 
         options.router.all(`/${config.slug}*`,
           bindModelMiddleware(model),

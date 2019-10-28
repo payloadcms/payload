@@ -46,13 +46,10 @@ this.blockSchema.plugin(autopopulate);
           flexibleSchema[field.name] = field;
         }
       });
-      // TODO: instead of making the model with all the fields, create a separate model
-      // replace block schema with a ref to the new model type
 
       const Schema = new mongoose.Schema(fields)
         .plugin(paginate)
         .plugin(buildQueryPlugin)
-        // .plugin(localizationPlugin, config.localization)
         .plugin(autopopulate);
 
       const Model = mongoose.model(blockConfig.slug, Schema);
@@ -64,7 +61,7 @@ this.blockSchema.plugin(autopopulate);
             autopopulate: true,
             ref: blockConfig.slug,
           }
-        }
+        }, {_id: false}
       );
       RefSchema.plugin(autopopulate);
 
@@ -78,9 +75,9 @@ this.blockSchema.plugin(autopopulate);
 
       this.contentBlocks[blockConfig.slug] = {
         config: blockConfig,
-        schema: Schema,
-        refSchema: RefSchema,
-        model: Model
+        Schema,
+        RefSchema,
+        Model,
       };
     });
   };
@@ -116,7 +113,7 @@ this.blockSchema.plugin(autopopulate);
       Object.values(flexibleSchema).forEach(flexible => {
         flexible.blocks.forEach(blockType => {
           Schema.path(flexible.name)
-            .discriminator(blockType, this.contentBlocks[blockType].refSchema);
+            .discriminator(blockType, this.contentBlocks[blockType].RefSchema);
         });
       });
 
