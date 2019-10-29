@@ -145,7 +145,7 @@ function eachPathRecursive(schema, handler, path) {
   schema.eachPath((pathname, schemaType) => {
     path.push(pathname);
     if (schemaType.schema) {
-      console.log(pathname, schemaType.schema);
+      // console.log(pathname, schemaType.schema);
       eachPathRecursive(schemaType.schema, handler, path);
     } else {
       handler(path.join('.'), schemaType);

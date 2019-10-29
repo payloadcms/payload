@@ -1,6 +1,7 @@
 module.exports = {
   slug: 'cta',
   label: 'CTA',
+  useAsContentBlock: true,
   policies: {
     create: (req, res, next) => {
       return next();
@@ -22,6 +23,9 @@ module.exports = {
       type: 'input',
       maxLength: 100,
       required: true
+    },
+    {
+      relationTo: 'Category',
     },
     {
       name: 'url',

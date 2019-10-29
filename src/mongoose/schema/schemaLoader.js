@@ -3,7 +3,7 @@ import fieldToSchemaMap from './fieldToSchemaMap';
 import localizationPlugin from '../../localization/localization.plugin';
 import autopopulate from '../autopopulate.plugin';
 import validateCollection from '../../utilities/validateCollection';
-import {schemaBaseFields} from './schemaBaseFields';
+import { schemaBaseFields } from './schemaBaseFields';
 import passwordResetConfig from '../../auth/passwordResets/passwordReset.config';
 import paginate from '../paginate.plugin';
 import buildQueryPlugin from '../buildQuery.plugin';
@@ -26,8 +26,8 @@ class SchemaLoader {
    */
   constructor(config) {
     this.blockSchema = new mongoose.Schema({},
-      {discriminatorKey: 'blockType', _id: false});
-this.blockSchema.plugin(autopopulate);
+      { discriminatorKey: 'blockType', _id: false });
+    this.blockSchema.plugin(autopopulate);
     this.blockSchemaLoader(config);
     this.collectionSchemaLoader(config);
     this.globalSchemaLoader(config);
@@ -61,7 +61,7 @@ this.blockSchema.plugin(autopopulate);
             autopopulate: true,
             ref: blockConfig.slug,
           }
-        }, {_id: false}
+        }, { _id: false }
       );
       RefSchema.plugin(autopopulate);
 
@@ -87,7 +87,7 @@ this.blockSchema.plugin(autopopulate);
 
       validateCollection(collectionConfig, this.collections);
       this.collections[collectionConfig.labels.singular] = collectionConfig;
-      const fields = {...schemaBaseFields};
+      const fields = { ...schemaBaseFields };
 
       // authentication
       if (config.auth && config.auth.passwordResets) {
@@ -95,27 +95,39 @@ this.blockSchema.plugin(autopopulate);
       }
 
       const flexibleSchema = {};
+
       collectionConfig.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];
         if (fieldSchema) fields[field.name] = fieldSchema(field, this.blockSchema);
-        if (field.type === 'flexible') {
-          flexibleSchema[field.name] = field;
-        }
+        // if (field.type === 'flexible') {
+        //   flexibleSchema[field.name] = field;
+        // }
       });
 
-      const Schema = new mongoose.Schema(fields, {timestamps: collectionConfig.timestamps});
+      const Schema = new mongoose.Schema(fields, { timestamps: collectionConfig.timestamps });
 
       Schema.plugin(paginate);
       Schema.plugin(buildQueryPlugin);
       Schema.plugin(localizationPlugin, config.localization);
       Schema.plugin(autopopulate);
 
-      Object.values(flexibleSchema).forEach(flexible => {
-        flexible.blocks.forEach(blockType => {
-          Schema.path(flexible.name)
-            .discriminator(blockType, this.contentBlocks[blockType].RefSchema);
-        });
-      });
+      // Object.values(flexibleSchema).forEach(flexible => {
+      //   flexible.blocks.forEach(blockType => {
+
+      //     // console.log(Schema.tree);
+
+      //     Schema.virtual(`${flexible.name}_populated`).get(function () {
+      //       const newFlexibleData = [...this[flexible.name], { test: 'hello' }];
+
+      //       this.contentBlocks[blockType].Model.populate();
+
+      //       return newFlexibleData;
+      //     });
+
+      //     Schema.path(flexible.name)
+      //       .discriminator(blockType, this.contentBlocks[blockType].RefSchema);
+      //   });
+      // });
 
       if (collectionConfig.plugins) {
         collectionConfig.plugins.forEach(plugin => {
@@ -142,13 +154,13 @@ this.blockSchema.plugin(autopopulate);
         const fieldSchema = fieldToSchemaMap[field.type];
         if (fieldSchema) globalFields[globalConfig.slug][field.name] = fieldSchema(field, this.blockSchema);
       });
-      globalSchemaGroups[config.slug] = new mongoose.Schema(globalFields[config.slug], {_id: false});
+      globalSchemaGroups[config.slug] = new mongoose.Schema(globalFields[config.slug], { _id: false });
     });
 
     if (config.globals) {
       this.globalModel = mongoose.model(
         'global',
-        new mongoose.Schema({...globalSchemaGroups, timestamps: false})
+        new mongoose.Schema({ ...globalSchemaGroups, timestamps: false })
           .plugin(localizationPlugin, config.localization)
           .plugin(autopopulate)
       );

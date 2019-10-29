@@ -11,13 +11,13 @@ const formatBaseSchema = field => {
 
 const fieldToSchemaMap = {
   number: field => {
-    return {...formatBaseSchema(field), type: Number};
+    return { ...formatBaseSchema(field), type: Number };
   },
   input: field => {
-    return {...formatBaseSchema(field), type: String};
+    return { ...formatBaseSchema(field), type: String };
   },
   textarea: field => {
-    return {...formatBaseSchema(field), type: String};
+    return { ...formatBaseSchema(field), type: String };
   },
   date: field => {
     return {
@@ -44,13 +44,21 @@ const fieldToSchemaMap = {
     return [schema];
   },
   enum: field => {
-    return {...formatBaseSchema(field),
+    return {
+      ...formatBaseSchema(field),
       type: String,
       enum: field.enum,
     };
   },
-  flexible: (field, flexibleSchema) => {
-    return field.hasMany ? [flexibleSchema] : flexibleSchema;
+  flexible: (field) => {
+    return [{
+      value: {
+        type: mongoose.Types.ObjectId,
+        autopopulate: true,
+        refPath: `${field.name}.blockType`
+      },
+      blockType: String
+    }];
   },
 };
 
