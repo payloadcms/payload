@@ -25,9 +25,6 @@ module.exports = {
       required: true
     },
     {
-      relationTo: 'Category',
-    },
-    {
       name: 'url',
       label: 'URL',
       type: 'input',

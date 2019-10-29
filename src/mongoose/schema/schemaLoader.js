@@ -41,7 +41,7 @@ class SchemaLoader {
       const flexibleSchema = {};
       blockConfig.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) fields[field.name] = fieldSchema(field, this.blockSchema);
+        if (fieldSchema) fields[field.name] = fieldSchema(field);
         if (field.type === 'flexible') {
           flexibleSchema[field.name] = field;
         }
@@ -94,14 +94,9 @@ class SchemaLoader {
         config.fields.push(...passwordResetConfig.fields);
       }
 
-      const flexibleSchema = {};
-
       collectionConfig.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) fields[field.name] = fieldSchema(field, this.blockSchema);
-        // if (field.type === 'flexible') {
-        //   flexibleSchema[field.name] = field;
-        // }
+        if (fieldSchema) fields[field.name] = fieldSchema(field);
       });
 
       const Schema = new mongoose.Schema(fields, { timestamps: collectionConfig.timestamps });
@@ -110,24 +105,6 @@ class SchemaLoader {
       Schema.plugin(buildQueryPlugin);
       Schema.plugin(localizationPlugin, config.localization);
       Schema.plugin(autopopulate);
-
-      // Object.values(flexibleSchema).forEach(flexible => {
-      //   flexible.blocks.forEach(blockType => {
-
-      //     // console.log(Schema.tree);
-
-      //     Schema.virtual(`${flexible.name}_populated`).get(function () {
-      //       const newFlexibleData = [...this[flexible.name], { test: 'hello' }];
-
-      //       this.contentBlocks[blockType].Model.populate();
-
-      //       return newFlexibleData;
-      //     });
-
-      //     Schema.path(flexible.name)
-      //       .discriminator(blockType, this.contentBlocks[blockType].RefSchema);
-      //   });
-      // });
 
       if (collectionConfig.plugins) {
         collectionConfig.plugins.forEach(plugin => {

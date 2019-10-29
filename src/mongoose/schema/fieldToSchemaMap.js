@@ -55,9 +55,10 @@ const fieldToSchemaMap = {
       value: {
         type: mongoose.Types.ObjectId,
         autopopulate: true,
-        refPath: `${field.name}.blockType`
+        refPath: `${field.name}.blockType`,
       },
-      blockType: String
+      blockType: { type: String, enum: field.blocks },
+      _id: false,
     }];
   },
 };
