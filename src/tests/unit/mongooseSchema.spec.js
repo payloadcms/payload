@@ -23,20 +23,4 @@ describe('schemaLoader', () => {
     expect(schemaLoader.blockSchema).not.toBeNull();
     expect(schemaLoader.contentBlocks).not.toBeNull();
   });
-
-  xit('insert content block', async () => {
-    const Quote = schemaLoader.contentBlocks.quote.model;
-
-    await new Quote({
-      author: 'Bob',
-      quote: 'Hi there',
-      color: '#ddd',
-    }).save(() => {
-      // not working without a callback? I don't understand
-    });
-
-    const quote = await Quote.findOne({author: 'Bob'});
-    expect(quote.author).toEqual('Bob');
-
-  });
 });

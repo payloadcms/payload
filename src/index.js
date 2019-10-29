@@ -87,8 +87,7 @@ class Payload {
       .forEach(collection => {
         const config = collection.config;
         const model = collection.model;
-// console.log(config.slug, model.schema.tree);
-// console.log(model.schema.tree.flexible && model.schema.tree.flexible[0].discriminators || 'na');
+
         // register passport with model
         if (config.auth) {
           passport.use(model.createStrategy());

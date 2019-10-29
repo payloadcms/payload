@@ -8,5 +8,4 @@ module.exports = {
     '^.+\\.(j|t)s$': 'babel-jest'
   },
   testEnvironment: 'node',
-  setupFilesAfterEnv: ['./jest.setup.js']
 };
