@@ -100,11 +100,10 @@ class SchemaLoader {
       });
 
       const Schema = new mongoose.Schema(fields, { timestamps: collectionConfig.timestamps });
-
-      Schema.plugin(paginate);
-      Schema.plugin(buildQueryPlugin);
-      Schema.plugin(localizationPlugin, config.localization);
-      Schema.plugin(autopopulate);
+      Schema.plugin(paginate)
+        .plugin(buildQueryPlugin)
+        .plugin(localizationPlugin, config.localization)
+        .plugin(autopopulate);
 
       if (collectionConfig.plugins) {
         collectionConfig.plugins.forEach(plugin => {
@@ -124,14 +123,16 @@ class SchemaLoader {
     const globalFields = {};
     Object.values(config.globals).forEach(globalConfig => {
       validateGlobal(globalConfig, this.globals);
-      this.globals[globalConfig.label] = config;
+      this.globals[globalConfig.label] = globalConfig;
       globalFields[globalConfig.slug] = {};
 
       globalConfig.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) globalFields[globalConfig.slug][field.name] = fieldSchema(field, this.blockSchema);
+        if (fieldSchema) globalFields[globalConfig.slug][field.name] = fieldSchema(field, globalConfig.slug);
       });
-      globalSchemaGroups[config.slug] = new mongoose.Schema(globalFields[config.slug], { _id: false });
+      globalSchemaGroups[globalConfig.slug] = new mongoose.Schema(globalFields[globalConfig.slug], { _id: false })
+          .plugin(localizationPlugin, config.localization)
+          .plugin(autopopulate);
     });
 
     if (config.globals) {

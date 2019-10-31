@@ -150,11 +150,11 @@ export default function localizationPlugin(schema, options) {
       this.fallbackLocale = fallbackLocale;
       this.schema.eachPath((path, schemaType) => {
         if (schemaType.options.type instanceof Array) {
-          this[path].forEach(doc => doc.setLocale && doc.setLocale(locale, fallbackLocale));
+          this[path] && this[path].forEach(doc => doc.setLocale && doc.setLocale(locale, fallbackLocale));
         }
 
         if (schemaType.options.ref && this[path]) {
-          this[path].setLocale && this[path].setLocale(locale, fallbackLocale);
+          this[path] && this[path].setLocale && this[path].setLocale(locale, fallbackLocale);
         }
       })
     },

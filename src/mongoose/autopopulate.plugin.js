@@ -3,10 +3,6 @@ module.exports = function (schema) {
 
   eachPathRecursive(schema, (pathname, schemaType) => {
     let option;
-    // console.log(pathname);
-    // if (pathname === 'relation') {
-    //   console.log(schemaType.options);
-    // }
     if (schemaType.options && schemaType.options.autopopulate) {
       option = schemaType.options.autopopulate;
       pathsToPopulate.push({
@@ -141,11 +137,9 @@ function eachPathRecursive(schema, handler, path) {
   if (!path) {
     path = [];
   }
-  // console.log(path, schema);
   schema.eachPath((pathname, schemaType) => {
     path.push(pathname);
     if (schemaType.schema) {
-      // console.log(pathname, schemaType.schema);
       eachPathRecursive(schemaType.schema, handler, path);
     } else {
       handler(path.join('.'), schemaType);

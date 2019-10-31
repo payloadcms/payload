@@ -50,12 +50,12 @@ const fieldToSchemaMap = {
       enum: field.enum,
     };
   },
-  flexible: (field) => {
+  flexible: (field, path) => {
     return [{
       value: {
         type: mongoose.Types.ObjectId,
         autopopulate: true,
-        refPath: `${field.name}.blockType`,
+        refPath: `${path ? (path + '.') : ''}${field.name}.blockType`,
       },
       blockType: { type: String, enum: field.blocks },
       _id: false,
