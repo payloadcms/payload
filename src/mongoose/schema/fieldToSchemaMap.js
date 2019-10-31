@@ -51,7 +51,7 @@ const fieldToSchemaMap = {
     };
   },
   flexible: (field, path) => {
-    return [{
+    const schema = {
       value: {
         type: mongoose.Types.ObjectId,
         autopopulate: true,
@@ -59,7 +59,8 @@ const fieldToSchemaMap = {
       },
       blockType: { type: String, enum: field.blocks },
       _id: false,
-    }];
+    };
+    return field.hasMany !== false ? [schema] : schema;
   },
 };
 
