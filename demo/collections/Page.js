@@ -43,6 +43,7 @@ module.exports = {
       type: 'relationship',
       relationType: 'reference',
       relationTo: 'Category',
+      hasMany: true
     },
     {
       name: 'image',

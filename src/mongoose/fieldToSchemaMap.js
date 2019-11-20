@@ -19,6 +19,15 @@ const fieldToSchemaMap = {
   textarea: field => {
     return {...formatBaseSchema(field), type: String};
   },
+  WYSIWYG: field => {
+    return {...formatBaseSchema(field), type: String};
+  },
+  code: field => {
+    return {...formatBaseSchema(field), type: String};
+  },
+  boolean: field => {
+    return {...formatBaseSchema(field), type: Boolean};
+  },
   date: field => {
     return {
       ...formatBaseSchema(field),
@@ -26,12 +35,13 @@ const fieldToSchemaMap = {
     }
   },
   relationship: field => {
-    return [{
+    const schema = {
       ...formatBaseSchema(field),
       type: mongoose.Schema.Types.ObjectId,
       autopopulate: true,
       ref: field.relationTo,
-    }];
+    };
+    return field.hasMany ? [schema] : schema;
   },
   repeater: field => {
     const schema = {};

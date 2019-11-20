@@ -1,10 +1,6 @@
 export default {
   fields: [
     {
-      name: 'filename',
-      type: 'input',
-    },
-    {
       name: 'sizes',
       type: 'repeater',
       id: false,
@@ -17,7 +13,7 @@ export default {
           name: 'width',
           type: 'number',
         },
-      ]
+      ],
     }
   ]
 }
