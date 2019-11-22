@@ -2,17 +2,23 @@ import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { NavLink, Link } from 'react-router-dom';
-import { Arrow } from 'payload/components';
+import Arrow from '../../graphics/Arrow';
+import Icon from '../../graphics/Icon';
 
 import './index.scss';
 
 const mapState = state => ({
-  collections: state.common.collections
+  config: state.common.config
 });
 
 const Sidebar = props => {
 
-  const Icon = props.icon;
+  const {
+    collections,
+    routes: {
+      admin,
+    }
+  } = props.config;
 
   return (
     <aside className="sidebar">
@@ -21,8 +27,8 @@ const Sidebar = props => {
       </Link>
       <span className="uppercase-label">Collections</span>
       <nav>
-        {props.collections && Object.keys(props.collections).map((key, i) => {
-          const href = `/collections/${props.collections[key].slug}`;
+        {collections && Object.keys(collections).map((key, i) => {
+          const href = `${admin}/collections/${collections[key].slug}`;
           const classes = props.location.pathname.indexOf(href) > -1
             ? 'active'
             : undefined;
@@ -30,7 +36,7 @@ const Sidebar = props => {
           return (
             <Link className={classes} key={i} to={href}>
               <Arrow />
-              {props.collections[key].plural}
+              {collections[key].labels.plural}
             </Link>
           );
         })}

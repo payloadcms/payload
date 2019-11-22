@@ -1,5 +1,6 @@
 const collections = require('./collections');
 const globals = require('./globals');
+const path = require('path');
 
 module.exports = {
   port: 3000,
@@ -9,6 +10,10 @@ module.exports = {
   routes: {
     api: '/api',
     admin: '/admin'
+  },
+  paths: {
+    scssOverrides: path.resolve(__dirname, 'client/scss/overrides.scss'),
+    customComponents: path.resolve(__dirname, 'client/components/custom')
   },
   mongoURL: 'mongodb://localhost/payload',
   collections: collections,

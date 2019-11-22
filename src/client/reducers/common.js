@@ -6,7 +6,13 @@ const defaultState = {
   viewHeight: false,
   stepNav: [],
   locale: null,
-  config: null,
+  config: {
+    collections: {},
+    localization: {
+      locales: []
+    },
+    routes: {},
+  },
   searchParams: {},
   status: []
 };

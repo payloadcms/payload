@@ -6,7 +6,7 @@ module.exports = {
   slug: 'users',
   labels: {
     singular: 'User',
-    plural: 'users',
+    plural: 'Users',
   },
   useAsTitle: 'email',
   policies: {

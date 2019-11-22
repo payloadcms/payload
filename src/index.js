@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import passport from 'passport';
 import express from 'express';
+import path from 'path';
+import webpack from 'webpack';
 import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 import fileUpload from 'express-fileupload';
@@ -21,6 +23,9 @@ import passwordResetConfig from './auth/passwordResets/passwordReset.config';
 import validateCollection from './utilities/validateCollection';
 import validateGlobal from './utilities/validateGlobal';
 import setModelLocaleMiddleware from './mongoose/setModelLocale.middleware';
+import getWebpackDevConfig from './client/config/getWebpackDevConfig';
+import webpackDevMiddleware from 'webpack-dev-middleware';
+import webpackHotMiddleware from 'webpack-hot-middleware';
 import authRoutes from './routes/auth.routes';
 
 class Payload {
@@ -68,8 +73,8 @@ class Payload {
 
     options.app.use(express.json());
     options.app.use(methodOverride('X-HTTP-Method-Override'));
-    options.app.use(express.urlencoded({extended: true}));
-    options.app.use(bodyParser.urlencoded({extended: true}));
+    options.app.use(express.urlencoded({ extended: true }));
+    options.app.use(bodyParser.urlencoded({ extended: true }));
     options.app.use(localizationMiddleware(options.config.localization));
     options.app.use(options.router);
 
@@ -81,7 +86,7 @@ class Payload {
     options.config.collections && Object.values(options.config.collections).forEach(config => {
       validateCollection(config, this.collections);
       this.collections[config.labels.singular] = config;
-      const fields = {...schemaBaseFields};
+      const fields = { ...schemaBaseFields };
 
       // authentication
       if (config.auth && config.auth.passwordResets) {
@@ -93,7 +98,7 @@ class Payload {
         if (fieldSchema) fields[field.name] = fieldSchema(field);
       });
 
-      const Schema = new mongoose.Schema(fields, {timestamps: config.timestamps});
+      const Schema = new mongoose.Schema(fields, { timestamps: config.timestamps });
 
       Schema.plugin(paginate);
       Schema.plugin(buildQueryPlugin);
@@ -153,13 +158,14 @@ class Payload {
         const fieldSchema = fieldToSchemaMap[field.type];
         if (fieldSchema) globalFields[config.slug][field.name] = fieldSchema(field);
       });
-      globalSchemaGroups[config.slug] = new mongoose.Schema(globalFields[config.slug], {_id: false});
+
+      globalSchemaGroups[config.slug] = new mongoose.Schema(globalFields[config.slug], { _id: false });
     });
 
     if (options.config.globals) {
       globalModel = mongoose.model(
         'global',
-        new mongoose.Schema({...globalSchemaGroups, timestamps: false})
+        new mongoose.Schema({ ...globalSchemaGroups, timestamps: false })
           .plugin(localizationPlugin, options.config.localization)
           .plugin(autopopulate)
       );
@@ -179,6 +185,28 @@ class Payload {
       .get(fetch)
       .post(upsert)
       .put(upsert);
+
+    const webpackDevConfig = getWebpackDevConfig(options.config);
+
+    const compiler = webpack(webpackDevConfig);
+
+    options.app.use(webpackDevMiddleware(compiler, {
+      publicPath: webpackDevConfig.output.publicPath,
+    }));
+
+    options.app.get(`${options.config.routes.admin}*`, (req, res, next) => {
+      const filename = path.resolve(compiler.outputPath, 'index.html');
+      compiler.outputFileSystem.readFile(filename, (err, result) => {
+        if (err) {
+          return next(err)
+        }
+        res.set('content-type', 'text/html')
+        res.send(result)
+        res.end()
+      })
+    })
+
+    options.app.use(webpackHotMiddleware(compiler));
   }
 }
 

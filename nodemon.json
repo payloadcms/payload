@@ -2,10 +2,9 @@
   "ignore": [
     ".git",
     "node_modules/**/node_modules",
-    "src/components"
+    "src/client"
   ],
   "watch": [
-    "demo/",
     "src/"
   ],
   "ext": "js,json"
