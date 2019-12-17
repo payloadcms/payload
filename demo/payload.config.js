@@ -11,6 +11,7 @@ module.exports = {
     api: '/api',
     admin: '/admin'
   },
+  plugins: [],
   paths: {
     scssOverrides: path.resolve(__dirname, 'client/scss/overrides.scss'),
     customComponents: path.resolve(__dirname, 'client/components/custom')
