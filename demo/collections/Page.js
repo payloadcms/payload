@@ -77,8 +77,9 @@ module.exports = {
       name: 'flexible',
       label: 'Flexible Content Blocks',
       type: 'flexible',
-      blocks: ['group', 'quote', 'cta'],
-      hasMany: true,
+      blocks: ['quote', 'cta'],
+      localized: true,
+      hasMany: false,
     },
     {
       label: 'Meta Information',

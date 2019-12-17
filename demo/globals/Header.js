@@ -31,11 +31,12 @@ module.exports = {
       required: true
     },
     {
-      name: 'flexible',
+      name: 'flexibleGlobal',
       label: 'Global Flexible Block',
       type: 'flexible',
       blocks: ['quote', 'cta'],
-      hasMany: true,
+      localized: true,
+      hasMany: false,
     },
     {
       // TODO: this is some proof of concept parts that are not done.

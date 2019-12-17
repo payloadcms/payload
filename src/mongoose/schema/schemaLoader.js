@@ -49,6 +49,7 @@ class SchemaLoader {
 
       const Schema = new mongoose.Schema(fields)
         .plugin(paginate)
+        .plugin(localizationPlugin, config.localization)
         .plugin(buildQueryPlugin)
         .plugin(autopopulate);
 
@@ -96,11 +97,11 @@ class SchemaLoader {
 
       collectionConfig.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) fields[field.name] = fieldSchema(field);
+        if (fieldSchema) fields[field.name] = fieldSchema(field, {localization: config.localization});
       });
 
-      const Schema = new mongoose.Schema(fields, { timestamps: collectionConfig.timestamps });
-      Schema.plugin(paginate)
+      const Schema = new mongoose.Schema(fields, { timestamps: collectionConfig.timestamps })
+        .plugin(paginate)
         .plugin(buildQueryPlugin)
         .plugin(localizationPlugin, config.localization)
         .plugin(autopopulate);
@@ -128,7 +129,7 @@ class SchemaLoader {
 
       globalConfig.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) globalFields[globalConfig.slug][field.name] = fieldSchema(field, globalConfig.slug);
+        if (fieldSchema) globalFields[globalConfig.slug][field.name] = fieldSchema(field, {path: globalConfig.slug, localization: config.localization});
       });
       globalSchemaGroups[globalConfig.slug] = new mongoose.Schema(globalFields[globalConfig.slug], { _id: false })
           .plugin(localizationPlugin, config.localization)

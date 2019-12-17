@@ -19,18 +19,23 @@ export default function localizationPlugin(schema, options) {
   }
 
   schema.eachPath((path, schemaType) => {
-
+    // TODO: We need a way to set if this should recurse or not. What is happening on global's flexible field is that it tries to save flexibleGlobal.en.en on post.
+    let recurse = true;
+    if (path.endsWith('global.en')) {
+      recurse = false;
+    }
     if (schemaType.schema) { // propagate plugin initialization for sub-documents schemas
       schemaType.schema.plugin(localizationPlugin, pluginOptions);
+      if (!recurse)
+        return;
+    }
+
+    if (!schemaType.options.localized && !(schemaType.schema && schemaType.schema.options.localized)) {
       return;
     }
 
-    if (!schemaType.options.localized) {
-      return;
-    }
-
-    if (!(schemaType instanceof mongoose.Schema.Types.String)) {
-      throw new mongoose.Error('localization can only be used on type String');
+    if (!((schemaType instanceof mongoose.Schema.Types.String) || (schemaType instanceof mongoose.Schema.Types.Embedded))) {
+      throw new mongoose.Error('localization can only be used on type String or Embedded');
     }
 
     let pathArray = path.split('.'),
@@ -89,11 +94,11 @@ export default function localizationPlugin(schema, options) {
           let locales = this.schema.options.localization.locales;
           locales.forEach(locale => {
             if (!value[locale]) {
+              // this.set(`${path}.${locale}`, value);
               return;
             }
-            this.set(path + '.' + locale, value[locale]);
+            this.set(`${path}.${locale}`, value[locale]);
           }, this);
-          return;
         }
 
         // embedded and sub-documents will use locale methods from the top level document
@@ -107,6 +112,8 @@ export default function localizationPlugin(schema, options) {
     // delete schemaType.options.localized; // This was removed to allow viewing inside query parser
 
     let localizedObject = {};
+    // TODO: setting equal to object is good for hasMany: false, but breaking for hasMany: true;
+    // console.log(path, schemaType.options);
     localizedObject[key] = {};
     pluginOptions.locales.forEach(function (locale) {
       let localeOptions = Object.assign({}, schemaType.options);

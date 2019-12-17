@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import localizationPlugin from '../../localization/localization.plugin';
+import autopopulate from '../autopopulate.plugin';
 
 const formatBaseSchema = field => {
   return {
@@ -11,13 +13,13 @@ const formatBaseSchema = field => {
 
 const fieldToSchemaMap = {
   number: field => {
-    return { ...formatBaseSchema(field), type: Number };
+    return {...formatBaseSchema(field), type: Number};
   },
   input: field => {
-    return { ...formatBaseSchema(field), type: String };
+    return {...formatBaseSchema(field), type: String};
   },
   textarea: field => {
-    return { ...formatBaseSchema(field), type: String };
+    return {...formatBaseSchema(field), type: String};
   },
   date: field => {
     return {
@@ -50,17 +52,33 @@ const fieldToSchemaMap = {
       enum: field.enum,
     };
   },
-  flexible: (field, path) => {
-    const schema = {
+  flexible: (field, options = {}) => {
+    const flexible = {
       value: {
         type: mongoose.Types.ObjectId,
         autopopulate: true,
-        refPath: `${path ? (path + '.') : ''}${field.name}.blockType`,
+        refPath: `${options.path ? (options.path + '.') : ''}${field.name}.blockType`,
       },
-      blockType: { type: String, enum: field.blocks },
+      blockType: {type: String, enum: field.blocks},
       _id: false,
     };
-    return field.hasMany !== false ? [schema] : schema;
+
+    const schema = new mongoose.Schema(
+      field.hasMany !== false ? [flexible] : flexible,
+      {
+        hasMany: field.hasMany,
+        localized: field.localized || false,
+      }
+    );
+if (field.name === 'flexibleGlobal') {
+  console.log(field.hasMany !== false ? [flexible] : flexible);
+}
+    if (field.localized) {
+      schema.plugin(localizationPlugin, options.localization);
+    }
+    schema.plugin(autopopulate);
+
+    return schema;
   },
 };
 
