@@ -24,6 +24,7 @@ export default function localizationPlugin(schema, options) {
     if (path.endsWith('global.en')) {
       recurse = false;
     }
+
     if (schemaType.schema) { // propagate plugin initialization for sub-documents schemas
       schemaType.schema.plugin(localizationPlugin, pluginOptions);
       if (!recurse)
@@ -32,10 +33,6 @@ export default function localizationPlugin(schema, options) {
 
     if (!schemaType.options.localized && !(schemaType.schema && schemaType.schema.options.localized)) {
       return;
-    }
-
-    if (!((schemaType instanceof mongoose.Schema.Types.String) || (schemaType instanceof mongoose.Schema.Types.Embedded))) {
-      throw new mongoose.Error('localization can only be used on type String or Embedded');
     }
 
     let pathArray = path.split('.'),
@@ -53,7 +50,6 @@ export default function localizationPlugin(schema, options) {
       return mem[part];
     }, schema.tree);
     delete tree[key];
-
 
     schema.virtual(path)
       .get(function () {
@@ -89,8 +85,9 @@ export default function localizationPlugin(schema, options) {
         return value;
       })
       .set(function (value) {
+
         // multiple locales are set as an object
-        if (typeof value === 'object') {
+        if (typeof value === 'object' && !Array.isArray(value)) {
           let locales = this.schema.options.localization.locales;
           locales.forEach(locale => {
             if (!value[locale]) {
@@ -99,6 +96,7 @@ export default function localizationPlugin(schema, options) {
             }
             this.set(`${path}.${locale}`, value[locale]);
           }, this);
+          return;
         }
 
         // embedded and sub-documents will use locale methods from the top level document

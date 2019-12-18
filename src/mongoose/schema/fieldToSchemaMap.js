@@ -63,30 +63,22 @@ const fieldToSchemaMap = {
     };
   },
   flexible: (field, options = {}) => {
-    const flexible = {
+    const schema = new mongoose.Schema({
       value: {
-        type: mongoose.Types.ObjectId,
         autopopulate: true,
+        type: mongoose.Types.ObjectId,
         refPath: `${options.path ? (options.path + '.') : ''}${field.name}.blockType`,
       },
       blockType: { type: String, enum: field.blocks },
       _id: false,
-    };
+    });
 
-    const schema = new mongoose.Schema(
-      field.hasMany !== false ? [flexible] : flexible,
-      {
-        hasMany: field.hasMany,
-        localized: field.localized || false,
-      }
-    );
-
-    if (field.localized) {
-      schema.plugin(localizationPlugin, options.localization);
-    }
     schema.plugin(autopopulate);
 
-    return schema;
+    return {
+      localized: field.localized || false,
+      type: [schema],
+    }
   },
 };
 

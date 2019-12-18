@@ -24,7 +24,7 @@ module.exports = {
       name: 'title',
       label: 'Page Title',
       type: 'input',
-      unique: true,
+      unique: false,
       localized: true,
       maxLength: 100,
       required: true,
@@ -43,7 +43,8 @@ module.exports = {
       type: 'relationship',
       relationType: 'reference',
       relationTo: 'Category',
-      hasMany: true
+      hasMany: true,
+      localized: true,
     },
     {
       name: 'image',
@@ -75,12 +76,11 @@ module.exports = {
       ]
     },
     {
-      name: 'flexible',
+      name: 'blocks',
       label: 'Flexible Content Blocks',
       type: 'flexible',
-      blocks: ['quote', 'cta'],
+      blocks: ['Quote', 'cta'],
       localized: true,
-      hasMany: false,
     },
     {
       label: 'Meta Information',
