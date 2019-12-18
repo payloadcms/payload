@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { schemaBaseFields } from '../../../mongoose/schemaBaseFields';
+import { schemaBaseFields } from '../../../mongoose/schema/schemaBaseFields';
 import paginate from '../../../mongoose/paginate.plugin';
 import buildQueryPlugin from '../../../mongoose/buildQuery.plugin';
 import localizationPlugin from '../../../localization/localization.plugin';

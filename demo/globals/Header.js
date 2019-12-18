@@ -28,7 +28,15 @@ module.exports = {
       name: 'logo',
       label: 'Logo',
       type: 'media',
-      required: true
+      required: false
+    },
+    {
+      name: 'flexibleGlobal',
+      label: 'Global Flexible Block',
+      type: 'flexible',
+      blocks: ['quote', 'cta'],
+      localized: true,
+      hasMany: false,
     },
     {
       // TODO: this is some proof of concept parts that are not done.

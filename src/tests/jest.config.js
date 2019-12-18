@@ -7,5 +7,5 @@ module.exports = {
   transform: {
     '^.+\\.(j|t)s$': 'babel-jest'
   },
-  testEnvironment: 'node'
+  testEnvironment: 'node',
 };

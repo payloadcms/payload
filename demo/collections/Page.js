@@ -49,7 +49,7 @@ module.exports = {
       name: 'image',
       label: 'Image',
       type: 'media',
-      required: true
+      required: false
     },
     {
       name: 'author',
@@ -73,6 +73,14 @@ module.exports = {
           label: 'Content'
         }
       ]
+    },
+    {
+      name: 'flexible',
+      label: 'Flexible Content Blocks',
+      type: 'flexible',
+      blocks: ['quote', 'cta'],
+      localized: true,
+      hasMany: false,
     },
     {
       label: 'Meta Information',
