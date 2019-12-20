@@ -155,9 +155,9 @@ class Payload {
 
     const compiler = webpack(webpackDevConfig);
 
-    options.app.use(webpackDevMiddleware(compiler, {
-      publicPath: webpackDevConfig.output.publicPath,
-    }));
+    // options.app.use(webpackDevMiddleware(compiler, {
+    //   publicPath: webpackDevConfig.output.publicPath,
+    // }));
 
     options.app.get(`${options.config.routes.admin}*`, (req, res, next) => {
       const filename = path.resolve(compiler.outputPath, 'index.html');

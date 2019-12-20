@@ -34,6 +34,7 @@ module.exports = function (schema) {
   }
 
   function autopopulateHandler() {
+
     if (this._mongooseOptions &&
       this._mongooseOptions.lean &&
       // If lean and user didn't explicitly do `lean({ autopulate: true })`,
@@ -126,30 +127,9 @@ function handleFunction(fn, options) {
   processOption.call(this, val, options);
 }
 
-function eachPathRecursive(currentSchema, handler, path = [], parentPath) {
-
+function eachPathRecursive(currentSchema, handler, path = []) {
   currentSchema.eachPath((pathname, schemaType) => {
     path.push(pathname);
-
-    if (schemaType.options.refPath && schemaType.options.refPath.includes('{{LOCALE}}')) {
-      currentSchema.remove(pathname);
-
-      let locale = parentPath;
-
-      if (parentPath && parentPath.includes('.')) {
-        locale = parentPath.split('.').pop();
-      }
-
-      schemaType.options.refPath = schemaType.options.refPath.replace('{{LOCALE}}', locale);
-
-      currentSchema.add({
-        [pathname]: {
-          ...schemaType.options,
-        },
-      });
-
-      currentSchema.tree[pathname].refPath = schemaType.options.refPath;
-    }
 
     if (schemaType.schema) {
       eachPathRecursive(schemaType.schema, handler, path, pathname);
