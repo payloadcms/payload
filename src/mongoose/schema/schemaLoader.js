@@ -51,7 +51,7 @@ class SchemaLoader {
         .plugin(paginate)
         .plugin(localizationPlugin, config.localization)
         .plugin(buildQueryPlugin)
-        .plugin(autopopulate);
+        .plugin(autopopulate, config.localization);
 
       const Model = mongoose.model(blockConfig.slug, Schema);
 
@@ -64,7 +64,7 @@ class SchemaLoader {
           }
         }, { _id: false }
       );
-      RefSchema.plugin(autopopulate);
+      RefSchema.plugin(autopopulate, config.localization);
 
       Object.values(flexibleSchema).forEach(flexible => {
         flexible.blocks.forEach(blockType => {
@@ -97,14 +97,14 @@ class SchemaLoader {
 
       collectionConfig.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) fields[field.name] = fieldSchema(field, {localization: config.localization});
+        if (fieldSchema) fields[field.name] = fieldSchema(field, { localization: config.localization });
       });
 
       const Schema = new mongoose.Schema(fields, { timestamps: collectionConfig.timestamps })
         .plugin(paginate)
         .plugin(buildQueryPlugin)
         .plugin(localizationPlugin, config.localization)
-        .plugin(autopopulate);
+        .plugin(autopopulate, config.localization);
 
       if (collectionConfig.plugins) {
         collectionConfig.plugins.forEach(plugin => {
@@ -129,11 +129,11 @@ class SchemaLoader {
 
       globalConfig.fields.forEach(field => {
         const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) globalFields[globalConfig.slug][field.name] = fieldSchema(field, {path: globalConfig.slug, localization: config.localization});
+        if (fieldSchema) globalFields[globalConfig.slug][field.name] = fieldSchema(field, { path: globalConfig.slug, localization: config.localization });
       });
       globalSchemaGroups[globalConfig.slug] = new mongoose.Schema(globalFields[globalConfig.slug], { _id: false })
-          .plugin(localizationPlugin, config.localization)
-          .plugin(autopopulate);
+        .plugin(localizationPlugin, config.localization)
+        .plugin(autopopulate);
     });
 
     if (config.globals) {
@@ -141,7 +141,7 @@ class SchemaLoader {
         'global',
         new mongoose.Schema({ ...globalSchemaGroups, timestamps: false })
           .plugin(localizationPlugin, config.localization)
-          .plugin(autopopulate)
+          .plugin(autopopulate, config.localization)
       );
     }
   };

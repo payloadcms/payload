@@ -79,7 +79,7 @@ module.exports = {
       name: 'blocks',
       label: 'Flexible Content Blocks',
       type: 'flexible',
-      blocks: ['Quote', 'cta'],
+      blocks: ['quote', 'cta'],
       localized: true,
     },
     {

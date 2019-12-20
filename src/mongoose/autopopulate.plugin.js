@@ -5,6 +5,7 @@ module.exports = function (schema) {
     let option;
     if (schemaType.options && schemaType.options.autopopulate) {
       option = schemaType.options.autopopulate;
+
       pathsToPopulate.push({
         options: defaultOptions(pathname, schemaType.options),
         autopopulate: option
@@ -32,7 +33,9 @@ module.exports = function (schema) {
     });
   }
 
-  var autopopulateHandler = function () {
+  console.log(JSON.stringify(pathsToPopulate));
+
+  function autopopulateHandler() {
     if (this._mongooseOptions &&
       this._mongooseOptions.lean &&
       // If lean and user didn't explicitly do `lean({ autopulate: true })`,
@@ -69,7 +72,7 @@ module.exports = function (schema) {
       processOption.call(this,
         pathsToPopulate[i].autopopulate, pathsToPopulate[i].options);
     }
-  };
+  }
 
   schema.
     pre('find', autopopulateHandler).
@@ -125,20 +128,31 @@ function handleFunction(fn, options) {
   processOption.call(this, val, options);
 }
 
-function mergeOptions(destination, source) {
-  const keys = Object.keys(source);
-  const numKeys = keys.length;
-  for (let i = 0; i < numKeys; ++i) {
-    destination[keys[i]] = source[keys[i]];
-  }
-}
+function eachPathRecursive(currentSchema, handler, path) {
 
-function eachPathRecursive(schema, handler, path) {
   if (!path) {
     path = [];
   }
-  schema.eachPath((pathname, schemaType) => {
+
+  currentSchema.eachPath((pathname, schemaType) => {
     path.push(pathname);
+
+    if (schemaType.options.refPath && schemaType.options.refPath.includes('{{LOCALE}}')) {
+      currentSchema.remove(pathname);
+
+      // If we can get a value for 'en' here, we can fix everything
+
+      schemaType.options.refPath = schemaType.options.refPath.replace('{{LOCALE}}', 'en');
+
+      currentSchema.add({
+        [pathname]: {
+          ...schemaType.options,
+        },
+      });
+
+      currentSchema.tree[pathname].refPath = schemaType.options.refPath;
+    }
+
     if (schemaType.schema) {
       eachPathRecursive(schemaType.schema, handler, path);
     } else {

@@ -36,7 +36,6 @@ module.exports = {
       type: 'flexible',
       blocks: ['quote', 'cta'],
       localized: true,
-      hasMany: false,
     },
     {
       // TODO: this is some proof of concept parts that are not done.

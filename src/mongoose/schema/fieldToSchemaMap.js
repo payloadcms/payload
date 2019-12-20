@@ -1,6 +1,4 @@
 import mongoose from 'mongoose';
-import localizationPlugin from '../../localization/localization.plugin';
-import autopopulate from '../autopopulate.plugin';
 
 const formatBaseSchema = field => {
   return {
@@ -67,13 +65,11 @@ const fieldToSchemaMap = {
       value: {
         autopopulate: true,
         type: mongoose.Types.ObjectId,
-        refPath: `${options.path ? (options.path + '.') : ''}${field.name}.blockType`,
+        refPath: `${options.path ? (options.path + '.') : ''}${field.name}${field.localized ? '.{{LOCALE}}' : ''}.blockType`,
       },
       blockType: { type: String, enum: field.blocks },
       _id: false,
     });
-
-    schema.plugin(autopopulate);
 
     return {
       localized: field.localized || false,
