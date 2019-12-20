@@ -33,8 +33,6 @@ module.exports = function (schema) {
     });
   }
 
-  console.log(JSON.stringify(pathsToPopulate));
-
   function autopopulateHandler() {
     if (this._mongooseOptions &&
       this._mongooseOptions.lean &&
@@ -128,11 +126,7 @@ function handleFunction(fn, options) {
   processOption.call(this, val, options);
 }
 
-function eachPathRecursive(currentSchema, handler, path) {
-
-  if (!path) {
-    path = [];
-  }
+function eachPathRecursive(currentSchema, handler, path = [], parentPath) {
 
   currentSchema.eachPath((pathname, schemaType) => {
     path.push(pathname);
@@ -140,9 +134,13 @@ function eachPathRecursive(currentSchema, handler, path) {
     if (schemaType.options.refPath && schemaType.options.refPath.includes('{{LOCALE}}')) {
       currentSchema.remove(pathname);
 
-      // If we can get a value for 'en' here, we can fix everything
+      let locale = parentPath;
 
-      schemaType.options.refPath = schemaType.options.refPath.replace('{{LOCALE}}', 'en');
+      if (parentPath && parentPath.includes('.')) {
+        locale = parentPath.split('.').pop();
+      }
+
+      schemaType.options.refPath = schemaType.options.refPath.replace('{{LOCALE}}', locale);
 
       currentSchema.add({
         [pathname]: {
@@ -154,7 +152,7 @@ function eachPathRecursive(currentSchema, handler, path) {
     }
 
     if (schemaType.schema) {
-      eachPathRecursive(schemaType.schema, handler, path);
+      eachPathRecursive(schemaType.schema, handler, path, pathname);
     } else {
       handler(path.join('.'), schemaType);
     }
