@@ -20,7 +20,7 @@ module.exports = {
   },
   mongoURL: 'mongodb://localhost/payload',
   collections: collections,
-  globals: [],
+  globals: globals,
   contentBlocks: contentBlocks,
   localization: {
     locales: [
