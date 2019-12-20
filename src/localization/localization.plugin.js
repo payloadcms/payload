@@ -258,16 +258,15 @@ function formatRefPathLocales(schema, parentSchema, parentPath) {
       // Removing and adding a path to a schema does not update tree, so do it manually
       newSchema.tree[pathname].refPath = refPath;
 
+      const parentSchemaType = parentSchema.path(parentPath).instance;
+
       // Remove old schema from parent
       parentSchema.remove(parentPath);
 
       // Replace newly cloned and updated schema on parent
-
-      /////////////////////////////////////////////
-      // TODO: only format [newSchema] as array if it is indeed an array.
-      // All cases are formatted as arrays here and they may not be arrays
-      /////////////////////////////////////////////
-      parentSchema.add({ [parentPath]: [newSchema] });
+      parentSchema.add({
+        [parentPath]: parentSchemaType === 'Array' ? [newSchema] : newSchema
+      });
     }
 
     // If nested schema found, continue recursively
