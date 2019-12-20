@@ -104,7 +104,7 @@ class SchemaLoader {
         .plugin(paginate)
         .plugin(buildQueryPlugin)
         .plugin(localizationPlugin, config.localization)
-        .plugin(autopopulate, config.localization);
+        .plugin(autopopulate);
 
       if (collectionConfig.plugins) {
         collectionConfig.plugins.forEach(plugin => {
@@ -141,7 +141,7 @@ class SchemaLoader {
         'global',
         new mongoose.Schema({ ...globalSchemaGroups, timestamps: false })
           .plugin(localizationPlugin, config.localization)
-          .plugin(autopopulate, config.localization)
+          .plugin(autopopulate)
       );
     }
   };
