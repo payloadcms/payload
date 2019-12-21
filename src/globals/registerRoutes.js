@@ -2,9 +2,9 @@ import { upsert, fetch } from './requestHandlers';
 import setModelLocaleMiddleware from '../localization/setModelLocale';
 import bindModelMiddleware from '../mongoose/bindModel';
 
-const registerGlobals = ({ router }, Globals) => {
+const registerGlobals = (globals, router) => {
   router.all('/globals*',
-    bindModelMiddleware(Globals),
+    bindModelMiddleware(globals),
     setModelLocaleMiddleware());
 
   router
@@ -12,7 +12,7 @@ const registerGlobals = ({ router }, Globals) => {
     .get(fetch);
 
   router
-    .route('/globals/:key')
+    .route('/globals/:slug')
     .get(fetch)
     .post(upsert)
     .put(upsert);

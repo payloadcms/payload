@@ -3,14 +3,14 @@ import fieldToSchemaMap from '../mongoose/schema/fieldToSchemaMap';
 import autopopulate from '../mongoose/autopopulate';
 import localizationPlugin from '../localization/plugin';
 
-const registerGlobals = ({ config }) => {
+const registerSchema = (globalConfigs, config) => {
   const globalFields = {};
   const globalSchemaGroups = {};
   const globals = {
     config: {},
   };
 
-  Object.values(config.globals).forEach((globalConfig) => {
+  Object.values(globalConfigs).forEach((globalConfig) => {
     globals.config[globalConfig.label] = globalConfig;
     globalFields[globalConfig.slug] = {};
 
@@ -18,13 +18,11 @@ const registerGlobals = ({ config }) => {
       const fieldSchema = fieldToSchemaMap[field.type];
       if (fieldSchema) globalFields[globalConfig.slug][field.name] = fieldSchema(field, { path: globalConfig.slug, localization: config.localization });
     });
-    globalSchemaGroups[globalConfig.slug] = new mongoose.Schema(globalFields[globalConfig.slug], { _id: false })
-      .plugin(localizationPlugin, config.localization)
-      .plugin(autopopulate);
+    globalSchemaGroups[globalConfig.slug] = globalFields[globalConfig.slug];
   });
 
   globals.model = mongoose.model(
-    'global',
+    'globals',
     new mongoose.Schema({ ...globalSchemaGroups, timestamps: false })
       .plugin(localizationPlugin, config.localization)
       .plugin(autopopulate),
@@ -33,4 +31,4 @@ const registerGlobals = ({ config }) => {
   return globals;
 };
 
-export default registerGlobals;
+export default registerSchema;

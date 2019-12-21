@@ -16,18 +16,6 @@ import registerGlobalSchema from './globals/registerSchema';
 import registerGlobalRoutes from './globals/registerRoutes';
 
 class Payload {
-  collections = {};
-
-  globals = {
-    model: null,
-    config: {},
-  };
-
-  user = {
-    model: null,
-    config: {},
-  };
-
   constructor(options) {
     this.config = options.config;
     this.app = options.app;
@@ -53,8 +41,8 @@ class Payload {
 
   registerGlobals = (globals) => {
     validateGlobals(globals);
-    registerGlobalSchema(globals, this.globals, this.config);
-    registerGlobalRoutes(globals);
+    this.globals = registerGlobalSchema(globals, this.config);
+    registerGlobalRoutes(this.globals.model, this.router);
   }
 }
 

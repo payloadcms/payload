@@ -13,21 +13,14 @@ export default function localizationPlugin(schema, options) {
 
   // the first available locale will be used as default if it's not set or unknown value passed
   if (!options.defaultLocale || pluginOptions.locales.indexOf(options.defaultLocale) === -1) {
-    pluginOptions.defaultLocale = pluginOptions.locales[0];
+    [pluginOptions.defaultLocale] = pluginOptions.locales;
   } else {
     pluginOptions.defaultLocale = options.defaultLocale.slice(0);
   }
 
   schema.eachPath((path, schemaType) => {
-    // TODO: We need a way to set if this should recurse or not. What is happening on global's flexible field is that it tries to save flexibleGlobal.en.en on post.
-    let recurse = true;
-    if (path.endsWith('global.en')) {
-      recurse = false;
-    }
-
     if (schemaType.schema) { // propagate plugin initialization for sub-documents schemas
       schemaType.schema.plugin(localizationPlugin, pluginOptions);
-      if (!recurse) return;
     }
 
     if (!schemaType.options.localized && !(schemaType.schema && schemaType.schema.options.localized)) {

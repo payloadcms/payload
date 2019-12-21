@@ -1,23 +1,21 @@
-const find = query => {
-
+const find = ({ Model, locale, fallback }) => {
   return new Promise((resolve, reject) => {
-    query.Model.findOne({}, (err, doc) => {
-
+    Model.findOne(null, (err, doc) => {
       if (err || !doc) {
-        return reject({ message: 'not found' })
+        return reject({ message: 'not found' });
       }
 
       let result = doc;
 
-      if (query.locale) {
-        doc.setLocale(query.locale, query.fallback);
+      if (locale) {
+        doc.setLocale(locale, fallback);
         const json = doc.toJSON({ virtuals: true });
         result = json;
       }
 
       resolve(result);
-    })
-  })
+    });
+  });
 };
 
 export default find;

@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import validate from './validate';
 import baseFields from '../mongoose/schema/baseFields';
 import fieldToSchemaMap from '../mongoose/schema/fieldToSchemaMap';
 import paginate from '../mongoose/paginate';
@@ -8,8 +7,7 @@ import localizationPlugin from '../localization/plugin';
 import autopopulate from '../mongoose/autopopulate';
 import passwordResetConfig from '../auth/passwordResets/config';
 
-const registerSchema = (collection, collections, config) => {
-  validate(collection, collections);
+const addSchema = (collection, collections, config) => {
   const fields = { ...baseFields };
 
   if (collection.auth) {
@@ -42,4 +40,4 @@ const registerSchema = (collection, collections, config) => {
   };
 };
 
-export default registerSchema;
+export default addSchema;
