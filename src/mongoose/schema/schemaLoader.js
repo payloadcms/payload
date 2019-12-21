@@ -2,9 +2,6 @@ import mongoose from 'mongoose';
 import fieldToSchemaMap from './fieldToSchemaMap';
 import localizationPlugin from '../../localization/localization.plugin';
 import autopopulate from '../autopopulate.plugin';
-import validateCollection from '../../utilities/validateCollection';
-import { schemaBaseFields } from './schemaBaseFields';
-import passwordResetConfig from '../../auth/passwordResets/passwordReset.config';
 import paginate from '../paginate.plugin';
 import buildQueryPlugin from '../buildQuery.plugin';
 import validateGlobal from '../../utilities/validateGlobal';
@@ -83,41 +80,6 @@ class SchemaLoader {
     });
   };
 
-  collectionSchemaLoader = config => {
-    Object.values(config.collections).forEach(collectionConfig => {
-
-      validateCollection(collectionConfig, this.collections);
-      this.collections[collectionConfig.labels.singular] = collectionConfig;
-      const fields = { ...schemaBaseFields };
-
-      // authentication
-      if (config.auth && config.auth.passwordResets) {
-        config.fields.push(...passwordResetConfig.fields);
-      }
-
-      collectionConfig.fields.forEach(field => {
-        const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) fields[field.name] = fieldSchema(field, { localization: config.localization });
-      });
-
-      const Schema = new mongoose.Schema(fields, { timestamps: collectionConfig.timestamps })
-        .plugin(paginate)
-        .plugin(buildQueryPlugin)
-        .plugin(localizationPlugin, config.localization)
-        .plugin(autopopulate);
-
-      if (collectionConfig.plugins) {
-        collectionConfig.plugins.forEach(plugin => {
-          Schema.plugin(plugin.plugin, plugin.options);
-        });
-      }
-
-      this.collections[collectionConfig.labels.singular] = {
-        config: collectionConfig,
-        model: mongoose.model(collectionConfig.labels.singular, Schema)
-      };
-    });
-  };
 
   globalSchemaLoader = config => {
     let globalSchemaGroups = {};

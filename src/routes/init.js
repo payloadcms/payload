@@ -1,8 +1,7 @@
 import express from 'express';
 
 const router = express.Router();
-const initRoutes = User => {
-
+const initRoutes = (User) => {
   router
     .route('/init')
     .get((req, res) => {
@@ -10,8 +9,8 @@ const initRoutes = User => {
         if (err) res.status(200).json({ error: err });
         return count >= 1
           ? res.status(200).json({ initialized: true })
-          : res.status(200).json({ initialized: false })
-      })
+          : res.status(200).json({ initialized: false });
+      });
     });
 
   return router;

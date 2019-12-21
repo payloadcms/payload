@@ -1,14 +1,13 @@
 import express from 'express';
-import authRequestHandlers from '../auth/requestHandlers';
-import authValidate from '../auth/validate';
 import passport from 'passport';
-import checkRoleMiddleware from '../auth/checkRole.middleware';
-import passwordResetRoutes from './passwordReset.routes';
+import authRequestHandlers from './requestHandlers';
+import authValidate from './validate';
+import checkRoleMiddleware from './checkRoleMiddleware';
+import passwordResetRoutes from './passwordResets/routes';
 
 const router = express.Router();
 const authRoutes = (userConfig, User) => {
-
-  let auth = authRequestHandlers(User);
+  const auth = authRequestHandlers(User);
 
   router
     .route('/login')
@@ -39,13 +38,11 @@ const authRoutes = (userConfig, User) => {
         (req, res, next) => {
           User.countDocuments({}, (err, count) => {
             if (err) res.status(500).json({ error: err });
-            if (count >= 1)
-              return res.status(403).json({ initialized: true });
+            if (count >= 1) return res.status(403).json({ initialized: true });
             next();
-          })
+          });
         },
-        auth.register
-      );
+        auth.register);
   }
 
   return router;

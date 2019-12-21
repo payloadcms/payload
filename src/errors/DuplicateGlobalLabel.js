@@ -1,4 +1,4 @@
-import {PayloadError } from './PayloadError';
+import { PayloadError } from './PayloadError';
 
 export class DuplicateGlobalLabelError extends PayloadError {
   constructor(config) {
