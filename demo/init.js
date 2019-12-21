@@ -3,6 +3,7 @@ const Payload = require('../');
 const config = require('./payload.config');
 
 const router = express.Router({}); // eslint-disable-line new-cap
+const globals = require('./globals');
 const registerCollections = require('./collections');
 const registerContentBlocks = require('./content-blocks');
 
@@ -13,6 +14,8 @@ const payload = new Payload({
   app,
   router,
 });
+
+payload.registerGlobals(globals);
 
 registerCollections(payload);
 registerContentBlocks(payload);
