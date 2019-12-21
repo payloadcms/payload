@@ -1,7 +1,6 @@
 /* eslint-disable no-use-before-define */
 
 export default function buildQueryPlugin(schema) {
-
   schema.statics.apiQuery = function (rawParams, locale, cb) {
     const model = this;
     const params = paramParser(this, rawParams, locale);
@@ -17,10 +16,9 @@ export default function buildQueryPlugin(schema) {
 }
 
 export function paramParser(model, rawParams, locale) {
-
   let query = {
     searchParams: {},
-    sort: false
+    sort: false,
   };
 
   // Construct searchParams
@@ -41,16 +39,16 @@ export function paramParser(model, rawParams, locale) {
 }
 
 function convertToBoolean(str) {
-  return str.toLowerCase() === 'true' ||
-    str.toLowerCase() === 't' ||
-    str.toLowerCase() === 'yes' ||
-    str.toLowerCase() === 'y' ||
-    str === '1';
+  return str.toLowerCase() === 'true'
+    || str.toLowerCase() === 't'
+    || str.toLowerCase() === 'yes'
+    || str.toLowerCase() === 'y'
+    || str === '1';
 }
 
 function addSearchParam(query, key, value) {
   if (typeof query.searchParams[key] !== 'undefined') {
-    for (let i in value) {
+    for (const i in value) {
       query.searchParams[key][i] = value[i];
     }
   } else {
@@ -68,24 +66,22 @@ function parseParam(key, val, model, query, locale) {
 
   if (val === '') {
     return {};
-  } else if (lcKey === 'sort_by' || lcKey === 'order_by') {
+  } if (lcKey === 'sort_by' || lcKey === 'order_by') {
     const parts = val.split(',');
     query.sort = {};
     query.sort[parts[0]] = parts[1] === 'asc' || parts.length <= 1 ? 1 : parts[1];
   } else if (lcKey === 'include') {
     if (val.match(',')) {
-      let orArray = [];
+      const orArray = [];
       val.split(',').map(id => orArray.push({ _id: id }));
       query = addSearchParam(query, '$or', orArray);
-    } else
-      query.searchParams['_id'] = val;
+    } else query.searchParams._id = val;
   } else if (lcKey === 'exclude') {
     if (val.match(',')) {
-      let andArray = [];
+      const andArray = [];
       val.split(',').map(id => andArray.push({ _id: { $ne: id } }));
       query = addSearchParam(query, '$and', andArray);
-    } else
-      query.searchParams['_id'] = { $ne: val };
+    } else query.searchParams._id = { $ne: val };
   } else if (lcKey === 'locale') {
     // Do nothing
   } else {
@@ -97,14 +93,15 @@ function parseParam(key, val, model, query, locale) {
 function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator, locale) {
   let paramType;
   let key = keyPrefix + lcKey;
-  let matches = lcKey.match(/(.+)\.(.+)/);
+  const matches = lcKey.match(/(.+)\.(.+)/);
+
   if (matches) {
     // Parse SubSchema
-    if (schema.paths[matches[1]].constructor.name === 'DocumentArray' ||
-      schema.paths[matches[1]].constructor.name === 'Mixed') {
-      parseSchemaForKey(schema.paths[matches[1]].schema, `${matches[1]}.`, matches[2], val, operator)
-    } else if (schema.paths[matches[1]].constructor.name === 'SchemaType' ||
-      schema.paths[matches[1]].constructor.name === 'SingleNestedPath') {
+    if (schema.paths[matches[1]].constructor.name === 'DocumentArray'
+      || schema.paths[matches[1]].constructor.name === 'Mixed') {
+      parseSchemaForKey(schema.paths[matches[1]].schema, `${matches[1]}.`, matches[2], val, operator);
+    } else if (schema.paths[matches[1]].constructor.name === 'SchemaType'
+      || schema.paths[matches[1]].constructor.name === 'SingleNestedPath') {
       // This wasn't handled in the original package but seems to work
       paramType = schema.paths[matches[1]].schema.paths.name.instance;
     }
@@ -143,13 +140,13 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator, local
         query = addSearchParam(query, key, { $in: val.split(',') });
       }
     } else if (val.match(/([0-9]+)/)) {
-      if (operator === 'gt' ||
-        operator === 'gte' ||
-        operator === 'lt' ||
-        operator === 'lte' ||
-        operator === 'ne') {
-        let newParam = {};
-        newParam['$' + operator] = val;
+      if (operator === 'gt'
+        || operator === 'gte'
+        || operator === 'lt'
+        || operator === 'lte'
+        || operator === 'ne') {
+        const newParam = {};
+        newParam[`$${operator}`] = val;
         query = addSearchParam(query, key, newParam);
       } else {
         query = addSearchParam(query, key, parseInt(val));
@@ -167,19 +164,19 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator, local
         query = addSearchParam(query, key, { $in: options });
       }
     } else if (val.match(/([0-9]+)/)) {
-      if (operator === 'gt' ||
-        operator === 'gte' ||
-        operator === 'lt' ||
-        operator === 'lte') {
-        let newParam = {};
-        newParam['$' + operator] = val;
+      if (operator === 'gt'
+        || operator === 'gte'
+        || operator === 'lt'
+        || operator === 'lte') {
+        const newParam = {};
+        newParam[`$${operator}`] = val;
         query = addSearchParam(query, key, newParam);
       } else {
         query = addSearchParam(query, key, val);
       }
     } else if (operator === 'ne' || operator === 'not') {
       const neregex = new RegExp(val, 'i');
-      query = addSearchParam(query, key, { '$not': neregex });
+      query = addSearchParam(query, key, { $not: neregex });
     } else if (operator === 'like') {
       query = addSearchParam(query, key, { $regex: val, $options: '-i' });
     } else {

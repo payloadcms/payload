@@ -38,6 +38,15 @@ module.exports = {
       required: true,
     },
     {
+      name: 'category',
+      label: 'Category',
+      type: 'relationship',
+      relationType: 'reference',
+      relationTo: 'categories',
+      hasMany: false,
+      localized: true,
+    },
+    {
       name: 'categories',
       label: 'Categories',
       type: 'relationship',
@@ -45,6 +54,15 @@ module.exports = {
       relationTo: 'categories',
       hasMany: true,
       localized: true,
+    },
+    {
+      name: 'nonLocalizedCategory',
+      label: 'Categories',
+      type: 'relationship',
+      relationType: 'reference',
+      relationTo: 'categories',
+      hasMany: false,
+      localized: false,
     },
     {
       name: 'image',

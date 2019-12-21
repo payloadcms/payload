@@ -26,6 +26,7 @@ module.exports = {
       type: 'input',
       maxLength: 100,
       required: true,
+      unique: false,
     },
     {
       name: 'description',
