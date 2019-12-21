@@ -1,5 +1,5 @@
 export { PayloadError } from './PayloadError';
-export { DuplicateCollectionLabelError } from './DuplicateCollectionLabelError';
-export { DuplicateGlobalLabelError } from './DuplicateGlobalLabelError';
-export { MissingCollectionLabelError } from './MissingCollectionLabelError';
-export { MissingGlobalLabelError } from './MissingGlobalLabelError';
+export { DuplicateCollectionLabel } from './DuplicateCollection';
+export { DuplicateGlobalLabel } from './DuplicateGlobalLabel';
+export { MissingCollectionLabel } from './MissingCollectionLabel';
+export { MissingGlobalLabel } from './MissingGlobalLabel';

@@ -35,14 +35,14 @@ module.exports = {
       type: 'textarea',
       localized: true,
       height: 100,
-      required: true
+      required: true,
     },
     {
       name: 'categories',
       label: 'Categories',
       type: 'relationship',
       relationType: 'reference',
-      relationTo: 'Category',
+      relationTo: 'categories',
       hasMany: true,
       localized: true,
     },
@@ -50,17 +50,17 @@ module.exports = {
       name: 'image',
       label: 'Image',
       type: 'media',
-      required: false
+      required: false,
     },
     {
       name: 'author',
       label: 'Written by:',
       type: 'reference',
       reference: {
-        to: 'Author',
+        to: 'authors',
         nested: true,
-        relationship: 'oneToMany'
-      }
+        relationship: 'oneToMany',
+      },
     },
     {
       name: 'slides',
@@ -71,15 +71,15 @@ module.exports = {
         {
           name: 'content',
           type: 'textarea',
-          label: 'Content'
-        }
-      ]
+          label: 'Content',
+        },
+      ],
     },
     {
       name: 'blocks',
       label: 'Flexible Content Blocks',
       type: 'flexible',
-      blocks: ['quote', 'cta'],
+      blocks: ['quotes', 'ctas'],
       localized: true,
     },
     {
@@ -91,23 +91,23 @@ module.exports = {
           type: 'input',
           maxLength: 100,
           label: 'Meta Title',
-          width: 50
+          width: 50,
         },
         {
           name: 'metaKeywords',
           type: 'input',
           maxLength: 100,
           label: 'Meta Keywords',
-          width: 50
+          width: 50,
         },
         {
           name: 'metaDesc',
           type: 'textarea',
           label: 'Meta Description',
-          height: 100
-        }
-      ]
-    }
+          height: 100,
+        },
+      ],
+    },
   ],
-  timestamps: true
+  timestamps: true,
 };

@@ -1,12 +1,12 @@
 import mongoose from 'mongoose';
-import buildQueryPlugin from '../mongoose/buildQuery.plugin';
-import paginate from '../mongoose/paginate.plugin';
-import localizationPlugin from '../localization/localization.plugin';
+import buildQueryPlugin from '../mongoose/buildQuery';
+import paginate from '../mongoose/paginate';
+import localizationPlugin from '../localization/plugin';
 
 const uploadModelLoader = (config) => {
 
   const UploadSchema = new mongoose.Schema({
-    filename: {type: String},
+    filename: { type: String },
   }, {
     timestamps: true,
     discriminatorKey: 'type'

@@ -1,9 +1,9 @@
 import express from 'express';
-import {upload, update} from '../uploads/requestHandlers';
-import uploadMiddleware from './upload.middleware';
-import uploadModelLoader from './upload.model';
-import imageUploadModelLoader from './images/image.model';
-import setModelLocaleMiddleware from '../mongoose/setModelLocale.middleware';
+import { upload, update } from './requestHandlers';
+import uploadMiddleware from './middleware';
+import uploadModelLoader from './model';
+import imageUploadModelLoader from './images/model';
+import setModelLocaleMiddleware from '../localization/setModelLocale';
 import passport from 'passport';
 
 const router = express.Router();
@@ -17,7 +17,7 @@ const uploadRoutes = config => {
   };
 
   router.all('/upload*',
-    passport.authenticate('jwt', {session: false}),
+    passport.authenticate('jwt', { session: false }),
     uploadMiddleware(config, UploadModels),
     setModelLocaleMiddleware(),
   );

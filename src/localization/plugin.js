@@ -27,17 +27,16 @@ export default function localizationPlugin(schema, options) {
 
     if (schemaType.schema) { // propagate plugin initialization for sub-documents schemas
       schemaType.schema.plugin(localizationPlugin, pluginOptions);
-      if (!recurse)
-        return;
+      if (!recurse) return;
     }
 
     if (!schemaType.options.localized && !(schemaType.schema && schemaType.schema.options.localized)) {
       return;
     }
 
-    let pathArray = path.split('.'),
-      key = pathArray.pop(),
-      prefix = pathArray.join('.');
+    const pathArray = path.split('.');
+    const key = pathArray.pop();
+    let prefix = pathArray.join('.');
 
     if (prefix) prefix += '.';
 
@@ -46,38 +45,36 @@ export default function localizationPlugin(schema, options) {
 
     // schema.remove removes path from paths object only, but doesn't update tree
     // sounds like a bug, removing item from the tree manually
-    let tree = pathArray.reduce((mem, part) => {
+    const tree = pathArray.reduce((mem, part) => {
       return mem[part];
     }, schema.tree);
     delete tree[key];
 
     schema.virtual(path)
       .get(function () {
-
         // embedded and sub-documents will use locale methods from the top level document
-        let owner = this.ownerDocument ? this.ownerDocument() : this,
-          locale = owner.getLocale(),
-          localeSubDoc = this.$__getValue(path);
+        const owner = this.ownerDocument ? this.ownerDocument() : this;
+        const locale = owner.getLocale();
+        const localeSubDoc = this.$__getValue(path);
 
         if (localeSubDoc === null || localeSubDoc === void 0) {
           return localeSubDoc;
         }
 
-        let value = localeSubDoc[locale];
+        const value = localeSubDoc[locale];
 
         // If there is no value to return, AKA no translation in locale, handle fallbacks
         if (!value) {
-
           // If user specified fallback code as null, send back null
           if (this.fallbackLocale === 'null' || (this.fallbackLocale && !localeSubDoc[this.fallbackLocale])) {
             return null;
 
             // If user specified fallback code AND record exists, return that
-          } else if (localeSubDoc[this.fallbackLocale]) {
+          } if (localeSubDoc[this.fallbackLocale]) {
             return localeSubDoc[this.fallbackLocale];
 
             // Otherwise, check if there is a default fallback value and if so, send that
-          } else if (options.fallback && localeSubDoc[options.defaultLocale]) {
+          } if (options.fallback && localeSubDoc[options.defaultLocale]) {
             return localeSubDoc[options.defaultLocale];
           }
         }
@@ -85,11 +82,10 @@ export default function localizationPlugin(schema, options) {
         return value;
       })
       .set(function (value) {
-
         // multiple locales are set as an object
         if (typeof value === 'object' && !Array.isArray(value)) {
-          let locales = this.schema.options.localization.locales;
-          locales.forEach(locale => {
+          const { locales } = this.schema.options.localization;
+          locales.forEach((locale) => {
             if (!value[locale]) {
               // this.set(`${path}.${locale}`, value);
               return;
@@ -100,8 +96,8 @@ export default function localizationPlugin(schema, options) {
         }
 
         // embedded and sub-documents will use locale methods from the top level document
-        let owner = this.ownerDocument ? this.ownerDocument() : this;
-        this.set(path + '.' + owner.getLocale(), value);
+        const owner = this.ownerDocument ? this.ownerDocument() : this;
+        this.set(`${path}.${owner.getLocale()}`, value);
       });
 
 
@@ -109,12 +105,12 @@ export default function localizationPlugin(schema, options) {
     // and is unwanted for all child locale-properties
     // delete schemaType.options.localized; // This was removed to allow viewing inside query parser
 
-    let localizedObject = {};
+    const localizedObject = {};
     // TODO: setting equal to object is good for hasMany: false, but breaking for hasMany: true;
     // console.log(path, schemaType.options);
     localizedObject[key] = {};
     pluginOptions.locales.forEach(function (locale) {
-      let localeOptions = Object.assign({}, schemaType.options);
+      const localeOptions = Object.assign({}, schemaType.options);
       if (locale !== options.defaultLocale) {
         delete localeOptions.default;
         delete localeOptions.required;
@@ -136,13 +132,13 @@ export default function localizationPlugin(schema, options) {
 
   // document methods to set the locale for each model instance (document)
   schema.method({
-    getLocales: function () {
+    getLocales() {
       return this.schema.options.localization.locales;
     },
-    getLocale: function () {
+    getLocale() {
       return this.docLocale || this.schema.options.localization.defaultLocale;
     },
-    setLocale: function (locale, fallbackLocale) {
+    setLocale(locale, fallbackLocale) {
       const locales = this.getLocales();
       if (locale && locales.indexOf(locale) !== -1) {
         this.docLocale = locale;
@@ -156,42 +152,40 @@ export default function localizationPlugin(schema, options) {
         if (schemaType.options.ref && this[path]) {
           this[path] && this[path].setLocale && this[path].setLocale(locale, fallbackLocale);
         }
-      })
+      });
     },
-    unsetLocale: function () {
+    unsetLocale() {
       delete this.docLocale;
     },
-    setFallback: function (fallback = true) {
+    setFallback(fallback = true) {
       pluginOptions.fallback = fallback;
-    }
+    },
   });
 
   // model methods to set the locale for the current schema
   schema.static({
-    getLocales: function () {
+    getLocales() {
       return this.schema.options.localization.locales;
     },
-    getDefaultLocale: function () {
+    getDefaultLocale() {
       return this.schema.options.localization.defaultLocale;
     },
-    setDefaultLocale: function (locale) {
-
-      let updateLocale = function (schema, locale) {
-        schema.options.localization.defaultLocale = locale.slice(0);
+    setDefaultLocale(locale) {
+      const updateLocale = function (schemaToUpdate, localeToUpdate) {
+        schemaToUpdate.options.localization.defaultLocale = localeToUpdate.slice(0);
 
         // default locale change for sub-documents schemas
-        schema.eachPath((path, schemaType) => {
+        schemaToUpdate.eachPath((path, schemaType) => {
           if (schemaType.schema) {
-            updateLocale(schemaType.schema, locale);
+            updateLocale(schemaType.schema, localeToUpdate);
           }
         });
-
       };
 
       if (locale && this.getLocales().indexOf(locale) !== -1) {
         updateLocale(this.schema, locale);
       }
-    }
+    },
   });
 
   // Find any dynamic {{LOCALE}} in refPaths and modify schemas appropriately
@@ -207,11 +201,12 @@ export default function localizationPlugin(schema, options) {
     // define a global method to change the locale for all models (and their schemas)
     // created for the current mongo connection
     model.db.setDefaultLocale = function (locale) {
-      let model, modelName;
+      let modelToUpdate; let
+        modelName;
       for (modelName in this.models) {
         if (this.models.hasOwnProperty(modelName)) {
-          model = this.models[modelName];
-          model.setDefaultLocale && model.setDefaultLocale(locale);
+          modelToUpdate = this.models[modelName];
+          modelToUpdate.setDefaultLocale && modelToUpdate.setDefaultLocale(locale);
         }
       }
     };
@@ -226,10 +221,8 @@ export default function localizationPlugin(schema, options) {
 function formatRefPathLocales(schema, parentSchema, parentPath) {
   // Loop through all refPaths within schema
   schema.eachPath((pathname, schemaType) => {
-
     // If a dynamic refPath is found
     if (schemaType.options.refPath && schemaType.options.refPath.includes('{{LOCALE}}') && parentSchema) {
-
       // Create a clone of the schema for each locale
       const newSchema = schema.clone();
 
@@ -265,7 +258,7 @@ function formatRefPathLocales(schema, parentSchema, parentPath) {
 
       // Replace newly cloned and updated schema on parent
       parentSchema.add({
-        [parentPath]: parentSchemaType === 'Array' ? [newSchema] : newSchema
+        [parentPath]: parentSchemaType === 'Array' ? [newSchema] : newSchema,
       });
     }
 

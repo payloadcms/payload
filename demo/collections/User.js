@@ -28,7 +28,7 @@ module.exports = {
     'editor',
     'moderator',
     'user',
-    'viewer'
+    'viewer',
   ],
   auth: {
     strategy: 'jwt',
@@ -44,14 +44,14 @@ module.exports = {
       type: 'input',
       unique: true,
       maxLength: 100,
-      required: true
+      required: true,
     },
     {
       name: 'role',
       type: 'enum',
       enum: payloadConfig.roles,
       default: 'user',
-    }
+    },
   ],
-  timestamps: true
+  timestamps: true,
 };

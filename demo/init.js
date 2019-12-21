@@ -1,15 +1,21 @@
 const express = require('express');
 const Payload = require('../');
 const config = require('./payload.config');
+
 const router = express.Router({}); // eslint-disable-line new-cap
+const registerCollections = require('./collections');
+const registerContentBlocks = require('./content-blocks');
 
 const app = express();
 
-new Payload({
+const payload = new Payload({
   config,
   app,
   router,
 });
+
+registerCollections(payload);
+registerContentBlocks(payload);
 
 if (process.env.NODE_ENV !== 'production') {
   router.use((req, res, next) => {

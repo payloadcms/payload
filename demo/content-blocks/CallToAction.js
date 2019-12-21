@@ -1,6 +1,9 @@
 module.exports = {
-  slug: 'cta',
-  label: 'CTA',
+  slug: 'ctas',
+  labels: {
+    singular: 'Call to Action',
+    plural: 'Calls to Action',
+  },
   useAsContentBlock: true,
   policies: {
     create: (req, res, next) => {
@@ -22,15 +25,15 @@ module.exports = {
       label: 'Label',
       type: 'input',
       maxLength: 100,
-      required: true
+      required: true,
     },
     {
       name: 'url',
       label: 'URL',
       type: 'input',
       height: 100,
-      required: true
+      required: true,
     },
   ],
-  timestamps: true
+  timestamps: true,
 };

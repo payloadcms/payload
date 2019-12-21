@@ -4,4 +4,4 @@ const schemaBaseFields = {
   publishedAt: Date
 };
 
-export { schemaBaseFields }
+export default schemaBaseFields;

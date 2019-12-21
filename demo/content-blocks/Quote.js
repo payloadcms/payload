@@ -1,6 +1,9 @@
 module.exports = {
-  slug: 'quote',
-  label: 'Quote',
+  slug: 'quotes',
+  labels: {
+    singular: 'Quote',
+    plural: 'Quotes',
+  },
   policies: {
     create: (req, res, next) => {
       return next();
@@ -21,21 +24,21 @@ module.exports = {
       label: 'Author',
       type: 'input',
       maxLength: 100,
-      required: true
+      required: true,
     },
     {
       name: 'quote',
       label: 'Quote',
       type: 'textarea',
       height: 100,
-      required: true
+      required: true,
     },
     {
       name: 'color',
       label: 'Color',
       type: 'input',
       maxLength: 7,
-      required: true
+      required: true,
     },
   ],
 };

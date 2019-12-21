@@ -1,14 +1,14 @@
 import mongoose from 'mongoose';
-import localizationPlugin from '../../localization/localization.plugin';
+import localizationPlugin from '../../localization/plugin';
 
 const imageUploadModelLoader = (Upload, config) => {
 
   const ImageSchema = new mongoose.Schema(
     {
       sizes: [{
-        name: {type: String},
-        height: {type: Number},
-        width: {type: Number},
+        name: { type: String },
+        height: { type: Number },
+        width: { type: Number },
         _id: false
       }]
     }

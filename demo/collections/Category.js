@@ -1,6 +1,5 @@
 module.exports = {
   slug: 'categories',
-  label: 'Categories',
   labels: {
     singular: 'Category',
     plural: 'Categories',
@@ -26,15 +25,15 @@ module.exports = {
       label: 'Category Title',
       type: 'input',
       maxLength: 100,
-      required: true
+      required: true,
     },
     {
       name: 'description',
       label: 'Description',
       type: 'textarea',
       height: 100,
-      required: true
+      required: true,
     },
   ],
-  timestamps: true
+  timestamps: true,
 };
