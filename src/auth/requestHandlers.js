@@ -30,7 +30,7 @@ export default User => ({
    * @returns {*}
    */
   login: (req, res) => {
-    let { email, password } = req.body;
+    const { email, password } = req.body;
 
     User.findByUsername(email, (err, user) => {
       if (err || !user) return res.status(401).json({ message: 'Auth Failed' });
@@ -38,15 +38,15 @@ export default User => ({
       user.authenticate(password, (authErr, model, passwordError) => {
         if (authErr || passwordError) return res.status(401).json({ message: 'Auth Failed' });
 
-        let opts = {};
-        opts.expiresIn = process.env.tokenExpiration || 7200;  // 20min default expiration
+        const opts = {};
+        opts.expiresIn = process.env.tokenExpiration || 7200; // 20min default expiration
         const secret = process.env.secret || 'SECRET_KEY';
         const token = jwt.sign({ email }, secret, opts);
         return res.status(200).json({
           message: 'Auth Passed',
-          token
+          token,
         });
-      })
+      });
     });
   },
 
@@ -74,5 +74,5 @@ export default User => ({
     }
 
     next();
-  }
-})
+  },
+});

@@ -26,7 +26,7 @@ class Payload {
     initUploads(options);
     initPassport(this.app);
     initCORS(options);
-    registerConfigRoute(options);
+    registerConfigRoute(options, this.getCollections, this.getGlobals);
 
     if (!this.config.disableAdmin) {
       initWebpack(options);
@@ -44,6 +44,10 @@ class Payload {
     this.globals = registerGlobalSchema(globals, this.config);
     registerGlobalRoutes(this.globals.model, this.router);
   }
+
+  getCollections = () => this.collections;
+
+  getGlobals = () => this.globals;
 }
 
 module.exports = Payload;
