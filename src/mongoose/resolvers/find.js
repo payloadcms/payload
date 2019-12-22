@@ -1,10 +1,8 @@
-const find = query => {
-
+const find = (query) => {
   return new Promise((resolve, reject) => {
     query.Model.find({}, (err, docs) => {
-
       if (err || !docs) {
-        return reject({ message: 'not found' })
+        return reject({ message: 'not found' });
       }
 
       let result = docs;
@@ -16,8 +14,8 @@ const find = query => {
       }
 
       resolve(result);
-    })
-  })
+    });
+  });
 };
 
 export default find;
