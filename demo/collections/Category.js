@@ -27,6 +27,7 @@ module.exports = {
       maxLength: 100,
       required: true,
       unique: false,
+      localized: true,
     },
     {
       name: 'description',
@@ -34,6 +35,7 @@ module.exports = {
       type: 'textarea',
       height: 100,
       required: true,
+      localized: true,
     },
   ],
   timestamps: true,

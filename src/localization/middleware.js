@@ -1,5 +1,3 @@
-import languageParser from 'accept-language-parser';
-
 /**
  * sets request locale
  *
@@ -12,22 +10,14 @@ export default function localizationMiddleware(localization) {
       req.locale = 'all';
       return next();
     }
-    let setLocale;
-    if (req.query.locale) {
-      setLocale = localization.locales.find(search => search === req.query.locale);
-      if (setLocale) {
-        req.locale = setLocale;
-      }
-    }
-    if (req.body.locale) {
-      setLocale = localization.locales.find(search => search === req.body.locale);
-      if (setLocale) {
-        req.locale = setLocale;
-      }
+
+    let requestedLocale = req.body && req.body.locale;
+    if (req.query.locale) requestedLocale = req.query.locale;
+
+    if (localization.locales.find(search => search === requestedLocale)) {
+      req.locale = requestedLocale;
     }
 
-
-    if (!req.locale && req.headers['accept-language']) req.locale = languageParser.pick(localization.locales, req.headers['accept-language']);
     if (!req.locale) req.locale = localization.defaultLocale;
     return next();
   };
