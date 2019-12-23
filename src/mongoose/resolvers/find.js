@@ -1,16 +1,17 @@
+import { NotFound } from '../../errors';
+
 const find = (query) => {
   return new Promise((resolve, reject) => {
     query.Model.find({}, (err, docs) => {
       if (err || !docs) {
-        return reject({ message: 'not found' });
+        reject(new NotFound());
       }
 
       let result = docs;
 
       if (query.locale) {
         docs.setLocale(query.locale, query.fallback);
-        const json = docs.toJSON({ virtuals: true });
-        result = json;
+        result = docs.toJSON({ virtuals: true });
       }
 
       resolve(result);

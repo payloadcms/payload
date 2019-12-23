@@ -7,5 +7,5 @@ export {
   modelById,
   find,
   findOne,
-  create
-}
+  create,
+};

@@ -8,15 +8,15 @@ const query = (req, res) => {
     }
     return res.json({
       ...result,
-      docs: result.docs.map(doc => {
+      docs: result.docs.map((doc) => {
         if (req.locale && doc.setLocale) {
           doc.setLocale(req.locale, req.query['fallback-locale']);
         }
 
-        return doc.toJSON({ virtuals: true })
-      })
+        return doc.toJSON({ virtuals: true });
+      }),
     });
-  })
+  });
 };
 
 export default query;

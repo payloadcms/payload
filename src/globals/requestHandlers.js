@@ -4,10 +4,11 @@ import { createAutopopulateOptions } from '../mongoose/createAutopopulateOptions
 
 export const upsert = (req, res) => {
   if (!req.model.schema.tree[req.params.slug]) {
-    return res.status(httpStatus.NOT_FOUND).json({ error: 'not found' });
+    res.status(httpStatus.NOT_FOUND).json({ error: 'not found' });
+    return;
   }
 
-  req.model.findOne({}, (err, doc) => {
+  req.model.findOne({}, (findErr, doc) => {
     let global = {};
 
     if (!doc) {
@@ -16,8 +17,8 @@ export const upsert = (req, res) => {
       } else {
         global = req.body;
       }
-      return req.model.create(global, (err, result) => {
-        if (err) return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
+      return req.model.create(global, (createErr, result) => {
+        if (createErr) return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: createErr });
 
         return res.status(httpStatus.CREATED)
           .json({
