@@ -1,7 +1,9 @@
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-use-before-define */
 
 export default function buildQueryPlugin(schema) {
-  schema.statics.apiQuery = function (rawParams, locale, cb) {
+  function apiQuery(rawParams, locale, cb) {
     const model = this;
     const params = paramParser(this, rawParams, locale);
 
@@ -12,7 +14,9 @@ export default function buildQueryPlugin(schema) {
     }
 
     return params.searchParams;
-  };
+  }
+
+  schema.statics.apiQuery = apiQuery;
 }
 
 export function paramParser(model, rawParams, locale) {
@@ -22,18 +26,18 @@ export function paramParser(model, rawParams, locale) {
   };
 
   // Construct searchParams
-  for (const key in rawParams) {
+  Object.keys(rawParams).forEach((key) => {
     const separatedParams = rawParams[key]
       .match(/{\w+}(.[^{}]*)/g);
 
     if (separatedParams === null) {
       query = parseParam(key, rawParams[key], model, query, locale);
     } else {
-      for (let i = 0; i < separatedParams.length; ++i) {
-        query = parseParam(key, separatedParams[i], model, query, locale);
-      }
+      separatedParams.forEach((param) => {
+        query = parseParam(key, param, model, query, locale);
+      });
     }
-  }
+  });
 
   return query;
 }
@@ -48,9 +52,9 @@ function convertToBoolean(str) {
 
 function addSearchParam(query, key, value) {
   if (typeof query.searchParams[key] !== 'undefined') {
-    for (const i in value) {
+    value.forEach((i) => {
       query.searchParams[key][i] = value[i];
-    }
+    });
   } else {
     query.searchParams[key] = value;
   }
@@ -62,7 +66,7 @@ function parseParam(key, val, model, query, locale) {
   let operator = val.match(/\{(.*)\}/);
   val = val.replace(/\{(.*)\}/, '');
 
-  if (operator) operator = operator[1];
+  if (operator) [, operator] = operator;
 
   if (val === '') {
     return {};
@@ -84,6 +88,8 @@ function parseParam(key, val, model, query, locale) {
     } else query.searchParams._id = { $ne: val };
   } else if (lcKey === 'locale') {
     // Do nothing
+  } else if (lcKey === 'depth') {
+    query.maxDepth = val;
   } else {
     query = parseSchemaForKey(model.schema, query, '', lcKey, val, operator, locale);
   }
@@ -149,7 +155,7 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator, local
         newParam[`$${operator}`] = val;
         query = addSearchParam(query, key, newParam);
       } else {
-        query = addSearchParam(query, key, parseInt(val));
+        query = addSearchParam(query, key, parseInt(val, 0));
       }
     }
   } else if (paramType === 'String') {

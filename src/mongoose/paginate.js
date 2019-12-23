@@ -1,3 +1,6 @@
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-prototype-builtins */
+/* eslint-disable no-param-reassign */
 import { createAutopopulateOptions } from './createAutopopulateOptions';
 
 /**
@@ -24,34 +27,34 @@ function paginatePlugin(dbQuery, options, callback) {
   options = Object.assign({}, paginatePlugin.options, options);
   options.customLabels = options.customLabels ? options.customLabels : {};
 
-  let defaultLimit = 10;
+  const defaultLimit = 10;
 
-  let select = options.select;
-  let sort = options.sort;
-  let collation = options.collation || {};
-  let populate = options.populate;
-  let lean = options.lean || false;
-  let leanWithId = options.hasOwnProperty('leanWithId') ? options.leanWithId : true;
-  let limit = options.hasOwnProperty('limit') ? parseInt(options.limit) : defaultLimit;
+  const { select } = options;
+  const { sort } = options;
+  const collation = options.collation || {};
+  const { populate } = options;
+  const lean = options.lean || false;
+  const leanWithId = options.hasOwnProperty('leanWithId') ? options.leanWithId : true;
+  const limit = options.hasOwnProperty('limit') ? parseInt(options.limit, 0) : defaultLimit;
   let skip;
   let offset;
   let page;
 
   // Custom Labels
-  let labelTotal = options.customLabels.totalDocs ? options.customLabels.totalDocs : 'totalDocs';
-  let labelLimit = options.customLabels.limit ? options.customLabels.limit : 'limit';
-  let labelPage = options.customLabels.page ? options.customLabels.page : 'page';
-  let labelTotalPages = options.customLabels.totalPages ? options.customLabels.totalPages : 'totalPages';
-  let labelDocs = options.customLabels.docs ? options.customLabels.docs : 'docs';
-  let labelNextPage = options.customLabels.nextPage ? options.customLabels.nextPage : 'nextPage';
-  let labelPrevPage = options.customLabels.prevPage ? options.customLabels.prevPage : 'prevPage';
-  let labelPagingCounter = options.customLabels.pagingCounter ? options.customLabels.pagingCounter : 'pagingCounter';
+  const labelTotal = options.customLabels.totalDocs ? options.customLabels.totalDocs : 'totalDocs';
+  const labelLimit = options.customLabels.limit ? options.customLabels.limit : 'limit';
+  const labelPage = options.customLabels.page ? options.customLabels.page : 'page';
+  const labelTotalPages = options.customLabels.totalPages ? options.customLabels.totalPages : 'totalPages';
+  const labelDocs = options.customLabels.docs ? options.customLabels.docs : 'docs';
+  const labelNextPage = options.customLabels.nextPage ? options.customLabels.nextPage : 'nextPage';
+  const labelPrevPage = options.customLabels.prevPage ? options.customLabels.prevPage : 'prevPage';
+  const labelPagingCounter = options.customLabels.pagingCounter ? options.customLabels.pagingCounter : 'pagingCounter';
 
   if (options.hasOwnProperty('offset')) {
-    offset = parseInt(options.offset);
+    offset = parseInt(options.offset, 0);
     skip = offset;
   } else if (options.hasOwnProperty('page')) {
-    page = parseInt(options.page);
+    page = parseInt(options.page, 0);
     skip = (page - 1) * limit;
   } else {
     offset = 0;
@@ -92,11 +95,10 @@ function paginatePlugin(dbQuery, options, callback) {
 
   return Promise.all([count, docs])
     .then((values) => {
-
-      let result = {
+      const result = {
         [labelDocs]: values[1],
         [labelTotal]: values[0],
-        [labelLimit]: limit
+        [labelLimit]: limit,
       };
 
       if (offset !== undefined) {
@@ -104,7 +106,6 @@ function paginatePlugin(dbQuery, options, callback) {
       }
 
       if (page !== undefined) {
-
         const pages = Math.ceil(values[0] / limit) || 1;
 
         result.hasPrevPage = false;
@@ -134,23 +135,23 @@ function paginatePlugin(dbQuery, options, callback) {
       // Adding support for callbacks if specified.
       if (typeof callback === 'function') {
         return callback(null, result);
-      } else {
-        return Promise.resolve(result);
       }
+      return Promise.resolve(result);
     }).catch((reject) => {
       if (typeof callback === 'function') {
         return callback(reject);
-      } else {
-        return Promise.reject(reject);
       }
+      return Promise.reject(reject);
     });
+}
+
+function bindPaginate(schema) {
+  schema.statics.paginate = paginatePlugin;
 }
 
 /**
  * @param {Schema} schema
  */
-module.exports = function (schema) {
-  schema.statics.paginate = paginatePlugin;
-};
+module.exports = bindPaginate;
 
 module.exports.paginate = paginatePlugin;
