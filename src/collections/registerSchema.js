@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import mongooseHidden from 'mongoose-hidden';
 import baseFields from '../mongoose/schema/baseFields';
 import fieldToSchemaMap from '../mongoose/schema/fieldToSchemaMap';
 import paginate from '../mongoose/paginate';
@@ -23,7 +24,8 @@ const addSchema = (collection, config) => {
     .plugin(paginate)
     .plugin(buildQueryPlugin)
     .plugin(localizationPlugin, config.localization)
-    .plugin(autopopulate);
+    .plugin(autopopulate)
+    .plugin(mongooseHidden());
 
   if (collection.plugins) {
     collection.plugins.forEach((plugin) => {
