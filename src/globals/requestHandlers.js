@@ -58,13 +58,18 @@ export const fetch = (req, res) => {
 
   findOne(query, createAutopopulateOptions(query))
     .then((doc) => {
-      if (doc[req.params.key]) {
-        return res.json(doc[req.params.key]);
+      const globals = { ...doc };
+      delete globals._id;
+      delete globals.id;
+      delete globals.__v;
+
+      if (globals[req.params.key]) {
+        return res.json(globals[req.params.key]);
       } if (req.params.key) {
         return res.status(httpStatus.NOT_FOUND)
           .json({ error: 'not found' });
       }
-      return res.json(doc);
+      return res.json(globals);
     })
     .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err }));
 };

@@ -16,6 +16,8 @@ import registerGlobalSchema from './globals/registerSchema';
 import registerGlobalRoutes from './globals/registerRoutes';
 
 class Payload {
+  collections = {};
+
   constructor(options) {
     this.config = options.config;
     this.app = options.app;
@@ -35,7 +37,8 @@ class Payload {
 
   registerCollection = (collection) => {
     validateCollection(collection, this.collections, this.User);
-    this.collections = registerCollectionSchema(collection, this.collections, this.config);
+    const registeredCollection = registerCollectionSchema(collection, this.config);
+    this.collections[collection.slug] = registeredCollection;
     registerCollectionRoutes(this.collections[collection.slug], this.router);
   }
 

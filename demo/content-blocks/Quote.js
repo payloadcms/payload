@@ -4,6 +4,7 @@ module.exports = {
     singular: 'Quote',
     plural: 'Quotes',
   },
+  useAsContentBlock: true,
   policies: {
     create: (req, res, next) => {
       return next();

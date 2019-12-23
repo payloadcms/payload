@@ -7,7 +7,7 @@ import localizationPlugin from '../localization/plugin';
 import autopopulate from '../mongoose/autopopulate';
 import passwordResetConfig from '../auth/passwordResets/config';
 
-const addSchema = (collection, collections, config) => {
+const addSchema = (collection, config) => {
   const fields = { ...baseFields };
 
   if (collection.auth) {
@@ -32,11 +32,8 @@ const addSchema = (collection, collections, config) => {
   }
 
   return {
-    ...collections,
-    [collection.slug]: {
-      config: collection,
-      model: mongoose.model(collection.slug, Schema),
-    },
+    config: collection,
+    model: mongoose.model(collection.slug, Schema),
   };
 };
 
