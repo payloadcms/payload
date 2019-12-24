@@ -8,16 +8,16 @@ module.exports = function (schema) {
 
       pathsToPopulate.push({
         options: defaultOptions(pathname, schemaType.options),
-        autopopulate: option
+        autopopulate: option,
       });
-    } else if (schemaType.options &&
-      schemaType.options.type &&
-      schemaType.options.type[0] &&
-      schemaType.options.type[0].autopopulate) {
+    } else if (schemaType.options
+      && schemaType.options.type
+      && schemaType.options.type[0]
+      && schemaType.options.type[0].autopopulate) {
       option = schemaType.options.type[0].autopopulate;
       pathsToPopulate.push({
         options: defaultOptions(pathname, schemaType.options.type[0]),
-        autopopulate: option
+        autopopulate: option,
       });
     }
   });
@@ -34,12 +34,11 @@ module.exports = function (schema) {
   }
 
   function autopopulateHandler() {
-
-    if (this._mongooseOptions &&
-      this._mongooseOptions.lean &&
+    if (this._mongooseOptions
+      && this._mongooseOptions.lean
       // If lean and user didn't explicitly do `lean({ autopulate: true })`,
       // skip it. See gh-27, gh-14, gh-48
-      !this._mongooseOptions.lean.autopopulate) {
+      && !this._mongooseOptions.lean.autopopulate) {
       return;
     }
 
@@ -48,7 +47,7 @@ module.exports = function (schema) {
       return;
     }
 
-    let maxDepth = options.maxDepth;
+    let { maxDepth } = options;
 
     if (options.autopopulate && options.autopopulate.maxDepth) {
       maxDepth = options.autopopulate.maxDepth;
@@ -66,17 +65,17 @@ module.exports = function (schema) {
       pathsToPopulate[i].options.options = pathsToPopulate[i].options.options || {};
       Object.assign(pathsToPopulate[i].options.options, {
         ...options,
-        _depth: depth + 1
+        _depth: depth + 1,
       });
       processOption.call(this,
         pathsToPopulate[i].autopopulate, pathsToPopulate[i].options);
     }
   }
 
-  schema.
-    pre('find', autopopulateHandler).
-    pre('findOne', autopopulateHandler).
-    pre('findOneAndUpdate', autopopulateHandler);
+  schema
+    .pre('find', autopopulateHandler)
+    .pre('findOne', autopopulateHandler)
+    .pre('findOneAndUpdate', autopopulateHandler);
 };
 
 function defaultOptions(pathname, v) {

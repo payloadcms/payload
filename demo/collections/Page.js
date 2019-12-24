@@ -24,7 +24,7 @@ module.exports = {
       name: 'title',
       label: 'Page Title',
       type: 'input',
-      unique: false,
+      unique: true,
       localized: true,
       maxLength: 100,
       required: true,

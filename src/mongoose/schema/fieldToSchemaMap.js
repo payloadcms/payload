@@ -2,10 +2,10 @@ import mongoose from 'mongoose';
 
 const formatBaseSchema = field => {
   return {
+    hide: field.hide || false,
     localized: field.localized || false,
     unique: field.unique || false,
     default: field.default || undefined,
-    hidden: field.hidden || false
   };
 };
 
@@ -68,7 +68,6 @@ const fieldToSchemaMap = {
         refPath: `${options.path ? (options.path + '.') : ''}${field.name}${field.localized ? '.{{LOCALE}}' : ''}.blockType`,
       },
       blockType: { type: String, enum: field.blocks },
-      _id: false,
     });
 
     return {

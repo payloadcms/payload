@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable func-names */
 import mongoose from 'mongoose';
@@ -78,6 +79,10 @@ export default function localizationPlugin(schema, options) {
 
     if (!schemaType.options.localized && !(schemaType.schema && schemaType.schema.options.localized)) {
       return;
+    }
+
+    if (schemaType.options.unique) {
+      schemaType.options.sparse = true;
     }
 
     const pathArray = path.split('.');
