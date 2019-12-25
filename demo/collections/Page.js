@@ -1,3 +1,6 @@
+const Quote = require('../content-blocks/Quote');
+const CallToAction = require('../content-blocks/CallToAction');
+
 module.exports = {
   slug: 'pages',
   labels: {
@@ -94,10 +97,10 @@ module.exports = {
       ],
     },
     {
-      name: 'blocks',
-      label: 'Flexible Content Blocks',
+      name: 'layout',
+      label: 'Layout Blocks',
       type: 'flexible',
-      blocks: ['quotes', 'ctas'],
+      blocks: [Quote, CallToAction],
       localized: true,
     },
     {

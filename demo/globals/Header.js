@@ -1,3 +1,6 @@
+const Quote = require('../content-blocks/Quote');
+const CallToAction = require('../content-blocks/CallToAction');
+
 module.exports = {
   slug: 'header',
   label: 'Header',
@@ -34,7 +37,7 @@ module.exports = {
       name: 'flexibleGlobal',
       label: 'Global Flexible Block',
       type: 'flexible',
-      blocks: ['quotes', 'ctas'],
+      blocks: [Quote, CallToAction],
       localized: true,
     },
   ],

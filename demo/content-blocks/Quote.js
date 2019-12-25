@@ -1,23 +1,7 @@
 module.exports = {
-  slug: 'quotes',
   labels: {
     singular: 'Quote',
     plural: 'Quotes',
-  },
-  useAsContentBlock: true,
-  policies: {
-    create: (req, res, next) => {
-      return next();
-    },
-    read: (req, res, next) => {
-      return next();
-    },
-    update: (req, res, next) => {
-      return next();
-    },
-    destroy: (req, res, next) => {
-      return next();
-    },
   },
   fields: [
     {

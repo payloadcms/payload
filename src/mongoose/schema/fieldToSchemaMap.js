@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+import { Schema } from 'mongoose';
 
-const formatBaseSchema = field => {
+const formatBaseSchema = (field) => {
   return {
     hide: field.hide || false,
     localized: field.localized || false,
@@ -10,70 +10,63 @@ const formatBaseSchema = field => {
 };
 
 const fieldToSchemaMap = {
-  number: field => {
+  number: (field) => {
     return { ...formatBaseSchema(field), type: Number };
   },
-  input: field => {
+  input: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
-  textarea: field => {
+  textarea: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
-  WYSIWYG: field => {
+  WYSIWYG: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
-  code: field => {
+  code: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
-  boolean: field => {
+  boolean: (field) => {
     return { ...formatBaseSchema(field), type: Boolean };
   },
-  date: field => {
+  date: (field) => {
     return {
       ...formatBaseSchema(field),
-      type: Date
-    }
+      type: Date,
+    };
   },
-  relationship: field => {
+  relationship: (field) => {
     const schema = {
       ...formatBaseSchema(field),
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       autopopulate: true,
       ref: field.relationTo,
     };
     return field.hasMany ? [schema] : schema;
   },
-  repeater: field => {
+  repeater: (field) => {
     const schema = {};
     if (field.id === false) {
       schema._id = false;
     }
-    field.fields.forEach(subField => {
+    field.fields.forEach((subField) => {
       schema[subField.name] = fieldToSchemaMap[subField.type](subField);
     });
     return [schema];
   },
-  enum: field => {
+  enum: (field) => {
     return {
       ...formatBaseSchema(field),
       type: String,
       enum: field.enum,
     };
   },
-  flexible: (field, options = {}) => {
-    const schema = new mongoose.Schema({
-      value: {
-        autopopulate: true,
-        type: mongoose.Types.ObjectId,
-        refPath: `${options.path ? (options.path + '.') : ''}${field.name}${field.localized ? '.{{LOCALE}}' : ''}.blockType`,
-      },
-      blockType: { type: String, enum: field.blocks },
-    });
+  flexible: (field) => {
+    const blockSchema = new Schema({ blockType: String }, { discriminatorKey: 'blockType', _id: false });
 
     return {
+      type: [blockSchema],
       localized: field.localized || false,
-      type: [schema],
-    }
+    };
   },
 };
 
