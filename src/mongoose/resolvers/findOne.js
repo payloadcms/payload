@@ -11,7 +11,6 @@ const find = ({
     };
   }
 
-const find = ({ Model, locale, fallback }) => {
   return new Promise((resolve, reject) => {
     Model.findOne(null, null, options, (err, doc) => {
       if (err || !doc) {
