@@ -37,16 +37,15 @@ class Payload {
 
   registerCollection = (collection) => {
     validateCollection(collection, this.collections, this.User);
-    const registeredCollection = registerCollectionSchema(collection, this.config);
-    this.collections[collection.slug] = registeredCollection;
+    this.collections[collection.slug] = registerCollectionSchema(collection, this.config);
     registerCollectionRoutes(this.collections[collection.slug], this.router);
-  }
+  };
 
   registerGlobals = (globals) => {
     validateGlobals(globals);
     this.globals = registerGlobalSchema(globals, this.config);
     registerGlobalRoutes(this.globals.model, this.router);
-  }
+  };
 
   getCollections = () => this.collections;
 
