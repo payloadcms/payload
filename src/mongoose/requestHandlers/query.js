@@ -11,6 +11,7 @@ const query = (req, res) => {
 
   req.model.paginate(req.model.apiQuery(req.query, req.locale), { options: queryOptions }, (err, result) => {
     if (err) {
+      console.log(err);
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
     }
     return res.json({

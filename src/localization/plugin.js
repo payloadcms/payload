@@ -105,14 +105,12 @@ export default function localizationPlugin(schema, options) {
         this.set(`${path}.${owner.getLocale()}`, value);
       });
 
-
     // localized option is not needed for the current path any more,
     // and is unwanted for all child locale-properties
     // delete schemaType.options.localized; // This was removed to allow viewing inside query parser
 
     const localizedObject = {};
     // TODO: setting equal to object is good for hasMany: false, but breaking for hasMany: true;
-    // console.log(path, schemaType.options);
     localizedObject[key] = {};
     pluginOptions.locales.forEach(function (locale) {
       const localeOptions = Object.assign({}, schemaType.options);
@@ -133,6 +131,16 @@ export default function localizationPlugin(schema, options) {
     }, localizedObject[key]);
 
     schema.add(localizedObject, prefix);
+  });
+
+  schema.eachPath((path, schemaType) => {
+    if (schemaType.schema && schemaType.schema.discriminators) {
+      Object.keys(schemaType.schema.discriminators).forEach((key) => {
+        if (schema.path(path)) {
+          schema.path(path).discriminator(key, schemaType.schema.discriminators[key]);
+        }
+      });
+    }
   });
 
   // document methods to set the locale for each model instance (document)
@@ -177,14 +185,16 @@ export default function localizationPlugin(schema, options) {
     },
     setDefaultLocale(locale) {
       const updateLocale = function (schemaToUpdate, localeToUpdate) {
-        schemaToUpdate.options.localization.defaultLocale = localeToUpdate.slice(0);
+        if (schemaToUpdate.options.localization) {
+          schemaToUpdate.options.localization.defaultLocale = localeToUpdate.slice(0);
 
-        // default locale change for sub-documents schemas
-        schemaToUpdate.eachPath((path, schemaType) => {
-          if (schemaType.schema) {
-            updateLocale(schemaType.schema, localeToUpdate);
-          }
-        });
+          // default locale change for sub-documents schemas
+          schemaToUpdate.eachPath((path, schemaType) => {
+            if (schemaType.schema) {
+              updateLocale(schemaType.schema, localeToUpdate);
+            }
+          });
+        }
       };
 
       updateLocale(this.schema, locale);

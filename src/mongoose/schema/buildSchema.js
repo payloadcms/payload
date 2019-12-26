@@ -1,34 +1,35 @@
 import { Schema } from 'mongoose';
-import mongooseHidden from 'mongoose-hidden';
 import fieldToSchemaMap from './fieldToSchemaMap';
 import baseFields from './baseFields';
-import localizationPlugin from '../../localization/plugin';
 
 const buildSchema = (configFields, config, options = {}) => {
   const fields = { ...baseFields };
-  const flexibleFields = [];
+  const flexiblefields = [];
 
   configFields.forEach((field) => {
     const fieldSchema = fieldToSchemaMap[field.type];
-    if (fieldSchema) fields[field.name] = fieldSchema(field, { localization: config.localization });
-    if (field.type === 'flexible') flexibleFields.push(field);
+    if (field.type === 'flexible') {
+      flexiblefields.push(field);
+    }
+
+    if (fieldSchema) {
+      fields[field.name] = fieldSchema(field, { localization: config.localization });
+    }
   });
 
-  const schema = new Schema(fields, options)
-    .plugin(localizationPlugin, config.localization)
-    .plugin(mongooseHidden());
+  const schema = new Schema(fields, options);
 
-  flexibleFields.forEach((field) => {
+  flexiblefields.forEach((field) => {
     field.blocks.forEach((block) => {
-      const subSchema = buildSchema(block.fields, config, { _id: false });
+      const blockSchemaFields = {};
 
-      if (field.localized && config.localization && config.localization.locales) {
-        config.localization.locales.forEach((locale) => {
-          schema.path(`${field.name}.${locale}`).discriminator(block.labels.singular, subSchema);
-        });
-      } else {
-        schema.path(field.name).discriminator(block.labels.singular, subSchema);
-      }
+      block.fields.forEach((blockField) => {
+        const fieldSchema = fieldToSchemaMap[blockField.type];
+        if (fieldSchema) blockSchemaFields[blockField.name] = fieldSchema(blockField, { localization: config.localization });
+      });
+
+      const blockSchema = new Schema(blockSchemaFields, { _id: false });
+      schema.path(field.name).discriminator(block.labels.singular, blockSchema);
     });
   });
 
