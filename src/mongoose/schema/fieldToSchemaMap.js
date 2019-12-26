@@ -65,7 +65,7 @@ const fieldToSchemaMap = {
 
     return {
       type: [flexibleSchema],
-      localized: false,
+      localized: field.localized || false,
     };
   },
 };
