@@ -57,15 +57,15 @@ const update = async (req, res, next, config) => {
 const upload = async (req, res, next, config) => {
   console.log(req.files);
   if (!req.files || Object.keys(req.files).length === 0) {
-    res.status(400)
-      .send('No files were uploaded.');
+    res.status(httpStatus.BAD_REQUEST)
+      .json({ error: 'No files were uploaded.' });
     return;
   }
 
   mkdirp(config.staticDir, (err) => {
     if (err) {
       console.error(err);
-      res.status(500)
+      res.status(httpStatus.INTERNAL_SERVER_ERROR)
         .json({ error: 'Upload failed.' });
     }
   });
