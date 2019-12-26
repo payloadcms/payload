@@ -10,6 +10,6 @@ const registerExpressMiddleware = ({ app, config, router }) => {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(localizationMiddleware(config.localization));
   app.use(router);
-}
+};
 
 export default registerExpressMiddleware;

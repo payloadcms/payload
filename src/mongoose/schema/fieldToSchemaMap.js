@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const formatBaseSchema = field => {
+const formatBaseSchema = (field) => {
   return {
     hide: field.hide || false,
     localized: field.localized || false,
@@ -10,31 +10,31 @@ const formatBaseSchema = field => {
 };
 
 const fieldToSchemaMap = {
-  number: field => {
+  number: (field) => {
     return { ...formatBaseSchema(field), type: Number };
   },
-  input: field => {
+  input: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
-  textarea: field => {
+  textarea: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
-  WYSIWYG: field => {
+  WYSIWYG: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
-  code: field => {
+  code: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
-  boolean: field => {
+  boolean: (field) => {
     return { ...formatBaseSchema(field), type: Boolean };
   },
-  date: field => {
+  date: (field) => {
     return {
       ...formatBaseSchema(field),
-      type: Date
-    }
+      type: Date,
+    };
   },
-  relationship: field => {
+  relationship: (field) => {
     const schema = {
       ...formatBaseSchema(field),
       type: mongoose.Schema.Types.ObjectId,
@@ -43,7 +43,7 @@ const fieldToSchemaMap = {
     };
     return field.hasMany ? [schema] : schema;
   },
-  repeater: field => {
+  repeater: (field) => {
     const schema = {};
     if (field.id === false) {
       schema._id = false;
@@ -53,7 +53,7 @@ const fieldToSchemaMap = {
     });
     return [schema];
   },
-  enum: field => {
+  enum: (field) => {
     return {
       ...formatBaseSchema(field),
       type: String,
@@ -73,7 +73,7 @@ const fieldToSchemaMap = {
     return {
       localized: field.localized || false,
       type: [schema],
-    }
+    };
   },
 };
 

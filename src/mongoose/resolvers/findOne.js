@@ -1,11 +1,11 @@
-import NotFound from '../../errors';
+import { NotFound } from '../../errors';
 
 const find = ({ Model, locale, fallback }) => {
   return new Promise((resolve, reject) => {
     Model.findOne(null, (err, doc) => {
       if (err || !doc) {
-        console.log('ok');
         reject(new NotFound());
+        return;
       }
 
       let result = doc;
