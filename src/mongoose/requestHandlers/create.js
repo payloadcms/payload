@@ -11,7 +11,7 @@ const create = (req, res) => {
     res.status(httpStatus.CREATED)
       .json({
         message: 'success',
-        result: result.toJSON({ virtuals: true }),
+        result: result.toJSON({ virtuals: true })
       });
   });
 };

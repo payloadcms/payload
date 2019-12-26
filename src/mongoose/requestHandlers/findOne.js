@@ -1,5 +1,4 @@
 import { modelById } from '../resolvers';
-import { createAutopopulateOptions } from '../createAutopopulateOptions';
 
 const findOne = (req, res) => {
   const query = {
@@ -10,7 +9,7 @@ const findOne = (req, res) => {
     depth: req.query.depth,
   };
 
-  modelById(query, createAutopopulateOptions(query))
+  modelById(query)
     .then(doc => res.json(doc))
     .catch(err => res.status(err.status).json({ error: err }));
 };

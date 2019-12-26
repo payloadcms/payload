@@ -1,23 +1,7 @@
 module.exports = {
-  slug: 'ctas',
   labels: {
     singular: 'Call to Action',
     plural: 'Calls to Action',
-  },
-  useAsContentBlock: true,
-  policies: {
-    create: (req, res, next) => {
-      return next();
-    },
-    read: (req, res, next) => {
-      return next();
-    },
-    update: (req, res, next) => {
-      return next();
-    },
-    destroy: (req, res, next) => {
-      return next();
-    },
   },
   fields: [
     {
@@ -35,5 +19,4 @@ module.exports = {
       required: true,
     },
   ],
-  timestamps: true,
 };

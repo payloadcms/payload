@@ -4,13 +4,10 @@ import initUploads from './init/uploads';
 import initPassport from './init/passport';
 import initCORS from './init/cors';
 import initWebpack from './init/webpack';
-
 import registerConfigRoute from './routes/config';
-
 import validateCollection from './collections/validate';
 import registerCollectionSchema from './collections/registerSchema';
 import registerCollectionRoutes from './collections/registerRoutes';
-
 import validateGlobals from './globals/validate';
 import registerGlobalSchema from './globals/registerSchema';
 import registerGlobalRoutes from './globals/registerRoutes';

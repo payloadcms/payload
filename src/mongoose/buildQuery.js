@@ -88,8 +88,6 @@ function parseParam(key, val, model, query, locale) {
     } else query.searchParams._id = { $ne: val };
   } else if (lcKey === 'locale') {
     // Do nothing
-  } else if (lcKey === 'depth') {
-    query.maxDepth = val;
   } else {
     query = parseSchemaForKey(model.schema, query, '', lcKey, val, operator, locale);
   }

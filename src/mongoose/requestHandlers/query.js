@@ -1,7 +1,15 @@
 import httpStatus from 'http-status';
 
 const query = (req, res) => {
-  req.model.paginate(req.model.apiQuery(req.query, req.locale), { ...req.query }, (err, result) => {
+  const queryOptions = {};
+
+  if (req.query.depth) {
+    queryOptions.autopopulate = {
+      maxDepth: req.query.depth,
+    };
+  }
+
+  req.model.paginate(req.model.apiQuery(req.query, req.locale), { options: queryOptions }, (err, result) => {
     if (err) {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
       return;

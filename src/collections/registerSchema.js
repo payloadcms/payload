@@ -1,27 +1,20 @@
 import mongoose from 'mongoose';
 import mongooseHidden from 'mongoose-hidden';
-import baseFields from '../mongoose/schema/baseFields';
-import fieldToSchemaMap from '../mongoose/schema/fieldToSchemaMap';
-import paginate from '../mongoose/paginate';
+import paginate from 'mongoose-paginate-v2';
+import autopopulate from 'mongoose-autopopulate';
 import buildQueryPlugin from '../mongoose/buildQuery';
 import localizationPlugin from '../localization/plugin';
-import autopopulate from '../mongoose/autopopulate';
 import passwordResetConfig from '../auth/passwordResets/config';
+import buildSchema from '../mongoose/schema/buildSchema';
 
 const addSchema = (collection, config) => {
-  const fields = { ...baseFields };
-
   if (collection.auth) {
     collection.fields.push(...passwordResetConfig.fields);
   }
 
-  collection.fields.forEach((field) => {
-    const fieldSchema = fieldToSchemaMap[field.type];
-    if (fieldSchema) fields[field.name] = fieldSchema(field, { localization: config.localization });
-  });
+  const schema = buildSchema(collection.fields, config, { timestamps: collection.timestamps });
 
-  const Schema = new mongoose.Schema(fields, { timestamps: collection.timestamps })
-    .plugin(paginate)
+  schema.plugin(paginate)
     .plugin(buildQueryPlugin)
     .plugin(localizationPlugin, config.localization)
     .plugin(autopopulate)
@@ -29,13 +22,13 @@ const addSchema = (collection, config) => {
 
   if (collection.plugins) {
     collection.plugins.forEach((plugin) => {
-      Schema.plugin(plugin.plugin, plugin.options);
+      schema.plugin(plugin.plugin, plugin.options);
     });
   }
 
   return {
     config: collection,
-    model: mongoose.model(collection.slug, Schema),
+    model: mongoose.model(collection.slug, schema),
   };
 };
 

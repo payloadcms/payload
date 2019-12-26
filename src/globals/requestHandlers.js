@@ -1,6 +1,5 @@
 import httpStatus from 'http-status';
 import { findOne } from '../mongoose/resolvers';
-import { createAutopopulateOptions } from '../mongoose/createAutopopulateOptions';
 import { NotFound } from '../errors';
 
 export const upsert = (req, res) => {
@@ -54,14 +53,9 @@ export const fetch = (req, res) => {
     depth: req.query.depth,
   };
 
-  findOne(query, createAutopopulateOptions(query))
+  findOne(query)
     .then((doc) => {
       const globals = { ...doc };
-      // eslint-disable-next-line no-underscore-dangle
-      delete globals._id;
-      delete globals.id;
-      // eslint-disable-next-line no-underscore-dangle
-      delete globals.__v;
 
       if (globals[req.params.key]) {
         return res.json(globals[req.params.key]);

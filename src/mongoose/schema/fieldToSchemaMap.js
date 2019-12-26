@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import { Schema } from 'mongoose';
 
 const formatBaseSchema = (field) => {
   return {
@@ -37,7 +37,7 @@ const fieldToSchemaMap = {
   relationship: (field) => {
     const schema = {
       ...formatBaseSchema(field),
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       autopopulate: true,
       ref: field.relationTo,
     };
@@ -46,9 +46,10 @@ const fieldToSchemaMap = {
   repeater: (field) => {
     const schema = {};
     if (field.id === false) {
+      // eslint-disable-next-line no-underscore-dangle
       schema._id = false;
     }
-    field.fields.forEach(subField => {
+    field.fields.forEach((subField) => {
       schema[subField.name] = fieldToSchemaMap[subField.type](subField);
     });
     return [schema];
@@ -60,19 +61,12 @@ const fieldToSchemaMap = {
       enum: field.enum,
     };
   },
-  flexible: (field, options = {}) => {
-    const schema = new mongoose.Schema({
-      value: {
-        autopopulate: true,
-        type: mongoose.Types.ObjectId,
-        refPath: `${options.path ? (options.path + '.') : ''}${field.name}${field.localized ? '.{{LOCALE}}' : ''}.blockType`,
-      },
-      blockType: { type: String, enum: field.blocks },
-    });
+  flexible: (field) => {
+    const flexibleSchema = new Schema({ name: String }, { discriminatorKey: 'blockType', _id: false });
 
     return {
+      type: [flexibleSchema],
       localized: field.localized || false,
-      type: [schema],
     };
   },
 };

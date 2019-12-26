@@ -5,7 +5,6 @@ const config = require('./payload.config');
 const router = express.Router({}); // eslint-disable-line new-cap
 const globals = require('./globals');
 const registerCollections = require('./collections');
-const registerContentBlocks = require('./content-blocks');
 
 const app = express();
 
@@ -18,7 +17,6 @@ const payload = new Payload({
 payload.registerGlobals(globals);
 
 registerCollections(payload);
-registerContentBlocks(payload);
 
 if (process.env.NODE_ENV !== 'production') {
   router.use((req, res, next) => {

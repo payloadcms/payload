@@ -1,8 +1,18 @@
 import { NotFound } from '../../errors';
 
-const modelById = (query, options) => {
+const modelById = (query) => {
+  const options = {};
+  const { depth } = query;
+
+  if (depth) {
+    options.autopopulate = {
+      maxDepth: depth,
+    };
+  }
+
   return new Promise((resolve, reject) => {
     query.Model.findOne({ _id: query.id }, {}, options, (err, doc) => {
+
       if (err || !doc) {
         reject(new NotFound());
         return;

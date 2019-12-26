@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
+import autopopulate from 'mongoose-autopopulate';
 import fieldToSchemaMap from '../mongoose/schema/fieldToSchemaMap';
-import autopopulate from '../mongoose/autopopulate';
 import localizationPlugin from '../localization/plugin';
 
 const registerSchema = (globalConfigs, config) => {
