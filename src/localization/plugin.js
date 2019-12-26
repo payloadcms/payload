@@ -134,7 +134,7 @@ export default function localizationPlugin(schema, options) {
   });
 
   schema.eachPath((path, schemaType) => {
-    if (schemaType.schema && schemaType.schema.discriminators) {
+    if (schemaType.schema && schemaType.options.localized && schemaType.schema.discriminators) {
       Object.keys(schemaType.schema.discriminators).forEach((key) => {
         if (schema.path(path)) {
           schema.path(path).discriminator(key, schemaType.schema.discriminators[key]);

@@ -1,5 +1,4 @@
 import { Schema } from 'mongoose';
-import config from '../../auth/passwordResets/config';
 
 const formatBaseSchema = (field) => {
   return {
@@ -66,7 +65,7 @@ const fieldToSchemaMap = {
 
     return {
       type: [flexibleSchema],
-      localized: field.localized || false,
+      localized: false,
     };
   },
 };
