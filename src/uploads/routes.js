@@ -8,7 +8,7 @@ import passport from 'passport';
 
 const router = express.Router();
 
-const uploadRoutes = config => {
+const uploadRoutes = (config) => {
 
   const Upload = uploadModelLoader(config);
   const UploadModels = {
@@ -19,17 +19,16 @@ const uploadRoutes = config => {
   router.all('/upload*',
     passport.authenticate('jwt', { session: false }),
     uploadMiddleware(config, UploadModels),
-    setModelLocaleMiddleware(),
-  );
+    setModelLocaleMiddleware());
 
   router.route('/upload')
     .post(
-      (req, res, next) => upload(req, res, next, config)
+      (req, res, next) => upload(req, res, next, config),
     );
 
   router.route('/upload/:id')
     .put(
-      (req, res, next) => update(req, res, next, config)
+      (req, res, next) => update(req, res, next, config),
     );
 
   return router;

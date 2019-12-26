@@ -8,12 +8,10 @@ const initUploads = ({ config, app, router }) => {
   app.use(fileUpload({}));
 
   if (config.uploads) {
-    app.use(fileUpload());
+    app.use(fileUpload({dubug: true}));
 
-    router.use('', uploadRoutes(config)
-    );
+    router.use('', uploadRoutes(config));
   }
-}
+};
 
 export default initUploads;
-
