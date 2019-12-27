@@ -55,7 +55,6 @@ const update = async (req, res, next, config) => {
 };
 
 const upload = async (req, res, next, config) => {
-  console.log(req.files);
   if (!req.files || Object.keys(req.files).length === 0) {
     res.status(httpStatus.BAD_REQUEST)
       .json({ error: 'No files were uploaded.' });
