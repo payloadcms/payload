@@ -61,7 +61,7 @@ const fieldToSchemaMap = {
     };
   },
   flexible: (field) => {
-    const flexibleSchema = new Schema({ name: String }, { discriminatorKey: 'blockType', _id: false });
+    const flexibleSchema = new Schema({ blockName: String }, { discriminatorKey: 'blockType', _id: false });
 
     return {
       type: [flexibleSchema],
