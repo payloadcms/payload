@@ -1,3 +1,5 @@
+import { NotFound } from '../../errors';
+
 const find = ({
   Model, locale, fallback, depth,
 }) => {
@@ -12,15 +14,15 @@ const find = ({
   return new Promise((resolve, reject) => {
     Model.findOne(null, null, options, (err, doc) => {
       if (err || !doc) {
-        return reject({ message: 'not found' });
+        reject(new NotFound());
+        return;
       }
 
       let result = doc;
 
       if (locale) {
         doc.setLocale(locale, fallback);
-        const json = doc.toJSON({ virtuals: true });
-        result = json;
+        result = doc.toJSON({ virtuals: true });
       }
 
       resolve(result);

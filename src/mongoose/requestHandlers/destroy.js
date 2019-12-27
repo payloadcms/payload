@@ -1,14 +1,22 @@
 import httpStatus from 'http-status';
+import { NotFound } from '../../errors';
 
 const destroy = (req, res) => {
   req.model.findOneAndDelete({ _id: req.params.id }, (err, doc) => {
-    if (err)
-      return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
+    if (err) {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR)
+        .json({ error: err });
+      return;
+    }
 
-    if (!doc)
-      return res.status(httpStatus.NOT_FOUND).send('Not Found');
+    if (!doc) {
+      res.status(httpStatus.NOT_FOUND)
+        .json(new NotFound());
+      return;
+    }
 
-    return res.send();
+    res.status(httpStatus.OK)
+      .send({ result: 'success' });
   });
 };
 

@@ -16,7 +16,8 @@
     "webpack": "webpack-dev-server --mode development --config src/client/config/webpack.dev.config.js --open --hot --history-api-fallback",
     "demo-server": "nodemon demo/init.js",
     "debug": "nodemon --inspect ./demo/init.js",
-    "dev": "npm-run-all -p webpack demo-server"
+    "dev": "npm-run-all -p webpack demo-server",
+    "lint": "eslint **/*.js"
   },
   "author": "",
   "license": "ISC",

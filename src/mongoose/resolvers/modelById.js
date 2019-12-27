@@ -1,3 +1,5 @@
+import { NotFound } from '../../errors';
+
 const modelById = (query) => {
   const options = {};
   const { depth } = query;
@@ -10,8 +12,10 @@ const modelById = (query) => {
 
   return new Promise((resolve, reject) => {
     query.Model.findOne({ _id: query.id }, {}, options, (err, doc) => {
+
       if (err || !doc) {
-        return reject({ message: 'not found' });
+        reject(new NotFound());
+        return;
       }
 
       let result = doc;

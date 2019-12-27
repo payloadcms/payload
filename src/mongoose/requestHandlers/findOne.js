@@ -1,4 +1,3 @@
-import httpStatus from 'http-status';
 import { modelById } from '../resolvers';
 
 const findOne = (req, res) => {
@@ -12,7 +11,7 @@ const findOne = (req, res) => {
 
   modelById(query)
     .then(doc => res.json(doc))
-    .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err }));
+    .catch(err => res.status(err.status).json({ error: err }));
 };
 
 export default findOne;

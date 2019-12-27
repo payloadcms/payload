@@ -1,21 +1,24 @@
 import httpStatus from 'http-status';
+import { NotFound } from '../../errors';
 
 const update = (req, res) => {
   req.model.findOne({ _id: req.params.id }, '', {}, (err, doc) => {
-    if (!doc)
-      return res.status(httpStatus.NOT_FOUND).send('Not Found');
+    if (!doc) {
+      res.status(httpStatus.NOT_FOUND).json(new NotFound());
+      return;
+    }
 
-    Object.keys(req.body).forEach(e => {
-      doc[e] = req.body[e];
-    });
+    Object.assign(doc, req.body);
 
-    doc.save((err) => {
-      if (err)
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
+    doc.save((saveError) => {
+      if (saveError) {
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: saveError });
+        return;
+      }
 
-      return res.json({
+      res.status(httpStatus.OK).json({
         message: 'success',
-        result: doc.toJSON({ virtuals: true })
+        result: doc.toJSON({ virtuals: true }),
       });
     });
   });

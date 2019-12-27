@@ -5,7 +5,6 @@ import authRoutes from '../auth/routes';
 import {
   query, create, findOne, destroy, update,
 } from '../mongoose/requestHandlers';
-import { upload as uploadMedia, update as updateMedia } from '../uploads/requestHandlers';
 import bindModelMiddleware from '../mongoose/bindModel';
 import setModelLocaleMiddleware from '../localization/setModelLocale';
 
@@ -28,18 +27,13 @@ const registerRoutes = ({ model, config }, router) => {
     bindModelMiddleware(model),
     setModelLocaleMiddleware());
 
-  // TODO: this feels sloppy, need to discuss media enabled collection handlers
-  const createHandler = config.media ? (req, res, next) => uploadMedia(req, res, next, config.media) : create;
-  const updateHandler = config.media ? (req, res, next) => updateMedia(req, res, next, config.media) : update;
-  // TODO: Do we need a delete?
-
   router.route(`/${config.slug}`)
     .get(config.policies.read, query)
-    .post(config.policies.create, createHandler);
+    .post(config.policies.create, create);
 
   router.route(`/${config.slug}/:id`)
     .get(config.policies.read, findOne)
-    .put(config.policies.update, updateHandler)
+    .put(config.policies.update, update)
     .delete(config.policies.destroy, destroy);
 };
 

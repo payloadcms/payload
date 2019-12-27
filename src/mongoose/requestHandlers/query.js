@@ -11,9 +11,10 @@ const query = (req, res) => {
 
   req.model.paginate(req.model.apiQuery(req.query, req.locale), { options: queryOptions }, (err, result) => {
     if (err) {
-      return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
+      return;
     }
-    return res.json({
+    res.status(httpStatus.OK).json({
       ...result,
       docs: result.docs.map((doc) => {
         if (req.locale && doc.setLocale) {

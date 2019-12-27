@@ -1,39 +1,42 @@
 import sharp from 'sharp';
 import { promisify } from 'util';
 import imageSize from 'image-size';
+
 const sizeOf = promisify(imageSize);
 
 function getOutputImageName(sourceImage, size) {
-  let extension = sourceImage.split('.').pop();
-  let filenameWithoutExtension = sourceImage.substr(0, sourceImage.lastIndexOf('.')) || sourceImage;
+  const extension = sourceImage.split('.')
+    .pop();
+  const filenameWithoutExtension = sourceImage.substr(0, sourceImage.lastIndexOf('.')) || sourceImage;
   return `${filenameWithoutExtension}-${size.width}x${size.height}.${extension}`;
 }
 
 export async function resizeAndSave(config, uploadConfig, file) {
-  let sourceImage = `${config.staticDir}/${file.name}`;
+  const sourceImage = `${config.staticDir}/${file.name}`;
 
-  let outputSizes = [];
+  const outputSizes = [];
   try {
     const dimensions = await sizeOf(sourceImage);
-    for (let desiredSize of uploadConfig.imageSizes) {
+    uploadConfig.imageSizes.map(async (desiredSize) => {
       if (desiredSize.width > dimensions.width) {
-        continue;
+        return;
       }
-      let outputImageName = getOutputImageName(sourceImage, desiredSize);
+      const outputImageName = getOutputImageName(sourceImage, desiredSize);
+      // eslint-disable-next-line no-await-in-loop
       await sharp(sourceImage)
         .resize(desiredSize.width, desiredSize.height, {
-          position: desiredSize.crop || 'centre' // would it make sense for this to be set by the uploader?
+          position: desiredSize.crop || 'centre', // would it make sense for this to be set by the uploader?
         })
         .toFile(outputImageName);
       outputSizes.push({
         name: desiredSize.name,
         height: desiredSize.height,
-        width: desiredSize.width
+        width: desiredSize.width,
       });
-    }
+    });
   } catch (e) {
     console.log('error in resize and save', e.message);
   }
-
+  console.log(outputSizes);
   return outputSizes;
 }

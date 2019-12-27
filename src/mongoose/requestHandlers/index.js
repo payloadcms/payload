@@ -9,5 +9,5 @@ export {
   destroy,
   findOne,
   query,
-  update
-}
+  update,
+};
