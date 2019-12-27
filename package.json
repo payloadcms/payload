@@ -26,6 +26,7 @@
     "accept-language-parser": "^1.5.0",
     "babel-jest": "^24.9.0",
     "body-parser": "^1.19.0",
+    "compression": "^1.7.4",
     "connect-history-api-fallback": "^1.6.0",
     "dotenv": "^6.0.0",
     "express": "^4.17.1",
