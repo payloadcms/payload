@@ -1,4 +1,5 @@
 import passport from 'passport';
+import AnonymousStrategy from 'passport-anonymous';
 import jwtStrategy from '../auth/jwt';
 import initRoutes from '../routes/init';
 import authRoutes from '../auth/routes';
@@ -7,6 +8,7 @@ import {
 } from '../mongoose/requestHandlers';
 import bindModelMiddleware from '../mongoose/bindModel';
 import setModelLocaleMiddleware from '../localization/setModelLocale';
+import { loadPolicy } from '../auth/loadPolicy';
 
 const registerRoutes = ({ model, config }, router) => {
   // register passport with model
@@ -18,6 +20,7 @@ const registerRoutes = ({ model, config }, router) => {
       passport.serializeUser(model.serializeUser());
       passport.deserializeUser(model.deserializeUser());
     }
+    passport.use(new AnonymousStrategy.Strategy());
 
     router.use('', initRoutes(model));
     router.use('', authRoutes(config, model));
@@ -28,13 +31,13 @@ const registerRoutes = ({ model, config }, router) => {
     setModelLocaleMiddleware());
 
   router.route(`/${config.slug}`)
-    .get(config.policies.read, query)
-    .post(config.policies.create, create);
+    .get(loadPolicy(config.policies.read), query)
+    .post(loadPolicy(config.policies.create), create);
 
   router.route(`/${config.slug}/:id`)
-    .get(config.policies.read, findOne)
-    .put(config.policies.update, update)
-    .delete(config.policies.destroy, destroy);
+    .get(loadPolicy(config.policies.read), findOne)
+    .put(loadPolicy(config.policies.update), update)
+    .delete(loadPolicy(config.policies.destroy), destroy);
 };
 
 export default registerRoutes;
