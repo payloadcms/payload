@@ -3,7 +3,7 @@ import HttpStatus from 'http-status';
 
 const requireAuth = (req, res) => {
   if (!req.user) {
-    res.status(HttpStatus.FORBIDDEN)
+    res.status(HttpStatus.UNAUTHORIZED)
       .send();
   }
 };
