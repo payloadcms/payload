@@ -12,31 +12,30 @@ function getOutputImageName(sourceImage, size) {
 }
 
 export async function resizeAndSave(config, uploadConfig, file) {
+  console.log(uploadConfig);
   const sourceImage = `${config.staticDir}/${file.name}`;
 
   const outputSizes = [];
   try {
     const dimensions = await sizeOf(sourceImage);
-    uploadConfig.imageSizes.map(async (desiredSize) => {
+    for (const desiredSize of uploadConfig.imageSizes) {
       if (desiredSize.width > dimensions.width) {
-        return;
+        continue;
       }
-      const outputImageName = getOutputImageName(sourceImage, desiredSize);
-      // eslint-disable-next-line no-await-in-loop
+      let outputImageName = getOutputImageName(sourceImage, desiredSize);
       await sharp(sourceImage)
         .resize(desiredSize.width, desiredSize.height, {
-          position: desiredSize.crop || 'centre', // would it make sense for this to be set by the uploader?
+          position: desiredSize.crop || 'centre' // would it make sense for this to be set by the uploader?
         })
         .toFile(outputImageName);
       outputSizes.push({
         name: desiredSize.name,
         height: desiredSize.height,
-        width: desiredSize.width,
+        width: desiredSize.width
       });
-    });
+    }
   } catch (e) {
     console.log('error in resize and save', e.message);
   }
-  console.log(outputSizes);
   return outputSizes;
 }
