@@ -4,10 +4,7 @@ import uploadRoutes from '../uploads/routes';
 const initUploads = ({ config, app, router }) => {
   const staticUrl = config.staticUrl ? config.staticUrl : `/${config.staticDir}`;
   app.use(staticUrl, express.static(config.staticDir));
-
-  if (config.uploads) {
-    router.use('', uploadRoutes(config, app, router));
-  }
+  router.use('', uploadRoutes(config, app, router));
 };
 
 export default initUploads;
