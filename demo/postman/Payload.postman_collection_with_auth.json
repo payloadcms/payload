@@ -1,18 +1,15 @@
 {
 	"info": {
+		"_postman_id": "00e8c5e4-3695-4178-94c7-6c0cef9f604a",
 		"name": "Payload",
-		"_postman_id": "027b80cb-1244-c4b7-01f4-2a0ccf32e0a3",
-		"description": "",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
 			"name": "Roles",
-			"description": "",
 			"item": [
 				{
 					"name": "At Least",
-					"description": "",
 					"item": [
 						{
 							"name": "Role - At least admin",
@@ -28,10 +25,6 @@
 										"value": "JWT {{token}}"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "http://localhost:3000/role/admin/atleast",
 									"protocol": "http",
@@ -63,10 +56,6 @@
 										"value": "JWT {{token}}"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "http://localhost:3000/role/viewer/atleast",
 									"protocol": "http",
@@ -98,10 +87,6 @@
 										"value": "JWT {{token}}"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "http://localhost:3000/role/user/atleast",
 									"protocol": "http",
@@ -120,11 +105,11 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "Exact",
-					"description": "",
 					"item": [
 						{
 							"name": "Role - Admin only",
@@ -140,10 +125,6 @@
 										"value": "JWT {{token}}"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "http://localhost:3000/role/admin/only",
 									"protocol": "http",
@@ -175,10 +156,6 @@
 										"value": "JWT {{token}}"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "http://localhost:3000/role/user/only",
 									"protocol": "http",
@@ -197,46 +174,154 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
-			"name": "Public Domain Check",
+			"name": "Reference Queries",
+			"item": [
+				{
+					"name": "Get Page - One Level Deep",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/pages?categories.title=MyCategory",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"pages"
+							],
+							"query": [
+								{
+									"key": "categories.title",
+									"value": "MyCategory"
+								}
+							]
+						},
+						"description": "\t"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Page - Recursive",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/pages?categories.owners.email=test@test.com",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"pages"
+							],
+							"query": [
+								{
+									"key": "categories.owners.email",
+									"value": "test@test.com"
+								}
+							]
+						},
+						"description": "\t"
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Get Page",
 			"request": {
-				"method": "POST",
+				"method": "GET",
 				"header": [
 					{
 						"key": "Content-Type",
 						"value": "application/json"
 					}
 				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"domain\": \"http://localhost:8000\"}"
-				},
 				"url": {
-					"raw": "https://jyiixvked0.execute-api.us-east-1.amazonaws.com/dev/call",
-					"protocol": "https",
+					"raw": "http://localhost:3000/pages?locale=en&content=Some English content",
+					"protocol": "http",
 					"host": [
-						"jyiixvked0",
-						"execute-api",
-						"us-east-1",
-						"amazonaws",
-						"com"
+						"localhost"
 					],
+					"port": "3000",
 					"path": [
-						"dev",
-						"call"
+						"pages"
+					],
+					"query": [
+						{
+							"key": "locale",
+							"value": "en"
+						},
+						{
+							"key": "content",
+							"value": "Some English content"
+						}
 					]
-				}
+				},
+				"description": "\t"
 			},
 			"response": []
 		},
 		{
-			"name": "Get Page",
+			"name": "Get Page copy",
 			"request": {
 				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/pages?locale=en&content=Some English content",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"pages"
+					],
+					"query": [
+						{
+							"key": "locale",
+							"value": "en"
+						},
+						{
+							"key": "content",
+							"value": "Some English content"
+						}
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Post Page",
+			"request": {
+				"method": "POST",
 				"header": [
 					{
 						"key": "Content-Type",
@@ -263,7 +348,7 @@
 			"response": []
 		},
 		{
-			"name": "Post Page",
+			"name": "Post Page copy",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -303,7 +388,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"title\": \"sup dog\",\n\t\"content\": \"some shit\"\n}"
+					"raw": "{\n\t\"email\": \"test@test.com\",\n\t\"password\": \"test123\"\n}"
 				},
 				"url": {
 					"raw": "http://localhost:3000/users",
@@ -394,6 +479,421 @@
 				"description": "\tThis is to test that the JWT comes through properly.  "
 			},
 			"response": []
+		},
+		{
+			"name": "Post Media",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "JWT {{token}}"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "type",
+							"value": "image",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/danri/Pictures/IMG_5373.jpg"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/upload",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"upload"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Post Media copy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "JWT {{token}}"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "imagename",
+							"type": "text"
+						},
+						{
+							"key": "caption",
+							"value": "this is something funny",
+							"type": "text"
+						},
+						{
+							"key": "description",
+							"value": "this is what this image is",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"value": "",
+							"type": "file"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/media",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"media"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Media",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "JWT {{token}}"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/media",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"media"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Put Media",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "JWT {{token}}"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "imagename",
+							"type": "text"
+						},
+						{
+							"key": "caption",
+							"value": "this is in spanish ",
+							"type": "text"
+						},
+						{
+							"key": "description",
+							"value": "this is my second spanish description",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"value": "",
+							"type": "file",
+							"disabled": true
+						},
+						{
+							"key": "locale",
+							"value": "es",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/media/5cce426e85570a193076c90e",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"media",
+						"5cce426e85570a193076c90e"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Forgot",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "JWT {{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"userEmail\": \"test@test.com\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/forgot",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"forgot"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Reset - Token",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "JWT {{token}}"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/reset/9d95ad972943b4bb17d4e914f087ffbbc5959bd2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"reset",
+						"9d95ad972943b4bb17d4e914f087ffbbc5959bd2"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Reset - Set Password",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "JWT {{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"token\": \"9d95ad972943b4bb17d4e914f087ffbbc5959bd2\",\n\t\"password\": \"test123\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/reset",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"reset"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Post Follower",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "JWT {{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"John Doe\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/followers",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"followers"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Follower",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "JWT {{token}}"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/followers?name=John Doe",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"followers"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "John Doe"
+						}
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Post Category",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "JWT {{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"John Doe\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/followers",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"followers"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
 		}
-	]
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "f054eb31-d47b-480c-9615-9189c1c355a6",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "18326854-1e21-47ce-bdb9-20bee674b3e3",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
 }
