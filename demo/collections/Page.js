@@ -1,3 +1,6 @@
+import HttpStatus from 'http-status';
+import checkRoleMiddleware from '../../src/auth/checkRoleMiddleware';
+
 const Quote = require('../content-blocks/Quote');
 const CallToAction = require('../content-blocks/CallToAction');
 
@@ -9,17 +12,22 @@ module.exports = {
   },
   useAsTitle: 'title',
   policies: {
-    create: (req, res, next) => {
-      return next();
-    },
+    // options: create, read, update, delete
+    // null or undefined policies will default to requiring auth
+    // any policy can use req.user to see that the user is logged
+    create: null,
     read: (req, res, next) => {
-      return next();
+      // allow anonymous access
+      next();
     },
-    update: (req, res, next) => {
-      return next();
-    },
+    update: checkRoleMiddleware('user', 'admin'),
     destroy: (req, res, next) => {
-      return next();
+      if (req.user && req.user.role) {
+        next();
+        return;
+      }
+      res.status(HttpStatus.FORBIDDEN)
+        .send();
     },
   },
   fields: [
