@@ -1,9 +1,7 @@
-export default [
-  {
-    name: 'filename',
-    label: 'Filename',
-    type: 'input',
+export default {
+  filename: {
+    type: String,
     unique: true,
     required: true,
   },
-];
+};

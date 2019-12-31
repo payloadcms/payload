@@ -4,11 +4,11 @@ import { upload, update } from './requestHandlers';
 import uploadMiddleware from './middleware';
 import setModelLocaleMiddleware from '../localization/setModelLocale';
 
-const uploadRoutes = (models, config, router) => {
+const uploadRoutes = (Upload, config, router) => {
   router.all('/upload*',
     fileUpload(),
     passport.authenticate('jwt', { session: false }),
-    uploadMiddleware(config, models),
+    uploadMiddleware(config, Upload),
     setModelLocaleMiddleware());
 
   router.route('/upload')

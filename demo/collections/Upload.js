@@ -1,7 +1,3 @@
-const passportLocalMongoose = require('passport-local-mongoose');
-const payloadConfig = require('../payload.config');
-const userValidate = require('../User/User.validate');
-
 module.exports = {
   slug: 'uploads',
   labels: {
@@ -25,18 +21,12 @@ module.exports = {
   },
   fields: [
     {
-      name: 'email',
-      label: 'Email Address',
+      name: 'test-custom-media-field',
+      label: 'Testing a Custom Media Field',
       type: 'input',
-      unique: true,
       maxLength: 100,
       required: true,
-    },
-    {
-      name: 'role',
-      type: 'enum',
-      enum: payloadConfig.roles,
-      default: 'user',
+      localized: true,
     },
   ],
   timestamps: true,

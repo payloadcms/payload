@@ -75,23 +75,23 @@ class Payload {
       this.config.upload,
       this.config,
       { discriminatorKey: 'type' },
-      baseUploadFields,
     );
 
-    const imageSchema = buildCollectionSchema(
-      this.config.upload,
-      this.config,
-      { discriminatorKey: 'type' },
-      { ...baseUploadFields, ...baseImageFields },
-    );
+    uploadSchema.add(baseUploadFields);
+
+    const imageSchema = new mongoose.Schema(baseImageFields, {
+      discriminatorKey: 'type',
+    });
 
     this.Upload = mongoose.model(this.config.upload.labels.singular, uploadSchema);
     this.Upload.discriminator('image', imageSchema);
 
-    registerUploadRoutes({
-      default: this.Upload,
-      image: imageSchema,
-    }, this.config, this.router);
+    registerUploadRoutes(this.Upload, this.config, this.router);
+
+    registerCollectionRoutes({
+      model: this.Upload,
+      config: this.config.upload,
+    }, this.router);
   }
 
   registerGlobals = (globals) => {

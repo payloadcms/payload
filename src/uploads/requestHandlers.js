@@ -80,6 +80,7 @@ const upload = async (req, res, next, config) => {
   const handlerData = await fileTypeHandler(config, req.uploadConfig, req.files.file);
 
   req.model.create({
+    ...req.body,
     filename: req.files.file.name,
     ...handlerData,
   }, (mediaCreateError, result) => {
