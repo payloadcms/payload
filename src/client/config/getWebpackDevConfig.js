@@ -45,7 +45,7 @@ module.exports = (config) => {
     output: {
       path: '/',
       publicPath: '/static',
-      filename: '[name].js'
+      filename: '[name].js',
     },
     devServer: {
       historyApiFallback: true,
@@ -58,8 +58,8 @@ module.exports = (config) => {
           test: /\.js$/,
           exclude: /node_modules/,
           use: {
-            loader: 'babel-loader'
-          }
+            loader: 'babel-loader',
+          },
         },
         {
           // "oneOf" will traverse all following loaders until one will
@@ -82,7 +82,7 @@ module.exports = (config) => {
             // to immediately apply all styles to the DOM.
             {
               test: /\.(scss|sass)$/,
-              use: getStyleLoaders({ importLoaders: 2 }, 'sass-loader')
+              use: getStyleLoaders({ importLoaders: 2 }, 'sass-loader'),
             },
             // "file" loader makes sure those assets get served by WebpackDevServer.
             // When you `import` an asset, you get its (virtual) filename.
@@ -100,14 +100,14 @@ module.exports = (config) => {
                 name: 'static/media/[name].[hash:8].[ext]',
               },
             },
-          ]
-        }
+          ],
+        },
       ],
     },
     plugins: [
       new HtmlWebpackPlugin({
         template: './src/client/index.html',
-        filename: './index.html'
+        filename: './index.html',
       }),
       new webpack.HotModuleReplacementPlugin(),
     ],
@@ -115,8 +115,8 @@ module.exports = (config) => {
       alias: {
         payload: path.resolve(__dirname, '../../'),
         scssOverrides: config.paths.scssOverrides,
-        customComponents: config.paths.customComponents
-      }
-    }
-  }
+        config: config.paths.config,
+      },
+    },
+  };
 };

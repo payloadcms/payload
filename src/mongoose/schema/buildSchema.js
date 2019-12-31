@@ -2,8 +2,8 @@ import { Schema } from 'mongoose';
 import fieldToSchemaMap from './fieldToSchemaMap';
 import baseFields from './baseFields';
 
-const buildSchema = (configFields, config, options = {}) => {
-  const fields = { ...baseFields };
+const buildSchema = (configFields, config, options = {}, additionalBaseFields = {}) => {
+  const fields = { ...baseFields, ...additionalBaseFields };
   const flexiblefields = [];
 
   configFields.forEach((field) => {

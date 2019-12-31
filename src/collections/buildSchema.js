@@ -1,18 +1,12 @@
-import mongoose from 'mongoose';
 import mongooseHidden from 'mongoose-hidden';
 import paginate from 'mongoose-paginate-v2';
 import autopopulate from 'mongoose-autopopulate';
 import buildQueryPlugin from '../mongoose/buildQuery';
 import localizationPlugin from '../localization/plugin';
-import passwordResetConfig from '../auth/passwordResets/config';
 import buildSchema from '../mongoose/schema/buildSchema';
 
-const addSchema = (collection, config) => {
-  if (collection.auth) {
-    collection.fields.push(...passwordResetConfig.fields);
-  }
-
-  const schema = buildSchema(collection.fields, config, { timestamps: collection.timestamps });
+const buildCollectionSchema = (collection, config, schemaOptions = {}) => {
+  const schema = buildSchema(collection.fields, config, { timestamps: collection.timestamps, ...schemaOptions });
 
   schema.plugin(paginate)
     .plugin(buildQueryPlugin)
@@ -26,10 +20,7 @@ const addSchema = (collection, config) => {
     });
   }
 
-  return {
-    config: collection,
-    model: mongoose.model(collection.slug, schema),
-  };
+  return schema;
 };
 
-export default addSchema;
+export default buildCollectionSchema;
