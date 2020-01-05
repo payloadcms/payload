@@ -1,10 +1,6 @@
-import { DuplicateCollection, MissingCollectionLabel, ExistingUser } from '../errors';
+import { DuplicateCollection, MissingCollectionLabel } from '../errors';
 
-export default function validateCollection(collection, collections, userModel) {
-  if (collection.auth && userModel) {
-    throw new ExistingUser();
-  }
-
+export default function validateCollection(collection, collections) {
   if (!collection.labels.singular) {
     throw new MissingCollectionLabel(collection);
   }

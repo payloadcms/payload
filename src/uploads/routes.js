@@ -2,29 +2,23 @@ import passport from 'passport';
 import fileUpload from 'express-fileupload';
 import { upload, update } from './requestHandlers';
 import uploadMiddleware from './middleware';
-import uploadModelLoader from './model';
-import imageUploadModelLoader from './images/model';
 import setModelLocaleMiddleware from '../localization/setModelLocale';
 
-const uploadRoutes = (config, app, router) => {
-  const Upload = uploadModelLoader(config);
-  const UploadModels = {
-    default: Upload,
-    image: imageUploadModelLoader(Upload, config),
-  };
+const uploadRoutes = (Upload, config, router) => {
+  const { upload: uploadConfig } = config;
 
-  router.all('/upload*',
+  router.all(`/${uploadConfig.slug}*`,
     fileUpload(),
     passport.authenticate('jwt', { session: false }),
-    uploadMiddleware(config, UploadModels),
+    uploadMiddleware(config, Upload),
     setModelLocaleMiddleware());
 
-  router.route('/upload')
+  router.route(`/${uploadConfig.slug}`)
     .post(
       (req, res, next) => upload(req, res, next, config),
     );
 
-  router.route('/upload/:id')
+  router.route(`/${uploadConfig.slug}/:id`)
     .put(
       (req, res, next) => update(req, res, next, config),
     );

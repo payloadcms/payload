@@ -1,7 +1,17 @@
 const path = require('path');
+const Page = require('./collections/Page');
+const Category = require('./collections/Category');
+const User = require('./collections/User');
+const Upload = require('./collections/Upload');
+const Header = require('./globals/Header');
+const Footer = require('./globals/Footer');
 
 module.exports = {
   disableAdmin: true,
+  collections: [Page, Category],
+  user: User,
+  upload: Upload,
+  globals: [Header, Footer],
   port: 3000,
   serverUrl: 'http://localhost:3000',
   cors: ['http://localhost', 'http://localhost:8080', 'http://localhost:8081'],
@@ -14,7 +24,7 @@ module.exports = {
   compression: {},
   paths: {
     scssOverrides: path.resolve(__dirname, 'client/scss/overrides.scss'),
-    customComponents: path.resolve(__dirname, 'client/components/custom'),
+    config: path.resolve(__dirname),
   },
   mongoURL: 'mongodb://localhost/payload',
   localization: {
