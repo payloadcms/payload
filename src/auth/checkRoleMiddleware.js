@@ -1,11 +1,12 @@
-import HttpStatus from 'http-status';
+const HttpStatus = require('http-status');
 
 /**
  * authorize a request by comparing the current user with one or more roles
  * @param roles
  * @returns {Function}
  */
-export default function checkRoleMiddleware(...roles) {
+
+const checkRoleMiddleware = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
       res.status(HttpStatus.UNAUTHORIZED)
@@ -17,4 +18,6 @@ export default function checkRoleMiddleware(...roles) {
       next();
     }
   };
-}
+};
+
+module.exports = checkRoleMiddleware;

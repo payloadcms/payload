@@ -30,19 +30,17 @@ const authRoutes = (userConfig, User) => {
   if (userConfig.auth.registration) {
     router
       .route(`${userConfig.slug}/register`) // TODO: not sure how to incorporate url params like `:pageId`
-      .post(userConfig.auth.registrationValidation, auth.register);
+      .post(auth.register);
 
     router
       .route('/first-register')
-      .post(userConfig.auth.registrationValidation,
-        (req, res, next) => {
-          User.countDocuments({}, (err, count) => {
-            if (err) res.status(500).json({ error: err });
-            if (count >= 1) return res.status(403).json({ initialized: true });
-            next();
-          });
-        },
-        auth.register);
+      .post((req, res, next) => {
+        User.countDocuments({}, (err, count) => {
+          if (err) res.status(500).json({ error: err });
+          if (count >= 1) return res.status(403).json({ initialized: true });
+          next();
+        });
+      }, auth.register);
   }
 
   return router;

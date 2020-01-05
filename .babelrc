@@ -11,5 +11,6 @@
 				"regenerator": true
 			}
 		]
-	]
+	],
+	"sourceType": "unambiguous"
 }

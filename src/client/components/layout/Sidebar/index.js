@@ -1,24 +1,24 @@
 import React from 'react';
-import { withRouter } from 'react-router-dom';
+import { withRouter, NavLink, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { NavLink, Link } from 'react-router-dom';
+import config from 'payload-config';
+
 import Arrow from '../../graphics/Arrow';
 import Icon from '../../graphics/Icon';
 
 import './index.scss';
 
 const mapState = state => ({
-  config: state.common.config
+  config: state.common.config,
 });
 
-const Sidebar = props => {
-
+const Sidebar = (props) => {
   const {
     collections,
     routes: {
       admin,
-    }
-  } = props.config;
+    },
+  } = config;
 
   return (
     <aside className="sidebar">
@@ -34,7 +34,11 @@ const Sidebar = props => {
             : undefined;
 
           return (
-            <Link className={classes} key={i} to={href}>
+            <Link
+              className={classes}
+              key={i}
+              to={href}
+            >
               <Arrow />
               {collections[key].labels.plural}
             </Link>
@@ -43,21 +47,30 @@ const Sidebar = props => {
       </nav>
       <span className="uppercase-label">Globals</span>
       <nav>
-        <NavLink activeClassName="active" to="/media-library">
+        <NavLink
+          activeClassName="active"
+          to="/media-library"
+        >
           <Arrow />
           Media Library
         </NavLink>
-        <NavLink activeClassName="active" to="/components">
+        <NavLink
+          activeClassName="active"
+          to="/components"
+        >
           <Arrow />
           Components
         </NavLink>
-        <NavLink activeClassName="active" to="/settings">
+        <NavLink
+          activeClassName="active"
+          to="/settings"
+        >
           <Arrow />
           Settings
         </NavLink>
       </nav>
     </aside>
   );
-}
+};
 
 export default withRouter(connect(mapState)(Sidebar));

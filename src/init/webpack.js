@@ -18,13 +18,13 @@ const initWebpack = ({ config, app }) => {
     const filename = path.resolve(compiler.outputPath, 'index.html');
     compiler.outputFileSystem.readFile(filename, (err, result) => {
       if (err) {
-        return next(err)
+        return next(err);
       }
-      res.set('content-type', 'text/html')
-      res.send(result)
-      res.end()
-    })
-  })
-}
+      res.set('content-type', 'text/html');
+      res.send(result);
+      res.end();
+    });
+  });
+};
 
 export default initWebpack;

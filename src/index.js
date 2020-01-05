@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import passportLocalMongoose from 'passport-local-mongoose';
 import connectMongoose from './init/connectMongoose';
 import registerExpressMiddleware from './init/registerExpressMiddleware';
 import initPassport from './init/passport';
@@ -61,6 +62,7 @@ class Payload {
   registerUser = () => {
     this.config.user.fields.push(...baseUserFields);
     const userSchema = buildCollectionSchema(this.config.user, this.config);
+    userSchema.plugin(passportLocalMongoose, { usernameField: 'email' });
 
     this.User = mongoose.model(this.config.user.labels.singular, userSchema);
     initUserAuth(this.User, this.config, this.router);

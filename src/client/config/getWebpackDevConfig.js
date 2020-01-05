@@ -115,7 +115,7 @@ module.exports = (config) => {
       alias: {
         payload: path.resolve(__dirname, '../../'),
         scssOverrides: config.paths.scssOverrides,
-        config: config.paths.config,
+        'payload-config': config.paths.config,
       },
     },
   };

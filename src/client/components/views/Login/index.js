@@ -11,30 +11,43 @@ import FormSubmit from '../../forms/Submit';
 import './index.scss';
 
 const mapStateToProps = state => ({
-  windowHeight: state.common.windowHeight
+  windowHeight: state.common.windowHeight,
 });
 
 const cookies = new Cookies();
 
-const handleAjaxResponse = res => {
+const handleAjaxResponse = (res) => {
   cookies.set('token', res.token, { path: '/' });
 };
 
-const Login = props => {
-
+const Login = (props) => {
   const Logo = props.logo;
   const minHeight = props.windowHeight;
 
   return (
-    <ContentBlock className="login" width="narrow" style={{ minHeight }}>
+    <ContentBlock
+      className="login"
+      width="narrow"
+      style={{ minHeight }}
+    >
       <div className="wrap">
         <Form
           handleAjaxResponse={handleAjaxResponse}
           method="POST"
           action="http://localhost:3000/login"
-          redirect="/">
-          <Email label="Email Address" name="email" required />
-          <Password error="password" label="Password" name="password" required />
+          redirect="/"
+        >
+          <Email
+            label="Email Address"
+            name="email"
+            required
+          />
+          <Password
+            error="password"
+            label="Password"
+            name="password"
+            required
+          />
           <FormSubmit>Login</FormSubmit>
         </Form>
         <Link to="/">To Dashboard</Link>

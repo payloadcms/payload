@@ -1,6 +1,4 @@
-const passportLocalMongoose = require('passport-local-mongoose');
 const payloadConfig = require('../payload.config');
-const userValidate = require('../User/User.validate');
 
 module.exports = {
   slug: 'users',
@@ -34,9 +32,7 @@ module.exports = {
     strategy: 'jwt',
     passwordResets: true,
     registration: true,
-    registrationValidation: userValidate.post,
   },
-  plugins: [{ plugin: passportLocalMongoose, options: { usernameField: 'email' } }],
   fields: [
     {
       name: 'email',

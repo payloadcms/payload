@@ -7,7 +7,7 @@ const Header = require('./globals/Header');
 const Footer = require('./globals/Footer');
 
 module.exports = {
-  disableAdmin: true,
+  // disableAdmin: true,
   collections: [Page, Category],
   user: User,
   upload: Upload,
@@ -24,7 +24,7 @@ module.exports = {
   compression: {},
   paths: {
     scssOverrides: path.resolve(__dirname, 'client/scss/overrides.scss'),
-    config: path.resolve(__dirname),
+    config: path.resolve(__dirname, 'payload.config.js'),
   },
   mongoURL: 'mongodb://localhost/payload',
   localization: {

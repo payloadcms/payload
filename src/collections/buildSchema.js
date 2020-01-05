@@ -14,12 +14,6 @@ const buildCollectionSchema = (collection, config, schemaOptions = {}) => {
     .plugin(autopopulate)
     .plugin(mongooseHidden());
 
-  if (collection.plugins) {
-    collection.plugins.forEach((plugin) => {
-      schema.plugin(plugin.plugin, plugin.options);
-    });
-  }
-
   return schema;
 };
 

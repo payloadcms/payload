@@ -1,6 +1,5 @@
-import HttpStatus from 'http-status';
-import checkRoleMiddleware from '../../src/auth/checkRoleMiddleware';
-
+const HttpStatus = require('http-status');
+const checkRoleMiddleware = require('../../src/auth/checkRoleMiddleware');
 const Quote = require('../content-blocks/Quote');
 const CallToAction = require('../content-blocks/CallToAction');
 
