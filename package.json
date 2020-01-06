@@ -25,6 +25,7 @@
     "@hapi/joi": "^15.1.1",
     "accept-language-parser": "^1.5.0",
     "babel-jest": "^24.9.0",
+    "babel-plugin-add-module-exports": "^1.0.2",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "connect-history-api-fallback": "^1.6.0",
@@ -68,9 +69,9 @@
     "superagent-promise": "^1.1.0",
     "universal-cookie": "^3.1.0",
     "url-loader": "^1.0.1",
+    "webpack": "^4.41.0",
     "webpack-dev-middleware": "^3.7.2",
-    "webpack-hot-middleware": "^2.25.0",
-    "webpack": "^4.41.0"
+    "webpack-hot-middleware": "^2.25.0"
   },
   "devDependencies": {
     "@babel/core": "^7.2.0",

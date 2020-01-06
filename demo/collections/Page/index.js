@@ -1,7 +1,8 @@
 const HttpStatus = require('http-status');
-const checkRoleMiddleware = require('../../src/auth/checkRoleMiddleware');
-const Quote = require('../content-blocks/Quote');
-const CallToAction = require('../content-blocks/CallToAction');
+const checkRoleMiddleware = require('../../../src/auth/checkRoleMiddleware');
+const Quote = require('../../content-blocks/Quote');
+const CallToAction = require('../../content-blocks/CallToAction');
+const List = require('./components/List');
 
 module.exports = {
   slug: 'pages',
@@ -137,5 +138,8 @@ module.exports = {
       ],
     },
   ],
+  components: {
+    List,
+  },
   timestamps: true,
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { SetStepNav } from 'payload/components';
+import SetStepNav from '../../../utilities/SetStepNav';
 
 import './index.scss';
 

@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import Routes from './routes';
+import Routes from './Routes';
 import store from '../store';
 import MeasureWindow from './utilities/MeasureWindow';
 import MeasureScroll from './utilities/MeasureScroll';
