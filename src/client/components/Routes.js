@@ -53,7 +53,7 @@ const Routes = () => {
                         return (
                           <Switch key={collection.slug}>
                             <Route
-                              path={`${match.url}/collections/:collectionSlug/create`}
+                              path={`${match.url}/collections/${collection.slug}/create`}
                               exact
                               render={(routeProps) => {
                                 return (
@@ -66,7 +66,7 @@ const Routes = () => {
                             />
 
                             <Route
-                              path={`${match.url}/collections/:collectionSlug/:id`}
+                              path={`${match.url}/collections/${collection.slug}/:id`}
                               exact
                               render={(routeProps) => {
                                 return (
@@ -79,12 +79,10 @@ const Routes = () => {
                             />
 
                             <Route
-                              path={`${match.url}/collections/:collectionSlug`}
+                              path={`${match.url}/collections/${collection.slug}`}
                               exact
                               render={(routeProps) => {
                                 const ListComponent = components.List ? components.List : List;
-
-                                console.log(ListComponent);
                                 return (
                                   <ListComponent
                                     {...routeProps}

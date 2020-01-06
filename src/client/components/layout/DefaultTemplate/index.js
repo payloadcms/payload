@@ -5,16 +5,16 @@ import Localizer from '../../modules/Localizer';
 
 import './index.scss';
 
-const DefaultTemplate = props => {
+const DefaultTemplate = ({ children }) => {
   return (
     <div className="default-template">
       <div className="wrap">
-        <Sidebar icon={props.icon} collections={props.collections} />
+        <Sidebar />
         <div className="eyebrow">
           <StepNav />
           <Localizer />
         </div>
-        {props.children}
+        {children}
       </div>
     </div>
   );

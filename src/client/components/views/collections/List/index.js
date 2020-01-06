@@ -8,11 +8,11 @@ const ListView = (props) => {
     <article className="collection-list">
       <SetStepNav nav={[
         {
-          label: props.collection.label,
+          label: props.collection.labels.plural,
         },
       ]}
       />
-      {props.children}
+      <h1>{props.collection.labels.plural}</h1>
     </article>
   );
 };

@@ -15,6 +15,7 @@ const mapState = state => ({
 const Sidebar = (props) => {
   const {
     collections,
+    globals,
     routes: {
       admin,
     },
@@ -27,6 +28,13 @@ const Sidebar = (props) => {
       </Link>
       <span className="uppercase-label">Collections</span>
       <nav>
+        <NavLink
+          activeClassName="active"
+          to="/admin/media-library"
+        >
+          <Arrow />
+          Media Library
+        </NavLink>
         {collections && Object.keys(collections).map((key, i) => {
           const href = `${admin}/collections/${collections[key].slug}`;
           const classes = props.location.pathname.indexOf(href) > -1
@@ -47,27 +55,23 @@ const Sidebar = (props) => {
       </nav>
       <span className="uppercase-label">Globals</span>
       <nav>
-        <NavLink
-          activeClassName="active"
-          to="/media-library"
-        >
-          <Arrow />
-          Media Library
-        </NavLink>
-        <NavLink
-          activeClassName="active"
-          to="/components"
-        >
-          <Arrow />
-          Components
-        </NavLink>
-        <NavLink
-          activeClassName="active"
-          to="/settings"
-        >
-          <Arrow />
-          Settings
-        </NavLink>
+        {globals && globals.map((global, i) => {
+          const href = `${admin}/globals/${global.slug}`;
+          const classes = props.location.pathname.indexOf(href) > -1
+            ? 'active'
+            : undefined;
+
+          return (
+            <Link
+              className={classes}
+              key={i}
+              to={href}
+            >
+              <Arrow />
+              {global.label}
+            </Link>
+          );
+        })}
       </nav>
     </aside>
   );
