@@ -14,9 +14,23 @@ const handleAjaxResponse = (res) => {
   cookies.set('token', res.token, { path: '/' });
 };
 
+const passwordField = {
+  name: 'password',
+  label: 'Password',
+  type: 'password',
+};
+
 const baseClass = 'create-first-user';
 
 const CreateFirstUser = () => {
+  const fields = [...config.user.fields];
+
+  if (config.user.passwordIndex) {
+    fields.splice(config.user.passwordIndex, 0, passwordField);
+  } else {
+    fields.push(passwordField);
+  }
+
   return (
     <ContentBlock className={baseClass}>
       <div className={`${baseClass}__wrap`}>
@@ -25,9 +39,9 @@ const CreateFirstUser = () => {
         <Form
           handleAjaxResponse={handleAjaxResponse}
           method="POST"
-          action="/first-user"
+          action="/first-register"
         >
-          <RenderFields fields={config.user.fields} />
+          <RenderFields fields={fields} />
           <FormSubmit>Create</FormSubmit>
         </Form>
       </div>

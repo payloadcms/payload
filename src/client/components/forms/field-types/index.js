@@ -1,8 +1,21 @@
-export { default as Email } from './Email';
-export { default as Group } from './Group';
-export { default as HiddenInput } from './HiddenInput';
-export { default as Input } from './Input';
-export { default as Media } from './Media';
-export { default as Password } from './Password';
-export { default as Repeater } from './Repeater';
-export { default as Textarea } from './Textarea';
+import email from './Email';
+import group from './Group';
+import hidden from './HiddenInput';
+import input from './Input';
+import media from './Media';
+import password from './Password';
+import repeater from './Repeater';
+import textarea from './Textarea';
+import select from './Select';
+
+export default {
+  email,
+  group,
+  hidden,
+  input,
+  media,
+  password,
+  repeater,
+  textarea,
+  select,
+};

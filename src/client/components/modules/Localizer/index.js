@@ -1,66 +1,64 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { Link, withRouter } from 'react-router-dom';
-import Arrow from '../../graphics/Arrow';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import config from 'payload-config';
 import qs from 'qs';
+import { useLocale } from '../../utilities/Locale';
+import { useSearchParams } from '../../utilities/SearchParams';
+import Arrow from '../../graphics/Arrow';
 
 import './index.scss';
 
-const mapState = state => ({
-  config: state.common.config,
-  locale: state.common.locale,
-  searchParams: state.common.searchParams
-})
+const baseClass = 'localizer';
 
-class Localizer extends Component {
+const Localizer = () => {
+  const [active, setActive] = useState(false);
+  const activeLocale = useLocale();
+  const searchParams = useSearchParams();
 
-  constructor() {
-    super();
+  const { locales } = config.localization ? config.localization : { locales: [] };
 
-    this.state = {
-      active: false
-    }
-  }
+  if (locales.length <= 1) return null;
 
-  toggleActive = () =>
-    this.setState({ active: !this.state.active })
+  const classes = [
+    baseClass,
+    active && `${baseClass}--active`,
+  ].filter(Boolean).join(' ');
 
-  render() {
-    let locales = [];
+  return (
+    <div className={classes}>
+      <button
+        type="button"
+        onClick={() => setActive(!active)}
+        className={`${baseClass}__current`}
+      >
+        <Arrow />
+        {activeLocale}
+      </button>
+      <ul>
+        {locales.map((locale, i) => {
+          if (activeLocale === locale) return null;
 
-    if (this.props.config && this.props.config.localization) locales = this.props.config.localization.locales;
+          const newParams = {
+            ...searchParams,
+            locale,
+          };
 
-    if (locales.length <= 1) return null;
+          const search = qs.stringify(newParams);
 
-    return (
-      <div className={`localizer${this.state.active ? ' active' : ''}`}>
-        <button onClick={this.toggleActive} className="current-locale">
-          <Arrow />{this.props.locale}
-        </button>
-        <ul>
-          {locales.map((locale, i) => {
+          return (
+            <li key={i}>
+              <Link
+                to={{ search }}
+                onClick={() => setActive(false)}
+              >
+                {locale}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+};
 
-            if (locale === this.props.locale) return null;
-
-            const newParams = {
-              ...this.props.searchParams,
-              locale
-            };
-
-            const search = qs.stringify(newParams);
-
-            return (
-              <li key={i}>
-                <Link to={{ search }} onClick={this.toggleActive}>
-                  {locale}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    )
-  }
-}
-
-export default withRouter(connect(mapState)(Localizer));
+export default Localizer;

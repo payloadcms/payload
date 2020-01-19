@@ -1,9 +1,10 @@
-import React from 'react';
-import SetStepNav from '../../../utilities/SetStepNav';
+import React, { useEffect } from 'react';
+import { useStepNav } from '../../../modules/StepNav';
 
 import './index.scss';
 
 const EditView = props => {
+  const { setStepNav } = useStepNav();
 
   const nav = [{
     url: `/collections/${props.collection.slug}`,
@@ -21,9 +22,10 @@ const EditView = props => {
     })
   }
 
+  useEffect(() => setStepNav(nav), []);
+
   return (
     <article className="collection-edit">
-      <SetStepNav nav={nav} />
       <header>
         {props.isEditing &&
           <h1>

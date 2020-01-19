@@ -1,16 +1,20 @@
-import React from 'react';
-import SetStepNav from '../../utilities/SetStepNav';
+import React, { useEffect } from 'react';
+import { useStepNav } from '../../modules/StepNav';
 
-const MediaLibrary = props => {
+const MediaLibrary = () => {
+  const { setStepNav } = useStepNav();
+
+  useEffect(() => {
+    setStepNav([{
+      label: 'Media Library',
+    }]);
+  }, []);
 
   return (
     <div className="media-library">
-      <SetStepNav nav={[{
-        label: 'Media Library'
-      }]} />
       <h1>Media Library</h1>
     </div>
-  )
-}
+  );
+};
 
 export default MediaLibrary;

@@ -3,7 +3,7 @@
 .localizer {
   position: relative;
 
-  .current-locale {
+  &__current {
     @extend %uppercase-label;
     @extend %btn-reset;
     display: flex;
@@ -43,7 +43,7 @@
     visibility: hidden;
   }
 
-  &.active {
+  &--active {
     svg {
       transform: rotate(-90deg);
     }

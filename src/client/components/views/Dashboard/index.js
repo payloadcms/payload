@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import SetStepNav from '../../utilities/SetStepNav';
+import { useStepNav } from '../../modules/StepNav';
 
 import './index.scss';
 
 const Dashboard = () => {
+  const { setStepNav } = useStepNav();
+
+  useEffect(() => setStepNav([]), []);
+
   return (
     <article className="dashboard">
-      <SetStepNav nav={[]} />
       <h1>Dashboard</h1>
       <Link to="/login">Login</Link>
       <br />

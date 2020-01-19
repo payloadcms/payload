@@ -1,117 +1,163 @@
-import React, { Component } from 'react';
-import FormContext from '../../Form/Context'
+import React, { useContext, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import FormContext from '../../Form/Context';
+import Tooltip from '../../../modules/Tooltip';
 
 import './index.scss';
 
-const fieldType = (PassedComponent, type, validate, errors) => {
+const baseClass = 'field-type';
 
-  class FieldType extends Component {
+const asFieldType = (PassedComponent, type, validate, errors) => {
+  const FieldType = (props) => {
+    const formContext = useContext(FormContext);
 
-    constructor(props) {
-      super(props);
+    const {
+      name,
+      id,
+      value,
+      required,
+      initialValue,
+      valueOverride,
+      onChange,
+    } = props;
 
-      this.state = {
-        init: false
-      };
-    }
-
-    sendField(value) {
-      this.props.context.setValue({
-        name: this.props.name,
-        value: value,
-        valid: this.props.required && validate
-          ? validate(value || '', this.props.type)
-          : true
+    const sendField = (valueToSend) => {
+      formContext.setValue({
+        name,
+        value: valueToSend,
+        valid: required && validate
+          ? validate(valueToSend || '', type)
+          : true,
       });
-    }
+    };
 
-    componentDidMount() {
-      let value = this.props.value ? this.props.value : '';
-      value = this.props.initialValue ? this.props.initialValue : value;
-      value = this.props.valueOverride ? this.props.valueOverride : value;
-      this.sendField(value);
+    useEffect(() => {
+      let valueToInitialize = value;
+      if (initialValue) valueToInitialize = initialValue;
+      if (valueOverride) valueToInitialize = valueOverride;
+      sendField(valueToInitialize);
+    }, []);
 
-      this.setState({
-        init: true
-      });
-    }
+    useEffect(() => {
+      sendField(valueOverride);
+    }, [valueOverride]);
 
-    componentDidUpdate(prevProps) {
-      if (prevProps.valueOverride !== this.props.valueOverride) {
-        this.sendField(this.props.valueOverride);
-      }
+    useEffect(() => {
+      sendField(initialValue);
+    }, [initialValue]);
 
-      if (prevProps.initialValue !== this.props.initialValue) {
-        this.sendField(this.props.initialValue);
-      }
-    }
+    const classList = [baseClass, type];
+    const valid = formContext.fields[name] ? formContext.fields[name].valid : true;
+    const showError = valid === false && formContext.submitted;
 
-    render() {
-      const valid = this.props.context.fields[this.props.name]
-        ? this.props.context.fields[this.props.name].valid
-        : true;
+    if (showError) classList.push('error');
 
-      const showError = valid === false && this.props.context.submitted;
+    let valueToRender = formContext.fields[name] ? formContext.fields[name].value : '';
 
-      let className = `field-type ${type}${showError ? ' error' : ''}`;
+    // If valueOverride present, field is being controlled by state outside form
+    valueToRender = valueOverride || value;
 
-      let value = this.props.context.fields[this.props.name] ? this.props.context.fields[this.props.name].value : '';
+    const classes = classList.filter(Boolean).join(' ');
 
-      // If valueOverride present, field is being controlled by state outside form
-      value = this.props.valueOverride ? this.props.valueOverride : value;
-
-      return (
-        <PassedComponent {...this.props}
-          className={className}
-          value={value}
-          label={<Label {...this.props} />}
-          error={<Error showError={showError} type={this.props.type} />}
-          onChange={e => {
-            this.sendField(e.target.value);
-            this.props.onChange && this.props.onChange(e);
-          }} />
-      )
-    }
-  }
-
-  const Label = props => {
-    if (props.label) {
-      return (
-        <label htmlFor={props.id ? props.id : props.name}>
-          {props.label}
-          {props.required &&
-            <span className="required">*</span>
-          }
-        </label>
-      )
-    }
-
-    return null;
-  }
-
-  const Error = props => {
-    if (props.showError) {
-      return (
-        <Tooltip className="error-message">
-          {props.error && errors[props.error]}
-
-          {!props.error && errors}
-        </Tooltip>
-      )
-    }
-
-    return null;
-  }
-
-  const FieldTypeWithContext = props => {
     return (
-      <FormContext.Consumer>
-        {context => <FieldType {...props} context={context} />}
-      </FormContext.Consumer>
+      <PassedComponent
+        {...props}
+        className={classes}
+        value={valueToRender}
+        label={(
+          <Label
+            htmlFor={id || name}
+            {...props}
+          />
+        )}
+        error={(
+          <Error
+            showError={showError}
+            type={type}
+          />
+        )}
+        onChange={(e) => {
+          sendField(e.target.value);
+          if (onChange && typeof onChange === 'function') onChange(e);
+        }}
+      />
     );
   };
 
-  return FieldTypeWithContext;
-}
+  FieldType.defaultProps = {
+    value: '',
+    required: false,
+    initialValue: '',
+    valueOverride: '',
+    onChange: null,
+    id: '',
+  };
 
-export default fieldType;
+  FieldType.propTypes = {
+    name: PropTypes.string.isRequired,
+    value: PropTypes.string,
+    required: PropTypes.bool,
+    type: PropTypes.string.isRequired,
+    initialValue: PropTypes.string,
+    valueOverride: PropTypes.string,
+    onChange: PropTypes.func,
+    id: PropTypes.string,
+  };
+
+  const Label = (props) => {
+    const {
+      label, required, htmlFor,
+    } = props;
+
+    if (label) {
+      return (
+        <label htmlFor={htmlFor}>
+          {label}
+          {required
+            && <span className="required">*</span>
+          }
+        </label>
+      );
+    }
+
+    return null;
+  };
+
+  Label.defaultProps = {
+    required: false,
+  };
+
+  Label.propTypes = {
+    label: PropTypes.string.isRequired,
+    htmlFor: PropTypes.string.isRequired,
+    required: PropTypes.bool,
+  };
+
+  const Error = (props) => {
+    const { error, showError } = props;
+
+    if (showError) {
+      return (
+        <Tooltip className="error-message">
+          {error && errors[error]}
+          {!error && errors}
+        </Tooltip>
+      );
+    }
+
+    return null;
+  };
+
+  Error.defaultProps = {
+    showError: false,
+  };
+
+  Error.propTypes = {
+    error: PropTypes.string.isRequired,
+    showError: PropTypes.bool,
+  };
+
+  return FieldType;
+};
+
+export default asFieldType;

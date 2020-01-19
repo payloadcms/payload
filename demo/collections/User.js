@@ -8,6 +8,7 @@ module.exports = {
   },
   useAsTitle: 'email',
   useAsUsername: 'email',
+  passwordIndex: 1,
   policies: {
     create: (req, res, next) => {
       return next();
@@ -38,8 +39,9 @@ module.exports = {
     },
     {
       name: 'role',
-      type: 'enum',
-      enum: roles,
+      label: 'Role',
+      type: 'select',
+      options: roles,
       default: 'user',
     },
   ],

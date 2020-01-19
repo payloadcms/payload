@@ -24,6 +24,13 @@ module.exports = {
       "aspects": ["invalidHref", "preferButton"]
     }],
     "jsx-a11y/click-events-have-key-events": 0,
+    "jsx-a11y/label-has-for": [2, {
+      "components": ["Label"],
+      "required": {
+        "every": ["id"]
+      },
+      "allowChildren": false
+    }],
     "react/no-array-index-key": 0,
     "max-len": 0,
     "react/no-danger": 0,

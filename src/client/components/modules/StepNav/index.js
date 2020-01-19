@@ -1,36 +1,74 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, createContext, useContext } from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Arrow from '../../graphics/Arrow';
 
 import './index.scss';
 
-const mapStateToProps = state => ({
-  nav: state.common.stepNav
-});
+const Context = createContext({});
 
-class StepNav extends Component {
-  render() {
-    const dashboardLabel = <span>Dashboard</span>;
+const StepNavProvider = ({ children }) => {
+  const [stepNav, setStepNav] = useState([]);
 
-    return (
-      <nav className="step-nav">
-        {this.props.nav.length > 0
-          ? <Link to="/">{dashboardLabel}<Arrow /></Link>
-          : dashboardLabel
-        }
-        {this.props.nav.map((item, i) => {
-          const StepLabel = <span key={i}>{item.label}</span>;
+  return (
+    <Context.Provider value={{
+      stepNav,
+      setStepNav,
+    }}
+    >
+      {children}
+    </Context.Provider>
+  );
+};
 
-          const Step = this.props.nav.length === i + 1
-            ? StepLabel
-            : <Link to={item.url} key={i}>{StepLabel}<Arrow /></Link>;
+StepNavProvider.propTypes = {
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node,
+  ]).isRequired,
+};
 
-          return Step;
-        })}
-      </nav>
-    );
-  }
-}
+const useStepNav = () => useContext(Context);
 
-export default connect(mapStateToProps)(StepNav);
+const StepNav = () => {
+  const dashboardLabel = <span>Dashboard</span>;
+  const { stepNav } = useStepNav();
+
+  return (
+    <nav className="step-nav">
+      {stepNav.length > 0
+        ? (
+          <Link to="/admin">
+            {dashboardLabel}
+            <Arrow />
+          </Link>
+        )
+        : dashboardLabel
+      }
+      {stepNav.map((item, i) => {
+        const StepLabel = <span key={i}>{item.label}</span>;
+
+        const Step = stepNav.length === i + 1
+          ? StepLabel
+          : (
+            <Link
+              to={item.url}
+              key={i}
+            >
+              {StepLabel}
+              <Arrow />
+            </Link>
+          );
+
+        return Step;
+      })}
+    </nav>
+  );
+};
+
+export {
+  StepNavProvider,
+  useStepNav,
+};
+
+export default StepNav;
