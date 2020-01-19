@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import FormContext from '../../forms/Form/Context'
+import FormContext from '../../Form/Context'
 
 import './index.scss';
 

@@ -3,8 +3,8 @@ import Cookies from 'universal-cookie';
 import { Link } from 'react-router-dom';
 import ContentBlock from '../../layout/ContentBlock';
 import Form from '../../forms/Form';
-import Email from '../../field-types/Email';
-import Password from '../../field-types/Password';
+import Email from '../../forms/field-types/Email';
+import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
 
 import './index.scss';

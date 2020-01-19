@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import FormContext from './Context';
 import { useLocale } from '../../utilities/Locale';
 import { useStatusList } from '../../modules/Status';
-import HiddenInput from '../../field-types/HiddenInput';
+import HiddenInput from '../field-types/HiddenInput';
 import api from '../../../api';
 
 import './index.scss';
