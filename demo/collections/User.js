@@ -1,4 +1,4 @@
-const payloadConfig = require('../payload.config');
+const roles = require('../policies/roles');
 
 module.exports = {
   slug: 'users',
@@ -7,6 +7,7 @@ module.exports = {
     plural: 'Users',
   },
   useAsTitle: 'email',
+  useAsUsername: 'email',
   policies: {
     create: (req, res, next) => {
       return next();
@@ -21,13 +22,6 @@ module.exports = {
       return next();
     },
   },
-  roles: [
-    'admin',
-    'editor',
-    'moderator',
-    'user',
-    'viewer',
-  ],
   auth: {
     strategy: 'jwt',
     passwordResets: true,
@@ -45,7 +39,7 @@ module.exports = {
     {
       name: 'role',
       type: 'enum',
-      enum: payloadConfig.roles,
+      enum: roles,
       default: 'user',
     },
   ],

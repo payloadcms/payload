@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Section } from 'payload/components';
+import Section from '../../../layout/Section';
 
 class Repeater extends Component {
   constructor(props) {

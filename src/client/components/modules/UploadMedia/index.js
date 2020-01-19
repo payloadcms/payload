@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { createPortal } from 'react-dom';
 import { connect } from 'react-redux';
-import { Button } from 'payload/components';
-import api from 'payload/api';
+import Button from '../../controls/Button';
+import api from '../../../api';
 
 import './index.scss';
 

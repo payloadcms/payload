@@ -17,8 +17,8 @@ export default User => ({
         const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
         return next(error);
       }
-      passport.authenticate('local')(req, res, () => {
-        res.json({ email: user.email, role: user.role, createdAt: user.createdAt });
+      return passport.authenticate('local')(req, res, () => {
+        return res.json({ email: user.email, role: user.role, createdAt: user.createdAt });
       });
     });
   },
@@ -35,7 +35,7 @@ export default User => ({
     User.findByUsername(email, (err, user) => {
       if (err || !user) return res.status(401).json({ message: 'Auth Failed' });
 
-      user.authenticate(password, (authErr, model, passwordError) => {
+      return user.authenticate(password, (authErr, model, passwordError) => {
         if (authErr || passwordError) return res.status(401).json({ message: 'Auth Failed' });
 
         const opts = {};
@@ -73,6 +73,6 @@ export default User => ({
       next(error);
     }
 
-    next();
+    return next();
   },
 });

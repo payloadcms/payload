@@ -1,7 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
-import Init from './utilities/Init';
 import { SearchParamsProvider } from './utilities/SearchParams';
 import { LocaleProvider } from './utilities/Locale';
 import { StatusListProvider } from './modules/Status';
@@ -11,17 +10,15 @@ import '../scss/app.scss';
 
 const Index = () => {
   return (
-    <Init>
-      <Router>
-        <SearchParamsProvider>
-          <LocaleProvider>
-            <StatusListProvider>
-              <Routes />
-            </StatusListProvider>
-          </LocaleProvider>
-        </SearchParamsProvider>
-      </Router>
-    </Init>
+    <Router>
+      <SearchParamsProvider>
+        <LocaleProvider>
+          <StatusListProvider>
+            <Routes />
+          </StatusListProvider>
+        </LocaleProvider>
+      </SearchParamsProvider>
+    </Router>
   );
 };
 

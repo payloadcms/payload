@@ -2,7 +2,6 @@ import express from 'express';
 import passport from 'passport';
 import authRequestHandlers from './requestHandlers';
 import authValidate from './validate';
-import checkRoleMiddleware from './checkRoleMiddleware';
 import passwordResetRoutes from './passwordResets/routes';
 
 const router = express.Router();
@@ -16,12 +15,6 @@ const authRoutes = (userConfig, User) => {
   router
     .route('/me')
     .post(passport.authenticate(userConfig.auth.strategy, { session: false }), auth.me);
-
-  userConfig.roles.forEach((role) => {
-    router
-      .route(`/role/${role}`)
-      .get(passport.authenticate(userConfig.auth.strategy, { session: false }), checkRoleMiddleware(role), auth.me);
-  });
 
   if (userConfig.auth.passwordResets) {
     router.use('', passwordResetRoutes(userConfig.email, User));

@@ -1,32 +1,28 @@
-import React, { Component } from 'react';
+import React, { useContext } from 'react';
+import PropTypes from 'prop-types';
 import FormContext from '../Form/Context';
 import Button from '../../controls/Button';
 
 import './index.scss';
 
-class FormSubmit extends Component {
-  render() {
-    return (
-      <div className="form-submit">
-        <Button disabled={this.props.context.processing ? 'disabled' : ''}>
-          {this.props.children}
-        </Button>
-      </div>
-    );
-  }
-}
+const baseClass = 'form-submit';
 
-const ContextFormSubmit = (props) => {
+const FormSubmit = ({ children }) => {
+  const formContext = useContext(FormContext);
   return (
-    <FormContext.Consumer>
-      {context => (
-        <FormSubmit
-          {...props}
-          context={context}
-        />
-      )}
-    </FormContext.Consumer>
+    <div className={baseClass}>
+      <Button disabled={formContext.processing ? 'disabled' : ''}>
+        {children}
+      </Button>
+    </div>
   );
 };
 
-export default ContextFormSubmit;
+FormSubmit.propTypes = {
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node,
+  ]).isRequired,
+};
+
+export default FormSubmit;

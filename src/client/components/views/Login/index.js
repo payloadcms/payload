@@ -15,13 +15,15 @@ const handleAjaxResponse = (res) => {
   cookies.set('token', res.token, { path: '/' });
 };
 
+const baseClass = 'login';
+
 const Login = () => {
   return (
     <ContentBlock
-      className="login"
+      className={baseClass}
       width="narrow"
     >
-      <div className="wrap">
+      <div className={`${baseClass}__wrap`}>
         <Form
           handleAjaxResponse={handleAjaxResponse}
           method="POST"

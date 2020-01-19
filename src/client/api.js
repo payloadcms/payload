@@ -15,7 +15,7 @@ const requests = {
       headers: {
         ...setJWT()
       }
-    }).then(res => res.body);
+    });
   },
 
   post: (url, body) =>
@@ -25,7 +25,7 @@ const requests = {
       headers: {
         ...setJWT()
       },
-    }).then(res => res.body),
+    }),
 
   put: (url, body) =>
     fetch(`${url}`, {
@@ -34,7 +34,7 @@ const requests = {
       headers: {
         ...setJWT()
       },
-    }).then(res => res.body),
+    }),
 };
 
 export default {

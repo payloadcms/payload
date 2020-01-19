@@ -13,9 +13,13 @@ export const loadPolicy = (policy) => {
     passport.authenticate(['jwt', 'anonymous'], { session: false }),
     (req, res, next) => {
       if (policy) {
-        policy(req, res, next);
-      } else {
-        requireAuth(req, res);
+        if (!policy(req.user)) {
+          return res.status(HttpStatus.FORBIDDEN)
+            .send('Role not authorized.');
+        }
+
+        return next();
       }
+      requireAuth(req, res);
     }];
 };

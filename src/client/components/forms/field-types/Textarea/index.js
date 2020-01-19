@@ -1,28 +1,70 @@
 import React from 'react';
-import { fieldType } from 'payload/components';
+import PropTypes from 'prop-types';
+import fieldType from '../fieldType';
 
 import './index.scss';
 
-const error = 'Please fill in the textarea';
+const errorMessage = 'Please fill in the textarea';
 
 const validate = value => value.length > 0;
 
-const Textarea = props => {
+const Textarea = (props) => {
+  const {
+    className,
+    style,
+    error,
+    label,
+    value,
+    onChange,
+    disabled,
+    placeholder,
+    id,
+    name,
+  } = props;
+
   return (
-    <div className={props.className} style={props.style}>
-      {props.error}
-      {props.label}
+    <div
+      className={className}
+      style={style}
+    >
+      {error}
+      {label}
       <textarea
-        value={props.value || ''}
-        onChange={props.onChange}
-        disabled={props.disabled}
-        placeholder={props.placeholder}
-        type={props.type}
-        id={props.id ? props.id : props.name}
-        name={props.name}>
-      </textarea>
+        value={value || ''}
+        onChange={onChange}
+        disabled={disabled}
+        placeholder={placeholder}
+        id={id || name}
+        name={name}
+      />
     </div>
   );
-}
+};
 
-export default fieldType(Textarea, 'textarea', validate, error);
+Textarea.defaultProps = {
+  className: null,
+  style: {},
+  error: null,
+  label: null,
+  value: '',
+  onChange: null,
+  disabled: null,
+  placeholder: null,
+  id: null,
+  name: 'textarea',
+};
+
+Textarea.propTypes = {
+  className: PropTypes.string,
+  style: PropTypes.shape({}),
+  error: PropTypes.node,
+  label: PropTypes.string,
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  disabled: PropTypes.string,
+  placeholder: PropTypes.string,
+  id: PropTypes.string,
+  name: PropTypes.string,
+};
+
+export default fieldType(Textarea, 'textarea', validate, errorMessage);

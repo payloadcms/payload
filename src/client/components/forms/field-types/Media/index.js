@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { fieldType, UploadMedia } from 'payload/components';
+import fieldType from '../fieldType';
+import UploadMedia from '../../../modules/UploadMedia';
 
 import './index.scss';
 

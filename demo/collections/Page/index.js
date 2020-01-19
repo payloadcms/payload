@@ -1,5 +1,4 @@
-const HttpStatus = require('http-status');
-const checkRoleMiddleware = require('../../../src/auth/checkRoleMiddleware');
+const checkRole = require('../../policies/checkRole');
 const Quote = require('../../content-blocks/Quote');
 const CallToAction = require('../../content-blocks/CallToAction');
 const List = require('./components/List');
@@ -16,19 +15,9 @@ module.exports = {
     // null or undefined policies will default to requiring auth
     // any policy can use req.user to see that the user is logged
     create: null,
-    read: (req, res, next) => {
-      // allow anonymous access
-      next();
-    },
-    update: checkRoleMiddleware('user', 'admin'),
-    destroy: (req, res, next) => {
-      if (req.user && req.user.role) {
-        next();
-        return;
-      }
-      res.status(HttpStatus.FORBIDDEN)
-        .send();
-    },
+    read: () => true,
+    update: user => checkRole(['user', 'admin'], user),
+    destroy: user => checkRole(['user', 'admin'], user),
   },
   fields: [
     {
