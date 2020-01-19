@@ -70,7 +70,7 @@ class Payload {
       model: this.User,
       config: this.config.user,
     }, this.router);
-  }
+  };
 
   registerUpload = () => {
     const uploadSchema = buildCollectionSchema(
@@ -94,7 +94,7 @@ class Payload {
     }, this.router);
 
     registerUploadRoutes(this.Upload, this.config, this.router);
-  }
+  };
 
   registerGlobals = (globals) => {
     validateGlobals(globals);

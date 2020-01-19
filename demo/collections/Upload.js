@@ -1,3 +1,5 @@
+const checkRole = require('../policies/checkRole');
+
 module.exports = {
   slug: 'uploads',
   labels: {
@@ -6,18 +8,10 @@ module.exports = {
   },
   useAsTitle: 'filename',
   policies: {
-    create: (req, res, next) => {
-      return next();
-    },
-    read: (req, res, next) => {
-      return next();
-    },
-    update: (req, res, next) => {
-      return next();
-    },
-    destroy: (req, res, next) => {
-      return next();
-    },
+    create: user => checkRole(['user', 'admin'], user),
+    read: () => true,
+    update: user => checkRole(['user', 'admin'], user),
+    destroy: user => checkRole(['user', 'admin'], user),
   },
   fields: [
     {

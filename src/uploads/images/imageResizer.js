@@ -13,28 +13,26 @@ function getOutputImageName(sourceImage, size) {
 
 export async function resizeAndSave(config, uploadConfig, file) {
   const sourceImage = `${config.staticDir}/${file.name}`;
-
-  const outputSizes = [];
   try {
     const dimensions = await sizeOf(sourceImage);
-    uploadConfig.imageSizes.forEach(async (desiredSize) => {
-      if (desiredSize.width > dimensions.width) {
-        return;
-      }
-      const outputImageName = getOutputImageName(sourceImage, desiredSize);
-      await sharp(sourceImage)
-        .resize(desiredSize.width, desiredSize.height, {
-          position: desiredSize.crop || 'centre',
-        })
-        .toFile(outputImageName);
-      outputSizes.push({
-        name: desiredSize.name,
-        height: desiredSize.height,
-        width: desiredSize.width,
-      });
-    });
+    console.log('ook');
+    return await Promise.all(uploadConfig.imageSizes
+      .filter(desiredSize => desiredSize.width < dimensions.width)
+      .map(async (desiredSize) => {
+        const outputImageName = getOutputImageName(sourceImage, desiredSize);
+        await sharp(sourceImage)
+          .resize(desiredSize.width, desiredSize.height, {
+            // would it make sense for this to be set by the uploader?
+            position: desiredSize.crop || 'centre',
+          })
+          .toFile(outputImageName);
+        console.log({ ...desiredSize });
+        return { ...desiredSize };
+      }));
   } catch (e) {
     console.log('error in resize and save', e.message);
   }
-  return outputSizes;
+  return [];
+  // console.log(outputSizes);
+  // return outputSizes;
 }
