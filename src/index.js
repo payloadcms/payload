@@ -88,12 +88,12 @@ class Payload {
     this.Upload = mongoose.model(this.config.upload.labels.singular, uploadSchema);
     this.Upload.discriminator('image', imageSchema);
 
+    registerUploadRoutes(this.Upload, this.config, this.router);
+
     registerCollectionRoutes({
       model: this.Upload,
       config: this.config.upload,
     }, this.router);
-
-    registerUploadRoutes(this.Upload, this.config, this.router);
   };
 
   registerGlobals = (globals) => {
