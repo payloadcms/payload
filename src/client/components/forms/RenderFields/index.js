@@ -2,11 +2,41 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import fieldTypes from '../field-types';
 
+import './index.scss';
+
+const baseClass = 'render-fields';
+
 const RenderFields = ({ fields }) => {
   if (fields) {
-    return fields.map((field, i) => {
-      return field.name + i;
-    });
+    return (
+      <div className={baseClass}>
+        {fields.map((field, i) => {
+          const FieldComponent = field.component || fieldTypes[field.type];
+
+          if (FieldComponent) {
+            return (
+              <FieldComponent
+                key={i}
+                {...field}
+              />
+            );
+          }
+
+          return (
+            <div
+              className={`${baseClass}__no-field-found`}
+              key={i}
+            >
+              No matched field found for
+              {' '}
+              &quot;
+              {field.label}
+              &quot;
+            </div>
+          );
+        })}
+      </div>
+    );
   }
 
   return null;

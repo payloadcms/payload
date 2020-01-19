@@ -38,8 +38,9 @@ module.exports = {
     },
     {
       name: 'role',
-      type: 'enum',
-      enum: roles,
+      label: 'Role',
+      type: 'select',
+      options: roles,
       default: 'user',
     },
   ],

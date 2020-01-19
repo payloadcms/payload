@@ -7,22 +7,36 @@ const error = 'Please fill in the field';
 
 const validate = value => value.length > 0;
 
-const Input = props => {
+const Input = (props) => {
+  const {
+    className,
+    style,
+    width,
+    error,
+    label,
+    value,
+    onChange,
+    disabled,
+    placeholder,
+    id,
+    name,
+  } = props;
+
   return (
-    <div className={props.className} style={{
-      ...props.style,
-      width: props.width ? `${props.width}%` : null
+    <div className={className} style={{
+      ...style,
+      width: width ? `${width}%` : null
     }}>
-      {props.error}
-      {props.label}
+      {error}
+      {label}
       <input
-        value={props.value || ''}
-        onChange={props.onChange}
-        disabled={props.disabled}
-        placeholder={props.placeholder}
+        value={value || ''}
+        onChange={onChange}
+        disabled={disabled}
+        placeholder={placeholder}
         type="text"
-        id={props.id ? props.id : props.name}
-        name={props.name} />
+        id={id ? id : name}
+        name={name} />
     </div>
   );
 }

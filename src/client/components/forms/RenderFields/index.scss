@@ -1,0 +1,7 @@
+@import '../../../scss/styles';
+
+.render-fields {
+  &__no-field-found {
+    @include gutter;
+  }
+}

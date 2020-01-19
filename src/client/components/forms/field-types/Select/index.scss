@@ -1,0 +1,16 @@
+@import '../../../../scss//styles';
+
+.field-type.select {
+  margin-bottom: base(.5);
+  position: relative;
+
+  select {
+    @include formInput();
+  }
+
+  &.error {
+    select {
+      background-color: lighten($error, 20%);
+    }
+  }
+}

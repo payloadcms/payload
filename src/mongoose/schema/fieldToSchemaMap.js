@@ -54,11 +54,14 @@ const fieldToSchemaMap = {
     });
     return [schema];
   },
-  enum: (field) => {
+  select: (field) => {
     return {
       ...formatBaseSchema(field),
       type: String,
-      enum: field.enum,
+      enum: field.options.map((option) => {
+        if (typeof option === 'object') return option.value;
+        return option;
+      }),
     };
   },
   flexible: (field) => {

@@ -37,12 +37,12 @@ const Routes = () => {
               <Route path={`${match.url}/create-first-user`}>
                 <CreateFirstUser />
               </Route>
-              <Route>
-                <Redirect to="/admin/create-first-user" />
-              </Route>
+              <Redirect to="/admin/create-first-user" />
             </Switch>
           );
-        } if (initialized === true) {
+        }
+
+        if (initialized === true) {
           return (
             <Switch>
               <Route path={`${match.url}/login`}>
