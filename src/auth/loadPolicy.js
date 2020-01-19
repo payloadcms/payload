@@ -15,11 +15,11 @@ export const loadPolicy = (policy) => {
       if (policy) {
         if (!policy(req.user)) {
           return res.status(HttpStatus.FORBIDDEN)
-            .send('Role not authorized.');
+            .send('Not authorized.');
         }
 
         return next();
       }
-      requireAuth(req, res);
+      return requireAuth(req, res);
     }];
 };
