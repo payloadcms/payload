@@ -8,8 +8,8 @@
 @mixin default-template-width {
   padding-left: $base;
   padding-right: $base;
-  margin-left: rem(6);
-  width: calc(100% - #{rem(6)});
+  margin-left: base(6);
+  width: calc(100% - #{base(6)});
 
   .wrap {
     max-width: $content-width;
@@ -25,19 +25,19 @@
   padding: $base;
 
   @include mid-break {
-    padding: rem(.75);
+    padding: base(.75);
   }
 
   @include small-break {
-    padding: rem(.5);
+    padding: base(.5);
   }
 }
 
 @mixin pad-x2 {
-  padding: rem(2) rem(2) rem(1);
+  padding: base(2) base(2) base(1);
 
   @include mid-break {
-    padding: rem(1) rem(1) 0;
+    padding: base(1) base(1) 0;
   }
 }
 
@@ -49,12 +49,12 @@
   padding-top: $base;
 
   @include mid-break {
-    padding-top: rem(.5);
+    padding-top: base(.5);
   }
 }
 
 @mixin pad-vert-x2 {
-  padding-top: rem(2);
+  padding-top: base(2);
   padding-bottom: $base;
 
   @include mid-break {
@@ -64,21 +64,21 @@
 }
 
 @mixin pad-vert-x3 {
-  padding-top: rem(3);
-  padding-bottom: rem(2);
+  padding-top: base(3);
+  padding-bottom: base(2);
 
   @include mid-break {
-    padding-top: rem(2);
+    padding-top: base(2);
     padding-bottom: $base;
   }
 }
 
 @mixin pad-vert-x4 {
-  padding-top: rem(4);
-  padding-bottom: rem(3);
+  padding-top: base(4);
+  padding-bottom: base(3);
 
   @include mid-break {
-    padding-top: rem(2);
+    padding-top: base(2);
     padding-bottom: $base;
   }
 }
@@ -91,42 +91,42 @@
   margin-bottom: $base;
 
   @include small-break {
-    margin-bottom: rem(.75);
+    margin-bottom: base(.75);
   }
 }
 
 @mixin m-x2 {
-  margin-bottom: rem(2);
+  margin-bottom: base(2);
 
   @include mid-break {
     margin-bottom: $base;
   }
 
   @include small-break {
-    margin-bottom: rem(.75);
+    margin-bottom: base(.75);
   }
 }
 
 @mixin m-x3 {
-  margin-bottom: rem(3);
+  margin-bottom: base(3);
 
   @include mid-break {
-    margin-bottom: rem(2);
+    margin-bottom: base(2);
   }
 
   @include small-break {
-    margin-bottom: rem(1);
+    margin-bottom: base(1);
   }
 }
 
 @mixin m-x4 {
-  margin-bottom: rem(4);
+  margin-bottom: base(4);
 
   @include mid-break {
-    margin-bottom: rem(3);
+    margin-bottom: base(3);
   }
 
   @include small-break {
-    margin-bottom: rem(2);
+    margin-bottom: base(2);
   }
 }

@@ -12,8 +12,8 @@
     color: $black;
     font-weight: bold;
     border-radius: $radius-sm;
-    padding: rem(.5);
-    margin-bottom: rem(.5);
+    padding: base(.5);
+    margin-bottom: base(.5);
     display: flex;
     justify-content: space-between;
   }
@@ -24,8 +24,8 @@
 
     svg {
       @include color-svg($black);
-      width: rem(.35);
-      height: rem(.35);
+      width: base(.35);
+      height: base(.35);
     }
 
     &:hover {

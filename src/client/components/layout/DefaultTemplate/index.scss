@@ -2,7 +2,7 @@
 
 .default-template {
   @include default-template-width;
-  padding-top: rem(1);
+  padding-top: base(1);
 
   .eyebrow {
     @include m;

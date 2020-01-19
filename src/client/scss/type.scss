@@ -12,63 +12,63 @@
 }
 
 %jumbo {
-  font-size: rem(2.5);
+  font-size: base(2.5);
   line-height: 1;
-  margin: 0 0 rem(2);
+  margin: 0 0 base(2);
 }
 
 %h1 {
-  margin: 0 0 rem(1);
-  font-size: rem(1);
-  line-height: rem(1);
+  margin: 0 0 base(1);
+  font-size: base(1);
+  line-height: base(1);
 
   @include small-break {
-    letter-spacing: rem(0);
-    font-size: rem(1.25);
-    line-height: rem(1.25);
+    letter-spacing: base(0);
+    font-size: base(1.25);
+    line-height: base(1.25);
   }
 }
 
 %h2 {
-  margin: 0 0 rem(1);
-  font-size: rem(.7);
-  line-height: rem(.75);
+  margin: 0 0 base(1);
+  font-size: base(.7);
+  line-height: base(.75);
   letter-spacing: 0;
 
   @include small-break {
-    font-size: rem(.85);
-    line-height: rem(.85);
+    font-size: base(.85);
+    line-height: base(.85);
   }
 }
 
 %h3 {
-  margin: 0 0 rem(1);
-  font-size: rem(1);
+  margin: 0 0 base(1);
+  font-size: base(1);
   line-height: 1.25;
   font-weight: 500;
 
   @include small-break {
-    font-size: rem(.65);
-    line-height: rem(.75);
+    font-size: base(.65);
+    line-height: base(.75);
   }
 }
 
 %h4 {
   margin: 0 0 $base;
-  font-size: rem(.75);
+  font-size: base(.75);
   line-height: 1.5;
 }
 
 %h5 {
   margin: 0;
-  font-size: rem(.5);
+  font-size: base(.5);
   line-height: 1.5;
   font-weight: 700;
 }
 
 %small {
   margin: 0;
-  font-size: rem(.4);
+  font-size: base(.4);
   line-height: 1.5;
 }
 
@@ -78,35 +78,35 @@
 
 %uppercase-label {
   text-transform: uppercase;
-  letter-spacing: rem(.1);
-  font-size: rem(.3);
+  letter-spacing: base(.1);
+  font-size: base(.3);
   font-family: $font-label;
   -webkit-font-smoothing: auto;
 
   @include mid-break {
-    font-size: rem(.31);
-    letter-spacing: rem(.05);
+    font-size: base(.31);
+    letter-spacing: base(.05);
   }
 }
 
 %large-body {
-  font-size: rem(.6);
-  line-height: rem(1);
-  letter-spacing: rem(.02);
+  font-size: base(.6);
+  line-height: base(1);
+  letter-spacing: base(.02);
 
   @include mid-break {
-    font-size: rem(.7);
-    line-height: rem(1);
+    font-size: base(.7);
+    line-height: base(1);
   }
 
   @include small-break {
-    font-size: rem(.55);
-    line-height: rem(.75);
+    font-size: base(.55);
+    line-height: base(.75);
   }
 }
 
 %code {
-  font-size: rem(.4);
+  font-size: base(.4);
   color: $gray;
 
   span {

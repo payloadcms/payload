@@ -2,7 +2,7 @@
 
 .field-type {
   @include gutter;
-  margin-bottom: rem(.5);
+  margin-bottom: base(.5);
   position: relative;
   width: 100%;
 
@@ -11,14 +11,14 @@
 
     .required {
       color: $error;
-      margin-left: rem(.25);
+      margin-left: base(.25);
       margin-right: auto;
     }
   }
 
   .tooltip {
     left: auto;
-    right: rem(.5);
+    right: base(.5);
     transform: none;
     background-color: $error;
 
@@ -28,6 +28,6 @@
   }
 
   @include small-break {
-    margin-bottom: rem(.5);
+    margin-bottom: base(.5);
   }
 }

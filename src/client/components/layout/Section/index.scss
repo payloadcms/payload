@@ -2,7 +2,7 @@
 
 section.section {
   @extend %shadow;
-  margin: rem(1) rem(.5);
+  margin: base(1) base(.5);
 
   header,
   .content {

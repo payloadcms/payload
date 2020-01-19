@@ -1,55 +1,50 @@
-import React, { Component, createContext } from 'react';
-import { withRouter } from 'react-router-dom';
-import { connect } from 'react-redux';
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import FormContext from './Context';
+import { useLocale } from '../../utilities/Locale';
+import { useStatusList } from '../../modules/Status';
 import HiddenInput from '../../field-types/HiddenInput';
 import api from '../../../api';
 
 import './index.scss';
 
-export const FormContext = createContext({});
+const Form = (props) => {
+  const [fields, setFields] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const history = useHistory();
+  const locale = useLocale();
+  const { addStatus } = useStatusList();
 
-const mapState = state => ({
-  searchParams: state.common.searchParams
-})
+  const {
+    onSubmit,
+    ajax,
+    method,
+    action,
+    handleAjaxResponse,
+    children,
+    className,
+    redirect,
+  } = props;
 
-const mapDispatch = dispatch => ({
-  addStatus: status => dispatch({ type: 'ADD_STATUS', payload: status })
-})
-
-class Form extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      fields: {},
-      status: null,
-      submitted: false,
-      processing: false
-    };
-  }
-
-  setValue = field => {
-    this.setState(prevState => ({
-      ...prevState,
-      fields: {
-        ...prevState.fields,
-        [field.name]: {
-          value: field.value,
-          valid: field.valid
-        }
-      }
-    }));
-  }
-
-  submit = e => {
-    this.setState({
-      submitted: true
+  const setValue = (field) => {
+    setFields({
+      ...fields,
+      [field.name]: {
+        value: field.value,
+        valid: field.valid,
+      },
     });
+  };
+
+  const submit = (e) => {
+    setSubmitted(true);
 
     let isValid = true;
 
-    Object.keys(this.state.fields).forEach((field) => {
-      if (!this.state.fields[field].valid) {
+    Object.keys(fields).forEach((field) => {
+      if (!fields[field].valid) {
         isValid = false;
       }
     });
@@ -59,80 +54,100 @@ class Form extends Component {
       e.preventDefault();
 
       // If submit handler comes through via props, run that
-    } else if (this.props.onSubmit) {
+    } else if (onSubmit) {
       e.preventDefault();
-      this.props.onSubmit(this.state.fields);
+      onSubmit(fields);
 
       // If form is AJAX, fetch data
-    } else if (this.props.ajax !== false) {
+    } else if (ajax !== false) {
       e.preventDefault();
-      let data = {};
+      const data = {};
 
       // Clean up data passed from field state
-      Object.keys(this.state.fields).forEach((field) => {
-        data[field] = this.state.fields[field].value;
+      Object.keys(fields).forEach((field) => {
+        data[field] = fields[field].value;
       });
 
-      this.setState({
-        processing: true
-      });
+      setProcessing(true);
 
       // Make the API call from the action
-      api.requests[this.props.method.toLowerCase()](this.props.action, data).then(
-        res => {
-
+      api.requests[method.toLowerCase()](action, data).then(
+        (res) => {
           // If prop handleAjaxResponse is passed, pass it the response
-          this.props.handleAjaxResponse && this.props.handleAjaxResponse(res);
+          if (handleAjaxResponse && typeof handleAjaxResponse === 'function') handleAjaxResponse(res);
 
           // Provide form data to the redirected page
-          if (this.props.redirect) {
-            this.props.history.push(this.props.redirect, data);
+          if (redirect) {
+            history.push(redirect, data);
           } else {
-            this.setState({ processing: false });
-            this.props.addStatus({
+            setProcessing(false);
+            addStatus({
               message: res.message,
-              type: 'success'
-            })
+              type: 'success',
+            });
           }
         },
-        error => {
+        (error) => {
           console.log(error);
-          this.setState({ processing: false });
-          this.props.addStatus({
+          setProcessing(false);
+          addStatus({
             message: error.message,
-            type: 'error'
-          })
-        }
+            type: 'error',
+          });
+        },
       );
     }
 
     // If valid and not AJAX submit as usual
-    return;
-  }
+  };
 
-  render() {
+  return (
+    <form
+      noValidate
+      onSubmit={submit}
+      method={method}
+      action={action}
+      className={className}
+    >
+      <FormContext.Provider value={{
+        setValue,
+        fields,
+        processing,
+        submitted,
+      }}
+      >
+        <HiddenInput
+          name="locale"
+          valueOverride={locale}
+        />
+        {children}
+      </FormContext.Provider>
+    </form>
+  );
+};
 
-    return (
-      <form
-        noValidate
-        onSubmit={this.submit}
-        method={this.props.method}
-        action={this.props.action}
-        className={this.props.className}>
-        <FormContext.Provider value={{
-          setValue: this.setValue.bind(this),
-          fields: this.state.fields,
-          processing: this.state.processing,
-          submitted: this.state.submitted
-        }}>
-          <HiddenInput
-            name="locale"
-            valueOverride={this.props.searchParams.locale} />
-          {this.props.children}
-        </FormContext.Provider>
-      </form>
-    );
-  }
-}
+Form.defaultProps = {
+  redirect: '',
+  onSubmit: null,
+  ajax: true,
+  method: 'POST',
+  action: '',
+  handleAjaxResponse: false,
+  className: '',
+};
 
-export default withRouter(connect(mapState, mapDispatch)(Form));
+Form.propTypes = {
+  onSubmit: PropTypes.func,
+  ajax: PropTypes.bool,
+  method: PropTypes.oneOf(['post', 'POST', 'get', 'GET', 'put', 'PUT', 'delete', 'DELETE']),
+  action: PropTypes.string,
+  handleAjaxResponse: PropTypes.func,
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node,
+  ]).isRequired,
+  className: PropTypes.string,
+  redirect: PropTypes.string,
+};
+
+export default Form;

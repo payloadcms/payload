@@ -24,17 +24,17 @@ body {
 
 html {
   font-size: $body;
-  line-height: rem(1);
+  line-height: base(1);
   font-size: 20px;
 
   @include mid-break {
     font-size: 18px;
-    line-height: rem(1);
+    line-height: base(1);
   }
 
   @include small-break {
     font-size: 16px;
-    line-height: rem(.8)
+    line-height: base(.8)
   }
 }
 
@@ -75,7 +75,7 @@ h5 {
 }
 
 p {
-    margin: 0 0 rem(.5);
+    margin: 0 0 base(.5);
 }
 
 ul {

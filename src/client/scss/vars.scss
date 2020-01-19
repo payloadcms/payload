@@ -18,7 +18,7 @@ $body           : 18px;
 $base-px        : 36px;
 $base           : ($base-px / $body) + rem; // This computes to 36px in rem
 
-@function rem($multiplier) {
+@function base($multiplier) {
 	@return ($base-px / $body) * $multiplier + rem;
 }
 

@@ -1,7 +1,7 @@
 @import '~payload/client/scss/styles';
 
 .upload-media {
-  padding: rem(1);
+  padding: base(1);
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -17,6 +17,6 @@
   }
 
   .btn {
-    margin: rem(.125) 0 0;
+    margin: base(.125) 0 0;
   }
 }

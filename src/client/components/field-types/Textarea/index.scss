@@ -1,12 +1,12 @@
 @import '~payload/client/scss/styles';
 
 .field-type.textarea {
-  margin-bottom: rem(.5);
+  margin-bottom: base(.5);
   position: relative;
 
   textarea {
     @include formInput();
-    min-height: rem(3);
+    min-height: base(3);
   }
 
   &.error {

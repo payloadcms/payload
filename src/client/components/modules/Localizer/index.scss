@@ -17,9 +17,9 @@
 
     svg {
       transform: rotate(90deg);
-      width: rem(.25);
-      height: rem(.25);
-      margin-right: rem(.375);
+      width: base(.25);
+      height: base(.25);
+      margin-right: base(.375);
     }
 
     &:hover {

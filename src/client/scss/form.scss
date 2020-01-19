@@ -10,10 +10,10 @@
     background: white;
     color: $black;
     border-radius: 0;
-    font-size: rem(.55);
-    height: rem(1.75);
-    line-height: rem(1.75);
-    padding: 0 rem(.75);
+    font-size: base(.55);
+    height: base(1.75);
+    line-height: base(1.75);
+    padding: 0 base(.75);
     -webkit-appearance: none;
 
     &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
@@ -43,6 +43,6 @@
     }
 
     @include small-break {
-        margin-bottom: rem(.5);
+        margin-bottom: base(.5);
     }
 }

@@ -8,15 +8,15 @@
   }
 
   a {
-    margin-right: rem(.35);
+    margin-right: base(.35);
     border: 0;
     display: flex;
     align-items: center;
 
     svg {
-      margin-left: rem(.35);
-      width: rem(.25);
-      height: rem(.25);
+      margin-left: base(.35);
+      width: base(.25);
+      height: base(.25);
     }
 
     label {

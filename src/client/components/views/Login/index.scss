@@ -1,13 +1,13 @@
-@import '~payload/client/scss/styles';
+@import '../../../scss/styles';
 
 .login {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  min-height: 100vh;
 
   .logo-wrap {
-    display: block;
-    margin: 0 auto rem(1);
+    margin: 0 auto base(1);
     max-width: 200px;
 
     svg {

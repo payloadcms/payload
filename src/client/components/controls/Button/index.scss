@@ -4,11 +4,11 @@
     @extend %uppercase-label;
     background-color: $primary;
     border: 1px solid $primary;
-    padding: rem(.5) rem(.75);
-    line-height: rem(.5);
+    padding: base(.5) base(.75);
+    line-height: base(.5);
     border-radius: $radius-sm;
-    margin-top: rem(1);
-    margin-bottom: rem(1);
+    margin-top: base(1);
+    margin-bottom: base(1);
     cursor: pointer;
 
     &.btn-secondary {
@@ -33,9 +33,9 @@
     }
 
     &.btn-small {
-        padding: rem(0) rem(.25) rem(.04);
+        padding: base(0) base(.25) base(.04);
         border-radius: 3px;
-        font-size: rem(.3);
+        font-size: base(.3);
     }
 
     &.btn-text {
@@ -55,12 +55,12 @@
       padding: 0;
       border-radius: 0;
       border: 0;
-      width: rem(1.5);
-      height: rem(1.5);
+      width: base(1.5);
+      height: base(1.5);
 
       svg {
-          width: rem(.75);
-          height: rem(.75);
+          width: base(.75);
+          height: base(.75);
       }
 
       &:hover {

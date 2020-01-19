@@ -1,6 +1,5 @@
 import React from 'react';
 import Cookies from 'universal-cookie';
-import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import ContentBlock from '../../layout/ContentBlock';
 import Form from '../../forms/Form';
@@ -10,25 +9,17 @@ import FormSubmit from '../../forms/Submit';
 
 import './index.scss';
 
-const mapStateToProps = state => ({
-  windowHeight: state.common.windowHeight,
-});
-
 const cookies = new Cookies();
 
 const handleAjaxResponse = (res) => {
   cookies.set('token', res.token, { path: '/' });
 };
 
-const Login = (props) => {
-  const Logo = props.logo;
-  const minHeight = props.windowHeight;
-
+const Login = () => {
   return (
     <ContentBlock
       className="login"
       width="narrow"
-      style={{ minHeight }}
     >
       <div className="wrap">
         <Form
@@ -56,4 +47,4 @@ const Login = (props) => {
   );
 };
 
-export default connect(mapStateToProps)(Login);
+export default Login;

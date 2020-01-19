@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FormContext } from '../Form';
+import FormContext from '../Form/Context';
 import Button from '../../controls/Button';
 
 import './index.scss';
@@ -16,13 +16,17 @@ class FormSubmit extends Component {
   }
 }
 
-const ContextFormSubmit = props => {
+const ContextFormSubmit = (props) => {
   return (
     <FormContext.Consumer>
-      {context => <FormSubmit {...props} context={context} />}
+      {context => (
+        <FormSubmit
+          {...props}
+          context={context}
+        />
+      )}
     </FormContext.Consumer>
   );
 };
 
 export default ContextFormSubmit;
-

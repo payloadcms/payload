@@ -12,7 +12,7 @@
   .content {
     flex-grow: 1;
     min-width: 0;
-    padding-right: rem(1);
+    padding-right: base(1);
   }
 
   .controls {
@@ -25,7 +25,7 @@
     }
 
     > *:last-child {
-      margin-left: rem(1);
+      margin-left: base(1);
     }
   }
 
@@ -35,8 +35,8 @@
     position: absolute;
     z-index: -1;
     top: 0;
-    right: - rem(1);
+    right: - base(1);
     bottom: 0;
-    left: - rem(1);
+    left: - base(1);
   }
 }
