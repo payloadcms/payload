@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import { APIError } from './APIError';
+import APIError from './APIError';
 
 export class NotFound extends APIError {
   constructor() {

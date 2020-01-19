@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import Cookies from 'universal-cookie';
 import {
   Route, Switch, withRouter, Redirect,
@@ -56,67 +56,71 @@ const Routes = () => {
                   if (cookies.get('token')) {
                     return (
                       <DefaultTemplate>
-                        <Route
-                          path={`${match.url}/media-library`}
-                          component={MediaLibrary}
-                        />
-                        <Route
-                          path={`${match.url}/create-user`}
-                          component={CreateUser}
-                        />
-                        <Route
-                          path={`${match.url}/`}
-                          exact
-                          component={Dashboard}
-                        />
+                        <Switch>
+                          <Route
+                            path={`${match.url}/media-library`}
+                            component={MediaLibrary}
+                          />
+                          <Route
+                            path={`${match.url}/create-user`}
+                            component={CreateUser}
+                          />
+                          <Route
+                            path={`${match.url}/`}
+                            exact
+                            component={Dashboard}
+                          />
 
-                        {config.collections.map((collection) => {
-                          const components = collection.components ? collection.components : {};
-                          return (
-                            <Switch key={collection.slug}>
-                              <Route
-                                path={`${match.url}/collections/${collection.slug}/create`}
-                                exact
-                                render={(routeProps) => {
-                                  return (
-                                    <Edit
-                                      {...routeProps}
-                                      collection={collection}
-                                    />
-                                  );
-                                }}
-                              />
+                          {config.collections.map((collection) => {
+                            const components = collection.components ? collection.components : {};
+                            return (
+                              <Fragment key={collection.slug}>
+                                <Route
+                                  path={`${match.url}/collections/${collection.slug}/create`}
+                                  exact
+                                  render={(routeProps) => {
+                                    return (
+                                      <Edit
+                                        {...routeProps}
+                                        collection={collection}
+                                      />
+                                    );
+                                  }}
+                                />
 
-                              <Route
-                                path={`${match.url}/collections/${collection.slug}/:id`}
-                                exact
-                                render={(routeProps) => {
-                                  return (
-                                    <Edit
-                                      {...routeProps}
-                                      collection={collection}
-                                    />
-                                  );
-                                }}
-                              />
+                                <Route
+                                  path={`${match.url}/collections/${collection.slug}/:id`}
+                                  exact
+                                  render={(routeProps) => {
+                                    return (
+                                      <Edit
+                                        {...routeProps}
+                                        collection={collection}
+                                      />
+                                    );
+                                  }}
+                                />
 
-                              <Route
-                                path={`${match.url}/collections/${collection.slug}`}
-                                exact
-                                render={(routeProps) => {
-                                  const ListComponent = components.List ? components.List : List;
-                                  return (
-                                    <ListComponent
-                                      {...routeProps}
-                                      collection={collection}
-                                    />
-                                  );
-                                }}
-                              />
-
-                            </Switch>
-                          );
-                        })}
+                                <Route
+                                  path={`${match.url}/collections/${collection.slug}`}
+                                  exact
+                                  render={(routeProps) => {
+                                    const ListComponent = components.List ? components.List : List;
+                                    return (
+                                      <ListComponent
+                                        {...routeProps}
+                                        collection={collection}
+                                      />
+                                    );
+                                  }}
+                                />
+                              </Fragment>
+                            );
+                          })}
+                          <Route>
+                            <h1>Not Found</h1>
+                          </Route>
+                        </Switch>
                       </DefaultTemplate>
                     );
                   }

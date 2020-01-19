@@ -1,12 +1,12 @@
 import React, { createContext, useContext } from 'react';
 import config from 'payload-config';
 import PropTypes from 'prop-types';
-import searchParamsContext from '../SearchParams';
+import { useSearchParams } from '../SearchParams';
 
 const Context = createContext({});
 
 export const LocaleProvider = ({ children }) => {
-  const searchParams = useContext(searchParamsContext);
+  const searchParams = useSearchParams();
 
   let activeLocale = null;
 

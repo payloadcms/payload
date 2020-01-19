@@ -21,18 +21,20 @@ const requests = {
   post: (url, body) =>
     fetch(`${url}`, {
       method: 'post',
-      body,
+      body: JSON.stringify(body),
       headers: {
-        ...setJWT()
+        ...setJWT(),
+        'Content-Type': 'application/json',
       },
     }),
 
   put: (url, body) =>
     fetch(`${url}`, {
       method: 'put',
-      body,
+      body: JSON.stringify(body),
       headers: {
-        ...setJWT()
+        ...setJWT(),
+        'Content-Type': 'application/json',
       },
     }),
 };

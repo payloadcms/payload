@@ -19,7 +19,7 @@ class ExtendableError extends Error {
  * Class representing an API error.
  * @extends ExtendableError
  */
-export class APIError extends ExtendableError {
+class APIError extends ExtendableError {
   /**
    * Creates an API error.
    * @param {string} message - Error message.
@@ -30,3 +30,5 @@ export class APIError extends ExtendableError {
     super(message, status, isPublic);
   }
 }
+
+export default APIError;

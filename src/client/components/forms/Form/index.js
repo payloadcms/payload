@@ -70,6 +70,8 @@ const Form = (props) => {
 
       setProcessing(true);
 
+      console.log(data);
+
       // Make the API call from the action
       api.requests[method.toLowerCase()](action, data).then(
         (res) => {

@@ -8,6 +8,7 @@ module.exports = {
   },
   useAsTitle: 'email',
   useAsUsername: 'email',
+  passwordIndex: 1,
   policies: {
     create: (req, res, next) => {
       return next();

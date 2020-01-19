@@ -72,8 +72,7 @@ const StatusList = () => {
 
 export {
   StatusListProvider,
-  StatusList,
   useStatusList,
 };
 
-export default Context;
+export default StatusList;

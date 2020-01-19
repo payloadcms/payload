@@ -1,6 +1,5 @@
 import React from 'react';
-import { withRouter, NavLink, Link } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { useLocation, NavLink, Link } from 'react-router-dom';
 import config from 'payload-config';
 
 import Arrow from '../../graphics/Arrow';
@@ -8,11 +7,7 @@ import Icon from '../../graphics/Icon';
 
 import './index.scss';
 
-const mapState = state => ({
-  config: state.common.config,
-});
-
-const Sidebar = (props) => {
+const Sidebar = () => {
   const {
     collections,
     globals,
@@ -20,6 +15,8 @@ const Sidebar = (props) => {
       admin,
     },
   } = config;
+
+  const location = useLocation();
 
   return (
     <aside className="sidebar">
@@ -37,7 +34,7 @@ const Sidebar = (props) => {
         </NavLink>
         {collections && Object.keys(collections).map((key, i) => {
           const href = `${admin}/collections/${collections[key].slug}`;
-          const classes = props.location.pathname.indexOf(href) > -1
+          const classes = location.pathname.indexOf(href) > -1
             ? 'active'
             : undefined;
 
@@ -57,7 +54,7 @@ const Sidebar = (props) => {
       <nav>
         {globals && globals.map((global, i) => {
           const href = `${admin}/globals/${global.slug}`;
-          const classes = props.location.pathname.indexOf(href) > -1
+          const classes = location.pathname.indexOf(href) > -1
             ? 'active'
             : undefined;
 
@@ -77,4 +74,4 @@ const Sidebar = (props) => {
   );
 };
 
-export default withRouter(connect(mapState)(Sidebar));
+export default Sidebar;

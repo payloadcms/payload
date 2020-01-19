@@ -1,4 +1,4 @@
-import React, { createContext } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import qs from 'qs';
@@ -27,4 +27,4 @@ SearchParamsProvider.propTypes = {
   ]).isRequired,
 };
 
-export default Context;
+export const useSearchParams = () => useContext(Context);
