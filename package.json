@@ -65,8 +65,6 @@
     "react-router-dom": "^4.3.1",
     "redux": "^4.0.4",
     "sharp": "^0.22.1",
-    "superagent": "^3.8.3",
-    "superagent-promise": "^1.1.0",
     "universal-cookie": "^3.1.0",
     "url-loader": "^1.0.1",
     "webpack": "^4.41.0",
