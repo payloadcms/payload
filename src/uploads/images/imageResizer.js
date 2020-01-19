@@ -11,12 +11,19 @@ function getOutputImageName(sourceImage, size) {
   return `${filenameWithoutExtension}-${size.width}x${size.height}.${extension}`;
 }
 
+/**
+ * Resize images according to image desired width and height and return sizes
+ * @param config
+ * @param uploadConfig
+ * @param file
+ * @returns String[]
+ */
 export async function resizeAndSave(config, uploadConfig, file) {
   const sourceImage = `${config.staticDir}/${file.name}`;
+  let sizes;
   try {
     const dimensions = await sizeOf(sourceImage);
-    console.log('ook');
-    return await Promise.all(uploadConfig.imageSizes
+    sizes = uploadConfig.imageSizes
       .filter(desiredSize => desiredSize.width < dimensions.width)
       .map(async (desiredSize) => {
         const outputImageName = getOutputImageName(sourceImage, desiredSize);
@@ -28,11 +35,10 @@ export async function resizeAndSave(config, uploadConfig, file) {
           .toFile(outputImageName);
         console.log({ ...desiredSize });
         return { ...desiredSize };
-      }));
+      });
   } catch (e) {
     console.log('error in resize and save', e.message);
   }
-  return [];
-  // console.log(outputSizes);
-  // return outputSizes;
+
+  return Promise.all(sizes);
 }

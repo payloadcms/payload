@@ -78,7 +78,6 @@ const upload = async (req, res, next, config) => {
   }
 
   const handlerData = await fileTypeHandler(config, req.uploadConfig, req.files.file);
-  // const handlerData = {};
 
   req.model.create({
     ...req.body,
