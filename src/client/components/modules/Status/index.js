@@ -1,6 +1,6 @@
 import React, { useState, createContext, useContext } from 'react';
 import PropTypes from 'prop-types';
-import Close from '../../forms/Submit/graphics/Close';
+import Close from '../../graphics/Close';
 
 import './index.scss';
 
