@@ -62,6 +62,7 @@ const Routes = () => {
                             component={MediaLibrary}
                           />
                           <Route
+                            exact
                             path={`${match.url}/create-user`}
                             component={CreateUser}
                           />
@@ -70,11 +71,10 @@ const Routes = () => {
                             exact
                             component={Dashboard}
                           />
-
                           {config.collections.map((collection) => {
                             const components = collection.components ? collection.components : {};
                             return (
-                              <Fragment key={collection.slug}>
+                              <Switch key={collection.slug}>
                                 <Route
                                   path={`${match.url}/collections/${collection.slug}/create`}
                                   exact
@@ -114,12 +114,12 @@ const Routes = () => {
                                     );
                                   }}
                                 />
-                              </Fragment>
+                                <Route>
+                                  <h1>Not Found</h1>
+                                </Route>
+                              </Switch>
                             );
                           })}
-                          <Route>
-                            <h1>Not Found</h1>
-                          </Route>
                         </Switch>
                       </DefaultTemplate>
                     );

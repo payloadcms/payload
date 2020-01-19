@@ -8,12 +8,12 @@ import './index.scss';
 const Context = createContext({});
 
 const StepNavProvider = ({ children }) => {
-  const [nav, setNav] = useState([]);
+  const [stepNav, setStepNav] = useState([]);
 
   return (
     <Context.Provider value={{
-      nav,
-      setNav,
+      stepNav,
+      setStepNav,
     }}
     >
       {children}
@@ -32,23 +32,23 @@ const useStepNav = () => useContext(Context);
 
 const StepNav = () => {
   const dashboardLabel = <span>Dashboard</span>;
-  const { nav } = useStepNav();
+  const { stepNav } = useStepNav();
 
   return (
     <nav className="step-nav">
-      {nav.length > 0
+      {stepNav.length > 0
         ? (
-          <Link to="/">
+          <Link to="/admin">
             {dashboardLabel}
             <Arrow />
           </Link>
         )
         : dashboardLabel
       }
-      {nav.map((item, i) => {
+      {stepNav.map((item, i) => {
         const StepLabel = <span key={i}>{item.label}</span>;
 
-        const Step = nav.length === i + 1
+        const Step = stepNav.length === i + 1
           ? StepLabel
           : (
             <Link

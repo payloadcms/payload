@@ -1,26 +1,30 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ContentBlock from '../../layout/ContentBlock';
 import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
-import SetStepNav from '../../utilities/SetStepNav';
+import { useStepNav } from '../../modules/StepNav';
 
 import './index.scss';
 
 const CreateUser = () => {
+  const { setStepNav } = useStepNav();
+
+  useEffect(() => {
+    setStepNav([
+      {
+        label: 'Create User',
+      },
+    ]);
+  }, []);
+
   return (
     <ContentBlock
       className="create-user"
       align="left"
       width="narrow"
     >
-      <SetStepNav nav={[
-        {
-          label: 'Create User',
-        },
-      ]}
-      />
       <h1>Create New User</h1>
       <Form
         method="POST"
