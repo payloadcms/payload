@@ -33,7 +33,6 @@ export async function resizeAndSave(config, uploadConfig, file) {
             position: desiredSize.crop || 'centre',
           })
           .toFile(outputImageName);
-        console.log({ ...desiredSize });
         return { ...desiredSize };
       });
   } catch (e) {
