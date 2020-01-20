@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import Cookies from 'universal-cookie';
 import config from 'payload-config';
 import { useStatusList } from '../../modules/Status';
 import ContentBlock from '../../layout/ContentBlock';
@@ -9,6 +8,7 @@ import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import FormSubmit from '../../forms/Submit';
 import getSanitizedConfig from '../../../config/getSanitizedConfig';
+import { useUser } from '../../data/User';
 
 import './index.scss';
 
@@ -17,8 +17,6 @@ const {
     admin,
   },
 } = getSanitizedConfig();
-
-const cookies = new Cookies();
 
 const passwordField = {
   name: 'password',
@@ -31,11 +29,13 @@ const baseClass = 'create-first-user';
 const CreateFirstUser = (props) => {
   const { setInitialized } = props;
   const { addStatus } = useStatusList();
+  const { user, setToken } = useUser();
   const history = useHistory();
+
   const handleAjaxResponse = (res) => {
     res.json().then((data) => {
       if (data.token) {
-        cookies.set('token', data.token, { path: '/' });
+        setToken(data.token);
         setInitialized(true);
         history.push(`${admin}`);
       } else {

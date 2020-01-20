@@ -1,14 +1,12 @@
 import React, { Component } from 'react';
 import { createPortal } from 'react-dom';
-import { connect } from 'react-redux';
 import Button from '../../controls/Button';
 import api from '../../../api';
+import getSanitizedConfig from '../../../config/getSanitizedConfig';
 
 import './index.scss';
 
-const mapState = state => ({
-  config: state.common.config
-})
+const config = getSanitizedConfig();
 
 class UploadMedia extends Component {
 
@@ -98,7 +96,7 @@ class UploadMedia extends Component {
         <span className="instructions">Drag and drop a file here</span>
         <span className="or">&mdash;or&mdash;</span>
         <Button className="select-file" type="secondary" onClick={this.handleSelectFile}>Select a File</Button>
-        <UploadMediaForm files={this.state.files} selectingFile={this.state.selectingFile} config={this.props.config} setSelectingFile={this.setSelectingFile} />
+        <UploadMediaForm files={this.state.files} selectingFile={this.state.selectingFile} config={config} setSelectingFile={this.setSelectingFile} />
       </div>
     )
   }
@@ -163,4 +161,4 @@ class UploadMediaForm extends Component {
   }
 }
 
-export default connect(mapState)(UploadMedia);
+export default UploadMedia;

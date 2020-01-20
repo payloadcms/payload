@@ -8,7 +8,9 @@ import passwordResetRoutes from './passwordResets/routes';
 
 const router = express.Router();
 const authRoutes = (userConfig, User) => {
-  const auth = authRequestHandlers(User);
+  const auth = authRequestHandlers(userConfig, User);
+
+  const usernameField = userConfig.useAsUsername || 'email';
 
   router
     .route('/login')
@@ -36,7 +38,7 @@ const authRoutes = (userConfig, User) => {
           next();
         });
       }, (req, res, next) => {
-        User.register(new User({ email: req.body.email }), req.body.password, (err, user) => {
+        User.register(new User({ [usernameField]: req.body[usernameField] }), req.body.password, (err) => {
           if (err) {
             const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
             return next(error);

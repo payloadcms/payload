@@ -3,7 +3,7 @@ import passport from 'passport';
 import httpStatus from 'http-status';
 import APIError from '../errors/APIError';
 
-export default User => ({
+export default (userConfig, User) => ({
   /**
    * Returns User when succesfully registered
    * @param req
@@ -12,13 +12,15 @@ export default User => ({
    * @returns {*}
    */
   register: (req, res, next) => {
-    User.register(new User({ email: req.body.email }), req.body.password, (err, user) => {
+    const usernameField = userConfig.useAsUsername || 'email';
+
+    User.register(new User({ usernameField: req.body[usernameField] }), req.body.password, (err, user) => {
       if (err) {
         const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
         return next(error);
       }
       return passport.authenticate('local')(req, res, () => {
-        return res.json({ email: user.email, role: user.role, createdAt: user.createdAt });
+        return res.json({ [usernameField]: user[usernameField], role: user.role, createdAt: user.createdAt });
       });
     });
   },
@@ -30,18 +32,28 @@ export default User => ({
    * @returns {*}
    */
   login: (req, res) => {
-    const { email, password } = req.body;
+    const usernameField = userConfig.useAsUsername || 'email';
+    const username = req.body[usernameField];
+    const { password } = req.body;
 
-    User.findByUsername(email, (err, user) => {
+    User.findByUsername(username, (err, user) => {
       if (err || !user) return res.status(401).json({ message: 'Auth Failed' });
 
       return user.authenticate(password, (authErr, model, passwordError) => {
         if (authErr || passwordError) return res.status(401).json({ message: 'Auth Failed' });
 
         const opts = {};
-        opts.expiresIn = process.env.tokenExpiration || 7200; // 20min default expiration
+        opts.expiresIn = process.env.tokenExpiration || 7200;
         const secret = process.env.secret || 'SECRET_KEY';
-        const token = jwt.sign({ email }, secret, opts);
+
+        const fieldsToSign = userConfig.fields.reduce((acc, field) => {
+          if (field.saveToJWT) acc[field.name] = user[field.name];
+          return acc;
+        }, {
+          [usernameField]: username,
+        });
+
+        const token = jwt.sign(fieldsToSign, secret, opts);
         return res.status(200).json({
           message: 'Auth Passed',
           token,

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import Cookies from 'universal-cookie';
 import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
 import config from 'payload-config';
+import { useUser } from './data/User';
 import Dashboard from './views/Dashboard';
 import Login from './views/Login';
 import Logout from './views/Logout';
@@ -13,10 +13,9 @@ import Edit from './views/collections/Edit';
 import List from './views/collections/List';
 import { requests } from '../api';
 
-const cookies = new Cookies();
-
 const Routes = () => {
   const [initialized, setInitialized] = useState(null);
+  const { user } = useUser();
 
   useEffect(() => {
     requests.get('/init').then(res => res.json().then((data) => {
@@ -55,7 +54,7 @@ const Routes = () => {
               </Route>
               <Route
                 render={() => {
-                  if (cookies.get('token')) {
+                  if (user) {
                     return (
                       <Switch>
                         <Route

@@ -14,6 +14,7 @@ module.exports = {
   },
   plugins: [
     'react',
+    'react-hooks',
   ],
   rules: {
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
@@ -31,6 +32,8 @@ module.exports = {
       },
       "allowChildren": false
     }],
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
     "react/no-array-index-key": 0,
     "max-len": 0,
     "react/no-danger": 0,

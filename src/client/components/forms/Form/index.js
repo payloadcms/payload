@@ -5,7 +5,7 @@ import FormContext from './Context';
 import { useLocale } from '../../utilities/Locale';
 import { useStatusList } from '../../modules/Status';
 import HiddenInput from '../field-types/HiddenInput';
-import api from '../../../api';
+import { requests } from '../../../api';
 
 import './index.scss';
 
@@ -71,7 +71,7 @@ const Form = (props) => {
       setProcessing(true);
 
       // Make the API call from the action
-      api.requests[method.toLowerCase()](action, data).then(
+      requests[method.toLowerCase()](action, data).then(
         (res) => {
           // If prop handleAjaxResponse is passed, pass it the response
           if (handleAjaxResponse && typeof handleAjaxResponse === 'function') handleAjaxResponse(res);

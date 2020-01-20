@@ -8,7 +8,7 @@ const setJWT = () => {
   return jwt ? { 'Authorization': `JWT ${jwt}` } : {}
 };
 
-const requests = {
+export const requests = {
   get: (url, params) => {
     const query = qs.stringify(params, { addQueryPrefix: true });
     return fetch(`${url}${query}`, {
@@ -37,8 +37,4 @@ const requests = {
         'Content-Type': 'application/json',
       },
     }),
-};
-
-export default {
-  requests
 };

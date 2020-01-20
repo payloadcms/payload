@@ -22,6 +22,10 @@
     label {
       cursor: pointer;
     }
+
+    &:hover {
+      border-bottom: 0;
+    }
   }
 
   > label {

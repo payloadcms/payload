@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import Cookies from 'universal-cookie';
 import { useStatusList } from '../../modules/Status';
 import ContentBlock from '../../layout/ContentBlock';
 import Form from '../../forms/Form';
@@ -9,10 +8,9 @@ import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
 import getSanitizedConfig from '../../../config/getSanitizedConfig';
 import Button from '../../controls/Button';
+import { useUser } from '../../data/User';
 
 import './index.scss';
-
-const cookies = new Cookies();
 
 const baseClass = 'login';
 
@@ -25,11 +23,12 @@ const {
 const Login = () => {
   const { addStatus } = useStatusList();
   const history = useHistory();
+  const { user, setToken } = useUser();
 
   const handleAjaxResponse = (res) => {
     res.json().then((data) => {
       if (data.token) {
-        cookies.set('token', data.token, { path: '/' });
+        setToken(data.token);
         history.push(`${admin}`);
       } else {
         addStatus({
@@ -40,9 +39,7 @@ const Login = () => {
     });
   };
 
-  const token = cookies.get('token');
-
-  if (token) {
+  if (user) {
     return (
       <ContentBlock
         className={baseClass}

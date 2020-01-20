@@ -1,12 +1,10 @@
-import React from 'react';
-import Cookies from 'universal-cookie';
+import React, { useEffect } from 'react';
+import { useUser } from '../../data/User';
 import ContentBlock from '../../layout/ContentBlock';
 import getSanitizedConfig from '../../../config/getSanitizedConfig';
 import Button from '../../controls/Button';
 
 import './index.scss';
-
-const cookies = new Cookies();
 
 const baseClass = 'logout';
 
@@ -17,7 +15,11 @@ const {
 } = getSanitizedConfig();
 
 const Logout = () => {
-  cookies.remove('token', { path: '/' });
+  const { logOut } = useUser();
+
+  useEffect(() => {
+    logOut();
+  }, [logOut]);
 
   return (
     <ContentBlock
@@ -28,9 +30,9 @@ const Logout = () => {
         <h1>You have been logged out.</h1>
         <br />
         <Button
-          el="link"
+          el="anchor"
           type="secondary"
-          to={`${admin}/login`}
+          url={`${admin}/login`}
         >
           Log back in
         </Button>

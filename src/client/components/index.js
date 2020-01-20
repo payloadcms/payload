@@ -4,21 +4,24 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { SearchParamsProvider } from './utilities/SearchParams';
 import { LocaleProvider } from './utilities/Locale';
 import { StatusListProvider } from './modules/Status';
+import { UserProvider } from './data/User';
 import Routes from './Routes';
 
 import '../scss/app.scss';
 
 const Index = () => {
   return (
-    <Router>
-      <SearchParamsProvider>
-        <LocaleProvider>
-          <StatusListProvider>
-            <Routes />
-          </StatusListProvider>
-        </LocaleProvider>
-      </SearchParamsProvider>
-    </Router>
+    <UserProvider>
+      <Router>
+        <SearchParamsProvider>
+          <LocaleProvider>
+            <StatusListProvider>
+              <Routes />
+            </StatusListProvider>
+          </LocaleProvider>
+        </SearchParamsProvider>
+      </Router>
+    </UserProvider>
   );
 };
 
