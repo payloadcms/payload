@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
@@ -70,52 +70,59 @@ const Routes = () => {
                         {config.collections.map((collection) => {
                           const components = collection.components ? collection.components : {};
                           return (
-                            <Switch key={collection.slug}>
-                              <Route
-                                path={`${match.url}/collections/${collection.slug}/create`}
-                                exact
-                                render={(routeProps) => {
-                                  return (
-                                    <Edit
-                                      {...routeProps}
-                                      collection={collection}
-                                    />
-                                  );
-                                }}
-                              />
-
-                              <Route
-                                path={`${match.url}/collections/${collection.slug}/:id`}
-                                exact
-                                render={(routeProps) => {
-                                  return (
-                                    <Edit
-                                      {...routeProps}
-                                      collection={collection}
-                                    />
-                                  );
-                                }}
-                              />
-
-                              <Route
-                                path={`${match.url}/collections/${collection.slug}`}
-                                exact
-                                render={(routeProps) => {
-                                  const ListComponent = components.List ? components.List : List;
-                                  return (
-                                    <ListComponent
-                                      {...routeProps}
-                                      collection={collection}
-                                    />
-                                  );
-                                }}
-                              />
-                              <Route>
-                                <NotFound />
-                              </Route>
-                            </Switch>
+                            <Route
+                              key={collection.slug}
+                              path={`${match.url}/collections/${collection.slug}`}
+                              exact
+                              render={(routeProps) => {
+                                const ListComponent = components.List ? components.List : List;
+                                return (
+                                  <ListComponent
+                                    {...routeProps}
+                                    collection={collection}
+                                  />
+                                );
+                              }}
+                            />
                           );
                         })}
+                        {config.collections.map((collection) => {
+                          return (
+                            <Route
+                              key={collection.slug}
+                              path={`${match.url}/collections/${collection.slug}/:id`}
+                              exact
+                              render={(routeProps) => {
+                                return (
+                                  <Edit
+                                    {...routeProps}
+                                    collection={collection}
+                                  />
+                                );
+                              }}
+                            />
+                          );
+                        })}
+                        {config.collections.map((collection) => {
+                          return (
+                            <Route
+                              key={collection.slug}
+                              path={`${match.url}/collections/${collection.slug}/create`}
+                              exact
+                              render={(routeProps) => {
+                                return (
+                                  <Edit
+                                    {...routeProps}
+                                    collection={collection}
+                                  />
+                                );
+                              }}
+                            />
+                          );
+                        })}
+                        <Route path={`${match.url}*`}>
+                          <NotFound />
+                        </Route>
                       </Switch>
                     );
                   }

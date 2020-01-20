@@ -1,26 +1,23 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { useStepNav } from '../../../modules/StepNav';
+import DefaultTemplate from '../../../layout/DefaultTemplate';
 
 import './index.scss';
 
 const ListView = (props) => {
-  const { setStepNav } = useStepNav();
-
   const { collection } = props;
 
-  useEffect(() => {
-    setStepNav([
-      {
-        label: collection.labels.plural,
-      },
-    ]);
-  }, []);
-
   return (
-    <article className="collection-list">
+    <DefaultTemplate
+      className="collection-list"
+      stepNav={[
+        {
+          label: collection.labels.plural,
+        },
+      ]}
+    >
       <h1>{collection.labels.plural}</h1>
-    </article>
+    </DefaultTemplate>
   );
 };
 
