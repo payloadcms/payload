@@ -1,0 +1,12 @@
+@import '../../../scss/styles';
+
+.logout {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  min-height: 100vh;
+
+  &__wrap {
+    margin: 0 auto base(1);
+  }
+}

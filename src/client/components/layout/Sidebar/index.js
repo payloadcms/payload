@@ -74,7 +74,12 @@ const Sidebar = () => {
           );
         })}
       </nav>
-      <LogOut />
+      <Link
+        to={`${admin}/logout`}
+        className="log-out"
+      >
+        Log out
+      </Link>
     </aside>
   );
 };

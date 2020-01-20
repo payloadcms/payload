@@ -1,4 +1,5 @@
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import Cookies from 'universal-cookie';
 import { useStatusList } from '../../modules/Status';
 import ContentBlock from '../../layout/ContentBlock';
@@ -23,11 +24,13 @@ const {
 
 const Login = () => {
   const { addStatus } = useStatusList();
+  const history = useHistory();
 
   const handleAjaxResponse = (res) => {
     res.json().then((data) => {
       if (data.token) {
         cookies.set('token', data.token, { path: '/' });
+        history.push(`${admin}`);
       } else {
         addStatus({
           type: 'error',

@@ -11,10 +11,6 @@
   width: base(6);
   padding: base(1);
 
-  .brand {
-    border-bottom: 0;
-  }
-
   .icon-wrap {
     margin: 0 0 base(.5);
 
@@ -28,6 +24,10 @@
     color: $gray;
   }
 
+  a, a:hover {
+    border-bottom: 0;
+  }
+
   nav {
     margin: base(.25) 0 $base;
 
@@ -35,7 +35,6 @@
       position: relative;
       display: flex;
       padding: base(.33) 0;
-      border-bottom: 0;
 
       svg {
         opacity: 0;

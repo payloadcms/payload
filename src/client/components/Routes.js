@@ -6,6 +6,7 @@ import {
 import config from 'payload-config';
 import Dashboard from './views/Dashboard';
 import Login from './views/Login';
+import Logout from './views/Logout';
 import CreateFirstUser from './views/CreateFirstUser';
 import CreateUser from './views/CreateUser';
 import MediaLibrary from './views/MediaLibrary';
@@ -46,6 +47,9 @@ const Routes = () => {
             <Switch>
               <Route path={`${match.url}/login`}>
                 <Login />
+              </Route>
+              <Route path={`${match.url}/logout`}>
+                <Logout />
               </Route>
               <Route path={`${match.url}/forgot`}>
                 <h1>Forgot Password</h1>
