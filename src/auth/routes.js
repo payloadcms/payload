@@ -10,8 +10,6 @@ const router = express.Router();
 const authRoutes = (userConfig, User) => {
   const auth = authRequestHandlers(userConfig, User);
 
-  const usernameField = userConfig.useAsUsername || 'email';
-
   router
     .route('/login')
     .post(authValidate.login, auth.login);
