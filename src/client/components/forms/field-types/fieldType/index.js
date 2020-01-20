@@ -1,7 +1,8 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import FormContext from '../../Form/Context';
 import Tooltip from '../../../modules/Tooltip';
+import useMountEffect from '../../../../hooks/useMountEffect';
 
 import './index.scss';
 
@@ -10,39 +11,32 @@ const baseClass = 'field-type';
 const asFieldType = (PassedComponent, type, validate, errors) => {
   const FieldType = (props) => {
     const formContext = useContext(FormContext);
+    const { setValue } = formContext;
 
     const {
       name,
       id,
       required,
-      initialValue,
+      defaultValue,
       valueOverride,
       onChange,
     } = props;
 
-    const sendField = (valueToSend) => {
-      formContext.setValue({
+    const sendField = useCallback((valueToSend) => {
+      setValue({
         name,
         value: valueToSend,
         valid: required && validate
           ? validate(valueToSend || '', type)
           : true,
       });
-    };
+    }, [name, required, setValue]);
 
-    useEffect(() => {
-      let valueToInitialize = initialValue;
+    useMountEffect(() => {
+      let valueToInitialize = defaultValue;
       if (valueOverride) valueToInitialize = valueOverride;
       sendField(valueToInitialize);
-    }, []);
-
-    useEffect(() => {
-      sendField(valueOverride);
-    }, [valueOverride]);
-
-    useEffect(() => {
-      sendField(initialValue);
-    }, [initialValue]);
+    });
 
     const classList = [baseClass, type];
     const valid = formContext.fields[name] ? formContext.fields[name].valid : true;
@@ -62,6 +56,7 @@ const asFieldType = (PassedComponent, type, validate, errors) => {
         {...props}
         className={classes}
         value={valueToRender}
+        sendField={sendField}
         label={(
           <Label
             htmlFor={id || name}
@@ -84,7 +79,7 @@ const asFieldType = (PassedComponent, type, validate, errors) => {
 
   FieldType.defaultProps = {
     required: false,
-    initialValue: '',
+    defaultValue: '',
     valueOverride: '',
     onChange: null,
     id: '',
@@ -93,7 +88,7 @@ const asFieldType = (PassedComponent, type, validate, errors) => {
   FieldType.propTypes = {
     name: PropTypes.string.isRequired,
     required: PropTypes.bool,
-    initialValue: PropTypes.string,
+    defaultValue: PropTypes.string,
     valueOverride: PropTypes.string,
     onChange: PropTypes.func,
     id: PropTypes.string,

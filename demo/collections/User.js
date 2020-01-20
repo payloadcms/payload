@@ -42,7 +42,7 @@ module.exports = {
       label: 'Role',
       type: 'select',
       options: roles,
-      default: 'user',
+      defaultValue: 'user',
       saveToJWT: true,
     },
   ],

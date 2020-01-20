@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import fieldType from '../fieldType';
 
 import './index.scss';
+import useMountEffect from '../../../../hooks/useMountEffect';
 
 const errorMessage = 'Please fill in the textarea';
 
@@ -21,7 +22,23 @@ const Select = (props) => {
     id,
     name,
     options,
+    sendField,
+    defaultValue,
   } = props;
+
+  useMountEffect(() => {
+    let initialValue = defaultValue;
+
+    if (!initialValue) {
+      if (typeof options[0] === 'object') {
+        initialValue = options[0].value;
+      } else {
+        [initialValue] = options;
+      }
+    }
+
+    sendField(initialValue);
+  });
 
   return (
     <div
@@ -39,22 +56,21 @@ const Select = (props) => {
         name={name}
       >
         {options && options.map((option, i) => {
+          let optionValue = option;
+          let optionLabel = option;
+
           if (typeof option === 'object') {
-            return (
-              <option
-                key={i}
-                value={option.value}
-              >
-                {option.label}
-              </option>
-            );
+            optionValue = option.value;
+            optionLabel = option.label;
           }
+
           return (
             <option
-              value={option}
               key={i}
+              value={optionValue}
+              selected={value === optionValue ? 'selected' : undefined}
             >
-              {option}
+              {optionLabel}
             </option>
           );
         })}
@@ -74,9 +90,11 @@ Select.defaultProps = {
   placeholder: null,
   id: null,
   name: 'select',
+  defaultValue: '',
 };
 
 Select.propTypes = {
+  sendField: PropTypes.func.isRequired,
   className: PropTypes.string,
   style: PropTypes.shape({}),
   error: PropTypes.node,
@@ -87,6 +105,7 @@ Select.propTypes = {
   placeholder: PropTypes.string,
   id: PropTypes.string,
   name: PropTypes.string,
+  defaultValue: PropTypes.string,
   options: PropTypes.oneOfType([
     PropTypes.arrayOf(
       PropTypes.string,
