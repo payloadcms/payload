@@ -18,12 +18,13 @@ import registerCollectionRoutes from './collections/registerRoutes';
 import validateGlobals from './globals/validate';
 import registerGlobalSchema from './globals/registerSchema';
 import registerGlobalRoutes from './globals/registerRoutes';
+import mongooseHidden from "mongoose-hidden";
 
 class Payload {
   collections = {};
 
   constructor(options) {
-    // Setup & inititalization
+    // Setup & initialization
     connectMongoose(options.config.mongoURL);
     registerExpressMiddleware(options);
     initPassport(options.app);
@@ -73,6 +74,7 @@ class Payload {
   };
 
   registerUpload = () => {
+    // TODO: mongooseHidden on our upload model is hiding all the fields
     const uploadSchema = buildCollectionSchema(
       this.config.upload,
       this.config,
@@ -86,6 +88,7 @@ class Payload {
     });
 
     this.Upload = mongoose.model(this.config.upload.labels.singular, uploadSchema);
+    // TODO: image type hard coded, but in the future we need some way of customizing how uploads are handled in customizable pattern
     this.Upload.discriminator('image', imageSchema);
 
     registerUploadRoutes(this.Upload, this.config, this.router);

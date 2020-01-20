@@ -9,7 +9,7 @@ module.exports = {
   useAsTitle: 'filename',
   policies: {
     create: user => checkRole(['user', 'admin'], user),
-    read: () => true,
+    read: user => checkRole(['user', 'admin'], user),
     update: user => checkRole(['user', 'admin'], user),
     destroy: user => checkRole(['user', 'admin'], user),
   },

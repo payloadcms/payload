@@ -1,3 +1,4 @@
+const checkRole = require('../policies/checkRole');
 const Quote = require('../content-blocks/Quote');
 const CallToAction = require('../content-blocks/CallToAction');
 
@@ -5,18 +6,10 @@ module.exports = {
   slug: 'header',
   label: 'Header',
   policies: {
-    create: (req, res, next) => {
-      return next();
-    },
-    read: (req, res, next) => {
-      return next();
-    },
-    update: (req, res, next) => {
-      return next();
-    },
-    destroy: (req, res, next) => {
-      return next();
-    },
+    create: user => checkRole(['admin'], user),
+    read: () => true,
+    update: user => checkRole(['admin'], user),
+    destroy: user => checkRole(['admin'], user),
   },
   fields: [
     {
