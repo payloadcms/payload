@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLocation, NavLink, Link } from 'react-router-dom';
 import getSanitizedConfig from '../../../config/getSanitizedConfig';
-import LogOut from '../../controls/LogOut';
 
 import Arrow from '../../graphics/Arrow';
 import Icon from '../../graphics/Icon';

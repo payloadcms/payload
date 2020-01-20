@@ -1,5 +1,7 @@
 import express from 'express';
 import passport from 'passport';
+import httpStatus from 'http-status';
+import APIError from '../errors/APIError';
 import authRequestHandlers from './requestHandlers';
 import authValidate from './validate';
 import passwordResetRoutes from './passwordResets/routes';
@@ -33,7 +35,16 @@ const authRoutes = (userConfig, User) => {
           if (count >= 1) return res.status(403).json({ initialized: true });
           next();
         });
-      }, auth.register);
+      }, (req, res, next) => {
+        User.register(new User({ email: req.body.email }), req.body.password, (err, user) => {
+          if (err) {
+            const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
+            return next(error);
+          }
+
+          return next();
+        });
+      }, auth.login);
   }
 
   return router;

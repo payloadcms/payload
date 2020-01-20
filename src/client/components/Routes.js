@@ -34,7 +34,7 @@ const Routes = () => {
           return (
             <Switch>
               <Route path={`${match.url}/create-first-user`}>
-                <CreateFirstUser />
+                <CreateFirstUser setInitialized={setInitialized} />
               </Route>
               <Redirect to="/admin/create-first-user" />
             </Switch>

@@ -9,9 +9,7 @@ module.exports = {
     create: (req, res, next) => {
       return next();
     },
-    read: (req, res, next) => {
-      return next();
-    },
+    read: () => false,
     update: (req, res, next) => {
       return next();
     },

@@ -1,18 +1,24 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import { useHistory } from 'react-router-dom';
 import Cookies from 'universal-cookie';
 import config from 'payload-config';
+import { useStatusList } from '../../modules/Status';
 import ContentBlock from '../../layout/ContentBlock';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import FormSubmit from '../../forms/Submit';
+import getSanitizedConfig from '../../../config/getSanitizedConfig';
 
 import './index.scss';
 
-const cookies = new Cookies();
+const {
+  routes: {
+    admin,
+  },
+} = getSanitizedConfig();
 
-const handleAjaxResponse = (res) => {
-  cookies.set('token', res.token, { path: '/' });
-};
+const cookies = new Cookies();
 
 const passwordField = {
   name: 'password',
@@ -22,7 +28,25 @@ const passwordField = {
 
 const baseClass = 'create-first-user';
 
-const CreateFirstUser = () => {
+const CreateFirstUser = (props) => {
+  const { setInitialized } = props;
+  const { addStatus } = useStatusList();
+  const history = useHistory();
+  const handleAjaxResponse = (res) => {
+    res.json().then((data) => {
+      if (data.token) {
+        cookies.set('token', data.token, { path: '/' });
+        setInitialized(true);
+        history.push(`${admin}`);
+      } else {
+        addStatus({
+          type: 'error',
+          message: 'There was a problem creating your first user.',
+        });
+      }
+    });
+  };
+
   const fields = [...config.user.fields];
 
   if (config.user.passwordIndex) {
@@ -47,6 +71,10 @@ const CreateFirstUser = () => {
       </div>
     </ContentBlock>
   );
+};
+
+CreateFirstUser.propTypes = {
+  setInitialized: PropTypes.func.isRequired,
 };
 
 export default CreateFirstUser;

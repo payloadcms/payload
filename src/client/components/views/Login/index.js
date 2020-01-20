@@ -1,5 +1,5 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import Cookies from 'universal-cookie';
 import { useStatusList } from '../../modules/Status';
 import ContentBlock from '../../layout/ContentBlock';
@@ -50,7 +50,13 @@ const Login = () => {
       >
         <div className={`${baseClass}__wrap`}>
           <h1>Already logged in</h1>
-          <p>To log in with another user, you should log out first.</p>
+          <p>
+            To log in with another user, you should
+            {' '}
+            <Link to={`${admin}/logout`}>log out</Link>
+            {' '}
+            first.
+          </p>
           <br />
           <Button
             el="link"
