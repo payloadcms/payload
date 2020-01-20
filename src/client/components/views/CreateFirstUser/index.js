@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import config from 'payload-config';
-import { useStatusList } from '../../modules/Status';
+import StatusList, { useStatusList } from '../../modules/Status';
 import ContentBlock from '../../layout/ContentBlock';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
@@ -22,6 +22,7 @@ const passwordField = {
   name: 'password',
   label: 'Password',
   type: 'password',
+  required: true,
 };
 
 const baseClass = 'create-first-user';
@@ -29,7 +30,7 @@ const baseClass = 'create-first-user';
 const CreateFirstUser = (props) => {
   const { setInitialized } = props;
   const { addStatus } = useStatusList();
-  const { user, setToken } = useUser();
+  const { setToken } = useUser();
   const history = useHistory();
 
   const handleAjaxResponse = (res) => {
@@ -56,12 +57,17 @@ const CreateFirstUser = (props) => {
   }
 
   return (
-    <ContentBlock className={baseClass}>
+    <ContentBlock
+      className={baseClass}
+      width="narrow"
+    >
       <div className={`${baseClass}__wrap`}>
         <h1>Welcome to Payload</h1>
         <p>To begin, create your first user.</p>
+        <StatusList />
         <Form
           handleAjaxResponse={handleAjaxResponse}
+          disableSuccessStatus
           method="POST"
           action="/first-register"
         >

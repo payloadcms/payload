@@ -26,6 +26,7 @@ const Form = (props) => {
     children,
     className,
     redirect,
+    disableSuccessStatus,
   } = props;
 
   const setValue = (field) => {
@@ -81,10 +82,12 @@ const Form = (props) => {
             history.push(redirect, data);
           } else {
             setProcessing(false);
-            addStatus({
-              message: res.message,
-              type: 'success',
-            });
+            if (!disableSuccessStatus) {
+              addStatus({
+                message: res.message,
+                type: 'success',
+              });
+            }
           }
         },
         (error) => {
@@ -134,9 +137,11 @@ Form.defaultProps = {
   action: '',
   handleAjaxResponse: null,
   className: '',
+  disableSuccessStatus: false,
 };
 
 Form.propTypes = {
+  disableSuccessStatus: PropTypes.bool,
   onSubmit: PropTypes.func,
   ajax: PropTypes.bool,
   method: PropTypes.oneOf(['post', 'POST', 'get', 'GET', 'put', 'PUT', 'delete', 'DELETE']),

@@ -33,13 +33,13 @@ const authRoutes = (userConfig, User) => {
         User.countDocuments({}, (err, count) => {
           if (err) res.status(500).json({ error: err });
           if (count >= 1) return res.status(403).json({ initialized: true });
-          next();
+          return next();
         });
       }, (req, res, next) => {
         User.register(new User(req.body), req.body.password, (err) => {
           if (err) {
             const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
-            return next(error);
+            return res.status(httpStatus.UNAUTHORIZED).json(error);
           }
 
           return next();

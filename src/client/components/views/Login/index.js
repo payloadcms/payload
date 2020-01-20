@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { useStatusList } from '../../modules/Status';
+import StatusList, { useStatusList } from '../../modules/Status';
 import ContentBlock from '../../layout/ContentBlock';
 import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
@@ -73,6 +73,7 @@ const Login = () => {
       width="narrow"
     >
       <div className={`${baseClass}__wrap`}>
+        <StatusList />
         <Form
           handleAjaxResponse={handleAjaxResponse}
           method="POST"

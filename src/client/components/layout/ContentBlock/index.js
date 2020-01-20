@@ -16,7 +16,10 @@ const ContentBlock = (props) => {
     : classes;
 
   return (
-    <section className={classes} style={props.style}>
+    <section
+      className={classes}
+      style={props.style}
+    >
       {props.children}
     </section>
   );

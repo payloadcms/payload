@@ -43,6 +43,7 @@ module.exports = {
       type: 'select',
       options: roles,
       defaultValue: 'user',
+      required: true,
       saveToJWT: true,
     },
   ],

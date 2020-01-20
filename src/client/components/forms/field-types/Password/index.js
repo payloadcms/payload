@@ -3,10 +3,7 @@ import fieldType from '../fieldType';
 
 import './index.scss';
 
-const errors = {
-  password: 'Please enter a password',
-  confirm: 'Please ensure that both passwords match'
-};
+const error = 'Please enter a password';
 
 const validate = value => value.length > 0;
 
@@ -30,4 +27,4 @@ const Password = props => {
   );
 }
 
-export default fieldType(Password, 'password', validate, errors);
+export default fieldType(Password, 'password', validate, error);
