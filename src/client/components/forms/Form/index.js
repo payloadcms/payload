@@ -132,7 +132,7 @@ Form.defaultProps = {
   ajax: true,
   method: 'POST',
   action: '',
-  handleAjaxResponse: false,
+  handleAjaxResponse: null,
   className: '',
 };
 

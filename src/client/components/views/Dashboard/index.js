@@ -22,8 +22,6 @@ const Dashboard = () => {
       <h1>Dashboard</h1>
       <Link to={`${admin}/login`}>Login</Link>
       <br />
-      <Link to={`${admin}/create-user`}>Create User</Link>
-      <br />
       <Link to={`${admin}/collections/pages`}>Pages List</Link>
       <br />
       <Link to={`${admin}/collections/pages/test123`}>Edit Page</Link>

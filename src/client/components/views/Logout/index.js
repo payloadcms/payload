@@ -17,7 +17,7 @@ const {
 } = getSanitizedConfig();
 
 const Logout = () => {
-  const token = cookies.remove('token');
+  cookies.remove('token', { path: '/' });
 
   return (
     <ContentBlock

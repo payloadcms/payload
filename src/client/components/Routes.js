@@ -8,7 +8,6 @@ import Dashboard from './views/Dashboard';
 import Login from './views/Login';
 import Logout from './views/Logout';
 import CreateFirstUser from './views/CreateFirstUser';
-import CreateUser from './views/CreateUser';
 import MediaLibrary from './views/MediaLibrary';
 import Edit from './views/collections/Edit';
 import List from './views/collections/List';
@@ -62,11 +61,6 @@ const Routes = () => {
                         <Route
                           path={`${match.url}/media-library`}
                           component={MediaLibrary}
-                        />
-                        <Route
-                          exact
-                          path={`${match.url}/create-user`}
-                          component={CreateUser}
                         />
                         <Route
                           path={`${match.url}/`}
