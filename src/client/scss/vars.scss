@@ -14,7 +14,7 @@ $desktop-height : 900px;
 // BASELINE GRID
 //////////////////////////////
 
-$body           : 18px;
+$body           : 20px;
 $base-px        : 36px;
 $base           : ($base-px / $body) + rem; // This computes to 36px in rem
 
@@ -40,7 +40,7 @@ $light-gray : #f5f5f5;
 $gray       : #afafaf;
 $black      : rgb(60, 60, 60);
 
-$error      : #ff8989;
+$error      : #ff6f76;
 $warning    : #fff93b;
 
 //////////////////////////////

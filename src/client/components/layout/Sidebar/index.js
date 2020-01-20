@@ -1,33 +1,37 @@
 import React from 'react';
 import { useLocation, NavLink, Link } from 'react-router-dom';
-import config from 'payload-config';
+import getSanitizedConfig from '../../../config/getSanitizedConfig';
+import LogOut from '../../controls/LogOut';
 
 import Arrow from '../../graphics/Arrow';
 import Icon from '../../graphics/Icon';
 
 import './index.scss';
 
-const Sidebar = () => {
-  const {
-    collections,
-    globals,
-    routes: {
-      admin,
-    },
-  } = config;
+const {
+  collections,
+  globals,
+  routes: {
+    admin,
+  },
+} = getSanitizedConfig();
 
+const Sidebar = () => {
   const location = useLocation();
 
   return (
     <aside className="sidebar">
-      <Link to="/">
+      <Link
+        to={admin}
+        className="brand"
+      >
         <Icon />
       </Link>
       <span className="uppercase-label">Collections</span>
       <nav>
         <NavLink
           activeClassName="active"
-          to="/admin/media-library"
+          to={`${admin}/media-library`}
         >
           <Arrow />
           Media Library
@@ -70,6 +74,7 @@ const Sidebar = () => {
           );
         })}
       </nav>
+      <LogOut />
     </aside>
   );
 };

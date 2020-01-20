@@ -14,7 +14,6 @@ const asFieldType = (PassedComponent, type, validate, errors) => {
     const {
       name,
       id,
-      value,
       required,
       initialValue,
       valueOverride,
@@ -32,8 +31,7 @@ const asFieldType = (PassedComponent, type, validate, errors) => {
     };
 
     useEffect(() => {
-      let valueToInitialize = value;
-      if (initialValue) valueToInitialize = initialValue;
+      let valueToInitialize = initialValue;
       if (valueOverride) valueToInitialize = valueOverride;
       sendField(valueToInitialize);
     }, []);
@@ -55,7 +53,7 @@ const asFieldType = (PassedComponent, type, validate, errors) => {
     let valueToRender = formContext.fields[name] ? formContext.fields[name].value : '';
 
     // If valueOverride present, field is being controlled by state outside form
-    valueToRender = valueOverride || value;
+    valueToRender = valueOverride || valueToRender;
 
     const classes = classList.filter(Boolean).join(' ');
 
@@ -85,7 +83,6 @@ const asFieldType = (PassedComponent, type, validate, errors) => {
   };
 
   FieldType.defaultProps = {
-    value: '',
     required: false,
     initialValue: '',
     valueOverride: '',
@@ -95,9 +92,7 @@ const asFieldType = (PassedComponent, type, validate, errors) => {
 
   FieldType.propTypes = {
     name: PropTypes.string.isRequired,
-    value: PropTypes.string,
     required: PropTypes.bool,
-    type: PropTypes.string.isRequired,
     initialValue: PropTypes.string,
     valueOverride: PropTypes.string,
     onChange: PropTypes.func,
@@ -125,10 +120,11 @@ const asFieldType = (PassedComponent, type, validate, errors) => {
 
   Label.defaultProps = {
     required: false,
+    label: '',
   };
 
   Label.propTypes = {
-    label: PropTypes.string.isRequired,
+    label: PropTypes.string,
     htmlFor: PropTypes.string.isRequired,
     required: PropTypes.bool,
   };
@@ -153,7 +149,6 @@ const asFieldType = (PassedComponent, type, validate, errors) => {
   };
 
   Error.propTypes = {
-    error: PropTypes.string.isRequired,
     showError: PropTypes.bool,
   };
 

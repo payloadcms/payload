@@ -1,8 +1,12 @@
-import React, { useState, createContext, useContext } from 'react';
+import React, {
+  useState, createContext, useContext,
+} from 'react';
 import PropTypes from 'prop-types';
 import Close from '../../graphics/Close';
 
 import './index.scss';
+
+const baseClass = 'status-list';
 
 const Context = createContext({});
 
@@ -17,10 +21,12 @@ const StatusListProvider = ({ children }) => {
         newStatusList.splice(i, 1);
         setStatus(newStatusList);
       },
-      addStatus: status => [
-        ...statusList,
-        status,
-      ],
+      addStatus: (status) => {
+        setStatus([
+          ...statusList,
+          status,
+        ]);
+      },
     }}
     >
       {children}
@@ -42,11 +48,16 @@ const StatusList = () => {
 
   if (statusList.length > 0) {
     return (
-      <ul className="status">
+      <ul className={baseClass}>
         {statusList.map((status, i) => {
+          const classes = [
+            `${baseClass}__status`,
+            `${baseClass}__status--${status.type}`,
+          ].join(' ');
+
           return (
             <li
-              className={status.type}
+              className={classes}
               key={i}
             >
               {status.message}

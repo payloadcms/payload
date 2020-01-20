@@ -1,0 +1,14 @@
+@import '../../../scss/styles';
+
+.log-out {
+  @extend %btn-reset;
+  font-size: $body;
+  font-family: $font-body;
+  font-weight: 400;
+  color: $black;
+  cursor: pointer;
+
+  &:hover {
+    color: $primary;
+  }
+}

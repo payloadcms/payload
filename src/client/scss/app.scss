@@ -23,9 +23,8 @@ body {
 }
 
 html {
-  font-size: $body;
   line-height: base(1);
-  font-size: 20px;
+  font-size: $body;
 
   @include mid-break {
     font-size: 18px;

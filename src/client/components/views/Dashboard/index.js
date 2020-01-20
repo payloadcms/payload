@@ -1,25 +1,33 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { useStepNav } from '../../modules/StepNav';
+import DefaultTemplate from '../../layout/DefaultTemplate';
+import getSanitizedConfig from '../../../config/getSanitizedConfig';
 
 import './index.scss';
 
+const {
+  routes: {
+    admin,
+  },
+} = getSanitizedConfig();
+
+const baseClass = 'dashboard';
+
 const Dashboard = () => {
-  const { setStepNav } = useStepNav();
-
-  useEffect(() => setStepNav([]), []);
-
   return (
-    <article className="dashboard">
+    <DefaultTemplate
+      className={baseClass}
+      stepNav={[]}
+    >
       <h1>Dashboard</h1>
-      <Link to="/login">Login</Link>
+      <Link to={`${admin}/login`}>Login</Link>
       <br />
-      <Link to="/create-user">Create User</Link>
+      <Link to={`${admin}/create-user`}>Create User</Link>
       <br />
-      <Link to="/collections/pages">Pages List</Link>
+      <Link to={`${admin}/collections/pages`}>Pages List</Link>
       <br />
-      <Link to="/collections/pages/test123">Edit Page</Link>
-    </article>
+      <Link to={`${admin}/collections/pages/test123`}>Edit Page</Link>
+    </DefaultTemplate>
   );
 };
 

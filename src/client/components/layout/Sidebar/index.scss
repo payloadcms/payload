@@ -2,10 +2,18 @@
 
 .sidebar {
   position: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   top: 0;
   left: 0;
+  bottom: 0;
   width: base(6);
   padding: base(1);
+
+  .brand {
+    border-bottom: 0;
+  }
 
   .icon-wrap {
     margin: 0 0 base(.5);
@@ -48,5 +56,9 @@
         }
       }
     }
+  }
+
+  .log-out {
+    margin-top: auto;
   }
 }
