@@ -9,8 +9,10 @@ const cookies = new Cookies();
 const Context = createContext({});
 
 const UserProvider = ({ children }) => {
+  const cookieToken = cookies.get('token');
+
   const [token, setToken] = useState('');
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(cookieToken ? jwtDecode(cookieToken) : null);
 
   useEffect(() => {
     if (token) {

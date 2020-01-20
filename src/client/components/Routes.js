@@ -7,6 +7,7 @@ import { useUser } from './data/User';
 import Dashboard from './views/Dashboard';
 import Login from './views/Login';
 import Logout from './views/Logout';
+import NotFound from './views/NotFound';
 import CreateFirstUser from './views/CreateFirstUser';
 import MediaLibrary from './views/MediaLibrary';
 import Edit from './views/collections/Edit';
@@ -110,7 +111,7 @@ const Routes = () => {
                                 }}
                               />
                               <Route>
-                                <h1>Not Found</h1>
+                                <NotFound />
                               </Route>
                             </Switch>
                           );
