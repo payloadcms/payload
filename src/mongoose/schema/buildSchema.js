@@ -13,7 +13,7 @@ const buildSchema = (configFields, config, options = {}, additionalBaseFields = 
     }
 
     if (fieldSchema) {
-      fields[field.name] = fieldSchema(field, { localization: config.localization });
+      fields[field.name] = fieldSchema(field, config);
     }
   });
 
@@ -25,7 +25,7 @@ const buildSchema = (configFields, config, options = {}, additionalBaseFields = 
 
       block.fields.forEach((blockField) => {
         const fieldSchema = fieldToSchemaMap[blockField.type];
-        if (fieldSchema) blockSchemaFields[blockField.name] = fieldSchema(blockField, { localization: config.localization });
+        if (fieldSchema) blockSchemaFields[blockField.name] = fieldSchema(blockField, config);
       });
 
       const blockSchema = new Schema(blockSchemaFields, { _id: false });

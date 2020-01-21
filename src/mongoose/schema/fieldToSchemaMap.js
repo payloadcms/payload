@@ -34,6 +34,15 @@ const fieldToSchemaMap = {
       type: Date,
     };
   },
+  upload: (field, config) => {
+    const schema = {
+      ...formatBaseSchema(field),
+      type: Schema.Types.ObjectId,
+      autopopulate: true,
+      ref: config.upload.labels.singular,
+    };
+    return schema;
+  },
   relationship: (field) => {
     const schema = {
       ...formatBaseSchema(field),

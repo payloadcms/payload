@@ -67,7 +67,7 @@ module.exports = {
     {
       name: 'image',
       label: 'Image',
-      type: 'media',
+      type: 'upload',
       required: false,
     },
     {
