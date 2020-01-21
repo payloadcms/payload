@@ -1,25 +1,24 @@
-import React, { createContext, useContext } from 'react';
+import React, {
+  createContext, useContext, useState, useEffect,
+} from 'react';
 import config from 'payload-config';
 import PropTypes from 'prop-types';
 import { useSearchParams } from '../SearchParams';
 
+const defaultLocale = (config.localization && config.localization.defaultLocale) ? config.localization.defaultLocale : 'en';
 const Context = createContext({});
 
 export const LocaleProvider = ({ children }) => {
+  const [locale, setLocale] = useState(defaultLocale);
   const searchParams = useSearchParams();
+  const localeFromParams = searchParams.locale;
 
-  let activeLocale = null;
-
-  if (config.localization) {
-    if (searchParams.locale && config.localization.locales.indexOf(searchParams.locale) > -1) {
-      activeLocale = searchParams.locale;
-    } else {
-      activeLocale = (config.localization.defaultLocale);
-    }
-  }
+  useEffect(() => {
+    if (localeFromParams && config.localization.locales.indexOf(localeFromParams) > -1) setLocale(localeFromParams);
+  }, [localeFromParams]);
 
   return (
-    <Context.Provider value={activeLocale}>
+    <Context.Provider value={locale}>
       {children}
     </Context.Provider>
   );
