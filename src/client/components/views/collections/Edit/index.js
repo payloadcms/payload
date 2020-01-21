@@ -4,6 +4,12 @@ import { useRouteMatch } from 'react-router-dom';
 import getSanitizedConfig from '../../../../config/getSanitizedConfig';
 import DefaultTemplate from '../../../layout/DefaultTemplate';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
+import Form from '../../../forms/Form';
+import StickyHeader from '../../../modules/StickyHeader';
+import APIURL from '../../../modules/APIURL';
+import Button from '../../../controls/Button';
+import FormSubmit from '../../../forms/Submit';
+import RenderFields from '../../../forms/RenderFields';
 
 import './index.scss';
 
@@ -16,9 +22,9 @@ const {
 
 const EditView = (props) => {
   const { collection, isEditing } = props;
-  const match = useRouteMatch();
+  const { params: { id } = {} } = useRouteMatch();
   const [data] = usePayloadAPI(
-    `${serverURL}/${collection.slug}/${isEditing ? match.params.id : ''}`
+    `${serverURL}/${collection.slug}/${isEditing ? id : ''}`
   );
 
   const nav = [{
@@ -54,6 +60,18 @@ const EditView = (props) => {
           <h1>Create New {collection.labels.singular}</h1>
         }
       </header>
+      <Form method={id ? 'put' : 'post'} action={`${serverURL}/${collection.slug}${id ? `/${id}` : ''}`}>
+        <StickyHeader showStatus={true}
+          content={
+            <APIURL />
+          } action={
+            <>
+              <Button type="secondary">Preview</Button>
+              <FormSubmit>Save</FormSubmit>
+            </>
+          } />
+        <RenderFields fields={collection.fields} />
+      </Form>
     </DefaultTemplate>
   );
 };

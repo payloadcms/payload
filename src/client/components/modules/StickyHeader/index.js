@@ -1,24 +1,44 @@
 import React from 'react';
-import { Sticky, Status } from 'payload/components';
+import PropTypes from 'prop-types';
+import Sticky from '../../layout/Sticky';
+import Status from '../Status';
 
 import './index.scss';
 
-const StickyHeader = props => {
+const StickyHeader = (props) => {
+  const { showStatus, content, action } = props;
+
   return (
     <Sticky className="sticky-header">
-      {props.showStatus &&
-        <Status />
+      {showStatus
+        && <Status />
       }
       <div className="sticky-header-wrap">
         <div className="content">
-          {props.content}
+          {content}
         </div>
         <div className="controls">
-          {props.action}
+          {action}
         </div>
       </div>
     </Sticky>
-  )
-}
+  );
+};
+
+StickyHeader.defaultProps = {
+  showStatus: true,
+};
+
+StickyHeader.propTypes = {
+  content: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node,
+  ]).isRequired,
+  showStatus: PropTypes.bool,
+  action: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node,
+  ]).isRequired,
+};
 
 export default StickyHeader;

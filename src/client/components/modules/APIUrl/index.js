@@ -1,18 +1,17 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
+import { useLocale } from '../../utilities/Locale';
+import getSanitizedConfig from '../../../config/getSanitizedConfig';
 
 import './index.scss';
 
-const mapState = state => ({
-  locale: state.common.locale,
-  config: state.common.config,
-});
+const { serverURL } = getSanitizedConfig();
 
-const APIUrl = (props) => {
-  const { collectionSlug, id } = props.match.params;
+const APIURL = () => {
+  const { collectionSlug, id } = useRouteMatch();
+  const locale = useLocale();
 
-  const apiUrl = `${props.config.serverURL}/${collectionSlug}/${id}`;
+  const apiUrl = `${serverURL}/${collectionSlug}/${id}?locale=${locale}`;
 
   return (
     <div className="api-url">
@@ -37,4 +36,4 @@ const APIUrl = (props) => {
   );
 };
 
-export default withRouter(connect(mapState)(APIUrl));
+export default APIURL;
