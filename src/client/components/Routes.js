@@ -90,7 +90,7 @@ const Routes = () => {
                           return (
                             <Route
                               key={collection.slug}
-                              path={`${match.url}/collections/${collection.slug}/:id`}
+                              path={`${match.url}/collections/${collection.slug}/create`}
                               exact
                               render={(routeProps) => {
                                 return (
@@ -107,7 +107,7 @@ const Routes = () => {
                           return (
                             <Route
                               key={collection.slug}
-                              path={`${match.url}/collections/${collection.slug}/create`}
+                              path={`${match.url}/collections/${collection.slug}/:id`}
                               exact
                               render={(routeProps) => {
                                 return (
