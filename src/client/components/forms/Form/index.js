@@ -9,6 +9,8 @@ import { requests } from '../../../api';
 
 import './index.scss';
 
+const baseClass = 'form';
+
 const Form = (props) => {
   const [fields, setFields] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -104,13 +106,18 @@ const Form = (props) => {
     // If valid and not AJAX submit as usual
   };
 
+  const classes = [
+    className,
+    baseClass,
+  ].filter(Boolean).join(' ');
+
   return (
     <form
       noValidate
       onSubmit={submit}
       method={method}
       action={action}
-      className={className}
+      className={classes}
     >
       <FormContext.Provider value={{
         setValue,

@@ -1,6 +1,6 @@
 @import '~payload/client/scss/styles';
 
-form {
+.form {
   @include row;
 
   > * {
