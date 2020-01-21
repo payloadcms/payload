@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import Filter from '../Filter';
 import Table from '../../layout/Table';
+import getSanitizedConfig from '../../../config/getSanitizedConfig';
+
+const { routes: { admin } } = getSanitizedConfig();
 
 class SearchableTable extends Component {
   constructor(props) {
@@ -28,7 +31,7 @@ class SearchableTable extends Component {
       return this.props.data.map((row) => {
         const formattedRow = { ...row };
 
-        const url = `/collections/${this.props.collection.slug}/${row._id}`;
+        const url = `${admin}/collections/${this.props.collection.slug}/${row.id}`;
 
         // Link the first column
         formattedRow[this.state.columns[0].key] = <Link to={url}>{row[this.state.columns[0].key]}</Link>;

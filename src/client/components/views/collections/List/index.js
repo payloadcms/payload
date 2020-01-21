@@ -22,6 +22,8 @@ const ListView = (props) => {
     `${serverURL}/${collection.slug}`,
   );
 
+  console.log(data);
+
   return (
     <DefaultTemplate
       className="collection-list"
