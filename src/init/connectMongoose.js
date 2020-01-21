@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+const mongoose = require('mongoose');
 
 const connectMongoose = (url) => {
   mongoose.connect(url, {
@@ -11,6 +11,6 @@ const connectMongoose = (url) => {
       console.log('Connected to Mongo server successfully!');
     }
   });
-}
+};
 
-export default connectMongoose;
+module.exports = connectMongoose;

@@ -1,7 +1,9 @@
-import APIError from './APIError';
+const APIError = require('./APIError');
 
-export class DuplicateCollection extends APIError {
+class DuplicateCollection extends APIError {
   constructor(config) {
     super(`Collection name "${config.labels.singular}" is already in use`);
   }
 }
+
+module.exports = DuplicateCollection;

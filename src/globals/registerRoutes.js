@@ -1,6 +1,8 @@
-import { upsert, fetch } from './requestHandlers';
-import setModelLocaleMiddleware from '../localization/setModelLocale';
-import bindModelMiddleware from '../mongoose/bindModel';
+const requestHandlers = require('./requestHandlers');
+const setModelLocaleMiddleware = require('../localization/setModelLocale');
+const bindModelMiddleware = require('../mongoose/bindModel');
+
+const { upsert, fetch } = requestHandlers;
 
 const registerGlobals = (globals, router) => {
   router.all('/globals*',
@@ -18,4 +20,4 @@ const registerGlobals = (globals, router) => {
     .put(upsert);
 };
 
-export default registerGlobals;
+module.exports = registerGlobals;

@@ -1,6 +1,6 @@
-import { Schema } from 'mongoose';
-import fieldToSchemaMap from './fieldToSchemaMap';
-import baseFields from './baseFields';
+const { Schema } = require('mongoose');
+const fieldToSchemaMap = require('./fieldToSchemaMap');
+const baseFields = require('./baseFields');
 
 const buildSchema = (configFields, config, options = {}, additionalBaseFields = {}) => {
   const fields = { ...baseFields, ...additionalBaseFields };
@@ -36,4 +36,4 @@ const buildSchema = (configFields, config, options = {}, additionalBaseFields = 
   return schema;
 };
 
-export default buildSchema;
+module.exports = buildSchema;

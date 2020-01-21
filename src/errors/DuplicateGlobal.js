@@ -1,7 +1,9 @@
-import APIError from './APIError';
+const APIError = require('./APIError');
 
-export class DuplicateGlobal extends APIError {
+class DuplicateGlobal extends APIError {
   constructor(config) {
     super(`Global label "${config.label}" is already in use`);
   }
 }
+
+module.exports = DuplicateGlobal;

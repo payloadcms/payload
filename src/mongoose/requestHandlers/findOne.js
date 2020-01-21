@@ -1,4 +1,4 @@
-import { modelById } from '../resolvers';
+const { modelById } = require('../resolvers');
 
 const findOne = (req, res) => {
   const query = {
@@ -14,4 +14,4 @@ const findOne = (req, res) => {
     .catch(err => res.status(err.status).json({ error: err }));
 };
 
-export default findOne;
+module.exports = findOne;

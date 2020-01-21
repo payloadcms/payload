@@ -1,8 +1,8 @@
-import passport from 'passport';
-import fileUpload from 'express-fileupload';
-import { upload, update } from './requestHandlers';
-import uploadMiddleware from './middleware';
-import setModelLocaleMiddleware from '../localization/setModelLocale';
+const passport = require('passport');
+const fileUpload = require('express-fileupload');
+const { upload, update } = require('./requestHandlers');
+const uploadMiddleware = require('./middleware');
+const setModelLocaleMiddleware = require('../localization/setModelLocale');
 
 const uploadRoutes = (Upload, config, router) => {
   const { upload: uploadConfig } = config;
@@ -26,4 +26,4 @@ const uploadRoutes = (Upload, config, router) => {
   return router;
 };
 
-export default uploadRoutes;
+module.exports = uploadRoutes;

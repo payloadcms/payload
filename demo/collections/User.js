@@ -1,4 +1,5 @@
 const roles = require('../policies/roles');
+const checkRole = require('../policies/checkRole');
 
 module.exports = {
   slug: 'users',
@@ -10,18 +11,10 @@ module.exports = {
   useAsUsername: 'email',
   passwordIndex: 1,
   policies: {
-    create: (req, res, next) => {
-      return next();
-    },
-    read: (req, res, next) => {
-      return next();
-    },
-    update: (req, res, next) => {
-      return next();
-    },
-    destroy: (req, res, next) => {
-      return next();
-    },
+    create: user => checkRole(['admin'], user),
+    read: null,
+    update: user => checkRole(['admin'], user),
+    destroy: user => checkRole(['admin'], user),
   },
   auth: {
     strategy: 'jwt',

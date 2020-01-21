@@ -1,4 +1,4 @@
-import passport from 'passport';
+const passport = require('passport');
 
 const registerConfigRoute = ({ router, config }, getCollections, getGlobals) => {
   router.use('/config',
@@ -32,4 +32,4 @@ const registerConfigRoute = ({ router, config }, getCollections, getGlobals) => 
     });
 };
 
-export default registerConfigRoute;
+module.exports = registerConfigRoute;

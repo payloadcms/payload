@@ -1,4 +1,4 @@
-import { NotFound } from '../../errors';
+const { NotFound } = require('../../errors');
 
 const modelById = (query) => {
   const options = {};
@@ -12,7 +12,6 @@ const modelById = (query) => {
 
   return new Promise((resolve, reject) => {
     query.Model.findOne({ _id: query.id }, {}, options, (err, doc) => {
-
       if (err || !doc) {
         reject(new NotFound());
         return;
@@ -32,4 +31,4 @@ const modelById = (query) => {
   });
 };
 
-export default modelById;
+module.exports = modelById;

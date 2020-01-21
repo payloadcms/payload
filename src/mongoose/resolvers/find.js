@@ -1,4 +1,4 @@
-import { NotFound } from '../../errors';
+const { NotFound } = require('../../errors');
 
 const find = (query) => {
   return new Promise((resolve, reject) => {
@@ -19,4 +19,4 @@ const find = (query) => {
   });
 };
 
-export default find;
+module.exports = find;

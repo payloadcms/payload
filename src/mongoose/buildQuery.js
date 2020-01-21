@@ -2,7 +2,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-use-before-define */
 
-export default function buildQueryPlugin(schema) {
+function buildQueryPlugin(schema) {
   function apiQuery(rawParams, locale, cb) {
     const model = this;
     const params = paramParser(this, rawParams, locale);
@@ -19,7 +19,7 @@ export default function buildQueryPlugin(schema) {
   schema.statics.apiQuery = apiQuery;
 }
 
-export function paramParser(model, rawParams, locale) {
+function paramParser(model, rawParams, locale) {
   let query = {
     searchParams: {},
     sort: false,
@@ -193,3 +193,8 @@ function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator, local
   }
   return query;
 }
+
+module.exports = {
+  buildQueryPlugin,
+  paramParser,
+};

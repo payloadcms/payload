@@ -1,7 +1,9 @@
-import APIError from './APIError';
+const APIError = require('./APIError');
 
-export class MissingGlobalLabel extends APIError {
+class MissingGlobalLabel extends APIError {
   constructor(config) {
     super(`${config.globals} object is missing label`);
   }
 }
+
+module.exports = MissingGlobalLabel;

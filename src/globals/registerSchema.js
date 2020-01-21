@@ -1,7 +1,8 @@
-import mongoose from 'mongoose';
-import autopopulate from 'mongoose-autopopulate';
-import fieldToSchemaMap from '../mongoose/schema/fieldToSchemaMap';
-import localizationPlugin from '../localization/plugin';
+const mongoose = require('mongoose');
+const autopopulate = require('mongoose-autopopulate');
+const mongooseHidden = require('mongoose-hidden');
+const fieldToSchemaMap = require('../mongoose/schema/fieldToSchemaMap');
+const localizationPlugin = require('../localization/plugin');
 
 const registerSchema = (globalConfigs, config) => {
   const globalFields = {};
@@ -25,10 +26,11 @@ const registerSchema = (globalConfigs, config) => {
     'globals',
     new mongoose.Schema({ ...globalSchemaGroups, timestamps: false })
       .plugin(localizationPlugin, config.localization)
-      .plugin(autopopulate),
+      .plugin(autopopulate)
+      .plugin(mongooseHidden()),
   );
 
   return globals;
 };
 
-export default registerSchema;
+module.exports = registerSchema;

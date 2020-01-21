@@ -1,9 +1,9 @@
-import jwt from 'jsonwebtoken';
-import passport from 'passport';
-import httpStatus from 'http-status';
-import APIError from '../errors/APIError';
+const jwt = require('jsonwebtoken');
+const passport = require('passport');
+const httpStatus = require('http-status');
+const APIError = require('../errors/APIError');
 
-export default (userConfig, User) => ({
+module.exports = (userConfig, User) => ({
   /**
    * Returns User when succesfully registered
    * @param req

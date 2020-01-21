@@ -1,9 +1,11 @@
-import {
+const requestHandlers = require('../mongoose/requestHandlers');
+const bindModelMiddleware = require('../mongoose/bindModel');
+const setModelLocaleMiddleware = require('../localization/setModelLocale');
+const loadPolicy = require('../auth/loadPolicy');
+
+const {
   query, create, findOne, destroy, update,
-} from '../mongoose/requestHandlers';
-import bindModelMiddleware from '../mongoose/bindModel';
-import setModelLocaleMiddleware from '../localization/setModelLocale';
-import { loadPolicy } from '../auth/loadPolicy';
+} = requestHandlers;
 
 const registerRoutes = ({ model, config }, router) => {
   router.all(`/${config.slug}*`,
@@ -20,4 +22,4 @@ const registerRoutes = ({ model, config }, router) => {
     .delete(loadPolicy(config.policies.destroy), destroy);
 };
 
-export default registerRoutes;
+module.exports = registerRoutes;

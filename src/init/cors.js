@@ -13,6 +13,6 @@ const initCORS = ({ config, app }) => {
       next();
     });
   }
-}
+};
 
-export default initCORS;
+module.exports = initCORS;

@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   filename: {
     type: String,
     unique: true,

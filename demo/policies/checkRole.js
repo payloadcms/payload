@@ -4,13 +4,8 @@
  * @param user
  * @returns {Function}
  */
-
 const checkRole = (roles, user) => {
-  if (user && roles.some(role => role === user.role)) {
-    return true;
-  }
-
-  return false;
+  return !!(user && roles.some(role => role === user.role));
 };
 
 module.exports = checkRole;

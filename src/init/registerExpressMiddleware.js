@@ -1,8 +1,8 @@
-import express from 'express';
-import compression from 'compression';
-import bodyParser from 'body-parser';
-import methodOverride from 'method-override';
-import localizationMiddleware from '../localization/middleware';
+const express = require('express');
+const compression = require('compression');
+const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
+const localizationMiddleware = require('../localization/middleware');
 
 const registerExpressMiddleware = ({ app, config, router }) => {
   app.use(express.json());
@@ -14,4 +14,4 @@ const registerExpressMiddleware = ({ app, config, router }) => {
   app.use(router);
 };
 
-export default registerExpressMiddleware;
+module.exports = registerExpressMiddleware;

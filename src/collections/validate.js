@@ -1,6 +1,8 @@
-import { DuplicateCollection, MissingCollectionLabel } from '../errors';
+const errors = require('../errors');
 
-export default function validateCollection(collection, collections) {
+const { DuplicateCollection, MissingCollectionLabel } = errors;
+
+module.exports = function validateCollection(collection, collections) {
   if (!collection.labels.singular) {
     throw new MissingCollectionLabel(collection);
   }
@@ -8,4 +10,4 @@ export default function validateCollection(collection, collections) {
   if (collections && collections[collection.labels.singular]) {
     throw new DuplicateCollection(collection);
   }
-}
+};

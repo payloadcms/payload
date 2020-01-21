@@ -77,7 +77,6 @@
     "@babel/plugin-transform-runtime": "^7.6.2",
     "@babel/preset-env": "^7.6.2",
     "@babel/preset-react": "^7.0.0",
-    "@babel/register": "^7.6.2",
     "@babel/runtime": "^7.6.2",
     "autoprefixer": "^9.6.1",
     "axios": "^0.18.1",

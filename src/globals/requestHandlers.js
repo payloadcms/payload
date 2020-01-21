@@ -1,8 +1,8 @@
-import httpStatus from 'http-status';
-import { findOne } from '../mongoose/resolvers';
-import { NotFound } from '../errors';
+const httpStatus = require('http-status');
+const { findOne } = require('../mongoose/resolvers');
+const { NotFound } = require('../errors');
 
-export const upsert = (req, res) => {
+const upsert = (req, res) => {
   if (!req.model.schema.tree[req.params.slug]) {
     res.status(httpStatus.NOT_FOUND).json(new NotFound());
     return;
@@ -45,7 +45,7 @@ export const upsert = (req, res) => {
   });
 };
 
-export const fetch = (req, res) => {
+const fetch = (req, res) => {
   const query = {
     Model: req.model,
     locale: req.locale,
@@ -65,4 +65,9 @@ export const fetch = (req, res) => {
       return res.json(globals);
     })
     .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err }));
+};
+
+module.exports = {
+  fetch,
+  upsert,
 };
