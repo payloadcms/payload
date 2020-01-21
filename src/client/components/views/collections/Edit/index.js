@@ -1,20 +1,25 @@
-import React, { useEffect } from 'react';
-import { useStepNav } from '../../../modules/StepNav';
+import React from 'react';
+import PropTypes from 'prop-types';
+import withEditData from '../../../data/edit';
+import getSanitizedConfig from '../../../../config/getSanitizedConfig';
+import DefaultTemplate from '../../../layout/DefaultTemplate';
 
 import './index.scss';
 
-const EditView = props => {
-  const { setStepNav } = useStepNav();
+const { routes: { admin } } = getSanitizedConfig();
+
+const EditView = (props) => {
+  const { collection, data, isEditing } = props;
 
   const nav = [{
-    url: `/collections/${props.collection.slug}`,
-    label: props.collection.label
+    url: `${admin}/collections/${collection.slug}`,
+    label: collection.labels.plural,
   }];
 
-  if (props.isEditing) {
+  if (isEditing) {
     nav.push({
-      url: `/collections/${props.collection.slug}/${props.data._id}`,
-      label: props.data ? props.data[props.collection.useAsTitle] : ''
+      url: `${admin}/collections/${collection.slug}/${data._id}`,
+      label: data ? data[collection.useAsTitle] : ''
     })
   } else {
     nav.push({
@@ -22,25 +27,38 @@ const EditView = props => {
     })
   }
 
-  useEffect(() => setStepNav(nav), []);
-
   return (
-    <article className="collection-edit">
+    <DefaultTemplate
+      className="collection-edit"
+      stepNav={nav}
+    >
       <header>
-        {props.isEditing &&
+        {isEditing &&
           <h1>
-            Edit {Object.keys(props.data).length > 0 &&
-              (props.data[props.collection.useAsTitle] ? props.data[props.collection.useAsTitle] : '[Untitled]')
+            Edit {Object.keys(data).length > 0 &&
+              (data[collection.useAsTitle] ? data[collection.useAsTitle] : '[Untitled]')
             }
           </h1>
         }
-        {!props.isEditing &&
-          <h1>Create New {props.collection.singular}</h1>
+        {!isEditing &&
+          <h1>Create New {collection.labels.singular}</h1>
         }
       </header>
-      {props.children}
-    </article>
+    </DefaultTemplate>
   );
 };
 
-export default EditView;
+EditView.propTypes = {
+  collection: PropTypes.shape({
+    labels: PropTypes.shape({
+      plural: PropTypes.string,
+    }),
+    slug: PropTypes.string,
+    useAsTitle: PropTypes.string,
+  }).isRequired,
+  data: PropTypes.shape({
+    _id: PropTypes.string,
+  }).isRequired,
+};
+
+export default withEditData(EditView);

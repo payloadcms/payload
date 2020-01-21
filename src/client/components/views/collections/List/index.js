@@ -1,11 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import getSanitizedConfig from '../../../../config/getSanitizedConfig';
 import withListData from '../../../data/list';
 import DefaultTemplate from '../../../layout/DefaultTemplate';
 import HeadingButton from '../../../modules/HeadingButton';
 import SearchableTable from '../../../modules/SearchableTable';
 
 import './index.scss';
+
+const { routes: { admin } } = getSanitizedConfig();
 
 const ListView = (props) => {
   const { collection, data } = props;
@@ -22,7 +25,7 @@ const ListView = (props) => {
       <HeadingButton
         heading={collection.labels.plural}
         buttonLabel="Add New"
-        buttonURL={`/collections/${collection.slug}/create`}
+        buttonURL={`${admin}/collections/${collection.slug}/create`}
         buttonType="link"
       />
       <SearchableTable

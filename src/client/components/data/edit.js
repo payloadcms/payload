@@ -1,62 +1,57 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import api from 'payload/api';
-
-const mapState = state => ({
-  locale: state.common.locale,
-});
+import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import { useRouteMatch, useHistory } from 'react-router-dom';
+import config from 'payload-config';
+import useMountEffect from '../../hooks/useMountEffect';
+import { requests } from '../../api';
+import { useLocale } from '../utilities/Locale';
 
 const withEditData = (PassedComponent) => {
-  class EditData extends Component {
-    constructor(props) {
-      super(props);
+  const EditData = (props) => {
+    const { collection } = props;
+    const locale = useLocale();
+    const [data, setData] = useState({});
+    const match = useRouteMatch();
+    const history = useHistory();
 
-      this.state = {
-        data: {},
-      };
-    }
-
-    fetchData = () => {
-      const { id } = this.props.match.params;
+    const fetchData = () => {
+      const { id } = match.params;
 
       const params = {
-        locale: this.props.locale,
+        locale,
         'fallback-locale': 'null',
       };
 
       if (id) {
-        api.requests.get(`${this.props.config.serverUrl}/${this.props.collection.slug}/${id}`, params).then(
-          res => this.setState({ data: res }),
+        requests.get(`${config.serverUrl}/${collection.slug}/${id}`, params).then(
+          res => setData(res),
           (err) => {
             console.warn(err);
-            this.props.history.push('/not-found');
+            history.push('/not-found');
           },
         );
       }
-    }
+    };
 
-    componentDidMount() {
-      this.fetchData();
-    }
+    useMountEffect(fetchData);
+    useEffect(fetchData, [locale]);
 
-    componentDidUpdate(prevProps) {
-      if (prevProps.locale !== this.props.locale) {
-        this.fetchData();
-      }
-    }
+    return (
+      <PassedComponent
+        {...props}
+        data={data}
+      />
+    );
+  };
 
-    render() {
-      return (
-        <PassedComponent
-          {...this.props}
-          data={this.state.data}
-        />
-      );
-    }
-  }
+  EditData.propTypes = {
+    collection: PropTypes.shape({
+      slug: PropTypes.string,
+    }).isRequired,
+  };
 
-  return withRouter(connect(mapState)(EditData));
+
+  return EditData;
 };
 
 export default withEditData;
