@@ -22,10 +22,12 @@ const StatusListProvider = ({ children }) => {
         setStatus(newStatusList);
       },
       addStatus: (status) => {
-        setStatus([
-          ...statusList,
-          status,
-        ]);
+        setStatus((prevStatus) => {
+          return [
+            ...prevStatus,
+            status,
+          ];
+        });
       },
     }}
     >

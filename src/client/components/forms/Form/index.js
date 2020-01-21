@@ -76,24 +76,35 @@ const Form = (props) => {
       // Make the API call from the action
       requests[method.toLowerCase()](action, data).then(
         (res) => {
-          // If prop handleAjaxResponse is passed, pass it the response
-          if (handleAjaxResponse && typeof handleAjaxResponse === 'function') handleAjaxResponse(res);
+          if (res.status < 400) {
+            // If prop handleAjaxResponse is passed, pass it the response
+            if (handleAjaxResponse && typeof handleAjaxResponse === 'function') handleAjaxResponse(res);
 
-          // Provide form data to the redirected page
-          if (redirect) {
-            history.push(redirect, data);
-          } else {
-            setProcessing(false);
-            if (!disableSuccessStatus) {
-              addStatus({
-                message: res.message,
-                type: 'success',
-              });
+            // Provide form data to the redirected page
+            if (redirect) {
+              history.push(redirect, data);
+            } else {
+              setProcessing(false);
+              if (!disableSuccessStatus) {
+                addStatus({
+                  message: res.message,
+                  type: 'success',
+                });
+              }
             }
+          } else {
+            res.json().then((json) => {
+              setProcessing(false);
+              json.errors.forEach((err) => {
+                addStatus({
+                  message: err.message,
+                  type: 'error',
+                });
+              });
+            });
           }
         },
         (error) => {
-          console.log(error);
           setProcessing(false);
           addStatus({
             message: error.message,
