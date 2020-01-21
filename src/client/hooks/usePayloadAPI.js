@@ -20,8 +20,9 @@ const usePayloadAPI = (url, initialParams = {}, initialData = {}) => {
           ...params,
         });
 
-        const result = await fetch(`${url}?${search}`);
-        setData(result);
+        const response = await fetch(`${url}?${search}`);
+        const json = await response.json();
+        setData(json);
       } catch (error) {
         setIsError(true);
       }

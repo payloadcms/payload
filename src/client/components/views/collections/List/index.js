@@ -18,7 +18,7 @@ const {
 const ListView = (props) => {
   const { collection } = props;
 
-  const [data] = usePayloadAPI(
+  const [{ data }] = usePayloadAPI(
     `${serverURL}/${collection.slug}`,
   );
 

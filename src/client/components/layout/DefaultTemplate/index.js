@@ -2,14 +2,14 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Sidebar from '../Sidebar';
 import StepNav, { useStepNav, StepNavProvider } from '../../modules/StepNav';
-import StatusList, { StatusListProvider } from '../../modules/Status';
+import { StatusListProvider } from '../../modules/Status';
 import Localizer from '../../modules/Localizer';
 
 import './index.scss';
 
 const SetStepNav = ({ stepNav }) => {
   const { setStepNav } = useStepNav();
-  useEffect(() => setStepNav(stepNav), []);
+  useEffect(() => setStepNav(stepNav), [setStepNav, stepNav]);
 
   return null;
 };
@@ -38,7 +38,6 @@ const DefaultTemplate = ({ children, className, stepNav }) => {
               <StepNav />
               <Localizer />
             </div>
-            <StatusList />
             {children}
             <SetStepNav stepNav={stepNav} />
           </StepNavProvider>

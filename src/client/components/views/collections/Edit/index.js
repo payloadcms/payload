@@ -23,7 +23,7 @@ const {
 const EditView = (props) => {
   const { collection, isEditing } = props;
   const { params: { id } = {} } = useRouteMatch();
-  const [data] = usePayloadAPI(
+  const [{ data }] = usePayloadAPI(
     `${serverURL}/${collection.slug}/${isEditing ? id : ''}`
   );
 

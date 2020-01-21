@@ -20,7 +20,7 @@ module.exports = {
       type: 'input',
       maxLength: 100,
       required: true,
-      unique: false,
+      unique: true,
       localized: true,
     },
     {

@@ -1,6 +1,4 @@
-@import 'vars';
-@import 'structure';
-@import 'queries';
+@import '../../../scss/styles';
 
 @mixin formInput () {
     @extend %inputShadow;
