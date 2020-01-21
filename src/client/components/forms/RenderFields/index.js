@@ -4,12 +4,10 @@ import fieldTypes from '../field-types';
 
 import './index.scss';
 
-const baseClass = 'render-fields';
-
 const RenderFields = ({ fields }) => {
   if (fields) {
     return (
-      <div className={baseClass}>
+      <>
         {fields.map((field, i) => {
           const FieldComponent = field.component || fieldTypes[field.type];
 
@@ -24,7 +22,7 @@ const RenderFields = ({ fields }) => {
 
           return (
             <div
-              className={`${baseClass}__no-field-found`}
+              className="missing-field"
               key={i}
             >
               No matched field found for
@@ -35,7 +33,7 @@ const RenderFields = ({ fields }) => {
             </div>
           );
         })}
-      </div>
+      </>
     );
   }
 
