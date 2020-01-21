@@ -1,8 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import DefaultTemplate from 'payload/client/components/layout/DefaultTemplate';
-
-import './index.scss';
 
 const PageListView = (props) => {
   const { collection } = props;
