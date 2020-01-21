@@ -5,11 +5,18 @@ import RenderFields from '../../RenderFields';
 
 import './index.scss';
 
-const formatSubField = (subField) => {
-  return subField;
+const formatSubField = (parentName, subField) => {
+  const formatted = {
+    ...subField,
+    name: `${parentName}.${subField.name}`
+  };
+
+  return formatted;
 };
 
-const Group = ({ label, fields }) => {
+const Group = (props) => {
+  const { label, fields, name } = props;
+
   return (
     <Section
       heading={label}
@@ -17,7 +24,7 @@ const Group = ({ label, fields }) => {
     >
       <RenderFields
         fields={fields}
-        formatter={formatSubField}
+        formatter={(field) => formatSubField(name, field)}
       />
     </Section>
   );
@@ -32,6 +39,7 @@ Group.propTypes = {
     PropTypes.shape({}),
   ).isRequired,
   label: PropTypes.string,
+  name: PropTypes.string.isRequired,
 };
 
 export default Group;

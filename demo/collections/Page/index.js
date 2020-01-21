@@ -103,25 +103,26 @@ module.exports = {
     {
       label: 'Meta Information',
       type: 'group',
+      name: 'meta',
       fields: [
         {
-          name: 'metaTitle',
+          name: 'title',
           type: 'input',
           maxLength: 100,
-          label: 'Meta Title',
+          label: 'Title',
           width: 50,
         },
         {
-          name: 'metaKeywords',
+          name: 'keywords',
           type: 'input',
           maxLength: 100,
-          label: 'Meta Keywords',
+          label: 'Keywords',
           width: 50,
         },
         {
-          name: 'metaDesc',
+          name: 'desc',
           type: 'textarea',
-          label: 'Meta Description',
+          label: 'Description',
           height: 100,
         },
       ],
