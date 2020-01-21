@@ -58,7 +58,7 @@ Textarea.propTypes = {
   className: PropTypes.string,
   style: PropTypes.shape({}),
   error: PropTypes.node,
-  label: PropTypes.string,
+  label: PropTypes.node,
   value: PropTypes.string,
   onChange: PropTypes.func,
   disabled: PropTypes.string,

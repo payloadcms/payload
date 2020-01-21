@@ -1,14 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Section from '../../../layout/Section';
+import RenderFields from '../../RenderFields';
 
-const Group = ({ label, children }) => {
+const Group = ({ label, fields }) => {
   return (
     <Section
       heading={label}
       className="field-group"
     >
-      {children}
+      <RenderFields fields={fields} />
     </Section>
   );
 };
@@ -18,10 +19,9 @@ Group.defaultProps = {
 };
 
 Group.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
+  fields: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ).isRequired,
   label: PropTypes.string,
 };
 

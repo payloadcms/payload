@@ -1,27 +1,29 @@
-import React, { Component } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import Section from '../../../layout/Section';
+import RenderFields from '../../RenderFields';
 
-class Repeater extends Component {
-  constructor(props) {
-    super(props);
-  }
+const Repeater = (props) => {
+  const { label, fields } = props;
 
-  render() {
-    return (
-      <div className="field-repeater">
-        <Section heading={this.props.label}>
-          {this.props.initialValue.map((item, i) =>
-            React.Children.map(this.props.children, child =>
-              React.cloneElement(child, {
-                initialValue: item[child.props.name],
-                name: `${this.props.name}[${i}]${child.props.name}`
-              })
-            )
-          )}
-        </Section>
-      </div>
-    )
-  }
-}
+  return (
+    <div className="field-repeater">
+      <Section heading={label}>
+        <RenderFields fields={fields} />
+      </Section>
+    </div>
+  );
+};
+
+Repeater.defaultProps = {
+  label: '',
+};
+
+Repeater.propTypes = {
+  fields: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ).isRequired,
+  label: PropTypes.string,
+};
 
 export default Repeater;
