@@ -25,6 +25,7 @@ module.exports = {
   paths: {
     scssOverrides: path.resolve(__dirname, 'client/scss/overrides.scss'),
     config: path.resolve(__dirname, 'payload.config.js'),
+    components: path.resolve(__dirname, 'client/components.js'),
   },
   mongoURL: 'mongodb://localhost/payload',
   localization: {

@@ -3,6 +3,7 @@ import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
 import config from 'payload-config';
+import customComponents from 'payload-custom-components';
 import { useUser } from './data/User';
 import Dashboard from './views/Dashboard';
 import Login from './views/Login';
@@ -68,14 +69,13 @@ const Routes = () => {
                           component={Dashboard}
                         />
                         {config.collections.map((collection) => {
-                          const components = collection.components ? collection.components : {};
                           return (
                             <Route
                               key={collection.slug}
                               path={`${match.url}/collections/${collection.slug}`}
                               exact
                               render={(routeProps) => {
-                                const ListComponent = components.List ? components.List : List;
+                                const ListComponent = (customComponents[collection.slug] && customComponents[collection.slug].List) ? customComponents[collection.slug].List : List;
                                 return (
                                   <ListComponent
                                     {...routeProps}
