@@ -1,4 +1,4 @@
-import httpStatus from 'http-status';
+const httpStatus = require('http-status');
 
 const uploadMiddleware = (config, Upload) => {
   return (req, res, next) => {
@@ -18,4 +18,4 @@ const uploadMiddleware = (config, Upload) => {
   };
 };
 
-export default uploadMiddleware;
+module.exports = uploadMiddleware;

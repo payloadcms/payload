@@ -5,4 +5,4 @@ const bindModelMiddleware = (model) => {
   };
 };
 
-export default bindModelMiddleware;
+module.exports = bindModelMiddleware;

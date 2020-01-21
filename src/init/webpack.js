@@ -1,8 +1,8 @@
-import webpack from 'webpack';
-import webpackDevMiddleware from 'webpack-dev-middleware';
-import webpackHotMiddleware from 'webpack-hot-middleware';
-import path from 'path';
-import getWebpackDevConfig from '../client/config/getWebpackDevConfig';
+const webpack = require('webpack');
+const webpackDevMiddleware = require('webpack-dev-middleware');
+const webpackHotMiddleware = require('webpack-hot-middleware');
+const path = require('path');
+const getWebpackDevConfig = require('../client/config/getWebpackDevConfig');
 
 const initWebpack = ({ config, app }) => {
   const webpackDevConfig = getWebpackDevConfig(config);
@@ -27,4 +27,4 @@ const initWebpack = ({ config, app }) => {
   });
 };
 
-export default initWebpack;
+module.exports = initWebpack;

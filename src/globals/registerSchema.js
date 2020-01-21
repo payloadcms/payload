@@ -1,7 +1,7 @@
-import mongoose from 'mongoose';
-import autopopulate from 'mongoose-autopopulate';
-import fieldToSchemaMap from '../mongoose/schema/fieldToSchemaMap';
-import localizationPlugin from '../localization/plugin';
+const mongoose = require('mongoose');
+const autopopulate = require('mongoose-autopopulate');
+const fieldToSchemaMap = require('../mongoose/schema/fieldToSchemaMap');
+const localizationPlugin = require('../localization/plugin');
 
 const registerSchema = (globalConfigs, config) => {
   const globalFields = {};
@@ -31,4 +31,4 @@ const registerSchema = (globalConfigs, config) => {
   return globals;
 };
 
-export default registerSchema;
+module.exports = registerSchema;

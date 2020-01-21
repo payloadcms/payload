@@ -4,7 +4,7 @@
  * @param localization
  * @returns {Function}
  */
-export default function localizationMiddleware(localization) {
+module.exports = function localizationMiddleware(localization) {
   const middleware = (req, res, next) => {
     if (req.query.locale === '*' || req.query.locale === 'all') {
       req.locale = 'all';
@@ -23,4 +23,4 @@ export default function localizationMiddleware(localization) {
   };
 
   return middleware;
-}
+};

@@ -1,6 +1,6 @@
-import sharp from 'sharp';
-import { promisify } from 'util';
-import imageSize from 'image-size';
+const sharp = require('sharp');
+const { promisify } = require('util');
+const imageSize = require('image-size');
 
 const sizeOf = promisify(imageSize);
 
@@ -11,7 +11,7 @@ function getOutputImageName(sourceImage, size) {
   return `${filenameWithoutExtension}-${size.width}x${size.height}.${extension}`;
 }
 
-export async function resizeAndSave(config, uploadConfig, file) {
+module.exports = async function resizeAndSave(config, uploadConfig, file) {
   const sourceImage = `${config.staticDir}/${file.name}`;
 
   const outputSizes = [];
@@ -37,4 +37,4 @@ export async function resizeAndSave(config, uploadConfig, file) {
     console.log('error in resize and save', e.message);
   }
   return outputSizes;
-}
+};

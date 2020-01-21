@@ -1,4 +1,4 @@
-import httpStatus from 'http-status';
+const httpStatus = require('http-status');
 
 const query = (req, res) => {
   const queryOptions = {};
@@ -27,4 +27,4 @@ const query = (req, res) => {
   });
 };
 
-export default query;
+module.exports = query;

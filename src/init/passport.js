@@ -1,8 +1,8 @@
-import passport from 'passport';
+const passport = require('passport');
 
 const initPassport = (app) => {
   app.use(passport.initialize());
   app.use(passport.session());
-}
+};
 
-export default initPassport;
+module.exports = initPassport;

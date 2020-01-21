@@ -1,8 +1,8 @@
-import mkdirp from 'mkdirp';
-import httpStatus from 'http-status';
-import { resizeAndSave } from './images/imageResizer';
-import modelById from '../mongoose/resolvers/modelById';
-import { NotFound } from '../errors';
+const mkdirp = require('mkdirp');
+const httpStatus = require('http-status');
+const { resizeAndSave } = require('./images/imageResizer');
+const modelById = require('../mongoose/resolvers/modelById');
+const { NotFound } = require('../errors');
 
 async function fileTypeHandler(config, uploadConfig, file) {
   const data = {};
@@ -97,4 +97,7 @@ const upload = async (req, res, next, config) => {
   });
 };
 
-export { update, upload };
+module.exports = {
+  update,
+  upload,
+};

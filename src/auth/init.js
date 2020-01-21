@@ -1,8 +1,8 @@
-import passport from 'passport';
-import AnonymousStrategy from 'passport-anonymous';
-import jwtStrategy from './jwt';
-import initRoutes from '../routes/init';
-import authRoutes from './routes';
+const passport = require('passport');
+const AnonymousStrategy = require('passport-anonymous');
+const jwtStrategy = require('./jwt');
+const initRoutes = require('../routes/init');
+const authRoutes = require('./routes');
 
 const initUsers = (User, config, router) => {
   passport.use(User.createStrategy());
@@ -20,4 +20,4 @@ const initUsers = (User, config, router) => {
   router.use('', authRoutes(userConfig, User));
 };
 
-export default initUsers;
+module.exports = initUsers;

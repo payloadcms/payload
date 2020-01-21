@@ -1,7 +1,7 @@
-import express from 'express';
-import passport from 'passport/lib';
-import * as nodemailer from 'nodemailer';
-import * as crypto from 'crypto';
+const express = require('express');
+const passport = require('passport/lib');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 const router = express.Router();
 const passwordResetRoutes = (emailConfig, User) => {
@@ -159,4 +159,4 @@ const smtpEmailHandler = (req, res, next, emailConfig) => {
   });
 };
 
-export default passwordResetRoutes;
+module.exports = passwordResetRoutes;

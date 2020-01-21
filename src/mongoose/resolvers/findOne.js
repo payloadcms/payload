@@ -1,4 +1,4 @@
-import { NotFound } from '../../errors';
+const { NotFound } = require('../../errors');
 
 const find = ({
   Model, locale, fallback, depth,
@@ -30,4 +30,4 @@ const find = ({
   });
 };
 
-export default find;
+module.exports = find;

@@ -5,4 +5,4 @@ const setModelLocaleMiddleware = () => {
   };
 };
 
-export default setModelLocaleMiddleware;
+module.exports = setModelLocaleMiddleware;

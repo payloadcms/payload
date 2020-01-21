@@ -1,5 +1,5 @@
-import httpStatus from 'http-status';
-import { NotFound } from '../../errors';
+const httpStatus = require('http-status');
+const { NotFound } = require('../../errors');
 
 const destroy = (req, res) => {
   req.model.findOneAndDelete({ _id: req.params.id }, (err, doc) => {
@@ -20,4 +20,4 @@ const destroy = (req, res) => {
   });
 };
 
-export default destroy;
+module.exports = destroy;

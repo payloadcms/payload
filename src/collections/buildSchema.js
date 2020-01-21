@@ -1,9 +1,9 @@
-import mongooseHidden from 'mongoose-hidden';
-import paginate from 'mongoose-paginate-v2';
-import autopopulate from 'mongoose-autopopulate';
-import buildQueryPlugin from '../mongoose/buildQuery';
-import localizationPlugin from '../localization/plugin';
-import buildSchema from '../mongoose/schema/buildSchema';
+const mongooseHidden = require('mongoose-hidden');
+const paginate = require('mongoose-paginate-v2');
+const autopopulate = require('mongoose-autopopulate');
+const { buildQueryPlugin } = require('../mongoose/buildQuery');
+const localizationPlugin = require('../localization/plugin');
+const buildSchema = require('../mongoose/schema/buildSchema');
 
 const buildCollectionSchema = (collection, config, schemaOptions = {}) => {
   const schema = buildSchema(collection.fields, config, { timestamps: collection.timestamps, ...schemaOptions });
@@ -17,4 +17,4 @@ const buildCollectionSchema = (collection, config, schemaOptions = {}) => {
   return schema;
 };
 
-export default buildCollectionSchema;
+module.exports = buildCollectionSchema;

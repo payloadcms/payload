@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+const { Schema } = require('mongoose');
 
 const formatBaseSchema = (field) => {
   return {
@@ -74,4 +74,4 @@ const fieldToSchemaMap = {
   },
 };
 
-export default fieldToSchemaMap;
+module.exports = fieldToSchemaMap;

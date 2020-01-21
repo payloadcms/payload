@@ -1,5 +1,5 @@
-import validate from 'express-validation';
-import Joi from 'joi';
+const validate = require('express-validation');
+const Joi = require('joi');
 
 module.exports = {
   login: validate({
@@ -7,5 +7,5 @@ module.exports = {
       email: Joi.string().email().required(),
       password: Joi.string().required(),
     },
-  })
+  }),
 };

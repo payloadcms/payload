@@ -1,10 +1,10 @@
-import express from 'express';
-import passport from 'passport';
-import httpStatus from 'http-status';
-import APIError from '../errors/APIError';
-import authRequestHandlers from './requestHandlers';
-import authValidate from './validate';
-import passwordResetRoutes from './passwordResets/routes';
+const express = require('express');
+const passport = require('passport');
+const httpStatus = require('http-status');
+const APIError = require('../errors/APIError');
+const authRequestHandlers = require('./requestHandlers');
+const authValidate = require('./validate');
+const passwordResetRoutes = require('./passwordResets/routes');
 
 const router = express.Router();
 const authRoutes = (userConfig, User) => {
@@ -50,4 +50,4 @@ const authRoutes = (userConfig, User) => {
   return router;
 };
 
-export default authRoutes;
+module.exports = authRoutes;

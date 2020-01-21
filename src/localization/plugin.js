@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable func-names */
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
-export default function localizationPlugin(schema, options) {
+module.exports = function localizationPlugin(schema, options) {
   if (!options || !options.locales || !Array.isArray(options.locales) || !options.locales.length) {
     throw new mongoose.Error('Required locales array is missing');
   }
@@ -226,4 +226,4 @@ export default function localizationPlugin(schema, options) {
       mongoose.setDefaultLocale = mongoose.connection.setDefaultLocale;
     }
   });
-}
+};

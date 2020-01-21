@@ -1,4 +1,4 @@
-import { APIError } from '../../errors';
+const { APIError } = require('../../errors');
 
 const create = (query) => {
   return new Promise((resolve, reject) => {
@@ -13,4 +13,4 @@ const create = (query) => {
   });
 };
 
-export default create;
+module.exports = create;

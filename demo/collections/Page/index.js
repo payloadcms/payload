@@ -1,7 +1,7 @@
 const checkRole = require('../../policies/checkRole');
 const Quote = require('../../content-blocks/Quote');
 const CallToAction = require('../../content-blocks/CallToAction');
-const List = require('./components/List');
+// const List = require('./components/List');
 
 module.exports = {
   slug: 'pages',
@@ -128,7 +128,7 @@ module.exports = {
     },
   ],
   components: {
-    List,
+    // List,
   },
   timestamps: true,
 };

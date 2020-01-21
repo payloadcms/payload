@@ -1,5 +1,5 @@
-import httpStatus from 'http-status';
-import { NotFound } from '../../errors';
+const httpStatus = require('http-status');
+const { NotFound } = require('../../errors');
 
 const update = (req, res) => {
   req.model.findOne({ _id: req.params.id }, '', {}, (err, doc) => {
@@ -24,4 +24,4 @@ const update = (req, res) => {
   });
 };
 
-export default update;
+module.exports = update;

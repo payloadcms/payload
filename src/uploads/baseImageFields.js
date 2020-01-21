@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   sizes: [{
     name: { type: String },
     height: { type: Number },

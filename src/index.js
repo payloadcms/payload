@@ -1,28 +1,33 @@
-import mongoose from 'mongoose';
-import passportLocalMongoose from 'passport-local-mongoose';
-import connectMongoose from './init/connectMongoose';
-import registerExpressMiddleware from './init/registerExpressMiddleware';
-import initPassport from './init/passport';
-import initCORS from './init/cors';
-import initUploads from './init/uploads';
-import initWebpack from './init/webpack';
-import initUserAuth from './auth/init';
-import baseUserFields from './auth/baseFields';
-import baseUploadFields from './uploads/baseUploadFields';
-import baseImageFields from './uploads/baseImageFields';
-import registerUploadRoutes from './uploads/routes';
-import registerConfigRoute from './routes/config';
-import validateCollection from './collections/validate';
-import buildCollectionSchema from './collections/buildSchema';
-import registerCollectionRoutes from './collections/registerRoutes';
-import validateGlobals from './globals/validate';
-import registerGlobalSchema from './globals/registerSchema';
-import registerGlobalRoutes from './globals/registerRoutes';
+const mongoose = require('mongoose');
+const passportLocalMongoose = require('passport-local-mongoose');
+const connectMongoose = require('./init/connectMongoose');
+const registerExpressMiddleware = require('./init/registerExpressMiddleware');
+const initPassport = require('./init/passport');
+const initCORS = require('./init/cors');
+const initUploads = require('./init/uploads');
+const initWebpack = require('./init/webpack');
+const initUserAuth = require('./auth/init');
+const baseUserFields = require('./auth/baseFields');
+const baseUploadFields = require('./uploads/baseUploadFields');
+const baseImageFields = require('./uploads/baseImageFields');
+const registerUploadRoutes = require('./uploads/routes');
+const registerConfigRoute = require('./routes/config');
+const validateCollection = require('./collections/validate');
+const buildCollectionSchema = require('./collections/buildSchema');
+const registerCollectionRoutes = require('./collections/registerRoutes');
+const validateGlobals = require('./globals/validate');
+const registerGlobalSchema = require('./globals/registerSchema');
+const registerGlobalRoutes = require('./globals/registerRoutes');
 
 class Payload {
-  collections = {};
-
   constructor(options) {
+    this.collections = {};
+    this.registerUser.bind(this);
+    this.registerUpload.bind(this);
+    this.registerGlobals.bind(this);
+    this.getCollections.bind(this);
+    this.getGlobals.bind(this);
+
     // Setup & inititalization
     connectMongoose(options.config.mongoURL);
     registerExpressMiddleware(options);
@@ -59,7 +64,7 @@ class Payload {
     if (!this.config.disableAdmin) initWebpack(options);
   }
 
-  registerUser = () => {
+  registerUser() {
     this.config.user.fields.push(...baseUserFields);
     const userSchema = buildCollectionSchema(this.config.user, this.config);
     userSchema.plugin(passportLocalMongoose, { usernameField: this.config.user.useAsUsername });
@@ -72,7 +77,7 @@ class Payload {
     }, this.router);
   }
 
-  registerUpload = () => {
+  registerUpload() {
     const uploadSchema = buildCollectionSchema(
       this.config.upload,
       this.config,
@@ -96,15 +101,19 @@ class Payload {
     registerUploadRoutes(this.Upload, this.config, this.router);
   }
 
-  registerGlobals = (globals) => {
+  registerGlobals(globals) {
     validateGlobals(globals);
     this.globals = registerGlobalSchema(globals, this.config);
     registerGlobalRoutes(this.globals.model, this.router);
-  };
+  }
 
-  getCollections = () => this.collections;
+  getCollections() {
+    return this.collections;
+  }
 
-  getGlobals = () => this.globals;
+  getGlobals() {
+    return this.globals;
+  }
 }
 
 module.exports = Payload;

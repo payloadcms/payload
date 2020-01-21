@@ -1,10 +1,10 @@
-import create from './create';
-import destroy from './destroy';
-import findOne from './findOne';
-import query from './query';
-import update from './update';
+const create = require('./create');
+const destroy = require('./destroy');
+const findOne = require('./findOne');
+const query = require('./query');
+const update = require('./update');
 
-export {
+module.exports = {
   create,
   destroy,
   findOne,

@@ -1,9 +1,9 @@
-import modelById from './modelById';
-import find from './find';
-import findOne from './findOne';
-import create from './create';
+const modelById = require('./modelById');
+const find = require('./find');
+const findOne = require('./findOne');
+const create = require('./create');
 
-export {
+module.exports = {
   modelById,
   find,
   findOne,

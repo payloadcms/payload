@@ -1,4 +1,4 @@
-import express from 'express';
+const express = require('express');
 
 const router = express.Router();
 const initRoutes = (User) => {
@@ -16,4 +16,4 @@ const initRoutes = (User) => {
   return router;
 };
 
-export default initRoutes;
+module.exports = initRoutes;
