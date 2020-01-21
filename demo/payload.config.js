@@ -35,7 +35,6 @@ module.exports = {
     defaultLocale: 'en',
     fallback: true,
   },
-  // uploads: false, // To disable upload routes otherwise defaults will be use and if set to an object
   uploads: {
     image: {
       imageSizes: [

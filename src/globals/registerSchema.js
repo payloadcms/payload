@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const autopopulate = require('mongoose-autopopulate');
+const mongooseHidden = require('mongoose-hidden');
 const fieldToSchemaMap = require('../mongoose/schema/fieldToSchemaMap');
 const localizationPlugin = require('../localization/plugin');
 
@@ -25,7 +26,8 @@ const registerSchema = (globalConfigs, config) => {
     'globals',
     new mongoose.Schema({ ...globalSchemaGroups, timestamps: false })
       .plugin(localizationPlugin, config.localization)
-      .plugin(autopopulate),
+      .plugin(autopopulate)
+      .plugin(mongooseHidden()),
   );
 
   return globals;
