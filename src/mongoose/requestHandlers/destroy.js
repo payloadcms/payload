@@ -5,7 +5,7 @@ const destroy = (req, res) => {
   req.model.findOneAndDelete({ _id: req.params.id }, (err, doc) => {
     if (err) {
       res.status(httpStatus.INTERNAL_SERVER_ERROR)
-        .json({ error: err });
+        .json({ err });
       return;
     }
 

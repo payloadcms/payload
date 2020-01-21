@@ -11,7 +11,7 @@ const findOne = (req, res) => {
 
   modelById(query)
     .then(doc => res.json(doc))
-    .catch(err => res.status(err.status).json({ error: err }));
+    .catch(err => res.status(err.status).json({ err }));
 };
 
 module.exports = findOne;

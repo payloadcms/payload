@@ -12,7 +12,7 @@ const update = (req, res) => {
 
     doc.save((saveError) => {
       if (saveError) {
-        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: saveError });
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ saveError });
         return;
       }
 
