@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ReactSelect from 'react-select';
 import fieldType from '../fieldType';
 
 import './index.scss';
@@ -27,17 +28,7 @@ const Select = (props) => {
   } = props;
 
   useMountEffect(() => {
-    let initialValue = defaultValue;
-
-    if (!initialValue) {
-      if (typeof options[0] === 'object') {
-        initialValue = options[0].value;
-      } else {
-        [initialValue] = options;
-      }
-    }
-
-    sendField(initialValue);
+    sendField(defaultValue || options[0].value);
   });
 
   return (
@@ -47,15 +38,14 @@ const Select = (props) => {
     >
       {error}
       {label}
-      <select
-        value={value || ''}
-        onChange={onChange}
+      <ReactSelect
+        value={options.find(option => option.value === value)}
+        onChange={selected => onChange(selected.value)}
         disabled={disabled}
         placeholder={placeholder}
         id={id || name}
         name={name}
-      >
-        {options && options.map((option, i) => {
+        options={options.map((option, i) => {
           let optionValue = option;
           let optionLabel = option;
 
@@ -64,17 +54,12 @@ const Select = (props) => {
             optionLabel = option.label;
           }
 
-          return (
-            <option
-              key={i}
-              value={optionValue}
-              selected={value === optionValue ? 'selected' : undefined}
-            >
-              {optionLabel}
-            </option>
-          );
+          return {
+            value: optionValue,
+            label: optionLabel,
+          };
         })}
-      </select>
+      />
     </div>
   );
 };
@@ -84,13 +69,13 @@ Select.defaultProps = {
   style: {},
   error: null,
   label: null,
-  value: '',
+  value: {},
   onChange: null,
   disabled: null,
   placeholder: null,
   id: null,
   name: 'select',
-  defaultValue: '',
+  defaultValue: null,
 };
 
 Select.propTypes = {
@@ -99,7 +84,13 @@ Select.propTypes = {
   style: PropTypes.shape({}),
   error: PropTypes.node,
   label: PropTypes.node,
-  value: PropTypes.string,
+  value: PropTypes.oneOfType([
+    PropTypes.shape({
+      value: PropTypes.string,
+      label: PropTypes.string,
+    }),
+    PropTypes.string,
+  ]),
   onChange: PropTypes.func,
   disabled: PropTypes.string,
   placeholder: PropTypes.string,

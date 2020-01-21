@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useCallback } from 'react';
+import React, { useContext, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import FormContext from '../../Form/Context';
 import Tooltip from '../../../modules/Tooltip';
@@ -70,7 +70,12 @@ const asFieldType = (PassedComponent, type, validate, errors) => {
           />
         )}
         onChange={(e) => {
-          sendField(e.target.value);
+          if (e.target && e.target.value) {
+            sendField(e.target.value);
+          } else {
+            sendField(e);
+          }
+
           if (onChange && typeof onChange === 'function') onChange(e);
         }}
       />
