@@ -6,23 +6,32 @@ import './index.scss';
 
 const mapState = state => ({
   locale: state.common.locale,
-  config: state.common.config
-})
+  config: state.common.config,
+});
 
-const APIUrl = props => {
-
+const APIUrl = (props) => {
   const { collectionSlug, id } = props.match.params;
 
-  const apiUrl = `${props.config.serverUrl}/${collectionSlug}/${id}`;
+  const apiUrl = `${props.config.serverURL}/${collectionSlug}/${id}`;
 
   return (
     <div className="api-url">
       <span className="uppercase-label">API URL</span>
-      {id &&
-        <div className="url"><a href={apiUrl} rel="noopener noreferrer" target="_blank">{apiUrl}</a></div>
+      {id
+        && (
+          <div className="url">
+            <a
+              href={apiUrl}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {apiUrl}
+            </a>
+          </div>
+        )
       }
-      {!id &&
-        <div>&mdash;</div>
+      {!id
+        && <div>&mdash;</div>
       }
     </div>
   );

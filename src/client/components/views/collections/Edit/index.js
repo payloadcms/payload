@@ -1,15 +1,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import withEditData from '../../../data/edit';
+import { useRouteMatch } from 'react-router-dom';
 import getSanitizedConfig from '../../../../config/getSanitizedConfig';
 import DefaultTemplate from '../../../layout/DefaultTemplate';
+import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 
 import './index.scss';
 
-const { routes: { admin } } = getSanitizedConfig();
+const {
+  serverURL,
+  routes: {
+    admin
+  }
+} = getSanitizedConfig();
 
 const EditView = (props) => {
-  const { collection, data, isEditing } = props;
+  const { collection, isEditing } = props;
+  const match = useRouteMatch();
+  const [data] = usePayloadAPI(
+    `${serverURL}/${collection.slug}/${isEditing ? match.params.id : ''}`
+  );
 
   const nav = [{
     url: `${admin}/collections/${collection.slug}`,
@@ -48,6 +58,10 @@ const EditView = (props) => {
   );
 };
 
+EditView.defaultProps = {
+  isEditing: false,
+};
+
 EditView.propTypes = {
   collection: PropTypes.shape({
     labels: PropTypes.shape({
@@ -56,9 +70,7 @@ EditView.propTypes = {
     slug: PropTypes.string,
     useAsTitle: PropTypes.string,
   }).isRequired,
-  data: PropTypes.shape({
-    _id: PropTypes.string,
-  }).isRequired,
+  isEditing: PropTypes.bool,
 };
 
-export default withEditData(EditView);
+export default EditView;

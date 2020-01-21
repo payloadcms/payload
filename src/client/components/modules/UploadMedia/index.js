@@ -144,7 +144,7 @@ class UploadMediaForm extends Component {
 
   handleSubmit = () => {
     const data = new FormData(this.formRef.current);
-    api.requests.post(`${this.props.config.serverUrl}/upload`, data).then(
+    api.requests.post(`${this.props.config.serverURL}/upload`, data).then(
       res => console.log(res),
       err => {
         console.warn(err);

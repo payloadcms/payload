@@ -1,17 +1,26 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import getSanitizedConfig from '../../../../config/getSanitizedConfig';
-import withListData from '../../../data/list';
 import DefaultTemplate from '../../../layout/DefaultTemplate';
 import HeadingButton from '../../../modules/HeadingButton';
 import SearchableTable from '../../../modules/SearchableTable';
 
 import './index.scss';
 
-const { routes: { admin } } = getSanitizedConfig();
+const {
+  serverURL,
+  routes: {
+    admin,
+  },
+} = getSanitizedConfig();
 
 const ListView = (props) => {
-  const { collection, data } = props;
+  const { collection } = props;
+
+  const [data] = usePayloadAPI(
+    `${serverURL}/${collection.slug}`,
+  );
 
   return (
     <DefaultTemplate
@@ -43,9 +52,6 @@ ListView.propTypes = {
     }),
     slug: PropTypes.string,
   }).isRequired,
-  data: PropTypes.shape({
-    docs: PropTypes.array,
-  }).isRequired,
 };
 
-export default withListData(ListView);
+export default ListView;

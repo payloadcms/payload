@@ -13,7 +13,7 @@ module.exports = {
   upload: Upload,
   globals: [Header, Footer],
   port: 3000,
-  serverUrl: 'http://localhost:3000',
+  serverURL: 'http://localhost:3000',
   cors: ['http://localhost', 'http://localhost:8080', 'http://localhost:8081'],
   adminURL: '/payload-login',
   routes: {
