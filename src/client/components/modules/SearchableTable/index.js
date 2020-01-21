@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { Filter, Table } from 'payload/components'
+import Filter from '../Filter';
+import Table from '../../layout/Table';
 
 class SearchableTable extends Component {
-
   constructor(props) {
     super(props);
 
@@ -11,29 +11,29 @@ class SearchableTable extends Component {
       rows: this.structureRows(this.props.data),
       columns: [{
         key: 'title',
-        label: 'Title'
+        label: 'Title',
       }, {
         key: '_id',
-        label: 'ID'
+        label: 'ID',
       }, {
         key: 'createdAt',
         label: 'Created At',
-        handler: time => new Date(time).toDateString()
-      }]
-    }
+        handler: time => new Date(time).toDateString(),
+      }],
+    };
   }
 
   structureRows = () => {
     if (this.props.data) {
-      return this.props.data.map(row => {
+      return this.props.data.map((row) => {
         const formattedRow = { ...row };
 
         const url = `/collections/${this.props.collection.slug}/${row._id}`;
 
         // Link the first column
-        formattedRow[this.state.columns[0].key] = <Link to={url}>{row[this.state.columns[0].key]}</Link>
+        formattedRow[this.state.columns[0].key] = <Link to={url}>{row[this.state.columns[0].key]}</Link>;
         return formattedRow;
-      })
+      });
     }
 
     return [];
@@ -42,19 +42,21 @@ class SearchableTable extends Component {
   componentDidUpdate(prevProps) {
     if (prevProps.data !== this.props.data) {
       this.setState({
-        rows: this.structureRows(this.props.data)
-      })
+        rows: this.structureRows(this.props.data),
+      });
     }
   }
 
   render() {
-
     return (
       <React.Fragment>
         <Filter />
-        <Table rows={this.state.rows} columns={this.state.columns} />
+        <Table
+          rows={this.state.rows}
+          columns={this.state.columns}
+        />
       </React.Fragment>
-    )
+    );
   }
 }
 

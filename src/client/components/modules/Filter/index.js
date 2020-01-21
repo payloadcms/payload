@@ -1,14 +1,16 @@
-import React, { Component } from 'react';
-import { Form, Input } from 'payload/components';
+import React from 'react';
+import Form from '../../forms/Form';
+import Input from '../../forms/field-types/Input';
 
-class Filter extends Component {
-  render() {
-    return (
-      <Form className="filter">
-        <Input placeholder="Search" name="keywords" />
-      </Form>
-    );
-  }
-}
+const Filter = () => {
+  return (
+    <Form className="filter">
+      <Input
+        placeholder="Search"
+        name="keywords"
+      />
+    </Form>
+  );
+};
 
 export default Filter;

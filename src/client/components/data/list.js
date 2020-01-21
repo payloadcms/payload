@@ -1,53 +1,42 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import api from 'payload/api';
-
-const mapState = state => ({
-  locale: state.common.locale,
-});
+import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import config from 'payload-config';
+import { requests } from '../../api';
+import useMountEffect from '../../hooks/useMountEffect';
+import { useLocale } from '../utilities/Locale';
 
 const withListData = (PassedComponent) => {
-  class ListData extends Component {
-    constructor(props) {
-      super(props);
+  const ListData = (props) => {
+    const { collection } = props;
+    const locale = useLocale();
+    const [data, setData] = useState({});
 
-      this.state = {
-        data: [],
-      };
-    }
-
-    fetchData = () => {
-      const params = {
-        locale: this.props.locale,
-      };
-
-      api.requests.get(`${this.props.config.serverUrl}/${this.props.collection.slug}`, params).then(
-        res => this.setState({ data: res }),
+    const fetchData = () => {
+      const params = { locale };
+      requests.get(`${config.serverUrl}/${collection.slug}`, params).then(
+        res => setData(res),
         err => console.warn(err),
       );
-    }
+    };
 
-    componentDidMount() {
-      this.fetchData();
-    }
+    useMountEffect(fetchData);
+    useEffect(fetchData, [locale]);
 
-    componentDidUpdate(prevProps) {
-      if (prevProps.locale !== this.props.locale) {
-        this.fetchData();
-      }
-    }
+    return (
+      <PassedComponent
+        {...props}
+        data={data}
+      />
+    );
+  };
 
-    render() {
-      return (
-        <PassedComponent
-          {...this.props}
-          data={this.state.data}
-        />
-      );
-    }
-  }
+  ListData.propTypes = {
+    collection: PropTypes.shape({
+      slug: PropTypes.string,
+    }).isRequired,
+  };
 
-  return connect(mapState)(ListData);
+  return ListData;
 };
 
 export default withListData;

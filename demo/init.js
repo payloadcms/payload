@@ -1,5 +1,5 @@
 const express = require('express');
-const Payload = require('../');
+const Payload = require('../src');
 const config = require('./payload.config');
 
 const router = express.Router({}); // eslint-disable-line new-cap

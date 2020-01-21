@@ -1,11 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import withListData from '../../../data/list';
 import DefaultTemplate from '../../../layout/DefaultTemplate';
+import HeadingButton from '../../../modules/HeadingButton';
+import SearchableTable from '../../../modules/SearchableTable';
 
 import './index.scss';
 
 const ListView = (props) => {
-  const { collection } = props;
+  const { collection, data } = props;
 
   return (
     <DefaultTemplate
@@ -16,7 +19,16 @@ const ListView = (props) => {
         },
       ]}
     >
-      <h1>{collection.labels.plural}</h1>
+      <HeadingButton
+        heading={collection.labels.plural}
+        buttonLabel="Add New"
+        buttonURL={`/collections/${collection.slug}/create`}
+        buttonType="link"
+      />
+      <SearchableTable
+        data={data.docs}
+        collection={collection}
+      />
     </DefaultTemplate>
   );
 };
@@ -26,7 +38,11 @@ ListView.propTypes = {
     labels: PropTypes.shape({
       plural: PropTypes.string,
     }),
+    slug: PropTypes.string,
+  }).isRequired,
+  data: PropTypes.shape({
+    docs: PropTypes.array,
   }).isRequired,
 };
 
-export default ListView;
+export default withListData(ListView);
