@@ -1,9 +1,26 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import DefaultTemplate from 'payload/client/components/layout/DefaultTemplate';
 
-const List = () => {
+import './index.scss';
+
+const PageListView = (props) => {
+  const { collection } = props;
+
   return (
-    <h1>Custom list for Pages</h1>
+    <>
+      <h1>{collection.labels.plural}</h1>
+      <p>This is a custom Pages list view</p>
+    </>
   );
 };
 
-export default List;
+PageListView.propTypes = {
+  collection: PropTypes.shape({
+    labels: PropTypes.shape({
+      plural: PropTypes.string,
+    }),
+  }).isRequired,
+};
+
+export default PageListView;

@@ -1,0 +1,7 @@
+@import '~payload/client/scss/styles';
+
+.collection-list {
+  .heading-button {
+    @include m;
+  }
+}
