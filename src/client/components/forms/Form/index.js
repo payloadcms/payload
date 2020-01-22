@@ -43,8 +43,6 @@ const Form = (props) => {
     disableSuccessStatus,
   } = props;
 
-  console.log(fields);
-
   const submit = (e) => {
     setSubmitted(true);
 
