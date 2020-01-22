@@ -65,7 +65,7 @@ const fieldToSchemaMap = {
     return [schema];
   },
   select: (field) => {
-    return {
+    const schema = {
       ...formatBaseSchema(field),
       type: String,
       enum: field.options.map((option) => {
@@ -73,6 +73,8 @@ const fieldToSchemaMap = {
         return option;
       }),
     };
+
+    return field.hasMany ? [schema] : schema;
   },
   flexible: (field) => {
     const flexibleSchema = new Schema({ blockName: String }, { discriminatorKey: 'blockType', _id: false });

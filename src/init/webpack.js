@@ -15,8 +15,7 @@ const initWebpack = ({ config, app }) => {
   app.use(webpackHotMiddleware(compiler));
 
   app.get(`${config.routes.admin}*`, (req, res, next) => {
-    const filename = path.resolve(compiler.outputPath, 'index.html');
-    compiler.outputFileSystem.readFile(filename, (err, result) => {
+    compiler.outputFileSystem.readFile('/index.html', (err, result) => {
       if (err) {
         return next(err);
       }
