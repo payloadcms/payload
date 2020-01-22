@@ -27,7 +27,7 @@ const Email = (props) => {
     value,
     showError,
     processing,
-    onFieldChange
+    onFieldChange,
   } = useFieldType({
     name,
     required,
@@ -36,13 +36,25 @@ const Email = (props) => {
     validate,
   });
 
+  const fieldWidth = width ? `${width}%` : undefined;
+
   return (
-    <div className="field-type email" style={{
-      ...style,
-      width: width ? `${width}%` : null
-    }}>
-      <Error showError={showError} message={errorMessage} />
-      <Label htmlFor={name} label={label} required={required} />
+    <div
+      className="field-type email"
+      style={{
+        ...style,
+        width: fieldWidth,
+      }}
+    >
+      <Error
+        showError={showError}
+        message={errorMessage}
+      />
+      <Label
+        htmlFor={name}
+        label={label}
+        required={required}
+      />
       <input
         value={value || ''}
         onChange={onFieldChange}
@@ -50,31 +62,35 @@ const Email = (props) => {
         placeholder={placeholder}
         type="email"
         id={name}
-        name={name} />
+        name={name}
+      />
     </div>
   );
-}
+};
 
 Email.defaultProps = {
+  label: null,
   required: false,
-  processing: false,
   defaultValue: null,
+  valueOverride: null,
+  placeholder: undefined,
   validate: defaultValidate,
   errorMessage: defaultError,
   width: 100,
   style: {},
-}
+};
 
 Email.propTypes = {
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
+  placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
-  defaultValidate: PropTypes.func,
+  valueOverride: PropTypes.string,
+  validate: PropTypes.func,
   errorMessage: PropTypes.string,
   width: PropTypes.number,
   style: PropTypes.shape({}),
-  processing: PropTypes.bool,
-  label: PropTypes.string.isRequired,
-}
+  label: PropTypes.string,
+};
 
 export default Email;

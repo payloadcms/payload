@@ -45,19 +45,39 @@ const Select = (props) => {
     showError && 'error',
   ].filter(Boolean).join(' ');
 
+  const fieldWidth = width ? `${width}%` : undefined;
+
   return (
     <div
       className={classes}
       style={{
         ...style,
-        width: width ? `${width}%` : null,
+        width: fieldWidth,
       }}
     >
-      <Error showError={showError} message={errorMessage} />
-      <Label htmlFor={name} label={label} required={required} />
+      <Error
+        showError={showError}
+        message={errorMessage}
+      />
+      <Label
+        htmlFor={name}
+        label={label}
+        required={required}
+      />
       <ReactSelect
         value={options.find(option => option.value === value)}
-        onChange={selected => onFieldChange(hasMany ? selected : selected.value)}
+        onChange={(selected) => {
+          if (hasMany) {
+            if (selected) {
+              onFieldChange(selected.map(selectedOption => selectedOption.value));
+            } else {
+              onFieldChange(null);
+            }
+          }
+          if (selected) {
+            onFieldChange(selected.value);
+          }
+        }}
         disabled={formProcessing ? 'disabled' : undefined}
         components={{ DropdownIndicator: Arrow }}
         className="react-select"
@@ -65,7 +85,7 @@ const Select = (props) => {
         isMulti={hasMany}
         id={name}
         name={name}
-        options={options.map((option, i) => {
+        options={options.map((option) => {
           let optionValue = option;
           let optionLabel = option;
 
@@ -85,39 +105,27 @@ const Select = (props) => {
 };
 
 Select.defaultProps = {
-  className: null,
   style: {},
+  required: false,
   errorMessage: defaultError,
   validate: defaultValidate,
-  value: {},
-  onChange: null,
-  disabled: null,
-  placeholder: null,
-  id: null,
+  valueOverride: null,
   name: 'select',
   defaultValue: null,
   hasMany: false,
+  width: 100,
 };
 
 Select.propTypes = {
-  className: PropTypes.string,
+  required: PropTypes.bool,
   style: PropTypes.shape({}),
   errorMessage: PropTypes.string,
+  valueOverride: PropTypes.string,
   label: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([
-    PropTypes.shape({
-      value: PropTypes.string,
-      label: PropTypes.string,
-    }),
-    PropTypes.string,
-  ]),
   defaultValue: PropTypes.string,
-  defaultValidate: PropTypes.func,
-  onChange: PropTypes.func,
-  disabled: PropTypes.string,
-  placeholder: PropTypes.string,
-  id: PropTypes.string,
+  validate: PropTypes.func,
   name: PropTypes.string,
+  width: PropTypes.number,
   options: PropTypes.oneOfType([
     PropTypes.arrayOf(
       PropTypes.string,
