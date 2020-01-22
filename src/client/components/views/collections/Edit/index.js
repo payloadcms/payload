@@ -25,7 +25,8 @@ const EditView = (props) => {
   const { params: { id } = {} } = useRouteMatch();
 
   const [{ data }] = usePayloadAPI(
-    `${serverURL}/${collection.slug}/${isEditing ? id : ''}`
+    `${serverURL}/${collection.slug}/${isEditing ? id : ''}`,
+    { 'fallback-locale': 'null' }
   );
 
   const nav = [{
