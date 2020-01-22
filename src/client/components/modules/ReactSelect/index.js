@@ -17,7 +17,7 @@ const ReactSelect = (props) => {
 
   const classes = [
     'react-select',
-    showError && 'react-select-error',
+    showError && 'react-select--error',
   ].filter(Boolean).join(' ');
 
   return (

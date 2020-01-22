@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import ReactSelect from '../../../modules/ReactSelect';
 import useFieldType from '../../useFieldType';
@@ -10,7 +10,9 @@ import './index.scss';
 const defaultError = 'Please make a selection.';
 const defaultValidate = value => value.length > 0;
 
-const Select = (props) => {
+const Relationship = (props) => {
+  const [options, setOptions] = useState([]);
+
   const {
     name,
     required,
@@ -21,7 +23,6 @@ const Select = (props) => {
     width,
     errorMessage,
     label,
-    options,
     hasMany,
   } = props;
 
@@ -40,7 +41,7 @@ const Select = (props) => {
 
   const classes = [
     'field-type',
-    'select',
+    'relationship',
     showError && 'error',
   ].filter(Boolean).join(' ');
 
@@ -74,7 +75,7 @@ const Select = (props) => {
   );
 };
 
-Select.defaultProps = {
+Relationship.defaultProps = {
   style: {},
   required: false,
   errorMessage: defaultError,
@@ -85,7 +86,7 @@ Select.defaultProps = {
   width: 100,
 };
 
-Select.propTypes = {
+Relationship.propTypes = {
   required: PropTypes.bool,
   style: PropTypes.shape({}),
   errorMessage: PropTypes.string,
@@ -95,18 +96,7 @@ Select.propTypes = {
   validate: PropTypes.func,
   name: PropTypes.string.isRequired,
   width: PropTypes.number,
-  options: PropTypes.oneOfType([
-    PropTypes.arrayOf(
-      PropTypes.string,
-    ),
-    PropTypes.arrayOf(
-      PropTypes.shape({
-        value: PropTypes.string,
-        label: PropTypes.string,
-      }),
-    ),
-  ]).isRequired,
   hasMany: PropTypes.bool,
 };
 
-export default Select;
+export default Relationship;

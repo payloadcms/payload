@@ -31,14 +31,14 @@ module.exports = {
       required: true,
       localized: true,
     },
-    // {
-    //   name: 'page',
-    //   label: 'Page',
-    //   type: 'relationship',
-    //   relationTo: 'pages',
-    //   localized: false,
-    //   hasMany: false,
-    // },
+    {
+      name: 'page',
+      label: 'Page',
+      type: 'relationship',
+      relationTo: 'pages',
+      localized: false,
+      hasMany: false,
+    },
     {
       name: 'demo-select',
       label: 'Demo Select',

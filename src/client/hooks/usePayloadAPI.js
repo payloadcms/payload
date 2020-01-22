@@ -30,7 +30,7 @@ const usePayloadAPI = (url, initialParams = {}, initialData = {}) => {
       setIsLoading(false);
     };
 
-    fetchData();
+    if (url) fetchData();
   }, [url, locale, params]);
 
   return [{ data, isLoading, isError }, { setParams }];
