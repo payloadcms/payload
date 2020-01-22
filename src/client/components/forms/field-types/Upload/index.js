@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import fieldType from '../../fieldType';
+import useFieldType from '../../useFieldType';
 import UploadMedia from '../../../modules/UploadMedia';
 
 import './index.scss';
 
-const error = 'There was a problem uploading your file.';
+const defaultError = 'There was a problem uploading your file.';
 
-const validate = () => true;
+const defaultValidate = () => true;
 
 class Media extends Component {
 

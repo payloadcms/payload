@@ -1,0 +1,11 @@
+@import '~payload/client/scss/styles';
+
+label.field-label {
+  display: flex;
+
+  .required {
+    color: $error;
+    margin-left: base(.25);
+    margin-right: auto;
+  }
+}

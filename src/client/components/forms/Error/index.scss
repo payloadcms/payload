@@ -1,0 +1,14 @@
+@import '~payload/client/scss/styles';
+
+.field-error {
+  .tooltip {
+    left: auto;
+    right: base(.5);
+    transform: none;
+    background-color: $error;
+
+    span {
+      border-top-color: $error;
+    }
+  }
+}

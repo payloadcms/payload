@@ -1,14 +1,44 @@
 import React from 'react';
-import fieldType from '../../fieldType';
+import PropTypes from 'prop-types';
+import useFieldType from '../../useFieldType';
 
-const HiddenInput = props => (
-  <input
-    type="hidden"
-    value={props.value || ''}
-    onChange={props.onChange}
-    id={props.id ? props.id : props.name}
-    name={props.name}
-  />
-);
+const HiddenInput = (props) => {
+  const {
+    name,
+    required,
+    defaultValue,
+    valueOverride,
+  } = props;
 
-export default fieldType(HiddenInput, 'hiddenInput');
+  const { value, onChange } = useFieldType({
+    name,
+    required,
+    defaultValue,
+    valueOverride,
+  });
+
+  return (
+    <input
+      type="hidden"
+      value={value || ''}
+      onChange={onChange}
+      id={name}
+      name={name}
+    />
+  );
+};
+
+HiddenInput.defaultProps = {
+  required: false,
+  defaultValue: null,
+  valueOverride: null,
+};
+
+HiddenInput.propTypes = {
+  name: PropTypes.string.isRequired,
+  required: PropTypes.bool,
+  defaultValue: PropTypes.string,
+  valueOverride: PropTypes.string,
+};
+
+export default HiddenInput;

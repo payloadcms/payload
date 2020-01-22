@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useMemo } from 'react';
+import React, { useState, useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import FormContext from './Context';
@@ -42,6 +42,8 @@ const Form = (props) => {
     redirect,
     disableSuccessStatus,
   } = props;
+
+  console.log(fields);
 
   const submit = (e) => {
     setSubmitted(true);
