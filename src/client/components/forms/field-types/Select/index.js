@@ -23,6 +23,7 @@ const Select = (props) => {
     errorMessage,
     label,
     options,
+    hasMany,
   } = props;
 
   const {
@@ -56,11 +57,12 @@ const Select = (props) => {
       <Label htmlFor={name} label={label} required={required} />
       <ReactSelect
         value={options.find(option => option.value === value)}
-        onChange={selected => onFieldChange(selected.value)}
+        onChange={selected => onFieldChange(hasMany ? selected : selected.value)}
         disabled={formProcessing ? 'disabled' : undefined}
         components={{ DropdownIndicator: Arrow }}
         className="react-select"
         classNamePrefix="rs"
+        isMulti={hasMany}
         id={name}
         name={name}
         options={options.map((option, i) => {
@@ -94,6 +96,7 @@ Select.defaultProps = {
   id: null,
   name: 'select',
   defaultValue: null,
+  hasMany: false,
 };
 
 Select.propTypes = {
@@ -126,6 +129,7 @@ Select.propTypes = {
       }),
     ),
   ]).isRequired,
+  hasMany: PropTypes.bool,
 };
 
 export default Select;

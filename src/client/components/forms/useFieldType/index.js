@@ -55,7 +55,7 @@ const useFieldType = (options) => {
     formSubmitted: submitted,
     formProcessing: processing,
     onFieldChange: (e) => {
-      if (e.target) {
+      if (e && e.target) {
         sendField(e.target.value);
       } else {
         sendField(e);

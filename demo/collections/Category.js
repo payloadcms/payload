@@ -40,8 +40,8 @@ module.exports = {
     //   hasMany: false,
     // },
     {
-      name: 'role',
-      label: 'Role',
+      name: 'demo-select',
+      label: 'Demo Select',
       type: 'select',
       options: [{
         value: 'Option 1',
@@ -58,7 +58,27 @@ module.exports = {
       }],
       defaultValue: 'Option 1',
       required: true,
-      saveToJWT: true,
+    },
+    {
+      name: 'demo-select-many',
+      label: 'Demo Select w/ hasMany',
+      type: 'select',
+      options: [{
+        value: 'Option 1',
+        label: 'Here is a label for Option 1',
+      }, {
+        value: 'Option 2',
+        label: 'Option 2 Label',
+      }, {
+        value: 'Option 3',
+        label: 'Option 3 Label',
+      }, {
+        value: 'Option 4',
+        label: 'Option 4 Label',
+      }],
+      defaultValue: 'Option 1',
+      required: true,
+      hasMany: true,
     },
   ],
   timestamps: true,

@@ -55,10 +55,7 @@ const fieldToSchemaMap = {
   },
   repeater: (field) => {
     const schema = {};
-    if (field.id === false) {
-      // eslint-disable-next-line no-underscore-dangle
-      schema._id = false;
-    }
+
     field.fields.forEach((subField) => {
       schema[subField.name] = fieldToSchemaMap[subField.type](subField);
     });
