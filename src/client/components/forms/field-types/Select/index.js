@@ -4,6 +4,7 @@ import ReactSelect from 'react-select';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
+import Arrow from '../../../graphics/Arrow';
 
 import './index.scss';
 
@@ -57,6 +58,9 @@ const Select = (props) => {
         value={options.find(option => option.value === value)}
         onChange={selected => onFieldChange(selected.value)}
         disabled={formProcessing ? 'disabled' : undefined}
+        components={{ DropdownIndicator: Arrow }}
+        className="react-select"
+        classNamePrefix="rs"
         id={name}
         name={name}
         options={options.map((option, i) => {

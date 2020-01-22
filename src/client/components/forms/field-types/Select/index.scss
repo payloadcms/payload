@@ -1,17 +1,66 @@
-@import '../../../../scss//styles';
+@import '../../../../scss/styles';
 @import '../shared';
 
 .field-type.select {
   margin-bottom: base(.5);
   position: relative;
 
-  select {
-    @include formInput();
+  .react-select {
+    .rs__control {
+      @include formInput;
+    }
+
+    .rs__value-container {
+      height: base(1.75);
+      padding: 0;
+
+      > * {
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+    }
+
+    .rs__indicators {
+      .arrow {
+        margin-left: base(.5);
+        transform: rotate(90deg);
+        width: base(.3);
+        height: base(.3);
+      }
+    }
+
+    .rs__indicator-separator {
+      display: none;
+    }
+
+    .rs__menu {
+      border-radius: 0;
+      @extend %inputShadowActive;
+    }
+
+    .rs__option {
+      font-family: $font-body;
+      font-size: $body;
+      padding: base(.375) base(.75);
+      color: $black;
+
+      &--is-focused {
+        background-color: rgba($primary, .1);
+      }
+
+      &--is-selected {
+        background-color: rgba($primary, .5);
+      }
+    }
   }
 
   &.error {
-    select {
-      background-color: lighten($error, 20%);
+    .react-select {
+      .rs__control {
+        background-color: lighten($error, 20%);
+      }
     }
   }
 }

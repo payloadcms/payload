@@ -49,6 +49,12 @@ module.exports = {
       }, {
         value: 'Option 2',
         label: 'Option 2 Label',
+      }, {
+        value: 'Option 3',
+        label: 'Option 3 Label',
+      }, {
+        value: 'Option 4',
+        label: 'Option 4 Label',
       }],
       defaultValue: 'Option 1',
       required: true,

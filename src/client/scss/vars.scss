@@ -60,6 +60,11 @@ $stroke-width : 1px;
 	box-shadow: 0 22px 65px rgba(0,0,0,.07);
 }
 
+%inputShadowActive {
+  box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
+					0 10px 20px 0 rgba(0,2,4,.08);
+}
+
 %inputShadow {
   @extend %shadow-sm;
 
@@ -69,8 +74,7 @@ $stroke-width : 1px;
 	}
 
 	&:active, &:focus {
-		box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
-					0 10px 20px 0 rgba(0,2,4,.08);
+		@extend %inputShadowActive;
 	}
 }
 
