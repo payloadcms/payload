@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactSelect from 'react-select';
-import fieldType from '../fieldType';
+import fieldType from '../../fieldType';
 
 import './index.scss';
 import useMountEffect from '../../../../hooks/useMountEffect';

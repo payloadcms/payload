@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import fieldType from '../fieldType';
+import fieldType from '../../fieldType';
 
 import './index.scss';
 

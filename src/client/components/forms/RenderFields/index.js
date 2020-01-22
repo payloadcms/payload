@@ -4,18 +4,20 @@ import fieldTypes from '../field-types';
 
 import './index.scss';
 
-const RenderFields = ({ fields, formatter }) => {
+const RenderFields = ({ fields, formatter, initialData }) => {
   if (fields) {
     return (
       <>
         {fields.map((field, i) => {
           const FieldComponent = field.component || fieldTypes[field.type];
-          const formattedField = (formatter && typeof formatter === 'function') ? formatter(field, i) : field;
+          const formattedField = (formatter && typeof formatter === 'function') ? formatter(field, i) : {};
 
           if (FieldComponent) {
             return (
               <FieldComponent
                 key={i}
+                {...field}
+                defaultValue={initialData[field.name]}
                 {...formattedField}
               />
             );
@@ -43,6 +45,7 @@ const RenderFields = ({ fields, formatter }) => {
 
 RenderFields.defaultProps = {
   formatter: null,
+  initialData: {},
 };
 
 RenderFields.propTypes = {
@@ -50,6 +53,7 @@ RenderFields.propTypes = {
     PropTypes.shape({}),
   ).isRequired,
   formatter: PropTypes.func,
+  initialData: PropTypes.shape({}),
 };
 
 export default RenderFields;

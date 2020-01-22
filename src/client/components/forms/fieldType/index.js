@@ -1,8 +1,8 @@
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import FormContext from '../../Form/Context';
-import Tooltip from '../../../modules/Tooltip';
-import useMountEffect from '../../../../hooks/useMountEffect';
+import FormContext from '../Form/Context';
+import Tooltip from '../../modules/Tooltip';
+import useMountEffect from '../../../hooks/useMountEffect';
 
 import './index.scss';
 
@@ -11,7 +11,7 @@ const baseClass = 'field-type';
 const asFieldType = (PassedComponent, type, validate, errors) => {
   const FieldType = (props) => {
     const formContext = useContext(FormContext);
-    const { setValue } = formContext;
+    const { setField } = formContext;
 
     const {
       name,
@@ -23,20 +23,28 @@ const asFieldType = (PassedComponent, type, validate, errors) => {
     } = props;
 
     const sendField = useCallback((valueToSend) => {
-      setValue({
+      setField({
         name,
         value: valueToSend,
         valid: required && validate
           ? validate(valueToSend || '', type)
           : true,
       });
-    }, [name, required, setValue]);
+    }, [name, required, setField]);
 
     useMountEffect(() => {
       let valueToInitialize = defaultValue;
       if (valueOverride) valueToInitialize = valueOverride;
       sendField(valueToInitialize);
     });
+
+    useEffect(() => {
+      sendField(defaultValue);
+    }, [defaultValue, sendField]);
+
+    useEffect(() => {
+      sendField(valueOverride);
+    }, [valueOverride, sendField]);
 
     const classList = [baseClass, type];
     const valid = formContext.fields[name] ? formContext.fields[name].valid : true;

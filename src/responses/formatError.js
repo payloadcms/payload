@@ -10,6 +10,13 @@ const formatErrorResponse = (incoming, source) => {
         }, []),
       };
 
+    case 'APIError':
+      return {
+        errors: [
+          incoming,
+        ],
+      };
+
     default:
       return incoming;
   }

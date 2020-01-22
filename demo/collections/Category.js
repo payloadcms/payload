@@ -50,7 +50,7 @@ module.exports = {
         value: 'Option 2',
         label: 'Option 2 Label',
       }],
-      defaultValue: 'user',
+      defaultValue: 'Option 1',
       required: true,
       saveToJWT: true,
     },

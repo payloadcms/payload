@@ -1,39 +1,37 @@
 import React from 'react';
-import { useRouteMatch } from 'react-router-dom';
-import { useLocale } from '../../utilities/Locale';
-import getSanitizedConfig from '../../../config/getSanitizedConfig';
+import PropTypes from 'prop-types';
 
 import './index.scss';
 
-const { serverURL } = getSanitizedConfig();
-
-const APIURL = () => {
-  const { collectionSlug, id } = useRouteMatch();
-  const locale = useLocale();
-
-  const apiUrl = `${serverURL}/${collectionSlug}/${id}?locale=${locale}`;
-
+const APIURL = ({ url }) => {
   return (
     <div className="api-url">
       <span className="uppercase-label">API URL</span>
-      {id
+      {url
         && (
           <div className="url">
             <a
-              href={apiUrl}
+              href={url}
               rel="noopener noreferrer"
               target="_blank"
             >
-              {apiUrl}
+              {url}
             </a>
           </div>
         )
       }
-      {!id
+      {!url
         && <div>&mdash;</div>
       }
     </div>
   );
+};
+
+APIURL.propTypes = {
+  url: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.bool,
+  ]).isRequired,
 };
 
 export default APIURL;

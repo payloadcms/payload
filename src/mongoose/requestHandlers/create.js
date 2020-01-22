@@ -1,8 +1,9 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../errors/formatResponse');
+const formatErrorResponse = require('../../responses/formatError');
+const formatSuccessResponse = require('../../responses/formatSuccess');
 
 const create = (req, res) => {
-  req.model.create(req.body, (err, result) => {
+  req.model.create(req.body, (err) => {
     if (err) {
       res.status(httpStatus.INTERNAL_SERVER_ERROR)
         .json(formatErrorResponse(err, 'mongoose'));
@@ -10,10 +11,7 @@ const create = (req, res) => {
     }
 
     res.status(httpStatus.CREATED)
-      .json({
-        message: 'success',
-        result: result.toJSON({ virtuals: true }),
-      });
+      .json(formatSuccessResponse(`${req.collection.labels.singular} successfully created.`, 'message'));
   });
 };
 

@@ -112,6 +112,7 @@ const Routes = () => {
                               render={(routeProps) => {
                                 return (
                                   <Edit
+                                    isEditing
                                     {...routeProps}
                                     collection={collection}
                                   />

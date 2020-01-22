@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useReducer, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import FormContext from './Context';
@@ -11,8 +11,20 @@ import './index.scss';
 
 const baseClass = 'form';
 
+const initialFieldState = {};
+
+function fieldReducer(state, action) {
+  return {
+    ...state,
+    [action.name]: {
+      value: action.value,
+      valid: action.valid,
+    },
+  };
+}
+
 const Form = (props) => {
-  const [fields, setFields] = useState({});
+  const [fields, setField] = useReducer(fieldReducer, initialFieldState);
   const [submitted, setSubmitted] = useState(false);
   const [processing, setProcessing] = useState(false);
   const history = useHistory();
@@ -30,16 +42,6 @@ const Form = (props) => {
     redirect,
     disableSuccessStatus,
   } = props;
-
-  const setValue = (field) => {
-    setFields({
-      ...fields,
-      [field.name]: {
-        value: field.value,
-        valid: field.valid,
-      },
-    });
-  };
 
   const submit = (e) => {
     setSubmitted(true);
@@ -78,20 +80,24 @@ const Form = (props) => {
         (res) => {
           if (res.status < 400) {
             // If prop handleAjaxResponse is passed, pass it the response
-            if (handleAjaxResponse && typeof handleAjaxResponse === 'function') handleAjaxResponse(res);
+            if (handleAjaxResponse && typeof handleAjaxResponse === 'function') {
+              return handleAjaxResponse(res);
+            }
 
-            // Provide form data to the redirected page
             if (redirect) {
-              history.push(redirect, data);
-            } else {
-              setProcessing(false);
+              return history.push(redirect, data);
+            }
+
+            setProcessing(false);
+
+            res.json().then((json) => {
               if (!disableSuccessStatus) {
                 addStatus({
-                  message: res.message,
+                  message: json.message,
                   type: 'success',
                 });
               }
-            }
+            });
           } else {
             res.json().then((json) => {
               setProcessing(false);
@@ -131,7 +137,7 @@ const Form = (props) => {
       className={classes}
     >
       <FormContext.Provider value={{
-        setValue,
+        setField,
         fields,
         processing,
         submitted,

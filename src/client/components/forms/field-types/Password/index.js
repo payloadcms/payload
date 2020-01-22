@@ -1,5 +1,5 @@
 import React from 'react';
-import fieldType from '../fieldType';
+import fieldType from '../../fieldType';
 
 import './index.scss';
 

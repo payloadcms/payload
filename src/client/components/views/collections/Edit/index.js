@@ -23,6 +23,7 @@ const {
 const EditView = (props) => {
   const { collection, isEditing } = props;
   const { params: { id } = {} } = useRouteMatch();
+
   const [{ data }] = usePayloadAPI(
     `${serverURL}/${collection.slug}/${isEditing ? id : ''}`
   );
@@ -34,7 +35,6 @@ const EditView = (props) => {
 
   if (isEditing) {
     nav.push({
-      url: `${admin}/collections/${collection.slug}/${data._id}`,
       label: data ? data[collection.useAsTitle] : ''
     })
   } else {
@@ -63,14 +63,14 @@ const EditView = (props) => {
       <Form method={id ? 'put' : 'post'} action={`${serverURL}/${collection.slug}${id ? `/${id}` : ''}`}>
         <StickyHeader showStatus={true}
           content={
-            <APIURL />
+            <APIURL url={isEditing && `${serverURL}/${collection.slug}/${data.id}`} />
           } action={
             <>
               <Button type="secondary">Preview</Button>
               <FormSubmit>Save</FormSubmit>
             </>
           } />
-        <RenderFields fields={collection.fields} />
+        <RenderFields fields={collection.fields} initialData={data} />
       </Form>
     </DefaultTemplate>
   );

@@ -2,6 +2,7 @@ const requestHandlers = require('../mongoose/requestHandlers');
 const bindModelMiddleware = require('../mongoose/bindModel');
 const setModelLocaleMiddleware = require('../localization/setModelLocale');
 const loadPolicy = require('../auth/loadPolicy');
+const bindCollectionMiddleware = require('./bindCollection');
 
 const {
   query, create, findOne, destroy, update,
@@ -10,6 +11,7 @@ const {
 const registerRoutes = ({ model, config }, router) => {
   router.all(`/${config.slug}*`,
     bindModelMiddleware(model),
+    bindCollectionMiddleware(config),
     setModelLocaleMiddleware());
 
   router.route(`/${config.slug}`)
