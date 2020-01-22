@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ReactSelect from 'react-select';
+import ReactSelect from '../../../modules/ReactSelect';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import Arrow from '../../../graphics/Arrow';
 
 import './index.scss';
 
@@ -65,40 +64,11 @@ const Select = (props) => {
         required={required}
       />
       <ReactSelect
-        value={options.find(option => option.value === value)}
-        onChange={(selected) => {
-          if (hasMany) {
-            if (selected) {
-              onFieldChange(selected.map(selectedOption => selectedOption.value));
-            } else {
-              onFieldChange(null);
-            }
-          }
-          if (selected) {
-            onFieldChange(selected.value);
-          }
-        }}
-        disabled={formProcessing ? 'disabled' : undefined}
-        components={{ DropdownIndicator: Arrow }}
-        className="react-select"
-        classNamePrefix="rs"
+        onChange={onFieldChange}
+        value={value}
+        disabled={formProcessing}
+        options={options}
         isMulti={hasMany}
-        id={name}
-        name={name}
-        options={options.map((option) => {
-          let optionValue = option;
-          let optionLabel = option;
-
-          if (typeof option === 'object') {
-            optionValue = option.value;
-            optionLabel = option.label;
-          }
-
-          return {
-            value: optionValue,
-            label: optionLabel,
-          };
-        })}
       />
     </div>
   );
