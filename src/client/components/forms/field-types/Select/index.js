@@ -28,7 +28,7 @@ const Select = (props) => {
     value,
     showError,
     formProcessing,
-    onChange,
+    onFieldChange,
   } = useFieldType({
     name,
     required,
@@ -55,7 +55,7 @@ const Select = (props) => {
       <Label htmlFor={name} label={label} required={required} />
       <ReactSelect
         value={options.find(option => option.value === value)}
-        onChange={selected => onChange(selected.value)}
+        onChange={selected => onFieldChange(selected.value)}
         disabled={formProcessing ? 'disabled' : undefined}
         id={name}
         name={name}

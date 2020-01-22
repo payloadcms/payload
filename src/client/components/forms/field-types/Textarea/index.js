@@ -26,7 +26,7 @@ const Textarea = (props) => {
   const {
     value,
     showError,
-    onChange,
+    onFieldChange,
     formProcessing,
   } = useFieldType({
     name,
@@ -51,7 +51,7 @@ const Textarea = (props) => {
       <Label htmlFor={name} label={label} required={required} />
       <textarea
         value={value || ''}
-        onChange={onChange}
+        onChange={onFieldChange}
         disabled={formProcessing ? 'disabled' : undefined}
         placeholder={placeholder}
         id={name}
@@ -62,8 +62,8 @@ const Textarea = (props) => {
 }
 
 Textarea.defaultProps = {
-  label: null,
   required: false,
+  label: null,
   processing: false,
   defaultValue: null,
   validate: defaultValidate,

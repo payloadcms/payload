@@ -26,7 +26,7 @@ const Input = (props) => {
   const {
     value,
     showError,
-    onChange,
+    onFieldChange,
     formProcessing,
   } = useFieldType({
     name,
@@ -51,7 +51,7 @@ const Input = (props) => {
       <Label htmlFor={name} label={label} required={required} />
       <input
         value={value || ''}
-        onChange={onChange}
+        onChange={onFieldChange}
         disabled={formProcessing ? 'disabled' : undefined}
         placeholder={placeholder}
         type="text"

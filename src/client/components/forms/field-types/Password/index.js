@@ -9,7 +9,7 @@ import './index.scss';
 const defaultError = 'Please enter a password.';
 const defaultValidate = value => value.length > 3;
 
-const Input = (props) => {
+const Password = (props) => {
   const {
     name,
     required,
@@ -27,6 +27,7 @@ const Input = (props) => {
     value,
     showError,
     processing,
+    onFieldChange,
   } = useFieldType({
     name,
     required,
@@ -44,7 +45,7 @@ const Input = (props) => {
       <Label htmlFor={name} label={label} required={required} />
       <input
         value={value || ''}
-        onChange={onChange}
+        onChange={onFieldChange}
         disabled={processing ? 'disabled' : undefined}
         placeholder={placeholder}
         type="password"
@@ -54,7 +55,7 @@ const Input = (props) => {
   );
 }
 
-Input.defaultProps = {
+Password.defaultProps = {
   required: false,
   processing: false,
   defaultValue: null,
@@ -64,7 +65,7 @@ Input.defaultProps = {
   style: {},
 }
 
-Input.propTypes = {
+Password.propTypes = {
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
   defaultValue: PropTypes.string,
@@ -76,4 +77,4 @@ Input.propTypes = {
   label: PropTypes.string.isRequired,
 }
 
-export default Input;
+export default Password;

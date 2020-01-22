@@ -54,7 +54,7 @@ const useFieldType = (options) => {
     value: valueToRender,
     formSubmitted: submitted,
     formProcessing: processing,
-    onChange: (e) => {
+    onFieldChange: (e) => {
       if (e.target) {
         sendField(e.target.value);
       } else {
