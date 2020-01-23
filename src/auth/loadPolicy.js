@@ -3,11 +3,13 @@ const httpStatus = require('http-status');
 const { Forbidden } = require('../errors');
 const formatErrorResponse = require('../responses/formatError');
 
-const requireAuth = (req, res) => {
+const requireAuth = (req, res, next) => {
   if (!req.user) {
     res.status(httpStatus.UNAUTHORIZED)
       .send();
   }
+
+  return next();
 };
 
 const loadPolicy = (policy) => {
