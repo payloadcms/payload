@@ -175,9 +175,6 @@ class Relationship extends Component {
     // eslint-disable-next-line prefer-template
     const fieldWidth = width ? width + '%' : null;
 
-    // Todo: revise defaultValue.
-    // Use this category: http://localhost:3000/admin/collections/categories/5e2904bfc47ddb0aae200ad0
-
     return (
       <div
         className={classes}
