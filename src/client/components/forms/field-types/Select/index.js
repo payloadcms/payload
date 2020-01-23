@@ -66,6 +66,7 @@ const Select = (props) => {
       <ReactSelect
         onChange={onFieldChange}
         value={value}
+        showError={showError}
         disabled={formProcessing}
         options={options}
         isMulti={hasMany}

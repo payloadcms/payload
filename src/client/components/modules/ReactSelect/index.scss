@@ -86,7 +86,7 @@ div.react-select {
   }
 
   &--error {
-    .rs__control {
+    div.rs__control {
       background-color: lighten($error, 20%);
     }
   }

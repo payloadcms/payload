@@ -63,7 +63,7 @@ class Relationship extends Component {
   }
 
   formatSelectedValue = (selectedValue) => {
-    return selectedValue.value;
+    return selectedValue ? selectedValue.value : selectedValue;
   }
 
   addResults = (incoming, relation) => {
@@ -156,6 +156,7 @@ class Relationship extends Component {
           formatValue={this.formatSelectedValue}
           onMenuScrollToBottom={this.handleMenuScrollToBottom}
           value={value}
+          showError={showError}
           disabled={formProcessing}
           options={options}
           isMulti={hasMany}
