@@ -1,6 +1,7 @@
 const path = require('path');
 const Page = require('./collections/Page');
 const Category = require('./collections/Category');
+const Post = require('./collections/Post');
 const User = require('./collections/User');
 const Upload = require('./collections/Upload');
 const Header = require('./globals/Header');
@@ -8,7 +9,7 @@ const Footer = require('./globals/Footer');
 
 module.exports = {
   // disableAdmin: true,
-  collections: [Page, Category],
+  collections: [Page, Category, Post],
   user: User,
   upload: Upload,
   globals: [Header, Footer],

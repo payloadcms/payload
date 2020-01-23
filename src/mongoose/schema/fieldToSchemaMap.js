@@ -45,13 +45,33 @@ const fieldToSchemaMap = {
     return schema;
   },
   relationship: (field) => {
-    const schema = {
-      ...formatBaseSchema(field),
-      type: Schema.Types.ObjectId,
-      autopopulate: true,
-      ref: field.relationTo,
-    };
-    return field.hasMany ? [schema] : schema;
+    let schema = {};
+
+    if (Array.isArray(field.relationTo)) {
+      schema.value = {
+        type: Schema.Types.ObjectId,
+        autopopulate: true,
+        refPath: `${field.name}${field.localized ? '.{{LOCALE}}' : ''}.relationTo`
+      }
+      schema.relationTo = { type: String, enum: field.relationTo };
+    } else {
+      schema = {
+        ...formatBaseSchema(field),
+      };
+
+      schema.type = Schema.Types.ObjectId;
+      schema.autopopulate = true;
+      schema.ref = field.relationTo;
+    }
+
+    if (field.hasMany) {
+      return {
+        type: [schema],
+        localized: field.localized,
+      }
+    }
+
+    return schema;
   },
   repeater: (field) => {
     const schema = {};

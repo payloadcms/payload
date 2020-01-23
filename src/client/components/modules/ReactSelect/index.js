@@ -13,6 +13,7 @@ const ReactSelect = (props) => {
     onChange,
     value,
     disabled,
+    formatValue,
   } = props;
 
   const classes = [
@@ -22,40 +23,43 @@ const ReactSelect = (props) => {
 
   return (
     <Select
+      {...props}
       value={options.find(option => option.value === value)}
       onChange={(selected) => {
-        let valueToChange = null;
+        if (formatValue) {
+          onChange(formatValue(selected));
+        } else {
+          let valueToChange = null;
 
-        if (isMulti) {
-          if (selected) {
-            valueToChange = selected.map(selectedOption => selectedOption.value);
+          if (isMulti) {
+            if (selected) {
+              valueToChange = selected.map(selectedOption => selectedOption.value);
+            }
+          } else if (selected) {
+            valueToChange = selected.value;
           }
-        }
 
-        if (selected) {
-          valueToChange = selected.value;
+          onChange(valueToChange);
         }
-
-        onChange(valueToChange);
       }}
       disabled={disabled ? 'disabled' : undefined}
       components={{ DropdownIndicator: Arrow }}
       className={classes}
       classNamePrefix="rs"
-      isMulti={isMulti}
       options={options.map((option) => {
-        let optionValue = option;
-        let optionLabel = option;
+        const formattedOption = {
+          value: option,
+          label: option,
+        };
 
         if (typeof option === 'object') {
-          optionValue = option.value;
-          optionLabel = option.label;
+          formattedOption.value = option.value;
+          formattedOption.label = option.label;
+
+          if (option.options) formattedOption.options = option.options;
         }
 
-        return {
-          value: optionValue,
-          label: optionLabel,
-        };
+        return formattedOption;
       })}
     />
   );
@@ -66,13 +70,21 @@ ReactSelect.defaultProps = {
   value: null,
   showError: false,
   disabled: false,
+  formatValue: null,
 };
 
 ReactSelect.propTypes = {
-  value: PropTypes.string,
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(
+      PropTypes.string,
+    ),
+    PropTypes.shape({}),
+  ]),
   onChange: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
   showError: PropTypes.bool,
+  formatValue: PropTypes.func,
   options: PropTypes.oneOfType([
     PropTypes.arrayOf(
       PropTypes.string,

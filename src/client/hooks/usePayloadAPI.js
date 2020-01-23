@@ -2,7 +2,13 @@ import { useState, useEffect } from 'react';
 import queryString from 'qs';
 import { useLocale } from '../components/utilities/Locale';
 
-const usePayloadAPI = (url, initialParams = {}, initialData = {}) => {
+const usePayloadAPI = (url, options = {}) => {
+  const {
+    initialParams = {},
+    initialData = {},
+    onLoad,
+  } = options;
+
   const [data, setData] = useState(initialData);
   const [params, setParams] = useState(initialParams);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +37,7 @@ const usePayloadAPI = (url, initialParams = {}, initialData = {}) => {
     };
 
     if (url) fetchData();
-  }, [url, locale, params]);
+  }, [url, locale, params, onLoad]);
 
   return [{ data, isLoading, isError }, { setParams }];
 };

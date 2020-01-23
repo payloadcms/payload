@@ -32,10 +32,10 @@ module.exports = {
       localized: true,
     },
     {
-      name: 'page',
-      label: 'Page',
+      name: 'post',
+      label: 'Post',
       type: 'relationship',
-      relationTo: 'pages',
+      relationTo: ['posts', 'categories'],
       localized: false,
       hasMany: false,
     },

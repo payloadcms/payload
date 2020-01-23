@@ -26,7 +26,7 @@ const EditView = (props) => {
 
   const [{ data }] = usePayloadAPI(
     (isEditing ? `${serverURL}/${collection.slug}` : null),
-    { 'fallback-locale': 'null' }
+    { initialParams: { 'fallback-locale': 'null' } }
   );
 
   const nav = [{
