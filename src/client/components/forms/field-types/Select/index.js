@@ -46,11 +46,6 @@ const Select = (props) => {
 
   const fieldWidth = width ? `${width}%` : undefined;
 
-  // console.log(defaultValue);
-
-  // Todo: revise defaultValue.
-  // Use this category: http://localhost:3000/admin/collections/categories/5e2904bfc47ddb0aae200ad0
-
   return (
     <div
       className={classes}
@@ -69,6 +64,13 @@ const Select = (props) => {
         required={required}
       />
       <ReactSelect
+        findValueInOptions={(reactSelectOptions, reactSelectValue) => {
+          if (hasMany && Array.isArray(reactSelectValue)) {
+            return reactSelectValue.map(subValue => reactSelectOptions.find(option => option.value === subValue));
+          }
+
+          return reactSelectOptions.find(option => option.value === reactSelectValue);
+        }}
         onChange={onFieldChange}
         value={value}
         showError={showError}
@@ -97,7 +99,10 @@ Select.propTypes = {
   errorMessage: PropTypes.string,
   valueOverride: PropTypes.string,
   label: PropTypes.string.isRequired,
-  defaultValue: PropTypes.string,
+  defaultValue: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.array,
+  ]),
   validate: PropTypes.func,
   name: PropTypes.string.isRequired,
   width: PropTypes.number,

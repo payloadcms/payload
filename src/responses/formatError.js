@@ -13,7 +13,9 @@ const formatErrorResponse = (incoming, source) => {
     case 'APIError':
       return {
         errors: [
-          incoming,
+          {
+            message: incoming.name,
+          },
         ],
       };
 

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Cookies from 'universal-cookie';
 import ReactSelect from '../../../modules/ReactSelect';
@@ -20,13 +20,11 @@ class Relationship extends Component {
   constructor(props) {
     super(props);
 
-    const { relationTo } = this.props;
-    const hasMultipleRelations = Array.isArray(relationTo);
+    const { relationTo, hasMultipleRelations } = this.props;
     const relations = hasMultipleRelations ? relationTo : [relationTo];
 
     this.state = {
       relations,
-      hasMultipleRelations,
       results: relations.reduce((acc, relation) => ({
         ...acc,
         [relation]: {
@@ -39,6 +37,8 @@ class Relationship extends Component {
     };
   }
 
+  // Get initial options to populate ReactSelect
+  // At first, only load the first 10 of the first related model
   componentDidMount() {
     const { relations } = this.state;
     const token = cookies.get('token');
@@ -62,12 +62,16 @@ class Relationship extends Component {
     })
   }
 
+  // This is needed to reduce the selected option to only its value
+  // Essentially, remove the label
   formatSelectedValue = (selectedValue) => {
     return selectedValue ? selectedValue.value : selectedValue;
   }
 
+  // When ReactSelect prepopulates a selected option,
+  // if there are multiple relations, we need to find a nested option to match from
   findValueInOptions = (options, value) => {
-    const { hasMultipleRelations } = this.state;
+    const { hasMultipleRelations } = this.props;
 
     let foundValue = false;
 
@@ -75,15 +79,18 @@ class Relationship extends Component {
       options.find((option) => {
 
         if (option.options) {
-          foundValue = option.options.find((subOption) => {
+          const potentialValue = option.options.find((subOption) => {
             if (subOption.value && subOption.value.value && value && value.value) {
-              if (subOption.value.value === value.value.id) {
+
+              if (subOption.value.value === value.value) {
                 return true;
               }
             }
 
             return false;
           });
+
+          if (potentialValue) foundValue = potentialValue;
         }
 
         if (option === value) {
@@ -97,6 +104,8 @@ class Relationship extends Component {
     return foundValue;
   }
 
+  // Build and maintain a list of all results, keyed by collection type
+  // Note - this is different than options so that we can easily keep current page and total pages
   addResults = (incoming, relation) => {
     const { results } = this.state;
 
@@ -113,8 +122,9 @@ class Relationship extends Component {
     }
   }
 
+  // Convert results into a ReactSelect-friendly array of options
   formatOptions = (results) => {
-    const { hasMultipleRelations } = this.state;
+    const { hasMultipleRelations } = this.props;
 
     return Object.keys(results).sort().reduce((acc, collectionSlug) => {
       const collectionResults = results[collectionSlug].docs;
@@ -233,6 +243,7 @@ Relationship.propTypes = {
   width: PropTypes.number,
   hasMany: PropTypes.bool,
   onFieldChange: PropTypes.func.isRequired,
+  hasMultipleRelations: PropTypes.bool.isRequired,
   value: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.arrayOf(
@@ -243,14 +254,49 @@ Relationship.propTypes = {
 };
 
 const RelationshipFieldType = (props) => {
+  const [formattedDefaultValue, setFormattedDefaultValue] = useState(null);
+  const { defaultValue, relationTo, hasMany } = props;
+  const hasMultipleRelations = Array.isArray(relationTo);
+
   const fieldType = useFieldType({
     ...props,
+    defaultValue: formattedDefaultValue,
   });
+
+  useEffect(() => {
+    const formatDefaultValue = (valueToFormat) => {
+      let incomingRelatedDocument = valueToFormat;
+      let relatedCollection = collections.find(collection => relationTo === collection.slug);
+
+      if (hasMultipleRelations) {
+        incomingRelatedDocument = valueToFormat.value
+        relatedCollection = collections.find(collection => valueToFormat.relationTo === collection.slug);
+      }
+
+      return {
+        label: incomingRelatedDocument[relatedCollection.useAsTitle],
+        value: incomingRelatedDocument.id,
+      }
+    }
+
+    if (defaultValue) {
+      if (hasMany && Array.isArray(defaultValue)) {
+        let formattedDefaultValue = [];
+        defaultValue.forEach((individualValue) => {
+          formattedDefaultValue.push(formatDefaultValue(individualValue));
+          setFormattedDefaultValue(formattedDefaultValue);
+        })
+      } else {
+        setFormattedDefaultValue(formatDefaultValue(defaultValue));
+      };
+    }
+  }, [defaultValue]);
 
   return (
     <Relationship
       {...props}
       {...fieldType}
+      hasMultipleRelations={hasMultipleRelations}
     />
   );
 };

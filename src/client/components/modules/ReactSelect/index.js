@@ -22,11 +22,10 @@ const ReactSelect = (props) => {
     showError && 'react-select--error',
   ].filter(Boolean).join(' ');
 
-  let valueToRender = options.find(option => option.value === value);
+  let valueToRender = value;
 
   if (findValueInOptions && typeof findValueInOptions === 'function') {
     valueToRender = findValueInOptions(options, value);
-    console.log(valueToRender);
   }
 
   return (

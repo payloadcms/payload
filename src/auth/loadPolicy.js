@@ -1,9 +1,11 @@
 const passport = require('passport');
-const HttpStatus = require('http-status');
+const httpStatus = require('http-status');
+const { Forbidden } = require('../errors');
+const formatErrorResponse = require('../responses/formatError');
 
 const requireAuth = (req, res) => {
   if (!req.user) {
-    res.status(HttpStatus.UNAUTHORIZED)
+    res.status(httpStatus.UNAUTHORIZED)
       .send();
   }
 };
@@ -14,8 +16,8 @@ const loadPolicy = (policy) => {
     (req, res, next) => {
       if (policy) {
         if (!policy(req.user)) {
-          return res.status(HttpStatus.FORBIDDEN)
-            .send('Not authorized.');
+          return res.status(httpStatus.FORBIDDEN)
+            .json(formatErrorResponse(new Forbidden(), 'APIError'));
         }
 
         return next();
