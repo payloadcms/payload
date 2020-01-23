@@ -47,6 +47,13 @@ div.react-select {
     @extend %inputShadowActive;
   }
 
+  .rs__group-heading {
+    @extend %uppercase-label;
+    color: $black;
+    padding-left: base(.5);
+    margin-bottom: base(.25);
+  }
+
   .rs__option {
     font-family: $font-body;
     font-size: $body;

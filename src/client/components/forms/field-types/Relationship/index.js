@@ -76,29 +76,19 @@ class Relationship extends Component {
     let foundValue = false;
 
     if (hasMultipleRelations) {
-      options.find((option) => {
+      options.forEach((option) => {
+        const potentialValue = option.options.find((subOption) => {
+          if (subOption.value && subOption.value.value && value && value.value) {
+            return subOption.value.value === value.value;
+          }
 
-        if (option.options) {
-          const potentialValue = option.options.find((subOption) => {
-            if (subOption.value && subOption.value.value && value && value.value) {
+          return false;
+        });
 
-              if (subOption.value.value === value.value) {
-                return true;
-              }
-            }
-
-            return false;
-          });
-
-          if (potentialValue) foundValue = potentialValue;
-        }
-
-        if (option === value) {
-          foundValue = option;
-        }
-
-        return;
+        if (potentialValue) foundValue = potentialValue;
       });
+    } else {
+      foundValue = options.find(option => option.value === value);
     }
 
     return foundValue;

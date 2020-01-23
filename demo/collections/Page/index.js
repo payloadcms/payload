@@ -39,7 +39,7 @@ module.exports = {
     },
     {
       name: 'category',
-      label: 'Category',
+      label: 'Localized Category',
       type: 'relationship',
       relationType: 'reference',
       relationTo: 'categories',
@@ -48,7 +48,7 @@ module.exports = {
     },
     {
       name: 'categories',
-      label: 'Categories',
+      label: 'Categories hasMany',
       type: 'relationship',
       relationType: 'reference',
       relationTo: 'categories',
@@ -57,7 +57,7 @@ module.exports = {
     },
     {
       name: 'nonLocalizedCategory',
-      label: 'Categories',
+      label: 'Non-Localized Category',
       type: 'relationship',
       relationType: 'reference',
       relationTo: 'categories',
@@ -69,16 +69,6 @@ module.exports = {
       label: 'Image',
       type: 'upload',
       required: false,
-    },
-    {
-      name: 'author',
-      label: 'Written by:',
-      type: 'reference',
-      reference: {
-        to: 'authors',
-        nested: true,
-        relationship: 'oneToMany',
-      },
     },
     {
       name: 'slides',
