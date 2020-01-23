@@ -84,9 +84,7 @@ ReactSelect.defaultProps = {
 ReactSelect.propTypes = {
   value: PropTypes.oneOfType([
     PropTypes.string,
-    PropTypes.arrayOf(
-      PropTypes.string,
-    ),
+    PropTypes.array,
     PropTypes.shape({}),
   ]),
   findValueInOptions: PropTypes.func,
