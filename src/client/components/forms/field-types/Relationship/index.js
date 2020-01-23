@@ -66,6 +66,37 @@ class Relationship extends Component {
     return selectedValue ? selectedValue.value : selectedValue;
   }
 
+  findValueInOptions = (options, value) => {
+    const { hasMultipleRelations } = this.state;
+
+    let foundValue = false;
+
+    if (hasMultipleRelations) {
+      options.find((option) => {
+
+        if (option.options) {
+          foundValue = option.options.find((subOption) => {
+            if (subOption.value && subOption.value.value && value && value.value) {
+              if (subOption.value.value === value.value.id) {
+                return true;
+              }
+            }
+
+            return false;
+          });
+        }
+
+        if (option === value) {
+          foundValue = option;
+        }
+
+        return;
+      });
+    }
+
+    return foundValue;
+  }
+
   addResults = (incoming, relation) => {
     const { results } = this.state;
 
@@ -158,6 +189,7 @@ class Relationship extends Component {
           onChange={onFieldChange}
           formatValue={this.formatSelectedValue}
           onMenuScrollToBottom={this.handleMenuScrollToBottom}
+          findValueInOptions={this.findValueInOptions}
           value={value}
           showError={showError}
           disabled={formProcessing}

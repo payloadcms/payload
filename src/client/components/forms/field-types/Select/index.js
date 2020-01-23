@@ -46,6 +46,8 @@ const Select = (props) => {
 
   const fieldWidth = width ? `${width}%` : undefined;
 
+  // console.log(defaultValue);
+
   // Todo: revise defaultValue.
   // Use this category: http://localhost:3000/admin/collections/categories/5e2904bfc47ddb0aae200ad0
 
