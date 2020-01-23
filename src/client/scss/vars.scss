@@ -68,14 +68,14 @@ $stroke-width : 1px;
 %inputShadow {
   @extend %shadow-sm;
 
-	&:hover {
-		box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
-					0 5px 20px 0 rgba(0,2,4,.06);
+  &:hover {
+		box-shadow: 0 2px 4px 0 rgba(0,2,4,.1), 0 5px 20px 0 rgba(0,2,4,.06);
 	}
 
 	&:active, &:focus {
-		@extend %inputShadowActive;
-	}
+    box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
+      0 10px 20px 0 rgba(0,2,4,.08);
+  }
 }
 
 //////////////////////////////

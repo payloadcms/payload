@@ -269,14 +269,14 @@ const RelationshipFieldType = (props) => {
 
   useEffect(() => {
     const formatDefaultValue = (valueToFormat) => {
-      let incomingRelatedDocument = valueToFormat;
-
       if (hasMultipleRelations) {
-        incomingRelatedDocument = valueToFormat.value
-        return incomingRelatedDocument.id;
+        return {
+          ...valueToFormat,
+          value: valueToFormat.value.id
+        };
       }
 
-      return incomingRelatedDocument.id;
+      return valueToFormat.id;
     }
 
     if (defaultValue) {
