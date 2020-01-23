@@ -87,8 +87,8 @@ class Relationship extends Component {
 
         if (potentialValue) foundValue = potentialValue;
       });
-    } else {
-      foundValue = options.find(option => option.value === value);
+    } else if (value) {
+      foundValue = options.find(option => option.value === value.value);
     }
 
     return foundValue;
@@ -119,18 +119,27 @@ class Relationship extends Component {
     return Object.keys(results).sort().reduce((acc, collectionSlug) => {
       const collectionResults = results[collectionSlug].docs;
       const collectionConfig = collections.find((collection) => collection.slug === collectionSlug);
-      const optionGroup = {
-        label: collectionConfig.labels.plural,
-        options: collectionResults.map((result) => ({
-          label: result[collectionConfig.useAsTitle],
-          value: hasMultipleRelations ? {
-            relationTo: collectionConfig.slug,
-            value: result.id,
-          } : result.id,
-        })),
-      };
 
-      acc.push(optionGroup);
+      if (hasMultipleRelations) {
+        acc.push({
+          label: collectionConfig.labels.plural,
+          options: collectionResults.map((result) => ({
+            label: result[collectionConfig.useAsTitle],
+            value: {
+              relationTo: collectionConfig.slug,
+              value: result.id,
+            },
+          })),
+        });
+      } else {
+        collectionResults.map((result) => {
+          acc.push({
+            label: result[collectionConfig.useAsTitle],
+            value: result.id,
+          });
+        });
+      }
+
       return acc;
     }, []);
   }
