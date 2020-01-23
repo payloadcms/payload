@@ -14,14 +14,6 @@ module.exports = {
     destroy: user => checkRole(['user', 'admin'], user),
   },
   fields: [
-    {
-      name: 'test-custom-media-field',
-      label: 'Testing a Custom Media Field',
-      type: 'input',
-      maxLength: 100,
-      required: true,
-      localized: true,
-    },
   ],
   timestamps: true,
 };

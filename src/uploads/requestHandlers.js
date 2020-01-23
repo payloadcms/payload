@@ -1,6 +1,6 @@
 const mkdirp = require('mkdirp');
 const httpStatus = require('http-status');
-const { resizeAndSave } = require('./images/imageResizer');
+const resizeAndSave = require('./images/imageResizer');
 const modelById = require('../mongoose/resolvers/modelById');
 const { NotFound } = require('../errors');
 
