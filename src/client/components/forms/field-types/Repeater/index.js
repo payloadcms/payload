@@ -8,24 +8,23 @@ const Repeater = (props) => {
     label, fields, name, defaultValue,
   } = props;
 
+  let rows = defaultValue.length > 0 ? defaultValue : [{}];
+
   return (
     <div className="field-repeater">
       <Section heading={label}>
-        <RenderFields
-          fields={fields.map((subField, i) => {
-            let defaultSubValue = null;
-
-            if (defaultValue[i] && defaultValue[i][subField.name]) {
-              defaultSubValue = defaultValue[i][subField.name];
-            }
-
-            return {
-              ...subField,
-              name: `${name}[${i}][${subField.name}]`,
-              defaultValue: defaultSubValue,
-            };
-          })}
-        />
+        {rows.map((row, i) => {
+          return (
+            <RenderFields
+              key={i}
+              fields={fields.map((subField) => ({
+                ...subField,
+                name: `${name}[${i}][${subField.name}]`,
+                defaultValue: row[subField.name] || null,
+              }))}
+            />
+          )
+        })}
       </Section>
     </div>
   );

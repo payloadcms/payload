@@ -81,6 +81,14 @@ const fieldToSchemaMap = {
     });
     return [schema];
   },
+  group: (field) => {
+    const schema = {};
+
+    field.fields.forEach((subField) => {
+      schema[subField.name] = fieldToSchemaMap[subField.type](subField);
+    });
+    return schema;
+  },
   select: (field) => {
     const schema = {
       ...formatBaseSchema(field),
