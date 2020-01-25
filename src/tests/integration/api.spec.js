@@ -6,9 +6,9 @@ import axios from 'axios';
 import * as faker from 'faker';
 
 describe('API', () => {
-  let token = null;
+  const token = null;
   let email = '';
-  let password = 'test123';
+  const password = 'test123';
 
   describe('register', () => {
     it('should allow create user', async () => {
@@ -16,7 +16,7 @@ describe('API', () => {
       const createResponse = await axios.post('http://localhost:3000/users', {
         email: `${email}`,
 
-        password: password,
+        password,
       }, { headers: { 'Content-Type': 'application/json' } });
       expect(createResponse.status).toBe(201);
 
@@ -38,7 +38,7 @@ describe('API', () => {
   //   })
   // })
 
-  describe('collections', () => {
+  describe('2', () => {
     it('should allow create page', async () => {
       const createResponse = await axios.post('http://localhost:3000/pages', {
         title: faker.name.firstName(),
@@ -47,7 +47,9 @@ describe('API', () => {
       expect(createResponse.status).toBe(201);
       expect(createResponse.data.result.title).not.toBeNull();
     });
+  });
 
+  describe('3', () => {
     it('should allow create page - locale', async () => {
       const englishCreateResponse = await axios.post('http://localhost:3000/pages', {
         title: `English-${faker.name.firstName()}`,
@@ -62,7 +64,9 @@ describe('API', () => {
       }, { headers: { Authorization: `JWT ${token}`, 'Content-Type': 'application/json' } });
       expect(spanishCreateResponse.status).toBe(200);
     });
+  });
 
+  describe('4', () => {
     it('should allow querying of page', async () => {
       const title = `English-${faker.name.firstName()}`;
       const englishCreateResponse = await axios.post('http://localhost:3000/pages', {
@@ -76,7 +80,9 @@ describe('API', () => {
       expect(getResponse.data.totalDocs).toEqual(1);
       expect(getResponse.data.docs[0].title).toEqual(title);
     });
+  });
 
+  describe('5', () => {
     it('should allow querying of page - locale', async () => {
       const englishTitle = `English-${faker.name.firstName()}`;
       const englishCreateResponse = await axios.post('http://localhost:3000/pages', {
@@ -102,5 +108,5 @@ describe('API', () => {
       expect(getResponse2.data.totalDocs).toEqual(1);
       expect(getResponse2.data.docs[0].title).toEqual(spanishTitle);
     });
-  })
+  });
 });
