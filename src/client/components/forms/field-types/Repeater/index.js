@@ -14,7 +14,6 @@ const Repeater = (props) => {
         <RenderFields
           fields={fields.map((subField, i) => {
             let defaultSubValue = null;
-            const subFieldName = `${name}[${i}][${subField.name}]`;
 
             if (defaultValue[i] && defaultValue[i][subField.name]) {
               defaultSubValue = defaultValue[i][subField.name];
@@ -22,7 +21,7 @@ const Repeater = (props) => {
 
             return {
               ...subField,
-              name: subFieldName,
+              name: `${name}[${i}][${subField.name}]`,
               defaultValue: defaultSubValue,
             };
           })}

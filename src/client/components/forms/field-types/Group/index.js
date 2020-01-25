@@ -5,36 +5,32 @@ import RenderFields from '../../RenderFields';
 
 import './index.scss';
 
-const formatSubField = (parentName, subField) => {
-  const formatted = {
-    ...subField,
-    name: `${parentName}[${subField.name}]`
-  };
-
-  return formatted;
-};
-
 const Group = (props) => {
-  const { label, fields, name } = props;
+  const { label, fields, name, defaultValue } = props;
 
   return (
     <Section
       heading={label}
       className="field-group"
     >
-      <RenderFields
-        fields={fields}
-        formatter={(field) => formatSubField(name, field)}
-      />
+      <RenderFields fields={fields.map((subField) => {
+        return {
+          ...subField,
+          name: `${name}[${subField.name}]`,
+          defaultValue: defaultValue[subField.name],
+        };
+      })} />
     </Section>
   );
 };
 
 Group.defaultProps = {
   label: '',
+  defaultValue: {},
 };
 
 Group.propTypes = {
+  defaultValue: PropTypes.shape({}),
   fields: PropTypes.arrayOf(
     PropTypes.shape({}),
   ).isRequired,
