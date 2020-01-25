@@ -1,7 +1,7 @@
 import email from './Email';
 import group from './Group';
 import hidden from './HiddenInput';
-import input from './Input';
+import text from './Text';
 // import upload from './Upload';
 import relationship from './Relationship';
 import password from './Password';
@@ -13,7 +13,7 @@ export default {
   email,
   group,
   hidden,
-  input,
+  text,
   relationship,
   // upload,
   password,

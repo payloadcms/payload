@@ -4,21 +4,20 @@ const formatSuccessResponse = require('../../responses/formatSuccess');
 const { NotFound } = require('../../errors');
 
 const update = (req, res) => {
+  console.log(req.body);
   req.model.findOne({ _id: req.params.id }, '', {}, (err, doc) => {
     if (!doc) {
-      res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(new NotFound(), 'APIError'));
-      return;
+      return res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(new NotFound(), 'APIError'));
     }
 
     Object.assign(doc, req.body);
 
     doc.save((saveError) => {
       if (saveError) {
-        res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(saveError, 'mongoose'));
-        return;
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(saveError, 'mongoose'));
       }
 
-      res.status(httpStatus.OK).json(formatSuccessResponse('Updated successfully.', 'message'));
+      return res.status(httpStatus.OK).json(formatSuccessResponse('Updated successfully.', 'message'));
     });
   });
 };

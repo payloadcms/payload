@@ -3,24 +3,29 @@ import PropTypes from 'prop-types';
 import Section from '../../../layout/Section';
 import RenderFields from '../../RenderFields';
 
-const formatSubField = (parentName, subField, i) => {
-  const formatted = {
-    ...subField,
-    name: `${parentName}[${i}]${subField.name}`
-  };
-
-  return formatted;
-};
-
 const Repeater = (props) => {
-  const { label, fields, name } = props;
+  const {
+    label, fields, name, defaultValue,
+  } = props;
 
   return (
     <div className="field-repeater">
       <Section heading={label}>
         <RenderFields
-          fields={fields}
-          formatter={(field, i) => formatSubField(name, field, i)}
+          fields={fields.map((subField, i) => {
+            let defaultSubValue = null;
+            const subFieldName = `${name}[${i}][${subField.name}]`;
+
+            if (defaultValue[i] && defaultValue[i][subField.name]) {
+              defaultSubValue = defaultValue[i][subField.name];
+            }
+
+            return {
+              ...subField,
+              name: subFieldName,
+              defaultValue: defaultSubValue,
+            };
+          })}
         />
       </Section>
     </div>
@@ -29,9 +34,13 @@ const Repeater = (props) => {
 
 Repeater.defaultProps = {
   label: '',
+  defaultValue: [],
 };
 
 Repeater.propTypes = {
+  defaultValue: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ),
   fields: PropTypes.arrayOf(
     PropTypes.shape({}),
   ).isRequired,

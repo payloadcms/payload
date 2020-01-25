@@ -18,23 +18,33 @@ export const requests = {
     });
   },
 
-  post: (url, body) =>
-    fetch(`${url}`, {
-      method: 'post',
-      body: JSON.stringify(body),
-      headers: {
-        ...setJWT(),
-        'Content-Type': 'application/json',
-      },
-    }),
+  post: (url, options = {}) => {
+    const headers = options && options.headers ? { ...options.headers } : {};
 
-  put: (url, body) =>
-    fetch(`${url}`, {
-      method: 'put',
-      body: JSON.stringify(body),
+    const formattedOptions = {
+      ...options,
+      method: 'post',
       headers: {
+        ...headers,
         ...setJWT(),
-        'Content-Type': 'application/json',
       },
-    }),
+    };
+
+    return fetch(`${url}`, formattedOptions);
+  },
+
+  put: (url, options = {}) => {
+    const headers = options && options.headers ? { ...options.headers } : {};
+
+    const formattedOptions = {
+      ...options,
+      method: 'put',
+      headers: {
+        ...headers,
+        ...setJWT(),
+      },
+    };
+
+    return fetch(`${url}`, formattedOptions);
+  },
 };

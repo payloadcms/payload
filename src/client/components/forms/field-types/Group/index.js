@@ -8,7 +8,7 @@ import './index.scss';
 const formatSubField = (parentName, subField) => {
   const formatted = {
     ...subField,
-    name: `${parentName}.${subField.name}`
+    name: `${parentName}[${subField.name}]`
   };
 
   return formatted;

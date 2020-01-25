@@ -14,7 +14,7 @@ const fieldToSchemaMap = {
   number: (field) => {
     return { ...formatBaseSchema(field), type: Number };
   },
-  input: (field) => {
+  text: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
   textarea: (field) => {

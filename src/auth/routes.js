@@ -3,7 +3,6 @@ const passport = require('passport');
 const httpStatus = require('http-status');
 const APIError = require('../errors/APIError');
 const authRequestHandlers = require('./requestHandlers');
-const authValidate = require('./validate');
 const passwordResetRoutes = require('./passwordResets/routes');
 
 const router = express.Router();
@@ -12,7 +11,7 @@ const authRoutes = (userConfig, User) => {
 
   router
     .route('/login')
-    .post(authValidate.login, auth.login);
+    .post(auth.login);
 
   router
     .route('/me')

@@ -1,7 +1,6 @@
 const checkRole = require('../../policies/checkRole');
 const Quote = require('../../content-blocks/Quote');
 const CallToAction = require('../../content-blocks/CallToAction');
-// const List = require('./components/List');
 
 module.exports = {
   slug: 'pages',
@@ -23,7 +22,7 @@ module.exports = {
     {
       name: 'title',
       label: 'Page Title',
-      type: 'input',
+      type: 'text',
       unique: true,
       localized: true,
       maxLength: 100,
@@ -77,9 +76,14 @@ module.exports = {
       id: false,
       fields: [
         {
-          name: 'content',
+          name: 'title',
+          type: 'text',
+          label: 'Title',
+        },
+        {
+          name: 'description',
           type: 'textarea',
-          label: 'Content',
+          label: 'Description',
         },
       ],
     },
@@ -97,14 +101,14 @@ module.exports = {
       fields: [
         {
           name: 'title',
-          type: 'input',
+          type: 'text',
           maxLength: 100,
           label: 'Title',
           width: 50,
         },
         {
           name: 'keywords',
-          type: 'input',
+          type: 'text',
           maxLength: 100,
           label: 'Keywords',
           width: 50,

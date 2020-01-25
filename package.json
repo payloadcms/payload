@@ -30,6 +30,7 @@
     "connect-history-api-fallback": "^1.6.0",
     "dotenv": "^6.0.0",
     "express": "^4.17.1",
+    "express-busboy": "^7.0.1",
     "express-fileupload": "^1.1.5",
     "express-graphql": "^0.7.1",
     "express-validation": "^1.0.3",

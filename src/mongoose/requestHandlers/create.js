@@ -5,12 +5,11 @@ const formatSuccessResponse = require('../../responses/formatSuccess');
 const create = (req, res) => {
   req.model.create(req.body, (err) => {
     if (err) {
-      res.status(httpStatus.INTERNAL_SERVER_ERROR)
+      return res.status(httpStatus.INTERNAL_SERVER_ERROR)
         .json(formatErrorResponse(err, 'mongoose'));
-      return;
     }
 
-    res.status(httpStatus.CREATED)
+    return res.status(httpStatus.CREATED)
       .json(formatSuccessResponse(`${req.collection.labels.singular} successfully created.`, 'message'));
   });
 };

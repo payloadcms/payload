@@ -9,7 +9,7 @@ import './index.scss';
 const defaultError = 'Please fill in the field';
 const defaultValidate = value => value.length > 0;
 
-const Input = (props) => {
+const Text = (props) => {
   const {
     name,
     required,
@@ -38,14 +38,14 @@ const Input = (props) => {
 
   const classes = [
     'field-type',
-    'input',
+    'text',
     showError && 'error',
   ].filter(Boolean).join(' ');
 
   const fieldWidth = width ? `${width}%` : undefined;
 
   return (
-    <article
+    <div
       className={classes}
       style={{
         ...style,
@@ -70,11 +70,11 @@ const Input = (props) => {
         id={name}
         name={name}
       />
-    </article>
+    </div>
   );
 };
 
-Input.defaultProps = {
+Text.defaultProps = {
   label: null,
   required: false,
   defaultValue: null,
@@ -86,7 +86,7 @@ Input.defaultProps = {
   style: {},
 };
 
-Input.propTypes = {
+Text.propTypes = {
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
@@ -99,4 +99,4 @@ Input.propTypes = {
   label: PropTypes.string,
 };
 
-export default Input;
+export default Text;

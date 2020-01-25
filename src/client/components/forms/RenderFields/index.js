@@ -9,6 +9,7 @@ const RenderFields = ({ fields, formatter, initialData }) => {
     return (
       <>
         {fields.map((field, i) => {
+          const { defaultValue } = field;
           const FieldComponent = field.component || fieldTypes[field.type];
           const formattedField = (formatter && typeof formatter === 'function') ? formatter(field, i) : {};
 
@@ -17,7 +18,7 @@ const RenderFields = ({ fields, formatter, initialData }) => {
               <FieldComponent
                 key={i}
                 {...field}
-                defaultValue={initialData[field.name]}
+                defaultValue={defaultValue || initialData[field.name]}
                 {...formattedField}
               />
             );

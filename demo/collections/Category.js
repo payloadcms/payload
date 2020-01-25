@@ -17,7 +17,7 @@ module.exports = {
     {
       name: 'title',
       label: 'Category Title',
-      type: 'input',
+      type: 'text',
       maxLength: 100,
       required: true,
       unique: true,

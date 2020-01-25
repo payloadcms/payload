@@ -66,17 +66,28 @@ const Form = (props) => {
       // If form is AJAX, fetch data
     } else if (ajax !== false) {
       e.preventDefault();
-      const data = {};
+      const body = new URLSearchParams();
 
       // Clean up data passed from field state
-      Object.keys(fields).forEach((field) => {
-        data[field] = fields[field].value;
+      Object.keys(fields).forEach((key) => {
+        const { value } = fields[key];
+
+        // If there is an array, it needs to be properly added to FormData value by value
+        if (Array.isArray(value)) {
+          value.forEach((individualValue) => {
+            body.append(`${key}[]`, individualValue);
+          });
+        } else {
+          body.append(key, value);
+        }
       });
 
       setProcessing(true);
 
       // Make the API call from the action
-      requests[method.toLowerCase()](action, data).then(
+      requests[method.toLowerCase()](action, {
+        body,
+      }).then(
         (res) => {
           if (res.status < 400) {
             // If prop handleAjaxResponse is passed, pass it the response
@@ -85,7 +96,7 @@ const Form = (props) => {
             }
 
             if (redirect) {
-              return history.push(redirect, data);
+              return history.push(redirect, body);
             }
 
             setProcessing(false);

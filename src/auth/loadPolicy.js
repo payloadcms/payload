@@ -5,8 +5,7 @@ const formatErrorResponse = require('../responses/formatError');
 
 const requireAuth = (req, res, next) => {
   if (!req.user) {
-    res.status(httpStatus.UNAUTHORIZED)
-      .send();
+    res.status(httpStatus.UNAUTHORIZED).json(formatErrorResponse(new Forbidden(), 'APIError'));
   }
 
   return next();
@@ -24,7 +23,7 @@ const loadPolicy = (policy) => {
 
         return next();
       }
-      return requireAuth(req, res);
+      requireAuth(req, res, next);
     }];
 };
 
