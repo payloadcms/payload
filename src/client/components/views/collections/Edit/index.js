@@ -20,6 +20,8 @@ const {
   }
 } = getSanitizedConfig();
 
+const baseClass = 'collection-edit';
+
 const EditView = (props) => {
   const { collection, isEditing } = props;
   const { params: { id } = {} } = useRouteMatch();
@@ -46,10 +48,10 @@ const EditView = (props) => {
 
   return (
     <DefaultTemplate
-      className="collection-edit"
+      className={baseClass}
       stepNav={nav}
     >
-      <header>
+      <header className={`${baseClass}__header`}>
         {isEditing &&
           <h1>
             Edit {Object.keys(data).length > 0 &&
@@ -61,7 +63,7 @@ const EditView = (props) => {
           <h1>Create New {collection.labels.singular}</h1>
         }
       </header>
-      <Form method={id ? 'put' : 'post'} action={`${serverURL}/${collection.slug}${id ? `/${id}` : ''}`}>
+      <Form className={`${baseClass}__form`} method={id ? 'put' : 'post'} action={`${serverURL}/${collection.slug}${id ? `/${id}` : ''}`}>
         <StickyHeader showStatus={true}
           content={
             <APIURL url={isEditing && `${serverURL}/${collection.slug}/${data.id}`} />

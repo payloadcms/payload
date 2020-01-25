@@ -30,19 +30,19 @@ const DefaultTemplate = ({ children, className, stepNav }) => {
 
   return (
     <div className={classes}>
-      <div className="wrap">
-        <StatusListProvider>
-          <StepNavProvider>
-            <Sidebar />
-            <div className="eyebrow">
-              <StepNav />
-              <Localizer />
-            </div>
+      <StatusListProvider>
+        <StepNavProvider>
+          <Sidebar />
+          <div className={`${baseClass}__eyebrow`}>
+            <StepNav />
+            <Localizer />
+          </div>
+          <div className={`${baseClass}__wrap`}>
             {children}
-            <SetStepNav stepNav={stepNav} />
-          </StepNavProvider>
-        </StatusListProvider>
-      </div>
+          </div>
+          <SetStepNav stepNav={stepNav} />
+        </StepNavProvider>
+      </StatusListProvider>
     </div>
   );
 };

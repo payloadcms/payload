@@ -4,7 +4,7 @@
   @include default-template-width;
   padding-top: base(1);
 
-  .eyebrow {
+  &__eyebrow {
     @include m;
     display: flex;
     align-items: center;
