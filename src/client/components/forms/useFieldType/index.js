@@ -12,7 +12,6 @@ const useFieldType = (options) => {
     name,
     required,
     defaultValue,
-    valueOverride,
     onChange,
     validate,
   } = options;
@@ -28,24 +27,17 @@ const useFieldType = (options) => {
   }, [name, required, setField, validate]);
 
   useMountEffect(() => {
-    let valueToInitialize = defaultValue;
-    if (valueOverride) valueToInitialize = valueOverride;
-    sendField(valueToInitialize);
+    sendField(defaultValue);
   });
 
   useEffect(() => {
     sendField(defaultValue);
-  }, [defaultValue, sendField]);
-
-  useEffect(() => {
-    sendField(valueOverride);
-  }, [valueOverride, sendField]);
+  }, [defaultValue, name, sendField]);
 
   const valid = formContext.fields[name] ? formContext.fields[name].valid : true;
   const showError = valid === false && formContext.submitted;
 
-  let valueToRender = formContext.fields[name] ? formContext.fields[name].value : '';
-  valueToRender = valueOverride || valueToRender;
+  const valueToRender = formContext.fields[name] ? formContext.fields[name].value : '';
 
   return {
     ...options,

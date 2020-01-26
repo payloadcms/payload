@@ -15,7 +15,6 @@ const Select = (props) => {
     name,
     required,
     defaultValue,
-    valueOverride,
     validate,
     style,
     width,
@@ -34,7 +33,6 @@ const Select = (props) => {
     name,
     required,
     defaultValue,
-    valueOverride,
     validate,
   });
 
@@ -87,7 +85,6 @@ Select.defaultProps = {
   required: false,
   errorMessage: defaultError,
   validate: defaultValidate,
-  valueOverride: null,
   defaultValue: null,
   hasMany: false,
   width: 100,
@@ -97,7 +94,6 @@ Select.propTypes = {
   required: PropTypes.bool,
   style: PropTypes.shape({}),
   errorMessage: PropTypes.string,
-  valueOverride: PropTypes.string,
   label: PropTypes.string.isRequired,
   defaultValue: PropTypes.oneOfType([
     PropTypes.string,

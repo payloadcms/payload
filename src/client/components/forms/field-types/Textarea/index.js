@@ -14,7 +14,6 @@ const Textarea = (props) => {
     name,
     required,
     defaultValue,
-    valueOverride,
     validate,
     style,
     width,
@@ -32,7 +31,6 @@ const Textarea = (props) => {
     name,
     required,
     defaultValue,
-    valueOverride,
     validate,
   });
 
@@ -42,13 +40,25 @@ const Textarea = (props) => {
     showError && 'error',
   ].filter(Boolean).join(' ');
 
+  const fieldWidth = width ? `${width}%` : undefined;
+
   return (
-    <div className={classes} style={{
-      ...style,
-      width: width ? `${width}%` : null
-    }}>
-      <Error showError={showError} message={errorMessage} />
-      <Label htmlFor={name} label={label} required={required} />
+    <div
+      className={classes}
+      style={{
+        ...style,
+        width: fieldWidth,
+      }}
+    >
+      <Error
+        showError={showError}
+        message={errorMessage}
+      />
+      <Label
+        htmlFor={name}
+        label={label}
+        required={required}
+      />
       <textarea
         value={value || ''}
         onChange={onFieldChange}
@@ -59,29 +69,27 @@ const Textarea = (props) => {
       />
     </div>
   );
-}
+};
 
 Textarea.defaultProps = {
   required: false,
   label: null,
-  processing: false,
   defaultValue: null,
   validate: defaultValidate,
   errorMessage: defaultError,
   width: 100,
   style: {},
-}
+};
 
 Textarea.propTypes = {
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
   defaultValue: PropTypes.string,
-  defaultValidate: PropTypes.func,
+  validate: PropTypes.func,
   errorMessage: PropTypes.string,
   width: PropTypes.number,
   style: PropTypes.shape({}),
-  processing: PropTypes.bool,
   label: PropTypes.string,
-}
+};
 
 export default Textarea;

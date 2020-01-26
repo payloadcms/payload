@@ -14,7 +14,6 @@ const Email = (props) => {
     name,
     required,
     defaultValue,
-    valueOverride,
     validate,
     style,
     width,
@@ -32,7 +31,6 @@ const Email = (props) => {
     name,
     required,
     defaultValue,
-    valueOverride,
     validate,
   });
 
@@ -72,7 +70,6 @@ Email.defaultProps = {
   label: null,
   required: false,
   defaultValue: null,
-  valueOverride: null,
   placeholder: undefined,
   validate: defaultValidate,
   errorMessage: defaultError,
@@ -85,7 +82,6 @@ Email.propTypes = {
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
-  valueOverride: PropTypes.string,
   validate: PropTypes.func,
   errorMessage: PropTypes.string,
   width: PropTypes.number,

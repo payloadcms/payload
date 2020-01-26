@@ -14,7 +14,6 @@ const Text = (props) => {
     name,
     required,
     defaultValue,
-    valueOverride,
     validate,
     style,
     width,
@@ -32,7 +31,6 @@ const Text = (props) => {
     name,
     required,
     defaultValue,
-    valueOverride,
     validate,
   });
 
@@ -78,7 +76,6 @@ Text.defaultProps = {
   label: null,
   required: false,
   defaultValue: null,
-  valueOverride: null,
   placeholder: undefined,
   validate: defaultValidate,
   errorMessage: defaultError,
@@ -91,7 +88,6 @@ Text.propTypes = {
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
-  valueOverride: PropTypes.string,
   validate: PropTypes.func,
   errorMessage: PropTypes.string,
   width: PropTypes.number,
