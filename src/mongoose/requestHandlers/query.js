@@ -2,15 +2,19 @@ const httpStatus = require('http-status');
 const formatErrorResponse = require('../../responses/formatError');
 
 const query = (req, res) => {
-  const queryOptions = {};
+  const paginateQuery = {
+    limit: req.query.limit,
+    page: req.query.page,
+    options: {},
+  };
 
   if (req.query.depth) {
-    queryOptions.autopopulate = {
+    paginateQuery.options.autopopulate = {
       maxDepth: req.query.depth,
     };
   }
 
-  req.model.paginate(req.model.apiQuery(req.query, req.locale), { options: queryOptions }, (err, result) => {
+  req.model.paginate(req.model.apiQuery(req.query, req.locale), paginateQuery, (err, result) => {
     if (err) {
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));
     }

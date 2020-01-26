@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { SearchParamsProvider } from './utilities/SearchParams';
 import { LocaleProvider } from './utilities/Locale';
-import StatusList, { StatusListProvider } from './modules/Status';
+import { StatusListProvider } from './modules/Status';
 import { UserProvider } from './data/User';
 import Routes from './Routes';
 
