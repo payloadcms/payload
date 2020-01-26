@@ -58,7 +58,6 @@ module.exports = {
     "react/no-array-index-key": 0,
     "max-len": 0,
     "react/no-danger": 0,
-    "react/no-did-update-set-state": 0,
     "import/prefer-default-export": 0,
     "no-throw-literal": 0,
     "react/jsx-max-props-per-line": [

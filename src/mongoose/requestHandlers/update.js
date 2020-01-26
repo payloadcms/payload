@@ -16,7 +16,10 @@ const update = (req, res) => {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(saveError, 'mongoose'));
       }
 
-      return res.status(httpStatus.OK).json(formatSuccessResponse('Updated successfully.', 'message'));
+      return res.status(httpStatus.OK).json({
+        ...formatSuccessResponse('Updated successfully.', 'message'),
+        doc: doc.toJSON({ virtuals: true }),
+      });
     });
   });
 };

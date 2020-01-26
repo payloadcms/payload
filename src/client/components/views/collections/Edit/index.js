@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useRouteMatch } from 'react-router-dom';
+import { useRouteMatch, useHistory } from 'react-router-dom';
 import getSanitizedConfig from '../../../../config/getSanitizedConfig';
 import DefaultTemplate from '../../../layout/DefaultTemplate';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
@@ -25,6 +25,19 @@ const baseClass = 'collection-edit';
 const EditView = (props) => {
   const { collection, isEditing } = props;
   const { params: { id } = {} } = useRouteMatch();
+  const history = useHistory();
+
+  const handleAjaxResponse = (res, { addStatus }) => {
+    if (!isEditing) {
+      res.json().then((json) => {
+        history.push(`${admin}/collections/${collection.slug}/${json.doc.id}`);
+        addStatus({
+          message: json.message,
+          type: 'success',
+        });
+      });
+    }
+  }
 
   const [{ data }] = usePayloadAPI(
     (isEditing ? `${serverURL}/${collection.slug}/${id}` : null),
@@ -52,18 +65,18 @@ const EditView = (props) => {
       stepNav={nav}
     >
       <header className={`${baseClass}__header`}>
-        {isEditing &&
+        {isEditing && (
           <h1>
             Edit {Object.keys(data).length > 0 &&
               (data[collection.useAsTitle] ? data[collection.useAsTitle] : '[Untitled]')
             }
           </h1>
-        }
+        )}
         {!isEditing &&
           <h1>Create New {collection.labels.singular}</h1>
         }
       </header>
-      <Form className={`${baseClass}__form`} method={id ? 'put' : 'post'} action={`${serverURL}/${collection.slug}${id ? `/${id}` : ''}`}>
+      <Form className={`${baseClass}__form`} method={id ? 'put' : 'post'} action={`${serverURL}/${collection.slug}${id ? `/${id}` : ''}`} handleAjaxResponse={handleAjaxResponse}>
         <StickyHeader showStatus={true}
           content={
             <APIURL url={isEditing && `${serverURL}/${collection.slug}/${data.id}`} />

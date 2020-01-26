@@ -61,13 +61,15 @@ const Routes = () => {
                       <Switch>
                         <Route
                           path={`${match.url}/media-library`}
-                          component={MediaLibrary}
-                        />
+                        >
+                          <MediaLibrary />
+                        </Route>
                         <Route
                           path={`${match.url}/`}
                           exact
-                          component={Dashboard}
-                        />
+                        >
+                          <Dashboard />
+                        </Route>
                         {config.collections.map((collection) => {
                           return (
                             <Route

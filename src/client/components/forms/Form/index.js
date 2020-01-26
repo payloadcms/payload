@@ -30,7 +30,8 @@ const Form = (props) => {
   const [processing, setProcessing] = useState(false);
   const history = useHistory();
   const locale = useLocale();
-  const { addStatus } = useStatusList();
+  const statusList = useStatusList();
+  const { addStatus } = statusList;
 
   const {
     onSubmit,
@@ -87,11 +88,11 @@ const Form = (props) => {
           if (res.status < 400) {
             // If prop handleAjaxResponse is passed, pass it the response
             if (handleAjaxResponse && typeof handleAjaxResponse === 'function') {
-              return handleAjaxResponse(res);
+              handleAjaxResponse(res, statusList);
             }
 
             if (redirect) {
-              return history.push(redirect, body);
+              return history.push(redirect, data);
             }
 
             setProcessing(false);
