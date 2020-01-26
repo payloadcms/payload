@@ -27,13 +27,14 @@ const EditView = (props) => {
   const { params: { id } = {} } = useRouteMatch();
   const history = useHistory();
 
-  const handleAjaxResponse = (res, { addStatus }) => {
+  const handleAjaxResponse = (res) => {
     if (!isEditing) {
       res.json().then((json) => {
-        history.push(`${admin}/collections/${collection.slug}/${json.doc.id}`);
-        addStatus({
-          message: json.message,
-          type: 'success',
+        history.push(`${admin}/collections/${collection.slug}/${json.doc.id}`, {
+          status: {
+            message: json.message,
+            type: 'success',
+          }
         });
       });
     }

@@ -15,9 +15,7 @@ const Index = () => {
       <Router>
         <SearchParamsProvider>
           <LocaleProvider>
-            <StatusListProvider>
-              <Routes />
-            </StatusListProvider>
+            <Routes />
           </LocaleProvider>
         </SearchParamsProvider>
       </Router>

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Sidebar from '../Sidebar';
 import StepNav, { useStepNav, StepNavProvider } from '../../modules/StepNav';
+import { StatusListProvider, HandleLocationStatus } from '../../modules/Status';
 import Localizer from '../../modules/Localizer';
 
 import './index.scss';
@@ -29,17 +30,20 @@ const DefaultTemplate = ({ children, className, stepNav }) => {
 
   return (
     <div className={classes}>
-      <StepNavProvider>
-        <Sidebar />
-        <div className={`${baseClass}__eyebrow`}>
-          <StepNav />
-          <Localizer />
-        </div>
-        <div className={`${baseClass}__wrap`}>
-          {children}
-        </div>
-        <SetStepNav stepNav={stepNav} />
-      </StepNavProvider>
+      <StatusListProvider>
+        <HandleLocationStatus />
+        <StepNavProvider>
+          <Sidebar />
+          <div className={`${baseClass}__eyebrow`}>
+            <StepNav />
+            <Localizer />
+          </div>
+          <div className={`${baseClass}__wrap`}>
+            {children}
+          </div>
+          <SetStepNav stepNav={stepNav} />
+        </StepNavProvider>
+      </StatusListProvider>
     </div>
   );
 };

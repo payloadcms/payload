@@ -73,7 +73,7 @@ const Routes = () => {
                         {config.collections.map((collection) => {
                           return (
                             <Route
-                              key={collection.slug}
+                              key={`${collection.slug}-list`}
                               path={`${match.url}/collections/${collection.slug}`}
                               exact
                               render={(routeProps) => {
@@ -91,7 +91,7 @@ const Routes = () => {
                         {config.collections.map((collection) => {
                           return (
                             <Route
-                              key={collection.slug}
+                              key={`${collection.slug}-create`}
                               path={`${match.url}/collections/${collection.slug}/create`}
                               exact
                               render={(routeProps) => {
@@ -108,7 +108,7 @@ const Routes = () => {
                         {config.collections.map((collection) => {
                           return (
                             <Route
-                              key={collection.slug}
+                              key={`${collection.slug}-edit`}
                               path={`${match.url}/collections/${collection.slug}/:id`}
                               exact
                               render={(routeProps) => {
