@@ -2,22 +2,6 @@
 @import 'vars';
 
 /////////////////////////////
-// STRUCTURE
-/////////////////////////////
-
-@mixin default-template-width {
-  padding-left: $base;
-  padding-right: $base;
-  margin-left: base(6);
-  width: calc(100% - #{base(6)});
-
-  .wrap {
-    max-width: $content-width;
-    margin: 0 auto;
-  }
-}
-
-/////////////////////////////
 // PADDING
 /////////////////////////////
 
