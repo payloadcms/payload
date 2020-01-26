@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Sidebar from '../Sidebar';
 import StepNav, { useStepNav, StepNavProvider } from '../../modules/StepNav';
-import { StatusListProvider, HandleLocationStatus } from '../../modules/Status';
+import { StatusListProvider } from '../../modules/Status';
 import Localizer from '../../modules/Localizer';
 
 import './index.scss';
@@ -31,7 +31,6 @@ const DefaultTemplate = ({ children, className, stepNav }) => {
   return (
     <div className={classes}>
       <StatusListProvider>
-        <HandleLocationStatus />
         <StepNavProvider>
           <Sidebar />
           <div className={`${baseClass}__eyebrow`}>

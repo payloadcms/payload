@@ -32,31 +32,6 @@ const statusReducer = (state, action) => {
   }
 };
 
-const StatusListProvider = ({ children }) => {
-  const [statusList, dispatchStatus] = useReducer(statusReducer, initialStatus);
-
-  const removeStatus = useCallback(i => dispatchStatus({ type: 'REMOVE', payload: i }), []);
-  const addStatus = useCallback(status => dispatchStatus({ type: 'ADD', payload: status }), []);
-
-  return (
-    <Context.Provider value={{
-      statusList,
-      removeStatus,
-      addStatus,
-    }}
-    >
-      {children}
-    </Context.Provider>
-  );
-};
-
-StatusListProvider.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
-};
-
 const useStatusList = () => useContext(Context);
 
 const HandleLocationStatus = () => {
@@ -74,6 +49,32 @@ const HandleLocationStatus = () => {
   }, [addStatus, state]);
 
   return null;
+};
+
+const StatusListProvider = ({ children }) => {
+  const [statusList, dispatchStatus] = useReducer(statusReducer, initialStatus);
+
+  const removeStatus = useCallback(i => dispatchStatus({ type: 'REMOVE', payload: i }), []);
+  const addStatus = useCallback(status => dispatchStatus({ type: 'ADD', payload: status }), []);
+
+  return (
+    <Context.Provider value={{
+      statusList,
+      removeStatus,
+      addStatus,
+    }}
+    >
+      {children}
+      <HandleLocationStatus />
+    </Context.Provider>
+  );
+};
+
+StatusListProvider.propTypes = {
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node,
+  ]).isRequired,
 };
 
 const StatusList = () => {
