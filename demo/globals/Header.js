@@ -15,7 +15,7 @@ module.exports = {
     {
       name: 'title',
       label: 'Site Title',
-      type: 'input',
+      type: 'text',
       localized: true,
       maxLength: 100,
       required: true,
@@ -23,7 +23,7 @@ module.exports = {
     {
       name: 'logo',
       label: 'Logo',
-      type: 'media',
+      type: 'upload',
       required: false,
     },
     {

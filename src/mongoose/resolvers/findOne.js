@@ -1,6 +1,6 @@
 const { NotFound } = require('../../errors');
 
-const find = ({
+const findOne = ({
   Model, locale, fallback, depth,
 }) => {
   const options = {};
@@ -30,4 +30,4 @@ const find = ({
   });
 };
 
-module.exports = find;
+module.exports = findOne;

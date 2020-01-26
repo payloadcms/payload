@@ -13,7 +13,7 @@ const modelById = (query) => {
   return new Promise((resolve, reject) => {
     query.Model.findOne({ _id: query.id }, {}, options, (err, doc) => {
       if (err || !doc) {
-        reject(new NotFound());
+        reject(err);
         return;
       }
 

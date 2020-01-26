@@ -17,7 +17,7 @@ const registerSchema = (globalConfigs, config) => {
 
     globalConfig.fields.forEach((field) => {
       const fieldSchema = fieldToSchemaMap[field.type];
-      if (fieldSchema) globalFields[globalConfig.slug][field.name] = fieldSchema(field, { path: globalConfig.slug, localization: config.localization });
+      if (fieldSchema) globalFields[globalConfig.slug][field.name] = fieldSchema(field, config);
     });
     globalSchemaGroups[globalConfig.slug] = globalFields[globalConfig.slug];
   });

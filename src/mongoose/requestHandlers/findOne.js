@@ -1,4 +1,6 @@
+const httpStatus = require('http-status');
 const { modelById } = require('../resolvers');
+const formatErrorResponse = require('../../responses/formatError');
 
 const findOne = (req, res) => {
   const query = {
@@ -11,7 +13,7 @@ const findOne = (req, res) => {
 
   modelById(query)
     .then(doc => res.json(doc))
-    .catch(err => res.status(err.status).json(err));
+    .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose')));
 };
 
 module.exports = findOne;

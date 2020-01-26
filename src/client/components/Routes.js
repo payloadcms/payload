@@ -13,6 +13,7 @@ import CreateFirstUser from './views/CreateFirstUser';
 import MediaLibrary from './views/MediaLibrary';
 import Edit from './views/collections/Edit';
 import List from './views/collections/List';
+import EditGlobal from './views/globals/Edit';
 import { requests } from '../api';
 
 const Routes = () => {
@@ -117,6 +118,23 @@ const Routes = () => {
                                     isEditing
                                     {...routeProps}
                                     collection={collection}
+                                  />
+                                );
+                              }}
+                            />
+                          );
+                        })}
+                        {config.globals.map((global) => {
+                          return (
+                            <Route
+                              key={`${global.slug}`}
+                              path={`${match.url}/globals/${global.slug}`}
+                              exact
+                              render={(routeProps) => {
+                                return (
+                                  <EditGlobal
+                                    {...routeProps}
+                                    global={global}
                                   />
                                 );
                               }}

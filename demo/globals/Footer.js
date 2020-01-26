@@ -13,8 +13,7 @@ module.exports = {
     {
       name: 'copyright',
       label: 'Copyright',
-      type: 'input',
-      required: true,
+      type: 'text',
     },
   ],
 };

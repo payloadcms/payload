@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const formatErrorResponse = require('../../responses/formatError');
 
 const query = (req, res) => {
   const queryOptions = {};
@@ -11,8 +12,7 @@ const query = (req, res) => {
 
   req.model.paginate(req.model.apiQuery(req.query, req.locale), { options: queryOptions }, (err, result) => {
     if (err) {
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).json(err);
-      return;
+      return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));
     }
     res.status(httpStatus.OK).json({
       ...result,

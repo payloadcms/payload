@@ -1,11 +1,11 @@
 const httpStatus = require('http-status');
 const { findOne } = require('../mongoose/resolvers');
 const { NotFound } = require('../errors');
+const formatErrorResponse = require('../responses/formatError');
 
 const upsert = (req, res) => {
   if (!req.model.schema.tree[req.params.slug]) {
-    res.status(httpStatus.NOT_FOUND).json(new NotFound());
-    return;
+    return res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(new NotFound(), 'APIError'));
   }
 
   req.model.findOne({}, (findErr, doc) => {
@@ -18,7 +18,7 @@ const upsert = (req, res) => {
       }
 
       return req.model.create(global, (createErr, result) => {
-        if (createErr) return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: createErr });
+        if (createErr) return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(createErr, 'mongoose'));
 
         return res.status(httpStatus.CREATED)
           .json({
@@ -35,11 +35,11 @@ const upsert = (req, res) => {
     Object.assign(doc[req.params.slug], req.body);
 
     return doc.save((err) => {
-      if (err) return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
+      if (err) return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));
 
       return res.json({
-        message: 'success',
-        result: doc.toJSON({ virtuals: true }),
+        message: 'Saved successfully.',
+        doc: doc.toJSON({ virtuals: true }),
       });
     });
   });
@@ -55,16 +55,16 @@ const fetch = (req, res) => {
 
   findOne(query)
     .then((doc) => {
-      const globals = { ...doc };
-
-      if (globals[req.params.key]) {
-        return res.json(globals[req.params.key]);
-      } if (req.params.key) {
-        return res.status(httpStatus.NOT_FOUND).json(new NotFound());
+      if (doc[req.params.slug]) {
+        return res.json(doc[req.params.slug]);
+      } if (req.params.slug) {
+        return res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(new NotFound(), 'APIError'));
       }
-      return res.json(globals);
+      return res.json(doc);
     })
-    .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err }));
+    .catch((err) => {
+      return res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(err, 'APIError'));
+    });
 };
 
 module.exports = {
