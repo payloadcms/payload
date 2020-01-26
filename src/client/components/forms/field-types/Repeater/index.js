@@ -19,7 +19,7 @@ const Repeater = (props) => {
               key={i}
               fields={fields.map((subField) => ({
                 ...subField,
-                name: `${name}[${i}][${subField.name}]`,
+                name: `${name}.${i}.${subField.name}`,
                 defaultValue: row[subField.name] || null,
               }))}
             />

@@ -1,6 +1,7 @@
 import React, { useState, useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { unflatten } from 'flat';
 import FormContext from './Context';
 import { useLocale } from '../../utilities/Locale';
 import { useStatusList } from '../../modules/Status';
@@ -66,27 +67,21 @@ const Form = (props) => {
       // If form is AJAX, fetch data
     } else if (ajax !== false) {
       e.preventDefault();
-      const body = new URLSearchParams();
+      const data = {};
 
       // Clean up data passed from field state
       Object.keys(fields).forEach((key) => {
-        const { value } = fields[key];
-
-        // If there is an array, it needs to be properly added to FormData value by value
-        if (Array.isArray(value)) {
-          value.forEach((individualValue) => {
-            body.append(`${key}[]`, individualValue);
-          });
-        } else {
-          body.append(key, value);
-        }
+        data[key] = fields[key].value;
       });
 
       setProcessing(true);
 
       // Make the API call from the action
       requests[method.toLowerCase()](action, {
-        body,
+        body: JSON.stringify(unflatten(data)),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       }).then(
         (res) => {
           if (res.status < 400) {

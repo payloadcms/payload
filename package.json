@@ -35,6 +35,7 @@
     "express-graphql": "^0.7.1",
     "express-validation": "^1.0.3",
     "file-loader": "^1.1.11",
+    "flat": "^5.0.0",
     "graphql": "^14.5.8",
     "graphql-tools": "^4.0.5",
     "http-status": "^1.3.2",

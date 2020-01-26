@@ -4,7 +4,6 @@ const formatSuccessResponse = require('../../responses/formatSuccess');
 const { NotFound } = require('../../errors');
 
 const update = (req, res) => {
-  console.log(req.body);
   req.model.findOne({ _id: req.params.id }, '', {}, (err, doc) => {
     if (!doc) {
       return res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(new NotFound(), 'APIError'));

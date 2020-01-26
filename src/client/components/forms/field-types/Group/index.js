@@ -16,7 +16,7 @@ const Group = (props) => {
       <RenderFields fields={fields.map((subField) => {
         return {
           ...subField,
-          name: `${name}[${subField.name}]`,
+          name: `${name}.${subField.name}`,
           defaultValue: defaultValue[subField.name],
         };
       })} />
