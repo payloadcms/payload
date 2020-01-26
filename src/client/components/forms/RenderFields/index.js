@@ -17,7 +17,7 @@ const RenderFields = ({ fields, initialData }) => {
               <FieldComponent
                 key={i}
                 {...field}
-                defaultValue={defaultValue || initialData[field.name]}
+                defaultValue={initialData[field.name] || defaultValue}
               />
             );
           }
