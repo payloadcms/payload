@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { SearchParamsProvider } from './utilities/SearchParams';
 import { LocaleProvider } from './utilities/Locale';
-import { StatusListProvider } from './modules/Status';
+import StatusList, { StatusListProvider } from './modules/Status';
 import { UserProvider } from './data/User';
 import Routes from './Routes';
 
@@ -13,11 +13,13 @@ const Index = () => {
   return (
     <UserProvider>
       <Router>
-        <SearchParamsProvider>
-          <LocaleProvider>
-            <Routes />
-          </LocaleProvider>
-        </SearchParamsProvider>
+        <StatusListProvider>
+          <SearchParamsProvider>
+            <LocaleProvider>
+              <Routes />
+            </LocaleProvider>
+          </SearchParamsProvider>
+        </StatusListProvider>
       </Router>
     </UserProvider>
   );
