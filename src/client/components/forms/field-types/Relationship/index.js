@@ -6,6 +6,7 @@ import useFieldType from '../../useFieldType';
 import getSanitizedConfig from '../../../../config/getSanitizedConfig';
 import Label from '../../Label';
 import Error from '../../Error';
+import some from 'async-some';
 
 import './index.scss';
 
@@ -16,6 +17,8 @@ const { serverURL, collections } = getSanitizedConfig();
 const defaultError = 'Please make a selection.';
 const defaultValidate = value => value.length > 0;
 
+const maxResultsPerRequest = 10;
+
 class Relationship extends Component {
   constructor(props) {
     super(props);
@@ -25,41 +28,55 @@ class Relationship extends Component {
 
     this.state = {
       relations,
-      results: relations.reduce((acc, relation) => ({
-        ...acc,
-        [relation]: {
-          docs: [],
-          totalPages: null,
-          page: 1,
-        }
-      }), {}),
+      lastFullyLoadedRelation: -1,
+      lastPageLoaded: 1,
       options: [],
     };
   }
 
-  // Get initial options to populate ReactSelect
-  // At first, only load the first 10 of the first related model
   componentDidMount() {
-    const { relations } = this.state;
+    this.getNextOptions();
+  }
+
+  getNextOptions = () => {
+    const { relations, lastFullyLoadedRelation, lastPageLoaded } = this.state;
     const token = cookies.get('token');
 
-    relations.forEach((relation) => {
-      fetch(`${serverURL}/${relation}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).then((res) => {
-        res.json().then((json) => {
-          const updatedResults = this.addResults(json, relation);
-          const formattedOptions = this.formatOptions(updatedResults);
+    const relationsToSearch = relations.slice(lastFullyLoadedRelation + 1);
 
-          this.setState({
-            results: updatedResults,
-            options: formattedOptions,
+    if (relationsToSearch.length > 0) {
+      some(relationsToSearch, async (relation, callback) => {
+        const response = await fetch(`${serverURL}/${relation}?limit=${maxResultsPerRequest}&page=${lastPageLoaded}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.hasNextPage) {
+          return callback(false, {
+            data,
+            relation,
           })
-        })
+        }
+
+        callback({ relation, data });
+      }, (lastPage, nextPage) => {
+        if (nextPage) {
+          const { data, relation } = nextPage;
+          this.addOptions(data, relation);
+        } else {
+          const { data, relation } = lastPage;
+          this.addOptions(data, relation);
+          this.setState({
+            lastFullyLoadedRelation: relations.indexOf(relation),
+            lastPageLoaded: 1,
+          })
+        }
+
       })
-    })
+    }
   }
 
   // This is needed to reduce the selected option to only its value
@@ -104,58 +121,62 @@ class Relationship extends Component {
     return foundValue;
   }
 
-  // Build and maintain a list of all results, keyed by collection type
-  // Note - this is different than options so that we can easily keep current page and total pages
-  addResults = (incoming, relation) => {
-    const { results } = this.state;
-
-    return {
-      ...results,
-      [relation]: {
-        totalPages: incoming.totalPages,
-        page: incoming.page,
-        docs: [
-          ...results[relation].docs,
-          ...incoming.docs,
-        ]
-      }
-    }
-  }
-
-  // Convert results into a ReactSelect-friendly array of options
-  formatOptions = (results) => {
+  addOptions = (data, relation) => {
     const { hasMultipleRelations } = this.props;
+    const { lastPageLoaded, options } = this.state;
 
-    return Object.keys(results).sort().reduce((acc, collectionSlug) => {
-      const collectionResults = results[collectionSlug].docs;
-      const collectionConfig = collections.find((collection) => collection.slug === collectionSlug);
+    if (!hasMultipleRelations) {
+      this.setState({
+        options: [
+          ...options,
+          ...data.docs.map((doc) => ({
+            label: doc[collection.useAsTitle],
+            value: doc.id,
+          }))
+        ],
+      });
+    } else {
+      const allOptionGroups = [...options];
+      const collection = collections.find(collection => collection.slug === relation);
+      const optionsToAddTo = allOptionGroups.find(optionGroup => optionGroup.label === collection.labels.plural);
 
-      if (hasMultipleRelations) {
-        acc.push({
-          label: collectionConfig.labels.plural,
-          options: collectionResults.map((result) => ({
-            label: result[collectionConfig.useAsTitle],
-            value: {
-              relationTo: collectionConfig.slug,
-              value: result.id,
-            },
-          })),
-        });
+      const newOptions = data.docs.map((doc) => {
+        return {
+          label: doc[collection.useAsTitle],
+          value: {
+            relationTo: collection.slug,
+            value: doc.id,
+          }
+        }
+      })
+
+      if (optionsToAddTo) {
+        optionsToAddTo.options = [
+          ...optionsToAddTo.options,
+          ...newOptions,
+        ];
       } else {
-        collectionResults.map((result) => {
-          acc.push({
-            label: result[collectionConfig.useAsTitle],
-            value: result.id,
-          });
+        allOptionGroups.push({
+          label: collection.labels.plural,
+          options: newOptions,
         });
       }
 
-      return acc;
-    }, []);
+      this.setState({
+        options: [
+          ...allOptionGroups,
+        ],
+      })
+    }
+
+    this.setState({
+      lastPageLoaded: lastPageLoaded + 1,
+    });
   }
 
   handleMenuScrollToBottom = () => {
-    console.log('scrolled');
+    const { lastPageLoaded, lastFullyLoadedRelation } = this.state;
+    this.getNextOptions();
   }
 
   render() {

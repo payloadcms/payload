@@ -3,10 +3,11 @@ const formatErrorResponse = require('../../responses/formatError');
 
 const query = (req, res) => {
   const paginateQuery = {
-    limit: req.query.limit,
-    page: req.query.page,
     options: {},
   };
+
+  if (req.query.page) paginateQuery.page = req.query.page;
+  if (req.query.limit) paginateQuery.limit = req.query.limit;
 
   if (req.query.depth) {
     paginateQuery.options.autopopulate = {

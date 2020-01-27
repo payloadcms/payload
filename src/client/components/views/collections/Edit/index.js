@@ -27,18 +27,16 @@ const EditView = (props) => {
   const { params: { id } = {} } = useRouteMatch();
   const history = useHistory();
 
-  const handleAjaxResponse = (res) => {
-    if (!isEditing) {
-      res.json().then((json) => {
-        history.push(`${admin}/collections/${collection.slug}/${json.doc.id}`, {
-          status: {
-            message: json.message,
-            type: 'success',
-          }
-        });
+  const handleAjaxResponse = !isEditing ? (res) => {
+    res.json().then((json) => {
+      history.push(`${admin}/collections/${collection.slug}/${json.doc.id}`, {
+        status: {
+          message: json.message,
+          type: 'success',
+        }
       });
-    }
-  }
+    });
+  } : null;
 
   const [{ data }] = usePayloadAPI(
     (isEditing ? `${serverURL}/${collection.slug}/${id}` : null),

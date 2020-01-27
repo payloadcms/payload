@@ -23,6 +23,7 @@
   "dependencies": {
     "@hapi/joi": "^15.1.1",
     "accept-language-parser": "^1.5.0",
+    "async-some": "^1.0.2",
     "babel-jest": "^24.9.0",
     "babel-plugin-add-module-exports": "^1.0.2",
     "body-parser": "^1.19.0",
