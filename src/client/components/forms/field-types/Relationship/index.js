@@ -1,12 +1,12 @@
 import React, { Component, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Cookies from 'universal-cookie';
+import some from 'async-some';
 import ReactSelect from '../../../modules/ReactSelect';
 import useFieldType from '../../useFieldType';
 import getSanitizedConfig from '../../../../config/getSanitizedConfig';
 import Label from '../../Label';
 import Error from '../../Error';
-import some from 'async-some';
 
 import './index.scss';
 
@@ -28,8 +28,9 @@ class Relationship extends Component {
 
     this.state = {
       relations,
+      search: '',
       lastFullyLoadedRelation: -1,
-      lastPageLoaded: 1,
+      lastLoadedPage: 1,
       options: [],
     };
   }
@@ -39,14 +40,14 @@ class Relationship extends Component {
   }
 
   getNextOptions = () => {
-    const { relations, lastFullyLoadedRelation, lastPageLoaded } = this.state;
+    const { relations, lastFullyLoadedRelation, lastLoadedPage } = this.state;
     const token = cookies.get('token');
 
     const relationsToSearch = relations.slice(lastFullyLoadedRelation + 1);
 
     if (relationsToSearch.length > 0) {
       some(relationsToSearch, async (relation, callback) => {
-        const response = await fetch(`${serverURL}/${relation}?limit=${maxResultsPerRequest}&page=${lastPageLoaded}`, {
+        const response = await fetch(`${serverURL}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -71,7 +72,7 @@ class Relationship extends Component {
           this.addOptions(data, relation);
           this.setState({
             lastFullyLoadedRelation: relations.indexOf(relation),
-            lastPageLoaded: 1,
+            lastLoadedPage: 1,
           })
         }
 
@@ -118,12 +119,13 @@ class Relationship extends Component {
       }
     }
 
-    return foundValue;
+    return foundValue || null;
   }
 
   addOptions = (data, relation) => {
     const { hasMultipleRelations } = this.props;
-    const { lastPageLoaded, options } = this.state;
+    const { lastLoadedPage, options } = this.state;
+    const collection = collections.find(collection => collection.slug === relation);
 
     if (!hasMultipleRelations) {
       this.setState({
@@ -137,7 +139,6 @@ class Relationship extends Component {
       });
     } else {
       const allOptionGroups = [...options];
-      const collection = collections.find(collection => collection.slug === relation);
       const optionsToAddTo = allOptionGroups.find(optionGroup => optionGroup.label === collection.labels.plural);
 
       const newOptions = data.docs.map((doc) => {
@@ -170,12 +171,17 @@ class Relationship extends Component {
     }
 
     this.setState({
-      lastPageLoaded: lastPageLoaded + 1,
+      lastLoadedPage: lastLoadedPage + 1,
     });
   }
 
+  handleInputChange = (search) => {
+    this.setState({
+      search
+    })
+  }
+
   handleMenuScrollToBottom = () => {
-    const { lastPageLoaded, lastFullyLoadedRelation } = this.state;
     this.getNextOptions();
   }
 
@@ -205,6 +211,8 @@ class Relationship extends Component {
     // eslint-disable-next-line prefer-template
     const fieldWidth = width ? width + '%' : null;
 
+    const valueToRender = this.findValueInOptions(options, value);
+
     return (
       <div
         className={classes}
@@ -223,11 +231,12 @@ class Relationship extends Component {
           required={required}
         />
         <ReactSelect
+          onInputChange={this.handleInputChange}
           onChange={onFieldChange}
           formatValue={this.formatSelectedValue}
           onMenuScrollToBottom={this.handleMenuScrollToBottom}
           findValueInOptions={this.findValueInOptions}
-          value={value}
+          value={valueToRender}
           showError={showError}
           disabled={formProcessing}
           options={options}
