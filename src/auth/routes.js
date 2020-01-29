@@ -38,6 +38,7 @@ const authRoutes = (userConfig, User) => {
       }, (req, res, next) => {
         User.register(new User(req.body), req.body.password, (err) => {
           if (err) {
+            console.log('err', err);
             const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
             return res.status(httpStatus.UNAUTHORIZED).json(error);
           }

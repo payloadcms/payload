@@ -24,7 +24,7 @@ const loadPolicy = (policy) => {
 
         return next();
       }
-      return requireAuth(req, res);
+      return requireAuth(req, res, next);
     }];
 };
 
