@@ -1,7 +1,7 @@
 const mongooseHidden = require('mongoose-hidden');
 const paginate = require('mongoose-paginate-v2');
 const autopopulate = require('mongoose-autopopulate');
-const { buildQueryPlugin } = require('../mongoose/buildQuery');
+const buildQueryPlugin = require('../mongoose/buildQuery');
 const localizationPlugin = require('../localization/plugin');
 const buildSchema = require('../mongoose/schema/buildSchema');
 

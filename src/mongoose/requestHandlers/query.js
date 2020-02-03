@@ -17,7 +17,8 @@ const query = (req, res) => {
 
   req.model.paginate(req.model.apiQuery(req.query, req.locale), paginateQuery, (err, result) => {
     if (err) {
-      return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));
+      // return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));
+      return res.status(httpStatus.INTERNAL_SERVER_ERROR).send();
     }
     res.status(httpStatus.OK).json({
       ...result,
