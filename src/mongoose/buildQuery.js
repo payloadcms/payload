@@ -92,6 +92,8 @@ class ParamParser {
           this.query.searchParams[key] = value;
         }
       });
+    } else {
+      this.query.searchParams[key] = value;
     }
   }
 
@@ -100,8 +102,7 @@ class ParamParser {
     let key = keyPrefix + lcKey;
 
     const split = lcKey.split('.');
-    console.log('lcKey', lcKey);
-    if (split.length > 1) {
+    if (split.length > 1 && schema.paths[lcKey] === undefined) {
       // Parse SubSchema
       if (schema.paths[split[0]].constructor.name === 'DocumentArray'
         || schema.paths[split[0]].constructor.name === 'Mixed') {
@@ -113,7 +114,7 @@ class ParamParser {
         paramType = 'Array';
       }
     } else if (schema.obj[lcKey] && typeof schema === 'object') {
-      if (schema.obj[lcKey].intl) {
+      if (schema.obj[lcKey].localized) {
         key = `${key}.${locale}`;
       }
       paramType = schema.obj[lcKey].name || schema.obj[lcKey].type.name;
@@ -160,7 +161,7 @@ class ParamParser {
           || operator === 'lte'
           || operator === 'ne') {
           const newParam = {};
-          newParam[`$${ operator}`] = val;
+          newParam[`$${operator}`] = val;
           this.addSearchParam(key, newParam);
         } else {
           this.addSearchParam(key, parseInt(val));
@@ -203,7 +204,6 @@ class ParamParser {
       const recurseSchema = async (count, tempSchema) => {
         const path = tempSchema.paths[split[count]];
         const ref = path && path.options && path.options.type && path.options.type[0].ref;
-        console.log('ref', ref);
         let refKey = split[count + 1];
 
         if (ref && refKey) {
@@ -217,8 +217,6 @@ class ParamParser {
           if (refKey && refModel.schema.obj[refKey].intl) {
             refKey = `${refKey}.${locale}`;
           }
-
-          console.log('refKey', refKey, count);
 
           // TODO: Need to recursively traverse paths longer than two segments.
           // Example: this code handles "categories.title" but will not handle "categories.pages.title".
@@ -235,7 +233,6 @@ class ParamParser {
 
       await recurseSchema(0, schema);
     }
-    console.log('this.query', JSON.stringify(this.query));
   }
 }
 

@@ -213,6 +213,10 @@ class Relationship extends Component {
 
     const valueToRender = this.findValueInOptions(options, value);
 
+    /////////////////////////////////////////////
+    // TODO: simplify formatValue pattern seen below with react select
+    /////////////////////////////////////////////
+
     return (
       <div
         className={classes}
