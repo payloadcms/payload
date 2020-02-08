@@ -39,12 +39,12 @@ class ParamParser {
       // Need to loop through keys on rawParams[key] to call addSearchParam on each operator found
       if (typeof this.rawParams[key] === 'object') {
         Object.keys(this.rawParams[key]).forEach(async (operator) => {
-          const searchParam = await this.buildSearchParam(this.model.schema, key, this.rawParams[key][operator], operator);
-          this.query.searchParams = this.addSearchParam(searchParam, this.query.searchParams);
+          const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, key, this.rawParams[key][operator], operator);
+          this.query.searchParams = this.addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
         })
       } else {
-        const searchParam = await this.buildSearchParam(this.model.schema, key, this.rawParams[key]);
-        this.query.searchParams = this.addSearchParam(searchParam, this.query.searchParams);
+        const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, key, this.rawParams[key]);
+        this.query.searchParams = this.addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
       }
     };
 
@@ -83,21 +83,19 @@ class ParamParser {
 
           if (typeof val === 'object') {
             Object.keys(val).forEach(async (operator) => {
-              const searchParam = await this.buildSearchParam(subModel.schema, localizedSubKey, val[operator], operator);
-              subQuery = this.addSearchParam(searchParam, subQuery);
+              const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val[operator], operator);
+              subQuery = this.addSearchParam(searchParamKey, searchParamValue, subQuery);
             })
           } else {
-            const searchParam = await this.buildSearchParam(subModel.schema, localizedSubKey, val);
-            subQuery = this.addSearchParam(searchParam, subQuery);
+            const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val);
+            subQuery = this.addSearchParam(searchParamKey, searchParamValue, subQuery);
           }
 
           const matchingSubDocuments = await subModel.find(subQuery);
 
-          return {
-            [localizedPath]: {
-              $in: matchingSubDocuments.map(subDoc => subDoc.id)
-            }
-          };
+          return [localizedPath, {
+            $in: matchingSubDocuments.map(subDoc => subDoc.id)
+          }];
         }
       }
     }
@@ -135,18 +133,25 @@ class ParamParser {
       }
     }
 
-    return { [localizedKey]: formattedValue };
+    return [localizedKey, formattedValue];
   }
 
-  addSearchParam(value, searchParams) {
-    let updatedSearchParams = { ...searchParams };
+  addSearchParam(key, value, searchParams) {
 
-    updatedSearchParams = {
-      ...updatedSearchParams,
-      ...value,
+    if (typeof value === 'object') {
+      return {
+        ...searchParams,
+        [key]: {
+          ...searchParams[key],
+          ...value,
+        }
+      }
+    }
+
+    return {
+      ...searchParams,
+      [key]: value,
     };
-
-    return updatedSearchParams;
   }
 }
 
