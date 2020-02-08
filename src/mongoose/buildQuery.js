@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const validOperators = ['like', 'in', 'all', 'nin', 'gte', 'gt', 'lte', 'lt', 'ne'];
 
 function buildQueryPlugin(schema) {
@@ -27,25 +28,80 @@ class ParamParser {
     };
   }
 
+  getLocalizedKey(key, schemaObject) {
+    return `${key}${(schemaObject && schemaObject.localized) ? `.${this.locale}` : ''}`;
+  }
+
   async parse() {
-    Object.keys(this.rawParams).forEach(async (key) => {
+    for (let key of Object.keys(this.rawParams)) {
 
       // If rawParams[key] is an object, that means there are operators present.
       // Need to loop through keys on rawParams[key] to call addSearchParam on each operator found
       if (typeof this.rawParams[key] === 'object') {
         Object.keys(this.rawParams[key]).forEach(async (operator) => {
-          await this.buildSearchParam(this.model.schema, key, this.rawParams[key][operator], operator);
+          const searchParam = await this.buildSearchParam(this.model.schema, key, this.rawParams[key][operator], operator);
+          this.query.searchParams = this.addSearchParam(searchParam, this.query.searchParams);
         })
       } else {
-        await this.buildSearchParam(this.model.schema, key, this.rawParams[key]);
+        const searchParam = await this.buildSearchParam(this.model.schema, key, this.rawParams[key]);
+        this.query.searchParams = this.addSearchParam(searchParam, this.query.searchParams);
       }
-    });
-    return Promise.resolve(this.query);
+    };
+
+    return this.query;
   }
 
   async buildSearchParam(schema, key, val, operator) {
-    const schemaObject = schema.obj[key];
-    const localizedKey = `${key}${(schemaObject && schemaObject.localized) ? `.${this.locale}` : ''}`;
+    let schemaObject = schema.obj[key];
+    const localizedKey = this.getLocalizedKey(key, schemaObject);
+
+    if (key.includes('.')) {
+      const paths = key.split('.');
+      schemaObject = schema.obj[paths[0]];
+      const localizedPath = this.getLocalizedKey(paths[0], schemaObject);
+      const path = schema.paths[localizedPath];
+
+      // If the schema object has a dot, split on the dot
+      // Check the path of the first index of the newly split array
+      // If it's an array OR an ObjectID, we need to recurse
+
+      if (path) {
+        // If the path is an ObjectId with a direct ref,
+        // Grab it
+        let ref = path.options.ref;
+
+        // If the path is an Array, grab the ref of the first index type
+        if (path.instance === 'Array') {
+          ref = path.options && path.options.type && path.options.type[0].ref;
+        }
+
+        if (ref) {
+          const subModel = mongoose.model(ref);
+          let subQuery = {};
+
+          const localizedSubKey = this.getLocalizedKey(paths[1], subModel.schema.obj[paths[1]]);
+
+          if (typeof val === 'object') {
+            Object.keys(val).forEach(async (operator) => {
+              const searchParam = await this.buildSearchParam(subModel.schema, localizedSubKey, val[operator], operator);
+              subQuery = this.addSearchParam(searchParam, subQuery);
+            })
+          } else {
+            const searchParam = await this.buildSearchParam(subModel.schema, localizedSubKey, val);
+            subQuery = this.addSearchParam(searchParam, subQuery);
+          }
+
+          const matchingSubDocuments = await subModel.find(subQuery);
+
+          return {
+            [localizedPath]: {
+              $in: matchingSubDocuments.map(subDoc => subDoc.id)
+            }
+          };
+        }
+      }
+    }
+
     let formattedValue = val;
 
     if (operator && validOperators.includes(operator)) {
@@ -68,24 +124,29 @@ class ParamParser {
           };
 
           break;
+
+        case 'like':
+          formattedValue = {
+            '$regex': val,
+            '$options': '-i',
+          };
+
+          break;
       }
     }
 
-    this.addSearchParam(localizedKey, formattedValue);
+    return { [localizedKey]: formattedValue };
   }
 
-  addSearchParam(key, value) {
-    if (typeof this.query.searchParams[key] !== 'undefined') {
-      Object.keys(value).forEach((i) => {
-        if (value.hasOwnProperty(i)) {
-          this.query.searchParams[key][i] = value[i];
-        } else {
-          this.query.searchParams[key] = value;
-        }
-      });
-    } else {
-      this.query.searchParams[key] = value;
-    }
+  addSearchParam(value, searchParams) {
+    let updatedSearchParams = { ...searchParams };
+
+    updatedSearchParams = {
+      ...updatedSearchParams,
+      ...value,
+    };
+
+    return updatedSearchParams;
   }
 }
 
