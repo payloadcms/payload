@@ -1,8 +1,4 @@
-const mongoose = require('mongoose');
-
 const validOperators = ['like', 'in', 'all', 'nin', 'gte', 'gt', 'lte', 'lt', 'ne'];
-
-/* eslint-disable no-use-before-define */
 
 function buildQueryPlugin(schema) {
   schema.statics.apiQuery = async function (rawParams, locale, cb) {
@@ -41,7 +37,7 @@ class ParamParser {
           await this.buildSearchParam(this.model.schema, key, this.rawParams[key][operator], operator);
         })
       } else {
-        await this.buildSearchParam(this.model.schema, key, val);
+        await this.buildSearchParam(this.model.schema, key, this.rawParams[key]);
       }
     });
     return Promise.resolve(this.query);

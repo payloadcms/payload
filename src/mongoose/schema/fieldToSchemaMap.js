@@ -82,6 +82,7 @@ const fieldToSchemaMap = {
     return [schema];
   },
   group: (field) => {
+    // Localization for groups not supported
     const schema = {};
 
     field.fields.forEach((subField) => {
