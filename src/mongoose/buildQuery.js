@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const validOperators = ['like', 'in', 'all', 'nin', 'gte', 'gt', 'lte', 'lt', 'ne'];
 
+// This plugin asynchronously builds a list of Mongoose query constraints
+// which can then be used in subsequent Mongoose queries.
 function buildQueryPlugin(schema) {
   schema.statics.apiQuery = async function (rawParams, locale, cb) {
     const model = this;
@@ -32,6 +34,7 @@ class ParamParser {
     return `${key}${(schemaObject && schemaObject.localized) ? `.${this.locale}` : ''}`;
   }
 
+  // Entry point to the ParamParser class
   async parse() {
     for (let key of Object.keys(this.rawParams)) {
 
@@ -42,6 +45,7 @@ class ParamParser {
           const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, key, this.rawParams[key][operator], operator);
           this.query.searchParams = this.addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
         })
+        // Otherwise there are no operators present
       } else {
         const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, key, this.rawParams[key]);
         this.query.searchParams = this.addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
