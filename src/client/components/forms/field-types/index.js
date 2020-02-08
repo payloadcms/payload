@@ -8,6 +8,7 @@ import password from './Password';
 import repeater from './Repeater';
 import textarea from './Textarea';
 import select from './Select';
+import number from './Number';
 
 export default {
   email,
@@ -16,6 +17,7 @@ export default {
   text,
   relationship,
   // upload,
+  number,
   password,
   repeater,
   textarea,

@@ -1,0 +1,17 @@
+@import '~payload/client/scss/styles';
+@import '../shared';
+
+.field-type.number {
+	margin-bottom: base(.5);
+	position: relative;
+
+	input {
+		@include formInput;
+	}
+
+	&.error {
+		input {
+      background-color: lighten($error, 20%);
+		}
+	}
+}

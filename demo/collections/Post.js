@@ -31,6 +31,12 @@ module.exports = {
       required: true,
       localized: true,
     },
+    {
+      name: 'priority',
+      label: 'Priority',
+      type: 'number',
+      required: true,
+    },
   ],
   timestamps: true,
 };
