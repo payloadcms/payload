@@ -43,12 +43,12 @@ class ParamParser {
       if (typeof this.rawParams[key] === 'object') {
         Object.keys(this.rawParams[key]).forEach(async (operator) => {
           const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, key, this.rawParams[key][operator], operator);
-          this.query.searchParams = this.addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
+          this.query.searchParams = this.addSearchParam(searchParamKey, searchParamValue, this.query.searchParams, this.model.schema);
         })
         // Otherwise there are no operators present
       } else {
         const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, key, this.rawParams[key]);
-        this.query.searchParams = this.addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
+        this.query.searchParams = this.addSearchParam(searchParamKey, searchParamValue, this.query.searchParams, this.model.schema);
       }
     };
 
@@ -88,11 +88,11 @@ class ParamParser {
           if (typeof val === 'object') {
             Object.keys(val).forEach(async (operator) => {
               const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val[operator], operator);
-              subQuery = this.addSearchParam(searchParamKey, searchParamValue, subQuery);
+              subQuery = this.addSearchParam(searchParamKey, searchParamValue, subQuery, subModel.schema);
             })
           } else {
             const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val);
-            subQuery = this.addSearchParam(searchParamKey, searchParamValue, subQuery);
+            subQuery = this.addSearchParam(searchParamKey, searchParamValue, subQuery, subModel.schema);
           }
 
           const matchingSubDocuments = await subModel.find(subQuery);
@@ -140,22 +140,25 @@ class ParamParser {
     return [localizedKey, formattedValue];
   }
 
-  addSearchParam(key, value, searchParams) {
-
-    if (typeof value === 'object') {
-      return {
-        ...searchParams,
-        [key]: {
-          ...searchParams[key],
-          ...value,
+  addSearchParam(key, value, searchParams, schema) {
+    if (schema.paths[key]) {
+      if (typeof value === 'object') {
+        return {
+          ...searchParams,
+          [key]: {
+            ...searchParams[key],
+            ...value,
+          }
         }
       }
+
+      return {
+        ...searchParams,
+        [key]: value,
+      };
     }
 
-    return {
-      ...searchParams,
-      [key]: value,
-    };
+    return searchParams;
   }
 }
 
