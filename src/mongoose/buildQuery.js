@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+const validOperators = ['like', 'in', 'all', 'nin', 'gte', 'gt', 'lte', 'lt', 'ne'];
+
 /* eslint-disable no-use-before-define */
 
 function buildQueryPlugin(schema) {
@@ -31,25 +33,49 @@ class ParamParser {
 
   async parse() {
     Object.keys(this.rawParams).forEach(async (key) => {
-      const separatedParams = this.rawParams[key].match(/{\w+}(.[^{}]*)/g);
-      if (separatedParams === null) {
-        await this.parseParam(key, this.rawParams[key]);
+
+      // If rawParams[key] is an object, that means there are operators present.
+      // Need to loop through keys on rawParams[key] to call addSearchParam on each operator found
+      if (typeof this.rawParams[key] === 'object') {
+        Object.keys(this.rawParams[key]).forEach(async (operator) => {
+          await this.buildSearchParam(this.model.schema, key, this.rawParams[key][operator], operator);
+        })
       } else {
-        await separatedParams.forEach(separatedParam => this.parseParam(key, separatedParam));
+        await this.buildSearchParam(this.model.schema, key, val);
       }
     });
-    return this.query;
+    return Promise.resolve(this.query);
   }
 
-  async parseParam(key, val) {
-    await this.parseSchemaForKey(this.model.schema, key, val);
-    return Promise.resolve(true);
-  }
-
-  async parseSchemaForKey(schema, key, val) {
+  async buildSearchParam(schema, key, val, operator) {
     const schemaObject = schema.obj[key];
     const localizedKey = `${key}${(schemaObject && schemaObject.localized) ? `.${this.locale}` : ''}`;
-    this.addSearchParam(localizedKey, val);
+    let formattedValue = val;
+
+    if (operator && validOperators.includes(operator)) {
+      switch (operator) {
+        case 'gte':
+        case 'lte':
+        case 'lt':
+        case 'gt':
+          formattedValue = {
+            [`$${operator}`]: val,
+          };
+
+          break;
+
+        case 'in':
+        case 'all':
+        case 'nin':
+          formattedValue = {
+            [`$${operator}`]: val.split(','),
+          };
+
+          break;
+      }
+    }
+
+    this.addSearchParam(localizedKey, formattedValue);
   }
 
   addSearchParam(key, value) {
