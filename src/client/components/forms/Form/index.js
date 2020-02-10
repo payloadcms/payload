@@ -151,7 +151,7 @@ const Form = (props) => {
       >
         <HiddenInput
           name="locale"
-          valueOverride={locale}
+          defaultValue={locale}
         />
         {children}
       </FormContext.Provider>

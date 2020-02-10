@@ -87,7 +87,7 @@ Number.propTypes = {
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
-  defaultValue: PropTypes.string,
+  defaultValue: PropTypes.number,
   validate: PropTypes.func,
   errorMessage: PropTypes.string,
   width: PropTypes.number,
