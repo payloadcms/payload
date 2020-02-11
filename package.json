@@ -15,7 +15,6 @@
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
     "debug": "nodemon --inspect ./demo/init.js",
     "dev": "nodemon demo/init.js",
-    "build": "webpack --env.platform=web --config ./src/client/config/webpack.prod.config.js --mode production",
     "lint": "eslint **/*.js"
   },
   "bin": {
