@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 
-const args = process.argv.slice(2);
+const args = require('minimist')(process.argv.slice(2));
+const build = require('./build');
 
-const scriptIndex = args.findIndex(
+const scriptIndex = args._.findIndex(
   x => x === 'build' || x === 'test',
 );
 
-const script = scriptIndex === -1 ? args[0] : args[scriptIndex];
+const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex];
 
 switch (script) {
   case 'build': {
-    console.log('building');
+    build(args);
     break;
   }
 
