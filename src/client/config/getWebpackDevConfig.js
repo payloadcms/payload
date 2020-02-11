@@ -40,7 +40,7 @@ const getStyleLoaders = (cssOptions, preProcessor) => {
 module.exports = (config) => {
   return {
     entry: {
-      main: ['webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000', './src/client/components/index.js'],
+      main: [path.resolve(__dirname, '../../../node_modules/webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000'), path.resolve(__dirname, '../components/index.js')],
     },
     output: {
       path: '/',
@@ -52,6 +52,7 @@ module.exports = (config) => {
     },
     devtool: 'source-map',
     mode: 'development',
+    resolveLoader: { modules: [path.join(__dirname, '../../../node_modules')] },
     module: {
       rules: [
         {
@@ -59,6 +60,27 @@ module.exports = (config) => {
           exclude: /node_modules/,
           use: {
             loader: 'babel-loader',
+            options: {
+              presets: [
+                [
+                  require.resolve('@babel/preset-env'),
+                  {
+                    modules: 'commonjs',
+                  },
+                ],
+                require.resolve('@babel/preset-react'),
+              ],
+              plugins: [
+                require.resolve('@babel/plugin-proposal-class-properties'),
+                require.resolve('babel-plugin-add-module-exports'),
+                [
+                  require.resolve('@babel/plugin-transform-runtime'),
+                  {
+                    regenerator: true,
+                  },
+                ],
+              ],
+            },
           },
         },
         {
@@ -106,12 +128,13 @@ module.exports = (config) => {
     },
     plugins: [
       new HtmlWebpackPlugin({
-        template: './src/client/index.html',
+        template: path.resolve(__dirname, '../index.html'),
         filename: './index.html',
       }),
       new webpack.HotModuleReplacementPlugin(),
     ],
     resolve: {
+      modules: [path.resolve(__dirname, '../../../node_modules')],
       alias: {
         payload: path.resolve(__dirname, '../../'),
         'payload-scss-overrides': config.paths.scssOverrides,

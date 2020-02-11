@@ -13,17 +13,24 @@
     "test": "jest --config src/tests/jest.config.js",
     "test:int": "jest --config src/tests/jest.config.integration.js",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
-    "webpack": "webpack-dev-server --mode development --config src/client/config/webpack.dev.config.js --open --hot --history-api-fallback",
     "debug": "nodemon --inspect ./demo/init.js",
     "dev": "nodemon demo/init.js",
+    "build": "webpack --env.platform=web --config ./src/client/config/webpack.prod.config.js --mode production",
     "lint": "eslint **/*.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@babel/core": "^7.8.3",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-transform-runtime": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "@babel/preset-react": "^7.8.3",
+    "@babel/runtime": "^7.8.3",
     "@hapi/joi": "^15.1.1",
     "accept-language-parser": "^1.5.0",
     "async-some": "^1.0.2",
+    "babel-loader": "^8.0.6",
     "babel-jest": "^24.9.0",
     "babel-plugin-add-module-exports": "^1.0.2",
     "body-parser": "^1.19.0",
@@ -75,17 +82,10 @@
     "webpack-hot-middleware": "^2.25.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.8.3",
-    "@babel/plugin-proposal-class-properties": "^7.8.3",
-    "@babel/plugin-transform-runtime": "^7.8.3",
-    "@babel/preset-env": "^7.8.3",
-    "@babel/preset-react": "^7.8.3",
-    "@babel/runtime": "^7.8.3",
     "autoprefixer": "^9.7.4",
     "axios": "^0.18.1",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
-    "babel-loader": "^8.0.6",
     "circular-dependency-plugin": "^5.2.0",
     "css-loader": "^1.0.0",
     "eslint": "^6.8.0",
@@ -107,6 +107,7 @@
     "sass-loader": "7.1.0",
     "style-loader": "^0.21.0",
     "supertest": "^3.4.2",
-    "uglifyjs-webpack-plugin": "^1.2.7"
+    "uglifyjs-webpack-plugin": "^1.2.7",
+    "webpack-cli": "^3.3.11"
   }
 }
