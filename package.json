@@ -18,6 +18,9 @@
     "build": "webpack --env.platform=web --config ./src/client/config/webpack.prod.config.js --mode production",
     "lint": "eslint **/*.js"
   },
+  "bin": {
+    "payload": "./src/bin/index.js"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
