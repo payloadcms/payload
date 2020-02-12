@@ -1,23 +1,18 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
-const webpack = require('webpack');
 const getStyleLoaders = require('./getStyleLoaders');
 
 module.exports = (config) => {
   return {
     entry: {
-      main: [path.resolve(__dirname, '../../../node_modules/webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000'), path.resolve(__dirname, '../components/index.js')],
+      main: [path.resolve(__dirname, '../components/index.js')],
     },
+    stats: 'verbose',
     output: {
-      path: '/',
-      publicPath: '/static',
+      path: path.resolve(process.cwd(), 'build'),
       filename: '[name].js',
     },
-    devServer: {
-      historyApiFallback: true,
-    },
-    devtool: 'source-map',
-    mode: 'development',
+    mode: 'production',
     resolveLoader: { modules: [path.join(__dirname, '../../../node_modules')] },
     module: {
       rules: [
@@ -97,7 +92,6 @@ module.exports = (config) => {
         template: path.resolve(__dirname, '../index.html'),
         filename: './index.html',
       }),
-      new webpack.HotModuleReplacementPlugin(),
     ],
     resolve: {
       modules: [path.resolve(__dirname, '../../../node_modules')],

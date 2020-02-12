@@ -3,13 +3,26 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const getWebpackProdConfig = require('../client/config/getWebpackProdConfig');
 
 module.exports = (args) => {
   const configPath = path.resolve(process.cwd(), (args.config || './payload.config.js'));
 
   try {
     const config = require(configPath);
-    console.log(config);
+    const webpackProdConfig = getWebpackProdConfig(config);
+    webpack(webpackProdConfig, (err, stats) => { // Stats Object
+      if (err || stats.hasErrors()) {
+        // Handle errors here
+        console.log(err);
+      }
+
+      console.log(stats.toString({
+        chunks: false, // Makes the build much quieter
+        colors: true, // Shows colors in the console
+      }));
+      // Done processing
+    });
   } catch (err) {
     console.error(`Error: can't find the configuration file located at ${configPath}.`);
   }
