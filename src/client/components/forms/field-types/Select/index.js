@@ -15,7 +15,16 @@ const findValueToRender = (options, value, hasMany) => {
     return value.map(subValue => options.find(option => option.value === subValue));
   }
 
-  return options.find(option => option.value === value);
+  const matchedOption = options.find(option => option.value === value || option === value);
+
+  if (typeof matchedOption === 'string') {
+    return {
+      value: matchedOption,
+      label: matchedOption,
+    };
+  }
+
+  return matchedOption;
 };
 
 const Select = (props) => {

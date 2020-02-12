@@ -25,7 +25,7 @@ module.exports = {
     {
       name: 'email',
       label: 'Email Address',
-      type: 'input',
+      type: 'email',
       unique: true,
       maxLength: 100,
       required: true,
