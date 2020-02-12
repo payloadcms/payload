@@ -7,10 +7,9 @@ module.exports = (config) => {
     entry: {
       main: [path.resolve(__dirname, '../components/index.js')],
     },
-    stats: 'verbose',
     output: {
       path: path.resolve(process.cwd(), 'build'),
-      filename: '[name].js',
+      filename: '[name].[chunkhash].js',
     },
     mode: 'production',
     resolveLoader: { modules: [path.join(__dirname, '../../../node_modules')] },
@@ -91,6 +90,7 @@ module.exports = (config) => {
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, '../index.html'),
         filename: './index.html',
+        minify: true,
       }),
     ],
     resolve: {
