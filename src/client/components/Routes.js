@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
-import config from 'payload-config';
 import customComponents from 'payload-custom-components';
+import getSanitizedConfig from '../config/getSanitizedConfig';
 import { useUser } from './data/User';
 import Dashboard from './views/Dashboard';
 import Login from './views/Login';
@@ -15,6 +15,8 @@ import Edit from './views/collections/Edit';
 import List from './views/collections/List';
 import EditGlobal from './views/globals/Edit';
 import { requests } from '../api';
+
+const config = getSanitizedConfig();
 
 const Routes = () => {
   const [initialized, setInitialized] = useState(null);
@@ -30,7 +32,7 @@ const Routes = () => {
 
   return (
     <Route
-      path="/admin"
+      path={config.routes.admin}
       render={({ match }) => {
         if (initialized === false) {
           return (
@@ -39,7 +41,7 @@ const Routes = () => {
                 <CreateFirstUser setInitialized={setInitialized} />
               </Route>
               <Route>
-                <Redirect to="/admin/create-first-user" />
+                <Redirect to={`${match.url}/create-first-user`} />
               </Route>
             </Switch>
           );
@@ -149,7 +151,7 @@ const Routes = () => {
                       </Switch>
                     );
                   }
-                  return <Redirect to="/admin/login" />;
+                  return <Redirect to={`${match.url}/login`} />;
                 }}
               />
             </Switch>
