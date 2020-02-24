@@ -7,7 +7,7 @@ import Error from '../../Error';
 import './index.scss';
 
 const defaultError = 'Please fill in the field';
-const defaultValidate = value => value.length > 0;
+const defaultValidate = value => (/^-?[0-9]\d*$/).test(value);
 
 const Number = (props) => {
   const {
