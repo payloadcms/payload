@@ -2,14 +2,18 @@ import React from 'react';
 
 import './index.scss';
 
-const Table = props => {
+const Table = (props) => {
   if (props.rows && props.rows.length) {
     return (
-      <table border="0" cellPadding="0" cellSpacing="0">
+      <table
+        border="0"
+        cellPadding="0"
+        cellSpacing="0"
+      >
         <thead>
           <tr>
             {props.columns.map((col, i) => {
-              return <th key={i}>{col.label}</th>
+              return <th key={i}>{col.label}</th>;
             })}
           </tr>
         </thead>
@@ -21,22 +25,25 @@ const Table = props => {
                   const value = col.handler ? col.handler(row[col.key]) : row[col.key];
                   return (
                     <td key={i}>
-                      {value
-                        ? value
-                        : <span className="no-data" dangerouslySetInnerHTML={{ __html: '&mdash;' }} />
+                      {value || (
+                      <span
+                        className="no-data"
+                        dangerouslySetInnerHTML={{ __html: '&mdash;' }}
+                      />
+                      )
                       }
                     </td>
-                  )
+                  );
                 })}
               </tr>
-            )
+            );
           })}
         </tbody>
       </table>
-    )
+    );
   }
 
   return null;
-}
+};
 
 export default Table;

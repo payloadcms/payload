@@ -1,0 +1,28 @@
+@import '~payload/client/scss/styles';
+
+.pagination-node {
+  @extend %btn-reset;
+  outline: 0;
+  box-shadow: $shadow-sm;
+  padding: base(.5) base(.65);
+  margin-right: base(.45);
+  cursor: pointer;
+  color: $gray;
+
+  &:hover {
+    color: $black;
+  }
+
+  &--is-active {
+    color: $black;
+  }
+
+  &--is-disabled {
+    background-color: $light-gray;
+    .icon {
+      .stroke {
+        stroke: $gray;
+      }
+    }
+  }
+}
