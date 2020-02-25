@@ -51,9 +51,10 @@ $radius-sm    : 5px;
 $radius-lrg   : 10px;
 $stroke-width : 1px;
 
+$shadow-sm: 0 2px 4px 0 rgba(0,2,4,.1),0 2px 20px 0 rgba(0,2,4,.04);
+
 %shadow-sm {
-	box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
-				0 2px 20px 0 rgba(0,2,4,.04);
+	box-shadow: $shadow-sm
 }
 
 %shadow {
