@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import PaginationNode from './PaginationNode';
@@ -6,6 +6,27 @@ import Arrow from '../../graphics/Arrow';
 import './index.scss';
 
 const baseClass = 'pagination';
+
+const RangeOfClickableNodes = ({
+  start,
+  end,
+  currentPage,
+  onClick,
+}) => {
+  const paginationNodes = Array.from({ length: (end - start + 1) }, (_, index = start) => index + start);
+  return paginationNodes.map((pageNum) => {
+    return (
+      <PaginationNode
+        key={pageNum}
+        pageTo={pageNum}
+        onClick={() => onClick(pageNum)}
+        currentPage={currentPage}
+      />
+    );
+  });
+};
+
+const Ellipsis = () => <span className="ellipsis">...</span>;
 
 const Pagination = (props) => {
   const {
@@ -118,20 +139,6 @@ const Pagination = (props) => {
     });
   }
 
-  const RangeOfClickableNodes = ({ start, end }) => {
-    const paginationNodes = Array.from({ length: (end - start + 1) }, (_, index = start) => index + start);
-    return paginationNodes.map((pageNum) => {
-      return (
-        <PaginationNode
-          key={pageNum}
-          pageTo={pageNum}
-          onClick={() => setPage(pageNum)}
-          currentPage={currentPage}
-        />
-      );
-    });
-  };
-
   return (
     <div className={baseClass}>
       {pageBlocks.map((pageBlock, index) => {
@@ -152,18 +159,13 @@ const Pagination = (props) => {
                 key={index}
                 start={pageBlock.start}
                 end={pageBlock.end}
+                onClick={setPage}
+                currentPage={currentPage}
               />
             );
 
           case 'ellipsis':
-            return (
-              <span
-                key={index}
-                className="ellipsis"
-              >
-                ...
-              </span>
-            );
+            return <Ellipsis />;
 
           case 'prevPage':
             return (
