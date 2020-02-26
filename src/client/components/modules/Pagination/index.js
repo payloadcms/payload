@@ -30,9 +30,6 @@ const Ellipsis = () => <span className="ellipsis">...</span>;
 
 const Pagination = (props) => {
   const {
-    totalDocs,
-    limit,
-    pagingCounter,
     totalPages,
     page: currentPage,
     hasPrevPage,
