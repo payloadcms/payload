@@ -57,7 +57,7 @@ const ListView = (props) => {
         hasNextPage={data.hasNextPage}
         prevPage={data.prevPage}
         nextPage={data.nextPage}
-        pageNeighbors={1}
+        numberOfNeighbors={1}
       />
     </DefaultTemplate>
   );

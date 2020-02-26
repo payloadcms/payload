@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import PaginationNode from './PaginationNode';
@@ -39,7 +39,7 @@ const Pagination = (props) => {
     hasNextPage,
     prevPage,
     nextPage,
-    pageNeighbors,
+    numberOfNeighbors,
     usePrevNextArrows,
     setPage,
   } = props;
@@ -47,11 +47,12 @@ const Pagination = (props) => {
   if (totalPages <= 1) return null;
   const pageBlocks = [];
 
-  const bottomPageThreshold = 2;
-  const leftEdge = currentPage - pageNeighbors;
-  const leftEdgeIndex = (leftEdge - 1 > bottomPageThreshold) ? leftEdge : 1;
-  const rightEdge = currentPage + pageNeighbors;
-  const rightEdgeIndex = (rightEdge + 1 < totalPages - 1) ? rightEdge : totalPages;
+  const leftEllipsisIndex = 2;
+  const leftEdge = currentPage - numberOfNeighbors;
+  const leftmostNeighborIndex = leftEdge - 1 > leftEllipsisIndex ? currentPage - numberOfNeighbors : 1;
+
+  const rightEdge = currentPage + numberOfNeighbors;
+  const rightmostNeighborIndex = (rightEdge + 1 < totalPages - 1) ? rightEdge : totalPages;
 
   if (usePrevNextArrows) {
     pageBlocks.push({
@@ -61,19 +62,19 @@ const Pagination = (props) => {
     });
   }
 
-  if (leftEdgeIndex === 1 && rightEdgeIndex === totalPages) {
+  if (leftmostNeighborIndex === 1 && rightmostNeighborIndex === totalPages) {
     // 1 2 3 [4] 5 6 7
     pageBlocks.push({
       type: 'range',
-      start: leftEdgeIndex,
-      end: rightEdgeIndex,
+      start: leftmostNeighborIndex,
+      end: rightmostNeighborIndex,
     });
-  } else if (leftEdgeIndex === 1 && rightEdgeIndex !== totalPages) {
+  } else if (leftmostNeighborIndex === 1 && rightmostNeighborIndex !== totalPages) {
     // 1 [2] 3 4 ... 7
     pageBlocks.push({
       type: 'range',
-      start: leftEdgeIndex,
-      end: rightEdgeIndex,
+      start: leftmostNeighborIndex,
+      end: rightmostNeighborIndex,
     });
     pageBlocks.push({
       type: 'ellipsis',
@@ -85,7 +86,7 @@ const Pagination = (props) => {
       start: totalPages,
       end: null,
     });
-  } else if (leftEdgeIndex !== 1 && rightEdgeIndex === totalPages) {
+  } else if (leftmostNeighborIndex !== 1 && rightmostNeighborIndex === totalPages) {
     // 1 ... 4 5 [6] 7
     pageBlocks.push({
       type: 'index',
@@ -99,10 +100,10 @@ const Pagination = (props) => {
     });
     pageBlocks.push({
       type: 'range',
-      start: leftEdgeIndex,
-      end: rightEdgeIndex,
+      start: leftmostNeighborIndex,
+      end: rightmostNeighborIndex,
     });
-  } else if (leftEdgeIndex !== 1 && rightEdgeIndex !== totalPages) {
+  } else if (leftmostNeighborIndex !== 1 && rightmostNeighborIndex !== totalPages) {
     // 1 ... 4 5 [6] 7 8 ... 11
     pageBlocks.push({
       type: 'index',
@@ -116,8 +117,8 @@ const Pagination = (props) => {
     });
     pageBlocks.push({
       type: 'range',
-      start: leftEdgeIndex,
-      end: rightEdgeIndex,
+      start: leftmostNeighborIndex,
+      end: rightmostNeighborIndex,
     });
     pageBlocks.push({
       type: 'ellipsis',
@@ -215,7 +216,7 @@ Pagination.defaultProps = {
   hasNextPage: false,
   prevPage: null,
   nextPage: null,
-  pageNeighbors: 1,
+  numberOfNeighbors: 1,
   usePrevNextArrows: true,
 };
 
@@ -229,7 +230,7 @@ Pagination.propTypes = {
   hasNextPage: PropTypes.bool,
   prevPage: PropTypes.number,
   nextPage: PropTypes.number,
-  pageNeighbors: PropTypes.number,
+  numberOfNeighbors: PropTypes.number,
   usePrevNextArrows: PropTypes.bool,
   setPage: PropTypes.func.isRequired,
 };
