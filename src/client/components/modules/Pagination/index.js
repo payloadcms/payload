@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useHistory, useLocation } from 'react-router-dom';
+import queryString from 'qs';
 
 import Page from './Page';
 import Ellipsis from './Ellipsis';
@@ -18,6 +20,9 @@ const nodeTypes = {
 const baseClass = 'pagination';
 
 const Pagination = (props) => {
+  const history = useHistory();
+  const location = useLocation();
+
   const {
     totalPages,
     page: currentPage,
@@ -26,8 +31,13 @@ const Pagination = (props) => {
     prevPage,
     nextPage,
     numberOfNeighbors,
-    setPage,
   } = props;
+
+  const updatePage = (page) => {
+    const params = queryString.parse(location.search, { ignoreQueryPrefix: true });
+    params.page = page;
+    history.push({ search: queryString.stringify(params, { addQueryPrefix: true }) });
+  };
 
   if (totalPages <= 1) return null;
 
@@ -52,7 +62,7 @@ const Pagination = (props) => {
       type: 'Page',
       props: {
         page: 1,
-        setPage,
+        updatePage,
       },
     });
   }
@@ -64,7 +74,7 @@ const Pagination = (props) => {
       type: 'Page',
       props: {
         page: totalPages,
-        setPage,
+        updatePage,
       },
     });
   }
@@ -74,7 +84,7 @@ const Pagination = (props) => {
     nodes.unshift({
       type: 'PrevArrow',
       props: {
-        setPage: () => setPage(prevPage),
+        updatePage: () => updatePage(prevPage),
       },
     });
   }
@@ -83,7 +93,7 @@ const Pagination = (props) => {
     nodes.push({
       type: 'NextArrow',
       props: {
-        setPage: () => setPage(nextPage),
+        updatePage: () => updatePage(nextPage),
       },
     });
   }
@@ -96,7 +106,7 @@ const Pagination = (props) => {
             <Page
               key={i}
               page={node}
-              setPage={setPage}
+              updatePage={updatePage}
               isCurrent={currentPage === node}
             />
           );
@@ -139,5 +149,4 @@ Pagination.propTypes = {
   prevPage: PropTypes.number,
   nextPage: PropTypes.number,
   numberOfNeighbors: PropTypes.number,
-  setPage: PropTypes.func.isRequired,
 };

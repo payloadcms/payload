@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
+import queryString from 'qs';
 import PropTypes from 'prop-types';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import getSanitizedConfig from '../../../../config/getSanitizedConfig';
@@ -18,11 +20,12 @@ const {
 
 const ListView = (props) => {
   const { collection } = props;
-  const [page, setPage] = useState(null);
+  const location = useLocation();
+  const { page } = queryString.parse(location.search, { ignoreQueryPrefix: true });
 
   const apiURL = [
     `${serverURL}/${collection.slug}?`,
-    page !== null && `page=${page}&`,
+    page && `page=${page}&`,
     'page=4&',
     'limit=4',
   ].filter(Boolean).join('');
@@ -49,7 +52,6 @@ const ListView = (props) => {
         collection={collection}
       />
       <Pagination
-        setPage={setPage}
         totalDocs={data.totalDocs}
         limit={data.limit}
         totalPages={data.totalPages}

@@ -4,7 +4,7 @@ import './index.scss';
 
 const baseClass = 'paginator__page';
 
-const Page = ({ page, isCurrent, setPage }) => {
+const Page = ({ page, isCurrent, updatePage }) => {
   const classes = [
     baseClass,
     isCurrent && `${baseClass}--is-current`,
@@ -13,7 +13,7 @@ const Page = ({ page, isCurrent, setPage }) => {
   return (
     <button
       className={classes}
-      onClick={() => setPage(page)}
+      onClick={() => updatePage(page)}
       type="button"
     >
       {page}
