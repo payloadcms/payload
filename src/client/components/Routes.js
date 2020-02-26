@@ -75,7 +75,7 @@ const Routes = () => {
                         >
                           <Dashboard />
                         </Route>
-                        {config.collections.map((collection) => {
+                        {config.collections && config.collections.map((collection) => {
                           return (
                             <Route
                               key={`${collection.slug}-list`}
@@ -93,7 +93,7 @@ const Routes = () => {
                             />
                           );
                         })}
-                        {config.collections.map((collection) => {
+                        {config.collections && config.collections.map((collection) => {
                           return (
                             <Route
                               key={`${collection.slug}-create`}
@@ -110,7 +110,7 @@ const Routes = () => {
                             />
                           );
                         })}
-                        {config.collections.map((collection) => {
+                        {config.collections && config.collections.map((collection) => {
                           return (
                             <Route
                               key={`${collection.slug}-edit`}
@@ -128,7 +128,7 @@ const Routes = () => {
                             />
                           );
                         })}
-                        {config.globals.map((global) => {
+                        {config.globals && config.globals.map((global) => {
                           return (
                             <Route
                               key={`${global.slug}`}

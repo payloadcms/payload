@@ -1,0 +1,38 @@
+@import '../../../scss/styles.scss';
+
+.paginator {
+  display: flex;
+  align-items: flex-end;
+
+  &__prev-arrow,
+  &__next-arrow,
+  &__page {
+    @extend %btn-reset;
+    line-height: 1;
+    outline: 0;
+    box-shadow: $shadow-sm;
+    padding: base(.5) base(.65);
+    margin-right: base(.45);
+    cursor: pointer;
+    font-size: base(.4);
+    color: $black;
+
+    &--is-current {
+      color: $gray;
+      cursor: default;
+    }
+  }
+
+  &__prev-arrow {
+    .icon {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__ellipsis {
+    line-height: 1;
+    padding: base(.25);
+    padding-bottom: 0;
+    margin-right: base(.45);
+  }
+}
