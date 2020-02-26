@@ -2,6 +2,7 @@
 
 table {
   width: 100%;
+  margin-bottom: base(.75);
 
   th {
     @extend %uppercase-label;

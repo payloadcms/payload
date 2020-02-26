@@ -7,7 +7,7 @@ import getSanitizedConfig from '../../../../config/getSanitizedConfig';
 import DefaultTemplate from '../../../layout/DefaultTemplate';
 import HeadingButton from '../../../modules/HeadingButton';
 import SearchableTable from '../../../modules/SearchableTable';
-import Pagination from '../../../modules/Pagination';
+import Pagination from '../../../modules/Paginator';
 
 import './index.scss';
 
@@ -27,7 +27,7 @@ const ListView = (props) => {
     `${serverURL}/${collection.slug}?`,
     page && `page=${page}&`,
     'page=4&',
-    'limit=4',
+    'limit=1',
   ].filter(Boolean).join('');
 
   const [{ data }] = usePayloadAPI(apiURL);

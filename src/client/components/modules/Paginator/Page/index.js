@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import './index.scss';
 
@@ -19,6 +20,18 @@ const Page = ({ page, isCurrent, updatePage }) => {
       {page}
     </button>
   );
+};
+
+Page.defaultProps = {
+  page: 1,
+  isCurrent: false,
+  updatePage: null,
+};
+
+Page.propTypes = {
+  page: PropTypes.number,
+  isCurrent: PropTypes.bool,
+  updatePage: PropTypes.func,
 };
 
 export default Page;

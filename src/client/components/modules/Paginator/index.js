@@ -17,7 +17,7 @@ const nodeTypes = {
   PrevArrow,
 };
 
-const baseClass = 'pagination';
+const baseClass = 'paginator';
 
 const Pagination = (props) => {
   const history = useHistory();
@@ -33,6 +33,7 @@ const Pagination = (props) => {
     numberOfNeighbors,
   } = props;
 
+  // uses react router to set the current page
   const updatePage = (page) => {
     const params = queryString.parse(location.search, { ignoreQueryPrefix: true });
     params.page = page;
@@ -56,8 +57,9 @@ const Pagination = (props) => {
   const nodes = pages.slice(rangeStartIndex, rangeEndIndex);
 
   // Add prev ellipsis and first page if necessary
+  if (currentPage - numberOfNeighbors - 1 >= 2) nodes.unshift({ type: 'Ellipsis' });
+  // Add first page if necessary
   if (currentPage > numberOfNeighbors + 1) {
-    nodes.unshift({ type: 'Ellipsis' });
     nodes.unshift({
       type: 'Page',
       props: {
@@ -68,8 +70,9 @@ const Pagination = (props) => {
   }
 
   // Add next ellipsis and total page if necessary
+  if (currentPage + numberOfNeighbors + 1 < totalPages) nodes.push({ type: 'Ellipsis' });
+  // Add last page if necessary
   if (rangeEndIndex < totalPages) {
-    nodes.push({ type: 'Ellipsis' });
     nodes.push({
       type: 'Page',
       props: {
@@ -79,7 +82,7 @@ const Pagination = (props) => {
     });
   }
 
-  // Add prev and next arrows based on need
+  // Add prev and next arrows based on necessity
   if (hasPrevPage) {
     nodes.unshift({
       type: 'PrevArrow',

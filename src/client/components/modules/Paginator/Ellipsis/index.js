@@ -2,6 +2,6 @@ import React from 'react';
 
 import './index.scss';
 
-const Ellipsis = () => <span className="ellipsis">...</span>;
+const Ellipsis = () => <span className="paginator__ellipsis">...</span>;
 
 export default Ellipsis;
