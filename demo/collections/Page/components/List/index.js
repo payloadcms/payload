@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import DefaultTemplate from 'payload/client/components/layout/DefaultTemplate';
+import DefaultTemplate from '../../../../../src/client/components/layout/DefaultTemplate';
 
 import './index.scss';
 
@@ -18,6 +18,7 @@ const PageListView = (props) => {
     >
       <h1>{collection.labels.plural}</h1>
       <p>This is a custom Pages list view</p>
+      <p>Sup</p>
     </DefaultTemplate>
   );
 };

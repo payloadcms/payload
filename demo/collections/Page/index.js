@@ -122,8 +122,5 @@ module.exports = {
       ],
     },
   ],
-  components: {
-    // List,
-  },
   timestamps: true,
 };

@@ -16,12 +16,10 @@ module.exports = {
   port: 3000,
   serverURL: 'http://localhost:3000',
   cors: ['http://localhost', 'http://localhost:8080', 'http://localhost:8081'],
-  adminURL: '/payload-login',
   routes: {
     api: '/api',
     admin: '/admin',
   },
-  plugins: [],
   compression: {},
   paths: {
     scssOverrides: path.resolve(__dirname, 'client/scss/overrides.scss'),
