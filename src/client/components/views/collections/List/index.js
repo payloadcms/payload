@@ -23,6 +23,8 @@ const ListView = (props) => {
   const apiURL = [
     `${serverURL}/${collection.slug}?`,
     page !== null && `page=${page}&`,
+    'page=4&',
+    'limit=4',
   ].filter(Boolean).join('');
 
   const [{ data }] = usePayloadAPI(apiURL);
@@ -52,7 +54,6 @@ const ListView = (props) => {
         limit={data.limit}
         totalPages={data.totalPages}
         page={data.page}
-        pagingCounter={data.pagingCounter}
         hasPrevPage={data.hasPrevPage}
         hasNextPage={data.hasNextPage}
         prevPage={data.prevPage}

@@ -105,7 +105,6 @@ module.exports = (config) => {
         'payload-scss-overrides': config.paths.scssOverrides,
         'payload-custom-components': config.paths.components,
         'payload-config': config.paths.config,
-        'payload-scss': path.resolve(__dirname, '../scss'),
       },
     },
   };

@@ -1,32 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import PaginationNode from './PaginationNode';
-import Arrow from '../../graphics/Arrow';
+import Page from './Page';
+import Ellipsis from './Ellipsis';
+import NextArrow from './NextArrow';
+import PrevArrow from './PrevArrow';
+
 import './index.scss';
 
-const baseClass = 'pagination';
-
-const RangeOfClickableNodes = ({
-  start,
-  end,
-  currentPage,
-  onClick,
-}) => {
-  const paginationNodes = Array.from({ length: (end - start + 1) }, (_, index = start) => index + start);
-  return paginationNodes.map((pageNum) => {
-    return (
-      <PaginationNode
-        key={pageNum}
-        pageTo={pageNum}
-        onClick={() => onClick(pageNum)}
-        currentPage={currentPage}
-      />
-    );
-  });
+const nodeTypes = {
+  Page,
+  Ellipsis,
+  NextArrow,
+  PrevArrow,
 };
 
-const Ellipsis = () => <span className="ellipsis">...</span>;
+const baseClass = 'pagination';
 
 const Pagination = (props) => {
   const {
@@ -37,165 +26,90 @@ const Pagination = (props) => {
     prevPage,
     nextPage,
     numberOfNeighbors,
-    usePrevNextArrows,
     setPage,
   } = props;
 
   if (totalPages <= 1) return null;
-  const pageBlocks = [];
 
-  const leftEllipsisIndex = 2;
-  const leftEdge = currentPage - numberOfNeighbors;
-  const leftmostNeighborIndex = leftEdge - 1 > leftEllipsisIndex ? currentPage - numberOfNeighbors : 1;
+  // Create array of integers for each page
+  const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
 
-  const rightEdge = currentPage + numberOfNeighbors;
-  const rightmostNeighborIndex = (rightEdge + 1 < totalPages - 1) ? rightEdge : totalPages;
+  // Assign indices for start and end of the range of pages that should be shown in paginator
+  let rangeStartIndex = (currentPage - 1) - numberOfNeighbors;
 
-  if (usePrevNextArrows) {
-    pageBlocks.push({
-      type: 'prevPage',
-      start: null,
-      end: null,
+  // Sanitize rangeStartIndex in case it is less than zero for safe split
+  if (rangeStartIndex <= 0) rangeStartIndex = 0;
+
+  const rangeEndIndex = (currentPage - 1) + numberOfNeighbors + 1;
+
+  // Slice out the range of pages that we want to render
+  const nodes = pages.slice(rangeStartIndex, rangeEndIndex);
+
+  // Add prev ellipsis and first page if necessary
+  if (currentPage > numberOfNeighbors + 1) {
+    nodes.unshift({ type: 'Ellipsis' });
+    nodes.unshift({
+      type: 'Page',
+      props: {
+        page: 1,
+        setPage,
+      },
     });
   }
 
-  if (leftmostNeighborIndex === 1 && rightmostNeighborIndex === totalPages) {
-    // 1 2 3 [4] 5 6 7
-    pageBlocks.push({
-      type: 'range',
-      start: leftmostNeighborIndex,
-      end: rightmostNeighborIndex,
-    });
-  } else if (leftmostNeighborIndex === 1 && rightmostNeighborIndex !== totalPages) {
-    // 1 [2] 3 4 ... 7
-    pageBlocks.push({
-      type: 'range',
-      start: leftmostNeighborIndex,
-      end: rightmostNeighborIndex,
-    });
-    pageBlocks.push({
-      type: 'ellipsis',
-      start: null,
-      end: null,
-    });
-    pageBlocks.push({
-      type: 'index',
-      start: totalPages,
-      end: null,
-    });
-  } else if (leftmostNeighborIndex !== 1 && rightmostNeighborIndex === totalPages) {
-    // 1 ... 4 5 [6] 7
-    pageBlocks.push({
-      type: 'index',
-      start: 1,
-      end: null,
-    });
-    pageBlocks.push({
-      type: 'ellipsis',
-      start: null,
-      end: null,
-    });
-    pageBlocks.push({
-      type: 'range',
-      start: leftmostNeighborIndex,
-      end: rightmostNeighborIndex,
-    });
-  } else if (leftmostNeighborIndex !== 1 && rightmostNeighborIndex !== totalPages) {
-    // 1 ... 4 5 [6] 7 8 ... 11
-    pageBlocks.push({
-      type: 'index',
-      start: 1,
-      end: null,
-    });
-    pageBlocks.push({
-      type: 'ellipsis',
-      start: null,
-      end: null,
-    });
-    pageBlocks.push({
-      type: 'range',
-      start: leftmostNeighborIndex,
-      end: rightmostNeighborIndex,
-    });
-    pageBlocks.push({
-      type: 'ellipsis',
-      start: null,
-      end: null,
-    });
-    pageBlocks.push({
-      type: 'index',
-      start: totalPages,
-      end: null,
+  // Add next ellipsis and total page if necessary
+  if (rangeEndIndex < totalPages) {
+    nodes.push({ type: 'Ellipsis' });
+    nodes.push({
+      type: 'Page',
+      props: {
+        page: totalPages,
+        setPage,
+      },
     });
   }
 
-  if (usePrevNextArrows) {
-    pageBlocks.push({
-      type: 'nextPage',
-      start: null,
-      end: null,
+  // Add prev and next arrows based on need
+  if (hasPrevPage) {
+    nodes.unshift({
+      type: 'PrevArrow',
+      props: {
+        setPage: () => setPage(prevPage),
+      },
+    });
+  }
+
+  if (hasNextPage) {
+    nodes.push({
+      type: 'NextArrow',
+      props: {
+        setPage: () => setPage(nextPage),
+      },
     });
   }
 
   return (
     <div className={baseClass}>
-      {pageBlocks.map((pageBlock, index) => {
-        switch (pageBlock.type) {
-          case 'index':
-            return (
-              <PaginationNode
-                key={index}
-                pageTo={pageBlock.start}
-                onClick={() => setPage(pageBlock.start)}
-                currentPage={currentPage}
-              />
-            );
-
-          case 'range':
-            return (
-              <RangeOfClickableNodes
-                key={index}
-                start={pageBlock.start}
-                end={pageBlock.end}
-                onClick={setPage}
-                currentPage={currentPage}
-              />
-            );
-
-          case 'ellipsis':
-            return <Ellipsis />;
-
-          case 'prevPage':
-            return (
-              <PaginationNode
-                key={index}
-                pageTo={prevPage}
-                onClick={prevPage ? () => setPage(prevPage) : null}
-                currentPage={currentPage}
-                isDisabled={!hasPrevPage}
-                className="prev"
-              >
-                <Arrow />
-              </PaginationNode>
-            );
-
-          case 'nextPage':
-            return (
-              <PaginationNode
-                key={index}
-                pageTo={nextPage}
-                onClick={nextPage ? () => setPage(nextPage) : null}
-                currentPage={currentPage}
-                isDisabled={!hasNextPage}
-                className="next"
-              >
-                <Arrow />
-              </PaginationNode>
-            );
-
-          default:
-            return null;
+      {nodes.map((node, i) => {
+        if (typeof node === 'number') {
+          return (
+            <Page
+              key={i}
+              page={node}
+              setPage={setPage}
+              isCurrent={currentPage === node}
+            />
+          );
         }
+
+        const NodeType = nodeTypes[node.type];
+
+        return (
+          <NodeType
+            key={i}
+            {...node.props}
+          />
+        );
       })}
     </div>
   );
@@ -208,13 +122,11 @@ Pagination.defaultProps = {
   limit: null,
   totalPages: null,
   page: 1,
-  pagingCounter: 0,
   hasPrevPage: false,
   hasNextPage: false,
   prevPage: null,
   nextPage: null,
   numberOfNeighbors: 1,
-  usePrevNextArrows: true,
 };
 
 Pagination.propTypes = {
@@ -222,12 +134,10 @@ Pagination.propTypes = {
   limit: PropTypes.number,
   totalPages: PropTypes.number,
   page: PropTypes.number,
-  pagingCounter: PropTypes.number,
   hasPrevPage: PropTypes.bool,
   hasNextPage: PropTypes.bool,
   prevPage: PropTypes.number,
   nextPage: PropTypes.number,
   numberOfNeighbors: PropTypes.number,
-  usePrevNextArrows: PropTypes.bool,
   setPage: PropTypes.func.isRequired,
 };
