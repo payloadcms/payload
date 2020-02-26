@@ -56,7 +56,7 @@ const Pagination = (props) => {
   // Slice out the range of pages that we want to render
   const nodes = pages.slice(rangeStartIndex, rangeEndIndex);
 
-  // Add prev ellipsis and first page if necessary
+  // Add prev ellipsis if necessary
   if (currentPage - numberOfNeighbors - 1 >= 2) nodes.unshift({ type: 'Ellipsis' });
   // Add first page if necessary
   if (currentPage > numberOfNeighbors + 1) {
@@ -69,7 +69,7 @@ const Pagination = (props) => {
     });
   }
 
-  // Add next ellipsis and total page if necessary
+  // Add next ellipsis if necessary
   if (currentPage + numberOfNeighbors + 1 < totalPages) nodes.push({ type: 'Ellipsis' });
   // Add last page if necessary
   if (rangeEndIndex < totalPages) {
