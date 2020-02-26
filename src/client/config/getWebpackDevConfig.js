@@ -100,7 +100,7 @@ module.exports = (config) => {
       new webpack.HotModuleReplacementPlugin(),
     ],
     resolve: {
-      modules: [path.resolve(__dirname, '../../../node_modules')],
+      modules: ['node_modules', path.resolve(__dirname, '../../../node_modules')],
       alias: {
         'payload-scss-overrides': config.paths.scssOverrides,
         'payload-custom-components': config.paths.components,
