@@ -7,11 +7,12 @@
   margin-bottom: base(1);
 
   &__page {
+    cursor: pointer;
+
     &--is-current {
       box-shadow: $shadow-sm;
       color: $gray;
       cursor: default;
-      cursor: pointer;
     }
 
     &--is-last-page {
