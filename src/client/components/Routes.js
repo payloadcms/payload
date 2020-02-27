@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
+import List from 'payload/custom-components/views/collections/List';
+import DefaultList from './views/collections/List';
 import getSanitizedClientConfig from '../config/getSanitizedClientConfig';
 import { useUser } from './data/User';
 import Dashboard from './views/Dashboard';
@@ -11,7 +13,6 @@ import NotFound from './views/NotFound';
 import CreateFirstUser from './views/CreateFirstUser';
 import MediaLibrary from './views/MediaLibrary';
 import Edit from './views/collections/Edit';
-import List from './views/collections/List';
 import EditGlobal from './views/globals/Edit';
 import { requests } from '../api';
 
@@ -19,7 +20,8 @@ const config = getSanitizedClientConfig();
 
 const CollectionRoutes = ({ match }) => {
   const collectionRoutes = config?.collections.reduce((routesToRender, collection) => {
-    const ListComponent = List;
+    let ListComponent = (typeof List === 'object' && List[collection.slug]) ? List[collection.slug] : List;
+    if (!ListComponent) ListComponent = DefaultList;
     routesToRender.push({
       path: `${match.url}/collections/${collection.slug}`,
       component: ListComponent,

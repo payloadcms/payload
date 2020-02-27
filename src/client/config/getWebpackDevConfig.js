@@ -105,7 +105,8 @@ module.exports = (config) => {
       alias: {
         'payload-scss-overrides': config.paths.scssOverrides,
         'payload-config': config.paths.config,
-        'payload/Sidebar': (config.customComponents.layout && config.customComponents.layout.Sidebar) ? config.customComponents.layout.Sidebar : path.resolve(__dirname, '../components/layout/Sidebar/index.js'),
+        'payload/custom-components/layout/Sidebar': (config.customComponents.layout && config.customComponents.layout.Sidebar) ? config.customComponents.layout.Sidebar : path.resolve(__dirname, '../components/layout/Sidebar/index.js'),
+        'payload/custom-components/views/collections/List': (config.customComponents.views && config.customComponents.views.collections) ? config.customComponents.views.collections.List : path.resolve(__dirname, '../components/views/collections/List/index.js'),
       },
     },
   };
