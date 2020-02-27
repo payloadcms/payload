@@ -13,6 +13,10 @@
       cursor: default;
       cursor: pointer;
     }
+
+    &--is-last-page {
+      margin-right: 0;
+    }
   }
 
   .clickable-arrow,
@@ -20,7 +24,7 @@
     @extend %btn-reset;
     @extend %small;
     outline: 0;
-    padding: base(.25) base(.45);
+    padding: base(.35) base(.45);
     color: $black;
     line-height: 1;
   }
@@ -28,10 +32,6 @@
   &__page,
   &__separator {
     margin-right: base(.25);
-
-    &--is-last-page {
-      margin-right: 0;
-    }
   }
 
   &__separator {
