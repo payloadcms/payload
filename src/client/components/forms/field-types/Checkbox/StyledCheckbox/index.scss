@@ -6,7 +6,6 @@
   cursor: pointer;
   max-width: base(1.75);
   font-size: base(1);
-  font-family: $font-body;
   align-items: center;
   justify-content: center;
 
@@ -14,7 +13,6 @@
     opacity: 0;
     line-height: 0;
     position: relative;
-    top: -2px;
   }
 
   &--is-checked {
