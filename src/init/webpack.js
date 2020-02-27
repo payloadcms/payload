@@ -1,10 +1,9 @@
 const webpack = require('webpack');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
-const path = require('path');
 const getWebpackDevConfig = require('../client/config/getWebpackDevConfig');
 
-const initWebpack = ({ config, app }) => {
+const initWebpack = (app, config) => {
   const webpackDevConfig = getWebpackDevConfig(config);
   const compiler = webpack(webpackDevConfig);
 

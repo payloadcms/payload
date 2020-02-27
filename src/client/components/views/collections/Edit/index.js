@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useRouteMatch, useHistory } from 'react-router-dom';
-import getSanitizedConfig from '../../../../config/getSanitizedConfig';
+import getSanitizedClientConfig from '../../../../config/getSanitizedClientConfig';
 import DefaultTemplate from '../../../layout/DefaultTemplate';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Form from '../../../forms/Form';
@@ -16,9 +16,9 @@ import './index.scss';
 const {
   serverURL,
   routes: {
-    admin
-  }
-} = getSanitizedConfig();
+    admin,
+  },
+} = getSanitizedClientConfig();
 
 const baseClass = 'collection-edit';
 
@@ -33,14 +33,14 @@ const EditView = (props) => {
         status: {
           message: json.message,
           type: 'success',
-        }
+        },
       });
     });
   } : null;
 
   const [{ data }] = usePayloadAPI(
     (isEditing ? `${serverURL}/${collection.slug}/${id}` : null),
-    { initialParams: { 'fallback-locale': 'null' } }
+    { initialParams: { 'fallback-locale': 'null' } },
   );
 
   const nav = [{
@@ -50,12 +50,12 @@ const EditView = (props) => {
 
   if (isEditing) {
     nav.push({
-      label: data ? data[collection.useAsTitle] : ''
-    })
+      label: data ? data[collection.useAsTitle] : '',
+    });
   } else {
     nav.push({
-      label: 'Create New'
-    })
+      label: 'Create New',
+    });
   }
 
   return (
@@ -66,26 +66,45 @@ const EditView = (props) => {
       <header className={`${baseClass}__header`}>
         {isEditing && (
           <h1>
-            Edit {Object.keys(data).length > 0 &&
-              (data[collection.useAsTitle] ? data[collection.useAsTitle] : '[Untitled]')
+            Edit
+            {' '}
+            {Object.keys(data).length > 0
+              && (data[collection.useAsTitle] ? data[collection.useAsTitle] : '[Untitled]')
             }
           </h1>
         )}
-        {!isEditing &&
-          <h1>Create New {collection.labels.singular}</h1>
+        {!isEditing
+          && (
+          <h1>
+            Create New
+            {' '}
+            {collection.labels.singular}
+          </h1>
+          )
         }
       </header>
-      <Form className={`${baseClass}__form`} method={id ? 'put' : 'post'} action={`${serverURL}/${collection.slug}${id ? `/${id}` : ''}`} handleAjaxResponse={handleAjaxResponse}>
-        <StickyHeader showStatus={true}
+      <Form
+        className={`${baseClass}__form`}
+        method={id ? 'put' : 'post'}
+        action={`${serverURL}/${collection.slug}${id ? `/${id}` : ''}`}
+        handleAjaxResponse={handleAjaxResponse}
+      >
+        <StickyHeader
+          showStatus
           content={
             <APIURL url={isEditing && `${serverURL}/${collection.slug}/${data.id}`} />
-          } action={
+          }
+          action={(
             <>
               <Button type="secondary">Preview</Button>
               <FormSubmit>Save</FormSubmit>
             </>
-          } />
-        <RenderFields fields={collection.fields} initialData={data} />
+          )}
+        />
+        <RenderFields
+          fields={collection.fields}
+          initialData={data}
+        />
       </Form>
     </DefaultTemplate>
   );

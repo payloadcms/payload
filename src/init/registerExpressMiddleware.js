@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const localizationMiddleware = require('../localization/middleware');
 
-const registerExpressMiddleware = ({ app, config, router }) => {
+const registerExpressMiddleware = (app, config, router) => {
   app.use(express.json());
   app.use(methodOverride('X-HTTP-Method-Override'));
   app.use(express.urlencoded({ extended: true }));

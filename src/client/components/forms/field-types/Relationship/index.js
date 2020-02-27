@@ -4,7 +4,7 @@ import Cookies from 'universal-cookie';
 import some from 'async-some';
 import ReactSelect from '../../../modules/ReactSelect';
 import useFieldType from '../../useFieldType';
-import getSanitizedConfig from '../../../../config/getSanitizedConfig';
+import getSanitizedClientConfig from '../../../../config/getSanitizedClientConfig';
 import Label from '../../Label';
 import Error from '../../Error';
 
@@ -12,7 +12,7 @@ import './index.scss';
 
 const cookies = new Cookies();
 
-const { serverURL, collections } = getSanitizedConfig();
+const { serverURL, collections } = getSanitizedClientConfig();
 
 const defaultError = 'Please make a selection.';
 const defaultValidate = value => value.length > 0;
@@ -49,8 +49,8 @@ class Relationship extends Component {
       some(relationsToSearch, async (relation, callback) => {
         const response = await fetch(`${serverURL}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}`, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         const data = await response.json();
@@ -59,7 +59,7 @@ class Relationship extends Component {
           return callback(false, {
             data,
             relation,
-          })
+          });
         }
 
         callback({ relation, data });
@@ -73,10 +73,9 @@ class Relationship extends Component {
           this.setState({
             lastFullyLoadedRelation: relations.indexOf(relation),
             lastLoadedPage: 1,
-          })
+          });
         }
-
-      })
+      });
     }
   }
 
@@ -131,10 +130,10 @@ class Relationship extends Component {
       this.setState({
         options: [
           ...options,
-          ...data.docs.map((doc) => ({
+          ...data.docs.map(doc => ({
             label: doc[collection.useAsTitle],
             value: doc.id,
-          }))
+          })),
         ],
       });
     } else {
@@ -147,9 +146,9 @@ class Relationship extends Component {
           value: {
             relationTo: collection.slug,
             value: doc.id,
-          }
-        }
-      })
+          },
+        };
+      });
 
       if (optionsToAddTo) {
         optionsToAddTo.options = [
@@ -167,7 +166,7 @@ class Relationship extends Component {
         options: [
           ...allOptionGroups,
         ],
-      })
+      });
     }
 
     this.setState({
@@ -177,8 +176,8 @@ class Relationship extends Component {
 
   handleInputChange = (search) => {
     this.setState({
-      search
-    })
+      search,
+    });
   }
 
   handleMenuScrollToBottom = () => {
@@ -213,9 +212,9 @@ class Relationship extends Component {
 
     const valueToRender = this.findValueInOptions(options, value);
 
-    /////////////////////////////////////////////
+    // ///////////////////////////////////////////
     // TODO: simplify formatValue pattern seen below with react select
-    /////////////////////////////////////////////
+    // ///////////////////////////////////////////
 
     return (
       <div
@@ -306,23 +305,23 @@ const RelationshipFieldType = (props) => {
       if (hasMultipleRelations) {
         return {
           ...valueToFormat,
-          value: valueToFormat.value.id
+          value: valueToFormat.value.id,
         };
       }
 
       return valueToFormat.id;
-    }
+    };
 
     if (defaultValue) {
       if (hasMany && Array.isArray(defaultValue)) {
-        let formattedDefaultValue = [];
+        const formattedDefaultValue = [];
         defaultValue.forEach((individualValue) => {
           formattedDefaultValue.push(formatDefaultValue(individualValue));
-        })
+        });
         setFormattedDefaultValue(formattedDefaultValue);
       } else {
         setFormattedDefaultValue(formatDefaultValue(defaultValue));
-      };
+      }
     }
   }, [defaultValue]);
 

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useUser } from '../../data/User';
 import ContentBlock from '../../layout/ContentBlock';
-import getSanitizedConfig from '../../../config/getSanitizedConfig';
+import getSanitizedClientConfig from '../../../config/getSanitizedClientConfig';
 import Button from '../../controls/Button';
 
 import './index.scss';
@@ -12,7 +12,7 @@ const {
   routes: {
     admin,
   },
-} = getSanitizedConfig();
+} = getSanitizedClientConfig();
 
 const Logout = () => {
   const { logOut } = useUser();

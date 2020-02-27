@@ -104,8 +104,8 @@ module.exports = (config) => {
       modules: ['node_modules', path.resolve(__dirname, '../../../node_modules')],
       alias: {
         'payload-scss-overrides': config.paths.scssOverrides,
-        'payload-custom-components': config.paths.components,
         'payload-config': config.paths.config,
+        'payload/Sidebar': (config.customComponents.layout && config.customComponents.layout.Sidebar) ? config.customComponents.layout.Sidebar : path.resolve(__dirname, '../components/layout/Sidebar/index.js'),
       },
     },
   };

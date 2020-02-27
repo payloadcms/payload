@@ -1,6 +1,6 @@
 const express = require('express');
 
-const initUploads = ({ config, app }) => {
+const initUploads = (app, config) => {
   const staticUrl = config.staticUrl ? config.staticUrl : `/${config.staticDir}`;
   app.use(staticUrl, express.static(config.staticDir));
 };

@@ -7,7 +7,7 @@ import ContentBlock from '../../layout/ContentBlock';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import FormSubmit from '../../forms/Submit';
-import getSanitizedConfig from '../../../config/getSanitizedConfig';
+import getSanitizedClientConfig from '../../../config/getSanitizedClientConfig';
 import { useUser } from '../../data/User';
 
 import './index.scss';
@@ -16,7 +16,7 @@ const {
   routes: {
     admin,
   },
-} = getSanitizedConfig();
+} = getSanitizedClientConfig();
 
 const passwordField = {
   name: 'password',

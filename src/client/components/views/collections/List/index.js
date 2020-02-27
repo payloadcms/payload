@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'qs';
 import PropTypes from 'prop-types';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
-import getSanitizedConfig from '../../../../config/getSanitizedConfig';
+import getSanitizedClientConfig from '../../../../config/getSanitizedClientConfig';
 import DefaultTemplate from '../../../layout/DefaultTemplate';
 import HeadingButton from '../../../modules/HeadingButton';
 import SearchableTable from '../../../modules/SearchableTable';
@@ -16,7 +16,7 @@ const {
   routes: {
     admin,
   },
-} = getSanitizedConfig();
+} = getSanitizedClientConfig();
 
 const ListView = (props) => {
   const { collection } = props;

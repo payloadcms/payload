@@ -11,13 +11,13 @@ const baseUserFields = require('./auth/baseFields');
 const baseUploadFields = require('./uploads/baseUploadFields');
 const baseImageFields = require('./uploads/baseImageFields');
 const registerUploadRoutes = require('./uploads/routes');
-const registerConfigRoute = require('./routes/config');
 const validateCollection = require('./collections/validate');
 const buildCollectionSchema = require('./collections/buildSchema');
 const registerCollectionRoutes = require('./collections/registerRoutes');
 const validateGlobals = require('./globals/validate');
 const registerGlobalSchema = require('./globals/registerSchema');
 const registerGlobalRoutes = require('./globals/registerRoutes');
+const sanitizeConfig = require('./utilities/sanitizeConfig');
 
 class Payload {
   constructor(options) {
@@ -28,18 +28,17 @@ class Payload {
     this.getCollections.bind(this);
     this.getGlobals.bind(this);
 
-    // Setup & initialization
-    connectMongoose(options.config.mongoURL);
-    registerExpressMiddleware(options);
-    initPassport(options.app);
-    initUploads(options);
-    initCORS(options);
-    registerConfigRoute(options, this.getCollections, this.getGlobals);
-
     // Bind options, app, router
-    this.config = options.config;
     this.app = options.app;
+    this.config = sanitizeConfig(options.config);
     this.router = options.router;
+
+    // Setup & initialization
+    connectMongoose(this.config.mongoURL);
+    registerExpressMiddleware(this.app, this.config, this.router);
+    initPassport(this.app);
+    initUploads(this.app, this.config);
+    initCORS(this.app, this.config);
 
     // Register and bind required collections
     this.registerUser();
@@ -61,7 +60,7 @@ class Payload {
     this.registerGlobals(this.config.globals);
 
     // Enable client webpack
-    if (!this.config.disableAdmin) initWebpack(options);
+    if (!this.config.disableAdmin) initWebpack(this.app, this.config);
   }
 
   registerUser() {

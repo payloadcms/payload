@@ -1,9 +1,8 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
-import customComponents from 'payload-custom-components';
-import getSanitizedConfig from '../config/getSanitizedConfig';
+import getSanitizedClientConfig from '../config/getSanitizedClientConfig';
 import { useUser } from './data/User';
 import Dashboard from './views/Dashboard';
 import Login from './views/Login';
@@ -16,11 +15,11 @@ import List from './views/collections/List';
 import EditGlobal from './views/globals/Edit';
 import { requests } from '../api';
 
-const config = getSanitizedConfig();
+const config = getSanitizedClientConfig();
 
-const RenderCollectionRoutes = ({ match }) => {
+const CollectionRoutes = ({ match }) => {
   const collectionRoutes = config?.collections.reduce((routesToRender, collection) => {
-    const ListComponent = customComponents?.collections?.[collection.slug]?.views?.List || List;
+    const ListComponent = List;
     routesToRender.push({
       path: `${match.url}/collections/${collection.slug}`,
       component: ListComponent,
@@ -127,7 +126,7 @@ const Routes = () => {
                           <Dashboard />
                         </Route>
 
-                        <RenderCollectionRoutes match={match} />
+                        <CollectionRoutes match={match} />
 
                         {config.globals && config.globals.map((global) => {
                           return (

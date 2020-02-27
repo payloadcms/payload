@@ -2,115 +2,127 @@ import React, { Component } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '../../controls/Button';
 import api from '../../../api';
-import getSanitizedConfig from '../../../config/getSanitizedConfig';
+import getSanitizedClientConfig from '../../../config/getSanitizedClientConfig';
 
 import './index.scss';
 
-const config = getSanitizedConfig();
+const config = getSanitizedClientConfig();
 
 class UploadMedia extends Component {
-
   constructor() {
     super();
 
     this.state = {
       dragging: false,
       selectingFile: false,
-      files: null
-    }
+      files: null,
+    };
 
     this.dropRef = React.createRef();
     this.dragCounter = 0;
   }
 
   componentDidMount() {
-    let div = this.dropRef.current
-    div.addEventListener('dragenter', this.handleDragIn)
-    div.addEventListener('dragleave', this.handleDragOut)
-    div.addEventListener('dragover', this.handleDrag)
-    div.addEventListener('drop', this.handleDrop)
+    const div = this.dropRef.current;
+    div.addEventListener('dragenter', this.handleDragIn);
+    div.addEventListener('dragleave', this.handleDragOut);
+    div.addEventListener('dragover', this.handleDrag);
+    div.addEventListener('drop', this.handleDrop);
   }
 
   componentWillUnmount() {
-    let div = this.dropRef.current
-    div.removeEventListener('dragenter', this.handleDragIn)
-    div.removeEventListener('dragleave', this.handleDragOut)
-    div.removeEventListener('dragover', this.handleDrag)
-    div.removeEventListener('drop', this.handleDrop)
+    const div = this.dropRef.current;
+    div.removeEventListener('dragenter', this.handleDragIn);
+    div.removeEventListener('dragleave', this.handleDragOut);
+    div.removeEventListener('dragover', this.handleDrag);
+    div.removeEventListener('drop', this.handleDrop);
   }
 
-  handleDrag = e => {
+  handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
   }
 
-  handleDragIn = e => {
+  handleDragIn = (e) => {
     e.preventDefault();
     e.stopPropagation();
     this.dragCounter++;
     if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
-      this.setState({ dragging: true })
+      this.setState({ dragging: true });
     }
   }
 
-  handleDragOut = e => {
+  handleDragOut = (e) => {
     e.preventDefault();
     e.stopPropagation();
     this.dragCounter--;
     if (this.dragCounter > 0) return;
-    this.setState({ dragging: false })
+    this.setState({ dragging: false });
   }
 
-  handleDrop = e => {
+  handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    this.setState({ dragging: false })
+    this.setState({ dragging: false });
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       this.setState({
         files: e.dataTransfer.files,
-        dragging: false
-      })
+        dragging: false,
+      });
 
       e.dataTransfer.clearData();
       this.dragCounter = 0;
     } else {
-      this.setState({ dragging: false })
+      this.setState({ dragging: false });
     }
   }
 
-  handleSelectFile = e => {
+  handleSelectFile = (e) => {
     e.preventDefault();
     e.stopPropagation();
     this.setState({
-      selectingFile: true
-    })
+      selectingFile: true,
+    });
   }
 
-  setSelectingFile = selectingFile => {
-    this.setState({ selectingFile })
+  setSelectingFile = (selectingFile) => {
+    this.setState({ selectingFile });
   }
 
   render() {
     return (
-      <div ref={this.dropRef} className={`upload-media${this.state.dragging ? ' dragging' : ''}`}>
+      <div
+        ref={this.dropRef}
+        className={`upload-media${this.state.dragging ? ' dragging' : ''}`}
+      >
         <span className="instructions">Drag and drop a file here</span>
         <span className="or">&mdash;or&mdash;</span>
-        <Button className="select-file" type="secondary" onClick={this.handleSelectFile}>Select a File</Button>
-        <UploadMediaForm files={this.state.files} selectingFile={this.state.selectingFile} config={config} setSelectingFile={this.setSelectingFile} />
+        <Button
+          className="select-file"
+          type="secondary"
+          onClick={this.handleSelectFile}
+        >
+          Select a File
+        </Button>
+        <UploadMediaForm
+          files={this.state.files}
+          selectingFile={this.state.selectingFile}
+          config={config}
+          setSelectingFile={this.setSelectingFile}
+        />
       </div>
-    )
+    );
   }
 }
 
 // Need to set up a separate component with a Portal
 // to make sure forms are not embedded within other forms
 class UploadMediaForm extends Component {
-
   constructor() {
     super();
     this.state = {
-      submitted: false
-    }
+      submitted: false,
+    };
     this.formRef = React.createRef();
     this.inputRef = React.createRef();
   }
@@ -148,18 +160,23 @@ class UploadMediaForm extends Component {
     const data = new FormData(this.formRef.current);
     api.requests.post(`${this.props.config.serverURL}/upload`, data).then(
       res => console.log(res),
-      err => {
+      (err) => {
         console.warn(err);
-      }
+      },
     );
   }
 
   render() {
     return createPortal(
       <form ref={this.formRef}>
-        <input type="file" name="files" ref={this.inputRef} />
+        <input
+          type="file"
+          name="files"
+          ref={this.inputRef}
+        />
       </form>,
-      document.getElementById('portal'))
+      document.getElementById('portal'),
+    );
   }
 }
 

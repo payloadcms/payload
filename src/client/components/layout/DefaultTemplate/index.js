@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import Sidebar from '../Sidebar';
+import Sidebar from 'payload/Sidebar';
 import StepNav, { useStepNav, StepNavProvider } from '../../modules/StepNav';
 import { StatusListProvider } from '../../modules/Status';
 import Localizer from '../../modules/Localizer';

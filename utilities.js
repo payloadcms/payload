@@ -1,7 +1,7 @@
 import usePayloadAPI from './src/client/hooks/usePayloadAPI';
-import getSanitizedConfig from './src/client/config/getSanitizedConfig';
+import getSanitizedClientConfig from './src/client/config/getSanitizedClientConfig';
 
 export default {
   usePayloadAPI,
-  getSanitizedConfig,
+  getSanitizedClientConfig,
 };

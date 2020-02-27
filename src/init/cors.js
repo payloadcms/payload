@@ -1,4 +1,4 @@
-const initCORS = ({ config, app }) => {
+const initCORS = (app, config) => {
   if (config.cors) {
     app.use((req, res, next) => {
       if (config.cors.indexOf(req.headers.origin) > -1) {

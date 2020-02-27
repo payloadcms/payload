@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import getSanitizedConfig from '../../../../config/getSanitizedConfig';
+import getSanitizedClientConfig from '../../../../config/getSanitizedClientConfig';
 import DefaultTemplate from '../../../layout/DefaultTemplate';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Form from '../../../forms/Form';
@@ -15,9 +15,9 @@ import './index.scss';
 const {
   serverURL,
   routes: {
-    admin
-  }
-} = getSanitizedConfig();
+    admin,
+  },
+} = getSanitizedClientConfig();
 
 const baseClass = 'global-edit';
 
@@ -26,7 +26,7 @@ const EditView = (props) => {
 
   const [{ data }] = usePayloadAPI(
     `${serverURL}/globals/${global.slug}`,
-    { initialParams: { 'fallback-locale': 'null' } }
+    { initialParams: { 'fallback-locale': 'null' } },
   );
 
   const nav = [{
@@ -41,20 +41,32 @@ const EditView = (props) => {
     >
       <header className={`${baseClass}__header`}>
         <h1>
-          Edit {global.label}
+          Edit
+          {' '}
+          {global.label}
         </h1>
       </header>
-      <Form className={`${baseClass}__form`} method={data ? 'put' : 'post'} action={`${serverURL}/globals/${global.slug}`}>
-        <StickyHeader showStatus={true}
+      <Form
+        className={`${baseClass}__form`}
+        method={data ? 'put' : 'post'}
+        action={`${serverURL}/globals/${global.slug}`}
+      >
+        <StickyHeader
+          showStatus
           content={
             <APIURL url={`${serverURL}/globals/${global.slug}`} />
-          } action={
+          }
+          action={(
             <>
               <Button type="secondary">Preview</Button>
               <FormSubmit>Save</FormSubmit>
             </>
-          } />
-        <RenderFields fields={global.fields} initialData={data} />
+          )}
+        />
+        <RenderFields
+          fields={global.fields}
+          initialData={data}
+        />
       </Form>
     </DefaultTemplate>
   );
