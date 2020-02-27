@@ -9,6 +9,7 @@ import repeater from './Repeater';
 import textarea from './Textarea';
 import select from './Select';
 import number from './Number';
+import checkbox from './Checkbox';
 
 export default {
   email,
@@ -22,4 +23,5 @@ export default {
   repeater,
   textarea,
   select,
+  checkbox,
 };

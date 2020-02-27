@@ -1,6 +1,5 @@
 import { useContext, useCallback, useEffect } from 'react';
 import FormContext from '../Form/Context';
-import useMountEffect from '../../../hooks/useMountEffect';
 
 import './index.scss';
 
@@ -26,13 +25,9 @@ const useFieldType = (options) => {
     });
   }, [name, required, setField, validate]);
 
-  useMountEffect(() => {
-    sendField(defaultValue);
-  });
-
   useEffect(() => {
     sendField(defaultValue);
-  }, [defaultValue, name, sendField]);
+  }, [defaultValue, sendField]);
 
   const valid = formContext.fields[name] ? formContext.fields[name].valid : true;
   const showError = valid === false && formContext.submitted;

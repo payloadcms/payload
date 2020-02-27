@@ -26,7 +26,7 @@ const fieldToSchemaMap = {
   code: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
-  boolean: (field) => {
+  checkbox: (field) => {
     return { ...formatBaseSchema(field), type: Boolean };
   },
   date: (field) => {
@@ -51,8 +51,8 @@ const fieldToSchemaMap = {
       schema.value = {
         type: Schema.Types.ObjectId,
         autopopulate: true,
-        refPath: `${field.name}${field.localized ? '.{{LOCALE}}' : ''}.relationTo`
-      }
+        refPath: `${field.name}${field.localized ? '.{{LOCALE}}' : ''}.relationTo`,
+      };
       schema.relationTo = { type: String, enum: field.relationTo };
     } else {
       schema = {
@@ -68,7 +68,7 @@ const fieldToSchemaMap = {
       return {
         type: [schema],
         localized: field.localized,
-      }
+      };
     }
 
     return schema;
