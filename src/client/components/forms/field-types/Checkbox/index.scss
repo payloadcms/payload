@@ -1,0 +1,12 @@
+@import '../shared';
+
+.field-type.checkbox {
+  .tooltip {
+    right: auto;
+
+    span {
+      left: calc(#{base(1.25)} / 2);
+      transform: none;
+    }
+  }
+}

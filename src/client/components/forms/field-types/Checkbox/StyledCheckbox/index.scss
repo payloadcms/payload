@@ -20,4 +20,8 @@
       opacity: 1;
     }
   }
+
+  &--has-error {
+    background-color: lighten($error, 20%);
+  }
 }

@@ -6,18 +6,19 @@ import './index.scss';
 const baseClass = 'styled-checkbox';
 
 const StyledCheckbox = ({
-  onClick, isChecked, label, name, isDisabled,
+  onClick, isChecked, label, name, isDisabled, hasError,
 }) => {
   const classes = [
     baseClass,
     isChecked && `${baseClass}--is-checked`,
     isDisabled && `${baseClass}--is-disabled`,
+    hasError && `${baseClass}--has-error`,
   ].filter(Boolean).join(' ');
 
   return (
     <button
       className={classes}
-      onClick={() => (onClick && !isDisabled) && onClick(!isChecked)}
+      onClick={() => !isDisabled && onClick(!isChecked)}
       type="button"
       title={label}
       role="checkbox"
@@ -31,18 +32,19 @@ const StyledCheckbox = ({
 };
 
 StyledCheckbox.defaultProps = {
-  onClick: null,
   isChecked: false,
   label: 'Checkbox',
   isDisabled: false,
+  hasError: false,
 };
 
 StyledCheckbox.propTypes = {
-  onClick: PropTypes.func,
+  onClick: PropTypes.func.isRequired,
   isChecked: PropTypes.bool,
   label: PropTypes.string,
   name: PropTypes.string.isRequired,
   isDisabled: PropTypes.bool,
+  hasError: PropTypes.bool,
 };
 
 export default StyledCheckbox;

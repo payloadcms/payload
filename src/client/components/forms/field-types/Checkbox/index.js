@@ -5,6 +5,8 @@ import Label from '../../Label';
 import Error from '../../Error';
 import StyledCheckbox from './StyledCheckbox';
 
+import './index.scss';
+
 const defaultError = 'Checkbox is required';
 const defaultValidate = value => Boolean(value);
 
@@ -63,6 +65,7 @@ const Checkbox = (props) => {
         name={name}
         label={label}
         isDisabled={formProcessing}
+        hasError={showError}
       />
     </div>
   );
