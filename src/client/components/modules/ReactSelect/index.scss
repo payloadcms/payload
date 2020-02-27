@@ -44,7 +44,7 @@ div.react-select {
 
   .rs__menu {
     border-radius: 0;
-    @extend %inputShadowActive;
+    @include inputShadowActive;
   }
 
   .rs__group-heading {

@@ -1,11 +1,9 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
 import StyledCheckbox from './StyledCheckbox';
-
-import './index.scss';
 
 const defaultError = 'Checkbox is required';
 const defaultValidate = value => Boolean(value);
@@ -34,18 +32,13 @@ const Checkbox = (props) => {
     validate,
   });
 
-  const checkboxRef = useRef(null);
-
   const classes = [
     'field-type',
     'checkbox',
-    value && 'checkbox--is-checked',
     showError && 'error',
   ].filter(Boolean).join(' ');
 
   const fieldWidth = width ? `${width}%` : undefined;
-
-  const formatFieldChangeValue = () => onFieldChange(checkboxRef.current.checked);
 
   return (
     <div
@@ -64,20 +57,12 @@ const Checkbox = (props) => {
         label={label}
         required={required}
       />
-      <input
-        className="checkbox__input"
-        ref={checkboxRef}
-        value={value}
-        onChange={formatFieldChangeValue}
-        disabled={formProcessing ? 'disabled' : undefined}
-        type="checkbox"
-        id={name}
-        name={name}
-        checked={value}
-      />
       <StyledCheckbox
         onClick={onFieldChange}
-        isChecked={value}
+        isChecked={value || false}
+        name={name}
+        label={label}
+        isDisabled={formProcessing}
       />
     </div>
   );

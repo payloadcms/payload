@@ -1,7 +1,7 @@
 @import '../../../scss/styles.scss';
 
 section.section {
-  @extend %shadow;
+  @include shadow;
   margin: base(1) 0;
 
   header,

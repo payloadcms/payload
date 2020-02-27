@@ -1,10 +1,25 @@
-@import '../../../../../scss/styles.scss';
-
+@import '../../shared';
 
 .styled-checkbox {
-  @extend %btn-reset;
-  outline: none;
+  @include formInput;
+  padding: 0;
   cursor: pointer;
-  padding: 30px;
-  box-shadow: $shadow-sm;
+  max-width: base(1.75);
+  font-size: base(1);
+  font-family: $font-body;
+  align-items: center;
+  justify-content: center;
+
+  .checked-symbol {
+    opacity: 0;
+    line-height: 0;
+    position: relative;
+    top: -2px;
+  }
+
+  &--is-checked {
+    .checked-symbol {
+      opacity: 1;
+    }
+  }
 }
