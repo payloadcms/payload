@@ -1,8 +1,7 @@
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
-import Loading from './views/Loading';
 import List from './views/collections/List';
 import config from '../config/sanitizedClientConfig';
 import { useUser } from './data/User';
@@ -16,58 +15,6 @@ import Edit from './views/collections/Edit';
 import EditGlobal from './views/globals/Edit';
 import { requests } from '../api';
 import customComponents from './custom-components';
-
-const CollectionRoutes = ({ match }) => {
-  const collectionRoutes = config?.collections.reduce((routesToRender, collection) => {
-    const ListComponent = customComponents[collection.slug]?.views?.List || List;
-
-    routesToRender.push({
-      path: `${match.url}/collections/${collection.slug}`,
-      component: ListComponent,
-      componentProps: {
-        collection,
-      },
-    });
-
-    routesToRender.push({
-      path: `${match.url}/collections/${collection.slug}/create`,
-      component: Edit,
-    });
-
-    routesToRender.push({
-      path: `${match.url}/collections/${collection.slug}/:id`,
-      component: Edit,
-      componentProps: {
-        isEditing: true,
-        collection,
-      },
-    });
-
-    return routesToRender;
-  }, []);
-
-  return collectionRoutes.map((route, index) => {
-    const ComponentToRender = route.component;
-
-    return (
-      <Route
-        key={index}
-        path={route.path}
-        exact
-        render={(routeProps) => {
-          return (
-            <Suspense fallback={<Loading />}>
-              <ComponentToRender
-                {...routeProps}
-                {...route.componentProps}
-              />
-            </Suspense>
-          );
-        }}
-      />
-    );
-  });
-};
 
 const Routes = () => {
   const [initialized, setInitialized] = useState(null);
@@ -128,9 +75,59 @@ const Routes = () => {
                         >
                           <Dashboard />
                         </Route>
-
-                        <CollectionRoutes match={match} />
-
+                        {config.collections.map((collection) => {
+                          return (
+                            <Route
+                              key={`${collection.slug}-list`}
+                              path={`${match.url}/collections/${collection.slug}`}
+                              exact
+                              render={(routeProps) => {
+                                const ListComponent = (customComponents[collection.slug] && customComponents[collection.slug].List) ? customComponents[collection.slug].List : List;
+                                return (
+                                  <ListComponent
+                                    {...routeProps}
+                                    collection={collection}
+                                  />
+                                );
+                              }}
+                            />
+                          );
+                        })}
+                        {config.collections.map((collection) => {
+                          return (
+                            <Route
+                              key={`${collection.slug}-create`}
+                              path={`${match.url}/collections/${collection.slug}/create`}
+                              exact
+                              render={(routeProps) => {
+                                return (
+                                  <Edit
+                                    {...routeProps}
+                                    collection={collection}
+                                  />
+                                );
+                              }}
+                            />
+                          );
+                        })}
+                        {config.collections.map((collection) => {
+                          return (
+                            <Route
+                              key={`${collection.slug}-edit`}
+                              path={`${match.url}/collections/${collection.slug}/:id`}
+                              exact
+                              render={(routeProps) => {
+                                return (
+                                  <Edit
+                                    isEditing
+                                    {...routeProps}
+                                    collection={collection}
+                                  />
+                                );
+                              }}
+                            />
+                          );
+                        })}
                         {config.globals && config.globals.map((global) => {
                           return (
                             <Route

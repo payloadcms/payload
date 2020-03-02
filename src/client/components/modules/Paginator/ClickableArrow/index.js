@@ -23,7 +23,7 @@ const ClickableArrow = (props) => {
   return (
     <button
       className={classes}
-      onClick={!isDisabled && updatePage}
+      onClick={!isDisabled ? updatePage : undefined}
       type="button"
     >
       <Arrow />
