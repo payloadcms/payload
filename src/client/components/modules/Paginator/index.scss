@@ -10,7 +10,7 @@
     cursor: pointer;
 
     &--is-current {
-      box-shadow: $shadow-sm;
+      @include shadow-sm;
       color: $gray;
       cursor: default;
     }
