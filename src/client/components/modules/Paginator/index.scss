@@ -3,36 +3,40 @@
 .paginator {
   display: flex;
   align-items: flex-end;
+  justify-content: flex-end;
+  margin-bottom: base(1);
 
-  &__prev-arrow,
-  &__next-arrow,
   &__page {
-    @extend %btn-reset;
-    line-height: 1;
-    outline: 0;
-    box-shadow: $shadow-sm;
-    padding: base(.5) base(.65);
-    margin-right: base(.45);
     cursor: pointer;
-    font-size: base(.4);
-    color: $black;
 
     &--is-current {
+      box-shadow: $shadow-sm;
       color: $gray;
       cursor: default;
     }
-  }
 
-  &__prev-arrow {
-    .icon {
-      transform: rotate(180deg);
+    &--is-last-page {
+      margin-right: 0;
     }
   }
 
-  &__ellipsis {
+  .clickable-arrow,
+  &__page {
+    @extend %btn-reset;
+    @extend %small;
+    outline: 0;
+    padding: base(.35) base(.45);
+    color: $black;
     line-height: 1;
-    padding: base(.25);
-    padding-bottom: 0;
-    margin-right: base(.45);
+  }
+
+  &__page,
+  &__separator {
+    margin-right: base(.25);
+  }
+
+  &__separator {
+    align-self: center;
+    color: $gray;
   }
 }

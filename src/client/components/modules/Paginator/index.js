@@ -4,17 +4,15 @@ import { useHistory, useLocation } from 'react-router-dom';
 import queryString from 'qs';
 
 import Page from './Page';
-import Ellipsis from './Ellipsis';
-import NextArrow from './NextArrow';
-import PrevArrow from './PrevArrow';
+import Separator from './Separator';
+import ClickableArrow from './ClickableArrow';
 
 import './index.scss';
 
 const nodeTypes = {
   Page,
-  Ellipsis,
-  NextArrow,
-  PrevArrow,
+  Separator,
+  ClickableArrow,
 };
 
 const baseClass = 'paginator';
@@ -56,8 +54,8 @@ const Pagination = (props) => {
   // Slice out the range of pages that we want to render
   const nodes = pages.slice(rangeStartIndex, rangeEndIndex);
 
-  // Add prev ellipsis if necessary
-  if (currentPage - numberOfNeighbors - 1 >= 2) nodes.unshift({ type: 'Ellipsis' });
+  // Add prev separator if necessary
+  if (currentPage - numberOfNeighbors - 1 >= 2) nodes.unshift({ type: 'Separator' });
   // Add first page if necessary
   if (currentPage > numberOfNeighbors + 1) {
     nodes.unshift({
@@ -65,12 +63,13 @@ const Pagination = (props) => {
       props: {
         page: 1,
         updatePage,
+        isFirstPage: true,
       },
     });
   }
 
-  // Add next ellipsis if necessary
-  if (currentPage + numberOfNeighbors + 1 < totalPages) nodes.push({ type: 'Ellipsis' });
+  // Add next separator if necessary
+  if (currentPage + numberOfNeighbors + 1 < totalPages) nodes.push({ type: 'Separator' });
   // Add last page if necessary
   if (rangeEndIndex < totalPages) {
     nodes.push({
@@ -78,28 +77,29 @@ const Pagination = (props) => {
       props: {
         page: totalPages,
         updatePage,
+        isLastPage: true,
       },
     });
   }
 
   // Add prev and next arrows based on necessity
-  if (hasPrevPage) {
-    nodes.unshift({
-      type: 'PrevArrow',
-      props: {
-        updatePage: () => updatePage(prevPage),
-      },
-    });
-  }
+  nodes.push({
+    type: 'ClickableArrow',
+    props: {
+      updatePage: () => updatePage(prevPage),
+      isDisabled: !hasPrevPage,
+      direction: 'left',
+    },
+  });
 
-  if (hasNextPage) {
-    nodes.push({
-      type: 'NextArrow',
-      props: {
-        updatePage: () => updatePage(nextPage),
-      },
-    });
-  }
+  nodes.push({
+    type: 'ClickableArrow',
+    props: {
+      updatePage: () => updatePage(nextPage),
+      isDisabled: !hasNextPage,
+      direction: 'right',
+    },
+  });
 
   return (
     <div className={baseClass}>
