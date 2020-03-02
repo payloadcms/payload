@@ -1,7 +1,7 @@
 @import '../../../scss/styles';
 
 @mixin formInput () {
-    @extend %inputShadow;
+    @include inputShadow;
     font-family: $font-brand;
     width: 100%;
     border: 1px solid $light-gray;

@@ -10,7 +10,7 @@
     @extend %btn-reset;
     line-height: 1;
     outline: 0;
-    box-shadow: $shadow-sm;
+    @include shadow-sm;
     padding: base(.5) base(.65);
     margin-right: base(.45);
     cursor: pointer;

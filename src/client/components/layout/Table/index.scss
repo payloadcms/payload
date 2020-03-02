@@ -16,7 +16,7 @@ table {
   }
 
   tbody {
-    @extend %shadow-sm;
+    @include shadow-sm;
   }
 
   tr:nth-child(even) {
