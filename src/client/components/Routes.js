@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
-import List from './views/collections/List';
+import DefaultList from './views/collections/List';
 import config from '../config/sanitizedClientConfig';
 import { useUser } from './data/User';
 import Dashboard from './views/Dashboard';
@@ -82,9 +82,9 @@ const Routes = () => {
                               path={`${match.url}/collections/${collection.slug}`}
                               exact
                               render={(routeProps) => {
-                                const ListComponent = (customComponents[collection.slug] && customComponents[collection.slug].List) ? customComponents[collection.slug].List : List;
+                                const List = customComponents[collection.slug]?.views?.List || DefaultList;
                                 return (
-                                  <ListComponent
+                                  <List
                                     {...routeProps}
                                     collection={collection}
                                   />

@@ -38,8 +38,6 @@ const EditView = (props) => {
     });
   } : null;
 
-  console.log(isEditing);
-
   const [{ data }] = usePayloadAPI(
     (isEditing ? `${serverURL}/${collection.slug}/${id}` : null),
     { initialParams: { 'fallback-locale': 'null' } },
