@@ -1,13 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import config from 'payload-config';
 import StatusList, { useStatusList } from '../../modules/Status';
 import ContentBlock from '../../layout/ContentBlock';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import FormSubmit from '../../forms/Submit';
-import getSanitizedClientConfig from '../../../config/getSanitizedClientConfig';
+import config from '../../../config/sanitizedClientConfig';
 import { useUser } from '../../data/User';
 
 import './index.scss';
@@ -16,7 +15,7 @@ const {
   routes: {
     admin,
   },
-} = getSanitizedClientConfig();
+} = config;
 
 const passwordField = {
   name: 'password',

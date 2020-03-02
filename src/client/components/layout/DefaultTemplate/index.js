@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import Sidebar from 'payload/custom-components/layout/Sidebar';
+import DefaultSidebar from '../Sidebar';
 import StepNav, { useStepNav, StepNavProvider } from '../../modules/StepNav';
 import { StatusListProvider } from '../../modules/Status';
 import Localizer from '../../modules/Localizer';
+import customComponents from '../../custom-components';
 
 import './index.scss';
+
+const Sidebar = customComponents?.layout?.Sidebar || DefaultSidebar;
 
 const SetStepNav = ({ stepNav }) => {
   const { setStepNav } = useStepNav();

@@ -1,9 +1,9 @@
 import React from 'react';
-import getSanitizedClientConfig from '../../../config/getSanitizedClientConfig';
+import config from '../../../config/sanitizedClientConfig';
 import Button from '../../controls/Button';
 import DefaultTemplate from '../../layout/DefaultTemplate';
 
-const { routes: { admin } } = getSanitizedClientConfig();
+const { routes: { admin } } = config;
 
 const NotFound = () => {
   return (

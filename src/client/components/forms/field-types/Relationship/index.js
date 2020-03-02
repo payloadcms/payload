@@ -4,7 +4,7 @@ import Cookies from 'universal-cookie';
 import some from 'async-some';
 import ReactSelect from '../../../modules/ReactSelect';
 import useFieldType from '../../useFieldType';
-import getSanitizedClientConfig from '../../../../config/getSanitizedClientConfig';
+import config from '../../../../config/sanitizedClientConfig';
 import Label from '../../Label';
 import Error from '../../Error';
 
@@ -12,7 +12,7 @@ import './index.scss';
 
 const cookies = new Cookies();
 
-const { serverURL, collections } = getSanitizedClientConfig();
+const { serverURL, collections } = config;
 
 const defaultError = 'Please make a selection.';
 const defaultValidate = value => value.length > 0;

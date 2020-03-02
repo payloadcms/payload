@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import DefaultTemplate from '../../layout/DefaultTemplate';
-import getSanitizedClientConfig from '../../../config/getSanitizedClientConfig';
+import config from '../../../config/sanitizedClientConfig';
 
 import './index.scss';
 
@@ -9,7 +9,7 @@ const {
   routes: {
     admin,
   },
-} = getSanitizedClientConfig();
+} = config;
 
 const baseClass = 'dashboard';
 

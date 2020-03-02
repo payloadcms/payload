@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
-import List from 'payload/custom-components/views/collections/List';
-import DefaultList from './views/collections/List';
-import getSanitizedClientConfig from '../config/getSanitizedClientConfig';
+import Loading from './views/Loading';
+import List from './views/collections/List';
+import config from '../config/sanitizedClientConfig';
 import { useUser } from './data/User';
 import Dashboard from './views/Dashboard';
 import Login from './views/Login';
@@ -15,13 +15,12 @@ import MediaLibrary from './views/MediaLibrary';
 import Edit from './views/collections/Edit';
 import EditGlobal from './views/globals/Edit';
 import { requests } from '../api';
-
-const config = getSanitizedClientConfig();
+import customComponents from './custom-components';
 
 const CollectionRoutes = ({ match }) => {
   const collectionRoutes = config?.collections.reduce((routesToRender, collection) => {
-    let ListComponent = (typeof List === 'object' && List[collection.slug]) ? List[collection.slug] : List;
-    if (!ListComponent) ListComponent = DefaultList;
+    const ListComponent = customComponents[collection.slug]?.views?.List || List;
+
     routesToRender.push({
       path: `${match.url}/collections/${collection.slug}`,
       component: ListComponent,
@@ -57,10 +56,12 @@ const CollectionRoutes = ({ match }) => {
         exact
         render={(routeProps) => {
           return (
-            <ComponentToRender
-              {...routeProps}
-              {...route.componentProps}
-            />
+            <Suspense fallback={<Loading />}>
+              <ComponentToRender
+                {...routeProps}
+                {...route.componentProps}
+              />
+            </Suspense>
           );
         }}
       />

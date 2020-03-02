@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { PayloadLogo } from 'payload/components';
+import PayloadLogo from '../PayloadLogo';
 
 const Logo = () => {
   return (

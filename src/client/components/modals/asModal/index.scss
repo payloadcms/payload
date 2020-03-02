@@ -1,4 +1,4 @@
-@import '~payload/client/scss/styles';
+@import '../../../scss/styles.scss';
 
 .modal {
 	transform: translateZ(0);
@@ -16,6 +16,6 @@
 	&.open {
 		opacity: 1;
 		visibility: visible;
-		z-index: $z-modal;
+		z-index: 100;
 	}
 }

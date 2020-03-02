@@ -6,7 +6,7 @@ import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
-import getSanitizedClientConfig from '../../../config/getSanitizedClientConfig';
+import config from '../../../config/sanitizedClientConfig';
 import Button from '../../controls/Button';
 import { useUser } from '../../data/User';
 
@@ -18,7 +18,7 @@ const {
   routes: {
     admin,
   },
-} = getSanitizedClientConfig();
+} = config;
 
 const Login = () => {
   const { addStatus } = useStatusList();

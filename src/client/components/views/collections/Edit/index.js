@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useRouteMatch, useHistory } from 'react-router-dom';
-import getSanitizedClientConfig from '../../../../config/getSanitizedClientConfig';
+import config from '../../../../config/sanitizedClientConfig';
 import DefaultTemplate from '../../../layout/DefaultTemplate';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Form from '../../../forms/Form';
@@ -18,7 +18,7 @@ const {
   routes: {
     admin,
   },
-} = getSanitizedClientConfig();
+} = config;
 
 const baseClass = 'collection-edit';
 
@@ -75,11 +75,11 @@ const EditView = (props) => {
         )}
         {!isEditing
           && (
-          <h1>
-            Create New
+            <h1>
+              Create New
             {' '}
-            {collection.labels.singular}
-          </h1>
+              {collection.labels.singular}
+            </h1>
           )
         }
       </header>

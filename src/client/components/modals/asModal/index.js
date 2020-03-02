@@ -5,16 +5,12 @@
 
 import React, { Component } from 'react';
 import { createPortal } from 'react-dom';
-import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import queryString from 'qs';
-import { Close, Button } from 'payload/components';
+import Close from '../../graphics/Close';
+import Button from '../../controls/Button';
 
 import './index.scss';
-
-const mapStateToProps = state => ({
-  searchParams: state.common.searchParams
-})
 
 const asModal = (PassedComponent, modalSlug) => {
 

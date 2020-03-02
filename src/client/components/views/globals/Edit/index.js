@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import getSanitizedClientConfig from '../../../../config/getSanitizedClientConfig';
+import config from '../../../../config/sanitizedClientConfig';
 import DefaultTemplate from '../../../layout/DefaultTemplate';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Form from '../../../forms/Form';
@@ -17,7 +17,7 @@ const {
   routes: {
     admin,
   },
-} = getSanitizedClientConfig();
+} = config;
 
 const baseClass = 'global-edit';
 

@@ -2,11 +2,9 @@ import React, { Component } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '../../controls/Button';
 import api from '../../../api';
-import getSanitizedClientConfig from '../../../config/getSanitizedClientConfig';
+import config from '../../../config/sanitizedClientConfig';
 
 import './index.scss';
-
-const config = getSanitizedClientConfig();
 
 class UploadMedia extends Component {
   constructor() {
