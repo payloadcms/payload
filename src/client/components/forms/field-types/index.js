@@ -2,6 +2,7 @@ import email from './Email';
 import group from './Group';
 import hidden from './HiddenInput';
 import text from './Text';
+import date from './DateTime';
 // import upload from './Upload';
 import relationship from './Relationship';
 import password from './Password';
@@ -16,6 +17,7 @@ export default {
   group,
   hidden,
   text,
+  date,
   relationship,
   // upload,
   number,
