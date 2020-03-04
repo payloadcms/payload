@@ -1,6 +1,35 @@
 @import '../shared';
 
+$cal-icon-width: 24px;
+
 .date-time-picker {
+
+  &--hide-dates {
+    .react-datepicker {
+      &__month-container {
+        display: none;
+        visibility: hidden;
+      }
+    }
+  }
+
+  &__input-wrapper {
+    position: relative;
+
+    .icon {
+      pointer-events: none;
+      position: absolute;
+      right: base(.75);
+      top: 50%;
+      transform: translateY(-50%);
+      width: $cal-icon-width;
+      height: auto;
+
+      path {
+        fill: $gray;
+      }
+    }
+  }
 
   .react-datepicker-wrapper {
     display: block;
@@ -13,6 +42,7 @@
 
   .react-datepicker__input-container input {
     @include formInput;
+    padding-right: calc(#{base(.75)} + #{$cal-icon-width});
   }
 
   &--has-error {
@@ -106,7 +136,7 @@
   }
 
   .react-datepicker__day--keyboard-selected, .react-datepicker__month-text--keyboard-selected {
-    background: $black;
+    background: $gray;
     box-shadow: inset 0px 0px 0px 1px $primary, 0px 0px 0px 1px $primary;
     color: white;
     border-radius: 0;
@@ -135,4 +165,11 @@
     line-height: 20px;
   }
 
+  @include small-break {
+    &__input-wrapper {
+      .icon {
+        top: calc(50% - #{base(.25)});
+      }
+    }
+  }
 }
