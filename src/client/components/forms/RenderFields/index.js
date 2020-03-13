@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import fieldTypes from '../field-types';
 
@@ -10,7 +10,7 @@ const RenderFields = ({ fields, initialData }) => {
       <>
         {fields.map((field, i) => {
           const { defaultValue } = field;
-          const FieldComponent = field.component || fieldTypes[field.type];
+          const FieldComponent = fieldTypes[field.type];
 
           if (FieldComponent) {
             return (
