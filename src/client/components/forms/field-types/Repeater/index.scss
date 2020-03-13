@@ -38,20 +38,20 @@
 
   .btn.delete {
     position: absolute;
-    height: 30px;
-    width: 30px;
+    height: 20px;
+    width: 20px;
     margin: 0;
     top: base(1);
     right: base(1);
-    padding: 3px;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
 
     .x {
       @include color-svg($error);
-      height: 15px;
-      width: 15px;
+      height: 100%;
+      padding: 3px;
     }
   }
 }

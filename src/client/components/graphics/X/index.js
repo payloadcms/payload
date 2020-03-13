@@ -5,30 +5,38 @@ import './index.scss';
 const X = () => {
   return (
     <svg
-      width="22px"
-      height="20px"
-      viewBox="0 0 22 20"
+      width="15px"
+      height="16px"
+      viewBox="0 0 15 16"
       version="1.1"
       xmlns="http://www.w3.org/2000/svg"
       className="x"
     >
       <g
         stroke="none"
-        strokeWidth="2"
+        strokeWidth="1"
         fill="none"
         fillRule="evenodd"
+        strokeLinecap="square"
       >
         <g
+          transform="translate(7.000000, 8.000000) rotate(-315.000000) translate(-7.000000, -8.000000) translate(-3.500000, -2.500000)"
           className="stroke"
-          transform="translate(1.000000, 0.000000)"
         >
-          <path
-            d="M0,0 C6.66666667,6.66666667 13.3333333,13.3333333 20,20"
+          <line
+            x1="11"
+            y1="1"
+            x2="11"
+            y2="20"
+            id="Line"
           />
-          <path
-            d="M0,0 C6.66666667,6.66666667 13.3333333,13.3333333 20,20"
-            id="Path"
-            transform="translate(10.000000, 10.000000) scale(-1, 1) translate(-10.000000, -10.000000) "
+          <line
+            x1="10.5"
+            y1="0.5"
+            x2="10.5"
+            y2="19.5"
+            id="Line"
+            transform="translate(10.500000, 10.000000) rotate(90.000000) translate(-10.500000, -10.000000) "
           />
         </g>
       </g>
