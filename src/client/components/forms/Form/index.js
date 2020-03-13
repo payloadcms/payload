@@ -101,7 +101,7 @@ const Form = (props) => {
     });
 
     dispatchFields({
-      type: 'replace',
+      type,
       value: {
         ...stateWithoutFields,
         ...reindexedRows,

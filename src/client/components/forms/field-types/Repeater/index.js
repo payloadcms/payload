@@ -4,8 +4,14 @@ import PropTypes from 'prop-types';
 import FormContext from '../../Form/Context';
 import Section from '../../../layout/Section';
 import RenderFields from '../../RenderFields';
+import RepeatFieldButton from '../../../controls/RepeatFieldButton';
+import Button from '../../../controls/Button';
+import X from '../../../graphics/X';
+
 
 import './index.scss';
+
+const baseClass = 'field-repeater';
 
 const Repeater = (props) => {
   const formContext = useContext(FormContext);
@@ -47,36 +53,37 @@ const Repeater = (props) => {
   const iterableInternalRowCount = Array.from(Array(internalRowCount).keys());
 
   return (
-    <div className="field-repeater">
-      <Section heading={label}>
+    <div className={baseClass}>
+      <Section
+        heading={label}
+        className="repeater"
+      >
 
         {iterableInternalRowCount.map((_, rowIndex) => {
           return (
             <React.Fragment key={rowIndex}>
-              <h2>{`Repeater Item ${rowIndex}`}</h2>
+              <div className={`${baseClass}__section-inner`}>
+                <Button
+                  className="delete"
+                  onClick={() => removeRow({ rowIndex })}
+                  type="error"
+                >
+                  <X />
+                </Button>
+                <h2>{`${label} - Item ${rowIndex}`}</h2>
 
-              <RenderFields
-                fields={fields.map((field) => {
-                  return ({
-                    ...field,
-                    name: `${name}.${rowIndex}.${field.name}`,
-                    defaultValue: initialRows[rowIndex] ? initialRows[rowIndex][field.name] : null,
-                  });
-                })}
-              />
+                <RenderFields
+                  fields={fields.map((field) => {
+                    return ({
+                      ...field,
+                      name: `${name}.${rowIndex}.${field.name}`,
+                      defaultValue: initialRows[rowIndex] ? initialRows[rowIndex][field.name] : null,
+                    });
+                  })}
+                />
+              </div>
 
-              <button
-                onClick={() => addNewRow({ rowIndex })}
-                type="button"
-              >
-                {`Add after ${rowIndex}`}
-              </button>
-              <button
-                onClick={() => removeRow({ rowIndex })}
-                type="button"
-              >
-                {`Remove ${rowIndex}`}
-              </button>
+              <RepeatFieldButton onClick={() => addNewRow({ rowIndex })} />
             </React.Fragment>
           );
         })}
