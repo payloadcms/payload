@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 
 import FormContext from '../../Form/Context';
@@ -14,7 +14,7 @@ const baseClass = 'field-repeater';
 
 const Repeater = (props) => {
   const formContext = useContext(FormContext);
-  const { adjustRows } = formContext;
+  const { dispatchFields } = formContext;
 
   const {
     label,
@@ -23,33 +23,10 @@ const Repeater = (props) => {
     fields,
   } = props;
 
-  const [internalRowCount, setInternalRowCount] = useState(1);
-  useEffect(() => { setInternalRowCount(defaultOrSavedValue.length); }, [defaultOrSavedValue]);
+  const addNewRow = rowIndex => dispatchFields({ type: 'ADD_ROW', payload: { rowIndex, name } });
+  const removeRow = rowIndex => dispatchFields({ type: 'REMOVE_ROW', payload: { rowIndex, name } });
 
-  function addNewRow({ rowIndex }) {
-    setInternalRowCount(count => count + 1);
-    adjustRows({
-      index: rowIndex + 1,
-      fieldName: name,
-      totalRows: internalRowCount,
-      fields,
-      adjustmentType: 'addAfter',
-    });
-  }
-
-  function removeRow({ rowIndex }) {
-    setInternalRowCount(count => count - 1);
-    adjustRows({
-      index: rowIndex,
-      fieldName: name,
-      totalRows: internalRowCount,
-      fields,
-      adjustmentType: 'remove',
-    });
-  }
-
-  const initialRows = defaultOrSavedValue.length > 0 ? defaultOrSavedValue : [{}];
-  const iterableInternalRowCount = Array.from(Array(internalRowCount).keys());
+  const rows = defaultOrSavedValue.length > 0 ? defaultOrSavedValue : [];
 
   return (
     <div className={baseClass}>
@@ -58,17 +35,17 @@ const Repeater = (props) => {
         className="repeater"
       >
 
-        {iterableInternalRowCount.length === 0
+        {rows.length === 0
           && (
-            <RepeatFieldButton onClick={() => addNewRow({ rowIndex: 0 })} />
+            <RepeatFieldButton onClick={() => addNewRow(0)} />
           )}
-        {iterableInternalRowCount.map((_, rowIndex) => {
+        {rows.map((_, rowIndex) => {
           return (
             <React.Fragment key={rowIndex}>
               <div className={`${baseClass}__section-inner`}>
                 <Button
                   className="delete"
-                  onClick={() => removeRow({ rowIndex })}
+                  onClick={() => removeRow(rowIndex)}
                   type="error"
                 >
                   <X />
@@ -86,7 +63,7 @@ const Repeater = (props) => {
                 />
               </div>
 
-              <RepeatFieldButton onClick={() => addNewRow({ rowIndex })} />
+              <RepeatFieldButton onClick={() => addNewRow(rowIndex)} />
             </React.Fragment>
           );
         })}
