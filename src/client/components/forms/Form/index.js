@@ -1,7 +1,7 @@
 import React, { useState, useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { unflatten } from 'flat';
+import flatten, { unflatten } from 'flat';
 import FormContext from './Context';
 import { useLocale } from '../../utilities/Locale';
 import { useStatusList } from '../../modules/Status';
@@ -12,25 +12,112 @@ import './index.scss';
 
 const baseClass = 'form';
 
-const initialFieldState = {};
+const reduceToFieldNames = fields => fields.reduce((acc, field) => {
+  if (field.name) acc.push(field.name);
+  return acc;
+}, []);
 
+const reindexRows = ({
+  fieldName, fields, rowFieldNamesAsArray, totalRows, index: adjustmentIndex, adjustmentType,
+}) => {
+  return Array.from(Array(totalRows).keys()).reduce((reindexedRows, _, rowIndex) => {
+    const currentRow = rowFieldNamesAsArray.reduce((fieldAcc, rowFieldName) => {
+      let newIndex;
+      const defaultFieldValues = {
+        value: null,
+        valid: true,
+      };
+
+      switch (adjustmentType) {
+        case 'addAfter':
+          newIndex = rowIndex <= adjustmentIndex ? rowIndex : rowIndex + 1;
+
+          if (rowIndex === adjustmentIndex) {
+            return {
+              ...fieldAcc,
+              [`${fieldName}.${newIndex}.${rowFieldName}`]: fields[`${fieldName}.${rowIndex}.${rowFieldName}`],
+            };
+          }
+          return {
+            ...fieldAcc,
+            [`${fieldName}.${newIndex}.${rowFieldName}`]: fields[`${fieldName}.${rowIndex}.${rowFieldName}`],
+          };
+
+        case 'remove':
+          if (rowIndex === adjustmentIndex) return fieldAcc;
+
+          newIndex = rowIndex < adjustmentIndex ? rowIndex : rowIndex - 1;
+          return {
+            ...fieldAcc,
+            [`${fieldName}.${newIndex}.${rowFieldName}`]: fields[`${fieldName}.${rowIndex}.${rowFieldName}`] || { ...defaultFieldValues },
+          };
+
+        default:
+          return { ...fieldAcc };
+      }
+    }, {});
+
+    return { ...reindexedRows, ...currentRow };
+  }, {});
+};
+
+const initialFieldState = {};
 function fieldReducer(state, action) {
-  return {
-    ...state,
-    [action.name]: {
-      value: action.value,
-      valid: action.valid,
-    },
-  };
+  switch (action.type) {
+    case 'replace':
+      return {
+        ...action.value,
+      };
+
+    default:
+      return {
+        ...state,
+        [action.name]: {
+          value: action.value,
+          valid: action.valid,
+        },
+      };
+  }
 }
 
 const Form = (props) => {
-  const [fields, setField] = useReducer(fieldReducer, initialFieldState);
+  const [fields, dispatchFields] = useReducer(fieldReducer, initialFieldState);
   const [submitted, setSubmitted] = useState(false);
   const [processing, setProcessing] = useState(false);
   const history = useHistory();
   const locale = useLocale();
   const { addStatus } = useStatusList();
+
+  function adjustRows({
+    index, fieldName, fields: fieldsForInsert, totalRows, adjustmentType,
+  }) {
+    const rowFieldNamesAsArray = reduceToFieldNames(fieldsForInsert);
+    const reindexedRows = reindexRows({
+      fieldName,
+      fields,
+      rowFieldNamesAsArray,
+      totalRows,
+      index,
+      adjustmentType,
+    });
+
+    const stateWithoutFields = { ...fields };
+    Array.from(Array(totalRows).keys()).forEach((rowIndex) => {
+      rowFieldNamesAsArray.forEach((rowFieldName) => { delete stateWithoutFields[`${fieldName}.${rowIndex}.${rowFieldName}`]; });
+    });
+    console.log({
+      ...stateWithoutFields,
+      ...reindexedRows,
+    });
+
+    dispatchFields({
+      type: 'replace',
+      value: {
+        ...stateWithoutFields,
+        ...reindexedRows,
+      },
+    });
+  }
 
   const {
     onSubmit,
@@ -143,10 +230,11 @@ const Form = (props) => {
       className={classes}
     >
       <FormContext.Provider value={{
-        setField,
+        dispatchFields,
         fields,
         processing,
         submitted,
+        adjustRows,
       }}
       >
         <HiddenInput

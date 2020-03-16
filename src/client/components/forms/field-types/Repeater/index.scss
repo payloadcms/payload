@@ -1,0 +1,57 @@
+@import '../../../../scss/styles.scss';
+
+.field-repeater {
+  .content {
+    flex-direction: column;
+  }
+
+  &__section-inner {
+    padding: base(1);
+    margin-right: base(1);
+    background: $light-gray;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .repeat-field-button {
+    .btn {
+      @include color-svg($primary);
+      height: 30px;
+      width: 30px;
+      top: 50%;
+      left: 50%;
+      padding: 0;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        @include color-svg(white);
+      }
+
+      .crosshair {
+        padding: 3px;
+      }
+    }
+  }
+
+  .btn.delete {
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    margin: 0;
+    top: base(1);
+    right: base(1);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .x {
+      @include color-svg($error);
+      height: 100%;
+      padding: 3px;
+    }
+  }
+}

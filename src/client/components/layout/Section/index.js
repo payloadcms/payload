@@ -1,20 +1,43 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import './index.scss';
 
-const Section = props => {
+const baseClass = 'section';
+
+const Section = (props) => {
+  const { className, heading, children } = props;
+
+  const classes = [
+    baseClass,
+    className && className,
+  ].filter(Boolean).join(' ');
+
   return (
-    <section className={`section${props.className ? ` ${props.className}` : ''}`}>
-      {props.heading &&
-        <header>
-          <h2>{props.heading}</h2>
-        </header>
-      }
+    <section className={classes}>
+      {heading
+        && (
+          <header>
+            <h2>{heading}</h2>
+          </header>
+        )}
       <div className="content">
-        {props.children}
+        {children}
       </div>
     </section>
-  )
-}
+  );
+};
+
+Section.defaultProps = {
+  className: '',
+  heading: '',
+  children: undefined,
+};
+
+Section.propTypes = {
+  className: PropTypes.string,
+  heading: PropTypes.string,
+  children: PropTypes.node,
+};
 
 export default Section;

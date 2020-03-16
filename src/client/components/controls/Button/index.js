@@ -25,7 +25,7 @@ class Button extends Component {
       ...this.props,
       className: classes,
       onClick: this.props.onClick,
-      disabled: this.props.disabled
+      disabled: this.props.disabled,
     };
   }
 
@@ -33,14 +33,20 @@ class Button extends Component {
     switch (this.props.el) {
       case 'link':
         return (
-          <Link {...this.buttonProps} to={this.props.to ? this.props.to : this.props.url}>
+          <Link
+            {...this.buttonProps}
+            to={this.props.to ? this.props.to : this.props.url}
+          >
             {this.props.children}
           </Link>
         );
 
       case 'anchor':
         return (
-          <a {...this.buttonProps} href={this.props.url}>
+          <a
+            {...this.buttonProps}
+            href={this.props.url}
+          >
             {this.props.children}
           </a>
         );

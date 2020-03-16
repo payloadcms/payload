@@ -5,7 +5,7 @@ import './index.scss';
 
 const useFieldType = (options) => {
   const formContext = useContext(FormContext);
-  const { setField, submitted, processing } = formContext;
+  const { dispatchFields, submitted, processing } = formContext;
 
   const {
     name,
@@ -16,14 +16,14 @@ const useFieldType = (options) => {
   } = options;
 
   const sendField = useCallback((valueToSend) => {
-    setField({
+    dispatchFields({
       name,
       value: valueToSend,
       valid: required && validate
         ? validate(valueToSend || '')
         : true,
     });
-  }, [name, required, setField, validate]);
+  }, [name, required, dispatchFields, validate]);
 
   useEffect(() => {
     sendField(defaultValue);
