@@ -1,5 +1,6 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { unflatten } from 'flat';
 
 import FormContext from '../../Form/Context';
 import Section from '../../../layout/Section';
@@ -13,20 +14,36 @@ import './index.scss';
 const baseClass = 'field-repeater';
 
 const Repeater = (props) => {
+  const [rowCount, setRowCount] = useState(0);
   const formContext = useContext(FormContext);
-  const { dispatchFields } = formContext;
+  const { fields: fieldState, dispatchFields } = formContext;
 
   const {
     label,
     name,
-    defaultValue: defaultOrSavedValue,
     fields,
+    defaultValue,
   } = props;
 
-  const addNewRow = rowIndex => dispatchFields({ type: 'ADD_ROW', payload: { rowIndex, name } });
-  const removeRow = rowIndex => dispatchFields({ type: 'REMOVE_ROW', payload: { rowIndex, name } });
+  const addNewRow = (rowIndex) => {
+    dispatchFields({
+      type: 'ADD_ROW', rowIndex, name, fields,
+    });
 
-  const rows = defaultOrSavedValue.length > 0 ? defaultOrSavedValue : [];
+    setRowCount(rowCount + 1);
+  };
+
+  const removeRow = (rowIndex) => {
+    dispatchFields({
+      type: 'REMOVE_ROW', rowIndex, name, fields,
+    });
+
+    setRowCount(rowCount - 1);
+  };
+
+  useEffect(() => {
+    setRowCount(defaultValue.length);
+  }, [defaultValue]);
 
   return (
     <div className={baseClass}>
@@ -35,11 +52,11 @@ const Repeater = (props) => {
         className="repeater"
       >
 
-        {rows.length === 0
+        {rowCount === 0
           && (
             <RepeatFieldButton onClick={() => addNewRow(0)} />
           )}
-        {rows.map((_, rowIndex) => {
+        {Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
           return (
             <React.Fragment key={rowIndex}>
               <div className={`${baseClass}__section-inner`}>
@@ -54,10 +71,11 @@ const Repeater = (props) => {
 
                 <RenderFields
                   fields={fields.map((field) => {
+                    const fieldName = `${name}.${rowIndex}.${field.name}`;
                     return ({
                       ...field,
-                      name: `${name}.${rowIndex}.${field.name}`,
-                      defaultValue: initialRows[rowIndex] ? initialRows[rowIndex][field.name] : null,
+                      name: fieldName,
+                      defaultValue: fieldState?.[fieldName]?.value,
                     });
                   })}
                 />
