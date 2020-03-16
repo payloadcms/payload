@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { unflatten } from 'flat';
 
 import FormContext from '../../Form/Context';
 import Section from '../../../layout/Section';
