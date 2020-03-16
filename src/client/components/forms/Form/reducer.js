@@ -1,15 +1,20 @@
 import { unflatten, flatten } from 'flat';
 
 const splitRowsFromState = (state, name) => {
+  // Take a copy of state
   const remainingState = { ...state };
-  const rowObject = Object.keys(state).reduce((acc, key) => {
+
+  const rowObject = {};
+
+  // Loop over all keys from state
+  // If the key begins with the name of the parent field,
+  // Add value to rowObject and delete it from remaining state
+  Object.keys(state).forEach((key) => {
     if (key.indexOf(`${name}.`) === 0) {
-      acc[key] = state[key];
+      rowObject[key] = state[key];
       delete remainingState[key];
     }
-
-    return acc;
-  }, {});
+  });
 
   const rows = unflatten(rowObject);
 
@@ -42,7 +47,10 @@ function fieldReducer(state, action) {
       const { rowIndex, name, fields } = action;
       const { rows, remainingState } = splitRowsFromState(state, name);
 
+      // Get names of sub fields
       const subFields = fields.reduce((acc, field) => ({ ...acc, [field.name]: {} }), {});
+
+      // Add new object containing subfield names to rows array
       rows.splice(rowIndex + 1, 0, subFields);
 
       return {
