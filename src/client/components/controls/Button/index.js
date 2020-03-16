@@ -19,8 +19,8 @@ const Button = (props) => {
   ].filter(Boolean).join(' ');
 
   function handleClick(event) {
-    event.preventDefault();
-    onClick();
+    if (type !== 'submit' && onClick) event.preventDefault();
+    if (onClick) onClick();
   }
 
   const buttonProps = {
@@ -53,8 +53,8 @@ const Button = (props) => {
     default:
       return (
         <button
-          {...buttonProps}
           type="button"
+          {...buttonProps}
         >
           {children}
         </button>
