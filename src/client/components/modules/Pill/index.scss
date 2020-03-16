@@ -1,0 +1,9 @@
+@import '../../../scss/styles.scss';
+
+.pill {
+  @extend %uppercase-label;
+  color: $black;
+  border: 1px solid $gray;
+  border-radius: 3px;
+  padding: 0 base(.25);
+}

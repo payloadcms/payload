@@ -1,16 +1,70 @@
 @import '../../../../scss/styles.scss';
 
 .field-repeater {
+
   .content {
     flex-direction: column;
   }
 
-  &__section-inner {
-    padding: base(1);
+  &__section {
     margin-right: base(1);
     background: $light-gray;
     flex-direction: column;
     position: relative;
+
+    + .field-repeater__section {
+      margin-top: base(.5);
+    }
+  }
+
+  &__section-header {
+    padding: base(.75) base(1);
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid white;
+
+    .pill {
+      margin-right: base(.5);
+    }
+
+    &__heading {
+      font-family: $font-body;
+      margin: 0;
+      font-size: base(.65);
+    }
+
+    &__controls {
+      margin-left: auto;
+
+      .btn {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .icon-button--crossOut,
+      .icon-button--crosshair {
+        margin-right: base(.25);
+      }
+
+      .icon-button--crosshair {
+        border-color: $primary;
+        @include color-svg($primary);
+
+        &:hover {
+          background: lighten($primary, 50%);
+        }
+      }
+
+      .icon-button--arrow {
+        svg {
+          transform: rotate(-90deg);
+        }
+      }
+    }
+  }
+
+  &__section-content {
+    padding: base(.75) base(1);
   }
 
   .repeat-field-button {
@@ -26,10 +80,6 @@
       align-items: center;
       justify-content: center;
 
-      &:hover {
-        @include color-svg(white);
-      }
-
       .crosshair {
         padding: 3px;
       }
@@ -37,21 +87,13 @@
   }
 
   .btn.delete {
-    position: absolute;
-    height: 20px;
-    width: 20px;
-    margin: 0;
-    top: base(1);
-    right: base(1);
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    line-height: 0;
+    padding: base(.15);
 
     .x {
+      padding: 1px;
       @include color-svg($error);
       height: 100%;
-      padding: 3px;
     }
   }
 }

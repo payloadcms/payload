@@ -1,7 +1,6 @@
 @import '../../../scss/styles.scss';
 
 .field-type {
-  @include gutter;
   margin-bottom: base(.5);
   position: relative;
   width: 100%;

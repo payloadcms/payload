@@ -4,9 +4,8 @@ import PropTypes from 'prop-types';
 import FormContext from '../../Form/Context';
 import Section from '../../../layout/Section';
 import RenderFields from '../../RenderFields';
-import RepeatFieldButton from '../../../controls/RepeatFieldButton';
-import Button from '../../../controls/Button';
-import X from '../../../graphics/X';
+import IconButton from '../../../controls/IconButton';
+import Pill from '../../../modules/Pill';
 
 import './index.scss';
 
@@ -24,7 +23,7 @@ const Repeater = (props) => {
     defaultValue,
   } = props;
 
-  const addNewRow = (rowIndex) => {
+  const addRow = (rowIndex) => {
     dispatchFields({
       type: 'ADD_ROW', rowIndex, name, fields,
     });
@@ -50,37 +49,50 @@ const Repeater = (props) => {
         heading={label}
         className="repeater"
       >
-
-        {rowCount === 0
-          && (
-            <RepeatFieldButton onClick={() => addNewRow(0)} />
-          )}
         {Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
           return (
             <React.Fragment key={rowIndex}>
-              <div className={`${baseClass}__section-inner`}>
-                <Button
-                  className="delete"
-                  onClick={() => removeRow(rowIndex)}
-                  type="error"
-                >
-                  <X />
-                </Button>
-                <h2>{`${label} - Item ${rowIndex}`}</h2>
+              <div className={`${baseClass}__section`}>
+                <div className={`${baseClass}__section-header`}>
+                  <Pill>
+                    {name}
+                  </Pill>
+                  <h4 className={`${baseClass}__section-header__heading`}>Title Goes Here</h4>
 
-                <RenderFields
-                  fields={fields.map((field) => {
-                    const fieldName = `${name}.${rowIndex}.${field.name}`;
-                    return ({
-                      ...field,
-                      name: fieldName,
-                      defaultValue: fieldState?.[fieldName]?.value,
-                    });
-                  })}
-                />
+                  <div className={`${baseClass}__section-header__controls`}>
+                    <IconButton
+                      iconName="crosshair"
+                      onClick={() => addRow(rowIndex)}
+                      size="small"
+                    />
+
+                    <IconButton
+                      iconName="crossOut"
+                      onClick={() => removeRow(rowIndex)}
+                      size="small"
+                    />
+
+                    <IconButton
+                      iconName="arrow"
+                      // onClick={() => removeRow(rowIndex)}
+                      size="small"
+                    />
+                  </div>
+                </div>
+
+                <div className={`${baseClass}__section-content`}>
+                  <RenderFields
+                    fields={fields.map((field) => {
+                      const fieldName = `${name}.${rowIndex}.${field.name}`;
+                      return ({
+                        ...field,
+                        name: fieldName,
+                        defaultValue: fieldState?.[fieldName]?.value,
+                      });
+                    })}
+                  />
+                </div>
               </div>
-
-              <RepeatFieldButton onClick={() => addNewRow(rowIndex)} />
             </React.Fragment>
           );
         })}
