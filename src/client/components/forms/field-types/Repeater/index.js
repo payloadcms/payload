@@ -8,7 +8,6 @@ import RepeatFieldButton from '../../../controls/RepeatFieldButton';
 import Button from '../../../controls/Button';
 import X from '../../../graphics/X';
 
-
 import './index.scss';
 
 const baseClass = 'field-repeater';
@@ -34,7 +33,7 @@ const Repeater = (props) => {
       fieldName: name,
       totalRows: internalRowCount,
       fields,
-      type: 'addAfter',
+      adjustmentType: 'addAfter',
     });
   }
 
@@ -45,7 +44,7 @@ const Repeater = (props) => {
       fieldName: name,
       totalRows: internalRowCount,
       fields,
-      type: 'remove',
+      adjustmentType: 'remove',
     });
   }
 
@@ -59,6 +58,10 @@ const Repeater = (props) => {
         className="repeater"
       >
 
+        {iterableInternalRowCount.length === 0
+          && (
+            <RepeatFieldButton onClick={() => addNewRow({ rowIndex: 0 })} />
+          )}
         {iterableInternalRowCount.map((_, rowIndex) => {
           return (
             <React.Fragment key={rowIndex}>

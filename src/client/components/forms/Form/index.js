@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useCallback } from 'react';
+import React, { useState, useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import flatten, { unflatten } from 'flat';
@@ -18,14 +18,20 @@ const reduceToFieldNames = fields => fields.reduce((acc, field) => {
 }, []);
 
 const reindexRows = ({
-  fieldName, fields, rowFieldNamesAsArray, totalRows, index: adjustmentIndex, type,
+  fieldName, fields, rowFieldNamesAsArray, totalRows, index: adjustmentIndex, adjustmentType,
 }) => {
   return Array.from(Array(totalRows).keys()).reduce((reindexedRows, _, rowIndex) => {
     const currentRow = rowFieldNamesAsArray.reduce((fieldAcc, rowFieldName) => {
       let newIndex;
-      switch (type) {
+      const defaultFieldValues = {
+        value: null,
+        valid: true,
+      };
+
+      switch (adjustmentType) {
         case 'addAfter':
           newIndex = rowIndex <= adjustmentIndex ? rowIndex : rowIndex + 1;
+
           if (rowIndex === adjustmentIndex) {
             return {
               ...fieldAcc,
@@ -38,12 +44,12 @@ const reindexRows = ({
           };
 
         case 'remove':
-          if (rowIndex === adjustmentIndex) return { ...fieldAcc };
+          if (rowIndex === adjustmentIndex) return fieldAcc;
 
           newIndex = rowIndex < adjustmentIndex ? rowIndex : rowIndex - 1;
           return {
             ...fieldAcc,
-            [`${fieldName}.${newIndex}.${rowFieldName}`]: fields[`${fieldName}.${rowIndex}.${rowFieldName}`],
+            [`${fieldName}.${newIndex}.${rowFieldName}`]: fields[`${fieldName}.${rowIndex}.${rowFieldName}`] || { ...defaultFieldValues },
           };
 
         default:
@@ -83,7 +89,7 @@ const Form = (props) => {
   const { addStatus } = useStatusList();
 
   function adjustRows({
-    index, fieldName, fields: fieldsForInsert, totalRows, type,
+    index, fieldName, fields: fieldsForInsert, totalRows, adjustmentType,
   }) {
     const rowFieldNamesAsArray = reduceToFieldNames(fieldsForInsert);
     const reindexedRows = reindexRows({
@@ -92,16 +98,20 @@ const Form = (props) => {
       rowFieldNamesAsArray,
       totalRows,
       index,
-      type,
+      adjustmentType,
     });
 
     const stateWithoutFields = { ...fields };
     Array.from(Array(totalRows).keys()).forEach((rowIndex) => {
       rowFieldNamesAsArray.forEach((rowFieldName) => { delete stateWithoutFields[`${fieldName}.${rowIndex}.${rowFieldName}`]; });
     });
+    console.log({
+      ...stateWithoutFields,
+      ...reindexedRows,
+    });
 
     dispatchFields({
-      type,
+      type: 'replace',
       value: {
         ...stateWithoutFields,
         ...reindexedRows,
