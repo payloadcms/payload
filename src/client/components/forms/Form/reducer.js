@@ -1,5 +1,24 @@
 import { unflatten, flatten } from 'flat';
 
+const splitRowsFromState = (state, name) => {
+  const remainingState = { ...state };
+  const rowObject = Object.keys(state).reduce((acc, key) => {
+    if (key.indexOf(`${name}.`) === 0) {
+      acc[key] = state[key];
+      delete remainingState[key];
+    }
+
+    return acc;
+  }, {});
+
+  const rows = unflatten(rowObject);
+
+  return {
+    rows: rows[name] || [],
+    remainingState,
+  };
+};
+
 function fieldReducer(state, action) {
   switch (action.type) {
     case 'REPLACE_ALL':
@@ -8,39 +27,28 @@ function fieldReducer(state, action) {
       };
 
     case 'REMOVE_ROW': {
+      const { rowIndex, name } = action;
+      const { rows, remainingState } = splitRowsFromState(state, name);
+
+      rows.splice(rowIndex, 1);
+
       return {
-        ...state,
+        ...remainingState,
+        ...(flatten({ [name]: rows }, { maxDepth: 3 })),
       };
     }
 
     case 'ADD_ROW': {
       const { rowIndex, name, fields } = action;
-
-      const newState = { ...state };
-
-      const rows = {};
-
-      Object.keys(newState).forEach((key) => {
-        if (key.indexOf(`${name}.`) === 0) {
-          rows[key] = newState[key];
-          delete newState[key];
-        }
-      });
-
-      const unflattenedRows = unflatten(rows);
-
-      if (!unflattenedRows[name]) unflattenedRows[name] = [];
+      const { rows, remainingState } = splitRowsFromState(state, name);
 
       const subFields = fields.reduce((acc, field) => ({ ...acc, [field.name]: {} }), {});
+      rows.splice(rowIndex + 1, 0, subFields);
 
-      unflattenedRows[name].splice(rowIndex + 1, 0, subFields);
-
-      const finalState = {
-        ...newState,
-        ...(flatten(unflattenedRows, { maxDepth: 3 })),
+      return {
+        ...remainingState,
+        ...(flatten({ [name]: rows }, { maxDepth: 3 })),
       };
-
-      return finalState;
     }
 
     default:
