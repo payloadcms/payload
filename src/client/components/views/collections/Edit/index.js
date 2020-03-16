@@ -10,6 +10,7 @@ import APIURL from '../../../modules/APIURL';
 import Button from '../../../controls/Button';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
+import customComponents from '../../../custom-components';
 
 import './index.scss';
 
@@ -77,7 +78,7 @@ const EditView = (props) => {
           && (
             <h1>
               Create New
-            {' '}
+              {' '}
               {collection.labels.singular}
             </h1>
           )
@@ -102,6 +103,7 @@ const EditView = (props) => {
           )}
         />
         <RenderFields
+          customComponents={customComponents?.[collection.slug]?.fields}
           fields={collection.fields}
           initialData={data}
         />
