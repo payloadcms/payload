@@ -1,0 +1,77 @@
+@import '../../../../../scss/styles.scss';
+
+.repeater-section {
+  background: $light-gray;
+  flex-direction: column;
+  position: relative;
+  border: $stroke-width solid lighten($gray, 20%);
+
+  + .repeater-section {
+    margin-top: base(.5);
+  }
+
+  &__collapse__icon {
+    svg {
+      transition: 150ms linear;
+    }
+
+    &--open {
+      svg {
+        transform: rotate(90deg);
+      }
+    }
+
+    &--closed {
+      svg {
+        transform: rotate(-90deg);
+      }
+    }
+  }
+
+  &__header {
+    padding: base(.75) base(1);
+    display: flex;
+    align-items: center;
+
+    .pill {
+      margin-right: base(.5);
+    }
+
+    &__heading {
+      font-family: $font-body;
+      margin: 0;
+      font-size: base(.65);
+    }
+
+    &__controls {
+      margin-left: auto;
+
+      .btn {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .icon-button--crossOut,
+      .icon-button--crosshair {
+        margin-right: base(.25);
+      }
+
+      .icon-button--crosshair {
+        border-color: $primary;
+        @include color-svg($primary);
+
+        &:hover {
+          background: lighten($primary, 50%);
+        }
+      }
+    }
+  }
+
+  &__content {
+    box-shadow: inset 0px 1px 0px white;
+
+    > div {
+      padding: base(.75) base(1);
+    }
+  }
+}

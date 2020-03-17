@@ -3,9 +3,7 @@ import PropTypes from 'prop-types';
 
 import FormContext from '../../Form/Context';
 import Section from '../../../layout/Section';
-import RenderFields from '../../RenderFields';
-import IconButton from '../../../controls/IconButton';
-import Pill from '../../../modules/Pill';
+import RepeaterSection from './RepeaterSection'; // eslint-disable-line import/no-cycle
 
 import './index.scss';
 
@@ -49,51 +47,17 @@ const Repeater = (props) => {
         heading={label}
         className="repeater"
       >
-        {Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
+        {rowCount > 0 && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
           return (
-            <React.Fragment key={rowIndex}>
-              <div className={`${baseClass}__section`}>
-                <div className={`${baseClass}__section-header`}>
-                  <Pill>
-                    {name}
-                  </Pill>
-                  <h4 className={`${baseClass}__section-header__heading`}>Title Goes Here</h4>
-
-                  <div className={`${baseClass}__section-header__controls`}>
-                    <IconButton
-                      iconName="crosshair"
-                      onClick={() => addRow(rowIndex)}
-                      size="small"
-                    />
-
-                    <IconButton
-                      iconName="crossOut"
-                      onClick={() => removeRow(rowIndex)}
-                      size="small"
-                    />
-
-                    <IconButton
-                      iconName="arrow"
-                      // onClick={() => removeRow(rowIndex)}
-                      size="small"
-                    />
-                  </div>
-                </div>
-
-                <div className={`${baseClass}__section-content`}>
-                  <RenderFields
-                    fields={fields.map((field) => {
-                      const fieldName = `${name}.${rowIndex}.${field.name}`;
-                      return ({
-                        ...field,
-                        name: fieldName,
-                        defaultValue: fieldState?.[fieldName]?.value,
-                      });
-                    })}
-                  />
-                </div>
-              </div>
-            </React.Fragment>
+            <RepeaterSection
+              key={rowIndex}
+              addRow={() => addRow(rowIndex)}
+              removeRow={() => removeRow(rowIndex)}
+              rowIndex={rowIndex}
+              fieldState={fieldState}
+              fields={fields}
+              parentName={name}
+            />
           );
         })}
 

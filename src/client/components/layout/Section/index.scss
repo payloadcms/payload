@@ -4,21 +4,52 @@ section.section {
   @include shadow;
   margin: base(1) 0;
 
-  header,
-  .content {
-    @include pad;
-  }
-
   header {
     border-bottom: 1px solid $light-gray;
+    display: flex;
+    align-items: center;
+    @include pad;
 
     * {
       margin-bottom: 0;
     }
   }
 
-  .content {
+  &__content {
     display: flex;
     flex-wrap: wrap;
+  }
+}
+
+.section {
+  &__heading {
+    margin-bottom: 0;
+    margin-right: base(1);
+  }
+
+  &__content {
+    @include pad;
+  }
+
+  &__controls {
+    margin-left: auto;
+  }
+
+  &__collapse__icon {
+    svg {
+      transition: 150ms linear;
+    }
+
+    &--open {
+      svg {
+        transform: rotate(90deg);
+      }
+    }
+
+    &--closed {
+      svg {
+        transform: rotate(-90deg);
+      }
+    }
   }
 }

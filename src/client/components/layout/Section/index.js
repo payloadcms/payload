@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import AnimateHeight from 'react-animate-height';
 
 import './index.scss';
+import IconButton from '../../controls/IconButton';
 
 const baseClass = 'section';
 
@@ -13,17 +15,36 @@ const Section = (props) => {
     className && className,
   ].filter(Boolean).join(' ');
 
+  const [isSectionOpen, setIsSectionOpen] = useState(true);
+
   return (
     <section className={classes}>
       {heading
         && (
           <header>
-            <h2>{heading}</h2>
+            <h2 className={`${baseClass}__heading`}>{heading}</h2>
+            <div className={`${baseClass}__controls`}>
+              <IconButton
+                className={`${baseClass}__collapse__icon ${baseClass}__collapse__icon--${isSectionOpen ? 'open' : 'closed'}`}
+                iconName="arrow"
+                size="small"
+                onClick={() => setIsSectionOpen(state => !state)}
+              />
+            </div>
           </header>
         )}
-      <div className="content">
-        {children}
-      </div>
+      {children
+        && (
+          <AnimateHeight
+            className={`${baseClass}__content ${baseClass}__content--is-${isSectionOpen ? 'open' : 'closed'}`}
+            height={isSectionOpen ? 'auto' : 0}
+            duration={150}
+          >
+            <div>
+              {children}
+            </div>
+          </AnimateHeight>
+        )}
     </section>
   );
 };
