@@ -4,6 +4,7 @@
   line-height: 0;
   background: transparent;
   border: 1px solid $black;
+  margin-top: 0;
 
   &:hover {
     background: lighten($black, 50%);
