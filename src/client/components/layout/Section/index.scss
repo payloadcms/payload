@@ -28,7 +28,9 @@ section.section {
   }
 
   &__content {
-    @include pad;
+    > div {
+      @include pad;
+    }
   }
 
   &__controls {

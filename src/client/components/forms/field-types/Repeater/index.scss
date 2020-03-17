@@ -1,4 +1,11 @@
+@import '../../../../scss/styles.scss';
+
 .field-repeater {
+  &__row {
+    + .field-repeater__row {
+      margin-top: base(.5);
+    }
+  }
   .content {
     flex-direction: column;
   }

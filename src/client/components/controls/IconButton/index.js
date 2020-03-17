@@ -9,7 +9,7 @@ import './index.scss';
 
 const baseClass = 'icon-button';
 
-const IconButton = ({ iconName, className, ...rest }) => {
+const IconButton = React.forwardRef(({ iconName, className, ...rest }, ref) => {
   const classes = [
     baseClass,
     className && className,
@@ -25,14 +25,16 @@ const IconButton = ({ iconName, className, ...rest }) => {
   const Icon = icons[iconName] || icons.arrow;
 
   return (
-    <Button
-      className={classes}
-      {...rest}
-    >
-      <Icon />
-    </Button>
+    <span ref={ref}>
+      <Button
+        className={classes}
+        {...rest}
+      >
+        <Icon />
+      </Button>
+    </span>
   );
-};
+});
 
 IconButton.defaultProps = {
   className: '',

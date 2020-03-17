@@ -4,22 +4,22 @@ const splitRowsFromState = (state, name) => {
   // Take a copy of state
   const remainingState = { ...state };
 
-  const rowObject = {};
+  const rowsFromStateObject = {};
 
   // Loop over all keys from state
   // If the key begins with the name of the parent field,
-  // Add value to rowObject and delete it from remaining state
+  // Add value to rowsFromStateObject and delete it from remaining state
   Object.keys(state).forEach((key) => {
     if (key.indexOf(`${name}.`) === 0) {
-      rowObject[key] = state[key];
+      rowsFromStateObject[key] = state[key];
       delete remainingState[key];
     }
   });
 
-  const rows = unflatten(rowObject);
+  const rowsFromState = unflatten(rowsFromStateObject);
 
   return {
-    rows: rows[name] || [],
+    rowsFromState: rowsFromState[name] || [],
     remainingState,
   };
 };
@@ -33,29 +33,46 @@ function fieldReducer(state, action) {
 
     case 'REMOVE_ROW': {
       const { rowIndex, name } = action;
-      const { rows, remainingState } = splitRowsFromState(state, name);
+      const { rowsFromState, remainingState } = splitRowsFromState(state, name);
 
-      rows.splice(rowIndex, 1);
+      rowsFromState.splice(rowIndex, 1);
 
       return {
         ...remainingState,
-        ...(flatten({ [name]: rows }, { maxDepth: 3 })),
+        ...(flatten({ [name]: rowsFromState }, { maxDepth: 3 })),
       };
     }
 
     case 'ADD_ROW': {
       const { rowIndex, name, fields } = action;
-      const { rows, remainingState } = splitRowsFromState(state, name);
+      const { rowsFromState, remainingState } = splitRowsFromState(state, name);
 
       // Get names of sub fields
       const subFields = fields.reduce((acc, field) => ({ ...acc, [field.name]: {} }), {});
 
-      // Add new object containing subfield names to rows array
-      rows.splice(rowIndex + 1, 0, subFields);
+      // Add new object containing subfield names to rowsFromState array
+      rowsFromState.splice(rowIndex + 1, 0, subFields);
 
       return {
         ...remainingState,
-        ...(flatten({ [name]: rows }, { maxDepth: 3 })),
+        ...(flatten({ [name]: rowsFromState }, { maxDepth: 3 })),
+      };
+    }
+
+    case 'MOVE_ROW': {
+      const { moveFromIndex, moveToIndex, name } = action;
+      const { rowsFromState, remainingState } = splitRowsFromState(state, name);
+
+      // copy the row to move
+      const copyOfMovingRow = rowsFromState[moveFromIndex];
+      // delete the row by index
+      rowsFromState.splice(moveFromIndex, 1);
+      // insert row copyOfMovingRow back in
+      rowsFromState.splice(moveToIndex, 0, copyOfMovingRow);
+
+      return {
+        ...remainingState,
+        ...(flatten({ [name]: rowsFromState }, { maxDepth: 3 })),
       };
     }
 

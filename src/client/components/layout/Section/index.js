@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import './index.scss';
 import IconButton from '../../controls/IconButton';
 
 const baseClass = 'section';
 
-const Section = (props) => {
-  const { className, heading, children } = props;
+const Section = React.forwardRef((props, ref) => {
+  const {
+    className, heading, children, rowCount, addInitialRow,
+  } = props;
 
   const classes = [
     baseClass,
@@ -17,18 +20,21 @@ const Section = (props) => {
 
   const [isSectionOpen, setIsSectionOpen] = useState(true);
 
+  const iconProps = {};
+  iconProps.iconName = `${rowCount === 0 ? 'crosshair' : 'arrow'}`;
+  iconProps.onClick = rowCount === 0 ? () => addInitialRow() : () => setIsSectionOpen(state => !state);
+
   return (
     <section className={classes}>
       {heading
         && (
-          <header>
+          <header ref={ref}>
             <h2 className={`${baseClass}__heading`}>{heading}</h2>
             <div className={`${baseClass}__controls`}>
               <IconButton
                 className={`${baseClass}__collapse__icon ${baseClass}__collapse__icon--${isSectionOpen ? 'open' : 'closed'}`}
-                iconName="arrow"
                 size="small"
-                onClick={() => setIsSectionOpen(state => !state)}
+                {...iconProps}
               />
             </div>
           </header>
@@ -40,14 +46,12 @@ const Section = (props) => {
             height={isSectionOpen ? 'auto' : 0}
             duration={150}
           >
-            <div>
-              {children}
-            </div>
+            {children}
           </AnimateHeight>
         )}
     </section>
   );
-};
+});
 
 Section.defaultProps = {
   className: '',
