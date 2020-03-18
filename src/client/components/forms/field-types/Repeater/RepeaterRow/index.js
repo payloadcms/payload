@@ -9,23 +9,28 @@ import Pill from '../../../../modules/Pill';
 
 import './index.scss';
 
-const baseClass = 'repeater-section';
+const baseClass = 'repeater-row';
 
-const RepeaterSection = ({
+const RepeaterRow = ({
   addRow, removeRow, rowIndex, parentName, fields, fieldState, forceContentCollapse,
 }) => {
-  const [isSectionOpen, setIsSectionOpen] = useState(true);
+  const [isRowOpen, setIsRowOpen] = useState(true);
 
   useEffect(() => {
-    if (forceContentCollapse) setIsSectionOpen(false);
+    if (forceContentCollapse) setIsRowOpen(false);
   }, [forceContentCollapse]);
+
+  const addAndCollapseRow = () => {
+    addRow();
+    setIsRowOpen(false);
+  };
 
   return (
     <Draggable
       draggableId={`row-${rowIndex}`}
       index={rowIndex}
     >
-      {(providedDrag, snapshot) => (
+      {providedDrag => (
         <div
           ref={providedDrag.innerRef}
           className={baseClass}
@@ -37,18 +42,20 @@ const RepeaterSection = ({
             </Pill>
             <h4 className={`${baseClass}__header__heading`}>Title Goes Here</h4>
 
+            <div className={`${baseClass}__header__drag-handle__wrap`}>
+              <div
+                {...providedDrag.dragHandleProps}
+                className={`${baseClass}__header__drag-handle`}
+                role="button"
+                tabIndex={0}
+              />
+            </div>
+
             <div className={`${baseClass}__header__controls`}>
 
               <IconButton
-                {...providedDrag.dragHandleProps}
                 iconName="crosshair"
-                onClick={addRow}
-                size="small"
-              />
-
-              <IconButton
-                iconName="crosshair"
-                onClick={addRow}
+                onClick={addAndCollapseRow}
                 size="small"
               />
 
@@ -59,9 +66,9 @@ const RepeaterSection = ({
               />
 
               <IconButton
-                className={`${baseClass}__collapse__icon ${baseClass}__collapse__icon--${isSectionOpen ? 'open' : 'closed'}`}
+                className={`${baseClass}__collapse__icon ${baseClass}__collapse__icon--${isRowOpen ? 'open' : 'closed'}`}
                 iconName="arrow"
-                onClick={() => setIsSectionOpen(state => !state)}
+                onClick={() => setIsRowOpen(state => !state)}
                 size="small"
               />
             </div>
@@ -69,7 +76,7 @@ const RepeaterSection = ({
 
           <AnimateHeight
             className={`${baseClass}__content`}
-            height={isSectionOpen ? 'auto' : 0}
+            height={isRowOpen ? 'auto' : 0}
             duration={150}
           >
             <RenderFields
@@ -91,11 +98,11 @@ const RepeaterSection = ({
   );
 };
 
-RepeaterSection.defaultProps = {
+RepeaterRow.defaultProps = {
   forceContentCollapse: false,
 };
 
-RepeaterSection.propTypes = {
+RepeaterRow.propTypes = {
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
   rowIndex: PropTypes.number.isRequired,
@@ -105,4 +112,4 @@ RepeaterSection.propTypes = {
   forceContentCollapse: PropTypes.bool,
 };
 
-export default RepeaterSection;
+export default RepeaterRow;

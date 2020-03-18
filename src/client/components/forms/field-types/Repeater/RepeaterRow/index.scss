@@ -1,10 +1,11 @@
 @import '../../../../../scss/styles.scss';
 
-.repeater-section {
+.repeater-row {
   background: $light-gray;
   flex-direction: column;
   position: relative;
   border: $stroke-width solid lighten($gray, 20%);
+  margin-top: base(.5);
 
   &__collapse__icon {
     svg {
@@ -37,6 +38,28 @@
       font-family: $font-body;
       margin: 0;
       font-size: base(.65);
+    }
+
+    &__drag-handle__wrap {
+      flex: 1;
+    }
+
+    &__drag-handle {
+      max-width: 100px;
+      height: 15px;
+      margin: 0 base(1) 0 auto;
+      background: repeating-linear-gradient(
+        90deg,
+        $gray,
+        $gray 4px,
+        transparent 4px,
+        transparent 10px,
+      );
+      opacity: .5;
+
+      &:hover {
+        opacity: 1;
+      }
     }
 
     &__controls {

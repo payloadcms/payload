@@ -30,6 +30,7 @@ section.section {
   &__content {
     > div {
       @include pad;
+      padding-top: base(.5);
     }
   }
 
@@ -37,7 +38,7 @@ section.section {
     margin-left: auto;
   }
 
-  &__collapse__icon {
+  &__collapse-icon {
     svg {
       transition: 150ms linear;
     }
@@ -54,4 +55,9 @@ section.section {
       }
     }
   }
+
+  &__add-row-button {
+    margin-right: base(.5);
+  }
+
 }
