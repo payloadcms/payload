@@ -9,6 +9,7 @@ import RepeaterRow from './RepeaterRow'; // eslint-disable-line import/no-cycle
 const baseClass = 'field-repeater';
 
 const Repeater = (props) => {
+  const [newRowIndex, setNewRowIndex] = useState(null);
   const [rowCount, setRowCount] = useState(0);
   const formContext = useContext(FormContext);
   const { fields: fieldState, dispatchFields } = formContext;
@@ -25,6 +26,7 @@ const Repeater = (props) => {
       type: 'ADD_ROW', rowIndex, name, fields,
     });
 
+    setNewRowIndex(rowIndex);
     setRowCount(rowCount + 1);
   };
 
@@ -46,6 +48,9 @@ const Repeater = (props) => {
     setRowCount(defaultValue.length);
   }, [defaultValue]);
 
+  const onBeforeCapture = () => {
+  };
+
   const onDragEnd = (result) => {
     if (!result.destination) return;
     const sourceIndex = result.source.index;
@@ -54,7 +59,10 @@ const Repeater = (props) => {
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <DragDropContext
+      onDragEnd={onDragEnd}
+      onBeforeCapture={onBeforeCapture}
+    >
       <div className={baseClass}>
         <Section
           heading={label}
@@ -80,6 +88,8 @@ const Repeater = (props) => {
                        rowIndex={rowIndex}
                        fieldState={fieldState}
                        fields={fields}
+                       newRowIndex={newRowIndex}
+                       rowCount={rowCount}
                      />
                    );
                  }))

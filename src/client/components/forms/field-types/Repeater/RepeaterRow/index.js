@@ -12,9 +12,19 @@ import './index.scss';
 const baseClass = 'repeater-row';
 
 const RepeaterRow = ({
-  addRow, removeRow, rowIndex, parentName, fields, fieldState,
+  addRow, removeRow, rowIndex, parentName, fields, fieldState, newRowIndex, rowCount,
 }) => {
   const [isRowOpen, setIsRowOpen] = useState(true);
+
+  useEffect(() => {
+    if (rowCount === 1) setIsRowOpen(true);
+    else if (newRowIndex + 1 === rowIndex) setIsRowOpen(true);
+    else setIsRowOpen(false);
+  }, [newRowIndex, rowCount, rowIndex]);
+
+  const handleCollapseClick = () => {
+    setIsRowOpen(state => !state);
+  };
 
   return (
     <Draggable
@@ -60,7 +70,7 @@ const RepeaterRow = ({
                 <IconButton
                   className={`${baseClass}__collapse__icon ${baseClass}__collapse__icon--${isRowOpen ? 'open' : 'closed'}`}
                   iconName="arrow"
-                  onClick={() => setIsRowOpen(state => !state)}
+                  onClick={handleCollapseClick}
                   size="small"
                 />
               </div>
@@ -90,6 +100,11 @@ const RepeaterRow = ({
   );
 };
 
+RepeaterRow.defaultProps = {
+  newRowIndex: null,
+  rowCount: null,
+};
+
 RepeaterRow.propTypes = {
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
@@ -97,6 +112,8 @@ RepeaterRow.propTypes = {
   parentName: PropTypes.string.isRequired,
   fields: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   fieldState: PropTypes.shape({}).isRequired,
+  newRowIndex: PropTypes.number,
+  rowCount: PropTypes.number,
 };
 
 export default RepeaterRow;
