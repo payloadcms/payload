@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 
@@ -9,7 +9,7 @@ const baseClass = 'section';
 
 const Section = (props) => {
   const {
-    className, heading, children, rowCount, addRow, useAddRowButton, shouldCalcContentHeight,
+    className, heading, children, rowCount, addRow, useAddRowButton,
   } = props;
 
   const classes = [
@@ -17,14 +17,7 @@ const Section = (props) => {
     className && className,
   ].filter(Boolean).join(' ');
 
-  const contentRef = useRef(null);
-  const [contentHeight, setContentHeight] = useState(null);
-  const [isSectionOpen, setIsSectionOpen] = useState(false);
-
-  useEffect(() => {
-    if (shouldCalcContentHeight) setContentHeight(contentRef.current.offsetHeight);
-    else setContentHeight(null);
-  }, [shouldCalcContentHeight]);
+  const [isSectionOpen, setIsSectionOpen] = useState(true);
 
   const addInitialRow = () => {
     addRow();
@@ -63,14 +56,7 @@ const Section = (props) => {
             height={isSectionOpen ? 'auto' : 0}
             duration={150}
           >
-            <div
-              ref={contentRef}
-              style={{
-                height: shouldCalcContentHeight && `${contentHeight}px`,
-              }}
-            >
-              {children}
-            </div>
+            {children}
           </AnimateHeight>
         )}
     </section>
@@ -83,7 +69,6 @@ Section.defaultProps = {
   children: undefined,
   rowCount: 0,
   addRow: undefined,
-  shouldCalcContentHeight: false,
   useAddRowButton: false,
 };
 
@@ -93,7 +78,6 @@ Section.propTypes = {
   children: PropTypes.node,
   rowCount: PropTypes.number,
   addRow: PropTypes.func,
-  shouldCalcContentHeight: PropTypes.bool,
   useAddRowButton: PropTypes.bool,
 };
 

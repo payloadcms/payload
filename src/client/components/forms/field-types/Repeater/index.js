@@ -1,6 +1,4 @@
-import React, {
-  useContext, useState, useEffect, useRef,
-} from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
@@ -10,44 +8,10 @@ import RepeaterRow from './RepeaterRow'; // eslint-disable-line import/no-cycle
 
 const baseClass = 'field-repeater';
 
-const MemoizedSection = React.memo((props) => {
-  const {
-    label, rowCount, addRow, shouldCalcContentHeight, removeRow, fieldState, name, fields, useAddRowButton,
-  } = props;
-
-  return (
-    <Section
-      heading={label}
-      className="repeater"
-      rowCount={rowCount}
-      addRow={() => addRow(0)}
-      shouldCalcContentHeight={shouldCalcContentHeight}
-      useAddRowButton={useAddRowButton}
-    >
-      {rowCount !== 0
-        && (Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
-          return (
-            <RepeaterRow
-              key={rowIndex}
-              addRow={() => addRow(rowIndex)}
-              removeRow={() => removeRow(rowIndex)}
-              rowIndex={rowIndex}
-              fieldState={fieldState}
-              fields={fields}
-              parentName={name}
-            />
-          );
-        }))
-      }
-    </Section>
-  );
-});
-
 const Repeater = (props) => {
   const [rowCount, setRowCount] = useState(0);
   const formContext = useContext(FormContext);
   const { fields: fieldState, dispatchFields } = formContext;
-  const [shouldCalcContentHeight, setShouldCalcContentHeight] = useState(false);
 
   const {
     label,
@@ -82,45 +46,50 @@ const Repeater = (props) => {
     setRowCount(defaultValue.length);
   }, [defaultValue]);
 
-  const onBeforeCapture = (result) => {
-    setShouldCalcContentHeight(true);
-  };
-
   const onDragEnd = (result) => {
     if (!result.destination) return;
-    setShouldCalcContentHeight(false);
-
-    moveRow(result.source.index, result.destination.index);
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+    moveRow(sourceIndex, destinationIndex);
   };
 
   return (
-    <DragDropContext
-      onDragEnd={onDragEnd}
-      onBeforeCapture={onBeforeCapture}
-    >
+    <DragDropContext onDragEnd={onDragEnd}>
       <div className={baseClass}>
-        <Droppable droppableId="repeater-drop">
-          {(provided) => {
-            return (
+        <Section
+          heading={label}
+          className="repeater"
+          rowCount={rowCount}
+          addRow={() => addRow(0)}
+          useAddRowButton
+        >
+          <Droppable droppableId="repeater-drop">
+            {provided => (
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
               >
-                <MemoizedSection
-                  label={label}
-                  rowCount={rowCount}
-                  useAddRowButton
-                  addRow={addRow}
-                  removeRow={removeRow}
-                  shouldCalcContentHeight={shouldCalcContentHeight}
-                  fieldState={fieldState}
-                  name={name}
-                  fields={fields}
-                />
+                {rowCount !== 0
+                 && (Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
+                   return (
+                     <RepeaterRow
+                       key={rowIndex}
+                       parentName={name}
+                       addRow={() => addRow(rowIndex)}
+                       removeRow={() => removeRow(rowIndex)}
+                       rowIndex={rowIndex}
+                       fieldState={fieldState}
+                       fields={fields}
+                     />
+                   );
+                 }))
+                }
+                {provided.placeholder}
               </div>
-            );
-          }}
-        </Droppable>
+            )}
+          </Droppable>
+        </Section>
+
       </div>
     </DragDropContext>
   );
