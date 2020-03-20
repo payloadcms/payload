@@ -1,17 +1,20 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, {
+  useContext, useState, useEffect, useReducer,
+} from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
 import FormContext from '../../Form/Context';
 import Section from '../../../layout/Section';
 import RepeaterRow from './RepeaterRow'; // eslint-disable-line import/no-cycle
+import collapsibleReducer from './reducer';
 
 const baseClass = 'field-repeater';
 
 const Repeater = (props) => {
-  const [newRowIndex, setNewRowIndex] = useState(null);
-  const [rowCount, setRowCount] = useState(0);
+  const [collapsibleStates, dispatchCollapsibleStates] = useReducer(collapsibleReducer, []);
   const formContext = useContext(FormContext);
+  const [rowCount, setRowCount] = useState(0);
   const { fields: fieldState, dispatchFields } = formContext;
 
   const {
@@ -26,13 +29,21 @@ const Repeater = (props) => {
       type: 'ADD_ROW', rowIndex, name, fields,
     });
 
-    setNewRowIndex(rowIndex);
+    dispatchCollapsibleStates({
+      type: 'ADD_COLLAPSIBLE', collapsibleIndex: rowIndex,
+    });
+
     setRowCount(rowCount + 1);
   };
 
   const removeRow = (rowIndex) => {
     dispatchFields({
       type: 'REMOVE_ROW', rowIndex, name, fields,
+    });
+
+    dispatchCollapsibleStates({
+      type: 'REMOVE_COLLAPSIBLE',
+      collapsibleIndex: rowIndex,
     });
 
     setRowCount(rowCount - 1);
@@ -42,14 +53,20 @@ const Repeater = (props) => {
     dispatchFields({
       type: 'MOVE_ROW', moveFromIndex, moveToIndex, name,
     });
+
+    dispatchCollapsibleStates({
+      type: 'MOVE_COLLAPSIBLE', collapsibleIndex: moveFromIndex, moveToIndex,
+    });
   };
 
   useEffect(() => {
     setRowCount(defaultValue.length);
-  }, [defaultValue]);
 
-  const onBeforeCapture = () => {
-  };
+    dispatchCollapsibleStates({
+      type: 'SET_ALL_COLLAPSIBLES',
+      payload: Array.from(Array(defaultValue.length).keys()).reduce(acc => ([...acc, true]), []), // sets all collapsibles to open on first load
+    });
+  }, [defaultValue]);
 
   const onDragEnd = (result) => {
     if (!result.destination) return;
@@ -59,10 +76,7 @@ const Repeater = (props) => {
   };
 
   return (
-    <DragDropContext
-      onDragEnd={onDragEnd}
-      onBeforeCapture={onBeforeCapture}
-    >
+    <DragDropContext onDragEnd={onDragEnd}>
       <div className={baseClass}>
         <Section
           heading={label}
@@ -78,7 +92,7 @@ const Repeater = (props) => {
                 {...provided.droppableProps}
               >
                 {rowCount !== 0
-                 && (Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
+                 && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
                    return (
                      <RepeaterRow
                        key={rowIndex}
@@ -88,11 +102,13 @@ const Repeater = (props) => {
                        rowIndex={rowIndex}
                        fieldState={fieldState}
                        fields={fields}
-                       newRowIndex={newRowIndex}
                        rowCount={rowCount}
+                       defaultValue={defaultValue[rowIndex]}
+                       dispatchCollapsibleStates={dispatchCollapsibleStates}
+                       collapsibleStates={collapsibleStates}
                      />
                    );
-                 }))
+                 })
                 }
                 {provided.placeholder}
               </div>

@@ -1,29 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
 
 import RenderFields from '../../../RenderFields';
 import IconButton from '../../../../controls/IconButton';
-import Pill from '../../../../modules/Pill';
 
 import './index.scss';
 
 const baseClass = 'repeater-row';
 
 const RepeaterRow = ({
-  addRow, removeRow, rowIndex, parentName, fields, fieldState, newRowIndex, rowCount,
+  addRow, removeRow, rowIndex, parentName, fields, defaultValue, dispatchCollapsibleStates, collapsibleStates,
 }) => {
-  const [isRowOpen, setIsRowOpen] = useState(true);
-
-  useEffect(() => {
-    if (rowCount === 1) setIsRowOpen(true);
-    else if (newRowIndex + 1 === rowIndex) setIsRowOpen(true);
-    else setIsRowOpen(false);
-  }, [newRowIndex, rowCount, rowIndex]);
-
   const handleCollapseClick = () => {
-    setIsRowOpen(state => !state);
+    dispatchCollapsibleStates({
+      type: 'UPDATE_COLLAPSIBLE_STATUS',
+      collapsibleIndex: rowIndex,
+    });
   };
 
   return (
@@ -39,18 +33,13 @@ const RepeaterRow = ({
             {...providedDrag.draggableProps}
           >
             <div className={`${baseClass}__header`}>
-              <Pill>
-                {parentName}
-              </Pill>
-              <h4 className={`${baseClass}__header__heading`}>Title Goes Here</h4>
+              <div
+                {...providedDrag.dragHandleProps}
+                className={`${baseClass}__header__drag-handle`}
+              />
 
-              <div className={`${baseClass}__header__drag-handle__wrap`}>
-                <div
-                  {...providedDrag.dragHandleProps}
-                  className={`${baseClass}__header__drag-handle`}
-                  tabIndex={0}
-                  role="button"
-                />
+              <div className={`${baseClass}__header__row-index`}>
+                {`${rowIndex + 1 > 9 ? rowIndex + 1 : `0${rowIndex + 1}`}`}
               </div>
 
               <div className={`${baseClass}__header__controls`}>
@@ -68,7 +57,7 @@ const RepeaterRow = ({
                 />
 
                 <IconButton
-                  className={`${baseClass}__collapse__icon ${baseClass}__collapse__icon--${isRowOpen ? 'open' : 'closed'}`}
+                  className={`${baseClass}__collapse__icon ${baseClass}__collapse__icon--${collapsibleStates[rowIndex] ? 'open' : 'closed'}`}
                   iconName="arrow"
                   onClick={handleCollapseClick}
                   size="small"
@@ -78,8 +67,8 @@ const RepeaterRow = ({
 
             <AnimateHeight
               className={`${baseClass}__content`}
-              height={isRowOpen ? 'auto' : 0}
-              duration={150}
+              height={collapsibleStates[rowIndex] ? 'auto' : 0}
+              duration={0}
             >
               <RenderFields
                 key={rowIndex}
@@ -88,7 +77,7 @@ const RepeaterRow = ({
                   return ({
                     ...field,
                     name: fieldName,
-                    defaultValue: fieldState?.[fieldName]?.value,
+                    defaultValue: defaultValue?.[field.name],
                   });
                 })}
               />
@@ -101,8 +90,9 @@ const RepeaterRow = ({
 };
 
 RepeaterRow.defaultProps = {
-  newRowIndex: null,
   rowCount: null,
+  defaultValue: null,
+  collapsibleStates: [],
 };
 
 RepeaterRow.propTypes = {
@@ -112,8 +102,10 @@ RepeaterRow.propTypes = {
   parentName: PropTypes.string.isRequired,
   fields: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   fieldState: PropTypes.shape({}).isRequired,
-  newRowIndex: PropTypes.number,
   rowCount: PropTypes.number,
+  defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
+  dispatchCollapsibleStates: PropTypes.func.isRequired,
+  collapsibleStates: PropTypes.arrayOf(PropTypes.bool),
 };
 
 export default RepeaterRow;
