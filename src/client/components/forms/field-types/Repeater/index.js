@@ -9,7 +9,9 @@ import Section from '../../../layout/Section';
 import RepeaterRow from './RepeaterRow'; // eslint-disable-line import/no-cycle
 import collapsibleReducer from './reducer';
 
-const baseClass = 'field-repeater';
+import './index.scss';
+
+const baseClass = 'field-type repeater';
 
 const Repeater = (props) => {
   const [collapsibleStates, dispatchCollapsibleStates] = useReducer(collapsibleReducer, []);
