@@ -92,7 +92,7 @@ function fieldReducer(state, action) {
 
       return {
         ...remainingState,
-        ...(flatten({ [name]: rowsFromState }, { maxDepth: 3 })),
+        ...(flatten({ [name]: rowsFromState }, { filters: flattenFilters })),
       };
     }
 

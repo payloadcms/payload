@@ -94,23 +94,22 @@ const Repeater = (props) => {
                 {...provided.droppableProps}
               >
                 {rowCount !== 0
-                 && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
-                   return (
-                     <RepeaterRow
-                       key={rowIndex}
-                       parentName={name}
-                       addRow={() => addRow(rowIndex)}
-                       removeRow={() => removeRow(rowIndex)}
-                       rowIndex={rowIndex}
-                       fieldState={fieldState}
-                       fields={fields}
-                       rowCount={rowCount}
-                       defaultValue={defaultValue[rowIndex]}
-                       dispatchCollapsibleStates={dispatchCollapsibleStates}
-                       collapsibleStates={collapsibleStates}
-                     />
-                   );
-                 })
+                  && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
+                    return (
+                      <RepeaterRow
+                        key={rowIndex}
+                        parentName={name}
+                        addRow={() => addRow(rowIndex)}
+                        removeRow={() => removeRow(rowIndex)}
+                        rowIndex={rowIndex}
+                        fields={fields}
+                        rowCount={rowCount}
+                        defaultValue={defaultValue[rowIndex]}
+                        dispatchCollapsibleStates={dispatchCollapsibleStates}
+                        collapsibleStates={collapsibleStates}
+                      />
+                    );
+                  })
                 }
                 {provided.placeholder}
               </div>

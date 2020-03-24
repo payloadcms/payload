@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { ModalProvider, ModalContainer } from '@trbl/react-modal';
 import Loading from './views/Loading';
 import { SearchParamsProvider } from './utilities/SearchParams';
 import { LocaleProvider } from './utilities/Locale';
@@ -14,15 +15,21 @@ const Index = () => {
   return (
     <UserProvider>
       <Router>
-        <StatusListProvider>
-          <SearchParamsProvider>
-            <LocaleProvider>
-              <Suspense fallback={<Loading />}>
-                <Routes />
-              </Suspense>
-            </LocaleProvider>
-          </SearchParamsProvider>
-        </StatusListProvider>
+        <ModalProvider
+          classPrefix="payload"
+          transTime={0}
+        >
+          <StatusListProvider>
+            <SearchParamsProvider>
+              <LocaleProvider>
+                <Suspense fallback={<Loading />}>
+                  <Routes />
+                </Suspense>
+              </LocaleProvider>
+            </SearchParamsProvider>
+          </StatusListProvider>
+          <ModalContainer />
+        </ModalProvider>
       </Router>
     </UserProvider>
   );

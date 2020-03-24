@@ -31,7 +31,7 @@ const buildSchema = (configFields, config, options = {}, additionalBaseFields = 
           });
 
           const blockSchema = new Schema(blockSchemaFields, { _id: false });
-          schema.path(field.name).discriminator(block.labels.singular, blockSchema);
+          schema.path(field.name).discriminator(block.slug, blockSchema);
         });
       }
     });
