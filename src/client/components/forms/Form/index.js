@@ -1,7 +1,7 @@
 import React, { useState, useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { unflatten } from 'flat';
+import { unflatten } from 'flatley';
 import FormContext from './Context';
 import { useLocale } from '../../utilities/Locale';
 import { useStatusList } from '../../modules/Status';
@@ -122,6 +122,8 @@ const Form = (props) => {
     className,
     baseClass,
   ].filter(Boolean).join(' ');
+
+  // console.log(fields);
 
   return (
     <form

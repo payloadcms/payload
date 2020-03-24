@@ -1,4 +1,4 @@
-import { unflatten, flatten } from 'flat';
+import { unflatten, flatten } from 'flatley';
 
 const splitRowsFromState = (state, name) => {
   // Take a copy of state
@@ -6,12 +6,14 @@ const splitRowsFromState = (state, name) => {
 
   const rowsFromStateObject = {};
 
+  const namePrefixToRemove = name.substring(0, name.lastIndexOf('.') + 1);
+
   // Loop over all keys from state
   // If the key begins with the name of the parent field,
   // Add value to rowsFromStateObject and delete it from remaining state
   Object.keys(state).forEach((key) => {
     if (key.indexOf(`${name}.`) === 0) {
-      rowsFromStateObject[key] = state[key];
+      rowsFromStateObject[key.replace(namePrefixToRemove, '')] = state[key];
       delete remainingState[key];
     }
   });
@@ -19,10 +21,19 @@ const splitRowsFromState = (state, name) => {
   const rowsFromState = unflatten(rowsFromStateObject);
 
   return {
-    rowsFromState: rowsFromState[name] || [],
+    rowsFromState: rowsFromState[name.replace(namePrefixToRemove, '')] || [],
     remainingState,
   };
 };
+
+const flattenFilters = [{
+  test: (_, value) => {
+    const hasValidProperty = Object.prototype.hasOwnProperty.call(value, 'valid');
+    const hasValueProperty = Object.prototype.hasOwnProperty.call(value, 'value');
+
+    return (hasValidProperty && hasValueProperty);
+  },
+}];
 
 function fieldReducer(state, action) {
   switch (action.type) {
@@ -39,7 +50,7 @@ function fieldReducer(state, action) {
 
       return {
         ...remainingState,
-        ...(flatten({ [name]: rowsFromState }, { maxDepth: 3 })),
+        ...(flatten({ [name]: rowsFromState }, { filters: flattenFilters })),
       };
     }
 
@@ -48,14 +59,23 @@ function fieldReducer(state, action) {
       const { rowsFromState, remainingState } = splitRowsFromState(state, name);
 
       // Get names of sub fields
-      const subFields = fields.reduce((acc, field) => ({ ...acc, [field.name]: {} }), {});
+      const subFields = fields.reduce((acc, field) => {
+        if (field.type === 'flexible' || field.type === 'repeater') {
+          return acc;
+        }
+
+        return {
+          ...acc,
+          [field.name]: {},
+        };
+      }, {});
 
       // Add new object containing subfield names to rowsFromState array
       rowsFromState.splice(rowIndex + 1, 0, subFields);
 
       return {
         ...remainingState,
-        ...(flatten({ [name]: rowsFromState }, { maxDepth: 3 })),
+        ...(flatten({ [name]: rowsFromState }, { filters: flattenFilters })),
       };
     }
 
