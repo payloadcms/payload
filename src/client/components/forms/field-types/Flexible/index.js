@@ -9,7 +9,7 @@ import FormContext from '../../Form/Context';
 import Section from '../../../layout/Section';
 import FlexibleRow from './FlexibleRow'; // eslint-disable-line import/no-cycle
 import AddRowModal from './AddRowModal';
-import rowReducer from './reducer';
+import collapsibleReducer from './reducer';
 
 import './index.scss';
 
@@ -25,9 +25,9 @@ const Flexible = (props) => {
 
   const { toggle: toggleModal, closeAll: closeAllModals } = useContext(ModalContext);
   const [rowIndexBeingAdded, setRowIndexBeingAdded] = useState(null);
-  const [rows, dispatchRows] = useReducer(rowReducer, []);
+  const [rowCount, setRowCount] = useState(0);
+  const [collapsibleStates, dispatchCollapsibleStates] = useReducer(collapsibleReducer, []);
   const formContext = useContext(FormContext);
-  const rowCount = rows.length;
   const modalSlug = `flexible-${name}`;
 
   const { fields: fieldState, dispatchFields } = formContext;
@@ -36,12 +36,14 @@ const Flexible = (props) => {
     const blockToAdd = blocks.find(block => block.slug === blockType);
 
     dispatchFields({
-      type: 'ADD_ROW', rowIndex, name, fields: blockToAdd.fields,
+      type: 'ADD_ROW', rowIndex, name, fields: blockToAdd.fields, blockType,
     });
 
-    dispatchRows({
-      type: 'ADD', rowIndex, blockType,
+    dispatchCollapsibleStates({
+      type: 'ADD_COLLAPSIBLE', collapsibleIndex: rowIndex,
     });
+
+    setRowCount(rowCount + 1);
   };
 
   const removeRow = (rowIndex) => {
@@ -49,29 +51,31 @@ const Flexible = (props) => {
       type: 'REMOVE_ROW', rowIndex, name,
     });
 
-    dispatchRows({
-      type: 'REMOVE',
-      rowIndex,
+    dispatchCollapsibleStates({
+      type: 'REMOVE_COLLAPSIBLE',
+      collapsibleIndex: rowIndex,
     });
+
+    setRowCount(rowCount - 1);
   };
 
   const moveRow = (moveFromIndex, moveToIndex) => {
-    dispatchRows({
-      type: 'MOVE', rowIndex: moveFromIndex, moveToIndex,
-    });
-
     dispatchFields({
       type: 'MOVE_ROW', moveFromIndex, moveToIndex, name,
+    });
+
+    dispatchCollapsibleStates({
+      type: 'MOVE_COLLAPSIBLE', collapsibleIndex: moveFromIndex, moveToIndex,
     });
   };
 
   useEffect(() => {
-    if (defaultValue) {
-      dispatchRows({
-        type: 'LOAD_ROWS',
-        payload: defaultValue,
-      });
-    }
+    setRowCount(defaultValue.length);
+
+    dispatchCollapsibleStates({
+      type: 'SET_ALL_COLLAPSIBLES',
+      payload: Array.from(Array(defaultValue.length).keys()).reduce(acc => ([...acc, true]), []), // sets all collapsibles to open on first load
+    });
   }, [defaultValue]);
 
   const openAddRowModal = (rowIndex) => {
@@ -104,8 +108,9 @@ const Flexible = (props) => {
                   {...provided.droppableProps}
                 >
                   {rowCount !== 0
-                    && rows.map((row, rowIndex) => {
-                      const blockToRender = blocks.find(block => block.slug === row.blockType);
+                    && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
+                      const blockType = fieldState[`${name}.${rowIndex}.blockType`];
+                      const blockToRender = blocks.find(block => block.slug === blockType);
 
                       return (
                         <FlexibleRow
@@ -117,8 +122,8 @@ const Flexible = (props) => {
                           fieldState={fieldState}
                           block={blockToRender}
                           defaultValue={defaultValue[rowIndex]}
-                          dispatchRows={dispatchRows}
-                          rows={rows}
+                          dispatchCollapsibleStates={dispatchCollapsibleStates}
+                          collapsibleStates={collapsibleStates}
                         />
                       );
                     })

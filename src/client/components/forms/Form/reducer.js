@@ -55,7 +55,9 @@ function fieldReducer(state, action) {
     }
 
     case 'ADD_ROW': {
-      const { rowIndex, name, fields } = action;
+      const {
+        rowIndex, name, fields, blockType,
+      } = action;
       const { rowsFromState, remainingState } = splitRowsFromState(state, name);
 
       // Get names of sub fields
@@ -69,6 +71,8 @@ function fieldReducer(state, action) {
           [field.name]: {},
         };
       }, {});
+
+      if (blockType) subFields.blockType = blockType;
 
       // Add new object containing subfield names to rowsFromState array
       rowsFromState.splice(rowIndex + 1, 0, subFields);

@@ -19,14 +19,14 @@ const FlexibleRow = (props) => {
     parentName,
     block,
     defaultValue,
-    dispatchRows,
-    rows,
+    dispatchCollapsibleStates,
+    collapsibleStates,
   } = props;
 
   const handleCollapseClick = () => {
-    dispatchRows({
-      type: 'UPDATE_IS_ROW_OPEN',
-      rowIndex,
+    dispatchCollapsibleStates({
+      type: 'UPDATE_COLLAPSIBLE_STATUS',
+      collapsibleIndex: rowIndex,
     });
   };
 
@@ -67,7 +67,7 @@ const FlexibleRow = (props) => {
                 />
 
                 <IconButton
-                  className={`${baseClass}__collapse__icon ${baseClass}__collapse__icon--${rows[rowIndex].isOpen ? 'open' : 'closed'}`}
+                  className={`${baseClass}__collapse__icon ${baseClass}__collapse__icon--${collapsibleStates[rowIndex] ? 'open' : 'closed'}`}
                   iconName="arrow"
                   onClick={handleCollapseClick}
                   size="small"
@@ -77,7 +77,7 @@ const FlexibleRow = (props) => {
 
             <AnimateHeight
               className={`${baseClass}__content`}
-              height={rows[rowIndex].isOpen ? 'auto' : 0}
+              height={collapsibleStates[rowIndex] ? 'auto' : 0}
               duration={0}
             >
               <RenderFields
@@ -101,7 +101,7 @@ const FlexibleRow = (props) => {
 
 FlexibleRow.defaultProps = {
   defaultValue: null,
-  rows: [],
+  collapsibleStates: [],
 };
 
 FlexibleRow.propTypes = {
@@ -118,11 +118,8 @@ FlexibleRow.propTypes = {
   parentName: PropTypes.string.isRequired,
   fieldState: PropTypes.shape({}).isRequired,
   defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
-  dispatchRows: PropTypes.func.isRequired,
-  rows: PropTypes.arrayOf(PropTypes.shape({
-    isOpen: PropTypes.bool,
-    blockType: PropTypes.string,
-  })),
+  dispatchCollapsibleStates: PropTypes.func.isRequired,
+  collapsibleStates: PropTypes.arrayOf(PropTypes.bool),
 };
 
 export default FlexibleRow;

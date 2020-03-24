@@ -1,48 +1,35 @@
-const rowReducer = (currentState, action) => {
+const collapsibleReducer = (currentState, action) => {
   const {
-    type, rowIndex, moveToIndex, payload, blockType,
+    type, collapsibleIndex, moveToIndex, payload,
   } = action;
 
-  const newState = [...currentState];
+  const stateCopy = [...currentState];
+  const movingCollapsibleState = stateCopy[collapsibleIndex];
 
   switch (type) {
-    case 'LOAD_ROWS':
-      return payload.reduce((acc, row) => {
-        acc.push({
-          blockType: row.blockType,
-          isOpen: true,
-        });
+    case 'SET_ALL_COLLAPSIBLES':
+      return payload;
 
-        return acc;
-      }, []);
+    case 'ADD_COLLAPSIBLE':
+      stateCopy.splice(collapsibleIndex + 1, 0, true);
+      return stateCopy;
 
-    case 'ADD':
-      newState.splice(rowIndex + 1, 0, { blockType, isOpen: true });
-      return newState;
+    case 'REMOVE_COLLAPSIBLE':
+      stateCopy.splice(collapsibleIndex, 1);
+      return stateCopy;
 
-    case 'REMOVE':
-      newState.splice(rowIndex, 1);
-      return newState;
+    case 'UPDATE_COLLAPSIBLE_STATUS':
+      stateCopy[collapsibleIndex] = !movingCollapsibleState;
+      return stateCopy;
 
-    case 'UPDATE_IS_ROW_OPEN': {
-      const movingRow = newState[rowIndex];
-      newState[rowIndex] = {
-        ...movingRow,
-        isOpen: !movingRow.isOpen,
-      };
-      return newState;
-    }
-
-    case 'MOVE': {
-      const movingRow = newState[rowIndex];
-      newState.splice(rowIndex, 1);
-      newState.splice(moveToIndex, 0, movingRow);
-      return newState;
-    }
+    case 'MOVE_COLLAPSIBLE':
+      stateCopy.splice(collapsibleIndex, 1);
+      stateCopy.splice(moveToIndex, 0, movingCollapsibleState);
+      return stateCopy;
 
     default:
       return currentState;
   }
 };
 
-export default rowReducer;
+export default collapsibleReducer;
