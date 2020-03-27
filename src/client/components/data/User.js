@@ -9,14 +9,26 @@ const cookies = new Cookies();
 const Context = createContext({});
 
 const UserProvider = ({ children }) => {
-  const cookieToken = cookies.get('token');
   const [token, setToken] = useState('');
-  const [user, setUser] = useState(cookieToken ? jwtDecode(cookieToken) : null);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const cookieToken = cookies.get('token');
+    if (cookieToken) {
+      const decoded = jwtDecode(cookieToken);
+      if (decoded.exp > Date.now() / 1000) {
+        setUser(decoded);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (token) {
-      setUser(jwtDecode(token));
-      cookies.set('token', token, { path: '/' });
+      const decoded = jwtDecode(token);
+      if (decoded.exp > Date.now() / 1000) {
+        setUser(decoded);
+        cookies.set('token', decoded, { path: '/' });
+      }
     }
   }, [token]);
 
