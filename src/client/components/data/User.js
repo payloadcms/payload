@@ -27,7 +27,7 @@ const UserProvider = ({ children }) => {
       const decoded = jwtDecode(token);
       if (decoded.exp > Date.now() / 1000) {
         setUser(decoded);
-        cookies.set('token', decoded, { path: '/' });
+        cookies.set('token', token, { path: '/' });
       }
     }
   }, [token]);

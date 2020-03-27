@@ -13,7 +13,7 @@ const RedirectToLogin = () => {
       message: 'You need to log in to be able to do that.',
       type: 'error',
     });
-  }, []);
+  }, [addStatus]);
 
   return (
     <Redirect to={`${config.routes.admin}/login`} />
