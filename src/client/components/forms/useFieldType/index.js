@@ -26,7 +26,7 @@ const useFieldType = (options) => {
   }, [name, required, dispatchFields, validate]);
 
   useEffect(() => {
-    sendField(defaultValue);
+    if (defaultValue != null) sendField(defaultValue);
   }, [defaultValue, sendField]);
 
   const valid = formContext.fields[name] ? formContext.fields[name].valid : true;

@@ -3,16 +3,26 @@ import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
 
+// eslint-disable-next-line import/no-cycle
 import RenderFields from '../../../RenderFields';
 import IconButton from '../../../../controls/IconButton';
 
 import './index.scss';
 
-const baseClass = 'repeater-row';
+const baseClass = 'flexible-row';
 
-const RepeaterRow = ({
-  addRow, removeRow, rowIndex, parentName, fields, defaultValue, dispatchCollapsibleStates, collapsibleStates,
-}) => {
+const FlexibleRow = (props) => {
+  const {
+    addRow,
+    removeRow,
+    rowIndex,
+    parentName,
+    block,
+    defaultValue,
+    dispatchCollapsibleStates,
+    collapsibleStates,
+  } = props;
+
   const handleCollapseClick = () => {
     dispatchCollapsibleStates({
       type: 'UPDATE_COLLAPSIBLE_STATUS',
@@ -39,7 +49,7 @@ const RepeaterRow = ({
               />
 
               <div className={`${baseClass}__header__row-index`}>
-                {`${rowIndex + 1 > 9 ? rowIndex + 1 : `0${rowIndex + 1}`}`}
+                {`${block.labels.singular} ${rowIndex + 1 > 9 ? rowIndex + 1 : `0${rowIndex + 1}`}`}
               </div>
 
               <div className={`${baseClass}__header__controls`}>
@@ -72,7 +82,7 @@ const RepeaterRow = ({
             >
               <RenderFields
                 key={rowIndex}
-                fields={fields.map((field) => {
+                fields={block.fields.map((field) => {
                   const fieldName = `${parentName}.${rowIndex}.${field.name}`;
                   return ({
                     ...field,
@@ -89,22 +99,27 @@ const RepeaterRow = ({
   );
 };
 
-RepeaterRow.defaultProps = {
-  rowCount: null,
+FlexibleRow.defaultProps = {
   defaultValue: null,
   collapsibleStates: [],
 };
 
-RepeaterRow.propTypes = {
+FlexibleRow.propTypes = {
+  block: PropTypes.shape({
+    labels: PropTypes.shape({
+      singular: PropTypes.string,
+    }),
+    fields: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+    slug: PropTypes.string,
+  }).isRequired,
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
   rowIndex: PropTypes.number.isRequired,
   parentName: PropTypes.string.isRequired,
-  fields: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-  rowCount: PropTypes.number,
+  fieldState: PropTypes.shape({}).isRequired,
   defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
   dispatchCollapsibleStates: PropTypes.func.isRequired,
   collapsibleStates: PropTypes.arrayOf(PropTypes.bool),
 };
 
-export default RepeaterRow;
+export default FlexibleRow;

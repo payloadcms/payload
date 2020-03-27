@@ -15,6 +15,7 @@ import Edit from './views/collections/Edit';
 import EditGlobal from './views/globals/Edit';
 import { requests } from '../api';
 import customComponents from './custom-components';
+import RedirectToLogin from './utilities/RedirectToLogin';
 
 const Routes = () => {
   const [initialized, setInitialized] = useState(null);
@@ -151,7 +152,7 @@ const Routes = () => {
                       </Switch>
                     );
                   }
-                  return <Redirect to={`${match.url}/login`} />;
+                  return <RedirectToLogin />;
                 }}
               />
             </Switch>
