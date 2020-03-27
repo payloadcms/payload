@@ -7,9 +7,9 @@ import { ModalContext } from '@trbl/react-modal';
 
 import FormContext from '../../Form/Context';
 import Section from '../../../layout/Section';
-import FlexibleRow from './FlexibleRow'; // eslint-disable-line import/no-cycle
 import AddRowModal from './AddRowModal';
 import collapsibleReducer from './reducer';
+import DraggableSection from '../../DraggableSection'; // eslint-disable-line import/no-cycle
 
 import './index.scss';
 
@@ -113,14 +113,14 @@ const Flexible = (props) => {
                       const blockToRender = blocks.find(block => block.slug === blockType);
 
                       return (
-                        <FlexibleRow
+                        <DraggableSection
                           key={rowIndex}
                           parentName={name}
                           addRow={() => openAddRowModal(rowIndex)}
                           removeRow={() => removeRow(rowIndex)}
                           rowIndex={rowIndex}
                           fieldState={fieldState}
-                          block={blockToRender}
+                          renderFields={blockToRender.fields}
                           defaultValue={defaultValue[rowIndex]}
                           dispatchCollapsibleStates={dispatchCollapsibleStates}
                           collapsibleStates={collapsibleStates}

@@ -1,10 +1,16 @@
-@import '../../../../../scss/styles.scss';
+@import '../../../scss/styles.scss';
 
-.repeater-row {
+.draggable-section {
   background: $light-gray;
   flex-direction: column;
   position: relative;
   margin-top: base(.5);
+
+  .field-type,
+  .missing-field {
+    padding-left: 0;
+    padding-right: 0;
+  }
 
   &:hover {
     @include shadow-sm;
@@ -74,7 +80,18 @@
         @include color-svg($primary);
 
         &:hover {
-          background: lighten($primary, 50%);
+          background: $primary;
+          @include color-svg($black);
+        }
+      }
+
+      .icon-button--crossOut {
+        border-color: $black;
+        @include color-svg($black);
+
+        &:hover {
+          background: $black;
+          @include color-svg(white);
         }
       }
     }

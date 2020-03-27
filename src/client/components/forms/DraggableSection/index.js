@@ -3,16 +3,26 @@ import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
 
-import RenderFields from '../../../RenderFields';
-import IconButton from '../../../../controls/IconButton';
+import RenderFields from '../RenderFields'; // eslint-disable-line import/no-cycle
+import IconButton from '../../controls/IconButton';
 
 import './index.scss';
 
-const baseClass = 'repeater-row';
+const baseClass = 'draggable-section';
 
-const RepeaterRow = ({
-  addRow, removeRow, rowIndex, parentName, fields, defaultValue, dispatchCollapsibleStates, collapsibleStates,
-}) => {
+const DraggableSection = (props) => {
+  const {
+    addRow,
+    removeRow,
+    rowIndex,
+    parentName,
+    renderFields,
+    defaultValue,
+    dispatchCollapsibleStates,
+    collapsibleStates,
+    singularName,
+  } = props;
+
   const handleCollapseClick = () => {
     dispatchCollapsibleStates({
       type: 'UPDATE_COLLAPSIBLE_STATUS',
@@ -34,12 +44,15 @@ const RepeaterRow = ({
           >
             <div className={`${baseClass}__header`}>
               <div
-                {...providedDrag.dragHandleProps}
                 className={`${baseClass}__header__drag-handle`}
+                {...providedDrag.dragHandleProps}
+                onClick={handleCollapseClick}
+                role="button"
+                tabIndex={0}
               />
 
               <div className={`${baseClass}__header__row-index`}>
-                {`${rowIndex + 1 > 9 ? rowIndex + 1 : `0${rowIndex + 1}`}`}
+                {`${singularName} ${rowIndex + 1}`}
               </div>
 
               <div className={`${baseClass}__header__controls`}>
@@ -55,13 +68,6 @@ const RepeaterRow = ({
                   onClick={removeRow}
                   size="small"
                 />
-
-                <IconButton
-                  className={`${baseClass}__collapse__icon ${baseClass}__collapse__icon--${collapsibleStates[rowIndex] ? 'open' : 'closed'}`}
-                  iconName="arrow"
-                  onClick={handleCollapseClick}
-                  size="small"
-                />
               </div>
             </div>
 
@@ -72,7 +78,7 @@ const RepeaterRow = ({
             >
               <RenderFields
                 key={rowIndex}
-                fields={fields.map((field) => {
+                fields={renderFields.map((field) => {
                   const fieldName = `${parentName}.${rowIndex}.${field.name}`;
                   return ({
                     ...field,
@@ -89,22 +95,24 @@ const RepeaterRow = ({
   );
 };
 
-RepeaterRow.defaultProps = {
+DraggableSection.defaultProps = {
   rowCount: null,
   defaultValue: null,
   collapsibleStates: [],
+  singularName: '',
 };
 
-RepeaterRow.propTypes = {
+DraggableSection.propTypes = {
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
   rowIndex: PropTypes.number.isRequired,
   parentName: PropTypes.string.isRequired,
-  fields: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  singularName: PropTypes.string,
+  renderFields: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   rowCount: PropTypes.number,
   defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
   dispatchCollapsibleStates: PropTypes.func.isRequired,
   collapsibleStates: PropTypes.arrayOf(PropTypes.bool),
 };
 
-export default RepeaterRow;
+export default DraggableSection;

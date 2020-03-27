@@ -6,7 +6,7 @@ import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
 import FormContext from '../../Form/Context';
 import Section from '../../../layout/Section';
-import RepeaterRow from './RepeaterRow'; // eslint-disable-line import/no-cycle
+import DraggableSection from '../../DraggableSection'; // eslint-disable-line import/no-cycle
 import collapsibleReducer from './reducer';
 
 import './index.scss';
@@ -24,6 +24,7 @@ const Repeater = (props) => {
     name,
     fields,
     defaultValue,
+    singularName,
   } = props;
 
   const addRow = (rowIndex) => {
@@ -82,7 +83,6 @@ const Repeater = (props) => {
       <div className={baseClass}>
         <Section
           heading={label}
-          className="repeater"
           rowCount={rowCount}
           addRow={() => addRow(0)}
           useAddRowButton
@@ -94,22 +94,24 @@ const Repeater = (props) => {
                 {...provided.droppableProps}
               >
                 {rowCount !== 0
-                  && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
-                    return (
-                      <RepeaterRow
-                        key={rowIndex}
-                        parentName={name}
-                        addRow={() => addRow(rowIndex)}
-                        removeRow={() => removeRow(rowIndex)}
-                        rowIndex={rowIndex}
-                        fields={fields}
-                        rowCount={rowCount}
-                        defaultValue={defaultValue[rowIndex]}
-                        dispatchCollapsibleStates={dispatchCollapsibleStates}
-                        collapsibleStates={collapsibleStates}
-                      />
-                    );
-                  })
+                 && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
+                   return (
+                     <DraggableSection
+                       key={rowIndex}
+                       parentName={name}
+                       singularName={singularName}
+                       addRow={() => addRow(rowIndex)}
+                       removeRow={() => removeRow(rowIndex)}
+                       rowIndex={rowIndex}
+                       fieldState={fieldState}
+                       renderFields={fields}
+                       rowCount={rowCount}
+                       defaultValue={defaultValue[rowIndex]}
+                       dispatchCollapsibleStates={dispatchCollapsibleStates}
+                       collapsibleStates={collapsibleStates}
+                     />
+                   );
+                 })
                 }
                 {provided.placeholder}
               </div>
@@ -124,6 +126,7 @@ const Repeater = (props) => {
 
 Repeater.defaultProps = {
   label: '',
+  singularName: '',
   defaultValue: [],
 };
 
@@ -135,6 +138,7 @@ Repeater.propTypes = {
     PropTypes.shape({}),
   ).isRequired,
   label: PropTypes.string,
+  singularName: PropTypes.string,
   name: PropTypes.string.isRequired,
 };
 

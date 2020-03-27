@@ -4,6 +4,7 @@ import AnimateHeight from 'react-animate-height';
 
 import './index.scss';
 import IconButton from '../../controls/IconButton';
+import Button from '../../controls/Button';
 
 const baseClass = 'section';
 
@@ -28,25 +29,13 @@ const Section = (props) => {
     <section className={classes}>
       {heading
         && (
-          <header>
+          <header
+            className={`${baseClass}__collapsible-header`}
+            onClick={() => setIsSectionOpen(state => !state)}
+            role="button"
+            tabIndex={0}
+          >
             <h2 className={`${baseClass}__heading`}>{heading}</h2>
-            <div className={`${baseClass}__controls`}>
-              {(rowCount === 0 && useAddRowButton)
-                && (
-                  <IconButton
-                    className={`${baseClass}__add-row-button`}
-                    size="small"
-                    iconName="crosshair"
-                    onClick={() => addInitialRow()}
-                  />
-                )}
-              <IconButton
-                className={`${baseClass}__collapse-icon ${baseClass}__collapse-icon--${isSectionOpen ? 'open' : 'closed'}`}
-                size="small"
-                iconName="arrow"
-                onClick={() => setIsSectionOpen(state => !state)}
-              />
-            </div>
           </header>
         )}
       {children
@@ -54,8 +43,19 @@ const Section = (props) => {
           <AnimateHeight
             className={`${baseClass}__content ${baseClass}__content--is-${isSectionOpen ? 'open' : 'closed'}`}
             height={isSectionOpen ? 'auto' : 0}
-            duration={150}
+            duration={0}
           >
+              {(rowCount === 0 && useAddRowButton)
+                && (
+                  <div className={`${baseClass}__add-button-wrap`}>
+                    <Button
+                      onClick={addInitialRow}
+                      type="secondary"
+                    >
+                      Add Row
+                    </Button>
+                  </div>
+                )}
             {children}
           </AnimateHeight>
         )}
