@@ -110,7 +110,7 @@ const Flexible = (props) => {
                   {rowCount !== 0
                     && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
                       const blockType = fieldState[`${name}.${rowIndex}.blockType`];
-                      const blockToRender = blocks.find(block => block.slug === blockType);
+                      const blockToRender = blocks.find(block => block.slug === blockType.value);
 
                       return (
                         <DraggableSection

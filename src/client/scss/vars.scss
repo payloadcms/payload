@@ -56,7 +56,11 @@ $stroke-width : 1px;
 }
 
 @mixin shadow {
-	box-shadow: 0 22px 65px rgba(0,0,0,.07);
+  box-shadow: 0 12px 45px rgba(0,0,0,.03);
+
+  &:hover {
+    	box-shadow: 0 12px 45px rgba(0,0,0,.07);
+  }
 }
 
 @mixin inputShadowActive {

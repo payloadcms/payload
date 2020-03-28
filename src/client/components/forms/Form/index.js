@@ -65,6 +65,8 @@ const Form = (props) => {
 
       setProcessing(true);
 
+      console.log(JSON.stringify(unflatten(data)));
+
       // Make the API call from the action
       requests[method.toLowerCase()](action, {
         body: JSON.stringify(unflatten(data)),
