@@ -25,6 +25,7 @@ const Flexible = (props) => {
 
   const { toggle: toggleModal, closeAll: closeAllModals } = useContext(ModalContext);
   const [rowIndexBeingAdded, setRowIndexBeingAdded] = useState(null);
+  const [hasModifiedRows, setHasModifiedRows] = useState(false);
   const [rowCount, setRowCount] = useState(0);
   const [collapsibleStates, dispatchCollapsibleStates] = useReducer(collapsibleReducer, []);
   const formContext = useContext(FormContext);
@@ -44,6 +45,7 @@ const Flexible = (props) => {
     });
 
     setRowCount(rowCount + 1);
+    setHasModifiedRows(true);
   };
 
   const removeRow = (rowIndex) => {
@@ -57,6 +59,7 @@ const Flexible = (props) => {
     });
 
     setRowCount(rowCount - 1);
+    setHasModifiedRows(true);
   };
 
   const moveRow = (moveFromIndex, moveToIndex) => {
@@ -67,6 +70,8 @@ const Flexible = (props) => {
     dispatchCollapsibleStates({
       type: 'MOVE_COLLAPSIBLE', collapsibleIndex: moveFromIndex, moveToIndex,
     });
+
+    setHasModifiedRows(true);
   };
 
   useEffect(() => {
@@ -109,23 +114,41 @@ const Flexible = (props) => {
                 >
                   {rowCount !== 0
                     && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
-                      const blockType = fieldState[`${name}.${rowIndex}.blockType`];
-                      const blockToRender = blocks.find(block => block.slug === blockType.value);
+                      let blockType = fieldState[`${name}.${rowIndex}.blockType`]?.value;
 
-                      return (
-                        <DraggableSection
-                          key={rowIndex}
-                          parentName={name}
-                          addRow={() => openAddRowModal(rowIndex)}
-                          removeRow={() => removeRow(rowIndex)}
-                          rowIndex={rowIndex}
-                          fieldState={fieldState}
-                          renderFields={blockToRender.fields}
-                          defaultValue={defaultValue[rowIndex]}
-                          dispatchCollapsibleStates={dispatchCollapsibleStates}
-                          collapsibleStates={collapsibleStates}
-                        />
-                      );
+                      if (!hasModifiedRows && !blockType) {
+                        blockType = defaultValue?.[rowIndex]?.blockType;
+                      }
+
+                      const blockToRender = blocks.find(block => block.slug === blockType);
+
+                      if (blockToRender) {
+                        return (
+                          <DraggableSection
+                            key={rowIndex}
+                            parentName={name}
+                            addRow={() => openAddRowModal(rowIndex)}
+                            removeRow={() => removeRow(rowIndex)}
+                            rowIndex={rowIndex}
+                            fieldState={fieldState}
+                            renderFields={[
+                              ...blockToRender.fields,
+                              {
+                                name: 'blockType',
+                                type: 'hidden',
+                              }, {
+                                name: 'blockName',
+                                type: 'hidden',
+                              },
+                            ]}
+                            defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
+                            dispatchCollapsibleStates={dispatchCollapsibleStates}
+                            collapsibleStates={collapsibleStates}
+                          />
+                        );
+                      }
+
+                      return null;
                     })
                   }
                   {provided.placeholder}
