@@ -3,7 +3,7 @@ const passport = require('passport');
 const httpStatus = require('http-status');
 const APIError = require('../errors/APIError');
 
-module.exports = (userConfig, User) => ({
+module.exports = (config, User) => ({
   /**
    * Returns User when succesfully registered
    * @param req
@@ -12,7 +12,7 @@ module.exports = (userConfig, User) => ({
    * @returns {*}
    */
   register: (req, res, next) => {
-    const usernameField = userConfig.useAsUsername || 'email';
+    const usernameField = config.user.useAsUsername || 'email';
 
     User.register(new User({ usernameField: req.body[usernameField] }), req.body.password, (err, user) => {
       if (err) {
@@ -23,7 +23,7 @@ module.exports = (userConfig, User) => ({
         return res.json({
           [usernameField]: user[usernameField],
           role: user.role,
-          createdAt: user.createdAt
+          createdAt: user.createdAt,
         });
       });
     });
@@ -36,7 +36,7 @@ module.exports = (userConfig, User) => ({
    * @returns {*}
    */
   login: (req, res) => {
-    const usernameField = userConfig.useAsUsername || 'email';
+    const usernameField = config.user.useAsUsername || 'email';
     const username = req.body[usernameField];
     const { password } = req.body;
 
@@ -49,10 +49,10 @@ module.exports = (userConfig, User) => ({
         if (authErr || passwordError) return new APIError('Authentication Failed', httpStatus.UNAUTHORIZED);
 
         const opts = {};
-        opts.expiresIn = process.env.tokenExpiration || 7200;
-        const secret = process.env.secret || 'SECRET_KEY';
+        opts.expiresIn = config.user.auth.tokenExpiration;
+        const secret = config.user.auth.secretKey;
 
-        const fieldsToSign = userConfig.fields.reduce((acc, field) => {
+        const fieldsToSign = config.user.fields.reduce((acc, field) => {
           if (field.saveToJWT) acc[field.name] = user[field.name];
           return acc;
         }, {
@@ -77,9 +77,9 @@ module.exports = (userConfig, User) => ({
    */
   refresh: (req, res, next) => {
     const { token } = req.body;
-    const secret = process.env.secret || 'SECRET_KEY';
+    const secret = config.user.auth.secretKey;
     const opts = {};
-    opts.expiresIn = process.env.tokenExpiration || 7200;
+    opts.expiresIn = config.user.auth.tokenExpiration;
 
     try {
       jwt.verify(token, secret, {});

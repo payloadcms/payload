@@ -6,8 +6,8 @@ const authRequestHandlers = require('./requestHandlers');
 const passwordResetRoutes = require('./passwordResets/routes');
 
 const router = express.Router();
-const authRoutes = (userConfig, User) => {
-  const auth = authRequestHandlers(userConfig, User);
+const authRoutes = (config, User) => {
+  const auth = authRequestHandlers(config, User);
 
   router
     .route('/login')
@@ -19,15 +19,15 @@ const authRoutes = (userConfig, User) => {
 
   router
     .route('/me')
-    .post(passport.authenticate(userConfig.auth.strategy, { session: false }), auth.me);
+    .post(passport.authenticate(config.user.auth.strategy, { session: false }), auth.me);
 
-  if (userConfig.auth.passwordResets) {
-    router.use('', passwordResetRoutes(userConfig.email, User));
+  if (config.user.auth.passwordResets) {
+    router.use('', passwordResetRoutes(config.user.email, User));
   }
 
-  if (userConfig.auth.registration) {
+  if (config.user.auth.registration) {
     router
-      .route(`${userConfig.slug}/register`) // TODO: not sure how to incorporate url params like `:pageId`
+      .route(`${config.user.slug}/register`) // TODO: not sure how to incorporate url params like `:pageId`
       .post(auth.register);
 
     router

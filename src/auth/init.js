@@ -7,9 +7,7 @@ const authRoutes = require('./routes');
 const initUsers = (User, config, router) => {
   passport.use(User.createStrategy());
 
-  const { user: userConfig } = config;
-
-  if (userConfig.auth.strategy === 'jwt') {
+  if (config.user.auth.strategy === 'jwt') {
     passport.use(jwtStrategy(User));
     passport.serializeUser(User.serializeUser());
     passport.deserializeUser(User.deserializeUser());
@@ -17,7 +15,7 @@ const initUsers = (User, config, router) => {
   passport.use(new AnonymousStrategy.Strategy());
 
   router.use('', initRoutes(User));
-  router.use('', authRoutes(userConfig, User));
+  router.use('', authRoutes(config, User));
 };
 
 module.exports = initUsers;
