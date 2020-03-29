@@ -20,6 +20,12 @@ const registerSchema = (globalConfigs, config) => {
 
     Object.values(globalConfigs).forEach((globalConfig) => {
       const globalSchema = buildSchema(globalConfig.fields, config);
+
+      globalSchema
+        .plugin(localizationPlugin, config.localization)
+        .plugin(autopopulate)
+        .plugin(mongooseHidden());
+
       Globals.discriminator(globalConfig.slug, globalSchema);
     });
 

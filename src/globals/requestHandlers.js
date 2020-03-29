@@ -19,6 +19,10 @@ const upsert = (req, res) => {
       });
     }
 
+    if (req.query.locale && doc.setLocale) {
+      doc.setLocale(req.query.locale, req.query['fallback-locale']);
+    }
+
     Object.assign(doc, req.body);
 
     return doc.save((err) => {

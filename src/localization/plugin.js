@@ -266,8 +266,8 @@ module.exports = function localizationPlugin(schema, options) {
     // define a global method to change the locale for all models (and their schemas)
     // created for the current mongo connection
     model.db.setDefaultLocale = function (locale) {
-      let modelToUpdate; let
-        modelName;
+      let modelToUpdate;
+      let modelName;
       for (modelName in this.models) {
         if (this.models.hasOwnProperty(modelName)) {
           modelToUpdate = this.models[modelName];
