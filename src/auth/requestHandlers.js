@@ -12,7 +12,7 @@ module.exports = (config, User) => ({
    * @returns {*}
    */
   register: (req, res, next) => {
-    const usernameField = config.user.useAsUsername || 'email';
+    const usernameField = config.user.auth.useAsUsername;
 
     User.register(new User({ usernameField: req.body[usernameField] }), req.body.password, (err, user) => {
       if (err) {
@@ -36,7 +36,7 @@ module.exports = (config, User) => ({
    * @returns {*}
    */
   login: (req, res) => {
-    const usernameField = config.user.useAsUsername || 'email';
+    const usernameField = config.user.auth.useAsUsername;
     const username = req.body[usernameField];
     const { password } = req.body;
 

@@ -19,36 +19,32 @@ const authRoutes = (config, User) => {
 
   router
     .route('/me')
-    .post(passport.authenticate(config.user.auth.strategy, { session: false }), auth.me);
+    .post(passport.authenticate('jwt', { session: false }), auth.me);
 
-  if (config.user.auth.passwordResets) {
-    router.use('', passwordResetRoutes(config.user.email, User));
-  }
+  router.use('', passwordResetRoutes(config.email, User));
 
-  if (config.user.auth.registration) {
-    router
-      .route(`${config.user.slug}/register`) // TODO: not sure how to incorporate url params like `:pageId`
-      .post(auth.register);
+  router
+    .route(`${config.user.slug}/register`)
+    .post(auth.register);
 
-    router
-      .route('/first-register')
-      .post((req, res, next) => {
-        User.countDocuments({}, (err, count) => {
-          if (err) res.status(500).json({ error: err });
-          if (count >= 1) return res.status(403).json({ initialized: true });
-          return next();
-        });
-      }, (req, res, next) => {
-        User.register(new User(req.body), req.body.password, (err) => {
-          if (err) {
-            const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
-            return res.status(httpStatus.UNAUTHORIZED).json(error);
-          }
+  router
+    .route('/first-register')
+    .post((req, res, next) => {
+      User.countDocuments({}, (err, count) => {
+        if (err) res.status(500).json({ error: err });
+        if (count >= 1) return res.status(403).json({ initialized: true });
+        return next();
+      });
+    }, (req, res, next) => {
+      User.register(new User(req.body), req.body.password, (err) => {
+        if (err) {
+          const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
+          return res.status(httpStatus.UNAUTHORIZED).json(error);
+        }
 
-          return next();
-        });
-      }, auth.login);
-  }
+        return next();
+      });
+    }, auth.login);
 
   return router;
 };
