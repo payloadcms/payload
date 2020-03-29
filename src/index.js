@@ -110,7 +110,7 @@ class Payload {
   registerGlobals() {
     validateGlobals(this.config.globals);
     this.globals = registerGlobalSchema(this.config.globals, this.config);
-    registerGlobalRoutes(this.globals.model, this.router);
+    registerGlobalRoutes(this.globals, this.router);
   }
 
   getCollections() {

@@ -3,11 +3,13 @@ const { NotFound } = require('../errors');
 const formatErrorResponse = require('../responses/formatError');
 
 const upsert = (req, res) => {
-  req.model.findOne({ globalType: req.params.slug }, (findErr, doc) => {
+  const { slug } = req.global;
+
+  req.model.findOne({ globalType: slug }, (findErr, doc) => {
     if (!doc) {
       return req.model.create({
         ...req.body,
-        globalType: req.params.slug,
+        globalType: slug,
       }, (createErr, result) => {
         if (createErr) return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(createErr, 'mongoose'));
 
@@ -37,6 +39,8 @@ const upsert = (req, res) => {
 };
 
 const findOne = (req, res) => {
+  const { slug } = req.global;
+
   const options = {};
 
   if (req.query.depth) {
@@ -45,7 +49,7 @@ const findOne = (req, res) => {
     };
   }
 
-  req.model.findOne({ globalType: req.params.slug }, null, options, (findErr, doc) => {
+  req.model.findOne({ globalType: slug }, null, options, (findErr, doc) => {
     if (!doc) {
       return res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(new NotFound(), 'APIError'));
     }
@@ -61,29 +65,7 @@ const findOne = (req, res) => {
   });
 };
 
-const findAll = (req, res) => {
-  const options = {
-    locale: req.locale,
-    fallback: req.query['fallback-locale'],
-  };
-
-  if (req.query.depth) {
-    options.autopopulate = {
-      maxDepth: req.query.depth,
-    };
-  }
-
-  req.model.findOne({ globalType: req.params.slug }, null, options, (findErr, doc) => {
-    if (!doc) {
-      return res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(new NotFound(), 'APIError'));
-    }
-
-    return res.status(httpStatus.OK).json(doc.toJSON({ virtuals: true }));
-  });
-};
-
 module.exports = {
-  findAll,
   findOne,
   upsert,
 };
