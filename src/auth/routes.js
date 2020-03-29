@@ -14,6 +14,10 @@ const authRoutes = (userConfig, User) => {
     .post(auth.login);
 
   router
+    .route('/refresh')
+    .post(auth.refresh);
+
+  router
     .route('/me')
     .post(passport.authenticate(userConfig.auth.strategy, { session: false }), auth.me);
 
