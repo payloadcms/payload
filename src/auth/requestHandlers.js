@@ -20,7 +20,11 @@ module.exports = (userConfig, User) => ({
         return next(error);
       }
       return passport.authenticate('local')(req, res, () => {
-        return res.json({ [usernameField]: user[usernameField], role: user.role, createdAt: user.createdAt });
+        return res.json({
+          [usernameField]: user[usernameField],
+          role: user.role,
+          createdAt: user.createdAt
+        });
       });
     });
   },
@@ -37,10 +41,12 @@ module.exports = (userConfig, User) => ({
     const { password } = req.body;
 
     User.findByUsername(username, (err, user) => {
-      if (err || !user) return res.status(401).json({ message: 'Auth Failed' });
+      if (err || !user) {
+        return new APIError('Authentication Failed', httpStatus.UNAUTHORIZED);
+      }
 
       return user.authenticate(password, (authErr, model, passwordError) => {
-        if (authErr || passwordError) return res.status(401).json({ message: 'Auth Failed' });
+        if (authErr || passwordError) return new APIError('Authentication Failed', httpStatus.UNAUTHORIZED);
 
         const opts = {};
         opts.expiresIn = process.env.tokenExpiration || 7200;
@@ -54,12 +60,38 @@ module.exports = (userConfig, User) => ({
         });
 
         const token = jwt.sign(fieldsToSign, secret, opts);
-        return res.status(200).json({
-          message: 'Auth Passed',
-          token,
-        });
+        return res.status(200)
+          .json({
+            message: 'Auth Passed',
+            token,
+          });
       });
     });
+  },
+
+  /**
+   * Refresh an expired or soon to be expired auth token
+   * @param req
+   * @param res
+   * @param next
+   */
+  refresh: (req, res, next) => {
+    const { token } = req.body;
+    const secret = process.env.secret || 'SECRET_KEY';
+    const opts = {};
+    opts.expiresIn = process.env.tokenExpiration || 7200;
+
+    try {
+      jwt.verify(token, secret, {});
+      const refreshToken = jwt.sign(token, secret);
+      res.status(200)
+        .json({
+          message: 'Token Refresh Successful',
+          refreshToken,
+        });
+    } catch (e) {
+      next(new APIError('Authentication error', httpStatus.UNAUTHORIZED));
+    }
   },
 
   /**
@@ -69,7 +101,8 @@ module.exports = (userConfig, User) => ({
    * @returns {*}
    */
   me: (req, res) => {
-    return res.status(200).send(req.user);
+    return res.status(200)
+      .send(req.user);
   },
 
   /**
