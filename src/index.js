@@ -25,6 +25,7 @@ class Payload {
     this.registerUser.bind(this);
     this.registerUpload.bind(this);
     this.registerGlobals.bind(this);
+    this.registerCollections.bind(this);
     this.getCollections.bind(this);
     this.getGlobals.bind(this);
 
@@ -44,20 +45,11 @@ class Payload {
     this.registerUser();
     this.registerUpload();
 
-    // Register custom collections
-    this.config.collections.forEach((collection) => {
-      validateCollection(collection, this.collections);
-
-      this.collections[collection.slug] = {
-        model: mongoose.model(collection.slug, buildCollectionSchema(collection, this.config)),
-        config: collection,
-      };
-
-      registerCollectionRoutes(this.collections[collection.slug], this.router);
-    });
+    // Register collections
+    this.registerCollections();
 
     // Register globals
-    this.registerGlobals(this.config.globals);
+    this.registerGlobals();
 
     // Enable client webpack
     if (!this.config.disableAdmin) initWebpack(this.app, this.config);
@@ -102,9 +94,22 @@ class Payload {
     }, this.router);
   }
 
-  registerGlobals(globals) {
-    validateGlobals(globals);
-    this.globals = registerGlobalSchema(globals, this.config);
+  registerCollections() {
+    this.config.collections.forEach((collection) => {
+      validateCollection(collection, this.collections);
+
+      this.collections[collection.slug] = {
+        model: mongoose.model(collection.slug, buildCollectionSchema(collection, this.config)),
+        config: collection,
+      };
+
+      registerCollectionRoutes(this.collections[collection.slug], this.router);
+    });
+  }
+
+  registerGlobals() {
+    validateGlobals(this.config.globals);
+    this.globals = registerGlobalSchema(this.config.globals, this.config);
     registerGlobalRoutes(this.globals.model, this.router);
   }
 

@@ -142,7 +142,6 @@ module.exports = function localizationPlugin(schema, options) {
           const { locales } = this.schema.options.localization;
           locales.forEach((locale) => {
             if (!value[locale]) {
-              // this.set(`${path}.${locale}`, value);
               return;
             }
             this.set(`${path}.${locale}`, value[locale]);
@@ -152,17 +151,19 @@ module.exports = function localizationPlugin(schema, options) {
 
         // embedded and sub-documents will use locale methods from the top level document
         const owner = this.ownerDocument ? this.ownerDocument() : this;
+        const locale = owner.getLocale();
 
-        this.set(`${path}.${owner.getLocale()}`, value);
+        this.set(`${path}.${locale}`, value);
       });
 
     // localized option is not needed for the current path any more,
     // and is unwanted for all child locale-properties
     // delete schemaType.options.localized; // This was removed to allow viewing inside query parser
 
-    const localizedObject = {};
-    // TODO: setting equal to object is good for hasMany: false, but breaking for hasMany: true;
-    localizedObject[key] = {};
+    const localizedObject = {
+      [key]: {},
+    };
+
     pluginOptions.locales.forEach(function (locale) {
       const localeOptions = Object.assign({}, schemaType.options);
       if (locale !== options.defaultLocale) {

@@ -2,7 +2,7 @@ const requestHandlers = require('./requestHandlers');
 const setModelLocaleMiddleware = require('../localization/setModelLocale');
 const bindModelMiddleware = require('../mongoose/bindModel');
 
-const { upsert, fetch } = requestHandlers;
+const { upsert, findOne, findAll } = requestHandlers;
 
 const registerGlobals = (globals, router) => {
   router.all('/globals*',
@@ -11,11 +11,11 @@ const registerGlobals = (globals, router) => {
 
   router
     .route('/globals')
-    .get(fetch);
+    .get(findAll);
 
   router
     .route('/globals/:slug')
-    .get(fetch)
+    .get(findOne)
     .post(upsert)
     .put(upsert);
 };
