@@ -1,36 +1,36 @@
 const mongoose = require('mongoose');
 const autopopulate = require('mongoose-autopopulate');
 const mongooseHidden = require('mongoose-hidden');
-const fieldToSchemaMap = require('../mongoose/schema/fieldToSchemaMap');
+const buildSchema = require('../mongoose/schema/buildSchema');
 const localizationPlugin = require('../localization/plugin');
 
 const registerSchema = (globalConfigs, config) => {
-  const globalFields = {};
-  const globalSchemaGroups = {};
   const globals = {
-    config: {},
+    config: globalConfigs,
+    model: {},
   };
 
   if (globalConfigs && globalConfigs.length > 0) {
-    Object.values(globalConfigs).forEach((globalConfig) => {
-      globals.config[globalConfig.label] = globalConfig;
-      globalFields[globalConfig.slug] = {};
-
-      globalConfig.fields.forEach((field) => {
-        const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) globalFields[globalConfig.slug][field.name] = fieldSchema(field, config);
-      });
-      globalSchemaGroups[globalConfig.slug] = globalFields[globalConfig.slug];
-    });
-  }
-
-  globals.model = mongoose.model(
-    'globals',
-    new mongoose.Schema({ ...globalSchemaGroups, timestamps: false })
+    const globalsSchema = new mongoose.Schema({}, { discriminatorKey: 'globalType', timestamps: false })
       .plugin(localizationPlugin, config.localization)
       .plugin(autopopulate)
-      .plugin(mongooseHidden()),
-  );
+      .plugin(mongooseHidden());
+
+    const Globals = mongoose.model('globals', globalsSchema);
+
+    Object.values(globalConfigs).forEach((globalConfig) => {
+      const globalSchema = buildSchema(globalConfig.fields, config);
+
+      globalSchema
+        .plugin(localizationPlugin, config.localization)
+        .plugin(autopopulate)
+        .plugin(mongooseHidden());
+
+      Globals.discriminator(globalConfig.slug, globalSchema);
+    });
+
+    globals.model = Globals;
+  }
 
   return globals;
 };

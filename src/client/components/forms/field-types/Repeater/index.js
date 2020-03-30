@@ -17,6 +17,7 @@ const Repeater = (props) => {
   const [collapsibleStates, dispatchCollapsibleStates] = useReducer(collapsibleReducer, []);
   const formContext = useContext(FormContext);
   const [rowCount, setRowCount] = useState(0);
+  const [hasModifiedRows, setHasModifiedRows] = useState(false);
   const { fields: fieldState, dispatchFields } = formContext;
 
   const {
@@ -37,6 +38,7 @@ const Repeater = (props) => {
     });
 
     setRowCount(rowCount + 1);
+    setHasModifiedRows(true);
   };
 
   const removeRow = (rowIndex) => {
@@ -50,6 +52,7 @@ const Repeater = (props) => {
     });
 
     setRowCount(rowCount - 1);
+    setHasModifiedRows(true);
   };
 
   const moveRow = (moveFromIndex, moveToIndex) => {
@@ -60,6 +63,8 @@ const Repeater = (props) => {
     dispatchCollapsibleStates({
       type: 'MOVE_COLLAPSIBLE', collapsibleIndex: moveFromIndex, moveToIndex,
     });
+
+    setHasModifiedRows(true);
   };
 
   useEffect(() => {
@@ -94,24 +99,24 @@ const Repeater = (props) => {
                 {...provided.droppableProps}
               >
                 {rowCount !== 0
-                 && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
-                   return (
-                     <DraggableSection
-                       key={rowIndex}
-                       parentName={name}
-                       singularName={singularName}
-                       addRow={() => addRow(rowIndex)}
-                       removeRow={() => removeRow(rowIndex)}
-                       rowIndex={rowIndex}
-                       fieldState={fieldState}
-                       renderFields={fields}
-                       rowCount={rowCount}
-                       defaultValue={defaultValue[rowIndex]}
-                       dispatchCollapsibleStates={dispatchCollapsibleStates}
-                       collapsibleStates={collapsibleStates}
-                     />
-                   );
-                 })
+                  && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
+                    return (
+                      <DraggableSection
+                        key={rowIndex}
+                        parentName={name}
+                        singularName={singularName}
+                        addRow={() => addRow(rowIndex)}
+                        removeRow={() => removeRow(rowIndex)}
+                        rowIndex={rowIndex}
+                        fieldState={fieldState}
+                        renderFields={fields}
+                        rowCount={rowCount}
+                        defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
+                        dispatchCollapsibleStates={dispatchCollapsibleStates}
+                        collapsibleStates={collapsibleStates}
+                      />
+                    );
+                  })
                 }
                 {provided.placeholder}
               </div>

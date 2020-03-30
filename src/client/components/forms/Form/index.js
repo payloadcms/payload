@@ -51,6 +51,7 @@ const Form = (props) => {
       // If submit handler comes through via props, run that
     } else if (onSubmit) {
       e.preventDefault();
+
       onSubmit(fields);
 
       // If form is AJAX, fetch data

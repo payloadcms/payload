@@ -72,7 +72,12 @@ function fieldReducer(state, action) {
         };
       }, {});
 
-      if (blockType) subFields.blockType = blockType;
+      if (blockType) {
+        subFields.blockType = {
+          value: blockType,
+          valid: true,
+        };
+      }
 
       // Add new object containing subfield names to rowsFromState array
       rowsFromState.splice(rowIndex + 1, 0, subFields);

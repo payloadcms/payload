@@ -1,12 +1,8 @@
 @import '../../../scss/styles.scss';
 
 section.section {
-  @include shadow;
+  @include inputShadow;
   margin: base(1) 0;
-
-  &:hover {
-    box-shadow: 0 22px 65px rgba(0,0,0,.15);
-  }
 
   .section__collapsible-header {
     border-bottom: 1px solid $light-gray;

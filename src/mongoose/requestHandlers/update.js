@@ -11,7 +11,7 @@ const update = (req, res) => {
 
     Object.assign(doc, req.body);
 
-    doc.save((saveError) => {
+    return doc.save((saveError) => {
       if (saveError) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(saveError, 'mongoose'));
       }
