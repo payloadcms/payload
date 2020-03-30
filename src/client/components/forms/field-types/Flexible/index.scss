@@ -1,6 +1,10 @@
 @import '../../../../scss/styles.scss';
 
 .field-type.flexible {
+  > .section {
+    margin-top: 0;
+  }
+
   .section__content {
     > div > div {
       @include gutter;
