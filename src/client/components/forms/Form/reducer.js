@@ -48,9 +48,11 @@ function fieldReducer(state, action) {
 
       rowsFromState.splice(rowIndex, 1);
 
+      const flattenedRowState = rowsFromState.length > 0 ? flatten({ [name]: rowsFromState }, { filters: flattenFilters }) : {};
+
       return {
         ...remainingState,
-        ...(flatten({ [name]: rowsFromState }, { filters: flattenFilters })),
+        ...flattenedRowState,
       };
     }
 
