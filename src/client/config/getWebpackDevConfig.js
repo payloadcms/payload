@@ -82,7 +82,7 @@ module.exports = (config) => {
             // Chains the sass-loader with the css-loader and the style-loader
             // to immediately apply all styles to the DOM.
             {
-              test: /\.(scss|sass)$/,
+              test: /\.(scss|sass|css)$/,
               use: getStyleLoaders({ importLoaders: 2 }, 'sass-loader'),
             },
             // "file" loader makes sure those assets get served by WebpackDevServer.

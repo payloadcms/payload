@@ -96,8 +96,7 @@ a {
 .icon {
   @include color-svg($black);
 
-
-  path, line, polyline {
+  path, line, polyline, rect {
     vector-effect: non-scaling-stroke;
     shape-rendering:crispEdges;
     fill: none;

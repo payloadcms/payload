@@ -7,7 +7,7 @@ import Label from '../../Label';
 import Error from '../../Error';
 import CalendarIcon from '../../../graphics/Calendar';
 
-import './react-datepicker.scss';
+import 'react-datepicker/dist/react-datepicker.css';
 import './index.scss';
 
 const defaultError = 'Please fill in the field with a valid date';
@@ -30,7 +30,7 @@ const DateTime = (props) => {
     minDate,
     maxDate,
     monthsShown,
-    useTime: showTimeSelect,
+    useTime,
     minTime,
     maxTime,
     timeIntervals,
@@ -50,12 +50,19 @@ const DateTime = (props) => {
     validate,
   });
 
+  let dateTimeFormat = inputDateTimeFormat;
+  if (!dateTimeFormat) {
+    if (useTime && useDate) dateTimeFormat = 'MMM d, yyy h:mma';
+    else if (useTime) dateTimeFormat = 'h:mma';
+    else dateTimeFormat = 'MMM d, yyy';
+  }
+
   const dateTimePickerProps = {
     minDate,
     maxDate,
-    dateFormat: inputDateTimeFormat,
+    dateFormat: dateTimeFormat,
     monthsShown: Math.min(2, monthsShown),
-    showTimeSelect,
+    showTimeSelect: useTime,
     minTime,
     maxTime,
     timeIntervals,
@@ -114,13 +121,13 @@ DateTime.defaultProps = {
   // date specific props
   useDate: true,
   minDate: new Date(),
-  maxDate: undefined,
+  maxDate: null,
   monthsShown: 1,
-  inputDateTimeFormat: 'MMM d, yyy',
+  inputDateTimeFormat: '',
   // time specific props
   useTime: false,
-  minTime: null,
-  maxTime: null,
+  minTime: new Date('4040-01-01T01:00:00'),
+  maxTime: new Date('4040-01-01T24:00:00'),
   timeIntervals: 30,
   timeFormat: 'h:mm aa',
 };
