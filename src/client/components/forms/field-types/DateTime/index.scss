@@ -26,7 +26,7 @@ $cal-icon-width: 24px;
       height: auto;
 
       path {
-        fill: $gray;
+        fill: $black;
       }
     }
   }
@@ -53,6 +53,7 @@ $cal-icon-width: 24px;
 
   .react-datepicker {
     @include shadow-sm;
+    background: white;
     display: inline-flex;
     border: 1px solid $light-gray;
     font-family: $font-body;
@@ -63,6 +64,7 @@ $cal-icon-width: 24px;
     &__header {
       padding-top: 0;
       text-transform: none;
+      text-align: center;
       border-radius: 0;
       border: none;
       background-color: white;
@@ -155,6 +157,23 @@ $cal-icon-width: 24px;
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box,
   .react-datepicker__time-container {
     width: 120px;
+  }
+
+  .react-datepicker__navigation {
+    background: none;
+    line-height: 1.7rem;
+    text-align: center;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    width: 0;
+    padding: 0;
+    border: 0.45rem solid transparent;
+    z-index: 1;
+    height: 10px;
+    width: 10px;
+    text-indent: -999em;
+    overflow: hidden;
   }
 
   .react-datepicker__navigation--next--with-time:not(.react-datepicker__navigation--next--with-today-button) {

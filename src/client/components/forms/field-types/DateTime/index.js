@@ -7,10 +7,10 @@ import Label from '../../Label';
 import Error from '../../Error';
 import CalendarIcon from '../../../graphics/Calendar';
 
-import 'react-datepicker/dist/react-datepicker.css';
+import './react-datepicker.scss';
 import './index.scss';
 
-const defaultError = 'Please fill in the field as a valid date';
+const defaultError = 'Please fill in the field with a valid date';
 const defaultValidate = value => value instanceof Date;
 
 const baseClass = 'date-time-picker';
@@ -116,8 +116,7 @@ DateTime.defaultProps = {
   minDate: new Date(),
   maxDate: undefined,
   monthsShown: 1,
-  inputDateTimeFormat: 'MMMM d, yyy h:mm aa',
-  // inputDateTimeFormat: 'MMM d, yyy',
+  inputDateTimeFormat: 'MMM d, yyy',
   // time specific props
   useTime: false,
   minTime: null,

@@ -1,5 +1,17 @@
 @import '../../../scss/styles';
 
+.field-type {
+  &.repeater,
+  &.flexible {
+    margin: base(1) 0;
+
+    section {
+      margin: 0;
+      background-color: white;
+    }
+  }
+}
+
 @mixin formInput () {
     @include inputShadow;
     font-family: $font-brand;
