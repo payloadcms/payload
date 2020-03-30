@@ -4,9 +4,6 @@ import FormContext from '../Form/Context';
 import './index.scss';
 
 const useFieldType = (options) => {
-  const formContext = useContext(FormContext);
-  const { dispatchFields, submitted, processing } = formContext;
-
   const {
     name,
     required,
@@ -14,6 +11,10 @@ const useFieldType = (options) => {
     onChange,
     validate,
   } = options;
+
+  const formContext = useContext(FormContext);
+  const { dispatchFields, submitted, processing } = formContext;
+  const mountValue = formContext.fields[name]?.value || null;
 
   const sendField = useCallback((valueToSend) => {
     dispatchFields({
@@ -24,6 +25,10 @@ const useFieldType = (options) => {
         : true,
     });
   }, [name, required, dispatchFields, validate]);
+
+  useEffect(() => {
+    sendField(mountValue);
+  }, [sendField, mountValue]);
 
   useEffect(() => {
     if (defaultValue != null) sendField(defaultValue);
