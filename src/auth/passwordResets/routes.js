@@ -103,7 +103,7 @@ const passwordResetRoutes = (emailConfig, User) => {
     }
   };
 
-  const resetPassword = (req, res, User) => {
+  const resetPassword = (req, res) => {
     User.findOne(
       {
         resetPasswordToken: req.body.token,
