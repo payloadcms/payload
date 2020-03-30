@@ -58,7 +58,7 @@ class Payload {
   registerUser() {
     this.config.user.fields.push(...baseUserFields);
     const userSchema = buildCollectionSchema(this.config.user, this.config);
-    userSchema.plugin(passportLocalMongoose, { usernameField: this.config.user.useAsUsername });
+    userSchema.plugin(passportLocalMongoose, { usernameField: this.config.user.auth.useAsUsername });
 
     this.User = mongoose.model(this.config.user.labels.singular, userSchema);
     initUserAuth(this.User, this.config, this.router);

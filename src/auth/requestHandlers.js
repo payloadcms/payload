@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const httpStatus = require('http-status');
 const APIError = require('../errors/APIError');
+const formatErrorResponse = require('../responses/formatError');
 
 module.exports = (config, User) => ({
   /**
@@ -30,7 +31,7 @@ module.exports = (config, User) => ({
   },
 
   /**
-   * Returns passport login response (cookie) when valid username and password is provided
+   * Returns passport login response (JWT) when valid username and password is provided
    * @param req
    * @param res
    * @returns {*}
@@ -42,7 +43,7 @@ module.exports = (config, User) => ({
 
     User.findByUsername(username, (err, user) => {
       if (err || !user) {
-        return new APIError('Authentication Failed', httpStatus.UNAUTHORIZED);
+        return res.status(httpStatus.UNAUTHORIZED).json(formatErrorResponse(err, 'mongoose'));
       }
 
       return user.authenticate(password, (authErr, model, passwordError) => {
