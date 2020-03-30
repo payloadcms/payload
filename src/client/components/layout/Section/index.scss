@@ -4,6 +4,13 @@ section.section {
   @include inputShadow;
   margin: base(1) 0;
 
+  &.field-group {
+    .section__content > div > .field-type {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
   .section__collapsible-header {
     border-bottom: 1px solid $light-gray;
     display: flex;
