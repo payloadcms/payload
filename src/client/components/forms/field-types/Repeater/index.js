@@ -25,7 +25,7 @@ const Repeater = (props) => {
     name,
     fields,
     defaultValue,
-    singularName,
+    singularLabel,
   } = props;
 
   const addRow = (rowIndex) => {
@@ -104,7 +104,7 @@ const Repeater = (props) => {
                       <DraggableSection
                         key={rowIndex}
                         parentName={name}
-                        singularName={singularName}
+                        singularLabel={singularLabel}
                         addRow={() => addRow(rowIndex)}
                         removeRow={() => removeRow(rowIndex)}
                         rowIndex={rowIndex}
@@ -131,7 +131,7 @@ const Repeater = (props) => {
 
 Repeater.defaultProps = {
   label: '',
-  singularName: '',
+  singularLabel: '',
   defaultValue: [],
 };
 
@@ -143,7 +143,7 @@ Repeater.propTypes = {
     PropTypes.shape({}),
   ).isRequired,
   label: PropTypes.string,
-  singularName: PropTypes.string,
+  singularLabel: PropTypes.string,
   name: PropTypes.string.isRequired,
 };
 

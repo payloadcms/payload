@@ -20,7 +20,7 @@ const DraggableSection = (props) => {
     defaultValue,
     dispatchCollapsibleStates,
     collapsibleStates,
-    singularName,
+    singularLabel,
   } = props;
 
   const handleCollapseClick = () => {
@@ -52,7 +52,7 @@ const DraggableSection = (props) => {
               />
 
               <div className={`${baseClass}__header__row-index`}>
-                {`${singularName} ${rowIndex + 1}`}
+                {`${singularLabel} ${rowIndex + 1}`}
               </div>
 
               <div className={`${baseClass}__header__controls`}>
@@ -99,7 +99,7 @@ DraggableSection.defaultProps = {
   rowCount: null,
   defaultValue: null,
   collapsibleStates: [],
-  singularName: '',
+  singularLabel: '',
 };
 
 DraggableSection.propTypes = {
@@ -107,7 +107,7 @@ DraggableSection.propTypes = {
   removeRow: PropTypes.func.isRequired,
   rowIndex: PropTypes.number.isRequired,
   parentName: PropTypes.string.isRequired,
-  singularName: PropTypes.string,
+  singularLabel: PropTypes.string,
   renderFields: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   rowCount: PropTypes.number,
   defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
