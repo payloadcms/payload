@@ -68,7 +68,10 @@ function fieldReducer(state, action) {
 
         return {
           ...acc,
-          [field.name]: {},
+          [field.name]: {
+            value: null,
+            valid: !field.required,
+          },
         };
       }, {});
 

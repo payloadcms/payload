@@ -3,7 +3,6 @@
 section.section {
   @include inputShadow;
   margin: base(1) 0;
-  transition: 300ms ease;
 
   .section__collapsible-header {
     border-bottom: 1px solid $light-gray;
