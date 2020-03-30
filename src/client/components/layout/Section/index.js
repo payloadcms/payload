@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 
 import './index.scss';
-import IconButton from '../../controls/IconButton';
 import Button from '../../controls/Button';
 
 const baseClass = 'section';
@@ -45,17 +44,17 @@ const Section = (props) => {
             height={isSectionOpen ? 'auto' : 0}
             duration={0}
           >
-              {(rowCount === 0 && useAddRowButton)
-                && (
-                  <div className={`${baseClass}__add-button-wrap`}>
-                    <Button
-                      onClick={addInitialRow}
-                      type="secondary"
-                    >
-                      Add Row
-                    </Button>
-                  </div>
-                )}
+            {(rowCount === 0 && useAddRowButton)
+              && (
+                <div className={`${baseClass}__add-button-wrap`}>
+                  <Button
+                    onClick={addInitialRow}
+                    type="secondary"
+                  >
+                    Add Row
+                  </Button>
+                </div>
+              )}
             {children}
           </AnimateHeight>
         )}

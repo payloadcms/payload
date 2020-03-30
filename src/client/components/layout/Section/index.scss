@@ -1,15 +1,8 @@
 @import '../../../scss/styles.scss';
 
-section.section {
+.section {
   @include inputShadow;
   margin: base(1) 0;
-
-  &.field-group {
-    .section__content > div > .field-type {
-      padding-left: 0;
-      padding-right: 0;
-    }
-  }
 
   .section__collapsible-header {
     border-bottom: 1px solid $light-gray;
@@ -27,29 +20,16 @@ section.section {
     }
   }
 
-  .section__add-button-wrap {
-    .btn {
-      margin: 0;
-      margin-top: base(.5);
-    }
-  }
-
-  &__content {
-    display: flex;
-    flex-wrap: wrap;
-  }
-}
-
-.section {
   &__heading {
     margin-bottom: 0;
     margin-right: base(1);
   }
 
-  &__content {
-    > div {
-      @include pad;
-      padding-top: base(.5);
+  .section__add-button-wrap {
+    @include gutter;
+
+    .btn {
+      margin: 0 0 base(.5);
     }
   }
 
@@ -79,4 +59,10 @@ section.section {
     margin-right: base(.5);
   }
 
+  &__content {
+    > div {
+      @include row;
+      padding: base(1) base(1) base(.5);
+    }
+  }
 }

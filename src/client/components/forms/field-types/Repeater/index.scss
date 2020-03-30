@@ -2,4 +2,10 @@
 
 .field-type.repeater {
   background: white;
+  .section__content {
+    > div > div {
+      @include gutter;
+      width: 100%;
+    }
+  }
 }

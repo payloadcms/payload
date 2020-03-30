@@ -1,5 +1,10 @@
+@import '../../../../scss/styles.scss';
+
 .field-type.flexible {
-  > .section {
-    background: white;
+  .section__content {
+    > div > div {
+      @include gutter;
+      width: 100%;
+    }
   }
 }
