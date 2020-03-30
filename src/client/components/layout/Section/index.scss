@@ -3,7 +3,6 @@
 section.section {
   @include shadow;
   margin: base(1) 0;
-  transition: 300ms ease;
 
   &:hover {
     box-shadow: 0 22px 65px rgba(0,0,0,.15);
