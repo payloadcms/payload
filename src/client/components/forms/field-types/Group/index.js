@@ -6,21 +6,26 @@ import RenderFields from '../../RenderFields';
 import './index.scss';
 
 const Group = (props) => {
-  const { label, fields, name, defaultValue } = props;
+  const {
+    label, fields, name, defaultValue,
+  } = props;
 
   return (
-    <Section
-      heading={label}
-      className="field-group"
-    >
-      <RenderFields fields={fields.map((subField) => {
-        return {
-          ...subField,
-          name: `${name}.${subField.name}`,
-          defaultValue: defaultValue[subField.name],
-        };
-      })} />
-    </Section>
+    <div className="field-type group">
+      <Section
+        heading={label}
+        className="field-group"
+      >
+        <RenderFields fields={fields.map((subField) => {
+          return {
+            ...subField,
+            name: `${name}.${subField.name}`,
+            defaultValue: defaultValue[subField.name],
+          };
+        })}
+        />
+      </Section>
+    </div>
   );
 };
 
