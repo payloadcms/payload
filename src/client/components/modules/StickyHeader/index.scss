@@ -1,7 +1,6 @@
 @import '../../../scss/styles.scss';
 
 .sticky-header {
-  @include gutter;
 
   .sticky-header-wrap {
     display: flex;

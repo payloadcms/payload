@@ -1,24 +1,75 @@
 @import '../../../scss/styles.scss';
 
 section.section {
-  @include shadow;
+  @include inputShadow;
   margin: base(1) 0;
 
-  header,
-  .content {
-    @include pad;
-  }
-
-  header {
+  .section__collapsible-header {
     border-bottom: 1px solid $light-gray;
+    display: flex;
+    align-items: center;
+    @include pad;
+    outline: 0;
+
+    &:hover {
+      cursor: pointer;
+    }
 
     * {
       margin-bottom: 0;
     }
   }
 
-  .content {
+  .section__add-button-wrap {
+    .btn {
+      margin: 0;
+      margin-top: base(.5);
+    }
+  }
+
+  &__content {
     display: flex;
     flex-wrap: wrap;
   }
+}
+
+.section {
+  &__heading {
+    margin-bottom: 0;
+    margin-right: base(1);
+  }
+
+  &__content {
+    > div {
+      @include pad;
+      padding-top: base(.5);
+    }
+  }
+
+  &__controls {
+    margin-left: auto;
+  }
+
+  &__collapse-icon {
+    svg {
+      transition: 150ms linear;
+    }
+
+    &--open {
+      svg {
+        transform: rotate(90deg);
+      }
+    }
+
+    &--closed {
+      svg {
+        transform: rotate(-90deg);
+      }
+    }
+  }
+
+  &__add-row-button {
+    margin-right: base(.5);
+  }
+
 }

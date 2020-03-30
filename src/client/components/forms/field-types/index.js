@@ -7,6 +7,7 @@ import date from './DateTime';
 import relationship from './Relationship';
 import password from './Password';
 import repeater from './Repeater';
+import flexible from './Flexible';
 import textarea from './Textarea';
 import select from './Select';
 import number from './Number';
@@ -20,6 +21,7 @@ export default {
   date,
   relationship,
   // upload,
+  flexible,
   number,
   password,
   repeater,

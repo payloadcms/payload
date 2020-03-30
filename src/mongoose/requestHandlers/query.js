@@ -9,6 +9,7 @@ const query = (req, res) => {
 
     if (req.query.page) paginateQuery.page = req.query.page;
     if (req.query.limit) paginateQuery.limit = req.query.limit;
+    if (req.query.sort) paginateQuery.sort = req.query.sort;
 
     if (req.query.depth) {
       paginateQuery.options.autopopulate = {

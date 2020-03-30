@@ -1,31 +1,20 @@
 import React, { useState, useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { unflatten } from 'flat';
+import { unflatten } from 'flatley';
 import FormContext from './Context';
 import { useLocale } from '../../utilities/Locale';
 import { useStatusList } from '../../modules/Status';
 import HiddenInput from '../field-types/HiddenInput';
 import { requests } from '../../../api';
+import fieldReducer from './reducer';
 
 import './index.scss';
 
 const baseClass = 'form';
 
-const initialFieldState = {};
-
-function fieldReducer(state, action) {
-  return {
-    ...state,
-    [action.name]: {
-      value: action.value,
-      valid: action.valid,
-    },
-  };
-}
-
 const Form = (props) => {
-  const [fields, setField] = useReducer(fieldReducer, initialFieldState);
+  const [fields, dispatchFields] = useReducer(fieldReducer, {});
   const [submitted, setSubmitted] = useState(false);
   const [processing, setProcessing] = useState(false);
   const history = useHistory();
@@ -62,6 +51,7 @@ const Form = (props) => {
       // If submit handler comes through via props, run that
     } else if (onSubmit) {
       e.preventDefault();
+
       onSubmit(fields);
 
       // If form is AJAX, fetch data
@@ -143,7 +133,7 @@ const Form = (props) => {
       className={classes}
     >
       <FormContext.Provider value={{
-        setField,
+        dispatchFields,
         fields,
         processing,
         submitted,

@@ -21,7 +21,7 @@ const buildSchema = (configFields, config, options = {}, additionalBaseFields = 
 
   if (flexiblefields.length > 0) {
     flexiblefields.forEach((field) => {
-      if (field.length > 0) {
+      if (field.blocks && field.blocks.length > 0) {
         field.blocks.forEach((block) => {
           const blockSchemaFields = {};
 
@@ -31,7 +31,7 @@ const buildSchema = (configFields, config, options = {}, additionalBaseFields = 
           });
 
           const blockSchema = new Schema(blockSchemaFields, { _id: false });
-          schema.path(field.name).discriminator(block.labels.singular, blockSchema);
+          schema.path(field.name).discriminator(block.slug, blockSchema);
         });
       }
     });

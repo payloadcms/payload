@@ -7,6 +7,10 @@
     width: 100%;
   }
 
+  .sticky-header {
+    @include gutter;
+  }
+
   > .btn {
     @include gutter;
   }

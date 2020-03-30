@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const validOperators = ['like', 'in', 'all', 'nin', 'gte', 'gt', 'lte', 'lt', 'ne'];
 
 // This plugin asynchronously builds a list of Mongoose query constraints
@@ -12,6 +13,7 @@ function buildQueryPlugin(schema) {
     if (cb) {
       model
         .find(params.searchParams)
+        .sort(params.sort)
         .exec(cb);
     }
 
@@ -36,21 +38,25 @@ class ParamParser {
 
   // Entry point to the ParamParser class
   async parse() {
-    for (let key of Object.keys(this.rawParams)) {
-
+    for (const key of Object.keys(this.rawParams)) {
       // If rawParams[key] is an object, that means there are operators present.
       // Need to loop through keys on rawParams[key] to call addSearchParam on each operator found
       if (typeof this.rawParams[key] === 'object') {
-        Object.keys(this.rawParams[key]).forEach(async (operator) => {
-          const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, key, this.rawParams[key][operator], operator);
-          this.query.searchParams = this.addSearchParam(searchParamKey, searchParamValue, this.query.searchParams, this.model.schema);
-        })
+        Object.keys(this.rawParams[key])
+          .forEach(async (operator) => {
+            const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, key, this.rawParams[key][operator], operator);
+            this.query.searchParams = this.addSearchParam(searchParamKey, searchParamValue, this.query.searchParams, this.model.schema);
+          });
         // Otherwise there are no operators present
       } else {
         const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, key, this.rawParams[key]);
-        this.query.searchParams = this.addSearchParam(searchParamKey, searchParamValue, this.query.searchParams, this.model.schema);
+        if (searchParamKey === 'sort') {
+          this.query.sort = searchParamValue;
+        } else {
+          this.query.searchParams = this.addSearchParam(searchParamKey, searchParamValue, this.query.searchParams, this.model.schema);
+        }
       }
-    };
+    }
 
     return this.query;
   }
@@ -72,7 +78,7 @@ class ParamParser {
       if (path) {
         // If the path is an ObjectId with a direct ref,
         // Grab it
-        let ref = path.options.ref;
+        let { ref } = path.options;
 
         // If the path is an Array, grab the ref of the first index type
         if (path.instance === 'Array') {
@@ -89,7 +95,7 @@ class ParamParser {
             Object.keys(val).forEach(async (operator) => {
               const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val[operator], operator);
               subQuery = this.addSearchParam(searchParamKey, searchParamValue, subQuery, subModel.schema);
-            })
+            });
           } else {
             const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val);
             subQuery = this.addSearchParam(searchParamKey, searchParamValue, subQuery, subModel.schema);
@@ -98,7 +104,7 @@ class ParamParser {
           const matchingSubDocuments = await subModel.find(subQuery);
 
           return [localizedPath, {
-            $in: matchingSubDocuments.map(subDoc => subDoc.id)
+            $in: matchingSubDocuments.map(subDoc => subDoc.id),
           }];
         }
       }
@@ -129,8 +135,8 @@ class ParamParser {
 
         case 'like':
           formattedValue = {
-            '$regex': val,
-            '$options': '-i',
+            $regex: val,
+            $options: '-i',
           };
 
           break;
@@ -148,8 +154,8 @@ class ParamParser {
           [key]: {
             ...searchParams[key],
             ...value,
-          }
-        }
+          },
+        };
       }
 
       return {

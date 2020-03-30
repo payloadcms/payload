@@ -5,7 +5,7 @@ const formatBaseSchema = (field) => {
     hide: field.hide || false,
     localized: field.localized || false,
     unique: field.unique || false,
-    required: field.required || false,
+    required: (field.required && !field.localized) || false,
     default: field.defaultValue || undefined,
   };
 };
