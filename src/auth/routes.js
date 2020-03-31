@@ -1,7 +1,5 @@
 const express = require('express');
 const passport = require('passport');
-const httpStatus = require('http-status');
-const APIError = require('../errors/APIError');
 const authRequestHandlers = require('./requestHandlers');
 const passwordResetRoutes = require('./passwordResets/routes');
 
@@ -29,22 +27,7 @@ const authRoutes = (config, User) => {
 
   router
     .route('/first-register')
-    .post((req, res, next) => {
-      User.countDocuments({}, (err, count) => {
-        if (err) res.status(500).json({ error: err });
-        if (count >= 1) return res.status(403).json({ initialized: true });
-        return next();
-      });
-    }, (req, res, next) => {
-      User.register(new User(req.body), req.body.password, (err) => {
-        if (err) {
-          const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
-          return res.status(httpStatus.UNAUTHORIZED).json(error);
-        }
-
-        return next();
-      });
-    }, auth.login);
+    .post(auth.checkForExistingUsers, auth.register);
 
   return router;
 };
