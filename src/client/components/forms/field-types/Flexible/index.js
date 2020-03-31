@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { ModalContext } from '@trbl/react-modal';
 
+import Button from '../../../controls/Button';
 import FormContext from '../../Form/Context';
 import Section from '../../../layout/Section';
 import AddRowModal from './AddRowModal';
@@ -21,6 +22,7 @@ const Flexible = (props) => {
     name,
     blocks,
     defaultValue,
+    singularLabel,
   } = props;
 
   const { toggle: toggleModal, closeAll: closeAllModals } = useContext(ModalContext);
@@ -102,17 +104,26 @@ const Flexible = (props) => {
           <Section
             heading={label}
             className="flexible"
-            rowCount={rowCount}
-            addRow={() => openAddRowModal(0)}
-            useAddRowButton
           >
-            <Droppable droppableId="flexible-drop">
-              {provided => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                >
-                  {rowCount !== 0
+            {(rowCount === 0
+              ? (
+                <div className={`${baseClass}__add-button-wrap`}>
+                  <Button
+                    onClick={() => openAddRowModal(0)}
+                    type="secondary"
+                  >
+                    {`Add ${singularLabel}`}
+                  </Button>
+                </div>
+              )
+              : (
+                <Droppable droppableId="flexible-drop">
+                  {provided => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                    >
+                      {rowCount !== 0
                     && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
                       let blockType = fieldState[`${name}.${rowIndex}.blockType`]?.value;
 
@@ -141,9 +152,11 @@ const Flexible = (props) => {
                                 type: 'hidden',
                               },
                             ]}
+                            singularLabel={blockType}
                             defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
                             dispatchCollapsibleStates={dispatchCollapsibleStates}
                             collapsibleStates={collapsibleStates}
+                            useHeadingPill
                           />
                         );
                       }
@@ -151,10 +164,11 @@ const Flexible = (props) => {
                       return null;
                     })
                   }
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              ))}
           </Section>
         </div>
       </DragDropContext>
@@ -172,6 +186,7 @@ const Flexible = (props) => {
 Flexible.defaultProps = {
   label: '',
   defaultValue: [],
+  singularLabel: 'Block',
 };
 
 Flexible.propTypes = {
@@ -182,6 +197,7 @@ Flexible.propTypes = {
     PropTypes.shape({}),
   ).isRequired,
   label: PropTypes.string,
+  singularLabel: PropTypes.string,
   name: PropTypes.string.isRequired,
 };
 

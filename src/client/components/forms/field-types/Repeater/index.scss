@@ -3,6 +3,14 @@
 .field-type.repeater {
   background: white;
 
+  &__add-button-wrap {
+    @include gutter;
+
+    .btn {
+      margin: 0 0 base(.5);
+    }
+  }
+
   .section .section {
     margin-top: 0;
   }

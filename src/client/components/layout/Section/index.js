@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
+import Chevron from '../../graphics/Chevron';
 
 import './index.scss';
-import Button from '../../controls/Button';
 
 const baseClass = 'section';
 
 const Section = (props) => {
   const {
-    className, heading, children, rowCount, addRow, useAddRowButton,
+    className, heading, children,
   } = props;
 
   const classes = [
@@ -18,11 +18,6 @@ const Section = (props) => {
   ].filter(Boolean).join(' ');
 
   const [isSectionOpen, setIsSectionOpen] = useState(true);
-
-  const addInitialRow = () => {
-    addRow();
-    setIsSectionOpen(true);
-  };
 
   return (
     <section className={classes}>
@@ -35,6 +30,8 @@ const Section = (props) => {
             tabIndex={0}
           >
             <h2 className={`${baseClass}__heading`}>{heading}</h2>
+
+            <Chevron isOpen={isSectionOpen} />
           </header>
         )}
       {children
@@ -44,17 +41,6 @@ const Section = (props) => {
             height={isSectionOpen ? 'auto' : 0}
             duration={0}
           >
-            {(rowCount === 0 && useAddRowButton)
-              && (
-                <div className={`${baseClass}__add-button-wrap`}>
-                  <Button
-                    onClick={addInitialRow}
-                    type="secondary"
-                  >
-                    Add Row
-                  </Button>
-                </div>
-              )}
             {children}
           </AnimateHeight>
         )}
@@ -66,18 +52,12 @@ Section.defaultProps = {
   className: '',
   heading: '',
   children: undefined,
-  rowCount: 0,
-  addRow: undefined,
-  useAddRowButton: false,
 };
 
 Section.propTypes = {
   className: PropTypes.string,
   heading: PropTypes.string,
   children: PropTypes.node,
-  rowCount: PropTypes.number,
-  addRow: PropTypes.func,
-  useAddRowButton: PropTypes.bool,
 };
 
 export default Section;
