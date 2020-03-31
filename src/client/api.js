@@ -5,7 +5,7 @@ const cookies = new Cookies();
 
 const setJWT = () => {
   const jwt = cookies.get('token');
-  return jwt ? { 'Authorization': `JWT ${jwt}` } : {}
+  return jwt ? { Authorization: `JWT ${jwt}` } : {};
 };
 
 export const requests = {
@@ -13,8 +13,8 @@ export const requests = {
     const query = qs.stringify(params, { addQueryPrefix: true });
     return fetch(`${url}${query}`, {
       headers: {
-        ...setJWT()
-      }
+        ...setJWT(),
+      },
     });
   },
 

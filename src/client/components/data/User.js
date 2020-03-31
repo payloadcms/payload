@@ -4,6 +4,7 @@ import React, {
 import jwtDecode from 'jwt-decode';
 import PropTypes from 'prop-types';
 import Cookies from 'universal-cookie';
+import { requests } from '../../api';
 
 const cookies = new Cookies();
 const Context = createContext({});
@@ -32,6 +33,15 @@ const UserProvider = ({ children }) => {
     }
   }, [token]);
 
+  const refreshToken = async () => {
+    const request = await requests.post('/refresh');
+
+    if (request.status === 200) {
+      const json = await requests.json();
+      cookies.set('token', json.refreshToken, { path: '/' });
+    }
+  };
+
   const logOut = () => {
     setUser(null);
     cookies.remove('token', { path: '/' });
@@ -42,6 +52,7 @@ const UserProvider = ({ children }) => {
       user,
       setToken,
       logOut,
+      refreshToken,
     }}
     >
       {children}
