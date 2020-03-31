@@ -5,6 +5,8 @@ import { Draggable } from 'react-beautiful-dnd';
 
 import RenderFields from '../RenderFields'; // eslint-disable-line import/no-cycle
 import IconButton from '../../controls/IconButton';
+import Pill from '../../modules/Pill';
+import Chevron from '../../graphics/Chevron';
 
 import './index.scss';
 
@@ -21,6 +23,7 @@ const DraggableSection = (props) => {
     dispatchCollapsibleStates,
     collapsibleStates,
     singularLabel,
+    useHeadingPill,
   } = props;
 
   const handleCollapseClick = () => {
@@ -44,15 +47,18 @@ const DraggableSection = (props) => {
           >
             <div className={`${baseClass}__header`}>
               <div
-                className={`${baseClass}__header__drag-handle`}
                 {...providedDrag.dragHandleProps}
+                className={`${baseClass}__header__drag-handle`}
                 onClick={handleCollapseClick}
                 role="button"
                 tabIndex={0}
               />
 
-              <div className={`${baseClass}__header__row-index`}>
-                {`${singularLabel} ${rowIndex + 1}`}
+              <div className={`${baseClass}__header__row-name`}>
+                {useHeadingPill
+                  ? <Pill>{singularLabel}</Pill>
+                  : `${singularLabel} ${rowIndex + 1}`
+                }
               </div>
 
               <div className={`${baseClass}__header__controls`}>
@@ -68,6 +74,8 @@ const DraggableSection = (props) => {
                   onClick={removeRow}
                   size="small"
                 />
+
+                <Chevron isOpen={collapsibleStates[rowIndex]} />
               </div>
             </div>
 
@@ -100,6 +108,7 @@ DraggableSection.defaultProps = {
   defaultValue: null,
   collapsibleStates: [],
   singularLabel: '',
+  useHeadingPill: false,
 };
 
 DraggableSection.propTypes = {
@@ -113,6 +122,7 @@ DraggableSection.propTypes = {
   defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
   dispatchCollapsibleStates: PropTypes.func.isRequired,
   collapsibleStates: PropTypes.arrayOf(PropTypes.bool),
+  useHeadingPill: PropTypes.bool,
 };
 
 export default DraggableSection;

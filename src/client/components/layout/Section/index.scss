@@ -25,38 +25,16 @@
     margin-right: base(1);
   }
 
-  .section__add-button-wrap {
-    @include gutter;
-
-    .btn {
-      margin: 0 0 base(.5);
-    }
-  }
-
-  &__controls {
+  .chevron {
     margin-left: auto;
-  }
 
-  &__collapse-icon {
-    svg {
-      transition: 150ms linear;
+    &--is-open {
+      transform: rotate(180deg);
     }
 
-    &--open {
-      svg {
-        transform: rotate(90deg);
-      }
+    &--is-closed {
+      transform: rotate(0deg);
     }
-
-    &--closed {
-      svg {
-        transform: rotate(-90deg);
-      }
-    }
-  }
-
-  &__add-row-button {
-    margin-right: base(.5);
   }
 
   &__content {

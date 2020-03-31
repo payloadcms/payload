@@ -4,6 +4,7 @@ import React, {
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
+import Button from '../../../controls/Button';
 import FormContext from '../../Form/Context';
 import Section from '../../../layout/Section';
 import DraggableSection from '../../DraggableSection'; // eslint-disable-line import/no-cycle
@@ -86,42 +87,49 @@ const Repeater = (props) => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className={baseClass}>
-        <Section
-          heading={label}
-          rowCount={rowCount}
-          addRow={() => addRow(0)}
-          useAddRowButton
-        >
-          <Droppable droppableId="repeater-drop">
-            {provided => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-              >
-                {rowCount !== 0
-                  && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
-                    return (
-                      <DraggableSection
-                        key={rowIndex}
-                        parentName={name}
-                        singularLabel={singularLabel}
-                        addRow={() => addRow(rowIndex)}
-                        removeRow={() => removeRow(rowIndex)}
-                        rowIndex={rowIndex}
-                        fieldState={fieldState}
-                        renderFields={fields}
-                        rowCount={rowCount}
-                        defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
-                        dispatchCollapsibleStates={dispatchCollapsibleStates}
-                        collapsibleStates={collapsibleStates}
-                      />
-                    );
-                  })
-                }
-                {provided.placeholder}
+        <Section heading={label}>
+          {(rowCount === 0
+            ? (
+              <div className={`${baseClass}__add-button-wrap`}>
+                <Button
+                  onClick={() => addRow(0)}
+                  type="secondary"
+                >
+                  {`Add ${singularLabel}`}
+                </Button>
               </div>
-            )}
-          </Droppable>
+            )
+            : (
+              <Droppable droppableId="repeater-drop">
+                {provided => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                  >
+                    {rowCount !== 0
+                      && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
+                        return (
+                          <DraggableSection
+                            key={rowIndex}
+                            parentName={name}
+                            singularLabel={singularLabel}
+                            addRow={() => addRow(rowIndex)}
+                            removeRow={() => removeRow(rowIndex)}
+                            rowIndex={rowIndex}
+                            fieldState={fieldState}
+                            renderFields={fields}
+                            defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
+                            dispatchCollapsibleStates={dispatchCollapsibleStates}
+                            collapsibleStates={collapsibleStates}
+                          />
+                        );
+                      })
+                    }
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            ))}
         </Section>
 
       </div>
@@ -131,7 +139,7 @@ const Repeater = (props) => {
 
 Repeater.defaultProps = {
   label: '',
-  singularLabel: '',
+  singularLabel: 'Row',
   defaultValue: [],
 };
 

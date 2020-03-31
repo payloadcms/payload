@@ -51,8 +51,9 @@
       z-index: 2;
     }
 
-    &__row-index {
+    &__row-name {
       font-family: $font-body;
+      font-weight: bold;
       font-size: base(.5);
     }
 
@@ -92,6 +93,14 @@
         &:hover {
           background: $black;
           @include color-svg(white);
+        }
+      }
+
+      .chevron {
+        margin-left: base(.5);
+
+        &__is--open {
+          transform: rotate(180deg);
         }
       }
     }
