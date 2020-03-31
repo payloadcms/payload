@@ -76,15 +76,6 @@ const Flexible = (props) => {
     setHasModifiedRows(true);
   };
 
-  useEffect(() => {
-    setRowCount(defaultValue.length);
-
-    dispatchCollapsibleStates({
-      type: 'SET_ALL_COLLAPSIBLES',
-      payload: Array.from(Array(defaultValue.length).keys()).reduce(acc => ([...acc, true]), []), // sets all collapsibles to open on first load
-    });
-  }, [defaultValue]);
-
   const openAddRowModal = (rowIndex) => {
     setRowIndexBeingAdded(rowIndex);
     toggleModal(modalSlug);
@@ -96,6 +87,16 @@ const Flexible = (props) => {
     const destinationIndex = result.destination.index;
     moveRow(sourceIndex, destinationIndex);
   };
+
+  useEffect(() => {
+    setRowCount(defaultValue.length);
+    setHasModifiedRows(false);
+
+    dispatchCollapsibleStates({
+      type: 'SET_ALL_COLLAPSIBLES',
+      payload: Array.from(Array(defaultValue.length).keys()).reduce(acc => ([...acc, true]), []), // sets all collapsibles to open on first load
+    });
+  }, [defaultValue]);
 
   return (
     <Fragment>
@@ -123,47 +124,46 @@ const Flexible = (props) => {
                       ref={provided.innerRef}
                       {...provided.droppableProps}
                     >
-                      {rowCount !== 0
-                    && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
-                      let blockType = fieldState[`${name}.${rowIndex}.blockType`]?.value;
+                      {rowCount !== 0 && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
+                        let blockType = fieldState[`${name}.${rowIndex}.blockType`]?.value;
 
-                      if (!hasModifiedRows && !blockType) {
-                        blockType = defaultValue?.[rowIndex]?.blockType;
+                        if (!hasModifiedRows && !blockType) {
+                          blockType = defaultValue?.[rowIndex]?.blockType;
+                        }
+
+                        const blockToRender = blocks.find(block => block.slug === blockType);
+
+                        if (blockToRender) {
+                          return (
+                            <DraggableSection
+                              key={rowIndex}
+                              parentName={name}
+                              addRow={() => openAddRowModal(rowIndex)}
+                              removeRow={() => removeRow(rowIndex)}
+                              rowIndex={rowIndex}
+                              fieldState={fieldState}
+                              renderFields={[
+                                ...blockToRender.fields,
+                                {
+                                  name: 'blockType',
+                                  type: 'hidden',
+                                }, {
+                                  name: 'blockName',
+                                  type: 'hidden',
+                                },
+                              ]}
+                              singularLabel={blockType}
+                              defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
+                              dispatchCollapsibleStates={dispatchCollapsibleStates}
+                              collapsibleStates={collapsibleStates}
+                              useHeadingPill
+                            />
+                          );
+                        }
+
+                        return null;
+                      })
                       }
-
-                      const blockToRender = blocks.find(block => block.slug === blockType);
-
-                      if (blockToRender) {
-                        return (
-                          <DraggableSection
-                            key={rowIndex}
-                            parentName={name}
-                            addRow={() => openAddRowModal(rowIndex)}
-                            removeRow={() => removeRow(rowIndex)}
-                            rowIndex={rowIndex}
-                            fieldState={fieldState}
-                            renderFields={[
-                              ...blockToRender.fields,
-                              {
-                                name: 'blockType',
-                                type: 'hidden',
-                              }, {
-                                name: 'blockName',
-                                type: 'hidden',
-                              },
-                            ]}
-                            singularLabel={blockType}
-                            defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
-                            dispatchCollapsibleStates={dispatchCollapsibleStates}
-                            collapsibleStates={collapsibleStates}
-                            useHeadingPill
-                          />
-                        );
-                      }
-
-                      return null;
-                    })
-                  }
                       {provided.placeholder}
                     </div>
                   )}

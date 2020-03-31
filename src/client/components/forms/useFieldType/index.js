@@ -31,6 +31,10 @@ const useFieldType = (options) => {
   }, [sendField, mountValue]);
 
   useEffect(() => {
+    return () => dispatchFields({ name, type: 'REMOVE' });
+  }, [dispatchFields, name]);
+
+  useEffect(() => {
     if (defaultValue != null) sendField(defaultValue);
   }, [defaultValue, sendField]);
 

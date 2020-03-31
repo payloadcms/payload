@@ -110,6 +110,12 @@ function fieldReducer(state, action) {
       };
     }
 
+    case 'REMOVE': {
+      const newState = { ...state };
+      delete newState[action.name];
+      return newState;
+    }
+
     default:
       return {
         ...state,
