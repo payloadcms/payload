@@ -4,7 +4,7 @@ import DefaultSidebar from '../Sidebar';
 import StepNav, { useStepNav, StepNavProvider } from '../../modules/StepNav';
 import { StatusListProvider } from '../../modules/Status';
 import Localizer from '../../modules/Localizer';
-import customComponents from '../../custom-components';
+import customComponents from '../../customComponents';
 
 import './index.scss';
 

@@ -10,7 +10,7 @@ import APIURL from '../../../modules/APIURL';
 import Button from '../../../controls/Button';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
-import customComponents from '../../../custom-components';
+import customComponents from '../../../customComponents';
 
 import './index.scss';
 
@@ -123,6 +123,7 @@ EditView.propTypes = {
     }),
     slug: PropTypes.string,
     useAsTitle: PropTypes.string,
+    fields: PropTypes.arrayOf(PropTypes.shape({})),
   }).isRequired,
   isEditing: PropTypes.bool,
 };

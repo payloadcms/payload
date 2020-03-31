@@ -1,8 +1,8 @@
 import React, {
   createContext, useContext, useState, useEffect,
 } from 'react';
-import config from 'payload-config';
 import PropTypes from 'prop-types';
+import config from '../../../config/sanitizedClientConfig';
 import { useSearchParams } from '../SearchParams';
 
 const defaultLocale = (config.localization && config.localization.defaultLocale) ? config.localization.defaultLocale : 'en';

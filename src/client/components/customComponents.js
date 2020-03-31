@@ -1,21 +1,20 @@
 function stringify(obj) {
   if (typeof obj === 'object') {
-    var result = []
-    Object.keys(obj).forEach(function (key) {
-      var val = stringify(obj[key])
+    const result = [];
+    Object.keys(obj).forEach((key) => {
+      const val = stringify(obj[key]);
       if (val !== null) {
-        result.push('"' + key + '": ' + val)
+        result.push(`"${key}": ${val}`);
       }
-    })
-    return "{" + result.join(",") + "}"
+    });
+    return `{${result.join(',')}}`;
   }
 
   return `React.lazy(() => import('${obj}'))`;
 }
 
 module.exports = function (config) {
-  let allCollectionComponents = config.collections.reduce((obj, collection) => {
-
+  const allCollectionComponents = config.collections.reduce((obj, collection) => {
     obj[collection.slug] = {
       fields: {},
       ...(collection.components || {}),
@@ -24,7 +23,7 @@ module.exports = function (config) {
     collection.fields.forEach((field) => {
       if (field.component) {
         obj[collection.slug].fields[field.name] = field.component;
-      };
+      }
     });
 
     return obj;
@@ -38,6 +37,7 @@ module.exports = function (config) {
   return {
     code: `
       const React = require('react');
-      module.exports = ${string}
-  ` };
+      module.exports = ${string};
+  `,
+  };
 };

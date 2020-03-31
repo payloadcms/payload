@@ -14,7 +14,7 @@ import MediaLibrary from './views/MediaLibrary';
 import Edit from './views/collections/Edit';
 import EditGlobal from './views/globals/Edit';
 import { requests } from '../api';
-import customComponents from './custom-components';
+import customComponents from './customComponents';
 import RedirectToLogin from './utilities/RedirectToLogin';
 
 const Routes = () => {

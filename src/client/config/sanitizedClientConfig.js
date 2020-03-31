@@ -1,6 +1,12 @@
-import config from 'payload-config';
-import sanitizeConfig from '../../utilities/sanitizeConfig';
+const sanitizeConfig = require('../../utilities/sanitizeConfig');
+const secureConfig = require('../../utilities/secureConfig');
 
-const sanitizedConfig = sanitizeConfig(config);
+module.exports = (config) => {
+  const sanitizedConfig = sanitizeConfig(config);
+  const securedConfig = secureConfig(sanitizedConfig);
 
-export default sanitizedConfig;
+  return {
+    code: `
+    module.exports = ${JSON.stringify(securedConfig)}`,
+  };
+};

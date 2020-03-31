@@ -25,7 +25,16 @@ module.exports = (config) => {
     module: {
       rules: [
         {
-          test: require.resolve('../components/custom-components.js'),
+          test: require.resolve('../components/customComponents'),
+          use: [
+            {
+              loader: 'val-loader',
+              options: config,
+            },
+          ],
+        },
+        {
+          test: require.resolve('./sanitizedClientConfig'),
           use: [
             {
               loader: 'val-loader',
@@ -116,7 +125,6 @@ module.exports = (config) => {
       modules: ['node_modules', path.resolve(__dirname, '../../../node_modules')],
       alias: {
         'payload-scss-overrides': config.paths.scssOverrides,
-        'payload-config': config.paths.config,
       },
     },
   };

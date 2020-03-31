@@ -28,7 +28,6 @@ class Relationship extends Component {
 
     this.state = {
       relations,
-      search: '',
       lastFullyLoadedRelation: -1,
       lastLoadedPage: 1,
       options: [],
