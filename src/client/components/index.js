@@ -13,8 +13,8 @@ import '../scss/app.scss';
 
 const Index = () => {
   return (
-    <UserProvider>
-      <Router>
+    <Router>
+      <UserProvider>
         <ModalProvider
           classPrefix="payload"
           transTime={0}
@@ -30,8 +30,8 @@ const Index = () => {
           </StatusListProvider>
           <ModalContainer />
         </ModalProvider>
-      </Router>
-    </UserProvider>
+      </UserProvider>
+    </Router>
   );
 };
 

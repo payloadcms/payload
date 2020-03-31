@@ -46,7 +46,7 @@ module.exports = (config, User) => ({
         return res.status(httpStatus.UNAUTHORIZED).json(formatErrorResponse(err, 'mongoose'));
       }
 
-      user.authenticate(password, (authErr, model, passwordError) => {
+      return user.authenticate(password, (authErr, model, passwordError) => {
         if (authErr || passwordError) return new APIError('Authentication Failed', httpStatus.UNAUTHORIZED);
 
         const opts = {};
@@ -78,12 +78,12 @@ module.exports = (config, User) => ({
    * @param next
    */
   refresh: (req, res, next) => {
-    const { token } = req.body;
     const secret = config.user.auth.secretKey;
     const opts = {};
     opts.expiresIn = config.user.auth.tokenExpiration;
 
     try {
+      const token = req.headers.authorization.replace('JWT ', '');
       jwt.verify(token, secret, {});
       const refreshToken = jwt.sign(token, secret);
       res.status(200)

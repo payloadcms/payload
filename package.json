@@ -56,7 +56,6 @@
     "image-size": "^0.7.5",
     "jest": "^24.9.0",
     "jsonwebtoken": "^8.5.1",
-    "jwt-decode": "^2.2.0",
     "loader-utils": "^1.4.0",
     "merge-graphql-schemas": "^1.7.6",
     "method-override": "^3.0.0",
