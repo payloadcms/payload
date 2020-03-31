@@ -4,7 +4,7 @@ const jwtStrategy = require('./jwt');
 const initRoutes = require('../routes/init');
 const authRoutes = require('./routes');
 
-const initUsers = (User, config, router) => {
+const initUserAuth = (User, config, router) => {
   passport.use(User.createStrategy());
 
   passport.use(jwtStrategy(User, config));
@@ -17,4 +17,4 @@ const initUsers = (User, config, router) => {
   router.use('', authRoutes(config, User));
 };
 
-module.exports = initUsers;
+module.exports = initUserAuth;

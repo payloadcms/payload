@@ -62,6 +62,7 @@ class Payload {
 
     this.User = mongoose.model(this.config.user.labels.singular, userSchema);
     initUserAuth(this.User, this.config, this.router);
+
     registerCollectionRoutes({
       model: this.User,
       config: this.config.user,

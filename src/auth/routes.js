@@ -4,6 +4,7 @@ const authRequestHandlers = require('./requestHandlers');
 const passwordResetRoutes = require('./passwordResets/routes');
 
 const router = express.Router();
+
 const authRoutes = (config, User) => {
   const auth = authRequestHandlers(config, User);
 
