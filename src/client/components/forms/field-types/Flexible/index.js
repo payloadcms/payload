@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-import { ModalContext } from '@trbl/react-modal';
+import { useModal } from '@trbl/react-modal';
 
 import Button from '../../../controls/Button';
 import FormContext from '../../Form/Context';
@@ -25,7 +25,7 @@ const Flexible = (props) => {
     singularLabel,
   } = props;
 
-  const { toggle: toggleModal, closeAll: closeAllModals } = useContext(ModalContext);
+  const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
   const [rowIndexBeingAdded, setRowIndexBeingAdded] = useState(null);
   const [hasModifiedRows, setHasModifiedRows] = useState(false);
   const [rowCount, setRowCount] = useState(0);

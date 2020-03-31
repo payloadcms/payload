@@ -1,28 +1,45 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import './index.scss';
 
+const baseClass = 'content-block';
+
 const ContentBlock = (props) => {
-  let classes = props.className
-    ? `content-block ${props.className}`
-    : 'content-block';
+  const {
+    className, width, align, style, children,
+  } = props;
 
-  classes = props.width
-    ? `${classes} ${props.width}`
-    : classes;
-
-  classes = props.align
-    ? `${classes} align-${props.align}`
-    : classes;
+  const classes = [
+    className,
+    baseClass,
+    width && `${baseClass}--width-${width}`,
+    align && `${baseClass}--align-${align}`,
+  ].filter(Boolean).join(' ');
 
   return (
     <section
       className={classes}
-      style={props.style}
+      style={style}
     >
-      {props.children}
+      {children}
     </section>
   );
+};
+
+ContentBlock.defaultProps = {
+  align: null,
+  width: null,
+  className: null,
+  style: {},
+};
+
+ContentBlock.propTypes = {
+  width: PropTypes.oneOf(['narrow', 'wide']),
+  align: PropTypes.oneOf(['left', 'right']),
+  className: PropTypes.string,
+  style: PropTypes.shape({}),
+  children: PropTypes.node.isRequired,
 };
 
 export default ContentBlock;

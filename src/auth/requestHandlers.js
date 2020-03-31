@@ -85,11 +85,11 @@ module.exports = (config, User) => ({
     try {
       const token = req.headers.authorization.replace('JWT ', '');
       jwt.verify(token, secret, {});
-      const refreshToken = jwt.sign(token, secret);
+      const refreshedToken = jwt.sign(token, secret);
       res.status(200)
         .json({
           message: 'Token Refresh Successful',
-          refreshToken,
+          refreshedToken,
         });
     } catch (e) {
       next(new APIError('Authentication error', httpStatus.UNAUTHORIZED));

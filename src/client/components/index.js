@@ -14,11 +14,11 @@ import '../scss/app.scss';
 const Index = () => {
   return (
     <Router>
-      <UserProvider>
-        <ModalProvider
-          classPrefix="payload"
-          transTime={0}
-        >
+      <ModalProvider
+        classPrefix="payload"
+        transTime={0}
+      >
+        <UserProvider>
           <StatusListProvider>
             <SearchParamsProvider>
               <LocaleProvider>
@@ -29,8 +29,8 @@ const Index = () => {
             </SearchParamsProvider>
           </StatusListProvider>
           <ModalContainer />
-        </ModalProvider>
-      </UserProvider>
+        </UserProvider>
+      </ModalProvider>
     </Router>
   );
 };

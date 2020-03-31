@@ -5,19 +5,19 @@
   margin-left: auto;
   margin-right: auto;
 
-  &.narrow {
+  &--width-narrow {
     max-width: $mobile-width;
   }
 
-  &.wide {
+  &--width-wide {
     max-width: $frame-width;
   }
 
-  &.align-left {
+  &--align-left {
     margin-left: 0;
   }
 
-  &.align-right {
+  &--align-right {
     margin-right: 0;
   }
 }
