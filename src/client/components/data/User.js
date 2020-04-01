@@ -70,11 +70,11 @@ const UserProvider = ({ children }) => {
     let reminder = false;
     let forceLogOut = false;
 
+    console.log(user?.exp);
+
     if (user && isNotExpired(user)) {
       reminder = setTimeout(() => {
-        if (user && isNotExpired(user)) {
-          toggleModal('stay-logged-in');
-        }
+        toggleModal('stay-logged-in');
       }, (tokenExpiration - 60) * 1000);
 
       forceLogOut = setTimeout(() => {
