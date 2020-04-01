@@ -11,11 +11,7 @@ import { useUser } from '../../data/User';
 
 import './index.scss';
 
-const {
-  routes: {
-    admin,
-  },
-} = config;
+const { serverURL, routes: { admin, api } } = config;
 
 const passwordField = {
   name: 'password',
@@ -68,7 +64,7 @@ const CreateFirstUser = (props) => {
           handleAjaxResponse={handleAjaxResponse}
           disableSuccessStatus
           method="POST"
-          action="/first-register"
+          action={`${serverURL}${api}/first-register`}
         >
           <RenderFields fields={fields} />
           <FormSubmit>Create</FormSubmit>

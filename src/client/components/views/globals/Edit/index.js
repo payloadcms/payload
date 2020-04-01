@@ -16,6 +16,7 @@ const {
   serverURL,
   routes: {
     admin,
+    api,
   },
 } = config;
 
@@ -25,7 +26,7 @@ const EditView = (props) => {
   const { global } = props;
 
   const [{ data }] = usePayloadAPI(
-    `${serverURL}/globals/${global.slug}`,
+    `${serverURL}${api}/globals/${global.slug}`,
     { initialParams: { 'fallback-locale': 'null' } },
   );
 

@@ -12,7 +12,7 @@ import './index.scss';
 
 const cookies = new Cookies();
 
-const { serverURL, collections } = config;
+const { serverURL, routes: { api }, collections } = config;
 
 const defaultError = 'Please make a selection.';
 const defaultValidate = value => value.length > 0;
@@ -46,7 +46,7 @@ class Relationship extends Component {
 
     if (relationsToSearch.length > 0) {
       some(relationsToSearch, async (relation, callback) => {
-        const response = await fetch(`${serverURL}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}`, {
+        const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -14,11 +14,7 @@ import './index.scss';
 
 const baseClass = 'login';
 
-const {
-  routes: {
-    admin,
-  },
-} = config;
+const { serverURL, routes: { admin, api } } = config;
 
 const Login = () => {
   const { addStatus } = useStatusList();
@@ -77,7 +73,7 @@ const Login = () => {
         <Form
           handleAjaxResponse={handleAjaxResponse}
           method="POST"
-          action="http://localhost:3000/login"
+          action={`${serverURL}${api}/login`}
           redirect={admin}
         >
           <Email

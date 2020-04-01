@@ -11,6 +11,7 @@ import config from '../../securedConfig';
 import StayLoggedInModal from '../modals/StayLoggedIn';
 import useThrottledEffect from '../../hooks/useThrottledEffect';
 
+const { serverURL, routes: { admin, api } } = config;
 const cookies = new Cookies();
 const Context = createContext({});
 
@@ -32,7 +33,7 @@ const UserProvider = ({ children }) => {
 
     if (decodedToken?.exp > (Date.now() / 1000)) {
       setTimeout(async () => {
-        const request = await requests.post('/refresh');
+        const request = await requests.post(`${serverURL}${api}/refresh`);
 
         if (request.status === 200) {
           const json = await request.json();
@@ -84,7 +85,6 @@ const UserProvider = ({ children }) => {
       }, ((remainingTime - 60) * 1000));
 
       forceLogOut = setTimeout(() => {
-        const { routes: { admin } } = config;
         history.push(`${admin}/logout`);
         closeAllModals();
       }, remainingTime * 1000);

@@ -22,7 +22,7 @@ const Routes = () => {
   const { user } = useUser();
 
   useEffect(() => {
-    requests.get('/init').then(res => res.json().then((data) => {
+    requests.get(`${config.routes.api}/init`).then(res => res.json().then((data) => {
       if (data && 'initialized' in data) {
         setInitialized(data.initialized);
       }

@@ -14,12 +14,7 @@ import customComponents from '../../../customComponents';
 
 import './index.scss';
 
-const {
-  serverURL,
-  routes: {
-    admin,
-  },
-} = config;
+const { serverURL, routes: { admin, api } } = config;
 
 const baseClass = 'collection-edit';
 
@@ -40,7 +35,7 @@ const EditView = (props) => {
   } : null;
 
   const [{ data }] = usePayloadAPI(
-    (isEditing ? `${serverURL}/${collection.slug}/${id}` : null),
+    (isEditing ? `${serverURL}${api}/${collection.slug}/${id}` : null),
     { initialParams: { 'fallback-locale': 'null' } },
   );
 
@@ -93,7 +88,7 @@ const EditView = (props) => {
         <StickyHeader
           showStatus
           content={
-            <APIURL url={isEditing && `${serverURL}/${collection.slug}/${data.id}`} />
+            <APIURL url={isEditing && `${serverURL}${api}/${collection.slug}/${data.id}`} />
           }
           action={(
             <>

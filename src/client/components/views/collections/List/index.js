@@ -11,12 +11,7 @@ import Pagination from '../../../modules/Paginator';
 
 import './index.scss';
 
-const {
-  serverURL,
-  routes: {
-    admin,
-  },
-} = config;
+const { serverURL, routes: { admin, api } } = config;
 
 const ListView = (props) => {
   const { collection } = props;
@@ -24,7 +19,7 @@ const ListView = (props) => {
   const { page } = queryString.parse(location.search, { ignoreQueryPrefix: true });
 
   const apiURL = [
-    `${serverURL}/${collection.slug}?`,
+    `${serverURL}${api}/${collection.slug}?`,
     page && `page=${page}&`,
   ].filter(Boolean).join('');
 
