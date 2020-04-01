@@ -10,7 +10,7 @@ const RenderFields = ({ fields, initialData, customComponents }) => {
       <>
         {fields.map((field, i) => {
           const { defaultValue } = field;
-          const FieldComponent = customComponents?.[field.name] || fieldTypes[field.type];
+          const FieldComponent = customComponents?.[field.name]?.field || fieldTypes[field.type];
 
           if (FieldComponent) {
             return (

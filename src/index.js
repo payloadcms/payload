@@ -21,9 +21,6 @@ class Payload {
     this.registerCollections = registerCollections.bind(this);
     this.registerGlobals = registerGlobals.bind(this);
 
-    this.getCollections.bind(this);
-    this.getGlobals.bind(this);
-
     // Setup & initialization
     connectMongoose(this.config.mongoURL);
 
@@ -49,14 +46,6 @@ class Payload {
 
     // Bind static
     this.express.use(this.config.staticURL, express.static(this.config.staticDir));
-  }
-
-  getCollections() {
-    return this.collections;
-  }
-
-  getGlobals() {
-    return this.globals;
   }
 }
 

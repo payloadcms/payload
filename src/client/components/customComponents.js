@@ -14,19 +14,21 @@ function stringify(obj) {
 }
 
 module.exports = function (config) {
-  const allCollectionComponents = config.collections.reduce((obj, collection) => {
-    obj[collection.slug] = {
+  const allCollectionComponents = config.collections.reduce((components, collection) => {
+    const newComponents = { ...components };
+
+    newComponents[collection.slug] = {
       fields: {},
       ...(collection.components || {}),
     };
 
     collection.fields.forEach((field) => {
-      if (field.component) {
-        obj[collection.slug].fields[field.name] = field.component;
+      if (field.components) {
+        newComponents[collection.slug].fields[field.name] = field.components;
       }
     });
 
-    return obj;
+    return newComponents;
   }, {});
 
   const string = stringify({
