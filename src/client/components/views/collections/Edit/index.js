@@ -82,7 +82,7 @@ const EditView = (props) => {
       <Form
         className={`${baseClass}__form`}
         method={id ? 'put' : 'post'}
-        action={`${serverURL}/${collection.slug}${id ? `/${id}` : ''}`}
+        action={`${serverURL}${api}/${collection.slug}${id ? `/${id}` : ''}`}
         handleAjaxResponse={handleAjaxResponse}
       >
         <StickyHeader
@@ -115,6 +115,7 @@ EditView.propTypes = {
   collection: PropTypes.shape({
     labels: PropTypes.shape({
       plural: PropTypes.string,
+      singular: PropTypes.string,
     }),
     slug: PropTypes.string,
     useAsTitle: PropTypes.string,
