@@ -65,23 +65,23 @@ const UserProvider = ({ children }) => {
   }, [token]);
 
   useEffect(() => {
-    const { tokenExpiration } = config.user.auth;
-
     let reminder = false;
     let forceLogOut = false;
 
-    console.log(user?.exp);
+    const exp = user?.exp || 0;
+    const now = Math.round((new Date()).getTime() / 1000);
+    const remainingTime = exp - now;
 
-    if (user && isNotExpired(user)) {
+    if (remainingTime > 0) {
       reminder = setTimeout(() => {
         toggleModal('stay-logged-in');
-      }, (tokenExpiration - 60) * 1000);
+      }, (remainingTime - 60));
 
       forceLogOut = setTimeout(() => {
         const { routes: { admin } } = config;
         history.push(`${admin}/logout`);
         closeAllModals();
-      }, tokenExpiration * 1000);
+      }, remainingTime);
     }
 
     return () => {
