@@ -34,6 +34,7 @@ const StayLoggedInModal = (props) => {
             Stay logged in
           </Button>
           <Button
+            type="secondary"
             onClick={() => {
               closeAllModals();
               history.push(`${config.routes.admin}/logout`);

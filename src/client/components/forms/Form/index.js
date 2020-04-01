@@ -7,6 +7,8 @@ import { useLocale } from '../../utilities/Locale';
 import { useStatusList } from '../../modules/Status';
 import HiddenInput from '../field-types/HiddenInput';
 import { requests } from '../../../api';
+import useThrottledEffect from '../../../hooks/useThrottledEffect';
+import { useUser } from '../../data/User';
 import fieldReducer from './reducer';
 
 import './index.scss';
@@ -20,6 +22,7 @@ const Form = (props) => {
   const history = useHistory();
   const locale = useLocale();
   const { addStatus } = useStatusList();
+  const { refreshToken } = useUser();
 
   const {
     onSubmit,
@@ -118,6 +121,10 @@ const Form = (props) => {
 
     // If valid and not AJAX submit as usual
   };
+
+  useThrottledEffect(() => {
+    refreshToken();
+  }, 15000, [fields]);
 
   const classes = [
     className,

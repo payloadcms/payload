@@ -9,11 +9,12 @@ import { useModal } from '@trbl/react-modal';
 import { requests } from '../../api';
 import config from '../../config/sanitizedClientConfig';
 import StayLoggedInModal from '../modals/StayLoggedIn';
+import useThrottledEffect from '../../hooks/useThrottledEffect';
 
 const cookies = new Cookies();
 const Context = createContext({});
 
-const isNotExpired = decodedJWT => decodedJWT?.exp > Date.now() / 1000;
+const isNotExpired = decodedJWT => (decodedJWT?.exp || 0) > Date.now() / 1000;
 
 const UserProvider = ({ children }) => {
   const [token, setToken] = useState('');
@@ -23,7 +24,13 @@ const UserProvider = ({ children }) => {
   const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
 
   const refreshToken = useCallback(() => {
-    if (isNotExpired(user)) {
+    // Need to retrieve token straight from cookie so as to keep this function
+    // with no dependencies and to make sure we have the exact token that will be used
+    // in the request to the /refresh route
+    const tokenFromCookie = cookies.get('token');
+    const decodedToken = jwt.decode(tokenFromCookie);
+
+    if (decodedToken?.exp > (Date.now() / 1000)) {
       setTimeout(async () => {
         const request = await requests.post('/refresh');
 
@@ -33,10 +40,11 @@ const UserProvider = ({ children }) => {
         }
       }, 1000);
     }
-  }, [user, setToken]);
+  }, [setToken]);
 
   const logOut = () => {
     setUser(null);
+    setToken(null);
     cookies.remove('token', { path: '/' });
   };
 
@@ -46,12 +54,10 @@ const UserProvider = ({ children }) => {
     if (cookieToken) setToken(cookieToken);
   }, []);
 
-
   // When location changes, refresh token
-  useEffect(() => {
+  useThrottledEffect(() => {
     refreshToken();
-  }, [location, refreshToken]);
-
+  }, 15000, [location, refreshToken]);
 
   // When token changes, set cookie, decode and set user
   useEffect(() => {
