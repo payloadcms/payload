@@ -4,13 +4,13 @@ const mongooseHidden = require('mongoose-hidden');
 const buildSchema = require('../mongoose/schema/buildSchema');
 const localizationPlugin = require('../localization/plugin');
 
-const registerSchema = (globalConfigs, config) => {
+const registerSchema = (config) => {
   const globals = {
-    config: globalConfigs,
+    config: config.globals,
     model: {},
   };
 
-  if (globalConfigs && globalConfigs.length > 0) {
+  if (config.globals && config.globals.length > 0) {
     const globalsSchema = new mongoose.Schema({}, { discriminatorKey: 'globalType', timestamps: false })
       .plugin(localizationPlugin, config.localization)
       .plugin(autopopulate)
@@ -18,7 +18,7 @@ const registerSchema = (globalConfigs, config) => {
 
     const Globals = mongoose.model('globals', globalsSchema);
 
-    Object.values(globalConfigs).forEach((globalConfig) => {
+    Object.values(config.globals).forEach((globalConfig) => {
       const globalSchema = buildSchema(globalConfig.fields, config);
 
       globalSchema

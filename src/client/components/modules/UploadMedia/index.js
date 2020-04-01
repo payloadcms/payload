@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '../../controls/Button';
 import api from '../../../api';
-import config from '../../../config/sanitizedClientConfig';
+import config from '../../../securedConfig';
 
 import './index.scss';
 

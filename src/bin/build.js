@@ -3,7 +3,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const getWebpackProdConfig = require('../client/config/getWebpackProdConfig');
+const getWebpackProdConfig = require('../webpack/getWebpackProdConfig');
 
 module.exports = (args) => {
   const configPath = path.resolve(process.cwd(), (args.config || './payload.config.js'));

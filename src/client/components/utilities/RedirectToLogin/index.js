@@ -3,7 +3,7 @@ import {
   Redirect,
 } from 'react-router-dom';
 import { useStatusList } from '../../modules/Status';
-import config from '../../../config/sanitizedClientConfig';
+import config from '../../../securedConfig';
 
 const RedirectToLogin = () => {
   const { addStatus } = useStatusList();

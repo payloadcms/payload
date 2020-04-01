@@ -1,10 +1,13 @@
+const express = require('express');
 const passport = require('passport');
 const fileUpload = require('express-fileupload');
 const { upload, update } = require('./requestHandlers');
 const uploadMiddleware = require('./middleware');
 const setModelLocaleMiddleware = require('../localization/setModelLocale');
 
-const uploadRoutes = (Upload, config, router) => {
+const router = express.Router();
+
+const uploadRoutes = (config, Upload) => {
   const { upload: uploadConfig } = config;
 
   router.all(`/${uploadConfig.slug}*`,

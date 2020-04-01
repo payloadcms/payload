@@ -6,7 +6,7 @@ import ContentBlock from '../../layout/ContentBlock';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import FormSubmit from '../../forms/Submit';
-import config from '../../../config/sanitizedClientConfig';
+import config from '../../../securedConfig';
 import { useUser } from '../../data/User';
 
 import './index.scss';

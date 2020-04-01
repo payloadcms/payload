@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { asModal } from '@trbl/react-modal';
 import ContentBlock from '../../layout/ContentBlock';
 import Button from '../../controls/Button';
-import config from '../../../config/sanitizedClientConfig';
+import config from '../../../securedConfig';
 
 import './index.scss';
 

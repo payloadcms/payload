@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useUser } from '../../data/User';
 import ContentBlock from '../../layout/ContentBlock';
-import config from '../../../config/sanitizedClientConfig';
+import config from '../../../securedConfig';
 import Button from '../../controls/Button';
 
 import './index.scss';

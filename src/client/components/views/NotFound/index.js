@@ -1,5 +1,5 @@
 import React from 'react';
-import config from '../../../config/sanitizedClientConfig';
+import config from '../../../securedConfig';
 import Button from '../../controls/Button';
 import DefaultTemplate from '../../layout/DefaultTemplate';
 

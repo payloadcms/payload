@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import Filter from '../Filter';
 import Table from '../../layout/Table';
-import config from '../../../config/sanitizedClientConfig';
+import config from '../../../securedConfig';
 
 const { routes: { admin } } = config;
 

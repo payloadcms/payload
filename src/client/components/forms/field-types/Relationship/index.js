@@ -4,7 +4,7 @@ import Cookies from 'universal-cookie';
 import some from 'async-some';
 import ReactSelect from '../../../modules/ReactSelect';
 import useFieldType from '../../useFieldType';
-import config from '../../../../config/sanitizedClientConfig';
+import config from '../../../../securedConfig';
 import Label from '../../Label';
 import Error from '../../Error';
 

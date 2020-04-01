@@ -1,28 +1,31 @@
 const webpack = require('webpack');
+const express = require('express');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
-const getWebpackDevConfig = require('../client/config/getWebpackDevConfig');
+const getWebpackDevConfig = require('./getWebpackDevConfig');
 
-const initWebpack = (app, config) => {
+const router = express.Router();
+
+const initWebpack = (config) => {
   const webpackDevConfig = getWebpackDevConfig(config);
   const compiler = webpack(webpackDevConfig);
 
-  app.use(webpackDevMiddleware(compiler, {
+  router.use(webpackDevMiddleware(compiler, {
     publicPath: webpackDevConfig.output.publicPath,
   }));
 
-  app.use(webpackHotMiddleware(compiler));
+  router.use(webpackHotMiddleware(compiler));
 
-  app.get(`${config.routes.admin}*`, (req, res, next) => {
+  router.get(`${config.routes.admin}*`, (req, res, next) => {
     compiler.outputFileSystem.readFile('/index.html', (err, result) => {
       if (err) {
         return next(err);
       }
-      res.set('content-type', 'text/html');
-      res.send(result);
-      res.end();
+      return res.set('content-type', 'text/html').send(result);
     });
   });
+
+  return router;
 };
 
 module.exports = initWebpack;

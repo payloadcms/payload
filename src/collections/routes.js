@@ -1,3 +1,4 @@
+const express = require('express');
 const requestHandlers = require('../mongoose/requestHandlers');
 const bindModelMiddleware = require('../mongoose/bindModel');
 const setModelLocaleMiddleware = require('../localization/setModelLocale');
@@ -8,7 +9,9 @@ const {
   query, create, findOne, destroy, update,
 } = requestHandlers;
 
-const registerRoutes = ({ model, config }, router) => {
+const router = express.Router();
+
+const registerRoutes = ({ model, config }) => {
   router.all(`/${config.slug}*`,
     bindModelMiddleware(model),
     bindCollectionMiddleware(config),
@@ -22,6 +25,8 @@ const registerRoutes = ({ model, config }, router) => {
     .get(loadPolicy(config.policies.read), findOne)
     .put(loadPolicy(config.policies.update), update)
     .delete(loadPolicy(config.policies.destroy), destroy);
+
+  return router;
 };
 
 module.exports = registerRoutes;

@@ -6,7 +6,10 @@ const getStyleLoaders = require('./getStyleLoaders');
 module.exports = (config) => {
   return {
     entry: {
-      main: [path.resolve(__dirname, '../../../node_modules/webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000'), path.resolve(__dirname, '../components/index.js')],
+      main: [
+        path.resolve(__dirname, '../../node_modules/webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000'),
+        path.resolve(__dirname, '../client/components/index.js'),
+      ],
     },
     output: {
       path: '/',
@@ -21,11 +24,11 @@ module.exports = (config) => {
     node: {
       __dirname: true,
     },
-    resolveLoader: { modules: [path.join(__dirname, '../../../node_modules')] },
+    resolveLoader: { modules: [path.join(__dirname, '../../node_modules')] },
     module: {
       rules: [
         {
-          test: require.resolve('../components/customComponents'),
+          test: require.resolve('../client/components/customComponents'),
           use: [
             {
               loader: 'val-loader',
@@ -34,7 +37,7 @@ module.exports = (config) => {
           ],
         },
         {
-          test: require.resolve('./sanitizedClientConfig'),
+          test: require.resolve('../client/securedConfig'),
           use: [
             {
               loader: 'val-loader',
@@ -116,13 +119,13 @@ module.exports = (config) => {
     },
     plugins: [
       new HtmlWebpackPlugin({
-        template: path.resolve(__dirname, '../index.html'),
+        template: path.resolve(__dirname, '../client/index.html'),
         filename: './index.html',
       }),
       new webpack.HotModuleReplacementPlugin(),
     ],
     resolve: {
-      modules: ['node_modules', path.resolve(__dirname, '../../../node_modules')],
+      modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
       alias: {
         'payload-scss-overrides': config.paths.scssOverrides,
       },

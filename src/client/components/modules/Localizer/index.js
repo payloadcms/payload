@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import qs from 'qs';
-import config from '../../../config/sanitizedClientConfig';
+import config from '../../../securedConfig';
 import { useLocale } from '../../utilities/Locale';
 import { useSearchParams } from '../../utilities/SearchParams';
 import Arrow from '../../graphics/Arrow';

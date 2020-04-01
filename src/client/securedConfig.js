@@ -1,5 +1,5 @@
-const sanitizeConfig = require('../../utilities/sanitizeConfig');
-const secureConfig = require('../../utilities/secureConfig');
+const sanitizeConfig = require('../utilities/sanitizeConfig');
+const secureConfig = require('../utilities/secureConfig');
 
 module.exports = (config) => {
   const sanitizedConfig = sanitizeConfig(config);

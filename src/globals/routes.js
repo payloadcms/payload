@@ -1,18 +1,21 @@
+const express = require('express');
 const requestHandlers = require('./requestHandlers');
 const setModelLocaleMiddleware = require('../localization/setModelLocale');
 const bindModelMiddleware = require('../mongoose/bindModel');
 const loadPolicy = require('../auth/loadPolicy');
-const bindGlobalMiddleware = require('../globals/bindGlobalMiddleware');
+const getMiddleware = require('./middleware');
 
 const { upsert, findOne } = requestHandlers;
 
-const registerGlobals = (globals, router) => {
+const router = express.Router();
+
+const registerGlobals = (globalConfigs, Globals) => {
   router.all('/globals*',
-    bindModelMiddleware(globals.model),
+    bindModelMiddleware(Globals),
     setModelLocaleMiddleware());
 
-  globals.config.forEach((global) => {
-    router.all(`/globals/${global.slug}`, bindGlobalMiddleware(global));
+  globalConfigs.forEach((global) => {
+    router.all(`/globals/${global.slug}`, getMiddleware(global));
 
     router
       .route(`/globals/${global.slug}`)
@@ -20,6 +23,8 @@ const registerGlobals = (globals, router) => {
       .post(loadPolicy(global.policies.create), upsert)
       .put(loadPolicy(global.policies.update), upsert);
   });
+
+  return router;
 };
 
 module.exports = registerGlobals;

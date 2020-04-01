@@ -6,7 +6,7 @@ import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
-import config from '../../../config/sanitizedClientConfig';
+import config from '../../../securedConfig';
 import Button from '../../controls/Button';
 import { useUser } from '../../data/User';
 

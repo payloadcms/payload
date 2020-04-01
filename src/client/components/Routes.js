@@ -3,7 +3,7 @@ import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
 import DefaultList from './views/collections/List';
-import config from '../config/sanitizedClientConfig';
+import config from '../securedConfig';
 import { useUser } from './data/User';
 import Dashboard from './views/Dashboard';
 import Login from './views/Login';

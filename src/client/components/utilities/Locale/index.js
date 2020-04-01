@@ -2,7 +2,7 @@ import React, {
   createContext, useContext, useState, useEffect,
 } from 'react';
 import PropTypes from 'prop-types';
-import config from '../../../config/sanitizedClientConfig';
+import config from '../../../securedConfig';
 import { useSearchParams } from '../SearchParams';
 
 const defaultLocale = (config.localization && config.localization.defaultLocale) ? config.localization.defaultLocale : 'en';
