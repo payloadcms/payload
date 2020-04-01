@@ -112,7 +112,7 @@ module.exports = function localizationPlugin(schema, options) {
           return localeSubDoc;
         }
 
-        const value = localeSubDoc[locale];
+        const value = localeSubDoc[locale] || null;
 
         if (locale === 'all') {
           return value;
