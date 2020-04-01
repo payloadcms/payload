@@ -75,13 +75,13 @@ const UserProvider = ({ children }) => {
     if (remainingTime > 0) {
       reminder = setTimeout(() => {
         toggleModal('stay-logged-in');
-      }, (remainingTime - 60));
+      }, ((remainingTime - 60) * 1000));
 
       forceLogOut = setTimeout(() => {
         const { routes: { admin } } = config;
         history.push(`${admin}/logout`);
         closeAllModals();
-      }, remainingTime);
+      }, remainingTime * 1000);
     }
 
     return () => {
