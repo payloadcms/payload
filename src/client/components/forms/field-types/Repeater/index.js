@@ -4,6 +4,7 @@ import React, {
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
+import withCondition from '../../withCondition';
 import Button from '../../../controls/Button';
 import FormContext from '../../Form/Context';
 import Section from '../../../layout/Section';
@@ -155,4 +156,4 @@ Repeater.propTypes = {
   name: PropTypes.string.isRequired,
 };
 
-export default Repeater;
+export default withCondition(Repeater);

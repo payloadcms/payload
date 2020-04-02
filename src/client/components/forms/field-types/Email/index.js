@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
@@ -89,4 +90,4 @@ Email.propTypes = {
   label: PropTypes.string,
 };
 
-export default Email;
+export default withCondition(Email);

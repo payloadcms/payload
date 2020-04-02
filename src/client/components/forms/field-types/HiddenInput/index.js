@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
+import withCondition from '../../withCondition';
 
 const HiddenInput = (props) => {
   const {
@@ -37,4 +38,4 @@ HiddenInput.propTypes = {
   defaultValue: PropTypes.string,
 };
 
-export default HiddenInput;
+export default withCondition(HiddenInput);

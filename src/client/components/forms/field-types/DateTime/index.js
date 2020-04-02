@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 
+import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
@@ -156,4 +157,4 @@ DateTime.propTypes = {
   timeFormat: PropTypes.string,
 };
 
-export default DateTime;
+export default withCondition(DateTime);

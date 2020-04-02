@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
+import withCondition from '../../withCondition';
 
 import './index.scss';
 
@@ -84,4 +85,4 @@ Password.propTypes = {
   validate: PropTypes.func,
 };
 
-export default Password;
+export default withCondition(Password);

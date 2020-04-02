@@ -2,6 +2,7 @@ import React, { Component, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Cookies from 'universal-cookie';
 import some from 'async-some';
+import withCondition from '../../withCondition';
 import ReactSelect from '../../../modules/ReactSelect';
 import useFieldType from '../../useFieldType';
 import config from '../../../../securedConfig';
@@ -341,4 +342,4 @@ RelationshipFieldType.propTypes = {
   validate: PropTypes.func,
 };
 
-export default RelationshipFieldType;
+export default withCondition(RelationshipFieldType);

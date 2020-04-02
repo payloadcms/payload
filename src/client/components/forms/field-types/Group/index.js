@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Section from '../../../layout/Section';
 import RenderFields from '../../RenderFields';
+import withCondition from '../../withCondition';
 
 import './index.scss';
 
@@ -43,4 +44,4 @@ Group.propTypes = {
   name: PropTypes.string.isRequired,
 };
 
-export default Group;
+export default withCondition(Group);

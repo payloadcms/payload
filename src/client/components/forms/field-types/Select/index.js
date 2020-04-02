@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import withCondition from '../../withCondition';
 import ReactSelect from '../../../modules/ReactSelect';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
@@ -128,4 +129,4 @@ Select.propTypes = {
   hasMany: PropTypes.bool,
 };
 
-export default Select;
+export default withCondition(Select);

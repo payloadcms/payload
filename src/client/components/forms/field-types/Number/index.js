@@ -3,13 +3,14 @@ import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
+import withCondition from '../../withCondition';
 
 import './index.scss';
 
 const defaultError = 'Please fill in the field';
 const defaultValidate = value => (/^-?[0-9]\d*$/).test(value);
 
-const Number = (props) => {
+const NumberField = (props) => {
   const {
     name,
     required,
@@ -72,7 +73,7 @@ const Number = (props) => {
   );
 };
 
-Number.defaultProps = {
+NumberField.defaultProps = {
   label: null,
   required: false,
   defaultValue: null,
@@ -83,7 +84,7 @@ Number.defaultProps = {
   style: {},
 };
 
-Number.propTypes = {
+NumberField.propTypes = {
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
@@ -95,4 +96,4 @@ Number.propTypes = {
   label: PropTypes.string,
 };
 
-export default Number;
+export default withCondition(NumberField);
