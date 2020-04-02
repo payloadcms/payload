@@ -26,14 +26,18 @@ const useFieldType = (options) => {
     });
   }, [name, required, dispatchFields, validate]);
 
+  // Send value up to form on mount and when value changes
   useEffect(() => {
     sendField(mountValue);
   }, [sendField, mountValue]);
 
+  // Remove field from state on "unmount"
   useEffect(() => {
     return () => dispatchFields({ name, type: 'REMOVE' });
   }, [dispatchFields, name]);
 
+  // Send up new value when default is loaded
+  // only if it's not null
   useEffect(() => {
     if (defaultValue != null) sendField(defaultValue);
   }, [defaultValue, sendField]);

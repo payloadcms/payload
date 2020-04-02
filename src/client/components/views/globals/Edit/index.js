@@ -50,12 +50,12 @@ const EditView = (props) => {
       <Form
         className={`${baseClass}__form`}
         method={data ? 'put' : 'post'}
-        action={`${serverURL}/globals/${global.slug}`}
+        action={`${serverURL}${api}/globals/${global.slug}`}
       >
         <StickyHeader
           showStatus
           content={
-            <APIURL url={`${serverURL}/globals/${global.slug}`} />
+            <APIURL url={`${serverURL}${api}/globals/${global.slug}`} />
           }
           action={(
             <>
@@ -77,6 +77,7 @@ EditView.propTypes = {
   global: PropTypes.shape({
     label: PropTypes.string,
     slug: PropTypes.string,
+    fields: PropTypes.arrayOf(PropTypes.shape({})),
   }).isRequired,
 };
 

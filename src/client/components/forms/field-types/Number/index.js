@@ -61,7 +61,7 @@ const Number = (props) => {
       />
       <input
         value={value || ''}
-        onChange={onFieldChange}
+        onChange={e => onFieldChange(parseInt(e.target.value, 10))}
         disabled={formProcessing ? 'disabled' : undefined}
         placeholder={placeholder}
         type="number"

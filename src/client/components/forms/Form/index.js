@@ -1,4 +1,4 @@
-import React, { useState, useReducer } from 'react';
+import React, { useContext, useState, useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { unflatten } from 'flatley';
@@ -14,6 +14,8 @@ import fieldReducer from './reducer';
 import './index.scss';
 
 const baseClass = 'form';
+
+export const useForm = () => useContext(FormContext);
 
 const Form = (props) => {
   const [fields, dispatchFields] = useReducer(fieldReducer, {});

@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
+import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
 
@@ -79,6 +80,7 @@ Textarea.defaultProps = {
   errorMessage: defaultError,
   width: 100,
   style: {},
+  placeholder: null,
 };
 
 Textarea.propTypes = {
@@ -90,6 +92,7 @@ Textarea.propTypes = {
   width: PropTypes.number,
   style: PropTypes.shape({}),
   label: PropTypes.string,
+  placeholder: PropTypes.string,
 };
 
-export default Textarea;
+export default withCondition(Textarea);

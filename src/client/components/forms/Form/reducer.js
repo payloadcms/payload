@@ -1,4 +1,5 @@
 import { unflatten, flatten } from 'flatley';
+import flattenFilters from './flattenFilters';
 
 const splitRowsFromState = (state, name) => {
   // Take a copy of state
@@ -25,15 +26,6 @@ const splitRowsFromState = (state, name) => {
     remainingState,
   };
 };
-
-const flattenFilters = [{
-  test: (_, value) => {
-    const hasValidProperty = Object.prototype.hasOwnProperty.call(value, 'valid');
-    const hasValueProperty = Object.prototype.hasOwnProperty.call(value, 'value');
-
-    return (hasValidProperty && hasValueProperty);
-  },
-}];
 
 function fieldReducer(state, action) {
   switch (action.type) {
