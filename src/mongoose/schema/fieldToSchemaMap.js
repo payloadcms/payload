@@ -17,6 +17,9 @@ const fieldToSchemaMap = {
   text: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
+  email: (field) => {
+    return { ...formatBaseSchema(field), type: String };
+  },
   textarea: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
