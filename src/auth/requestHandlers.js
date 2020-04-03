@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const httpStatus = require('http-status');
 const APIError = require('../errors/APIError');
-const formatErrorResponse = require('../responses/formatError');
+const formatErrorResponse = require('../express/responses/formatError');
 
 module.exports = (config, User) => ({
   /**

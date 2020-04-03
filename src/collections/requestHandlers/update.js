@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../responses/formatError');
-const formatSuccessResponse = require('../../responses/formatSuccess');
+const formatErrorResponse = require('../../express/responses/formatError');
+const formatSuccessResponse = require('../../express/responses/formatSuccess');
 const { NotFound } = require('../../errors');
 
 const update = (req, res) => {

@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 const { NotFound } = require('../errors');
-const formatErrorResponse = require('../responses/formatError');
+const formatErrorResponse = require('../express/responses/formatError');
 
 const upsert = (req, res) => {
   const { slug } = req.global;
