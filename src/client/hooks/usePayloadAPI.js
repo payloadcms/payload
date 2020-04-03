@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import queryString from 'qs';
 import { useLocale } from '../components/utilities/Locale';
+import { requests } from '../api';
 
 const usePayloadAPI = (url, options = {}) => {
   const {
@@ -26,7 +27,7 @@ const usePayloadAPI = (url, options = {}) => {
           ...params,
         });
 
-        const response = await fetch(`${url}?${search}`);
+        const response = await requests.get(`${url}?${search}`);
         const json = await response.json();
         setData(json);
       } catch (error) {

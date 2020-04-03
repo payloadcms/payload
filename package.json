@@ -49,6 +49,7 @@
     "file-loader": "^1.1.11",
     "flatley": "^5.2.0",
     "graphql": "^15.0.0",
+    "graphql-playground-middleware-express": "^1.7.12",
     "graphql-tools": "^4.0.7",
     "html-webpack-plugin": "^3.2.0",
     "http-status": "^1.4.2",

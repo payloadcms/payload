@@ -19,7 +19,7 @@ const ListView = (props) => {
   const { page } = queryString.parse(location.search, { ignoreQueryPrefix: true });
 
   const apiURL = [
-    `${serverURL}${api}/${collection.slug}?`,
+    `${serverURL}${api}/${collection.slug}`,
     page && `page=${page}&`,
   ].filter(Boolean).join('');
 

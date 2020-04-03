@@ -21,7 +21,7 @@ function init() {
     },
   });
 
-  Query.fields.user = {
+  Query.fields.User = {
     type: userType,
     args: {
       id: { type: GraphQLString },
@@ -50,7 +50,8 @@ function init() {
       args: {
         id: { type: GraphQLString },
       },
-      resolve: (_, { id }) => {
+      resolve: (_, { id }, context) => {
+        console.log(context);
         return {
           id,
           email: 'test',
@@ -63,13 +64,7 @@ function init() {
   // const mutation = new GraphQLObjectType(Mutation);
   const schema = new GraphQLSchema({ query });
 
-  return graphQLHTTP({
-    schema,
-    graphiql: true,
-    context: ({ req }) => ({
-      user: req.user,
-    }),
-  });
+  return graphQLHTTP({ schema });
 }
 
 module.exports = init;
