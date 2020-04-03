@@ -3,7 +3,7 @@ const { findByID } = require('../queries');
 const formatErrorResponse = require('../../responses/formatError');
 
 const findByIDHandler = async (req, res) => {
-  const query = {
+  const options = {
     Model: req.model,
     id: req.params.id,
     locale: req.locale,
@@ -12,7 +12,7 @@ const findByIDHandler = async (req, res) => {
   };
 
   try {
-    const doc = await findByID(query);
+    const doc = await findByID(options);
     return res.json(doc);
   } catch (err) {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));

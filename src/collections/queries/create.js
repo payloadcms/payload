@@ -1,16 +1,17 @@
-const { APIError } = require('../../errors');
+const create = async (options) => {
+  try {
+    // Await validation here
 
-const create = (query) => {
-  return new Promise((resolve, reject) => {
-    query.Model.create(query.input, (err, doc) => {
-      console.log(err, doc);
-      if (err || !doc) {
-        reject(new APIError(err));
-        return;
-      }
-      resolve(doc);
-    });
-  });
+    // Await pre-hook here
+
+    const doc = await options.Model.create(options.data);
+
+    // Await post hook here
+
+    return doc.toJSON({ virtuals: true });
+  } catch (err) {
+    throw err;
+  }
 };
 
 module.exports = create;
