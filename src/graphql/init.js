@@ -7,10 +7,10 @@ const Query = {
   fields: {},
 };
 
-const Mutation = {
-  name: 'Mutation',
-  fields: {},
-};
+// const Mutation = {
+//   name: 'Mutation',
+//   fields: {},
+// };
 
 function init() {
   const userType = new GraphQLObjectType({
@@ -42,6 +42,7 @@ function init() {
     collection.graphQLType = buildType(this.config, {
       name: label,
       fields: collection.config.fields,
+      parent: label,
     });
 
     Query.fields[label] = {
@@ -59,9 +60,8 @@ function init() {
   });
 
   const query = new GraphQLObjectType(Query);
-  const mutation = new GraphQLObjectType(Mutation);
-
-  const schema = new GraphQLSchema({ query, mutation });
+  // const mutation = new GraphQLObjectType(Mutation);
+  const schema = new GraphQLSchema({ query });
 
   return graphQLHTTP({
     schema,

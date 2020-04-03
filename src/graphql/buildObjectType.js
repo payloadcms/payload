@@ -9,6 +9,8 @@ const {
   GraphQLObjectType,
 } = require('graphql');
 
+const formatName = require('./formatName');
+
 const getTypeWithNullable = (field, type) => {
   if (field.required && !field.localized) {
     return new GraphQLNonNull(type);
@@ -17,15 +19,19 @@ const getTypeWithNullable = (field, type) => {
   return type;
 };
 
-const buildObjectType = (config, { name, fields }) => {
+const combineParentName = (parent, name) => {
+  return formatName(`${parent ? `${parent}_` : ''}${name}`);
+};
+
+const buildObjectType = (config, { name, fields, parent }) => {
   const getLocalizedType = (field, type) => {
     if (config.localization && field.localized) {
       return new GraphQLObjectType({
-        name: `${field.name} - Locale`,
+        name: `${combineParentName(parent, field.label)}_Locale`,
         fields: config.localization.locales.reduce((localeFields, locale) => {
           return {
             ...localeFields,
-            [locale]: type,
+            [locale]: { type },
           };
         }, {}),
       });
@@ -125,9 +131,12 @@ const buildObjectType = (config, { name, fields }) => {
       };
     },
     repeater: (field) => {
+      const fullName = combineParentName(parent, field.label);
+
       const type = buildObjectType(config, {
-        name: field.label,
+        name: fullName,
         fields: field.fields,
+        parent: fullName,
       });
 
       const typeWithNullable = new GraphQLList(getTypeWithNullable(field, type));
@@ -140,9 +149,12 @@ const buildObjectType = (config, { name, fields }) => {
       };
     },
     group: (field) => {
+      const fullName = combineParentName(parent, field.label);
+
       const type = buildObjectType(config, {
-        name: field.label,
+        name: fullName,
         fields: field.fields,
+        parent: fullName,
       });
 
       return {
@@ -150,13 +162,15 @@ const buildObjectType = (config, { name, fields }) => {
       };
     },
     select: (field) => {
+      const fullName = combineParentName(parent, field.label);
+
       const type = new GraphQLEnumType({
-        name: field.name,
+        name: fullName,
         values: field.options.reduce((values, option) => {
           if (typeof option === 'object' && option.value) {
             return {
               ...values,
-              [option.label]: {
+              [formatName(option.label)]: {
                 value: option.value,
               },
             };
@@ -187,49 +201,55 @@ const buildObjectType = (config, { name, fields }) => {
     },
     flexible: (field) => {
       const blockTypes = field.blocks.reduce((blocks, block) => {
+        const formattedBlockName = formatName(block.labels.singular);
+        const fullName = `${combineParentName(parent, field.label)}_${formattedBlockName}`;
         return {
           ...blocks,
           [block.slug]: buildObjectType(config, {
-            name: block.labels.singular,
+            name: fullName,
             fields: block.fields,
+            parent: fullName,
           }),
         };
       }, {});
 
-      return getLocalizedType(
-        field,
-        new GraphQLList(new GraphQLInterfaceType({
-          name: field.name,
-          fields: {
-            blockType: {
-              type: new GraphQLEnumType({
-                name: 'Block Type',
-                values: field.blocks.reduce((values, block) => {
-                  return {
-                    ...values,
-                    [block.slug]: {
-                      value: block.slug,
-                    },
-                  };
-                }, {}),
-              }),
+      return {
+        type: getLocalizedType(
+          field,
+          new GraphQLList(new GraphQLInterfaceType({
+            name: combineParentName(parent, field.label),
+            fields: {
+              blockType: {
+                type: new GraphQLEnumType({
+                  name: `${combineParentName(parent, field.label)}_BlockType`,
+                  values: field.blocks.reduce((values, block) => {
+                    return {
+                      ...values,
+                      [block.slug]: {
+                        value: block.slug,
+                      },
+                    };
+                  }, {}),
+                }),
+              },
+              blockName: { type: GraphQLString },
             },
-            blockName: { type: GraphQLString },
-          },
-          resolveType(value) {
-            return blockTypes[value.blockType];
-          },
-        })),
-      );
+            resolveType(value) {
+              return blockTypes[value.blockType];
+            },
+          })),
+        ),
+      };
     },
   };
 
   return new GraphQLObjectType({
     name,
     fields: fields.reduce((schema, field) => {
+      const fieldName = formatName(field.label);
       return {
         ...schema,
-        [field.name]: fieldToSchemaMap[field.type](field),
+        [fieldName]: fieldToSchemaMap[field.type](field),
       };
     }, {}),
   });
