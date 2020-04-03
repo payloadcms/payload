@@ -1,8 +1,9 @@
 const httpStatus = require('http-status');
 const formatErrorResponse = require('../../responses/formatError');
 const formatSuccessResponse = require('../../responses/formatSuccess');
+const { create } = require('../queries');
 
-const create = (req, res) => {
+const createHandler = (req, res) => {
   req.model.create(req.body, (err, doc) => {
     if (err) {
       return res.status(httpStatus.INTERNAL_SERVER_ERROR)
@@ -17,4 +18,4 @@ const create = (req, res) => {
   });
 };
 
-module.exports = create;
+module.exports = createHandler;

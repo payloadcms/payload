@@ -1,4 +1,4 @@
-const modelById = async (query) => {
+const findByID = async (query) => {
   const options = {};
   const { depth } = query;
 
@@ -20,4 +20,4 @@ const modelById = async (query) => {
   }
 };
 
-module.exports = modelById;
+module.exports = findByID;
