@@ -3,7 +3,7 @@ const passport = require('passport');
 const compression = require('compression');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
-const localizationMiddleware = require('../localization/middleware');
+const localizationMiddleware = require('../../localization/middleware');
 
 const middleware = (config) => {
   return [

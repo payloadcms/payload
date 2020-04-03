@@ -1,5 +1,4 @@
 const express = require('express');
-const graphQLHTTP = require('express-graphql');
 
 const connectMongoose = require('./mongoose/connect');
 const expressMiddleware = require('./express/middleware');

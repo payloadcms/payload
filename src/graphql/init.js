@@ -1,8 +1,13 @@
 const graphQLHTTP = require('express-graphql');
 const { GraphQLObjectType, GraphQLString, GraphQLSchema } = require('graphql');
 
-const queryType = {
+const Query = {
   name: 'Query',
+  fields: {},
+};
+
+const Mutation = {
+  name: 'Mutation',
   fields: {},
 };
 
@@ -15,7 +20,7 @@ function init() {
     },
   });
 
-  queryType.fields.user = {
+  Query.fields.user = {
     type: userType,
     args: {
       id: { type: GraphQLString },
@@ -28,8 +33,10 @@ function init() {
     },
   };
 
-  const query = new GraphQLObjectType(queryType);
-  const schema = new GraphQLSchema({ query });
+  const query = new GraphQLObjectType(Query);
+  const mutation = new GraphQLObjectType(Mutation);
+
+  const schema = new GraphQLSchema({ query, mutation });
 
   return graphQLHTTP({
     schema,

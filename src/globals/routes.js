@@ -1,7 +1,7 @@
 const express = require('express');
 const requestHandlers = require('./requestHandlers');
 const setModelLocaleMiddleware = require('../localization/setModelLocale');
-const bindModelMiddleware = require('../mongoose/bindModel');
+const bindModelMiddleware = require('../express/middleware/bindModel');
 const loadPolicy = require('../auth/loadPolicy');
 const getMiddleware = require('./middleware');
 

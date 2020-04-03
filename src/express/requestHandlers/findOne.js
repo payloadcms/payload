@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { modelById } = require('../resolvers');
+const { modelById } = require('../../mongoose/queries');
 const formatErrorResponse = require('../../responses/formatError');
 
 const findOne = (req, res) => {
