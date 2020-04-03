@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 const { findByID } = require('../queries');
-const formatErrorResponse = require('../../responses/formatError');
+const formatErrorResponse = require('../../express/responses/formatError');
 
 const findByIDHandler = async (req, res) => {
   const options = {

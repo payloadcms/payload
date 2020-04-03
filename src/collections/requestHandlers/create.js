@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../responses/formatError');
-const formatSuccessResponse = require('../../responses/formatSuccess');
+const formatErrorResponse = require('../../express/responses/formatError');
+const formatSuccessResponse = require('../../express/responses/formatSuccess');
 const { create } = require('../queries');
 
 const createHandler = async (req, res) => {
@@ -15,7 +15,6 @@ const createHandler = async (req, res) => {
       doc,
     });
   } catch (err) {
-    console.log(err);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));
   }
 };
