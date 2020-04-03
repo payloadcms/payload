@@ -1,7 +1,7 @@
 const mkdirp = require('mkdirp');
 const httpStatus = require('http-status');
 const resizeAndSave = require('./images/imageResizer');
-const modelById = require('../mongoose/queries/modelById');
+const modelById = require('../collections/queries/modelById');
 const { NotFound } = require('../errors');
 
 async function fileTypeHandler(config, uploadConfig, file) {

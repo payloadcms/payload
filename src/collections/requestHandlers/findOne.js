@@ -1,8 +1,8 @@
 const httpStatus = require('http-status');
-const { modelById } = require('../../mongoose/queries');
+const { modelById } = require('../queries');
 const formatErrorResponse = require('../../responses/formatError');
 
-const findOne = (req, res) => {
+const findOne = async (req, res) => {
   const query = {
     Model: req.model,
     id: req.params.id,
@@ -11,9 +11,13 @@ const findOne = (req, res) => {
     depth: req.query.depth,
   };
 
-  modelById(query)
-    .then(doc => res.json(doc))
-    .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose')));
+  try {
+    const doc = await modelById(query);
+    return res.json(doc);
+  } catch (err) {
+    console.log(err);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));
+  }
 };
 
 module.exports = findOne;
