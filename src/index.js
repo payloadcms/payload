@@ -1,4 +1,5 @@
 const express = require('express');
+const graphQLHTTP = require('express-graphql');
 
 const connectMongoose = require('./mongoose/connect');
 const expressMiddleware = require('./express/middleware');
@@ -7,6 +8,7 @@ const registerUser = require('./auth/register');
 const registerUpload = require('./uploads/register');
 const registerCollections = require('./collections/register');
 const registerGlobals = require('./globals/register');
+const initGraphQL = require('./graphql/init');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
 
 class Payload {
@@ -20,6 +22,7 @@ class Payload {
     this.registerUpload = registerUpload.bind(this);
     this.registerCollections = registerCollections.bind(this);
     this.registerGlobals = registerGlobals.bind(this);
+    this.initGraphQL = initGraphQL.bind(this);
 
     // Setup & initialization
     connectMongoose(this.config.mongoURL);
@@ -46,6 +49,9 @@ class Payload {
 
     // Bind static
     this.express.use(this.config.staticURL, express.static(this.config.staticDir));
+
+    // Init GraphQL
+    this.express.use(this.config.routes.graphQL, this.initGraphQL());
   }
 }
 

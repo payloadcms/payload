@@ -4,6 +4,7 @@ const sanitizeConfig = (config) => {
   sanitizedConfig.routes = {
     admin: (config.routes && config.routes.admin) ? config.routes.admin : '/admin',
     api: (config.routes && config.routes.api) ? config.routes.api : '/api',
+    graphQL: (config.routes && config.routes.graphQL) ? config.routes.graphQL : '/graphql',
   };
   sanitizedConfig.components = { ...(config.components || {}) };
 
