@@ -51,7 +51,7 @@ function init() {
         id: { type: GraphQLString },
       },
       resolve: (_, { id }, context) => {
-        console.log(context);
+        console.log(context.user);
         return {
           id,
           email: 'test',

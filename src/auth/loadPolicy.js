@@ -1,4 +1,3 @@
-const passport = require('passport');
 const httpStatus = require('http-status');
 const { Forbidden } = require('../errors');
 const formatErrorResponse = require('../express/responses/formatError');
@@ -13,7 +12,6 @@ const requireAuth = (req, res, next) => {
 
 const loadPolicy = (policy) => {
   return [
-    passport.authenticate(['jwt', 'anonymous'], { session: false }),
     (req, res, next) => {
       if (policy) {
         if (!policy(req.user)) {

@@ -15,6 +15,7 @@ const middleware = (config) => {
     bodyParser.urlencoded({ extended: true }),
     compression(config.compression),
     localizationMiddleware(config.localization),
+    passport.authenticate(['jwt', 'anonymous'], { session: false }),
     (req, res, next) => {
       if (config.cors) {
         if (config.cors.indexOf(req.headers.origin) > -1) {
@@ -24,7 +25,6 @@ const middleware = (config) => {
 
         res.header('Access-Control-Allow-Headers',
           'Origin X-Requested-With, Content-Type, Accept, Authorization');
-        res.header('Content-Language', config.localization.locale);
       }
 
       next();
