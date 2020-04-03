@@ -1,6 +1,7 @@
 const graphQLHTTP = require('express-graphql');
 const { GraphQLObjectType, GraphQLString, GraphQLSchema } = require('graphql');
 const buildType = require('./buildObjectType');
+const loadPolicy = require('../express/middleware/loadPolicy');
 
 const Query = {
   name: 'Query',
@@ -50,8 +51,7 @@ function init() {
       args: {
         id: { type: GraphQLString },
       },
-      resolve: (_, { id }, context) => {
-        console.log(context.user);
+      resolve: async (_, { id }, context) => {
         return {
           id,
           email: 'test',

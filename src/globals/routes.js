@@ -2,7 +2,7 @@ const express = require('express');
 const requestHandlers = require('./requestHandlers');
 const setModelLocaleMiddleware = require('../localization/setModelLocale');
 const bindModelMiddleware = require('../express/middleware/bindModel');
-const loadPolicy = require('../auth/loadPolicy');
+const loadPolicy = require('../express/middleware/loadPolicy');
 const getMiddleware = require('./middleware');
 
 const { upsert, findOne } = requestHandlers;

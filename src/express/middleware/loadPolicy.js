@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
-const { Forbidden } = require('../errors');
-const formatErrorResponse = require('../express/responses/formatError');
+const { Forbidden } = require('../../errors');
+const formatErrorResponse = require('../responses/formatError');
 
 const requireAuth = (req, res, next) => {
   if (!req.user) {

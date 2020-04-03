@@ -2,23 +2,25 @@ const mongoose = require('mongoose');
 
 const validOperators = ['like', 'in', 'all', 'nin', 'gte', 'gt', 'lte', 'lt', 'ne'];
 
-// This plugin asynchronously builds a list of Mongoose query constraints
-// which can then be used in subsequent Mongoose queries.
-function buildQueryPlugin(schema) {
-  schema.statics.apiQuery = async function (rawParams, locale, cb) {
-    const model = this;
-    const paramParser = new ParamParser(this, rawParams, locale);
-    const params = await paramParser.parse();
-
-    if (cb) {
-      model
-        .find(params.searchParams)
-        .sort(params.sort)
-        .exec(cb);
+function addSearchParam(key, value, searchParams, schema) {
+  if (schema.paths[key]) {
+    if (typeof value === 'object') {
+      return {
+        ...searchParams,
+        [key]: {
+          ...searchParams[key],
+          ...value,
+        },
+      };
     }
 
-    return params.searchParams;
-  };
+    return {
+      ...searchParams,
+      [key]: value,
+    };
+  }
+
+  return searchParams;
 }
 
 class ParamParser {
@@ -38,14 +40,14 @@ class ParamParser {
 
   // Entry point to the ParamParser class
   async parse() {
-    for (const key of Object.keys(this.rawParams)) {
+    Object.keys(this.rawParams).forEach(async (key) => {
       // If rawParams[key] is an object, that means there are operators present.
       // Need to loop through keys on rawParams[key] to call addSearchParam on each operator found
       if (typeof this.rawParams[key] === 'object') {
         Object.keys(this.rawParams[key])
           .forEach(async (operator) => {
             const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, key, this.rawParams[key][operator], operator);
-            this.query.searchParams = this.addSearchParam(searchParamKey, searchParamValue, this.query.searchParams, this.model.schema);
+            this.query.searchParams = addSearchParam(searchParamKey, searchParamValue, this.query.searchParams, this.model.schema);
           });
         // Otherwise there are no operators present
       } else {
@@ -53,10 +55,10 @@ class ParamParser {
         if (searchParamKey === 'sort') {
           this.query.sort = searchParamValue;
         } else {
-          this.query.searchParams = this.addSearchParam(searchParamKey, searchParamValue, this.query.searchParams, this.model.schema);
+          this.query.searchParams = addSearchParam(searchParamKey, searchParamValue, this.query.searchParams, this.model.schema);
         }
       }
-    }
+    });
 
     return this.query;
   }
@@ -92,13 +94,13 @@ class ParamParser {
           const localizedSubKey = this.getLocalizedKey(paths[1], subModel.schema.obj[paths[1]]);
 
           if (typeof val === 'object') {
-            Object.keys(val).forEach(async (operator) => {
-              const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val[operator], operator);
-              subQuery = this.addSearchParam(searchParamKey, searchParamValue, subQuery, subModel.schema);
+            Object.keys(val).forEach(async (subOperator) => {
+              const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val[subOperator], subOperator);
+              subQuery = addSearchParam(searchParamKey, searchParamValue, subQuery, subModel.schema);
             });
           } else {
             const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val);
-            subQuery = this.addSearchParam(searchParamKey, searchParamValue, subQuery, subModel.schema);
+            subQuery = addSearchParam(searchParamKey, searchParamValue, subQuery, subModel.schema);
           }
 
           const matchingSubDocuments = await subModel.find(subQuery);
@@ -133,7 +135,7 @@ class ParamParser {
 
           break;
 
-        case 'like':
+        default:
           formattedValue = {
             $regex: val,
             $options: '-i',
@@ -145,27 +147,17 @@ class ParamParser {
 
     return [localizedKey, formattedValue];
   }
+}
 
-  addSearchParam(key, value, searchParams, schema) {
-    if (schema.paths[key]) {
-      if (typeof value === 'object') {
-        return {
-          ...searchParams,
-          [key]: {
-            ...searchParams[key],
-            ...value,
-          },
-        };
-      }
-
-      return {
-        ...searchParams,
-        [key]: value,
-      };
-    }
-
-    return searchParams;
-  }
+// This plugin asynchronously builds a list of Mongoose query constraints
+// which can then be used in subsequent Mongoose queries.
+function buildQueryPlugin(schema) {
+  const modifiedSchema = schema;
+  modifiedSchema.statics.apiQuery = async (rawParams, locale) => {
+    const paramParser = new ParamParser(this, rawParams, locale);
+    const params = await paramParser.parse();
+    return params.searchParams;
+  };
 }
 
 module.exports = buildQueryPlugin;

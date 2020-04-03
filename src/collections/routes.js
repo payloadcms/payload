@@ -2,7 +2,7 @@ const express = require('express');
 const requestHandlers = require('./requestHandlers');
 const bindModelMiddleware = require('../express/middleware/bindModel');
 const setModelLocaleMiddleware = require('../localization/setModelLocale');
-const loadPolicy = require('../auth/loadPolicy');
+const loadPolicy = require('../express/middleware/loadPolicy');
 const bindCollectionMiddleware = require('./bindCollection');
 
 const {
