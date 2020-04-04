@@ -2,7 +2,6 @@ const {
   GraphQLString,
   GraphQLFloat,
   GraphQLBoolean,
-  GraphQLNonNull,
   GraphQLList,
   GraphQLInterfaceType,
   GraphQLEnumType,
@@ -11,102 +10,99 @@ const {
 
 const formatName = require('./formatName');
 const combineParentName = require('./combineParentName');
-const getTypeWithNullable = require('./combineParentName');
+const getTypeWithOperators = require('./getTypeWithOperators');
 
-const buildObjectType = (config, { name, fields, parent }) => {
-  const getLocalizedType = (field, type) => {
-    if (config.localization && field.localized) {
-      return new GraphQLObjectType({
-        name: `${combineParentName(parent, field.label)}_Locale`,
-        fields: config.localization.locales.reduce((localeFields, locale) => {
-          return {
-            ...localeFields,
-            [locale]: { type },
-          };
-        }, {}),
-      });
-    }
-
-    return type;
-  };
-
+const buildQueryInputObjectType = ({ name, fields, parent }) => {
   const fieldToSchemaMap = {
     number: (field) => {
       const type = GraphQLFloat;
       return {
-        type: getLocalizedType(
+        type: getTypeWithOperators(
           field,
-          getTypeWithNullable(field, type),
+          type,
+          parent,
+          ['equals', 'gte', 'gt', 'lte', 'lt', 'ne'],
         ),
       };
     },
     text: (field) => {
       const type = GraphQLString;
       return {
-        type: getLocalizedType(
+        type: getTypeWithOperators(
           field,
-          getTypeWithNullable(field, type),
+          type,
+          parent,
+          ['equals', 'like', 'ne'],
         ),
       };
     },
     email: (field) => {
       const type = GraphQLString;
       return {
-        type: getLocalizedType(
+        type: getTypeWithOperators(
           field,
-          getTypeWithNullable(field, type),
+          type,
+          parent,
+          ['equals', 'like', 'ne'],
         ),
       };
     },
     textarea: (field) => {
       const type = GraphQLString;
       return {
-        type: getLocalizedType(
+        type: getTypeWithOperators(
           field,
-          getTypeWithNullable(field, type),
+          type,
+          parent,
+          ['equals', 'like', 'ne'],
         ),
       };
     },
     WYSIWYG: (field) => {
       const type = GraphQLString;
       return {
-        type: getLocalizedType(
+        type: getTypeWithOperators(
           field,
-          getTypeWithNullable(field, type),
+          type,
+          parent,
+          ['equals', 'like', 'ne'],
         ),
       };
     },
     code: (field) => {
       const type = GraphQLString;
       return {
-        type: getLocalizedType(
+        type: getTypeWithOperators(
           field,
-          getTypeWithNullable(field, type),
+          type,
+          parent,
+          ['equals', 'like', 'ne'],
         ),
       };
     },
     date: (field) => {
       const type = GraphQLString;
       return {
-        type: getLocalizedType(
+        type: getTypeWithOperators(
           field,
-          getTypeWithNullable(field, type),
+          type,
+          parent,
+          ['equals', 'like', 'ne'],
         ),
       };
     },
-    upload: (field) => {
+    upload: () => {
       const type = GraphQLString;
       return {
-        type: getLocalizedType(
-          field,
-          getTypeWithNullable(field, type),
-        ),
+        type,
       };
     },
     checkbox: field => ({
-      type: getLocalizedType(
+      type: getTypeWithOperators(
         field,
-        new GraphQLNonNull(GraphQLBoolean),
+        GraphQLBoolean,
+        parent,
+        ['equals', 'ne'],
       ),
     }),
     relationship: (field) => {
@@ -245,4 +241,4 @@ const buildObjectType = (config, { name, fields, parent }) => {
   });
 };
 
-module.exports = buildObjectType;
+module.exports = buildQueryInputObjectType;

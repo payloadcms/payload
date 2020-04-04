@@ -1,7 +1,7 @@
 const graphQLHTTP = require('express-graphql');
 const { GraphQLObjectType, GraphQLString, GraphQLSchema } = require('graphql');
 const buildType = require('./buildObjectType');
-const loadPolicy = require('../express/middleware/loadPolicy');
+const buildInputObjectType = require('./buildInputObjectType');
 
 const Query = {
   name: 'Query',
@@ -46,10 +46,15 @@ function init() {
       parent: label,
     });
 
+    collection.graphQLInputType = buildInputObjectType({
+      name: label,
+      fields: collection.config.fields,
+    });
+
     Query.fields[label] = {
       type: collection.graphQLType,
       args: {
-        id: { type: GraphQLString },
+        data: collection.graphQLInputType,
       },
       resolve: async (_, { id }, context) => {
         return {
