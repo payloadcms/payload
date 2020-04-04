@@ -1,7 +1,9 @@
 const graphQLHTTP = require('express-graphql');
 const { GraphQLObjectType, GraphQLString, GraphQLSchema } = require('graphql');
-const buildType = require('./buildObjectType');
-const buildInputObjectType = require('./buildInputObjectType');
+const buildType = require('./schema/buildObjectType');
+const buildWhereInputType = require('./schema/buildWhereInputType');
+const formatName = require('./utilities/formatName');
+const withPolicy = require('./resolvers/withPolicy');
 
 const Query = {
   name: 'Query',
@@ -38,30 +40,41 @@ function init() {
   Object.keys(this.collections).forEach((collectionKey) => {
     const collection = this.collections[collectionKey];
 
-    const label = collection.config.labels.singular.replace(' ', '');
+    const {
+      config: {
+        policies,
+        fields,
+        labels: {
+          singular: singularLabel,
+        },
+      },
+    } = collection;
+
+    const label = formatName(singularLabel);
 
     collection.graphQLType = buildType(this.config, {
       name: label,
-      fields: collection.config.fields,
+      fields,
       parent: label,
     });
 
-    collection.graphQLInputType = buildInputObjectType({
+    collection.graphQLWhereInputType = buildWhereInputType({
       name: label,
-      fields: collection.config.fields,
+      fields,
+      parent: label,
     });
 
     Query.fields[label] = {
       type: collection.graphQLType,
       args: {
-        data: collection.graphQLInputType,
+        where: { type: collection.graphQLWhereInputType },
       },
-      resolve: async (_, { id }, context) => {
+      resolve: withPolicy(policies.read, async (_, args, context) => {
+        console.log(JSON.stringify(args);
         return {
-          id,
-          email: 'test',
+          image: 'test',
         };
-      },
+      }),
     };
   });
 

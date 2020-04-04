@@ -2,114 +2,118 @@ const {
   GraphQLString,
   GraphQLFloat,
   GraphQLBoolean,
+  GraphQLNonNull,
   GraphQLList,
   GraphQLInterfaceType,
   GraphQLEnumType,
   GraphQLObjectType,
 } = require('graphql');
 
-const formatName = require('./formatName');
-const combineParentName = require('./combineParentName');
-const getTypeWithOperators = require('./getTypeWithOperators');
+const formatName = require('../utilities/formatName');
+const combineParentName = require('../utilities/combineParentName');
+const withNullableType = require('./withNullableType');
 
-const buildQueryInputObjectType = ({ name, fields, parent }) => {
+const buildObjectType = (config, { name, fields, parent }) => {
+  const getLocalizedType = (field, type) => {
+    if (config.localization && field.localized) {
+      return new GraphQLObjectType({
+        name: `${combineParentName(parent, field.label)}_Locale`,
+        fields: config.localization.locales.reduce((localeFields, locale) => {
+          return {
+            ...localeFields,
+            [locale]: { type },
+          };
+        }, {}),
+      });
+    }
+
+    return type;
+  };
+
   const fieldToSchemaMap = {
     number: (field) => {
       const type = GraphQLFloat;
       return {
-        type: getTypeWithOperators(
+        type: getLocalizedType(
           field,
-          type,
-          parent,
-          ['equals', 'gte', 'gt', 'lte', 'lt', 'ne'],
+          withNullableType(field, type),
         ),
       };
     },
     text: (field) => {
       const type = GraphQLString;
       return {
-        type: getTypeWithOperators(
+        type: getLocalizedType(
           field,
-          type,
-          parent,
-          ['equals', 'like', 'ne'],
+          withNullableType(field, type),
         ),
       };
     },
     email: (field) => {
       const type = GraphQLString;
       return {
-        type: getTypeWithOperators(
+        type: getLocalizedType(
           field,
-          type,
-          parent,
-          ['equals', 'like', 'ne'],
+          withNullableType(field, type),
         ),
       };
     },
     textarea: (field) => {
       const type = GraphQLString;
       return {
-        type: getTypeWithOperators(
+        type: getLocalizedType(
           field,
-          type,
-          parent,
-          ['equals', 'like', 'ne'],
+          withNullableType(field, type),
         ),
       };
     },
     WYSIWYG: (field) => {
       const type = GraphQLString;
       return {
-        type: getTypeWithOperators(
+        type: getLocalizedType(
           field,
-          type,
-          parent,
-          ['equals', 'like', 'ne'],
+          withNullableType(field, type),
         ),
       };
     },
     code: (field) => {
       const type = GraphQLString;
       return {
-        type: getTypeWithOperators(
+        type: getLocalizedType(
           field,
-          type,
-          parent,
-          ['equals', 'like', 'ne'],
+          withNullableType(field, type),
         ),
       };
     },
     date: (field) => {
       const type = GraphQLString;
       return {
-        type: getTypeWithOperators(
+        type: getLocalizedType(
           field,
-          type,
-          parent,
-          ['equals', 'like', 'ne'],
+          withNullableType(field, type),
         ),
       };
     },
-    upload: () => {
+    upload: (field) => {
       const type = GraphQLString;
       return {
-        type,
+        type: getLocalizedType(
+          field,
+          withNullableType(field, type),
+        ),
       };
     },
     checkbox: field => ({
-      type: getTypeWithOperators(
+      type: getLocalizedType(
         field,
-        GraphQLBoolean,
-        parent,
-        ['equals', 'ne'],
+        new GraphQLNonNull(GraphQLBoolean),
       ),
     }),
     relationship: (field) => {
       const type = GraphQLString;
       const typeWithLocale = getLocalizedType(
         field,
-        getTypeWithNullable(field, type),
+        withNullableType(field, type),
       );
 
       return {
@@ -125,7 +129,7 @@ const buildQueryInputObjectType = ({ name, fields, parent }) => {
         parent: fullName,
       });
 
-      const typeWithNullable = new GraphQLList(getTypeWithNullable(field, type));
+      const typeWithNullable = new GraphQLList(withNullableType(field, type));
 
       return {
         type: getLocalizedType(
@@ -176,7 +180,7 @@ const buildQueryInputObjectType = ({ name, fields, parent }) => {
       });
 
       const typeWithList = field.hasMany ? new GraphQLList(type) : type;
-      const typeWithNullable = getTypeWithNullable(field, typeWithList);
+      const typeWithNullable = withNullableType(field, typeWithList);
 
       return {
         type: getLocalizedType(
@@ -241,4 +245,4 @@ const buildQueryInputObjectType = ({ name, fields, parent }) => {
   });
 };
 
-module.exports = buildQueryInputObjectType;
+module.exports = buildObjectType;

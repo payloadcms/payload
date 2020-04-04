@@ -9,7 +9,6 @@ module.exports = (User, config) => {
   opts.secretOrKey = config.user.auth.secretKey;
 
   return new JwtStrategy(opts, (token, done) => {
-    console.log(`Token authenticated for user: ${token.email}`);
     User.findByUsername(token.email, (err, user) => {
       if (err || !user) done(null, false);
       return done(null, user);
