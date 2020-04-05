@@ -90,7 +90,7 @@ function init() {
       resolve: withPolicy(policies.read, async (_, { id }) => {
         return findByID({
           depth: 0,
-          Model: collection.model,
+          model: collection.model,
           id,
         });
       }),
@@ -121,7 +121,7 @@ function init() {
       resolve: withPolicy(policies.read, async (_, args) => {
         return find({
           depth: 0,
-          Model: collection.model,
+          model: collection.model,
           query: args,
         });
       }),

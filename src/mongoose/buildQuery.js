@@ -29,39 +29,43 @@ class ParamParser {
 
   // Entry point to the ParamParser class
   async parse() {
-    for (const key of Object.keys(this.rawParams)) {
-      if (key === 'where') {
-        // We need to determine if the whereKey is an AND, OR, or a schema path
-        for (const rawRelationOrPath of Object.keys(this.rawParams.where)) {
-          const relationOrPath = rawRelationOrPath.toLowerCase();
-          if (relationOrPath === 'and') {
-            const andConditions = this.rawParams.where[rawRelationOrPath];
-            this.query.searchParams.$and = await this.buildAndOrConditions(andConditions);
-          } else if (relationOrPath === 'or' && Array.isArray(this.rawParams.where[rawRelationOrPath])) {
-            const orConditions = this.rawParams.where[rawRelationOrPath];
-            this.query.searchParams.$or = await this.buildAndOrConditions(orConditions);
-          } else {
-            // It's a path - and there can be multiple comparisons on a single path.
-            // For example - title like 'test' and title not equal to 'tester'
-            // So we need to loop on keys again here to handle each operator independently
-            const pathOperators = this.rawParams.where[relationOrPath];
+    if (typeof this.rawParams === 'object') {
+      for (const key of Object.keys(this.rawParams)) {
+        if (key === 'where') {
+          // We need to determine if the whereKey is an AND, OR, or a schema path
+          for (const rawRelationOrPath of Object.keys(this.rawParams.where)) {
+            const relationOrPath = rawRelationOrPath.toLowerCase();
+            if (relationOrPath === 'and') {
+              const andConditions = this.rawParams.where[rawRelationOrPath];
+              this.query.searchParams.$and = await this.buildAndOrConditions(andConditions);
+            } else if (relationOrPath === 'or' && Array.isArray(this.rawParams.where[rawRelationOrPath])) {
+              const orConditions = this.rawParams.where[rawRelationOrPath];
+              this.query.searchParams.$or = await this.buildAndOrConditions(orConditions);
+            } else {
+              // It's a path - and there can be multiple comparisons on a single path.
+              // For example - title like 'test' and title not equal to 'tester'
+              // So we need to loop on keys again here to handle each operator independently
+              const pathOperators = this.rawParams.where[relationOrPath];
 
-            if (typeof pathOperators === 'object') {
-              for (const operator of Object.keys(pathOperators)) {
-                if (validOperators.includes(operator)) {
-                  const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, relationOrPath, pathOperators[operator], operator);
-                  this.query.searchParams = addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
+              if (typeof pathOperators === 'object') {
+                for (const operator of Object.keys(pathOperators)) {
+                  if (validOperators.includes(operator)) {
+                    const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, relationOrPath, pathOperators[operator], operator);
+                    this.query.searchParams = addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
+                  }
                 }
               }
             }
           }
+        } else if (key === 'sort') {
+          this.query.sort = this.rawParams[key];
         }
-      } else if (key === 'sort') {
-        this.query.sort = this.rawParams[key];
       }
+
+      return this.query;
     }
 
-    return this.query;
+    return {};
   }
 
   async buildAndOrConditions(conditions) {

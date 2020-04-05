@@ -3,22 +3,25 @@ const { APIError } = require('../../errors');
 const find = async (options) => {
   try {
     const {
-      Model,
-      query,
+      model,
+      query = {},
       locale,
       fallbackLocale,
-      paginate,
+      paginate = {},
       depth,
     } = options;
 
     // await pre find hook here
 
-    const mongooseQuery = await Model.buildQuery(query, locale);
+    const mongooseQuery = await model.buildQuery(query, locale);
 
     const paginateQuery = {
       options: {},
-      ...paginate,
     };
+
+    if (paginate.page) paginateQuery.page = paginate.page;
+    if (paginate.limit) paginateQuery.limit = paginate.limit;
+    if (paginate.sort) paginateQuery.sort = paginate.sort;
 
     if (depth) {
       paginateQuery.options.autopopulate = {
@@ -26,7 +29,7 @@ const find = async (options) => {
       };
     }
 
-    const result = await Model.paginate(mongooseQuery, paginateQuery);
+    const result = await model.paginate(mongooseQuery, paginateQuery);
 
     // await post find hook here
 

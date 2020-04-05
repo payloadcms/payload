@@ -4,7 +4,7 @@ const { find } = require('../queries');
 const findHandler = async (req, res) => {
   try {
     const result = await find({
-      Model: req.Model,
+      model: req.model,
       paginate: {
         page: req.query.page,
         limit: req.query.limit,

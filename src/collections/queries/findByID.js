@@ -13,7 +13,7 @@ const findByID = async (options) => {
   try {
     // Await pre findOne hook here
 
-    const doc = await options.Model.findOne({ _id: options.id }, {}, mongooseOptions);
+    const doc = await options.model.findOne({ _id: options.id }, {}, mongooseOptions);
 
     if (!doc) {
       throw new NotFound();
