@@ -1,3 +1,5 @@
+const { NotFound } = require('../../errors');
+
 const findByID = async (options) => {
   const mongooseOptions = {};
   const { depth } = options;
@@ -12,6 +14,11 @@ const findByID = async (options) => {
     // Await pre findOne hook here
 
     const doc = await options.Model.findOne({ _id: options.id }, {}, mongooseOptions);
+
+    if (!doc) {
+      throw new NotFound();
+    }
+
     if (options.locale && doc.setLocale) {
       doc.setLocale(options.locale, options.fallback);
     }

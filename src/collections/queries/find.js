@@ -11,6 +11,8 @@ const find = async (options) => {
       depth,
     } = options;
 
+    // await pre find hook here
+
     const mongooseQuery = await Model.buildQuery(query, locale);
 
     const paginateQuery = {
@@ -25,6 +27,8 @@ const find = async (options) => {
     }
 
     const result = await Model.paginate(mongooseQuery, paginateQuery);
+
+    // await post find hook here
 
     return {
       ...result,
