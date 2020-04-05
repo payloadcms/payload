@@ -1,11 +1,17 @@
+const {
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLSchema,
+  GraphQLNonNull,
+} = require('graphql');
 const graphQLHTTP = require('express-graphql');
-const { GraphQLObjectType, GraphQLString, GraphQLSchema } = require('graphql');
 const getBuildObjectType = require('./schema/getBuildObjectType');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 const formatName = require('./utilities/formatName');
 const withPolicy = require('./resolvers/withPolicy');
 const getLocaleStringType = require('./types/getLocaleStringType');
 const getLocaleFloatType = require('./types/getLocaleFloatType');
+const { findByID } = require('../collections/queries');
 
 const Query = {
   name: 'Query',
@@ -25,7 +31,7 @@ function init() {
     },
   };
 
-  const buildObjectType = getBuildObjectType(this);
+  const buildObjectType = getBuildObjectType(this.config, this.graphQL);
 
   const userType = new GraphQLObjectType({
     name: 'User',
@@ -38,7 +44,7 @@ function init() {
   Query.fields.User = {
     type: userType,
     args: {
-      id: { type: GraphQLString },
+      id: { type: new GraphQLNonNull(GraphQLString) },
     },
     resolve: (_, { id }) => {
       return {
@@ -56,28 +62,45 @@ function init() {
         policies,
         fields,
         labels: {
-          singular: singularLabel,
+          singular,
+          plural,
         },
       },
     } = collection;
 
-    const label = formatName(singularLabel);
+    const singularLabel = formatName(singular);
+    const pluralLabel = formatName(plural);
 
-    collection.graphQLType = buildObjectType(label, fields, label);
+    collection.graphQLType = buildObjectType(singularLabel, fields, singularLabel);
 
     collection.graphQLWhereInputType = buildWhereInputType({
-      name: label,
+      name: singularLabel,
       fields,
-      parent: label,
+      parent: singularLabel,
     });
 
-    Query.fields[label] = {
+    Query.fields[singularLabel] = {
+      type: collection.graphQLType,
+      args: {
+        id: { type: GraphQLString },
+      },
+      resolve: withPolicy(policies.read, async (_, { id }) => {
+        const doc = findByID({
+          depth: 0,
+          Model: collection.model,
+          id,
+        });
+
+        return doc;
+      }),
+    };
+
+    Query.fields[`get${pluralLabel}`] = {
       type: collection.graphQLType,
       args: {
         where: { type: collection.graphQLWhereInputType },
       },
       resolve: withPolicy(policies.read, async (_, args, context) => {
-        console.log(JSON.stringify(args));
         return {
           image: 'test',
         };

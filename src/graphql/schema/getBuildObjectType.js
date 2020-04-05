@@ -13,20 +13,20 @@ const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
 const withNullableType = require('./withNullableType');
 
-function getBuildObjectType(context) {
+function getBuildObjectType(config, graphQL) {
   const withLocalizedType = (field, type) => {
-    if (context.config.localization && field.localized) {
+    if (config.localization && field.localized) {
       if (type instanceof GraphQLObjectType) {
-        const LocaleObjectType = context.graphQL.buildLocaleObjectType(field, type);
+        const LocaleObjectType = graphQL.buildLocaleObjectType(field, type);
         return LocaleObjectType;
       }
 
       if (type === GraphQLString) {
-        return context.graphQL.types.LocaleStringType;
+        return graphQL.types.LocaleStringType;
       }
 
       if (type === GraphQLFloat) {
-        return context.graphQL.types.LocaleFloatType;
+        return graphQL.types.LocaleFloatType;
       }
     }
 
