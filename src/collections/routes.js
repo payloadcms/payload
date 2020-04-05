@@ -6,7 +6,7 @@ const loadPolicy = require('../express/middleware/loadPolicy');
 const bindCollectionMiddleware = require('./bindCollection');
 
 const {
-  query, create, findByID, destroy, update,
+  find, create, findByID, destroy, update,
 } = requestHandlers;
 
 const router = express.Router();
@@ -18,7 +18,7 @@ const registerRoutes = ({ model, config }) => {
     setModelLocaleMiddleware());
 
   router.route(`/${config.slug}`)
-    .get(loadPolicy(config.policies.read), query)
+    .get(loadPolicy(config.policies.read), find)
     .post(loadPolicy(config.policies.create), create);
 
   router.route(`/${config.slug}/:id`)

@@ -1,22 +1,44 @@
-const { NotFound } = require('../../errors');
+const { APIError } = require('../../errors');
 
-const find = (query) => {
-  return new Promise((resolve, reject) => {
-    query.Model.find({}, (err, docs) => {
-      if (err || !docs) {
-        reject(new NotFound());
-      }
+const find = async (options) => {
+  try {
+    const {
+      Model,
+      query,
+      locale,
+      fallbackLocale,
+      paginate,
+      depth,
+    } = options;
 
-      let result = docs;
+    const mongooseQuery = await Model.buildQuery(query, locale);
 
-      if (query.locale) {
-        docs.setLocale(query.locale, query.fallback);
-        result = docs.toJSON({ virtuals: true });
-      }
+    const paginateQuery = {
+      options: {},
+      ...paginate,
+    };
 
-      resolve(result);
-    });
-  });
+    if (depth) {
+      paginateQuery.options.autopopulate = {
+        maxDepth: depth,
+      };
+    }
+
+    const result = await Model.paginate(mongooseQuery, paginateQuery);
+
+    return {
+      ...result,
+      docs: result.docs.map((doc) => {
+        if (locale && doc.setLocale) {
+          doc.setLocale(locale, fallbackLocale);
+        }
+
+        return doc.toJSON({ virtuals: true });
+      }),
+    };
+  } catch (err) {
+    throw new APIError();
+  }
 };
 
 module.exports = find;

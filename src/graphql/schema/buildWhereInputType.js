@@ -2,6 +2,7 @@ const {
   GraphQLString,
   GraphQLFloat,
   GraphQLBoolean,
+  GraphQLInt,
   GraphQLList,
   // GraphQLInterfaceType,
   // GraphQLEnumType,
@@ -150,6 +151,9 @@ const buildWhereInputType = ({ name, fields, parent }) => {
           },
         })),
       },
+      page: { type: GraphQLInt },
+      limit: { type: GraphQLInt },
+      sort: { type: GraphQLString },
     },
   });
 };

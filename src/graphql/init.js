@@ -3,6 +3,9 @@ const {
   GraphQLString,
   GraphQLSchema,
   GraphQLNonNull,
+  GraphQLList,
+  GraphQLInt,
+  GraphQLBoolean,
 } = require('graphql');
 const graphQLHTTP = require('express-graphql');
 const getBuildObjectType = require('./schema/getBuildObjectType');
@@ -11,7 +14,7 @@ const formatName = require('./utilities/formatName');
 const withPolicy = require('./resolvers/withPolicy');
 const getLocaleStringType = require('./types/getLocaleStringType');
 const getLocaleFloatType = require('./types/getLocaleFloatType');
-const { findByID } = require('../collections/queries');
+const { find, findByID } = require('../collections/queries');
 
 const Query = {
   name: 'Query',
@@ -85,25 +88,42 @@ function init() {
         id: { type: GraphQLString },
       },
       resolve: withPolicy(policies.read, async (_, { id }) => {
-        const doc = findByID({
+        return findByID({
           depth: 0,
           Model: collection.model,
           id,
         });
-
-        return doc;
       }),
     };
 
-    Query.fields[`get${pluralLabel}`] = {
-      type: collection.graphQLType,
+    Query.fields[pluralLabel] = {
+      type: new GraphQLObjectType({
+        name: pluralLabel,
+        fields: {
+          docs: {
+            type: new GraphQLList(collection.graphQLType),
+          },
+          totalDocs: { type: GraphQLInt },
+          offset: { type: GraphQLInt },
+          limit: { type: GraphQLInt },
+          totalPages: { type: GraphQLInt },
+          page: { type: GraphQLInt },
+          pagingCounter: { type: GraphQLInt },
+          hasPrevPage: { type: GraphQLBoolean },
+          hasNextPage: { type: GraphQLBoolean },
+          prevPage: { type: GraphQLBoolean },
+          nextPage: { type: GraphQLBoolean },
+        },
+      }),
       args: {
         where: { type: collection.graphQLWhereInputType },
       },
-      resolve: withPolicy(policies.read, async (_, args, context) => {
-        return {
-          image: 'test',
-        };
+      resolve: withPolicy(policies.read, async (_, args) => {
+        return find({
+          depth: 0,
+          Model: collection.model,
+          query: args,
+        });
       }),
     };
   });
