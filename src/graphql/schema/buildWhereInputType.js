@@ -9,16 +9,15 @@ const {
 } = require('graphql');
 
 const formatName = require('../utilities/formatName');
-// const combineParentName = require('./combineParentName');
-const withTypeOperators = require('./withTypeOperators');
+const withOperators = require('./withOperators');
 
 const buildWhereInputType = ({ name, fields, parent }) => {
   const fieldToSchemaMap = {
     number: (field) => {
       const type = GraphQLFloat;
       return {
-        type: withTypeOperators(
-          field,
+        type: withOperators(
+          field.name,
           type,
           parent,
           ['equals', 'gte', 'gt', 'lte', 'lt', 'not_equals'],
@@ -28,8 +27,8 @@ const buildWhereInputType = ({ name, fields, parent }) => {
     text: (field) => {
       const type = GraphQLString;
       return {
-        type: withTypeOperators(
-          field,
+        type: withOperators(
+          field.name,
           type,
           parent,
           ['equals', 'like', 'not_equals'],
@@ -39,8 +38,8 @@ const buildWhereInputType = ({ name, fields, parent }) => {
     email: (field) => {
       const type = GraphQLString;
       return {
-        type: withTypeOperators(
-          field,
+        type: withOperators(
+          field.name,
           type,
           parent,
           ['equals', 'like', 'not_equals'],
@@ -50,8 +49,8 @@ const buildWhereInputType = ({ name, fields, parent }) => {
     textarea: (field) => {
       const type = GraphQLString;
       return {
-        type: withTypeOperators(
-          field,
+        type: withOperators(
+          field.name,
           type,
           parent,
           ['equals', 'like', 'not_equals'],
@@ -61,8 +60,8 @@ const buildWhereInputType = ({ name, fields, parent }) => {
     WYSIWYG: (field) => {
       const type = GraphQLString;
       return {
-        type: withTypeOperators(
-          field,
+        type: withOperators(
+          field.name,
           type,
           parent,
           ['equals', 'like', 'not_equals'],
@@ -72,8 +71,8 @@ const buildWhereInputType = ({ name, fields, parent }) => {
     code: (field) => {
       const type = GraphQLString;
       return {
-        type: withTypeOperators(
-          field,
+        type: withOperators(
+          field.name,
           type,
           parent,
           ['equals', 'like', 'not_equals'],
@@ -83,8 +82,8 @@ const buildWhereInputType = ({ name, fields, parent }) => {
     date: (field) => {
       const type = GraphQLString;
       return {
-        type: withTypeOperators(
-          field,
+        type: withOperators(
+          field.name,
           type,
           parent,
           ['equals', 'like', 'not_equals'],
@@ -98,8 +97,8 @@ const buildWhereInputType = ({ name, fields, parent }) => {
       };
     },
     checkbox: field => ({
-      type: withTypeOperators(
-        field,
+      type: withOperators(
+        field.name,
         GraphQLBoolean,
         parent,
         ['equals', 'not_equals'],
@@ -120,19 +119,14 @@ const buildWhereInputType = ({ name, fields, parent }) => {
     return schema;
   }, {});
 
-  // fieldTypes.id = {
-  //   text: (field) => {
-  //     const type = GraphQLString;
-  //     return {
-  //       type: withTypeOperators(
-  //         field,
-  //         type,
-  //         parent,
-  //         ['equals', 'not_equals'],
-  //       ),
-  //     };
-  //   },
-  // };
+  fieldTypes.id = {
+    type: withOperators(
+      'id',
+      GraphQLString,
+      parent,
+      ['equals', 'not_equals'],
+    ),
+  };
 
   const fieldName = formatName(name);
 

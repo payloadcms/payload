@@ -1,9 +1,11 @@
 const graphQLHTTP = require('express-graphql');
 const { GraphQLObjectType, GraphQLString, GraphQLSchema } = require('graphql');
-const buildType = require('./schema/buildObjectType');
+const getBuildObjectType = require('./schema/getBuildObjectType');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 const formatName = require('./utilities/formatName');
 const withPolicy = require('./resolvers/withPolicy');
+const getLocaleStringType = require('./types/getLocaleStringType');
+const getLocaleFloatType = require('./types/getLocaleFloatType');
 
 const Query = {
   name: 'Query',
@@ -16,6 +18,15 @@ const Query = {
 // };
 
 function init() {
+  this.graphQL = {
+    types: {
+      LocaleStringType: getLocaleStringType(this.config.localization),
+      LocaleFloatType: getLocaleFloatType(this.config.localization),
+    },
+  };
+
+  const buildObjectType = getBuildObjectType(this);
+
   const userType = new GraphQLObjectType({
     name: 'User',
     fields: {
@@ -52,11 +63,7 @@ function init() {
 
     const label = formatName(singularLabel);
 
-    collection.graphQLType = buildType(this.config, {
-      name: label,
-      fields,
-      parent: label,
-    });
+    collection.graphQLType = buildObjectType(label, fields, label);
 
     collection.graphQLWhereInputType = buildWhereInputType({
       name: label,
@@ -70,7 +77,7 @@ function init() {
         where: { type: collection.graphQLWhereInputType },
       },
       resolve: withPolicy(policies.read, async (_, args, context) => {
-        console.log(JSON.stringify(args);
+        console.log(JSON.stringify(args));
         return {
           image: 'test',
         };

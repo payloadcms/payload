@@ -51,7 +51,6 @@ class Payload {
       endpoint: `${this.config.routes.api}${this.config.routes.graphQL}`,
     }));
 
-
     // Bind router to API
     this.express.use(this.config.routes.api, this.router);
 

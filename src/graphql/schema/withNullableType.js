@@ -1,6 +1,6 @@
 const { GraphQLNonNull } = require('graphql');
 
-const getTypeWithNullable = (field, type) => {
+const withNullableType = (field, type) => {
   if (field.required && !field.localized) {
     return new GraphQLNonNull(type);
   }
@@ -8,4 +8,4 @@ const getTypeWithNullable = (field, type) => {
   return type;
 };
 
-module.exports = getTypeWithNullable;
+module.exports = withNullableType;

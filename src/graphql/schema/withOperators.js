@@ -1,10 +1,10 @@
 const { GraphQLInputObjectType } = require('graphql');
 const combineParentName = require('../utilities/combineParentName');
 
-const getTypeWithOperators = (field, type, parent, operators) => {
-  const fullName = `${combineParentName(parent, field.label)}_Operator`;
+const withOperators = (fieldName, type, parent, operators) => {
+  const name = `${combineParentName(parent, fieldName)}Operator`;
   return new GraphQLInputObjectType({
-    name: fullName,
+    name,
     fields: operators.reduce((fields, operator) => {
       return {
         ...fields,
@@ -14,4 +14,4 @@ const getTypeWithOperators = (field, type, parent, operators) => {
   });
 };
 
-module.exports = getTypeWithOperators;
+module.exports = withOperators;
