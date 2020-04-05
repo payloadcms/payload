@@ -3,16 +3,6 @@ const mongoose = require('mongoose');
 const validOperators = ['like', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals'];
 
 function addSearchParam(key, value, searchParams) {
-  if (typeof value === 'object') {
-    return {
-      ...searchParams,
-      [key]: {
-        ...searchParams[key],
-        ...value,
-      },
-    };
-  }
-
   return {
     ...searchParams,
     [key]: value,
@@ -44,10 +34,10 @@ class ParamParser {
           const relationOrPath = rawRelationOrPath.toLowerCase();
 
           if (relationOrPath === 'and') {
-            this.query.searchParams = addSearchParam('$and', {}, this.query.searchParams);
+            this.query.searchParams.$and = {};
             // Loop over all AND operations and add them to the $AND search param
           } else if (relationOrPath === 'or') {
-            this.query.searchParams = addSearchParam('$or', {}, this.query.searchParams);
+            this.query.searchParams.$or = {};
             // Loop over all AND operations and add them to the $AND search param
           } else {
             // It's a path - and there can be multiple comparisons on a single path.
@@ -55,10 +45,11 @@ class ParamParser {
             // So we need to loop on keys again here to grab operators
             const pathOperators = this.rawParams[key][relationOrPath];
 
-            if (typeof path === 'object') {
+            if (typeof pathOperators === 'object') {
               Object.keys(pathOperators).forEach(async (operator) => {
                 const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, relationOrPath, pathOperators[operator], operator);
                 this.query.searchParams = addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
+                console.log(this.query.searchParams);
               });
             }
           }
@@ -96,27 +87,27 @@ class ParamParser {
           ref = path.options && path.options.type && path.options.type[0].ref;
         }
 
+        // //////////////////////////////////////////////////////////////////////////
+        // TODO:
+        //
+        // Need to handle relationships that have more than one type.
+        // Right now, this code only handles one ref. But there could be a
+        // refPath as well, which could allow for a relation to multiple types.
+        // In that case, we would need to get the allowed referenced models
+        // and run the subModel query on each - building up a list of $in IDs.
+        // //////////////////////////////////////////////////////////////////////////
+
         if (ref) {
           const subModel = mongoose.model(ref);
           let subQuery = {};
 
           const localizedSubKey = this.getLocalizedKey(paths[1], subModel.schema.obj[paths[1]]);
-
-          if (typeof val === 'object') {
-            Object.keys(val).forEach(async (subOperator) => {
-              const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val[subOperator], subOperator);
-              subQuery = addSearchParam(searchParamKey, searchParamValue, subQuery, subModel.schema);
-            });
-          } else {
-            const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val);
-            subQuery = addSearchParam(searchParamKey, searchParamValue, subQuery, subModel.schema);
-          }
+          const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val, operator);
+          subQuery = addSearchParam(searchParamKey, searchParamValue, subQuery, subModel.schema);
 
           const matchingSubDocuments = await subModel.find(subQuery);
-
-          return [localizedPath, {
-            $in: matchingSubDocuments.map(subDoc => subDoc.id),
-          }];
+          console.log(subQuery);
+          return ['$in', matchingSubDocuments.map(subDoc => subDoc.id)];
         }
       }
     }
@@ -173,13 +164,13 @@ class ParamParser {
 function buildQueryPlugin(schema) {
   const modifiedSchema = schema;
 
-  async function apiQuery(rawParams, locale) {
+  async function buildQuery(rawParams, locale) {
     const paramParser = new ParamParser(this, rawParams, locale);
     const params = await paramParser.parse();
     return params.searchParams;
   }
 
-  modifiedSchema.statics.apiQuery = apiQuery;
+  modifiedSchema.statics.buildQuery = buildQuery;
 }
 
 module.exports = buildQueryPlugin;

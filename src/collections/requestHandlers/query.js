@@ -1,8 +1,9 @@
 const httpStatus = require('http-status');
-// const formatErrorResponse = require('../../responses/formatError');
 
-const query = (req, res) => {
-  req.model.apiQuery(req.query, req.locale).then((apiQuery) => {
+const query = async (req, res) => {
+  try {
+    const mongooseQuery = await req.model.buildQuery(req.query, req.locale);
+
     const paginateQuery = {
       options: {},
     };
@@ -17,9 +18,8 @@ const query = (req, res) => {
       };
     }
 
-    req.model.paginate(apiQuery, paginateQuery, (err, result) => {
+    req.model.paginate(mongooseQuery, paginateQuery, (err, result) => {
       if (err) {
-        // return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).send();
       }
 
@@ -34,7 +34,9 @@ const query = (req, res) => {
         }),
       });
     });
-  });
+  } catch (err) {
+    throw err;
+  }
 };
 
 module.exports = query;
