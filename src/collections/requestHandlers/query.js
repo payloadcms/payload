@@ -18,24 +18,20 @@ const query = async (req, res) => {
       };
     }
 
-    req.model.paginate(mongooseQuery, paginateQuery, (err, result) => {
-      if (err) {
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).send();
-      }
+    const result = await req.model.paginate(mongooseQuery, paginateQuery);
 
-      return res.status(httpStatus.OK).json({
-        ...result,
-        docs: result.docs.map((doc) => {
-          if (req.locale && doc.setLocale) {
-            doc.setLocale(req.locale, req.query['fallback-locale']);
-          }
+    return res.status(httpStatus.OK).json({
+      ...result,
+      docs: result.docs.map((doc) => {
+        if (req.locale && doc.setLocale) {
+          doc.setLocale(req.locale, req.query['fallback-locale']);
+        }
 
-          return doc.toJSON({ virtuals: true });
-        }),
-      });
+        return doc.toJSON({ virtuals: true });
+      }),
     });
   } catch (err) {
-    throw err;
+    return res.status(400).json(err);
   }
 };
 

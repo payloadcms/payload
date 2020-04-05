@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 const mongoose = require('mongoose');
 
 const validOperators = ['like', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals'];
@@ -27,10 +28,10 @@ class ParamParser {
 
   // Entry point to the ParamParser class
   async parse() {
-    Object.keys(this.rawParams).forEach(async (key) => {
+    for (const key of Object.keys(this.rawParams)) {
       if (key === 'where') {
         // We need to determine if the whereKey is an AND, OR, or a schema path
-        Object.keys(this.rawParams[key]).forEach(async (rawRelationOrPath) => {
+        for (const rawRelationOrPath of Object.keys(this.rawParams[key])) {
           const relationOrPath = rawRelationOrPath.toLowerCase();
 
           if (relationOrPath === 'and') {
@@ -46,18 +47,17 @@ class ParamParser {
             const pathOperators = this.rawParams[key][relationOrPath];
 
             if (typeof pathOperators === 'object') {
-              Object.keys(pathOperators).forEach(async (operator) => {
+              for (const operator of Object.keys(pathOperators)) {
                 const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, relationOrPath, pathOperators[operator], operator);
                 this.query.searchParams = addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
-                console.log(this.query.searchParams);
-              });
+              }
             }
           }
-        });
+        }
       } else if (key === 'sort') {
         this.query.sort = this.rawParams[key];
       }
-    }, this);
+    }
 
     return this.query;
   }
@@ -106,8 +106,10 @@ class ParamParser {
           subQuery = addSearchParam(searchParamKey, searchParamValue, subQuery, subModel.schema);
 
           const matchingSubDocuments = await subModel.find(subQuery);
-          console.log(subQuery);
-          return ['$in', matchingSubDocuments.map(subDoc => subDoc.id)];
+
+          return [localizedPath, {
+            $in: matchingSubDocuments.map(subDoc => subDoc.id),
+          }];
         }
       }
     }
