@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 const mongoose = require('mongoose');
 
@@ -31,25 +32,26 @@ class ParamParser {
     for (const key of Object.keys(this.rawParams)) {
       if (key === 'where') {
         // We need to determine if the whereKey is an AND, OR, or a schema path
-        for (const rawRelationOrPath of Object.keys(this.rawParams[key])) {
+        for (const rawRelationOrPath of Object.keys(this.rawParams.where)) {
           const relationOrPath = rawRelationOrPath.toLowerCase();
-
           if (relationOrPath === 'and') {
-            this.query.searchParams.$and = {};
-            // Loop over all AND operations and add them to the $AND search param
-          } else if (relationOrPath === 'or') {
-            this.query.searchParams.$or = {};
-            // Loop over all AND operations and add them to the $AND search param
+            const andConditions = this.rawParams.where[rawRelationOrPath];
+            this.query.searchParams.$and = await this.buildAndOrConditions(andConditions);
+          } else if (relationOrPath === 'or' && Array.isArray(this.rawParams.where[rawRelationOrPath])) {
+            const orConditions = this.rawParams.where[rawRelationOrPath];
+            this.query.searchParams.$or = await this.buildAndOrConditions(orConditions);
           } else {
             // It's a path - and there can be multiple comparisons on a single path.
             // For example - title like 'test' and title not equal to 'tester'
-            // So we need to loop on keys again here to grab operators
-            const pathOperators = this.rawParams[key][relationOrPath];
+            // So we need to loop on keys again here to handle each operator independently
+            const pathOperators = this.rawParams.where[relationOrPath];
 
             if (typeof pathOperators === 'object') {
               for (const operator of Object.keys(pathOperators)) {
-                const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, relationOrPath, pathOperators[operator], operator);
-                this.query.searchParams = addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
+                if (validOperators.includes(operator)) {
+                  const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, relationOrPath, pathOperators[operator], operator);
+                  this.query.searchParams = addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
+                }
               }
             }
           }
@@ -60,6 +62,35 @@ class ParamParser {
     }
 
     return this.query;
+  }
+
+  async buildAndOrConditions(conditions) {
+    const completedConditions = [];
+    // Loop over all AND / OR operations and add them to the AND / OR query param
+    // Operations should come through as an array
+    for (const condition of conditions) {
+      // If the operation is properly formatted as an object
+      if (typeof condition === 'object') {
+        // We will loop through each path within the condition
+        for (const path of Object.keys(condition)) {
+          // At this point we have an operation - i.e. title equals 'test'
+          const operation = condition[path];
+          if (typeof operation === 'object') {
+            // Once again we need to loop through operators at this point to build the query properly
+            for (const operator of Object.keys(operation)) {
+              if (validOperators.includes(operator)) {
+                const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, path, operation[operator], operator);
+                completedConditions.push({
+                  [searchParamKey]: searchParamValue,
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return completedConditions;
   }
 
   // Checks to see
