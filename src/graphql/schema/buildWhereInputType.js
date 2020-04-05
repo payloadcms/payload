@@ -131,12 +131,12 @@ const buildWhereInputType = ({ name, fields, parent }) => {
   const fieldName = formatName(name);
 
   return new GraphQLInputObjectType({
-    name: `${fieldName}Where`,
+    name: `${fieldName}_where`,
     fields: {
       ...fieldTypes,
       OR: {
         type: new GraphQLList(new GraphQLInputObjectType({
-          name: `${fieldName}WhereOr`,
+          name: `${fieldName}_where_or`,
           fields: {
             ...fieldTypes,
           },
@@ -144,7 +144,7 @@ const buildWhereInputType = ({ name, fields, parent }) => {
       },
       AND: {
         type: new GraphQLList(new GraphQLInputObjectType({
-          name: `${fieldName}WhereAnd`,
+          name: `${fieldName}_where_and`,
           fields: {
             ...fieldTypes,
           },

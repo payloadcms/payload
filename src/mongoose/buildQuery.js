@@ -1,30 +1,27 @@
 const mongoose = require('mongoose');
 
-const validOperators = ['like', 'in', 'all', 'nin', 'gte', 'gt', 'lte', 'lt', 'ne'];
+const validOperators = ['like', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equal', 'equals'];
 
-function addSearchParam(key, value, searchParams, schema) {
-  if (schema.paths[key]) {
-    if (typeof value === 'object') {
-      return {
-        ...searchParams,
-        [key]: {
-          ...searchParams[key],
-          ...value,
-        },
-      };
-    }
-
+function addSearchParam(key, value, searchParams) {
+  if (typeof value === 'object') {
     return {
       ...searchParams,
-      [key]: value,
+      [key]: {
+        ...searchParams[key],
+        ...value,
+      },
     };
   }
 
-  return searchParams;
+  return {
+    ...searchParams,
+    [key]: value,
+  };
 }
 
 class ParamParser {
   constructor(model, rawParams, locale) {
+    this.parse = this.parse.bind(this);
     this.model = model;
     this.rawParams = rawParams;
     this.locale = locale;
@@ -41,15 +38,30 @@ class ParamParser {
   // Entry point to the ParamParser class
   async parse() {
     Object.keys(this.rawParams).forEach(async (key) => {
-      // If rawParams[key] is an object, that means there are operators present.
-      // Need to loop through keys on rawParams[key] to call addSearchParam on each operator found
-      if (typeof this.rawParams[key] === 'object') {
-        Object.keys(this.rawParams[key])
-          .forEach(async (operator) => {
-            const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, key, this.rawParams[key][operator], operator);
-            this.query.searchParams = addSearchParam(searchParamKey, searchParamValue, this.query.searchParams, this.model.schema);
-          });
-        // Otherwise there are no operators present
+      if (key === 'where') {
+        // We now need to determine if the whereKey is an AND, OR, or a schema path
+        Object.keys(this.rawParams[key]).forEach(async (rawRelationOrPath) => {
+          const relationOrPath = rawRelationOrPath.toLowerCase();
+
+          if (relationOrPath === 'and') {
+            this.query.searchParams = addSearchParam('$and', {}, this.query.searchParams);
+          } else if (relationOrPath === 'or') {
+            this.query.searchParams = addSearchParam('$or', {}, this.query.searchParams);
+          } else {
+            // It's a path - and there can be multiple comparisons on a single path.
+            // For example - title like 'test' and title not equal to 'tester'
+            // So we need to loop on keys again here to grab operators
+
+            const pathWhere = this.rawParams[key][relationOrPath];
+
+            if (typeof pathWhere === 'object') {
+              Object.keys(pathWhere).forEach(async (operator) => {
+                const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, relationOrPath, pathWhere[operator], operator);
+                this.query.searchParams = addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
+              });
+            }
+          }
+        });
       } else {
         const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, key, this.rawParams[key]);
         if (searchParamKey === 'sort') {
@@ -58,11 +70,12 @@ class ParamParser {
           this.query.searchParams = addSearchParam(searchParamKey, searchParamValue, this.query.searchParams, this.model.schema);
         }
       }
-    });
+    }, this);
 
     return this.query;
   }
 
+  // Checks to see
   async buildSearchParam(schema, key, val, operator) {
     let schemaObject = schema.obj[key];
     const localizedKey = this.getLocalizedKey(key, schemaObject);
@@ -116,10 +129,10 @@ class ParamParser {
 
     if (operator && validOperators.includes(operator)) {
       switch (operator) {
-        case 'gte':
-        case 'lte':
-        case 'lt':
-        case 'gt':
+        case 'greater_than_equal':
+        case 'less_than_equal':
+        case 'less_than':
+        case 'greater_than':
           formattedValue = {
             [`$${operator}`]: val,
           };
@@ -128,18 +141,23 @@ class ParamParser {
 
         case 'in':
         case 'all':
-        case 'nin':
+        case 'not_in':
           formattedValue = {
             [`$${operator}`]: val.split(','),
           };
 
           break;
 
-        default:
+        case 'like':
           formattedValue = {
             $regex: val,
             $options: '-i',
           };
+
+          break;
+
+        default:
+          formattedValue = val;
 
           break;
       }
@@ -153,11 +171,14 @@ class ParamParser {
 // which can then be used in subsequent Mongoose queries.
 function buildQueryPlugin(schema) {
   const modifiedSchema = schema;
-  modifiedSchema.statics.apiQuery = async (rawParams, locale) => {
+
+  async function apiQuery(rawParams, locale) {
     const paramParser = new ParamParser(this, rawParams, locale);
     const params = await paramParser.parse();
     return params.searchParams;
-  };
+  }
+
+  modifiedSchema.statics.apiQuery = apiQuery;
 }
 
 module.exports = buildQueryPlugin;

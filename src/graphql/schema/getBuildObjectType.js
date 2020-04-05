@@ -101,7 +101,7 @@ function getBuildObjectType(context) {
         ),
       }),
       select: (field) => {
-        const fullName = combineParentName(parent, field.label);
+        const fullName = combineParentName(parent, field.name);
 
         const type = new GraphQLEnumType({
           name: fullName,
