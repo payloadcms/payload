@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const validOperators = ['like', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equal', 'equals'];
+const validOperators = ['like', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals'];
 
 function addSearchParam(key, value, searchParams) {
   if (typeof value === 'object') {
@@ -39,36 +39,32 @@ class ParamParser {
   async parse() {
     Object.keys(this.rawParams).forEach(async (key) => {
       if (key === 'where') {
-        // We now need to determine if the whereKey is an AND, OR, or a schema path
+        // We need to determine if the whereKey is an AND, OR, or a schema path
         Object.keys(this.rawParams[key]).forEach(async (rawRelationOrPath) => {
           const relationOrPath = rawRelationOrPath.toLowerCase();
 
           if (relationOrPath === 'and') {
             this.query.searchParams = addSearchParam('$and', {}, this.query.searchParams);
+            // Loop over all AND operations and add them to the $AND search param
           } else if (relationOrPath === 'or') {
             this.query.searchParams = addSearchParam('$or', {}, this.query.searchParams);
+            // Loop over all AND operations and add them to the $AND search param
           } else {
             // It's a path - and there can be multiple comparisons on a single path.
             // For example - title like 'test' and title not equal to 'tester'
             // So we need to loop on keys again here to grab operators
+            const pathOperators = this.rawParams[key][relationOrPath];
 
-            const pathWhere = this.rawParams[key][relationOrPath];
-
-            if (typeof pathWhere === 'object') {
-              Object.keys(pathWhere).forEach(async (operator) => {
-                const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, relationOrPath, pathWhere[operator], operator);
+            if (typeof path === 'object') {
+              Object.keys(pathOperators).forEach(async (operator) => {
+                const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, relationOrPath, pathOperators[operator], operator);
                 this.query.searchParams = addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
               });
             }
           }
         });
-      } else {
-        const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, key, this.rawParams[key]);
-        if (searchParamKey === 'sort') {
-          this.query.sort = searchParamValue;
-        } else {
-          this.query.searchParams = addSearchParam(searchParamKey, searchParamValue, this.query.searchParams, this.model.schema);
-        }
+      } else if (key === 'sort') {
+        this.query.sort = this.rawParams[key];
       }
     }, this);
 
@@ -130,35 +126,40 @@ class ParamParser {
     if (operator && validOperators.includes(operator)) {
       switch (operator) {
         case 'greater_than_equal':
-        case 'less_than_equal':
-        case 'less_than':
-        case 'greater_than':
-          formattedValue = {
-            [`$${operator}`]: val,
-          };
+          formattedValue = { $gte: val };
+          break;
 
+        case 'less_than_equal':
+          formattedValue = { $lte: val };
+          break;
+
+        case 'less_than':
+          formattedValue = { $lt: val };
+          break;
+
+        case 'greater_than':
+          formattedValue = { $gt: val };
           break;
 
         case 'in':
         case 'all':
-        case 'not_in':
-          formattedValue = {
-            [`$${operator}`]: val.split(','),
-          };
+          formattedValue = { [`$${operator}`]: val.split(',') };
+          break;
 
+        case 'not_in':
+          formattedValue = { $nin: val.split(',') };
+          break;
+
+        case 'not_equals':
+          formattedValue = { $ne: val };
           break;
 
         case 'like':
-          formattedValue = {
-            $regex: val,
-            $options: '-i',
-          };
-
+          formattedValue = { $regex: val, $options: '-i' };
           break;
 
         default:
           formattedValue = val;
-
           break;
       }
     }

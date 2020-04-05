@@ -20,7 +20,7 @@ const buildWhereInputType = ({ name, fields, parent }) => {
           field.name,
           type,
           parent,
-          ['equals', 'gte', 'gt', 'lte', 'lt', 'not_equals'],
+          ['equals', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals'],
         ),
       };
     },
