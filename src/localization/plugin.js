@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-restricted-syntax */
-/* eslint-disable func-names */
 const mongoose = require('mongoose');
 const sanitizeFallbackLocale = require('./sanitizeFallbackLocale');
 const formatRefPathLocales = require('./formatRefPathLocales');
@@ -10,22 +9,9 @@ module.exports = function localizationPlugin(schema, options) {
     throw new mongoose.Error('Required locales array is missing');
   }
 
-  // plugin options to be set under schema options
-  schema.options.localization = {};
-  const pluginOptions = schema.options.localization;
-
-  pluginOptions.locales = options.locales.slice(0);
-
-  // the first available locale will be used as default if it's not set or unknown value passed
-  if (!options.defaultLocale || pluginOptions.locales.indexOf(options.defaultLocale) === -1) {
-    [pluginOptions.defaultLocale] = pluginOptions.locales;
-  } else {
-    pluginOptions.defaultLocale = options.defaultLocale.slice(0);
-  }
-
   schema.eachPath((path, schemaType) => {
     if (schemaType.schema) { // propagate plugin initialization for sub-documents schemas
-      schemaType.schema.plugin(localizationPlugin, pluginOptions);
+      schemaType.schema.plugin(localizationPlugin, options);
     }
 
     if (!schemaType.options.localized && !(schemaType.schema && schemaType.schema.options.localized)) {
@@ -115,7 +101,7 @@ module.exports = function localizationPlugin(schema, options) {
       [key]: {},
     };
 
-    pluginOptions.locales.forEach(function (locale) {
+    options.locales.forEach(function (locale) {
       const localeOptions = Object.assign({}, schemaType.options);
       if (locale !== options.defaultLocale) {
         delete localeOptions.default;
@@ -149,13 +135,13 @@ module.exports = function localizationPlugin(schema, options) {
   // document methods to set the locale for each model instance (document)
   schema.method({
     getLocales() {
-      return this.schema.options.localization.locales;
+      return options.locales;
     },
     getLocale() {
-      return this.docLocale || this.schema.options.localization.defaultLocale;
+      return this.docLocale || options.defaultLocale;
     },
     setLocale(locale, fallbackLocale) {
-      const locales = this.getLocales();
+      const locales = [...this.getLocales(), 'all'];
       if (locale && locales.indexOf(locale) !== -1) {
         this.docLocale = locale;
       }
@@ -171,66 +157,8 @@ module.exports = function localizationPlugin(schema, options) {
         }
       });
     },
-    unsetLocale() {
-      delete this.docLocale;
-    },
-    setFallback(fallback = true) {
-      pluginOptions.fallback = fallback;
-    },
-  });
-
-  // model methods to set the locale for the current schema
-  schema.static({
-    getLocales() {
-      return this.schema.options.localization.locales;
-    },
-    getDefaultLocale() {
-      return this.schema.options.localization.defaultLocale;
-    },
-    setDefaultLocale(locale) {
-      const updateLocale = function (schemaToUpdate, localeToUpdate) {
-        if (schemaToUpdate.options.localization) {
-          schemaToUpdate.options.localization.defaultLocale = localeToUpdate.slice(0);
-
-          // default locale change for sub-documents schemas
-          schemaToUpdate.eachPath((path, schemaType) => {
-            if (schemaType.schema) {
-              updateLocale(schemaType.schema, localeToUpdate);
-            }
-          });
-        }
-      };
-
-      updateLocale(this.schema, locale);
-    },
   });
 
   // Find any dynamic {{LOCALE}} in refPaths and modify schemas appropriately
   formatRefPathLocales(schema);
-
-  // Mongoose will emit 'init' event once the schema will be attached to the model
-  schema.on('init', (model) => {
-    // no actions are required in the global method is already defined
-    if (model.db.setDefaultLocale) {
-      return;
-    }
-
-    // define a global method to change the locale for all models (and their schemas)
-    // created for the current mongo connection
-    model.db.setDefaultLocale = function (locale) {
-      let modelToUpdate;
-      let modelName;
-      for (modelName in this.models) {
-        if (this.models.hasOwnProperty(modelName)) {
-          modelToUpdate = this.models[modelName];
-          if (modelToUpdate.setDefaultLocale) modelToUpdate.setDefaultLocale(locale);
-        }
-      }
-    };
-
-    // create an alias for the global change locale method attached to the default connection
-    if (!mongoose.setDefaultLocale) {
-      mongoose.setDefaultLocale = mongoose.connection.setDefaultLocale;
-    }
-  });
 };
