@@ -5,7 +5,7 @@ const {
   GraphQLNonNull,
   GraphQLList,
   GraphQLObjectType,
-  GraphQLInterfaceType,
+  GraphQLUnionType,
   GraphQLEnumType,
 } = require('graphql');
 
@@ -170,41 +170,43 @@ function getBuildObjectType(config, graphQL) {
         };
       },
       flexible: (field) => {
-        const blockTypes = field.blocks.reduce((blocks, block) => {
-          const formattedBlockName = formatName(block.labels.singular);
-          const fullName = `${combineParentName(parent, field.label)}_${formattedBlockName}`;
+        const blockTypeOptions = field.blocks.map(block => block.slug);
 
-          return {
-            ...blocks,
-            [block.slug]: buildObjectType(fullName, block.fields, fullName),
-          };
-        }, {});
+        field.blocks.forEach((block) => {
+          if (graphQL.types.blockTypes[block.slug] === undefined) {
+            const formattedBlockName = formatName(block.labels.singular);
+
+            graphQL.types.blockTypes[block.slug] = buildObjectType(
+              formattedBlockName,
+              [
+                ...block.fields,
+                {
+                  name: 'blockName',
+                  type: 'text',
+                },
+                {
+                  name: 'blockType',
+                  type: 'select',
+                  options: blockTypeOptions,
+                },
+              ],
+              formattedBlockName,
+            );
+          }
+        });
 
         return {
           type: withLocalizedType(
             field,
-            new GraphQLList(new GraphQLInterfaceType({
-              name: combineParentName(parent, field.label),
-              fields: {
-                blockType: {
-                  type: new GraphQLEnumType({
-                    name: `${combineParentName(parent, field.label)}_BlockType`,
-                    values: field.blocks.reduce((values, block) => {
-                      return {
-                        ...values,
-                        [block.slug]: {
-                          value: block.slug,
-                        },
-                      };
-                    }, {}),
-                  }),
+            new GraphQLList(
+              new GraphQLUnionType({
+                name: combineParentName(parent, field.label),
+                types: field.blocks.map(blockType => graphQL.types.blockTypes[blockType.slug]),
+                resolveType(data) {
+                  return graphQL.types.blockTypes[data.blockType];
                 },
-                blockName: { type: GraphQLString },
-              },
-              resolveType(value) {
-                return blockTypes[value.blockType];
-              },
-            })),
+              }),
+            ),
           ),
         };
       },

@@ -30,6 +30,7 @@ function init() {
     types: {
       LocaleStringType: getLocaleStringType(this.config.localization),
       LocaleFloatType: getLocaleFloatType(this.config.localization),
+      blockTypes: {},
     },
   };
 
