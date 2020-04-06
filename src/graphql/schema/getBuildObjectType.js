@@ -176,7 +176,7 @@ function getBuildObjectType(config, graphQL) {
           if (graphQL.types.blockTypes[block.slug] === undefined) {
             const formattedBlockName = formatName(block.labels.singular);
 
-            graphQL.types.blockTypes[block.slug] = buildObjectType(
+            graphQL.addBlockType(buildObjectType(
               formattedBlockName,
               [
                 ...block.fields,
@@ -191,7 +191,7 @@ function getBuildObjectType(config, graphQL) {
                 },
               ],
               formattedBlockName,
-            );
+            ), block.slug);
           }
         });
 

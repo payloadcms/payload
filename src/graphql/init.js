@@ -32,6 +32,9 @@ function init() {
       LocaleFloatType: getLocaleFloatType(this.config.localization),
       blockTypes: {},
     },
+    addBlockType: (blockType, slug) => {
+      this.graphQL.types.blockTypes[slug] = blockType;
+    },
   };
 
   const buildObjectType = getBuildObjectType(this.config, this.graphQL);
