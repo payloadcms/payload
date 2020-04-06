@@ -2,57 +2,8 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable func-names */
 const mongoose = require('mongoose');
-
-function formatRefPathLocales(schema, parentSchema, parentPath) {
-  // Loop through all refPaths within schema
-  schema.eachPath((pathname, schemaType) => {
-    // If a dynamic refPath is found
-    if (schemaType.options.refPath && schemaType.options.refPath.includes('{{LOCALE}}') && parentSchema) {
-      // Create a clone of the schema for each locale
-      const newSchema = schema.clone();
-
-      // Remove the old pathname in order to rebuild it after it's formatted
-      newSchema.remove(pathname);
-
-      // Get the locale from the parent path
-      let locale = parentPath;
-
-      // Split the parent path and take only the last segment as locale
-      if (parentPath && parentPath.includes('.')) {
-        locale = parentPath.split('.').pop();
-      }
-
-      // Replace {{LOCALE}} appropriately
-      const refPath = schemaType.options.refPath.replace('{{LOCALE}}', locale);
-
-      // Add new schemaType back to newly cloned schema
-      newSchema.add({
-        [pathname]: {
-          ...schemaType.options,
-          refPath,
-        },
-      });
-
-      // Removing and adding a path to a schema does not update tree, so do it manually
-      newSchema.tree[pathname].refPath = refPath;
-
-      const parentSchemaType = parentSchema.path(parentPath).instance;
-
-      // Remove old schema from parent
-      parentSchema.remove(parentPath);
-
-      // Replace newly cloned and updated schema on parent
-      parentSchema.add({
-        [parentPath]: parentSchemaType === 'Array' ? [newSchema] : newSchema,
-      });
-    }
-
-    // If nested schema found, continue recursively
-    if (schemaType.schema) {
-      formatRefPathLocales(schemaType.schema, schema, pathname);
-    }
-  });
-}
+const sanitizeFallbackLocale = require('./sanitizeFallbackLocale');
+const formatRefPathLocales = require('./formatRefPathLocales');
 
 module.exports = function localizationPlugin(schema, options) {
   if (!options || !options.locales || !Array.isArray(options.locales) || !options.locales.length) {
@@ -121,7 +72,7 @@ module.exports = function localizationPlugin(schema, options) {
         // If there is no value to return, AKA no translation in locale, handle fallbacks
         if (!value) {
           // If user specified fallback code as null, send back null
-          if (this.fallbackLocale === 'null' || (this.fallbackLocale && !localeSubDoc[this.fallbackLocale])) {
+          if (this.fallbackLocale === null || (this.fallbackLocale && !localeSubDoc[this.fallbackLocale])) {
             return null;
 
             // If user specified fallback code AND record exists, return that
@@ -208,14 +159,15 @@ module.exports = function localizationPlugin(schema, options) {
       if (locale && locales.indexOf(locale) !== -1) {
         this.docLocale = locale;
       }
-      this.fallbackLocale = fallbackLocale;
+
+      this.fallbackLocale = sanitizeFallbackLocale(fallbackLocale);
       this.schema.eachPath((path, schemaType) => {
         if (schemaType.options.type instanceof Array) {
-          if (this[path]) this[path].forEach(doc => doc.setLocale && doc.setLocale(locale, fallbackLocale));
+          if (this[path]) this[path].forEach(doc => doc.setLocale && doc.setLocale(locale, this.fallbackLocale));
         }
 
         if (schemaType.options.ref && this[path]) {
-          if (this[path] && this[path].setLocale) this[path].setLocale(locale, fallbackLocale);
+          if (this[path] && this[path].setLocale) this[path].setLocale(locale, this.fallbackLocale);
         }
       });
     },

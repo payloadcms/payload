@@ -29,6 +29,8 @@ const find = async (options) => {
       };
     }
 
+    model.setDefaultLocale(locale);
+
     const result = await model.paginate(mongooseQuery, paginateQuery);
 
     // await post find hook here
