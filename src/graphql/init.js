@@ -11,10 +11,9 @@ const graphQLHTTP = require('express-graphql');
 const getBuildObjectType = require('./schema/getBuildObjectType');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 const formatName = require('./utilities/formatName');
-const withPolicy = require('./resolvers/withPolicy');
 const getLocaleStringType = require('./types/getLocaleStringType');
 const getLocaleFloatType = require('./types/getLocaleFloatType');
-const { find, findByID } = require('../collections/queries');
+const { getFind, getFindByID } = require('../collections/graphql/resolvers');
 
 const Query = {
   name: 'Query',
@@ -62,7 +61,6 @@ function init() {
 
     const {
       config: {
-        policies,
         fields,
         labels: {
           singular,
@@ -87,13 +85,7 @@ function init() {
       args: {
         id: { type: GraphQLString },
       },
-      resolve: withPolicy(policies.read, async (_, { id }) => {
-        return findByID({
-          depth: 0,
-          model: collection.model,
-          id,
-        });
-      }),
+      resolve: getFindByID(collection),
     };
 
     Query.fields[pluralLabel] = {
@@ -118,13 +110,7 @@ function init() {
       args: {
         where: { type: collection.graphQLWhereInputType },
       },
-      resolve: withPolicy(policies.read, async (_, args) => {
-        return find({
-          depth: 0,
-          model: collection.model,
-          query: args,
-        });
-      }),
+      resolve: getFind(collection),
     };
   });
 
