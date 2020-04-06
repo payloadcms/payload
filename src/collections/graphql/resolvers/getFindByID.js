@@ -3,12 +3,17 @@ const findByIDQuery = require('../../queries/findByID');
 
 const findByID = ({ config, model }) => withPolicy(
   config.policies.read,
-  async (_, { id }) => {
-    const result = await findByIDQuery({
+  async (_, { id }, context) => {
+    const options = {
       depth: 0,
       model,
       id,
-    });
+      locale: context.locale,
+    };
+
+    if (context.query['fallback-locale']) options.fallbackLocale = context.query['fallback-locale'];
+
+    const result = await findByIDQuery(options);
 
     return result;
   },

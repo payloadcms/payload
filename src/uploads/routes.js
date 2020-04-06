@@ -3,7 +3,6 @@ const passport = require('passport');
 const fileUpload = require('express-fileupload');
 const { upload, update } = require('./requestHandlers');
 const uploadMiddleware = require('./middleware');
-const setModelLocaleMiddleware = require('../localization/setModelLocale');
 
 const router = express.Router();
 
@@ -13,8 +12,7 @@ const uploadRoutes = (config, Upload) => {
   router.all(`/${uploadConfig.slug}*`,
     fileUpload(),
     passport.authenticate('jwt', { session: false }),
-    uploadMiddleware(config, Upload),
-    setModelLocaleMiddleware());
+    uploadMiddleware(config, Upload));
 
   router.route(`/${uploadConfig.slug}`)
     .post(

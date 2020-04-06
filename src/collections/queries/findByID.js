@@ -20,7 +20,7 @@ const findByID = async (options) => {
     }
 
     if (options.locale && doc.setLocale) {
-      doc.setLocale(options.locale, options.fallback);
+      doc.setLocale(options.locale, options.fallbackLocale);
     }
 
     // Await post findOne hook here

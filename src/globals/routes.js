@@ -1,6 +1,5 @@
 const express = require('express');
 const requestHandlers = require('./requestHandlers');
-const setModelLocaleMiddleware = require('../localization/setModelLocale');
 const bindModelMiddleware = require('../express/middleware/bindModel');
 const loadPolicy = require('../express/middleware/loadPolicy');
 const getMiddleware = require('./middleware');
@@ -11,8 +10,7 @@ const router = express.Router();
 
 const registerGlobals = (globalConfigs, Globals) => {
   router.all('/globals*',
-    bindModelMiddleware(Globals),
-    setModelLocaleMiddleware());
+    bindModelMiddleware(Globals));
 
   globalConfigs.forEach((global) => {
     router.all(`/globals/${global.slug}`, getMiddleware(global));
