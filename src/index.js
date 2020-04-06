@@ -8,7 +8,7 @@ const registerUser = require('./auth/register');
 const registerUpload = require('./uploads/register');
 const registerCollections = require('./collections/register');
 const registerGlobals = require('./globals/register');
-const initGraphQL = require('./graphql/init');
+const GraphQL = require('./graphql');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
 
 class Payload {
@@ -22,7 +22,6 @@ class Payload {
     this.registerUpload = registerUpload.bind(this);
     this.registerCollections = registerCollections.bind(this);
     this.registerGlobals = registerGlobals.bind(this);
-    this.initGraphQL = initGraphQL.bind(this);
 
     // Setup & initialization
     connectMongoose(this.config.mongoURL);
@@ -45,7 +44,7 @@ class Payload {
     }
 
     // Init GraphQL
-    this.router.use(this.config.routes.graphQL, this.initGraphQL());
+    this.router.use(this.config.routes.graphQL, new GraphQL(this.config, this.collections).init());
 
     this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
       endpoint: `${this.config.routes.api}${this.config.routes.graphQL}`,

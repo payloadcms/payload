@@ -13,20 +13,20 @@ const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
 const withNullableType = require('./withNullableType');
 
-function getBuildObjectType(config, graphQL) {
+function getBuildObjectType(context) {
   const withLocalizedType = (field, type) => {
-    if (config.localization && field.localized) {
+    if (context.config.localization && field.localized) {
       if (type instanceof GraphQLObjectType) {
-        const LocaleObjectType = graphQL.buildLocaleObjectType(field, type);
+        const LocaleObjectType = context.buildLocaleObjectType(field, type);
         return LocaleObjectType;
       }
 
       if (type === GraphQLString) {
-        return graphQL.types.LocaleStringType;
+        return context.types.LocaleStringType;
       }
 
       if (type === GraphQLFloat) {
-        return graphQL.types.LocaleFloatType;
+        return context.types.LocaleFloatType;
       }
     }
 
@@ -173,10 +173,10 @@ function getBuildObjectType(config, graphQL) {
         const blockTypeOptions = field.blocks.map(block => block.slug);
 
         field.blocks.forEach((block) => {
-          if (graphQL.types.blockTypes[block.slug] === undefined) {
+          if (context.types.blockTypes[block.slug] === undefined) {
             const formattedBlockName = formatName(block.labels.singular);
 
-            graphQL.addBlockType(buildObjectType(
+            context.addBlockType(buildObjectType(
               formattedBlockName,
               [
                 ...block.fields,
@@ -201,9 +201,9 @@ function getBuildObjectType(config, graphQL) {
             new GraphQLList(
               new GraphQLUnionType({
                 name: combineParentName(parent, field.label),
-                types: field.blocks.map(blockType => graphQL.types.blockTypes[blockType.slug]),
+                types: field.blocks.map(blockType => context.types.blockTypes[blockType.slug]),
                 resolveType(data) {
-                  return graphQL.types.blockTypes[data.blockType];
+                  return context.types.blockTypes[data.blockType];
                 },
               }),
             ),
