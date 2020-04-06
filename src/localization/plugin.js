@@ -1,3 +1,4 @@
+/* eslint-disable func-names */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-restricted-syntax */
 const mongoose = require('mongoose');
@@ -52,7 +53,7 @@ module.exports = function localizationPlugin(schema, options) {
         const value = localeSubDoc[locale] || null;
 
         if (locale === 'all') {
-          return value;
+          return localeSubDoc;
         }
 
         // If there is no value to return, AKA no translation in locale, handle fallbacks
