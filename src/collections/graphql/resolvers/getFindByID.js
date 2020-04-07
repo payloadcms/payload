@@ -1,17 +1,25 @@
+/* eslint-disable no-param-reassign */
 const withPolicy = require('../../../graphql/resolvers/withPolicy');
 const findByIDQuery = require('../../queries/findByID');
 
 const findByID = ({ config, model }) => withPolicy(
   config.policies.read,
-  async (parent, { id }, context) => {
+  async (_, args, context) => {
     const options = {
       depth: 0,
       model,
-      id,
-      locale: context.locale,
+      id: args.id,
     };
 
-    if (context.query['fallback-locale']) options.fallbackLocale = context.query['fallback-locale'];
+    if (args.locale) {
+      context.locale = args.locale;
+      options.locale = args.locale;
+    }
+
+    if (args.fallbackLocale) {
+      context.fallbackLocale = args.fallbackLocale;
+      options.fallbackLocale = args.fallbackLocale;
+    }
 
     const result = await findByIDQuery(options);
 

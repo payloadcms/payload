@@ -46,6 +46,7 @@ const find = async (options) => {
       }),
     };
   } catch (err) {
+    console.log(err);
     throw new APIError();
   }
 };
