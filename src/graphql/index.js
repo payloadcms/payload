@@ -21,7 +21,7 @@ class GraphQL {
     this.init = this.init.bind(this);
     this.registerUser = this.registerUser.bind(this);
     this.registerCollections = this.registerCollections.bind(this);
-    this.addBlockType = this.addBlockType.bind(this);
+    this.buildBlockTypeIfMissing = this.buildBlockTypeIfMissing.bind(this);
 
     this.config = config;
     this.collections = collections;
@@ -81,11 +81,32 @@ class GraphQL {
   }
 
   registerCollections() {
-    Object.keys(this.collections).forEach((collectionKey) => {
-      const collection = this.collections[collectionKey];
+    Object.keys(this.collections).forEach((slug) => {
+      const {
+        config: {
+          labels: {
+            singular,
+          },
+          fields,
+        },
+      } = this.collections[slug];
+
+      const singularLabel = formatName(singular);
+
+      this.collections[slug].graphQLType = this.buildObjectType(
+        singularLabel,
+        fields,
+        singularLabel,
+        getFindByID(this.collections[slug]),
+      );
+    });
+
+    Object.keys(this.collections).forEach((collectionSlug) => {
+      const collection = this.collections[collectionSlug];
 
       const {
         config: {
+          slug,
           fields,
           labels: {
             singular,
@@ -97,8 +118,6 @@ class GraphQL {
       const singularLabel = formatName(singular);
       const pluralLabel = formatName(plural);
 
-      collection.graphQLType = this.buildObjectType(singularLabel, fields, singularLabel);
-
       collection.graphQLWhereInputType = buildWhereInputType({
         name: singularLabel,
         fields,
@@ -106,7 +125,7 @@ class GraphQL {
       });
 
       this.Query.fields[singularLabel] = {
-        type: collection.graphQLType,
+        type: this.collections[slug].graphQLType,
         args: {
           id: { type: GraphQLString },
         },
@@ -140,8 +159,32 @@ class GraphQL {
     });
   }
 
-  addBlockType(blockType, slug) {
-    this.types.blockTypes[slug] = blockType;
+  buildBlockTypeIfMissing(block) {
+    const {
+      slug,
+      labels: {
+        singular,
+      },
+    } = block;
+
+    if (!this.types.blockTypes[slug]) {
+      const formattedBlockName = formatName(singular);
+      this.types.blockTypes[slug] = this.buildObjectType(
+        formattedBlockName,
+        [
+          ...block.fields,
+          {
+            name: 'blockName',
+            type: 'text',
+          },
+          {
+            name: 'blockType',
+            type: 'text',
+          },
+        ],
+        formattedBlockName,
+      );
+    }
   }
 }
 

@@ -33,7 +33,7 @@ function getBuildObjectType(context) {
     return type;
   };
 
-  const buildObjectType = (name, fields, parent) => {
+  const buildObjectType = (name, fields, parent, resolver) => {
     const fieldToSchemaMap = {
       number: (field) => {
         return {
@@ -139,10 +139,31 @@ function getBuildObjectType(context) {
         };
       },
       relationship: (field) => {
-        const type = GraphQLString;
+        const { relationTo, label } = field;
+        let relationshipType;
+
+        if (Array.isArray(relationTo)) {
+          const types = relationTo.map((relation) => {
+            return context.collections[relation].graphQLType;
+          });
+
+          relationshipType = new GraphQLUnionType({
+            name: combineParentName(parent, label),
+            types,
+            resolveType(data) {
+              return context.types.blockTypes[data.blockType];
+            },
+          });
+        } else {
+          relationshipType = context.collections[relationTo].graphQLType;
+        }
+
+        // eslint-disable-next-line no-use-before-define
+        relationshipType = relationshipType || blockType;
+
         const typeWithLocale = withLocalizedType(
           field,
-          withNullableType(field, type),
+          withNullableType(field, relationshipType),
         );
 
         return {
@@ -170,29 +191,9 @@ function getBuildObjectType(context) {
         };
       },
       flexible: (field) => {
-        const blockTypeOptions = field.blocks.map(block => block.slug);
-
-        field.blocks.forEach((block) => {
-          if (context.types.blockTypes[block.slug] === undefined) {
-            const formattedBlockName = formatName(block.labels.singular);
-
-            context.addBlockType(buildObjectType(
-              formattedBlockName,
-              [
-                ...block.fields,
-                {
-                  name: 'blockName',
-                  type: 'text',
-                },
-                {
-                  name: 'blockType',
-                  type: 'select',
-                  options: blockTypeOptions,
-                },
-              ],
-              formattedBlockName,
-            ), block.slug);
-          }
+        const types = field.blocks.map((block) => {
+          context.buildBlockTypeIfMissing(block);
+          return context.types.blockTypes[block.slug];
         });
 
         return {
@@ -201,7 +202,7 @@ function getBuildObjectType(context) {
             new GraphQLList(
               new GraphQLUnionType({
                 name: combineParentName(parent, field.label),
-                types: field.blocks.map(blockType => context.types.blockTypes[blockType.slug]),
+                types,
                 resolveType(data) {
                   return context.types.blockTypes[data.blockType];
                 },
@@ -212,9 +213,9 @@ function getBuildObjectType(context) {
       },
     };
 
-    return new GraphQLObjectType({
+    const objectSchema = {
       name,
-      fields: fields.reduce((schema, field) => {
+      fields: () => fields.reduce((schema, field) => {
         const fieldSchema = fieldToSchemaMap[field.type];
         if (fieldSchema) {
           return {
@@ -225,7 +226,15 @@ function getBuildObjectType(context) {
 
         return schema;
       }, {}),
-    });
+    };
+
+    if (resolver) {
+      objectSchema.resolve = resolver;
+    }
+
+    const blockType = new GraphQLObjectType(objectSchema);
+
+    return blockType;
   };
 
   return buildObjectType;

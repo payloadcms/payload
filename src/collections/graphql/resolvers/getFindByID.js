@@ -3,7 +3,9 @@ const findByIDQuery = require('../../queries/findByID');
 
 const findByID = ({ config, model }) => withPolicy(
   config.policies.read,
-  async (_, { id }, context) => {
+  async (parent, { id }, context) => {
+    console.log(parent);
+
     const options = {
       depth: 0,
       model,
