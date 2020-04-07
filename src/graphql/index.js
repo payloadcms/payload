@@ -10,12 +10,9 @@ const {
 const graphQLHTTP = require('express-graphql');
 const getBuildObjectType = require('./schema/getBuildObjectType');
 const buildWhereInputType = require('./schema/buildWhereInputType');
+const buildLocaleInputType = require('./schema/buildLocaleInputType');
+const buildFallbackLocaleInputType = require('./schema/buildFallbackLocaleInputType');
 const formatName = require('./utilities/formatName');
-const getLocaleStringType = require('./types/getLocaleStringType');
-const getLocaleFloatType = require('./types/getLocaleFloatType');
-const getLocaleBooleanType = require('./types/getLocaleBooleanType');
-const getBuildLocaleCustomType = require('./types/getBuildLocaleCustomType');
-const getCheckIfLocaleObject = require('./utilities/getCheckIfLocaleObject');
 const { getFind, getFindByID } = require('../collections/graphql/resolvers');
 
 class GraphQL {
@@ -27,7 +24,6 @@ class GraphQL {
     this.registerUser = this.registerUser.bind(this);
     this.registerCollections = this.registerCollections.bind(this);
     this.buildBlockTypeIfMissing = this.buildBlockTypeIfMissing.bind(this);
-    this.checkIfLocaleObject = getCheckIfLocaleObject(this.config.localization);
 
     this.Query = {
       name: 'Query',
@@ -40,13 +36,11 @@ class GraphQL {
     };
 
     this.types = {
-      LocaleStringType: getLocaleStringType(this),
-      LocaleFloatType: getLocaleFloatType(this),
-      LocaleBooleanType: getLocaleBooleanType(this),
       blockTypes: {},
+      localeInputType: buildLocaleInputType(this.config.localization),
+      fallbackLocaleInputType: buildFallbackLocaleInputType(this.config.localization),
     };
 
-    this.buildLocaleCustomType = getBuildLocaleCustomType(this);
     this.buildObjectType = getBuildObjectType(this);
   }
 
@@ -156,7 +150,15 @@ class GraphQL {
           },
         }),
         args: {
-          where: { type: collection.graphQLWhereInputType },
+          where: {
+            type: collection.graphQLWhereInputType,
+          },
+          locale: {
+            type: this.types.localeInputType,
+          },
+          fallbackLocale: {
+            type: this.types.fallbackLocaleInputType,
+          },
         },
         resolve: getFind(collection),
       };

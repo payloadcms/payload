@@ -3,7 +3,6 @@ const {
   GraphQLString,
   GraphQLFloat,
   GraphQLBoolean,
-  GraphQLNonNull,
   GraphQLList,
   GraphQLObjectType,
   GraphQLUnionType,
@@ -17,80 +16,19 @@ const withNullableType = require('./withNullableType');
 function getBuildObjectType(context) {
   const buildObjectType = (name, fields, parent, resolver) => {
     const fieldToSchemaMap = {
-      number: (field) => {
-        return {
-          type: withNullableType(
-            field,
-            field.localized ? context.types.LocaleFloatType : GraphQLFloat,
-          ),
-        };
-      },
-      text: (field) => {
-        return {
-          type: withNullableType(
-            field,
-            field.localized ? context.types.LocaleStringType : GraphQLString,
-          ),
-        };
-      },
-      email: (field) => {
-        return {
-          type: withNullableType(
-            field,
-            field.localized ? context.types.LocaleStringType : GraphQLString,
-          ),
-        };
-      },
-      textarea: (field) => {
-        return {
-          type: withNullableType(
-            field,
-            field.localized ? context.types.LocaleStringType : GraphQLString,
-          ),
-        };
-      },
-      WYSIWYG: (field) => {
-        return {
-          type: withNullableType(
-            field,
-            field.localized ? context.types.LocaleStringType : GraphQLString,
-          ),
-        };
-      },
-      code: (field) => {
-        return {
-          type: withNullableType(
-            field,
-            field.localized ? context.types.LocaleStringType : GraphQLString,
-          ),
-        };
-      },
-      date: (field) => {
-        return {
-          type: withNullableType(
-            field,
-            field.localized ? context.types.LocaleStringType : GraphQLString,
-          ),
-        };
-      },
-      upload: (field) => {
-        return {
-          type: withNullableType(
-            field,
-            field.localized ? context.types.LocaleStringType : GraphQLString,
-          ),
-        };
-      },
-      checkbox: field => ({
-        type: withNullableType(
-          field,
-          field.localized ? context.types.LocaleBooleanType : GraphQLBoolean,
-        ),
-      }),
+      number: field => ({ type: withNullableType(field, GraphQLFloat) }),
+      text: field => ({ type: withNullableType(field, GraphQLString) }),
+      email: field => ({ type: withNullableType(field, GraphQLString) }),
+      textarea: field => ({ type: withNullableType(field, GraphQLString) }),
+      WYSIWYG: field => ({ type: withNullableType(field, GraphQLString) }),
+      code: field => ({ type: withNullableType(field, GraphQLString) }),
+      date: field => ({ type: withNullableType(field, GraphQLString) }),
+      upload: field => ({ type: withNullableType(field, GraphQLString) }),
+      checkbox: field => ({ type: withNullableType(field, GraphQLBoolean) }),
       select: (field) => {
         const fullName = combineParentName(parent, field.name);
 
-        const type = new GraphQLEnumType({
+        let type = new GraphQLEnumType({
           name: fullName,
           values: field.options.reduce((values, option) => {
             if (typeof option === 'object' && option.value) {
@@ -115,23 +53,21 @@ function getBuildObjectType(context) {
           }, {}),
         });
 
-        const typeWithList = field.hasMany ? new GraphQLList(type) : type;
-        const typeWithNullable = withNullableType(field, typeWithList);
+        type = field.hasMany ? new GraphQLList(type) : type;
+        type = withNullableType(field, type);
 
-        return {
-          type: field.localized ? context.buildLocaleCustomType(field, typeWithNullable, parent) : typeWithNullable,
-        };
+        return { type };
       },
       relationship: (field) => {
         const { relationTo, label } = field;
-        let relationshipType;
+        let type;
 
         if (Array.isArray(relationTo)) {
           const types = relationTo.map((relation) => {
             return context.collections[relation].graphQLType;
           });
 
-          relationshipType = new GraphQLUnionType({
+          type = new GraphQLUnionType({
             name: combineParentName(parent, label),
             types,
             resolveType(data) {
@@ -139,7 +75,7 @@ function getBuildObjectType(context) {
             },
           });
         } else {
-          relationshipType = context.collections[relationTo].graphQLType;
+          type = context.collections[relationTo].graphQLType;
         }
 
         // If the relationshipType is undefined at this point,
@@ -147,30 +83,24 @@ function getBuildObjectType(context) {
         // to itself. Therefore, we set the relationshipType equal to the blockType
         // that is currently being created.
 
-        relationshipType = relationshipType || newlyCreatedBlockType;
-
-        const localizedType = field.localized ? context.buildLocaleCustomType(field, relationshipType, parent) : relationshipType;
+        type = type || newlyCreatedBlockType;
 
         return {
-          type: field.hasMany ? new GraphQLList(localizedType) : localizedType,
+          type: field.hasMany ? new GraphQLList(type) : type,
         };
       },
       repeater: (field) => {
         const fullName = combineParentName(parent, field.label);
-        const type = buildObjectType(fullName, field.fields, fullName);
-        const typeWithNullable = new GraphQLList(withNullableType(field, type));
+        let type = buildObjectType(fullName, field.fields, fullName);
+        type = new GraphQLList(withNullableType(field, type));
 
-        return {
-          type: field.localized ? context.buildLocaleCustomType(field, typeWithNullable, parent) : typeWithNullable,
-        };
+        return { type };
       },
       group: (field) => {
         const fullName = combineParentName(parent, field.label);
         const type = buildObjectType(fullName, field.fields, fullName);
 
-        return {
-          type,
-        };
+        return { type };
       },
       flexible: (field) => {
         const blockTypes = field.blocks.map((block) => {
@@ -178,30 +108,15 @@ function getBuildObjectType(context) {
           return context.types.blockTypes[block.slug];
         });
 
-        const flexibleType = new GraphQLList(
-          new GraphQLUnionType({
-            name: combineParentName(parent, field.label),
-            blockTypes,
-            resolveType(data) {
-              // If the field contains all locales, it's a locale object
-              // Send back the locale object type
-              // Otherwise, grab the appropriate block type and send that
-              if (context.checkIfLocaleObject(data)) {
-                return flexibleLocaleObjectType;
-              }
-              return context.types.blockTypes[data.blockType];
-            },
-          }),
-        );
+        const type = new GraphQLList(new GraphQLUnionType({
+          name: combineParentName(parent, field.label),
+          types: blockTypes,
+          resolveType(data) {
+            return context.types.blockTypes[data.blockType];
+          },
+        }));
 
-        const flexibleLocaleObjectType = context.buildLocaleCustomType(field, flexibleType, parent);
-
-        if (field.localized) {
-          blockTypes.push(flexibleLocaleObjectType);
-          return { type: flexibleLocaleObjectType };
-        }
-
-        return flexibleType;
+        return { type };
       },
     };
 

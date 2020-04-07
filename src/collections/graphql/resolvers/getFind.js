@@ -4,15 +4,15 @@ const findQuery = require('../../queries/find');
 const find = ({ config, model }) => {
   return withPolicy(
     config.policies.read,
-    async (_, args, context) => {
+    async (_, args) => {
       const options = {
         depth: 0,
         model,
         query: args,
-        locale: context.locale,
+        locale: args.locale,
       };
 
-      if (context.query['fallback-locale']) options.fallbackLocale = context.query['fallback-locale'];
+      if (args.fallbackLocale) options.fallbackLocale = args.fallbackLocale;
 
       const results = await findQuery(options);
 
