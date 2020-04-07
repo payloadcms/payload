@@ -9,7 +9,10 @@ const find = ({ config, model }) => {
       const options = {
         depth: 0,
         model,
-        query: Object.keys(args).reduce((query, arg) => {
+      };
+
+      if (Object.keys(args).length > 0) {
+        options.query = Object.keys(args).reduce((query, arg) => {
           if (arg === 'where') {
             return {
               ...query,
@@ -18,8 +21,8 @@ const find = ({ config, model }) => {
           }
 
           return query;
-        }),
-      };
+        });
+      }
 
       if (args.locale) {
         context.locale = args.locale;
