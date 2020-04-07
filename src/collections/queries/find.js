@@ -15,21 +15,23 @@ const find = async (options) => {
 
     const mongooseQuery = await model.buildQuery(query, locale);
 
-    const paginateQuery = {
+    const mongooseOptions = {
       options: {},
     };
 
-    if (paginate.page) paginateQuery.page = paginate.page;
-    if (paginate.limit) paginateQuery.limit = paginate.limit;
-    if (paginate.sort) paginateQuery.sort = paginate.sort;
+    if (paginate.page) mongooseOptions.page = paginate.page;
+    if (paginate.limit) mongooseOptions.limit = paginate.limit;
+    if (paginate.sort) mongooseOptions.sort = paginate.sort;
 
-    if (depth) {
-      paginateQuery.options.autopopulate = {
-        maxDepth: depth,
+    if (depth && depth !== '0') {
+      mongooseOptions.options.autopopulate = {
+        maxDepth: parseInt(depth, 10),
       };
+    } else {
+      mongooseOptions.options.autopopulate = false;
     }
 
-    const result = await model.paginate(mongooseQuery, paginateQuery);
+    const result = await model.paginate(mongooseQuery, mongooseOptions);
 
     // await post find hook here
 

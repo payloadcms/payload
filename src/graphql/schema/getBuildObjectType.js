@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 const {
   GraphQLString,
   GraphQLFloat,
@@ -14,90 +15,76 @@ const combineParentName = require('../utilities/combineParentName');
 const withNullableType = require('./withNullableType');
 
 function getBuildObjectType(context) {
-  const withLocalizedType = (field, type) => {
-    if (context.config.localization && field.localized) {
-      if (type instanceof GraphQLObjectType) {
-        const LocaleObjectType = context.buildLocaleObjectType(field, type);
-        return LocaleObjectType;
-      }
-
-      if (type === GraphQLString) {
-        return context.types.LocaleStringType;
-      }
-
-      if (type === GraphQLFloat) {
-        return context.types.LocaleFloatType;
-      }
-    }
-
-    return type;
-  };
-
   const buildObjectType = (name, fields, parent, resolver) => {
     const fieldToSchemaMap = {
       number: (field) => {
         return {
-          type: withLocalizedType(field, withNullableType(field, GraphQLFloat)),
+          type: withNullableType(
+            field,
+            field.localized ? context.types.LocaleFloatType : GraphQLFloat,
+          ),
         };
       },
       text: (field) => {
         return {
-          type: withLocalizedType(field, withNullableType(field, GraphQLString)),
+          type: withNullableType(
+            field,
+            field.localized ? context.types.LocaleStringType : GraphQLString,
+          ),
         };
       },
       email: (field) => {
         return {
-          type: withLocalizedType(
+          type: withNullableType(
             field,
-            withNullableType(field, GraphQLString),
+            field.localized ? context.types.LocaleStringType : GraphQLString,
           ),
         };
       },
       textarea: (field) => {
         return {
-          type: withLocalizedType(
+          type: withNullableType(
             field,
-            withNullableType(field, GraphQLString),
+            field.localized ? context.types.LocaleStringType : GraphQLString,
           ),
         };
       },
       WYSIWYG: (field) => {
         return {
-          type: withLocalizedType(
+          type: withNullableType(
             field,
-            withNullableType(field, GraphQLString),
+            field.localized ? context.types.LocaleStringType : GraphQLString,
           ),
         };
       },
       code: (field) => {
         return {
-          type: withLocalizedType(
+          type: withNullableType(
             field,
-            withNullableType(field, GraphQLString),
+            field.localized ? context.types.LocaleStringType : GraphQLString,
           ),
         };
       },
       date: (field) => {
         return {
-          type: withLocalizedType(
+          type: withNullableType(
             field,
-            withNullableType(field, GraphQLString),
+            field.localized ? context.types.LocaleStringType : GraphQLString,
           ),
         };
       },
       upload: (field) => {
-        const type = GraphQLString;
         return {
-          type: withLocalizedType(
+          type: withNullableType(
             field,
-            withNullableType(field, type),
+            field.localized ? context.types.LocaleStringType : GraphQLString,
           ),
         };
       },
       checkbox: field => ({
-        type: withLocalizedType(
+        type: withNullableType(
           field,
-          new GraphQLNonNull(GraphQLBoolean),
+          field.localized ? context.types.LocaleBooleanType : GraphQLBoolean,
         ),
       }),
       select: (field) => {
@@ -132,10 +119,7 @@ function getBuildObjectType(context) {
         const typeWithNullable = withNullableType(field, typeWithList);
 
         return {
-          type: withLocalizedType(
-            field,
-            typeWithNullable,
-          ),
+          type: field.localized ? context.buildLocaleCustomType(field, typeWithNullable, parent) : typeWithNullable,
         };
       },
       relationship: (field) => {
@@ -158,16 +142,17 @@ function getBuildObjectType(context) {
           relationshipType = context.collections[relationTo].graphQLType;
         }
 
-        // eslint-disable-next-line no-use-before-define
-        relationshipType = relationshipType || blockType;
+        // If the relationshipType is undefined at this point,
+        // it can be assumed that this blockType can have a relationship
+        // to itself. Therefore, we set the relationshipType equal to the blockType
+        // that is currently being created.
 
-        const typeWithLocale = withLocalizedType(
-          field,
-          withNullableType(field, relationshipType),
-        );
+        relationshipType = relationshipType || newlyCreatedBlockType;
+
+        const localizedType = field.localized ? context.buildLocaleCustomType(field, relationshipType, parent) : relationshipType;
 
         return {
-          type: field.hasMany ? new GraphQLList(typeWithLocale) : typeWithLocale,
+          type: field.hasMany ? new GraphQLList(localizedType) : localizedType,
         };
       },
       repeater: (field) => {
@@ -176,10 +161,7 @@ function getBuildObjectType(context) {
         const typeWithNullable = new GraphQLList(withNullableType(field, type));
 
         return {
-          type: withLocalizedType(
-            field,
-            typeWithNullable,
-          ),
+          type: field.localized ? context.buildLocaleCustomType(field, typeWithNullable, parent) : typeWithNullable,
         };
       },
       group: (field) => {
@@ -191,25 +173,35 @@ function getBuildObjectType(context) {
         };
       },
       flexible: (field) => {
-        const types = field.blocks.map((block) => {
+        const blockTypes = field.blocks.map((block) => {
           context.buildBlockTypeIfMissing(block);
           return context.types.blockTypes[block.slug];
         });
 
-        return {
-          type: withLocalizedType(
-            field,
-            new GraphQLList(
-              new GraphQLUnionType({
-                name: combineParentName(parent, field.label),
-                types,
-                resolveType(data) {
-                  return context.types.blockTypes[data.blockType];
-                },
-              }),
-            ),
-          ),
-        };
+        const flexibleType = new GraphQLList(
+          new GraphQLUnionType({
+            name: combineParentName(parent, field.label),
+            blockTypes,
+            resolveType(data) {
+              // If the field contains all locales, it's a locale object
+              // Send back the locale object type
+              // Otherwise, grab the appropriate block type and send that
+              if (context.checkIfLocaleObject(data)) {
+                return flexibleLocaleObjectType;
+              }
+              return context.types.blockTypes[data.blockType];
+            },
+          }),
+        );
+
+        const flexibleLocaleObjectType = context.buildLocaleCustomType(field, flexibleType, parent);
+
+        if (field.localized) {
+          blockTypes.push(flexibleLocaleObjectType);
+          return { type: flexibleLocaleObjectType };
+        }
+
+        return flexibleType;
       },
     };
 
@@ -232,9 +224,9 @@ function getBuildObjectType(context) {
       objectSchema.resolve = resolver;
     }
 
-    const blockType = new GraphQLObjectType(objectSchema);
+    const newlyCreatedBlockType = new GraphQLObjectType(objectSchema);
 
-    return blockType;
+    return newlyCreatedBlockType;
   };
 
   return buildObjectType;

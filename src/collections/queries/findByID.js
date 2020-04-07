@@ -9,10 +9,12 @@ const findByID = async (options) => {
 
   const hasMultipleIDs = Array.isArray(id);
 
-  if (depth) {
-    mongooseOptions.autopopulate = {
-      maxDepth: depth,
+  if (depth && depth !== '0') {
+    mongooseOptions.options.autopopulate = {
+      maxDepth: parseInt(depth, 10),
     };
+  } else {
+    mongooseOptions.options.autopopulate = false;
   }
 
   try {
@@ -23,7 +25,7 @@ const findByID = async (options) => {
     if (hasMultipleIDs) {
       result = await model.find({
         _id: {
-          $in: id.map(id => mongoose.Types.ObjectId(id)),
+          $in: id.map(docId => mongoose.Types.ObjectId(docId)),
         },
       }, {}, mongooseOptions);
     } else {

@@ -13,18 +13,21 @@ const buildWhereInputType = require('./schema/buildWhereInputType');
 const formatName = require('./utilities/formatName');
 const getLocaleStringType = require('./types/getLocaleStringType');
 const getLocaleFloatType = require('./types/getLocaleFloatType');
-const getBuildLocaleObjectType = require('./types/getBuildLocaleObjectType');
+const getLocaleBooleanType = require('./types/getLocaleBooleanType');
+const getBuildLocaleCustomType = require('./types/getBuildLocaleCustomType');
+const getCheckIfLocaleObject = require('./utilities/getCheckIfLocaleObject');
 const { getFind, getFindByID } = require('../collections/graphql/resolvers');
 
 class GraphQL {
   constructor(config, collections) {
+    this.config = config;
+    this.collections = collections;
+
     this.init = this.init.bind(this);
     this.registerUser = this.registerUser.bind(this);
     this.registerCollections = this.registerCollections.bind(this);
     this.buildBlockTypeIfMissing = this.buildBlockTypeIfMissing.bind(this);
-
-    this.config = config;
-    this.collections = collections;
+    this.checkIfLocaleObject = getCheckIfLocaleObject(this.config.localization);
 
     this.Query = {
       name: 'Query',
@@ -37,12 +40,13 @@ class GraphQL {
     };
 
     this.types = {
-      LocaleStringType: getLocaleStringType(this.config.localization),
-      LocaleFloatType: getLocaleFloatType(this.config.localization),
+      LocaleStringType: getLocaleStringType(this),
+      LocaleFloatType: getLocaleFloatType(this),
+      LocaleBooleanType: getLocaleBooleanType(this),
       blockTypes: {},
     };
 
-    this.buildLocaleObjectType = getBuildLocaleObjectType(this);
+    this.buildLocaleCustomType = getBuildLocaleCustomType(this);
     this.buildObjectType = getBuildObjectType(this);
   }
 
