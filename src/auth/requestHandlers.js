@@ -15,7 +15,7 @@ module.exports = (config, User) => ({
   register: (req, res, next) => {
     const usernameField = config.user.auth.useAsUsername;
 
-    User.register(new User({ usernameField: req.body[usernameField] }), req.body.password, (err, user) => {
+    User.register(new User({ [usernameField]: req.body[usernameField] }), req.body.password, (err, user) => {
       if (err) {
         const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED);
         return next(error);
