@@ -13,8 +13,7 @@
     "test": "jest --config src/tests/jest.config.js",
     "test:int": "jest --config src/tests/jest.config.integration.js",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
-    "debug": "nodemon --inspect ./demo/init.js",
-    "dev": "nodemon demo/init.js",
+    "dev": "nodemon demo/server.js",
     "lint": "eslint **/*.js"
   },
   "bin": {
