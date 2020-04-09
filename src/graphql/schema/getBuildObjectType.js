@@ -14,6 +14,7 @@ const {
 const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
 const withNullableType = require('./withNullableType');
+const buildWhereInputType = require('./buildWhereInputType');
 const find = require('../../collections/queries/find');
 
 function getBuildObjectType(graphQLContext) {
@@ -65,6 +66,7 @@ function getBuildObjectType(graphQLContext) {
         const { relationTo, label } = field;
         const isRelatedToManyCollections = Array.isArray(relationTo);
         const hasManyValues = field.hasMany;
+        const name = combineParentName(parentName, label);
 
         let type;
 
@@ -74,7 +76,7 @@ function getBuildObjectType(graphQLContext) {
           });
 
           type = new GraphQLUnionType({
-            name: combineParentName(parentName, label),
+            name,
             types,
             resolveType(data) {
               return graphQLContext.types.blockTypes[data.blockType];
@@ -91,8 +93,16 @@ function getBuildObjectType(graphQLContext) {
 
         type = type || newlyCreatedBlockType;
 
-        return {
+        const relationship = {
           type: hasManyValues ? new GraphQLList(type) : type,
+          args: {
+            locale: {
+              type: graphQLContext.types.localeInputType,
+            },
+            fallbackLocale: {
+              type: graphQLContext.types.fallbackLocaleInputType,
+            },
+          },
           async resolve(parent, args, context) {
             const value = parent[field.name];
             const locale = args.locale || context.locale;
@@ -115,6 +125,7 @@ function getBuildObjectType(graphQLContext) {
                     model: graphQLContext.collections[relatedCollectionSlug].model,
                     query: {
                       where: {
+                        ...(args.where || {}),
                         _id: {
                           equals: id,
                         },
@@ -143,6 +154,7 @@ function getBuildObjectType(graphQLContext) {
                 model: graphQLContext.collections[relatedCollectionSlug].model,
                 query: {
                   where: {
+                    ...(args.where || {}),
                     _id: {
                       equals: id,
                     },
@@ -160,6 +172,33 @@ function getBuildObjectType(graphQLContext) {
             return null;
           },
         };
+
+        if (isRelatedToManyCollections) {
+          const relatedCollectionFields = relationTo.reduce((relatedCollectionFields, relation) => {
+            return [
+              ...relatedCollectionFields,
+              ...graphQLContext.collections[relation].config.fields,
+            ];
+          }, []);
+
+          relationship.args.where = {
+            type: buildWhereInputType({
+              name,
+              fields: relatedCollectionFields,
+              parent: name,
+            }),
+          };
+        } else {
+          relationship.args.where = {
+            type: buildWhereInputType({
+              name,
+              fields: graphQLContext.collections[relationTo].config.fields,
+              parent: name,
+            }),
+          };
+        }
+
+        return relationship;
       },
       repeater: (field) => {
         const fullName = combineParentName(parentName, field.label);

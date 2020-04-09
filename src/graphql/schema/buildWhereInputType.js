@@ -113,7 +113,7 @@ const buildWhereInputType = ({ name, fields, parent }) => {
     if (getFieldSchema) {
       return {
         ...schema,
-        [formatName(field.name)]: getFieldSchema(field),
+        [field.name]: getFieldSchema(field),
       };
     }
 
