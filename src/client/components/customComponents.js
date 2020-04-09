@@ -9,7 +9,6 @@ function stringify(obj) {
     });
     return `{${result.join(',')}}`;
   }
-
   return `React.lazy(() => import('${obj}'))`;
 }
 
@@ -34,7 +33,7 @@ module.exports = function (config) {
   const string = stringify({
     ...(allCollectionComponents || {}),
     ...(config.components || {}),
-  });
+  }).replace(/\\/g, '\\\\');
 
   return {
     code: `

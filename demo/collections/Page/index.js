@@ -155,7 +155,7 @@ module.exports = {
 	// components: {
 	// 	views: {
 	// 		List: path.resolve(__dirname, 'components/List/index.js'),
-	// 	}
+	// 	},
 	// },
 	timestamps: true,
 };
