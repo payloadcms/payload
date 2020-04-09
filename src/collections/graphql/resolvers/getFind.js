@@ -1,14 +1,16 @@
 /* eslint-disable no-param-reassign */
+const withDefaultLocale = require('../../../graphql/resolvers/withDefaultLocale');
 const withPolicy = require('../../../graphql/resolvers/withPolicy');
 const findQuery = require('../../queries/find');
 
-const find = ({ config, model }) => {
-  return withPolicy(
-    config.policies.read,
+const getFind = (config, collection) => withDefaultLocale(
+  config.localization,
+  withPolicy(
+    collection.config.policies.read,
     async (_, args, context) => {
       const options = {
         depth: 0,
-        model,
+        model: collection.model,
       };
 
       if (Object.keys(args).length > 0) {
@@ -16,12 +18,12 @@ const find = ({ config, model }) => {
           if (arg === 'where') {
             return {
               ...query,
-              arg: args[arg],
+              [arg]: args[arg],
             };
           }
 
           return query;
-        });
+        }, {});
       }
 
       if (args.locale) {
@@ -38,7 +40,7 @@ const find = ({ config, model }) => {
 
       return results;
     },
-  );
-};
+  ),
+);
 
-module.exports = find;
+module.exports = getFind;

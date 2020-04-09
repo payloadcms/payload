@@ -9,6 +9,7 @@ const {
 } = require('graphql');
 const graphQLHTTP = require('express-graphql');
 const getBuildObjectType = require('./schema/getBuildObjectType');
+const buildBlockTypeIfMissing = require('./schema/buildBlockTypeIfMissing');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 const buildLocaleInputType = require('./schema/buildLocaleInputType');
 const buildPaginatedListType = require('./schema/buildPaginatedListType');
@@ -24,7 +25,6 @@ class GraphQL {
     this.init = this.init.bind(this);
     this.registerUser = this.registerUser.bind(this);
     this.registerCollections = this.registerCollections.bind(this);
-    this.buildBlockTypeIfMissing = this.buildBlockTypeIfMissing.bind(this);
 
     this.Query = {
       name: 'Query',
@@ -43,6 +43,7 @@ class GraphQL {
     };
 
     this.buildObjectType = getBuildObjectType(this);
+    this.buildBlockTypeIfMissing = buildBlockTypeIfMissing.bind(this);
   }
 
   init() {
@@ -96,7 +97,7 @@ class GraphQL {
         singularLabel,
         fields,
         singularLabel,
-        getFindByID(this.collections[slug]),
+        getFindByID(this.config, this.collections[slug]),
       );
     });
 
@@ -128,7 +129,7 @@ class GraphQL {
         args: {
           id: { type: GraphQLString },
         },
-        resolve: getFindByID(collection),
+        resolve: getFindByID(this.config, collection),
       };
 
       this.Query.fields[pluralLabel] = {
@@ -144,37 +145,9 @@ class GraphQL {
             type: this.types.fallbackLocaleInputType,
           },
         },
-        resolve: getFind(collection),
+        resolve: getFind(this.config, collection),
       };
     });
-  }
-
-  buildBlockTypeIfMissing(block) {
-    const {
-      slug,
-      labels: {
-        singular,
-      },
-    } = block;
-
-    if (!this.types.blockTypes[slug]) {
-      const formattedBlockName = formatName(singular);
-      this.types.blockTypes[slug] = this.buildObjectType(
-        formattedBlockName,
-        [
-          ...block.fields,
-          {
-            name: 'blockName',
-            type: 'text',
-          },
-          {
-            name: 'blockType',
-            type: 'text',
-          },
-        ],
-        formattedBlockName,
-      );
-    }
   }
 }
 

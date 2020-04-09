@@ -66,7 +66,7 @@ function getBuildObjectType(graphQLContext) {
         const { relationTo, label } = field;
         const isRelatedToManyCollections = Array.isArray(relationTo);
         const hasManyValues = field.hasMany;
-        const name = combineParentName(parentName, label);
+        const relationshipName = combineParentName(parentName, label);
 
         let type;
 
@@ -76,7 +76,7 @@ function getBuildObjectType(graphQLContext) {
           });
 
           type = new GraphQLUnionType({
-            name,
+            name: relationshipName,
             types,
             resolveType(data) {
               return graphQLContext.types.blockTypes[data.blockType];
@@ -174,26 +174,26 @@ function getBuildObjectType(graphQLContext) {
         };
 
         if (isRelatedToManyCollections) {
-          const relatedCollectionFields = relationTo.reduce((relatedCollectionFields, relation) => {
+          const relatedCollectionFields = relationTo.reduce((allFields, relation) => {
             return [
-              ...relatedCollectionFields,
+              ...allFields,
               ...graphQLContext.collections[relation].config.fields,
             ];
           }, []);
 
           relationship.args.where = {
             type: buildWhereInputType({
-              name,
+              name: relationshipName,
               fields: relatedCollectionFields,
-              parent: name,
+              parent: relationshipName,
             }),
           };
         } else {
           relationship.args.where = {
             type: buildWhereInputType({
-              name,
+              name: relationshipName,
               fields: graphQLContext.collections[relationTo].config.fields,
-              parent: name,
+              parent: relationshipName,
             }),
           };
         }
