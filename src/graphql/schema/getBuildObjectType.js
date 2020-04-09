@@ -14,7 +14,7 @@ const {
 const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
 const withNullableType = require('./withNullableType');
-const findByID = require('../../collections/queries/findByID');
+const find = require('../../collections/queries/find');
 
 function getBuildObjectType(graphQLContext) {
   const buildObjectType = (name, fields, parentName) => {
@@ -111,14 +111,22 @@ function getBuildObjectType(graphQLContext) {
                     id = relatedDoc.value;
                   }
 
-                  const result = await findByID({
+                  const result = await find({
                     model: graphQLContext.collections[relatedCollectionSlug].model,
-                    id,
+                    query: {
+                      where: {
+                        _id: {
+                          equals: id,
+                        },
+                      },
+                    },
                     locale,
                     fallbackLocale,
                   });
 
-                  results.push(result);
+                  if (result.docs.length === 1) {
+                    results.push(result.docs[0]);
+                  }
                 }
               }
 
@@ -131,15 +139,25 @@ function getBuildObjectType(graphQLContext) {
             if (id) {
               id = id.toString();
 
-              const relatedDocument = await findByID({
+              const relatedDocument = await find({
                 model: graphQLContext.collections[relatedCollectionSlug].model,
-                id,
+                query: {
+                  where: {
+                    _id: {
+                      equals: id,
+                    },
+                  },
+                },
                 locale,
                 fallbackLocale,
               });
 
-              return relatedDocument;
+              if (relatedDocument.docs[0]) return relatedDocument.docs[0];
+
+              return null;
             }
+
+            return null;
           },
         };
       },

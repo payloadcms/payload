@@ -11,6 +11,16 @@ function addSearchParam(key, value, searchParams) {
   };
 }
 
+function convertArrayFromCommaDelineated(input) {
+  if (Array.isArray(input)) return input;
+
+  if (input.indexOf(',') > -1) {
+    return input.split(',');
+  }
+
+  return [input];
+}
+
 class ParamParser {
   constructor(model, rawParams, locale) {
     this.parse = this.parse.bind(this);
@@ -100,7 +110,12 @@ class ParamParser {
   // Checks to see
   async buildSearchParam(schema, key, val, operator) {
     let schemaObject = schema.obj[key];
-    const localizedKey = this.getLocalizedKey(key, schemaObject);
+
+    let localizedKey = this.getLocalizedKey(key, schemaObject);
+
+    if (key === '_id' || key === 'id') {
+      localizedKey = '_id';
+    }
 
     if (key.includes('.')) {
       const paths = key.split('.');
@@ -171,11 +186,11 @@ class ParamParser {
 
         case 'in':
         case 'all':
-          formattedValue = { [`$${operator}`]: val.split(',') };
+          formattedValue = { [`$${operator}`]: convertArrayFromCommaDelineated(val) };
           break;
 
         case 'not_in':
-          formattedValue = { $nin: val.split(',') };
+          formattedValue = { $nin: convertArrayFromCommaDelineated(val) };
           break;
 
         case 'not_equals':

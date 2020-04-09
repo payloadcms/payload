@@ -11,6 +11,7 @@ const graphQLHTTP = require('express-graphql');
 const getBuildObjectType = require('./schema/getBuildObjectType');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 const buildLocaleInputType = require('./schema/buildLocaleInputType');
+const buildPaginatedListType = require('./schema/buildPaginatedListType');
 const buildFallbackLocaleInputType = require('./schema/buildFallbackLocaleInputType');
 const formatName = require('./utilities/formatName');
 const { getFind, getFindByID } = require('../collections/graphql/resolvers');
@@ -131,24 +132,7 @@ class GraphQL {
       };
 
       this.Query.fields[pluralLabel] = {
-        type: new GraphQLObjectType({
-          name: pluralLabel,
-          fields: {
-            docs: {
-              type: new GraphQLList(collection.graphQLType),
-            },
-            totalDocs: { type: GraphQLInt },
-            offset: { type: GraphQLInt },
-            limit: { type: GraphQLInt },
-            totalPages: { type: GraphQLInt },
-            page: { type: GraphQLInt },
-            pagingCounter: { type: GraphQLInt },
-            hasPrevPage: { type: GraphQLBoolean },
-            hasNextPage: { type: GraphQLBoolean },
-            prevPage: { type: GraphQLBoolean },
-            nextPage: { type: GraphQLBoolean },
-          },
-        }),
+        type: buildPaginatedListType(pluralLabel, collection.graphQLType),
         args: {
           where: {
             type: collection.graphQLWhereInputType,
