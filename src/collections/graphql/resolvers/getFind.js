@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 const withDefaultLocale = require('../../../graphql/resolvers/withDefaultLocale');
 const withPolicy = require('../../../graphql/resolvers/withPolicy');
-const findQuery = require('../../queries/find');
+const find = require('../../queries/find');
 
 const getFind = (config, collection) => withDefaultLocale(
   config.localization,
@@ -11,20 +11,14 @@ const getFind = (config, collection) => withDefaultLocale(
       const options = {
         depth: 0,
         model: collection.model,
+        query: {},
+        paginate: {},
       };
 
-      if (Object.keys(args).length > 0) {
-        options.query = Object.keys(args).reduce((query, arg) => {
-          if (arg === 'where') {
-            return {
-              ...query,
-              [arg]: args[arg],
-            };
-          }
-
-          return query;
-        }, {});
-      }
+      if (args.where) options.query.where = args.where;
+      if (args.limit) options.paginate.limit = args.offset;
+      if (args.page) options.paginate.page = args.page;
+      if (args.sort) options.paginate.sort = args.sort;
 
       if (args.locale) {
         context.locale = args.locale;
@@ -36,7 +30,7 @@ const getFind = (config, collection) => withDefaultLocale(
         options.fallbackLocale = args.fallbackLocale;
       }
 
-      const results = await findQuery(options);
+      const results = await find(options);
 
       return results;
     },

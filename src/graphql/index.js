@@ -3,10 +3,9 @@ const {
   GraphQLString,
   GraphQLSchema,
   GraphQLNonNull,
-  GraphQLList,
   GraphQLInt,
-  GraphQLBoolean,
 } = require('graphql');
+
 const graphQLHTTP = require('express-graphql');
 const getBuildObjectType = require('./schema/getBuildObjectType');
 const buildBlockTypeIfMissing = require('./schema/buildBlockTypeIfMissing');
@@ -128,6 +127,8 @@ class GraphQL {
         type: this.collections[slug].graphQLType,
         args: {
           id: { type: GraphQLString },
+          locale: { type: this.types.localeInputType },
+          fallbackLocale: { type: this.types.fallbackLocaleInputType },
         },
         resolve: getFindByID(this.config, collection),
       };
@@ -135,15 +136,12 @@ class GraphQL {
       this.Query.fields[pluralLabel] = {
         type: buildPaginatedListType(pluralLabel, collection.graphQLType),
         args: {
-          where: {
-            type: collection.graphQLWhereInputType,
-          },
-          locale: {
-            type: this.types.localeInputType,
-          },
-          fallbackLocale: {
-            type: this.types.fallbackLocaleInputType,
-          },
+          where: { type: collection.graphQLWhereInputType },
+          locale: { type: this.types.localeInputType },
+          fallbackLocale: { type: this.types.fallbackLocaleInputType },
+          page: { type: GraphQLInt },
+          offset: { type: GraphQLInt },
+          sort: { type: GraphQLString },
         },
         resolve: getFind(this.config, collection),
       };
