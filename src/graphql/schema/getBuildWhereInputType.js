@@ -183,9 +183,8 @@ const getBuildWhereInputType = (graphQLContext) => {
           ['in', 'not_in', 'all', 'equals', 'not_equals'],
         ),
       }),
-      repeater: (field) => {
-        return recursivelyBuildNestedPaths(field);
-      },
+      repeater: field => recursivelyBuildNestedPaths(field),
+      group: field => recursivelyBuildNestedPaths(field),
     };
 
     const fieldTypes = fields.reduce((schema, field) => {
