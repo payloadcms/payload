@@ -15,7 +15,6 @@ const {
 const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
 const withNullableType = require('./withNullableType');
-const buildWhereInputType = require('./buildWhereInputType');
 const find = require('../../collections/queries/find');
 
 function getBuildObjectType(graphQLContext) {
@@ -194,7 +193,7 @@ function getBuildObjectType(graphQLContext) {
           }, []);
 
           relationship.args.where = {
-            type: buildWhereInputType({
+            type: graphQLContext.buildWhereInputType({
               name: relationshipName,
               fields: relatedCollectionFields,
               parent: relationshipName,
@@ -202,7 +201,7 @@ function getBuildObjectType(graphQLContext) {
           };
         } else {
           relationship.args.where = {
-            type: buildWhereInputType({
+            type: graphQLContext.buildWhereInputType({
               name: relationshipName,
               fields: graphQLContext.collections[relationTo].config.fields,
               parent: relationshipName,
