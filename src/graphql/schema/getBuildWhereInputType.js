@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 const {
   GraphQLString,
   GraphQLFloat,
@@ -13,8 +14,52 @@ const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
 const withOperators = require('./withOperators');
 
+// Pass context to buildWhereInputType - it may be needed in the future
+// for localization or similar as is the case with buildObjectType
 const getBuildWhereInputType = (graphQLContext) => {
+  // buildWhereInputType is similar to buildObjectType and operates
+  // on a field basis with a few distinct differences.
+  //
+  // 1. Everything needs to be a GraphQLInputObjectType or scalar / enum
+  // 2. Relationships, groups, repeaters and flex content are not
+  //    directly searchable. Instead, we need to build a chained pathname
+  //    using dot notation so Mongo can properly search nested paths.
   const buildWhereInputType = (name, fields, parentName) => {
+    // This is the function that builds nested paths for all
+    // field types with nested paths.
+    const recursivelyBuildNestedPaths = (field) => {
+      const nestedPaths = field.fields.reduce((nestedFields, nestedField) => {
+        const getFieldSchema = fieldToSchemaMap[nestedField.type];
+        const nestedFieldName = `${field.name}__${nestedField.name}`;
+
+        if (getFieldSchema) {
+          const fieldSchema = getFieldSchema({
+            ...nestedField,
+            name: nestedFieldName,
+          });
+
+          if (Array.isArray(fieldSchema)) {
+            return [
+              ...nestedFields,
+              ...fieldSchema,
+            ];
+          }
+
+          return [
+            ...nestedFields,
+            {
+              key: nestedFieldName,
+              type: fieldSchema,
+            },
+          ];
+        }
+
+        return nestedFields;
+      }, []);
+
+      return nestedPaths;
+    };
+
     const fieldToSchemaMap = {
       number: (field) => {
         const type = GraphQLFloat;
@@ -116,7 +161,7 @@ const getBuildWhereInputType = (graphQLContext) => {
               if (typeof option === 'object' && option.value) {
                 return {
                   ...values,
-                  [formatName(option.label)]: {
+                  [formatName(option.value)]: {
                     value: option.value,
                   },
                 };
@@ -138,15 +183,32 @@ const getBuildWhereInputType = (graphQLContext) => {
           ['in', 'not_in', 'all', 'equals', 'not_equals'],
         ),
       }),
+      repeater: (field) => {
+        return recursivelyBuildNestedPaths(field);
+      },
     };
 
     const fieldTypes = fields.reduce((schema, field) => {
       const getFieldSchema = fieldToSchemaMap[field.type];
 
       if (getFieldSchema) {
+        const fieldSchema = getFieldSchema(field);
+
+        if (Array.isArray(fieldSchema)) {
+          return {
+            ...schema,
+            ...(fieldSchema.reduce((subFields, subField) => {
+              return {
+                ...subFields,
+                [subField.key]: subField.type,
+              };
+            }, {})),
+          };
+        }
+
         return {
           ...schema,
-          [field.name]: getFieldSchema(field),
+          [field.name]: fieldSchema,
         };
       }
 

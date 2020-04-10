@@ -1,9 +1,11 @@
 const uppercase = require('./uppercase');
 
 const formatName = (string) => {
-  let formatted = string.replace(/-|\//g, '_');
-  formatted = uppercase(formatted);
-  formatted = formatted.replace(/ /g, '');
+  const formatted = string
+    .replace(/\./g, '_')
+    .replace(/-|\//g, '_')
+    .replace(/ /g, '');
+
   return formatted;
 };
 

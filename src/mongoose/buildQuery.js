@@ -112,11 +112,13 @@ class ParamParser {
 
     let localizedKey = this.getLocalizedKey(key, schemaObject);
 
+    localizedKey = key.split('__').join('.');
+
     if (key === '_id' || key === 'id') {
       localizedKey = '_id';
     }
 
-    if (key.includes('.')) {
+    if (key.includes('.') || key.includes('__')) {
       const paths = key.split('.');
       schemaObject = schema.obj[paths[0]];
       const localizedPath = this.getLocalizedKey(paths[0], schemaObject);

@@ -38,7 +38,7 @@ function getBuildObjectType(graphQLContext) {
             if (typeof option === 'object' && option.value) {
               return {
                 ...values,
-                [formatName(option.label)]: {
+                [formatName(option.value)]: {
                   value: option.value,
                 },
               };
