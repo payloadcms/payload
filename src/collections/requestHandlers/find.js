@@ -3,8 +3,9 @@ const { find } = require('../queries');
 
 const findHandler = async (req, res) => {
   try {
-    const result = await find({
+    const options = {
       model: req.model,
+      query: {},
       paginate: {
         page: req.query.page,
         limit: req.query.limit,
@@ -13,7 +14,11 @@ const findHandler = async (req, res) => {
       depth: req.query.depth,
       locale: req.locale,
       fallbackLocale: req.query['fallback-locale'],
-    });
+    };
+
+    if (req.query.where) options.query.where = req.query.where;
+
+    const result = await find(options);
 
     return res.status(httpStatus.OK).json(result);
   } catch (err) {

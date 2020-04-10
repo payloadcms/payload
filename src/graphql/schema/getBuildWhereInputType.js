@@ -108,30 +108,35 @@ const getBuildWhereInputType = (graphQLContext) => {
         ),
       }),
       select: field => ({
-        type: new GraphQLEnumType({
-          name: `${combineParentName(parentName, field.name)}_Input`,
-          values: field.options.reduce((values, option) => {
-            if (typeof option === 'object' && option.value) {
-              return {
-                ...values,
-                [formatName(option.label)]: {
-                  value: option.value,
-                },
-              };
-            }
+        type: withOperators(
+          field.name,
+          new GraphQLEnumType({
+            name: `${combineParentName(parentName, field.name)}_Input`,
+            values: field.options.reduce((values, option) => {
+              if (typeof option === 'object' && option.value) {
+                return {
+                  ...values,
+                  [formatName(option.label)]: {
+                    value: option.value,
+                  },
+                };
+              }
 
-            if (typeof option === 'string') {
-              return {
-                ...values,
-                [option]: {
-                  value: option,
-                },
-              };
-            }
+              if (typeof option === 'string') {
+                return {
+                  ...values,
+                  [option]: {
+                    value: option,
+                  },
+                };
+              }
 
-            return values;
-          }, {}),
-        }),
+              return values;
+            }, {}),
+          }),
+          parentName,
+          ['in', 'not_in', 'all', 'equals', 'not_equals'],
+        ),
       }),
     };
 
