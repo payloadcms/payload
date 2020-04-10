@@ -4,6 +4,7 @@
 const {
   GraphQLString,
   GraphQLFloat,
+  GraphQLInt,
   GraphQLBoolean,
   GraphQLList,
   GraphQLObjectType,
@@ -150,7 +151,7 @@ function getBuildObjectType(graphQLContext) {
             if (id) {
               id = id.toString();
 
-              const relatedDocument = await find({
+              const relatedDocumentQuery = {
                 model: graphQLContext.collections[relatedCollectionSlug].model,
                 query: {
                   where: {
@@ -160,9 +161,15 @@ function getBuildObjectType(graphQLContext) {
                     },
                   },
                 },
+                paginate: {},
                 locale,
                 fallbackLocale,
-              });
+              };
+
+              if (args.page) relatedDocumentQuery.paginate.page = args.page;
+              if (args.limit) relatedDocumentQuery.paginate.limit = args.limit;
+
+              const relatedDocument = await find();
 
               if (relatedDocument.docs[0]) return relatedDocument.docs[0];
 
@@ -172,6 +179,11 @@ function getBuildObjectType(graphQLContext) {
             return null;
           },
         };
+
+        if (hasManyValues) {
+          relationship.args.page = { type: GraphQLInt };
+          relationship.args.limit = { type: GraphQLInt };
+        }
 
         if (isRelatedToManyCollections) {
           const relatedCollectionFields = relationTo.reduce((allFields, relation) => {
