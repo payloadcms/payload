@@ -193,19 +193,19 @@ function getBuildObjectType(graphQLContext) {
           }, []);
 
           relationship.args.where = {
-            type: graphQLContext.buildWhereInputType({
-              name: relationshipName,
-              fields: relatedCollectionFields,
-              parent: relationshipName,
-            }),
+            type: graphQLContext.buildWhereInputType(
+              relationshipName,
+              relatedCollectionFields,
+              relationshipName,
+            ),
           };
         } else {
           relationship.args.where = {
-            type: graphQLContext.buildWhereInputType({
-              name: relationshipName,
-              fields: graphQLContext.collections[relationTo].config.fields,
-              parent: relationshipName,
-            }),
+            type: graphQLContext.buildWhereInputType(
+              relationshipName,
+              graphQLContext.collections[relationTo].config.fields,
+              relationshipName,
+            ),
           };
         }
 

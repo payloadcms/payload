@@ -5,15 +5,16 @@ const {
   GraphQLInt,
   GraphQLList,
   // GraphQLInterfaceType,
-  // GraphQLEnumType,
+  GraphQLEnumType,
   GraphQLInputObjectType,
 } = require('graphql');
 
 const formatName = require('../utilities/formatName');
+const combineParentName = require('../utilities/combineParentName');
 const withOperators = require('./withOperators');
 
 const getBuildWhereInputType = (graphQLContext) => {
-  const buildWhereInputType = ({ name, fields, parent }) => {
+  const buildWhereInputType = (name, fields, parentName) => {
     const fieldToSchemaMap = {
       number: (field) => {
         const type = GraphQLFloat;
@@ -21,7 +22,7 @@ const getBuildWhereInputType = (graphQLContext) => {
           type: withOperators(
             field.name,
             type,
-            parent,
+            parentName,
             ['equals', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals'],
           ),
         };
@@ -32,7 +33,7 @@ const getBuildWhereInputType = (graphQLContext) => {
           type: withOperators(
             field.name,
             type,
-            parent,
+            parentName,
             ['equals', 'like', 'not_equals'],
           ),
         };
@@ -43,7 +44,7 @@ const getBuildWhereInputType = (graphQLContext) => {
           type: withOperators(
             field.name,
             type,
-            parent,
+            parentName,
             ['equals', 'like', 'not_equals'],
           ),
         };
@@ -54,7 +55,7 @@ const getBuildWhereInputType = (graphQLContext) => {
           type: withOperators(
             field.name,
             type,
-            parent,
+            parentName,
             ['equals', 'like', 'not_equals'],
           ),
         };
@@ -65,7 +66,7 @@ const getBuildWhereInputType = (graphQLContext) => {
           type: withOperators(
             field.name,
             type,
-            parent,
+            parentName,
             ['equals', 'like', 'not_equals'],
           ),
         };
@@ -76,7 +77,7 @@ const getBuildWhereInputType = (graphQLContext) => {
           type: withOperators(
             field.name,
             type,
-            parent,
+            parentName,
             ['equals', 'like', 'not_equals'],
           ),
         };
@@ -87,7 +88,7 @@ const getBuildWhereInputType = (graphQLContext) => {
           type: withOperators(
             field.name,
             type,
-            parent,
+            parentName,
             ['equals', 'like', 'not_equals', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than'],
           ),
         };
@@ -102,9 +103,35 @@ const getBuildWhereInputType = (graphQLContext) => {
         type: withOperators(
           field.name,
           GraphQLBoolean,
-          parent,
+          parentName,
           ['equals', 'not_equals'],
         ),
+      }),
+      select: field => ({
+        type: new GraphQLEnumType({
+          name: `${combineParentName(parentName, field.name)}_Input`,
+          values: field.options.reduce((values, option) => {
+            if (typeof option === 'object' && option.value) {
+              return {
+                ...values,
+                [formatName(option.label)]: {
+                  value: option.value,
+                },
+              };
+            }
+
+            if (typeof option === 'string') {
+              return {
+                ...values,
+                [option]: {
+                  value: option,
+                },
+              };
+            }
+
+            return values;
+          }, {}),
+        }),
       }),
     };
 
@@ -125,7 +152,7 @@ const getBuildWhereInputType = (graphQLContext) => {
       type: withOperators(
         'id',
         GraphQLString,
-        parent,
+        parentName,
         ['equals', 'not_equals'],
       ),
     };

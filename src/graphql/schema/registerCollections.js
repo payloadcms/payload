@@ -45,11 +45,11 @@ function registerCollections() {
     const singularLabel = formatName(singular);
     const pluralLabel = formatName(plural);
 
-    collection.graphQLWhereInputType = this.buildWhereInputType({
-      name: singularLabel,
+    collection.graphQLWhereInputType = this.buildWhereInputType(
+      singularLabel,
       fields,
-      parent: singularLabel,
-    });
+      singularLabel,
+    );
 
     this.Query.fields[singularLabel] = {
       type: this.collections[slug].graphQLType,
