@@ -13,6 +13,8 @@ const getFind = (config, collection) => withDefaultLocale(
         model: collection.model,
         query: {},
         paginate: {},
+        locale: context.locale,
+        fallbackLocale: context.fallbackLocale,
       };
 
       if (args.where) options.query.where = args.where;

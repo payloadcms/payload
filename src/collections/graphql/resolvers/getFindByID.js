@@ -12,6 +12,8 @@ const findByID = (config, collection) => withDefaultLocale(
         depth: 0,
         model: collection.model,
         id: args.id,
+        locale: context.locale,
+        fallbackLocale: context.fallbackLocale,
       };
 
       if (args.locale) {
