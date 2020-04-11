@@ -1,5 +1,4 @@
 const express = require('express');
-const graphQLPlayground = require('graphql-playground-middleware-express').default;
 
 const connectMongoose = require('./mongoose/connect');
 const expressMiddleware = require('./express/middleware');
@@ -45,25 +44,6 @@ class Payload {
 
     // Init GraphQL
     this.router.use(this.config.routes.graphQL, new GraphQL(this.config, this.collections).init());
-
-    this.router.get(this.config.routes.graphQLPlayground, (req, res, next) => {
-      let endpoint = `${this.config.routes.api}${this.config.routes.graphQL}`;
-
-      if (req.cookies.token) {
-        endpoint += `?headers=${encodeURIComponent(
-          JSON.stringify({
-            Authorization: `JWT ${req.cookies.token}`,
-          }),
-        )}`;
-      }
-
-      graphQLPlayground({
-        endpoint,
-        settings: {
-          'request.credentials': 'include',
-        },
-      })(req, res, next);
-    });
 
     // Bind router to API
     this.express.use(this.config.routes.api, this.router);
