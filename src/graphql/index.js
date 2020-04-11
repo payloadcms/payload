@@ -27,8 +27,8 @@ class GraphQL {
     this.Mutation = { name: 'Mutation', fields: {} };
 
     this.buildBlockInputType = buildBlockInputType.bind(this);
-    this.buildWhereInputType = buildWhereInputType;
     this.buildMutationInputType = buildMutationInputType.bind(this);
+    this.buildWhereInputType = buildWhereInputType;
     this.buildObjectType = buildObjectType.bind(this);
     this.buildBlockType = buildBlockType.bind(this);
     this.registerCollections = registerCollections.bind(this);

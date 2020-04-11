@@ -2,7 +2,7 @@ const { GraphQLScalarType } = require('graphql');
 const combineParentName = require('../utilities/combineParentName');
 
 function buildBlockInputType(name, blocks, parentName) {
-  const fullName = combineParentName(name, parentName);
+  const fullName = combineParentName(parentName, name);
 
   const validate = (value) => {
     if (Array.isArray(value)) {

@@ -71,7 +71,7 @@ function buildObjectType(name, fields, parentName) {
 
       if (isRelatedToManyCollections) {
         const types = relationTo.map((relation) => {
-          return this.collections[relation].graphQLType;
+          return this.collections[relation].graphQL.type;
         });
 
         type = new GraphQLUnionType({
@@ -82,7 +82,7 @@ function buildObjectType(name, fields, parentName) {
           },
         });
       } else {
-        type = this.collections[relationTo].graphQLType;
+        ({ type } = this.collections[relationTo].graphQL);
       }
 
       // If the relationshipType is undefined at this point,
