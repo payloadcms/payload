@@ -1,9 +1,8 @@
 import Cookies from 'universal-cookie';
 import qs from 'qs';
 
-const cookies = new Cookies();
-
-const setJWT = () => {
+export const getJWTHeader = () => {
+  const cookies = new Cookies();
   const jwt = cookies.get('token');
   return jwt ? { Authorization: `JWT ${jwt}` } : {};
 };
@@ -13,7 +12,7 @@ export const requests = {
     const query = qs.stringify(params, { addQueryPrefix: true });
     return fetch(`${url}${query}`, {
       headers: {
-        ...setJWT(),
+        ...getJWTHeader(),
       },
     });
   },
@@ -26,7 +25,7 @@ export const requests = {
       method: 'post',
       headers: {
         ...headers,
-        ...setJWT(),
+        ...getJWTHeader(),
       },
     };
 
@@ -41,7 +40,7 @@ export const requests = {
       method: 'put',
       headers: {
         ...headers,
-        ...setJWT(),
+        ...getJWTHeader(),
       },
     };
 
