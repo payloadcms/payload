@@ -1,65 +1,52 @@
-const formatName = require('../utilities/formatName');
+const { GraphQLScalarType } = require('graphql');
+const combineParentName = require('../utilities/combineParentName');
 
-function buildBlockInputTypeIfMissing(block) {
-  const {
-    slug,
-    labels: {
-      singular,
-    },
-  } = block;
+function buildBlockInputType(name, blocks, parentName) {
+  const fullName = combineParentName(name, parentName);
 
-  if (!this.types.blockTypes[slug]) {
-    const formattedBlockName = formatName(singular);
-    this.types.blockTypes[slug] = this.buildBlockInputType(
-      formattedBlockName,
-      [
-        ...block.fields,
-        {
-          name: 'blockName',
-          type: 'text',
-        },
-        {
-          name: 'blockType',
-          type: 'text',
-        },
-      ],
-      formattedBlockName,
-    );
-  }
+  const validate = (value) => {
+    if (Array.isArray(value)) {
+      value.forEach((blockValue) => {
+        const blockToValidate = blocks.find(block => block.slug === blockValue.blockType);
+
+        if (!blockToValidate) {
+          throw new Error(`${fullName} tried to set a block type of ${blockValue}, but no corresponding block was found.`);
+        }
+
+        const allRequiredPaths = blockToValidate.fields.reduce((paths, field) => {
+          if (field.required && !field.localized) {
+            return [
+              ...paths,
+              {
+                name: field.name,
+                type: field.type,
+              },
+            ];
+          }
+
+          return paths;
+        });
+
+        allRequiredPaths.forEach((path) => {
+          if (!value[path]) {
+            throw new Error(`${fullName} is missing the required path ${path}`);
+          }
+        });
+      });
+    }
+
+    return value;
+  };
+
+  const LocaleCustomType = new GraphQLScalarType({
+    name: `${fullName}BlockInputType`,
+    description: `Validates ${fullName} values.`,
+    serialize: validate,
+    parseValue: validate,
+    parseLiteral: ast => ast.value,
+  });
+
+  return LocaleCustomType;
 }
 
-module.exports = buildBlockInputTypeIfMissing;
-
-
-// const { GraphQLScalarType } = require('graphql');
-// const combineParentName = require('../utilities/combineParentName');
-
-// const buildBlockInputType = (field, type, parent) => {
-//   const fullName = combineParentName(parent, field.label);
-
-//   const coerceType = (value) => {
-//     if (isLocaleObject) {
-//       // const allKeysValid = Object.values(value).every(locale => isValidJSValue(locale, type));
-
-//       // if (allKeysValid) {
-//       return value;
-//       // }
-//     }
-
-//     return value;
-
-//     // throw new Error(`${fullName}LocaleType can only represent an object containing locales or a matchiing ${fullName} type.`);
-//   };
-
-//   const LocaleCustomType = new GraphQLScalarType({
-//     name: `${fullName}LocaleType`,
-//     description: `Handles locale values that can either be an object containing locales or a matching ${fullName} type.`,
-//     serialize: coerceType,
-//     parseValue: coerceType,
-//     parseLiteral: ast => ast.value,
-//   });
-
-//   return LocaleCustomType;
-// };
-
-// module.exports = buildBlockInputType;
+module.exports = buildBlockInputType;

@@ -26,11 +26,11 @@ class GraphQL {
     this.Query = { name: 'Query', fields: {} };
     this.Mutation = { name: 'Mutation', fields: {} };
 
+    this.buildBlockInputType = buildBlockInputType.bind(this);
     this.buildWhereInputType = buildWhereInputType;
-    this.buildMutationInputType = buildMutationInputType;
+    this.buildMutationInputType = buildMutationInputType.bind(this);
     this.buildObjectType = buildObjectType.bind(this);
     this.buildBlockType = buildBlockType.bind(this);
-    this.buildBlockInputType = buildBlockInputType.bind(this);
     this.registerCollections = registerCollections.bind(this);
   }
 

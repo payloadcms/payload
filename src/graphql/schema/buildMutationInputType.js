@@ -15,7 +15,7 @@ const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
 const withOperators = require('./withOperators');
 
-const buildMutationInputType = (name, fields, parentName) => {
+function buildMutationInputType(name, fields, parentName) {
   const fieldToSchemaMap = {
     number: field => ({ type: withNullableType(field, GraphQLFloat) }),
     text: field => ({ type: withNullableType(field, GraphQLString) }),
@@ -69,6 +69,10 @@ const buildMutationInputType = (name, fields, parentName) => {
       let type = buildMutationInputType(fullName, field.fields, fullName);
       if (requiresAtLeastOneField) type = new GraphQLNonNull(type);
       return { type };
+    },
+    flexible: (field) => {
+      const blockInputType = this.buildBlockInputType(field.name, field.blocks, parentName);
+      return { type: new GraphQLList(blockInputType) };
     },
   };
 
@@ -135,6 +139,6 @@ const buildMutationInputType = (name, fields, parentName) => {
       sort: { type: GraphQLString },
     },
   });
-};
+}
 
 module.exports = buildMutationInputType;

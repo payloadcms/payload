@@ -1,6 +1,6 @@
 const formatName = require('../utilities/formatName');
 
-function buildBlockTypeIfMissing(block) {
+function buildBlockType(block) {
   const {
     slug,
     labels: {
@@ -28,4 +28,4 @@ function buildBlockTypeIfMissing(block) {
   }
 }
 
-module.exports = buildBlockTypeIfMissing;
+module.exports = buildBlockType;

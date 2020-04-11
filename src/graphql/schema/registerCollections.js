@@ -23,21 +23,29 @@ function registerCollections() {
     const singularLabel = formatName(singular);
     const pluralLabel = formatName(plural);
 
-    collection.graphQLType = this.buildObjectType(
+    collection.graphQL = {};
+
+    collection.graphQL.type = this.buildObjectType(
       singularLabel,
       fields,
       singularLabel,
       getFindByID(this.config, collection),
     );
 
-    collection.graphQLWhereInputType = this.buildWhereInputType(
+    collection.graphQL.whereInputType = this.buildWhereInputType(
+      singularLabel,
+      fields,
+      singularLabel,
+    );
+
+    collection.graphQL.mutationInputType = this.buildMutationInputType(
       singularLabel,
       fields,
       singularLabel,
     );
 
     this.Query.fields[singularLabel] = {
-      type: this.collections[slug].graphQLType,
+      type: collection.graphQL.type,
       args: {
         id: { type: GraphQLString },
         locale: { type: this.types.localeInputType },
@@ -47,9 +55,9 @@ function registerCollections() {
     };
 
     this.Query.fields[pluralLabel] = {
-      type: buildPaginatedListType(pluralLabel, collection.graphQLType),
+      type: buildPaginatedListType(pluralLabel, collection.graphQL.type),
       args: {
-        where: { type: collection.graphQLWhereInputType },
+        where: { type: collection.graphQL.whereInputType },
         locale: { type: this.types.localeInputType },
         fallbackLocale: { type: this.types.fallbackLocaleInputType },
         page: { type: GraphQLInt },
@@ -57,6 +65,16 @@ function registerCollections() {
         sort: { type: GraphQLString },
       },
       resolve: getFind(this.config, collection),
+    };
+
+    this.Mutation.fields[`create${singularLabel}`] = {
+      type: collection.graphQLType,
+      args: {
+        data: collection.graphQL.mutationInputType,
+      },
+      resolve: (_, args, context) => {
+        console.log(args);
+      },
     };
   });
 }
