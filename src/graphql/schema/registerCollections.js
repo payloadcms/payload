@@ -4,7 +4,7 @@ const {
 } = require('graphql');
 
 const formatName = require('../utilities/formatName');
-const { getFind, getFindByID } = require('../../collections/graphql/resolvers');
+const { getCreate, getFind, getFindByID } = require('../../collections/graphql/resolvers');
 const buildPaginatedListType = require('../schema/buildPaginatedListType');
 
 function registerCollections() {
@@ -41,7 +41,7 @@ function registerCollections() {
     collection.graphQL.mutationInputType = this.buildMutationInputType(
       singularLabel,
       fields,
-      singularLabel,
+      `create${singularLabel}`,
     );
 
     this.Query.fields[singularLabel] = {
@@ -70,11 +70,9 @@ function registerCollections() {
     this.Mutation.fields[`create${singularLabel}`] = {
       type: collection.graphQL.type,
       args: {
-        data: collection.graphQL.mutationInputType,
+        data: { type: collection.graphQL.mutationInputType },
       },
-      resolve: (_, args, context) => {
-        console.log(args);
-      },
+      resolve: getCreate(this.config, collection),
     };
   });
 }

@@ -4,7 +4,6 @@ const {
   GraphQLNonNull,
   GraphQLFloat,
   GraphQLBoolean,
-  GraphQLInt,
   GraphQLList,
   GraphQLEnumType,
   GraphQLInputObjectType,
@@ -13,7 +12,6 @@ const {
 const withNullableType = require('./withNullableType');
 const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
-const withOperators = require('./withOperators');
 
 function buildMutationInputType(name, fields, parentName) {
   const fieldToSchemaMap = {
@@ -82,18 +80,6 @@ function buildMutationInputType(name, fields, parentName) {
     if (getFieldSchema) {
       const fieldSchema = getFieldSchema(field);
 
-      if (Array.isArray(fieldSchema)) {
-        return {
-          ...schema,
-          ...(fieldSchema.reduce((subFields, subField) => {
-            return {
-              ...subFields,
-              [subField.key]: subField.type,
-            };
-          }, {})),
-        };
-      }
-
       return {
         ...schema,
         [field.name]: fieldSchema,
@@ -103,40 +89,12 @@ function buildMutationInputType(name, fields, parentName) {
     return schema;
   }, {});
 
-  fieldTypes.id = {
-    type: withOperators(
-      'id',
-      GraphQLString,
-      parentName,
-      ['equals', 'not_equals'],
-    ),
-  };
-
   const fieldName = formatName(name);
 
   return new GraphQLInputObjectType({
-    name: `${fieldName}_where`,
+    name: `create${fieldName}Input`,
     fields: {
       ...fieldTypes,
-      OR: {
-        type: new GraphQLList(new GraphQLInputObjectType({
-          name: `${fieldName}_where_or`,
-          fields: {
-            ...fieldTypes,
-          },
-        })),
-      },
-      AND: {
-        type: new GraphQLList(new GraphQLInputObjectType({
-          name: `${fieldName}_where_and`,
-          fields: {
-            ...fieldTypes,
-          },
-        })),
-      },
-      page: { type: GraphQLInt },
-      limit: { type: GraphQLInt },
-      sort: { type: GraphQLString },
     },
   });
 }

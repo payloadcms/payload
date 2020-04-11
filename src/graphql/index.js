@@ -38,8 +38,8 @@ class GraphQL {
     this.registerCollections();
 
     const query = new GraphQLObjectType(this.Query);
-    // const mutation = new GraphQLObjectType(Mutation);
-    const schema = new GraphQLSchema({ query });
+    const mutation = new GraphQLObjectType(this.Mutation);
+    const schema = new GraphQLSchema({ query, mutation });
 
     return graphQLHTTP({ schema });
   }

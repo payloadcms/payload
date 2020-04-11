@@ -3,6 +3,7 @@ const passport = require('passport');
 const compression = require('compression');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
+const cookieParser = require('cookie-parser');
 const localizationMiddleware = require('../../localization/middleware');
 
 const middleware = (config) => {
@@ -10,6 +11,7 @@ const middleware = (config) => {
     passport.initialize(),
     passport.session(),
     express.json(),
+    cookieParser(),
     methodOverride('X-HTTP-Method-Override'),
     express.urlencoded({ extended: true }),
     bodyParser.urlencoded({ extended: true }),
