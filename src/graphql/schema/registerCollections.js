@@ -9,41 +9,26 @@ const buildPaginatedListType = require('../schema/buildPaginatedListType');
 
 function registerCollections() {
   Object.keys(this.collections).forEach((slug) => {
+    const collection = this.collections[slug];
     const {
       config: {
-        labels: {
-          singular,
-        },
-        fields,
-      },
-    } = this.collections[slug];
-
-    const singularLabel = formatName(singular);
-
-    this.collections[slug].graphQLType = this.buildObjectType(
-      singularLabel,
-      fields,
-      singularLabel,
-      getFindByID(this.config, this.collections[slug]),
-    );
-  });
-
-  Object.keys(this.collections).forEach((collectionSlug) => {
-    const collection = this.collections[collectionSlug];
-
-    const {
-      config: {
-        slug,
-        fields,
         labels: {
           singular,
           plural,
         },
+        fields,
       },
     } = collection;
 
     const singularLabel = formatName(singular);
     const pluralLabel = formatName(plural);
+
+    collection.graphQLType = this.buildObjectType(
+      singularLabel,
+      fields,
+      singularLabel,
+      getFindByID(this.config, collection),
+    );
 
     collection.graphQLWhereInputType = this.buildWhereInputType(
       singularLabel,

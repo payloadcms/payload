@@ -23,7 +23,7 @@ const fieldToSchemaMap = {
   textarea: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
-  WYSIWYG: (field) => {
+  wysiwyg: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
   code: (field) => {

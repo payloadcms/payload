@@ -1,12 +1,14 @@
 const { GraphQLObjectType, GraphQLSchema } = require('graphql');
 
 const graphQLHTTP = require('express-graphql');
-const getBuildObjectType = require('./schema/getBuildObjectType');
-const buildBlockTypeIfMissing = require('./schema/buildBlockTypeIfMissing');
+const buildObjectType = require('./schema/buildObjectType');
+const buildMutationInputType = require('./schema/buildMutationInputType');
+const buildBlockType = require('./schema/buildBlockType');
+const buildBlockInputType = require('./schema/buildBlockInputType');
 const buildLocaleInputType = require('./schema/buildLocaleInputType');
 const buildFallbackLocaleInputType = require('./schema/buildFallbackLocaleInputType');
 const registerCollections = require('./schema/registerCollections');
-const getBuildWhereInputType = require('./schema/getBuildWhereInputType');
+const buildWhereInputType = require('./schema/buildWhereInputType');
 
 class GraphQL {
   constructor(config, collections) {
@@ -16,6 +18,7 @@ class GraphQL {
 
     this.types = {
       blockTypes: {},
+      blockInputTypes: {},
       localeInputType: buildLocaleInputType(this.config.localization),
       fallbackLocaleInputType: buildFallbackLocaleInputType(this.config.localization),
     };
@@ -23,9 +26,11 @@ class GraphQL {
     this.Query = { name: 'Query', fields: {} };
     this.Mutation = { name: 'Mutation', fields: {} };
 
-    this.buildWhereInputType = getBuildWhereInputType(this);
-    this.buildObjectType = getBuildObjectType(this);
-    this.buildBlockTypeIfMissing = buildBlockTypeIfMissing.bind(this);
+    this.buildWhereInputType = buildWhereInputType;
+    this.buildMutationInputType = buildMutationInputType;
+    this.buildObjectType = buildObjectType.bind(this);
+    this.buildBlockType = buildBlockType.bind(this);
+    this.buildBlockInputType = buildBlockInputType.bind(this);
     this.registerCollections = registerCollections.bind(this);
   }
 
