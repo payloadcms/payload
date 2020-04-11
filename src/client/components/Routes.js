@@ -11,6 +11,7 @@ import Logout from './views/Logout';
 import NotFound from './views/NotFound';
 import CreateFirstUser from './views/CreateFirstUser';
 import MediaLibrary from './views/MediaLibrary';
+import GraphQLPlayground from './views/GraphQLPlayground';
 import Edit from './views/collections/Edit';
 import EditGlobal from './views/globals/Edit';
 import { requests } from '../api';
@@ -49,6 +50,9 @@ const Routes = () => {
         if (initialized === true) {
           return (
             <Switch>
+              <Route path={`${match.url}${config.routes.graphQLPlayground}`}>
+                <GraphQLPlayground />
+              </Route>
               <Route path={`${match.url}/login`}>
                 <Login />
               </Route>

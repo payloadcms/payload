@@ -41,7 +41,7 @@ function registerCollections() {
     collection.graphQL.mutationInputType = this.buildMutationInputType(
       singularLabel,
       fields,
-      `create${singularLabel}`,
+      singularLabel,
     );
 
     this.Query.fields[singularLabel] = {

@@ -9,9 +9,13 @@ module.exports = (User, config) => {
   opts.secretOrKey = config.user.auth.secretKey;
 
   return new JwtStrategy(opts, (token, done) => {
-    User.findByUsername(token.email, (err, user) => {
-      if (err || !user) done(null, false);
-      return done(null, user);
-    });
+    if (token) {
+      User.findByUsername(token.email, (err, user) => {
+        if (err || !user) done(null, false);
+        return done(null, user);
+      });
+    } else {
+      return done(null, false);
+    }
   });
 };

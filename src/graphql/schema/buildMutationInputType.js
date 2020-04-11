@@ -8,6 +8,7 @@ const {
   GraphQLEnumType,
   GraphQLInputObjectType,
 } = require('graphql');
+const { GraphQLJSON } = require('graphql-type-json');
 
 const withNullableType = require('./withNullableType');
 const formatName = require('../utilities/formatName');
@@ -26,7 +27,7 @@ function buildMutationInputType(name, fields, parentName) {
     checkbox: () => ({ type: GraphQLBoolean }),
     select: (field) => {
       let type = new GraphQLEnumType({
-        name: `${combineParentName(parentName, field.name)}_Input`,
+        name: `${combineParentName(parentName, field.name)}_MutationInput`,
         values: field.options.reduce((values, option) => {
           if (typeof option === 'object' && option.value) {
             return {
@@ -69,8 +70,8 @@ function buildMutationInputType(name, fields, parentName) {
       return { type };
     },
     flexible: (field) => {
-      const blockInputType = this.buildBlockInputType(field.name, field.blocks, parentName);
-      return { type: new GraphQLList(blockInputType) };
+      // const blockInputType = this.buildBlockInputType(field.name, field.blocks, parentName);
+      return { type: GraphQLJSON };
     },
   };
 
@@ -92,7 +93,7 @@ function buildMutationInputType(name, fields, parentName) {
   const fieldName = formatName(name);
 
   return new GraphQLInputObjectType({
-    name: `create${fieldName}Input`,
+    name: `mutation${fieldName}Input`,
     fields: {
       ...fieldTypes,
     },
