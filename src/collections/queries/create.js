@@ -4,7 +4,7 @@ const create = async (options) => {
 
     // Await pre-hook here
 
-    const doc = await options.Model.create(options.data);
+    const doc = await options.model.create(options.data);
 
     // Await post hook here
 

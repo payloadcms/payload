@@ -6,7 +6,7 @@ const { create } = require('../queries');
 const createHandler = async (req, res) => {
   try {
     const doc = await create({
-      Model: req.model,
+      model: req.model,
       data: req.body,
     });
 
