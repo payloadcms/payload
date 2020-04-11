@@ -20,7 +20,7 @@ const ListView = (props) => {
 
   const apiURL = [
     `${serverURL}${api}/${collection.slug}`,
-    page && `page=${page}&`,
+    page && `?page=${page}&`,
   ].filter(Boolean).join('');
 
   const [{ data }] = usePayloadAPI(apiURL);
