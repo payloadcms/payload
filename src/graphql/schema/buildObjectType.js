@@ -17,7 +17,7 @@ const combineParentName = require('../utilities/combineParentName');
 const withNullableType = require('./withNullableType');
 const find = require('../../collections/queries/find');
 
-function buildObjectType(name, fields, parentName) {
+function buildObjectType(name, fields, parentName, addID) {
   const fieldToSchemaMap = {
     number: field => ({ type: withNullableType(field, GraphQLFloat) }),
     text: field => ({ type: withNullableType(field, GraphQLString) }),
@@ -241,6 +241,9 @@ function buildObjectType(name, fields, parentName) {
     },
   };
 
+  const baseFields = {};
+  if (addID) baseFields.id = { type: GraphQLString };
+
   const objectSchema = {
     name,
     fields: () => fields.reduce((schema, field) => {
@@ -253,9 +256,7 @@ function buildObjectType(name, fields, parentName) {
       }
 
       return schema;
-    }, {
-      id: { type: GraphQLString },
-    }),
+    }, baseFields),
   };
 
   const newlyCreatedBlockType = new GraphQLObjectType(objectSchema);

@@ -32,7 +32,7 @@ function registerCollections() {
       singularLabel,
       fields,
       singularLabel,
-      getFindByID(this.config, collection),
+      true,
     );
 
     collection.graphQL.whereInputType = this.buildWhereInputType(
