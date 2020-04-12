@@ -65,20 +65,23 @@ function buildMutationInputType(name, fields, parentName) {
         type = new GraphQLInputObjectType({
           name: fullName,
           fields: {
-            relationTo: new GraphQLEnumType({
-              name: `${fullName}RelationTo`,
-              values: field.relationTo.reduce((values, option) => ({
-                ...values,
-                [option]: {
-                  value: option,
-                },
-              }), {}),
-            }),
+            relationTo: {
+              type: new GraphQLEnumType({
+                name: `${fullName}RelationTo`,
+                values: field.relationTo.reduce((values, option) => ({
+                  ...values,
+                  [option]: {
+                    value: option,
+                  },
+                }), {}),
+              }),
+            },
+            value: { type: GraphQLString },
           },
         });
       }
 
-      return field.hasMany ? new GraphQLList(type) : type;
+      return { type: field.hasMany ? new GraphQLList(type) : type };
     },
     repeater: (field) => {
       const fullName = combineParentName(parentName, field.label);
