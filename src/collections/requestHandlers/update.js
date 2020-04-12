@@ -1,27 +1,26 @@
 const httpStatus = require('http-status');
 const formatErrorResponse = require('../../express/responses/formatError');
 const formatSuccessResponse = require('../../express/responses/formatSuccess');
+const { update } = require('../queries');
 const { NotFound } = require('../../errors');
 
-const update = (req, res) => {
-  req.model.findOne({ _id: req.params.id }, '', {}, (err, doc) => {
-    if (!doc) {
-      return res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(new NotFound(), 'APIError'));
-    }
-
-    Object.assign(doc, req.body);
-
-    return doc.save((saveError) => {
-      if (saveError) {
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(saveError, 'mongoose'));
-      }
-
-      return res.status(httpStatus.OK).json({
-        ...formatSuccessResponse('Updated successfully.', 'message'),
-        doc: doc.toJSON({ virtuals: true }),
-      });
+const updateHandler = async (req, res) => {
+  try {
+    const doc = await update({
+      model: req.model,
+      id: req.params.id,
+      data: req.body,
     });
-  });
+
+    if (!doc) return res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(new NotFound(), 'APIError'));
+
+    return res.status(httpStatus.OK).json({
+      ...formatSuccessResponse('Updated successfully.', 'message'),
+      doc,
+    });
+  } catch (err) {
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));
+  }
 };
 
-module.exports = update;
+module.exports = updateHandler;
