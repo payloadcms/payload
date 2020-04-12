@@ -69,10 +69,7 @@ function buildMutationInputType(name, fields, parentName) {
       if (requiresAtLeastOneField) type = new GraphQLNonNull(type);
       return { type };
     },
-    flexible: (field) => {
-      // const blockInputType = this.buildBlockInputType(field.name, field.blocks, parentName);
-      return { type: GraphQLJSON };
-    },
+    flexible: () => ({ type: GraphQLJSON }),
   };
 
   const fieldTypes = fields.reduce((schema, field) => {
