@@ -18,7 +18,7 @@ const getFind = (config, collection) => withDefaultLocale(
       };
 
       if (args.where) options.query.where = args.where;
-      if (args.limit) options.paginate.limit = args.offset;
+      if (args.limit) options.paginate.limit = args.limit;
       if (args.page) options.paginate.page = args.page;
       if (args.sort) options.paginate.sort = args.sort;
 

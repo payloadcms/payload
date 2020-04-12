@@ -1,4 +1,4 @@
-const destroy = async ({ id, model }) => {
+const deleteQuery = async ({ id, model }) => {
   try {
     // Await pre-hook here
 
@@ -12,4 +12,4 @@ const destroy = async ({ id, model }) => {
   }
 };
 
-module.exports = destroy;
+module.exports = deleteQuery;

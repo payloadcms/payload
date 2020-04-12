@@ -1,10 +1,10 @@
 const httpStatus = require('http-status');
 const { NotFound } = require('../../errors');
-const { destroy } = require('../queries');
+const { deleteQuery } = require('../queries');
 
-const destroyHandler = async (req, res) => {
+const deleteHandler = async (req, res) => {
   try {
-    const doc = await destroy({
+    const doc = await deleteQuery({
       model: req.model,
       id: req.params.id,
     });
@@ -13,10 +13,10 @@ const destroyHandler = async (req, res) => {
       return res.status(httpStatus.NOT_FOUND).json(new NotFound());
     }
 
-    return res.status(httpStatus.OK).send({ result: 'success' });
+    return res.status(httpStatus.OK).send(doc);
   } catch (err) {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(err);
   }
 };
 
-module.exports = destroyHandler;
+module.exports = deleteHandler;

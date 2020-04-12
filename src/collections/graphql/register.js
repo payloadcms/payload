@@ -1,11 +1,14 @@
 const {
   GraphQLString,
+  GraphQLNonNull,
   GraphQLInt,
 } = require('graphql');
 
-const formatName = require('../utilities/formatName');
-const { getCreate, getFind, getFindByID } = require('../../collections/graphql/resolvers');
-const buildPaginatedListType = require('../schema/buildPaginatedListType');
+const formatName = require('../../graphql/utilities/formatName');
+const {
+  getCreate, getFind, getFindByID, getDelete, getUpdate,
+} = require('./resolvers');
+const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
 
 function registerCollections() {
   Object.keys(this.collections).forEach((slug) => {
@@ -61,7 +64,7 @@ function registerCollections() {
         locale: { type: this.types.localeInputType },
         fallbackLocale: { type: this.types.fallbackLocaleInputType },
         page: { type: GraphQLInt },
-        offset: { type: GraphQLInt },
+        limit: { type: GraphQLInt },
         sort: { type: GraphQLString },
       },
       resolve: getFind(this.config, collection),
@@ -73,6 +76,23 @@ function registerCollections() {
         data: { type: collection.graphQL.mutationInputType },
       },
       resolve: getCreate(this.config, collection),
+    };
+
+    this.Mutation.fields[`update${singularLabel}`] = {
+      type: collection.graphQL.type,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLString) },
+        data: { type: collection.graphQL.mutationInputType },
+      },
+      resolve: getUpdate(this.config, collection),
+    };
+
+    this.Mutation.fields[`delete${singularLabel}`] = {
+      type: collection.graphQL.type,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: getDelete(collection),
     };
   });
 }

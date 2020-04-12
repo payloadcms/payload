@@ -116,12 +116,12 @@ function buildMutationInputType(name, fields, parentName) {
 
   const fieldName = formatName(name);
 
-  return new GraphQLInputObjectType({
+  return new GraphQLNonNull(new GraphQLInputObjectType({
     name: `mutation${fieldName}Input`,
     fields: {
       ...fieldTypes,
     },
-  });
+  }));
 }
 
 module.exports = buildMutationInputType;

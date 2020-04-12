@@ -253,7 +253,9 @@ function buildObjectType(name, fields, parentName) {
       }
 
       return schema;
-    }, {}),
+    }, {
+      id: { type: GraphQLString },
+    }),
   };
 
   const newlyCreatedBlockType = new GraphQLObjectType(objectSchema);

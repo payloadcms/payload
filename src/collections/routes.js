@@ -5,7 +5,7 @@ const loadPolicy = require('../express/middleware/loadPolicy');
 const bindCollectionMiddleware = require('./bindCollection');
 
 const {
-  find, create, findByID, destroy, update,
+  find, create, findByID, deleteHandler, update,
 } = requestHandlers;
 
 const router = express.Router();
@@ -22,7 +22,7 @@ const registerRoutes = ({ model, config }) => {
   router.route(`/${config.slug}/:id`)
     .get(loadPolicy(config.policies.read), findByID)
     .put(loadPolicy(config.policies.update), update)
-    .delete(loadPolicy(config.policies.destroy), destroy);
+    .delete(loadPolicy(config.policies.delete), deleteHandler);
 
   return router;
 };

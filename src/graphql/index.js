@@ -1,4 +1,4 @@
-const { GraphQLObjectType, GraphQLSchema, GraphQLInputObjectType } = require('graphql');
+const { GraphQLObjectType, GraphQLSchema } = require('graphql');
 
 const graphQLHTTP = require('express-graphql');
 const buildObjectType = require('./schema/buildObjectType');
@@ -6,7 +6,7 @@ const buildMutationInputType = require('./schema/buildMutationInputType');
 const buildBlockType = require('./schema/buildBlockType');
 const buildLocaleInputType = require('./schema/buildLocaleInputType');
 const buildFallbackLocaleInputType = require('./schema/buildFallbackLocaleInputType');
-const registerCollections = require('./schema/registerCollections');
+const registerCollections = require('../collections/graphql/register');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 
 class GraphQL {
