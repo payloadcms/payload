@@ -14,6 +14,13 @@ module.exports = {
     destroy: user => checkRole(['user', 'admin'], user),
   },
   fields: [
+    {
+      name: 'alt',
+      label: 'Alt Text',
+      type: 'text',
+      required: true,
+      localized: true,
+    },
   ],
   timestamps: true,
 };

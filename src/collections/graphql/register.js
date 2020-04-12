@@ -32,7 +32,9 @@ function registerCollections() {
       singularLabel,
       fields,
       singularLabel,
-      true,
+      {
+        id: { type: GraphQLString },
+      },
     );
 
     collection.graphQL.whereInputType = this.buildWhereInputType(

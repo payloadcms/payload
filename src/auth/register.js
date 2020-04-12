@@ -12,20 +12,20 @@ function registerUser() {
   this.config.user.fields.push(...baseUserFields);
   const userSchema = buildCollectionSchema(this.config.user, this.config);
   userSchema.plugin(passportLocalMongoose, { usernameField: this.config.user.auth.useAsUsername });
-  this.User = mongoose.model(this.config.user.labels.singular, userSchema);
+  this.User = {
+    config: this.config.user,
+    model: mongoose.model(this.config.user.labels.singular, userSchema),
+  };
 
-  passport.use(this.User.createStrategy());
-  passport.use(jwtStrategy(this.User, this.config));
-  passport.serializeUser(this.User.serializeUser());
-  passport.deserializeUser(this.User.deserializeUser());
+  passport.use(this.User.model.createStrategy());
+  passport.use(jwtStrategy(this.User.model, this.config));
+  passport.serializeUser(this.User.model.serializeUser());
+  passport.deserializeUser(this.User.model.deserializeUser());
   passport.use(new AnonymousStrategy.Strategy());
 
-  this.router.use(authRoutes(this.config, this.User));
+  this.router.use(authRoutes(this.config, this.User.model));
 
-  this.router.use(collectionRoutes({
-    model: this.User,
-    config: this.config.user,
-  }));
+  this.router.use(collectionRoutes(this.User));
 }
 
 module.exports = registerUser;

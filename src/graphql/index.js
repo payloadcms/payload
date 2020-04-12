@@ -7,11 +7,15 @@ const buildBlockType = require('./schema/buildBlockType');
 const buildLocaleInputType = require('./schema/buildLocaleInputType');
 const buildFallbackLocaleInputType = require('./schema/buildFallbackLocaleInputType');
 const registerCollections = require('../collections/graphql/register');
+const registerUser = require('../auth/graphql/register');
+const registerUpload = require('../uploads/graphql/register');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 
 class GraphQL {
-  constructor(config, collections) {
+  constructor(config, collections, User, Upload) {
     this.config = config;
+    this.User = User;
+    this.Upload = Upload;
     this.collections = collections;
     this.init = this.init.bind(this);
 
@@ -30,10 +34,14 @@ class GraphQL {
     this.buildWhereInputType = buildWhereInputType;
     this.buildObjectType = buildObjectType.bind(this);
     this.registerCollections = registerCollections.bind(this);
+    this.registerUser = registerUser.bind(this);
+    this.registerUpload = registerUpload.bind(this);
   }
 
   init() {
     this.registerCollections();
+    this.registerUser();
+    this.registerUpload();
 
     const query = new GraphQLObjectType(this.Query);
     const mutation = new GraphQLObjectType(this.Mutation);

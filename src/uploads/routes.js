@@ -7,12 +7,12 @@ const uploadMiddleware = require('./middleware');
 const router = express.Router();
 
 const uploadRoutes = (config, Upload) => {
-  const { upload: uploadConfig } = config;
+  const { config: uploadConfig, model } = Upload;
 
   router.all(`/${uploadConfig.slug}*`,
     fileUpload(),
     passport.authenticate('jwt', { session: false }),
-    uploadMiddleware(config, Upload));
+    uploadMiddleware(config, model));
 
   router.route(`/${uploadConfig.slug}`)
     .post(
