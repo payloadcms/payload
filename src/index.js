@@ -1,5 +1,6 @@
 const express = require('express');
-
+const graphQLPlayground = require('graphql-playground-middleware-express').default;
+const passport = require('passport');
 const connectMongoose = require('./mongoose/connect');
 const expressMiddleware = require('./express/middleware');
 const initWebpack = require('./webpack/init');
@@ -24,7 +25,6 @@ class Payload {
 
     // Setup & initialization
     connectMongoose(this.config.mongoURL);
-
     this.router.use(...expressMiddleware(this.config));
 
     // Register and bind required collections
@@ -42,8 +42,30 @@ class Payload {
       this.express.use(initWebpack(this.config));
     }
 
-    // Init GraphQL
-    this.router.use(this.config.routes.graphQL, new GraphQL(this.config, this.collections).init());
+    if (process.env.NODE_ENV !== 'production' || this.config.productionGraphQLPlayground) {
+      // Init GraphQL
+      this.router.use(
+        this.config.routes.graphQL,
+        (req, _, next) => {
+          const existingAuthHeader = req.get('Authorization');
+          const { token } = req.cookies;
+
+          if (!existingAuthHeader && token) {
+            req.headers.authorization = `JWT ${token}`;
+          }
+          next();
+        },
+        passport.authenticate(['jwt', 'anonymous'], { session: false }),
+        new GraphQL(this.config, this.collections).init(),
+      );
+    }
+
+    this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
+      endpoint: `${this.config.routes.api}${this.config.routes.graphQL}`,
+      settings: {
+        'request.credentials': 'include',
+      },
+    }));
 
     // Bind router to API
     this.express.use(this.config.routes.api, this.router);

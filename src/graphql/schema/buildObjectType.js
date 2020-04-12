@@ -232,7 +232,7 @@ function buildObjectType(name, fields, parentName) {
       const type = new GraphQLList(new GraphQLUnionType({
         name: combineParentName(parentName, field.label),
         types: blockTypes,
-        resolveType(data) {
+        resolveType: (data) => {
           return this.types.blockTypes[data.blockType];
         },
       }));

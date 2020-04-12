@@ -71,6 +71,7 @@ module.exports = {
   },
   staticURL: '/uploads',
   staticDir: 'demo/upload',
+  productionGraphQLPlayground: false,
   email: {
     provider: 'mock',
   },

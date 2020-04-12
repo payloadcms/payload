@@ -8,13 +8,11 @@ module.exports = (User, config) => {
   opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('JWT');
   opts.secretOrKey = config.user.auth.secretKey;
 
-  return new JwtStrategy(opts, (token, done) => {
-    if (token) {
-      User.findByUsername(token.email, (err, user) => {
-        if (err || !user) done(null, false);
-        return done(null, user);
-      });
-    } else {
+  return new JwtStrategy(opts, async (token, done) => {
+    try {
+      const user = await User.findByUsername(token.email);
+      return done(null, user);
+    } catch (err) {
       return done(null, false);
     }
   });
