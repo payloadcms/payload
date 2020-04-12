@@ -6,7 +6,7 @@ const {
 
 const formatName = require('../../graphql/utilities/formatName');
 const {
-  getCreate, getFind, getFindByID, getDelete, getUpdate,
+  getFind, getFindByID, getDelete, getUpdate,
 } = require('../../collections/graphql/resolvers');
 
 const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
@@ -69,14 +69,6 @@ function registerUser() {
       sort: { type: GraphQLString },
     },
     resolve: getFind(this.config, this.User),
-  };
-
-  this.Mutation.fields[`create${singularLabel}`] = {
-    type: this.User.graphQL.type,
-    args: {
-      data: { type: this.User.graphQL.mutationInputType },
-    },
-    resolve: getCreate(this.config, this.User),
   };
 
   this.Mutation.fields[`update${singularLabel}`] = {
