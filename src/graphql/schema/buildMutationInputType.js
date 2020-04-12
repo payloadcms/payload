@@ -56,6 +56,30 @@ function buildMutationInputType(name, fields, parentName) {
 
       return { type };
     },
+    relationship: (field) => {
+      const isRelatedToManyCollections = Array.isArray(field.relationTo);
+      let type = GraphQLString;
+
+      if (isRelatedToManyCollections) {
+        const fullName = `${combineParentName(parentName, field.label)}RelationshipInput`;
+        type = new GraphQLInputObjectType({
+          name: fullName,
+          fields: {
+            relationTo: new GraphQLEnumType({
+              name: `${fullName}RelationTo`,
+              values: field.relationTo.reduce((values, option) => ({
+                ...values,
+                [option]: {
+                  value: option,
+                },
+              }), {}),
+            }),
+          },
+        });
+      }
+
+      return field.hasMany ? new GraphQLList(type) : type;
+    },
     repeater: (field) => {
       const fullName = combineParentName(parentName, field.label);
       let type = buildMutationInputType(fullName, field.fields, fullName);

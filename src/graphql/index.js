@@ -1,4 +1,4 @@
-const { GraphQLObjectType, GraphQLSchema } = require('graphql');
+const { GraphQLObjectType, GraphQLSchema, GraphQLInputObjectType } = require('graphql');
 
 const graphQLHTTP = require('express-graphql');
 const buildObjectType = require('./schema/buildObjectType');
