@@ -1,12 +1,14 @@
 /* eslint-disable no-param-reassign */
-const findByIDQuery = require('../../queries/findByID');
+const findByID = require('../../queries/findByID');
 
-const findByID = collection => async (_, args, context) => {
+const findByIDResolver = collection => async (_, args, context) => {
   const options = {
-    ...collection,
+    config: collection.config,
+    Model: collection.Model,
     depth: 0,
     id: args.id,
     user: context.user,
+    api: 'GraphQL',
   };
 
   if (args.locale) {
@@ -19,9 +21,9 @@ const findByID = collection => async (_, args, context) => {
     options.fallbackLocale = args.fallbackLocale;
   }
 
-  const result = await findByIDQuery(options);
+  const result = await findByID(options);
 
   return result;
 };
 
-module.exports = findByID;
+module.exports = findByIDResolver;

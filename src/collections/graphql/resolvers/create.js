@@ -1,11 +1,13 @@
 /* eslint-disable no-param-reassign */
-const createQuery = require('../../queries/create');
+const create = require('../../queries/create');
 
-const create = collection => async (_, args, context) => {
+const createResolver = collection => async (_, args, context) => {
   const options = {
-    ...collection,
+    config: collection.config,
+    Model: collection.Model,
     data: args.data,
     user: context.user,
+    api: 'GraphQL',
   };
 
   if (args.locale) {
@@ -13,9 +15,9 @@ const create = collection => async (_, args, context) => {
     options.locale = args.locale;
   }
 
-  const result = await createQuery(options);
+  const result = await create(options);
 
   return result;
 };
 
-module.exports = create;
+module.exports = createResolver;

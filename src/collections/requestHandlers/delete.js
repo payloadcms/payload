@@ -5,12 +5,13 @@ const { deleteQuery } = require('../queries');
 const deleteHandler = async (req, res) => {
   try {
     const doc = await deleteQuery({
-      model: req.model,
+      Model: req.Model,
       config: req.collection,
       user: req.user,
       id: req.params.id,
       locale: req.locale,
       fallbackLocale: req.fallbackLocale,
+      api: 'REST',
     });
 
     if (!doc) {

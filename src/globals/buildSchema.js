@@ -7,7 +7,7 @@ const localizationPlugin = require('../localization/plugin');
 const registerSchema = (config) => {
   const globals = {
     config: config.globals,
-    model: {},
+    Model: {},
   };
 
   if (config.globals && config.globals.length > 0) {
@@ -29,7 +29,7 @@ const registerSchema = (config) => {
       Globals.discriminator(globalConfig.slug, globalSchema);
     });
 
-    globals.model = Globals;
+    globals.Model = Globals;
   }
 
   return globals;

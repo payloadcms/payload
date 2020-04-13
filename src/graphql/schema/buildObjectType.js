@@ -121,7 +121,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
                 }
 
                 const result = await find({
-                  model: this.collections[relatedCollectionSlug].model,
+                  Model: this.collections[relatedCollectionSlug].Model,
                   query: {
                     where: {
                       ...(args.where || {}),
@@ -150,7 +150,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
             id = id.toString();
 
             const relatedDocumentQuery = {
-              model: this.collections[relatedCollectionSlug].model,
+              Model: this.collections[relatedCollectionSlug].Model,
               query: {
                 where: {
                   ...(args.where || {}),

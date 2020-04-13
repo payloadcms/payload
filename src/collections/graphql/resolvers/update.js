@@ -1,13 +1,15 @@
 /* eslint-disable no-param-reassign */
-const updateQuery = require('../../queries/update');
+const update = require('../../queries/update');
 
-const update = collection => async (_, args, context) => {
+const updateResolver = collection => async (_, args, context) => {
   const options = {
-    ...collection,
+    config: collection.config,
+    Model: collection.Model,
     locale: context.locale,
     data: args.data,
     id: args.id,
     user: context.user,
+    api: 'GraphQL',
   };
 
   if (args.locale) {
@@ -15,9 +17,9 @@ const update = collection => async (_, args, context) => {
     options.locale = args.locale;
   }
 
-  const result = await updateQuery(options);
+  const result = await update(options);
 
   return result;
 };
 
-module.exports = update;
+module.exports = updateResolver;

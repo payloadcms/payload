@@ -1,19 +1,18 @@
 /* eslint-disable no-param-reassign */
 const find = require('../../queries/find');
 
-const getFind = collection => async (_, args, context) => {
+const findResolver = collection => async (_, args, context) => {
   const options = {
-    ...collection,
+    config: collection.config,
+    Model: collection.Model,
     depth: 0,
-    query: {},
-    paginate: {},
+    where: args.where,
+    limit: args.limit,
+    page: args.page,
+    sort: args.sort,
     user: context.user,
+    api: 'GraphQL',
   };
-
-  if (args.where) options.query.where = args.where;
-  if (args.limit) options.paginate.limit = args.limit;
-  if (args.page) options.paginate.page = args.page;
-  if (args.sort) options.paginate.sort = args.sort;
 
   if (args.locale) {
     context.locale = args.locale;
@@ -30,4 +29,4 @@ const getFind = collection => async (_, args, context) => {
   return results;
 };
 
-module.exports = getFind;
+module.exports = findResolver;

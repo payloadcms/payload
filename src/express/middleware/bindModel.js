@@ -1,6 +1,6 @@
-const bindModelMiddleware = (model) => {
+const bindModelMiddleware = (Model) => {
   return (req, res, next) => {
-    req.model = model;
+    req.Model = Model;
     next();
   };
 };

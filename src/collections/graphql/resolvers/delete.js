@@ -1,11 +1,13 @@
 /* eslint-disable no-param-reassign */
 const { deleteQuery } = require('../../queries');
 
-const getDelete = collection => async (_, args, context) => {
+const deleteResolver = collection => async (_, args, context) => {
   const options = {
-    ...collection,
+    config: collection.config,
+    Model: collection.Model,
     id: args.id,
     user: context.user,
+    api: 'GraphQL',
   };
 
   if (args.locale) {
@@ -23,4 +25,4 @@ const getDelete = collection => async (_, args, context) => {
   return result;
 };
 
-module.exports = getDelete;
+module.exports = deleteResolver;

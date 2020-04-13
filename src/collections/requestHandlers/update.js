@@ -7,12 +7,13 @@ const { NotFound } = require('../../errors');
 const updateHandler = async (req, res) => {
   try {
     const doc = await update({
-      model: req.model,
+      Model: req.Model,
       config: req.collection,
       user: req.user,
       id: req.params.id,
       data: req.body,
       locale: req.locale,
+      api: 'REST',
     });
 
     if (!doc) return res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(new NotFound(), 'APIError'));

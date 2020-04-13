@@ -9,9 +9,9 @@ const {
 
 const router = express.Router();
 
-const registerRoutes = ({ model, config }) => {
+const registerRoutes = ({ Model, config }) => {
   router.all(`/${config.slug}*`,
-    bindModelMiddleware(model),
+    bindModelMiddleware(Model),
     bindCollectionMiddleware(config));
 
   router.route(`/${config.slug}`)

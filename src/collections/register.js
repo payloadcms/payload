@@ -8,7 +8,7 @@ function registerCollections() {
     validate(collection, this.collections);
 
     this.collections[collection.slug] = {
-      model: mongoose.model(collection.slug, buildSchema(collection, this.config)),
+      Model: mongoose.model(collection.slug, buildSchema(collection, this.config)),
       config: collection,
     };
 

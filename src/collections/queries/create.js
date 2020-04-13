@@ -1,36 +1,75 @@
 const { Forbidden } = require('../../errors');
 const executePolicy = require('../../auth/executePolicy');
 
-const create = async (options) => {
+const create = async (args) => {
   try {
-    const {
-      model: Model,
-      data,
-      config,
-      user,
-      locale,
-    } = options;
+    // /////////////////////////////////////
+    // 1. Retrieve and execute policy
+    // /////////////////////////////////////
 
-    const policy = config && config.policies && config.policies.create;
-    const hasPermission = await executePolicy(user, policy);
+    const policy = args.config && args.config.policies && args.config.policies.create;
+    const hasPermission = await executePolicy(args.user, policy);
 
     if (hasPermission) {
       // Await validation here
 
-      // Await pre-hook here
+      let options = {
+        Model: args.Model,
+        config: args.config,
+        locale: args.locale,
+        fallbackLocale: args.fallbackLocale,
+        user: args.user,
+        api: args.api,
+        data: args.data,
+      };
 
-      const doc = new Model();
+      // /////////////////////////////////////
+      // 2. Execute before collection hook
+      // /////////////////////////////////////
 
-      if (locale && doc.setLocale) {
-        doc.setLocale(locale);
+      const beforeCreateHook = args.config && args.config.hooks && args.config.hooks.beforeCreate;
+
+      if (typeof beforeCreateHook === 'function') {
+        options = await beforeCreateHook(options);
       }
 
-      Object.assign(doc, data);
-      await doc.save();
+      // /////////////////////////////////////
+      // 3. Query database
+      // /////////////////////////////////////
 
-      // Await post hook here
+      const {
+        Model,
+        locale,
+        fallbackLocale,
+        data,
+      } = options;
 
-      return doc.toJSON({ virtuals: true });
+      let result = new Model();
+
+      if (locale && result.setLocale) {
+        result.setLocale(locale, fallbackLocale);
+      }
+
+      Object.assign(result, data);
+      await result.save();
+
+      result = result.toJSON({ virtuals: true });
+
+      // /////////////////////////////////////
+      // 4. Execute after collection hook
+      // /////////////////////////////////////
+
+      const afterDeleteHook = args.config && args.config.hooks && args.config.hooks.afterDelete;
+
+      if (typeof afterDeleteHook === 'function') {
+        result = await afterDeleteHook(options, result);
+      }
+
+      // /////////////////////////////////////
+      // 5. Return results
+      // /////////////////////////////////////
+
+      return result;
     }
 
     throw new Forbidden();

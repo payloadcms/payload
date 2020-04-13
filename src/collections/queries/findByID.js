@@ -1,52 +1,69 @@
 const { Forbidden, NotFound } = require('../../errors');
 const executePolicy = require('../../auth/executePolicy');
 
-const findByID = async (options) => {
+const findByID = async (args) => {
   try {
-    const {
-      depth,
-      locale,
-      fallbackLocale,
-      model,
-      config,
-      id,
-      user,
-    } = options;
-
     // /////////////////////////////////////
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    const policy = config && config.policies && config.policies.read;
-    const hasPermission = await executePolicy(user, policy);
+    const policy = args.config && args.config.policies && args.config.policies.read;
+    const hasPermission = await executePolicy(args.user, policy);
 
     if (hasPermission) {
-      let mongooseQuery = { _id: id };
-      let mongooseOptions = { options: {} };
-
-      if (depth && depth !== '0') {
-        mongooseOptions.options.autopopulate = {
-          maxDepth: parseInt(depth, 10),
-        };
-      } else {
-        mongooseOptions.options.autopopulate = false;
-      }
+      let options = {
+        query: { _id: args.id },
+        Model: args.Model,
+        locale: args.locale,
+        fallbackLocale: args.fallbackLocale,
+        depth: args.depth,
+        config: args.config,
+        user: args.user,
+        api: args.api,
+      };
 
       // /////////////////////////////////////
       // 2. Execute before collection hook
       // /////////////////////////////////////
 
-      const beforeReadHook = config && config.hooks && config.hooks.beforeRead;
+      const beforeReadHook = args.config && args.config.hooks && args.config.hooks.beforeRead;
 
       if (typeof beforeReadHook === 'function') {
-        [mongooseQuery, mongooseOptions] = await beforeReadHook(mongooseQuery, mongooseOptions);
+        options = await beforeReadHook(options);
       }
 
       // /////////////////////////////////////
       // 3. Query database
       // /////////////////////////////////////
 
-      let result = await model.findOne(mongooseQuery, {}, mongooseOptions);
+      const {
+        depth,
+        api,
+        Model,
+        query,
+        locale,
+        fallbackLocale,
+      } = options;
+
+      const queryOptionsToExecute = {
+        options: {},
+      };
+
+      // Only allow depth override within REST.
+      // If allowed in GraphQL, it would break resolvers
+      // as a full object will be returned instead of an ID string
+      if (api === 'REST') {
+        if (depth && depth !== '0') {
+          queryOptionsToExecute.options.autopopulate = {
+            maxDepth: parseInt(depth, 10),
+          };
+        } else {
+          queryOptionsToExecute.options.autopopulate = false;
+        }
+      }
+
+
+      let result = await Model.findOne(query, {}, queryOptionsToExecute);
 
       if (!result) throw new NotFound();
 
@@ -60,7 +77,7 @@ const findByID = async (options) => {
       // 4. Execute after collection hook
       // /////////////////////////////////////
 
-      const afterReadHook = config && config.hooks && config.hooks.afterRead;
+      const afterReadHook = args.config && args.config.hooks && args.config.hooks.afterRead;
 
       if (typeof afterReadHook === 'function') {
         result = await afterReadHook(options, result);

@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const path = require('path');
 const checkRole = require('../../policies/checkRole');
 
@@ -15,19 +16,20 @@ module.exports = {
     delete: user => checkRole(['user', 'admin'], user),
   },
   hooks: {
-    beforeCreate: value => value,
-    afterCreate: value => value,
-    beforeRead: (query, options) => [query, options],
-    afterRead: (options, result) => result,
-    beforeUpdate: value => value,
-    afterUpdate: value => value,
+    beforeCreate: options => options,
+    beforeRead: options => options,
+    beforeUpdate: options => options,
     beforeDelete: (options) => {
-      console.log(`About to delete ${options.id}`);
+      console.log(`About to delete ${options.query._id}`);
+      return options;
     },
-    afterDelete: (options, result) => {
-      console.log(`Deleted ${options.id}`);
-      console.log(`Deleted record: ${JSON.stringify(result)}`);
-      return result;
+    afterCreate: (options, value) => value,
+    afterRead: (options, value) => value,
+    afterUpdate: (options, value) => value,
+    afterDelete: (options, value) => {
+      console.log(`Deleted ${options.query._id}`);
+      console.log(`Deleted record: ${JSON.stringify(value)}`);
+      return value;
     },
   },
   fields: [
@@ -40,9 +42,9 @@ module.exports = {
       unique: true,
       localized: true,
       hooks: {
-        beforeRead: value => value,
-        beforeChange: value => value,
-        afterChange: value => value,
+        beforeCreate: value => value,
+        beforeUpdate: value => value,
+        afterRead: value => value,
       },
     },
     {

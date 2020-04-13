@@ -2,9 +2,9 @@ const httpStatus = require('http-status');
 
 const uploadMiddleware = (config, Upload) => {
   return (req, res, next) => {
-    req.model = Upload;
+    req.Model = Upload;
 
-    // set the req.model to the correct type of upload
+    // set the req.Model to the correct type of upload
     if (req.body.type) {
       if (config.uploads[req.body.type]) {
         req.uploadConfig = config.uploads[req.body.type];
