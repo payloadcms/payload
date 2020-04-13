@@ -6,13 +6,13 @@ function convertToText(obj) {
 
   if (obj === undefined || obj === null) {
     return String(obj);
-  } if (typeof (obj) === 'object' && (obj.join === undefined || obj.join === null)) {
+  } if (typeof (obj) === 'object' && !Array.isArray(obj)) {
     Object.keys(obj).forEach((prop) => {
       if (Object.prototype.hasOwnProperty.call(obj, prop)) string.push(`${prop}: ${convertToText(obj[prop])}`);
     });
 
     return `{${string.join(',')}}`;
-  } if (typeof (obj) === 'object' && !(obj.join === undefined || obj.join === null)) {
+  } if (Array.isArray(obj)) {
     Object.keys(obj).forEach((prop) => {
       string.push(convertToText(obj[prop]));
     });

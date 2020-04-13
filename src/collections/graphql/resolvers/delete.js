@@ -8,6 +8,16 @@ const getDelete = collection => async (_, args, context) => {
     user: context.user,
   };
 
+  if (args.locale) {
+    context.locale = args.locale;
+    options.locale = args.locale;
+  }
+
+  if (args.fallbackLocale) {
+    context.fallbackLocale = args.fallbackLocale;
+    options.fallbackLocale = args.fallbackLocale;
+  }
+
   const result = await deleteQuery(options);
 
   return result;

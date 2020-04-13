@@ -18,11 +18,17 @@ module.exports = {
     beforeCreate: value => value,
     afterCreate: value => value,
     beforeRead: (query, options) => [query, options],
-    afterRead: (options, value) => value,
+    afterRead: (options, result) => result,
     beforeUpdate: value => value,
     afterUpdate: value => value,
-    beforeDelete: value => value,
-    afterDelete: value => value,
+    beforeDelete: (options) => {
+      console.log(`About to delete ${options.id}`);
+    },
+    afterDelete: (options, result) => {
+      console.log(`Deleted ${options.id}`);
+      console.log(`Deleted record: ${JSON.stringify(result)}`);
+      return result;
+    },
   },
   fields: [
     {
