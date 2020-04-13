@@ -8,6 +8,8 @@ const updateHandler = async (req, res) => {
   try {
     const doc = await update({
       model: req.model,
+      config: req.collection,
+      user: req.user,
       id: req.params.id,
       data: req.body,
     });

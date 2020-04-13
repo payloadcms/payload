@@ -1,12 +1,26 @@
-const deleteQuery = async ({ id, model }) => {
+const { Forbidden } = require('../../errors');
+const executePolicy = require('../../auth/executePolicy');
+
+const deleteQuery = async (options) => {
   try {
-    // Await pre-hook here
+    const {
+      model,
+      id,
+      user,
+      config,
+    } = options;
 
-    const result = await model.findOneAndDelete({ _id: id });
+    const policy = config && config.policies && config.policies.delete;
+    const hasPermission = await executePolicy(user, policy);
 
-    // Await post hook here
+    if (hasPermission) {
+      // Await pre-hook here
 
-    return result;
+      const result = await model.findOneAndDelete({ _id: id });
+      return result.toJSON({ virtuals: true });
+      // Await post hook here
+    }
+    throw new Forbidden();
   } catch (err) {
     throw err;
   }

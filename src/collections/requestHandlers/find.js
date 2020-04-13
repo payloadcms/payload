@@ -5,6 +5,8 @@ const findHandler = async (req, res) => {
   try {
     const options = {
       model: req.model,
+      config: req.collection,
+      user: req.user,
       query: {},
       paginate: {
         page: req.query.page,

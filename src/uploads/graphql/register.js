@@ -6,7 +6,7 @@ const {
 
 const formatName = require('../../graphql/utilities/formatName');
 const {
-  getCreate, getFind, getFindByID, getDelete, getUpdate,
+  create, find, findByID, deleteResolver, update,
 } = require('../../collections/graphql/resolvers');
 
 const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
@@ -55,7 +55,7 @@ function registerUpload() {
       locale: { type: this.types.localeInputType },
       fallbackLocale: { type: this.types.fallbackLocaleInputType },
     },
-    resolve: getFindByID(this.config, this.Upload),
+    resolve: findByID(this.Upload),
   };
 
   this.Query.fields[pluralLabel] = {
@@ -68,7 +68,7 @@ function registerUpload() {
       limit: { type: GraphQLInt },
       sort: { type: GraphQLString },
     },
-    resolve: getFind(this.config, this.Upload),
+    resolve: find(this.Upload),
   };
 
   this.Mutation.fields[`update${singularLabel}`] = {
@@ -77,7 +77,7 @@ function registerUpload() {
       id: { type: new GraphQLNonNull(GraphQLString) },
       data: { type: this.Upload.graphQL.mutationInputType },
     },
-    resolve: getUpdate(this.config, this.Upload),
+    resolve: update(this.Upload),
   };
 
   this.Mutation.fields[`delete${singularLabel}`] = {
@@ -85,7 +85,7 @@ function registerUpload() {
     args: {
       id: { type: new GraphQLNonNull(GraphQLString) },
     },
-    resolve: getDelete(this.Upload),
+    resolve: deleteResolver(this.Upload),
   };
 }
 

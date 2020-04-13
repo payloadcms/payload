@@ -1,21 +1,33 @@
+const { Forbidden } = require('../../errors');
+const executePolicy = require('../../auth/executePolicy');
+
 const update = async (options) => {
   try {
     const {
       id,
       model,
       data,
+      config,
+      user,
     } = options;
-    // Await validation here
 
-    // Await pre-hook here
+    const policy = config && config.policies && config.policies.update;
+    const hasPermission = await executePolicy(user, policy);
 
-    const doc = await model.findOne({ _id: id });
-    Object.assign(doc, data);
-    await doc.save();
+    if (hasPermission) {
+      // Await validation here
 
-    // Await post hook here
+      // Await pre-hook here
 
-    return doc.toJSON({ virtuals: true });
+      const doc = await model.findOne({ _id: id });
+      Object.assign(doc, data);
+      await doc.save();
+
+      // Await post hook here
+
+      return doc.toJSON({ virtuals: true });
+    }
+    throw new Forbidden();
   } catch (err) {
     throw err;
   }

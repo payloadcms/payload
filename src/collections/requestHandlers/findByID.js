@@ -5,6 +5,8 @@ const formatErrorResponse = require('../../express/responses/formatError');
 const findByIDHandler = async (req, res) => {
   const options = {
     model: req.model,
+    config: req.collection,
+    user: req.user,
     id: req.params.id,
     locale: req.locale,
     fallbackLocale: req.query['fallback-locale'],

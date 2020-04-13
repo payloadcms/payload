@@ -6,6 +6,8 @@ const deleteHandler = async (req, res) => {
   try {
     const doc = await deleteQuery({
       model: req.model,
+      config: req.collection,
+      user: req.user,
       id: req.params.id,
     });
 

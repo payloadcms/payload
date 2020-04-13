@@ -1,7 +1,6 @@
 const express = require('express');
 const requestHandlers = require('./requestHandlers');
 const bindModelMiddleware = require('../express/middleware/bindModel');
-const loadPolicy = require('../express/middleware/loadPolicy');
 const bindCollectionMiddleware = require('./bindCollection');
 
 const {
@@ -16,13 +15,13 @@ const registerRoutes = ({ model, config }) => {
     bindCollectionMiddleware(config));
 
   router.route(`/${config.slug}`)
-    .get(loadPolicy(config.policies.read), find)
-    .post(loadPolicy(config.policies.create), create);
+    .get(find)
+    .post(create);
 
   router.route(`/${config.slug}/:id`)
-    .get(loadPolicy(config.policies.read), findByID)
-    .put(loadPolicy(config.policies.update), update)
-    .delete(loadPolicy(config.policies.delete), deleteHandler);
+    .get(findByID)
+    .put(update)
+    .delete(deleteHandler);
 
   return router;
 };
