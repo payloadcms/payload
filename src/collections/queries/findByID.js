@@ -21,9 +21,8 @@ const findByID = async (options) => {
     const hasPermission = await executePolicy(user, policy);
 
     if (hasPermission) {
-      let mongooseOptions = {
-        options: {},
-      };
+      let mongooseQuery = { _id: id };
+      let mongooseOptions = { options: {} };
 
       if (depth && depth !== '0') {
         mongooseOptions.options.autopopulate = {
@@ -40,14 +39,14 @@ const findByID = async (options) => {
       const beforeReadHook = config && config.hooks && config.hooks.beforeRead;
 
       if (typeof beforeReadHook === 'function') {
-        mongooseOptions = await beforeReadHook(mongooseOptions);
+        [mongooseQuery, mongooseOptions] = await beforeReadHook(mongooseQuery, mongooseOptions);
       }
 
       // /////////////////////////////////////
       // 3. Query database
       // /////////////////////////////////////
 
-      let result = await model.findOne({ _id: id }, {}, mongooseOptions);
+      let result = await model.findOne(mongooseQuery, {}, mongooseOptions);
 
       if (!result) throw new NotFound();
 

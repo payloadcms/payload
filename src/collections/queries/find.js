@@ -14,17 +14,16 @@ const find = async (options) => {
       user,
     } = options;
 
+    // /////////////////////////////////////
+    // 1. Retrieve and execute policy
+    // /////////////////////////////////////
+
     const policy = config && config.policies && config.policies.read;
     const hasPermission = await executePolicy(user, policy);
 
     if (hasPermission) {
-      // await pre find hook here
-
-      const mongooseQuery = await model.buildQuery(query, locale);
-
-      const mongooseOptions = {
-        options: {},
-      };
+      let mongooseQuery = await model.buildQuery(query, locale);
+      let mongooseOptions = {};
 
       if (paginate.page) mongooseOptions.page = paginate.page;
       if (paginate.limit) mongooseOptions.limit = paginate.limit;
@@ -38,11 +37,23 @@ const find = async (options) => {
         mongooseOptions.options.autopopulate = false;
       }
 
-      const result = await model.paginate(mongooseQuery, mongooseOptions);
+      // /////////////////////////////////////
+      // 2. Execute before collection hook
+      // /////////////////////////////////////
 
-      // await post find hook here
+      const beforeReadHook = config && config.hooks && config.hooks.beforeRead;
 
-      return {
+      if (typeof beforeReadHook === 'function') {
+        [mongooseQuery, mongooseOptions] = await beforeReadHook(mongooseQuery, mongooseOptions);
+      }
+
+      // /////////////////////////////////////
+      // 3. Query database
+      // /////////////////////////////////////
+
+      let result = await model.paginate(mongooseQuery, mongooseOptions);
+
+      result = {
         ...result,
         docs: result.docs.map((doc) => {
           if (locale && doc.setLocale) {
@@ -52,6 +63,22 @@ const find = async (options) => {
           return doc.toJSON({ virtuals: true });
         }),
       };
+
+      // /////////////////////////////////////
+      // 4. Execute after collection hook
+      // /////////////////////////////////////
+
+      const afterReadHook = config && config.hooks && config.hooks.afterRead;
+
+      if (typeof afterReadHook === 'function') {
+        result = await afterReadHook(options, result);
+      }
+
+      // /////////////////////////////////////
+      // 5. Return results
+      // /////////////////////////////////////
+
+      return result;
     }
     throw new Forbidden();
   } catch (err) {

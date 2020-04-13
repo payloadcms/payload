@@ -17,7 +17,7 @@ module.exports = {
   hooks: {
     beforeCreate: value => value,
     afterCreate: value => value,
-    beforeRead: options => options,
+    beforeRead: (query, options) => [query, options],
     afterRead: (options, value) => value,
     beforeUpdate: value => value,
     afterUpdate: value => value,
