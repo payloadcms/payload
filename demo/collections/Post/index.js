@@ -17,11 +17,8 @@ module.exports = {
   hooks: {
     beforeCreate: value => value,
     afterCreate: value => value,
-    beforeRead: (value) => {
-      console.log(value);
-      return value;
-    },
-    afterRead: value => value,
+    beforeRead: options => options,
+    afterRead: (options, value) => value,
     beforeUpdate: value => value,
     afterUpdate: value => value,
     beforeDelete: value => value,

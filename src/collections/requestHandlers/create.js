@@ -11,7 +11,6 @@ const createHandler = async (req, res) => {
       user: req.user,
       data: req.body,
       locale: req.locale,
-      fallbackLocale: req.fallbackLocale,
     });
 
     return res.status(httpStatus.CREATED).json({

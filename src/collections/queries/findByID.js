@@ -13,11 +13,15 @@ const findByID = async (options) => {
       user,
     } = options;
 
+    // /////////////////////////////////////
+    // 1. Retrieve and execute policy
+    // /////////////////////////////////////
+
     const policy = config && config.policies && config.policies.read;
     const hasPermission = await executePolicy(user, policy);
 
     if (hasPermission) {
-      const mongooseOptions = {
+      let mongooseOptions = {
         options: {},
       };
 
@@ -29,9 +33,21 @@ const findByID = async (options) => {
         mongooseOptions.options.autopopulate = false;
       }
 
-      // Await pre find hook here
+      // /////////////////////////////////////
+      // 2. Execute before collection hook
+      // /////////////////////////////////////
 
-      const result = await model.findOne({ _id: id }, {}, mongooseOptions);
+      const beforeReadHook = config && config.hooks && config.hooks.beforeRead;
+
+      if (typeof beforeReadHook === 'function') {
+        mongooseOptions = await beforeReadHook(mongooseOptions);
+      }
+
+      // /////////////////////////////////////
+      // 3. Query database
+      // /////////////////////////////////////
+
+      let result = await model.findOne({ _id: id }, {}, mongooseOptions);
 
       if (!result) throw new NotFound();
 
@@ -39,9 +55,23 @@ const findByID = async (options) => {
         result.setLocale(locale, fallbackLocale);
       }
 
-      // Await post find hook here
+      result = result.toJSON({ virtuals: true });
 
-      return result.toJSON({ virtuals: true });
+      // /////////////////////////////////////
+      // 4. Execute after collection hook
+      // /////////////////////////////////////
+
+      const afterReadHook = config && config.hooks && config.hooks.afterRead;
+
+      if (typeof afterReadHook === 'function') {
+        result = await afterReadHook(options, result);
+      }
+
+      // /////////////////////////////////////
+      // 5. Return results
+      // /////////////////////////////////////
+
+      return result;
     }
     throw new Forbidden();
   } catch (err) {
