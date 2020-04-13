@@ -1,6 +1,5 @@
-import localizationMiddleware from '../../localization/localization.middleware';
-import checkRoleMiddleware from '../../auth/checkRole.middleware';
-import mockExpress from 'jest-mock-express';
+const mockExpress = require('jest-mock-express');
+const localizationMiddleware = require('../../localization/middleware');
 
 let res = null;
 let next = null;
@@ -10,66 +9,7 @@ describe('Payload Middleware', () => {
     next = jest.fn();
   });
 
-
-  describe('Payload Role Middleware', () => {
-    it('Exact role - authorized', () => {
-      const req = {
-        user: {
-          role: 'user'
-        }
-      };
-
-      checkRoleMiddleware('user')(req, res, next);
-
-      expect(next).toHaveBeenCalledTimes(1);
-      expect(res.status).not.toHaveBeenCalled();
-    });
-
-    it('Exact role - unauthorized', () => {
-      const req = {
-        user: {
-          role: 'user'
-        }
-      };
-
-      checkRoleMiddleware('admin')(req, res, next);
-
-      expect(next).not.toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalled();
-      expect(res.send).toHaveBeenCalled();
-    });
-
-    it('Roles handle array - authorized', () => {
-      const req = {
-        user: {
-          role: 'user'
-        }
-      };
-
-      checkRoleMiddleware('admin', 'user')(req, res, next);
-
-      expect(next).toHaveBeenCalledTimes(1);
-      expect(res.status).not.toHaveBeenCalled();
-    });
-
-    it('Roles handle array - unauthorized', () => {
-      const req = {
-        user: {
-          role: 'user'
-        }
-      };
-
-      checkRoleMiddleware('admin', 'owner')(req, res, next);
-
-      expect(next).not.toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalled();
-      expect(res.send).toHaveBeenCalled();
-    });
-
-  });
-
   describe('Payload Locale Middleware', () => {
-
     let req, localization;
 
     beforeEach(() => {
