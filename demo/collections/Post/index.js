@@ -12,7 +12,17 @@ module.exports = {
     create: user => checkRole(['user', 'admin'], user),
     read: () => true,
     update: user => checkRole(['user', 'admin'], user),
-    destroy: user => checkRole(['user', 'admin'], user),
+    delete: user => checkRole(['user', 'admin'], user),
+  },
+  hooks: {
+    beforeCreate: value => value,
+    afterCreate: value => value,
+    beforeRead: value => value,
+    afterRead: value => value,
+    beforeUpdate: value => value,
+    afterUpdate: value => value,
+    beforeDelete: value => value,
+    afterDelete: value => value,
   },
   fields: [
     {
@@ -23,6 +33,11 @@ module.exports = {
       required: true,
       unique: true,
       localized: true,
+      hooks: {
+        beforeRead: value => value,
+        beforeChange: value => value,
+        afterChange: value => value,
+      },
     },
     {
       name: 'description',
