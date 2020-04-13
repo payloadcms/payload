@@ -1,4 +1,4 @@
-const { Forbidden } = require('../../errors');
+const { Forbidden, NotFound } = require('../../errors');
 const executePolicy = require('../../auth/executePolicy');
 
 const deleteQuery = async (args) => {
@@ -43,6 +43,9 @@ const deleteQuery = async (args) => {
       } = options;
 
       let result = await Model.findOneAndDelete(query);
+
+      if (!result) throw new NotFound();
+
       result = result.toJSON({ virtuals: true });
 
       if (locale && result.setLocale) {

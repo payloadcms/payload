@@ -11,8 +11,11 @@ const find = async (args) => {
     const hasPermission = await executePolicy(args.user, policy);
 
     if (hasPermission) {
+      const queryToBuild = {};
+      if (args.where) queryToBuild.where = args.where;
+
       let options = {
-        query: await args.Model.buildQuery({ where: args.where }, args.locale),
+        query: await args.Model.buildQuery(queryToBuild, args.locale),
         Model: args.Model,
         locale: args.locale,
         fallbackLocale: args.fallbackLocale,
@@ -52,9 +55,10 @@ const find = async (args) => {
       } = options;
 
       const optionsToExecute = {
-        page,
-        limit,
+        page: page || 1,
+        limit: limit || 10,
         sort,
+        options: {},
       };
 
       // Only allow depth override within REST.

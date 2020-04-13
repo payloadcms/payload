@@ -9,8 +9,8 @@ module.exports = function localizationMiddleware(localization) {
     const validLocales = [...localization.locales, 'all'];
     const validFallbackLocales = [...localization.locales, 'null'];
 
-    let requestedLocale = req.query.locale;
-    let requestedFallbackLocale = req.query['fallback-locale'];
+    let requestedLocale = req.query.locale || localization.defaultLocale;
+    let requestedFallbackLocale = req.query['fallback-locale'] || localization.defaultLocale;
 
     if (req.body) {
       if (req.body.locale) requestedLocale = req.body.locale;
