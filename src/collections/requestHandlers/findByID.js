@@ -9,7 +9,7 @@ const findByIDHandler = async (req, res) => {
     user: req.user,
     id: req.params.id,
     locale: req.locale,
-    fallbackLocale: req.query['fallback-locale'],
+    fallbackLocale: req.fallbackLocale,
     depth: req.query.depth,
   };
 

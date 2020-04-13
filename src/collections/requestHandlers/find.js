@@ -15,7 +15,7 @@ const findHandler = async (req, res) => {
       },
       depth: req.query.depth,
       locale: req.locale,
-      fallbackLocale: req.query['fallback-locale'],
+      fallbackLocale: req.fallbackLocale,
     };
 
     if (req.query.where) options.query.where = req.query.where;

@@ -12,6 +12,7 @@ const updateHandler = async (req, res) => {
       user: req.user,
       id: req.params.id,
       data: req.body,
+      locale: req.locale,
     });
 
     if (!doc) return res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(new NotFound(), 'APIError'));

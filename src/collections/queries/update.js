@@ -9,6 +9,7 @@ const update = async (options) => {
       data,
       config,
       user,
+      locale,
     } = options;
 
     const policy = config && config.policies && config.policies.update;
@@ -20,6 +21,11 @@ const update = async (options) => {
       // Await pre-hook here
 
       const doc = await model.findOne({ _id: id });
+
+      if (locale && doc.setLocale) {
+        doc.setLocale(locale);
+      }
+
       Object.assign(doc, data);
       await doc.save();
 
