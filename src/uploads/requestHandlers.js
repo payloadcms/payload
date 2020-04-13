@@ -1,7 +1,7 @@
 const mkdirp = require('mkdirp');
 const httpStatus = require('http-status');
 const resizeAndSave = require('./images/imageResizer');
-const modelById = require('../mongoose/resolvers/modelById');
+const findByID = require('../collections/queries/findByID');
 const { NotFound } = require('../errors');
 
 async function fileTypeHandler(config, uploadConfig, file) {
@@ -19,7 +19,7 @@ const update = async (req, res, next, config) => {
     id: req.params.id,
     locale: req.locale,
   };
-  const doc = await modelById(query, { returnRawDoc: true });
+  const doc = await findByID(query, { returnRawDoc: true });
   if (!doc) {
     res.status(httpStatus.NOT_FOUND)
       .json(new NotFound());

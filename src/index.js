@@ -1,120 +1,77 @@
-const mongoose = require('mongoose');
-const passportLocalMongoose = require('passport-local-mongoose');
-const connectMongoose = require('./init/connectMongoose');
-const registerExpressMiddleware = require('./init/registerExpressMiddleware');
-const initPassport = require('./init/passport');
-const initCORS = require('./init/cors');
-const initUploads = require('./init/uploads');
-const initWebpack = require('./init/webpack');
-const initUserAuth = require('./auth/init');
-const baseUserFields = require('./auth/baseFields');
-const baseUploadFields = require('./uploads/baseUploadFields');
-const baseImageFields = require('./uploads/baseImageFields');
-const registerUploadRoutes = require('./uploads/routes');
-const registerConfigRoute = require('./routes/config');
-const validateCollection = require('./collections/validate');
-const buildCollectionSchema = require('./collections/buildSchema');
-const registerCollectionRoutes = require('./collections/registerRoutes');
-const validateGlobals = require('./globals/validate');
-const registerGlobalSchema = require('./globals/registerSchema');
-const registerGlobalRoutes = require('./globals/registerRoutes');
+const express = require('express');
+const graphQLPlayground = require('graphql-playground-middleware-express').default;
+const passport = require('passport');
+const connectMongoose = require('./mongoose/connect');
+const expressMiddleware = require('./express/middleware');
+const initWebpack = require('./webpack/init');
+const registerUser = require('./auth/register');
+const registerUpload = require('./uploads/register');
+const registerCollections = require('./collections/register');
+const registerGlobals = require('./globals/register');
+const GraphQL = require('./graphql');
+const sanitizeConfig = require('./utilities/sanitizeConfig');
 
 class Payload {
   constructor(options) {
+    this.config = sanitizeConfig(options.config);
+    this.express = options.express;
+    this.router = express.Router();
     this.collections = {};
-    this.registerUser.bind(this);
-    this.registerUpload.bind(this);
-    this.registerGlobals.bind(this);
-    this.getCollections.bind(this);
-    this.getGlobals.bind(this);
+
+    this.registerUser = registerUser.bind(this);
+    this.registerUpload = registerUpload.bind(this);
+    this.registerCollections = registerCollections.bind(this);
+    this.registerGlobals = registerGlobals.bind(this);
 
     // Setup & initialization
-    connectMongoose(options.config.mongoURL);
-    registerExpressMiddleware(options);
-    initPassport(options.app);
-    initUploads(options);
-    initCORS(options);
-    registerConfigRoute(options, this.getCollections, this.getGlobals);
-
-    // Bind options, app, router
-    this.config = options.config;
-    this.app = options.app;
-    this.router = options.router;
+    connectMongoose(this.config.mongoURL);
+    this.router.use(...expressMiddleware(this.config));
 
     // Register and bind required collections
     this.registerUser();
     this.registerUpload();
 
-    // Register custom collections
-    this.config.collections.forEach((collection) => {
-      validateCollection(collection, this.collections);
-
-      this.collections[collection.slug] = {
-        model: mongoose.model(collection.slug, buildCollectionSchema(collection, this.config)),
-        config: collection,
-      };
-
-      registerCollectionRoutes(this.collections[collection.slug], this.router);
-    });
+    // Register collections
+    this.registerCollections();
 
     // Register globals
-    this.registerGlobals(this.config.globals);
+    this.registerGlobals();
 
-    // Enable client webpack
-    if (!this.config.disableAdmin) initWebpack(options);
-  }
+    // Enable client
+    if (!this.config.disableAdmin) {
+      this.express.use(initWebpack(this.config));
+    }
 
-  registerUser() {
-    this.config.user.fields.push(...baseUserFields);
-    const userSchema = buildCollectionSchema(this.config.user, this.config);
-    userSchema.plugin(passportLocalMongoose, { usernameField: this.config.user.useAsUsername });
+    if (process.env.NODE_ENV !== 'production' || this.config.productionGraphQLPlayground) {
+      // Init GraphQL
+      this.router.use(
+        this.config.routes.graphQL,
+        (req, _, next) => {
+          const existingAuthHeader = req.get('Authorization');
+          const { token } = req.cookies;
 
-    this.User = mongoose.model(this.config.user.labels.singular, userSchema);
-    initUserAuth(this.User, this.config, this.router);
-    registerCollectionRoutes({
-      model: this.User,
-      config: this.config.user,
-    }, this.router);
-  }
+          if (!existingAuthHeader && token) {
+            req.headers.authorization = `JWT ${token}`;
+          }
+          next();
+        },
+        passport.authenticate(['jwt', 'anonymous'], { session: false }),
+        new GraphQL(this.config, this.collections, this.User, this.Upload).init(),
+      );
+    }
 
-  registerUpload() {
-    // TODO: mongooseHidden on our upload model is hiding all the fields
-    const uploadSchema = buildCollectionSchema(
-      this.config.upload,
-      this.config,
-      { discriminatorKey: 'type' },
-    );
+    this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
+      endpoint: `${this.config.routes.api}${this.config.routes.graphQL}`,
+      settings: {
+        'request.credentials': 'include',
+      },
+    }));
 
-    uploadSchema.add(baseUploadFields);
+    // Bind router to API
+    this.express.use(this.config.routes.api, this.router);
 
-    const imageSchema = new mongoose.Schema(baseImageFields, {
-      discriminatorKey: 'type',
-    });
-
-    this.Upload = mongoose.model(this.config.upload.labels.singular, uploadSchema);
-    // TODO: image type hard coded, but in the future we need some way of customizing how uploads are handled in customizable pattern
-    this.Upload.discriminator('image', imageSchema);
-
-    registerUploadRoutes(this.Upload, this.config, this.router);
-
-    registerCollectionRoutes({
-      model: this.Upload,
-      config: this.config.upload,
-    }, this.router);
-  }
-
-  registerGlobals(globals) {
-    validateGlobals(globals);
-    this.globals = registerGlobalSchema(globals, this.config);
-    registerGlobalRoutes(this.globals.model, this.router);
-  }
-
-  getCollections() {
-    return this.collections;
-  }
-
-  getGlobals() {
-    return this.globals;
+    // Bind static
+    this.express.use(this.config.staticURL, express.static(this.config.staticDir));
   }
 }
 

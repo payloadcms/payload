@@ -2,6 +2,7 @@ const path = require('path');
 const Page = require('./collections/Page');
 const Category = require('./collections/Category');
 const Post = require('./collections/Post');
+const Layout = require('./collections/Layout');
 const User = require('./collections/User');
 const Upload = require('./collections/Upload');
 const Header = require('./globals/Header');
@@ -9,24 +10,22 @@ const Footer = require('./globals/Footer');
 
 module.exports = {
   // disableAdmin: true,
-  collections: [Page, Category, Post],
+  collections: [Page, Category, Post, Layout],
   user: User,
   upload: Upload,
   globals: [Header, Footer],
   port: 3000,
   serverURL: 'http://localhost:3000',
   cors: ['http://localhost', 'http://localhost:8080', 'http://localhost:8081'],
-  adminURL: '/payload-login',
   routes: {
     api: '/api',
     admin: '/admin',
+    graphQL: '/graphql',
+    graphQLPlayground: '/graphql-playground',
   },
-  plugins: [],
   compression: {},
   paths: {
     scssOverrides: path.resolve(__dirname, 'client/scss/overrides.scss'),
-    config: path.resolve(__dirname, 'payload.config.js'),
-    components: path.resolve(__dirname, 'client/components.js'),
   },
   mongoURL: 'mongodb://localhost/payload',
   localization: {
@@ -70,13 +69,15 @@ module.exports = {
       ],
     },
   },
-  staticUrl: '/uploads',
+  staticURL: '/uploads',
   staticDir: 'demo/upload',
+  productionGraphQLPlayground: false,
   email: {
     provider: 'mock',
   },
-  graphQL: {
-    path: '/graphql',
-    graphiql: true,
+  components: {
+    layout: {
+      // Sidebar: path.resolve(__dirname, 'client/components/layout/Sidebar/index.js'),
+    },
   },
 };

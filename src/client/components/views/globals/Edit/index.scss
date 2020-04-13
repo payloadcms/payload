@@ -1,0 +1,16 @@
+@import '../../../../scss/vars.scss';
+
+.global-edit {
+  &__header {
+
+    h1 {
+      margin: 0;
+    }
+  }
+
+  .sticky-header {
+    &:before {
+      left: - base(1.5);
+    }
+  }
+}

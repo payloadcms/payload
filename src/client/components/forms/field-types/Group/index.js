@@ -2,39 +2,41 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Section from '../../../layout/Section';
 import RenderFields from '../../RenderFields';
+import withCondition from '../../withCondition';
 
 import './index.scss';
 
-const formatSubField = (parentName, subField) => {
-  const formatted = {
-    ...subField,
-    name: `${parentName}.${subField.name}`
-  };
-
-  return formatted;
-};
-
 const Group = (props) => {
-  const { label, fields, name } = props;
+  const {
+    label, fields, name, defaultValue,
+  } = props;
 
   return (
-    <Section
-      heading={label}
-      className="field-group"
-    >
-      <RenderFields
-        fields={fields}
-        formatter={(field) => formatSubField(name, field)}
-      />
-    </Section>
+    <div className="field-type group">
+      <Section
+        heading={label}
+        className="field-group"
+      >
+        <RenderFields fields={fields.map((subField) => {
+          return {
+            ...subField,
+            name: `${name}.${subField.name}`,
+            defaultValue: defaultValue[subField.name],
+          };
+        })}
+        />
+      </Section>
+    </div>
   );
 };
 
 Group.defaultProps = {
   label: '',
+  defaultValue: {},
 };
 
 Group.propTypes = {
+  defaultValue: PropTypes.shape({}),
   fields: PropTypes.arrayOf(
     PropTypes.shape({}),
   ).isRequired,
@@ -42,4 +44,4 @@ Group.propTypes = {
   name: PropTypes.string.isRequired,
 };
 
-export default Group;
+export default withCondition(Group);

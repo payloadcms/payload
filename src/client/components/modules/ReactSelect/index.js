@@ -14,7 +14,6 @@ const ReactSelect = (props) => {
     value,
     disabled,
     formatValue,
-    findValueInOptions,
   } = props;
 
   const classes = [
@@ -22,16 +21,10 @@ const ReactSelect = (props) => {
     showError && 'react-select--error',
   ].filter(Boolean).join(' ');
 
-  let valueToRender = value;
-
-  if (findValueInOptions && typeof findValueInOptions === 'function') {
-    valueToRender = findValueInOptions(options, value);
-  }
-
   return (
     <Select
       {...props}
-      value={valueToRender}
+      value={value}
       onChange={(selected) => {
         if (formatValue) {
           onChange(formatValue(selected));
@@ -78,7 +71,6 @@ ReactSelect.defaultProps = {
   showError: false,
   disabled: false,
   formatValue: null,
-  findValueInOptions: null,
 };
 
 ReactSelect.propTypes = {
@@ -87,7 +79,6 @@ ReactSelect.propTypes = {
     PropTypes.array,
     PropTypes.shape({}),
   ]),
-  findValueInOptions: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
   showError: PropTypes.bool,

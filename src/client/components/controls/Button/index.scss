@@ -1,4 +1,4 @@
-@import '~payload/client/scss/styles';
+@import '../../../scss/styles.scss';
 
 .btn {
     @extend %uppercase-label;
@@ -30,6 +30,18 @@
                 @include color-svg($black);
             }
         }
+    }
+
+    &.btn-error {
+      border: $stroke-width solid $error;
+      color: $error;
+      background: none;
+
+      &:hover {
+        background: lighten($error, 22.5%);
+        border: $stroke-width solid $error;
+        color: $black;
+      }
     }
 
     &.btn-small {

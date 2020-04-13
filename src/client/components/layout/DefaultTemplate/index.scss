@@ -1,10 +1,17 @@
-@import '~payload/client/scss/styles';
+@import '../../../scss/styles.scss';
 
 .default-template {
-  @include default-template-width;
-  padding-top: base(1);
+  padding: $base;
+  margin-left: base(6);
+  width: calc(100% - #{base(6)});
 
-  .eyebrow {
+  &__eyebrow,
+  &__wrap {
+    max-width: $content-width;
+    margin: 0 auto;
+  }
+
+  &__eyebrow {
     @include m;
     display: flex;
     align-items: center;

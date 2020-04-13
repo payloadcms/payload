@@ -3,14 +3,17 @@ const passportJwt = require('passport-jwt');
 const JwtStrategy = passportJwt.Strategy;
 const { ExtractJwt } = passportJwt;
 
-const opts = {};
-opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('JWT');
-opts.secretOrKey = process.env.secret || 'SECRET_KEY';
+module.exports = (User, config) => {
+  const opts = {};
+  opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('JWT');
+  opts.secretOrKey = config.user.auth.secretKey;
 
-module.exports = User => new JwtStrategy(opts, (token, done) => {
-  console.log(`Token authenticated for user: ${token.email}`);
-  User.findByUsername(token.email, (err, user) => {
-    if (err || !user) done(null, false);
-    return done(null, user);
+  return new JwtStrategy(opts, async (token, done) => {
+    try {
+      const user = await User.findByUsername(token.email);
+      return done(null, user);
+    } catch (err) {
+      return done(null, false);
+    }
   });
-});
+};

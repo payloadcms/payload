@@ -1,9 +1,11 @@
 import React, { Component, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Cookies from 'universal-cookie';
+import some from 'async-some';
+import withCondition from '../../withCondition';
 import ReactSelect from '../../../modules/ReactSelect';
 import useFieldType from '../../useFieldType';
-import getSanitizedConfig from '../../../../config/getSanitizedConfig';
+import config from '../../../../securedConfig';
 import Label from '../../Label';
 import Error from '../../Error';
 
@@ -11,10 +13,12 @@ import './index.scss';
 
 const cookies = new Cookies();
 
-const { serverURL, collections } = getSanitizedConfig();
+const { serverURL, routes: { api }, collections } = config;
 
 const defaultError = 'Please make a selection.';
 const defaultValidate = value => value.length > 0;
+
+const maxResultsPerRequest = 10;
 
 class Relationship extends Component {
   constructor(props) {
@@ -25,41 +29,54 @@ class Relationship extends Component {
 
     this.state = {
       relations,
-      results: relations.reduce((acc, relation) => ({
-        ...acc,
-        [relation]: {
-          docs: [],
-          totalPages: null,
-          page: 1,
-        }
-      }), {}),
+      lastFullyLoadedRelation: -1,
+      lastLoadedPage: 1,
       options: [],
     };
   }
 
-  // Get initial options to populate ReactSelect
-  // At first, only load the first 10 of the first related model
   componentDidMount() {
-    const { relations } = this.state;
+    this.getNextOptions();
+  }
+
+  getNextOptions = () => {
+    const { relations, lastFullyLoadedRelation, lastLoadedPage } = this.state;
     const token = cookies.get('token');
 
-    relations.forEach((relation) => {
-      fetch(`${serverURL}/${relation}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).then((res) => {
-        res.json().then((json) => {
-          const updatedResults = this.addResults(json, relation);
-          const formattedOptions = this.formatOptions(updatedResults);
+    const relationsToSearch = relations.slice(lastFullyLoadedRelation + 1);
 
+    if (relationsToSearch.length > 0) {
+      some(relationsToSearch, async (relation, callback) => {
+        const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.hasNextPage) {
+          return callback(false, {
+            data,
+            relation,
+          });
+        }
+
+        callback({ relation, data });
+      }, (lastPage, nextPage) => {
+        if (nextPage) {
+          const { data, relation } = nextPage;
+          this.addOptions(data, relation);
+        } else {
+          const { data, relation } = lastPage;
+          this.addOptions(data, relation);
           this.setState({
-            results: updatedResults,
-            options: formattedOptions,
-          })
-        })
-      })
-    })
+            lastFullyLoadedRelation: relations.indexOf(relation),
+            lastLoadedPage: 1,
+          });
+        }
+      });
+    }
   }
 
   // This is needed to reduce the selected option to only its value
@@ -101,61 +118,70 @@ class Relationship extends Component {
       }
     }
 
-    return foundValue;
+    return foundValue || null;
   }
 
-  // Build and maintain a list of all results, keyed by collection type
-  // Note - this is different than options so that we can easily keep current page and total pages
-  addResults = (incoming, relation) => {
-    const { results } = this.state;
-
-    return {
-      ...results,
-      [relation]: {
-        totalPages: incoming.totalPages,
-        page: incoming.page,
-        docs: [
-          ...results[relation].docs,
-          ...incoming.docs,
-        ]
-      }
-    }
-  }
-
-  // Convert results into a ReactSelect-friendly array of options
-  formatOptions = (results) => {
+  addOptions = (data, relation) => {
     const { hasMultipleRelations } = this.props;
+    const { lastLoadedPage, options } = this.state;
+    const collection = collections.find(collection => collection.slug === relation);
 
-    return Object.keys(results).sort().reduce((acc, collectionSlug) => {
-      const collectionResults = results[collectionSlug].docs;
-      const collectionConfig = collections.find((collection) => collection.slug === collectionSlug);
-
-      if (hasMultipleRelations) {
-        acc.push({
-          label: collectionConfig.labels.plural,
-          options: collectionResults.map((result) => ({
-            label: result[collectionConfig.useAsTitle],
-            value: {
-              relationTo: collectionConfig.slug,
-              value: result.id,
-            },
+    if (!hasMultipleRelations) {
+      this.setState({
+        options: [
+          ...options,
+          ...data.docs.map(doc => ({
+            label: doc[collection.useAsTitle],
+            value: doc.id,
           })),
-        });
+        ],
+      });
+    } else {
+      const allOptionGroups = [...options];
+      const optionsToAddTo = allOptionGroups.find(optionGroup => optionGroup.label === collection.labels.plural);
+
+      const newOptions = data.docs.map((doc) => {
+        return {
+          label: doc[collection.useAsTitle],
+          value: {
+            relationTo: collection.slug,
+            value: doc.id,
+          },
+        };
+      });
+
+      if (optionsToAddTo) {
+        optionsToAddTo.options = [
+          ...optionsToAddTo.options,
+          ...newOptions,
+        ];
       } else {
-        collectionResults.map((result) => {
-          acc.push({
-            label: result[collectionConfig.useAsTitle],
-            value: result.id,
-          });
+        allOptionGroups.push({
+          label: collection.labels.plural,
+          options: newOptions,
         });
       }
 
-      return acc;
-    }, []);
+      this.setState({
+        options: [
+          ...allOptionGroups,
+        ],
+      });
+    }
+
+    this.setState({
+      lastLoadedPage: lastLoadedPage + 1,
+    });
+  }
+
+  handleInputChange = (search) => {
+    this.setState({
+      search,
+    });
   }
 
   handleMenuScrollToBottom = () => {
-    console.log('scrolled');
+    this.getNextOptions();
   }
 
   render() {
@@ -184,6 +210,12 @@ class Relationship extends Component {
     // eslint-disable-next-line prefer-template
     const fieldWidth = width ? width + '%' : null;
 
+    const valueToRender = this.findValueInOptions(options, value);
+
+    // ///////////////////////////////////////////
+    // TODO: simplify formatValue pattern seen below with react select
+    // ///////////////////////////////////////////
+
     return (
       <div
         className={classes}
@@ -202,11 +234,12 @@ class Relationship extends Component {
           required={required}
         />
         <ReactSelect
+          onInputChange={this.handleInputChange}
           onChange={onFieldChange}
           formatValue={this.formatSelectedValue}
           onMenuScrollToBottom={this.handleMenuScrollToBottom}
           findValueInOptions={this.findValueInOptions}
-          value={value}
+          value={valueToRender}
           showError={showError}
           disabled={formProcessing}
           options={options}
@@ -272,23 +305,23 @@ const RelationshipFieldType = (props) => {
       if (hasMultipleRelations) {
         return {
           ...valueToFormat,
-          value: valueToFormat.value.id
+          value: valueToFormat.value.id,
         };
       }
 
       return valueToFormat.id;
-    }
+    };
 
     if (defaultValue) {
       if (hasMany && Array.isArray(defaultValue)) {
-        let formattedDefaultValue = [];
+        const formattedDefaultValue = [];
         defaultValue.forEach((individualValue) => {
           formattedDefaultValue.push(formatDefaultValue(individualValue));
-        })
+        });
         setFormattedDefaultValue(formattedDefaultValue);
       } else {
         setFormattedDefaultValue(formatDefaultValue(defaultValue));
-      };
+      }
     }
   }, [defaultValue]);
 
@@ -309,4 +342,4 @@ RelationshipFieldType.propTypes = {
   validate: PropTypes.func,
 };
 
-export default RelationshipFieldType;
+export default withCondition(RelationshipFieldType);

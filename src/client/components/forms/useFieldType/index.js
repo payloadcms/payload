@@ -1,51 +1,51 @@
 import { useContext, useCallback, useEffect } from 'react';
 import FormContext from '../Form/Context';
-import useMountEffect from '../../../hooks/useMountEffect';
 
 import './index.scss';
 
 const useFieldType = (options) => {
-  const formContext = useContext(FormContext);
-  const { setField, submitted, processing } = formContext;
-
   const {
     name,
     required,
     defaultValue,
-    valueOverride,
     onChange,
     validate,
   } = options;
 
+  const formContext = useContext(FormContext);
+  const { dispatchFields, submitted, processing } = formContext;
+  const mountValue = formContext.fields[name]?.value || null;
+
   const sendField = useCallback((valueToSend) => {
-    setField({
+    dispatchFields({
       name,
       value: valueToSend,
       valid: required && validate
         ? validate(valueToSend || '')
         : true,
     });
-  }, [name, required, setField, validate]);
+  }, [name, required, dispatchFields, validate]);
 
-  useMountEffect(() => {
-    let valueToInitialize = defaultValue;
-    if (valueOverride) valueToInitialize = valueOverride;
-    sendField(valueToInitialize);
-  });
-
+  // Send value up to form on mount and when value changes
   useEffect(() => {
-    sendField(defaultValue);
+    sendField(mountValue);
+  }, [sendField, mountValue]);
+
+  // Remove field from state on "unmount"
+  useEffect(() => {
+    return () => dispatchFields({ name, type: 'REMOVE' });
+  }, [dispatchFields, name]);
+
+  // Send up new value when default is loaded
+  // only if it's not null
+  useEffect(() => {
+    if (defaultValue != null) sendField(defaultValue);
   }, [defaultValue, sendField]);
-
-  useEffect(() => {
-    sendField(valueOverride);
-  }, [valueOverride, sendField]);
 
   const valid = formContext.fields[name] ? formContext.fields[name].valid : true;
   const showError = valid === false && formContext.submitted;
 
-  let valueToRender = formContext.fields[name] ? formContext.fields[name].value : '';
-  valueToRender = valueOverride || valueToRender;
+  const valueToRender = formContext.fields[name] ? formContext.fields[name].value : '';
 
   return {
     ...options,

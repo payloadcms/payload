@@ -1,24 +1,46 @@
-@import '~payload/client/scss/styles';
+@import '../../../scss/styles.scss';
 
-section.section {
-  @extend %shadow;
-  margin: base(1) base(.5);
+.section {
+  @include inputShadow;
+  margin: base(.5) 0;
 
-  header,
-  .content {
-    @include pad;
-  }
-
-  header {
+  .section__collapsible-header {
     border-bottom: 1px solid $light-gray;
+    display: flex;
+    align-items: center;
+    @include pad;
+    outline: 0;
+
+    &:hover {
+      cursor: pointer;
+    }
 
     * {
       margin-bottom: 0;
     }
   }
 
-  .content {
-    display: flex;
-    flex-wrap: wrap;
+  &__heading {
+    margin-bottom: 0;
+    margin-right: base(1);
+  }
+
+  .chevron {
+    margin-left: auto;
+
+    &--is-open {
+      transform: rotate(180deg);
+    }
+
+    &--is-closed {
+      transform: rotate(0deg);
+    }
+  }
+
+  &__content {
+    > div {
+      @include row;
+      padding: base(1) base(1) base(.5);
+    }
   }
 }

@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import Filter from '../Filter';
 import Table from '../../layout/Table';
-import getSanitizedConfig from '../../../config/getSanitizedConfig';
+import config from '../../../securedConfig';
 
-const { routes: { admin } } = getSanitizedConfig();
+const { routes: { admin } } = config;
 
 class SearchableTable extends Component {
   constructor(props) {

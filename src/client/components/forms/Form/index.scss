@@ -1,10 +1,14 @@
-@import '~payload/client/scss/styles';
+@import '../../../scss/styles.scss';
 
 .form {
   @include row;
 
   > * {
     width: 100%;
+  }
+
+  .sticky-header {
+    @include gutter;
   }
 
   > .btn {

@@ -1,9 +1,16 @@
-@import '~payload/client/scss/styles';
+@import '../../../../scss/styles.scss';
 
 .collection-edit {
-  header {
+  &__header {
+
     h1 {
       margin: 0;
+    }
+  }
+
+  .sticky-header {
+    &:before {
+      left: - base(1.5);
     }
   }
 }

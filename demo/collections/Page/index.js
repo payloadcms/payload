@@ -1,7 +1,7 @@
+const path = require('path');
 const checkRole = require('../../policies/checkRole');
 const Quote = require('../../content-blocks/Quote');
 const CallToAction = require('../../content-blocks/CallToAction');
-// const List = require('./components/List');
 
 module.exports = {
   slug: 'pages',
@@ -23,7 +23,7 @@ module.exports = {
     {
       name: 'title',
       label: 'Page Title',
-      type: 'input',
+      type: 'text',
       unique: true,
       localized: true,
       maxLength: 100,
@@ -37,15 +37,15 @@ module.exports = {
       height: 100,
       required: true,
     },
-    // {
-    //   name: 'category',
-    //   label: 'Localized Category',
-    //   type: 'relationship',
-    //   relationType: 'reference',
-    //   relationTo: 'categories',
-    //   hasMany: false,
-    //   localized: true,
-    // },
+    {
+      name: 'category',
+      label: 'Localized Category',
+      type: 'relationship',
+      relationType: 'reference',
+      relationTo: 'categories',
+      hasMany: false,
+      localized: true,
+    },
     {
       name: 'categories',
       label: 'Categories hasMany',
@@ -71,21 +71,55 @@ module.exports = {
       required: false,
     },
     {
+      name: 'otherDate',
+      type: 'date',
+      label: 'Example Start Date',
+      width: 50,
+      useTime: true,
+    },
+    {
       name: 'slides',
       label: 'Slides',
+      singularLabel: 'Slide',
       type: 'repeater',
-      id: false,
       fields: [
         {
-          name: 'content',
+          name: 'cards',
+          label: 'Cards',
+          singularLabel: 'Card',
+          type: 'repeater',
+          fields: [
+            {
+              name: 'cardNumber',
+              type: 'text',
+              label: 'Card Number',
+            },
+            {
+              name: 'description',
+              type: 'textarea',
+              label: 'Description',
+              condition: (fields, siblings) => {
+                return (siblings.cardNumber && siblings.cardNumber.value);
+              },
+            },
+          ],
+        },
+        {
+          name: 'title',
+          type: 'text',
+          label: 'Title',
+        },
+        {
+          name: 'description',
           type: 'textarea',
-          label: 'Content',
+          label: 'Description',
         },
       ],
     },
     {
       name: 'layout',
       label: 'Layout Blocks',
+      singularLabel: 'Block',
       type: 'flexible',
       blocks: [Quote, CallToAction],
       localized: true,
@@ -97,14 +131,14 @@ module.exports = {
       fields: [
         {
           name: 'title',
-          type: 'input',
+          type: 'text',
           maxLength: 100,
           label: 'Title',
           width: 50,
         },
         {
           name: 'keywords',
-          type: 'input',
+          type: 'text',
           maxLength: 100,
           label: 'Keywords',
           width: 50,
@@ -118,8 +152,10 @@ module.exports = {
       ],
     },
   ],
-  components: {
-    // List,
-  },
+  // components: {
+  // 	views: {
+  // 		List: path.resolve(__dirname, 'components/List/index.js'),
+  // 	},
+  // },
   timestamps: true,
 };

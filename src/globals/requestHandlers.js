@@ -1,24 +1,17 @@
 const httpStatus = require('http-status');
-const { findOne } = require('../mongoose/resolvers');
 const { NotFound } = require('../errors');
+const formatErrorResponse = require('../express/responses/formatError');
 
 const upsert = (req, res) => {
-  if (!req.model.schema.tree[req.params.slug]) {
-    res.status(httpStatus.NOT_FOUND).json(new NotFound());
-    return;
-  }
+  const { slug } = req.global;
 
-  req.model.findOne({}, (findErr, doc) => {
-    let global = {};
+  req.model.findOne({ globalType: slug }, (findErr, doc) => {
     if (!doc) {
-      if (req.params.slug) {
-        global[req.params.slug] = req.body;
-      } else {
-        global = req.body;
-      }
-
-      return req.model.create(global, (createErr, result) => {
-        if (createErr) return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: createErr });
+      return req.model.create({
+        ...req.body,
+        globalType: slug,
+      }, (createErr, result) => {
+        if (createErr) return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(createErr, 'mongoose'));
 
         return res.status(httpStatus.CREATED)
           .json({
@@ -28,46 +21,51 @@ const upsert = (req, res) => {
       });
     }
 
-    if (!doc[req.params.slug]) {
-      Object.assign(doc[req.params.slug], {});
+    if (req.query.locale && doc.setLocale) {
+      doc.setLocale(req.query.locale, req.query['fallback-locale']);
     }
 
-    Object.assign(doc[req.params.slug], req.body);
+    Object.assign(doc, req.body);
 
     return doc.save((err) => {
-      if (err) return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err });
+      if (err) return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));
 
       return res.json({
-        message: 'success',
-        result: doc.toJSON({ virtuals: true }),
+        message: 'Saved successfully.',
+        doc: doc.toJSON({ virtuals: true }),
       });
     });
   });
 };
 
-const fetch = (req, res) => {
-  const query = {
-    Model: req.model,
-    locale: req.locale,
-    fallback: req.query['fallback-locale'],
-    depth: req.query.depth,
-  };
+const findOne = (req, res) => {
+  const { slug } = req.global;
 
-  findOne(query)
-    .then((doc) => {
-      const globals = { ...doc };
+  const options = {};
 
-      if (globals[req.params.key]) {
-        return res.json(globals[req.params.key]);
-      } if (req.params.key) {
-        return res.status(httpStatus.NOT_FOUND).json(new NotFound());
-      }
-      return res.json(globals);
-    })
-    .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err }));
+  if (req.query.depth) {
+    options.autopopulate = {
+      maxDepth: req.query.depth,
+    };
+  }
+
+  req.model.findOne({ globalType: slug }, null, options, (findErr, doc) => {
+    if (!doc) {
+      return res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(new NotFound(), 'APIError'));
+    }
+
+    let result = doc;
+
+    if (req.query.locale && doc.setLocale) {
+      doc.setLocale(req.query.locale, req.query['fallback-locale']);
+      result = doc.toJSON({ virtuals: true });
+    }
+
+    return res.status(httpStatus.OK).json(result);
+  });
 };
 
 module.exports = {
-  fetch,
+  findOne,
   upsert,
 };

@@ -19,19 +19,23 @@ const buildSchema = (configFields, config, options = {}, additionalBaseFields = 
 
   const schema = new Schema(fields, options);
 
-  flexiblefields.forEach((field) => {
-    field.blocks.forEach((block) => {
-      const blockSchemaFields = {};
+  if (flexiblefields.length > 0) {
+    flexiblefields.forEach((field) => {
+      if (field.blocks && field.blocks.length > 0) {
+        field.blocks.forEach((block) => {
+          const blockSchemaFields = {};
 
-      block.fields.forEach((blockField) => {
-        const fieldSchema = fieldToSchemaMap[blockField.type];
-        if (fieldSchema) blockSchemaFields[blockField.name] = fieldSchema(blockField, config);
-      });
+          block.fields.forEach((blockField) => {
+            const fieldSchema = fieldToSchemaMap[blockField.type];
+            if (fieldSchema) blockSchemaFields[blockField.name] = fieldSchema(blockField, config);
+          });
 
-      const blockSchema = new Schema(blockSchemaFields, { _id: false });
-      schema.path(field.name).discriminator(block.labels.singular, blockSchema);
+          const blockSchema = new Schema(blockSchemaFields, { _id: false });
+          schema.path(field.name).discriminator(block.slug, blockSchema);
+        });
+      }
     });
-  });
+  }
 
   return schema;
 };

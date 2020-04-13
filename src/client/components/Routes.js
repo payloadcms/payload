@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
-import config from 'payload-config';
-import customComponents from 'payload-custom-components';
+import DefaultList from './views/collections/List';
+import config from '../securedConfig';
 import { useUser } from './data/User';
 import Dashboard from './views/Dashboard';
 import Login from './views/Login';
@@ -12,15 +12,17 @@ import NotFound from './views/NotFound';
 import CreateFirstUser from './views/CreateFirstUser';
 import MediaLibrary from './views/MediaLibrary';
 import Edit from './views/collections/Edit';
-import List from './views/collections/List';
+import EditGlobal from './views/globals/Edit';
 import { requests } from '../api';
+import customComponents from './customComponents';
+import RedirectToLogin from './utilities/RedirectToLogin';
 
 const Routes = () => {
   const [initialized, setInitialized] = useState(null);
   const { user } = useUser();
 
   useEffect(() => {
-    requests.get('/init').then(res => res.json().then((data) => {
+    requests.get(`${config.routes.api}/init`).then(res => res.json().then((data) => {
       if (data && 'initialized' in data) {
         setInitialized(data.initialized);
       }
@@ -29,7 +31,7 @@ const Routes = () => {
 
   return (
     <Route
-      path="/admin"
+      path={config.routes.admin}
       render={({ match }) => {
         if (initialized === false) {
           return (
@@ -37,7 +39,9 @@ const Routes = () => {
               <Route path={`${match.url}/create-first-user`}>
                 <CreateFirstUser setInitialized={setInitialized} />
               </Route>
-              <Redirect to="/admin/create-first-user" />
+              <Route>
+                <Redirect to={`${match.url}/create-first-user`} />
+              </Route>
             </Switch>
           );
         }
@@ -54,6 +58,7 @@ const Routes = () => {
               <Route path={`${match.url}/forgot`}>
                 <h1>Forgot Password</h1>
               </Route>
+
               <Route
                 render={() => {
                   if (user) {
@@ -61,23 +66,26 @@ const Routes = () => {
                       <Switch>
                         <Route
                           path={`${match.url}/media-library`}
-                          component={MediaLibrary}
-                        />
+                        >
+                          <MediaLibrary />
+                        </Route>
+
                         <Route
                           path={`${match.url}/`}
                           exact
-                          component={Dashboard}
-                        />
+                        >
+                          <Dashboard />
+                        </Route>
                         {config.collections.map((collection) => {
                           return (
                             <Route
-                              key={collection.slug}
+                              key={`${collection.slug}-list`}
                               path={`${match.url}/collections/${collection.slug}`}
                               exact
                               render={(routeProps) => {
-                                const ListComponent = (customComponents[collection.slug] && customComponents[collection.slug].List) ? customComponents[collection.slug].List : List;
+                                const List = customComponents[collection.slug]?.views?.List || DefaultList;
                                 return (
-                                  <ListComponent
+                                  <List
                                     {...routeProps}
                                     collection={collection}
                                   />
@@ -89,7 +97,7 @@ const Routes = () => {
                         {config.collections.map((collection) => {
                           return (
                             <Route
-                              key={collection.slug}
+                              key={`${collection.slug}-create`}
                               path={`${match.url}/collections/${collection.slug}/create`}
                               exact
                               render={(routeProps) => {
@@ -106,7 +114,7 @@ const Routes = () => {
                         {config.collections.map((collection) => {
                           return (
                             <Route
-                              key={collection.slug}
+                              key={`${collection.slug}-edit`}
                               path={`${match.url}/collections/${collection.slug}/:id`}
                               exact
                               render={(routeProps) => {
@@ -121,13 +129,30 @@ const Routes = () => {
                             />
                           );
                         })}
+                        {config.globals && config.globals.map((global) => {
+                          return (
+                            <Route
+                              key={`${global.slug}`}
+                              path={`${match.url}/globals/${global.slug}`}
+                              exact
+                              render={(routeProps) => {
+                                return (
+                                  <EditGlobal
+                                    {...routeProps}
+                                    global={global}
+                                  />
+                                );
+                              }}
+                            />
+                          );
+                        })}
                         <Route path={`${match.url}*`}>
                           <NotFound />
                         </Route>
                       </Switch>
                     );
                   }
-                  return <Redirect to="/admin/login" />;
+                  return <RedirectToLogin />;
                 }}
               />
             </Switch>

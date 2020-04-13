@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import Sidebar from '../Sidebar';
+import DefaultSidebar from '../Sidebar';
 import StepNav, { useStepNav, StepNavProvider } from '../../modules/StepNav';
 import { StatusListProvider } from '../../modules/Status';
 import Localizer from '../../modules/Localizer';
+import customComponents from '../../customComponents';
 
 import './index.scss';
+
+const Sidebar = customComponents?.layout?.Sidebar || DefaultSidebar;
 
 const SetStepNav = ({ stepNav }) => {
   const { setStepNav } = useStepNav();
@@ -30,19 +33,19 @@ const DefaultTemplate = ({ children, className, stepNav }) => {
 
   return (
     <div className={classes}>
-      <div className="wrap">
-        <StatusListProvider>
-          <StepNavProvider>
-            <Sidebar />
-            <div className="eyebrow">
-              <StepNav />
-              <Localizer />
-            </div>
+      <StatusListProvider>
+        <StepNavProvider>
+          <Sidebar />
+          <div className={`${baseClass}__eyebrow`}>
+            <StepNav />
+            <Localizer />
+          </div>
+          <div className={`${baseClass}__wrap`}>
             {children}
-            <SetStepNav stepNav={stepNav} />
-          </StepNavProvider>
-        </StatusListProvider>
-      </div>
+          </div>
+          <SetStepNav stepNav={stepNav} />
+        </StepNavProvider>
+      </StatusListProvider>
     </div>
   );
 };

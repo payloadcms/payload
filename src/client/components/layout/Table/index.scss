@@ -1,7 +1,8 @@
-@import '~payload/client/scss/styles';
+@import '../../../scss/styles.scss';
 
 table {
   width: 100%;
+  margin-bottom: base(.75);
 
   th {
     @extend %uppercase-label;
@@ -15,7 +16,7 @@ table {
   }
 
   tbody {
-    @extend %shadow-sm;
+    @include shadow-sm;
   }
 
   tr:nth-child(even) {

@@ -1,200 +1,229 @@
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-use-before-define */
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
+const mongoose = require('mongoose');
 
-function buildQueryPlugin(schema) {
-  function apiQuery(rawParams, locale, cb) {
-    const model = this;
-    const params = paramParser(this, rawParams, locale);
+const validOperators = ['like', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals'];
 
-    if (cb) {
-      model
-        .find(params.searchParams)
-        .exec(cb);
+function addSearchParam(key, value, searchParams) {
+  return {
+    ...searchParams,
+    [key]: value,
+  };
+}
+
+function convertArrayFromCommaDelineated(input) {
+  if (Array.isArray(input)) return input;
+
+  if (input.indexOf(',') > -1) {
+    return input.split(',');
+  }
+
+  return [input];
+}
+
+class ParamParser {
+  constructor(model, rawParams, locale) {
+    this.parse = this.parse.bind(this);
+    this.model = model;
+    this.rawParams = rawParams;
+    this.locale = locale;
+    this.query = {
+      searchParams: {},
+      sort: false,
+    };
+  }
+
+  getLocalizedKey(key, schemaObject) {
+    return `${key}${(schemaObject && schemaObject.localized) ? `.${this.locale}` : ''}`;
+  }
+
+  // Entry point to the ParamParser class
+  async parse() {
+    if (typeof this.rawParams === 'object') {
+      for (const key of Object.keys(this.rawParams)) {
+        if (key === 'where') {
+          // We need to determine if the whereKey is an AND, OR, or a schema path
+          for (const relationOrPath of Object.keys(this.rawParams.where)) {
+            if (relationOrPath === 'and') {
+              const andConditions = this.rawParams.where[relationOrPath];
+              this.query.searchParams.$and = await this.buildAndOrConditions(andConditions);
+            } else if (relationOrPath === 'or' && Array.isArray(this.rawParams.where[relationOrPath])) {
+              const orConditions = this.rawParams.where[relationOrPath];
+              this.query.searchParams.$or = await this.buildAndOrConditions(orConditions);
+            } else {
+              // It's a path - and there can be multiple comparisons on a single path.
+              // For example - title like 'test' and title not equal to 'tester'
+              // So we need to loop on keys again here to handle each operator independently
+              const pathOperators = this.rawParams.where[relationOrPath];
+
+              if (typeof pathOperators === 'object') {
+                for (const operator of Object.keys(pathOperators)) {
+                  if (validOperators.includes(operator)) {
+                    const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, relationOrPath, pathOperators[operator], operator);
+                    this.query.searchParams = addSearchParam(searchParamKey, searchParamValue, this.query.searchParams);
+                  }
+                }
+              }
+            }
+          }
+        } else if (key === 'sort') {
+          this.query.sort = this.rawParams[key];
+        }
+      }
+
+      return this.query;
     }
 
+    return {};
+  }
+
+  async buildAndOrConditions(conditions) {
+    const completedConditions = [];
+    // Loop over all AND / OR operations and add them to the AND / OR query param
+    // Operations should come through as an array
+    for (const condition of conditions) {
+      // If the operation is properly formatted as an object
+      if (typeof condition === 'object') {
+        // We will loop through each path within the condition
+        for (const path of Object.keys(condition)) {
+          // At this point we have an operation - i.e. title equals 'test'
+          const operation = condition[path];
+          if (typeof operation === 'object') {
+            // Once again we need to loop through operators at this point to build the query properly
+            for (const operator of Object.keys(operation)) {
+              if (validOperators.includes(operator)) {
+                const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, path, operation[operator], operator);
+                completedConditions.push({
+                  [searchParamKey]: searchParamValue,
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return completedConditions;
+  }
+
+  // Checks to see
+  async buildSearchParam(schema, key, val, operator) {
+    let schemaObject = schema.obj[key];
+
+    let localizedKey = this.getLocalizedKey(key, schemaObject);
+
+    localizedKey = key.split('__').join('.');
+
+    if (key === '_id' || key === 'id') {
+      localizedKey = '_id';
+    }
+
+    if (key.includes('.') || key.includes('__')) {
+      const paths = key.split('.');
+      schemaObject = schema.obj[paths[0]];
+      const localizedPath = this.getLocalizedKey(paths[0], schemaObject);
+      const path = schema.paths[localizedPath];
+
+      // If the schema object has a dot, split on the dot
+      // Check the path of the first index of the newly split array
+      // If it's an array OR an ObjectID, we need to recurse
+
+      if (path) {
+        // If the path is an ObjectId with a direct ref,
+        // Grab it
+        let { ref } = path.options;
+
+        // If the path is an Array, grab the ref of the first index type
+        if (path.instance === 'Array') {
+          ref = path.options && path.options.type && path.options.type[0].ref;
+        }
+
+        // //////////////////////////////////////////////////////////////////////////
+        // TODO:
+        //
+        // Need to handle relationships that have more than one type.
+        // Right now, this code only handles one ref. But there could be a
+        // refPath as well, which could allow for a relation to multiple types.
+        // In that case, we would need to get the allowed referenced models
+        // and run the subModel query on each - building up a list of $in IDs.
+        // //////////////////////////////////////////////////////////////////////////
+
+        if (ref) {
+          const subModel = mongoose.model(ref);
+          let subQuery = {};
+
+          const localizedSubKey = this.getLocalizedKey(paths[1], subModel.schema.obj[paths[1]]);
+          const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val, operator);
+          subQuery = addSearchParam(searchParamKey, searchParamValue, subQuery, subModel.schema);
+
+          const matchingSubDocuments = await subModel.find(subQuery);
+
+          return [localizedPath, {
+            $in: matchingSubDocuments.map(subDoc => subDoc.id),
+          }];
+        }
+      }
+    }
+
+    let formattedValue = val;
+
+    if (operator && validOperators.includes(operator)) {
+      switch (operator) {
+        case 'greater_than_equal':
+          formattedValue = { $gte: val };
+          break;
+
+        case 'less_than_equal':
+          formattedValue = { $lte: val };
+          break;
+
+        case 'less_than':
+          formattedValue = { $lt: val };
+          break;
+
+        case 'greater_than':
+          formattedValue = { $gt: val };
+          break;
+
+        case 'in':
+        case 'all':
+          formattedValue = { [`$${operator}`]: convertArrayFromCommaDelineated(val) };
+          break;
+
+        case 'not_in':
+          formattedValue = { $nin: convertArrayFromCommaDelineated(val) };
+          break;
+
+        case 'not_equals':
+          formattedValue = { $ne: val };
+          break;
+
+        case 'like':
+          formattedValue = { $regex: val, $options: '-i' };
+          break;
+
+        default:
+          formattedValue = val;
+          break;
+      }
+    }
+
+    return [localizedKey, formattedValue];
+  }
+}
+
+// This plugin asynchronously builds a list of Mongoose query constraints
+// which can then be used in subsequent Mongoose queries.
+function buildQueryPlugin(schema) {
+  const modifiedSchema = schema;
+
+  async function buildQuery(rawParams, locale) {
+    const paramParser = new ParamParser(this, rawParams, locale);
+    const params = await paramParser.parse();
     return params.searchParams;
   }
 
-  schema.statics.apiQuery = apiQuery;
+  modifiedSchema.statics.buildQuery = buildQuery;
 }
 
-function paramParser(model, rawParams, locale) {
-  let query = {
-    searchParams: {},
-    sort: false,
-  };
-
-  // Construct searchParams
-  Object.keys(rawParams).forEach((key) => {
-    const separatedParams = rawParams[key]
-      .match(/{\w+}(.[^{}]*)/g);
-
-    if (separatedParams === null) {
-      query = parseParam(key, rawParams[key], model, query, locale);
-    } else {
-      separatedParams.forEach((param) => {
-        query = parseParam(key, param, model, query, locale);
-      });
-    }
-  });
-
-  return query;
-}
-
-function convertToBoolean(str) {
-  return str.toLowerCase() === 'true'
-    || str.toLowerCase() === 't'
-    || str.toLowerCase() === 'yes'
-    || str.toLowerCase() === 'y'
-    || str === '1';
-}
-
-function addSearchParam(query, key, value) {
-  if (typeof query.searchParams[key] !== 'undefined') {
-    value.forEach((i) => {
-      query.searchParams[key][i] = value[i];
-    });
-  } else {
-    query.searchParams[key] = value;
-  }
-  return query;
-}
-
-function parseParam(key, val, model, query, locale) {
-  const lcKey = key;
-  let operator = val.match(/\{(.*)\}/);
-  val = val.replace(/\{(.*)\}/, '');
-
-  if (operator) [, operator] = operator;
-
-  if (val === '') {
-    return {};
-  } if (lcKey === 'sort_by' || lcKey === 'order_by') {
-    const parts = val.split(',');
-    query.sort = {};
-    query.sort[parts[0]] = parts[1] === 'asc' || parts.length <= 1 ? 1 : parts[1];
-  } else if (lcKey === 'include') {
-    if (val.match(',')) {
-      const orArray = [];
-      val.split(',').map(id => orArray.push({ _id: id }));
-      query = addSearchParam(query, '$or', orArray);
-    } else query.searchParams._id = val;
-  } else if (lcKey === 'exclude') {
-    if (val.match(',')) {
-      const andArray = [];
-      val.split(',').map(id => andArray.push({ _id: { $ne: id } }));
-      query = addSearchParam(query, '$and', andArray);
-    } else query.searchParams._id = { $ne: val };
-  } else if (lcKey === 'locale') {
-    // Do nothing
-  } else {
-    query = parseSchemaForKey(model.schema, query, '', lcKey, val, operator, locale);
-  }
-  return query;
-}
-
-function parseSchemaForKey(schema, query, keyPrefix, lcKey, val, operator, locale) {
-  let paramType;
-  let key = keyPrefix + lcKey;
-  const matches = lcKey.match(/(.+)\.(.+)/);
-
-  if (matches) {
-    // Parse SubSchema
-    if (schema.paths[matches[1]].constructor.name === 'DocumentArray'
-      || schema.paths[matches[1]].constructor.name === 'Mixed') {
-      parseSchemaForKey(schema.paths[matches[1]].schema, `${matches[1]}.`, matches[2], val, operator);
-    } else if (schema.paths[matches[1]].constructor.name === 'SchemaType'
-      || schema.paths[matches[1]].constructor.name === 'SingleNestedPath') {
-      // This wasn't handled in the original package but seems to work
-      paramType = schema.paths[matches[1]].schema.paths.name.instance;
-    }
-  } else if (schema.obj[lcKey] && typeof schema === 'object') {
-    if (schema.obj[lcKey].localized) {
-      key = `${key}.${locale}`;
-    }
-    paramType = schema.obj[lcKey].name || schema.obj[lcKey].type.name;
-  } else if (typeof schema === 'undefined') {
-    paramType = 'String';
-  } else if (typeof schema.paths[lcKey] === 'undefined') {
-    // nada, not found
-  } else if (schema.paths[lcKey].constructor.name === 'SchemaBoolean') {
-    paramType = 'Boolean';
-  } else if (schema.paths[lcKey].constructor.name === 'SchemaString') {
-    paramType = 'String';
-  } else if (schema.paths[lcKey].constructor.name === 'SchemaNumber') {
-    paramType = 'Number';
-  } else if (schema.paths[lcKey].constructor.name === 'ObjectId') {
-    paramType = 'ObjectId';
-  } else if (schema.paths[lcKey].constructor.name === 'SchemaArray') {
-    paramType = 'Array';
-  }
-
-  if (paramType === 'Boolean') {
-    query = addSearchParam(query, key, convertToBoolean(val));
-  } else if (paramType === 'Number') {
-    if (val.match(/([0-9]+,?)/) && val.match(',')) {
-      if (operator === 'all') {
-        query = addSearchParam(query, key, { $all: val.split(',') });
-      } else if (operator === 'nin') {
-        query = addSearchParam(query, key, { $nin: val.split(',') });
-      } else if (operator === 'mod') {
-        query = addSearchParam(query, key, { $mod: [val.split(',')[0], val.split(',')[1]] });
-      } else {
-        query = addSearchParam(query, key, { $in: val.split(',') });
-      }
-    } else if (val.match(/([0-9]+)/)) {
-      if (operator === 'gt'
-        || operator === 'gte'
-        || operator === 'lt'
-        || operator === 'lte'
-        || operator === 'ne') {
-        const newParam = {};
-        newParam[`$${operator}`] = val;
-        query = addSearchParam(query, key, newParam);
-      } else {
-        query = addSearchParam(query, key, parseInt(val, 0));
-      }
-    }
-  } else if (paramType === 'String') {
-    if (val.match(',')) {
-      const options = val.split(',').map(str => new RegExp(str, 'i'));
-
-      if (operator === 'all') {
-        query = addSearchParam(query, key, { $all: options });
-      } else if (operator === 'nin') {
-        query = addSearchParam(query, key, { $nin: options });
-      } else {
-        query = addSearchParam(query, key, { $in: options });
-      }
-    } else if (val.match(/([0-9]+)/)) {
-      if (operator === 'gt'
-        || operator === 'gte'
-        || operator === 'lt'
-        || operator === 'lte') {
-        const newParam = {};
-        newParam[`$${operator}`] = val;
-        query = addSearchParam(query, key, newParam);
-      } else {
-        query = addSearchParam(query, key, val);
-      }
-    } else if (operator === 'ne' || operator === 'not') {
-      const neregex = new RegExp(val, 'i');
-      query = addSearchParam(query, key, { $not: neregex });
-    } else if (operator === 'like') {
-      query = addSearchParam(query, key, { $regex: val, $options: '-i' });
-    } else {
-      query = addSearchParam(query, key, val);
-    }
-  } else if (paramType === 'ObjectId') {
-    query = addSearchParam(query, key, val);
-  } else if (paramType === 'Array') {
-    query = addSearchParam(query, key, val);
-  }
-  return query;
-}
-
-module.exports = {
-  buildQueryPlugin,
-  paramParser,
-};
+module.exports = buildQueryPlugin;

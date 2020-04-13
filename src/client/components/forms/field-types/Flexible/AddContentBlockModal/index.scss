@@ -1,0 +1,10 @@
+@import '../../../../../scss/styles';
+
+.add-content-block-modal {
+  height: 100%;
+  background: rgba(white, .875);
+
+  &__wrap {
+    padding: base(1);
+  }
+}

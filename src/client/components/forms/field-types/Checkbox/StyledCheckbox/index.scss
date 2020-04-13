@@ -1,0 +1,27 @@
+@import '../../shared';
+
+.styled-checkbox {
+  @include formInput;
+  padding: 0;
+  cursor: pointer;
+  max-width: base(1.75);
+  font-size: base(1);
+  align-items: center;
+  justify-content: center;
+
+  .checked-symbol {
+    opacity: 0;
+    line-height: 0;
+    position: relative;
+  }
+
+  &--is-checked {
+    .checked-symbol {
+      opacity: 1;
+    }
+  }
+
+  &--has-error {
+    background-color: lighten($error, 20%);
+  }
+}

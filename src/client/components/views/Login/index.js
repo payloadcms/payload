@@ -6,7 +6,7 @@ import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
-import getSanitizedConfig from '../../../config/getSanitizedConfig';
+import config from '../../../securedConfig';
 import Button from '../../controls/Button';
 import { useUser } from '../../data/User';
 
@@ -14,11 +14,7 @@ import './index.scss';
 
 const baseClass = 'login';
 
-const {
-  routes: {
-    admin,
-  },
-} = getSanitizedConfig();
+const { serverURL, routes: { admin, api } } = config;
 
 const Login = () => {
   const { addStatus } = useStatusList();
@@ -77,7 +73,7 @@ const Login = () => {
         <Form
           handleAjaxResponse={handleAjaxResponse}
           method="POST"
-          action="http://localhost:3000/login"
+          action={`${serverURL}${api}/login`}
           redirect={admin}
         >
           <Email

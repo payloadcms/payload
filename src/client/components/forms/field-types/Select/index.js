@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import withCondition from '../../withCondition';
 import ReactSelect from '../../../modules/ReactSelect';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
@@ -10,12 +11,28 @@ import './index.scss';
 const defaultError = 'Please make a selection.';
 const defaultValidate = value => value.length > 0;
 
+const findValueToRender = (options, value, hasMany) => {
+  if (hasMany && Array.isArray(value)) {
+    return value.map(subValue => options.find(option => option.value === subValue));
+  }
+
+  const matchedOption = options.find(option => option.value === value || option === value);
+
+  if (typeof matchedOption === 'string') {
+    return {
+      value: matchedOption,
+      label: matchedOption,
+    };
+  }
+
+  return matchedOption;
+};
+
 const Select = (props) => {
   const {
     name,
     required,
     defaultValue,
-    valueOverride,
     validate,
     style,
     width,
@@ -34,7 +51,6 @@ const Select = (props) => {
     name,
     required,
     defaultValue,
-    valueOverride,
     validate,
   });
 
@@ -45,6 +61,8 @@ const Select = (props) => {
   ].filter(Boolean).join(' ');
 
   const fieldWidth = width ? `${width}%` : undefined;
+
+  const valueToRender = findValueToRender(options, value, hasMany);
 
   return (
     <div
@@ -64,15 +82,8 @@ const Select = (props) => {
         required={required}
       />
       <ReactSelect
-        findValueInOptions={(reactSelectOptions, reactSelectValue) => {
-          if (hasMany && Array.isArray(reactSelectValue)) {
-            return reactSelectValue.map(subValue => reactSelectOptions.find(option => option.value === subValue));
-          }
-
-          return reactSelectOptions.find(option => option.value === reactSelectValue);
-        }}
         onChange={onFieldChange}
-        value={value}
+        value={valueToRender}
         showError={showError}
         disabled={formProcessing}
         options={options}
@@ -87,7 +98,6 @@ Select.defaultProps = {
   required: false,
   errorMessage: defaultError,
   validate: defaultValidate,
-  valueOverride: null,
   defaultValue: null,
   hasMany: false,
   width: 100,
@@ -97,7 +107,6 @@ Select.propTypes = {
   required: PropTypes.bool,
   style: PropTypes.shape({}),
   errorMessage: PropTypes.string,
-  valueOverride: PropTypes.string,
   label: PropTypes.string.isRequired,
   defaultValue: PropTypes.oneOfType([
     PropTypes.string,
@@ -120,4 +129,4 @@ Select.propTypes = {
   hasMany: PropTypes.bool,
 };
 
-export default Select;
+export default withCondition(Select);

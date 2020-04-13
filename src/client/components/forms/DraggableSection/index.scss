@@ -1,0 +1,116 @@
+@import '../../../scss/styles.scss';
+
+.draggable-section {
+  background: $light-gray;
+  flex-direction: column;
+  position: relative;
+  margin-bottom: base(.5);
+
+  .field-type,
+  .missing-field {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  &:hover {
+    @include shadow-sm;
+  }
+
+  &__collapse__icon {
+    &--open {
+      svg {
+        transform: rotate(90deg);
+      }
+    }
+
+    &--closed {
+      svg {
+        transform: rotate(-90deg);
+      }
+    }
+  }
+
+  &__header {
+    padding: base(.75) base(1);
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    &__drag-handle {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      left: 0;
+      z-index: 1;
+    }
+
+    // elements above the drag handle
+    &__controls,
+    &__header__row-index {
+      position: relative;
+      z-index: 2;
+    }
+
+    &__row-name {
+      font-family: $font-body;
+      font-weight: bold;
+      font-size: base(.5);
+    }
+
+    &__heading {
+      font-family: $font-body;
+      margin: 0;
+      font-size: base(.65);
+    }
+
+    &__controls {
+      margin-left: auto;
+
+      .btn {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .icon-button--crossOut,
+      .icon-button--crosshair {
+        margin-right: base(.25);
+      }
+
+      .icon-button--crosshair {
+        border-color: $primary;
+        @include color-svg($primary);
+
+        &:hover {
+          background: $primary;
+          @include color-svg($black);
+        }
+      }
+
+      .icon-button--crossOut {
+        border-color: $black;
+        @include color-svg($black);
+
+        &:hover {
+          background: $black;
+          @include color-svg(white);
+        }
+      }
+
+      .chevron {
+        margin-left: base(.5);
+
+        &__is--open {
+          transform: rotate(180deg);
+        }
+      }
+    }
+  }
+
+  &__content {
+    box-shadow: inset 0px 1px 0px white;
+
+    > div {
+      padding: base(1) base(1) base(.5);
+    }
+  }
+}

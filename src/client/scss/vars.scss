@@ -51,22 +51,25 @@ $radius-sm    : 5px;
 $radius-lrg   : 10px;
 $stroke-width : 1px;
 
-%shadow-sm {
+@mixin shadow-sm {
+  box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),0 2px 20px 0 rgba(0,2,4,.04);
+}
+
+@mixin shadow {
+  box-shadow: 0 12px 45px rgba(0,0,0,.03);
+
+  &:hover {
+    	box-shadow: 0 12px 45px rgba(0,0,0,.07);
+  }
+}
+
+@mixin inputShadowActive {
 	box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
-				0 2px 20px 0 rgba(0,2,4,.04);
-}
-
-%shadow {
-	box-shadow: 0 22px 65px rgba(0,0,0,.07);
-}
-
-%inputShadowActive {
-  box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
 					0 10px 20px 0 rgba(0,2,4,.08);
 }
 
-%inputShadow {
-  @extend %shadow-sm;
+@mixin inputShadow {
+	@include shadow-sm;
 
   &:hover {
 		box-shadow: 0 2px 4px 0 rgba(0,2,4,.1), 0 5px 20px 0 rgba(0,2,4,.06);

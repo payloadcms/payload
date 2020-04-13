@@ -1,22 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import config from 'payload-config';
 import StatusList, { useStatusList } from '../../modules/Status';
 import ContentBlock from '../../layout/ContentBlock';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import FormSubmit from '../../forms/Submit';
-import getSanitizedConfig from '../../../config/getSanitizedConfig';
+import config from '../../../securedConfig';
 import { useUser } from '../../data/User';
 
 import './index.scss';
 
-const {
-  routes: {
-    admin,
-  },
-} = getSanitizedConfig();
+const { serverURL, routes: { admin, api } } = config;
 
 const passwordField = {
   name: 'password',
@@ -50,8 +45,8 @@ const CreateFirstUser = (props) => {
 
   const fields = [...config.user.fields];
 
-  if (config.user.passwordIndex) {
-    fields.splice(config.user.passwordIndex, 0, passwordField);
+  if (config.user.auth.passwordIndex) {
+    fields.splice(config.user.auth.passwordIndex, 0, passwordField);
   } else {
     fields.push(passwordField);
   }
@@ -69,7 +64,7 @@ const CreateFirstUser = (props) => {
           handleAjaxResponse={handleAjaxResponse}
           disableSuccessStatus
           method="POST"
-          action="/first-register"
+          action={`${serverURL}${api}/first-register`}
         >
           <RenderFields fields={fields} />
           <FormSubmit>Create</FormSubmit>

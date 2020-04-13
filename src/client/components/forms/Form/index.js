@@ -1,35 +1,30 @@
-import React, { useState, useReducer } from 'react';
+import React, { useContext, useState, useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { unflatten } from 'flatley';
 import FormContext from './Context';
 import { useLocale } from '../../utilities/Locale';
 import { useStatusList } from '../../modules/Status';
 import HiddenInput from '../field-types/HiddenInput';
 import { requests } from '../../../api';
+import useThrottledEffect from '../../../hooks/useThrottledEffect';
+import { useUser } from '../../data/User';
+import fieldReducer from './reducer';
 
 import './index.scss';
 
 const baseClass = 'form';
 
-const initialFieldState = {};
-
-function fieldReducer(state, action) {
-  return {
-    ...state,
-    [action.name]: {
-      value: action.value,
-      valid: action.valid,
-    },
-  };
-}
+export const useForm = () => useContext(FormContext);
 
 const Form = (props) => {
-  const [fields, setField] = useReducer(fieldReducer, initialFieldState);
+  const [fields, dispatchFields] = useReducer(fieldReducer, {});
   const [submitted, setSubmitted] = useState(false);
   const [processing, setProcessing] = useState(false);
   const history = useHistory();
   const locale = useLocale();
   const { addStatus } = useStatusList();
+  const { refreshToken } = useUser();
 
   const {
     onSubmit,
@@ -61,6 +56,7 @@ const Form = (props) => {
       // If submit handler comes through via props, run that
     } else if (onSubmit) {
       e.preventDefault();
+
       onSubmit(fields);
 
       // If form is AJAX, fetch data
@@ -69,14 +65,19 @@ const Form = (props) => {
       const data = {};
 
       // Clean up data passed from field state
-      Object.keys(fields).forEach((field) => {
-        data[field] = fields[field].value;
+      Object.keys(fields).forEach((key) => {
+        data[key] = fields[key].value;
       });
 
       setProcessing(true);
 
       // Make the API call from the action
-      requests[method.toLowerCase()](action, data).then(
+      requests[method.toLowerCase()](action, {
+        body: JSON.stringify(unflatten(data)),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then(
         (res) => {
           if (res.status < 400) {
             // If prop handleAjaxResponse is passed, pass it the response
@@ -123,6 +124,10 @@ const Form = (props) => {
     // If valid and not AJAX submit as usual
   };
 
+  useThrottledEffect(() => {
+    refreshToken();
+  }, 15000, [fields]);
+
   const classes = [
     className,
     baseClass,
@@ -137,7 +142,7 @@ const Form = (props) => {
       className={classes}
     >
       <FormContext.Provider value={{
-        setField,
+        dispatchFields,
         fields,
         processing,
         submitted,
@@ -145,7 +150,7 @@ const Form = (props) => {
       >
         <HiddenInput
           name="locale"
-          valueOverride={locale}
+          defaultValue={locale}
         />
         {children}
       </FormContext.Provider>

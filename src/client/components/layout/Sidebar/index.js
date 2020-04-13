@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, NavLink, Link } from 'react-router-dom';
-import getSanitizedConfig from '../../../config/getSanitizedConfig';
+import config from '../../../securedConfig';
 
 import Arrow from '../../graphics/Arrow';
 import Icon from '../../graphics/Icon';
@@ -13,7 +13,7 @@ const {
   routes: {
     admin,
   },
-} = getSanitizedConfig();
+} = config;
 
 const Sidebar = () => {
   const location = useLocation();

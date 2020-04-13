@@ -1,58 +1,93 @@
-import React, { Component } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 import './index.scss';
 
-class Button extends Component {
-  constructor(props) {
-    super(props);
+const baseClass = 'btn';
 
-    let classes = this.props.className ? `btn ${this.props.className}` : 'btn';
+const Button = (props) => {
+  const {
+    className, type, size, icon, el, to, url, children, onClick, disabled,
+  } = props;
 
-    if (this.props.type) {
-      classes += ` btn-${this.props.type}`;
-    }
+  const classes = [
+    baseClass,
+    className && className,
+    type && `btn-${type}`,
+    size && `btn-${size}`,
+    icon && 'btn-icon',
+    disabled && 'btn-disabled',
+  ].filter(Boolean).join(' ');
 
-    if (this.props.size) {
-      classes += ` btn-${this.props.size}`;
-    }
-
-    if (this.props.icon) {
-      classes += ' btn-icon';
-    }
-
-    this.buttonProps = {
-      ...this.props,
-      className: classes,
-      onClick: this.props.onClick,
-      disabled: this.props.disabled
-    };
+  function handleClick(event) {
+    if (type !== 'submit' && onClick) event.preventDefault();
+    if (onClick) onClick();
   }
 
-  render() {
-    switch (this.props.el) {
-      case 'link':
-        return (
-          <Link {...this.buttonProps} to={this.props.to ? this.props.to : this.props.url}>
-            {this.props.children}
-          </Link>
-        );
+  const buttonProps = {
+    ...props,
+    className: classes,
+    onClick: handleClick,
+  };
 
-      case 'anchor':
-        return (
-          <a {...this.buttonProps} href={this.props.url}>
-            {this.props.children}
-          </a>
-        );
+  switch (el) {
+    case 'link':
+      return (
+        <Link
+          {...buttonProps}
+          to={to || url}
+        >
+          {children}
+        </Link>
+      );
 
-      default:
-        return (
-          <button {...this.buttonProps}>
-            {this.props.children}
-          </button>
-        );
-    }
+    case 'anchor':
+      return (
+        <a
+          {...buttonProps}
+          href={url}
+        >
+          {children}
+        </a>
+      );
+
+    default:
+      return (
+        <button
+          type="button"
+          {...buttonProps}
+        >
+          {children}
+        </button>
+      );
   }
-}
+};
+
+Button.defaultProps = {
+  className: null,
+  type: null,
+  size: null,
+  icon: null,
+  el: null,
+  to: null,
+  url: null,
+  children: null,
+  onClick: null,
+  disabled: undefined,
+};
+
+Button.propTypes = {
+  className: PropTypes.string,
+  type: PropTypes.oneOf(['secondary', 'error', undefined]),
+  size: PropTypes.oneOf(['small', undefined]),
+  icon: PropTypes.node,
+  el: PropTypes.oneOf(['link', 'anchor', undefined]),
+  to: PropTypes.string,
+  url: PropTypes.string,
+  children: PropTypes.node,
+  onClick: PropTypes.func,
+  disabled: PropTypes.bool,
+};
 
 export default Button;

@@ -5,7 +5,7 @@ const formatBaseSchema = (field) => {
     hide: field.hide || false,
     localized: field.localized || false,
     unique: field.unique || false,
-    required: field.required || false,
+    required: (field.required && !field.localized) || false,
     default: field.defaultValue || undefined,
   };
 };
@@ -14,19 +14,22 @@ const fieldToSchemaMap = {
   number: (field) => {
     return { ...formatBaseSchema(field), type: Number };
   },
-  input: (field) => {
+  text: (field) => {
+    return { ...formatBaseSchema(field), type: String };
+  },
+  email: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
   textarea: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
-  WYSIWYG: (field) => {
+  wysiwyg: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
   code: (field) => {
     return { ...formatBaseSchema(field), type: String };
   },
-  boolean: (field) => {
+  checkbox: (field) => {
     return { ...formatBaseSchema(field), type: Boolean };
   },
   date: (field) => {
@@ -51,8 +54,8 @@ const fieldToSchemaMap = {
       schema.value = {
         type: Schema.Types.ObjectId,
         autopopulate: true,
-        refPath: `${field.name}${field.localized ? '.{{LOCALE}}' : ''}.relationTo`
-      }
+        refPath: `${field.name}${field.localized ? '.{{LOCALE}}' : ''}.relationTo`,
+      };
       schema.relationTo = { type: String, enum: field.relationTo };
     } else {
       schema = {
@@ -68,7 +71,7 @@ const fieldToSchemaMap = {
       return {
         type: [schema],
         localized: field.localized,
-      }
+      };
     }
 
     return schema;
@@ -80,6 +83,15 @@ const fieldToSchemaMap = {
       schema[subField.name] = fieldToSchemaMap[subField.type](subField);
     });
     return [schema];
+  },
+  group: (field) => {
+    // Localization for groups not supported
+    const schema = {};
+
+    field.fields.forEach((subField) => {
+      schema[subField.name] = fieldToSchemaMap[subField.type](subField);
+    });
+    return schema;
   },
   select: (field) => {
     const schema = {

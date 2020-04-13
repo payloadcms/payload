@@ -1,6 +1,7 @@
 import React, {
-  useState, createContext, useContext,
+  useReducer, createContext, useContext, useEffect, useCallback,
 } from 'react';
+import { useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Close from '../../graphics/Close';
 
@@ -10,28 +11,61 @@ const baseClass = 'status-list';
 
 const Context = createContext({});
 
+const initialStatus = [];
+
+const statusReducer = (state, action) => {
+  switch (action.type) {
+    case 'ADD':
+      return [
+        ...state,
+        action.payload,
+      ];
+
+    case 'REMOVE': {
+      const statusList = [...state];
+      statusList.splice(action.payload, 1);
+      return statusList;
+    }
+
+    default:
+      return state;
+  }
+};
+
+const useStatusList = () => useContext(Context);
+
+const HandleLocationStatus = () => {
+  const { state } = useLocation();
+  const { addStatus } = useStatusList();
+
+  useEffect(() => {
+    if (state && state.status) {
+      if (Array.isArray(state.status)) {
+        state.status.forEach(individualStatus => addStatus(individualStatus));
+      } else {
+        addStatus(state.status);
+      }
+    }
+  }, [addStatus, state]);
+
+  return null;
+};
+
 const StatusListProvider = ({ children }) => {
-  const [statusList, setStatus] = useState([]);
+  const [statusList, dispatchStatus] = useReducer(statusReducer, initialStatus);
+
+  const removeStatus = useCallback(i => dispatchStatus({ type: 'REMOVE', payload: i }), []);
+  const addStatus = useCallback(status => dispatchStatus({ type: 'ADD', payload: status }), []);
 
   return (
     <Context.Provider value={{
       statusList,
-      removeStatus: (i) => {
-        const newStatusList = [...statusList];
-        newStatusList.splice(i, 1);
-        setStatus(newStatusList);
-      },
-      addStatus: (status) => {
-        setStatus((prevStatus) => {
-          return [
-            ...prevStatus,
-            status,
-          ];
-        });
-      },
+      removeStatus,
+      addStatus,
     }}
     >
       {children}
+      <HandleLocationStatus />
     </Context.Provider>
   );
 };
@@ -42,8 +76,6 @@ StatusListProvider.propTypes = {
     PropTypes.node,
   ]).isRequired,
 };
-
-const useStatusList = () => useContext(Context);
 
 const StatusList = () => {
   const { statusList, removeStatus } = useStatusList();
@@ -86,6 +118,7 @@ const StatusList = () => {
 export {
   StatusListProvider,
   useStatusList,
+  HandleLocationStatus,
 };
 
 export default StatusList;

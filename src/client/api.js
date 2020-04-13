@@ -1,11 +1,10 @@
 import Cookies from 'universal-cookie';
 import qs from 'qs';
 
-const cookies = new Cookies();
-
-const setJWT = () => {
+export const getJWTHeader = () => {
+  const cookies = new Cookies();
   const jwt = cookies.get('token');
-  return jwt ? { 'Authorization': `JWT ${jwt}` } : {}
+  return jwt ? { Authorization: `JWT ${jwt}` } : {};
 };
 
 export const requests = {
@@ -13,28 +12,38 @@ export const requests = {
     const query = qs.stringify(params, { addQueryPrefix: true });
     return fetch(`${url}${query}`, {
       headers: {
-        ...setJWT()
-      }
+        ...getJWTHeader(),
+      },
     });
   },
 
-  post: (url, body) =>
-    fetch(`${url}`, {
-      method: 'post',
-      body: JSON.stringify(body),
-      headers: {
-        ...setJWT(),
-        'Content-Type': 'application/json',
-      },
-    }),
+  post: (url, options = {}) => {
+    const headers = options && options.headers ? { ...options.headers } : {};
 
-  put: (url, body) =>
-    fetch(`${url}`, {
-      method: 'put',
-      body: JSON.stringify(body),
+    const formattedOptions = {
+      ...options,
+      method: 'post',
       headers: {
-        ...setJWT(),
-        'Content-Type': 'application/json',
+        ...headers,
+        ...getJWTHeader(),
       },
-    }),
+    };
+
+    return fetch(`${url}`, formattedOptions);
+  },
+
+  put: (url, options = {}) => {
+    const headers = options && options.headers ? { ...options.headers } : {};
+
+    const formattedOptions = {
+      ...options,
+      method: 'put',
+      headers: {
+        ...headers,
+        ...getJWTHeader(),
+      },
+    };
+
+    return fetch(`${url}`, formattedOptions);
+  },
 };
