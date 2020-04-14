@@ -59,10 +59,10 @@ const create = async (args) => {
       // 4. Execute after collection hook
       // /////////////////////////////////////
 
-      const afterDeleteHook = args.config && args.config.hooks && args.config.hooks.afterDelete;
+      const afterCreateHook = args.config && args.config.hooks && args.config.hooks.afterCreate;
 
       if (typeof afterDeleteHook === 'function') {
-        result = await afterDeleteHook(options, result);
+        result = await afterCreateHook(options, result);
       }
 
       // /////////////////////////////////////
