@@ -1,29 +1,26 @@
 const httpStatus = require('http-status');
+const formatErrorResponse = require('../../express/responses/formatError');
+const { upsert } = require('../operations');
 
-const upsert = (Model, config) => async (req, res) => {
+const upsertHandler = (Model, config) => async (req, res) => {
   try {
     const { slug } = config;
 
-    let result = await Model.findOne({ globalType: slug });
+    const result = await upsert({
+      Model,
+      config,
+      slug,
+      depth: req.query.depth,
+      locale: req.locale,
+      fallbackLocale: req.fallbackLocale,
+      api: 'REST',
+      user: req.user,
+    });
 
-    if (!result) {
-      result = new Model();
-    }
-
-    if (req.query.locale && result.setLocale) {
-      result.setLocale(req.query.locale, req.query['fallback-locale']);
-    }
-
-    Object.assign(result, { ...req.body, globalType: slug });
-
-    result.save();
-
-    result = result.toJSON({ virtuals: true });
-
-    return res.status(httpStatus.CREATED).json({ message: 'Global saved successfully.', result });
+    return res.status(httpStatus.OK).json({ message: 'Global saved successfully.', result });
   } catch (error) {
-    throw error;
+    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
   }
 };
 
-module.exports = upsert;
+module.exports = upsertHandler;

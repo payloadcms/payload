@@ -14,6 +14,7 @@ const findOneHandler = (Model, config) => async (req, res) => {
       locale: req.locale,
       fallbackLocale: req.fallbackLocale,
       api: 'REST',
+      user: req.user,
     });
 
     return res.status(httpStatus.OK).json(result);
