@@ -1,34 +1,25 @@
 const httpStatus = require('http-status');
-const { NotFound } = require('../../errors');
 const formatErrorResponse = require('../../express/responses/formatError');
+const { findOne } = require('../operations');
 
-const findOne = (Model, config) => async (req, res) => {
+const findOneHandler = (Model, config) => async (req, res) => {
   try {
     const { slug } = config;
 
-    const options = {};
-
-    if (req.query.depth) {
-      options.autopopulate = {
-        maxDepth: req.query.depth,
-      };
-    }
-
-    let result = await Model.findOne({ globalType: slug });
-
-    if (!result) {
-      return res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(new NotFound(), 'APIError'));
-    }
-
-    if (req.query.locale && result.setLocale) {
-      result.setLocale(req.query.locale, req.query['fallback-locale']);
-      result = result.toJSON({ virtuals: true });
-    }
+    const result = await findOne({
+      Model,
+      config,
+      slug,
+      depth: req.query.depth,
+      locale: req.locale,
+      fallbackLocale: req.fallbackLocale,
+      api: 'REST',
+    });
 
     return res.status(httpStatus.OK).json(result);
   } catch (error) {
-    throw error();
+    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
   }
 };
 
-module.exports = findOne;
+module.exports = findOneHandler;

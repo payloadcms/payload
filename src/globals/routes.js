@@ -9,9 +9,9 @@ const registerGlobals = (globalConfigs, Globals) => {
   globalConfigs.forEach((global) => {
     router
       .route(`/globals/${global.slug}`)
-      .get(findOne(Globals.Model, global))
-      .post(upsert(Globals.Model, global))
-      .put(upsert(Globals.Model, global));
+      .get(findOne(Globals, global))
+      .post(upsert(Globals, global))
+      .put(upsert(Globals, global));
   });
 
   return router;

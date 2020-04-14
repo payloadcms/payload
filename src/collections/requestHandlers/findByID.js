@@ -18,7 +18,7 @@ const findByIDHandler = async (req, res) => {
     const doc = await findByID(options);
     return res.json(doc);
   } catch (err) {
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));
+    return res.status(err.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err));
   }
 };
 

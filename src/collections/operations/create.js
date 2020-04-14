@@ -1,4 +1,3 @@
-const { Forbidden } = require('../../errors');
 const executePolicy = require('../../auth/executePolicy');
 
 const create = async (args) => {
@@ -8,71 +7,68 @@ const create = async (args) => {
     // /////////////////////////////////////
 
     const policy = args.config && args.config.policies && args.config.policies.create;
-    const hasPermission = await executePolicy(args.user, policy);
 
-    if (hasPermission) {
-      // Await validation here
+    await executePolicy(args.user, policy);
 
-      let options = {
-        Model: args.Model,
-        config: args.config,
-        locale: args.locale,
-        fallbackLocale: args.fallbackLocale,
-        user: args.user,
-        api: args.api,
-        data: args.data,
-      };
+    // Await validation here
 
-      // /////////////////////////////////////
-      // 2. Execute before collection hook
-      // /////////////////////////////////////
+    let options = {
+      Model: args.Model,
+      config: args.config,
+      locale: args.locale,
+      fallbackLocale: args.fallbackLocale,
+      user: args.user,
+      api: args.api,
+      data: args.data,
+    };
 
-      const beforeCreateHook = args.config && args.config.hooks && args.config.hooks.beforeCreate;
+    // /////////////////////////////////////
+    // 2. Execute before collection hook
+    // /////////////////////////////////////
 
-      if (typeof beforeCreateHook === 'function') {
-        options = await beforeCreateHook(options);
-      }
+    const beforeCreateHook = args.config && args.config.hooks && args.config.hooks.beforeCreate;
 
-      // /////////////////////////////////////
-      // 3. Perform database operation
-      // /////////////////////////////////////
-
-      const {
-        Model,
-        locale,
-        fallbackLocale,
-        data,
-      } = options;
-
-      let result = new Model();
-
-      if (locale && result.setLocale) {
-        result.setLocale(locale, fallbackLocale);
-      }
-
-      Object.assign(result, data);
-      await result.save();
-
-      result = result.toJSON({ virtuals: true });
-
-      // /////////////////////////////////////
-      // 4. Execute after collection hook
-      // /////////////////////////////////////
-
-      const afterCreateHook = args.config && args.config.hooks && args.config.hooks.afterCreate;
-
-      if (typeof afterDeleteHook === 'function') {
-        result = await afterCreateHook(options, result);
-      }
-
-      // /////////////////////////////////////
-      // 5. Return results
-      // /////////////////////////////////////
-
-      return result;
+    if (typeof beforeCreateHook === 'function') {
+      options = await beforeCreateHook(options);
     }
 
-    throw new Forbidden();
+    // /////////////////////////////////////
+    // 3. Perform database operation
+    // /////////////////////////////////////
+
+    const {
+      Model,
+      locale,
+      fallbackLocale,
+      data,
+    } = options;
+
+    let result = new Model();
+
+    if (locale && result.setLocale) {
+      result.setLocale(locale, fallbackLocale);
+    }
+
+    Object.assign(result, data);
+    await result.save();
+
+    result = result.toJSON({ virtuals: true });
+
+    // /////////////////////////////////////
+    // 4. Execute after collection hook
+    // /////////////////////////////////////
+
+    const afterCreateHook = args.config && args.config.hooks && args.config.hooks.afterCreate;
+
+    if (typeof afterDeleteHook === 'function') {
+      result = await afterCreateHook(options, result);
+    }
+
+    // /////////////////////////////////////
+    // 5. Return results
+    // /////////////////////////////////////
+
+    return result;
   } catch (err) {
     throw err;
   }
