@@ -34,7 +34,7 @@ const authRoutes = (config, User) => {
   router.use('', passwordResetRoutes(config.email, User));
 
   router
-    .route(`${config.user.slug}/register`)
+    .route(`/${config.user.slug}/register`)
     .post(auth.register);
 
   router

@@ -11,7 +11,7 @@
   },
   "scripts": {
     "test": "jest --config src/tests/jest.config.js",
-    "test:int": "jest --config src/tests/jest.config.integration.js",
+    "test:int": "jest src/tests/integration/api.spec.js --runInBand",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
     "dev": "nodemon demo/server.js",
     "lint": "eslint **/*.js"

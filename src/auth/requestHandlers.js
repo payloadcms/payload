@@ -21,7 +21,7 @@ module.exports = (config, User) => ({
         return next(error);
       }
       return passport.authenticate('local')(req, res, () => {
-        return res.json({
+        return res.status(httpStatus.CREATED).json({
           [usernameField]: user[usernameField],
           role: user.role,
           createdAt: user.createdAt,
