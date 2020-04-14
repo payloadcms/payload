@@ -8,6 +8,8 @@ const createResolver = collection => async (_, args, context) => {
     data: args.data,
     user: context.user,
     api: 'GraphQL',
+    locale: context.locale,
+    fallbackLocale: context.fallbackLocale,
   };
 
   if (args.locale) {

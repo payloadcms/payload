@@ -12,6 +12,8 @@ const findResolver = collection => async (_, args, context) => {
     sort: args.sort,
     user: context.user,
     api: 'GraphQL',
+    locale: context.locale,
+    fallbackLocale: context.fallbackLocale,
   };
 
   if (args.locale) {

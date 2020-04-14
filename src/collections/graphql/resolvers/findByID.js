@@ -9,6 +9,8 @@ const findByIDResolver = collection => async (_, args, context) => {
     id: args.id,
     user: context.user,
     api: 'GraphQL',
+    locale: context.locale,
+    fallbackLocale: context.fallbackLocale,
   };
 
   if (args.locale) {

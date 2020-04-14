@@ -56,7 +56,7 @@ class Payload {
           next();
         },
         passport.authenticate(['jwt', 'anonymous'], { session: false }),
-        new GraphQL(this.config, this.collections, this.User, this.Upload).init(),
+        new GraphQL(this.config, this.collections, this.User, this.Upload, this.globals).init(),
       );
     }
 
