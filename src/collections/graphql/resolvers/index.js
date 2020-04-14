@@ -1,13 +1,13 @@
-const getFindByID = require('./getFindByID');
-const getFind = require('./getFind');
-const getCreate = require('./getCreate');
-const getUpdate = require('./getUpdate');
-const getDelete = require('./getDelete');
+const findByID = require('./findByID');
+const find = require('./find');
+const create = require('./create');
+const update = require('./update');
+const deleteResolver = require('./delete');
 
 module.exports = {
-  getFindByID,
-  getFind,
-  getCreate,
-  getUpdate,
-  getDelete,
+  findByID,
+  find,
+  create,
+  update,
+  deleteResolver,
 };

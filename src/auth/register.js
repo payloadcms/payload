@@ -14,16 +14,16 @@ function registerUser() {
   userSchema.plugin(passportLocalMongoose, { usernameField: this.config.user.auth.useAsUsername });
   this.User = {
     config: this.config.user,
-    model: mongoose.model(this.config.user.labels.singular, userSchema),
+    Model: mongoose.model(this.config.user.labels.singular, userSchema),
   };
 
-  passport.use(this.User.model.createStrategy());
-  passport.use(jwtStrategy(this.User.model, this.config));
-  passport.serializeUser(this.User.model.serializeUser());
-  passport.deserializeUser(this.User.model.deserializeUser());
+  passport.use(this.User.Model.createStrategy());
+  passport.use(jwtStrategy(this.User.Model, this.config));
+  passport.serializeUser(this.User.Model.serializeUser());
+  passport.deserializeUser(this.User.Model.deserializeUser());
   passport.use(new AnonymousStrategy.Strategy());
 
-  this.router.use(authRoutes(this.config, this.User.model));
+  this.router.use(authRoutes(this.config, this.User.Model));
 
   this.router.use(collectionRoutes(this.User));
 }

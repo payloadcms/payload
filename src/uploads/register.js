@@ -20,12 +20,12 @@ function registerUpload() {
   });
 
   this.Upload = {
-    model: mongoose.model(this.config.upload.labels.singular, uploadSchema),
+    Model: mongoose.model(this.config.upload.labels.singular, uploadSchema),
     config: this.config.upload,
   };
 
   // TODO: image type hard coded, but in the future we need some way of customizing how uploads are handled in customizable pattern
-  this.Upload.model.discriminator('image', imageSchema);
+  this.Upload.Model.discriminator('image', imageSchema);
 
   this.router.use(uploadRoutes(this.config, this.Upload));
 

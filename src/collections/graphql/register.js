@@ -6,7 +6,7 @@ const {
 
 const formatName = require('../../graphql/utilities/formatName');
 const {
-  getCreate, getFind, getFindByID, getDelete, getUpdate,
+  create, find, findByID, deleteResolver, update,
 } = require('./resolvers');
 const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
 
@@ -56,7 +56,7 @@ function registerCollections() {
         locale: { type: this.types.localeInputType },
         fallbackLocale: { type: this.types.fallbackLocaleInputType },
       },
-      resolve: getFindByID(this.config, collection),
+      resolve: findByID(collection),
     };
 
     this.Query.fields[pluralLabel] = {
@@ -69,7 +69,7 @@ function registerCollections() {
         limit: { type: GraphQLInt },
         sort: { type: GraphQLString },
       },
-      resolve: getFind(this.config, collection),
+      resolve: find(collection),
     };
 
     this.Mutation.fields[`create${singularLabel}`] = {
@@ -77,7 +77,7 @@ function registerCollections() {
       args: {
         data: { type: collection.graphQL.mutationInputType },
       },
-      resolve: getCreate(this.config, collection),
+      resolve: create(collection),
     };
 
     this.Mutation.fields[`update${singularLabel}`] = {
@@ -86,7 +86,7 @@ function registerCollections() {
         id: { type: new GraphQLNonNull(GraphQLString) },
         data: { type: collection.graphQL.mutationInputType },
       },
-      resolve: getUpdate(this.config, collection),
+      resolve: update(collection),
     };
 
     this.Mutation.fields[`delete${singularLabel}`] = {
@@ -94,7 +94,7 @@ function registerCollections() {
       args: {
         id: { type: new GraphQLNonNull(GraphQLString) },
       },
-      resolve: getDelete(collection),
+      resolve: deleteResolver(collection),
     };
   });
 }

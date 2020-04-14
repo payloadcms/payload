@@ -5,7 +5,7 @@ const routes = require('./routes');
 function registerGlobals() {
   validate(this.config.globals);
   this.globals = buildSchema(this.config);
-  this.router.use(routes(this.config.globals, this.globals.model));
+  this.router.use(routes(this.config.globals, this.globals.Model));
 }
 
 module.exports = registerGlobals;

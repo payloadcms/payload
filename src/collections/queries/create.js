@@ -1,14 +1,78 @@
-const create = async (options) => {
+const { Forbidden } = require('../../errors');
+const executePolicy = require('../../auth/executePolicy');
+
+const create = async (args) => {
   try {
-    // Await validation here
+    // /////////////////////////////////////
+    // 1. Retrieve and execute policy
+    // /////////////////////////////////////
 
-    // Await pre-hook here
+    const policy = args.config && args.config.policies && args.config.policies.create;
+    const hasPermission = await executePolicy(args.user, policy);
 
-    const doc = await options.model.create(options.data);
+    if (hasPermission) {
+      // Await validation here
 
-    // Await post hook here
+      let options = {
+        Model: args.Model,
+        config: args.config,
+        locale: args.locale,
+        fallbackLocale: args.fallbackLocale,
+        user: args.user,
+        api: args.api,
+        data: args.data,
+      };
 
-    return doc.toJSON({ virtuals: true });
+      // /////////////////////////////////////
+      // 2. Execute before collection hook
+      // /////////////////////////////////////
+
+      const beforeCreateHook = args.config && args.config.hooks && args.config.hooks.beforeCreate;
+
+      if (typeof beforeCreateHook === 'function') {
+        options = await beforeCreateHook(options);
+      }
+
+      // /////////////////////////////////////
+      // 3. Query database
+      // /////////////////////////////////////
+
+      const {
+        Model,
+        locale,
+        fallbackLocale,
+        data,
+      } = options;
+
+      let result = new Model();
+
+      if (locale && result.setLocale) {
+        result.setLocale(locale, fallbackLocale);
+      }
+
+      Object.assign(result, data);
+      await result.save();
+
+      result = result.toJSON({ virtuals: true });
+
+      // /////////////////////////////////////
+      // 4. Execute after collection hook
+      // /////////////////////////////////////
+
+      const afterDeleteHook = args.config && args.config.hooks && args.config.hooks.afterDelete;
+
+      if (typeof afterDeleteHook === 'function') {
+        result = await afterDeleteHook(options, result);
+      }
+
+      // /////////////////////////////////////
+      // 5. Return results
+      // /////////////////////////////////////
+
+      return result;
+    }
+
+    throw new Forbidden();
   } catch (err) {
     throw err;
   }
