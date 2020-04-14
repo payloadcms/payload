@@ -1,7 +1,14 @@
 const mongoose = require('mongoose');
 
-const connectMongoose = (url) => {
-  mongoose.connect(url, {
+const connectMongoose = async (url) => {
+  let urlToConnect = url;
+  if (process.env.NODE_ENV === 'test') {
+    // eslint-disable-next-line global-require
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    const mongod = new MongoMemoryServer();
+    urlToConnect = await mongod.getUri();
+  }
+  mongoose.connect(urlToConnect, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   }, (err) => {

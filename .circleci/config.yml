@@ -4,7 +4,7 @@ jobs:
     docker:
       # specify the version you desire here
       - image: circleci/node:9.11.1
-      
+
     working_directory: ~/repo
 
     steps:
@@ -23,6 +23,6 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-        
+
       # run tests!
-      - run: npm test
+      - run: npm test:unit
