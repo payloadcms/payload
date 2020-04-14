@@ -83,6 +83,19 @@ describe('API', () => {
       const englishQueryResponse = await axios.get(`http://localhost:3000/api/posts/${id}`);
       expect(englishQueryResponse.status).toBe(200);
       expect(englishQueryResponse.data.description).toBe(englishDesc);
+
+      const englishQueryResponseWithLocale = await axios.get(`http://localhost:3000/api/posts/${id}?locale=en`);
+      expect(englishQueryResponseWithLocale.status).toBe(200);
+      expect(englishQueryResponseWithLocale.data.description).toBe(englishDesc);
+
+      const spanishQueryResponse = await axios.get(`http://localhost:3000/api/posts/${id}/?locale=es`);
+      expect(spanishQueryResponse.status).toBe(200);
+      expect(spanishQueryResponse.data.description).toBe(spanishDesc);
+
+      const allQueryResponse = await axios.get(`http://localhost:3000/api/posts/${id}/?locale=all`);
+      expect(allQueryResponse.status).toBe(200);
+      expect(allQueryResponse.data.description.es).toBe(spanishDesc);
+      expect(allQueryResponse.data.description.en).toBe(englishDesc);
     });
   });
 });
