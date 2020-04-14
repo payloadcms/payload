@@ -1,52 +1,111 @@
-const { APIError } = require('../../errors');
+const { Forbidden } = require('../../errors');
+const executePolicy = require('../../auth/executePolicy');
 
-const find = async (options) => {
+const find = async (args) => {
   try {
-    const {
-      model,
-      query = {},
-      locale,
-      fallbackLocale,
-      paginate = {},
-      depth,
-    } = options;
+    // /////////////////////////////////////
+    // 1. Retrieve and execute policy
+    // /////////////////////////////////////
 
-    // await pre find hook here
+    const policy = args.config && args.config.policies && args.config.policies.read;
+    const hasPermission = await executePolicy(args.user, policy);
 
-    const mongooseQuery = await model.buildQuery(query, locale);
+    if (hasPermission) {
+      const queryToBuild = {};
+      if (args.where) queryToBuild.where = args.where;
 
-    const mongooseOptions = {
-      options: {},
-    };
-
-    if (paginate.page) mongooseOptions.page = paginate.page;
-    if (paginate.limit) mongooseOptions.limit = paginate.limit;
-    if (paginate.sort) mongooseOptions.sort = paginate.sort;
-
-    if (depth && depth !== '0') {
-      mongooseOptions.options.autopopulate = {
-        maxDepth: parseInt(depth, 10),
+      let options = {
+        query: await args.Model.buildQuery(queryToBuild, args.locale),
+        Model: args.Model,
+        locale: args.locale,
+        fallbackLocale: args.fallbackLocale,
+        page: args.page,
+        limit: args.limit,
+        sort: args.sort,
+        depth: args.depth,
+        config: args.config,
+        user: args.user,
+        api: args.api,
       };
-    } else {
-      mongooseOptions.options.autopopulate = false;
-    }
 
-    const result = await model.paginate(mongooseQuery, mongooseOptions);
+      // /////////////////////////////////////
+      // 2. Execute before collection hook
+      // /////////////////////////////////////
 
-    // await post find hook here
+      const beforeReadHook = args.config && args.config.hooks && args.config.hooks.beforeRead;
 
-    return {
-      ...result,
-      docs: result.docs.map((doc) => {
-        if (locale && doc.setLocale) {
-          doc.setLocale(locale, fallbackLocale);
+      if (typeof beforeReadHook === 'function') {
+        options = await beforeReadHook(options);
+      }
+
+      // /////////////////////////////////////
+      // 3. Query database
+      // /////////////////////////////////////
+
+      const {
+        query,
+        page,
+        limit,
+        sort,
+        api,
+        depth,
+        Model,
+        locale,
+        fallbackLocale,
+      } = options;
+
+      const optionsToExecute = {
+        page: page || 1,
+        limit: limit || 10,
+        sort,
+        options: {},
+      };
+
+      // Only allow depth override within REST.
+      // If allowed in GraphQL, it would break resolvers
+      // as a full object will be returned instead of an ID string
+      if (api === 'REST') {
+        if (depth && depth !== '0') {
+          optionsToExecute.options.autopopulate = {
+            maxDepth: parseInt(depth, 10),
+          };
+        } else {
+          optionsToExecute.options.autopopulate = false;
         }
+      }
 
-        return doc.toJSON({ virtuals: true });
-      }),
-    };
+      let result = await Model.paginate(query, optionsToExecute);
+
+      result = {
+        ...result,
+        docs: result.docs.map((doc) => {
+          if (locale && doc.setLocale) {
+            doc.setLocale(locale, fallbackLocale);
+          }
+
+          return doc.toJSON({ virtuals: true });
+        }),
+      };
+
+      // /////////////////////////////////////
+      // 4. Execute after collection hook
+      // /////////////////////////////////////
+
+      const afterReadHook = args.config && args.config.hooks && args.config.hooks.afterRead;
+
+      if (typeof afterReadHook === 'function') {
+        result = await afterReadHook(options, result);
+      }
+
+      // /////////////////////////////////////
+      // 5. Return results
+      // /////////////////////////////////////
+
+      return result;
+    }
+    throw new Forbidden();
   } catch (err) {
-    throw new APIError();
+    throw err;
   }
 };
 

@@ -2,67 +2,59 @@ const httpStatus = require('http-status');
 const { NotFound } = require('../errors');
 const formatErrorResponse = require('../express/responses/formatError');
 
-const upsert = (req, res) => {
-  const { slug } = req.global;
+const upsert = async (req, res) => {
+  try {
+    const { slug } = req.global;
 
-  req.model.findOne({ globalType: slug }, (findErr, doc) => {
-    if (!doc) {
-      return req.model.create({
-        ...req.body,
-        globalType: slug,
-      }, (createErr, result) => {
-        if (createErr) return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(createErr, 'mongoose'));
+    let result = await req.Model.findOne({ globalType: slug });
 
-        return res.status(httpStatus.CREATED)
-          .json({
-            message: 'success',
-            result: result.toJSON({ virtuals: true }),
-          });
-      });
+    if (!result) {
+      result = new req.Model();
     }
 
-    if (req.query.locale && doc.setLocale) {
-      doc.setLocale(req.query.locale, req.query['fallback-locale']);
+    if (req.query.locale && result.setLocale) {
+      result.setLocale(req.query.locale, req.query['fallback-locale']);
     }
 
-    Object.assign(doc, req.body);
+    Object.assign(result, { ...req.body, globalType: slug });
 
-    return doc.save((err) => {
-      if (err) return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));
+    result.save();
 
-      return res.json({
-        message: 'Saved successfully.',
-        doc: doc.toJSON({ virtuals: true }),
-      });
-    });
-  });
+    result = result.toJSON({ virtuals: true });
+
+    return res.status(httpStatus.CREATED).json({ message: 'Global saved successfully.', result });
+  } catch (error) {
+    throw error;
+  }
 };
 
-const findOne = (req, res) => {
-  const { slug } = req.global;
+const findOne = async (req, res) => {
+  try {
+    const { slug } = req.global;
 
-  const options = {};
+    const options = {};
 
-  if (req.query.depth) {
-    options.autopopulate = {
-      maxDepth: req.query.depth,
-    };
-  }
+    if (req.query.depth) {
+      options.autopopulate = {
+        maxDepth: req.query.depth,
+      };
+    }
 
-  req.model.findOne({ globalType: slug }, null, options, (findErr, doc) => {
-    if (!doc) {
+    let result = await req.Model.findOne({ globalType: slug });
+
+    if (!result) {
       return res.status(httpStatus.NOT_FOUND).json(formatErrorResponse(new NotFound(), 'APIError'));
     }
 
-    let result = doc;
-
-    if (req.query.locale && doc.setLocale) {
-      doc.setLocale(req.query.locale, req.query['fallback-locale']);
-      result = doc.toJSON({ virtuals: true });
+    if (req.query.locale && result.setLocale) {
+      result.setLocale(req.query.locale, req.query['fallback-locale']);
+      result = result.toJSON({ virtuals: true });
     }
 
     return res.status(httpStatus.OK).json(result);
-  });
+  } catch (error) {
+    throw error();
+  }
 };
 
 module.exports = {

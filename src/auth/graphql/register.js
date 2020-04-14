@@ -6,7 +6,7 @@ const {
 
 const formatName = require('../../graphql/utilities/formatName');
 const {
-  getFind, getFindByID, getDelete, getUpdate,
+  find, findByID, deleteResolver, update,
 } = require('../../collections/graphql/resolvers');
 
 const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
@@ -55,7 +55,7 @@ function registerUser() {
       locale: { type: this.types.localeInputType },
       fallbackLocale: { type: this.types.fallbackLocaleInputType },
     },
-    resolve: getFindByID(this.config, this.User),
+    resolve: findByID(this.User),
   };
 
   this.Query.fields[pluralLabel] = {
@@ -68,7 +68,7 @@ function registerUser() {
       limit: { type: GraphQLInt },
       sort: { type: GraphQLString },
     },
-    resolve: getFind(this.config, this.User),
+    resolve: find(this.User),
   };
 
   this.Mutation.fields[`update${singularLabel}`] = {
@@ -77,7 +77,7 @@ function registerUser() {
       id: { type: new GraphQLNonNull(GraphQLString) },
       data: { type: this.User.graphQL.mutationInputType },
     },
-    resolve: getUpdate(this.config, this.User),
+    resolve: update(this.User),
   };
 
   this.Mutation.fields[`delete${singularLabel}`] = {
@@ -85,7 +85,7 @@ function registerUser() {
     args: {
       id: { type: new GraphQLNonNull(GraphQLString) },
     },
-    resolve: getDelete(this.User),
+    resolve: deleteResolver(this.User),
   };
 }
 
