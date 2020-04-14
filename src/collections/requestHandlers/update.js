@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const formatErrorResponse = require('../../express/responses/formatError');
 const formatSuccessResponse = require('../../express/responses/formatSuccess');
-const { update } = require('../queries');
+const { update } = require('../operations');
 const { NotFound } = require('../../errors');
 
 const updateHandler = async (req, res) => {

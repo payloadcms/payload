@@ -1,9 +1,11 @@
+const { Forbidden } = require('../errors');
+
 const executePolicy = async (user, policy) => {
   if (policy) {
     const result = await policy(user);
 
     if (!result) {
-      return false;
+      throw new Forbidden();
     }
 
     return true;
@@ -13,7 +15,7 @@ const executePolicy = async (user, policy) => {
     return true;
   }
 
-  return false;
+  throw new Forbidden();
 };
 
 module.exports = executePolicy;

@@ -3,7 +3,7 @@ const APIError = require('./APIError');
 
 class NotFound extends APIError {
   constructor() {
-    super('Not found.', httpStatus.NOT_FOUND);
+    super('The requested resource was not found.', httpStatus.NOT_FOUND);
   }
 }
 

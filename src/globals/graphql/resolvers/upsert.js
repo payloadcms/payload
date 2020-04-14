@@ -1,15 +1,19 @@
 /* eslint-disable no-param-reassign */
-const { deleteQuery } = require('../../operations');
+const { upsert } = require('../../operations');
 
-const deleteResolver = collection => async (_, args, context) => {
+const upsertResolver = (Model, config) => async (_, args, context) => {
+  const { slug } = config;
+
   const options = {
-    config: collection.config,
-    Model: collection.Model,
-    id: args.id,
-    user: context.user,
-    api: 'GraphQL',
+    config,
+    Model,
     locale: context.locale,
     fallbackLocale: context.fallbackLocale,
+    data: args.data,
+    slug,
+    depth: 0,
+    api: 'GraphQL',
+    user: context.user,
   };
 
   if (args.locale) {
@@ -22,9 +26,9 @@ const deleteResolver = collection => async (_, args, context) => {
     options.fallbackLocale = args.fallbackLocale;
   }
 
-  const result = await deleteQuery(options);
+  const result = await upsert(options);
 
   return result;
 };
 
-module.exports = deleteResolver;
+module.exports = upsertResolver;

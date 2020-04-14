@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 const { NotFound } = require('../../errors');
-const { deleteQuery } = require('../queries');
+const { deleteQuery } = require('../operations');
 
 const deleteHandler = async (req, res) => {
   try {

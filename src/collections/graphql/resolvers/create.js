@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-const create = require('../../queries/create');
+const { create } = require('../../operations');
 
 const createResolver = collection => async (_, args, context) => {
   const options = {
@@ -8,6 +8,8 @@ const createResolver = collection => async (_, args, context) => {
     data: args.data,
     user: context.user,
     api: 'GraphQL',
+    locale: context.locale,
+    fallbackLocale: context.fallbackLocale,
   };
 
   if (args.locale) {

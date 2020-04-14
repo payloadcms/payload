@@ -1,7 +1,7 @@
 const mkdirp = require('mkdirp');
 const httpStatus = require('http-status');
 const resizeAndSave = require('./images/imageResizer');
-const findByID = require('../collections/queries/findByID');
+const findByID = require('../collections/operations/findByID');
 const { NotFound } = require('../errors');
 
 async function fileTypeHandler(config, uploadConfig, file) {

@@ -15,7 +15,7 @@ const {
 const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
 const withNullableType = require('./withNullableType');
-const find = require('../../collections/queries/find');
+const { find } = require('../../collections/operations');
 
 function buildObjectType(name, fields, parentName, baseFields = {}) {
   const fieldToSchemaMap = {
