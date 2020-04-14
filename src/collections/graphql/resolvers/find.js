@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-const find = require('../../queries/find');
+const { find } = require('../../operations');
 
 const findResolver = collection => async (_, args, context) => {
   const options = {

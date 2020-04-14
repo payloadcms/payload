@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-const create = require('../../queries/create');
+const { create } = require('../../operations');
 
 const createResolver = collection => async (_, args, context) => {
   const options = {

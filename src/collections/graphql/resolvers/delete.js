@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-const { deleteQuery } = require('../../queries');
+const { deleteQuery } = require('../../operations');
 
 const deleteResolver = collection => async (_, args, context) => {
   const options = {

@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-const findByID = require('../../queries/findByID');
+const { findByID } = require('../../operations');
 
 const findByIDResolver = collection => async (_, args, context) => {
   const options = {

@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { find } = require('../queries');
+const { find } = require('../operations');
 
 const findHandler = async (req, res) => {
   try {

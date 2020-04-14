@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-const update = require('../../queries/update');
+const { update } = require('../../operations');
 
 const updateResolver = collection => async (_, args, context) => {
   const options = {

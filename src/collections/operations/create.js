@@ -34,7 +34,7 @@ const create = async (args) => {
       }
 
       // /////////////////////////////////////
-      // 3. Query database
+      // 3. Perform database operation
       // /////////////////////////////////////
 
       const {
