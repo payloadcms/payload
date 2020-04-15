@@ -25,9 +25,6 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
     - run: npm install
-    - run: nohup npm run server &
-      env:
-        NODE_ENV: test
     - run: npm run test:int # In-memory db + api tests
       env:
         CI: true

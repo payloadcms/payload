@@ -1,3 +1,6 @@
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+
 const express = require('express');
 const graphQLPlayground = require('graphql-playground-middleware-express').default;
 const passport = require('passport');
@@ -8,7 +11,6 @@ const registerUser = require('./users/register');
 const registerUpload = require('./uploads/register');
 const registerCollections = require('./collections/register');
 const registerGlobals = require('./globals/register');
-const testingEndpoints = require('./express/testingEndpoints');
 const GraphQL = require('./graphql');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
 
@@ -23,7 +25,6 @@ class Payload {
     this.registerUpload = registerUpload.bind(this);
     this.registerCollections = registerCollections.bind(this);
     this.registerGlobals = registerGlobals.bind(this);
-    this.testingEndpoints = testingEndpoints.bind(this);
 
     // Setup & initialization
     connectMongoose(this.config.mongoURL);
@@ -40,7 +41,7 @@ class Payload {
     this.registerGlobals();
 
     // Enable client
-    if (!this.config.disableAdmin) {
+    if (!this.config.disableAdmin && process.env.NODE_ENV !== 'test') {
       this.express.use(initWebpack(this.config));
     }
 
@@ -60,10 +61,6 @@ class Payload {
         passport.authenticate(['jwt', 'anonymous'], { session: false }),
         new GraphQL(this.config, this.collections, this.User, this.Upload, this.globals).init(),
       );
-    }
-
-    if (process.env.NODE_ENV === 'test') {
-      this.testingEndpoints();
     }
 
     this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
