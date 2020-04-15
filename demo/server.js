@@ -9,6 +9,20 @@ const payload = new Payload({
   express: expressApp,
 });
 
-expressApp.listen(config.port, () => {
-  console.log(`listening on ${config.port}...`);
-});
+exports.payload = payload;
+
+exports.start = (cb) => {
+  expressApp.listen(config.port, () => {
+    console.log(`listening on ${config.port}...`);
+    if (cb) cb();
+  });
+};
+
+exports.close = (cb) => {
+  if (expressApp) expressApp.close(cb);
+};
+
+// when app.js is launched directly
+if (module.id === require.main.id) {
+  exports.start();
+}

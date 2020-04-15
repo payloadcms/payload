@@ -63,7 +63,6 @@ module.exports = (config) => {
               plugins: [
                 require.resolve('@babel/plugin-proposal-class-properties'),
                 require.resolve('@babel/plugin-proposal-optional-chaining'),
-                require.resolve('babel-plugin-add-module-exports'),
                 [
                   require.resolve('@babel/plugin-transform-runtime'),
                   {

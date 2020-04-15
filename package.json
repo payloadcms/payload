@@ -17,7 +17,7 @@
   },
   "scripts": {
     "test:unit": "cross-env NODE_ENV=test jest --config src/tests/jest.config.js",
-    "test:int": "cross-env NODE_ENV=test jest",
+    "test:int": "cross-env NODE_ENV=test jest src/tests/integration/api.spec.js --forceExit --detectOpenHandles",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
     "dev": "nodemon demo/server.js",
     "server": "node demo/server.js",
@@ -43,6 +43,7 @@
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.5",
     "dotenv": "^6.0.0",
+    "es6-promise": "^4.2.8",
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6",
     "express-graphql": "^0.9.0",
@@ -54,6 +55,7 @@
     "html-webpack-plugin": "^3.2.0",
     "http-status": "^1.4.2",
     "image-size": "^0.7.5",
+    "isomorphic-fetch": "^2.2.1",
     "jest": "^25.3.0",
     "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",
@@ -94,7 +96,6 @@
   "devDependencies": {
     "@babel/plugin-proposal-optional-chaining": "^7.8.3",
     "autoprefixer": "^9.7.4",
-    "axios": "^0.18.1",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
     "cross-env": "^7.0.2",
