@@ -8,6 +8,7 @@ const registerUser = require('./auth/register');
 const registerUpload = require('./uploads/register');
 const registerCollections = require('./collections/register');
 const registerGlobals = require('./globals/register');
+const testingEndpoints = require('./express/testingEndpoints');
 const GraphQL = require('./graphql');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
 
@@ -22,6 +23,7 @@ class Payload {
     this.registerUpload = registerUpload.bind(this);
     this.registerCollections = registerCollections.bind(this);
     this.registerGlobals = registerGlobals.bind(this);
+    this.testingEndpoints = testingEndpoints.bind(this);
 
     // Setup & initialization
     connectMongoose(this.config.mongoURL);
@@ -58,6 +60,10 @@ class Payload {
         passport.authenticate(['jwt', 'anonymous'], { session: false }),
         new GraphQL(this.config, this.collections, this.User, this.Upload, this.globals).init(),
       );
+    }
+
+    if (process.env.NODE_ENV === 'test') {
+      this.testingEndpoints();
     }
 
     this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({

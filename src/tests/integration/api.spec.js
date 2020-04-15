@@ -6,13 +6,18 @@ const axios = require('axios');
 const faker = require('faker');
 
 describe('API', () => {
+  const url = 'http://localhost:3000';
   let token = null;
   let email = 'test@test.com';
   const password = 'test123';
 
+  afterAll(async () => {
+    await axios.post(`${url}/api/killkillkill`);
+  });
+
   describe('first register', () => {
     it('should allow first user to register', async () => {
-      const createResponse = await axios.post('http://localhost:3000/api/first-register', {
+      const createResponse = await axios.post(`${url}/api/first-register`, {
         email,
         password,
       }, { headers: { 'Content-Type': 'application/json' } });
@@ -25,7 +30,7 @@ describe('API', () => {
 
   describe('login', () => {
     it('should allow login', async () => {
-      const loginResponse = await axios.post('http://localhost:3000/api/login', {
+      const loginResponse = await axios.post(`${url}/api/login`, {
         email,
         password,
       }, { headers: { 'Content-Type': 'application/json' } });
@@ -38,7 +43,7 @@ describe('API', () => {
   describe('register', () => {
     it('should allow create user', async () => {
       email = `${faker.name.firstName()}@test.com`;
-      const createResponse = await axios.post('http://localhost:3000/api/users/register', {
+      const createResponse = await axios.post(`${url}/api/users/register`, {
         email: `${email}`,
         password,
       }, { headers: { Authorization: `JWT ${token}`, 'Content-Type': 'application/json' } });
@@ -52,7 +57,7 @@ describe('API', () => {
 
   describe('Collections - Post', () => {
     it('should allow create post', async () => {
-      const createResponse = await axios.post('http://localhost:3000/api/posts', {
+      const createResponse = await axios.post(`${url}/api/posts`, {
         title: faker.name.firstName(),
         description: faker.lorem.lines(20),
         priority: 1,
@@ -64,7 +69,7 @@ describe('API', () => {
     it('should allow create post - localized', async () => {
       const spanishDesc = faker.lorem.lines(20);
       const englishDesc = faker.lorem.lines(20);
-      const englishCreateResponse = await axios.post('http://localhost:3000/api/posts', {
+      const englishCreateResponse = await axios.post(`${url}/api/posts`, {
         title: `English-${faker.name.firstName()}`,
         description: englishDesc,
         priority: 1,
@@ -72,7 +77,7 @@ describe('API', () => {
       expect(englishCreateResponse.status).toBe(201);
       const { id } = englishCreateResponse.data.doc;
 
-      const spanishCreateResponse = await axios.put(`http://localhost:3000/api/posts/${id}?locale=es`, {
+      const spanishCreateResponse = await axios.put(`${url}/api/posts/${id}?locale=es`, {
         title: `Spanish-${faker.name.firstName()}`,
         description: spanishDesc,
         priority: 1,
@@ -80,19 +85,19 @@ describe('API', () => {
       expect(spanishCreateResponse.status).toBe(200);
       expect(spanishCreateResponse.data.doc.description).toBe(spanishDesc);
 
-      const englishQueryResponse = await axios.get(`http://localhost:3000/api/posts/${id}`);
+      const englishQueryResponse = await axios.get(`${url}/api/posts/${id}`);
       expect(englishQueryResponse.status).toBe(200);
       expect(englishQueryResponse.data.description).toBe(englishDesc);
 
-      const englishQueryResponseWithLocale = await axios.get(`http://localhost:3000/api/posts/${id}?locale=en`);
+      const englishQueryResponseWithLocale = await axios.get(`${url}/api/posts/${id}?locale=en`);
       expect(englishQueryResponseWithLocale.status).toBe(200);
       expect(englishQueryResponseWithLocale.data.description).toBe(englishDesc);
 
-      const spanishQueryResponse = await axios.get(`http://localhost:3000/api/posts/${id}/?locale=es`);
+      const spanishQueryResponse = await axios.get(`${url}/api/posts/${id}/?locale=es`);
       expect(spanishQueryResponse.status).toBe(200);
       expect(spanishQueryResponse.data.description).toBe(spanishDesc);
 
-      const allQueryResponse = await axios.get(`http://localhost:3000/api/posts/${id}/?locale=all`);
+      const allQueryResponse = await axios.get(`${url}/api/posts/${id}/?locale=all`);
       expect(allQueryResponse.status).toBe(200);
       expect(allQueryResponse.data.description.es).toBe(spanishDesc);
       expect(allQueryResponse.data.description.en).toBe(englishDesc);
