@@ -1,4 +1,4 @@
-const executePolicy = require('../../auth/executePolicy');
+const executePolicy = require('../../users/executePolicy');
 
 const create = async (args) => {
   try {

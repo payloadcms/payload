@@ -5,7 +5,7 @@ const passportLocalMongoose = require('passport-local-mongoose');
 const jwtStrategy = require('./jwt');
 const authRoutes = require('./routes');
 const buildCollectionSchema = require('../collections/buildSchema');
-const baseUserFields = require('../auth/baseFields');
+const baseUserFields = require('./baseFields');
 const collectionRoutes = require('../collections/routes');
 
 function registerUser() {

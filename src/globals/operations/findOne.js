@@ -1,4 +1,4 @@
-const executePolicy = require('../../auth/executePolicy');
+const executePolicy = require('../../users/executePolicy');
 const { NotFound } = require('../../errors');
 
 const findOne = async (args) => {
