@@ -2,7 +2,6 @@
  * @jest-environment node
  */
 
-const http = require('http');
 const faker = require('faker');
 const server = require('../../../demo/server');
 
