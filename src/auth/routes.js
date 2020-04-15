@@ -1,45 +1,45 @@
 const express = require('express');
-const passport = require('passport');
-const authRequestHandlers = require('./requestHandlers');
 const passwordResetRoutes = require('./passwordResets/routes');
+
+const {
+  init,
+  login,
+  refresh,
+  me,
+  register,
+  checkIfInitialized,
+} = require('./requestHandlers');
 
 const router = express.Router();
 
 const authRoutes = (config, User) => {
-  const auth = authRequestHandlers(config, User);
+  const registerHandler = register(User, config);
 
   router
     .route('/init')
-    .get((req, res) => {
-      User.countDocuments({}, (err, count) => {
-        if (err) res.status(200).json({ error: err });
-        return count >= 1
-          ? res.status(200).json({ initialized: true })
-          : res.status(200).json({ initialized: false });
-      });
-    });
+    .get(init(User));
 
   router
     .route('/login')
-    .post(auth.login);
+    .post(login(User, config));
 
   router
     .route('/refresh')
-    .post(auth.refresh);
+    .post(refresh(config));
 
   router
     .route('/me')
-    .post(passport.authenticate('jwt', { session: false }), auth.me);
+    .post(me);
 
   router.use('', passwordResetRoutes(config.email, User));
 
   router
     .route(`/${config.user.slug}/register`)
-    .post(auth.register);
+    .post(registerHandler);
 
   router
     .route('/first-register')
-    .post(auth.checkForExistingUsers, auth.register);
+    .post(checkIfInitialized(User), registerHandler);
 
   return router;
 };
