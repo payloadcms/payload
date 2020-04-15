@@ -9,10 +9,15 @@
       "demo/client/*"
     ]
   },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  },
   "scripts": {
-    "test": "cross-env NODE_ENV=test run-p server test:int",
-    "test:unit": "jest --config src/tests/jest.config.js",
-    "test:int": "jest src/tests/integration/api.spec.js --runInBand",
+    "test:unit": "cross-env NODE_ENV=test jest --config src/tests/jest.config.js",
+    "test:int": "cross-env NODE_ENV=test jest",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
     "dev": "nodemon demo/server.js",
     "server": "node demo/server.js",
@@ -34,12 +39,9 @@
     "@trbl/react-modal": "^0.1.1",
     "accept-language-parser": "^1.5.0",
     "async-some": "^1.0.2",
-    "babel-jest": "^24.9.0",
     "babel-loader": "^8.0.6",
-    "babel-plugin-add-module-exports": "^1.0.2",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
-    "connect-history-api-fallback": "^1.6.0",
     "cookie-parser": "^1.4.5",
     "dotenv": "^6.0.0",
     "express": "^4.17.1",
@@ -54,12 +56,9 @@
     "graphql-type-json": "^0.3.1",
     "html-webpack-plugin": "^3.2.0",
     "http-status": "^1.4.2",
-    "ignore-styles": "^5.0.1",
     "image-size": "^0.7.5",
-    "jest": "^24.9.0",
+    "jest": "^25.3.0",
     "jsonwebtoken": "^8.5.1",
-    "loader-utils": "^1.4.0",
-    "merge-graphql-schemas": "^1.7.6",
     "method-override": "^3.0.0",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
@@ -92,7 +91,6 @@
     "url-loader": "^1.0.1",
     "val-loader": "^2.1.0",
     "webpack": "^4.41.5",
-    "webpack-bundle-analyzer": "^3.6.0",
     "webpack-dev-middleware": "^3.7.2",
     "webpack-hot-middleware": "^2.25.0"
   },
@@ -102,7 +100,6 @@
     "axios": "^0.18.1",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
-    "circular-dependency-plugin": "^5.2.0",
     "cross-env": "^7.0.2",
     "css-loader": "^1.0.0",
     "eslint": "^6.8.0",
@@ -113,7 +110,6 @@
     "eslint-plugin-react-hooks": "^2.3.0",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "faker": "^4.1.0",
-    "jest-mock-express": "^0.1.1",
     "node-sass": "^4.13.1",
     "node-sass-chokidar": "^1.4.0",
     "nodemon": "^1.19.4",
@@ -123,7 +119,6 @@
     "postcss-loader": "^2.1.6",
     "sass-loader": "7.1.0",
     "style-loader": "^0.21.0",
-    "supertest": "^3.4.2",
     "webpack-cli": "^3.3.11"
   }
 }
