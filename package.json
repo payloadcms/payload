@@ -9,12 +9,6 @@
       "demo/client/*"
     ]
   },
-  "jest": {
-    "testEnvironment": "node",
-    "coveragePathIgnorePatterns": [
-      "/node_modules/"
-    ]
-  },
   "scripts": {
     "test:unit": "cross-env NODE_ENV=test jest --config src/tests/jest.config.js",
     "test:int": "cross-env NODE_ENV=test jest src/tests/integration/api.spec.js --forceExit --detectOpenHandles",
