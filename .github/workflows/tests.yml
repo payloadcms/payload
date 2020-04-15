@@ -3,7 +3,7 @@ name: Node.js CI
 on: [push]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -16,6 +16,9 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm install
-    - run: npm test # In-memory db + api tests
+    - run: nohup npm run server &
+      env:
+        NODE_ENV: test
+    - run: npm run test:int # In-memory db + api tests
       env:
         CI: true
