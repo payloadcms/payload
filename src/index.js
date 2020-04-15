@@ -60,7 +60,9 @@ class Payload {
         passport.authenticate(['jwt', 'anonymous'], { session: false }),
         new GraphQL(this.config, this.collections, this.User, this.Upload).init(),
       );
+    }
 
+    if (process.env.NODE_ENV === 'test') {
       this.testingEndpoints();
     }
 
