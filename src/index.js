@@ -6,6 +6,7 @@ const graphQLPlayground = require('graphql-playground-middleware-express').defau
 const passport = require('passport');
 const connectMongoose = require('./mongoose/connect');
 const expressMiddleware = require('./express/middleware');
+const createAuthHeaderFromCookie = require('./express/middleware/createAuthHeaderFromCookie');
 const initWebpack = require('./webpack/init');
 const registerUser = require('./users/register');
 const registerUpload = require('./uploads/register');
@@ -50,23 +51,13 @@ class Payload {
       this.express.use(initWebpack(this.config));
     }
 
-    if (process.env.NODE_ENV !== 'production' || this.config.productionGraphQLPlayground) {
-      // Init GraphQL
-      this.router.use(
-        this.config.routes.graphQL,
-        (req, _, next) => {
-          const existingAuthHeader = req.get('Authorization');
-          const { token } = req.cookies;
-
-          if (!existingAuthHeader && token) {
-            req.headers.authorization = `JWT ${token}`;
-          }
-          next();
-        },
-        passport.authenticate(['jwt', 'anonymous'], { session: false }),
-        new GraphQL(this.config, this.collections, this.User, this.Upload, this.globals).init(),
-      );
-    }
+    // Init GraphQL
+    this.router.use(
+      this.config.routes.graphQL,
+      createAuthHeaderFromCookie,
+      passport.authenticate(['jwt', 'anonymous'], { session: false }),
+      new GraphQL(this.config, this.collections, this.User, this.Upload, this.globals),
+    );
 
     this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
       endpoint: `${this.config.routes.api}${this.config.routes.graphQL}`,
