@@ -26,8 +26,6 @@ describe('Users REST API', () => {
       method: 'post',
     });
 
-    const data = await response.json();
-
     expect(response.status).toBe(403);
   });
 
@@ -63,6 +61,22 @@ describe('Users REST API', () => {
 
     expect(response.status).toBe(200);
     expect(data[usernameField]).not.toBeNull();
+  });
+
+  it('should refresh a token and reset its expiration', async () => {
+    const response = await fetch(`${url}/api/refresh`, {
+      method: 'post',
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.token).not.toBeNull();
+
+    ({ token } = data);
   });
 
   it('should allow a user to be created', async () => {

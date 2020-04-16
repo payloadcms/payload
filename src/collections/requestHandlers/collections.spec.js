@@ -15,7 +15,7 @@ let localizedPostID;
 const englishPostDesc = faker.lorem.lines(20);
 const spanishPostDesc = faker.lorem.lines(20);
 
-describe('Collection CRUD', () => {
+describe('Collection REST CRUD', () => {
   beforeAll(async () => {
     const response = await fetch(`${url}/api/login`, {
       body: JSON.stringify({
@@ -107,9 +107,5 @@ describe('Collection CRUD', () => {
     expect(response.status).toBe(200);
     expect(data.description.es).toBe(spanishPostDesc);
     expect(data.description.en).toBe(englishPostDesc);
-  });
-
-  afterAll((done) => {
-    server.close(done);
   });
 });
