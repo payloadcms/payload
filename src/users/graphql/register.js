@@ -6,14 +6,16 @@ const {
 } = require('graphql');
 
 const formatName = require('../../graphql/utilities/formatName');
+const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
 
 const {
   find, findByID, deleteResolver, update,
 } = require('../../collections/graphql/resolvers');
 
-const { login, me, init } = require('./resolvers');
+const {
+  login, me, init, refresh,
+} = require('./resolvers');
 
-const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
 
 function registerUser() {
   const {
@@ -132,6 +134,11 @@ function registerUser() {
       password: { type: GraphQLString },
     },
     resolve: login(this.User.Model, this.User.config),
+  };
+
+  this.Mutation.fields.refreshToken = {
+    type: GraphQLString,
+    resolve: refresh(this.User.Model, this.User.config),
   };
 }
 

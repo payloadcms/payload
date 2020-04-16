@@ -13,9 +13,9 @@ const loginResolver = (User, config) => async (_, args) => {
     api: 'GraphQL',
   };
 
-  const result = await login(options);
+  const token = await login(options);
 
-  return result;
+  return token;
 };
 
 module.exports = loginResolver;
