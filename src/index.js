@@ -56,7 +56,7 @@ class Payload {
       this.config.routes.graphQL,
       createAuthHeaderFromCookie,
       passport.authenticate(['jwt', 'anonymous'], { session: false }),
-      new GraphQL(this.config, this.collections, this.User, this.Upload, this.globals),
+      new GraphQL(this.config, this.collections, this.User, this.Upload, this.globals).init(),
     );
 
     this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({

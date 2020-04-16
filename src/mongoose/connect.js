@@ -11,6 +11,7 @@ const connectMongoose = async (url) => {
     urlToConnect = await mongod.getUri();
     successfulConnectionMessage = 'Connected to in-memory Mongo server successfully!';
   }
+
   mongoose.connect(urlToConnect, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
