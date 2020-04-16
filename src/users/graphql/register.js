@@ -5,11 +5,12 @@ const {
 } = require('graphql');
 
 const formatName = require('../../graphql/utilities/formatName');
+
 const {
   find, findByID, deleteResolver, update,
 } = require('../../collections/graphql/resolvers');
 
-const { login } = require('./resolvers');
+const { login, me } = require('./resolvers');
 
 const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
 
@@ -74,6 +75,31 @@ function registerUser() {
       sort: { type: GraphQLString },
     },
     resolve: find(this.User),
+  };
+
+  const MeType = this.buildObjectType(
+    'Me',
+    this.User.config.fields.reduce((jwtFields, potentialField) => {
+      if (potentialField.saveToJWT) {
+        return [
+          ...jwtFields,
+          potentialField,
+        ];
+      }
+
+      return jwtFields;
+    }, [
+      {
+        name: this.User.config.auth.useAsUsername,
+        type: 'text',
+        required: true,
+      },
+    ]),
+  );
+
+  this.Query.fields.me = {
+    type: MeType,
+    resolve: me,
   };
 
   this.Mutation.fields[`update${singularLabel}`] = {
