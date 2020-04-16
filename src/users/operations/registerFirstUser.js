@@ -1,8 +1,13 @@
+const register = require('./register');
+const login = require('./login');
+const { Forbidden } = require('../../errors');
 
-const passport = require('passport');
-
-const register = async (args) => {
+const registerFirstUser = async (args) => {
   try {
+    const count = await args.Model.countDocuments({});
+
+    if (count >= 1) throw new Forbidden();
+
     // Await validation here
 
     let options = {
@@ -13,38 +18,26 @@ const register = async (args) => {
     };
 
     // /////////////////////////////////////
-    // 1. Execute before register hook
+    // 1. Execute before register first user hook
     // /////////////////////////////////////
 
-    const beforeRegisterHook = args.config.hooks && args.config.hooks.beforeRegister;
+    const beforeRegisterHook = args.config.hooks && args.config.hooks.beforeFirstRegister;
 
     if (typeof beforeRegisterHook === 'function') {
       options = await beforeRegisterHook(options);
     }
 
     // /////////////////////////////////////
-    // 2. Perform register
+    // 2. Perform register first user
     // /////////////////////////////////////
 
-    const {
-      Model,
-      config,
-      data,
-    } = options;
-
-    const usernameField = config.auth.useAsUsername;
-
-    let result = await Model.register(new Model({
-      [usernameField]: data[usernameField],
-    }), data.password);
-
-    await passport.authenticate('local');
+    let result = await register(options);
 
     // /////////////////////////////////////
     // 3. Execute after register hook
     // /////////////////////////////////////
 
-    const afterRegisterHook = args.config.hooks && args.config.hooks.afterRegister;
+    const afterRegisterHook = args.config.hooks && args.config.hooks.afterFirstRegister;
 
     if (typeof afterRegisterHook === 'function') {
       result = await afterRegisterHook(options, result);
@@ -54,10 +47,17 @@ const register = async (args) => {
     // 4. Return user
     // /////////////////////////////////////
 
-    return result;
+    const token = await login(options);
+
+    const results = {
+      ...result,
+      token,
+    };
+
+    return results;
   } catch (error) {
     throw error;
   }
 };
 
-module.exports = register;
+module.exports = registerFirstUser;

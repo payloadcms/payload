@@ -1,24 +1,20 @@
 const httpStatus = require('http-status');
 const formatErrorResponse = require('../../express/responses/formatError');
-const { login } = require('../operations');
+const { registerFirstUser } = require('../operations');
 
-const loginHandler = (User, config) => async (req, res) => {
+const registerFirstUserHandler = (User, config) => async (req, res) => {
   try {
-    const token = await login({
+    const firstUser = await registerFirstUser({
       Model: User,
       config,
-      data: req.body,
       api: 'REST',
+      data: req.body,
     });
 
-    return res.status(200)
-      .json({
-        message: 'Auth Passed',
-        token,
-      });
+    return res.status(201).json(firstUser);
   } catch (error) {
     return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
   }
 };
 
-module.exports = loginHandler;
+module.exports = registerFirstUserHandler;

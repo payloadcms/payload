@@ -10,7 +10,7 @@ const refreshHandler = config => async (req, res) => {
       authorization: req.headers.authorization,
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: 'Token refresh successful',
       refreshedToken,
     });

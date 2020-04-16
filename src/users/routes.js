@@ -6,7 +6,7 @@ const {
   refresh,
   me,
   register,
-  checkIfInitialized,
+  registerFirstUser,
   forgotPassword,
   resetPassword,
 } = require('./requestHandlers');
@@ -14,19 +14,17 @@ const {
 const router = express.Router();
 
 const authRoutes = (User, config, email) => {
-  const registerHandler = register(User, config);
-
   router
     .route('/init')
     .get(init(User));
 
   router
     .route('/login')
-    .post(login(User, config));
+    .post(login(User, config.user));
 
   router
     .route('/refresh')
-    .post(refresh(config));
+    .post(refresh(config.user));
 
   router
     .route('/me')
@@ -34,15 +32,15 @@ const authRoutes = (User, config, email) => {
 
   router
     .route(`/${config.user.slug}/register`)
-    .post(registerHandler);
+    .post(register(User, config.user));
 
   router
     .route('/first-register')
-    .post(checkIfInitialized(User), registerHandler);
+    .post(registerFirstUser(User, config.user));
 
   router
     .route('/forgot')
-    .post(forgotPassword(User, config));
+    .post(forgotPassword(User, config, email));
 
   router
     .route('/reset')

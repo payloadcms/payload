@@ -16,7 +16,7 @@ const login = async (args) => {
     // 1. Execute before login hook
     // /////////////////////////////////////
 
-    const beforeLoginHook = args.config && args.config.hooks && args.config.hooks.beforeLogin;
+    const beforeLoginHook = args.config.hooks && args.config.hooks.beforeLogin;
 
     if (typeof beforeLoginHook === 'function') {
       options = await beforeLoginHook(options);
@@ -77,8 +77,8 @@ const login = async (args) => {
     // /////////////////////////////////////
 
     return token;
-  } catch (err) {
-    throw err;
+  } catch (error) {
+    throw error;
   }
 };
 
