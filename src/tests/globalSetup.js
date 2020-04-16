@@ -24,8 +24,6 @@ const globalSetup = async () => {
   if (!data.token) {
     throw new Error('Failed to register first user');
   }
-
-  global.AUTH_TOKEN = data.token;
 };
 
 module.exports = globalSetup;

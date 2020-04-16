@@ -3,7 +3,6 @@
  */
 
 const faker = require('faker');
-const server = require('../../../demo/server');
 const config = require('../../../demo/payload.config');
 const { email, password } = require('../../tests/credentials');
 
@@ -76,7 +75,7 @@ describe('Collection REST CRUD', () => {
     expect(data.doc.description).toBe(spanishPostDesc);
   });
 
-  it('should allow a localized post to be retrieved in default locale of English', async () => {
+  it('should allow a localized post to be retrieved in unspecified locale, defaulting to English', async () => {
     const response = await fetch(`${url}/api/posts/${localizedPostID}`);
     const data = await response.json();
 
@@ -84,7 +83,7 @@ describe('Collection REST CRUD', () => {
     expect(data.description).toBe(englishPostDesc);
   });
 
-  it('should allow a localized post to be retrieved in default locale of English', async () => {
+  it('should allow a localized post to be retrieved in specified English locale', async () => {
     const response = await fetch(`${url}/api/posts/${localizedPostID}?locale=en`);
     const data = await response.json();
 
