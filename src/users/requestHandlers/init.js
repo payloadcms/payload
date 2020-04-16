@@ -1,10 +1,14 @@
-const init = User => (req, res) => {
-  User.countDocuments({}, (err, count) => {
-    if (err) res.status(200).json({ error: err });
-    return count >= 1
-      ? res.status(200).json({ initialized: true })
-      : res.status(200).json({ initialized: false });
-  });
+const httpStatus = require('http-status');
+const { init } = require('../operations');
+const formatError = require('../../express/responses/formatError');
+
+const initHandler = User => async (req, res) => {
+  try {
+    const initialized = await init({ Model: User });
+    return res.status(200).json({ initialized });
+  } catch (error) {
+    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatError(error));
+  }
 };
 
-module.exports = init;
+module.exports = initHandler;

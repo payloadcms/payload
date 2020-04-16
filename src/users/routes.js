@@ -13,7 +13,7 @@ const {
 
 const router = express.Router();
 
-const authRoutes = (config, User) => {
+const authRoutes = (User, config, email) => {
   const registerHandler = register(User, config);
 
   router

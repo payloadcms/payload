@@ -2,12 +2,6 @@ const httpStatus = require('http-status');
 const formatErrorResponse = require('../../express/responses/formatError');
 const { login } = require('../operations');
 
-/**
-   * Returns passport login response (JWT) when valid username and password is provided
-   * @param req
-   * @param res
-   * @returns {*}
-   */
 const loginHandler = (User, config) => async (req, res) => {
   try {
     const token = await login({

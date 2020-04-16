@@ -13,6 +13,7 @@ const registerCollections = require('./collections/register');
 const registerGlobals = require('./globals/register');
 const GraphQL = require('./graphql');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
+const registerEmail = require('./email/register');
 
 class Payload {
   constructor(options) {
@@ -25,6 +26,10 @@ class Payload {
     this.registerUpload = registerUpload.bind(this);
     this.registerCollections = registerCollections.bind(this);
     this.registerGlobals = registerGlobals.bind(this);
+    this.registerEmail = registerEmail.bind(this);
+
+    // Configure email service
+    this.registerEmail();
 
     // Setup & initialization
     connectMongoose(this.config.mongoURL);
