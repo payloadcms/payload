@@ -1,5 +1,6 @@
 const {
   GraphQLString,
+  GraphQLBoolean,
   GraphQLNonNull,
   GraphQLInt,
 } = require('graphql');
@@ -10,7 +11,7 @@ const {
   find, findByID, deleteResolver, update,
 } = require('../../collections/graphql/resolvers');
 
-const { login, me } = require('./resolvers');
+const { login, me, init } = require('./resolvers');
 
 const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
 
@@ -54,6 +55,26 @@ function registerUser() {
     singularLabel,
   );
 
+  this.User.graphQL.Me = this.buildObjectType(
+    'Me',
+    this.User.config.fields.reduce((jwtFields, potentialField) => {
+      if (potentialField.saveToJWT) {
+        return [
+          ...jwtFields,
+          potentialField,
+        ];
+      }
+
+      return jwtFields;
+    }, [
+      {
+        name: this.User.config.auth.useAsUsername,
+        type: 'text',
+        required: true,
+      },
+    ]),
+  );
+
   this.Query.fields[singularLabel] = {
     type: this.User.graphQL.type,
     args: {
@@ -77,29 +98,14 @@ function registerUser() {
     resolve: find(this.User),
   };
 
-  const MeType = this.buildObjectType(
-    'Me',
-    this.User.config.fields.reduce((jwtFields, potentialField) => {
-      if (potentialField.saveToJWT) {
-        return [
-          ...jwtFields,
-          potentialField,
-        ];
-      }
-
-      return jwtFields;
-    }, [
-      {
-        name: this.User.config.auth.useAsUsername,
-        type: 'text',
-        required: true,
-      },
-    ]),
-  );
-
-  this.Query.fields.me = {
-    type: MeType,
+  this.Query.fields.Me = {
+    type: this.User.graphQL.Me,
     resolve: me,
+  };
+
+  this.Query.fields.Initialized = {
+    type: GraphQLBoolean,
+    resolve: init(this.User.Model),
   };
 
   this.Mutation.fields[`update${singularLabel}`] = {
