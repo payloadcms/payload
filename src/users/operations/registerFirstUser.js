@@ -33,8 +33,20 @@ const registerFirstUser = async (args) => {
 
     let result = await register(options);
 
+
     // /////////////////////////////////////
-    // 3. Execute after register hook
+    // 3. Log in new user
+    // /////////////////////////////////////
+
+    const token = await login(options);
+
+    result = {
+      ...result,
+      token,
+    };
+
+    // /////////////////////////////////////
+    // 4. Execute after register first user hook
     // /////////////////////////////////////
 
     const afterRegisterHook = args.config.hooks && args.config.hooks.afterFirstRegister;
@@ -43,18 +55,7 @@ const registerFirstUser = async (args) => {
       result = await afterRegisterHook(options, result);
     }
 
-    // /////////////////////////////////////
-    // 4. Return user
-    // /////////////////////////////////////
-
-    const token = await login(options);
-
-    const results = {
-      ...result,
-      token,
-    };
-
-    return results;
+    return result;
   } catch (error) {
     throw error;
   }
