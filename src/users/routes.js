@@ -1,5 +1,4 @@
 const express = require('express');
-const passwordResetRoutes = require('./passwordResets/routes');
 
 const {
   init,
@@ -8,6 +7,8 @@ const {
   me,
   register,
   checkIfInitialized,
+  forgotPassword,
+  resetPassword,
 } = require('./requestHandlers');
 
 const router = express.Router();
@@ -31,8 +32,6 @@ const authRoutes = (config, User) => {
     .route('/me')
     .post(me);
 
-  router.use('', passwordResetRoutes(config.email, User));
-
   router
     .route(`/${config.user.slug}/register`)
     .post(registerHandler);
@@ -40,6 +39,14 @@ const authRoutes = (config, User) => {
   router
     .route('/first-register')
     .post(checkIfInitialized(User), registerHandler);
+
+  router
+    .route('/forgot')
+    .post(forgotPassword(User, config));
+
+  router
+    .route('/reset')
+    .post(resetPassword(User));
 
   return router;
 };

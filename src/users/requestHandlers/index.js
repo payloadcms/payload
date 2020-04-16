@@ -4,6 +4,8 @@ const me = require('./me');
 const refresh = require('./refresh');
 const register = require('./register');
 const init = require('./init');
+const forgotPassword = require('./forgotPassword');
+const resetPassword = require('./resetPassword');
 
 module.exports = {
   checkIfInitialized,
@@ -12,4 +14,6 @@ module.exports = {
   refresh,
   init,
   register,
+  forgotPassword,
+  resetPassword,
 };
