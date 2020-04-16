@@ -24,7 +24,7 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-    - run: npm install
-    - run: npm run test:int # In-memory db + api tests
+    - run: yarn
+    - run: yarn test:int # In-memory db + api tests
       env:
         CI: true
