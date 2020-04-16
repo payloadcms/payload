@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 
+require('isomorphic-fetch');
 const faker = require('faker');
 const config = require('../../../demo/payload.config');
 const { email, password } = require('../../tests/credentials');

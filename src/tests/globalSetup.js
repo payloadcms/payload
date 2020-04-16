@@ -1,3 +1,4 @@
+require('isomorphic-fetch');
 const server = require('../../demo/server');
 const config = require('../../demo/payload.config');
 const { email, password } = require('./credentials');
