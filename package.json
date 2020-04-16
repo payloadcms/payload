@@ -3,15 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "nodemonConfig": {
-    "ignore": [
-      "src/*",
-      "demo/client/*"
-    ]
-  },
   "scripts": {
     "test:unit": "cross-env NODE_ENV=test jest --config src/tests/jest.config.js",
-    "test:int": "cross-env NODE_ENV=test jest src/tests/integration/api.spec.js --forceExit --detectOpenHandles",
+    "test:int": "cross-env NODE_ENV=test jest --forceExit",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
     "dev": "nodemon demo/server.js",
     "server": "node demo/server.js",

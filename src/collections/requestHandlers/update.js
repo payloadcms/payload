@@ -23,6 +23,7 @@ const updateHandler = async (req, res) => {
       doc,
     });
   } catch (err) {
+    console.log(err);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));
   }
 };

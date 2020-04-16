@@ -1,11 +1,5 @@
-/**
-   * Returns User if user session is still open
-   * @param req
-   * @param res
-   * @returns {*}
-   */
-const me = (req, res) => {
-  return res.status(200).send(req.user);
+const meHandler = async (req, res) => {
+  return res.status(200).json(req.user);
 };
 
-module.exports = me;
+module.exports = meHandler;
