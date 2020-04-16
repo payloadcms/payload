@@ -1,13 +1,13 @@
 const sharp = require('sharp');
+const sanitize = require('sanitize-filename');
 const { promisify } = require('util');
 const imageSize = require('image-size');
 
 const sizeOf = promisify(imageSize);
 
 function getOutputImageName(sourceImage, size) {
-  const extension = sourceImage.split('.')
-    .pop();
-  const filenameWithoutExtension = sourceImage.substr(0, sourceImage.lastIndexOf('.')) || sourceImage;
+  const extension = sourceImage.split('.').pop();
+  const filenameWithoutExtension = sanitize(sourceImage.substr(0, sourceImage.lastIndexOf('.')) || sourceImage);
   return `${filenameWithoutExtension}-${size.width}x${size.height}.${extension}`;
 }
 
@@ -19,7 +19,6 @@ module.exports = async function resizeAndSave(config, uploadConfig, file) {
    * @param file
    * @returns String[]
    */
-
 
   const sourceImage = `${config.staticDir}/${file.name}`;
   let sizes;

@@ -6,13 +6,8 @@ import DefaultTemplate from '../../../layout/DefaultTemplate';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Form from '../../../forms/Form';
 import StickyHeader from '../../../modules/StickyHeader';
-<<<<<<< HEAD
-import APIURL from '../../../modules/APIURL';
-import PreviewButton from '../../../controls/PreviewButton';
-=======
 import APIUrl from '../../../modules/APIUrl';
 import Button from '../../../controls/Button';
->>>>>>> Fix APIUrl casing
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
 import * as fieldTypes from '../../../forms/field-types';
