@@ -2,11 +2,11 @@ const httpStatus = require('http-status');
 const formatErrorResponse = require('../../express/responses/formatError');
 const { registerFirstUser } = require('../operations');
 
-const registerFirstUserHandler = (User, config) => async (req, res) => {
+const registerFirstUserHandler = async (req, res) => {
   try {
     const firstUser = await registerFirstUser({
-      Model: User,
-      config,
+      Model: req.Model,
+      config: req.collection,
       api: 'REST',
       data: req.body,
     });

@@ -1,4 +1,6 @@
 const express = require('express');
+const bindModelMiddleware = require('../express/middleware/bindModel');
+const bindCollectionMiddleware = require('../collections/bindCollection');
 
 const {
   init,
@@ -9,42 +11,62 @@ const {
   registerFirstUser,
   forgotPassword,
   resetPassword,
+  update,
 } = require('./requestHandlers');
+
+const {
+  find,
+  findByID,
+  deleteHandler,
+} = require('../collections/requestHandlers');
 
 const router = express.Router();
 
 const authRoutes = (User, config, email) => {
+  router.all('*',
+    bindModelMiddleware(User),
+    bindCollectionMiddleware(config.user));
+
   router
     .route('/init')
-    .get(init(User));
+    .get(init);
 
   router
     .route('/login')
-    .post(login(User, config.user));
+    .post(login);
 
   router
-    .route('/refresh')
-    .post(refresh(config.user));
+    .route('/refresh-token')
+    .post(refresh);
 
   router
     .route('/me')
     .post(me);
 
   router
-    .route(`/${config.user.slug}/register`)
-    .post(register(User, config.user));
-
-  router
     .route('/first-register')
-    .post(registerFirstUser(User, config.user));
+    .post(registerFirstUser);
 
   router
-    .route('/forgot')
-    .post(forgotPassword(User, config, email));
+    .route('/forgot-password')
+    .post(forgotPassword(config, email));
 
   router
-    .route('/reset')
-    .post(resetPassword(User));
+    .route('/reset-password')
+    .post(resetPassword);
+
+  router
+    .route(`/${config.user.slug}/register`)
+    .post(register);
+
+  router
+    .route(`/${config.user.slug}`)
+    .get(find);
+
+  router.route(`/${config.user.slug}/:id`)
+    .get(findByID)
+    .put(update)
+    .delete(deleteHandler);
 
   return router;
 };

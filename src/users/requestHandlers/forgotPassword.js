@@ -2,10 +2,10 @@ const httpStatus = require('http-status');
 const formatErrorResponse = require('../../express/responses/formatError');
 const { forgotPassword } = require('../operations');
 
-const forgotPasswordHandler = (User, config, email) => async (req, res) => {
+const forgotPasswordHandler = (config, email) => async (req, res) => {
   try {
     await forgotPassword({
-      Model: User,
+      Model: req.Model,
       config,
       api: 'REST',
       data: req.body,

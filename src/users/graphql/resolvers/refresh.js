@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign */
 const { refresh } = require('../../operations');
 
-const refreshResolver = (User, config) => async (_, __, context) => {
+const refreshResolver = ({ Model, config }) => async (_, __, context) => {
   const options = {
     config,
-    Model: User,
+    Model,
     authorization: context.headers.authorization,
     api: 'GraphQL',
   };

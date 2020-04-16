@@ -1,4 +1,5 @@
 const executePolicy = require('../../users/executePolicy');
+const { NotFound } = require('../../errors');
 
 const update = async (args) => {
   try {
@@ -42,6 +43,8 @@ const update = async (args) => {
     } = options;
 
     let result = await Model.findOne({ _id: id });
+
+    if (!result) throw new NotFound();
 
     if (locale && result.setLocale) {
       result.setLocale(locale, fallbackLocale);

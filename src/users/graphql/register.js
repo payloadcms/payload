@@ -9,11 +9,11 @@ const formatName = require('../../graphql/utilities/formatName');
 const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
 
 const {
-  find, findByID, deleteResolver, update,
+  find, findByID, deleteResolver,
 } = require('../../collections/graphql/resolvers');
 
 const {
-  login, me, init, refresh,
+  login, me, init, refresh, register, update,
 } = require('./resolvers');
 
 
@@ -51,14 +51,33 @@ function registerUser() {
     singularLabel,
   );
 
+  const mutationFields = [
+    ...fields,
+    {
+      name: 'password',
+      type: 'text',
+    },
+  ];
+
   this.User.graphQL.mutationInputType = this.buildMutationInputType(
     singularLabel,
-    fields,
+    mutationFields,
     singularLabel,
   );
 
-  this.User.graphQL.Me = this.buildObjectType(
-    'Me',
+  this.User.graphQL.updateMutationInputType = this.buildMutationInputType(
+    `${singularLabel}Update`,
+    mutationFields.map((field) => {
+      return {
+        ...field,
+        required: false,
+      };
+    }),
+    `${singularLabel}Update`,
+  );
+
+  this.User.graphQL.jwt = this.buildObjectType(
+    'JWT',
     this.User.config.fields.reduce((jwtFields, potentialField) => {
       if (potentialField.saveToJWT) {
         return [
@@ -101,20 +120,20 @@ function registerUser() {
   };
 
   this.Query.fields.Me = {
-    type: this.User.graphQL.Me,
+    type: this.User.graphQL.jwt,
     resolve: me,
   };
 
   this.Query.fields.Initialized = {
     type: GraphQLBoolean,
-    resolve: init(this.User.Model),
+    resolve: init(this.User),
   };
 
   this.Mutation.fields[`update${singularLabel}`] = {
     type: this.User.graphQL.type,
     args: {
       id: { type: new GraphQLNonNull(GraphQLString) },
-      data: { type: this.User.graphQL.mutationInputType },
+      data: { type: this.User.graphQL.updateMutationInputType },
     },
     resolve: update(this.User),
   };
@@ -133,12 +152,20 @@ function registerUser() {
       [useAsUsername]: { type: GraphQLString },
       password: { type: GraphQLString },
     },
-    resolve: login(this.User.Model, this.User.config),
+    resolve: login(this.User),
+  };
+
+  this.Mutation.fields.register = {
+    type: this.User.graphQL.type,
+    args: {
+      data: { type: this.User.graphQL.mutationInputType },
+    },
+    resolve: register(this.User),
   };
 
   this.Mutation.fields.refreshToken = {
     type: GraphQLString,
-    resolve: refresh(this.User.Model, this.User.config),
+    resolve: refresh(this.User),
   };
 }
 

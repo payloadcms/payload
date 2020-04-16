@@ -49,6 +49,17 @@ function registerCollections() {
       singularLabel,
     );
 
+    collection.graphQL.updateMutationInputType = this.buildMutationInputType(
+      `${singularLabel}Update`,
+      fields.map((field) => {
+        return {
+          ...field,
+          required: false,
+        };
+      }),
+      `${singularLabel}Update`,
+    );
+
     this.Query.fields[singularLabel] = {
       type: collection.graphQL.type,
       args: {
@@ -84,7 +95,7 @@ function registerCollections() {
       type: collection.graphQL.type,
       args: {
         id: { type: new GraphQLNonNull(GraphQLString) },
-        data: { type: collection.graphQL.mutationInputType },
+        data: { type: collection.graphQL.updateMutationInputType },
       },
       resolve: update(collection),
     };

@@ -5,22 +5,20 @@ const { update } = require('../operations');
 
 const updateHandler = async (req, res) => {
   try {
-    const doc = await update({
+    const user = await update({
+      data: req.body,
       Model: req.Model,
       config: req.collection,
-      user: req.user,
       id: req.params.id,
-      data: req.body,
-      locale: req.locale,
       api: 'REST',
     });
 
     return res.status(httpStatus.OK).json({
       ...formatSuccessResponse('Updated successfully.', 'message'),
-      doc,
+      doc: user,
     });
   } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
+    return res.status(httpStatus.UNAUTHORIZED).json(formatErrorResponse(error));
   }
 };
 

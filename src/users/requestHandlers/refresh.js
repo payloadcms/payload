@@ -2,10 +2,10 @@ const httpStatus = require('http-status');
 const formatErrorResponse = require('../../express/responses/formatError');
 const { refresh } = require('../operations');
 
-const refreshHandler = config => async (req, res) => {
+const refreshHandler = async (req, res) => {
   try {
     const refreshedToken = await refresh({
-      config,
+      config: req.collection,
       api: 'REST',
       authorization: req.headers.authorization,
     });

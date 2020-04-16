@@ -2,10 +2,10 @@ const httpStatus = require('http-status');
 const formatErrorResponse = require('../../express/responses/formatError');
 const { resetPassword } = require('../operations');
 
-const resetPasswordHandler = User => async (req, res) => {
+const resetPasswordHandler = async (req, res) => {
   try {
     await resetPassword({
-      Model: User,
+      Model: req.Model,
       data: req.body,
       api: 'REST',
     });

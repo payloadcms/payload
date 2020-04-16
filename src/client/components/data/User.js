@@ -33,7 +33,7 @@ const UserProvider = ({ children }) => {
 
     if (decodedToken?.exp > (Date.now() / 1000)) {
       setTimeout(async () => {
-        const request = await requests.post(`${serverURL}${api}/refresh`);
+        const request = await requests.post(`${serverURL}${api}/refresh-token`);
 
         if (request.status === 200) {
           const json = await request.json();

@@ -1,12 +1,14 @@
 /* eslint-disable no-param-reassign */
-const { register } = require('../../operations');
+const { update } = require('../../operations');
 
-const registerResolver = ({ Model, config }) => async (_, args, context) => {
+const updateResolver = ({ Model, config }) => async (_, args, context) => {
   const options = {
     config,
     Model,
     data: args.data,
+    id: args.id,
     api: 'GraphQL',
+    user: context.user,
     locale: context.locale,
     fallbackLocale: context.fallbackLocale,
     depth: 0,
@@ -22,9 +24,9 @@ const registerResolver = ({ Model, config }) => async (_, args, context) => {
     options.fallbackLocale = args.fallbackLocale;
   }
 
-  const token = await register(options);
+  const user = await update(options);
 
-  return token;
+  return user;
 };
 
-module.exports = registerResolver;
+module.exports = updateResolver;

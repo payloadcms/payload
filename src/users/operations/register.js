@@ -28,14 +28,14 @@ const register = async (args) => {
 
     const {
       Model,
-      config,
       data,
     } = options;
 
-    const usernameField = config.auth.useAsUsername;
+    const modelData = { ...data };
+    delete modelData.password;
 
     let result = await Model.register(new Model({
-      [usernameField]: data[usernameField],
+      ...modelData,
     }), data.password);
 
     await passport.authenticate('local');

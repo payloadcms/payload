@@ -2,11 +2,11 @@ const httpStatus = require('http-status');
 const formatErrorResponse = require('../../express/responses/formatError');
 const { login } = require('../operations');
 
-const loginHandler = (User, config) => async (req, res) => {
+const loginHandler = async (req, res) => {
   try {
     const token = await login({
-      Model: User,
-      config,
+      Model: req.Model,
+      config: req.collection,
       data: req.body,
       api: 'REST',
     });

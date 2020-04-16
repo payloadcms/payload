@@ -1,10 +1,11 @@
 /* eslint-disable no-param-reassign */
 const { init } = require('../../operations');
 
-const initResolver = User => async () => {
+const initResolver = ({ Model }) => async (_, __, context) => {
   const options = {
-    Model: User,
+    Model,
     api: 'GraphQL',
+    user: context.user,
   };
 
   const result = await init(options);

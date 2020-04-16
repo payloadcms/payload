@@ -64,7 +64,7 @@ describe('Users REST API', () => {
   });
 
   it('should refresh a token and reset its expiration', async () => {
-    const response = await fetch(`${url}/api/refresh`, {
+    const response = await fetch(`${url}/api/refresh-token`, {
       method: 'post',
       headers: {
         Authorization: `JWT ${token}`,

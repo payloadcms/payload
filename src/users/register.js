@@ -6,7 +6,6 @@ const jwtStrategy = require('./jwt');
 const authRoutes = require('./routes');
 const buildCollectionSchema = require('../collections/buildSchema');
 const baseUserFields = require('./baseFields');
-const collectionRoutes = require('../collections/routes');
 
 function registerUser() {
   this.config.user.fields.push(...baseUserFields);
@@ -24,8 +23,6 @@ function registerUser() {
   passport.use(new AnonymousStrategy.Strategy());
 
   this.router.use(authRoutes(this.User.Model, this.config, this.email));
-
-  this.router.use(collectionRoutes(this.User));
 }
 
 module.exports = registerUser;

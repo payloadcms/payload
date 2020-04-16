@@ -2,12 +2,12 @@ const httpStatus = require('http-status');
 const formatErrorResponse = require('../../express/responses/formatError');
 const { register } = require('../operations');
 
-const registerHandler = (User, config) => async (req, res) => {
+const registerHandler = async (req, res) => {
   try {
     const user = await register({
       data: req.body,
-      Model: User,
-      config,
+      Model: req.Model,
+      config: req.collection,
       api: 'REST',
     });
 
