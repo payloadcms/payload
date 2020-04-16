@@ -6,13 +6,15 @@ const graphQLPlayground = require('graphql-playground-middleware-express').defau
 const passport = require('passport');
 const connectMongoose = require('./mongoose/connect');
 const expressMiddleware = require('./express/middleware');
+const createAuthHeaderFromCookie = require('./express/middleware/createAuthHeaderFromCookie');
 const initWebpack = require('./webpack/init');
-const registerUser = require('./auth/register');
+const registerUser = require('./users/register');
 const registerUpload = require('./uploads/register');
 const registerCollections = require('./collections/register');
 const registerGlobals = require('./globals/register');
 const GraphQL = require('./graphql');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
+const registerEmail = require('./email/register');
 
 class Payload {
   constructor(options) {
@@ -25,6 +27,10 @@ class Payload {
     this.registerUpload = registerUpload.bind(this);
     this.registerCollections = registerCollections.bind(this);
     this.registerGlobals = registerGlobals.bind(this);
+    this.registerEmail = registerEmail.bind(this);
+
+    // Configure email service
+    this.registerEmail();
 
     // Setup & initialization
     connectMongoose(this.config.mongoURL);
@@ -45,23 +51,13 @@ class Payload {
       this.express.use(initWebpack(this.config));
     }
 
-    if (process.env.NODE_ENV !== 'production' || this.config.productionGraphQLPlayground) {
-      // Init GraphQL
-      this.router.use(
-        this.config.routes.graphQL,
-        (req, _, next) => {
-          const existingAuthHeader = req.get('Authorization');
-          const { token } = req.cookies;
-
-          if (!existingAuthHeader && token) {
-            req.headers.authorization = `JWT ${token}`;
-          }
-          next();
-        },
-        passport.authenticate(['jwt', 'anonymous'], { session: false }),
-        new GraphQL(this.config, this.collections, this.User, this.Upload, this.globals).init(),
-      );
-    }
+    // Init GraphQL
+    this.router.use(
+      this.config.routes.graphQL,
+      createAuthHeaderFromCookie,
+      passport.authenticate(['jwt', 'anonymous'], { session: false }),
+      new GraphQL(this.config, this.collections, this.User, this.Upload, this.globals).init(),
+    );
 
     this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
       endpoint: `${this.config.routes.api}${this.config.routes.graphQL}`,

@@ -1,5 +1,5 @@
 const { NotFound } = require('../../errors');
-const executePolicy = require('../../auth/executePolicy');
+const executePolicy = require('../../users/executePolicy');
 
 const findByID = async (args) => {
   try {

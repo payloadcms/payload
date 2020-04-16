@@ -12,14 +12,12 @@ const payload = new Payload({
 exports.payload = payload;
 
 exports.start = (cb) => {
-  expressApp.listen(config.port, () => {
+  const server = expressApp.listen(config.port, () => {
     console.log(`listening on ${config.port}...`);
     if (cb) cb();
   });
-};
 
-exports.close = (cb) => {
-  if (expressApp) expressApp.close(cb);
+  return server;
 };
 
 // when app.js is launched directly

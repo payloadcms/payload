@@ -2,44 +2,21 @@
  * @jest-environment node
  */
 
+require('isomorphic-fetch');
 const faker = require('faker');
-const server = require('../../../demo/server');
+const config = require('../../../demo/payload.config');
+const { email, password } = require('../../tests/credentials');
 
-describe('API', () => {
-  const url = 'http://localhost:3000';
-  let token = null;
-  const email = 'test@test.com';
-  const password = 'test123';
+const url = config.serverURL;
 
-  let localizedPostID;
-  const englishPostDesc = faker.lorem.lines(20);
-  const spanishPostDesc = faker.lorem.lines(20);
+let token = null;
 
-  beforeAll((done) => {
-    server.start(done);
-  });
+let localizedPostID;
+const englishPostDesc = faker.lorem.lines(20);
+const spanishPostDesc = faker.lorem.lines(20);
 
-  it('should register a first user', async () => {
-    const response = await fetch(`${url}/api/first-register`, {
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'post',
-    });
-
-    const data = await response.json();
-
-    expect(response.status).toBe(201);
-    expect(data).toHaveProperty('email');
-    expect(data).toHaveProperty('role');
-    expect(data).toHaveProperty('createdAt');
-  });
-
-  it('should login a user successfully', async () => {
+describe('Collection REST CRUD', () => {
+  beforeAll(async () => {
     const response = await fetch(`${url}/api/login`, {
       body: JSON.stringify({
         email,
@@ -53,31 +30,7 @@ describe('API', () => {
 
     const data = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(data.token).not.toBeNull();
-
     ({ token } = data);
-  });
-
-  it('should allow a user to be created', async () => {
-    const response = await fetch(`${url}/api/users/register`, {
-      body: JSON.stringify({
-        email: `${faker.name.firstName()}@test.com`,
-        password,
-      }),
-      headers: {
-        Authorization: `JWT ${token}`,
-        'Content-Type': 'application/json',
-      },
-      method: 'post',
-    });
-
-    const data = await response.json();
-
-    expect(response.status).toBe(201);
-    expect(data).toHaveProperty('email');
-    expect(data).toHaveProperty('role');
-    expect(data).toHaveProperty('createdAt');
   });
 
   it('should allow a post to be created in English', async () => {
@@ -123,7 +76,7 @@ describe('API', () => {
     expect(data.doc.description).toBe(spanishPostDesc);
   });
 
-  it('should allow a localized post to be retrieved in default locale of English', async () => {
+  it('should allow a localized post to be retrieved in unspecified locale, defaulting to English', async () => {
     const response = await fetch(`${url}/api/posts/${localizedPostID}`);
     const data = await response.json();
 
@@ -131,7 +84,7 @@ describe('API', () => {
     expect(data.description).toBe(englishPostDesc);
   });
 
-  it('should allow a localized post to be retrieved in default locale of English', async () => {
+  it('should allow a localized post to be retrieved in specified English locale', async () => {
     const response = await fetch(`${url}/api/posts/${localizedPostID}?locale=en`);
     const data = await response.json();
 
@@ -154,9 +107,5 @@ describe('API', () => {
     expect(response.status).toBe(200);
     expect(data.description.es).toBe(spanishPostDesc);
     expect(data.description.en).toBe(englishPostDesc);
-  });
-
-  afterAll((done) => {
-    server.close(done);
   });
 });

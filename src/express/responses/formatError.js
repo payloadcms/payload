@@ -1,23 +1,25 @@
 const formatErrorResponse = (incoming) => {
-  if (incoming && incoming.errors) {
-    return {
-      errors: Object.keys(incoming.errors).reduce((acc, key) => {
-        acc.push({
-          message: incoming.errors[key].message,
-        });
-        return acc;
-      }, []),
-    };
-  }
+  if (incoming) {
+    if (incoming.errors) {
+      return {
+        errors: Object.keys(incoming.errors).reduce((acc, key) => {
+          acc.push({
+            message: incoming.errors[key].message,
+          });
+          return acc;
+        }, []),
+      };
+    }
 
-  if (incoming.name) {
-    return {
-      errors: [
-        {
-          message: incoming.message,
-        },
-      ],
-    };
+    if (incoming.name) {
+      return {
+        errors: [
+          {
+            message: incoming.message,
+          },
+        ],
+      };
+    }
   }
   // If the Mongoose error does not get returned with incoming && incoming.errors,
   // it's of a type that we really don't know how to handle. Sometimes this means a TypeError,

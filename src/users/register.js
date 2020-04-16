@@ -5,7 +5,7 @@ const passportLocalMongoose = require('passport-local-mongoose');
 const jwtStrategy = require('./jwt');
 const authRoutes = require('./routes');
 const buildCollectionSchema = require('../collections/buildSchema');
-const baseUserFields = require('../auth/baseFields');
+const baseUserFields = require('./baseFields');
 const collectionRoutes = require('../collections/routes');
 
 function registerUser() {
@@ -23,7 +23,7 @@ function registerUser() {
   passport.deserializeUser(this.User.Model.deserializeUser());
   passport.use(new AnonymousStrategy.Strategy());
 
-  this.router.use(authRoutes(this.config, this.User.Model));
+  this.router.use(authRoutes(this.User.Model, this.config, this.email));
 
   this.router.use(collectionRoutes(this.User));
 }

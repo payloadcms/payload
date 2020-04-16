@@ -1,4 +1,4 @@
-const executePolicy = require('../../auth/executePolicy');
+const executePolicy = require('../../users/executePolicy');
 
 const upsert = async (args) => {
   try {

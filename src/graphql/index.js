@@ -8,7 +8,7 @@ const buildLocaleInputType = require('./schema/buildLocaleInputType');
 const buildFallbackLocaleInputType = require('./schema/buildFallbackLocaleInputType');
 const registerCollections = require('../collections/graphql/register');
 const registerGlobals = require('../globals/graphql/register');
-const registerUser = require('../auth/graphql/register');
+const registerUser = require('../users/graphql/register');
 const registerUpload = require('../uploads/graphql/register');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 

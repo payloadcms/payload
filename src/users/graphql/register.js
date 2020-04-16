@@ -1,15 +1,21 @@
 const {
   GraphQLString,
+  GraphQLBoolean,
   GraphQLNonNull,
   GraphQLInt,
 } = require('graphql');
 
 const formatName = require('../../graphql/utilities/formatName');
+const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
+
 const {
   find, findByID, deleteResolver, update,
 } = require('../../collections/graphql/resolvers');
 
-const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
+const {
+  login, me, init, refresh,
+} = require('./resolvers');
+
 
 function registerUser() {
   const {
@@ -19,6 +25,9 @@ function registerUser() {
         plural,
       },
       fields,
+      auth: {
+        useAsUsername,
+      },
     },
   } = this.User;
 
@@ -48,6 +57,26 @@ function registerUser() {
     singularLabel,
   );
 
+  this.User.graphQL.Me = this.buildObjectType(
+    'Me',
+    this.User.config.fields.reduce((jwtFields, potentialField) => {
+      if (potentialField.saveToJWT) {
+        return [
+          ...jwtFields,
+          potentialField,
+        ];
+      }
+
+      return jwtFields;
+    }, [
+      {
+        name: this.User.config.auth.useAsUsername,
+        type: 'text',
+        required: true,
+      },
+    ]),
+  );
+
   this.Query.fields[singularLabel] = {
     type: this.User.graphQL.type,
     args: {
@@ -71,6 +100,16 @@ function registerUser() {
     resolve: find(this.User),
   };
 
+  this.Query.fields.Me = {
+    type: this.User.graphQL.Me,
+    resolve: me,
+  };
+
+  this.Query.fields.Initialized = {
+    type: GraphQLBoolean,
+    resolve: init(this.User.Model),
+  };
+
   this.Mutation.fields[`update${singularLabel}`] = {
     type: this.User.graphQL.type,
     args: {
@@ -86,6 +125,20 @@ function registerUser() {
       id: { type: new GraphQLNonNull(GraphQLString) },
     },
     resolve: deleteResolver(this.User),
+  };
+
+  this.Mutation.fields.login = {
+    type: GraphQLString,
+    args: {
+      [useAsUsername]: { type: GraphQLString },
+      password: { type: GraphQLString },
+    },
+    resolve: login(this.User.Model, this.User.config),
+  };
+
+  this.Mutation.fields.refreshToken = {
+    type: GraphQLString,
+    resolve: refresh(this.User.Model, this.User.config),
   };
 }
 
