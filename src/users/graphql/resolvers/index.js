@@ -1,4 +1,3 @@
-const checkIfInitialized = require('./checkIfInitialized');
 const login = require('./login');
 const me = require('./me');
 const refresh = require('./refresh');
@@ -8,7 +7,6 @@ const forgotPassword = require('./forgotPassword');
 const resetPassword = require('./resetPassword');
 
 module.exports = {
-  checkIfInitialized,
   login,
   me,
   refresh,

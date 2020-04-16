@@ -9,6 +9,8 @@ const {
   find, findByID, deleteResolver, update,
 } = require('../../collections/graphql/resolvers');
 
+const { login } = require('./resolvers');
+
 const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
 
 function registerUser() {
@@ -19,6 +21,9 @@ function registerUser() {
         plural,
       },
       fields,
+      auth: {
+        useAsUsername,
+      },
     },
   } = this.User;
 
@@ -86,6 +91,15 @@ function registerUser() {
       id: { type: new GraphQLNonNull(GraphQLString) },
     },
     resolve: deleteResolver(this.User),
+  };
+
+  this.Mutation.fields.login = {
+    type: GraphQLString,
+    args: {
+      [useAsUsername]: { type: GraphQLString },
+      password: { type: GraphQLString },
+    },
+    resolve: login(this.User.Model, this.User.config),
   };
 }
 
