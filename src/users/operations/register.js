@@ -10,6 +10,8 @@ const register = async (args) => {
       config: args.config,
       api: args.api,
       data: args.data,
+      locale: args.locale,
+      fallbackLocale: args.fallbackLocale,
     };
 
     // /////////////////////////////////////
@@ -29,14 +31,22 @@ const register = async (args) => {
     const {
       Model,
       data,
+      locale,
+      fallbackLocale,
     } = options;
 
     const modelData = { ...data };
     delete modelData.password;
 
-    let result = await Model.register(new Model({
-      ...modelData,
-    }), data.password);
+    const user = new Model();
+
+    if (locale && user.setLocale) {
+      user.setLocale(locale, fallbackLocale);
+    }
+
+    Object.assign(user, modelData);
+
+    let result = await Model.register(user, data.password);
 
     await passport.authenticate('local');
 

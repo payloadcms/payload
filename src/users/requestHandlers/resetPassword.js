@@ -8,6 +8,9 @@ const resetPasswordHandler = async (req, res) => {
       Model: req.Model,
       data: req.body,
       api: 'REST',
+      locale: req.locale,
+      fallbackLocale: req.fallbackLocale,
+      user: req.user,
     });
 
     return res.status(200).json({ message: 'Password successfully reset' });

@@ -4,8 +4,9 @@
  * @param user
  * @returns {Function}
  */
-const checkRole = (roles, user) => {
-  return !!(user && roles.some(role => role === user.role));
+const checkRole = (allRoles, user) => {
+  const hasPermission = !!(user && allRoles.some(role => user.roles.some(individualRole => individualRole === role)));
+  return hasPermission;
 };
 
 module.exports = checkRole;

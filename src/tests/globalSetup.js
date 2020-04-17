@@ -13,6 +13,7 @@ const globalSetup = async () => {
     body: JSON.stringify({
       [usernameField]: email,
       password,
+      roles: ['admin', 'user'],
     }),
     headers: {
       'Content-Type': 'application/json',

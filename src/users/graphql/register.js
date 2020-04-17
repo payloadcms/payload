@@ -13,9 +13,8 @@ const {
 } = require('../../collections/graphql/resolvers');
 
 const {
-  login, me, init, refresh, register, update,
+  login, me, init, refresh, register, update, forgotPassword, resetPassword,
 } = require('./resolvers');
-
 
 function registerUser() {
   const {
@@ -56,6 +55,7 @@ function registerUser() {
     {
       name: 'password',
       type: 'text',
+      required: true,
     },
   ];
 
@@ -161,6 +161,23 @@ function registerUser() {
       data: { type: this.User.graphQL.mutationInputType },
     },
     resolve: register(this.User),
+  };
+
+  this.Mutation.fields.resetPassword = {
+    type: this.User.graphQL.type,
+    args: {
+      token: { type: GraphQLString },
+      password: { type: GraphQLString },
+    },
+    resolve: resetPassword(this.User),
+  };
+
+  this.Mutation.fields.forgotPassword = {
+    type: new GraphQLNonNull(GraphQLBoolean),
+    args: {
+      [useAsUsername]: { type: GraphQLString },
+    },
+    resolve: forgotPassword(this.User, this.email),
   };
 
   this.Mutation.fields.refreshToken = {

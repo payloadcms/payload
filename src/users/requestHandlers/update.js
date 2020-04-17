@@ -11,6 +11,8 @@ const updateHandler = async (req, res) => {
       config: req.collection,
       id: req.params.id,
       api: 'REST',
+      locale: req.locale,
+      fallbackLocale: req.fallbackLocale,
     });
 
     return res.status(httpStatus.OK).json({

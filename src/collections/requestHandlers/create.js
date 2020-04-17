@@ -18,8 +18,8 @@ const createHandler = async (req, res) => {
       ...formatSuccessResponse(`${req.collection.labels.singular} successfully created.`, 'message'),
       doc,
     });
-  } catch (err) {
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err, 'mongoose'));
+  } catch (error) {
+    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
   }
 };
 

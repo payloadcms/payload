@@ -96,7 +96,7 @@ describe('Users REST API', () => {
 
     expect(response.status).toBe(201);
     expect(data).toHaveProperty(usernameField);
-    expect(data).toHaveProperty('role');
+    expect(data).toHaveProperty('roles');
     expect(data).toHaveProperty('createdAt');
   });
 });

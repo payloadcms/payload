@@ -15,24 +15,26 @@ let localizedPostID;
 const englishPostDesc = faker.lorem.lines(20);
 const spanishPostDesc = faker.lorem.lines(20);
 
-describe('Collection REST CRUD', () => {
-  beforeAll(async () => {
-    const response = await fetch(`${url}/api/login`, {
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'post',
-    });
-
-    const data = await response.json();
-
-    ({ token } = data);
+beforeAll(async (done) => {
+  const response = await fetch(`${url}/api/login`, {
+    body: JSON.stringify({
+      email,
+      password,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    method: 'post',
   });
 
+  const data = await response.json();
+
+  ({ token } = data);
+
+  done();
+});
+
+describe('Collection REST CRUD', () => {
   it('should allow a post to be created in English', async () => {
     const response = await fetch(`${url}/api/posts`, {
       body: JSON.stringify({

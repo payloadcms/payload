@@ -11,6 +11,7 @@ const resetPassword = async (args) => {
       Model: args.Model,
       api: args.api,
       data: args.data,
+      user: args.user,
     };
 
     // /////////////////////////////////////
