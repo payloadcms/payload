@@ -65,7 +65,7 @@ const EditView = (props) => {
           )}
         />
         <RenderFields
-          fields={global.fields}
+          fieldSchema={global.fields}
           initialData={data}
         />
       </Form>

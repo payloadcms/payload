@@ -17,7 +17,7 @@ const Group = (props) => {
         heading={label}
         className="field-group"
       >
-        <RenderFields fields={fields.map((subField) => {
+        <RenderFields fieldSchema={fields.map((subField) => {
           return {
             ...subField,
             name: `${name}.${subField.name}`,

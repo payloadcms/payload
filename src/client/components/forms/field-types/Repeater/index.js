@@ -32,7 +32,7 @@ const Repeater = (props) => {
 
   const addRow = (rowIndex) => {
     dispatchFields({
-      type: 'ADD_ROW', rowIndex, name, fields,
+      type: 'ADD_ROW', rowIndex, name, fieldSchema: fields,
     });
 
     dispatchCollapsibleStates({
@@ -118,7 +118,7 @@ const Repeater = (props) => {
                             removeRow={() => removeRow(rowIndex)}
                             rowIndex={rowIndex}
                             fieldState={fieldState}
-                            renderFields={fields}
+                            fieldSchema={fields}
                             defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
                             dispatchCollapsibleStates={dispatchCollapsibleStates}
                             collapsibleStates={collapsibleStates}

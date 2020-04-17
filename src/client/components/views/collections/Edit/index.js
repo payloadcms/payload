@@ -99,7 +99,7 @@ const EditView = (props) => {
         />
         <RenderFields
           customComponents={customComponents?.[collection.slug]?.fields}
-          fields={collection.fields}
+          fieldSchema={collection.fields}
           initialData={data}
         />
       </Form>

@@ -1,9 +1,10 @@
 import { unflatten, flatten } from 'flatley';
 import flattenFilters from './flattenFilters';
 
-const splitRowsFromState = (state, name) => {
+//
+const unflattenRowsFromState = (state, name) => {
   // Take a copy of state
-  const remainingState = { ...state };
+  const remainingFlattenedState = { ...state };
 
   const rowsFromStateObject = {};
 
@@ -15,15 +16,15 @@ const splitRowsFromState = (state, name) => {
   Object.keys(state).forEach((key) => {
     if (key.indexOf(`${name}.`) === 0) {
       rowsFromStateObject[key.replace(namePrefixToRemove, '')] = state[key];
-      delete remainingState[key];
+      delete remainingFlattenedState[key];
     }
   });
 
-  const rowsFromState = unflatten(rowsFromStateObject);
+  const unflattenedRows = unflatten(rowsFromStateObject);
 
   return {
-    rowsFromState: rowsFromState[name.replace(namePrefixToRemove, '')] || [],
-    remainingState,
+    unflattenedRows: unflattenedRows[name.replace(namePrefixToRemove, '')] || [],
+    remainingFlattenedState,
   };
 };
 
@@ -36,26 +37,27 @@ function fieldReducer(state, action) {
 
     case 'REMOVE_ROW': {
       const { rowIndex, name } = action;
-      const { rowsFromState, remainingState } = splitRowsFromState(state, name);
+      const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, name);
 
-      rowsFromState.splice(rowIndex, 1);
+      unflattenedRows.splice(rowIndex, 1);
 
-      const flattenedRowState = rowsFromState.length > 0 ? flatten({ [name]: rowsFromState }, { filters: flattenFilters }) : {};
+      const flattenedRowState = unflattenedRows.length > 0 ? flatten({ [name]: unflattenedRows }, { filters: flattenFilters }) : {};
 
       return {
-        ...remainingState,
+        ...remainingFlattenedState,
         ...flattenedRowState,
       };
     }
 
     case 'ADD_ROW': {
       const {
-        rowIndex, name, fields, blockType,
+        rowIndex, name, fieldSchema, blockType,
       } = action;
-      const { rowsFromState, remainingState } = splitRowsFromState(state, name);
+      const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, name);
 
       // Get names of sub fields
-      const subFields = fields.reduce((acc, field) => {
+      console.log('ADD', fieldSchema);
+      const subFields = fieldSchema.reduce((acc, field) => {
         if (field.type === 'flexible' || field.type === 'repeater') {
           return acc;
         }
@@ -76,29 +78,29 @@ function fieldReducer(state, action) {
         };
       }
 
-      // Add new object containing subfield names to rowsFromState array
-      rowsFromState.splice(rowIndex + 1, 0, subFields);
+      // Add new object containing subfield names to unflattenedRows array
+      unflattenedRows.splice(rowIndex + 1, 0, subFields);
 
       return {
-        ...remainingState,
-        ...(flatten({ [name]: rowsFromState }, { filters: flattenFilters })),
+        ...remainingFlattenedState,
+        ...(flatten({ [name]: unflattenedRows }, { filters: flattenFilters })),
       };
     }
 
     case 'MOVE_ROW': {
       const { moveFromIndex, moveToIndex, name } = action;
-      const { rowsFromState, remainingState } = splitRowsFromState(state, name);
+      const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, name);
 
       // copy the row to move
-      const copyOfMovingRow = rowsFromState[moveFromIndex];
+      const copyOfMovingRow = unflattenedRows[moveFromIndex];
       // delete the row by index
-      rowsFromState.splice(moveFromIndex, 1);
+      unflattenedRows.splice(moveFromIndex, 1);
       // insert row copyOfMovingRow back in
-      rowsFromState.splice(moveToIndex, 0, copyOfMovingRow);
+      unflattenedRows.splice(moveToIndex, 0, copyOfMovingRow);
 
       return {
-        ...remainingState,
-        ...(flatten({ [name]: rowsFromState }, { filters: flattenFilters })),
+        ...remainingFlattenedState,
+        ...(flatten({ [name]: unflattenedRows }, { filters: flattenFilters })),
       };
     }
 

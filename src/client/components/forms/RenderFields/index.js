@@ -4,11 +4,11 @@ import fieldTypes from '../field-types';
 
 import './index.scss';
 
-const RenderFields = ({ fields, initialData, customComponents }) => {
-  if (fields) {
+const RenderFields = ({ fieldSchema, initialData, customComponents }) => {
+  if (fieldSchema) {
     return (
       <>
-        {fields.map((field, i) => {
+        {fieldSchema.map((field, i) => {
           const { defaultValue } = field;
           const FieldComponent = customComponents?.[field.name]?.field || fieldTypes[field.type];
 
@@ -48,7 +48,7 @@ RenderFields.defaultProps = {
 };
 
 RenderFields.propTypes = {
-  fields: PropTypes.arrayOf(
+  fieldSchema: PropTypes.arrayOf(
     PropTypes.shape({}),
   ).isRequired,
   initialData: PropTypes.shape({}),

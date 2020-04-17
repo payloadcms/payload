@@ -40,7 +40,7 @@ const Flexible = (props) => {
     const blockToAdd = blocks.find(block => block.slug === blockType);
 
     dispatchFields({
-      type: 'ADD_ROW', rowIndex, name, fields: blockToAdd.fields, blockType,
+      type: 'ADD_ROW', rowIndex, name, fieldSchema: blockToAdd.fields, blockType,
     });
 
     dispatchCollapsibleStates({
@@ -143,7 +143,7 @@ const Flexible = (props) => {
                               removeRow={() => removeRow(rowIndex)}
                               rowIndex={rowIndex}
                               fieldState={fieldState}
-                              renderFields={[
+                              fieldSchema={[
                                 ...blockToRender.fields,
                                 {
                                   name: 'blockType',
@@ -157,7 +157,7 @@ const Flexible = (props) => {
                               defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
                               dispatchCollapsibleStates={dispatchCollapsibleStates}
                               collapsibleStates={collapsibleStates}
-                              useHeadingPill
+                              blockType="flexible"
                             />
                           );
                         }

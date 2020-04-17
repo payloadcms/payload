@@ -66,7 +66,7 @@ const CreateFirstUser = (props) => {
           method="POST"
           action={`${serverURL}${api}/first-register`}
         >
-          <RenderFields fields={fields} />
+          <RenderFields fieldSchema={fields} />
           <FormSubmit>Create</FormSubmit>
         </Form>
       </div>
