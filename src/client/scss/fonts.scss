@@ -6,6 +6,14 @@
   font-style: normal; }
 
 @font-face {
+  font-family: 'calibre-web';
+  src: url("../assets/fonts/cal-bold-webfont.eot");
+  src: url("../assets/fonts/cal-bold-webfont.eot?#iefix") format("embedded-opentype"), url("../assets/fonts/cal-bold-webfont.woff2") format("woff2"), url("../assets/fonts/cal-bold-webfont.woff") format("woff"), url("../assets/fonts/cal-bold-webfont.svg#calibre_regularregular") format("svg");
+  font-weight: 800;
+  font-style: bold; }
+
+
+@font-face {
   font-family: 'noe-display-web';
   src: url("../assets/fonts/NoeDisplay-Bold.eot") format("embedded-opentype");
   font-weight: bold;

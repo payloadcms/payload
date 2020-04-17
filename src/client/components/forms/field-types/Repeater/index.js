@@ -32,7 +32,7 @@ const Repeater = (props) => {
 
   const addRow = (rowIndex) => {
     dispatchFields({
-      type: 'ADD_ROW', rowIndex, name, fields,
+      type: 'ADD_ROW', rowIndex, name, fieldSchema: fields,
     });
 
     dispatchCollapsibleStates({
@@ -89,25 +89,14 @@ const Repeater = (props) => {
     <DragDropContext onDragEnd={onDragEnd}>
       <div className={baseClass}>
         <Section heading={label}>
-          {(rowCount === 0
-            ? (
-              <div className={`${baseClass}__add-button-wrap`}>
-                <Button
-                  onClick={() => addRow(0)}
-                  type="secondary"
+          <>
+            <Droppable droppableId="repeater-drop">
+              {provided => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
                 >
-                  {`Add ${singularLabel}`}
-                </Button>
-              </div>
-            )
-            : (
-              <Droppable droppableId="repeater-drop">
-                {provided => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                  >
-                    {rowCount !== 0
+                  {rowCount !== 0
                       && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
                         return (
                           <DraggableSection
@@ -118,7 +107,7 @@ const Repeater = (props) => {
                             removeRow={() => removeRow(rowIndex)}
                             rowIndex={rowIndex}
                             fieldState={fieldState}
-                            renderFields={fields}
+                            fieldSchema={fields}
                             defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
                             dispatchCollapsibleStates={dispatchCollapsibleStates}
                             collapsibleStates={collapsibleStates}
@@ -126,11 +115,20 @@ const Repeater = (props) => {
                         );
                       })
                     }
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+
+            <div className={`${baseClass}__add-button-wrap`}>
+              <Button
+                onClick={() => addRow(rowCount)}
+                type="secondary"
+              >
+                {`Add ${singularLabel}`}
+              </Button>
+            </div>
+          </>
         </Section>
 
       </div>
