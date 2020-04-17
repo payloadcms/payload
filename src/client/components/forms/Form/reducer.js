@@ -56,7 +56,6 @@ function fieldReducer(state, action) {
       const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, name);
 
       // Get names of sub fields
-      console.log('ADD', fieldSchema);
       const subFields = fieldSchema.reduce((acc, field) => {
         if (field.type === 'flexible' || field.type === 'repeater') {
           return acc;

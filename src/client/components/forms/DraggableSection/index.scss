@@ -6,6 +6,12 @@
   position: relative;
   margin-bottom: base(.5);
 
+  &.is-open {
+    &:hover {
+      box-shadow: none;
+    }
+  }
+
   .field-type,
   .missing-field {
     padding-left: 0;
@@ -40,21 +46,30 @@
       width: 100%;
       height: 100%;
       position: absolute;
-      left: 0;
+      top: 0; left: 0;
       z-index: 1;
+      outline: 0;
+
+      &:hover {
+        cursor: pointer;
+      }
     }
 
     // elements above the drag handle
-    &__controls,
-    &__header__row-index {
+    &__controls .btn,
+    &__header__row-index,
+    &__row-block-type-label {
       position: relative;
       z-index: 2;
     }
 
-    &__row-name {
+    &__row-block-type-label,
+    .editable-block-title__text-clone,
+    .editable-block-title input {
       font-family: $font-body;
       font-weight: bold;
       font-size: base(.5);
+      margin-right: base(.5);
     }
 
     &__heading {
@@ -65,6 +80,8 @@
 
     &__controls {
       margin-left: auto;
+      display: flex;
+      align-items: center;
 
       .btn {
         margin-top: 0;
