@@ -74,7 +74,13 @@ const findByID = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 4. Execute after collection hook
+    // 4. Execute after collection field-level hooks
+    // /////////////////////////////////////
+
+    result = await executeFieldHooks(args.config.fields, result, 'afterRead');
+
+    // /////////////////////////////////////
+    // 5. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterRead } = args.config.hooks;
@@ -82,12 +88,6 @@ const findByID = async (args) => {
     if (typeof afterRead === 'function') {
       result = await afterRead(options, result);
     }
-
-    // /////////////////////////////////////
-    // 5. Execute after collection field-level hooks
-    // /////////////////////////////////////
-
-    result = await executeFieldHooks(args.config.fields, result, 'afterRead');
 
     // /////////////////////////////////////
     // 6. Return results

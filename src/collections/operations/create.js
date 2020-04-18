@@ -1,4 +1,5 @@
 const executePolicy = require('../../users/executePolicy');
+const executeFieldHooks = require('../../fields/executeHooks');
 
 const create = async (args) => {
   try {
@@ -21,7 +22,13 @@ const create = async (args) => {
     };
 
     // /////////////////////////////////////
-    // 2. Execute before collection hook
+    // 2. Execute before create field-level hooks
+    // /////////////////////////////////////
+
+    options.data = await executeFieldHooks(args.config.fields, args.data, 'beforeCreate');
+
+    // /////////////////////////////////////
+    // 3. Execute before collection hook
     // /////////////////////////////////////
 
     const { beforeCreate } = args.config.hooks;
@@ -31,7 +38,7 @@ const create = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 3. Perform database operation
+    // 4. Perform database operation
     // /////////////////////////////////////
 
     const {
@@ -53,7 +60,7 @@ const create = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 4. Execute after collection hook
+    // 5. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterCreate } = args.config.hooks.afterCreate;
@@ -63,7 +70,7 @@ const create = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 5. Return results
+    // 6. Return results
     // /////////////////////////////////////
 
     return result;
