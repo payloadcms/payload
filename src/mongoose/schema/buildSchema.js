@@ -1,5 +1,5 @@
 const { Schema } = require('mongoose');
-const fieldToSchemaMap = require('../../fields/mongooseSchemaMap');
+const fieldToSchemaMap = require('../../fields/schemaMap');
 const baseFields = require('./baseFields');
 
 const buildSchema = (configFields, config, options = {}, additionalBaseFields = {}) => {

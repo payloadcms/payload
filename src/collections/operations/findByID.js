@@ -1,5 +1,6 @@
 const { NotFound } = require('../../errors');
 const executePolicy = require('../../users/executePolicy');
+const executeFieldHooks = require('../../fields/executeHooks');
 
 const findByID = async (args) => {
   try {
@@ -83,7 +84,13 @@ const findByID = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 5. Return results
+    // 5. Execute after collection field-level hooks
+    // /////////////////////////////////////
+
+    result = await executeFieldHooks(args.config.fields, result, 'afterRead');
+
+    // /////////////////////////////////////
+    // 6. Return results
     // /////////////////////////////////////
 
     return result;
