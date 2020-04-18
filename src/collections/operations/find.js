@@ -1,4 +1,5 @@
 const executePolicy = require('../../users/executePolicy');
+const executeFieldHooks = require('../../fields/executeHooks');
 
 const find = async (args) => {
   try {
@@ -75,13 +76,17 @@ const find = async (args) => {
 
     result = {
       ...result,
-      docs: result.docs.map((doc) => {
+      docs: await Promise.all(result.docs.map(async (doc) => {
         if (locale && doc.setLocale) {
           doc.setLocale(locale, fallbackLocale);
         }
 
-        return doc.toJSON({ virtuals: true });
-      }),
+        let virtualizedDoc = doc.toJSON({ virtuals: true });
+
+        virtualizedDoc = await executeFieldHooks(args.config.fields, virtualizedDoc, 'afterRead');
+
+        return virtualizedDoc;
+      })),
     };
 
     // /////////////////////////////////////
