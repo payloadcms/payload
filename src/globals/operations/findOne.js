@@ -1,5 +1,6 @@
 const executePolicy = require('../../users/executePolicy');
 const { NotFound } = require('../../errors');
+const executeFieldHooks = require('../../fields/executeHooks');
 
 const findOne = async (args) => {
   try {
@@ -7,8 +8,7 @@ const findOne = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    const policy = args.config && args.config.policies && args.config.policies.read;
-    await executePolicy(args.user, policy);
+    await executePolicy(args.user, args.config.policies.read);
 
     let options = { ...args };
 
@@ -16,10 +16,10 @@ const findOne = async (args) => {
     // 2. Execute before collection hook
     // /////////////////////////////////////
 
-    const beforeReadHook = args.config && args.config.hooks && args.config.hooks.beforeRead;
+    const { beforeRead } = args.config.hooks;
 
-    if (typeof beforeReadHook === 'function') {
-      options = await beforeReadHook(options);
+    if (typeof beforeRead === 'function') {
+      options = await beforeRead(options);
     }
 
     // /////////////////////////////////////
@@ -63,17 +63,23 @@ const findOne = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 4. Execute after collection hook
+    // 4. Execute after collection field-level hooks
     // /////////////////////////////////////
 
-    const afterReadHook = args.config && args.config.hooks && args.config.hooks.afterRead;
+    result = await executeFieldHooks(args.config.fields, result, 'afterRead');
 
-    if (typeof afterReadHook === 'function') {
-      result = await afterReadHook(options, result);
+    // /////////////////////////////////////
+    // 5. Execute after collection hook
+    // /////////////////////////////////////
+
+    const { afterRead } = args.config.hooks;
+
+    if (typeof afterRead === 'function') {
+      result = await afterRead(options, result);
     }
 
     // /////////////////////////////////////
-    // 5. Return results
+    // 6. Return results
     // /////////////////////////////////////
 
     return result;

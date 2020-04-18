@@ -1,8 +1,15 @@
 
 const { NotFound } = require('../../errors');
+const executePolicy = require('../../users/executePolicy');
 
 const update = async (args) => {
   try {
+    // /////////////////////////////////////
+    // 1. Retrieve and execute policy
+    // /////////////////////////////////////
+
+    await executePolicy(args.user, args.config.policies.update);
+
     // Await validation here
 
     let options = {
@@ -19,10 +26,10 @@ const update = async (args) => {
     // 1. Execute before update hook
     // /////////////////////////////////////
 
-    const beforeUpdateHook = args.config.hooks && args.config.hooks.beforeUpdate;
+    const { beforeUpdate } = args.config.hooks;
 
-    if (typeof beforeUpdateHook === 'function') {
-      options = await beforeUpdateHook(options);
+    if (typeof beforeUpdate === 'function') {
+      options = await beforeUpdate(options);
     }
 
     // /////////////////////////////////////

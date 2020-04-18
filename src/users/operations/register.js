@@ -8,7 +8,9 @@ const register = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    await executePolicy(args.user, args.config.policies.register);
+    if (!args.overridePolicy) {
+      await executePolicy(args.user, args.config.policies.register);
+    }
 
     // Await validation here
 
@@ -31,10 +33,10 @@ const register = async (args) => {
     // 3. Execute before register hook
     // /////////////////////////////////////
 
-    const beforeRegisterHook = args.config.hooks && args.config.hooks.beforeRegister;
+    const { beforeRegister } = args.config.hooks;
 
-    if (typeof beforeRegisterHook === 'function') {
-      options = await beforeRegisterHook(options);
+    if (typeof beforeRegister === 'function') {
+      options = await beforeRegister(options);
     }
 
     // /////////////////////////////////////
@@ -67,10 +69,10 @@ const register = async (args) => {
     // 5. Execute after register hook
     // /////////////////////////////////////
 
-    const afterRegisterHook = args.config.hooks && args.config.hooks.afterRegister;
+    const afterRegister = args.config.hooks;
 
-    if (typeof afterRegisterHook === 'function') {
-      result = await afterRegisterHook(options, result);
+    if (typeof afterRegister === 'function') {
+      result = await afterRegister(options, result);
     }
 
     // /////////////////////////////////////
