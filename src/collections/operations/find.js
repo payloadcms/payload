@@ -6,8 +6,7 @@ const find = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    const policy = args.config && args.config.policies && args.config.policies.read;
-    await executePolicy(args.user, policy);
+    await executePolicy(args.user, args.config.policies.read);
 
     const queryToBuild = {};
     if (args.where) queryToBuild.where = args.where;
@@ -30,10 +29,10 @@ const find = async (args) => {
     // 2. Execute before collection hook
     // /////////////////////////////////////
 
-    const beforeReadHook = args.config && args.config.hooks && args.config.hooks.beforeRead;
+    const { beforeRead } = args.config.hooks;
 
-    if (typeof beforeReadHook === 'function') {
-      options = await beforeReadHook(options);
+    if (typeof beforeRead === 'function') {
+      options = await beforeRead(options);
     }
 
     // /////////////////////////////////////
@@ -89,10 +88,10 @@ const find = async (args) => {
     // 4. Execute after collection hook
     // /////////////////////////////////////
 
-    const afterReadHook = args.config && args.config.hooks && args.config.hooks.afterRead;
+    const { afterRead } = args.config.hooks;
 
-    if (typeof afterReadHook === 'function') {
-      result = await afterReadHook(options, result);
+    if (typeof afterRead === 'function') {
+      result = await afterRead(options, result);
     }
 
     // /////////////////////////////////////

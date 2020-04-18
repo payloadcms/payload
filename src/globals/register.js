@@ -1,11 +1,18 @@
-const validate = require('./validate');
-const buildSchema = require('./buildSchema');
+const buildModel = require('./buildModel');
+const sanitize = require('./sanitize');
 const routes = require('./routes');
 
 function registerGlobals() {
-  validate(this.config.globals);
-  this.globals = buildSchema(this.config);
-  this.router.use(routes(this.config.globals, this.globals.Model));
+  this.config.globals = sanitize(this.config.globals);
+
+  if (this.config.globals) {
+    this.globals = {
+      Model: buildModel(this.config),
+      config: this.config.globals,
+    };
+
+    this.router.use(routes(this.config.globals, this.globals.Model));
+  }
 }
 
 module.exports = registerGlobals;

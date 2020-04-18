@@ -12,6 +12,10 @@ const sanitizeFields = (fields) => {
       field.validation = validations[field.type];
     }
 
+    if (field.localized && field.required) {
+      field.required = false;
+    }
+
     return field;
   });
 };

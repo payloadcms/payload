@@ -7,8 +7,7 @@ const update = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    const policy = args.config && args.config.policies && args.config.policies.update;
-    await executePolicy(args.user, policy);
+    await executePolicy(args.user, args.config.policies.update);
 
     // Await validation here
 
@@ -24,10 +23,10 @@ const update = async (args) => {
     // 2. Execute before collection hook
     // /////////////////////////////////////
 
-    const beforeUpdateHook = args.config && args.config.hooks && args.config.hooks.beforeUpdate;
+    const { beforeUpdate } = args.config.hooks;
 
-    if (typeof beforeUpdateHook === 'function') {
-      options = await beforeUpdateHook(options);
+    if (typeof beforeUpdate === 'function') {
+      options = await beforeUpdate(options);
     }
 
     // /////////////////////////////////////
@@ -59,10 +58,10 @@ const update = async (args) => {
     // 4. Execute after collection hook
     // /////////////////////////////////////
 
-    const afterUpdateHook = args.config && args.config.hooks && args.config.hooks.afterUpdate;
+    const { afterUpdate } = args.config.hooks;
 
-    if (typeof afterUpdateHook === 'function') {
-      result = await afterUpdateHook(options, result);
+    if (typeof afterUpdate === 'function') {
+      result = await afterUpdate(options, result);
     }
 
     // /////////////////////////////////////

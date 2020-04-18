@@ -21,8 +21,22 @@ const sanitizeCollection = (collections, collection) => {
     throw new DuplicateCollection(collection);
   }
 
+  // /////////////////////////////////
+  // Make copy of collection config
+  // /////////////////////////////////
 
   const sanitizedCollectionConfig = { ...collection };
+
+  // /////////////////////////////////
+  // Ensure that collection has required object structure
+  // /////////////////////////////////
+
+  if (!sanitizedCollectionConfig.hooks) sanitizedCollectionConfig.hooks = {};
+  if (!sanitizedCollectionConfig.policies) sanitizedCollectionConfig.policies = {};
+
+  // /////////////////////////////////
+  // Sanitize fields
+  // /////////////////////////////////
 
   sanitizedCollectionConfig.fields = sanitizeFields(collection.fields);
 

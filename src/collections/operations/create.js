@@ -6,9 +6,7 @@ const create = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    const policy = args.config && args.config.policies && args.config.policies.create;
-
-    await executePolicy(args.user, policy);
+    await executePolicy(args.user, args.config.policies.create);
 
     // Await validation here
 
@@ -26,10 +24,10 @@ const create = async (args) => {
     // 2. Execute before collection hook
     // /////////////////////////////////////
 
-    const beforeCreateHook = args.config && args.config.hooks && args.config.hooks.beforeCreate;
+    const { beforeCreate } = args.config.hooks;
 
-    if (typeof beforeCreateHook === 'function') {
-      options = await beforeCreateHook(options);
+    if (typeof beforeCreate === 'function') {
+      options = await beforeCreate(options);
     }
 
     // /////////////////////////////////////
@@ -58,10 +56,10 @@ const create = async (args) => {
     // 4. Execute after collection hook
     // /////////////////////////////////////
 
-    const afterCreateHook = args.config && args.config.hooks && args.config.hooks.afterCreate;
+    const { afterCreate } = args.config.hooks.afterCreate;
 
-    if (typeof afterDeleteHook === 'function') {
-      result = await afterCreateHook(options, result);
+    if (typeof afterCreate === 'function') {
+      result = await afterCreate(options, result);
     }
 
     // /////////////////////////////////////

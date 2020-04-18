@@ -7,9 +7,7 @@ const deleteQuery = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    const policy = args.config && args.config.policies && args.config.policies.delete;
-
-    await executePolicy(args.user, policy);
+    await executePolicy(args.user, args.config.policies.delete);
 
     let options = {
       query: { _id: args.id },
@@ -25,10 +23,10 @@ const deleteQuery = async (args) => {
     // 2. Execute before collection hook
     // /////////////////////////////////////
 
-    const beforeDeleteHook = args.config && args.config.hooks && args.config.hooks.beforeDelete;
+    const { beforeDelete } = args.config.hooks;
 
-    if (typeof beforeDeleteHook === 'function') {
-      options = await beforeDeleteHook(options);
+    if (typeof beforeDelete === 'function') {
+      options = await beforeDelete(options);
     }
 
     // /////////////////////////////////////
@@ -56,10 +54,10 @@ const deleteQuery = async (args) => {
     // 4. Execute after collection hook
     // /////////////////////////////////////
 
-    const afterDeleteHook = args.config && args.config.hooks && args.config.hooks.afterDelete;
+    const { afterDelete } = args.config.hooks;
 
-    if (typeof afterDeleteHook === 'function') {
-      result = await afterDeleteHook(options, result);
+    if (typeof afterDelete === 'function') {
+      result = await afterDelete(options, result);
     }
 
     // /////////////////////////////////////
