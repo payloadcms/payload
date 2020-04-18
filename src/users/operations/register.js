@@ -1,8 +1,15 @@
-
 const passport = require('passport');
+const executePolicy = require('../../users/executePolicy');
+const executeFieldHooks = require('../../fields/executeHooks');
 
 const register = async (args) => {
   try {
+    // /////////////////////////////////////
+    // 1. Retrieve and execute policy
+    // /////////////////////////////////////
+
+    await executePolicy(args.user, args.config.policies.register);
+
     // Await validation here
 
     let options = {
@@ -15,7 +22,13 @@ const register = async (args) => {
     };
 
     // /////////////////////////////////////
-    // 1. Execute before register hook
+    // 2. Execute before register field-level hooks
+    // /////////////////////////////////////
+
+    options.data = await executeFieldHooks(args.config.fields, args.data, 'beforeCreate');
+
+    // /////////////////////////////////////
+    // 3. Execute before register hook
     // /////////////////////////////////////
 
     const beforeRegisterHook = args.config.hooks && args.config.hooks.beforeRegister;
@@ -25,7 +38,7 @@ const register = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 2. Perform register
+    // 4. Perform register
     // /////////////////////////////////////
 
     const {
@@ -51,7 +64,7 @@ const register = async (args) => {
     await passport.authenticate('local');
 
     // /////////////////////////////////////
-    // 3. Execute after register hook
+    // 5. Execute after register hook
     // /////////////////////////////////////
 
     const afterRegisterHook = args.config.hooks && args.config.hooks.afterRegister;
@@ -61,7 +74,7 @@ const register = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 4. Return user
+    // 6. Return user
     // /////////////////////////////////////
 
     return result;
