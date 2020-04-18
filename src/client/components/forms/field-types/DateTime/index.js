@@ -12,7 +12,6 @@ import 'react-datepicker/dist/react-datepicker.css';
 import './index.scss';
 
 const defaultError = 'Please fill in the field with a valid date';
-const defaultValidate = value => value instanceof Date;
 
 const baseClass = 'date-time-picker';
 
@@ -115,7 +114,7 @@ DateTime.defaultProps = {
   required: false,
   defaultValue: null,
   placeholder: undefined,
-  validate: defaultValidate,
+  validate: null,
   errorMessage: defaultError,
   width: 100,
   style: {},

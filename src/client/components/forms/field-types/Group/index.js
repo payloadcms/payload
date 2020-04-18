@@ -8,7 +8,7 @@ import './index.scss';
 
 const Group = (props) => {
   const {
-    label, fields, name, defaultValue,
+    label, fields, name, defaultValue, fieldTypes,
   } = props;
 
   return (
@@ -17,13 +17,15 @@ const Group = (props) => {
         heading={label}
         className="field-group"
       >
-        <RenderFields fieldSchema={fields.map((subField) => {
-          return {
-            ...subField,
-            name: `${name}.${subField.name}`,
-            defaultValue: defaultValue[subField.name],
-          };
-        })}
+        <RenderFields
+          fieldTypes={fieldTypes}
+          fieldSchema={fields.map((subField) => {
+            return {
+              ...subField,
+              name: `${name}.${subField.name}`,
+              defaultValue: defaultValue[subField.name],
+            };
+          })}
         />
       </Section>
     </div>
@@ -42,6 +44,7 @@ Group.propTypes = {
   ).isRequired,
   label: PropTypes.string,
   name: PropTypes.string.isRequired,
+  fieldTypes: PropTypes.shape({}).isRequired,
 };
 
 export default withCondition(Group);

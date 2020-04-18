@@ -24,6 +24,7 @@ const Flexible = (props) => {
     blocks,
     defaultValue,
     singularLabel,
+    fieldTypes,
   } = props;
 
   const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
@@ -125,6 +126,7 @@ const Flexible = (props) => {
                     if (blockToRender) {
                       return (
                         <DraggableSection
+                          fieldTypes={fieldTypes}
                           key={rowIndex}
                           parentName={name}
                           addRow={() => openAddRowModal(rowIndex)}
@@ -152,7 +154,7 @@ const Flexible = (props) => {
 
                     return null;
                   })
-                      }
+                  }
                   {provided.placeholder}
                 </div>
               )}
@@ -196,6 +198,7 @@ Flexible.propTypes = {
   label: PropTypes.string,
   singularLabel: PropTypes.string,
   name: PropTypes.string.isRequired,
+  fieldTypes: PropTypes.shape({}).isRequired,
 };
 
 export default withCondition(Flexible);

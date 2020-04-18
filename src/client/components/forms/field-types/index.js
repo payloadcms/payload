@@ -1,31 +1,15 @@
-import email from './Email';
-import group from './Group';
-import hidden from './HiddenInput';
-import text from './Text';
-import date from './DateTime';
+export { default as email } from './Email';
+export { default as hidden } from './HiddenInput';
+export { default as text } from './Text';
+export { default as date } from './DateTime';
 // import upload from './Upload';
-import relationship from './Relationship';
-import password from './Password';
-import repeater from './Repeater';
-import flexible from './Flexible';
-import textarea from './Textarea';
-import select from './Select';
-import number from './Number';
-import checkbox from './Checkbox';
+export { default as password } from './Password';
+export { default as relationship } from './Relationship';
+export { default as textarea } from './Textarea';
+export { default as select } from './Select';
+export { default as number } from './Number';
+export { default as checkbox } from './Checkbox';
 
-export default {
-  email,
-  group,
-  hidden,
-  text,
-  date,
-  relationship,
-  // upload,
-  flexible,
-  number,
-  password,
-  repeater,
-  textarea,
-  select,
-  checkbox,
-};
+export { default as flexible } from './Flexible';
+export { default as group } from './Group';
+export { default as repeater } from './Repeater';

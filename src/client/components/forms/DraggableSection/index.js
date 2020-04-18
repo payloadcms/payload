@@ -2,8 +2,8 @@ import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
+import RenderFields from '../RenderFields';
 
-import RenderFields from '../RenderFields'; // eslint-disable-line import/no-cycle
 import IconButton from '../../controls/IconButton';
 import Pill from '../../modules/Pill';
 import Chevron from '../../graphics/Chevron';
@@ -25,6 +25,7 @@ const DraggableSection = (props) => {
     collapsibleStates,
     singularLabel,
     blockType,
+    fieldTypes,
   } = props;
   const draggableRef = useRef(null);
 
@@ -103,6 +104,7 @@ const DraggableSection = (props) => {
               duration={0}
             >
               <RenderFields
+                fieldTypes={fieldTypes}
                 key={rowIndex}
                 fieldSchema={fieldSchema.map((field) => {
                   const fieldName = `${parentName}.${rowIndex}.${field.name}`;
@@ -141,6 +143,7 @@ DraggableSection.propTypes = {
   dispatchCollapsibleStates: PropTypes.func.isRequired,
   collapsibleStates: PropTypes.arrayOf(PropTypes.bool),
   blockType: PropTypes.string,
+  fieldTypes: PropTypes.shape({}).isRequired,
 };
 
 export default DraggableSection;

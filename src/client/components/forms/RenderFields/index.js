@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import fieldTypes from '../field-types';
 
 import './index.scss';
 
-const RenderFields = ({ fieldSchema, initialData, customComponents }) => {
+const RenderFields = ({
+  fieldSchema, initialData, customComponents, fieldTypes,
+}) => {
   if (fieldSchema) {
     return (
       <>
@@ -15,6 +16,7 @@ const RenderFields = ({ fieldSchema, initialData, customComponents }) => {
           if (FieldComponent) {
             return (
               <FieldComponent
+                fieldTypes={fieldTypes}
                 key={i}
                 {...field}
                 defaultValue={initialData[field.name] || defaultValue}
@@ -53,6 +55,7 @@ RenderFields.propTypes = {
   ).isRequired,
   initialData: PropTypes.shape({}),
   customComponents: PropTypes.shape({}),
+  fieldTypes: PropTypes.shape({}).isRequired,
 };
 
 export default RenderFields;

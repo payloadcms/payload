@@ -10,6 +10,7 @@ import APIURL from '../../../modules/APIURL';
 import Button from '../../../controls/Button';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
+import * as fieldTypes from '../../../forms/field-types';
 import customComponents from '../../../customComponents';
 
 import './index.scss';
@@ -98,6 +99,7 @@ const EditView = (props) => {
           )}
         />
         <RenderFields
+          fieldTypes={fieldTypes}
           customComponents={customComponents?.[collection.slug]?.fields}
           fieldSchema={collection.fields}
           initialData={data}

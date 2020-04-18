@@ -8,7 +8,6 @@ import StyledCheckbox from './StyledCheckbox';
 import './index.scss';
 
 const defaultError = 'Checkbox is required';
-const defaultValidate = value => Boolean(value);
 
 const Checkbox = (props) => {
   const {
@@ -54,11 +53,6 @@ const Checkbox = (props) => {
         showError={showError}
         message={errorMessage}
       />
-      <Label
-        htmlFor={name}
-        label={label}
-        required={required}
-      />
       <StyledCheckbox
         onClick={onFieldChange}
         isChecked={value || false}
@@ -75,7 +69,7 @@ Checkbox.defaultProps = {
   label: null,
   required: false,
   defaultValue: false,
-  validate: defaultValidate,
+  validate: null,
   errorMessage: defaultError,
   width: 100,
   style: {},

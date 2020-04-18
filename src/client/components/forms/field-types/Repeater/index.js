@@ -28,6 +28,7 @@ const Repeater = (props) => {
     fields,
     defaultValue,
     singularLabel,
+    fieldTypes,
   } = props;
 
   const addRow = (rowIndex) => {
@@ -97,24 +98,25 @@ const Repeater = (props) => {
                   {...provided.droppableProps}
                 >
                   {rowCount !== 0
-                      && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
-                        return (
-                          <DraggableSection
-                            key={rowIndex}
-                            parentName={name}
-                            singularLabel={singularLabel}
-                            addRow={() => addRow(rowIndex)}
-                            removeRow={() => removeRow(rowIndex)}
-                            rowIndex={rowIndex}
-                            fieldState={fieldState}
-                            fieldSchema={fields}
-                            defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
-                            dispatchCollapsibleStates={dispatchCollapsibleStates}
-                            collapsibleStates={collapsibleStates}
-                          />
-                        );
-                      })
-                    }
+                    && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
+                      return (
+                        <DraggableSection
+                          fieldTypes={fieldTypes}
+                          key={rowIndex}
+                          parentName={name}
+                          singularLabel={singularLabel}
+                          addRow={() => addRow(rowIndex)}
+                          removeRow={() => removeRow(rowIndex)}
+                          rowIndex={rowIndex}
+                          fieldState={fieldState}
+                          fieldSchema={fields}
+                          defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
+                          dispatchCollapsibleStates={dispatchCollapsibleStates}
+                          collapsibleStates={collapsibleStates}
+                        />
+                      );
+                    })
+                  }
                   {provided.placeholder}
                 </div>
               )}
@@ -152,6 +154,7 @@ Repeater.propTypes = {
   label: PropTypes.string,
   singularLabel: PropTypes.string,
   name: PropTypes.string.isRequired,
+  fieldTypes: PropTypes.shape({}).isRequired,
 };
 
 export default withCondition(Repeater);
