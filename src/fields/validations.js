@@ -1,35 +1,93 @@
 const fieldToValidatorMap = {
-  number: (field, value) => {
+  number: (value, field) => {
     const parsedValue = parseInt(value, 10);
 
-    if (typeof parsedValue !== 'number') return false;
-    if (field.max && parsedValue > field.max) return false;
-    if (field.min && parsedValue < field.min) return false;
+    if (typeof parsedValue !== 'number' || Number.isNaN(parsedValue)) {
+      return `${field.label} value is not a valid number.`;
+    }
+
+    if (field.max && parsedValue > field.max) {
+      return `${field.label} value is greater than the max allowed value of ${field.max}.`;
+    }
+
+    if (field.min && parsedValue < field.min) {
+      return `${field.label} value is less than the min allowed value of ${field.min}.`;
+    }
 
     return true;
   },
-  text: (field, value) => {
-    if (field.maxLength && value.length > field.maxLength) return false;
-    if (field.minLength && value.length < field.minLength) return false;
+  text: (value, field) => {
+    if (field.maxLength && value.length > field.maxLength) {
+      return `${field.label} length is greater than the max allowed length of ${field.maxLength}.`;
+    }
+
+    if (field.minLength && value.length < field.minLength) {
+      return `${field.label} length is less than the minimum allowed length of ${field.minLength}.`;
+    }
 
     return true;
   },
-  email: value => /\S+@\S+\.\S+/.test(value),
-  textarea: (field, value) => {
-    if (field.maxLength && value.length > field.maxLength) return false;
-    if (field.minLength && value.length < field.minLength) return false;
+  email: (value, field) => {
+    if (/\S+@\S+\.\S+/.test(value)) {
+      return true;
+    }
+    return `${field.label} is not a valid email address.`;
+  },
+  textarea: (value, field) => {
+    if (field.maxLength && value.length > field.maxLength) {
+      return `${field.label} length is greater than the max allowed length of ${field.maxLength}.`;
+    }
+
+    if (field.minLength && value.length < field.minLength) {
+      return `${field.label} length is less than the minimum allowed length of ${field.minLength}.`;
+    }
 
     return true;
   },
-  wysiwyg: value => (!!value),
-  code: value => (!!value),
-  checkbox: value => Boolean(value),
-  date: value => value instanceof Date,
-  upload: value => (!!value),
-  relationship: value => (!!value),
-  repeater: value => (!!value),
-  select: value => (!!value),
-  flexible: value => (!!value),
+  wysiwyg: (value, field) => {
+    if (value) return true;
+
+    return `${field.label} is required.`;
+  },
+  code: (value, field) => {
+    if (value) return true;
+
+    return `${field.label} is required.`;
+  },
+  checkbox: (value, field) => {
+    if (value) {
+      return true;
+    }
+
+    return `${field.label} can only be equal to true or false.`;
+  },
+  date: (value, field) => {
+    if (value instanceof Date) {
+      return true;
+    }
+
+    return `${field.label} is not a valid date.`;
+  },
+  upload: (value, field) => {
+    if (value) return true;
+    return `${field.label} is required.`;
+  },
+  relationship: (value, field) => {
+    if (value) return true;
+    return `${field.label} is required.`;
+  },
+  repeater: (value, field) => {
+    if (value) return true;
+    return `${field.label} is required.`;
+  },
+  select: (value, field) => {
+    if (value) return true;
+    return `${field.label} is required.`;
+  },
+  flexible: (value, field) => {
+    if (value) return true;
+    return `${field.label} is required.`;
+  },
 };
 
 module.exports = fieldToValidatorMap;

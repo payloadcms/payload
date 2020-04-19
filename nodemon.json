@@ -1,11 +1,13 @@
 {
   "ignore": [
     ".git",
+    "node_modules",
     "node_modules/**/node_modules",
     "src/client"
   ],
   "watch": [
-    "src/"
+    "src/",
+    "demo/"
   ],
   "ext": "js,json"
 }

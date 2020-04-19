@@ -1,5 +1,6 @@
 const executePolicy = require('../../users/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
+const validate = require('../../fields/validate');
 
 const create = async (args) => {
   try {
@@ -8,8 +9,6 @@ const create = async (args) => {
     // /////////////////////////////////////
 
     await executePolicy(args, args.config.policies.create);
-
-    // Await validation here
 
     let options = {
       Model: args.Model,
@@ -22,13 +21,19 @@ const create = async (args) => {
     };
 
     // /////////////////////////////////////
-    // 2. Execute before create field-level hooks
+    // 2. Validate incoming data
+    // /////////////////////////////////////
+
+    await validate(args.config.fields, args.data);
+
+    // /////////////////////////////////////
+    // 3. Execute before create field-level hooks
     // /////////////////////////////////////
 
     options.data = await executeFieldHooks(args.config.fields, args.data, 'beforeCreate');
 
     // /////////////////////////////////////
-    // 3. Execute before collection hook
+    // 4. Execute before collection hook
     // /////////////////////////////////////
 
     const { beforeCreate } = args.config.hooks;
@@ -38,7 +43,7 @@ const create = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 4. Perform database operation
+    // 5. Perform database operation
     // /////////////////////////////////////
 
     const {
@@ -60,7 +65,7 @@ const create = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 5. Execute after collection hook
+    // 6. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterCreate } = args.config.hooks.afterCreate;
@@ -70,7 +75,7 @@ const create = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 6. Return results
+    // 7. Return results
     // /////////////////////////////////////
 
     return result;
