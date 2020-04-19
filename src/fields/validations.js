@@ -1,3 +1,5 @@
+const { iterateFields } = require('./validateCreate');
+
 const fieldToValidatorMap = {
   number: (value, field) => {
     const parsedValue = parseInt(value, 10);
@@ -76,17 +78,54 @@ const fieldToValidatorMap = {
     if (value) return true;
     return `${field.label} is required.`;
   },
+  group: (value, field) => {
+    return iterateFields(value, field.fields, `${field.name}.`);
+  },
   repeater: (value, field) => {
-    if (value) return true;
-    return `${field.label} is required.`;
+    if (value.length === 0) {
+      return `${field.label} requires at least one row.`;
+    }
+
+    let errors = [];
+
+    value.forEach((row, i) => {
+      const rowErrors = iterateFields(row, field.fields, `${field.name}.${i}.`);
+
+      if (rowErrors.length > 0) {
+        errors = errors.concat(rowErrors);
+      }
+    });
+
+    if (errors.length > 0) {
+      return errors;
+    }
+
+    return true;
   },
   select: (value, field) => {
     if (value) return true;
     return `${field.label} is required.`;
   },
   flexible: (value, field) => {
-    if (value) return true;
-    return `${field.label} is required.`;
+    if (value.length === 0) {
+      return `${field.label} requires at least one ${field.singularLabel}.`;
+    }
+
+    let errors = [];
+
+    value.forEach((row, i) => {
+      const rowErrors = iterateFields.iterateFields(row, field.fields, `${field.name}.${i}.`);
+
+      if (rowErrors.length > 0) {
+        errors = errors.concat(rowErrors);
+      }
+    });
+
+    if (errors.length > 0) {
+      return errors;
+    }
+
+    return true;
   },
 };
 

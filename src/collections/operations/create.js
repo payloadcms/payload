@@ -1,6 +1,6 @@
 const executePolicy = require('../../users/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
-const validate = require('../../fields/validate');
+const { validateCreate } = require('../../fields/validateCreate');
 
 const create = async (args) => {
   try {
@@ -24,7 +24,7 @@ const create = async (args) => {
     // 2. Validate incoming data
     // /////////////////////////////////////
 
-    await validate(args.config.fields, args.data);
+    await validateCreate(args.data, args.config.fields);
 
     // /////////////////////////////////////
     // 3. Execute before create field-level hooks

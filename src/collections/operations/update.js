@@ -1,6 +1,7 @@
 const executePolicy = require('../../users/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
 const { NotFound } = require('../../errors');
+const validate = require('../../fields/validateUpdate');
 
 const update = async (args) => {
   try {
@@ -9,8 +10,6 @@ const update = async (args) => {
     // /////////////////////////////////////
 
     await executePolicy(args, args.config.policies.update);
-
-    // Await validation here
 
     let options = {
       Model: args.Model,
@@ -21,13 +20,19 @@ const update = async (args) => {
     };
 
     // /////////////////////////////////////
-    // 2. Execute before update field-level hooks
+    // 2. Validate incoming data
+    // /////////////////////////////////////
+
+    await validate(args.data, args.config.fields);
+
+    // /////////////////////////////////////
+    // 3. Execute before update field-level hooks
     // /////////////////////////////////////
 
     options.data = await executeFieldHooks(args.config.fields, args.data, 'beforeUpdate');
 
     // /////////////////////////////////////
-    // 3. Execute before collection hook
+    // 4. Execute before collection hook
     // /////////////////////////////////////
 
     const { beforeUpdate } = args.config.hooks;
@@ -37,7 +42,7 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 4. Perform database operation
+    // 5. Perform database operation
     // /////////////////////////////////////
 
     const {
@@ -62,7 +67,7 @@ const update = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 5. Execute after collection hook
+    // 6. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterUpdate } = args.config.hooks;
@@ -72,7 +77,7 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 6. Return results
+    // 7. Return results
     // /////////////////////////////////////
 
     return result;

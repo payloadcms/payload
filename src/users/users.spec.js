@@ -76,7 +76,7 @@ describe('Users REST API', () => {
     expect(response.status).toBe(200);
     expect(data.token).not.toBeNull();
 
-    // token = data.refreshedToken;
+    token = data.refreshedToken;
   });
 
   it('should allow a user to be created', async () => {
@@ -84,6 +84,7 @@ describe('Users REST API', () => {
       body: JSON.stringify({
         [usernameField]: `${faker.name.firstName()}@test.com`,
         password,
+        roles: ['editor'],
       }),
       headers: {
         Authorization: `JWT ${token}`,

@@ -16,7 +16,7 @@ const registerHandler = async (req, res) => {
 
     return res.status(201).json(user);
   } catch (error) {
-    return res.status(httpStatus.UNAUTHORIZED).json(formatErrorResponse(error));
+    return res.status(error.status || httpStatus.UNAUTHORIZED).json(formatErrorResponse(error));
   }
 };
 

@@ -1,6 +1,7 @@
 const passport = require('passport');
 const executePolicy = require('../../users/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
+const { validateCreate } = require('../../fields/validateCreate');
 
 const register = async (args) => {
   try {
@@ -12,8 +13,6 @@ const register = async (args) => {
       await executePolicy(args, args.config.policies.register);
     }
 
-    // Await validation here
-
     let options = {
       Model: args.Model,
       config: args.config,
@@ -24,13 +23,19 @@ const register = async (args) => {
     };
 
     // /////////////////////////////////////
-    // 2. Execute before register field-level hooks
+    // 2. Validate incoming data
+    // /////////////////////////////////////
+
+    await validateCreate(args.data, args.config.fields);
+
+    // /////////////////////////////////////
+    // 3. Execute before register field-level hooks
     // /////////////////////////////////////
 
     options.data = await executeFieldHooks(args.config.fields, args.data, 'beforeCreate');
 
     // /////////////////////////////////////
-    // 3. Execute before register hook
+    // 4. Execute before register hook
     // /////////////////////////////////////
 
     const { beforeRegister } = args.config.hooks;
@@ -40,7 +45,7 @@ const register = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 4. Perform register
+    // 5. Perform register
     // /////////////////////////////////////
 
     const {
@@ -66,7 +71,7 @@ const register = async (args) => {
     await passport.authenticate('local');
 
     // /////////////////////////////////////
-    // 5. Execute after register hook
+    // 6. Execute after register hook
     // /////////////////////////////////////
 
     const afterRegister = args.config.hooks;
@@ -76,7 +81,7 @@ const register = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 6. Return user
+    // 7. Return user
     // /////////////////////////////////////
 
     return result;
