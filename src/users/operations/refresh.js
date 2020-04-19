@@ -14,10 +14,10 @@ const refresh = async (args) => {
     // 1. Execute before refresh hook
     // /////////////////////////////////////
 
-    const beforeRefreshHook = args.config.hooks && args.config.hooks.beforeRefresh;
+    const { beforeRefresh } = args.config.hooks;
 
-    if (typeof beforeRefreshHook === 'function') {
-      options = await beforeRefreshHook(options);
+    if (typeof beforeRefresh === 'function') {
+      options = await beforeRefresh(options);
     }
 
     // /////////////////////////////////////
@@ -29,17 +29,19 @@ const refresh = async (args) => {
     opts.expiresIn = options.config.auth.tokenExpiration;
 
     const token = options.authorization.replace('JWT ', '');
-    jwt.verify(token, secret, {});
-    const refreshedToken = jwt.sign(token, secret);
+    const payload = jwt.verify(token, secret, {});
+    delete payload.iat;
+    delete payload.exp;
+    const refreshedToken = jwt.sign(payload, secret, opts);
 
     // /////////////////////////////////////
     // 3. Execute after login hook
     // /////////////////////////////////////
 
-    const afterRefreshHook = args.config.hooks && args.config.hooks.afterRefresh;
+    const { afterRefresh } = args.config.hooks;
 
-    if (typeof afterRefreshHook === 'function') {
-      await afterRefreshHook(options, refreshedToken);
+    if (typeof afterRefresh === 'function') {
+      await afterRefresh(options, refreshedToken);
     }
 
     // /////////////////////////////////////

@@ -13,6 +13,7 @@ const updateHandler = async (req, res) => {
       api: 'REST',
       locale: req.locale,
       fallbackLocale: req.fallbackLocale,
+      user: req.user,
     });
 
     return res.status(httpStatus.OK).json({

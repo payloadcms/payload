@@ -37,6 +37,7 @@ const UserProvider = ({ children }) => {
 
         if (request.status === 200) {
           const json = await request.json();
+          console.log('refreshedToken', json.refreshedToken);
           setToken(json.refreshedToken);
         }
       }, 1000);

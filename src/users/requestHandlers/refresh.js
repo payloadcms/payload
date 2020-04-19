@@ -8,6 +8,7 @@ const refreshHandler = async (req, res) => {
       config: req.collection,
       api: 'REST',
       authorization: req.headers.authorization,
+      user: req.user,
     });
 
     return res.status(200).json({
