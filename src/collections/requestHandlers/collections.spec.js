@@ -12,8 +12,8 @@ const url = config.serverURL;
 let token = null;
 
 let localizedPostID;
-const englishPostDesc = faker.lorem.lines(20);
-const spanishPostDesc = faker.lorem.lines(20);
+const englishPostDesc = faker.lorem.lines(2);
+const spanishPostDesc = faker.lorem.lines(2);
 
 beforeAll(async (done) => {
   const response = await fetch(`${url}/api/login`, {
