@@ -68,7 +68,7 @@ const create = async (args) => {
     // 6. Execute after collection hook
     // /////////////////////////////////////
 
-    const { afterCreate } = args.config.hooks.afterCreate;
+    const { afterCreate } = args.config.hooks;
 
     if (typeof afterCreate === 'function') {
       result = await afterCreate(options, result);

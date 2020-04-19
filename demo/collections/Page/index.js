@@ -137,6 +137,7 @@ module.exports = {
           maxLength: 100,
           label: 'Title',
           width: 50,
+          required: true,
           hooks: {
             afterRead: value => `hooked value - ${value}`,
           },

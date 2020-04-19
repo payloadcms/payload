@@ -11,18 +11,25 @@ const iterateFields = async (fields, data, errors, path = '') => {
   } else {
     for (const field of fields) {
       if (field.required) {
-        const validationResult = await field.validate(data[field.name], field);
+        if (data && data[field.name]) {
+          const validationResult = await field.validate(data[field.name], field);
 
-        if (validationResult !== true) {
+          if (validationResult !== true) {
+            errors.push({
+              field: `${path}${field.name}`,
+              message: validationResult,
+            });
+          }
+        } else {
           errors.push({
-            field: field.name,
-            message: validationResult,
+            field: `${path}${field.name}`,
+            message: `${path}${field.name} is required.`,
           });
         }
       }
 
       if (field.fields) {
-        await iterateFields(field.fields, data[field.name], errors, `${path}${field.name}.`);
+        await iterateFields(field.fields, (data && data[field.name]), errors, `${path}${field.name}.`);
       }
     }
   }

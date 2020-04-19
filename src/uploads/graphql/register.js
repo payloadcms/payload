@@ -42,11 +42,11 @@ function registerUpload() {
     singularLabel,
   );
 
-  this.Upload.graphQL.mutationInputType = this.buildMutationInputType(
+  this.Upload.graphQL.mutationInputType = new GraphQLNonNull(this.buildMutationInputType(
     singularLabel,
     fields,
     singularLabel,
-  );
+  ));
 
   this.Query.fields[singularLabel] = {
     type: this.Upload.graphQL.type,

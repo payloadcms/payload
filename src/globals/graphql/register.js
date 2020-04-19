@@ -1,3 +1,4 @@
+const { GraphQLNonNull } = require('graphql');
 const formatName = require('../../graphql/utilities/formatName');
 
 const {
@@ -22,11 +23,11 @@ function registerGlobals() {
       formattedLabel,
     );
 
-    global.graphQL.mutationInputType = this.buildMutationInputType(
+    global.graphQL.mutationInputType = new GraphQLNonNull(this.buildMutationInputType(
       formattedLabel,
       fields,
       formattedLabel,
-    );
+    ));
 
     this.Query.fields[formattedLabel] = {
       type: global.graphQL.type,

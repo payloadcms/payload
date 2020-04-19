@@ -59,11 +59,11 @@ function registerUser() {
     },
   ];
 
-  this.User.graphQL.mutationInputType = this.buildMutationInputType(
+  this.User.graphQL.mutationInputType = new GraphQLNonNull(this.buildMutationInputType(
     singularLabel,
     mutationFields,
     singularLabel,
-  );
+  ));
 
   this.User.graphQL.updateMutationInputType = this.buildMutationInputType(
     `${singularLabel}Update`,
