@@ -7,10 +7,10 @@ const deleteQuery = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    await executePolicy(args.user, args.config.policies.delete);
+    await executePolicy(args, args.config.policies.delete);
 
     let options = {
-      query: { _id: args.id },
+      id: args.id,
       Model: args.Model,
       config: args.config,
       locale: args.locale,
@@ -35,12 +35,12 @@ const deleteQuery = async (args) => {
 
     const {
       Model,
-      query,
+      id,
       locale,
       fallbackLocale,
     } = options;
 
-    let result = await Model.findOneAndDelete(query);
+    let result = await Model.findOneAndDelete({ _id: id });
 
     if (!result) throw new NotFound();
 

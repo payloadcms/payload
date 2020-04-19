@@ -10,24 +10,24 @@ module.exports = {
   },
   useAsTitle: 'title',
   policies: {
-    create: user => checkRole(['user', 'admin'], user),
+    create: ({ user }) => checkRole(['user', 'admin'], user),
     read: () => true,
-    update: user => checkRole(['user', 'admin'], user),
-    delete: user => checkRole(['user', 'admin'], user),
+    update: ({ user }) => checkRole(['user', 'admin'], user),
+    delete: ({ user }) => checkRole(['user', 'admin'], user),
   },
   hooks: {
-    beforeCreate: options => options,
-    beforeRead: options => options,
-    beforeUpdate: options => options,
-    beforeDelete: (options) => {
-      console.log(`About to delete ${options.query._id}`);
-      return options;
+    beforeCreate: operation => operation,
+    beforeRead: operation => operation,
+    beforeUpdate: operation => operation,
+    beforeDelete: (operation) => {
+      console.log(`About to delete ${operation.id}`);
+      return operation;
     },
-    afterCreate: (options, value) => value,
-    afterRead: (options, value) => value,
-    afterUpdate: (options, value) => value,
-    afterDelete: (options, value) => {
-      console.log(`Deleted ${options.query._id}`);
+    afterCreate: (operation, value) => value,
+    afterRead: (operation, value) => value,
+    afterUpdate: (operation, value) => value,
+    afterDelete: (operation, value) => {
+      console.log(`Deleted ${operation.query._id}`);
       console.log(`Deleted record: ${JSON.stringify(value)}`);
       return value;
     },

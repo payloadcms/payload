@@ -9,7 +9,7 @@ const register = async (args) => {
     // /////////////////////////////////////
 
     if (!args.overridePolicy) {
-      await executePolicy(args.user, args.config.policies.register);
+      await executePolicy(args, args.config.policies.register);
     }
 
     // Await validation here

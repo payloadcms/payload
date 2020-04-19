@@ -8,7 +8,7 @@ const findOne = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    await executePolicy(args.user, args.config.policies.read);
+    await executePolicy(args, args.config.policies.read);
 
     let options = { ...args };
 

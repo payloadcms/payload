@@ -1,4 +1,3 @@
-const path = require('path');
 const checkRole = require('../../policies/checkRole');
 const Quote = require('../../content-blocks/Quote');
 const CallToAction = require('../../content-blocks/CallToAction');
@@ -16,8 +15,8 @@ module.exports = {
     // any policy can use req.user to see that the user is logged
     create: null,
     read: () => true,
-    update: user => checkRole(['user', 'admin'], user),
-    destroy: user => checkRole(['user', 'admin'], user),
+    update: ({ user }) => checkRole(['user', 'admin'], user),
+    destroy: ({ user }) => checkRole(['user', 'admin'], user),
   },
   fields: [
     {
@@ -159,9 +158,9 @@ module.exports = {
     },
   ],
   // components: {
-  // 	views: {
-  // 		List: path.resolve(__dirname, 'components/List/index.js'),
-  // 	},
+  //   views: {
+  //     List: path.resolve(__dirname, 'components/List/index.js'),
+  //   },
   // },
   timestamps: true,
 };

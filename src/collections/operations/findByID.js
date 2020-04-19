@@ -9,7 +9,7 @@ const findByID = async (args) => {
     // /////////////////////////////////////
 
     const policy = args.config && args.config.policies && args.config.policies.read;
-    await executePolicy(args.user, policy);
+    await executePolicy(args, policy);
 
     let options = {
       query: { _id: args.id },

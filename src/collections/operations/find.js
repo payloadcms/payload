@@ -7,7 +7,7 @@ const find = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    await executePolicy(args.user, args.config.policies.read);
+    await executePolicy(args, args.config.policies.read);
 
     const queryToBuild = {};
     if (args.where) queryToBuild.where = args.where;

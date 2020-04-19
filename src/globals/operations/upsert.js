@@ -7,7 +7,7 @@ const upsert = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    await executePolicy(args.user, args.config.policies.upsert);
+    await executePolicy(args, args.config.policies.upsert);
 
     let options = { ...args };
 

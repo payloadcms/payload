@@ -1,8 +1,8 @@
 const { Forbidden } = require('../errors');
 
-const executePolicy = async (user, policy) => {
+const executePolicy = async (operation, policy) => {
   if (policy) {
-    const result = await policy(user);
+    const result = await policy(operation);
 
     if (!result) {
       throw new Forbidden();
@@ -11,7 +11,7 @@ const executePolicy = async (user, policy) => {
     return true;
   }
 
-  if (user) {
+  if (operation.user) {
     return true;
   }
 

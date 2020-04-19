@@ -8,7 +8,7 @@ const update = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    await executePolicy(args.user, args.config.policies.update);
+    await executePolicy(args, args.config.policies.update);
 
     // Await validation here
 
