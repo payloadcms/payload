@@ -19,6 +19,7 @@ const createHandler = async (req, res) => {
       doc,
     });
   } catch (error) {
+    console.log(error); // TEMPORARY TO DEBUG JEST CI TESTS
     return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
   }
 };
