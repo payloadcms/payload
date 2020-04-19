@@ -101,6 +101,9 @@ module.exports = {
               condition: (fields, siblings) => {
                 return (siblings.cardNumber && siblings.cardNumber.value);
               },
+              hooks: {
+                afterRead: value => `hooked value - ${value}`,
+              },
             },
           ],
         },
@@ -135,6 +138,9 @@ module.exports = {
           maxLength: 100,
           label: 'Title',
           width: 50,
+          hooks: {
+            afterRead: value => `hooked value - ${value}`,
+          },
         },
         {
           name: 'keywords',

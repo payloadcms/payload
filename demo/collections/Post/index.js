@@ -44,7 +44,7 @@ module.exports = {
       hooks: {
         beforeCreate: value => value,
         beforeUpdate: value => value,
-        afterRead: value => value,
+        afterRead: value => `hooked value - ${value}`,
       },
     },
     {
