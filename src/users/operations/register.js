@@ -1,9 +1,17 @@
-
 const passport = require('passport');
+const executePolicy = require('../../users/executePolicy');
+const executeFieldHooks = require('../../fields/executeHooks');
+const { validateCreate } = require('../../fields/validateCreate');
 
 const register = async (args) => {
   try {
-    // Await validation here
+    // /////////////////////////////////////
+    // 1. Retrieve and execute policy
+    // /////////////////////////////////////
+
+    if (!args.overridePolicy) {
+      await executePolicy(args, args.config.policies.register);
+    }
 
     let options = {
       Model: args.Model,
@@ -15,17 +23,29 @@ const register = async (args) => {
     };
 
     // /////////////////////////////////////
-    // 1. Execute before register hook
+    // 2. Validate incoming data
     // /////////////////////////////////////
 
-    const beforeRegisterHook = args.config.hooks && args.config.hooks.beforeRegister;
+    await validateCreate(args.data, args.config.fields);
 
-    if (typeof beforeRegisterHook === 'function') {
-      options = await beforeRegisterHook(options);
+    // /////////////////////////////////////
+    // 3. Execute before register field-level hooks
+    // /////////////////////////////////////
+
+    options.data = await executeFieldHooks(args.config.fields, args.data, 'beforeCreate');
+
+    // /////////////////////////////////////
+    // 4. Execute before register hook
+    // /////////////////////////////////////
+
+    const { beforeRegister } = args.config.hooks;
+
+    if (typeof beforeRegister === 'function') {
+      options = await beforeRegister(options);
     }
 
     // /////////////////////////////////////
-    // 2. Perform register
+    // 5. Perform register
     // /////////////////////////////////////
 
     const {
@@ -51,17 +71,17 @@ const register = async (args) => {
     await passport.authenticate('local');
 
     // /////////////////////////////////////
-    // 3. Execute after register hook
+    // 6. Execute after register hook
     // /////////////////////////////////////
 
-    const afterRegisterHook = args.config.hooks && args.config.hooks.afterRegister;
+    const afterRegister = args.config.hooks;
 
-    if (typeof afterRegisterHook === 'function') {
-      result = await afterRegisterHook(options, result);
+    if (typeof afterRegister === 'function') {
+      result = await afterRegister(options, result);
     }
 
     // /////////////////////////////////////
-    // 4. Return user
+    // 7. Return user
     // /////////////////////////////////////
 
     return result;

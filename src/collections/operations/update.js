@@ -1,5 +1,7 @@
 const executePolicy = require('../../users/executePolicy');
+const executeFieldHooks = require('../../fields/executeHooks');
 const { NotFound } = require('../../errors');
+const validate = require('../../fields/validateUpdate');
 
 const update = async (args) => {
   try {
@@ -7,10 +9,7 @@ const update = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    const policy = args.config && args.config.policies && args.config.policies.update;
-    await executePolicy(args.user, policy);
-
-    // Await validation here
+    await executePolicy(args, args.config.policies.update);
 
     let options = {
       Model: args.Model,
@@ -21,17 +20,29 @@ const update = async (args) => {
     };
 
     // /////////////////////////////////////
-    // 2. Execute before collection hook
+    // 2. Validate incoming data
     // /////////////////////////////////////
 
-    const beforeUpdateHook = args.config && args.config.hooks && args.config.hooks.beforeUpdate;
+    await validate(args.data, args.config.fields);
 
-    if (typeof beforeUpdateHook === 'function') {
-      options = await beforeUpdateHook(options);
+    // /////////////////////////////////////
+    // 3. Execute before update field-level hooks
+    // /////////////////////////////////////
+
+    options.data = await executeFieldHooks(args.config.fields, args.data, 'beforeUpdate');
+
+    // /////////////////////////////////////
+    // 4. Execute before collection hook
+    // /////////////////////////////////////
+
+    const { beforeUpdate } = args.config.hooks;
+
+    if (typeof beforeUpdate === 'function') {
+      options = await beforeUpdate(options);
     }
 
     // /////////////////////////////////////
-    // 3. Perform database operation
+    // 5. Perform database operation
     // /////////////////////////////////////
 
     const {
@@ -56,17 +67,17 @@ const update = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 4. Execute after collection hook
+    // 6. Execute after collection hook
     // /////////////////////////////////////
 
-    const afterUpdateHook = args.config && args.config.hooks && args.config.hooks.afterUpdate;
+    const { afterUpdate } = args.config.hooks;
 
-    if (typeof afterUpdateHook === 'function') {
-      result = await afterUpdateHook(options, result);
+    if (typeof afterUpdate === 'function') {
+      result = await afterUpdate(options, result);
     }
 
     // /////////////////////////////////////
-    // 5. Return results
+    // 7. Return results
     // /////////////////////////////////////
 
     return result;

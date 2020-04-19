@@ -21,17 +21,20 @@ const registerFirstUser = async (args) => {
     // 1. Execute before register first user hook
     // /////////////////////////////////////
 
-    const beforeRegisterHook = args.config.hooks && args.config.hooks.beforeFirstRegister;
+    const { beforeRegister } = args.config.hooks;
 
-    if (typeof beforeRegisterHook === 'function') {
-      options = await beforeRegisterHook(options);
+    if (typeof beforeRegister === 'function') {
+      options = await beforeRegister(options);
     }
 
     // /////////////////////////////////////
     // 2. Perform register first user
     // /////////////////////////////////////
 
-    let result = await register(options);
+    let result = await register({
+      ...options,
+      overridePolicy: true,
+    });
 
 
     // /////////////////////////////////////
@@ -49,10 +52,10 @@ const registerFirstUser = async (args) => {
     // 4. Execute after register first user hook
     // /////////////////////////////////////
 
-    const afterRegisterHook = args.config.hooks && args.config.hooks.afterFirstRegister;
+    const afterRegister = args.config.hooks;
 
-    if (typeof afterRegisterHook === 'function') {
-      result = await afterRegisterHook(options, result);
+    if (typeof afterRegister === 'function') {
+      result = await afterRegister(options, result);
     }
 
     return result;

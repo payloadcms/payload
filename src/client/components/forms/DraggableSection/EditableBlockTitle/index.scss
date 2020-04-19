@@ -1,0 +1,39 @@
+@import '../../../../scss/styles.scss';
+
+.editable-block-title {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  max-width: 100%;
+  overflow-x: auto;
+
+  &__input-clone {
+    position: absolute;
+    top: 0; left: 0;
+    visibility: hidden;
+    white-space: pre;
+  }
+
+  &__input-clone,
+  input {
+    padding: base(.1) base(.2);
+    font-family: $font-body;
+    font-weight: bold;
+    font-size: base(.5);
+    margin-right: base(.5);
+  }
+
+  input {
+    background: none;
+    border: none;
+    width: 100%;
+    margin-right: base(.5);
+    border-radius: $radius-sm;
+
+    &:hover,
+    &:focus {
+      outline: 0;
+      background: rgba($gray, .25);
+    }
+  }
+}

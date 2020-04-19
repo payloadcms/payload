@@ -6,11 +6,14 @@ const jwtStrategy = require('./jwt');
 const authRoutes = require('./routes');
 const buildCollectionSchema = require('../collections/buildSchema');
 const baseUserFields = require('./baseFields');
+const sanitize = require('./sanitize');
 
 function registerUser() {
   this.config.user.fields.push(...baseUserFields);
+  this.config.user = sanitize(this.config.user);
   const userSchema = buildCollectionSchema(this.config.user, this.config);
   userSchema.plugin(passportLocalMongoose, { usernameField: this.config.user.auth.useAsUsername });
+
   this.User = {
     config: this.config.user,
     Model: mongoose.model(this.config.user.labels.singular, userSchema),

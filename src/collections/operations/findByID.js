@@ -1,5 +1,6 @@
 const { NotFound } = require('../../errors');
 const executePolicy = require('../../users/executePolicy');
+const executeFieldHooks = require('../../fields/executeHooks');
 
 const findByID = async (args) => {
   try {
@@ -8,7 +9,7 @@ const findByID = async (args) => {
     // /////////////////////////////////////
 
     const policy = args.config && args.config.policies && args.config.policies.read;
-    await executePolicy(args.user, policy);
+    await executePolicy(args, policy);
 
     let options = {
       query: { _id: args.id },
@@ -25,10 +26,10 @@ const findByID = async (args) => {
     // 2. Execute before collection hook
     // /////////////////////////////////////
 
-    const beforeReadHook = args.config && args.config.hooks && args.config.hooks.beforeRead;
+    const { beforeRead } = args.config.hooks;
 
-    if (typeof beforeReadHook === 'function') {
-      options = await beforeReadHook(options);
+    if (typeof beforeRead === 'function') {
+      options = await beforeRead(options);
     }
 
     // /////////////////////////////////////
@@ -73,17 +74,23 @@ const findByID = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 4. Execute after collection hook
+    // 4. Execute after collection field-level hooks
     // /////////////////////////////////////
 
-    const afterReadHook = args.config && args.config.hooks && args.config.hooks.afterRead;
+    result = await executeFieldHooks(args.config.fields, result, 'afterRead');
 
-    if (typeof afterReadHook === 'function') {
-      result = await afterReadHook(options, result);
+    // /////////////////////////////////////
+    // 5. Execute after collection hook
+    // /////////////////////////////////////
+
+    const { afterRead } = args.config.hooks;
+
+    if (typeof afterRead === 'function') {
+      result = await afterRead(options, result);
     }
 
     // /////////////////////////////////////
-    // 5. Return results
+    // 6. Return results
     // /////////////////////////////////////
 
     return result;

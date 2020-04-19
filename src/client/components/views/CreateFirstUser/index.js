@@ -5,6 +5,7 @@ import StatusList, { useStatusList } from '../../modules/Status';
 import ContentBlock from '../../layout/ContentBlock';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
+import * as fieldTypes from '../../forms/field-types';
 import FormSubmit from '../../forms/Submit';
 import config from '../../../securedConfig';
 import { useUser } from '../../data/User';
@@ -66,7 +67,10 @@ const CreateFirstUser = (props) => {
           method="POST"
           action={`${serverURL}${api}/first-register`}
         >
-          <RenderFields fields={fields} />
+          <RenderFields
+            fieldSchema={fields}
+            fieldTypes={fieldTypes}
+          />
           <FormSubmit>Create</FormSubmit>
         </Form>
       </div>

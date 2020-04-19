@@ -8,7 +8,6 @@ import Error from '../../Error';
 import './index.scss';
 
 const defaultError = 'Please enter a valid email.';
-const defaultValidate = value => /\S+@\S+\.\S+/.test(value);
 
 const Email = (props) => {
   const {
@@ -72,7 +71,7 @@ Email.defaultProps = {
   required: false,
   defaultValue: null,
   placeholder: undefined,
-  validate: defaultValidate,
+  validate: null,
   errorMessage: defaultError,
   width: 100,
   style: {},

@@ -24,6 +24,7 @@ const Flexible = (props) => {
     blocks,
     defaultValue,
     singularLabel,
+    fieldTypes,
   } = props;
 
   const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
@@ -40,7 +41,7 @@ const Flexible = (props) => {
     const blockToAdd = blocks.find(block => block.slug === blockType);
 
     dispatchFields({
-      type: 'ADD_ROW', rowIndex, name, fields: blockToAdd.fields, blockType,
+      type: 'ADD_ROW', rowIndex, name, fieldSchema: blockToAdd.fields, blockType,
     });
 
     dispatchCollapsibleStates({
@@ -107,69 +108,66 @@ const Flexible = (props) => {
             heading={label}
             className="flexible"
           >
-            {(rowCount === 0
-              ? (
-                <div className={`${baseClass}__add-button-wrap`}>
-                  <Button
-                    onClick={() => openAddRowModal(0)}
-                    type="secondary"
-                  >
-                    {`Add ${singularLabel}`}
-                  </Button>
+            <Droppable droppableId="flexible-drop">
+              {provided => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                >
+                  {rowCount !== 0 && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
+                    let blockType = fieldState[`${name}.${rowIndex}.blockType`]?.value;
+
+                    if (!hasModifiedRows && !blockType) {
+                      blockType = defaultValue?.[rowIndex]?.blockType;
+                    }
+
+                    const blockToRender = blocks.find(block => block.slug === blockType);
+
+                    if (blockToRender) {
+                      return (
+                        <DraggableSection
+                          fieldTypes={fieldTypes}
+                          key={rowIndex}
+                          parentName={name}
+                          addRow={() => openAddRowModal(rowIndex)}
+                          removeRow={() => removeRow(rowIndex)}
+                          rowIndex={rowIndex}
+                          fieldState={fieldState}
+                          fieldSchema={[
+                            ...blockToRender.fields,
+                            {
+                              name: 'blockType',
+                              type: 'hidden',
+                            }, {
+                              name: 'blockName',
+                              type: 'hidden',
+                            },
+                          ]}
+                          singularLabel={blockType}
+                          defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
+                          dispatchCollapsibleStates={dispatchCollapsibleStates}
+                          collapsibleStates={collapsibleStates}
+                          blockType="flexible"
+                        />
+                      );
+                    }
+
+                    return null;
+                  })
+                  }
+                  {provided.placeholder}
                 </div>
-              )
-              : (
-                <Droppable droppableId="flexible-drop">
-                  {provided => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                    >
-                      {rowCount !== 0 && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
-                        let blockType = fieldState[`${name}.${rowIndex}.blockType`]?.value;
+              )}
+            </Droppable>
 
-                        if (!hasModifiedRows && !blockType) {
-                          blockType = defaultValue?.[rowIndex]?.blockType;
-                        }
-
-                        const blockToRender = blocks.find(block => block.slug === blockType);
-
-                        if (blockToRender) {
-                          return (
-                            <DraggableSection
-                              key={rowIndex}
-                              parentName={name}
-                              addRow={() => openAddRowModal(rowIndex)}
-                              removeRow={() => removeRow(rowIndex)}
-                              rowIndex={rowIndex}
-                              fieldState={fieldState}
-                              renderFields={[
-                                ...blockToRender.fields,
-                                {
-                                  name: 'blockType',
-                                  type: 'hidden',
-                                }, {
-                                  name: 'blockName',
-                                  type: 'hidden',
-                                },
-                              ]}
-                              singularLabel={blockType}
-                              defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
-                              dispatchCollapsibleStates={dispatchCollapsibleStates}
-                              collapsibleStates={collapsibleStates}
-                              useHeadingPill
-                            />
-                          );
-                        }
-
-                        return null;
-                      })
-                      }
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              ))}
+            <div className={`${baseClass}__add-button-wrap`}>
+              <Button
+                onClick={() => openAddRowModal(rowCount)}
+                type="secondary"
+              >
+                {`Add ${singularLabel}`}
+              </Button>
+            </div>
           </Section>
         </div>
       </DragDropContext>
@@ -200,6 +198,7 @@ Flexible.propTypes = {
   label: PropTypes.string,
   singularLabel: PropTypes.string,
   name: PropTypes.string.isRequired,
+  fieldTypes: PropTypes.shape({}).isRequired,
 };
 
 export default withCondition(Flexible);

@@ -5,6 +5,7 @@ const MissingCollectionLabel = require('./MissingCollectionLabel');
 const MissingGlobalLabel = require('./MissingGlobalLabel');
 const NotFound = require('./NotFound');
 const Forbidden = require('./Forbidden');
+const ValidationError = require('./ValidationError');
 
 module.exports = {
   APIError,
@@ -14,4 +15,5 @@ module.exports = {
   MissingGlobalLabel,
   NotFound,
   Forbidden,
+  ValidationError,
 };

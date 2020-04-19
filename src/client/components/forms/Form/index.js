@@ -1,11 +1,11 @@
-import React, { useContext, useState, useReducer } from 'react';
+import React, { useState, useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { unflatten } from 'flatley';
+import HiddenInput from '../field-types/HiddenInput';
 import FormContext from './Context';
 import { useLocale } from '../../utilities/Locale';
 import { useStatusList } from '../../modules/Status';
-import HiddenInput from '../field-types/HiddenInput';
 import { requests } from '../../../api';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import { useUser } from '../../data/User';
@@ -14,8 +14,6 @@ import fieldReducer from './reducer';
 import './index.scss';
 
 const baseClass = 'form';
-
-export const useForm = () => useContext(FormContext);
 
 const Form = (props) => {
   const [fields, dispatchFields] = useReducer(fieldReducer, {});

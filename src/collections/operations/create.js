@@ -1,4 +1,6 @@
 const executePolicy = require('../../users/executePolicy');
+const executeFieldHooks = require('../../fields/executeHooks');
+const { validateCreate } = require('../../fields/validateCreate');
 
 const create = async (args) => {
   try {
@@ -6,11 +8,7 @@ const create = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    const policy = args.config && args.config.policies && args.config.policies.create;
-
-    await executePolicy(args.user, policy);
-
-    // Await validation here
+    await executePolicy(args, args.config.policies.create);
 
     let options = {
       Model: args.Model,
@@ -23,17 +21,29 @@ const create = async (args) => {
     };
 
     // /////////////////////////////////////
-    // 2. Execute before collection hook
+    // 2. Validate incoming data
     // /////////////////////////////////////
 
-    const beforeCreateHook = args.config && args.config.hooks && args.config.hooks.beforeCreate;
+    await validateCreate(args.data, args.config.fields);
 
-    if (typeof beforeCreateHook === 'function') {
-      options = await beforeCreateHook(options);
+    // /////////////////////////////////////
+    // 3. Execute before create field-level hooks
+    // /////////////////////////////////////
+
+    options.data = await executeFieldHooks(args.config.fields, args.data, 'beforeCreate');
+
+    // /////////////////////////////////////
+    // 4. Execute before collection hook
+    // /////////////////////////////////////
+
+    const { beforeCreate } = args.config.hooks;
+
+    if (typeof beforeCreate === 'function') {
+      options = await beforeCreate(options);
     }
 
     // /////////////////////////////////////
-    // 3. Perform database operation
+    // 5. Perform database operation
     // /////////////////////////////////////
 
     const {
@@ -55,17 +65,17 @@ const create = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 4. Execute after collection hook
+    // 6. Execute after collection hook
     // /////////////////////////////////////
 
-    const afterCreateHook = args.config && args.config.hooks && args.config.hooks.afterCreate;
+    const { afterCreate } = args.config.hooks;
 
-    if (typeof afterDeleteHook === 'function') {
-      result = await afterCreateHook(options, result);
+    if (typeof afterCreate === 'function') {
+      result = await afterCreate(options, result);
     }
 
     // /////////////////////////////////////
-    // 5. Return results
+    // 7. Return results
     // /////////////////////////////////////
 
     return result;

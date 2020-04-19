@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
+import RenderFields from '../RenderFields';
 
-import RenderFields from '../RenderFields'; // eslint-disable-line import/no-cycle
 import IconButton from '../../controls/IconButton';
 import Pill from '../../modules/Pill';
 import Chevron from '../../graphics/Chevron';
 
 import './index.scss';
+import EditableBlockTitle from './EditableBlockTitle';
 
 const baseClass = 'draggable-section';
 
@@ -18,20 +19,29 @@ const DraggableSection = (props) => {
     removeRow,
     rowIndex,
     parentName,
-    renderFields,
+    fieldSchema,
     defaultValue,
     dispatchCollapsibleStates,
     collapsibleStates,
     singularLabel,
-    useHeadingPill,
+    blockType,
+    fieldTypes,
   } = props;
+  const draggableRef = useRef(null);
 
   const handleCollapseClick = () => {
+    draggableRef.current.focus();
     dispatchCollapsibleStates({
       type: 'UPDATE_COLLAPSIBLE_STATUS',
       collapsibleIndex: rowIndex,
     });
   };
+
+  const draggableIsOpen = collapsibleStates[rowIndex];
+  const classes = [
+    baseClass,
+    draggableIsOpen && 'is-open',
+  ].filter(Boolean).join(' ');
 
   return (
     <Draggable
@@ -42,24 +52,33 @@ const DraggableSection = (props) => {
         return (
           <div
             ref={providedDrag.innerRef}
-            className={baseClass}
+            className={classes}
             {...providedDrag.draggableProps}
           >
             <div className={`${baseClass}__header`}>
               <div
                 {...providedDrag.dragHandleProps}
                 className={`${baseClass}__header__drag-handle`}
-                onClick={handleCollapseClick}
+                onClick={() => handleCollapseClick(providedDrag)}
                 role="button"
                 tabIndex={0}
+                ref={draggableRef}
               />
 
-              <div className={`${baseClass}__header__row-name`}>
-                {useHeadingPill
+              <div className={`${baseClass}__header__row-block-type-label`}>
+                {blockType === 'flexible'
                   ? <Pill>{singularLabel}</Pill>
                   : `${singularLabel} ${rowIndex + 1}`
                 }
               </div>
+
+              {blockType === 'flexible'
+                && (
+                  <EditableBlockTitle
+                    fieldName={`${parentName}.${rowIndex}.blockName`}
+                  />
+                )
+              }
 
               <div className={`${baseClass}__header__controls`}>
 
@@ -75,18 +94,19 @@ const DraggableSection = (props) => {
                   size="small"
                 />
 
-                <Chevron isOpen={collapsibleStates[rowIndex]} />
+                <Chevron isOpen={draggableIsOpen} />
               </div>
             </div>
 
             <AnimateHeight
               className={`${baseClass}__content`}
-              height={collapsibleStates[rowIndex] ? 'auto' : 0}
+              height={draggableIsOpen ? 'auto' : 0}
               duration={0}
             >
               <RenderFields
+                fieldTypes={fieldTypes}
                 key={rowIndex}
-                fields={renderFields.map((field) => {
+                fieldSchema={fieldSchema.map((field) => {
                   const fieldName = `${parentName}.${rowIndex}.${field.name}`;
                   return ({
                     ...field,
@@ -108,7 +128,7 @@ DraggableSection.defaultProps = {
   defaultValue: null,
   collapsibleStates: [],
   singularLabel: '',
-  useHeadingPill: false,
+  blockType: '',
 };
 
 DraggableSection.propTypes = {
@@ -117,12 +137,13 @@ DraggableSection.propTypes = {
   rowIndex: PropTypes.number.isRequired,
   parentName: PropTypes.string.isRequired,
   singularLabel: PropTypes.string,
-  renderFields: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  fieldSchema: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   rowCount: PropTypes.number,
   defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
   dispatchCollapsibleStates: PropTypes.func.isRequired,
   collapsibleStates: PropTypes.arrayOf(PropTypes.bool),
-  useHeadingPill: PropTypes.bool,
+  blockType: PropTypes.string,
+  fieldTypes: PropTypes.shape({}).isRequired,
 };
 
 export default DraggableSection;

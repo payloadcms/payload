@@ -33,12 +33,20 @@ const ReactSelect = (props) => {
 
           if (isMulti) {
             if (selected) {
-              valueToChange = selected.map(selectedOption => selectedOption.value);
+              valueToChange = selected.map((selectedOption) => {
+                if (typeof selectedOption === 'string') {
+                  return {
+                    label: selectedOption,
+                    value: selectedOption,
+                  };
+                }
+
+                return selectedOption;
+              });
             }
           } else if (selected) {
             valueToChange = selected.value;
           }
-
           onChange(valueToChange);
         }
       }}

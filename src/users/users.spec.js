@@ -8,12 +8,12 @@ const { email, password } = require('../tests/credentials');
 
 const config = require('../../demo/payload.config');
 
+const url = config.serverURL;
+const usernameField = config.user.auth.useAsUsername;
+
+let token = null;
+
 describe('Users REST API', () => {
-  const url = config.serverURL;
-  const usernameField = config.user.auth.useAsUsername;
-
-  let token = null;
-
   it('should prevent registering a first user', async () => {
     const response = await fetch(`${url}/api/first-register`, {
       body: JSON.stringify({
@@ -76,7 +76,7 @@ describe('Users REST API', () => {
     expect(response.status).toBe(200);
     expect(data.token).not.toBeNull();
 
-    ({ token } = data);
+    token = data.refreshedToken;
   });
 
   it('should allow a user to be created', async () => {
@@ -84,6 +84,7 @@ describe('Users REST API', () => {
       body: JSON.stringify({
         [usernameField]: `${faker.name.firstName()}@test.com`,
         password,
+        roles: ['editor'],
       }),
       headers: {
         Authorization: `JWT ${token}`,

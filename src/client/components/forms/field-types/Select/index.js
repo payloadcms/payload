@@ -11,21 +11,46 @@ import './index.scss';
 const defaultError = 'Please make a selection.';
 const defaultValidate = value => value.length > 0;
 
-const findValueToRender = (options, value, hasMany) => {
-  if (hasMany && Array.isArray(value)) {
-    return value.map(subValue => options.find(option => option.value === subValue));
+const formatFormValue = (value) => {
+  if (Array.isArray(value)) {
+    return value.map((subValue) => {
+      if (typeof subValue === 'object' && subValue.value) {
+        return subValue.value;
+      }
+
+      return subValue;
+    });
   }
 
-  const matchedOption = options.find(option => option.value === value || option === value);
+  if (typeof value === 'object' && value.value) {
+    return value.value;
+  }
 
-  if (typeof matchedOption === 'string') {
+  return value;
+};
+
+const formatRenderValue = (value) => {
+  if (Array.isArray(value)) {
+    return value.map((subValue) => {
+      if (typeof subValue === 'string') {
+        return {
+          label: subValue,
+          value: subValue,
+        };
+      }
+
+      return subValue;
+    });
+  }
+
+  if (typeof value === 'string') {
     return {
-      value: matchedOption,
-      label: matchedOption,
+      label: value,
+      value,
     };
   }
 
-  return matchedOption;
+  return value;
 };
 
 const Select = (props) => {
@@ -62,8 +87,6 @@ const Select = (props) => {
 
   const fieldWidth = width ? `${width}%` : undefined;
 
-  const valueToRender = findValueToRender(options, value, hasMany);
-
   return (
     <div
       className={classes}
@@ -83,7 +106,8 @@ const Select = (props) => {
       />
       <ReactSelect
         onChange={onFieldChange}
-        value={valueToRender}
+        value={formatRenderValue(value)}
+        formatValue={formatFormValue}
         showError={showError}
         disabled={formProcessing}
         options={options}

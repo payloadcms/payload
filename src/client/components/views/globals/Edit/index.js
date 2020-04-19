@@ -9,6 +9,7 @@ import APIURL from '../../../modules/APIURL';
 import Button from '../../../controls/Button';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
+import * as fieldTypes from '../../../forms/field-types';
 
 import './index.scss';
 
@@ -65,7 +66,8 @@ const EditView = (props) => {
           )}
         />
         <RenderFields
-          fields={global.fields}
+          fieldTypes={fieldTypes}
+          fieldSchema={global.fields}
           initialData={data}
         />
       </Form>

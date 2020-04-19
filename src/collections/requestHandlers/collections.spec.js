@@ -34,8 +34,8 @@ beforeAll(async (done) => {
   done();
 });
 
-describe('Collection REST CRUD', () => {
-  it('should allow a post to be created in English', async () => {
+describe('Collection REST Create', () => {
+  it('should allow a post to be created', async () => {
     const response = await fetch(`${url}/api/posts`, {
       body: JSON.stringify({
         title: faker.name.firstName(),
@@ -57,7 +57,9 @@ describe('Collection REST CRUD', () => {
 
     localizedPostID = data.doc.id;
   });
+});
 
+describe('Localized Collection REST Update', () => {
   it('should allow a Spanish locale to be added to an existing post', async () => {
     const response = await fetch(`${url}/api/posts/${localizedPostID}?locale=es`, {
       body: JSON.stringify({
@@ -77,7 +79,9 @@ describe('Collection REST CRUD', () => {
     expect(response.status).toBe(200);
     expect(data.doc.description).toBe(spanishPostDesc);
   });
+});
 
+describe('Localized Collection REST Read', () => {
   it('should allow a localized post to be retrieved in unspecified locale, defaulting to English', async () => {
     const response = await fetch(`${url}/api/posts/${localizedPostID}`);
     const data = await response.json();
