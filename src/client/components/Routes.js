@@ -69,6 +69,26 @@ const Routes = () => {
                         >
                           <MediaLibrary />
                         </Route>
+                        <Route
+                          path={`${match.url}/users`}
+                          render={(routeProps) => {
+                            const List = customComponents.users?.views?.List || DefaultList;
+                            return (
+                              <List
+                                {...routeProps}
+                                collection={config.user}
+                                columns={[{
+                                  key: 'email',
+                                  label: 'email',
+                                }, {
+                                  key: 'createdAt',
+                                  label: 'Created At',
+                                  handler: time => new Date(time).toDateString(),
+                                }]}
+                              />
+                            );
+                          }}
+                        />
 
                         <Route
                           path={`${match.url}/`}

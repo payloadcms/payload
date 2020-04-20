@@ -14,7 +14,7 @@ import './index.scss';
 const { serverURL, routes: { admin, api } } = config;
 
 const ListView = (props) => {
-  const { collection } = props;
+  const { collection, columns } = props;
   const location = useLocation();
   const { page } = queryString.parse(location.search, { ignoreQueryPrefix: true });
 
@@ -41,6 +41,7 @@ const ListView = (props) => {
         buttonType="link"
       />
       <SearchableTable
+        columns={columns}
         data={data.docs}
         collection={collection}
       />

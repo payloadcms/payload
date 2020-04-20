@@ -12,11 +12,11 @@ class SearchableTable extends Component {
 
     this.state = {
       rows: this.structureRows(this.props.data),
-      columns: [{
+      columns: this.props.columns || [{
         key: 'title',
         label: 'Title',
       }, {
-        key: '_id',
+        key: 'id',
         label: 'ID',
       }, {
         key: 'createdAt',
