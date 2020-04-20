@@ -10,7 +10,7 @@ const validateUpdate = async (data, fields) => {
     const dataToValidate = data[key];
     const field = fields.find(matchedField => matchedField.name === key);
 
-    if (field) {
+    if (field && dataToValidate) {
       const validationResult = await field.validate(dataToValidate, field);
 
       if (Array.isArray(validationResult)) {

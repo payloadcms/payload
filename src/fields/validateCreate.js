@@ -10,7 +10,7 @@ exports.iterateFields = async (data, fields, path = '') => {
     const requiresAtLeastOneSubfield = field.fields && field.fields.some(subField => (subField.required && !subField.localized));
 
     if (field.required || requiresAtLeastOneSubfield) {
-      if (data) {
+      if (data && data[field.name] !== null) {
         const validationResult = await field.validate(data[field.name], field);
 
         if (Array.isArray(validationResult)) {
