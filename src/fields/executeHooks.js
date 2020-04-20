@@ -1,6 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
-
 const executeFieldHooks = async (fields, data, hookName) => {
   if (Array.isArray(data)) {
     const postHookData = await Promise.all(data.map(async (row) => {
@@ -12,16 +9,27 @@ const executeFieldHooks = async (fields, data, hookName) => {
   }
 
   const postHookData = { ...data };
+  const hookPromises = [];
 
-  for (const field of fields) {
+  fields.forEach((field) => {
     if (typeof field.hooks[hookName] === 'function' && data[field.name]) {
-      postHookData[field.name] = await field.hooks[hookName](data[field.name]);
+      const hookPromise = async () => {
+        postHookData[field.name] = await field.hooks[hookName](data[field.name]);
+      };
+
+      hookPromises.push(hookPromise());
     }
 
     if (field.fields && data[field.name]) {
-      postHookData[field.name] = await executeFieldHooks(field.fields, data[field.name], hookName);
+      const hookPromise = async () => {
+        postHookData[field.name] = await executeFieldHooks(field.fields, data[field.name], hookName);
+      };
+
+      hookPromises.push(hookPromise());
     }
-  }
+  });
+
+  await Promise.all(hookPromises);
 
   return postHookData;
 };
