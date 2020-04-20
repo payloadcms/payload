@@ -1,8 +1,8 @@
 const express = require('express');
-const passport = require('passport');
 const fileUpload = require('express-fileupload');
 const { upload, update } = require('./requestHandlers');
 const uploadMiddleware = require('./middleware');
+const authenticate = require('../express/middleware/authenticate');
 
 const router = express.Router();
 
@@ -11,7 +11,7 @@ const uploadRoutes = (config, Upload) => {
 
   router.all(`/${uploadConfig.slug}*`,
     fileUpload(),
-    passport.authenticate('jwt', { session: false }),
+    authenticate,
     uploadMiddleware(config, Model));
 
   router.route(`/${uploadConfig.slug}`)

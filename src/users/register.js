@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const AnonymousStrategy = require('passport-anonymous');
 const passportLocalMongoose = require('passport-local-mongoose');
-const jwtStrategy = require('./jwt');
+const jwtStrategy = require('./strategies/jwt');
+const apiKeyStrategy = require('./strategies/apiKey');
 const authRoutes = require('./routes');
 const buildCollectionSchema = require('../collections/buildSchema');
 const baseUserFields = require('./baseFields');
@@ -20,7 +21,8 @@ function registerUser() {
   };
 
   passport.use(this.User.Model.createStrategy());
-  passport.use(jwtStrategy(this.User.Model, this.config));
+  passport.use(apiKeyStrategy(this.User));
+  passport.use(jwtStrategy(this.User));
   passport.serializeUser(this.User.Model.serializeUser());
   passport.deserializeUser(this.User.Model.deserializeUser());
   passport.use(new AnonymousStrategy.Strategy());
