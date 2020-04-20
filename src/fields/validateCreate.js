@@ -1,37 +1,46 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
-
 const { ValidationError } = require('../errors');
 
 exports.iterateFields = async (data, fields, path = '') => {
-  let errors = [];
+  const validationPromises = [];
+  const validatedFields = [];
 
-  for (const field of fields) {
+  fields.forEach((field) => {
     const requiresAtLeastOneSubfield = field.fields && field.fields.some(subField => (subField.required && !subField.localized));
 
     if (field.required || requiresAtLeastOneSubfield) {
       if (data && data[field.name] !== null) {
-        const validationResult = await field.validate(data[field.name], field);
-
-        if (Array.isArray(validationResult)) {
-          errors = [
-            ...errors,
-            ...validationResult,
-          ];
-        } else if (validationResult !== true) {
-          errors.push({
-            field: `${path}${field.name}`,
-            message: validationResult,
-          });
-        }
+        validationPromises.push(field.validate(data[field.name], field));
+        validatedFields.push(field);
       } else {
-        errors.push({
+        validationPromises.push({
           field: `${path}${field.name}`,
           message: `${path}${field.name} is required.`,
         });
       }
     }
-  }
+  });
+
+  const validationResults = await Promise.all(validationPromises);
+
+  const errors = validationResults.reduce((results, result, i) => {
+    const field = validatedFields[i];
+    if (Array.isArray(result)) {
+      return [
+        ...results,
+        ...result,
+      ];
+    } if (result !== true) {
+      return [
+        ...results,
+        {
+          field: `${path}${field.name}`,
+          message: result,
+        },
+      ];
+    }
+
+    return results;
+  }, []);
 
   return errors;
 };
