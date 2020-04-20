@@ -71,6 +71,7 @@ const Routes = () => {
                         </Route>
                         <Route
                           path={`${match.url}/users`}
+                          exact
                           render={(routeProps) => {
                             const List = customComponents.users?.views?.List || DefaultList;
                             return (
@@ -85,6 +86,31 @@ const Routes = () => {
                                   label: 'Created At',
                                   handler: time => new Date(time).toDateString(),
                                 }]}
+                              />
+                            );
+                          }}
+                        />
+                        <Route
+                          path={`${match.url}/users/create`}
+                          exact
+                          render={(routeProps) => {
+                            return (
+                              <Edit
+                                {...routeProps}
+                                collection={config.user}
+                              />
+                            );
+                          }}
+                        />
+                        <Route
+                          path={`${match.url}/users/create/:id`}
+                          exact
+                          render={(routeProps) => {
+                            return (
+                              <Edit
+                                isEditing
+                                {...routeProps}
+                                collection={config.user}
                               />
                             );
                           }}
