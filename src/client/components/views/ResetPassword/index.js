@@ -1,9 +1,8 @@
 import React from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import StatusList, { useStatusList } from '../../modules/Status';
+import { Link, useHistory, useParams } from 'react-router-dom';
+import StatusList from '../../modules/Status';
 import ContentBlock from '../../layout/ContentBlock';
 import Form from '../../forms/Form';
-import Email from '../../forms/field-types/Email';
 import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
 import config from '../../../securedConfig';
@@ -11,27 +10,24 @@ import Button from '../../controls/Button';
 import { useUser } from '../../data/User';
 
 import './index.scss';
+import HiddenInput from '../../forms/field-types/HiddenInput';
 
-const baseClass = 'login';
+const baseClass = 'reset-password';
 
 const { serverURL, routes: { admin, api } } = config;
 
-const Login = () => {
-  const { addStatus } = useStatusList();
+const ResetPassword = () => {
+  const { token } = useParams();
   const history = useHistory();
   const { user, setToken } = useUser();
 
   const handleAjaxResponse = (res) => {
     res.json()
       .then((data) => {
+        debugger;
         if (data.token) {
           setToken(data.token);
           history.push(`${admin}`);
-        } else {
-          addStatus({
-            type: 'error',
-            message: 'The username or password you have entered is invalid.',
-          });
         }
       });
   };
@@ -70,37 +66,28 @@ const Login = () => {
       width="narrow"
     >
       <div className={`${baseClass}__wrap`}>
-        <p>
-          <a
-            className=""
-            href={`${admin}/forgot`}
-          >
-            Forgot password?
-          </a>
-        </p>
         <StatusList />
         <Form
           handleAjaxResponse={handleAjaxResponse}
           method="POST"
-          action={`${serverURL}${api}/login`}
+          action={`${serverURL}${api}/reset-password`}
           redirect={admin}
         >
-          <Email
-            label="Email Address"
-            name="email"
-            required
-          />
           <Password
             error="password"
             label="Password"
             name="password"
             required
           />
-          <FormSubmit>Login</FormSubmit>
+          <HiddenInput
+            name="token"
+            defaultValue={token}
+          />
+          <FormSubmit>Reset Password</FormSubmit>
         </Form>
       </div>
     </ContentBlock>
   );
 };
 
-export default Login;
+export default ResetPassword;

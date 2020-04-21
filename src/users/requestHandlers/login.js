@@ -11,7 +11,7 @@ const loginHandler = async (req, res) => {
       api: 'REST',
     });
 
-    return res.status(200)
+    return res.status(httpStatus.OK)
       .json({
         message: 'Auth Passed',
         token,

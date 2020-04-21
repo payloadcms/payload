@@ -7,7 +7,7 @@
     "test:unit": "cross-env NODE_ENV=test jest --config src/tests/jest.config.js",
     "test:int": "cross-env NODE_ENV=test jest --forceExit --runInBand",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
-    "dev": "nodemon demo/server.js",
+    "dev": "node demo/server.js",
     "lint": "eslint **/*.js",
     "debug:test:int": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },

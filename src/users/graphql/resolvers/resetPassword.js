@@ -8,23 +8,11 @@ const resetPasswordResolver = ({ Model, config }) => async (_, args, context) =>
     data: args,
     api: 'GraphQL',
     user: context.user,
-    locale: context.locale,
-    fallbackLocale: context.fallbackLocale,
   };
 
-  if (args.locale) {
-    context.locale = args.locale;
-    options.locale = args.locale;
-  }
+  const token = await resetPassword(options);
 
-  if (args.fallbackLocale) {
-    context.fallbackLocale = args.fallbackLocale;
-    options.fallbackLocale = args.fallbackLocale;
-  }
-
-  const user = await resetPassword(options);
-
-  return user;
+  return token;
 };
 
 module.exports = resetPasswordResolver;

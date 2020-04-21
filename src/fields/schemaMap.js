@@ -32,6 +32,9 @@ const fieldToSchemaMap = {
   checkbox: (field) => {
     return { ...formatBaseSchema(field), type: Boolean };
   },
+  // hidden: (field) => {
+  //   return { ...formatBaseSchema(field), type: String };
+  // },
   date: (field) => {
     return {
       ...formatBaseSchema(field),

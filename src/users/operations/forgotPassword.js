@@ -50,16 +50,18 @@ const forgotPassword = async (args) => {
 
     await user.save();
 
-    const emailText = `You are receiving this because you (or someone else) have requested the reset of the password for your account.
+    const html = `You are receiving this because you (or someone else) have requested the reset of the password for your account.
                        Please click on the following link, or paste this into your browser to complete the process:
-                       ${config.serverURL}${config.routes.admin}/reset/${token}
+                       <a href="${config.serverURL}${config.routes.admin}/reset/${token}">
+                        ${config.serverURL}${config.routes.admin}/reset/${token}
+                       </a>
                        If you did not request this, please ignore this email and your password will remain unchanged.`;
 
     email({
       from: `"${config.email.fromName}" <${config.email.fromAddress}>`,
       to: data[usernameField],
       subject: 'Password Reset',
-      text: emailText,
+      html,
     });
 
     // /////////////////////////////////////
