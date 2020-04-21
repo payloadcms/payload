@@ -16,7 +16,6 @@ const cookies = new Cookies();
 const { serverURL, routes: { api }, collections } = config;
 
 const defaultError = 'Please make a selection.';
-const defaultValidate = value => value.length > 0;
 
 const maxResultsPerRequest = 10;
 
@@ -292,12 +291,15 @@ Relationship.propTypes = {
 
 const RelationshipFieldType = (props) => {
   const [formattedDefaultValue, setFormattedDefaultValue] = useState(null);
-  const { defaultValue, relationTo, hasMany } = props;
+  const {
+    defaultValue, relationTo, hasMany, validate,
+  } = props;
   const hasMultipleRelations = Array.isArray(relationTo);
 
   const fieldType = useFieldType({
     ...props,
     defaultValue: formattedDefaultValue,
+    validate,
   });
 
   useEffect(() => {
@@ -332,14 +334,6 @@ const RelationshipFieldType = (props) => {
       hasMultipleRelations={hasMultipleRelations}
     />
   );
-};
-
-RelationshipFieldType.defaultProps = {
-  validate: defaultValidate,
-};
-
-RelationshipFieldType.propTypes = {
-  validate: PropTypes.func,
 };
 
 export default withCondition(RelationshipFieldType);

@@ -9,7 +9,7 @@ const withCondition = (Field) => {
     const { fields } = useForm();
 
     if (condition) {
-      let siblingFields = {};
+      let siblingFields = fields;
 
       // If this field is nested
       // We can provide a list of sibling fields

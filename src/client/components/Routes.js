@@ -78,6 +78,7 @@ const Routes = () => {
                               <List
                                 {...routeProps}
                                 collection={config.user}
+                                getURL={row => `${match.url}/users/${row.id}`}
                                 columns={[{
                                   key: 'email',
                                   label: 'email',
@@ -103,7 +104,7 @@ const Routes = () => {
                           }}
                         />
                         <Route
-                          path={`${match.url}/users/create/:id`}
+                          path={`${match.url}/users/:id`}
                           exact
                           render={(routeProps) => {
                             return (
