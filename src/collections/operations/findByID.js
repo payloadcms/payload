@@ -32,12 +32,12 @@ const findByID = async (args) => {
 
     const {
       depth,
-      api,
       Model,
       query,
       req: {
         locale,
         fallbackLocale,
+        payloadAPI,
       },
     } = options;
 
@@ -48,7 +48,7 @@ const findByID = async (args) => {
     // Only allow depth override within REST.
     // If allowed in GraphQL, it would break resolvers
     // as a full object will be returned instead of an ID string
-    if (api === 'REST') {
+    if (payloadAPI === 'REST') {
       if (depth && depth !== '0') {
         queryOptionsToExecute.options.autopopulate = {
           maxDepth: parseInt(depth, 10),
