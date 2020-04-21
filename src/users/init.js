@@ -9,7 +9,7 @@ const buildCollectionSchema = require('../collections/buildSchema');
 const baseUserFields = require('./baseFields');
 const sanitize = require('./sanitize');
 
-function registerUser() {
+function initUser() {
   this.config.user.fields.push(...baseUserFields);
   this.config.user = sanitize(this.config.user);
   const userSchema = buildCollectionSchema(this.config.user, this.config);
@@ -27,7 +27,7 @@ function registerUser() {
   passport.deserializeUser(this.User.Model.deserializeUser());
   passport.use(new AnonymousStrategy.Strategy());
 
-  this.router.use(authRoutes(this.User.Model, this.config, this.email));
+  this.router.use(authRoutes(this.User.Model, this.config, this.sendEmail));
 }
 
-module.exports = registerUser;
+module.exports = initUser;

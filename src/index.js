@@ -8,13 +8,13 @@ const connectMongoose = require('./mongoose/connect');
 const expressMiddleware = require('./express/middleware');
 const createAuthHeaderFromCookie = require('./express/middleware/createAuthHeaderFromCookie');
 const initWebpack = require('./webpack/init');
-const registerUser = require('./users/register');
+const initUser = require('./users/init');
 const registerUpload = require('./uploads/register');
 const registerCollections = require('./collections/register');
 const registerGlobals = require('./globals/register');
 const GraphQL = require('./graphql');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
-const registerEmail = require('./email/register');
+const buildEmail = require('./email/build');
 
 class Payload {
   constructor(options) {
@@ -23,21 +23,23 @@ class Payload {
     this.router = express.Router();
     this.collections = {};
 
-    this.registerUser = registerUser.bind(this);
+    this.initUser = initUser.bind(this);
     this.registerUpload = registerUpload.bind(this);
     this.registerCollections = registerCollections.bind(this);
     this.registerGlobals = registerGlobals.bind(this);
-    this.registerEmail = registerEmail.bind(this);
+    this.buildEmail = buildEmail.bind(this);
+    this.sendEmail = this.sendEmail.bind(this);
+    this.getMockEmailCredentials = this.getMockEmailCredentials.bind(this);
 
     // Configure email service
-    this.registerEmail();
+    this.email = this.buildEmail();
 
     // Setup & initialization
     connectMongoose(this.config.mongoURL);
     this.router.use(...expressMiddleware(this.config));
 
     // Register and bind required collections
-    this.registerUser();
+    this.initUser();
     this.registerUpload();
 
     // Register collections
@@ -71,6 +73,21 @@ class Payload {
 
     // Bind static
     this.express.use(this.config.staticURL, express.static(this.config.staticDir));
+  }
+
+  async sendEmail(message) {
+    try {
+      const email = await this.email;
+      const result = email.transport.sendMail(message);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getMockEmailCredentials() {
+    const email = await this.email;
+    return email.account;
   }
 }
 

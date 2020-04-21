@@ -8,7 +8,7 @@ const buildLocaleInputType = require('./schema/buildLocaleInputType');
 const buildFallbackLocaleInputType = require('./schema/buildFallbackLocaleInputType');
 const registerCollections = require('../collections/graphql/register');
 const registerGlobals = require('../globals/graphql/register');
-const registerUser = require('../users/graphql/register');
+const initUser = require('../users/graphql/init');
 const registerUpload = require('../uploads/graphql/register');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 
@@ -36,14 +36,14 @@ class GraphQL {
     this.buildWhereInputType = buildWhereInputType;
     this.buildObjectType = buildObjectType.bind(this);
     this.registerCollections = registerCollections.bind(this);
-    this.registerUser = registerUser.bind(this);
+    this.initUser = initUser.bind(this);
     this.registerUpload = registerUpload.bind(this);
     this.registerGlobals = registerGlobals.bind(this);
   }
 
   init() {
     this.registerCollections();
-    this.registerUser();
+    this.initUser();
     this.registerUpload();
     this.registerGlobals();
 

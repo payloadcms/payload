@@ -22,7 +22,7 @@ const {
 
 const router = express.Router();
 
-const authRoutes = (User, config, email) => {
+const authRoutes = (User, config, sendEmail) => {
   router.all('*',
     bindModelMiddleware(User),
     bindCollectionMiddleware(config.user));
@@ -49,7 +49,7 @@ const authRoutes = (User, config, email) => {
 
   router
     .route('/forgot-password')
-    .post(forgotPassword(config, email));
+    .post(forgotPassword(config, sendEmail));
 
   router
     .route('/reset-password')

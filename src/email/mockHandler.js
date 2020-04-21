@@ -16,7 +16,10 @@ const mockEmailHandler = async (emailConfig) => {
     },
   };
 
-  return nodemailer.createTransport(smtpOptions);
+  return {
+    account: testAccount,
+    transport: nodemailer.createTransport(smtpOptions),
+  };
 };
 
 module.exports = mockEmailHandler;

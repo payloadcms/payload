@@ -67,6 +67,7 @@ const register = async (args) => {
     Object.assign(user, modelData);
 
     let result = await Model.register(user, data.password);
+    result = result.toJSON({ virtuals: true });
 
     await passport.authenticate('local');
 

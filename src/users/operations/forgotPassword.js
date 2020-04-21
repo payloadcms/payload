@@ -55,7 +55,7 @@ const forgotPassword = async (args) => {
                        ${config.serverURL}${config.routes.admin}/reset/${token}
                        If you did not request this, please ignore this email and your password will remain unchanged.`;
 
-    email.sendMail({
+    email({
       from: `"${config.email.fromName}" <${config.email.fromAddress}>`,
       to: data[usernameField],
       subject: 'Password Reset',
