@@ -69,6 +69,53 @@ const Routes = () => {
                         >
                           <MediaLibrary />
                         </Route>
+                        <Route
+                          path={`${match.url}/users`}
+                          exact
+                          render={(routeProps) => {
+                            const List = customComponents.users?.views?.List || DefaultList;
+                            return (
+                              <List
+                                {...routeProps}
+                                collection={config.user}
+                                getURL={row => `${match.url}/users/${row.id}`}
+                                columns={[{
+                                  key: 'email',
+                                  label: 'email',
+                                }, {
+                                  key: 'createdAt',
+                                  label: 'Created At',
+                                  handler: time => new Date(time).toDateString(),
+                                }]}
+                              />
+                            );
+                          }}
+                        />
+                        <Route
+                          path={`${match.url}/users/create`}
+                          exact
+                          render={(routeProps) => {
+                            return (
+                              <Edit
+                                {...routeProps}
+                                collection={config.user}
+                              />
+                            );
+                          }}
+                        />
+                        <Route
+                          path={`${match.url}/users/:id`}
+                          exact
+                          render={(routeProps) => {
+                            return (
+                              <Edit
+                                isEditing
+                                {...routeProps}
+                                collection={config.user}
+                              />
+                            );
+                          }}
+                        />
 
                         <Route
                           path={`${match.url}/`}

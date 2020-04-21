@@ -61,6 +61,7 @@ const Checkbox = (props) => {
         isDisabled={formProcessing}
         hasError={showError}
       />
+      {label}
     </div>
   );
 };

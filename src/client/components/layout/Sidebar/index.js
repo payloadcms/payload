@@ -52,6 +52,13 @@ const Sidebar = () => {
             </Link>
           );
         })}
+        <NavLink
+          activeClassName="active"
+          to={`${admin}/users`}
+        >
+          <Arrow />
+          Users
+        </NavLink>
       </nav>
       <span className="uppercase-label">Globals</span>
       <nav>

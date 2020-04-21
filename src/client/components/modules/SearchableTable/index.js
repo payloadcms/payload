@@ -12,11 +12,11 @@ class SearchableTable extends Component {
 
     this.state = {
       rows: this.structureRows(this.props.data),
-      columns: [{
+      columns: this.props.columns || [{
         key: 'title',
         label: 'Title',
       }, {
-        key: '_id',
+        key: 'id',
         label: 'ID',
       }, {
         key: 'createdAt',
@@ -31,7 +31,7 @@ class SearchableTable extends Component {
       return this.props.data.map((row) => {
         const formattedRow = { ...row };
 
-        const url = `${admin}/collections/${this.props.collection.slug}/${row.id}`;
+        const url = this.props.getURL ? this.props.getURL(row) : `${admin}/collections/${this.props.collection.slug}/${row.id}`;
 
         // Link the first column
         formattedRow[this.state.columns[0].key] = <Link to={url}>{row[this.state.columns[0].key]}</Link>;

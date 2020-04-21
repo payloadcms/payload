@@ -9,6 +9,13 @@ module.exports = {
     plural: 'Posts',
   },
   useAsTitle: 'title',
+  preview: (doc, token) => {
+    if (doc.title) {
+      return `http://localhost:3000/posts/${doc.title.value}?preview=true&token=${token}`;
+    }
+
+    return null;
+  },
   policies: {
     create: ({ user }) => checkRole(['user', 'admin'], user),
     read: () => true,

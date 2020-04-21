@@ -7,7 +7,7 @@ import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Form from '../../../forms/Form';
 import StickyHeader from '../../../modules/StickyHeader';
 import APIURL from '../../../modules/APIURL';
-import Button from '../../../controls/Button';
+import PreviewButton from '../../../controls/PreviewButton';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
 import * as fieldTypes from '../../../forms/field-types';
@@ -21,6 +21,17 @@ const baseClass = 'collection-edit';
 
 const EditView = (props) => {
   const { collection, isEditing } = props;
+  const {
+    slug,
+    preview,
+    fields,
+    labels: {
+      singular: singularLabel,
+      plural: pluralLabel,
+    },
+    useAsTitle,
+  } = collection;
+
   const { params: { id } = {} } = useRouteMatch();
   const history = useHistory();
 
@@ -36,18 +47,18 @@ const EditView = (props) => {
   } : null;
 
   const [{ data }] = usePayloadAPI(
-    (isEditing ? `${serverURL}${api}/${collection.slug}/${id}` : null),
+    (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
     { initialParams: { 'fallback-locale': 'null' } },
   );
 
   const nav = [{
-    url: `${admin}/collections/${collection.slug}`,
-    label: collection.labels.plural,
+    url: `${admin}/collections/${slug}`,
+    label: pluralLabel,
   }];
 
   if (isEditing) {
     nav.push({
-      label: data ? data[collection.useAsTitle] : '',
+      label: data ? data[useAsTitle] : '',
     });
   } else {
     nav.push({
@@ -66,7 +77,7 @@ const EditView = (props) => {
             Edit
             {' '}
             {Object.keys(data).length > 0
-              && (data[collection.useAsTitle] ? data[collection.useAsTitle] : '[Untitled]')
+              && (data[useAsTitle] ? data[useAsTitle] : '[Untitled]')
             }
           </h1>
         )}
@@ -75,7 +86,7 @@ const EditView = (props) => {
             <h1>
               Create New
               {' '}
-              {collection.labels.singular}
+              {singularLabel}
             </h1>
           )
         }
@@ -83,25 +94,25 @@ const EditView = (props) => {
       <Form
         className={`${baseClass}__form`}
         method={id ? 'put' : 'post'}
-        action={`${serverURL}${api}/${collection.slug}${id ? `/${id}` : ''}`}
+        action={`${serverURL}${api}/${slug}${id ? `/${id}` : ''}`}
         handleAjaxResponse={handleAjaxResponse}
       >
         <StickyHeader
           showStatus
           content={
-            <APIURL url={isEditing && `${serverURL}${api}/${collection.slug}/${data.id}`} />
+            <APIURL url={isEditing && `${serverURL}${api}/${slug}/${data.id}`} />
           }
           action={(
             <>
-              <Button type="secondary">Preview</Button>
+              <PreviewButton generatePreviewURL={preview} />
               <FormSubmit>Save</FormSubmit>
             </>
           )}
         />
         <RenderFields
           fieldTypes={fieldTypes}
-          customComponents={customComponents?.[collection.slug]?.fields}
-          fieldSchema={collection.fields}
+          customComponents={customComponents?.[slug]?.fields}
+          fieldSchema={fields}
           initialData={data}
         />
       </Form>
@@ -122,6 +133,7 @@ EditView.propTypes = {
     slug: PropTypes.string,
     useAsTitle: PropTypes.string,
     fields: PropTypes.arrayOf(PropTypes.shape({})),
+    preview: PropTypes.func,
   }).isRequired,
   isEditing: PropTypes.bool,
 };

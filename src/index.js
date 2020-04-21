@@ -3,7 +3,7 @@ require('isomorphic-fetch');
 
 const express = require('express');
 const graphQLPlayground = require('graphql-playground-middleware-express').default;
-const passport = require('passport');
+const authenticate = require('./express/middleware/authenticate');
 const connectMongoose = require('./mongoose/connect');
 const expressMiddleware = require('./express/middleware');
 const createAuthHeaderFromCookie = require('./express/middleware/createAuthHeaderFromCookie');
@@ -55,7 +55,7 @@ class Payload {
     this.router.use(
       this.config.routes.graphQL,
       createAuthHeaderFromCookie,
-      passport.authenticate(['jwt', 'anonymous'], { session: false }),
+      authenticate,
       new GraphQL(this.config, this.collections, this.User, this.Upload, this.globals).init(),
     );
 

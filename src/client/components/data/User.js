@@ -102,6 +102,7 @@ const UserProvider = ({ children }) => {
       setToken,
       logOut,
       refreshToken,
+      token,
     }}
     >
       {children}

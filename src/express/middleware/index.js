@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const cookieParser = require('cookie-parser');
 const localizationMiddleware = require('../../localization/middleware');
+const authenticate = require('./authenticate');
 
 const middleware = (config) => {
   return [
@@ -17,7 +18,7 @@ const middleware = (config) => {
     bodyParser.urlencoded({ extended: true }),
     compression(config.compression),
     localizationMiddleware(config.localization),
-    passport.authenticate(['jwt', 'anonymous'], { session: false }),
+    authenticate,
     (req, res, next) => {
       if (config.cors) {
         if (config.cors.indexOf(req.headers.origin) > -1) {

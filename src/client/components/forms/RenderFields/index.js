@@ -19,6 +19,7 @@ const RenderFields = ({
                 fieldTypes={fieldTypes}
                 key={i}
                 {...field}
+                validate={field.validate ? value => field.validate(value, field) : undefined}
                 defaultValue={initialData[field.name] || defaultValue}
               />
             );
