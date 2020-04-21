@@ -1,6 +1,5 @@
 import { useContext, useCallback, useEffect } from 'react';
 import FormContext from '../Form/Context';
-import { useLocale } from '../../utilities/Locale';
 
 import './index.scss';
 
@@ -13,7 +12,6 @@ const useFieldType = (options) => {
     validate,
   } = options;
 
-  const locale = useLocale();
   const formContext = useContext(FormContext);
   const { dispatchFields, submitted, processing } = formContext;
   const mountValue = formContext.fields[name]?.value || null;
@@ -43,10 +41,6 @@ const useFieldType = (options) => {
   useEffect(() => {
     if (defaultValue != null) sendField(defaultValue);
   }, [defaultValue, sendField]);
-
-  useEffect(() => {
-    sendField(null);
-  }, [locale, sendField]);
 
   const valid = formContext.fields[name] ? formContext.fields[name].valid : true;
   const showError = valid === false && formContext.submitted;

@@ -1,17 +1,18 @@
 import React, {
-  useContext, useEffect, useReducer, useState, Fragment,
+  useContext, useEffect, useReducer, useState,
 } from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { useModal } from '@trbl/react-modal';
 
+import { RowModifiedProvider, useRowModified } from '../../Form/RowModified';
 import withCondition from '../../withCondition';
 import Button from '../../../controls/Button';
 import FormContext from '../../Form/Context';
 import Section from '../../../layout/Section';
 import AddRowModal from './AddRowModal';
 import collapsibleReducer from './reducer';
-import DraggableSection from '../../DraggableSection'; // eslint-disable-line import/no-cycle
+import DraggableSection from '../../DraggableSection';
 
 import './index.scss';
 
@@ -27,15 +28,16 @@ const Flexible = (props) => {
     fieldTypes,
   } = props;
 
+  const parentRowsModified = useRowModified();
   const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
   const [rowIndexBeingAdded, setRowIndexBeingAdded] = useState(null);
-  const [hasModifiedRows, setHasModifiedRows] = useState(false);
+  const [lastModified, setLastModified] = useState(null);
   const [rowCount, setRowCount] = useState(0);
   const [collapsibleStates, dispatchCollapsibleStates] = useReducer(collapsibleReducer, []);
   const formContext = useContext(FormContext);
   const modalSlug = `flexible-${name}`;
 
-  const { fields: fieldState, dispatchFields } = formContext;
+  const { fields: fieldState, dispatchFields, countRows } = formContext;
 
   const addRow = (rowIndex, blockType) => {
     const blockToAdd = blocks.find(block => block.slug === blockType);
@@ -49,7 +51,7 @@ const Flexible = (props) => {
     });
 
     setRowCount(rowCount + 1);
-    setHasModifiedRows(true);
+    setLastModified(Date.now());
   };
 
   const removeRow = (rowIndex) => {
@@ -63,7 +65,7 @@ const Flexible = (props) => {
     });
 
     setRowCount(rowCount - 1);
-    setHasModifiedRows(true);
+    setLastModified(Date.now());
   };
 
   const moveRow = (moveFromIndex, moveToIndex) => {
@@ -75,7 +77,7 @@ const Flexible = (props) => {
       type: 'MOVE_COLLAPSIBLE', collapsibleIndex: moveFromIndex, moveToIndex,
     });
 
-    setHasModifiedRows(true);
+    setLastModified(Date.now());
   };
 
   const openAddRowModal = (rowIndex) => {
@@ -90,9 +92,16 @@ const Flexible = (props) => {
     moveRow(sourceIndex, destinationIndex);
   };
 
+  const updateRowCountOnParentRowModified = () => {
+    const countedRows = countRows(name);
+    setRowCount(countedRows);
+  };
+
+  useEffect(updateRowCountOnParentRowModified, [parentRowsModified]);
+
   useEffect(() => {
     setRowCount(defaultValue.length);
-    setHasModifiedRows(false);
+    setLastModified(null);
 
     dispatchCollapsibleStates({
       type: 'SET_ALL_COLLAPSIBLES',
@@ -101,7 +110,7 @@ const Flexible = (props) => {
   }, [defaultValue]);
 
   return (
-    <Fragment>
+    <RowModifiedProvider lastModified={lastModified}>
       <DragDropContext onDragEnd={onDragEnd}>
         <div className={baseClass}>
           <Section
@@ -117,7 +126,7 @@ const Flexible = (props) => {
                   {rowCount !== 0 && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
                     let blockType = fieldState[`${name}.${rowIndex}.blockType`]?.value;
 
-                    if (!hasModifiedRows && !blockType) {
+                    if (!lastModified && !blockType) {
                       blockType = defaultValue?.[rowIndex]?.blockType;
                     }
 
@@ -144,7 +153,7 @@ const Flexible = (props) => {
                             },
                           ]}
                           singularLabel={blockType}
-                          defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
+                          defaultValue={lastModified ? undefined : defaultValue[rowIndex]}
                           dispatchCollapsibleStates={dispatchCollapsibleStates}
                           collapsibleStates={collapsibleStates}
                           blockType="flexible"
@@ -178,7 +187,7 @@ const Flexible = (props) => {
         slug={modalSlug}
         blocks={blocks}
       />
-    </Fragment>
+    </RowModifiedProvider>
   );
 };
 

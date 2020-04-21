@@ -4,11 +4,12 @@ import React, {
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
+import { RowModifiedProvider, useRowModified } from '../../Form/RowModified';
 import withCondition from '../../withCondition';
 import Button from '../../../controls/Button';
 import FormContext from '../../Form/Context';
 import Section from '../../../layout/Section';
-import DraggableSection from '../../DraggableSection'; // eslint-disable-line import/no-cycle
+import DraggableSection from '../../DraggableSection';
 import collapsibleReducer from './reducer';
 
 import './index.scss';
@@ -16,11 +17,12 @@ import './index.scss';
 const baseClass = 'field-type repeater';
 
 const Repeater = (props) => {
+  const parentRowsModified = useRowModified();
   const [collapsibleStates, dispatchCollapsibleStates] = useReducer(collapsibleReducer, []);
   const formContext = useContext(FormContext);
   const [rowCount, setRowCount] = useState(0);
-  const [hasModifiedRows, setHasModifiedRows] = useState(false);
-  const { fields: fieldState, dispatchFields } = formContext;
+  const [lastModified, setLastModified] = useState(null);
+  const { fields: fieldState, dispatchFields, countRows } = formContext;
 
   const {
     label,
@@ -41,7 +43,7 @@ const Repeater = (props) => {
     });
 
     setRowCount(rowCount + 1);
-    setHasModifiedRows(true);
+    setLastModified(Date.now());
   };
 
   const removeRow = (rowIndex) => {
@@ -55,7 +57,7 @@ const Repeater = (props) => {
     });
 
     setRowCount(rowCount - 1);
-    setHasModifiedRows(true);
+    setLastModified(Date.now());
   };
 
   const moveRow = (moveFromIndex, moveToIndex) => {
@@ -67,17 +69,25 @@ const Repeater = (props) => {
       type: 'MOVE_COLLAPSIBLE', collapsibleIndex: moveFromIndex, moveToIndex,
     });
 
-    setHasModifiedRows(true);
+    setLastModified(Date.now());
   };
 
   useEffect(() => {
     setRowCount(defaultValue.length);
+    setLastModified(null);
 
     dispatchCollapsibleStates({
       type: 'SET_ALL_COLLAPSIBLES',
       payload: Array.from(Array(defaultValue.length).keys()).reduce(acc => ([...acc, true]), []), // sets all collapsibles to open on first load
     });
   }, [defaultValue]);
+
+  const updateRowCountOnParentRowModified = () => {
+    const countedRows = countRows(name);
+    setRowCount(countedRows);
+  };
+
+  useEffect(updateRowCountOnParentRowModified, [parentRowsModified]);
 
   const onDragEnd = (result) => {
     if (!result.destination) return;
@@ -87,54 +97,56 @@ const Repeater = (props) => {
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className={baseClass}>
-        <Section heading={label}>
-          <>
-            <Droppable droppableId="repeater-drop">
-              {provided => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
+    <RowModifiedProvider lastModified={lastModified}>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className={baseClass}>
+          <Section heading={label}>
+            <>
+              <Droppable droppableId="repeater-drop">
+                {provided => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                  >
+                    {rowCount !== 0
+                      && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
+                        return (
+                          <DraggableSection
+                            fieldTypes={fieldTypes}
+                            key={rowIndex}
+                            parentName={name}
+                            singularLabel={singularLabel}
+                            addRow={() => addRow(rowIndex)}
+                            removeRow={() => removeRow(rowIndex)}
+                            rowIndex={rowIndex}
+                            fieldState={fieldState}
+                            fieldSchema={fields}
+                            defaultValue={lastModified ? undefined : defaultValue[rowIndex]}
+                            dispatchCollapsibleStates={dispatchCollapsibleStates}
+                            collapsibleStates={collapsibleStates}
+                          />
+                        );
+                      })
+                    }
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+
+              <div className={`${baseClass}__add-button-wrap`}>
+                <Button
+                  onClick={() => addRow(rowCount)}
+                  type="secondary"
                 >
-                  {rowCount !== 0
-                    && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
-                      return (
-                        <DraggableSection
-                          fieldTypes={fieldTypes}
-                          key={rowIndex}
-                          parentName={name}
-                          singularLabel={singularLabel}
-                          addRow={() => addRow(rowIndex)}
-                          removeRow={() => removeRow(rowIndex)}
-                          rowIndex={rowIndex}
-                          fieldState={fieldState}
-                          fieldSchema={fields}
-                          defaultValue={hasModifiedRows ? undefined : defaultValue[rowIndex]}
-                          dispatchCollapsibleStates={dispatchCollapsibleStates}
-                          collapsibleStates={collapsibleStates}
-                        />
-                      );
-                    })
-                  }
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
+                  {`Add ${singularLabel}`}
+                </Button>
+              </div>
+            </>
+          </Section>
 
-            <div className={`${baseClass}__add-button-wrap`}>
-              <Button
-                onClick={() => addRow(rowCount)}
-                type="secondary"
-              >
-                {`Add ${singularLabel}`}
-              </Button>
-            </div>
-          </>
-        </Section>
-
-      </div>
-    </DragDropContext>
+        </div>
+      </DragDropContext>
+    </RowModifiedProvider>
   );
 };
 

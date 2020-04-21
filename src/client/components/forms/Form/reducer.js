@@ -80,10 +80,12 @@ function fieldReducer(state, action) {
       // Add new object containing subfield names to unflattenedRows array
       unflattenedRows.splice(rowIndex + 1, 0, subFields);
 
-      return {
+      const newState = {
         ...remainingFlattenedState,
         ...(flatten({ [name]: unflattenedRows }, { filters: flattenFilters })),
       };
+
+      return newState;
     }
 
     case 'MOVE_ROW': {
