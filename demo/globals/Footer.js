@@ -4,7 +4,7 @@ module.exports = {
   slug: 'footer',
   label: 'Footer',
   policies: {
-    upsert: ({ user }) => checkRole(['admin', 'user'], user),
+    upsert: ({ req: { user } }) => checkRole(['admin', 'user'], user),
     read: () => true,
   },
   fields: [

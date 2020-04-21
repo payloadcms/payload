@@ -10,7 +10,6 @@ const loginResolver = ({ Model, config }) => async (_, args, context) => {
       [usernameField]: args[usernameField],
       password: args.password,
     },
-    api: 'GraphQL',
     req: context,
   };
 

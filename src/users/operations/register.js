@@ -44,8 +44,10 @@ const register = async (args) => {
     const {
       Model,
       data,
-      locale,
-      fallbackLocale,
+      req: {
+        locale,
+        fallbackLocale,
+      },
     } = options;
 
     const modelData = { ...data };

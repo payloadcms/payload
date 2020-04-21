@@ -6,8 +6,6 @@ const forgotPasswordResolver = ({ Model, config }, email) => async (_, args, con
     Model,
     config,
     data: args,
-    api: 'GraphQL',
-    user: context.user,
     email,
     req: context,
   };

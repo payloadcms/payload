@@ -32,8 +32,10 @@ const update = async (args) => {
       Model,
       data,
       id,
-      locale,
-      fallbackLocale,
+      req: {
+        locale,
+        fallbackLocale,
+      },
     } = options;
 
     const dataToUpdate = { ...data };

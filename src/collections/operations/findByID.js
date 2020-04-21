@@ -35,8 +35,10 @@ const findByID = async (args) => {
       api,
       Model,
       query,
-      locale,
-      fallbackLocale,
+      req: {
+        locale,
+        fallbackLocale,
+      },
     } = options;
 
     const queryOptionsToExecute = {

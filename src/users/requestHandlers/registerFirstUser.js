@@ -8,7 +8,6 @@ const registerFirstUserHandler = async (req, res) => {
       req,
       Model: req.Model,
       config: req.collection,
-      api: 'REST',
       data: req.body,
     });
 

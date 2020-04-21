@@ -6,9 +6,6 @@ const registerResolver = ({ Model, config }) => async (_, args, context) => {
     config,
     Model,
     data: args.data,
-    api: 'GraphQL',
-    locale: context.locale,
-    fallbackLocale: context.fallbackLocale,
     depth: 0,
     req: context,
   };

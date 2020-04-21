@@ -8,10 +8,10 @@ module.exports = {
   },
   useAsTitle: 'title',
   policies: {
-    create: ({ user }) => checkRole(['user', 'admin'], user),
+    create: ({ req: { user } }) => checkRole(['user', 'admin'], user),
     read: () => true,
-    update: ({ user }) => checkRole(['user', 'admin'], user),
-    destroy: ({ user }) => checkRole(['user', 'admin'], user),
+    update: ({ req: { user } }) => checkRole(['user', 'admin'], user),
+    destroy: ({ req: { user } }) => checkRole(['user', 'admin'], user),
   },
   fields: [
     {

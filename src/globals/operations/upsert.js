@@ -35,10 +35,12 @@ const upsert = async (args) => {
 
     const {
       Model,
-      locale,
       slug,
-      fallbackLocale,
       data,
+      req: {
+        locale,
+        fallbackLocale,
+      },
     } = options;
 
 

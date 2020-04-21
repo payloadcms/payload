@@ -36,11 +36,12 @@ const find = async (args) => {
       page,
       limit,
       sort,
-      api,
       depth,
       Model,
-      locale,
-      fallbackLocale,
+      req: {
+        locale,
+        fallbackLocale,
+      },
     } = options;
 
     const optionsToExecute = {

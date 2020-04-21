@@ -8,7 +8,6 @@ const forgotPasswordHandler = (config, email) => async (req, res) => {
       req,
       Model: req.Model,
       config,
-      api: 'REST',
       data: req.body,
       email,
     });

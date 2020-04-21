@@ -9,11 +9,8 @@ const updateHandler = async (req, res) => {
       req,
       Model: req.Model,
       config: req.collection,
-      user: req.user,
       id: req.params.id,
       data: req.body,
-      locale: req.locale,
-      api: 'REST',
     });
 
     return res.status(httpStatus.OK).json({

@@ -2,26 +2,15 @@
 const { deleteQuery } = require('../../operations');
 
 const deleteResolver = collection => async (_, args, context) => {
+  if (args.locale) context.locale = args.locale;
+  if (args.fallbackLocale) context.fallbackLocale = args.fallbackLocale;
+
   const options = {
     config: collection.config,
     Model: collection.Model,
     id: args.id,
-    user: context.user,
-    api: 'GraphQL',
-    locale: context.locale,
-    fallbackLocale: context.fallbackLocale,
     req: context,
   };
-
-  if (args.locale) {
-    context.locale = args.locale;
-    options.locale = args.locale;
-  }
-
-  if (args.fallbackLocale) {
-    context.fallbackLocale = args.fallbackLocale;
-    options.fallbackLocale = args.fallbackLocale;
-  }
 
   const result = await deleteQuery(options);
 

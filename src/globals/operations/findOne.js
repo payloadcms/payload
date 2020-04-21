@@ -30,9 +30,11 @@ const findOne = async (args) => {
       depth,
       api,
       Model,
-      locale,
       slug,
-      fallbackLocale,
+      req: {
+        locale,
+        fallbackLocale,
+      },
     } = options;
 
     const queryOptionsToExecute = {

@@ -6,6 +6,7 @@ const methodOverride = require('method-override');
 const cookieParser = require('cookie-parser');
 const localizationMiddleware = require('../../localization/middleware');
 const authenticate = require('./authenticate');
+const identifyAPI = require('./identifyAPI');
 
 const middleware = (config) => {
   return [
@@ -19,6 +20,7 @@ const middleware = (config) => {
     compression(config.compression),
     localizationMiddleware(config.localization),
     authenticate,
+    identifyAPI('REST'),
     (req, res, next) => {
       if (config.cors) {
         if (config.cors.indexOf(req.headers.origin) > -1) {

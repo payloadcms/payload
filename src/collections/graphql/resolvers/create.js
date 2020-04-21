@@ -2,21 +2,16 @@
 const { create } = require('../../operations');
 
 const createResolver = collection => async (_, args, context) => {
+  if (args.locale) {
+    context.locale = args.locale;
+  }
+
   const options = {
     config: collection.config,
     Model: collection.Model,
     data: args.data,
-    user: context.user,
-    api: 'GraphQL',
-    locale: context.locale,
-    fallbackLocale: context.fallbackLocale,
     req: context,
   };
-
-  if (args.locale) {
-    context.locale = args.locale;
-    options.locale = args.locale;
-  }
 
   const result = await create(options);
 

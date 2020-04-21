@@ -9,7 +9,6 @@ const loginHandler = async (req, res) => {
       Model: req.Model,
       config: req.collection,
       data: req.body,
-      api: 'REST',
     });
 
     return res.status(200)

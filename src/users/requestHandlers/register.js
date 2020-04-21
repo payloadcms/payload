@@ -9,10 +9,6 @@ const registerHandler = async (req, res) => {
       data: req.body,
       Model: req.Model,
       config: req.collection,
-      api: 'REST',
-      locale: req.locale,
-      fallbackLocale: req.fallbackLocale,
-      user: req.user,
     });
 
     return res.status(201).json(user);

@@ -6,7 +6,7 @@ module.exports = {
   slug: 'header',
   label: 'Header',
   policies: {
-    upsert: ({ user }) => checkRole(['admin', 'user'], user),
+    upsert: ({ req: { user } }) => checkRole(['admin', 'user'], user),
     read: () => true,
   },
   fields: [

@@ -9,10 +9,7 @@ const createHandler = async (req, res) => {
       req,
       Model: req.Model,
       config: req.collection,
-      user: req.user,
       data: req.body,
-      locale: req.locale,
-      api: 'REST',
     });
 
     return res.status(httpStatus.CREATED).json({

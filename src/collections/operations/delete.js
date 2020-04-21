@@ -28,8 +28,10 @@ const deleteQuery = async (args) => {
     const {
       Model,
       id,
-      locale,
-      fallbackLocale,
+      req: {
+        locale,
+        fallbackLocale,
+      },
     } = options;
 
     let result = await Model.findOneAndDelete({ _id: id });

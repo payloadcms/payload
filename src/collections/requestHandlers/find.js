@@ -8,14 +8,10 @@ const findHandler = async (req, res) => {
       Model: req.Model,
       config: req.collection,
       where: req.query.where,
-      locale: req.locale,
-      fallbackLocale: req.fallbackLocale,
       page: req.query.page,
       limit: req.query.limit,
       sort: req.query.sort,
       depth: req.query.depth,
-      user: req.user,
-      api: 'REST',
     };
 
     const result = await find(options);

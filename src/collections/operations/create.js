@@ -40,9 +40,11 @@ const create = async (args) => {
 
     const {
       Model,
-      locale,
-      fallbackLocale,
       data,
+      req: {
+        locale,
+        fallbackLocale,
+      },
     } = options;
 
     let result = new Model();

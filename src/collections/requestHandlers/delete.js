@@ -8,11 +8,7 @@ const deleteHandler = async (req, res) => {
       req,
       Model: req.Model,
       config: req.collection,
-      user: req.user,
       id: req.params.id,
-      locale: req.locale,
-      fallbackLocale: req.fallbackLocale,
-      api: 'REST',
     });
 
     if (!doc) {
