@@ -10,6 +10,7 @@ const resetPasswordResolver = ({ Model, config }) => async (_, args, context) =>
     user: context.user,
     locale: context.locale,
     fallbackLocale: context.fallbackLocale,
+    req: context,
   };
 
   if (args.locale) {

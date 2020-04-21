@@ -5,6 +5,7 @@ const { forgotPassword } = require('../operations');
 const forgotPasswordHandler = (config, email) => async (req, res) => {
   try {
     await forgotPassword({
+      req,
       Model: req.Model,
       config,
       api: 'REST',

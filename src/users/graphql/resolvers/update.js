@@ -12,6 +12,7 @@ const updateResolver = ({ Model, config }) => async (_, args, context) => {
     locale: context.locale,
     fallbackLocale: context.fallbackLocale,
     depth: 0,
+    req: context,
   };
 
   if (args.locale) {

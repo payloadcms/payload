@@ -5,6 +5,7 @@ const { resetPassword } = require('../operations');
 const resetPasswordHandler = async (req, res) => {
   try {
     await resetPassword({
+      req,
       Model: req.Model,
       data: req.body,
       api: 'REST',

@@ -10,15 +10,7 @@ const create = async (args) => {
 
     await executePolicy(args, args.config.policies.create);
 
-    let options = {
-      Model: args.Model,
-      config: args.config,
-      locale: args.locale,
-      fallbackLocale: args.fallbackLocale,
-      user: args.user,
-      api: args.api,
-      data: args.data,
-    };
+    let options = { ...args };
 
     // /////////////////////////////////////
     // 2. Validate incoming data

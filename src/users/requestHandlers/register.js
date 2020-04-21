@@ -5,6 +5,7 @@ const { register } = require('../operations');
 const registerHandler = async (req, res) => {
   try {
     const user = await register({
+      req,
       data: req.body,
       Model: req.Model,
       config: req.collection,

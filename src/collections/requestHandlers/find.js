@@ -4,6 +4,7 @@ const { find } = require('../operations');
 const findHandler = async (req, res) => {
   try {
     const options = {
+      req,
       Model: req.Model,
       config: req.collection,
       where: req.query.where,

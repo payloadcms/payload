@@ -6,6 +6,7 @@ const { update } = require('../operations');
 const updateHandler = async (req, res) => {
   try {
     const user = await update({
+      req,
       data: req.body,
       Model: req.Model,
       config: req.collection,
@@ -13,7 +14,6 @@ const updateHandler = async (req, res) => {
       api: 'REST',
       locale: req.locale,
       fallbackLocale: req.fallbackLocale,
-      user: req.user,
     });
 
     return res.status(httpStatus.OK).json({

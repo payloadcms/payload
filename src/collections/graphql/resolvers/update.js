@@ -12,6 +12,7 @@ const updateResolver = collection => async (_, args, context) => {
     user: context.user,
     api: 'GraphQL',
     depth: 0,
+    req: context,
   };
 
   if (args.locale) {

@@ -6,6 +6,7 @@ const initResolver = ({ Model }) => async (_, __, context) => {
     Model,
     api: 'GraphQL',
     user: context.user,
+    req: context,
   };
 
   const result = await init(options);

@@ -7,6 +7,7 @@ const upsertHandler = (Model, config) => async (req, res) => {
     const { slug } = config;
 
     const result = await upsert({
+      req,
       Model,
       config,
       slug,

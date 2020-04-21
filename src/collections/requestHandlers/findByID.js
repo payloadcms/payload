@@ -4,6 +4,7 @@ const formatErrorResponse = require('../../express/responses/formatError');
 
 const findByIDHandler = async (req, res) => {
   const options = {
+    req,
     Model: req.Model,
     config: req.collection,
     user: req.user,

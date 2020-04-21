@@ -11,6 +11,7 @@ const findOneResolver = (Model, config) => async (_, args, context) => {
     depth: 0,
     api: 'GraphQL',
     user: context.user,
+    req: context,
   };
 
   if (args.locale) {

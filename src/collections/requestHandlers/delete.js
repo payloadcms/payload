@@ -5,6 +5,7 @@ const { deleteQuery } = require('../operations');
 const deleteHandler = async (req, res) => {
   try {
     const doc = await deleteQuery({
+      req,
       Model: req.Model,
       config: req.collection,
       user: req.user,

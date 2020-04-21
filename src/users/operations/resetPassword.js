@@ -7,12 +7,7 @@ const resetPassword = async (args) => {
       throw new APIError('Missing required data.');
     }
 
-    let options = {
-      Model: args.Model,
-      api: args.api,
-      data: args.data,
-      user: args.user,
-    };
+    let options = { ...args };
 
     // /////////////////////////////////////
     // 1. Execute before reset password hook

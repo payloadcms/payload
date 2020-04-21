@@ -13,17 +13,8 @@ const find = async (args) => {
     if (args.where) queryToBuild.where = args.where;
 
     let options = {
+      ...args,
       query: await args.Model.buildQuery(queryToBuild, args.locale),
-      Model: args.Model,
-      locale: args.locale,
-      fallbackLocale: args.fallbackLocale,
-      page: args.page,
-      limit: args.limit,
-      sort: args.sort,
-      depth: args.depth,
-      config: args.config,
-      user: args.user,
-      api: args.api,
     };
 
     // /////////////////////////////////////

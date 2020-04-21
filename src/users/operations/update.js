@@ -12,15 +12,7 @@ const update = async (args) => {
 
     // Await validation here
 
-    let options = {
-      Model: args.Model,
-      config: args.config,
-      api: args.api,
-      data: args.data,
-      id: args.id,
-      locale: args.locale,
-      fallbackLocale: args.fallbackLocale,
-    };
+    let options = { ...args };
 
     // /////////////////////////////////////
     // 1. Execute before update hook

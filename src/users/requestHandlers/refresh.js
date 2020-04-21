@@ -5,6 +5,7 @@ const { refresh } = require('../operations');
 const refreshHandler = async (req, res) => {
   try {
     const refreshedToken = await refresh({
+      req,
       config: req.collection,
       api: 'REST',
       authorization: req.headers.authorization,

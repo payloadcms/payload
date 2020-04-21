@@ -12,14 +12,8 @@ const findByID = async (args) => {
     await executePolicy(args, policy);
 
     let options = {
+      ...args,
       query: { _id: args.id },
-      Model: args.Model,
-      locale: args.locale,
-      fallbackLocale: args.fallbackLocale,
-      depth: args.depth,
-      config: args.config,
-      user: args.user,
-      api: args.api,
     };
 
     // /////////////////////////////////////

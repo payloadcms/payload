@@ -9,15 +9,7 @@ const deleteQuery = async (args) => {
 
     await executePolicy(args, args.config.policies.delete);
 
-    let options = {
-      id: args.id,
-      Model: args.Model,
-      config: args.config,
-      locale: args.locale,
-      fallbackLocale: args.fallbackLocale,
-      user: args.user,
-      api: args.api,
-    };
+    let options = { ...args };
 
     // /////////////////////////////////////
     // 2. Execute before collection hook

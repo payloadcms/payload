@@ -7,6 +7,7 @@ const findOneHandler = (Model, config) => async (req, res) => {
     const { slug } = config;
 
     const result = await findOne({
+      req,
       Model,
       config,
       slug,

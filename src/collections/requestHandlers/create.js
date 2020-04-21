@@ -6,6 +6,7 @@ const { create } = require('../operations');
 const createHandler = async (req, res) => {
   try {
     const doc = await create({
+      req,
       Model: req.Model,
       config: req.collection,
       user: req.user,
