@@ -15,13 +15,6 @@ const RenderFields = ({
           if (customComponents?.[field.name]?.field) {
             FieldComponent = customComponents[field.name].field;
           }
-          // let FieldComponent = fieldTypes[field.type];
-          // if (field.hidden) {
-          //   FieldComponent = fieldTypes.hidden;
-          // }
-          // if (customComponents?.[field.name]?.field) {
-          //   FieldComponent = customComponents[field.name].field;
-          // }
           if (FieldComponent) {
             return (
               <FieldComponent
