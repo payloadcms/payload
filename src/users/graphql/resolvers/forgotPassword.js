@@ -1,9 +1,8 @@
 /* eslint-disable no-param-reassign */
 const { forgotPassword } = require('../../operations');
 
-const forgotPasswordResolver = ({ Model, config }, email) => async (_, args, context) => {
+const forgotPasswordResolver = (config, email) => async (_, args, context) => {
   const options = {
-    Model,
     config,
     data: args,
     email,

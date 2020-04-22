@@ -177,7 +177,7 @@ function registerUser() {
     args: {
       [useAsUsername]: { type: GraphQLString },
     },
-    resolve: forgotPassword(this.User, this.email),
+    resolve: forgotPassword(this.config, this.sendEmail),
   };
 
   this.Mutation.fields.refreshToken = {
