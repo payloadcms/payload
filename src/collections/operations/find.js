@@ -13,17 +13,8 @@ const find = async (args) => {
     if (args.where) queryToBuild.where = args.where;
 
     let options = {
+      ...args,
       query: await args.Model.buildQuery(queryToBuild, args.locale),
-      Model: args.Model,
-      locale: args.locale,
-      fallbackLocale: args.fallbackLocale,
-      page: args.page,
-      limit: args.limit,
-      sort: args.sort,
-      depth: args.depth,
-      config: args.config,
-      user: args.user,
-      api: args.api,
     };
 
     // /////////////////////////////////////
@@ -45,11 +36,13 @@ const find = async (args) => {
       page,
       limit,
       sort,
-      api,
       depth,
       Model,
-      locale,
-      fallbackLocale,
+      req: {
+        locale,
+        fallbackLocale,
+        payloadAPI,
+      },
     } = options;
 
     const optionsToExecute = {
@@ -62,7 +55,7 @@ const find = async (args) => {
     // Only allow depth override within REST.
     // If allowed in GraphQL, it would break resolvers
     // as a full object will be returned instead of an ID string
-    if (api === 'REST') {
+    if (payloadAPI === 'REST') {
       if (depth && depth !== '0') {
         optionsToExecute.options.autopopulate = {
           maxDepth: parseInt(depth, 10),

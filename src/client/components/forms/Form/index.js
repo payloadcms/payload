@@ -144,6 +144,24 @@ const Form = (props) => {
         fields,
         processing,
         submitted,
+        countRows: (rowName) => {
+          const namePrefixToRemove = rowName.substring(0, rowName.lastIndexOf('.') + 1);
+
+          const rows = Object.keys(fields).reduce((matchedRows, key) => {
+            if (key.indexOf(`${rowName}.`) === 0) {
+              return {
+                ...matchedRows,
+                [key.replace(namePrefixToRemove, '')]: fields[key],
+              };
+            }
+
+            return matchedRows;
+          }, {});
+
+          const unflattenedRows = unflatten(rows);
+          const rowCount = unflattenedRows[rowName.replace(namePrefixToRemove, '')]?.length || 0;
+          return rowCount;
+        },
       }}
       >
         <HiddenInput

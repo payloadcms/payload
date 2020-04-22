@@ -17,10 +17,10 @@ module.exports = {
     return null;
   },
   policies: {
-    create: ({ user }) => checkRole(['user', 'admin'], user),
+    create: ({ req: { user } }) => checkRole(['user', 'admin'], user),
     read: () => true,
-    update: ({ user }) => checkRole(['user', 'admin'], user),
-    delete: ({ user }) => checkRole(['user', 'admin'], user),
+    update: ({ req: { user } }) => checkRole(['user', 'admin'], user),
+    delete: ({ req: { user } }) => checkRole(['user', 'admin'], user),
   },
   hooks: {
     beforeCreate: operation => operation,
@@ -51,7 +51,7 @@ module.exports = {
       hooks: {
         beforeCreate: value => value,
         beforeUpdate: value => value,
-        afterRead: value => `hooked value - ${value}`,
+        afterRead: value => value,
       },
     },
     {

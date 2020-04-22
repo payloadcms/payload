@@ -5,12 +5,7 @@ const login = async (args) => {
   try {
     // Await validation here
 
-    let options = {
-      Model: args.Model,
-      config: args.config,
-      api: args.api,
-      data: args.data,
-    };
+    let options = { ...args };
 
     // /////////////////////////////////////
     // 1. Execute before login hook

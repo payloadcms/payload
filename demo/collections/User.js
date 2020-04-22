@@ -9,10 +9,10 @@ module.exports = {
   },
   useAsTitle: 'email',
   policies: {
-    create: ({ user }) => checkRole(['admin', 'user'], user),
+    create: ({ req: { user } }) => checkRole(['admin', 'user'], user),
     read: null,
-    update: ({ user }) => checkRole(['admin', 'user'], user),
-    destroy: ({ user }) => checkRole(['admin', 'user'], user),
+    update: ({ req: { user } }) => checkRole(['admin', 'user'], user),
+    destroy: ({ req: { user } }) => checkRole(['admin', 'user'], user),
   },
   auth: {
     passwordIndex: 1,

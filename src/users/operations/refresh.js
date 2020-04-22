@@ -4,11 +4,7 @@ const refresh = async (args) => {
   try {
     // Await validation here
 
-    let options = {
-      config: args.config,
-      api: args.api,
-      authorization: args.authorization,
-    };
+    let options = { ...args };
 
     // /////////////////////////////////////
     // 1. Execute before refresh hook

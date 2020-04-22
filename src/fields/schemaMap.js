@@ -2,7 +2,7 @@ const { Schema } = require('mongoose');
 
 const formatBaseSchema = (field) => {
   return {
-    hide: field.hide || false,
+    hidden: field.hidden || false,
     localized: field.localized || false,
     unique: field.unique || false,
     required: (field.required && !field.localized) || false,
@@ -32,9 +32,6 @@ const fieldToSchemaMap = {
   checkbox: (field) => {
     return { ...formatBaseSchema(field), type: Boolean };
   },
-  // hidden: (field) => {
-  //   return { ...formatBaseSchema(field), type: String };
-  // },
   date: (field) => {
     return {
       ...formatBaseSchema(field),

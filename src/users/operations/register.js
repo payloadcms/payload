@@ -13,14 +13,7 @@ const register = async (args) => {
       await executePolicy(args, args.config.policies.register);
     }
 
-    let options = {
-      Model: args.Model,
-      config: args.config,
-      api: args.api,
-      data: args.data,
-      locale: args.locale,
-      fallbackLocale: args.fallbackLocale,
-    };
+    let options = { ...args };
 
     // /////////////////////////////////////
     // 2. Validate incoming data
@@ -51,8 +44,10 @@ const register = async (args) => {
     const {
       Model,
       data,
-      locale,
-      fallbackLocale,
+      req: {
+        locale,
+        fallbackLocale,
+      },
     } = options;
 
     const modelData = { ...data };

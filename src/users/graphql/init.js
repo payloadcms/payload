@@ -163,6 +163,14 @@ function registerUser() {
     resolve: register(this.User),
   };
 
+  this.Mutation.fields.forgotPassword = {
+    type: new GraphQLNonNull(GraphQLBoolean),
+    args: {
+      [useAsUsername]: { type: new GraphQLNonNull(GraphQLString) },
+    },
+    resolve: forgotPassword(this.User, this.email),
+  };
+
   this.Mutation.fields.resetPassword = {
     type: this.User.graphQL.type,
     args: {
@@ -170,14 +178,6 @@ function registerUser() {
       password: { type: GraphQLString },
     },
     resolve: resetPassword(this.User),
-  };
-
-  this.Mutation.fields.forgotPassword = {
-    type: new GraphQLNonNull(GraphQLBoolean),
-    args: {
-      [useAsUsername]: { type: GraphQLString },
-    },
-    resolve: forgotPassword(this.User, this.email),
   };
 
   this.Mutation.fields.refreshToken = {

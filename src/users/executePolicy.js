@@ -11,7 +11,7 @@ const executePolicy = async (operation, policy) => {
     return true;
   }
 
-  if (operation.user) {
+  if (operation.req.user) {
     return true;
   }
 

@@ -2,6 +2,9 @@
 const { findOne } = require('../../operations');
 
 const findOneResolver = (Model, config) => async (_, args, context) => {
+  if (args.locale) context.locale = args.locale;
+  if (args.fallbackLocale) context.fallbackLocale = args.fallbackLocale;
+
   const { slug } = config;
 
   const options = {
@@ -9,19 +12,8 @@ const findOneResolver = (Model, config) => async (_, args, context) => {
     config,
     slug,
     depth: 0,
-    api: 'GraphQL',
-    user: context.user,
+    req: context,
   };
-
-  if (args.locale) {
-    context.locale = args.locale;
-    options.locale = args.locale;
-  }
-
-  if (args.fallbackLocale) {
-    context.fallbackLocale = args.fallbackLocale;
-    options.fallbackLocale = args.fallbackLocale;
-  }
 
   const result = await findOne(options);
   return result;

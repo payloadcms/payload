@@ -2,6 +2,9 @@
 const { find } = require('../../operations');
 
 const findResolver = collection => async (_, args, context) => {
+  if (args.locale) context.locale = args.locale;
+  if (args.fallbackLocale) context.fallbackLocale = args.fallbackLocale;
+
   const options = {
     config: collection.config,
     Model: collection.Model,
@@ -10,21 +13,8 @@ const findResolver = collection => async (_, args, context) => {
     limit: args.limit,
     page: args.page,
     sort: args.sort,
-    user: context.user,
-    api: 'GraphQL',
-    locale: context.locale,
-    fallbackLocale: context.fallbackLocale,
+    req: context,
   };
-
-  if (args.locale) {
-    context.locale = args.locale;
-    options.locale = args.locale;
-  }
-
-  if (args.fallbackLocale) {
-    context.fallbackLocale = args.fallbackLocale;
-    options.fallbackLocale = args.fallbackLocale;
-  }
 
   const results = await find(options);
 

@@ -7,6 +7,7 @@ const { email, password } = require('../tests/credentials');
  */
 
 const config = require('../../demo/payload.config');
+const { payload } = require('../../demo/server');
 
 const url = config.serverURL;
 const usernameField = config.user.auth.useAsUsername;
@@ -77,6 +78,25 @@ describe('Users REST API', () => {
     expect(data.token).not.toBeNull();
 
     token = data.refreshedToken;
+  });
+
+  it('should allow forgot-password by email', async () => {
+    // TODO: figure out how to spy on payload instance functions
+    // const mailSpy = jest.spyOn(payload, 'sendEmail');
+    const response = await fetch(`${url}/api/forgot-password`, {
+      method: 'post',
+      body: JSON.stringify({
+        [usernameField]: email,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // is not working
+    // expect(mailSpy).toHaveBeenCalled();
+
+    expect(response.status).toBe(200);
   });
 
   it('should allow a user to be created', async () => {

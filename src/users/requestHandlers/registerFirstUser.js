@@ -5,9 +5,9 @@ const { registerFirstUser } = require('../operations');
 const registerFirstUserHandler = async (req, res) => {
   try {
     const firstUser = await registerFirstUser({
+      req,
       Model: req.Model,
       config: req.collection,
-      api: 'REST',
       data: req.body,
     });
 

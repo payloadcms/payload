@@ -15,6 +15,7 @@ const registerGlobals = require('./globals/register');
 const GraphQL = require('./graphql');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
 const buildEmail = require('./email/build');
+const identifyAPI = require('./express/middleware/identifyAPI');
 
 class Payload {
   constructor(options) {
@@ -56,6 +57,7 @@ class Payload {
     // Init GraphQL
     this.router.use(
       this.config.routes.graphQL,
+      identifyAPI('GraphQL'),
       createAuthHeaderFromCookie,
       authenticate,
       new GraphQL(this.config, this.collections, this.User, this.Upload, this.globals).init(),

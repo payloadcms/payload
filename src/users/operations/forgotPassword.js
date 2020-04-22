@@ -9,13 +9,7 @@ const forgotPassword = async (args) => {
       throw new APIError('Missing username.');
     }
 
-    let options = {
-      Model: args.Model,
-      config: args.config,
-      api: args.api,
-      data: args.data,
-      email: args.email,
-    };
+    let options = { ...args };
 
     // /////////////////////////////////////
     // 1. Execute before login hook

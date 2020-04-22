@@ -5,10 +5,10 @@ const { login } = require('../operations');
 const loginHandler = async (req, res) => {
   try {
     const token = await login({
+      req,
       Model: req.Model,
       config: req.collection,
       data: req.body,
-      api: 'REST',
     });
 
     return res.status(httpStatus.OK)

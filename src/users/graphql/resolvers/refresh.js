@@ -6,7 +6,7 @@ const refreshResolver = ({ Model, config }) => async (_, __, context) => {
     config,
     Model,
     authorization: context.headers.authorization,
-    api: 'GraphQL',
+    req: context,
   };
 
   const refreshedToken = await refresh(options);
