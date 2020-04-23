@@ -67,23 +67,23 @@ const find = async (args) => {
 
     let result = await Model.paginate(query, optionsToExecute);
 
+    // /////////////////////////////////////
+    // 4. Execute field-level afterRead hooks
+    // /////////////////////////////////////
+
     result = {
       ...result,
       docs: await Promise.all(result.docs.map(async (doc) => {
         if (locale && doc.setLocale) {
           doc.setLocale(locale, fallbackLocale);
         }
-
-        let virtualizedDoc = doc.toJSON({ virtuals: true });
-
-        virtualizedDoc = await executeFieldHooks(args.config.fields, virtualizedDoc, 'afterRead');
-
-        return virtualizedDoc;
+        const hookedDoc = await executeFieldHooks(args.config.fields, doc, 'afterRead');
+        return hookedDoc;
       })),
     };
 
     // /////////////////////////////////////
-    // 4. Execute after collection hook
+    // 5. Execute afterRead collection hook
     // /////////////////////////////////////
 
     const { afterRead } = args.config.hooks;
@@ -93,8 +93,13 @@ const find = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 5. Return results
+    // 6. Return results
     // /////////////////////////////////////
+
+    result = {
+      ...result,
+      docs: await Promise.all(result.docs.map(async doc => doc.toJSON({ virtuals: true }))),
+    };
 
     return result;
   } catch (err) {
