@@ -13,12 +13,8 @@ const registerUpload = require('../uploads/graphql/register');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 
 class GraphQL {
-  constructor(config, collections, User, Upload, globals) {
-    this.config = config;
-    this.User = User;
-    this.Upload = Upload;
-    this.collections = collections;
-    this.globals = globals;
+  constructor(init) {
+    Object.assign(this, init);
     this.init = this.init.bind(this);
 
     this.types = {

@@ -163,21 +163,21 @@ function registerUser() {
     resolve: register(this.User),
   };
 
+  this.Mutation.fields.forgotPassword = {
+    type: new GraphQLNonNull(GraphQLBoolean),
+    args: {
+      [useAsUsername]: { type: new GraphQLNonNull(GraphQLString) },
+    },
+    resolve: forgotPassword(this.config, this.User.Model, this.sendEmail),
+  };
+
   this.Mutation.fields.resetPassword = {
-    type: this.User.graphQL.type,
+    type: GraphQLString,
     args: {
       token: { type: GraphQLString },
       password: { type: GraphQLString },
     },
     resolve: resetPassword(this.User),
-  };
-
-  this.Mutation.fields.forgotPassword = {
-    type: new GraphQLNonNull(GraphQLBoolean),
-    args: {
-      [useAsUsername]: { type: GraphQLString },
-    },
-    resolve: forgotPassword(this.config, this.sendEmail),
   };
 
   this.Mutation.fields.refreshToken = {

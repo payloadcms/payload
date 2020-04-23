@@ -11,8 +11,10 @@ const RenderFields = ({
       <>
         {fieldSchema.map((field, i) => {
           const { defaultValue } = field;
-          const FieldComponent = customComponents?.[field.name]?.field || fieldTypes[field.type];
-
+          let FieldComponent = field.hidden ? fieldTypes.hidden : fieldTypes[field.type];
+          if (customComponents?.[field.name]?.field) {
+            FieldComponent = customComponents[field.name].field;
+          }
           if (FieldComponent) {
             return (
               <FieldComponent
@@ -56,7 +58,9 @@ RenderFields.propTypes = {
   ).isRequired,
   initialData: PropTypes.shape({}),
   customComponents: PropTypes.shape({}),
-  fieldTypes: PropTypes.shape({}).isRequired,
+  fieldTypes: PropTypes.shape({
+    hidden: PropTypes.node,
+  }).isRequired,
 };
 
 export default RenderFields;

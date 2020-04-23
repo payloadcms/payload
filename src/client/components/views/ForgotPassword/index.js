@@ -1,10 +1,9 @@
-import React from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import StatusList, { useStatusList } from '../../modules/Status';
 import ContentBlock from '../../layout/ContentBlock';
 import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
-import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
 import config from '../../../securedConfig';
 import Button from '../../controls/Button';
@@ -12,27 +11,24 @@ import { useUser } from '../../data/User';
 
 import './index.scss';
 
-const baseClass = 'login';
+const baseClass = 'forgot-password';
 
 const { serverURL, routes: { admin, api } } = config;
 
-const Login = () => {
+const ForgotPassword = () => {
   const { addStatus } = useStatusList();
-  const history = useHistory();
-  const { user, setToken } = useUser();
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const { user } = useUser();
 
   const handleAjaxResponse = (res) => {
     res.json()
-      .then((data) => {
-        if (data.token) {
-          setToken(data.token);
-          history.push(`${admin}`);
-        } else {
-          addStatus({
-            type: 'error',
-            message: 'The username or password you have entered is invalid.',
-          });
-        }
+      .then(() => {
+        setHasSubmitted(true);
+      }, () => {
+        addStatus({
+          type: 'error',
+          message: 'The email provided is not valid.',
+        });
       });
   };
 
@@ -64,43 +60,53 @@ const Login = () => {
     );
   }
 
+  if (hasSubmitted) {
+    return (
+      <ContentBlock
+        className={baseClass}
+        width="narrow"
+      >
+        <div className={`${baseClass}__wrap`}>
+          <h1>Email sent</h1>
+          <p>
+            Check your email for a link that will allow you to securely reset your password.
+          </p>
+          <br />
+          <Button
+            el="link"
+            type="secondary"
+            to={`${admin}/login`}
+          >
+            Go to login
+          </Button>
+        </div>
+      </ContentBlock>
+    );
+  }
+
   return (
     <ContentBlock
       className={baseClass}
       width="narrow"
     >
       <div className={`${baseClass}__wrap`}>
-        <p>
-          <a
-            className=""
-            href={`${admin}/forgot`}
-          >
-            Forgot password?
-          </a>
-        </p>
         <StatusList />
         <Form
+          novalidate
           handleAjaxResponse={handleAjaxResponse}
           method="POST"
-          action={`${serverURL}${api}/login`}
-          redirect={admin}
+          action={`${serverURL}${api}/forgot-password`}
         >
           <Email
             label="Email Address"
             name="email"
             required
           />
-          <Password
-            error="password"
-            label="Password"
-            name="password"
-            required
-          />
-          <FormSubmit>Login</FormSubmit>
+          <FormSubmit>Submit</FormSubmit>
         </Form>
       </div>
     </ContentBlock>
   );
 };
 
-export default Login;
+export default ForgotPassword;

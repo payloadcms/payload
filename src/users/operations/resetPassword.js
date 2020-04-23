@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const { APIError } = require('../../errors');
 
 const resetPassword = async (args) => {
@@ -25,10 +26,14 @@ const resetPassword = async (args) => {
 
     const {
       Model,
+      config,
       data,
     } = options;
 
-    let user = await Model.findOne({
+    const usernameField = config.auth.useAsUsername;
+    const username = data[usernameField];
+
+    const user = await Model.findOne({
       resetPasswordToken: data.token,
       resetPasswordExpiration: { $gt: Date.now() },
     });
@@ -42,6 +47,28 @@ const resetPassword = async (args) => {
 
     await user.save();
 
+    await user.authenticate(data.password);
+
+    const fieldsToSign = config.fields.reduce((signedFields, field) => {
+      if (field.saveToJWT) {
+        return {
+          ...signedFields,
+          [field.name]: user[field.name],
+        };
+      }
+      return signedFields;
+    }, {
+      [usernameField]: username,
+    });
+
+    const token = jwt.sign(
+      fieldsToSign,
+      config.auth.secretKey,
+      {
+        expiresIn: config.auth.tokenExpiration,
+      },
+    );
+
     // /////////////////////////////////////
     // 3. Execute after reset password hook
     // /////////////////////////////////////
@@ -49,14 +76,14 @@ const resetPassword = async (args) => {
     const afterResetPasswordHook = args.config.hooks && args.config.hooks.afterResetPassword;
 
     if (typeof afterResetPasswordHook === 'function') {
-      user = await afterResetPasswordHook(options, user);
+      await afterResetPasswordHook(options, user);
     }
 
     // /////////////////////////////////////
     // 4. Return updated user
     // /////////////////////////////////////
 
-    return user;
+    return token;
   } catch (error) {
     throw error;
   }
