@@ -172,7 +172,7 @@ function registerUser() {
   };
 
   this.Mutation.fields.resetPassword = {
-    type: this.User.graphQL.type,
+    type: GraphQLString,
     args: {
       token: { type: GraphQLString },
       password: { type: GraphQLString },
