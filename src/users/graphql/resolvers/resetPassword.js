@@ -10,11 +10,13 @@ const resetPasswordResolver = ({ Model, config }) => async (_, args, context) =>
     config,
     data: args,
     req: context,
+    api: 'GraphQL',
+    user: context.user,
   };
 
-  const user = await resetPassword(options);
+  const token = await resetPassword(options);
 
-  return user;
+  return token;
 };
 
 module.exports = resetPasswordResolver;

@@ -6,6 +6,7 @@ import DefaultList from './views/collections/List';
 import config from '../securedConfig';
 import { useUser } from './data/User';
 import Dashboard from './views/Dashboard';
+import ForgotPassword from './views/ForgotPassword';
 import Login from './views/Login';
 import Logout from './views/Logout';
 import NotFound from './views/NotFound';
@@ -16,6 +17,7 @@ import EditGlobal from './views/globals/Edit';
 import { requests } from '../api';
 import customComponents from './customComponents';
 import RedirectToLogin from './utilities/RedirectToLogin';
+import ResetPassword from './views/ResetPassword';
 
 const Routes = () => {
   const [initialized, setInitialized] = useState(null);
@@ -56,7 +58,10 @@ const Routes = () => {
                 <Logout />
               </Route>
               <Route path={`${match.url}/forgot`}>
-                <h1>Forgot Password</h1>
+                <ForgotPassword />
+              </Route>
+              <Route path={`${match.url}/reset/:token`}>
+                <ResetPassword />
               </Route>
 
               <Route

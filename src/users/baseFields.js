@@ -1,11 +1,13 @@
 module.exports = [
   {
     name: 'resetPasswordToken',
-    type: 'hidden',
+    type: 'text',
+    hidden: true,
   },
   {
     name: 'resetPasswordExpiration',
-    type: 'hidden',
+    type: 'date',
+    hidden: true,
   },
   {
     name: 'enableAPIKey',

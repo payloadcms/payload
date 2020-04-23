@@ -12,7 +12,10 @@ const forgotPasswordHandler = (config, email) => async (req, res) => {
       email,
     });
 
-    return res.sendStatus(200);
+    return res.status(httpStatus.OK)
+      .json({
+        message: 'Success',
+      });
   } catch (error) {
     return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
   }

@@ -4,15 +4,20 @@ const { resetPassword } = require('../operations');
 
 const resetPasswordHandler = async (req, res) => {
   try {
-    await resetPassword({
+    const token = await resetPassword({
       req,
       Model: req.Model,
       data: req.body,
     });
 
-    return res.status(200).json({ message: 'Password successfully reset' });
+    return res.status(httpStatus.OK)
+      .json({
+        message: 'Password reset',
+        token,
+      });
   } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
+    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR)
+      .json(formatErrorResponse(error));
   }
 };
 

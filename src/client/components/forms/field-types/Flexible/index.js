@@ -146,10 +146,12 @@ const Flexible = (props) => {
                             ...blockToRender.fields,
                             {
                               name: 'blockType',
-                              type: 'hidden',
+                              type: 'text',
+                              hidden: true,
                             }, {
                               name: 'blockName',
-                              type: 'hidden',
+                              type: 'text',
+                              hidden: true,
                             },
                           ]}
                           singularLabel={blockType}

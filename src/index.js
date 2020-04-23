@@ -60,7 +60,7 @@ class Payload {
       identifyAPI('GraphQL'),
       createAuthHeaderFromCookie,
       authenticate,
-      new GraphQL(this.config, this.collections, this.User, this.Upload, this.globals).init(),
+      new GraphQL(this).init(),
     );
 
     this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({

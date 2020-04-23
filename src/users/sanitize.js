@@ -29,6 +29,17 @@ const sanitizeUserCollection = (userConfig) => {
 
   sanitizedUserConfig.fields = sanitizeFields(userConfig.fields);
 
+  // /////////////////////////////////
+  // Hidden fields
+  // /////////////////////////////////
+
+  const hiddenFields = Array.isArray(sanitizedUserConfig.hidden) ? sanitizedUserConfig.hidden : [];
+  sanitizedUserConfig.hidden = [
+    ...hiddenFields,
+    'resetPasswordToken',
+    'resetPasswordExpiration',
+  ];
+
   return sanitizedUserConfig;
 };
 
