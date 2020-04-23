@@ -8,7 +8,7 @@ const executeFieldHooks = async (fields, data, hookName) => {
     return postHookData;
   }
 
-  const postHookData = { ...data };
+  const postHookData = Object.create(data);
   const hookPromises = [];
 
   fields.forEach((field) => {
