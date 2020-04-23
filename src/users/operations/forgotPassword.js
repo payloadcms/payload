@@ -67,12 +67,6 @@ const forgotPassword = async (args) => {
     if (typeof afterForgotPasswordHook === 'function') {
       await afterForgotPasswordHook(options);
     }
-
-    // /////////////////////////////////////
-    // 4. Return
-    // /////////////////////////////////////
-
-    return;
   } catch (error) {
     throw error;
   }
