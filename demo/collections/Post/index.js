@@ -31,7 +31,11 @@ module.exports = {
       return operation;
     },
     afterCreate: (operation, value) => value,
-    afterRead: (operation, value) => value,
+    afterRead: (operation) => {
+      const { json } = operation;
+      json.title += ' and this';
+      json.extra = 'afterRead Hook data';
+    },
     afterUpdate: (operation, value) => value,
     afterDelete: (operation, value) => {
       console.log(`Deleted ${operation.query._id}`);
@@ -49,9 +53,9 @@ module.exports = {
       unique: true,
       localized: true,
       hooks: {
-        beforeCreate: value => value,
-        beforeUpdate: value => value,
-        afterRead: value => value,
+        beforeCreate: operation => operation.value,
+        beforeUpdate: operation => operation.value,
+        afterRead: operation => operation.value,
       },
     },
     {

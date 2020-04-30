@@ -77,8 +77,7 @@ const find = async (args) => {
         if (locale && doc.setLocale) {
           doc.setLocale(locale, fallbackLocale);
         }
-        const hookedDoc = await executeFieldHooks(args.config.fields, doc, 'afterRead');
-        return hookedDoc;
+        return executeFieldHooks(options, args.config.fields, doc, 'afterRead', doc);
       })),
     };
 
@@ -89,17 +88,22 @@ const find = async (args) => {
     const { afterRead } = args.config.hooks;
 
     if (typeof afterRead === 'function') {
-      result = await afterRead(options, result);
+      result = {
+        ...result,
+        docs: await Promise.all(result.docs.map(async (doc) => {
+          const json = doc.toJSON({ virtuals: true });
+          return afterRead({
+            options,
+            doc,
+            json,
+          }) || json;
+        })),
+      };
     }
 
     // /////////////////////////////////////
     // 6. Return results
     // /////////////////////////////////////
-
-    result = {
-      ...result,
-      docs: await Promise.all(result.docs.map(async doc => doc.toJSON({ virtuals: true }))),
-    };
 
     return result;
   } catch (err) {

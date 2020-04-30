@@ -1,20 +1,23 @@
-const executeFieldHooks = async (fields, data, hookName) => {
+const executeFieldHooks = async (operation, fields, value, hookName, data = null) => {
+  const fullData = data || value;
   if (Array.isArray(data)) {
-    const postHookData = await Promise.all(data.map(async (row) => {
-      const rowData = await executeFieldHooks(fields, row, hookName);
-      return rowData;
+    return Promise.all(data.map(async (row) => {
+      return executeFieldHooks(operation, fields, fullData, row, hookName);
     }));
-
-    return postHookData;
   }
 
-  const postHookData = { ...data };
+  const postHookData = Object.create(fullData);
+
   const hookPromises = [];
 
   fields.forEach((field) => {
     if (typeof field.hooks[hookName] === 'function' && data[field.name]) {
       const hookPromise = async () => {
-        postHookData[field.name] = await field.hooks[hookName](data[field.name]);
+        postHookData[field.name] = await field.hooks[hookName]({
+          ...operation,
+          data: fullData,
+          value: data[field.name],
+        });
       };
 
       hookPromises.push(hookPromise());
@@ -22,7 +25,7 @@ const executeFieldHooks = async (fields, data, hookName) => {
 
     if (field.fields && data[field.name]) {
       const hookPromise = async () => {
-        postHookData[field.name] = await executeFieldHooks(field.fields, data[field.name], hookName);
+        postHookData[field.name] = await executeFieldHooks(operation, field.fields, fullData, hookName, data[field.name]);
       };
 
       hookPromises.push(hookPromise());
