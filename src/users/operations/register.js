@@ -25,7 +25,7 @@ const register = async (args) => {
     // 3. Execute before register field-level hooks
     // /////////////////////////////////////
 
-    options.data = await executeFieldHooks(args.config.fields, args.data, 'beforeCreate');
+    options.data = await executeFieldHooks(options, args.config.fields, args.data, 'beforeCreate');
 
     // /////////////////////////////////////
     // 4. Execute before register hook
