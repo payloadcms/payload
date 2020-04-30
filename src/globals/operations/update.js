@@ -1,13 +1,13 @@
 const executePolicy = require('../../users/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
 
-const upsert = async (args) => {
+const update = async (args) => {
   try {
     // /////////////////////////////////////
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    await executePolicy(args, args.config.policies.upsert);
+    await executePolicy(args, args.config.policies.update);
 
     let options = { ...args };
 
@@ -17,16 +17,16 @@ const upsert = async (args) => {
     // 2. Execute before update field-level hooks
     // /////////////////////////////////////
 
-    options.data = await executeFieldHooks(args.config.fields, args.data, 'beforeUpdate');
+    options.data = await executeFieldHooks(options, args.config.fields, args.data, 'beforeUpdate', args.data);
 
     // /////////////////////////////////////
     // 2. Execute before global hook
     // /////////////////////////////////////
 
-    const { beforeUpsert } = args.config.hooks;
+    const { beforeUpdate } = args.config.hooks;
 
-    if (typeof beforeUpsert === 'function') {
-      options = await beforeUpsert(options);
+    if (typeof beforeUpdate === 'function') {
+      options = await beforeUpdate(options);
     }
 
     // /////////////////////////////////////
@@ -64,10 +64,10 @@ const upsert = async (args) => {
     // 4. Execute after global hook
     // /////////////////////////////////////
 
-    const { afterUpsert } = args.config.hooks;
+    const { afterUpdate } = args.config.hooks;
 
-    if (typeof afterUpsert === 'function') {
-      result = await afterUpsert(options, result);
+    if (typeof afterUpdate === 'function') {
+      result = await afterUpdate(options, result);
     }
 
     // /////////////////////////////////////
@@ -80,4 +80,4 @@ const upsert = async (args) => {
   }
 };
 
-module.exports = upsert;
+module.exports = update;

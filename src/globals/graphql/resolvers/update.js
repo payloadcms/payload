@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
-const { upsert } = require('../../operations');
+const { update } = require('../../operations');
 
-const upsertResolver = (Model, config) => async (_, args, context) => {
+const updateResolver = (Model, config) => async (_, args, context) => {
   if (args.locale) context.locale = args.locale;
   if (args.fallbackLocale) context.fallbackLocale = args.fallbackLocale;
 
@@ -16,9 +16,9 @@ const upsertResolver = (Model, config) => async (_, args, context) => {
     req: context,
   };
 
-  const result = await upsert(options);
+  const result = await update(options);
 
   return result;
 };
 
-module.exports = upsertResolver;
+module.exports = updateResolver;

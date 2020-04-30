@@ -1,7 +1,7 @@
 const express = require('express');
 const requestHandlers = require('./requestHandlers');
 
-const { upsert, findOne } = requestHandlers;
+const { update, findOne } = requestHandlers;
 
 const router = express.Router();
 
@@ -10,8 +10,8 @@ const registerGlobals = (globalConfigs, Globals) => {
     router
       .route(`/globals/${global.slug}`)
       .get(findOne(Globals, global))
-      .post(upsert(Globals, global))
-      .put(upsert(Globals, global));
+      .post(update(Globals, global))
+      .put(update(Globals, global));
   });
 
   return router;

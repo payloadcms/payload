@@ -9,7 +9,7 @@ const executeFieldHooks = async (operation, fields, value, hookName, data = null
   const hookPromises = [];
 
   fields.forEach((field) => {
-    if (typeof field.hooks[hookName] === 'function' && data[field.name]) {
+    if (typeof field.hooks[hookName] === 'function' && fullData[field.name]) {
       const hookPromise = async () => {
         fullData[field.name] = await field.hooks[hookName]({
           ...operation,

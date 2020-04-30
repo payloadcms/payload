@@ -23,7 +23,7 @@ const update = async (args) => {
     // 3. Execute before update field-level hooks
     // /////////////////////////////////////
 
-    options.data = await executeFieldHooks(args.config.fields, args.data, 'beforeUpdate');
+    options.data = await executeFieldHooks(options, args.config.fields, args.data, 'beforeUpdate', args.data);
 
     // /////////////////////////////////////
     // 4. Execute before collection hook

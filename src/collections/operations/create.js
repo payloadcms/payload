@@ -22,7 +22,7 @@ const create = async (args) => {
     // 3. Execute before create field-level hooks
     // /////////////////////////////////////
 
-    options.data = await executeFieldHooks(null, args.config.fields, args.data, 'beforeCreate', args.data);
+    options.data = await executeFieldHooks(options, args.config.fields, args.data, 'beforeCreate', args.data);
 
     // /////////////////////////////////////
     // 4. Execute before collection hook

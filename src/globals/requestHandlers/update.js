@@ -1,12 +1,12 @@
 const httpStatus = require('http-status');
 const formatErrorResponse = require('../../express/responses/formatError');
-const { upsert } = require('../operations');
+const { update } = require('../operations');
 
-const upsertHandler = (Model, config) => async (req, res) => {
+const updateHandler = (Model, config) => async (req, res) => {
   try {
     const { slug } = config;
 
-    const result = await upsert({
+    const result = await update({
       req,
       Model,
       config,
@@ -20,4 +20,4 @@ const upsertHandler = (Model, config) => async (req, res) => {
   }
 };
 
-module.exports = upsertHandler;
+module.exports = updateHandler;

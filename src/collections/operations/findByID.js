@@ -58,7 +58,6 @@ const findByID = async (args) => {
       }
     }
 
-
     let result = await Model.findOne(query, {}, queryOptionsToExecute);
 
     if (!result) throw new NotFound();

@@ -86,9 +86,10 @@ const find = async (args) => {
     // /////////////////////////////////////
 
     const { afterRead } = args.config.hooks;
+    let afterReadResult = null;
 
     if (typeof afterRead === 'function') {
-      return {
+      afterReadResult = {
         ...result,
         docs: await Promise.all(result.docs.map(async (doc) => {
           const json = doc.toJSON({ virtuals: true });
@@ -101,7 +102,11 @@ const find = async (args) => {
       };
     }
 
-    return {
+    // /////////////////////////////////////
+    // 6. Return results
+    // /////////////////////////////////////
+
+    return afterReadResult || {
       ...result,
       docs: result.docs.map(doc => doc.toJSON({ virtuals: true })),
     };
