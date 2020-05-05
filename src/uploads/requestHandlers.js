@@ -3,14 +3,15 @@ const httpStatus = require('http-status');
 const resizeAndSave = require('./images/imageResizer');
 const findByID = require('../collections/operations/findByID');
 const { NotFound } = require('../errors');
+const { getFileSystemSafeFileName } = require('./utilities');
 
-async function fileTypeHandler(config, uploadConfig, file) {
-  const data = {};
+async function fileTypeHandler(config, uploadConfig, savedFilename) {
+  const fileData = {};
+  fileData.name = savedFilename;
   if (uploadConfig.imageSizes) {
-    data.sizes = await resizeAndSave(config, uploadConfig, file);
+    fileData.sizes = await resizeAndSave(config, uploadConfig, savedFilename);
   }
-
-  return data;
+  return fileData;
 }
 
 const update = async (req, res, next, config) => {
@@ -69,20 +70,20 @@ const upload = async (req, res, next, config) => {
     }
   });
 
-  const outputFilepath = `${config.staticDir}/${req.files.file.name}`;
-  const moveError = await req.files.file.mv(outputFilepath);
+  const fsSafeName = await getFileSystemSafeFileName(config.staticDir, req.files.file.name);
+  const moveError = await req.files.file.mv(`${config.staticDir}/${fsSafeName}`);
   if (moveError) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR)
       .send(moveError);
     return;
   }
 
-  const handlerData = await fileTypeHandler(config, req.uploadConfig, req.files.file);
+  const uploadData = await fileTypeHandler(config, req.uploadConfig, fsSafeName);
 
   req.Model.create({
     ...req.body,
-    filename: req.files.file.name,
-    ...handlerData,
+    filename: uploadData.name,
+    ...uploadData,
   }, (mediaCreateError, result) => {
     if (mediaCreateError) {
       return res.status(httpStatus.INTERNAL_SERVER_ERROR)

@@ -5,7 +5,7 @@ import DefaultTemplate from '../../../layout/DefaultTemplate';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Form from '../../../forms/Form';
 import StickyHeader from '../../../modules/StickyHeader';
-import APIUrl from '../../../modules/APIUrl';
+import APIURL from '../../../modules/APIURL';
 import Button from '../../../controls/Button';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
@@ -56,7 +56,7 @@ const EditView = (props) => {
         <StickyHeader
           showStatus
           content={
-            <APIUrl url={`${serverURL}${api}/globals/${global.slug}`} />
+            <APIURL url={`${serverURL}${api}/globals/${global.slug}`} />
           }
           action={(
             <>

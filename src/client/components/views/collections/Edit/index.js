@@ -6,8 +6,8 @@ import DefaultTemplate from '../../../layout/DefaultTemplate';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Form from '../../../forms/Form';
 import StickyHeader from '../../../modules/StickyHeader';
-import APIUrl from '../../../modules/APIUrl';
-import Button from '../../../controls/Button';
+import APIURL from '../../../modules/APIURL';
+import PreviewButton from '../../../controls/PreviewButton';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
 import * as fieldTypes from '../../../forms/field-types';
@@ -100,11 +100,7 @@ const EditView = (props) => {
         <StickyHeader
           showStatus
           content={
-<<<<<<< HEAD
             <APIURL url={isEditing && `${serverURL}${api}/${slug}/${data.id}`} />
-=======
-            <APIUrl url={isEditing && `${serverURL}${api}/${collection.slug}/${data.id}`} />
->>>>>>> Fix APIUrl casing
           }
           action={(
             <>
