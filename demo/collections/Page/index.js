@@ -101,7 +101,7 @@ module.exports = {
                 return (siblings.cardNumber && siblings.cardNumber.value);
               },
               hooks: {
-                afterRead: value => `hooked value - ${value}`,
+                afterRead: operation => operation.value,
               },
             },
           ],
@@ -139,7 +139,7 @@ module.exports = {
           width: 50,
           required: true,
           hooks: {
-            afterRead: value => `hooked value - ${value}`,
+            afterRead: operation => operation.value,
           },
         },
         {

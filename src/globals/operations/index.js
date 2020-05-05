@@ -1,7 +1,7 @@
-const upsert = require('./upsert');
+const update = require('./update');
 const findOne = require('./findOne');
 
 module.exports = {
   findOne,
-  upsert,
+  update,
 };
