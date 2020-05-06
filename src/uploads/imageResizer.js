@@ -18,7 +18,7 @@ function getOutputImage(sourceImage, size) {
   };
 }
 
-module.exports = async function resizeAndSave(config, uploadConfig, savedFilename) {
+module.exports = async function resizeAndSave(config, savedFilename) {
   /**
    * Resize images according to image desired width and height and return sizes
    * @param config Object
@@ -27,11 +27,13 @@ module.exports = async function resizeAndSave(config, uploadConfig, savedFilenam
    * @returns String[]
    */
 
-  const sourceImage = `${config.staticDir}/${savedFilename}`;
+  const { imageSizes, staticDir } = config.upload;
+
+  const sourceImage = `${staticDir}/${savedFilename}`;
   let sizes;
   try {
     const dimensions = await sizeOf(sourceImage);
-    sizes = uploadConfig.imageSizes
+    sizes = imageSizes
       .filter(desiredSize => desiredSize.width < dimensions.width)
       .map(async (desiredSize) => {
         const outputImage = getOutputImage(savedFilename, desiredSize);
@@ -41,7 +43,7 @@ module.exports = async function resizeAndSave(config, uploadConfig, savedFilenam
             // would it make sense for this to be set by the uploader?
             position: desiredSize.crop || 'centre',
           })
-          .toFile(`${config.staticDir}/${imageNameWithDimensions}`);
+          .toFile(`${staticDir}/${imageNameWithDimensions}`);
         return { ...desiredSize, filename: imageNameWithDimensions };
       });
     const savedSizes = await Promise.all(sizes);
