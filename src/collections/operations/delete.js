@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { NotFound } = require('../../errors');
 const executePolicy = require('../../users/executePolicy');
 
@@ -22,7 +23,7 @@ const deleteQuery = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 3. Perform database operation
+    // 3. Get existing document
     // /////////////////////////////////////
 
     const {
@@ -34,20 +35,45 @@ const deleteQuery = async (args) => {
       },
     } = options;
 
-    let result = await Model.findOneAndDelete({ _id: id });
+    let resultToDelete = await Model.findOne({ _id: id });
 
-    if (!result) throw new NotFound();
+    if (!resultToDelete) throw new NotFound();
+
+    resultToDelete = resultToDelete.toJSON({ virtuals: true });
+
+    if (locale && resultToDelete.setLocale) {
+      resultToDelete.setLocale(locale, fallbackLocale);
+    }
+
+    // /////////////////////////////////////
+    // 4. Delete any associated files
+    // /////////////////////////////////////
+
+    const { staticDir } = options.req.collection.config.upload;
+
+    fs.unlink(`${staticDir}/${resultToDelete.filename}`, (err) => {
+      console.log('Error deleting file:', err);
+    });
+
+    if (resultToDelete.sizes) {
+      Object.values(resultToDelete.sizes).forEach((size) => {
+        fs.unlink(`${staticDir}/${size.filename}`, (err) => {
+          console.log('Error deleting file:', err);
+        });
+      });
+    }
+
+    // /////////////////////////////////////
+    // 5. Delete database document
+    // /////////////////////////////////////
+
+    let result = await Model.findOneAndDelete({ _id: id });
 
     result = result.toJSON({ virtuals: true });
 
     if (locale && result.setLocale) {
       result.setLocale(locale, fallbackLocale);
     }
-
-    // /////////////////////////////////////
-    // TODO - if upload is present on the collection,
-    // delete the file here
-    // /////////////////////////////////////
 
     // /////////////////////////////////////
     // 4. Execute after collection hook

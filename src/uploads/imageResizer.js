@@ -18,7 +18,7 @@ function getOutputImage(sourceImage, size) {
   };
 }
 
-module.exports = async function resizeAndSave(config, savedFilename) {
+module.exports = async function resizeAndSave(config, savedFilename, mimeType) {
   /**
    * Resize images according to image desired width and height and return sizes
    * @param config Object
@@ -38,15 +38,23 @@ module.exports = async function resizeAndSave(config, savedFilename) {
       .map(async (desiredSize) => {
         const outputImage = getOutputImage(savedFilename, desiredSize);
         const imageNameWithDimensions = `${outputImage.name}-${outputImage.width}x${outputImage.height}.${outputImage.extension}`;
-        await sharp(sourceImage)
+        const output = await sharp(sourceImage)
           .resize(desiredSize.width, desiredSize.height, {
             // would it make sense for this to be set by the uploader?
             position: desiredSize.crop || 'centre',
           })
           .toFile(`${staticDir}/${imageNameWithDimensions}`);
-        return { ...desiredSize, filename: imageNameWithDimensions };
+
+        return {
+          ...desiredSize,
+          filename: imageNameWithDimensions,
+          filesize: output.size,
+          mimeType,
+        };
       });
+
     const savedSizes = await Promise.all(sizes);
+
     return savedSizes.reduce((results, size) => {
       return {
         ...results,
@@ -54,6 +62,8 @@ module.exports = async function resizeAndSave(config, savedFilename) {
           width: size.width,
           height: size.height,
           filename: size.filename,
+          mimeType: size.mimeType,
+          filesize: size.filesize,
         },
       };
     }, {});

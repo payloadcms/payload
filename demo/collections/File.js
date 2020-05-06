@@ -9,25 +9,6 @@ module.exports = {
   upload: {
     staticURL: '/files',
     staticDir: 'demo/files',
-    imageSizes: [
-      {
-        name: 'tablet',
-        width: 640,
-        height: 480,
-        crop: 'left top',
-      },
-      {
-        name: 'mobile',
-        width: 320,
-        height: 240,
-        crop: 'left top',
-      },
-      {
-        name: 'icon',
-        width: 16,
-        height: 16,
-      },
-    ],
   },
   useAsTitle: 'filename',
   policies: {

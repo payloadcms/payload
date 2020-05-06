@@ -72,16 +72,12 @@ const update = async (args) => {
       if (args.req.files || args.req.files.file) {
         const fsSafeName = await getSafeFilename(staticDir, options.req.files.file.name);
 
-        try {
-          await options.req.files.file.mv(`${staticDir}/${fsSafeName}`);
+        await options.req.files.file.mv(`${staticDir}/${fsSafeName}`);
 
-          fileData.filename = fsSafeName;
+        fileData.filename = fsSafeName;
 
-          if (imageSizes) {
-            fileData.sizes = await resizeAndSave(options.config, fsSafeName);
-          }
-        } catch (error) {
-          throw error;
+        if (imageSizes) {
+          fileData.sizes = await resizeAndSave(options.config, fsSafeName);
         }
       }
 

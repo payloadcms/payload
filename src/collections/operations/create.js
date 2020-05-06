@@ -36,37 +36,32 @@ const create = async (args) => {
     // /////////////////////////////////////
 
     if (args.config.upload) {
+      const { staticDir, imageSizes } = options.req.collection.config.upload;
+
       const fileData = {};
 
       if (!args.req.files || Object.keys(args.req.files).length === 0) {
         throw new MissingFile();
       }
 
-      const { staticDir, imageSizes } = options.req.collection.config.upload;
+      await mkdirp(staticDir);
 
-      try {
-        await mkdirp(staticDir);
-        const fsSafeName = await getSafeFilename(staticDir, options.req.files.file.name);
+      const fsSafeName = await getSafeFilename(staticDir, options.req.files.file.name);
 
-        try {
-          await options.req.files.file.mv(`${staticDir}/${fsSafeName}`);
+      await options.req.files.file.mv(`${staticDir}/${fsSafeName}`);
 
-          fileData.filename = fsSafeName;
+      fileData.filename = fsSafeName;
+      fileData.filesize = options.req.files.file.size;
+      fileData.mimeType = options.req.files.file.mimetype;
 
-          if (imageSizes) {
-            fileData.sizes = await resizeAndSave(options.config, fsSafeName);
-          }
-
-          options.data = {
-            ...options.data,
-            ...fileData,
-          };
-        } catch (error) {
-          throw error;
-        }
-      } catch (err) {
-        throw err;
+      if (imageSizes) {
+        fileData.sizes = await resizeAndSave(options.config, fsSafeName, fileData.mimeType);
       }
+
+      options.data = {
+        ...options.data,
+        ...fileData,
+      };
     }
 
     // /////////////////////////////////////
