@@ -9,6 +9,7 @@
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
     "dev": "nodemon demo/server.js",
     "lint": "eslint **/*.js",
+    "debug": "nodemon --inspect demo/server.js",
     "debug:test:int": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
   "bin": {

@@ -62,13 +62,13 @@ const findOne = async (args) => {
       result.setLocale(locale, fallbackLocale);
     }
 
-    result = result.toJSON({ virtuals: true });
+    let json = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
     // 4. Execute after collection field-level hooks
     // /////////////////////////////////////
 
-    result = await executeFieldHooks(args.config.fields, result, 'afterRead');
+    result = await executeFieldHooks(options, args.config.fields, result, 'afterRead', result);
 
     // /////////////////////////////////////
     // 5. Execute after collection hook
@@ -77,14 +77,14 @@ const findOne = async (args) => {
     const { afterRead } = args.config.hooks;
 
     if (typeof afterRead === 'function') {
-      result = await afterRead(options, result);
+      json = await afterRead(options, result, json) || json;
     }
 
     // /////////////////////////////////////
     // 6. Return results
     // /////////////////////////////////////
 
-    return result;
+    return json;
   } catch (error) {
     throw error;
   }

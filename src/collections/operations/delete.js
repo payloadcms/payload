@@ -56,7 +56,7 @@ const deleteQuery = async (args) => {
     const { afterDelete } = args.config.hooks;
 
     if (typeof afterDelete === 'function') {
-      result = await afterDelete(options, result);
+      result = await afterDelete(options, result) || result;
     }
 
     // /////////////////////////////////////

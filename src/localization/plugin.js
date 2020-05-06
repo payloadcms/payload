@@ -77,7 +77,7 @@ module.exports = function localizationPlugin(schema, options) {
       .set(function (value) {
         // multiple locales are set as an object
         if (value && typeof value === 'object' && !Array.isArray(value)) {
-          const { locales } = this.schema.options.localization;
+          const { locales } = options;
           locales.forEach((locale) => {
             if (!value[locale]) {
               return;

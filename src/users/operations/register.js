@@ -25,7 +25,7 @@ const register = async (args) => {
     // 3. Execute before register field-level hooks
     // /////////////////////////////////////
 
-    options.data = await executeFieldHooks(args.config.fields, args.data, 'beforeCreate');
+    options.data = await executeFieldHooks(options, args.config.fields, args.data, 'beforeCreate');
 
     // /////////////////////////////////////
     // 4. Execute before register hook
@@ -62,7 +62,6 @@ const register = async (args) => {
     Object.assign(user, modelData);
 
     let result = await Model.register(user, data.password);
-    result = result.toJSON({ virtuals: true });
 
     await passport.authenticate('local');
 
@@ -79,8 +78,7 @@ const register = async (args) => {
     // /////////////////////////////////////
     // 7. Return user
     // /////////////////////////////////////
-
-    return result;
+    return result.toJSON({ virtuals: true });
   } catch (error) {
     throw error;
   }

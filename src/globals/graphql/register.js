@@ -2,7 +2,7 @@ const { GraphQLNonNull } = require('graphql');
 const formatName = require('../../graphql/utilities/formatName');
 
 const {
-  findOne, upsert,
+  findOne, update,
 } = require('./resolvers');
 
 function registerGlobals() {
@@ -38,12 +38,12 @@ function registerGlobals() {
       resolve: findOne(this.globals.Model, global),
     };
 
-    this.Mutation.fields[`upsert${formattedLabel}`] = {
+    this.Mutation.fields[`update${formattedLabel}`] = {
       type: global.graphQL.type,
       args: {
         data: { type: global.graphQL.mutationInputType },
       },
-      resolve: upsert(this.globals.Model, global),
+      resolve: update(this.globals.Model, global),
     };
   });
 }
