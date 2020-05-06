@@ -1,7 +1,6 @@
 const { promisify } = require('util');
-const fs = require('fs');
-
 const sanitize = require('sanitize-filename');
+const fs = require('fs');
 
 const stat = promisify(fs.stat);
 
@@ -23,24 +22,22 @@ const incrementName = (name) => {
   return `${incrementedName}.${extension}`;
 };
 
-const utilities = {
-  async getFileSystemSafeFileName(staticDir, desiredFilename) {
-    let modifiedFilename = desiredFilename;
-    const exists = async (fileName) => {
-      console.log(`Checking for ${fileName} existence...`);
-      try {
-        await stat(fileName);
-        return true;
-      } catch (err) {
-        return false;
-      }
-    };
-    // eslint-disable-next-line no-await-in-loop
-    while (await exists(`${staticDir}/${modifiedFilename}`)) {
-      modifiedFilename = incrementName(modifiedFilename);
+async function getSafeFileName(staticDir, desiredFilename) {
+  let modifiedFilename = desiredFilename;
+  const exists = async (fileName) => {
+    console.log(`Checking for ${fileName} existence...`);
+    try {
+      await stat(fileName);
+      return true;
+    } catch (err) {
+      return false;
     }
-    return modifiedFilename;
-  },
-};
+  };
+  // eslint-disable-next-line no-await-in-loop
+  while (await exists(`${staticDir}/${modifiedFilename}`)) {
+    modifiedFilename = incrementName(modifiedFilename);
+  }
+  return modifiedFilename;
+}
 
-module.exports = utilities;
+module.exports = getSafeFileName;

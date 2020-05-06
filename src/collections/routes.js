@@ -1,4 +1,6 @@
 const express = require('express');
+const fileUpload = require('express-fileupload');
+
 const requestHandlers = require('./requestHandlers');
 const bindCollectionMiddleware = require('./bindCollection');
 
@@ -9,8 +11,15 @@ const {
 const router = express.Router();
 
 const registerRoutes = ({ Model, config }) => {
-  router.all(`/${config.slug}*`,
-    bindCollectionMiddleware({ Model, config }));
+  const middleware = [
+    bindCollectionMiddleware({ Model, config }),
+  ];
+
+  if (config.upload) {
+    middleware.push(fileUpload());
+  }
+
+  router.all(`/${config.slug}*`, ...middleware);
 
   router.route(`/${config.slug}`)
     .get(find)

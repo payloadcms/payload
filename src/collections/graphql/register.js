@@ -101,16 +101,16 @@ function registerCollections() {
         },
         resolve: create(collection),
       };
-    }
 
-    this.Mutation.fields[`update${singularLabel}`] = {
-      type: collection.graphQL.type,
-      args: {
-        id: { type: new GraphQLNonNull(GraphQLString) },
-        data: { type: collection.graphQL.updateMutationInputType },
-      },
-      resolve: update(collection),
-    };
+      this.Mutation.fields[`update${singularLabel}`] = {
+        type: collection.graphQL.type,
+        args: {
+          id: { type: new GraphQLNonNull(GraphQLString) },
+          data: { type: collection.graphQL.updateMutationInputType },
+        },
+        resolve: update(collection),
+      };
+    }
 
     this.Mutation.fields[`delete${singularLabel}`] = {
       type: collection.graphQL.type,

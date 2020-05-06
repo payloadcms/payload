@@ -3,6 +3,9 @@ const executeFieldHooks = require('../../fields/executeHooks');
 const { NotFound } = require('../../errors');
 const validate = require('../../fields/validateUpdate');
 
+const resizeAndSave = require('../../uploads/imageResizer');
+const getSafeFilename = require('../../uploads/getSafeFilename');
+
 const update = async (args) => {
   try {
     // /////////////////////////////////////
@@ -57,13 +60,45 @@ const update = async (args) => {
       result.setLocale(locale, fallbackLocale);
     }
 
+    // /////////////////////////////////////
+    // 6. Upload and resize any files that may be present
+    // /////////////////////////////////////
+
+    if (args.config.upload) {
+      const fileData = {};
+
+      const { staticDir, imageSizes } = args.config.upload;
+
+      if (args.req.files || args.req.files.file) {
+        const fsSafeName = await getSafeFilename(staticDir, options.req.files.file.name);
+
+        try {
+          await options.req.files.file.mv(`${staticDir}/${fsSafeName}`);
+
+          fileData.filename = fsSafeName;
+
+          if (imageSizes) {
+            fileData.sizes = await resizeAndSave(options.config, fsSafeName);
+          }
+        } catch (error) {
+          throw error;
+        }
+      }
+
+      options.data = {
+        ...options.data,
+        ...fileData,
+      };
+    }
+
     Object.assign(result, data);
+
     await result.save();
 
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 6. Execute after collection hook
+    // 7. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterUpdate } = args.config.hooks;
@@ -73,7 +108,7 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 7. Return results
+    // 8. Return results
     // /////////////////////////////////////
 
     return result;

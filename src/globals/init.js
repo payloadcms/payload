@@ -2,7 +2,7 @@ const buildModel = require('./buildModel');
 const sanitize = require('./sanitize');
 const routes = require('./routes');
 
-function registerGlobals() {
+function initGlobals() {
   this.config.globals = sanitize(this.config.globals);
 
   if (this.config.globals) {
@@ -15,4 +15,4 @@ function registerGlobals() {
   }
 }
 
-module.exports = registerGlobals;
+module.exports = initGlobals;

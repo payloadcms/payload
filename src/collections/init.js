@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const collectionRoutes = require('./routes');
 const buildSchema = require('./buildSchema');
 const sanitize = require('./sanitize');
-const uploadRoutes = require('../uploads/routes');
 
 function registerCollections() {
   this.config.collections.forEach((collection) => {
@@ -41,10 +40,6 @@ function registerCollections() {
       Model: mongoose.model(collection.slug, schema),
       config: sanitize(this.collections, collection),
     };
-
-    if (collection.upload) {
-      this.router.use(uploadRoutes(this.collections[collection.slug]));
-    }
 
     this.router.use(collectionRoutes(this.collections[collection.slug]));
   });

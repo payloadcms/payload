@@ -7,6 +7,7 @@ const MissingUseAsTitle = require('./MissingUseAsTitle');
 const NotFound = require('./NotFound');
 const Forbidden = require('./Forbidden');
 const ValidationError = require('./ValidationError');
+const MissingFile = require('./MissingFile');
 
 module.exports = {
   APIError,
@@ -18,4 +19,5 @@ module.exports = {
   NotFound,
   Forbidden,
   ValidationError,
+  MissingFile,
 };
