@@ -7,8 +7,8 @@ module.exports = {
     plural: 'Files',
   },
   upload: {
-    staticURL: '/media',
-    staticDir: 'demo/media',
+    staticURL: '/files',
+    staticDir: 'demo/files',
     imageSizes: [
       {
         name: 'tablet',

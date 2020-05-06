@@ -223,5 +223,7 @@ src/**/*.css
 demo**/*.css
 dist
 
-# Ignore demo/uploads
+# Ignore all uploads
 demo/upload
+demo/media
+demo/files
