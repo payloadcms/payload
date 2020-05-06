@@ -4,7 +4,6 @@ const { NotFound } = require('../../errors');
 const validate = require('../../fields/validateUpdate');
 
 const resizeAndSave = require('../../uploads/imageResizer');
-const getSafeFilename = require('../../uploads/getSafeFilename');
 
 const update = async (args) => {
   try {
@@ -42,6 +41,10 @@ const update = async (args) => {
     // 5. Perform database operation
     // /////////////////////////////////////
 
+    let {
+      data,
+    } = options;
+
     const {
       Model,
       id,
@@ -49,7 +52,6 @@ const update = async (args) => {
         locale,
         fallbackLocale,
       },
-      data,
     } = options;
 
     let result = await Model.findOne({ _id: id });
@@ -70,21 +72,19 @@ const update = async (args) => {
       const { staticDir, imageSizes } = args.config.upload;
 
       if (args.req.files || args.req.files.file) {
-        const fsSafeName = await getSafeFilename(staticDir, options.req.files.file.name);
+        await options.req.files.file.mv(`${staticDir}/${options.req.files.file.name}`);
 
-        await options.req.files.file.mv(`${staticDir}/${fsSafeName}`);
-
-        fileData.filename = fsSafeName;
+        fileData.filename = options.req.files.file.name;
 
         if (imageSizes) {
-          fileData.sizes = await resizeAndSave(options.config, fsSafeName);
+          fileData.sizes = await resizeAndSave(options.config, options.req.files.file.name);
         }
-      }
 
-      options.data = {
-        ...options.data,
-        ...fileData,
-      };
+        data = {
+          ...data,
+          ...fileData,
+        };
+      }
     }
 
     Object.assign(result, data);

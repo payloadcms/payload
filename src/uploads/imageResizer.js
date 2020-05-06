@@ -1,8 +1,9 @@
-/* eslint-disable func-names */
+const fs = require('fs');
 const sharp = require('sharp');
 const sanitize = require('sanitize-filename');
 const { promisify } = require('util');
 const imageSize = require('image-size');
+const fileExists = require('./fileExists');
 
 const sizeOf = promisify(imageSize);
 
@@ -38,12 +39,17 @@ module.exports = async function resizeAndSave(config, savedFilename, mimeType) {
       .map(async (desiredSize) => {
         const outputImage = getOutputImage(savedFilename, desiredSize);
         const imageNameWithDimensions = `${outputImage.name}-${outputImage.width}x${outputImage.height}.${outputImage.extension}`;
+        const imagePath = `${staticDir}/${imageNameWithDimensions}`;
+
+        if (fileExists(imagePath)) {
+          fs.unlinkSync(imagePath);
+        }
+
         const output = await sharp(sourceImage)
           .resize(desiredSize.width, desiredSize.height, {
-            // would it make sense for this to be set by the uploader?
             position: desiredSize.crop || 'centre',
           })
-          .toFile(`${staticDir}/${imageNameWithDimensions}`);
+          .toFile(imagePath);
 
         return {
           ...desiredSize,
