@@ -6,8 +6,8 @@ const registerFirstUserHandler = async (req, res) => {
   try {
     const firstUser = await registerFirstUser({
       req,
-      Model: req.Model,
-      config: req.collection,
+      Model: req.collection.Model,
+      config: req.collection.config,
       data: req.body,
     });
 

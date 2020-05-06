@@ -10,7 +10,7 @@ const config = require('../../demo/payload.config');
 const { payload } = require('../../demo/server');
 
 const url = config.serverURL;
-const usernameField = config.user.auth.useAsUsername;
+const usernameField = config.User.auth.useAsUsername;
 
 let token = null;
 

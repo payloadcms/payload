@@ -4,7 +4,7 @@ const config = require('../../demo/payload.config');
 const { email, password } = require('./credentials');
 
 const url = config.serverURL;
-const usernameField = config.user.auth.useAsUsername;
+const usernameField = config.User.auth.useAsUsername;
 
 const globalSetup = async () => {
   global.PAYLOAD_SERVER = server.start();

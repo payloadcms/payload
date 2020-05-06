@@ -4,7 +4,7 @@ const formatError = require('../../express/responses/formatError');
 
 const initHandler = async (req, res) => {
   try {
-    const initialized = await init({ Model: req.Model });
+    const initialized = await init({ Model: req.collection.Model });
     return res.status(200).json({ initialized });
   } catch (error) {
     return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatError(error));

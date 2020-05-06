@@ -16,7 +16,7 @@ async function fileTypeHandler(config, uploadConfig, savedFilename) {
 
 const update = async (req, res, next, config) => {
   const query = {
-    Model: req.Model,
+    Model: req.collection.Model,
     id: req.params.id,
     locale: req.locale,
   };
@@ -80,7 +80,7 @@ const upload = async (req, res, next, config) => {
 
   const uploadData = await fileTypeHandler(config, req.uploadConfig, fsSafeName);
 
-  req.Model.create({
+  req.collection.Model.create({
     ...req.body,
     filename: uploadData.name,
     ...uploadData,

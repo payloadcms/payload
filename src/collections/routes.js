@@ -1,6 +1,5 @@
 const express = require('express');
 const requestHandlers = require('./requestHandlers');
-const bindModelMiddleware = require('../express/middleware/bindModel');
 const bindCollectionMiddleware = require('./bindCollection');
 
 const {
@@ -11,8 +10,7 @@ const router = express.Router();
 
 const registerRoutes = ({ Model, config }) => {
   router.all(`/${config.slug}*`,
-    bindModelMiddleware(Model),
-    bindCollectionMiddleware(config));
+    bindCollectionMiddleware({ Model, config }));
 
   router.route(`/${config.slug}`)
     .get(find)

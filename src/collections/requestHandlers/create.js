@@ -7,8 +7,8 @@ const createHandler = async (req, res) => {
   try {
     const doc = await create({
       req,
-      Model: req.Model,
-      config: req.collection,
+      Model: req.collection.Model,
+      config: req.collection.config,
       data: req.body,
     });
 

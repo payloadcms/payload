@@ -1,5 +1,4 @@
 const express = require('express');
-const bindModelMiddleware = require('../express/middleware/bindModel');
 const bindCollectionMiddleware = require('../collections/bindCollection');
 
 const {
@@ -24,8 +23,7 @@ const router = express.Router();
 
 const authRoutes = (User, config, sendEmail) => {
   router.all('*',
-    bindModelMiddleware(User),
-    bindCollectionMiddleware(config.user));
+    bindCollectionMiddleware(User));
 
   router
     .route('/init')
@@ -56,14 +54,14 @@ const authRoutes = (User, config, sendEmail) => {
     .post(resetPassword);
 
   router
-    .route(`/${config.user.slug}/register`)
+    .route(`/${User.config.slug}/register`)
     .post(register);
 
   router
-    .route(`/${config.user.slug}`)
+    .route(`/${User.config.slug}`)
     .get(find);
 
-  router.route(`/${config.user.slug}/:id`)
+  router.route(`/${User.config.slug}/:id`)
     .get(findByID)
     .put(update)
     .delete(deleteHandler);

@@ -44,10 +44,10 @@ const CreateFirstUser = (props) => {
     });
   };
 
-  const fields = [...config.user.fields];
+  const fields = [...config.User.fields];
 
-  if (config.user.auth.passwordIndex) {
-    fields.splice(config.user.auth.passwordIndex, 0, passwordField);
+  if (config.User.auth.passwordIndex) {
+    fields.splice(config.User.auth.passwordIndex, 0, passwordField);
   } else {
     fields.push(passwordField);
   }

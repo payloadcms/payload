@@ -4,15 +4,22 @@ const Category = require('./collections/Category');
 const Post = require('./collections/Post');
 const Layout = require('./collections/Layout');
 const User = require('./collections/User');
-const Upload = require('./collections/Upload');
+const File = require('./collections/File');
+const Media = require('./collections/Media');
 const Header = require('./globals/Header');
 const Footer = require('./globals/Footer');
 
 module.exports = {
   // disableAdmin: true,
-  collections: [Page, Category, Post, Layout],
-  user: User,
-  upload: Upload,
+  collections: [
+    Page,
+    Category,
+    Post,
+    Layout,
+    File,
+    Media,
+  ],
+  User,
   globals: [Header, Footer],
   port: 3000,
   serverURL: 'http://localhost:3000',

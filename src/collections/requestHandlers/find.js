@@ -5,8 +5,8 @@ const findHandler = async (req, res) => {
   try {
     const options = {
       req,
-      Model: req.Model,
-      config: req.collection,
+      Model: req.collection.Model,
+      config: req.collection.config,
       where: req.query.where,
       page: req.query.page,
       limit: req.query.limit,

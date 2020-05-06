@@ -10,14 +10,14 @@ const baseUserFields = require('./baseFields');
 const sanitize = require('./sanitize');
 
 function initUser() {
-  this.config.user.fields.push(...baseUserFields);
-  this.config.user = sanitize(this.config.user);
-  const userSchema = buildCollectionSchema(this.config.user, this.config);
-  userSchema.plugin(passportLocalMongoose, { usernameField: this.config.user.auth.useAsUsername });
+  this.config.User.fields.push(...baseUserFields);
+  this.config.User = sanitize(this.config.User);
+  const userSchema = buildCollectionSchema(this.config.User, this.config);
+  userSchema.plugin(passportLocalMongoose, { usernameField: this.config.User.auth.useAsUsername });
 
   this.User = {
-    config: this.config.user,
-    Model: mongoose.model(this.config.user.labels.singular, userSchema),
+    config: this.config.User,
+    Model: mongoose.model(this.config.User.labels.singular, userSchema),
   };
 
   passport.use(this.User.Model.createStrategy());
@@ -27,7 +27,7 @@ function initUser() {
   passport.deserializeUser(this.User.Model.deserializeUser());
   passport.use(new AnonymousStrategy.Strategy());
 
-  this.router.use(authRoutes(this.User.Model, this.config, this.sendEmail));
+  this.router.use(authRoutes(this.User, this.config, this.sendEmail));
 }
 
 module.exports = initUser;

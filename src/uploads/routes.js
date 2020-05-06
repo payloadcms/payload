@@ -1,28 +1,21 @@
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const { upload, update } = require('./requestHandlers');
-const uploadMiddleware = require('./middleware');
+const bindCollectionMiddleware = require('../collections/bindCollection');
 const authenticate = require('../express/middleware/authenticate');
 
 const router = express.Router();
 
-const uploadRoutes = (config, Upload) => {
-  const { config: uploadConfig, Model } = Upload;
+const uploadRoutes = (collection) => {
+  const { config } = collection;
 
-  router.all(`/${uploadConfig.slug}*`,
+  router.all(`/${config.slug}*`,
     fileUpload(),
     authenticate,
-    uploadMiddleware(config, Model));
+    bindCollectionMiddleware(collection));
 
-  router.route(`/${uploadConfig.slug}`)
-    .post(
-      (req, res, next) => upload(req, res, next, config),
-    );
-
-  router.route(`/${uploadConfig.slug}/:id`)
-    .put(
-      (req, res, next) => update(req, res, next, config),
-    );
+  router.route(`/${config.slug}`).post(upload);
+  router.route(`/${config.slug}/:id`).put(update);
 
   return router;
 };

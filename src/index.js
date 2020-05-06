@@ -9,9 +9,8 @@ const expressMiddleware = require('./express/middleware');
 const createAuthHeaderFromCookie = require('./express/middleware/createAuthHeaderFromCookie');
 const initWebpack = require('./webpack/init');
 const initUser = require('./users/init');
-const registerUpload = require('./uploads/register');
-const registerCollections = require('./collections/register');
-const registerGlobals = require('./globals/register');
+const initCollections = require('./collections/init');
+const initGlobals = require('./globals/init');
 const GraphQL = require('./graphql');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
 const buildEmail = require('./email/build');
@@ -25,9 +24,8 @@ class Payload {
     this.collections = {};
 
     this.initUser = initUser.bind(this);
-    this.registerUpload = registerUpload.bind(this);
-    this.registerCollections = registerCollections.bind(this);
-    this.registerGlobals = registerGlobals.bind(this);
+    this.initCollections = initCollections.bind(this);
+    this.initGlobals = initGlobals.bind(this);
     this.buildEmail = buildEmail.bind(this);
     this.sendEmail = this.sendEmail.bind(this);
     this.getMockEmailCredentials = this.getMockEmailCredentials.bind(this);
@@ -39,15 +37,14 @@ class Payload {
     connectMongoose(this.config.mongoURL);
     this.router.use(...expressMiddleware(this.config));
 
-    // Register and bind required collections
+    // Register and bind User
     this.initUser();
-    this.registerUpload();
 
     // Register collections
-    this.registerCollections();
+    this.initCollections();
 
     // Register globals
-    this.registerGlobals();
+    this.initGlobals();
 
     // Enable client
     if (!this.config.disableAdmin && process.env.NODE_ENV !== 'test') {

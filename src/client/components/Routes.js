@@ -82,7 +82,7 @@ const Routes = () => {
                             return (
                               <List
                                 {...routeProps}
-                                collection={config.user}
+                                collection={config.User}
                                 getURL={row => `${match.url}/users/${row.id}`}
                                 columns={[{
                                   key: 'email',
@@ -116,7 +116,7 @@ const Routes = () => {
                               <Edit
                                 isEditing
                                 {...routeProps}
-                                collection={config.user}
+                                collection={config.User}
                               />
                             );
                           }}

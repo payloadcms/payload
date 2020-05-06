@@ -6,7 +6,8 @@ const resetPasswordHandler = async (req, res) => {
   try {
     const token = await resetPassword({
       req,
-      Model: req.Model,
+      Model: req.collection.Model,
+      config: req.collection.config,
       data: req.body,
     });
 

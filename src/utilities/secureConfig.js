@@ -3,7 +3,7 @@ const deepCopyObject = require('../utilities/deepCopyObject');
 const secureConfig = (config) => {
   const securedConfig = deepCopyObject(config);
 
-  delete securedConfig.user.auth.secretKey;
+  delete securedConfig.User.auth.secretKey;
 
   return securedConfig;
 };

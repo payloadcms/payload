@@ -3,7 +3,7 @@ const { APIError } = require('../../errors');
 
 const forgotPassword = async (args) => {
   try {
-    const usernameField = args.config.user.auth.useAsUsername;
+    const usernameField = args.config.User.auth.useAsUsername;
 
     if (!Object.prototype.hasOwnProperty.call(args.data, usernameField)) {
       throw new APIError('Missing username.');
@@ -15,7 +15,7 @@ const forgotPassword = async (args) => {
     // 1. Execute before login hook
     // /////////////////////////////////////
 
-    const beforeForgotPasswordHook = args.config.user.hooks && args.config.user.hooks.beforeForgotPassword;
+    const beforeForgotPasswordHook = args.config.User.hooks && args.config.User.hooks.beforeForgotPassword;
 
     if (typeof beforeForgotPasswordHook === 'function') {
       options = await beforeForgotPasswordHook(options);
@@ -62,7 +62,7 @@ const forgotPassword = async (args) => {
     // 3. Execute after forgot password hook
     // /////////////////////////////////////
 
-    const afterForgotPasswordHook = args.config.user.hooks && args.config.user.hooks.afterForgotPassword;
+    const afterForgotPasswordHook = args.config.User.hooks && args.config.User.hooks.afterForgotPassword;
 
     if (typeof afterForgotPasswordHook === 'function') {
       await afterForgotPasswordHook(options);

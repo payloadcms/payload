@@ -7,8 +7,8 @@ const registerHandler = async (req, res) => {
     const user = await register({
       req,
       data: req.body,
-      Model: req.Model,
-      config: req.collection,
+      Model: req.collection.Model,
+      config: req.collection.config,
     });
 
     return res.status(201).json(user);

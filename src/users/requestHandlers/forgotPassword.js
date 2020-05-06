@@ -6,7 +6,7 @@ const forgotPasswordHandler = (config, email) => async (req, res) => {
   try {
     await forgotPassword({
       req,
-      Model: req.Model,
+      Model: req.collection.Model,
       config,
       data: req.body,
       email,

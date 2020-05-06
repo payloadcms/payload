@@ -1,12 +1,35 @@
 const checkRole = require('../policies/checkRole');
 
 module.exports = {
-  slug: 'uploads',
+  slug: 'media',
   labels: {
-    singular: 'Upload',
-    plural: 'Uploads',
+    singular: 'Media',
+    plural: 'Media',
   },
   useAsTitle: 'filename',
+  upload: {
+    staticURL: '/media',
+    staticDir: 'demo/media',
+    imageSizes: [
+      {
+        name: 'tablet',
+        width: 640,
+        height: 480,
+        crop: 'left top',
+      },
+      {
+        name: 'mobile',
+        width: 320,
+        height: 240,
+        crop: 'left top',
+      },
+      {
+        name: 'icon',
+        width: 16,
+        height: 16,
+      },
+    ],
+  },
   policies: {
     create: ({ req: { user } }) => checkRole(['user', 'admin'], user),
     read: ({ req: { user } }) => checkRole(['user', 'admin'], user),
