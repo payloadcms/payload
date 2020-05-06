@@ -1,4 +1,4 @@
-const { DuplicateCollection, MissingCollectionLabel, MissingUseAsTitle } = require('../errors');
+const { DuplicateCollection, MissingCollectionLabel } = require('../errors');
 const sanitizeFields = require('../fields/sanitize');
 
 const sanitizeCollection = (collections, collection) => {
@@ -26,6 +26,11 @@ const sanitizeCollection = (collections, collection) => {
 
   if (!sanitizedCollectionConfig.hooks) sanitizedCollectionConfig.hooks = {};
   if (!sanitizedCollectionConfig.policies) sanitizedCollectionConfig.policies = {};
+
+  if (sanitizedCollectionConfig.upload) {
+    if (!sanitizedCollectionConfig.upload.staticDir) sanitizedCollectionConfig.upload.staticDir = '/static';
+    if (!sanitizedCollectionConfig.upload.staticURL) sanitizedCollectionConfig.upload.staticURL = '/static';
+  }
 
   // /////////////////////////////////
   // Sanitize fields

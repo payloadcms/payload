@@ -11,6 +11,7 @@ const initWebpack = require('./webpack/init');
 const initUser = require('./users/init');
 const initCollections = require('./collections/init');
 const initGlobals = require('./globals/init');
+const initStatic = require('./express/static');
 const GraphQL = require('./graphql');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
 const buildEmail = require('./email/build');
@@ -29,6 +30,7 @@ class Payload {
     this.buildEmail = buildEmail.bind(this);
     this.sendEmail = this.sendEmail.bind(this);
     this.getMockEmailCredentials = this.getMockEmailCredentials.bind(this);
+    this.initStatic = initStatic.bind(this);
 
     // Configure email service
     this.email = this.buildEmail();
@@ -70,8 +72,8 @@ class Payload {
     // Bind router to API
     this.express.use(this.config.routes.api, this.router);
 
-    // Bind static
-    this.express.use(this.config.staticURL, express.static(this.config.staticDir));
+    // Enable static routes for all collections permitting upload
+    this.initStatic();
   }
 
   async sendEmail(message) {
