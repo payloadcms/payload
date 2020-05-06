@@ -6,4 +6,4 @@ class MissingUseAsTitle extends APIError {
   }
 }
 
-module.exports = MissingCollectionLabel;
+module.exports = MissingUseAsTitle;

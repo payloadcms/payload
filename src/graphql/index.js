@@ -9,7 +9,6 @@ const buildFallbackLocaleInputType = require('./schema/buildFallbackLocaleInputT
 const registerCollections = require('../collections/graphql/register');
 const registerGlobals = require('../globals/graphql/register');
 const initUser = require('../users/graphql/init');
-const registerUpload = require('../uploads/graphql/register');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 
 class GraphQL {
@@ -33,14 +32,12 @@ class GraphQL {
     this.buildObjectType = buildObjectType.bind(this);
     this.registerCollections = registerCollections.bind(this);
     this.initUser = initUser.bind(this);
-    this.registerUpload = registerUpload.bind(this);
     this.registerGlobals = registerGlobals.bind(this);
   }
 
   init() {
     this.registerCollections();
     this.initUser();
-    this.registerUpload();
     this.registerGlobals();
 
     const query = new GraphQLObjectType(this.Query);

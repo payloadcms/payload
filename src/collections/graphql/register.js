@@ -24,7 +24,17 @@ function registerCollections() {
     } = collection;
 
     const singularLabel = formatName(singular);
-    const pluralLabel = formatName(plural);
+    let pluralLabel = formatName(plural);
+
+
+    // For collections named 'Media' or similar,
+    // there is a possibility that the singular name
+    // will equal the plural name. Append `all` to the beginning
+    // of potential conflicts
+
+    if (singularLabel === pluralLabel) {
+      pluralLabel = `all${singularLabel}`;
+    }
 
     collection.graphQL = {};
 

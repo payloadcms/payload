@@ -38,12 +38,12 @@ const fieldToSchemaMap = {
       type: Date,
     };
   },
-  upload: (field, config) => {
+  upload: (field) => {
     const schema = {
       ...formatBaseSchema(field),
       type: Schema.Types.ObjectId,
       autopopulate: true,
-      ref: config.upload.labels.singular,
+      ref: field.type,
     };
     return schema;
   },

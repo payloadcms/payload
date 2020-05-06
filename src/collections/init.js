@@ -43,7 +43,7 @@ function registerCollections() {
     };
 
     if (collection.upload) {
-      this.router.use(uploadRoutes(this.config, this.collections[collection.slug]));
+      this.router.use(uploadRoutes(this.collections[collection.slug]));
     }
 
     this.router.use(collectionRoutes(this.collections[collection.slug]));
