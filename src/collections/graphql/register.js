@@ -93,13 +93,15 @@ function registerCollections() {
       resolve: find(collection),
     };
 
-    this.Mutation.fields[`create${singularLabel}`] = {
-      type: collection.graphQL.type,
-      args: {
-        data: { type: collection.graphQL.mutationInputType },
-      },
-      resolve: create(collection),
-    };
+    if (!collection.upload) {
+      this.Mutation.fields[`create${singularLabel}`] = {
+        type: collection.graphQL.type,
+        args: {
+          data: { type: collection.graphQL.mutationInputType },
+        },
+        resolve: create(collection),
+      };
+    }
 
     this.Mutation.fields[`update${singularLabel}`] = {
       type: collection.graphQL.type,
