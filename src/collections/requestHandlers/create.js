@@ -13,7 +13,7 @@ const createHandler = async (req, res) => {
     });
 
     return res.status(httpStatus.CREATED).json({
-      ...formatSuccessResponse(`${req.collection.labels.singular} successfully created.`, 'message'),
+      ...formatSuccessResponse(`${req.collection.config.labels.singular} successfully created.`, 'message'),
       doc,
     });
   } catch (error) {

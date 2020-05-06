@@ -6,7 +6,7 @@ const refreshHandler = async (req, res) => {
   try {
     const refreshedToken = await refresh({
       req,
-      config: req.collection,
+      config: req.collection.config,
       authorization: req.headers.authorization,
     });
 
