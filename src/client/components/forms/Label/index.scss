@@ -4,7 +4,7 @@ label.field-label {
   display: flex;
 
   .required {
-    color: $error;
+    color: $color-red;
     margin-left: base(.25);
     margin-right: auto;
   }

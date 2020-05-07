@@ -6,7 +6,7 @@ import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import CalendarIcon from '../../../graphics/Calendar';
+import CalendarIcon from '../../../icons/Calendar';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import './index.scss';

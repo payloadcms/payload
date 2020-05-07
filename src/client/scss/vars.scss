@@ -1,25 +1,29 @@
+///////////////////////////////////////////////////////////////////////////////////////
+// All variables and mixins within this file are able to be overridden by
+// developers using Payload. No CSS definitions should be placed in this file.
+///////////////////////////////////////////////////////////////////////////////////////
+
 /////////////////////////////
 // BREAKPOINTS
 /////////////////////////////
 
-$mobile-width   : 500px;
-$tablet-width   : 1024px;
-$content-width  : 1280px;
-$frame-width    : 1680px;
-$mobile-height  : 400px;
-$tablet-height  : 700px;
-$desktop-height : 900px;
+$breakpoint-s-width  : 500px;
+$breakpoint-m-width  : 1024px;
+$breakpoint-l-width  : 1440px;
+$breakpoint-s-height : 400px;
+$breakpoint-m-height : 700px;
+$breakpoint-l-height : 900px;
 
 //////////////////////////////
 // BASELINE GRID
 //////////////////////////////
 
-$body           : 20px;
-$base-px        : 36px;
-$base           : ($base-px / $body) + rem; // This computes to 36px in rem
+$baseline           : 25px;
+$baseline-body-size : 15px;
+$baseline-rem       : ($baseline / $baseline-body-size) + rem;
 
 @function base($multiplier) {
-	@return ($base-px / $body) * $multiplier + rem;
+	@return ($baseline / $baseline-body-size) * $multiplier + rem;
 }
 
 //////////////////////////////
@@ -32,22 +36,28 @@ $font-body  : 'Suisse Intl';
 // COLORS
 //////////////////////////////
 
-$primary    : #1ff99a;
-
-$light-gray : #f5f5f5;
-$gray       : #afafaf;
-$black      : rgb(60, 60, 60);
-
-$error      : #ff6f76;
-$warning    : #fff93b;
+$color-dark-gray       : #333333;
+$color-gray            : #9A9A9A;
+$color-light-gray      : #E7E7E7;
+$color-background-gray : #F3F3F3;
+$color-red             : #ff6f76;
+$color-yellow          : #FDFFA4;
+$color-green           : #B2FFD6;
 
 //////////////////////////////
-// STYLE
+// STYLES
 //////////////////////////////
 
-$radius-sm    : 3px;
-$radius-lrg   : 10px;
-$stroke-width : 1px;
+$style-radius-s     : 3px;
+$style-radius-m     : 4px;
+$style-stroke-width : 1px;
+
+$style-stroke-width-s : 1px;
+$style-stroke-width-m : 2px;
+
+//////////////////////////////
+// SHADOWS
+//////////////////////////////
 
 @mixin shadow-sm {
   box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),0 2px 20px 0 rgba(0,2,4,.04);
@@ -77,20 +87,6 @@ $stroke-width : 1px;
     box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
       0 10px 20px 0 rgba(0,2,4,.08);
   }
-}
-
-//////////////////////////////
-// UTILITIES
-//////////////////////////////
-
-@mixin color-svg($color) {
-	.stroke {
-		stroke: $color;
-	}
-
-	.fill {
-		fill: $color;
-	}
 }
 
 //////////////////////////////

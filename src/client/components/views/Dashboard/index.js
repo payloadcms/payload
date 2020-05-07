@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import DefaultTemplate from '../../layout/DefaultTemplate';
+import DefaultTemplate from '../../templates/Default';
 import config from '../../../securedConfig';
 
 import './index.scss';

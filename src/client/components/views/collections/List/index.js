@@ -4,17 +4,15 @@ import queryString from 'qs';
 import PropTypes from 'prop-types';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import config from '../../../../securedConfig';
-import DefaultTemplate from '../../../layout/DefaultTemplate';
-import HeadingButton from '../../../modules/HeadingButton';
-import SearchableTable from '../../../modules/SearchableTable';
-import Pagination from '../../../modules/Paginator';
+import DefaultTemplate from '../../../templates/Default';
+import Paginator from '../../../elements/Paginator';
 
 import './index.scss';
 
-const { serverURL, routes: { admin, api } } = config;
+const { serverURL, routes: { api } } = config;
 
 const ListView = (props) => {
-  const { collection, columns, getURL } = props;
+  const { collection } = props;
   const location = useLocation();
   const { page } = queryString.parse(location.search, { ignoreQueryPrefix: true });
 
@@ -34,19 +32,7 @@ const ListView = (props) => {
         },
       ]}
     >
-      <HeadingButton
-        heading={collection.labels.plural}
-        buttonLabel="Add New"
-        buttonURL={`${admin}/collections/${collection.slug}/create`}
-        buttonType="link"
-      />
-      <SearchableTable
-        getURL={getURL}
-        columns={columns}
-        data={data.docs}
-        collection={collection}
-      />
-      <Pagination
+      <Paginator
         totalDocs={data.totalDocs}
         limit={data.limit}
         totalPages={data.totalPages}

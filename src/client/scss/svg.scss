@@ -1,0 +1,13 @@
+//////////////////////////////
+// UTILITIES
+//////////////////////////////
+
+@mixin color-svg($color) {
+	.stroke {
+		stroke: $color;
+	}
+
+	.fill {
+		fill: $color;
+	}
+}

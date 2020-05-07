@@ -1,0 +1,19 @@
+@import '../../../scss/styles.scss';
+
+.template-default {
+  padding: $baseline;
+  margin-left: base(6);
+  width: calc(100% - #{base(6)});
+
+  &__eyebrow,
+  &__wrap {
+    padding: 0 base(2);
+  }
+
+  &__eyebrow {
+    margin-bottom: base(1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}

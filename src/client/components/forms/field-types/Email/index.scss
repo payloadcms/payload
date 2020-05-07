@@ -10,7 +10,7 @@
 
 	&.error {
 		input {
-      background-color: lighten($error, 20%);
+      background-color: lighten($color-red, 20%);
 		}
 	}
 }

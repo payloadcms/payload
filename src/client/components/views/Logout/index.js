@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useUser } from '../../data/User';
-import ContentBlock from '../../layout/ContentBlock';
+import Minimal from '../../templates/Minimal';
 import config from '../../../securedConfig';
-import Button from '../../controls/Button';
+import Button from '../../elements/Button';
 
 import './index.scss';
 
@@ -22,10 +22,7 @@ const Logout = () => {
   }, [logOut]);
 
   return (
-    <ContentBlock
-      className={baseClass}
-      width="narrow"
-    >
+    <Minimal className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <h1>You have been logged out.</h1>
         <br />
@@ -37,7 +34,7 @@ const Logout = () => {
           Log back in
         </Button>
       </div>
-    </ContentBlock>
+    </Minimal>
   );
 };
 

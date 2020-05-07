@@ -3,8 +3,6 @@
 .field-type.flexible {
 
   &__add-button-wrap {
-    @include gutter;
-
     .btn {
       margin: 0;
     }
@@ -16,7 +14,6 @@
 
   .section__content {
     > div > div {
-      @include gutter;
       width: 100%;
     }
   }

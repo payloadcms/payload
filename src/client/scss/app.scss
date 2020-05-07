@@ -16,7 +16,7 @@ html, body {
 body {
   font-family: $font-body;
   font-weight: 400;
-  color: $black;
+  color: $color-dark-gray;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
@@ -24,7 +24,7 @@ body {
 
 html {
   line-height: base(1);
-  font-size: $body;
+  font-size: $baseline-body-size;
 
   @include mid-break {
     font-size: 18px;
@@ -38,13 +38,13 @@ html {
 }
 
 ::selection {
-  background: $primary;
-  color: $black;
+  background: $color-green;
+  color: $color-dark-gray;
 }
 
 ::-moz-selection {
-  background: $primary;
-  color: $black;
+  background: $color-green;
+  color: $color-dark-gray;
 }
 
 img {
@@ -78,31 +78,6 @@ p {
 }
 
 ul {
-  padding-left: $base;
-    margin: 0 0 $base;
-}
-
-a {
-  text-decoration: none;
-  color: $black;
-  border-bottom: 1px solid $black;
-
-  &:hover {
-    color: $primary;
-    border-bottom: 1px solid $primary;
-  }
-}
-
-.icon {
-  @include color-svg($black);
-
-  path, line, polyline, rect {
-    vector-effect: non-scaling-stroke;
-    shape-rendering:crispEdges;
-    fill: none;
-  }
-
-  .stroke {
-    stroke-width: $stroke-width;
-  }
+  padding-left: $baseline;
+  margin: 0 0 $baseline;
 }

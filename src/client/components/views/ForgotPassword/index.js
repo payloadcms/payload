@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import StatusList, { useStatusList } from '../../modules/Status';
-import ContentBlock from '../../layout/ContentBlock';
+import StatusList, { useStatusList } from '../../elements/Status';
 import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import FormSubmit from '../../forms/Submit';
 import config from '../../../securedConfig';
-import Button from '../../controls/Button';
+import Button from '../../elements/Button';
 import { useUser } from '../../data/User';
 
 import './index.scss';
@@ -34,10 +33,7 @@ const ForgotPassword = () => {
 
   if (user) {
     return (
-      <ContentBlock
-        className={baseClass}
-        width="narrow"
-      >
+      <div className={baseClass}>
         <div className={`${baseClass}__wrap`}>
           <h1>Already logged in</h1>
           <p>
@@ -56,16 +52,13 @@ const ForgotPassword = () => {
             Back to Dashboard
           </Button>
         </div>
-      </ContentBlock>
+      </div>
     );
   }
 
   if (hasSubmitted) {
     return (
-      <ContentBlock
-        className={baseClass}
-        width="narrow"
-      >
+      <div className={baseClass}>
         <div className={`${baseClass}__wrap`}>
           <h1>Email sent</h1>
           <p>
@@ -80,15 +73,12 @@ const ForgotPassword = () => {
             Go to login
           </Button>
         </div>
-      </ContentBlock>
+      </div>
     );
   }
 
   return (
-    <ContentBlock
-      className={baseClass}
-      width="narrow"
-    >
+    <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <StatusList />
         <Form
@@ -105,7 +95,7 @@ const ForgotPassword = () => {
           <FormSubmit>Submit</FormSubmit>
         </Form>
       </div>
-    </ContentBlock>
+    </div>
   );
 };
 

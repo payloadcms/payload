@@ -11,9 +11,8 @@ import Login from './views/Login';
 import Logout from './views/Logout';
 import NotFound from './views/NotFound';
 import CreateFirstUser from './views/CreateFirstUser';
-import MediaLibrary from './views/MediaLibrary';
 import Edit from './views/collections/Edit';
-import EditGlobal from './views/globals/Edit';
+import EditGlobal from './views/Global';
 import { requests } from '../api';
 import customComponents from './customComponents';
 import RedirectToLogin from './utilities/RedirectToLogin';
@@ -69,11 +68,6 @@ const Routes = () => {
                   if (user) {
                     return (
                       <Switch>
-                        <Route
-                          path={`${match.url}/media-library`}
-                        >
-                          <MediaLibrary />
-                        </Route>
                         <Route
                           path={`${match.url}/users`}
                           exact

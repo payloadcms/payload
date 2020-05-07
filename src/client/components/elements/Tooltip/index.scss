@@ -1,0 +1,24 @@
+@import '../../../scss/styles.scss';
+
+.tooltip {
+	background-color: $color-dark-gray;
+  position: absolute;
+  z-index: 2;
+	top: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	padding: 0 base(.4);
+	color: white;
+	line-height: base(.8);
+
+	span {
+		position: absolute;
+		transform: translateX(-50%);
+		top: base(.7);
+		left: 50%;
+		height: 0;
+		width: 0;
+		border: 10px solid transparent;
+		border-top-color: $color-dark-gray;
+	}
+}

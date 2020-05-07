@@ -32,7 +32,7 @@ module.exports = {
   },
   compression: {},
   paths: {
-    scssOverrides: path.resolve(__dirname, 'client/scss/overrides.scss'),
+    scss: path.resolve(__dirname, 'client/scss/overrides.scss'),
   },
   mongoURL: 'mongodb://localhost/payload',
   localization: {

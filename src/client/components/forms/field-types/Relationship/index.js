@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Cookies from 'universal-cookie';
 import some from 'async-some';
 import withCondition from '../../withCondition';
-import ReactSelect from '../../../modules/ReactSelect';
+import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
 import config from '../../../../securedConfig';
 import Label from '../../Label';

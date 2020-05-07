@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import StatusList, { useStatusList } from '../../modules/Status';
-import ContentBlock from '../../layout/ContentBlock';
+import StatusList, { useStatusList } from '../../elements/Status';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import * as fieldTypes from '../../forms/field-types';
@@ -53,10 +52,7 @@ const CreateFirstUser = (props) => {
   }
 
   return (
-    <ContentBlock
-      className={baseClass}
-      width="narrow"
-    >
+    <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <h1>Welcome to Payload</h1>
         <p>To begin, create your first user.</p>
@@ -74,7 +70,7 @@ const CreateFirstUser = (props) => {
           <FormSubmit>Create</FormSubmit>
         </Form>
       </div>
-    </ContentBlock>
+    </div>
   );
 };
 

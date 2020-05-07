@@ -1,7 +1,7 @@
 import React from 'react';
 import config from '../../../securedConfig';
-import Button from '../../controls/Button';
-import DefaultTemplate from '../../layout/DefaultTemplate';
+import Button from '../../elements/Button';
+import DefaultTemplate from '../../templates/Default';
 
 const { routes: { admin } } = config;
 

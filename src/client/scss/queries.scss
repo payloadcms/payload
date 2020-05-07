@@ -3,19 +3,19 @@
 /////////////////////////////
 
 @mixin small-break {
-  @media (max-width: #{$mobile-width}) {
+  @media (max-width: #{$breakpoint-s-width}) {
     @content;
   }
 }
 
 @mixin mid-break {
-  @media (max-height: #{$desktop-height}), (max-width: #{$tablet-width}) {
+  @media (max-width: #{$breakpoint-m-width}) {
     @content;
   }
 }
 
 @mixin large-break {
-  @media (max-width: #{$content-width}) {
+  @media (max-width: #{$breakpoint-l-width}) {
     @content;
   }
 }

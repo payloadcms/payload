@@ -2,10 +2,10 @@ import React, { Suspense } from 'react';
 import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ModalProvider, ModalContainer } from '@trbl/react-modal';
-import Loading from './views/Loading';
+import Loading from './elements/Loading';
 import { SearchParamsProvider } from './utilities/SearchParams';
 import { LocaleProvider } from './utilities/Locale';
-import { StatusListProvider } from './modules/Status';
+import { StatusListProvider } from './elements/Status';
 import { UserProvider } from './data/User';
 import Routes from './Routes';
 

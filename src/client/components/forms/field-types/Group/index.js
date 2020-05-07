@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Section from '../../../layout/Section';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 
@@ -13,21 +12,16 @@ const Group = (props) => {
 
   return (
     <div className="field-type group">
-      <Section
-        heading={label}
-        className="field-group"
-      >
-        <RenderFields
-          fieldTypes={fieldTypes}
-          fieldSchema={fields.map((subField) => {
-            return {
-              ...subField,
-              name: `${name}.${subField.name}`,
-              defaultValue: defaultValue[subField.name],
-            };
-          })}
-        />
-      </Section>
+      <RenderFields
+        fieldTypes={fieldTypes}
+        fieldSchema={fields.map((subField) => {
+          return {
+            ...subField,
+            name: `${name}.${subField.name}`,
+            defaultValue: defaultValue[subField.name],
+          };
+        })}
+      />
     </div>
   );
 };

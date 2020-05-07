@@ -28,12 +28,12 @@
     border: none;
     width: 100%;
     margin-right: base(.5);
-    border-radius: $radius-sm;
+    border-radius: $style-radius-s;
 
     &:hover,
     &:focus {
       outline: 0;
-      background: rgba($gray, .25);
+      background: rgba($color-gray, .25);
     }
   }
 }

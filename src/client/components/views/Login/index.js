@@ -1,13 +1,12 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import StatusList, { useStatusList } from '../../modules/Status';
-import ContentBlock from '../../layout/ContentBlock';
+import StatusList, { useStatusList } from '../../elements/Status';
 import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
 import config from '../../../securedConfig';
-import Button from '../../controls/Button';
+import Button from '../../elements/Button';
 import { useUser } from '../../data/User';
 
 import './index.scss';
@@ -38,10 +37,7 @@ const Login = () => {
 
   if (user) {
     return (
-      <ContentBlock
-        className={baseClass}
-        width="narrow"
-      >
+      <div className={baseClass}>
         <div className={`${baseClass}__wrap`}>
           <h1>Already logged in</h1>
           <p>
@@ -60,15 +56,12 @@ const Login = () => {
             Back to Dashboard
           </Button>
         </div>
-      </ContentBlock>
+      </div>
     );
   }
 
   return (
-    <ContentBlock
-      className={baseClass}
-      width="narrow"
-    >
+    <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <p>
           <a
@@ -99,7 +92,7 @@ const Login = () => {
           <FormSubmit>Login</FormSubmit>
         </Form>
       </div>
-    </ContentBlock>
+    </div>
   );
 };
 

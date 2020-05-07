@@ -2,12 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import config from '../../../../securedConfig';
-import DefaultTemplate from '../../../layout/DefaultTemplate';
+import DefaultTemplate from '../../../templates/Default';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Form from '../../../forms/Form';
-import StickyHeader from '../../../modules/StickyHeader';
-import APIURL from '../../../modules/APIURL';
-import PreviewButton from '../../../controls/PreviewButton';
+import StickyHeader from '../../../elements/StickyHeader';
+import PreviewButton from '../../../elements/PreviewButton';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
 import * as fieldTypes from '../../../forms/field-types';
@@ -97,18 +96,9 @@ const EditView = (props) => {
         action={`${serverURL}${api}/${slug}${id ? `/${id}` : ''}`}
         handleAjaxResponse={handleAjaxResponse}
       >
-        <StickyHeader
-          showStatus
-          content={
-            <APIURL url={isEditing && `${serverURL}${api}/${slug}/${data.id}`} />
-          }
-          action={(
-            <>
-              <PreviewButton generatePreviewURL={preview} />
-              <FormSubmit>Save</FormSubmit>
-            </>
-          )}
-        />
+        {' '}
+        <PreviewButton generatePreviewURL={preview} />
+        <FormSubmit>Save</FormSubmit>
         <RenderFields
           fieldTypes={fieldTypes}
           customComponents={customComponents?.[slug]?.fields}
