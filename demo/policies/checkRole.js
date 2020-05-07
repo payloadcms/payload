@@ -1,12 +1,11 @@
 /**
  * authorize a request by comparing the current user with one or more roles
- * @param roles
+ * @param allRoles
  * @param user
  * @returns {Function}
  */
 const checkRole = (allRoles, user) => {
-  const hasPermission = !!(user && allRoles.some(role => user.roles.some(individualRole => individualRole === role)));
-  return hasPermission;
+  return !!(user && allRoles.some(role => user.roles.some(individualRole => individualRole === role)));
 };
 
 module.exports = checkRole;

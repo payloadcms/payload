@@ -16,6 +16,7 @@ const GraphQL = require('./graphql');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
 const buildEmail = require('./email/build');
 const identifyAPI = require('./express/middleware/identifyAPI');
+const errorHandler = require('./errors/errorHandler');
 
 class Payload {
   constructor(options) {
@@ -68,6 +69,8 @@ class Payload {
         'request.credentials': 'include',
       },
     }));
+
+    this.router.use('', errorHandler(this.config));
 
     // Bind router to API
     this.express.use(this.config.routes.api, this.router);

@@ -7,9 +7,11 @@ const MissingUseAsTitle = require('./MissingUseAsTitle');
 const NotFound = require('./NotFound');
 const Forbidden = require('./Forbidden');
 const ValidationError = require('./ValidationError');
+const errorHandler = require('./errorHandler');
 const MissingFile = require('./MissingFile');
 
 module.exports = {
+  errorHandler,
   APIError,
   DuplicateCollection,
   DuplicateGlobal,

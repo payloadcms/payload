@@ -87,4 +87,8 @@ module.exports = {
       // Sidebar: path.resolve(__dirname, 'client/components/layout/Sidebar/index.js'),
     },
   },
+  // TODO: change to normal function
+  errorHandler(err) {
+    console.error('USER CONFIG DEFINED HANDLER', err.stack);
+  },
 };
