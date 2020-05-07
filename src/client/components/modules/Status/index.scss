@@ -7,7 +7,6 @@
   margin: 0;
 
   li {
-    @extend %uppercase-label;
     background: $primary;
     color: $black;
     font-weight: bold;

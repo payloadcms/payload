@@ -5,8 +5,4 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
-  .uppercase-label {
-    @extend %uppercase-label;
-  }
 }

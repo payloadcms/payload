@@ -6,7 +6,7 @@
 /////////////////////////////
 
 %h1, %h2, %h3, %h4, %h5 {
-  font-family: $font-brand;
+  font-family: $font-body;
   font-weight: 700;
   color: lighten($black, 4%);
 }
@@ -75,19 +75,6 @@
 /////////////////////////////
 // TYPE STYLES
 /////////////////////////////
-
-%uppercase-label {
-  text-transform: uppercase;
-  letter-spacing: base(.0875);
-  font-size: base(.325);
-  font-family: $font-label;
-  -webkit-font-smoothing: auto;
-
-  @include mid-break {
-    font-size: base(.31);
-    letter-spacing: base(.05);
-  }
-}
 
 %large-body {
   font-size: base(.6);

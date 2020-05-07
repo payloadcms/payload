@@ -37,7 +37,7 @@ div.react-select {
 
   .rs__input {
     input {
-      font-family: $font-brand;
+      font-family: $font-body;
       width: 100% !important;
     }
   }
@@ -48,7 +48,6 @@ div.react-select {
   }
 
   .rs__group-heading {
-    @extend %uppercase-label;
     color: $black;
     padding-left: base(.5);
     margin-bottom: base(.25);
@@ -78,7 +77,6 @@ div.react-select {
   }
 
   .rs__multi-value__label {
-    @extend %uppercase-label;
     padding: 0 base(.375);
   }
 

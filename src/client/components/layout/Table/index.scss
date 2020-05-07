@@ -5,7 +5,6 @@ table {
   margin-bottom: base(.75);
 
   th {
-    @extend %uppercase-label;
     font-weight: normal;
     text-align: left;
     color: $gray;

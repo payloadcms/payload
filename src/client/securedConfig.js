@@ -1,20 +1,20 @@
 const sanitizeConfig = require('../utilities/sanitizeConfig');
 const secureConfig = require('../utilities/secureConfig');
 
-function convertToText(obj) {
+function convertToString(obj) {
   const string = [];
 
   if (obj === undefined || obj === null) {
     return String(obj);
   } if (typeof (obj) === 'object' && !Array.isArray(obj)) {
     Object.keys(obj).forEach((prop) => {
-      if (Object.prototype.hasOwnProperty.call(obj, prop)) string.push(`${prop}: ${convertToText(obj[prop])}`);
+      if (Object.prototype.hasOwnProperty.call(obj, prop)) string.push(`${prop}: ${convertToString(obj[prop])}`);
     });
 
     return `{${string.join(',')}}`;
   } if (Array.isArray(obj)) {
     Object.keys(obj).forEach((prop) => {
-      string.push(convertToText(obj[prop]));
+      string.push(convertToString(obj[prop]));
     });
 
     return `[${string.join(',')}]`;
@@ -30,7 +30,7 @@ function convertToText(obj) {
 module.exports = (config) => {
   const sanitizedConfig = sanitizeConfig(config);
   const securedConfig = secureConfig(sanitizedConfig);
-  const stringifiedConfig = convertToText(securedConfig);
+  const stringifiedConfig = convertToString(securedConfig);
 
   return {
     code: `

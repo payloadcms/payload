@@ -4,7 +4,6 @@
   position: relative;
 
   &__current {
-    @extend %uppercase-label;
     @extend %btn-reset;
     display: flex;
     align-items: center;
@@ -32,7 +31,6 @@
   }
 
   ul {
-    @extend %uppercase-label;
     padding: 0;
     margin: 0;
     list-style: none;

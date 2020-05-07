@@ -1,7 +1,6 @@
 @import '../../../scss/styles.scss';
 
 .tooltip {
-	@extend %uppercase-label;
 	background-color: $primary;
   position: absolute;
   z-index: 2;

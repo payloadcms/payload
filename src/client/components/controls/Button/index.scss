@@ -1,7 +1,6 @@
 @import '../../../scss/styles.scss';
 
 .btn {
-    @extend %uppercase-label;
     background-color: $primary;
     border: 1px solid $primary;
     padding: base(.5) base(.75);

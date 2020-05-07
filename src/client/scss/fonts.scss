@@ -1,62 +1,40 @@
 @font-face {
-  font-family: 'calibre-web';
-  src: url("../assets/fonts/cal-regular-webfont.eot");
-  src: url("../assets/fonts/cal-regular-webfont.eot?#iefix") format("embedded-opentype"), url("../assets/fonts/cal-regular-webfont.woff2") format("woff2"), url("../assets/fonts/cal-regular-webfont.woff") format("woff"), url("../assets/fonts/cal-regular-webfont.ttf") format("truetype"), url("../assets/fonts/cal-regular-webfont.svg#calibre_regularregular") format("svg");
-  font-weight: 400;
-  font-style: normal; }
-
-@font-face {
-  font-family: 'calibre-web';
-  src: url("../assets/fonts/cal-bold-webfont.eot");
-  src: url("../assets/fonts/cal-bold-webfont.eot?#iefix") format("embedded-opentype"), url("../assets/fonts/cal-bold-webfont.woff2") format("woff2"), url("../assets/fonts/cal-bold-webfont.woff") format("woff"), url("../assets/fonts/cal-bold-webfont.svg#calibre_regularregular") format("svg");
-  font-weight: 800;
-  font-style: bold; }
-
-
-@font-face {
-  font-family: 'noe-display-web';
-  src: url("../assets/fonts/NoeDisplay-Bold.eot") format("embedded-opentype");
-  font-weight: bold;
-  font-style: normal; }
-
-@font-face {
-  font-family: 'noe-display-web';
-  src: url("../assets/fonts/NoeDisplay-Bold.woff") format("woff"), url("../assets/fonts/NoeDisplay-Bold.ttf") format("truetype"), url("../assets/fonts/NoeDisplay-Bold.svg#NoeDisplay-Bold") format("svg");
-  font-weight: bold;
-  font-style: normal; }
-
-@font-face {
-  font-family: 'noe-display-web';
-  src: url("../assets/fonts/NoeText-Regular.eot") format("embedded-opentype");
+  font-family: 'Suisse Intl';
+  src: url('../assets/fonts/SuisseIntl.woff2') format('woff2'),
+      url('../assets/fonts/SuisseIntl.woff') format('woff');
   font-weight: normal;
-  font-style: normal; }
+  font-style: normal;
+}
 
 @font-face {
-  font-family: 'noe-display-web';
-  src: url("../assets/fonts/NoeText-Regular.woff") format("woff"), url("../assets/fonts/NoeText-Regular.ttf") format("truetype"), url("../assets/fonts/NoeText-Regular.svg#NoeText-Regular") format("svg");
-  font-weight: normal;
-  font-style: normal; }
-
-@font-face {
-  font-family: 'gt-pressura-web';
-  src: url("../assets/fonts/GTPressuraMono.eot") format("embedded-opentype");
-  font-weight: normal;
-  font-style: normal; }
-
-@font-face {
-  font-family: 'gt-pressura-web';
-  src: url("../assets/fonts/GTPressuraMono.otf") format("opentype"), url("../assets/fonts/GTPressuraMono.woff") format("woff"), url("../assets/fonts/GTPressuraMono.ttf") format("truetype"), url("../assets/fonts/GTPressuraMono.svg#GTPressuraMono") format("svg");
-  font-weight: normal;
-  font-style: normal; }
-
-@font-face {
-  font-family: 'gt-pressura-web';
-  src: url("../assets/fonts/GTPressura-Light.eot") format("embedded-opentype");
+  font-family: 'Suisse Intl';
+  src: url('../assets/fonts/SuisseIntl-Thin.woff2') format('woff2'),
+      url('../assets/fonts/SuisseIntl-Thin.woff') format('woff');
   font-weight: 100;
-  font-style: normal; }
+  font-style: normal;
+}
 
 @font-face {
-  font-family: 'gt-pressura-web';
-  src: url("../assets/fonts/GTPressura-Light.woff") format("woff"), url("../assets/fonts/GTPressura-Light.ttf") format("truetype"), url("../assets/fonts/GTPressura-Light.svg#GTPressura-Light") format("svg");
-  font-weight: 100;
-  font-style: normal; }
+  font-family: 'Suisse Intl';
+  src: url('../assets/fonts/SuisseIntl-Light.woff2') format('woff2'),
+      url('../assets/fonts/SuisseIntl-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Suisse Intl Semi';
+  src: url('../assets/fonts/SuisseIntl-SemiBold.woff2') format('woff2'),
+      url('../assets/fonts/SuisseIntl-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Suisse Intl';
+  src: url('../assets/fonts/SuisseIntl-Bold.woff2') format('woff2'),
+      url('../assets/fonts/SuisseIntl-Bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+}
+

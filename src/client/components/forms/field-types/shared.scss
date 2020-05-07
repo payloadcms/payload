@@ -2,7 +2,7 @@
 
 @mixin formInput () {
     @include inputShadow;
-    font-family: $font-brand;
+    font-family: $font-body;
     width: 100%;
     border: 1px solid $light-gray;
     background: white;

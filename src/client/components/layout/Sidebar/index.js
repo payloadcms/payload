@@ -26,7 +26,7 @@ const Sidebar = () => {
       >
         <Icon />
       </Link>
-      <span className="uppercase-label">Collections</span>
+      <span className="label">Collections</span>
       <nav>
         <NavLink
           activeClassName="active"
@@ -60,7 +60,7 @@ const Sidebar = () => {
           Users
         </NavLink>
       </nav>
-      <span className="uppercase-label">Globals</span>
+      <span className="label">Globals</span>
       <nav>
         {globals && globals.map((global, i) => {
           const href = `${admin}/globals/${global.slug}`;

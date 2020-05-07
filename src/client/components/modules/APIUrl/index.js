@@ -6,7 +6,7 @@ import './index.scss';
 const APIURL = ({ url }) => {
   return (
     <div className="api-url">
-      <span className="uppercase-label">API URL</span>
+      <span className="label">API URL</span>
       {url
         && (
           <div className="url">

@@ -31,8 +31,4 @@
   > label {
     color: $gray;
   }
-
-  span {
-    @extend %uppercase-label;
-  }
 }
