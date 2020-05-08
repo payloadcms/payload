@@ -84,6 +84,7 @@ const ForgotPassword = () => {
         action={`${serverURL}${api}/forgot-password`}
       >
         <h1>Forgot Password</h1>
+        <p>Please enter your username or email address. You will receive an email message with instructions on how to reset your password.</p>
         <Email
           label="Email Address"
           name="email"
