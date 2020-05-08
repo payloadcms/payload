@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useStepNav } from '../../elements/StepNav';
-import config from '../../../securedConfig';
 
 import './index.scss';
 
@@ -9,7 +8,7 @@ const {
   routes: {
     admin,
   },
-} = config;
+} = PAYLOAD_CONFIG;
 
 const baseClass = 'dashboard';
 

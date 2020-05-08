@@ -5,6 +5,9 @@ module.exports = {
     es6: true,
     jest: true,
   },
+  globals: {
+    PAYLOAD_CONFIG: true,
+  },
   extends: 'airbnb',
   parserOptions: {
     ecmaFeatures: {

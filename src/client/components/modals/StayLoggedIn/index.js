@@ -3,11 +3,12 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { asModal } from '@trbl/react-modal';
 import Button from '../../elements/Button';
-import config from '../../../securedConfig';
 
 import './index.scss';
 
 const baseClass = 'stay-logged-in';
+
+const { routes: { admin } } = PAYLOAD_CONFIG;
 
 const StayLoggedInModal = (props) => {
   const {
@@ -35,7 +36,7 @@ const StayLoggedInModal = (props) => {
           type="secondary"
           onClick={() => {
             closeAllModals();
-            history.push(`${config.routes.admin}/logout`);
+            history.push(`${admin}/logout`);
           }}
         >
           Log out

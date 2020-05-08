@@ -4,7 +4,6 @@ import {
 } from 'react-router-dom';
 import DefaultList from './views/collections/List';
 import { useUser } from './data/User';
-import { useConfig } from './data/Config';
 import DefaultTemplate from './templates/Default';
 import Dashboard from './views/Dashboard';
 import ForgotPassword from './views/ForgotPassword';
@@ -19,13 +18,14 @@ import customComponents from './customComponents';
 import RedirectToLogin from './utilities/RedirectToLogin';
 import ResetPassword from './views/ResetPassword';
 
+const { routes, collections, User } = PAYLOAD_CONFIG;
+
 const Routes = () => {
   const [initialized, setInitialized] = useState(null);
   const { user } = useUser();
-  const { routes, collections, User } = useConfig();
 
   useEffect(() => {
-    requests.get(`${config.routes.api}/init`).then(res => res.json().then((data) => {
+    requests.get(`${routes.api}/init`).then(res => res.json().then((data) => {
       if (data && 'initialized' in data) {
         setInitialized(data.initialized);
       }

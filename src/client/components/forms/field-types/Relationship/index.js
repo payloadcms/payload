@@ -5,7 +5,6 @@ import some from 'async-some';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
-import config from '../../../../securedConfig';
 import Label from '../../Label';
 import Error from '../../Error';
 
@@ -13,7 +12,7 @@ import './index.scss';
 
 const cookies = new Cookies();
 
-const { serverURL, routes: { api }, collections } = config;
+const { serverURL, routes: { api }, collections } = PAYLOAD_CONFIG;
 
 const defaultError = 'Please make a selection.';
 

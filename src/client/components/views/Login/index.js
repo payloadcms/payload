@@ -7,7 +7,6 @@ import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
-import config from '../../../securedConfig';
 import Button from '../../elements/Button';
 import { useUser } from '../../data/User';
 
@@ -15,7 +14,7 @@ import './index.scss';
 
 const baseClass = 'login';
 
-const { serverURL, routes: { admin, api } } = config;
+const { serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
 
 const Login = () => {
   const { addStatus } = useStatusList();

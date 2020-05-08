@@ -6,12 +6,11 @@ import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import * as fieldTypes from '../../forms/field-types';
 import FormSubmit from '../../forms/Submit';
-import config from '../../../securedConfig';
 import { useUser } from '../../data/User';
 
 import './index.scss';
 
-const { serverURL, routes: { admin, api } } = config;
+const { serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
 
 const passwordField = {
   name: 'password',

@@ -4,7 +4,6 @@ import StatusList from '../../elements/Status';
 import Form from '../../forms/Form';
 import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
-import config from '../../../securedConfig';
 import Button from '../../elements/Button';
 import { useUser } from '../../data/User';
 
@@ -13,7 +12,7 @@ import HiddenInput from '../../forms/field-types/HiddenInput';
 
 const baseClass = 'reset-password';
 
-const { serverURL, routes: { admin, api } } = config;
+const { serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
 
 const ResetPassword = () => {
   const { token } = useParams();

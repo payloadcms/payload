@@ -1,9 +1,8 @@
 import React from 'react';
-import config from '../../../securedConfig';
 import Button from '../../elements/Button';
 import DefaultTemplate from '../../templates/Default';
 
-const { routes: { admin } } = config;
+const { routes: { admin } } = PAYLOAD_CONFIG;
 
 const NotFound = () => {
   return (

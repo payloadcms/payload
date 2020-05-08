@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useRouteMatch, useHistory } from 'react-router-dom';
-import config from '../../../../securedConfig';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import { useStepNav } from '../../../elements/StepNav';
 import Form from '../../../forms/Form';
@@ -13,7 +12,7 @@ import customComponents from '../../../customComponents';
 
 import './index.scss';
 
-const { serverURL, routes: { admin, api } } = config;
+const { serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
 
 const baseClass = 'collection-edit';
 

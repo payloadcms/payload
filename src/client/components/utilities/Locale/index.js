@@ -2,10 +2,11 @@ import React, {
   createContext, useContext, useState, useEffect,
 } from 'react';
 import PropTypes from 'prop-types';
-import config from '../../../securedConfig';
 import { useSearchParams } from '../SearchParams';
 
-const defaultLocale = (config.localization && config.localization.defaultLocale) ? config.localization.defaultLocale : 'en';
+const { localization } = PAYLOAD_CONFIG;
+
+const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
 const Context = createContext({});
 
 export const LocaleProvider = ({ children }) => {
@@ -14,7 +15,7 @@ export const LocaleProvider = ({ children }) => {
   const localeFromParams = searchParams.locale;
 
   useEffect(() => {
-    if (localeFromParams && config.localization.locales.indexOf(localeFromParams) > -1) setLocale(localeFromParams);
+    if (localeFromParams && localization.locales.indexOf(localeFromParams) > -1) setLocale(localeFromParams);
   }, [localeFromParams]);
 
   return (

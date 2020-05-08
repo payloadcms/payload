@@ -3,7 +3,8 @@ import {
   Redirect,
 } from 'react-router-dom';
 import { useStatusList } from '../../elements/Status';
-import config from '../../../securedConfig';
+
+const { routes: { admin } } = PAYLOAD_CONFIG;
 
 const RedirectToLogin = () => {
   const { addStatus } = useStatusList();
@@ -16,7 +17,7 @@ const RedirectToLogin = () => {
   }, [addStatus]);
 
   return (
-    <Redirect to={`${config.routes.admin}/login`} />
+    <Redirect to={`${admin}/login`} />
   );
 };
 

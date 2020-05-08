@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import config from '../../../securedConfig';
 import DefaultTemplate from '../../templates/Default';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import Form from '../../forms/Form';
@@ -13,7 +12,7 @@ const {
     admin,
     api,
   },
-} = config;
+} = PAYLOAD_CONFIG;
 
 const baseClass = 'global-edit';
 

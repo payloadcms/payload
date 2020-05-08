@@ -7,11 +7,11 @@ import PropTypes from 'prop-types';
 import Cookies from 'universal-cookie';
 import { useModal } from '@trbl/react-modal';
 import { requests } from '../../api';
-import config from '../../securedConfig';
 import StayLoggedInModal from '../modals/StayLoggedIn';
 import useThrottledEffect from '../../hooks/useThrottledEffect';
 
-const { serverURL, routes: { admin, api } } = config;
+const { serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
+
 const cookies = new Cookies();
 const Context = createContext({});
 

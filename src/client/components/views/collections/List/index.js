@@ -4,12 +4,11 @@ import queryString from 'qs';
 import PropTypes from 'prop-types';
 import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
-import config from '../../../../securedConfig';
 import Paginator from '../../../elements/Paginator';
 
 import './index.scss';
 
-const { serverURL, routes: { api } } = config;
+const { serverURL, routes: { api } } = PAYLOAD_CONFIG;
 
 const ListView = (props) => {
   const { collection } = props;

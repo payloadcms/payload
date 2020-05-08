@@ -2,6 +2,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 const getStyleLoaders = require('./getStyleLoaders');
+const secureConfig = require('../utilities/secureConfig');
 
 module.exports = (config) => {
   return {
@@ -21,9 +22,6 @@ module.exports = (config) => {
     },
     devtool: 'source-map',
     mode: 'development',
-    node: {
-      __dirname: true,
-    },
     resolveLoader: { modules: [path.join(__dirname, '../../node_modules')] },
     module: {
       rules: [
@@ -108,6 +106,9 @@ module.exports = (config) => {
       ],
     },
     plugins: [
+      new webpack.DefinePlugin({
+        PAYLOAD_CONFIG: JSON.stringify(secureConfig(config)),
+      }),
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, '../client/index.html'),
         filename: './index.html',

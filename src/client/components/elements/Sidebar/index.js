@@ -1,6 +1,5 @@
 import React from 'react';
 import { useLocation, NavLink, Link } from 'react-router-dom';
-import config from '../../../securedConfig';
 
 import Chevron from '../../icons/Chevron';
 
@@ -12,7 +11,7 @@ const {
   routes: {
     admin,
   },
-} = config;
+} = PAYLOAD_CONFIG;
 
 const Sidebar = () => {
   const location = useLocation();
