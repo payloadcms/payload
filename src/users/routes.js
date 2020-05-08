@@ -11,6 +11,7 @@ const {
   forgotPassword,
   resetPassword,
   update,
+  policies,
 } = require('./requestHandlers');
 
 const {
@@ -39,7 +40,11 @@ const authRoutes = (User, config, sendEmail) => {
 
   router
     .route('/me')
-    .post(me);
+    .get(me);
+
+  router
+    .route('/policies')
+    .get(policies(config));
 
   router
     .route('/first-register')

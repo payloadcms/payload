@@ -64,7 +64,7 @@ const login = async (args) => {
     const afterLoginHook = args.config && args.config.hooks && args.config.hooks.afterLogin;
 
     if (typeof afterLoginHook === 'function') {
-      await afterLoginHook(options, token);
+      await afterLoginHook({ ...options, token, user });
     }
 
     // /////////////////////////////////////

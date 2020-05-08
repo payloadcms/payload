@@ -52,7 +52,6 @@ describe('Users REST API', () => {
 
   it('should return a logged in user from /me', async () => {
     const response = await fetch(`${url}/api/me`, {
-      method: 'post',
       headers: {
         Authorization: `JWT ${token}`,
       },

@@ -2,6 +2,7 @@ const path = require('path');
 const Page = require('./collections/Page');
 const Category = require('./collections/Category');
 const Post = require('./collections/Post');
+const Order = require('./collections/Order');
 const Layout = require('./collections/Layout');
 const User = require('./collections/User');
 const File = require('./collections/File');
@@ -14,6 +15,7 @@ module.exports = {
   collections: [
     Page,
     Category,
+    Order,
     Post,
     Layout,
     File,
