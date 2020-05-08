@@ -5,10 +5,17 @@ import './index.scss';
 
 const baseClass = 'label';
 
-const Label = ({ children, as: Element, htmlFor }) => {
+const Label = ({
+  children, as: Element, htmlFor, className,
+}) => {
+  const classes = [
+    baseClass,
+    className && className,
+  ].filter(Boolean).join(' ');
+
   return (
     <Element
-      className={baseClass}
+      className={classes}
       htmlFor={htmlFor}
     >
       {children}
@@ -19,6 +26,7 @@ const Label = ({ children, as: Element, htmlFor }) => {
 Label.defaultProps = {
   as: 'span',
   htmlFor: undefined,
+  className: undefined,
 };
 
 Label.propTypes = {
@@ -28,6 +36,7 @@ Label.propTypes = {
   ]).isRequired,
   as: PropTypes.oneOf(['label', 'span']),
   htmlFor: PropTypes.string,
+  className: PropTypes.string,
 };
 
 export default Label;

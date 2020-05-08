@@ -2,6 +2,7 @@
 
 label.field-label {
   display: flex;
+  margin-bottom: base(.25);
 
   .required {
     color: $color-red;

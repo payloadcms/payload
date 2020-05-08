@@ -85,12 +85,9 @@ const Login = () => {
           name="password"
           required
         />
-        <a
-          className=""
-          href={`${admin}/forgot`}
-        >
+        <Link to={`${admin}/forgot`}>
           Forgot password?
-        </a>
+        </Link>
         <FormSubmit>Login</FormSubmit>
       </Form>
     </MinimalTemplate>

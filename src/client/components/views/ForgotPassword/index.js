@@ -35,13 +35,13 @@ const ForgotPassword = () => {
   if (user) {
     return (
       <MinimalTemplate className={baseClass}>
-        <h1>Already logged in</h1>
+        <h1>You&apos;re already logged in</h1>
         <p>
-          To log in with another user, you should
+          To change your password, go to your
           {' '}
-          <Link to={`${admin}/logout`}>log out</Link>
+          <Link to={`${admin}/logout`}>account</Link>
           {' '}
-          first.
+          and edit your password there.
         </p>
         <br />
         <Button
@@ -83,6 +83,7 @@ const ForgotPassword = () => {
         method="POST"
         action={`${serverURL}${api}/forgot-password`}
       >
+        <h1>Forgot Password</h1>
         <Email
           label="Email Address"
           name="email"
