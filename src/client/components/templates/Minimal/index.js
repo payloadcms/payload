@@ -20,7 +20,9 @@ const Minimal = (props) => {
       className={classes}
       style={style}
     >
-      {children}
+      <div className={`${baseClass}__wrap`}>
+        {children}
+      </div>
     </section>
   );
 };

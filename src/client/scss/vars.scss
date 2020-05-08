@@ -18,12 +18,12 @@ $breakpoint-l-height : 900px;
 // BASELINE GRID
 //////////////////////////////
 
-$baseline           : 25px;
-$baseline-body-size : 15px;
-$baseline-rem       : ($baseline / $baseline-body-size) + rem;
+$baseline-px         : 25px;
+$baseline-body-size  : 15px;
+$baseline            : ($baseline-px / $baseline-body-size) + rem;
 
 @function base($multiplier) {
-	@return ($baseline / $baseline-body-size) * $multiplier + rem;
+	@return ($baseline-px / $baseline-body-size) * $multiplier + rem;
 }
 
 //////////////////////////////

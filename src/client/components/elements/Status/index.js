@@ -5,6 +5,8 @@ import { useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import X from '../../icons/X';
 
+import './index.scss';
+
 const baseClass = 'status-list';
 
 const Context = createContext({});

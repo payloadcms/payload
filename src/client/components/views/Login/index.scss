@@ -1,17 +1,1 @@
-@import '../../../scss/styles';
 
-.login {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  min-height: 100vh;
-
-  &__wrap {
-    margin: 0 auto base(1);
-    width: 100%;
-
-    svg {
-      width: 100%;
-    }
-  }
-}

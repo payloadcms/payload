@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import MinimalTemplate from '../../templates/Minimal';
 import StatusList, { useStatusList } from '../../elements/Status';
 import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
@@ -37,7 +38,7 @@ const Login = () => {
 
   if (user) {
     return (
-      <div className={baseClass}>
+      <MinimalTemplate className={baseClass}>
         <div className={`${baseClass}__wrap`}>
           <h1>Already logged in</h1>
           <p>
@@ -56,12 +57,12 @@ const Login = () => {
             Back to Dashboard
           </Button>
         </div>
-      </div>
+      </MinimalTemplate>
     );
   }
 
   return (
-    <div className={baseClass}>
+    <MinimalTemplate className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <p>
           <a
@@ -92,7 +93,7 @@ const Login = () => {
           <FormSubmit>Login</FormSubmit>
         </Form>
       </div>
-    </div>
+    </MinimalTemplate>
   );
 };
 

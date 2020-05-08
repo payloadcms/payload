@@ -2,29 +2,29 @@
 
 .btn {
   background-color: $color-dark-gray;
-  border: 1px solid $color-dark-gray;
   color: white;
   padding: base(.5) base(.75);
-  line-height: base(.5);
+  line-height: base(1);
   border-radius: $style-radius-m;
+  font-size: .87rem;
   margin-top: base(1);
   margin-bottom: base(1);
+  border: 0;
   cursor: pointer;
 
   &.btn-secondary {
-    border: $style-stroke-width solid $color-dark-gray;
+    box-shadow: inset 0 0 0 $style-stroke-width $color-dark-gray;
     color: $color-dark-gray;
     background: none;
 
     &:hover {
       background: lighten($color-dark-gray, 5%);
-      border: $style-stroke-width solid lighten($color-dark-gray, 5%);
+      box-shadow: inset 0 0 0 $style-stroke-width lighten($color-dark-gray, 5%);
       color: white;
     }
   }
 
   &:hover {
-    border: $style-stroke-width solid lighten($color-dark-gray, 5%);
     background: lighten($color-dark-gray, 5%);
   }
 

@@ -5,7 +5,6 @@ import config from '../../../../securedConfig';
 import DefaultTemplate from '../../../templates/Default';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Form from '../../../forms/Form';
-import StickyHeader from '../../../elements/StickyHeader';
 import PreviewButton from '../../../elements/PreviewButton';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';

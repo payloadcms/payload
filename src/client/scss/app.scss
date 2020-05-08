@@ -9,7 +9,12 @@
   box-sizing: border-box;
 }
 
-html, body {
+html {
+  font-size: $baseline-body-size;
+  line-height: $baseline;
+}
+
+html, body, #app {
   height: 100%;
 }
 
@@ -22,20 +27,6 @@ body {
   margin: 0;
 }
 
-html {
-  line-height: base(1);
-  font-size: $baseline-body-size;
-
-  @include mid-break {
-    font-size: 18px;
-    line-height: base(1);
-  }
-
-  @include small-break {
-    font-size: 16px;
-    line-height: base(.8)
-  }
-}
 
 ::selection {
   background: $color-green;
