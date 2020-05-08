@@ -4,6 +4,7 @@ import {
 } from 'react-router-dom';
 import DefaultList from './views/collections/List';
 import { useUser } from './data/User';
+import { useConfig } from './data/Config';
 import DefaultTemplate from './templates/Default';
 import Dashboard from './views/Dashboard';
 import ForgotPassword from './views/ForgotPassword';
@@ -21,6 +22,7 @@ import ResetPassword from './views/ResetPassword';
 const Routes = () => {
   const [initialized, setInitialized] = useState(null);
   const { user } = useUser();
+  const { routes, collections, User } = useConfig();
 
   useEffect(() => {
     requests.get(`${config.routes.api}/init`).then(res => res.json().then((data) => {
@@ -32,7 +34,7 @@ const Routes = () => {
 
   return (
     <Route
-      path={config.routes.admin}
+      path={routes.admin}
       render={({ match }) => {
         if (initialized === false) {
           return (
@@ -77,7 +79,7 @@ const Routes = () => {
                               return (
                                 <List
                                   {...routeProps}
-                                  collection={config.User}
+                                  collection={User}
                                 />
                               );
                             }}
@@ -90,7 +92,7 @@ const Routes = () => {
                               return (
                                 <Edit
                                   {...routeProps}
-                                  collection={config.user}
+                                  collection={User}
                                 />
                               );
                             }}
@@ -104,7 +106,7 @@ const Routes = () => {
                                 <Edit
                                   isEditing
                                   {...routeProps}
-                                  collection={config.User}
+                                  collection={User}
                                 />
                               );
                             }}
@@ -117,7 +119,7 @@ const Routes = () => {
                             <Dashboard />
                           </Route>
 
-                          {config.collections.map((collection) => {
+                          {collections.map((collection) => {
                             return (
                               <Route
                                 key={`${collection.slug}-list`}
@@ -136,7 +138,7 @@ const Routes = () => {
                             );
                           })}
 
-                          {config.collections.map((collection) => {
+                          {collections.map((collection) => {
                             return (
                               <Route
                                 key={`${collection.slug}-create`}
@@ -154,7 +156,7 @@ const Routes = () => {
                             );
                           })}
 
-                          {config.collections.map((collection) => {
+                          {collections.map((collection) => {
                             return (
                               <Route
                                 key={`${collection.slug}-edit`}
