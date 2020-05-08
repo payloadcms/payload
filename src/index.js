@@ -16,7 +16,7 @@ const GraphQL = require('./graphql');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
 const buildEmail = require('./email/build');
 const identifyAPI = require('./express/middleware/identifyAPI');
-const errorHandler = require('./errors/errorHandler');
+const errorHandler = require('./express/middleware/errorHandler');
 
 class Payload {
   constructor(options) {
@@ -70,13 +70,17 @@ class Payload {
       },
     }));
 
-    this.router.use('', errorHandler(this.config));
+    // this.router.use('', (err, req, res) => {
+    //   console.log('wtf');
+    // });
 
     // Bind router to API
     this.express.use(this.config.routes.api, this.router);
 
     // Enable static routes for all collections permitting upload
     this.initStatic();
+
+    this.router.use(errorHandler(this.config));
   }
 
   async sendEmail(message) {

@@ -1,5 +1,5 @@
 const errorHandler = require('./errorHandler');
-const APIError = require('./APIError');
+const APIError = require('../../errors/APIError');
 
 const testError = new APIError('test error', 503);
 

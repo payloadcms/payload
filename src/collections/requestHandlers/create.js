@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
+// const formatErrorResponse = require('../../express/responses/formatError');
 const formatSuccessResponse = require('../../express/responses/formatSuccess');
 const { create } = require('../operations');
 
@@ -18,7 +18,6 @@ const createHandler = async (req, res, next) => {
     });
   } catch (error) {
     return next(error);
-    // return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
   }
 };
 

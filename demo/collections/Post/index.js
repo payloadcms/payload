@@ -24,9 +24,7 @@ module.exports = {
   },
   hooks: {
     beforeCreate: operation => operation,
-    beforeRead: operation => {
-      throw new Error('user defined error');
-    },
+    beforeRead: operation => operation,
     beforeUpdate: operation => operation,
     beforeDelete: (operation) => {
       console.log(`About to delete ${operation.id}`);

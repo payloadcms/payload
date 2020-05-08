@@ -8,6 +8,7 @@ const sanitizeConfig = (config) => {
     graphQLPlayground: (config.routes && config.routes.graphQLPlayground) ? config.routes.graphQLPlayground : '/graphql-playground',
   };
   sanitizedConfig.components = { ...(config.components || {}) };
+  sanitizedConfig.hooks = { ...(config.hooks || {}) };
 
   return sanitizedConfig;
 };

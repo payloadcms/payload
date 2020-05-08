@@ -7,7 +7,7 @@ const MissingUseAsTitle = require('./MissingUseAsTitle');
 const NotFound = require('./NotFound');
 const Forbidden = require('./Forbidden');
 const ValidationError = require('./ValidationError');
-const errorHandler = require('./errorHandler');
+const errorHandler = require('../express/middleware/errorHandler');
 const MissingFile = require('./MissingFile');
 
 module.exports = {

@@ -16,12 +16,9 @@ const findHandler = async (req, res, next) => {
 
     const result = await find(options);
 
-    // throw new Error('testing error handler');
-
     return res.status(httpStatus.OK).json(result);
   } catch (error) {
     return next(error);
-    // return res.status(400).json(err);
   }
 };
 
