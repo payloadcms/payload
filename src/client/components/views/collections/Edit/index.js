@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import config from '../../../../securedConfig';
-import DefaultTemplate from '../../../templates/Default';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
+import { useStepNav } from '../../../elements/StepNav';
 import Form from '../../../forms/Form';
 import PreviewButton from '../../../elements/PreviewButton';
 import FormSubmit from '../../../forms/Submit';
@@ -18,6 +18,10 @@ const { serverURL, routes: { admin, api } } = config;
 const baseClass = 'collection-edit';
 
 const EditView = (props) => {
+  const { params: { id } = {} } = useRouteMatch();
+  const history = useHistory();
+  const { setStepNav } = useStepNav();
+
   const { collection, isEditing } = props;
   const {
     slug,
@@ -30,8 +34,6 @@ const EditView = (props) => {
     useAsTitle,
   } = collection;
 
-  const { params: { id } = {} } = useRouteMatch();
-  const history = useHistory();
 
   const handleAjaxResponse = !isEditing ? (res) => {
     res.json().then((json) => {
@@ -64,11 +66,12 @@ const EditView = (props) => {
     });
   }
 
+  useEffect(() => {
+    setStepNav(nav);
+  }, [setStepNav, nav]);
+
   return (
-    <DefaultTemplate
-      className={baseClass}
-      stepNav={nav}
-    >
+    <div className={baseClass}>
       <header className={`${baseClass}__header`}>
         {isEditing && (
           <h1>
@@ -105,7 +108,7 @@ const EditView = (props) => {
           initialData={data}
         />
       </Form>
-    </DefaultTemplate>
+    </div>
   );
 };
 

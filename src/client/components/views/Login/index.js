@@ -77,6 +77,7 @@ const Login = () => {
         <Email
           label="Email Address"
           name="email"
+          autoComplete="email"
           required
         />
         <Password

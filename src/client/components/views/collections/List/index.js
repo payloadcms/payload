@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import queryString from 'qs';
 import PropTypes from 'prop-types';
+import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import config from '../../../../securedConfig';
-import DefaultTemplate from '../../../templates/Default';
 import Paginator from '../../../elements/Paginator';
 
 import './index.scss';
@@ -14,6 +14,7 @@ const { serverURL, routes: { api } } = config;
 const ListView = (props) => {
   const { collection } = props;
   const location = useLocation();
+  const { setStepNav } = useStepNav();
   const { page } = queryString.parse(location.search, { ignoreQueryPrefix: true });
 
   const apiURL = [
@@ -23,15 +24,16 @@ const ListView = (props) => {
 
   const [{ data }] = usePayloadAPI(apiURL);
 
+  useEffect(() => {
+    setStepNav([
+      {
+        label: collection.labels.plural,
+      },
+    ]);
+  }, [setStepNav, collection.labels.plural]);
+
   return (
-    <DefaultTemplate
-      className="collection-list"
-      stepNav={[
-        {
-          label: collection.labels.plural,
-        },
-      ]}
-    >
+    <div className="collection-list">
       <Paginator
         totalDocs={data.totalDocs}
         limit={data.limit}
@@ -43,7 +45,7 @@ const ListView = (props) => {
         nextPage={data.nextPage}
         numberOfNeighbors={1}
       />
-    </DefaultTemplate>
+    </div>
   );
 };
 

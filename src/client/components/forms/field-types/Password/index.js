@@ -58,6 +58,7 @@ const Password = (props) => {
         onChange={onFieldChange}
         disabled={processing ? 'disabled' : undefined}
         type="password"
+        autoComplete="current-password"
         id={name}
         name={name}
       />

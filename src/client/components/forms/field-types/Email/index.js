@@ -20,6 +20,7 @@ const Email = (props) => {
     errorMessage,
     label,
     placeholder,
+    autoComplete,
   } = props;
 
   const {
@@ -61,6 +62,7 @@ const Email = (props) => {
         type="email"
         id={name}
         name={name}
+        autoComplete={autoComplete}
       />
     </div>
   );
@@ -75,6 +77,7 @@ Email.defaultProps = {
   errorMessage: defaultError,
   width: 100,
   style: {},
+  autoComplete: undefined,
 };
 
 Email.propTypes = {
@@ -87,6 +90,7 @@ Email.propTypes = {
   width: PropTypes.number,
   style: PropTypes.shape({}),
   label: PropTypes.string,
+  autoComplete: PropTypes.string,
 };
 
 export default withCondition(Email);

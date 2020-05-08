@@ -37,15 +37,6 @@ module.exports = (config) => {
           ],
         },
         {
-          test: require.resolve('../client/securedConfig'),
-          use: [
-            {
-              loader: 'val-loader',
-              options: config,
-            },
-          ],
-        },
-        {
           test: /\.js$/,
           exclude: /node_modules/,
           use: {

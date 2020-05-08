@@ -92,6 +92,7 @@ const ForgotPassword = () => {
         />
         <FormSubmit>Submit</FormSubmit>
       </Form>
+      <Link to={`${admin}/login`}>Back to login</Link>
     </MinimalTemplate>
   );
 };
