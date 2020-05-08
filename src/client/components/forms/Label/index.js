@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import LabelElement from '../../elements/Label';
 
 import './index.scss';
 
@@ -10,7 +11,8 @@ const Label = (props) => {
 
   if (label) {
     return (
-      <label
+      <LabelElement
+        as="label"
         htmlFor={htmlFor}
         className="field-label"
       >
@@ -18,7 +20,7 @@ const Label = (props) => {
         {required
           && <span className="required">*</span>
         }
-      </label>
+      </LabelElement>
     );
   }
 
