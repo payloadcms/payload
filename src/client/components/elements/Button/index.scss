@@ -11,6 +11,7 @@
   margin-bottom: base(1);
   border: 0;
   cursor: pointer;
+  font-weight: bold;
 
   &.btn-secondary {
     box-shadow: inset 0 0 0 $style-stroke-width $color-dark-gray;

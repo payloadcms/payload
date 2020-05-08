@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import Logo from '../../graphics/Logo';
 import MinimalTemplate from '../../templates/Minimal';
 import StatusList, { useStatusList } from '../../elements/Status';
 import Form from '../../forms/Form';
@@ -63,36 +64,35 @@ const Login = () => {
 
   return (
     <MinimalTemplate className={baseClass}>
-      <div className={`${baseClass}__wrap`}>
-        <p>
-          <a
-            className=""
-            href={`${admin}/forgot`}
-          >
-            Forgot password?
-          </a>
-        </p>
-        <StatusList />
-        <Form
-          handleAjaxResponse={handleAjaxResponse}
-          method="POST"
-          action={`${serverURL}${api}/login`}
-          redirect={admin}
-        >
-          <Email
-            label="Email Address"
-            name="email"
-            required
-          />
-          <Password
-            error="password"
-            label="Password"
-            name="password"
-            required
-          />
-          <FormSubmit>Login</FormSubmit>
-        </Form>
+      <div className={`${baseClass}__brand`}>
+        <Logo />
       </div>
+      <StatusList />
+      <Form
+        handleAjaxResponse={handleAjaxResponse}
+        method="POST"
+        action={`${serverURL}${api}/login`}
+        redirect={admin}
+      >
+        <Email
+          label="Email Address"
+          name="email"
+          required
+        />
+        <Password
+          error="password"
+          label="Password"
+          name="password"
+          required
+        />
+        <a
+          className=""
+          href={`${admin}/forgot`}
+        >
+          Forgot password?
+        </a>
+        <FormSubmit>Login</FormSubmit>
+      </Form>
     </MinimalTemplate>
   );
 };
