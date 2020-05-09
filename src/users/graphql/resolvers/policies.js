@@ -1,6 +1,6 @@
 const { policies } = require('../../operations');
 
-const loginResolver = config => async (_, __, context) => {
+const policyResolver = config => async (_, __, context) => {
   const options = {
     config,
     req: context,
@@ -10,4 +10,4 @@ const loginResolver = config => async (_, __, context) => {
   return policyResults;
 };
 
-module.exports = loginResolver;
+module.exports = policyResolver;

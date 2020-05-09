@@ -4,6 +4,7 @@ const graphQLHTTP = require('express-graphql');
 const buildObjectType = require('./schema/buildObjectType');
 const buildMutationInputType = require('./schema/buildMutationInputType');
 const buildBlockType = require('./schema/buildBlockType');
+const buildPoliciesType = require('./schema/buildPoliciesType');
 const buildLocaleInputType = require('./schema/buildLocaleInputType');
 const buildFallbackLocaleInputType = require('./schema/buildFallbackLocaleInputType');
 const registerCollections = require('../collections/graphql/register');
@@ -30,6 +31,7 @@ class GraphQL {
     this.buildMutationInputType = buildMutationInputType.bind(this);
     this.buildWhereInputType = buildWhereInputType;
     this.buildObjectType = buildObjectType.bind(this);
+    this.buildPoliciesType = buildPoliciesType.bind(this);
     this.registerCollections = registerCollections.bind(this);
     this.initUser = initUser.bind(this);
     this.registerGlobals = registerGlobals.bind(this);

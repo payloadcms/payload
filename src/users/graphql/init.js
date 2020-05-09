@@ -13,7 +13,7 @@ const {
 } = require('../../collections/graphql/resolvers');
 
 const {
-  login, me, init, refresh, register, update, forgotPassword, resetPassword,
+  login, me, init, refresh, register, update, forgotPassword, resetPassword, policies,
 } = require('./resolvers');
 
 function registerUser() {
@@ -95,6 +95,11 @@ function registerUser() {
       },
     ]),
   );
+
+  this.Query.fields.Policies = {
+    type: this.buildPoliciesType(),
+    resolve: policies(this.config),
+  };
 
   this.Query.fields[singularLabel] = {
     type: this.User.graphQL.type,

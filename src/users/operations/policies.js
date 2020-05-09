@@ -15,13 +15,22 @@ const policies = async (args) => {
     config.collections.forEach((collection) => {
       policyResults[collection.slug] = {};
 
-      const baseOperations = ['create', 'read', 'update', 'delete'];
+      const operations = ['create', 'read', 'update', 'delete'];
 
-      baseOperations.forEach(async (operation) => {
+      operations.forEach(async (operation) => {
+        policyResults[collection.slug][operation] = {};
+
         if (typeof collection.policies[operation] === 'function') {
-          policyResults[collection.slug][operation] = await collection.policies[operation]({ req });
+          const result = await collection.policies[operation]({ req });
+
+          if (typeof result === 'object') {
+            policyResults[collection.slug][operation].permission = true;
+            policyResults[collection.slug][operation].where = result;
+          } else {
+            policyResults[collection.slug][operation].permission = !!(result);
+          }
         } else {
-          policyResults[collection.slug][operation] = isLoggedIn;
+          policyResults[collection.slug][operation].permission = isLoggedIn;
         }
       });
     });
