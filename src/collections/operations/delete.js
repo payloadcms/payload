@@ -13,7 +13,6 @@ const deleteQuery = async (args) => {
 
     let options = {
       ...args,
-      policy: policyResults,
     };
 
     // /////////////////////////////////////
@@ -37,7 +36,6 @@ const deleteQuery = async (args) => {
         locale,
         fallbackLocale,
       },
-      policy,
     } = options;
 
     let query = { _id: id };
@@ -45,7 +43,7 @@ const deleteQuery = async (args) => {
     if (hasWherePolicy) {
       query = {
         ...query,
-        ...policy,
+        ...policyResults,
       };
     }
 

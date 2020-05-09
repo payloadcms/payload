@@ -1,4 +1,4 @@
-const { NotFound } = require('../../errors');
+const { Unauthorized, NotFound } = require('../../errors');
 const executePolicy = require('../../users/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
 
@@ -8,13 +8,20 @@ const findByID = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    const policy = args.config && args.config.policies && args.config.policies.read;
-    await executePolicy(args, policy);
+    const policyResult = await executePolicy(args, args.config.policies.read);
+    const hasWherePolicy = typeof policyResults === 'object';
 
     let options = {
       ...args,
       query: { _id: args.id },
     };
+
+    if (hasWherePolicy) {
+      options.query = {
+        ...options.query,
+        ...policyResult,
+      };
+    }
 
     // /////////////////////////////////////
     // 2. Execute before collection hook
@@ -60,7 +67,8 @@ const findByID = async (args) => {
 
     let result = await Model.findOne(query, {}, queryOptionsToExecute);
 
-    if (!result) throw new NotFound();
+    if (!result && !hasWherePolicy) throw new NotFound();
+    if (!result && hasWherePolicy) throw new Unauthorized();
 
     if (locale && result.setLocale) {
       result.setLocale(locale, fallbackLocale);
