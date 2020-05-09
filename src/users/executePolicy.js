@@ -8,7 +8,7 @@ const executePolicy = async (operation, policy) => {
       throw new Forbidden();
     }
 
-    return policy;
+    return result;
   }
 
   if (operation.req.user) {

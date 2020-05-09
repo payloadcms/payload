@@ -17,7 +17,7 @@ function initUser() {
 
   this.User = {
     config: this.config.User,
-    Model: mongoose.model(this.config.User.labels.singular, userSchema),
+    Model: mongoose.model(this.config.User.slug, userSchema),
   };
 
   passport.use(this.User.Model.createStrategy());

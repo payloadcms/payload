@@ -8,14 +8,14 @@ const find = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    const policyResult = await executePolicy(args, args.config.policies.read);
+    const policyResults = await executePolicy(args, args.config.policies.read);
     const hasWherePolicy = typeof policyResults === 'object';
 
     const queryToBuild = {};
     if (args.where) queryToBuild.where = args.where;
 
     if (hasWherePolicy) {
-      queryToBuild.where = merge(args.where, policyResult);
+      queryToBuild.where = merge(args.where, policyResults);
     }
 
     let options = {
