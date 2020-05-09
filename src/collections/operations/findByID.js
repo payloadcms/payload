@@ -1,4 +1,4 @@
-const { Unauthorized, NotFound } = require('../../errors');
+const { Forbidden, NotFound } = require('../../errors');
 const executePolicy = require('../../users/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
 
@@ -8,7 +8,7 @@ const findByID = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    const policyResult = await executePolicy(args, args.config.policies.read);
+    const policyResults = await executePolicy(args, args.config.policies.read);
     const hasWherePolicy = typeof policyResults === 'object';
 
     let options = {
@@ -17,10 +17,14 @@ const findByID = async (args) => {
     };
 
     if (hasWherePolicy) {
-      options.query = {
-        ...options.query,
-        ...policyResult,
-      };
+      options.query = await args.Model.buildQuery({
+        where: {
+          ...policyResults,
+          _id: {
+            equals: args.id,
+          },
+        },
+      }, args.locale);
     }
 
     // /////////////////////////////////////
@@ -68,7 +72,7 @@ const findByID = async (args) => {
     let result = await Model.findOne(query, {}, queryOptionsToExecute);
 
     if (!result && !hasWherePolicy) throw new NotFound();
-    if (!result && hasWherePolicy) throw new Unauthorized();
+    if (!result && hasWherePolicy) throw new Forbidden();
 
     if (locale && result.setLocale) {
       result.setLocale(locale, fallbackLocale);

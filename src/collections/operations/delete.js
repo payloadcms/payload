@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { NotFound, Unauthorized } = require('../../errors');
+const { NotFound, Forbidden } = require('../../errors');
 const executePolicy = require('../../users/executePolicy');
 
 const deleteQuery = async (args) => {
@@ -50,7 +50,7 @@ const deleteQuery = async (args) => {
     let resultToDelete = await Model.findOne(query);
 
     if (!resultToDelete && !hasWherePolicy) throw new NotFound();
-    if (!resultToDelete && hasWherePolicy) throw new Unauthorized();
+    if (!resultToDelete && hasWherePolicy) throw new Forbidden();
 
     resultToDelete = resultToDelete.toJSON({ virtuals: true });
 
