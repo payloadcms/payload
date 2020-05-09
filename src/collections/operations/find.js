@@ -1,3 +1,4 @@
+const merge = require('lodash.merge');
 const executePolicy = require('../../users/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
 
@@ -7,10 +8,15 @@ const find = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    await executePolicy(args, args.config.policies.read);
+    const policyResult = await executePolicy(args, args.config.policies.read);
+    const hasWherePolicy = typeof policyResults === 'object';
 
     const queryToBuild = {};
     if (args.where) queryToBuild.where = args.where;
+
+    if (hasWherePolicy) {
+      queryToBuild.where = merge(args.where, policyResult);
+    }
 
     let options = {
       ...args,

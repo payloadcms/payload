@@ -13,7 +13,7 @@ module.exports = {
     read: null,
     update: ({ req: { user } }) => checkRole(['admin', 'user'], user),
     destroy: ({ req: { user } }) => checkRole(['admin', 'user'], user),
-    admin: () => false,
+    admin: () => true,
   },
   hooks: {
     beforeLogin: options => options,

@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { NotFound } = require('../../errors');
+const { NotFound, Unauthorized } = require('../../errors');
 const executePolicy = require('../../users/executePolicy');
 
 const deleteQuery = async (args) => {
@@ -8,9 +8,13 @@ const deleteQuery = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    await executePolicy(args, args.config.policies.delete);
+    const policyResults = await executePolicy(args, args.config.policies.delete);
+    const hasWherePolicy = typeof policyResults === 'object';
 
-    let options = { ...args };
+    let options = {
+      ...args,
+      policy: policyResults,
+    };
 
     // /////////////////////////////////////
     // 2. Execute before collection hook
@@ -33,11 +37,22 @@ const deleteQuery = async (args) => {
         locale,
         fallbackLocale,
       },
+      policy,
     } = options;
 
-    let resultToDelete = await Model.findOne({ _id: id });
+    let query = { _id: id };
 
-    if (!resultToDelete) throw new NotFound();
+    if (hasWherePolicy) {
+      query = {
+        ...query,
+        ...policy,
+      };
+    }
+
+    let resultToDelete = await Model.findOne(query);
+
+    if (!resultToDelete && !hasWherePolicy) throw new NotFound();
+    if (!resultToDelete && hasWherePolicy) throw new Unauthorized();
 
     resultToDelete = resultToDelete.toJSON({ virtuals: true });
 
