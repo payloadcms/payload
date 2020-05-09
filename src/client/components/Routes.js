@@ -17,12 +17,16 @@ import { requests } from '../api';
 import customComponents from './customComponents';
 import RedirectToLogin from './utilities/RedirectToLogin';
 import ResetPassword from './views/ResetPassword';
+import Unauthorized from './views/Unauthorized';
+import Loading from './elements/Loading';
 
-const { routes, collections, User } = PAYLOAD_CONFIG;
+const {
+  routes, collections, User, globals,
+} = PAYLOAD_CONFIG;
 
 const Routes = () => {
   const [initialized, setInitialized] = useState(null);
-  const { user } = useUser();
+  const { user, permissions: { canAccessAdmin } } = useUser();
 
   useEffect(() => {
     requests.get(`${routes.api}/init`).then(res => res.json().then((data) => {
@@ -68,133 +72,141 @@ const Routes = () => {
               <Route
                 render={() => {
                   if (user) {
-                    return (
-                      <DefaultTemplate>
-                        <Switch>
-                          <Route
-                            path={`${match.url}/users`}
-                            exact
-                            render={(routeProps) => {
-                              const List = customComponents.users?.views?.List || DefaultList;
+                    if (canAccessAdmin) {
+                      return (
+                        <DefaultTemplate>
+                          <Switch>
+                            <Route
+                              path={`${match.url}/users`}
+                              exact
+                              render={(routeProps) => {
+                                const List = customComponents.users?.views?.List || DefaultList;
+                                return (
+                                  <List
+                                    {...routeProps}
+                                    collection={User}
+                                  />
+                                );
+                              }}
+                            />
+
+                            <Route
+                              path={`${match.url}/users/create`}
+                              exact
+                              render={(routeProps) => {
+                                return (
+                                  <Edit
+                                    {...routeProps}
+                                    collection={User}
+                                  />
+                                );
+                              }}
+                            />
+
+                            <Route
+                              path={`${match.url}/users/:id`}
+                              exact
+                              render={(routeProps) => {
+                                return (
+                                  <Edit
+                                    isEditing
+                                    {...routeProps}
+                                    collection={User}
+                                  />
+                                );
+                              }}
+                            />
+
+                            <Route
+                              path={`${match.url}/`}
+                              exact
+                            >
+                              <Dashboard />
+                            </Route>
+
+                            {collections.map((collection) => {
                               return (
-                                <List
-                                  {...routeProps}
-                                  collection={User}
+                                <Route
+                                  key={`${collection.slug}-list`}
+                                  path={`${match.url}/collections/${collection.slug}`}
+                                  exact
+                                  render={(routeProps) => {
+                                    const List = customComponents[collection.slug]?.views?.List || DefaultList;
+                                    return (
+                                      <List
+                                        {...routeProps}
+                                        collection={collection}
+                                      />
+                                    );
+                                  }}
                                 />
                               );
-                            }}
-                          />
+                            })}
 
-                          <Route
-                            path={`${match.url}/users/create`}
-                            exact
-                            render={(routeProps) => {
+                            {collections.map((collection) => {
                               return (
-                                <Edit
-                                  {...routeProps}
-                                  collection={User}
+                                <Route
+                                  key={`${collection.slug}-create`}
+                                  path={`${match.url}/collections/${collection.slug}/create`}
+                                  exact
+                                  render={(routeProps) => {
+                                    return (
+                                      <Edit
+                                        {...routeProps}
+                                        collection={collection}
+                                      />
+                                    );
+                                  }}
                                 />
                               );
-                            }}
-                          />
+                            })}
 
-                          <Route
-                            path={`${match.url}/users/:id`}
-                            exact
-                            render={(routeProps) => {
+                            {collections.map((collection) => {
                               return (
-                                <Edit
-                                  isEditing
-                                  {...routeProps}
-                                  collection={User}
+                                <Route
+                                  key={`${collection.slug}-edit`}
+                                  path={`${match.url}/collections/${collection.slug}/:id`}
+                                  exact
+                                  render={(routeProps) => {
+                                    return (
+                                      <Edit
+                                        isEditing
+                                        {...routeProps}
+                                        collection={collection}
+                                      />
+                                    );
+                                  }}
                                 />
                               );
-                            }}
-                          />
+                            })}
 
-                          <Route
-                            path={`${match.url}/`}
-                            exact
-                          >
-                            <Dashboard />
-                          </Route>
+                            {globals && globals.map((global) => {
+                              return (
+                                <Route
+                                  key={`${global.slug}`}
+                                  path={`${match.url}/globals/${global.slug}`}
+                                  exact
+                                  render={(routeProps) => {
+                                    return (
+                                      <EditGlobal
+                                        {...routeProps}
+                                        global={global}
+                                      />
+                                    );
+                                  }}
+                                />
+                              );
+                            })}
+                          </Switch>
+                        </DefaultTemplate>
+                      );
+                    }
 
-                          {collections.map((collection) => {
-                            return (
-                              <Route
-                                key={`${collection.slug}-list`}
-                                path={`${match.url}/collections/${collection.slug}`}
-                                exact
-                                render={(routeProps) => {
-                                  const List = customComponents[collection.slug]?.views?.List || DefaultList;
-                                  return (
-                                    <List
-                                      {...routeProps}
-                                      collection={collection}
-                                    />
-                                  );
-                                }}
-                              />
-                            );
-                          })}
+                    if (canAccessAdmin === false) {
+                      return <Unauthorized />;
+                    }
 
-                          {collections.map((collection) => {
-                            return (
-                              <Route
-                                key={`${collection.slug}-create`}
-                                path={`${match.url}/collections/${collection.slug}/create`}
-                                exact
-                                render={(routeProps) => {
-                                  return (
-                                    <Edit
-                                      {...routeProps}
-                                      collection={collection}
-                                    />
-                                  );
-                                }}
-                              />
-                            );
-                          })}
-
-                          {collections.map((collection) => {
-                            return (
-                              <Route
-                                key={`${collection.slug}-edit`}
-                                path={`${match.url}/collections/${collection.slug}/:id`}
-                                exact
-                                render={(routeProps) => {
-                                  return (
-                                    <Edit
-                                      isEditing
-                                      {...routeProps}
-                                      collection={collection}
-                                    />
-                                  );
-                                }}
-                              />
-                            );
-                          })}
-
-                          {config.globals && config.globals.map((global) => {
-                            return (
-                              <Route
-                                key={`${global.slug}`}
-                                path={`${match.url}/globals/${global.slug}`}
-                                exact
-                                render={(routeProps) => {
-                                  return (
-                                    <EditGlobal
-                                      {...routeProps}
-                                      global={global}
-                                    />
-                                  );
-                                }}
-                              />
-                            );
-                          })}
-                        </Switch>
-                      </DefaultTemplate>
-                    );
+                    return <Loading />;
                   }
                   return <RedirectToLogin />;
                 }}

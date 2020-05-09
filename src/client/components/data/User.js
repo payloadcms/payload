@@ -17,9 +17,11 @@ const Context = createContext({});
 
 const isNotExpired = decodedJWT => (decodedJWT?.exp || 0) > Date.now() / 1000;
 
+
 const UserProvider = ({ children }) => {
   const [token, setToken] = useState('');
   const [user, setUser] = useState(null);
+  const [permissions, setPermissions] = useState({});
   const location = useLocation();
   const history = useHistory();
   const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
@@ -61,6 +63,7 @@ const UserProvider = ({ children }) => {
   }, 15000, [location, refreshToken]);
 
   // When token changes, set cookie, decode and set user
+  // Get new policies
   useEffect(() => {
     if (token) {
       const decoded = jwt.decode(token);
@@ -69,6 +72,16 @@ const UserProvider = ({ children }) => {
         cookies.set('token', token, { path: '/' });
       }
     }
+    async function getPermissions() {
+      const request = await requests.get(`${serverURL}${api}/policies`);
+
+      if (request.status === 200) {
+        const json = await request.json();
+        setPermissions(json);
+      }
+    }
+
+    getPermissions();
   }, [token]);
 
   useEffect(() => {
@@ -103,6 +116,7 @@ const UserProvider = ({ children }) => {
       logOut,
       refreshToken,
       token,
+      permissions,
     }}
     >
       {children}
