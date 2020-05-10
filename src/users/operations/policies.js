@@ -1,3 +1,5 @@
+const allOperations = ['create', 'read', 'update', 'delete'];
+
 const policies = async (args) => {
   try {
     const {
@@ -8,32 +10,42 @@ const policies = async (args) => {
 
     const isLoggedIn = !!(user);
 
+    const returnPolicyResults = (entity, operations) => {
+      const results = {};
+
+      operations.forEach(async (operation) => {
+        results[operation] = {};
+
+        if (typeof entity.policies[operation] === 'function') {
+          const result = await entity.policies[operation]({ req });
+
+          if (typeof result === 'object') {
+            results[operation].permission = true;
+            results[operation].where = result;
+          } else {
+            results[operation].permission = !!(result);
+          }
+        } else {
+          results[operation].permission = isLoggedIn;
+        }
+      });
+
+      return results;
+    };
+
     const policyResults = {
       canAccessAdmin: config.User.policies && config.User.policies.admin ? config.User.policies.admin(args) : isLoggedIn,
     };
 
     config.collections.forEach((collection) => {
-      policyResults[collection.slug] = {};
-
-      const operations = ['create', 'read', 'update', 'delete'];
-
-      operations.forEach(async (operation) => {
-        policyResults[collection.slug][operation] = {};
-
-        if (typeof collection.policies[operation] === 'function') {
-          const result = await collection.policies[operation]({ req });
-
-          if (typeof result === 'object') {
-            policyResults[collection.slug][operation].permission = true;
-            policyResults[collection.slug][operation].where = result;
-          } else {
-            policyResults[collection.slug][operation].permission = !!(result);
-          }
-        } else {
-          policyResults[collection.slug][operation].permission = isLoggedIn;
-        }
-      });
+      policyResults[collection.slug] = returnPolicyResults(collection, allOperations);
     });
+
+    config.globals.forEach((global) => {
+      policyResults[global.slug] = returnPolicyResults(global, ['read', 'update']);
+    });
+
+    policyResults[config.User.slug] = returnPolicyResults(config.User, allOperations);
 
     return policyResults;
   } catch (error) {

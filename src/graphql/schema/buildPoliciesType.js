@@ -2,16 +2,15 @@ const { GraphQLJSONObject } = require('graphql-type-json');
 const { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } = require('graphql');
 const formatName = require('../utilities/formatName');
 
-const buildCollectionFields = (collection) => {
+const buildFields = (label, operations) => {
   const fields = {};
-  const operations = ['create', 'read', 'update', 'delete'];
 
   operations.forEach((operation) => {
     const capitalizedOperation = operation.charAt(0).toUpperCase() + operation.slice(1);
 
     fields[operation] = {
       type: new GraphQLObjectType({
-        name: formatName(`${collection.labels.singular}${capitalizedOperation}Policy`),
+        name: formatName(`${label}${capitalizedOperation}Policy`),
         fields: {
           permission: { type: new GraphQLNonNull(GraphQLBoolean) },
           where: { type: GraphQLJSONObject },
@@ -34,7 +33,23 @@ function buildPoliciesType() {
     fields[collection.slug] = {
       type: new GraphQLObjectType({
         name: formatName(`${collection.labels.singular}Policy`),
-        fields: buildCollectionFields(collection),
+        fields: buildFields(collection.labels.singular, ['create', 'read', 'update', 'delete']),
+      }),
+    };
+  });
+
+  fields[this.config.User.slug] = {
+    type: new GraphQLObjectType({
+      name: formatName(`${this.config.User.labels.singular}Policy`),
+      fields: buildFields(this.config.User.labels.singular, ['create', 'read', 'update', 'delete']),
+    }),
+  };
+
+  Object.values(this.config.globals).forEach((global) => {
+    fields[global.slug] = {
+      type: new GraphQLObjectType({
+        name: formatName(`${global.label}Policy`),
+        fields: buildFields(global.label, ['read', 'update']),
       }),
     };
   });
