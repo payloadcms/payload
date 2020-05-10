@@ -142,11 +142,15 @@ const Flexible = (props) => {
                           {
                             name: 'blockType',
                             type: 'text',
-                            hidden: true,
+                            hidden: {
+                              admin: true,
+                            },
                           }, {
                             name: 'blockName',
                             type: 'text',
-                            hidden: true,
+                            hidden: {
+                              admin: true,
+                            },
                           },
                         ]}
                         singularLabel={blockType}

@@ -50,24 +50,24 @@ const EditView = (props) => {
     { initialParams: { 'fallback-locale': 'null' } },
   );
 
-  const nav = [{
-    url: `${admin}/collections/${slug}`,
-    label: pluralLabel,
-  }];
-
-  if (isEditing) {
-    nav.push({
-      label: data ? data[useAsTitle] : '',
-    });
-  } else {
-    nav.push({
-      label: 'Create New',
-    });
-  }
-
   useEffect(() => {
+    const nav = [{
+      url: `${admin}/collections/${slug}`,
+      label: pluralLabel,
+    }];
+
+    if (isEditing) {
+      nav.push({
+        label: data ? data[useAsTitle] : '',
+      });
+    } else {
+      nav.push({
+        label: 'Create New',
+      });
+    }
+
     setStepNav(nav);
-  }, [setStepNav, nav]);
+  }, [setStepNav, isEditing, pluralLabel, data, slug, useAsTitle]);
 
   return (
     <div className={baseClass}>
