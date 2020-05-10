@@ -1,11 +1,12 @@
 import React from 'react';
 import { useLocation, NavLink, Link } from 'react-router-dom';
-
+import { useUser } from '../../data/User';
 import Chevron from '../../icons/Chevron';
 
 import './index.scss';
 
 const {
+  User,
   collections,
   globals,
   routes: {
@@ -15,6 +16,7 @@ const {
 
 const Sidebar = () => {
   const location = useLocation();
+  const { permissions } = useUser();
 
   return (
     <aside className="sidebar">
@@ -26,49 +28,53 @@ const Sidebar = () => {
       </Link>
       <span className="label">Collections</span>
       <nav>
-        {collections && Object.keys(collections).map((key, i) => {
-          const href = `${admin}/collections/${collections[key].slug}`;
-          const classes = location.pathname.indexOf(href) > -1
-            ? 'active'
-            : undefined;
+        {collections && collections.map((collection, i) => {
+          const href = `${admin}/collections/${collection.slug}`;
 
-          return (
-            <Link
-              className={classes}
-              key={i}
-              to={href}
-            >
-              <Chevron />
-              {collections[key].labels.plural}
-            </Link>
-          );
+          if (permissions?.[collection.slug]?.read.permission) {
+            return (
+              <NavLink
+                activeClassName="active"
+                key={i}
+                to={href}
+              >
+                <Chevron />
+                {collection.labels.plural}
+              </NavLink>
+            );
+          }
+
+          return null;
         })}
-        <NavLink
-          activeClassName="active"
-          to={`${admin}/users`}
-        >
-          <Chevron />
-          Users
-        </NavLink>
+        {permissions?.[User.slug].read.permission && (
+          <NavLink
+            activeClassName="active"
+            to={`${admin}/${User.slug}`}
+          >
+            <Chevron />
+            {User.labels.singular}
+          </NavLink>
+        )}
       </nav>
       <span className="label">Globals</span>
       <nav>
         {globals && globals.map((global, i) => {
           const href = `${admin}/globals/${global.slug}`;
-          const classes = location.pathname.indexOf(href) > -1
-            ? 'active'
-            : undefined;
 
-          return (
-            <Link
-              className={classes}
-              key={i}
-              to={href}
-            >
-              <Chevron />
-              {global.label}
-            </Link>
-          );
+          if (permissions?.[global.slug].read.permission) {
+            return (
+              <NavLink
+                activeClassName="active"
+                key={i}
+                to={href}
+              >
+                <Chevron />
+                {global.label}
+              </NavLink>
+            );
+          }
+
+          return null;
         })}
       </nav>
       <Link

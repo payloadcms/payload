@@ -5,7 +5,7 @@ module.exports = {
   label: 'Footer',
   policies: {
     update: ({ req: { user } }) => checkRole(['admin', 'user'], user),
-    read: () => true,
+    read: ({ req: { user } }) => checkRole(['admin'], user),
   },
   fields: [
     {
