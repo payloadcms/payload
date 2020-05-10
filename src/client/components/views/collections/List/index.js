@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import queryString from 'qs';
 import PropTypes from 'prop-types';
 import { useStepNav } from '../../../elements/StepNav';
@@ -8,7 +8,7 @@ import Paginator from '../../../elements/Paginator';
 
 import './index.scss';
 
-const { serverURL, routes: { api } } = PAYLOAD_CONFIG;
+const { serverURL, routes: { api, admin } } = PAYLOAD_CONFIG;
 
 const ListView = (props) => {
   const { collection } = props;
@@ -33,6 +33,19 @@ const ListView = (props) => {
 
   return (
     <div className="collection-list">
+      {data.docs && (
+        <ul>
+          {data.docs.map((doc) => {
+            return (
+              <li key={doc.id}>
+                <Link to={`${admin}/collections/${collection.slug}/${doc.id}`}>
+                  {doc.id}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
       <Paginator
         totalDocs={data.totalDocs}
         limit={data.limit}
