@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const { NotFound } = require('../../errors');
 const { deleteQuery } = require('../operations');
 
-const deleteHandler = async (req, res) => {
+const deleteHandler = async (req, res, next) => {
   try {
     const doc = await deleteQuery({
       req,
@@ -16,8 +16,8 @@ const deleteHandler = async (req, res) => {
     }
 
     return res.status(httpStatus.OK).send(doc);
-  } catch (err) {
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(err);
+  } catch (error) {
+    return next(error);
   }
 };
 
