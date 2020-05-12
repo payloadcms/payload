@@ -148,3 +148,47 @@ describe('Collection REST Delete', () => {
     expect(deleteData.id).toBe(docId);
   });
 });
+
+describe('Collection REST Metadata', () => {
+  async function createPost(description) {
+    const response = await fetch(`${url}/api/posts`, {
+      body: JSON.stringify({
+        title: faker.name.firstName(),
+        description,
+        priority: 1,
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'post',
+    });
+
+    expect(response.status).toBe(201);
+  }
+
+  it('should include metadata', async () => {
+    const desc = 'metadataDesc';
+    for (let i = 0; i < 12; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await createPost(desc);
+    }
+
+    const getResponse = await fetch(`${url}/api/posts?description=${desc}`);
+    const data = await getResponse.json();
+
+    expect(getResponse.status).toBe(200);
+
+    // TODO: Assert exact length once query bug is fixed
+    expect(data.docs.length).toBeGreaterThan(0);
+    expect(data.totalDocs).toBeGreaterThan(0);
+    expect(data.limit).toBe(10);
+    expect(data.totalPages).toBe(2);
+    expect(data.page).toBe(1);
+    expect(data.pagingCounter).toBe(1);
+    expect(data.hasPrevPage).toBe(false);
+    expect(data.hasNextPage).toBe(true);
+    expect(data.prevPage).toBeNull();
+    expect(data.nextPage).toBe(2);
+  });
+});
