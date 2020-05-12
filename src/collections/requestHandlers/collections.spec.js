@@ -115,3 +115,36 @@ describe('Localized Collection REST Read', () => {
     expect(data.description.en).toBe(englishPostDesc);
   });
 });
+
+describe('Collection REST Delete', () => {
+  it('should allow a post to be deleted', async () => {
+    const response = await fetch(`${url}/api/posts`, {
+      body: JSON.stringify({
+        title: faker.name.firstName(),
+        description: englishPostDesc,
+        priority: 1,
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'post',
+    });
+
+    const data = await response.json();
+    const docId = data.doc.id;
+    expect(response.status).toBe(201);
+    expect(docId).not.toBeNull();
+
+    const deleteResponse = await fetch(`${url}/api/posts/${docId}`, {
+      headers: {
+        Authorization: `JWT ${token}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'delete',
+    });
+    expect(deleteResponse.status).toBe(200);
+    const deleteData = await deleteResponse.json();
+    expect(deleteData.id).toBe(docId);
+  });
+});

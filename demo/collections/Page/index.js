@@ -16,7 +16,7 @@ module.exports = {
     create: null,
     read: () => true,
     update: ({ req: { user } }) => checkRole(['user', 'admin'], user),
-    destroy: ({ req: { user } }) => checkRole(['user', 'admin'], user),
+    delete: ({ req: { user } }) => checkRole(['user', 'admin'], user),
   },
   fields: [
     {

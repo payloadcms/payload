@@ -38,7 +38,7 @@ module.exports = {
     },
     afterUpdate: (operation, value) => value,
     afterDelete: (operation, value) => {
-      console.log(`Deleted ${operation.query._id}`);
+      console.log(`Deleted ${value.id}`);
       console.log(`Deleted record: ${JSON.stringify(value)}`);
       return value;
     },
