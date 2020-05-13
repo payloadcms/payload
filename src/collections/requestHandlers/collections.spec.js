@@ -118,6 +118,31 @@ describe('REST', () => {
       });
     });
 
+    it('should allow querying by id', async () => {
+      const response = await fetch(`${url}/api/posts`, {
+        body: JSON.stringify({
+          title: faker.name.firstName(),
+          description: faker.lorem.lines(2),
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+
+      expect(response.status).toBe(201);
+
+      const data = await response.json();
+      const getResponse = await fetch(`${url}/api/posts/${data.doc.id}`);
+      expect(getResponse.status).toBe(200);
+
+      const getData = await getResponse.json();
+
+      expect(getData.id).not.toBeNull();
+    });
+
     it('should allow querying on a field', async () => {
       const desc = 'query test';
       const response = await fetch(`${url}/api/posts`, {
