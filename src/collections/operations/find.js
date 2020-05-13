@@ -14,7 +14,7 @@ const find = async (args) => {
 
     let options = {
       ...args,
-      query: await args.Model.buildQuery(queryToBuild, args.locale),
+      query: await args.Model.buildQuery(queryToBuild, args.req.locale),
     };
 
     // /////////////////////////////////////

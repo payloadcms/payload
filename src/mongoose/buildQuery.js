@@ -110,9 +110,9 @@ class ParamParser {
   async buildSearchParam(schema, key, val, operator) {
     let schemaObject = schema.obj[key];
 
-    let localizedKey = this.getLocalizedKey(key, schemaObject);
+    const sanitizedKey = key.replace(/__/gi, '.');
+    let localizedKey = this.getLocalizedKey(sanitizedKey, schemaObject);
 
-    localizedKey = key.split('__').join('.');
 
     if (key === '_id' || key === 'id') {
       localizedKey = '_id';

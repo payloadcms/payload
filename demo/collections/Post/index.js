@@ -33,7 +33,6 @@ module.exports = {
     afterCreate: (operation, value) => value,
     afterRead: (operation) => {
       const { json } = operation;
-      json.title += ' and this';
       json.extra = 'afterRead Hook data';
     },
     afterUpdate: (operation, value) => value,

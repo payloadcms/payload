@@ -192,3 +192,29 @@ describe('Collection REST Metadata', () => {
     expect(data.nextPage).toBe(2);
   });
 });
+
+describe('Collection REST Read - Querying', () => {
+  it('should allow querying on a field', async () => {
+    const desc = 'query test';
+    const response = await fetch(`${url}/api/posts`, {
+      body: JSON.stringify({
+        title: faker.name.firstName(),
+        description: desc,
+        priority: 1,
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'post',
+    });
+
+    expect(response.status).toBe(201);
+    const getResponse = await fetch(`${url}/api/posts?where[description][equals]=${desc}`);
+    const data = await getResponse.json();
+
+    expect(getResponse.status).toBe(200);
+    expect(data.docs[0].description).toBe(desc);
+    expect(data.docs.length).toBe(1);
+  });
+});
