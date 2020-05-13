@@ -203,7 +203,7 @@ describe('REST', () => {
 
   describe('Metadata', () => {
     async function createPost(description) {
-      const response = await fetch(`${url}/api/posts`, {
+      await fetch(`${url}/api/posts`, {
         body: JSON.stringify({
           title: faker.name.firstName(),
           description,
@@ -215,8 +215,6 @@ describe('REST', () => {
         },
         method: 'post',
       });
-
-      expect(response.status).toBe(201);
     }
 
     it('should include metadata', async () => {
