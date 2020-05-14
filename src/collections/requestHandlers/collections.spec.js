@@ -243,10 +243,10 @@ describe('REST', () => {
   });
 
   describe('Metadata', () => {
-    async function createPost(description) {
+    async function createPost(title, description) {
       await fetch(`${url}/api/posts`, {
         body: JSON.stringify({
-          title: faker.name.firstName(),
+          title: title || faker.name.firstName(),
           description,
           priority: 1,
         }),
@@ -262,7 +262,7 @@ describe('REST', () => {
       const desc = 'metadataDesc';
       for (let i = 0; i < 12; i += 1) {
       // eslint-disable-next-line no-await-in-loop
-        await createPost(desc);
+        await createPost(null, desc);
       }
 
       const getResponse = await fetch(`${url}/api/posts?where[description][equals]=${desc}`);
@@ -281,6 +281,61 @@ describe('REST', () => {
       expect(data.hasNextPage).toBe(true);
       expect(data.prevPage).toBeNull();
       expect(data.nextPage).toBe(2);
+    });
+
+    it('should sort the results', async () => {
+      const desc = 'sort';
+
+      // Create 2 posts with different titles, same desc
+      const req1 = await fetch(`${url}/api/posts`, {
+        body: JSON.stringify({
+          title: 'aaa',
+          description: desc,
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+
+      const req2 = await fetch(`${url}/api/posts`, {
+        body: JSON.stringify({
+          title: 'zzz',
+          description: desc,
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+
+      const req1data = await req1.json();
+      const req2data = await req2.json();
+      const id1 = req1data.doc.id;
+      const id2 = req2data.doc.id;
+
+      // Query on shared desc and sort ascending
+      const getResponse = await fetch(`${url}/api/posts?where[description][equals]=${desc}&sort=title`);
+      const data = await getResponse.json();
+
+      expect(getResponse.status).toBe(200);
+      expect(data.docs.length).toEqual(2);
+      expect(data.docs[0].id).toEqual(id1);
+      expect(data.docs[1].id).toEqual(id2);
+
+      // Query on shared desc and sort descending
+      const getResponseSorted = await fetch(`${url}/api/posts?where[description][equals]=${desc}&sort=-title`);
+      const sortedData = await getResponseSorted.json();
+
+      expect(getResponse.status).toBe(200);
+      expect(sortedData.docs.length).toEqual(2);
+      // Opposite order from first request
+      expect(sortedData.docs[0].id).toEqual(id2);
+      expect(sortedData.docs[1].id).toEqual(id1);
     });
   });
 
