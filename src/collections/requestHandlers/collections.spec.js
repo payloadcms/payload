@@ -64,6 +64,44 @@ describe('REST', () => {
   });
 
   describe('Update', () => {
+    it('should allow updating an existing post', async () => {
+      const createResponse = await fetch(`${url}/api/posts`, {
+        body: JSON.stringify({
+          title: faker.name.firstName(),
+          description: 'original description',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+
+      expect(createResponse.status).toBe(201);
+      const createData = await createResponse.json();
+      const { id } = createData.doc;
+
+      const updatedDesc = 'updated description';
+      const response = await fetch(`${url}/api/posts/${id}`, {
+        body: JSON.stringify({
+          title: 'asdf',
+          description: updatedDesc,
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'put',
+      });
+
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.doc.description).toBe(updatedDesc);
+    });
+
     it('should allow a Spanish locale to be added to an existing post', async () => {
       const response = await fetch(`${url}/api/posts/${localizedPostID}?locale=es`, {
         body: JSON.stringify({
