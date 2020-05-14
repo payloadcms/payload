@@ -55,6 +55,9 @@ describe('REST', () => {
       expect(response.status).toBe(201);
       expect(data.doc.title).not.toBeNull();
       expect(data.doc.id).not.toBeNull();
+      const timestampRegex = /^(\d{4})(?:-?W(\d+)(?:-?(\d+)D?)?|(?:-(\d+))?-(\d+))(?:[T ](\d+):(\d+)(?::(\d+)(?:\.(\d+))?)?)?(?:Z(-?\d*))?$/;
+      expect(data.doc.createdAt).toEqual(expect.stringMatching(timestampRegex));
+      expect(data.doc.updatedAt).toEqual(expect.stringMatching(timestampRegex));
 
       localizedPostID = data.doc.id;
     });
