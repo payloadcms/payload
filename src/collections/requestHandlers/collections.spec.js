@@ -283,4 +283,27 @@ describe('REST', () => {
       expect(data.nextPage).toBe(2);
     });
   });
+
+  describe('Hooks', () => {
+    it('afterRead', async () => {
+      const response = await fetch(`${url}/api/posts`, {
+        body: JSON.stringify({
+          title: faker.name.firstName(),
+          description: 'afterRead',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+      const data = await response.json();
+      const getResponse = await fetch(`${url}/api/posts/${data.doc.id}`);
+      const getResponseData = await getResponse.json();
+      console.log('getResponseData', getResponseData);
+      expect(getResponse.status).toBe(200);
+      expect(getResponseData.extra).toEqual('afterRead Hook data');
+    });
+  });
 });
