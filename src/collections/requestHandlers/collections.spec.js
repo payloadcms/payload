@@ -356,9 +356,8 @@ describe('REST', () => {
       const data = await response.json();
       const getResponse = await fetch(`${url}/api/posts/${data.doc.id}`);
       const getResponseData = await getResponse.json();
-      console.log('getResponseData', getResponseData);
       expect(getResponse.status).toBe(200);
-      expect(getResponseData.extra).toEqual('afterRead Hook data');
+      expect(getResponseData.afterReadHook).toEqual(true);
     });
   });
 });
