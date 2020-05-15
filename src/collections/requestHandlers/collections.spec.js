@@ -341,7 +341,7 @@ describe('Collections - REST', () => {
 
   describe('Hooks', () => {
     it('afterRead', async () => {
-      const response = await fetch(`${url}/api/posts`, {
+      const response = await fetch(`${url}/api/hooktests`, {
         body: JSON.stringify({
           title: faker.name.firstName(),
           description: 'afterRead',
@@ -350,11 +350,12 @@ describe('Collections - REST', () => {
         headers: {
           Authorization: `JWT ${token}`,
           'Content-Type': 'application/json',
+          hook: 'afterRead', // Used by hook
         },
         method: 'post',
       });
       const data = await response.json();
-      const getResponse = await fetch(`${url}/api/posts/${data.doc.id}`);
+      const getResponse = await fetch(`${url}/api/hooktests/${data.doc.id}`);
       const getResponseData = await getResponse.json();
       expect(getResponse.status).toBe(200);
       expect(getResponseData.afterReadHook).toEqual(true);
@@ -365,13 +366,47 @@ describe('Collections - REST', () => {
         headers: {
           Authorization: `JWT ${token}`,
           'Content-Type': 'application/json',
-          hook: 'beforeRead', // Found by our hook
+          hook: 'beforeRead', // Used by hook
         },
         method: 'get',
       });
       const data = await response.json();
       expect(response.status).toBe(200);
       expect(data.limit).toEqual(1); // Set in our beforeRead hook
+    });
+
+    it('afterUpdate', async () => {
+      const createResponse = await fetch(`${url}/api/hooktests`, {
+        body: JSON.stringify({
+          title: faker.name.firstName(),
+          description: 'Original',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+          hook: 'afterUpdate', // Used by hook
+        },
+        method: 'post',
+      });
+      const createData = await createResponse.json();
+      const { id } = createData.doc;
+
+      const response = await fetch(`${url}/api/hooktests/${id}`, {
+        body: JSON.stringify({
+          description: 'afterUpdate',
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+          hook: 'afterUpdate', // Used by hook
+        },
+        method: 'put',
+      });
+
+      const data = await response.json();
+      expect(response.status).toBe(200);
+      expect(data.doc.afterUpdateHook).toEqual(true);
     });
   });
 });

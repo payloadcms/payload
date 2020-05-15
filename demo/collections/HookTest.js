@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 module.exports = {
   slug: 'hooktests',
   labels: {
@@ -19,7 +20,6 @@ module.exports = {
     beforeRead: (operation) => {
       console.log('EXECUTING HOOK: beforeRead');
       if (operation.req.headers.hook === 'beforeRead') {
-        // eslint-disable-next-line no-param-reassign
         operation.limit = 1;
       }
       return operation;
@@ -39,14 +39,18 @@ module.exports = {
     afterRead: (operation) => {
       console.log('EXECUTING HOOK: afterRead');
       const { json } = operation;
-      json.extra = 'afterRead Hook data';
+      json.afterReadHook = true;
     },
     afterUpdate: (operation, value) => {
       console.log(`EXECUTING HOOK: afterUpdate - id: ${value.id}`);
+      if (operation.req.headers.hook === 'afterUpdate') {
+        value.afterUpdateHook = true;
+      }
       return value;
     },
     afterDelete: (operation, value) => {
       console.log(`EXECUTING HOOK: afterDelete - id: ${value.id}`);
+      value.afterDeleteHook = true;
       return value;
     },
   },
