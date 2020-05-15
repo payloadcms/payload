@@ -36,6 +36,10 @@ module.exports = {
     },
     beforeDelete: (operation) => {
       console.log(`EXECUTING HOOK: beforeDelete - id: ${operation.id}`);
+      if (operation.req.headers.hook === 'beforeDelete') {
+        // TODO: Find a better hook operation to assert against in tests
+        operation.req.headers.hook = 'afterDelete';
+      }
       return operation;
     },
     afterCreate: (operation, value) => {

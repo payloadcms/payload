@@ -408,6 +408,37 @@ describe('Collections - REST', () => {
         expect(response.status).toBe(200);
         expect(data.doc.description).toEqual('Updated-beforeUpdateSuffix');
       });
+
+      it('beforeDelete', async () => {
+        const createResponse = await fetch(`${url}/api/hooktests`, {
+          body: JSON.stringify({
+            title: faker.name.firstName(),
+            description: 'Original',
+            priority: 1,
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+            'Content-Type': 'application/json',
+          },
+          method: 'post',
+        });
+        const createData = await createResponse.json();
+        const { id } = createData.doc;
+
+        const response = await fetch(`${url}/api/hooktests/${id}`, {
+          headers: {
+            Authorization: `JWT ${token}`,
+            'Content-Type': 'application/json',
+            hook: 'beforeDelete', // Used by hook
+          },
+          method: 'delete',
+        });
+
+        const data = await response.json();
+        expect(response.status).toBe(200);
+        // Intentionally afterDeleteHook - beforeDelete hook is setting header in order to trigger afterDelete hook
+        expect(data.afterDeleteHook).toEqual(true);
+      });
     });
 
     describe('After', () => {
