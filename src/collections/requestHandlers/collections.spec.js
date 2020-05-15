@@ -385,7 +385,6 @@ describe('Collections - REST', () => {
         headers: {
           Authorization: `JWT ${token}`,
           'Content-Type': 'application/json',
-          hook: 'afterUpdate', // Used by hook
         },
         method: 'post',
       });
@@ -407,6 +406,36 @@ describe('Collections - REST', () => {
       const data = await response.json();
       expect(response.status).toBe(200);
       expect(data.doc.afterUpdateHook).toEqual(true);
+    });
+
+    it('afterDelete', async () => {
+      const createResponse = await fetch(`${url}/api/hooktests`, {
+        body: JSON.stringify({
+          title: faker.name.firstName(),
+          description: 'Original',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+      const createData = await createResponse.json();
+      const { id } = createData.doc;
+
+      const response = await fetch(`${url}/api/hooktests/${id}`, {
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+          hook: 'afterDelete', // Used by hook
+        },
+        method: 'delete',
+      });
+
+      const data = await response.json();
+      expect(response.status).toBe(200);
+      expect(data.afterDeleteHook).toEqual(true);
     });
   });
 });

@@ -50,7 +50,9 @@ module.exports = {
     },
     afterDelete: (operation, value) => {
       console.log(`EXECUTING HOOK: afterDelete - id: ${value.id}`);
-      value.afterDeleteHook = true;
+      if (operation.req.headers.hook === 'afterDelete') {
+        value.afterDeleteHook = true;
+      }
       return value;
     },
   },
