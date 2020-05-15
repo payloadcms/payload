@@ -340,175 +340,179 @@ describe('Collections - REST', () => {
   });
 
   describe('Hooks', () => {
-    it('beforeCreate', async () => {
-      const response = await fetch(`${url}/api/hooktests`, {
-        body: JSON.stringify({
-          title: faker.name.firstName(),
-          description: 'Original',
-          priority: 1,
-        }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-          hook: 'beforeCreate', // Used by hook
-        },
-        method: 'post',
+    describe('Before', () => {
+      it('beforeCreate', async () => {
+        const response = await fetch(`${url}/api/hooktests`, {
+          body: JSON.stringify({
+            title: faker.name.firstName(),
+            description: 'Original',
+            priority: 1,
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+            'Content-Type': 'application/json',
+            hook: 'beforeCreate', // Used by hook
+          },
+          method: 'post',
+        });
+        const data = await response.json();
+        expect(response.status).toBe(201);
+        expect(data.doc.description).toEqual('Original-beforeCreateSuffix');
       });
-      const data = await response.json();
-      expect(response.status).toBe(201);
-      expect(data.doc.description).toEqual('Original-beforeCreateSuffix');
+
+      it('beforeRead', async () => {
+        const response = await fetch(`${url}/api/hooktests`, {
+          headers: {
+            Authorization: `JWT ${token}`,
+            'Content-Type': 'application/json',
+            hook: 'beforeRead', // Used by hook
+          },
+          method: 'get',
+        });
+        const data = await response.json();
+        expect(response.status).toBe(200);
+        expect(data.limit).toEqual(1); // Set in our beforeRead hook
+      });
+
+      it('beforeUpdate', async () => {
+        const createResponse = await fetch(`${url}/api/hooktests`, {
+          body: JSON.stringify({
+            title: faker.name.firstName(),
+            description: 'Original',
+            priority: 1,
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+            'Content-Type': 'application/json',
+          },
+          method: 'post',
+        });
+        const createData = await createResponse.json();
+        expect(createResponse.status).toBe(201);
+        const { id } = createData.doc;
+
+        const response = await fetch(`${url}/api/hooktests/${id}`, {
+          body: JSON.stringify({
+            description: 'Updated',
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+            'Content-Type': 'application/json',
+            hook: 'beforeUpdate', // Used by hook
+
+          },
+          method: 'put',
+        });
+
+        const data = await response.json();
+        expect(response.status).toBe(200);
+        expect(data.doc.description).toEqual('Updated-beforeUpdateSuffix');
+      });
     });
 
-    it('beforeUpdate', async () => {
-      const createResponse = await fetch(`${url}/api/hooktests`, {
-        body: JSON.stringify({
-          title: faker.name.firstName(),
-          description: 'Original',
-          priority: 1,
-        }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
-        method: 'post',
-      });
-      const createData = await createResponse.json();
-      expect(createResponse.status).toBe(201);
-      const { id } = createData.doc;
-
-      const response = await fetch(`${url}/api/hooktests/${id}`, {
-        body: JSON.stringify({
-          description: 'Updated',
-        }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-          hook: 'beforeUpdate', // Used by hook
-
-        },
-        method: 'put',
+    describe('After', () => {
+      it('afterCreate', async () => {
+        const response = await fetch(`${url}/api/hooktests`, {
+          body: JSON.stringify({
+            title: faker.name.firstName(),
+            description: 'Original',
+            priority: 1,
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+            'Content-Type': 'application/json',
+            hook: 'afterCreate', // Used by hook
+          },
+          method: 'post',
+        });
+        const data = await response.json();
+        expect(response.status).toBe(201);
+        expect(data.doc.afterCreateHook).toEqual(true);
       });
 
-      const data = await response.json();
-      expect(response.status).toBe(200);
-      expect(data.doc.description).toEqual('Updated-beforeUpdateSuffix');
-    });
-
-    it('afterRead', async () => {
-      const response = await fetch(`${url}/api/hooktests`, {
-        body: JSON.stringify({
-          title: faker.name.firstName(),
-          description: 'afterRead',
-          priority: 1,
-        }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-          hook: 'afterRead', // Used by hook
-        },
-        method: 'post',
-      });
-      const data = await response.json();
-      const getResponse = await fetch(`${url}/api/hooktests/${data.doc.id}`);
-      const getResponseData = await getResponse.json();
-      expect(getResponse.status).toBe(200);
-      expect(getResponseData.afterReadHook).toEqual(true);
-    });
-
-    it('beforeRead', async () => {
-      const response = await fetch(`${url}/api/hooktests`, {
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-          hook: 'beforeRead', // Used by hook
-        },
-        method: 'get',
-      });
-      const data = await response.json();
-      expect(response.status).toBe(200);
-      expect(data.limit).toEqual(1); // Set in our beforeRead hook
-    });
-
-    it('afterCreate', async () => {
-      const response = await fetch(`${url}/api/hooktests`, {
-        body: JSON.stringify({
-          title: faker.name.firstName(),
-          description: 'Original',
-          priority: 1,
-        }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-          hook: 'afterCreate', // Used by hook
-        },
-        method: 'post',
-      });
-      const data = await response.json();
-      expect(response.status).toBe(201);
-      expect(data.doc.afterCreateHook).toEqual(true);
-    });
-
-    it('afterUpdate', async () => {
-      const createResponse = await fetch(`${url}/api/hooktests`, {
-        body: JSON.stringify({
-          title: faker.name.firstName(),
-          description: 'Original',
-          priority: 1,
-        }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
-        method: 'post',
-      });
-      const createData = await createResponse.json();
-      const { id } = createData.doc;
-
-      const response = await fetch(`${url}/api/hooktests/${id}`, {
-        body: JSON.stringify({
-          description: 'afterUpdate',
-        }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-          hook: 'afterUpdate', // Used by hook
-        },
-        method: 'put',
+      it('afterRead', async () => {
+        const response = await fetch(`${url}/api/hooktests`, {
+          body: JSON.stringify({
+            title: faker.name.firstName(),
+            description: 'afterRead',
+            priority: 1,
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+            'Content-Type': 'application/json',
+            hook: 'afterRead', // Used by hook
+          },
+          method: 'post',
+        });
+        const data = await response.json();
+        const getResponse = await fetch(`${url}/api/hooktests/${data.doc.id}`);
+        const getResponseData = await getResponse.json();
+        expect(getResponse.status).toBe(200);
+        expect(getResponseData.afterReadHook).toEqual(true);
       });
 
-      const data = await response.json();
-      expect(response.status).toBe(200);
-      expect(data.doc.afterUpdateHook).toEqual(true);
-    });
+      it('afterUpdate', async () => {
+        const createResponse = await fetch(`${url}/api/hooktests`, {
+          body: JSON.stringify({
+            title: faker.name.firstName(),
+            description: 'Original',
+            priority: 1,
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+            'Content-Type': 'application/json',
+          },
+          method: 'post',
+        });
+        const createData = await createResponse.json();
+        const { id } = createData.doc;
 
-    it('afterDelete', async () => {
-      const createResponse = await fetch(`${url}/api/hooktests`, {
-        body: JSON.stringify({
-          title: faker.name.firstName(),
-          description: 'Original',
-          priority: 1,
-        }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
-        method: 'post',
+        const response = await fetch(`${url}/api/hooktests/${id}`, {
+          body: JSON.stringify({
+            description: 'afterUpdate',
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+            'Content-Type': 'application/json',
+            hook: 'afterUpdate', // Used by hook
+          },
+          method: 'put',
+        });
+
+        const data = await response.json();
+        expect(response.status).toBe(200);
+        expect(data.doc.afterUpdateHook).toEqual(true);
       });
-      const createData = await createResponse.json();
-      const { id } = createData.doc;
 
-      const response = await fetch(`${url}/api/hooktests/${id}`, {
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-          hook: 'afterDelete', // Used by hook
-        },
-        method: 'delete',
+      it('afterDelete', async () => {
+        const createResponse = await fetch(`${url}/api/hooktests`, {
+          body: JSON.stringify({
+            title: faker.name.firstName(),
+            description: 'Original',
+            priority: 1,
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+            'Content-Type': 'application/json',
+          },
+          method: 'post',
+        });
+        const createData = await createResponse.json();
+        const { id } = createData.doc;
+
+        const response = await fetch(`${url}/api/hooktests/${id}`, {
+          headers: {
+            Authorization: `JWT ${token}`,
+            'Content-Type': 'application/json',
+            hook: 'afterDelete', // Used by hook
+          },
+          method: 'delete',
+        });
+
+        const data = await response.json();
+        expect(response.status).toBe(200);
+        expect(data.afterDeleteHook).toEqual(true);
       });
-
-      const data = await response.json();
-      expect(response.status).toBe(200);
-      expect(data.afterDeleteHook).toEqual(true);
     });
   });
 });
