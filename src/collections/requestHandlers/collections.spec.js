@@ -34,7 +34,7 @@ beforeAll(async (done) => {
   done();
 });
 
-describe('REST', () => {
+describe('Collections - REST', () => {
   describe('Create', () => {
     it('should allow a post to be created', async () => {
       const response = await fetch(`${url}/api/posts`, {
@@ -358,6 +358,20 @@ describe('REST', () => {
       const getResponseData = await getResponse.json();
       expect(getResponse.status).toBe(200);
       expect(getResponseData.afterReadHook).toEqual(true);
+    });
+
+    it('beforeRead', async () => {
+      const response = await fetch(`${url}/api/hooktests`, {
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+          hook: 'beforeRead', // Found by our hook
+        },
+        method: 'get',
+      });
+      const data = await response.json();
+      expect(response.status).toBe(200);
+      expect(data.limit).toEqual(1); // Set in our beforeRead hook
     });
   });
 });
