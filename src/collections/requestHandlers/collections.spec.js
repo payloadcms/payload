@@ -340,6 +340,25 @@ describe('Collections - REST', () => {
   });
 
   describe('Hooks', () => {
+    it('beforeCreate', async () => {
+      const response = await fetch(`${url}/api/hooktests`, {
+        body: JSON.stringify({
+          title: faker.name.firstName(),
+          description: 'Original',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+          hook: 'beforeCreate', // Used by hook
+        },
+        method: 'post',
+      });
+      const data = await response.json();
+      expect(response.status).toBe(201);
+      expect(data.doc.description).toEqual('Original-beforeCreateSuffix');
+    });
+
     it('afterRead', async () => {
       const response = await fetch(`${url}/api/hooktests`, {
         body: JSON.stringify({

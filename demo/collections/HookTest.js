@@ -15,6 +15,9 @@ module.exports = {
   hooks: {
     beforeCreate: (operation) => {
       console.log('EXECUTING HOOK: beforeCreate');
+      if (operation.req.headers.hook === 'beforeCreate') {
+        operation.req.body.description += '-beforeCreateSuffix';
+      }
       return operation;
     },
     beforeRead: (operation) => {
