@@ -28,7 +28,10 @@ module.exports = {
       return operation;
     },
     beforeUpdate: (operation) => {
-      console.log(`EXECUTING HOOK: beforeCreate - id: ${operation.id}`);
+      console.log(`EXECUTING HOOK: beforeUpdate - id: ${operation.id}`);
+      if (operation.req.headers.hook === 'beforeUpdate') {
+        operation.req.body.description += '-beforeUpdateSuffix';
+      }
       return operation;
     },
     beforeDelete: (operation) => {

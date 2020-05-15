@@ -359,6 +359,41 @@ describe('Collections - REST', () => {
       expect(data.doc.description).toEqual('Original-beforeCreateSuffix');
     });
 
+    it('beforeUpdate', async () => {
+      const createResponse = await fetch(`${url}/api/hooktests`, {
+        body: JSON.stringify({
+          title: faker.name.firstName(),
+          description: 'Original',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+      const createData = await createResponse.json();
+      expect(createResponse.status).toBe(201);
+      const { id } = createData.doc;
+
+      const response = await fetch(`${url}/api/hooktests/${id}`, {
+        body: JSON.stringify({
+          description: 'Updated',
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+          hook: 'beforeUpdate', // Used by hook
+
+        },
+        method: 'put',
+      });
+
+      const data = await response.json();
+      expect(response.status).toBe(200);
+      expect(data.doc.description).toEqual('Updated-beforeUpdateSuffix');
+    });
+
     it('afterRead', async () => {
       const response = await fetch(`${url}/api/hooktests`, {
         body: JSON.stringify({
