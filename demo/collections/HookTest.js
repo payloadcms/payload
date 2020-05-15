@@ -40,6 +40,9 @@ module.exports = {
     },
     afterCreate: (operation, value) => {
       console.log(`EXECUTING HOOK: afterCreate - id: ${value.id}`);
+      if (operation.req.headers.hook === 'afterCreate') {
+        value.afterCreateHook = true;
+      }
       return value;
     },
     afterRead: (operation) => {

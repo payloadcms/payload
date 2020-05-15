@@ -429,6 +429,25 @@ describe('Collections - REST', () => {
       expect(data.limit).toEqual(1); // Set in our beforeRead hook
     });
 
+    it('afterCreate', async () => {
+      const response = await fetch(`${url}/api/hooktests`, {
+        body: JSON.stringify({
+          title: faker.name.firstName(),
+          description: 'Original',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+          hook: 'afterCreate', // Used by hook
+        },
+        method: 'post',
+      });
+      const data = await response.json();
+      expect(response.status).toBe(201);
+      expect(data.doc.afterCreateHook).toEqual(true);
+    });
+
     it('afterUpdate', async () => {
       const createResponse = await fetch(`${url}/api/hooktests`, {
         body: JSON.stringify({
