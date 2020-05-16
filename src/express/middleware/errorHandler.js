@@ -2,8 +2,8 @@ const httpStatus = require('http-status');
 const formatErrorResponse = require('../responses/formatError');
 
 const errorHandler = config => async (err, req, res, next) => {
-  let response;
   const data = formatErrorResponse(err);
+  let response;
   let status = err.status || httpStatus.INTERNAL_SERVER_ERROR;
 
   // TODO: use payload logging

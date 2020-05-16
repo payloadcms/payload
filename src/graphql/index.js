@@ -10,6 +10,7 @@ const registerCollections = require('../collections/graphql/register');
 const registerGlobals = require('../globals/graphql/register');
 const initUser = require('../users/graphql/init');
 const buildWhereInputType = require('./schema/buildWhereInputType');
+const errorHandler = require('./errorHandler');
 
 class GraphQL {
   constructor(init) {
@@ -23,8 +24,14 @@ class GraphQL {
       fallbackLocaleInputType: buildFallbackLocaleInputType(this.config.localization),
     };
 
-    this.Query = { name: 'Query', fields: {} };
-    this.Mutation = { name: 'Mutation', fields: {} };
+    this.Query = {
+      name: 'Query',
+      fields: {},
+    };
+    this.Mutation = {
+      name: 'Mutation',
+      fields: {},
+    };
 
     this.buildBlockType = buildBlockType.bind(this);
     this.buildMutationInputType = buildMutationInputType.bind(this);
@@ -42,9 +49,40 @@ class GraphQL {
 
     const query = new GraphQLObjectType(this.Query);
     const mutation = new GraphQLObjectType(this.Mutation);
-    const schema = new GraphQLSchema({ query, mutation });
+    const schema = new GraphQLSchema({
+      query,
+      mutation,
+    });
 
-    return graphQLHTTP({ schema });
+    let errorExtension;
+    let errorExtensionIteration = 0;
+
+    const extensions = async (info) => {
+      const { result } = info;
+      if (result.errors) {
+        const afterErrorHook = typeof this.config.hooks.afterError === 'function' ? this.config.hooks.afterError : null;
+
+        errorExtension = await Promise.all(result.errors.map(async (error) => {
+          return errorHandler(error, info, this.config.debug, afterErrorHook);
+        }));
+      }
+      return null;
+    };
+
+    return graphQLHTTP({
+      schema,
+      customFormatErrorFn: (err) => {
+        const response = {
+          // message: err.message,
+          // locations: err.locations,
+          // path: err.path,
+          ...errorExtension[errorExtensionIteration],
+        };
+        errorExtensionIteration += 1;
+        return response;
+      },
+      extensions,
+    });
   }
 }
 
