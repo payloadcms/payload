@@ -9,6 +9,15 @@ import './index.scss';
 
 const defaultError = 'Please enter a valid email.';
 
+const defaultValidate = (value) => {
+  if (value.length === 0) {
+    return false;
+  }
+
+  const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}$/;
+  return pattern.test(value);
+};
+
 const Email = (props) => {
   const {
     name,
@@ -35,11 +44,17 @@ const Email = (props) => {
     validate,
   });
 
+  const classes = [
+    'field-type',
+    'email',
+    showError && 'error',
+  ].filter(Boolean).join(' ');
+
   const fieldWidth = width ? `${width}%` : undefined;
 
   return (
     <div
-      className="field-type email"
+      className={classes}
       style={{
         ...style,
         width: fieldWidth,
@@ -73,7 +88,7 @@ Email.defaultProps = {
   required: false,
   defaultValue: null,
   placeholder: undefined,
-  validate: null,
+  validate: defaultValidate,
   errorMessage: defaultError,
   width: 100,
   style: {},

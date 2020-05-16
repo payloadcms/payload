@@ -14,22 +14,13 @@
     padding: base(.5) base(.75);
     -webkit-appearance: none;
 
-    &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+    &::-webkit-input-placeholder {
       color: $color-gray;
       font-weight: normal;
       font-size: 1rem;
     }
-    &::-moz-placeholder { /* Firefox 19+ */
-      color: $color-gray;
-      font-weight: normal;
-      font-size: 1rem;
-    }
-    &:-ms-input-placeholder { /* IE 10+ */
-      color: $color-gray;
-      font-weight: normal;
-      font-size: 1rem;
-    }
-    &:-moz-placeholder { /* Firefox 18- */
+
+    &::-moz-placeholder {
       color: $color-gray;
       font-weight: normal;
       font-size: 1rem;

@@ -208,7 +208,7 @@ const Routes = () => {
 
                     return <Loading />;
                   }
-                  return <RedirectToLogin />;
+                  return <Redirect to={`${match.url}/login`} />;
                 }}
               />
               <Route path={`${match.url}*`}>
