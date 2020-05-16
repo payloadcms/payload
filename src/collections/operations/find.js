@@ -14,7 +14,7 @@ const find = async (args) => {
 
     let options = {
       ...args,
-      query: await args.Model.buildQuery(queryToBuild, args.locale),
+      query: await args.Model.buildQuery(queryToBuild, args.req.locale),
     };
 
     // /////////////////////////////////////
@@ -49,6 +49,7 @@ const find = async (args) => {
       page: page || 1,
       limit: limit || 10,
       sort,
+      collation: sort ? { locale: 'en' } : {}, // case-insensitive sort in MongoDB
       options: {},
     };
 

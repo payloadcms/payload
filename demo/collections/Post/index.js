@@ -33,12 +33,11 @@ module.exports = {
     afterCreate: (operation, value) => value,
     afterRead: (operation) => {
       const { json } = operation;
-      json.title += ' and this';
-      json.extra = 'afterRead Hook data';
+      json.afterReadHook = true;
     },
     afterUpdate: (operation, value) => value,
     afterDelete: (operation, value) => {
-      console.log(`Deleted ${operation.query._id}`);
+      console.log(`Deleted ${value.id}`);
       console.log(`Deleted record: ${JSON.stringify(value)}`);
       return value;
     },
