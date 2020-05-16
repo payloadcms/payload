@@ -11,9 +11,6 @@ module.exports = {
   },
   useAsTitle: 'title',
   policies: {
-    // options: create, read, update, delete
-    // null or undefined policies will default to requiring auth
-    // any policy can use req.user to see that the user is logged
     create: null,
     read: ({ req: { user } }) => checkRole(['admin'], user),
     update: ({ req: { user } }) => checkRole(['admin'], user),

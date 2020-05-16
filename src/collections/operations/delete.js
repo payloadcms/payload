@@ -62,18 +62,20 @@ const deleteQuery = async (args) => {
     // 4. Delete any associated files
     // /////////////////////////////////////
 
-    const { staticDir } = options.req.collection.config.upload;
+    if (options.req.collection.config.upload) {
+      const { staticDir } = options.req.collection.config.upload;
 
-    fs.unlink(`${staticDir}/${resultToDelete.filename}`, (err) => {
-      console.log('Error deleting file:', err);
-    });
-
-    if (resultToDelete.sizes) {
-      Object.values(resultToDelete.sizes).forEach((size) => {
-        fs.unlink(`${staticDir}/${size.filename}`, (err) => {
-          console.log('Error deleting file:', err);
-        });
+      fs.unlink(`${staticDir}/${resultToDelete.filename}`, (err) => {
+        console.log('Error deleting file:', err);
       });
+
+      if (resultToDelete.sizes) {
+        Object.values(resultToDelete.sizes).forEach((size) => {
+          fs.unlink(`${staticDir}/${size.filename}`, (err) => {
+            console.log('Error deleting file:', err);
+          });
+        });
+      }
     }
 
     // /////////////////////////////////////

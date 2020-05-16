@@ -84,6 +84,20 @@ const UserProvider = ({ children }) => {
     getPermissions();
   }, [token]);
 
+  // When user changes, get new policies
+  useEffect(() => {
+    async function getPermissions() {
+      const request = await requests.get(`${serverURL}${api}/policies`);
+
+      if (request.status === 200) {
+        const json = await request.json();
+        setPermissions(json);
+      }
+    }
+
+    getPermissions();
+  }, [user]);
+
   useEffect(() => {
     let reminder = false;
     let forceLogOut = false;

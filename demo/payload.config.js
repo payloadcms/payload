@@ -1,6 +1,7 @@
 const path = require('path');
 const Page = require('./collections/Page');
 const Category = require('./collections/Category');
+const HookTest = require('./collections/HookTest');
 const Post = require('./collections/Post');
 const Order = require('./collections/Order');
 const Layout = require('./collections/Layout');
@@ -16,6 +17,7 @@ module.exports = {
     Page,
     Category,
     Order,
+    HookTest,
     Post,
     Layout,
     File,

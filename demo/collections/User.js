@@ -12,12 +12,13 @@ module.exports = {
     create: ({ req: { user } }) => checkRole(['admin', 'user'], user),
     read: null,
     update: ({ req: { user } }) => checkRole(['admin', 'user'], user),
-    destroy: ({ req: { user } }) => checkRole(['admin', 'user'], user),
+    delete: ({ req: { user } }) => checkRole(['admin', 'user'], user),
     admin: () => true,
   },
   hooks: {
     beforeLogin: options => options,
     afterLogin: options => options,
+    delete: ({ req: { user } }) => checkRole(['admin', 'user'], user),
   },
   auth: {
     passwordIndex: 1,

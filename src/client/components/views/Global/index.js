@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import DefaultTemplate from '../../templates/Default';
+import { useStepNav } from '../../elements/StepNav';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
@@ -17,42 +17,42 @@ const {
 const baseClass = 'global-edit';
 
 const Global = (props) => {
-  const { global } = props;
+  const { global: { slug, label, fields } } = props;
+  const { setStepNav } = useStepNav();
 
   const [{ data }] = usePayloadAPI(
-    `${serverURL}${api}/globals/${global.slug}`,
+    `${serverURL}${api}/globals/${slug}`,
     { initialParams: { 'fallback-locale': 'null' } },
   );
 
-  const nav = [{
-    url: `${admin}/globals/${global.slug}`,
-    label: global.label,
-  }];
+  useEffect(() => {
+    setStepNav([{
+      url: `${admin}/globals/${slug}`,
+      label,
+    }]);
+  }, [setStepNav, slug, label]);
 
   return (
-    <DefaultTemplate
-      className={baseClass}
-      stepNav={nav}
-    >
+    <div className={baseClass}>
       <header className={`${baseClass}__header`}>
         <h1>
           Edit
           {' '}
-          {global.label}
+          {label}
         </h1>
       </header>
       <Form
         className={`${baseClass}__form`}
         method={data ? 'put' : 'post'}
-        action={`${serverURL}${api}/globals/${global.slug}`}
+        action={`${serverURL}${api}/globals/${slug}`}
       >
         <RenderFields
           fieldTypes={fieldTypes}
-          fieldSchema={global.fields}
+          fieldSchema={fields}
           initialData={data}
         />
       </Form>
-    </DefaultTemplate>
+    </div>
   );
 };
 
