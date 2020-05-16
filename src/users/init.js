@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const passport = require('passport');
 const AnonymousStrategy = require('passport-anonymous');
+const LocalStrategy = require('passport-local').Strategy;
 const passportLocalMongoose = require('passport-local-mongoose');
 const jwtStrategy = require('./strategies/jwt');
 const apiKeyStrategy = require('./strategies/apiKey');
@@ -20,6 +21,7 @@ function initUser() {
     Model: mongoose.model(this.config.User.slug, userSchema),
   };
 
+  passport.use(new LocalStrategy(this.User.Model.authenticate()));
   passport.use(this.User.Model.createStrategy());
   passport.use(apiKeyStrategy(this.User));
   passport.use(jwtStrategy(this.User));

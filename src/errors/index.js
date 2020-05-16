@@ -1,4 +1,5 @@
 const APIError = require('./APIError');
+const AuthenticationError = require('./AuthenticationError');
 const DuplicateCollection = require('./DuplicateCollection');
 const DuplicateGlobal = require('./DuplicateGlobal');
 const MissingCollectionLabel = require('./MissingCollectionLabel');
@@ -11,6 +12,7 @@ const MissingFile = require('./MissingFile');
 
 module.exports = {
   APIError,
+  AuthenticationError,
   DuplicateCollection,
   DuplicateGlobal,
   MissingCollectionLabel,

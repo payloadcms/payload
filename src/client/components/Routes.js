@@ -15,7 +15,6 @@ import Edit from './views/collections/Edit';
 import EditGlobal from './views/Global';
 import { requests } from '../api';
 import customComponents from './customComponents';
-import RedirectToLogin from './utilities/RedirectToLogin';
 import ResetPassword from './views/ResetPassword';
 import Unauthorized from './views/Unauthorized';
 import Loading from './elements/Loading';

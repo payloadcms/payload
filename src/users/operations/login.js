@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { Forbidden } = require('../../errors');
+const { Forbidden, AuthenticationError } = require('../../errors');
 
 const login = async (args) => {
   try {
@@ -35,7 +35,11 @@ const login = async (args) => {
 
     if (!user) throw new Forbidden();
 
-    await user.authenticate(password);
+    const authResult = await user.authenticate(password);
+
+    if (!authResult.user) {
+      throw new AuthenticationError();
+    }
 
     const fieldsToSign = config.fields.reduce((signedFields, field) => {
       if (field.saveToJWT) {
