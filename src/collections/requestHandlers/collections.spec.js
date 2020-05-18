@@ -16,7 +16,7 @@ const englishPostDesc = faker.lorem.lines(2);
 const spanishPostDesc = faker.lorem.lines(2);
 
 beforeAll(async (done) => {
-  const response = await fetch(`${url}/api/users/login`, {
+  const response = await fetch(`${url}/api/admins/login`, {
     body: JSON.stringify({
       email,
       password,
@@ -36,8 +36,8 @@ beforeAll(async (done) => {
 
 describe('Collections - REST', () => {
   describe('Create', () => {
-    it('should allow a post to be created', async () => {
-      const response = await fetch(`${url}/api/posts`, {
+    it('should allow a localized post to be created', async () => {
+      const response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
           title: faker.name.firstName(),
           description: englishPostDesc,
@@ -65,7 +65,7 @@ describe('Collections - REST', () => {
 
   describe('Update', () => {
     it('should allow updating an existing post', async () => {
-      const createResponse = await fetch(`${url}/api/posts`, {
+      const createResponse = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
           title: faker.name.firstName(),
           description: 'original description',
@@ -83,7 +83,7 @@ describe('Collections - REST', () => {
       const { id } = createData.doc;
 
       const updatedDesc = 'updated description';
-      const response = await fetch(`${url}/api/posts/${id}`, {
+      const response = await fetch(`${url}/api/localized-posts/${id}`, {
         body: JSON.stringify({
           title: 'asdf',
           description: updatedDesc,
@@ -103,7 +103,7 @@ describe('Collections - REST', () => {
     });
 
     it('should allow a Spanish locale to be added to an existing post', async () => {
-      const response = await fetch(`${url}/api/posts/${localizedPostID}?locale=es`, {
+      const response = await fetch(`${url}/api/localized-posts/${localizedPostID}?locale=es`, {
         body: JSON.stringify({
           title: `Spanish-${faker.name.firstName()}`,
           description: spanishPostDesc,
@@ -126,7 +126,7 @@ describe('Collections - REST', () => {
   describe('Read', () => {
     describe('Localized', () => {
       it('should allow a localized post to be retrieved in unspecified locale, defaulting to English', async () => {
-        const response = await fetch(`${url}/api/posts/${localizedPostID}`);
+        const response = await fetch(`${url}/api/localized-posts/${localizedPostID}`);
         const data = await response.json();
 
         expect(response.status).toBe(200);
@@ -134,7 +134,7 @@ describe('Collections - REST', () => {
       });
 
       it('should allow a localized post to be retrieved in specified English locale', async () => {
-        const response = await fetch(`${url}/api/posts/${localizedPostID}?locale=en`);
+        const response = await fetch(`${url}/api/localized-posts/${localizedPostID}?locale=en`);
         const data = await response.json();
 
         expect(response.status).toBe(200);
@@ -142,7 +142,7 @@ describe('Collections - REST', () => {
       });
 
       it('should allow a localized post to be retrieved in Spanish', async () => {
-        const response = await fetch(`${url}/api/posts/${localizedPostID}?locale=es`);
+        const response = await fetch(`${url}/api/localized-posts/${localizedPostID}?locale=es`);
         const data = await response.json();
 
         expect(response.status).toBe(200);
@@ -150,7 +150,7 @@ describe('Collections - REST', () => {
       });
 
       it('should allow a localized post to be retrieved in all locales', async () => {
-        const response = await fetch(`${url}/api/posts/${localizedPostID}?locale=all`);
+        const response = await fetch(`${url}/api/localized-posts/${localizedPostID}?locale=all`);
         const data = await response.json();
 
         expect(response.status).toBe(200);
@@ -160,7 +160,7 @@ describe('Collections - REST', () => {
     });
 
     it('should allow querying by id', async () => {
-      const response = await fetch(`${url}/api/posts`, {
+      const response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
           title: faker.name.firstName(),
           description: faker.lorem.lines(2),
@@ -176,7 +176,8 @@ describe('Collections - REST', () => {
       expect(response.status).toBe(201);
 
       const data = await response.json();
-      const getResponse = await fetch(`${url}/api/posts/${data.doc.id}`);
+      const getResponse = await fetch(`${url}/api/localized-posts/${data.doc.id}`);
+
       expect(getResponse.status).toBe(200);
 
       const getData = await getResponse.json();
@@ -186,7 +187,7 @@ describe('Collections - REST', () => {
 
     it('should allow querying on a field', async () => {
       const desc = 'query test';
-      const response = await fetch(`${url}/api/posts`, {
+      const response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
           title: faker.name.firstName(),
           description: desc,
@@ -200,7 +201,7 @@ describe('Collections - REST', () => {
       });
 
       expect(response.status).toBe(201);
-      const getResponse = await fetch(`${url}/api/posts?where[description][equals]=${desc}`);
+      const getResponse = await fetch(`${url}/api/localized-posts?where[description][equals]=${desc}`);
       const data = await getResponse.json();
 
       expect(getResponse.status).toBe(200);
@@ -211,7 +212,7 @@ describe('Collections - REST', () => {
 
   describe('Delete', () => {
     it('should allow a post to be deleted', async () => {
-      const response = await fetch(`${url}/api/posts`, {
+      const response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
           title: faker.name.firstName(),
           description: englishPostDesc,
@@ -229,7 +230,7 @@ describe('Collections - REST', () => {
       expect(response.status).toBe(201);
       expect(docId).not.toBeNull();
 
-      const deleteResponse = await fetch(`${url}/api/posts/${docId}`, {
+      const deleteResponse = await fetch(`${url}/api/localized-posts/${docId}`, {
         headers: {
           Authorization: `JWT ${token}`,
           'Content-Type': 'application/json',
@@ -244,7 +245,7 @@ describe('Collections - REST', () => {
 
   describe('Metadata', () => {
     async function createPost(title, description) {
-      await fetch(`${url}/api/posts`, {
+      await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
           title: title || faker.name.firstName(),
           description,
@@ -265,7 +266,7 @@ describe('Collections - REST', () => {
         await createPost(null, desc);
       }
 
-      const getResponse = await fetch(`${url}/api/posts?where[description][equals]=${desc}`);
+      const getResponse = await fetch(`${url}/api/localized-posts?where[description][equals]=${desc}`);
       const data = await getResponse.json();
 
       expect(getResponse.status).toBe(200);
@@ -287,7 +288,7 @@ describe('Collections - REST', () => {
       const desc = 'sort';
 
       // Create 2 posts with different titles, same desc
-      const req1 = await fetch(`${url}/api/posts`, {
+      const req1 = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
           title: 'aaa',
           description: desc,
@@ -300,7 +301,7 @@ describe('Collections - REST', () => {
         method: 'post',
       });
 
-      const req2 = await fetch(`${url}/api/posts`, {
+      const req2 = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
           title: 'zzz',
           description: desc,
@@ -319,7 +320,7 @@ describe('Collections - REST', () => {
       const id2 = req2data.doc.id;
 
       // Query on shared desc and sort ascending
-      const getResponse = await fetch(`${url}/api/posts?where[description][equals]=${desc}&sort=title`);
+      const getResponse = await fetch(`${url}/api/localized-posts?where[description][equals]=${desc}&sort=title`);
       const data = await getResponse.json();
 
       expect(getResponse.status).toBe(200);
@@ -328,7 +329,7 @@ describe('Collections - REST', () => {
       expect(data.docs[1].id).toEqual(id2);
 
       // Query on shared desc and sort descending
-      const getResponseSorted = await fetch(`${url}/api/posts?where[description][equals]=${desc}&sort=-title`);
+      const getResponseSorted = await fetch(`${url}/api/localized-posts?where[description][equals]=${desc}&sort=-title`);
       const sortedData = await getResponseSorted.json();
 
       expect(getResponse.status).toBe(200);
@@ -342,7 +343,7 @@ describe('Collections - REST', () => {
   describe('Hooks', () => {
     describe('Before', () => {
       it('beforeCreate', async () => {
-        const response = await fetch(`${url}/api/hooktests`, {
+        const response = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
             title: faker.name.firstName(),
             description: 'Original',
@@ -361,7 +362,7 @@ describe('Collections - REST', () => {
       });
 
       it('beforeRead', async () => {
-        const response = await fetch(`${url}/api/hooktests`, {
+        const response = await fetch(`${url}/api/hooks`, {
           headers: {
             Authorization: `JWT ${token}`,
             'Content-Type': 'application/json',
@@ -375,7 +376,7 @@ describe('Collections - REST', () => {
       });
 
       it('beforeUpdate', async () => {
-        const createResponse = await fetch(`${url}/api/hooktests`, {
+        const createResponse = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
             title: faker.name.firstName(),
             description: 'Original',
@@ -391,7 +392,7 @@ describe('Collections - REST', () => {
         expect(createResponse.status).toBe(201);
         const { id } = createData.doc;
 
-        const response = await fetch(`${url}/api/hooktests/${id}`, {
+        const response = await fetch(`${url}/api/hooks/${id}`, {
           body: JSON.stringify({
             description: 'Updated',
           }),
@@ -410,7 +411,7 @@ describe('Collections - REST', () => {
       });
 
       it('beforeDelete', async () => {
-        const createResponse = await fetch(`${url}/api/hooktests`, {
+        const createResponse = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
             title: faker.name.firstName(),
             description: 'Original',
@@ -425,7 +426,7 @@ describe('Collections - REST', () => {
         const createData = await createResponse.json();
         const { id } = createData.doc;
 
-        const response = await fetch(`${url}/api/hooktests/${id}`, {
+        const response = await fetch(`${url}/api/hooks/${id}`, {
           headers: {
             Authorization: `JWT ${token}`,
             'Content-Type': 'application/json',
@@ -443,7 +444,7 @@ describe('Collections - REST', () => {
 
     describe('After', () => {
       it('afterCreate', async () => {
-        const response = await fetch(`${url}/api/hooktests`, {
+        const response = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
             title: faker.name.firstName(),
             description: 'Original',
@@ -462,7 +463,7 @@ describe('Collections - REST', () => {
       });
 
       it('afterRead', async () => {
-        const response = await fetch(`${url}/api/hooktests`, {
+        const response = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
             title: faker.name.firstName(),
             description: 'afterRead',
@@ -476,14 +477,14 @@ describe('Collections - REST', () => {
           method: 'post',
         });
         const data = await response.json();
-        const getResponse = await fetch(`${url}/api/hooktests/${data.doc.id}`);
+        const getResponse = await fetch(`${url}/api/hooks/${data.doc.id}`);
         const getResponseData = await getResponse.json();
         expect(getResponse.status).toBe(200);
         expect(getResponseData.afterReadHook).toEqual(true);
       });
 
       it('afterUpdate', async () => {
-        const createResponse = await fetch(`${url}/api/hooktests`, {
+        const createResponse = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
             title: faker.name.firstName(),
             description: 'Original',
@@ -498,7 +499,7 @@ describe('Collections - REST', () => {
         const createData = await createResponse.json();
         const { id } = createData.doc;
 
-        const response = await fetch(`${url}/api/hooktests/${id}`, {
+        const response = await fetch(`${url}/api/hooks/${id}`, {
           body: JSON.stringify({
             description: 'afterUpdate',
           }),
@@ -516,7 +517,7 @@ describe('Collections - REST', () => {
       });
 
       it('afterDelete', async () => {
-        const createResponse = await fetch(`${url}/api/hooktests`, {
+        const createResponse = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
             title: faker.name.firstName(),
             description: 'Original',
@@ -531,7 +532,7 @@ describe('Collections - REST', () => {
         const createData = await createResponse.json();
         const { id } = createData.doc;
 
-        const response = await fetch(`${url}/api/hooktests/${id}`, {
+        const response = await fetch(`${url}/api/hooks/${id}`, {
           headers: {
             Authorization: `JWT ${token}`,
             'Content-Type': 'application/json',

@@ -53,7 +53,7 @@ class Payload {
       this.config.routes.graphQL,
       identifyAPI('GraphQL'),
       createAuthHeaderFromCookie,
-      authenticate,
+      authenticate(this.config),
       new GraphQL(this).init(),
     );
 

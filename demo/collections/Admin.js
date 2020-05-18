@@ -1,24 +1,21 @@
 const roles = require('../policies/roles');
 const checkRole = require('../policies/checkRole');
 
+const policy = ({ req: { user } }) => checkRole(['admin'], user);
+
 module.exports = {
-  slug: 'users',
+  slug: 'admins',
   labels: {
-    singular: 'User',
-    plural: 'Users',
+    singular: 'Admin',
+    plural: 'Admins',
   },
   useAsTitle: 'email',
   policies: {
-    create: ({ req: { user } }) => checkRole(['admin', 'user'], user),
-    read: null,
-    update: ({ req: { user } }) => checkRole(['admin', 'user'], user),
-    delete: ({ req: { user } }) => checkRole(['admin', 'user'], user),
+    create: policy,
+    read: policy,
+    update: policy,
+    delete: policy,
     admin: () => true,
-  },
-  hooks: {
-    beforeLogin: options => options,
-    afterLogin: options => options,
-    delete: ({ req: { user } }) => checkRole(['admin', 'user'], user),
   },
   auth: {
     tokenExpiration: 7200,

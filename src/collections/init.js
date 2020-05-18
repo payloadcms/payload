@@ -127,8 +127,8 @@ function registerCollections() {
       const AuthCollection = this.collections[formattedCollection.slug];
 
       passport.use(new LocalStrategy(AuthCollection.Model.authenticate()));
-      passport.use(apiKeyStrategy(AuthCollection));
-      passport.use(jwtStrategy(this.config, AuthCollection.Model));
+      passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(AuthCollection));
+      passport.use(`${AuthCollection.config.slug}-jwt`, jwtStrategy(this.config, AuthCollection));
       passport.serializeUser(AuthCollection.Model.serializeUser());
       passport.deserializeUser(AuthCollection.Model.deserializeUser());
       passport.use(new AnonymousStrategy.Strategy());

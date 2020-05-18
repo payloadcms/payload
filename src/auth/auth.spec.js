@@ -14,7 +14,7 @@ let token = null;
 
 describe('Users REST API', () => {
   it('should prevent registering a first user', async () => {
-    const response = await fetch(`${url}/api/users/first-register`, {
+    const response = await fetch(`${url}/api/admins/first-register`, {
       body: JSON.stringify({
         email: 'thisuser@shouldbeprevented.com',
         password: 'get-out',
@@ -29,7 +29,7 @@ describe('Users REST API', () => {
   });
 
   it('should login a user successfully', async () => {
-    const response = await fetch(`${url}/api/users/login`, {
+    const response = await fetch(`${url}/api/admins/login`, {
       body: JSON.stringify({
         email,
         password,
@@ -49,7 +49,7 @@ describe('Users REST API', () => {
   });
 
   it('should return a logged in user from /me', async () => {
-    const response = await fetch(`${url}/api/users/me`, {
+    const response = await fetch(`${url}/api/admins/me`, {
       headers: {
         Authorization: `JWT ${token}`,
       },
@@ -62,7 +62,7 @@ describe('Users REST API', () => {
   });
 
   it('should refresh a token and reset its expiration', async () => {
-    const response = await fetch(`${url}/api/users/refresh-token`, {
+    const response = await fetch(`${url}/api/admins/refresh-token`, {
       method: 'post',
       headers: {
         Authorization: `JWT ${token}`,
@@ -80,7 +80,7 @@ describe('Users REST API', () => {
   it('should allow forgot-password by email', async () => {
     // TODO: figure out how to spy on payload instance functions
     // const mailSpy = jest.spyOn(payload, 'sendEmail');
-    const response = await fetch(`${url}/api/users/forgot-password`, {
+    const response = await fetch(`${url}/api/admins/forgot-password`, {
       method: 'post',
       body: JSON.stringify({
         email,
@@ -97,7 +97,7 @@ describe('Users REST API', () => {
   });
 
   it('should allow a user to be created', async () => {
-    const response = await fetch(`${url}/api/users/register`, {
+    const response = await fetch(`${url}/api/admins/register`, {
       body: JSON.stringify({
         email: `${faker.name.firstName()}@test.com`,
         password,

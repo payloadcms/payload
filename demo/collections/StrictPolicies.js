@@ -1,18 +1,16 @@
-/* eslint-disable no-underscore-dangle */
-const path = require('path');
-const checkRole = require('../../policies/checkRole');
+const checkRole = require('../policies/checkRole');
 
 module.exports = {
-  slug: 'orders',
+  slug: 'strict-policies',
   labels: {
-    singular: 'Order',
-    plural: 'Orders',
+    singular: 'Strict Policy',
+    plural: 'Strict Policies',
   },
-  useAsTitle: 'title',
+  useAsTitle: 'email',
   policies: {
     create: () => true,
     read: ({ req: { user } }) => {
-      if (checkRole(['getout'], user)) {
+      if (checkRole(['admin'], user)) {
         return true;
       }
 
@@ -27,7 +25,7 @@ module.exports = {
       return false;
     },
     update: ({ req: { user } }) => {
-      if (checkRole(['getout'], user)) {
+      if (checkRole(['admin'], user)) {
         return true;
       }
 
@@ -43,28 +41,28 @@ module.exports = {
   },
   fields: [
     {
-      name: 'title',
-      label: 'Title',
+      name: 'address',
       type: 'text',
-      maxLength: 100,
-      required: true,
-      unique: true,
-      localized: true,
-    },
-    {
-      name: 'owner',
-      label: 'Owner',
-      type: 'relationship',
-      relationTo: 'users',
+      label: 'Address',
       required: true,
     },
     {
-      name: 'description',
-      label: 'Description',
-      type: 'textarea',
-      height: 100,
+      name: 'city',
+      type: 'text',
+      label: 'City',
       required: true,
-      localized: true,
+    },
+    {
+      name: 'state',
+      type: 'text',
+      label: 'State',
+      required: true,
+    },
+    {
+      name: 'zip',
+      type: 'number',
+      label: 'ZIP Code',
+      required: true,
     },
   ],
   timestamps: true,

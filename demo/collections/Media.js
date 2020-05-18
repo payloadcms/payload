@@ -1,5 +1,3 @@
-const checkRole = require('../policies/checkRole');
-
 module.exports = {
   slug: 'media',
   labels: {
@@ -29,12 +27,6 @@ module.exports = {
         height: 16,
       },
     ],
-  },
-  policies: {
-    create: ({ req: { user } }) => checkRole(['user', 'admin'], user),
-    read: ({ req: { user } }) => checkRole(['user', 'admin'], user),
-    update: ({ req: { user } }) => checkRole(['user', 'admin'], user),
-    delete: ({ req: { user } }) => checkRole(['user', 'admin'], user),
   },
   fields: [
     {

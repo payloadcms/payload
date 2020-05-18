@@ -1,15 +1,23 @@
 const path = require('path');
-const Page = require('./collections/Page');
-const Category = require('./collections/Category');
-const HookTest = require('./collections/HookTest');
-const Post = require('./collections/Post');
-const Order = require('./collections/Order');
-const Layout = require('./collections/Layout');
-const User = require('./collections/User');
+const Admin = require('./collections/Admin');
+const AllFields = require('./collections/AllFields');
+const Code = require('./collections/Code');
+const CustomComponents = require('./collections/CustomComponents');
 const File = require('./collections/File');
+const FlexibleContent = require('./collections/FlexibleContent');
+const Hooks = require('./collections/Hooks');
+const Localized = require('./collections/Localized');
 const Media = require('./collections/Media');
-const Header = require('./globals/Header');
-const Footer = require('./globals/Footer');
+const Preview = require('./collections/Preview');
+const RelationshipA = require('./collections/RelationshipA');
+const RelationshipB = require('./collections/RelationshipB');
+const RichText = require('./collections/RichText');
+const StrictPolicies = require('./collections/StrictPolicies');
+const WYSIWYG = require('./collections/WYSIWYG');
+
+const FlexibleGlobal = require('./globals/FlexibleGlobal');
+const NavigationRepeater = require('./globals/NavigationRepeater');
+const GlobalWithPolicies = require('./globals/GlobalWithPolicies');
 
 module.exports = {
   secret: 'SECRET_KEY',
@@ -18,17 +26,23 @@ module.exports = {
     disable: false,
   },
   collections: [
-    Page,
-    Category,
-    Order,
-    HookTest,
-    Post,
-    Layout,
+    Admin,
+    AllFields,
+    Code,
+    CustomComponents,
     File,
+    FlexibleContent,
+    Hooks,
+    Localized,
     Media,
-    User,
+    Preview,
+    RelationshipA,
+    RelationshipB,
+    RichText,
+    StrictPolicies,
+    WYSIWYG,
   ],
-  globals: [Header, Footer],
+  globals: [NavigationRepeater, GlobalWithPolicies, FlexibleGlobal],
   port: 3000,
   serverURL: 'http://localhost:3000',
   cors: ['http://localhost', 'http://localhost:8080', 'http://localhost:8081'],

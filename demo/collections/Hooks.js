@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
 module.exports = {
-  slug: 'hooktests',
+  slug: 'hooks',
   labels: {
-    singular: 'HookTest',
-    plural: 'HookTests',
+    singular: 'Hook',
+    plural: 'Hooks',
   },
   useAsTitle: 'title',
   policies: {
@@ -14,28 +14,24 @@ module.exports = {
   },
   hooks: {
     beforeCreate: (operation) => {
-      console.log('EXECUTING HOOK: beforeCreate');
       if (operation.req.headers.hook === 'beforeCreate') {
         operation.req.body.description += '-beforeCreateSuffix';
       }
       return operation;
     },
     beforeRead: (operation) => {
-      console.log('EXECUTING HOOK: beforeRead');
       if (operation.req.headers.hook === 'beforeRead') {
         operation.limit = 1;
       }
       return operation;
     },
     beforeUpdate: (operation) => {
-      console.log(`EXECUTING HOOK: beforeUpdate - id: ${operation.id}`);
       if (operation.req.headers.hook === 'beforeUpdate') {
         operation.req.body.description += '-beforeUpdateSuffix';
       }
       return operation;
     },
     beforeDelete: (operation) => {
-      console.log(`EXECUTING HOOK: beforeDelete - id: ${operation.id}`);
       if (operation.req.headers.hook === 'beforeDelete') {
         // TODO: Find a better hook operation to assert against in tests
         operation.req.headers.hook = 'afterDelete';
@@ -43,26 +39,22 @@ module.exports = {
       return operation;
     },
     afterCreate: (operation, value) => {
-      console.log(`EXECUTING HOOK: afterCreate - id: ${value.id}`);
       if (operation.req.headers.hook === 'afterCreate') {
         value.afterCreateHook = true;
       }
       return value;
     },
     afterRead: (operation) => {
-      console.log('EXECUTING HOOK: afterRead');
       const { json } = operation;
       json.afterReadHook = true;
     },
     afterUpdate: (operation, value) => {
-      console.log(`EXECUTING HOOK: afterUpdate - id: ${value.id}`);
       if (operation.req.headers.hook === 'afterUpdate') {
         value.afterUpdateHook = true;
       }
       return value;
     },
     afterDelete: (operation, value) => {
-      console.log(`EXECUTING HOOK: afterDelete - id: ${value.id}`);
       if (operation.req.headers.hook === 'afterDelete') {
         value.afterDeleteHook = true;
       }
