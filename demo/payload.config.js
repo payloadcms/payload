@@ -6,6 +6,7 @@ const CustomComponents = require('./collections/CustomComponents');
 const File = require('./collections/File');
 const FlexibleContent = require('./collections/FlexibleContent');
 const Hooks = require('./collections/Hooks');
+const HTML = require('./collections/HTML');
 const Localized = require('./collections/Localized');
 const Media = require('./collections/Media');
 const Preview = require('./collections/Preview');
@@ -13,7 +14,6 @@ const RelationshipA = require('./collections/RelationshipA');
 const RelationshipB = require('./collections/RelationshipB');
 const RichText = require('./collections/RichText');
 const StrictPolicies = require('./collections/StrictPolicies');
-const WYSIWYG = require('./collections/WYSIWYG');
 
 const FlexibleGlobal = require('./globals/FlexibleGlobal');
 const NavigationRepeater = require('./globals/NavigationRepeater');
@@ -33,6 +33,7 @@ module.exports = {
     File,
     FlexibleContent,
     Hooks,
+    HTML,
     Localized,
     Media,
     Preview,
@@ -40,7 +41,6 @@ module.exports = {
     RelationshipB,
     RichText,
     StrictPolicies,
-    WYSIWYG,
   ],
   globals: [NavigationRepeater, GlobalWithPolicies, FlexibleGlobal],
   port: 3000,
