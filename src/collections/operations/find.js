@@ -1,5 +1,5 @@
 const merge = require('lodash.merge');
-const executePolicy = require('../../users/executePolicy');
+const executePolicy = require('../../auth/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
 
 const find = async (args) => {

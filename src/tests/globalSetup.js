@@ -8,7 +8,7 @@ const url = config.serverURL;
 const globalSetup = async () => {
   global.PAYLOAD_SERVER = server.start();
 
-  const response = await fetch(`${url}/api/first-register`, {
+  const response = await fetch(`${url}/api/users/first-register`, {
     body: JSON.stringify({
       username,
       password,

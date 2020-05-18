@@ -1,4 +1,3 @@
-const mongooseHidden = require('mongoose-hidden');
 const paginate = require('mongoose-paginate-v2');
 const autopopulate = require('mongoose-autopopulate');
 const buildQueryPlugin = require('../mongoose/buildQuery');
@@ -11,8 +10,7 @@ const buildCollectionSchema = (collection, config, schemaOptions = {}) => {
   schema.plugin(paginate)
     .plugin(buildQueryPlugin)
     .plugin(localizationPlugin, config.localization)
-    .plugin(autopopulate)
-    .plugin(mongooseHidden());
+    .plugin(autopopulate);
 
   return schema;
 };

@@ -1,6 +1,6 @@
 const fs = require('fs');
 const { NotFound, Forbidden } = require('../../errors');
-const executePolicy = require('../../users/executePolicy');
+const executePolicy = require('../../auth/executePolicy');
 
 const deleteQuery = async (args) => {
   try {

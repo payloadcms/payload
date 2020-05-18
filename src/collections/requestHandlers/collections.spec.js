@@ -5,7 +5,7 @@
 require('isomorphic-fetch');
 const faker = require('faker');
 const config = require('../../../demo/payload.config');
-const { email, password } = require('../../tests/credentials');
+const { username, password } = require('../../tests/credentials');
 
 const url = config.serverURL;
 
@@ -16,9 +16,9 @@ const englishPostDesc = faker.lorem.lines(2);
 const spanishPostDesc = faker.lorem.lines(2);
 
 beforeAll(async (done) => {
-  const response = await fetch(`${url}/api/login`, {
+  const response = await fetch(`${url}/api/users/login`, {
     body: JSON.stringify({
-      email,
+      username,
       password,
     }),
     headers: {
@@ -261,7 +261,7 @@ describe('Collections - REST', () => {
     it('should include metadata', async () => {
       const desc = 'metadataDesc';
       for (let i = 0; i < 12; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
+        // eslint-disable-next-line no-await-in-loop
         await createPost(null, desc);
       }
 

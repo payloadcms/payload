@@ -83,8 +83,6 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
             return this.types.blockTypes[data.blockType];
           },
         });
-      } else if (relationTo === this.config.User.slug) {
-        ({ type } = this.User.graphQL);
       } else {
         ({ type } = this.collections[relationTo].graphQL);
       }
@@ -203,13 +201,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
           ),
         };
       } else {
-        let whereFields;
-
-        if (relationTo === this.config.User.slug) {
-          whereFields = this.User.config.fields;
-        } else {
-          whereFields = this.collections[relationTo].config.fields;
-        }
+        const whereFields = this.collections[relationTo].config.fields;
 
         relationship.args.where = {
           type: this.buildWhereInputType(

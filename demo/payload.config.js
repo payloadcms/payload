@@ -12,7 +12,11 @@ const Header = require('./globals/Header');
 const Footer = require('./globals/Footer');
 
 module.exports = {
-  // disableAdmin: true,
+  secret: 'SECRET_KEY',
+  admin: {
+    user: 'users',
+    disable: false,
+  },
   collections: [
     Page,
     Category,
