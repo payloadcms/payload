@@ -22,8 +22,8 @@ module.exports = {
     Layout,
     File,
     Media,
+    User,
   ],
-  User,
   globals: [Header, Footer],
   port: 3000,
   serverURL: 'http://localhost:3000',
@@ -47,41 +47,6 @@ module.exports = {
     defaultLocale: 'en',
     fallback: true,
   },
-  uploads: {
-    image: {
-      imageSizes: [
-        {
-          name: 'tablet',
-          width: 640,
-          height: 480,
-          crop: 'left top', // would it make sense for this to be set by the uploader?
-        },
-        {
-          name: 'mobile',
-          width: 320,
-          height: 240,
-          crop: 'left top',
-        },
-        { // Is the icon size required for the admin dashboard to work?
-          name: 'icon',
-          width: 16,
-          height: 16,
-        },
-      ],
-    },
-    profile: {
-      imageSizes: [
-        {
-          name: 'full',
-          width: 640,
-          height: 480,
-          crop: 'center',
-        },
-      ],
-    },
-  },
-  staticURL: '/uploads',
-  staticDir: 'demo/upload',
   productionGraphQLPlayground: false,
   email: {
     provider: 'mock',

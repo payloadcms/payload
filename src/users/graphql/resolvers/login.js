@@ -2,12 +2,11 @@
 const { login } = require('../../operations');
 
 const loginResolver = ({ Model, config }) => async (_, args, context) => {
-  const usernameField = config.auth.useAsUsername;
   const options = {
     Model,
     config,
     data: {
-      [usernameField]: args[usernameField],
+      username: args.username,
       password: args.password,
     },
     req: context,

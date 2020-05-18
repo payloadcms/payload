@@ -24,9 +24,6 @@ function registerUser() {
         plural,
       },
       fields,
-      auth: {
-        useAsUsername,
-      },
     },
   } = this.User;
 
@@ -89,7 +86,7 @@ function registerUser() {
       return jwtFields;
     }, [
       {
-        name: this.User.config.auth.useAsUsername,
+        name: 'username',
         type: 'text',
         required: true,
       },
@@ -154,7 +151,7 @@ function registerUser() {
   this.Mutation.fields.login = {
     type: GraphQLString,
     args: {
-      [useAsUsername]: { type: GraphQLString },
+      username: { type: GraphQLString },
       password: { type: GraphQLString },
     },
     resolve: login(this.User),
@@ -171,7 +168,7 @@ function registerUser() {
   this.Mutation.fields.forgotPassword = {
     type: new GraphQLNonNull(GraphQLBoolean),
     args: {
-      [useAsUsername]: { type: new GraphQLNonNull(GraphQLString) },
+      username: { type: new GraphQLNonNull(GraphQLString) },
     },
     resolve: forgotPassword(this.config, this.User.Model, this.sendEmail),
   };

@@ -27,9 +27,7 @@ const login = async (args) => {
       data,
     } = options;
 
-    const usernameField = config.auth.useAsUsername;
-    const username = data[usernameField];
-    const { password } = data;
+    const { username, password } = data;
 
     const user = await Model.findByUsername(username);
 
@@ -50,7 +48,7 @@ const login = async (args) => {
       }
       return signedFields;
     }, {
-      [usernameField]: username,
+      username,
     });
 
     const token = jwt.sign(

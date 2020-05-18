@@ -30,8 +30,7 @@ const resetPassword = async (args) => {
       data,
     } = options;
 
-    const usernameField = config.auth.useAsUsername;
-    const username = data[usernameField];
+    const { username } = data;
 
     const user = await Model.findOne({
       resetPasswordToken: data.token,

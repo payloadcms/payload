@@ -21,20 +21,10 @@ module.exports = {
     delete: ({ req: { user } }) => checkRole(['admin', 'user'], user),
   },
   auth: {
-    passwordIndex: 1,
-    useAsUsername: 'email',
     tokenExpiration: 7200,
     secretKey: 'SECRET_KEY',
   },
   fields: [
-    {
-      name: 'email',
-      label: 'Email Address',
-      type: 'email',
-      unique: true,
-      maxLength: 100,
-      required: true,
-    },
     {
       name: 'roles',
       label: 'Role',

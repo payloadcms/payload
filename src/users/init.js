@@ -14,7 +14,7 @@ function initUser() {
   this.config.User.fields.push(...baseUserFields);
   this.config.User = sanitize(this.config.User);
   const userSchema = buildCollectionSchema(this.config.User, this.config);
-  userSchema.plugin(passportLocalMongoose, { usernameField: this.config.User.auth.useAsUsername });
+  userSchema.plugin(passportLocalMongoose);
 
   this.User = {
     config: this.config.User,
