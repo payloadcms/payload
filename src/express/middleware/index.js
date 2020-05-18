@@ -19,7 +19,7 @@ const middleware = (config) => {
     bodyParser.urlencoded({ extended: true }),
     compression(config.compression),
     localizationMiddleware(config.localization),
-    authenticate,
+    authenticate(config),
     identifyAPI('REST'),
     (req, res, next) => {
       if (config.cors) {

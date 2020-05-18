@@ -20,7 +20,7 @@ import Unauthorized from './views/Unauthorized';
 import Loading from './elements/Loading';
 
 const {
-  routes, collections, User, globals,
+  admin: { user: userSlug }, routes, collections, User, globals,
 } = PAYLOAD_CONFIG;
 
 const Routes = () => {
@@ -28,7 +28,7 @@ const Routes = () => {
   const { user, permissions: { canAccessAdmin } } = useUser();
 
   useEffect(() => {
-    requests.get(`${routes.api}/init`).then(res => res.json().then((data) => {
+    requests.get(`${routes.api}/${userSlug}/init`).then(res => res.json().then((data) => {
       if (data && 'initialized' in data) {
         setInitialized(data.initialized);
       }

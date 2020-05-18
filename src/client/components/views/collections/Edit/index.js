@@ -58,7 +58,7 @@ const EditView = (props) => {
 
     if (isEditing) {
       nav.push({
-        label: data ? data[useAsTitle] : '',
+        label: data ? data[useAsTitle || 'id'] : '',
       });
     } else {
       nav.push({
@@ -77,7 +77,7 @@ const EditView = (props) => {
             Edit
             {' '}
             {Object.keys(data).length > 0
-              && (data[useAsTitle] ? data[useAsTitle] : '[Untitled]')
+              && (data[useAsTitle || 'id'] ? data[useAsTitle || 'id'] : '[Untitled]')
             }
           </h1>
         )}

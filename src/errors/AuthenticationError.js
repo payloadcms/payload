@@ -3,7 +3,7 @@ const APIError = require('./APIError');
 
 class AuthenticationError extends APIError {
   constructor() {
-    super('The username or password provided is incorrect.', httpStatus.BAD_REQUEST);
+    super('The email or password provided is incorrect.', httpStatus.UNAUTHORIZED);
   }
 }
 

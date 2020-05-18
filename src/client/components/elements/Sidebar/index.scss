@@ -2,14 +2,21 @@
 
 .sidebar {
   position: fixed;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
   top: 0;
   left: 0;
   bottom: 0;
-  width: base(6);
-  padding: base(1);
+  width: base(10);
+  overflow: hidden;
+
+  &__wrap {
+    height: 100%;
+    padding: base(1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: calc(100% + #{base(1)});
+    overflow-y: scroll;
+  }
 
   .icon-wrap {
     margin: 0 0 base(.5);
@@ -33,7 +40,7 @@
     a {
       position: relative;
       display: flex;
-      padding: base(.33) 0;
+      padding: base(.25) 0;
 
       svg {
         opacity: 0;

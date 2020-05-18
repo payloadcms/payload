@@ -129,7 +129,7 @@ class Relationship extends Component {
         options: [
           ...options,
           ...data.docs.map(doc => ({
-            label: doc[collection.useAsTitle],
+            label: doc[collection.useAsTitle || 'id'],
             value: doc.id,
           })),
         ],
@@ -140,7 +140,7 @@ class Relationship extends Component {
 
       const newOptions = data.docs.map((doc) => {
         return {
-          label: doc[collection.useAsTitle],
+          label: doc[collection.useAsTitle || doc.id],
           value: {
             relationTo: collection.slug,
             value: doc.id,

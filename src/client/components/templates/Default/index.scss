@@ -2,8 +2,8 @@
 
 .template-default {
   padding: $baseline;
-  margin-left: base(6);
-  width: calc(100% - #{base(6)});
+  margin-left: base(10);
+  width: calc(100% - #{base(10)});
 
   &__eyebrow,
   &__wrap {

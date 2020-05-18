@@ -7,9 +7,8 @@ const buildBlockType = require('./schema/buildBlockType');
 const buildPoliciesType = require('./schema/buildPoliciesType');
 const buildLocaleInputType = require('./schema/buildLocaleInputType');
 const buildFallbackLocaleInputType = require('./schema/buildFallbackLocaleInputType');
-const registerCollections = require('../collections/graphql/register');
-const registerGlobals = require('../globals/graphql/register');
-const initUser = require('../users/graphql/init');
+const initCollections = require('../collections/graphql/init');
+const initGlobals = require('../globals/graphql/init');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 
 class GraphQL {
@@ -32,15 +31,13 @@ class GraphQL {
     this.buildWhereInputType = buildWhereInputType;
     this.buildObjectType = buildObjectType.bind(this);
     this.buildPoliciesType = buildPoliciesType.bind(this);
-    this.registerCollections = registerCollections.bind(this);
-    this.initUser = initUser.bind(this);
-    this.registerGlobals = registerGlobals.bind(this);
+    this.initCollections = initCollections.bind(this);
+    this.initGlobals = initGlobals.bind(this);
   }
 
   init() {
-    this.registerCollections();
-    this.initUser();
-    this.registerGlobals();
+    this.initCollections();
+    this.initGlobals();
 
     const query = new GraphQLObjectType(this.Query);
     const mutation = new GraphQLObjectType(this.Mutation);

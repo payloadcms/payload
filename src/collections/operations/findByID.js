@@ -1,5 +1,5 @@
 const { Forbidden, NotFound } = require('../../errors');
-const executePolicy = require('../../users/executePolicy');
+const executePolicy = require('../../auth/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
 
 const findByID = async (args) => {

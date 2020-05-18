@@ -1,4 +1,4 @@
-const executePolicy = require('../../users/executePolicy');
+const executePolicy = require('../../auth/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
 const { NotFound, Forbidden } = require('../../errors');
 const validate = require('../../fields/validateUpdate');

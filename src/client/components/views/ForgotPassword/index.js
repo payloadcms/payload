@@ -12,7 +12,14 @@ import './index.scss';
 
 const baseClass = 'forgot-password';
 
-const { serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
+const {
+  admin: { user: userSlug },
+  serverURL,
+  routes: {
+    admin,
+    api,
+  },
+} = PAYLOAD_CONFIG;
 
 const ForgotPassword = () => {
   const { addStatus } = useStatusList();
@@ -38,7 +45,7 @@ const ForgotPassword = () => {
         <p>
           To change your password, go to your
           {' '}
-          <Link to={`${admin}/logout`}>account</Link>
+          <Link to={`${admin}/account`}>account</Link>
           {' '}
           and edit your password there.
         </p>
@@ -80,10 +87,10 @@ const ForgotPassword = () => {
         novalidate
         handleAjaxResponse={handleAjaxResponse}
         method="POST"
-        action={`${serverURL}${api}/forgot-password`}
+        action={`${serverURL}${api}/${userSlug}/forgot-password`}
       >
         <h1>Forgot Password</h1>
-        <p>Please enter your username or email address. You will receive an email message with instructions on how to reset your password.</p>
+        <p>Please enter your email below. You will receive an email message with instructions on how to reset your password.</p>
         <Email
           label="Email Address"
           name="email"

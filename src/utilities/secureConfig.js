@@ -19,15 +19,13 @@ const recursivelySecure = (object) => {
 const secureConfig = (insecureConfig) => {
   const config = deepCopyObject(insecureConfig);
 
-  delete config.User.auth.secretKey;
+  delete config.secret;
 
   recursivelySecure(config);
 
   config.collections.forEach((collection, i) => {
     config.collections[i] = recursivelySecure(collection);
   });
-
-  config.User = recursivelySecure(config.User);
 
   return config;
 };

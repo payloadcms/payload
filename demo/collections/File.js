@@ -1,5 +1,3 @@
-const checkRole = require('../policies/checkRole');
-
 module.exports = {
   slug: 'files',
   labels: {
@@ -11,12 +9,6 @@ module.exports = {
     staticDir: 'demo/files',
   },
   useAsTitle: 'filename',
-  policies: {
-    create: ({ req: { user } }) => checkRole(['user', 'admin'], user),
-    read: ({ req: { user } }) => checkRole(['user', 'admin'], user),
-    update: ({ req: { user } }) => checkRole(['user', 'admin'], user),
-    delete: ({ req: { user } }) => checkRole(['user', 'admin'], user),
-  },
   fields: [
     {
       name: 'type',
@@ -24,7 +16,7 @@ module.exports = {
       type: 'select',
       options: [{
         value: 'Type 1',
-        label: 'Here is a label for Type 1',
+        label: 'Type 2',
       }, {
         value: 'Type 2',
         label: 'Type 2 Label',
