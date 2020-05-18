@@ -13,6 +13,7 @@ import './index.scss';
 const baseClass = 'forgot-password';
 
 const {
+  admin: { user: userSlug },
   serverURL,
   routes: {
     admin,
@@ -86,10 +87,10 @@ const ForgotPassword = () => {
         novalidate
         handleAjaxResponse={handleAjaxResponse}
         method="POST"
-        action={`${serverURL}${api}/forgot-password`}
+        action={`${serverURL}${api}/${userSlug}/forgot-password`}
       >
         <h1>Forgot Password</h1>
-        <p>Please enter your username below. You will receive an email message with instructions on how to reset your password.</p>
+        <p>Please enter your email below. You will receive an email message with instructions on how to reset your password.</p>
         <Email
           label="Email Address"
           name="email"

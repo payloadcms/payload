@@ -1,7 +1,7 @@
 require('isomorphic-fetch');
 const server = require('../../demo/server');
 const config = require('../../demo/payload.config');
-const { username, password } = require('./credentials');
+const { email, password } = require('./credentials');
 
 const url = config.serverURL;
 
@@ -10,7 +10,7 @@ const globalSetup = async () => {
 
   const response = await fetch(`${url}/api/users/first-register`, {
     body: JSON.stringify({
-      username,
+      email,
       password,
       roles: ['admin', 'user'],
     }),

@@ -6,7 +6,7 @@ const loginResolver = (config, collection) => async (_, args, context) => {
     collection,
     config,
     data: {
-      username: args.username,
+      email: args.email,
       password: args.password,
     },
     req: context,

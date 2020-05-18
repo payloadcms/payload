@@ -18,7 +18,7 @@ const baseAuthFields = require('../auth/baseFields');
 const authRoutes = require('../auth/routes');
 
 function registerCollections() {
-  this.config.collections.forEach((collection) => {
+  this.config.collections.map((collection) => {
     const formattedCollection = { ...collection };
 
     if (collection.upload) {
@@ -105,15 +105,15 @@ function registerCollections() {
 
     if (collection.auth) {
       formattedCollection.fields = [
-        ...formattedCollection.fields,
         ...baseAuthFields,
+        ...formattedCollection.fields,
       ];
     }
 
     const schema = buildSchema(formattedCollection, this.config);
 
     if (collection.auth) {
-      schema.plugin(passportLocalMongoose);
+      schema.plugin(passportLocalMongoose, { usernameField: 'email' });
     }
 
     schema.plugin(mongooseHidden);
@@ -137,6 +137,8 @@ function registerCollections() {
     } else {
       this.router.use(collectionRoutes(this.collections[formattedCollection.slug]));
     }
+
+    return formattedCollection;
   });
 }
 

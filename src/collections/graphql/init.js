@@ -141,8 +141,8 @@ function registerCollections() {
           return jwtFields;
         }, [
           {
-            name: 'username',
-            type: 'text',
+            name: 'email',
+            type: 'email',
             required: true,
           },
         ]),
@@ -166,7 +166,7 @@ function registerCollections() {
       this.Mutation.fields[`login${singularLabel}`] = {
         type: GraphQLString,
         args: {
-          username: { type: GraphQLString },
+          email: { type: GraphQLString },
           password: { type: GraphQLString },
         },
         resolve: login(this.config, collection),
@@ -183,7 +183,7 @@ function registerCollections() {
       this.Mutation.fields[`forgotPassword${singularLabel}`] = {
         type: new GraphQLNonNull(GraphQLBoolean),
         args: {
-          username: { type: new GraphQLNonNull(GraphQLString) },
+          email: { type: new GraphQLNonNull(GraphQLString) },
         },
         resolve: forgotPassword(this.config, collection.Model, this.sendEmail),
       };

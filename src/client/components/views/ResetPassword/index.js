@@ -12,7 +12,7 @@ import HiddenInput from '../../forms/field-types/HiddenInput';
 
 const baseClass = 'reset-password';
 
-const { serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
+const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -61,7 +61,7 @@ const ResetPassword = () => {
         <Form
           handleAjaxResponse={handleAjaxResponse}
           method="POST"
-          action={`${serverURL}${api}/reset-password`}
+          action={`${serverURL}${api}/${userSlug}/reset-password`}
           redirect={admin}
         >
           <Password

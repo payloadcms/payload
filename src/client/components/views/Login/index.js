@@ -14,7 +14,7 @@ import './index.scss';
 
 const baseClass = 'login';
 
-const { serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
+const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
 
 const Login = () => {
   const { addStatus } = useStatusList();
@@ -30,7 +30,7 @@ const Login = () => {
         } else {
           addStatus({
             type: 'error',
-            message: 'The username or password you have entered is invalid.',
+            message: 'The email address or password you have entered is invalid.',
           });
         }
       });
@@ -70,7 +70,7 @@ const Login = () => {
       <Form
         handleAjaxResponse={handleAjaxResponse}
         method="POST"
-        action={`${serverURL}${api}/login`}
+        action={`${serverURL}${api}/${userSlug}/login`}
         redirect={admin}
       >
         <Email

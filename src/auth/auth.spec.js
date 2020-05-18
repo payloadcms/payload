@@ -1,13 +1,12 @@
 require('isomorphic-fetch');
 const faker = require('faker');
-const { username, password } = require('../tests/credentials');
+const { email, password } = require('../tests/credentials');
 
 /**
  * @jest-environment node
  */
 
 const config = require('../../demo/payload.config');
-const { payload } = require('../../demo/server');
 
 const url = config.serverURL;
 
@@ -17,7 +16,7 @@ describe('Users REST API', () => {
   it('should prevent registering a first user', async () => {
     const response = await fetch(`${url}/api/users/first-register`, {
       body: JSON.stringify({
-        username: 'thisuser@shouldbeprevented.com',
+        email: 'thisuser@shouldbeprevented.com',
         password: 'get-out',
       }),
       headers: {
@@ -32,7 +31,7 @@ describe('Users REST API', () => {
   it('should login a user successfully', async () => {
     const response = await fetch(`${url}/api/users/login`, {
       body: JSON.stringify({
-        username,
+        email,
         password,
       }),
       headers: {
@@ -59,7 +58,7 @@ describe('Users REST API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.username).not.toBeNull();
+    expect(data.email).not.toBeNull();
   });
 
   it('should refresh a token and reset its expiration', async () => {
@@ -84,7 +83,7 @@ describe('Users REST API', () => {
     const response = await fetch(`${url}/api/users/forgot-password`, {
       method: 'post',
       body: JSON.stringify({
-        username,
+        email,
       }),
       headers: {
         'Content-Type': 'application/json',
@@ -100,7 +99,7 @@ describe('Users REST API', () => {
   it('should allow a user to be created', async () => {
     const response = await fetch(`${url}/api/users/register`, {
       body: JSON.stringify({
-        username: `${faker.name.firstName()}@test.com`,
+        email: `${faker.name.firstName()}@test.com`,
         password,
         roles: ['editor'],
       }),
@@ -114,7 +113,7 @@ describe('Users REST API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(201);
-    expect(data).toHaveProperty('username');
+    expect(data).toHaveProperty('email');
     expect(data).toHaveProperty('roles');
     expect(data).toHaveProperty('createdAt');
   });

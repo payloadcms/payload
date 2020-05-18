@@ -10,7 +10,7 @@ import { requests } from '../../api';
 import StayLoggedInModal from '../modals/StayLoggedIn';
 import useThrottledEffect from '../../hooks/useThrottledEffect';
 
-const { serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
+const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
 
 const cookies = new Cookies();
 const Context = createContext({});
@@ -35,7 +35,7 @@ const UserProvider = ({ children }) => {
 
     if (decodedToken?.exp > (Date.now() / 1000)) {
       setTimeout(async () => {
-        const request = await requests.post(`${serverURL}${api}/refresh-token`);
+        const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`);
 
         if (request.status === 200) {
           const json = await request.json();
@@ -63,7 +63,6 @@ const UserProvider = ({ children }) => {
   }, 15000, [location, refreshToken]);
 
   // When token changes, set cookie, decode and set user
-  // Get new policies
   useEffect(() => {
     if (token) {
       const decoded = jwt.decode(token);
@@ -72,22 +71,12 @@ const UserProvider = ({ children }) => {
         cookies.set('token', token, { path: '/' });
       }
     }
-    async function getPermissions() {
-      const request = await requests.get(`${serverURL}${api}/policies`);
-
-      if (request.status === 200) {
-        const json = await request.json();
-        setPermissions(json);
-      }
-    }
-
-    getPermissions();
   }, [token]);
 
   // When user changes, get new policies
   useEffect(() => {
     async function getPermissions() {
-      const request = await requests.get(`${serverURL}${api}/policies`);
+      const request = await requests.get(`${serverURL}${api}/${userSlug}/policies`);
 
       if (request.status === 200) {
         const json = await request.json();

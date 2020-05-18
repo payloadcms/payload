@@ -33,7 +33,7 @@ const resetPassword = async (args) => {
       data,
     } = options;
 
-    const { username } = data;
+    const { email } = data;
 
     const user = await Model.findOne({
       resetPasswordToken: data.token,
@@ -60,7 +60,7 @@ const resetPassword = async (args) => {
       }
       return signedFields;
     }, {
-      username,
+      email,
     });
 
     const token = jwt.sign(

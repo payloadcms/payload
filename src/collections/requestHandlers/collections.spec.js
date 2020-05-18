@@ -5,7 +5,7 @@
 require('isomorphic-fetch');
 const faker = require('faker');
 const config = require('../../../demo/payload.config');
-const { username, password } = require('../../tests/credentials');
+const { email, password } = require('../../tests/credentials');
 
 const url = config.serverURL;
 
@@ -18,7 +18,7 @@ const spanishPostDesc = faker.lorem.lines(2);
 beforeAll(async (done) => {
   const response = await fetch(`${url}/api/users/login`, {
     body: JSON.stringify({
-      username,
+      email,
       password,
     }),
     headers: {

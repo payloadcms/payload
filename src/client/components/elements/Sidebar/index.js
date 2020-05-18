@@ -1,12 +1,14 @@
 import React from 'react';
-import { useLocation, NavLink, Link } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { useUser } from '../../data/User';
 import Chevron from '../../icons/Chevron';
 
 import './index.scss';
 
 const {
-  User,
+  admin: {
+    user: userSlug,
+  },
   collections,
   globals,
   routes: {
@@ -14,8 +16,9 @@ const {
   },
 } = PAYLOAD_CONFIG;
 
+const userConfig = collections.find(collection => collection.slug === userSlug);
+
 const Sidebar = () => {
-  const location = useLocation();
   const { permissions } = useUser();
 
   return (
@@ -46,15 +49,6 @@ const Sidebar = () => {
 
           return null;
         })}
-        {permissions?.[User.slug].read.permission && (
-          <NavLink
-            activeClassName="active"
-            to={`${admin}/${User.slug}`}
-          >
-            <Chevron />
-            {User.labels.singular}
-          </NavLink>
-        )}
       </nav>
       <span className="label">Globals</span>
       <nav>

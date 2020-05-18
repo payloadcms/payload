@@ -4,7 +4,7 @@ const defaultUser = {
     singular: 'User',
     plural: 'Users',
   },
-  useAsTitle: 'username',
+  useAsTitle: 'email',
   auth: {
     tokenExpiration: 7200,
   },

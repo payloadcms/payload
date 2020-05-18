@@ -10,7 +10,7 @@ module.exports = (config, Model) => {
 
   return new JwtStrategy(opts, async (token, done) => {
     try {
-      const user = await Model.findByUsername(token.username);
+      const user = await Model.findByUsername(token.email);
       return done(null, user);
     } catch (err) {
       return done(null, false);

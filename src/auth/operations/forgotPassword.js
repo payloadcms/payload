@@ -3,8 +3,8 @@ const { APIError } = require('../../errors');
 
 const forgotPassword = async (args) => {
   try {
-    if (!Object.prototype.hasOwnProperty.call(args.data, 'username')) {
-      throw new APIError('Missing username.');
+    if (!Object.prototype.hasOwnProperty.call(args.data, 'email')) {
+      throw new APIError('Missing email.');
     }
 
     let options = { ...args };
@@ -35,7 +35,7 @@ const forgotPassword = async (args) => {
     let token = await crypto.randomBytes(20);
     token = token.toString('hex');
 
-    const user = await Model.findOne({ username: data.username });
+    const user = await Model.findOne({ email: data.email });
 
     if (!user) return;
 
@@ -53,7 +53,7 @@ const forgotPassword = async (args) => {
 
     email({
       from: `"${config.email.fromName}" <${config.email.fromAddress}>`,
-      to: data.username,
+      to: data.email,
       subject: 'Password Reset',
       html,
     });
