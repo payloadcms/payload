@@ -48,8 +48,6 @@ const policies = async (args) => {
       policyResults[global.slug] = returnPolicyResults(global, ['read', 'update']);
     });
 
-    policyResults[config.User.slug] = returnPolicyResults(config.User, allOperations);
-
     return policyResults;
   } catch (error) {
     throw error;

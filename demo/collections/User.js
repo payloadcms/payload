@@ -22,7 +22,6 @@ module.exports = {
   },
   auth: {
     tokenExpiration: 7200,
-    secretKey: 'SECRET_KEY',
   },
   fields: [
     {
