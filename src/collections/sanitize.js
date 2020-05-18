@@ -1,5 +1,6 @@
 const { DuplicateCollection, MissingCollectionLabel } = require('../errors');
 const sanitizeFields = require('../fields/sanitize');
+const toKebabCase = require('../utilities/toKebabCase');
 
 const sanitizeCollection = (collections, collection) => {
   // /////////////////////////////////
@@ -19,6 +20,8 @@ const sanitizeCollection = (collections, collection) => {
   // /////////////////////////////////
 
   const sanitizedCollectionConfig = { ...collection };
+
+  sanitizedCollectionConfig.slug = toKebabCase(sanitizedCollectionConfig.slug);
 
   // /////////////////////////////////
   // Ensure that collection has required object structure

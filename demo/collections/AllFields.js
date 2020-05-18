@@ -1,5 +1,5 @@
 const AllFields = {
-  slug: 'All Fields',
+  slug: 'all-fields',
   labels: {
     singular: 'All Fields',
     plural: 'All Fields',

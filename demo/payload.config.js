@@ -22,7 +22,7 @@ const GlobalWithPolicies = require('./globals/GlobalWithPolicies');
 module.exports = {
   secret: 'SECRET_KEY',
   admin: {
-    user: 'users',
+    user: 'admins',
     disable: false,
   },
   collections: [

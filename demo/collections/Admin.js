@@ -1,7 +1,10 @@
 const roles = require('../policies/roles');
 const checkRole = require('../policies/checkRole');
 
-const policy = ({ req: { user } }) => checkRole(['admin'], user);
+const policy = ({ req: { user } }) => {
+  const result = checkRole(['admin'], user);
+  return result;
+};
 
 module.exports = {
   slug: 'admins',

@@ -18,8 +18,8 @@ const baseAuthFields = require('../auth/baseFields');
 const authRoutes = require('../auth/routes');
 
 function registerCollections() {
-  this.config.collections.map((collection) => {
-    const formattedCollection = { ...collection };
+  this.config.collections = this.config.collections.map((collection) => {
+    let formattedCollection = collection;
 
     if (collection.upload) {
       let uploadFields = [
@@ -110,6 +110,8 @@ function registerCollections() {
       ];
     }
 
+    formattedCollection = sanitize(this.collections, formattedCollection);
+
     const schema = buildSchema(formattedCollection, this.config);
 
     if (collection.auth) {
@@ -120,7 +122,7 @@ function registerCollections() {
 
     this.collections[formattedCollection.slug] = {
       Model: mongoose.model(formattedCollection.slug, schema),
-      config: sanitize(this.collections, formattedCollection),
+      config: formattedCollection,
     };
 
     if (collection.auth) {
