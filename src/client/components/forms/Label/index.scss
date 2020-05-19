@@ -3,6 +3,7 @@
 label.field-label {
   display: flex;
   margin-bottom: base(.25);
+  color: $color-gray;
 
   .required {
     color: $color-red;

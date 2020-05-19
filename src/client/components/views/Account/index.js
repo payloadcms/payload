@@ -1,17 +1,25 @@
-import React from 'react';
-import Minimal from '../../templates/Minimal';
+import React, { useEffect } from 'react';
+import { useStepNav } from '../../elements/StepNav';
 
 import './index.scss';
 
 const baseClass = 'account';
 
 const Account = () => {
+  const { setStepNav } = useStepNav();
+
+  useEffect(() => {
+    setStepNav([
+      {
+        label: 'Account',
+      },
+    ]);
+  }, [setStepNav]);
+
   return (
-    <Minimal className={baseClass}>
-      <div className={`${baseClass}__wrap`}>
-        <h1>Account</h1>
-      </div>
-    </Minimal>
+    <div className={baseClass}>
+      <h1>Account</h1>
+    </div>
   );
 };
 

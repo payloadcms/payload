@@ -19,7 +19,7 @@ $breakpoint-l-height : 900px;
 //////////////////////////////
 
 $baseline-px         : 25px;
-$baseline-body-size  : 13px;
+$baseline-body-size  : 14px;
 $baseline            : ($baseline-px / $baseline-body-size) + rem;
 
 @function base($multiplier) {

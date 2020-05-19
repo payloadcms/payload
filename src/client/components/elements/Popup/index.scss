@@ -1,10 +1,20 @@
 @import '../../../scss/styles.scss';
 
 .popup {
-  background: white;
-  position: absolute;
-  opacity: 0;
-  visibility: hidden;
+  position: relative;
+
+  &__content {
+    position: absolute;
+    background: white;
+    opacity: 0;
+    visibility: hidden;
+
+    &:after {
+      content: ' ';
+      position: absolute;
+      top: calc(100% - 1px);
+    }
+  }
 
   &__wrap {
     overflow: hidden;
@@ -15,11 +25,7 @@
     overflow-y: scroll;
   }
 
-  &:after {
-    content: ' ';
-    position: absolute;
-    top: calc(100% - 1px);
-  }
+
 
   &:focus,
   &:active {
@@ -31,11 +37,15 @@
   ////////////////////////////////
 
   &--vertical-align-top {
-    bottom: calc(100% + #{$baseline});
+    .popup__content {
+      bottom: calc(100% + #{$baseline});
+    }
   }
 
   &--vertical-align-bottom {
-    top: calc(100% + #{$baseline});
+    .popup__content {
+      top: calc(100% + #{$baseline});
+    }
   }
 
   ////////////////////////////////
@@ -43,11 +53,13 @@
   ////////////////////////////////
 
   &--size-small {
-    @include shadow-sm;
+    .popup__content {
+      @include shadow-sm;
 
-    &:after {
-      border: 12px solid transparent;
-      border-top-color: white;
+      &:after {
+        border: 12px solid transparent;
+        border-top-color: white;
+      }
     }
 
     .popup__scroll {
@@ -55,10 +67,12 @@
     }
 
     &.popup--align-left {
-      left: - base(.5);
+      .popup__content {
+        left: - base(.5);
 
-      &:after {
-        left: base(.425);
+        &:after {
+          left: base(.425);
+        }
       }
     }
   }
@@ -68,7 +82,9 @@
   ////////////////////////////////
 
   &--active {
-    opacity: 1;
-    visibility: visible;
+    .popup__content {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 }
