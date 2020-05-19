@@ -30,7 +30,7 @@ function buildPoliciesType() {
   };
 
   Object.values(this.config.collections).forEach((collection) => {
-    fields[collection.slug] = {
+    fields[formatName(collection.slug)] = {
       type: new GraphQLObjectType({
         name: formatName(`${collection.labels.singular}Policy`),
         fields: buildFields(collection.labels.singular, ['create', 'read', 'update', 'delete']),
@@ -39,7 +39,7 @@ function buildPoliciesType() {
   });
 
   Object.values(this.config.globals).forEach((global) => {
-    fields[global.slug] = {
+    fields[formatName(global.slug)] = {
       type: new GraphQLObjectType({
         name: formatName(`${global.label}Policy`),
         fields: buildFields(global.label, ['read', 'update']),

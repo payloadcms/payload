@@ -127,19 +127,10 @@ function registerCollections() {
       resolve: deleteResolver(collection),
     };
 
-    if (collection.auth) {
+    if (collection.config.auth) {
       collection.graphQL.jwt = this.buildObjectType(
         'JWT',
-        collection.config.fields.reduce((jwtFields, potentialField) => {
-          if (potentialField.saveToJWT) {
-            return [
-              ...jwtFields,
-              potentialField,
-            ];
-          }
-
-          return jwtFields;
-        }, [
+        collection.config.fields.filter(field => field.saveToJWT).concat([
           {
             name: 'email',
             type: 'email',
