@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
-import DefaultList from './views/collections/List';
+import List from './views/collections/List';
 import { useUser } from './data/User';
 import DefaultTemplate from './templates/Default';
 import Dashboard from './views/Dashboard';
@@ -14,7 +14,6 @@ import CreateFirstUser from './views/CreateFirstUser';
 import Edit from './views/collections/Edit';
 import EditGlobal from './views/Global';
 import { requests } from '../api';
-import customComponents from './customComponents';
 import ResetPassword from './views/ResetPassword';
 import Unauthorized from './views/Unauthorized';
 import Account from './views/Account';
@@ -94,7 +93,6 @@ const Routes = () => {
                                   path={`${match.url}/collections/${collection.slug}`}
                                   exact
                                   render={(routeProps) => {
-                                    const List = customComponents[collection.slug]?.views?.List || DefaultList;
                                     return (
                                       <List
                                         {...routeProps}

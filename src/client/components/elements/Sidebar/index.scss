@@ -35,6 +35,14 @@
     }
   }
 
+  &__log-out {
+    &:hover {
+      g {
+        transform: translateX(- #{base(.125)});
+      }
+    }
+  }
+
   a {
     padding: base(.125) 0;
     display: flex;

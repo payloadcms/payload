@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useUser } from '../../data/User';
 import Chevron from '../../icons/Chevron';
+import LogOut from '../../icons/LogOut';
 import Icon from '../../graphics/Icon';
 import Account from '../../graphics/Account';
 import Localizer from '../Localizer';
@@ -74,14 +75,17 @@ const Sidebar = () => {
         </nav>
         <div className={`${baseClass}__controls`}>
           <Localizer />
-          <Link to={`${admin}/account`}>
+          <Link
+            to={`${admin}/account`}
+            className={`${baseClass}__account`}
+          >
             <Account />
           </Link>
           <Link
             to={`${admin}/logout`}
-            className="log-out"
+            className={`${baseClass}__log-out`}
           >
-            Log out
+            <LogOut />
           </Link>
         </div>
       </div>
