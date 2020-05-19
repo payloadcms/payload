@@ -10,7 +10,19 @@ import { requests } from '../../api';
 import StayLoggedInModal from '../modals/StayLoggedIn';
 import useThrottledEffect from '../../hooks/useThrottledEffect';
 
-const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
+const {
+  cookiePrefix,
+  admin: {
+    user: userSlug,
+  },
+  serverURL,
+  routes: {
+    admin,
+    api,
+  },
+} = PAYLOAD_CONFIG;
+
+const cookieTokenName = `${cookiePrefix}-token`;
 
 const cookies = new Cookies();
 const Context = createContext({});
@@ -30,7 +42,7 @@ const UserProvider = ({ children }) => {
     // Need to retrieve token straight from cookie so as to keep this function
     // with no dependencies and to make sure we have the exact token that will be used
     // in the request to the /refresh route
-    const tokenFromCookie = cookies.get('token');
+    const tokenFromCookie = cookies.get(cookieTokenName);
     const decodedToken = jwt.decode(tokenFromCookie);
 
     if (decodedToken?.exp > (Date.now() / 1000)) {
@@ -48,12 +60,12 @@ const UserProvider = ({ children }) => {
   const logOut = () => {
     setUser(null);
     setToken(null);
-    cookies.remove('token', { path: '/' });
+    cookies.remove(cookieTokenName, { path: '/' });
   };
 
   // On mount, get cookie and set as token
   useEffect(() => {
-    const cookieToken = cookies.get('token');
+    const cookieToken = cookies.get(cookieTokenName);
     if (cookieToken) setToken(cookieToken);
   }, []);
 
@@ -68,7 +80,7 @@ const UserProvider = ({ children }) => {
       const decoded = jwt.decode(token);
       if (isNotExpired(decoded)) {
         setUser(decoded);
-        cookies.set('token', token, { path: '/' });
+        cookies.set(cookieTokenName, token, { path: '/' });
       }
     }
   }, [token]);

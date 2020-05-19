@@ -1,9 +1,12 @@
 import Cookies from 'universal-cookie';
 import qs from 'qs';
 
+const { cookiePrefix } = PAYLOAD_CONFIG;
+const cookieTokenName = `${cookiePrefix}-token`;
+
 export const getJWTHeader = () => {
   const cookies = new Cookies();
-  const jwt = cookies.get('token');
+  const jwt = cookies.get(cookieTokenName);
   return jwt ? { Authorization: `JWT ${jwt}` } : {};
 };
 

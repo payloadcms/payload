@@ -12,7 +12,10 @@ import './index.scss';
 
 const cookies = new Cookies();
 
-const { serverURL, routes: { api }, collections } = PAYLOAD_CONFIG;
+const {
+  cookiePrefix, serverURL, routes: { api }, collections,
+} = PAYLOAD_CONFIG;
+const cookieTokenName = `${cookiePrefix}-token`;
 
 const defaultError = 'Please make a selection.';
 
@@ -39,7 +42,7 @@ class Relationship extends Component {
 
   getNextOptions = () => {
     const { relations, lastFullyLoadedRelation, lastLoadedPage } = this.state;
-    const token = cookies.get('token');
+    const token = cookies.get(cookieTokenName);
 
     const relationsToSearch = relations.slice(lastFullyLoadedRelation + 1);
 
