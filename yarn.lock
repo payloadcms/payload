@@ -1184,6 +1184,20 @@
     qs "^6.9.1"
     react-transition-group "^4.3.0"
 
+"@trbl/react-scroll-info@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@trbl/react-scroll-info/-/react-scroll-info-1.1.1.tgz#31eac3b41825f6719313a3ab895df370a12554e7"
+  integrity sha512-1c79T7hHgM0mCt7z9/MZR5qzazGVJHUECYm4U6RrUIIaYikw71+VuTNOfPvFIzCOTjeW4CD0dT2iFM6bA0LO/A==
+  dependencies:
+    prop-types "^15.7.2"
+
+"@trbl/react-window-info@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@trbl/react-window-info/-/react-window-info-1.2.2.tgz#dc38086610ee0e7ea68d1f36afce7a4767d626f3"
+  integrity sha512-Ehy23q5EXv78w1ky4HVYxkazq7lqFwuULd2QXfRZZ4qriml+xZ6O3rUa1wTKb3EkzzmioH03ifFsU4my3coI2A==
+  dependencies:
+    prop-types "^15.7.2"
+
 "@types/babel__core@^7.1.7":
   version "7.1.7"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.7.tgz#1dacad8840364a57c98d0dd4855c6dd3752c6b89"

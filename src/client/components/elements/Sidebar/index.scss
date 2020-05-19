@@ -18,20 +18,28 @@
     overflow-y: scroll;
   }
 
-  .icon-wrap {
-    margin: 0 0 base(.5);
-
-    > * {
-      height: $baseline;
-    }
+  &__brand {
+    margin-bottom: $baseline;
   }
 
-  .label {
+  &__label {
     color: $color-gray;
   }
 
-  a, a:hover {
-    border-bottom: 0;
+  &__controls {
+    margin-top: auto;
+    margin-bottom: 0;
+
+    > * {
+      margin-top: base(1);
+    }
+  }
+
+  a {
+    padding: base(.125) 0;
+    display: flex;
+    font-weight: 600;
+    text-decoration: none;
   }
 
   nav {
@@ -39,17 +47,17 @@
 
     a {
       position: relative;
-      display: flex;
-      padding: base(.25) 0;
 
       svg {
         opacity: 0;
         position: absolute;
         top: 50%;
         left: - base(.5);
-        transform: translateY(-50%);
-        width: base(.3);
-        height: base(.3);
+        transform: translateY(-50%) rotate(-90deg);
+      }
+
+      &:hover {
+        text-decoration: underline;
       }
 
       &.active {
@@ -57,13 +65,8 @@
 
         svg {
           opacity: 1;
-          left: 0;
         }
       }
     }
-  }
-
-  .log-out {
-    margin-top: auto;
   }
 }

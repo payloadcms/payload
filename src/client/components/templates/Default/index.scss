@@ -1,7 +1,7 @@
 @import '../../../scss/styles.scss';
 
 .template-default {
-  padding: $baseline;
+  padding-top: $baseline;
   margin-left: base(10);
   width: calc(100% - #{base(10)});
 

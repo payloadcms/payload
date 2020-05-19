@@ -11,7 +11,7 @@
 
 html {
   font-size: $baseline-body-size;
-  line-height: $baseline;
+  line-height: $baseline-px;
   background: $color-background-gray;
 }
 
@@ -23,8 +23,6 @@ body {
   font-family: $font-body;
   font-weight: 400;
   color: $color-dark-gray;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   margin: 0;
 }
 

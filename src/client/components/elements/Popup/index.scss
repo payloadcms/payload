@@ -1,0 +1,74 @@
+@import '../../../scss/styles.scss';
+
+.popup {
+  background: white;
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+
+  &__wrap {
+    overflow: hidden;
+  }
+
+  &__scroll {
+    width: calc(100% + #{$baseline});
+    overflow-y: scroll;
+  }
+
+  &:after {
+    content: ' ';
+    position: absolute;
+    top: calc(100% - 1px);
+  }
+
+  &:focus,
+  &:active {
+    outline: none;
+  }
+
+  ////////////////////////////////
+  // VERTICAL ALIGNMENTS
+  ////////////////////////////////
+
+  &--vertical-align-top {
+    bottom: calc(100% + #{$baseline});
+  }
+
+  &--vertical-align-bottom {
+    top: calc(100% + #{$baseline});
+  }
+
+  ////////////////////////////////
+  // SIZES
+  ////////////////////////////////
+
+  &--size-small {
+    @include shadow-sm;
+
+    &:after {
+      border: 12px solid transparent;
+      border-top-color: white;
+    }
+
+    .popup__scroll {
+      padding: base(1) base(2) base(1) base(1);
+    }
+
+    &.popup--align-left {
+      left: - base(.5);
+
+      &:after {
+        left: base(.425);
+      }
+    }
+  }
+
+  ////////////////////////////////
+  // ACTIVE
+  ////////////////////////////////
+
+  &--active {
+    opacity: 1;
+    visibility: visible;
+  }
+}

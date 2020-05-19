@@ -26,6 +26,8 @@
     "@babel/runtime": "^7.8.4",
     "@date-io/date-fns": "^1.3.13",
     "@trbl/react-modal": "^0.1.1",
+    "@trbl/react-scroll-info": "^1.1.1",
+    "@trbl/react-window-info": "^1.2.2",
     "async-some": "^1.0.2",
     "babel-loader": "^8.0.6",
     "body-parser": "^1.19.0",

@@ -17,10 +17,11 @@ import { requests } from '../api';
 import customComponents from './customComponents';
 import ResetPassword from './views/ResetPassword';
 import Unauthorized from './views/Unauthorized';
+import Account from './views/Account';
 import Loading from './elements/Loading';
 
 const {
-  admin: { user: userSlug }, routes, collections, User, globals,
+  admin: { user: userSlug }, routes, collections, globals,
 } = PAYLOAD_CONFIG;
 
 const Routes = () => {
@@ -76,51 +77,14 @@ const Routes = () => {
                         <DefaultTemplate>
                           <Switch>
                             <Route
-                              path={`${match.url}/users`}
-                              exact
-                              render={(routeProps) => {
-                                const List = customComponents.users?.views?.List || DefaultList;
-                                return (
-                                  <List
-                                    {...routeProps}
-                                    collection={User}
-                                  />
-                                );
-                              }}
-                            />
-
-                            <Route
-                              path={`${match.url}/users/create`}
-                              exact
-                              render={(routeProps) => {
-                                return (
-                                  <Edit
-                                    {...routeProps}
-                                    collection={User}
-                                  />
-                                );
-                              }}
-                            />
-
-                            <Route
-                              path={`${match.url}/users/:id`}
-                              exact
-                              render={(routeProps) => {
-                                return (
-                                  <Edit
-                                    isEditing
-                                    {...routeProps}
-                                    collection={User}
-                                  />
-                                );
-                              }}
-                            />
-
-                            <Route
                               path={`${match.url}/`}
                               exact
                             >
                               <Dashboard />
+                            </Route>
+
+                            <Route path={`${match.url}/account`}>
+                              <Account />
                             </Route>
 
                             {collections.map((collection) => {
@@ -196,6 +160,9 @@ const Routes = () => {
                                 />
                               );
                             })}
+                            <Route path={`${match.url}*`}>
+                              <NotFound />
+                            </Route>
                           </Switch>
                         </DefaultTemplate>
                       );

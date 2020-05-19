@@ -1,0 +1,27 @@
+@import '../../../scss/styles.scss';
+
+.localizer {
+  position: relative;
+
+  button {
+    padding: base(.25) 0;
+    font-size: 1rem;
+    line-height: base(1);
+    background: transparent;
+    border: 0;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:active,
+    &:focus {
+      outline: none;
+    }
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+    margin: 0;
+  }
+}
