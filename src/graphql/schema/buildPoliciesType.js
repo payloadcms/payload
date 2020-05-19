@@ -38,13 +38,6 @@ function buildPoliciesType() {
     };
   });
 
-  fields[this.config.User.slug] = {
-    type: new GraphQLObjectType({
-      name: formatName(`${this.config.User.labels.singular}Policy`),
-      fields: buildFields(this.config.User.labels.singular, ['create', 'read', 'update', 'delete']),
-    }),
-  };
-
   Object.values(this.config.globals).forEach((global) => {
     fields[global.slug] = {
       type: new GraphQLObjectType({

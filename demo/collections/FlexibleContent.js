@@ -3,7 +3,7 @@ const Quote = require('../content-blocks/Quote');
 const NumberBlock = require('../content-blocks/Number');
 
 module.exports = {
-  slug: 'Flexible Content',
+  slug: 'flexible-content',
   labels: {
     singular: 'Flexible Content',
     plural: 'Flexible Content',

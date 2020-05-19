@@ -24,10 +24,13 @@ function buildMutationInputType(name, fields, parentName) {
     code: field => ({ type: withNullableType(field, GraphQLString) }),
     date: field => ({ type: withNullableType(field, GraphQLString) }),
     upload: field => ({ type: withNullableType(field, GraphQLString) }),
+    'rich-text': field => ({ type: withNullableType(field, GraphQLString) }),
+    html: field => ({ type: withNullableType(field, GraphQLString) }),
     checkbox: () => ({ type: GraphQLBoolean }),
     select: (field) => {
+      const formattedName = `${combineParentName(parentName, field.name)}_MutationInput`;
       let type = new GraphQLEnumType({
-        name: `${combineParentName(parentName, field.name)}_MutationInput`,
+        name: formattedName,
         values: field.options.reduce((values, option) => {
           if (typeof option === 'object' && option.value) {
             return {
@@ -70,7 +73,7 @@ function buildMutationInputType(name, fields, parentName) {
                 name: `${fullName}RelationTo`,
                 values: field.relationTo.reduce((values, option) => ({
                   ...values,
-                  [option]: {
+                  [formatName(option)]: {
                     value: option,
                   },
                 }), {}),
@@ -107,7 +110,7 @@ function buildMutationInputType(name, fields, parentName) {
 
       return {
         ...schema,
-        [field.name]: fieldSchema,
+        [formatName(field.name)]: fieldSchema,
       };
     }
 

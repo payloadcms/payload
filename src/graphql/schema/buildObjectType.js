@@ -252,7 +252,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
       if (fieldSchema) {
         return {
           ...schema,
-          [field.name]: fieldSchema(field),
+          [formatName(field.name)]: fieldSchema(field),
         };
       }
 

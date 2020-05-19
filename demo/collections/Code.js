@@ -1,5 +1,5 @@
 const Code = {
-  slug: 'Code',
+  slug: 'code',
   labels: {
     singular: 'Code',
     plural: 'Codes',

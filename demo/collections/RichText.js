@@ -1,5 +1,5 @@
 const RichText = {
-  slug: 'Rich Text',
+  slug: 'rich-text',
   labels: {
     singular: 'Rich Text',
     plural: 'Rich Texts',
