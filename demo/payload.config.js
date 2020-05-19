@@ -57,6 +57,10 @@ module.exports = {
     scss: path.resolve(__dirname, 'client/scss/overrides.scss'),
   },
   mongoURL: 'mongodb://localhost/payload',
+  graphQL: {
+    mutations: {},
+    queries: {},
+  },
   localization: {
     locales: [
       'en',

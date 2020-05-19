@@ -39,6 +39,16 @@ class GraphQL {
     this.initCollections();
     this.initGlobals();
 
+    this.Query = {
+      ...this.Query,
+      ...(this.config.queries),
+    };
+
+    this.Mutation = {
+      ...this.Mutation,
+      ...(this.config.mutations),
+    };
+
     const query = new GraphQLObjectType(this.Query);
     const mutation = new GraphQLObjectType(this.Mutation);
     const schema = new GraphQLSchema({ query, mutation });
