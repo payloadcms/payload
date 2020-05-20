@@ -1,0 +1,11 @@
+@import '../../../../scss/styles';
+
+.collection-list {
+  padding: base(3);
+  background: white;
+  height: 300px;
+
+  @include mid-break {
+    padding: base(1);
+  }
+}
