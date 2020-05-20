@@ -1,5 +1,10 @@
 module.exports = [
   {
+    name: 'email',
+    label: 'Email',
+    type: 'email',
+  },
+  {
     name: 'resetPasswordToken',
     type: 'text',
     hidden: true,

@@ -15,41 +15,69 @@ const { serverURL, routes: { api, admin } } = PAYLOAD_CONFIG;
 const baseClass = 'collection-list';
 
 const DefaultList = (props) => {
+  const {
+    collection,
+    collection: {
+      useAsTitle,
+      slug,
+      fields,
+      labels: {
+        plural: pluralLabel,
+      },
+    },
+  } = props;
+
+  const location = useLocation();
   const [search, setSearch] = useState('');
   const [columns, setColumns] = useState(null);
   const [filters, setFilters] = useState(null);
-
-  const location = useLocation();
-  const { collection } = props;
+  const [titleField, setTitleField] = useState(null);
 
   const { page } = queryString.parse(location.search, { ignoreQueryPrefix: true });
 
-  const apiURL = `${serverURL}${api}/${collection.slug}`;
+  const apiURL = `${serverURL}${api}/${slug}`;
 
   const [{ data }, { setParams }] = usePayloadAPI(apiURL, {});
 
   useEffect(() => {
+    if (useAsTitle) {
+      const foundTitleField = fields.find(field => field.name === useAsTitle);
+
+      if (foundTitleField) {
+        setTitleField(foundTitleField);
+      }
+    }
+  }, [useAsTitle, fields]);
+
+  useEffect(() => {
     const params = {
       where: {
+        AND: [],
       },
     };
 
     if (page) params.page = page;
 
     if (search) {
-      params.where[collection.useAsTitle || 'id'] = {
-        like: search,
-      };
+      params.where.AND.push({
+        [useAsTitle || 'id']: {
+          like: search,
+        },
+      });
     }
 
     setParams(params);
-  }, [search, setParams, page, collection.useAsTitle]);
+  }, [search, setParams, page, useAsTitle]);
+
+  console.log(fields);
 
   return (
     <div className={baseClass}>
-      <h1>{collection.labels.plural}</h1>
+      <h1>{pluralLabel}</h1>
       <div className={`${baseClass}__controls`}>
         <input
+          className={`${baseClass}__search`}
+          placeholder={`Search${` by ${titleField ? titleField.label : 'ID'}`}`}
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -90,6 +118,7 @@ DefaultList.propTypes = {
     }),
     slug: PropTypes.string,
     useAsTitle: PropTypes.string,
+    fields: PropTypes.arrayOf(PropTypes.shape),
   }).isRequired,
 };
 
