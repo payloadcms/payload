@@ -32,4 +32,10 @@
   .label {
     color: $color-gray;
   }
+
+  @include mid-break {
+    > *:first-child {
+      padding-left: $baseline;
+    }
+  }
 }

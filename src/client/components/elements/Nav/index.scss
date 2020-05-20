@@ -40,16 +40,19 @@
 
   &__scroll {
     height: 100%;
-    padding: base(1);
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    padding: base(1);
     width: calc(100% + #{base(1)});
     overflow-y: scroll;
   }
 
   &__wrap {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-grow: 1;
   }
 
   &__label {
@@ -136,6 +139,7 @@
     }
 
     &__wrap {
+      padding-top: 0;
       visibility: hidden;
       opacity: 0;
       overflow-y: scroll;
