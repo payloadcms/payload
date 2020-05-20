@@ -1,14 +1,14 @@
 @import 'vars';
-@import 'structure';
+@import 'queries';
 
 /////////////////////////////
 // HEADINGS
 /////////////////////////////
 
 %h1, %h2, %h3, %h4, %h5 {
-  font-family: $font-brand;
-  font-weight: 700;
-  color: lighten($black, 4%);
+  font-family: $font-body;
+  font-weight: 600;
+  color: $color-dark-gray;
 }
 
 %jumbo {
@@ -54,7 +54,7 @@
 }
 
 %h4 {
-  margin: 0 0 $base;
+  margin: 0 0 $baseline;
   font-size: base(.75);
   line-height: 1.5;
 }
@@ -76,19 +76,6 @@
 // TYPE STYLES
 /////////////////////////////
 
-%uppercase-label {
-  text-transform: uppercase;
-  letter-spacing: base(.0875);
-  font-size: base(.325);
-  font-family: $font-label;
-  -webkit-font-smoothing: auto;
-
-  @include mid-break {
-    font-size: base(.31);
-    letter-spacing: base(.05);
-  }
-}
-
 %large-body {
   font-size: base(.6);
   line-height: base(1);
@@ -107,9 +94,9 @@
 
 %code {
   font-size: base(.4);
-  color: $gray;
+  color: $color-gray;
 
   span {
-    color: $black;
+    color: $color-dark-gray;
   }
 }

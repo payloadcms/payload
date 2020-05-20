@@ -4,9 +4,9 @@ import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
 import RenderFields from '../RenderFields';
 
-import IconButton from '../../controls/IconButton';
-import Pill from '../../modules/Pill';
-import Chevron from '../../graphics/Chevron';
+import IconButton from '../../elements/IconButton';
+import Pill from '../../elements/Pill';
+import Chevron from '../../icons/Chevron';
 
 import './index.scss';
 import EditableBlockTitle from './EditableBlockTitle';
@@ -83,13 +83,13 @@ const DraggableSection = (props) => {
               <div className={`${baseClass}__header__controls`}>
 
                 <IconButton
-                  iconName="crosshair"
+                  iconName="Plus"
                   onClick={addRow}
                   size="small"
                 />
 
                 <IconButton
-                  iconName="crossOut"
+                  iconName="X"
                   onClick={removeRow}
                   size="small"
                 />

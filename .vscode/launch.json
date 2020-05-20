@@ -21,7 +21,8 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceFolder}/demo/server.js"
+      "program": "${workspaceFolder}/demo/server.js",
+      "skipFiles": ["<node_internals>/**"]
     },
     {
       "type": "chrome",

@@ -1,7 +1,7 @@
 @import '../../../scss/styles.scss';
 
 .draggable-section {
-  background: $light-gray;
+  background: $color-light-gray;
   flex-direction: column;
   position: relative;
   margin-bottom: base(.5);
@@ -94,21 +94,21 @@
       }
 
       .icon-button--crosshair {
-        border-color: $primary;
-        @include color-svg($primary);
+        border-color: $color-dark-gray;
+        @include color-svg($color-dark-gray);
 
         &:hover {
-          background: $primary;
-          @include color-svg($black);
+          background: $color-dark-gray;
+          @include color-svg($color-dark-gray);
         }
       }
 
       .icon-button--crossOut {
-        border-color: $black;
-        @include color-svg($black);
+        border-color: $color-dark-gray;
+        @include color-svg($color-dark-gray);
 
         &:hover {
-          background: $black;
+          background: $color-dark-gray;
           @include color-svg(white);
         }
       }

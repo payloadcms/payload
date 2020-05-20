@@ -5,7 +5,7 @@ import { unflatten } from 'flatley';
 import HiddenInput from '../field-types/HiddenInput';
 import FormContext from './Context';
 import { useLocale } from '../../utilities/Locale';
-import { useStatusList } from '../../modules/Status';
+import { useStatusList } from '../../elements/Status';
 import { requests } from '../../../api';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import { useUser } from '../../data/User';

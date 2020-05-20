@@ -8,7 +8,6 @@ const connectMongoose = require('./mongoose/connect');
 const expressMiddleware = require('./express/middleware');
 const createAuthHeaderFromCookie = require('./express/middleware/createAuthHeaderFromCookie');
 const initWebpack = require('./webpack/init');
-const initUser = require('./users/init');
 const initCollections = require('./collections/init');
 const initGlobals = require('./globals/init');
 const initStatic = require('./express/static');
@@ -25,7 +24,6 @@ class Payload {
     this.router = express.Router();
     this.collections = {};
 
-    this.initUser = initUser.bind(this);
     this.initCollections = initCollections.bind(this);
     this.initGlobals = initGlobals.bind(this);
     this.buildEmail = buildEmail.bind(this);
@@ -40,9 +38,6 @@ class Payload {
     connectMongoose(this.config.mongoURL);
     this.router.use(...expressMiddleware(this.config));
 
-    // Register and bind User
-    this.initUser();
-
     // Register collections
     this.initCollections();
 
@@ -50,7 +45,7 @@ class Payload {
     this.initGlobals();
 
     // Enable client
-    if (!this.config.disableAdmin && process.env.NODE_ENV !== 'test') {
+    if (!this.config.admin.disable && process.env.NODE_ENV !== 'test') {
       this.express.use(initWebpack(this.config));
     }
 
@@ -58,8 +53,8 @@ class Payload {
     this.router.use(
       this.config.routes.graphQL,
       identifyAPI('GraphQL'),
-      createAuthHeaderFromCookie,
-      authenticate,
+      createAuthHeaderFromCookie(this.config),
+      authenticate(this.config),
       new GraphQL(this).init(),
     );
 

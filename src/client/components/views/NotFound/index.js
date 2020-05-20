@@ -1,13 +1,11 @@
 import React from 'react';
-import config from '../../../securedConfig';
-import Button from '../../controls/Button';
-import DefaultTemplate from '../../layout/DefaultTemplate';
+import Button from '../../elements/Button';
 
-const { routes: { admin } } = config;
+const { routes: { admin } } = PAYLOAD_CONFIG;
 
 const NotFound = () => {
   return (
-    <DefaultTemplate className="not-found">
+    <div className="not-found">
       <h1>Nothing found</h1>
       <p>Sorry&mdash;there is nothing to correspond with your request.</p>
       <br />
@@ -17,7 +15,7 @@ const NotFound = () => {
       >
         Back to Dashboard
       </Button>
-    </DefaultTemplate>
+    </div>
   );
 };
 

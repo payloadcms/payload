@@ -1,6 +1,6 @@
-const executePolicy = require('../../users/executePolicy');
+const executePolicy = require('../../auth/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
-const { NotFound } = require('../../errors');
+const { NotFound, Forbidden } = require('../../errors');
 const validate = require('../../fields/validateUpdate');
 
 const resizeAndSave = require('../../uploads/imageResizer');
@@ -11,7 +11,8 @@ const update = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    await executePolicy(args, args.config.policies.update);
+    const policyResults = await executePolicy(args, args.config.policies.update);
+    const hasWherePolicy = typeof policyResults === 'object';
 
     let options = { ...args };
 
@@ -54,9 +55,19 @@ const update = async (args) => {
       },
     } = options;
 
-    let result = await Model.findOne({ _id: id });
+    let query = { _id: id };
 
-    if (!result) throw new NotFound();
+    if (hasWherePolicy) {
+      query = {
+        ...query,
+        ...policyResults,
+      };
+    }
+
+    let result = await Model.findOne(query);
+
+    if (!result && !hasWherePolicy) throw new NotFound();
+    if (!result && hasWherePolicy) throw new Forbidden();
 
     if (locale && result.setLocale) {
       result.setLocale(locale, fallbackLocale);

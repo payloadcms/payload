@@ -1,0 +1,80 @@
+@import '../../../scss/styles.scss';
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: base(10);
+  overflow: hidden;
+
+  &__wrap {
+    height: 100%;
+    padding: base(1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: calc(100% + #{base(1)});
+    overflow-y: scroll;
+  }
+
+  &__brand {
+    margin-bottom: $baseline;
+  }
+
+  &__label {
+    color: $color-gray;
+  }
+
+  &__controls {
+    margin-top: auto;
+    margin-bottom: 0;
+
+    > * {
+      margin-top: base(1);
+    }
+  }
+
+  &__log-out {
+    &:hover {
+      g {
+        transform: translateX(- #{base(.125)});
+      }
+    }
+  }
+
+  a {
+    padding: base(.125) 0;
+    display: flex;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  nav {
+    margin: base(.25) 0 $baseline;
+
+    a {
+      position: relative;
+
+      svg {
+        opacity: 0;
+        position: absolute;
+        top: 50%;
+        left: - base(.5);
+        transform: translateY(-50%) rotate(-90deg);
+      }
+
+      &:hover {
+        text-decoration: underline;
+      }
+
+      &.active {
+        padding-left: base(.6);
+
+        svg {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}

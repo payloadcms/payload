@@ -2,6 +2,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 const getStyleLoaders = require('./getStyleLoaders');
+const secureConfig = require('../utilities/secureConfig');
 
 module.exports = (config) => {
   return {
@@ -21,23 +22,11 @@ module.exports = (config) => {
     },
     devtool: 'source-map',
     mode: 'development',
-    node: {
-      __dirname: true,
-    },
     resolveLoader: { modules: [path.join(__dirname, '../../node_modules')] },
     module: {
       rules: [
         {
           test: require.resolve('../client/components/customComponents'),
-          use: [
-            {
-              loader: 'val-loader',
-              options: config,
-            },
-          ],
-        },
-        {
-          test: require.resolve('../client/securedConfig'),
           use: [
             {
               loader: 'val-loader',
@@ -117,6 +106,9 @@ module.exports = (config) => {
       ],
     },
     plugins: [
+      new webpack.DefinePlugin({
+        PAYLOAD_CONFIG: JSON.stringify(secureConfig(config)),
+      }),
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, '../client/index.html'),
         filename: './index.html',
@@ -126,7 +118,7 @@ module.exports = (config) => {
     resolve: {
       modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
       alias: {
-        'payload-scss-overrides': config.paths.scssOverrides,
+        'payload-scss-overrides': config.paths.scss,
       },
     },
   };

@@ -96,7 +96,7 @@ module.exports = (config) => {
     resolve: {
       modules: ['node_modules', path.resolve(__dirname, '../../../node_modules')],
       alias: {
-        'payload-scss-overrides': config.paths.scssOverrides,
+        'payload-scss-overrides': config.paths.scss,
       },
     },
   };

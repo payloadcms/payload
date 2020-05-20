@@ -1,13 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useRouteMatch, useHistory } from 'react-router-dom';
-import config from '../../../../securedConfig';
-import DefaultTemplate from '../../../layout/DefaultTemplate';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
+import { useStepNav } from '../../../elements/StepNav';
 import Form from '../../../forms/Form';
-import StickyHeader from '../../../modules/StickyHeader';
-import APIURL from '../../../modules/APIURL';
-import PreviewButton from '../../../controls/PreviewButton';
+import PreviewButton from '../../../elements/PreviewButton';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
 import * as fieldTypes from '../../../forms/field-types';
@@ -15,11 +12,15 @@ import customComponents from '../../../customComponents';
 
 import './index.scss';
 
-const { serverURL, routes: { admin, api } } = config;
+const { serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
 
 const baseClass = 'collection-edit';
 
 const EditView = (props) => {
+  const { params: { id } = {} } = useRouteMatch();
+  const history = useHistory();
+  const { setStepNav } = useStepNav();
+
   const { collection, isEditing } = props;
   const {
     slug,
@@ -32,8 +33,6 @@ const EditView = (props) => {
     useAsTitle,
   } = collection;
 
-  const { params: { id } = {} } = useRouteMatch();
-  const history = useHistory();
 
   const handleAjaxResponse = !isEditing ? (res) => {
     res.json().then((json) => {
@@ -51,33 +50,34 @@ const EditView = (props) => {
     { initialParams: { 'fallback-locale': 'null' } },
   );
 
-  const nav = [{
-    url: `${admin}/collections/${slug}`,
-    label: pluralLabel,
-  }];
+  useEffect(() => {
+    const nav = [{
+      url: `${admin}/collections/${slug}`,
+      label: pluralLabel,
+    }];
 
-  if (isEditing) {
-    nav.push({
-      label: data ? data[useAsTitle] : '',
-    });
-  } else {
-    nav.push({
-      label: 'Create New',
-    });
-  }
+    if (isEditing) {
+      nav.push({
+        label: data ? data[useAsTitle || 'id'] : '',
+      });
+    } else {
+      nav.push({
+        label: 'Create New',
+      });
+    }
+
+    setStepNav(nav);
+  }, [setStepNav, isEditing, pluralLabel, data, slug, useAsTitle]);
 
   return (
-    <DefaultTemplate
-      className={baseClass}
-      stepNav={nav}
-    >
+    <div className={baseClass}>
       <header className={`${baseClass}__header`}>
         {isEditing && (
           <h1>
             Edit
             {' '}
             {Object.keys(data).length > 0
-              && (data[useAsTitle] ? data[useAsTitle] : '[Untitled]')
+              && (data[useAsTitle || 'id'] ? data[useAsTitle || 'id'] : '[Untitled]')
             }
           </h1>
         )}
@@ -97,18 +97,9 @@ const EditView = (props) => {
         action={`${serverURL}${api}/${slug}${id ? `/${id}` : ''}`}
         handleAjaxResponse={handleAjaxResponse}
       >
-        <StickyHeader
-          showStatus
-          content={
-            <APIURL url={isEditing && `${serverURL}${api}/${slug}/${data.id}`} />
-          }
-          action={(
-            <>
-              <PreviewButton generatePreviewURL={preview} />
-              <FormSubmit>Save</FormSubmit>
-            </>
-          )}
-        />
+        {' '}
+        <PreviewButton generatePreviewURL={preview} />
+        <FormSubmit>Save</FormSubmit>
         <RenderFields
           fieldTypes={fieldTypes}
           customComponents={customComponents?.[slug]?.fields}
@@ -116,7 +107,7 @@ const EditView = (props) => {
           initialData={data}
         />
       </Form>
-    </DefaultTemplate>
+    </div>
   );
 };
 

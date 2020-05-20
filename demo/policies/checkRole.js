@@ -5,7 +5,17 @@
  * @returns {Function}
  */
 const checkRole = (allRoles, user) => {
-  return !!(user && allRoles.some(role => user.roles.some(individualRole => individualRole === role)));
+  if (user) {
+    if (allRoles.some((role) => {
+      return user.roles.some((individualRole) => {
+        return individualRole === role;
+      });
+    })) {
+      return true;
+    }
+  }
+
+  return false;
 };
 
 module.exports = checkRole;

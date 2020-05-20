@@ -7,19 +7,33 @@ import PropTypes from 'prop-types';
 import Cookies from 'universal-cookie';
 import { useModal } from '@trbl/react-modal';
 import { requests } from '../../api';
-import config from '../../securedConfig';
 import StayLoggedInModal from '../modals/StayLoggedIn';
 import useThrottledEffect from '../../hooks/useThrottledEffect';
 
-const { serverURL, routes: { admin, api } } = config;
+const {
+  cookiePrefix,
+  admin: {
+    user: userSlug,
+  },
+  serverURL,
+  routes: {
+    admin,
+    api,
+  },
+} = PAYLOAD_CONFIG;
+
+const cookieTokenName = `${cookiePrefix}-token`;
+
 const cookies = new Cookies();
 const Context = createContext({});
 
 const isNotExpired = decodedJWT => (decodedJWT?.exp || 0) > Date.now() / 1000;
 
+
 const UserProvider = ({ children }) => {
   const [token, setToken] = useState('');
   const [user, setUser] = useState(null);
+  const [permissions, setPermissions] = useState({});
   const location = useLocation();
   const history = useHistory();
   const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
@@ -28,12 +42,12 @@ const UserProvider = ({ children }) => {
     // Need to retrieve token straight from cookie so as to keep this function
     // with no dependencies and to make sure we have the exact token that will be used
     // in the request to the /refresh route
-    const tokenFromCookie = cookies.get('token');
+    const tokenFromCookie = cookies.get(cookieTokenName);
     const decodedToken = jwt.decode(tokenFromCookie);
 
     if (decodedToken?.exp > (Date.now() / 1000)) {
       setTimeout(async () => {
-        const request = await requests.post(`${serverURL}${api}/refresh-token`);
+        const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`);
 
         if (request.status === 200) {
           const json = await request.json();
@@ -46,12 +60,12 @@ const UserProvider = ({ children }) => {
   const logOut = () => {
     setUser(null);
     setToken(null);
-    cookies.remove('token', { path: '/' });
+    cookies.remove(cookieTokenName, { path: '/' });
   };
 
   // On mount, get cookie and set as token
   useEffect(() => {
-    const cookieToken = cookies.get('token');
+    const cookieToken = cookies.get(cookieTokenName);
     if (cookieToken) setToken(cookieToken);
   }, []);
 
@@ -66,10 +80,24 @@ const UserProvider = ({ children }) => {
       const decoded = jwt.decode(token);
       if (isNotExpired(decoded)) {
         setUser(decoded);
-        cookies.set('token', token, { path: '/' });
+        cookies.set(cookieTokenName, token, { path: '/' });
       }
     }
   }, [token]);
+
+  // When user changes, get new policies
+  useEffect(() => {
+    async function getPermissions() {
+      const request = await requests.get(`${serverURL}${api}/${userSlug}/policies`);
+
+      if (request.status === 200) {
+        const json = await request.json();
+        setPermissions(json);
+      }
+    }
+
+    getPermissions();
+  }, [user]);
 
   useEffect(() => {
     let reminder = false;
@@ -103,6 +131,7 @@ const UserProvider = ({ children }) => {
       logOut,
       refreshToken,
       token,
+      permissions,
     }}
     >
       {children}

@@ -1,0 +1,28 @@
+@import '../../../scss/styles.scss';
+
+.icon-button {
+  line-height: 0;
+  background: transparent;
+  border: $style-stroke-width-s solid $color-dark-gray;
+  margin-top: 0;
+
+  &:hover {
+    background: lighten($color-dark-gray, 50%);
+    border-color: lighten($color-dark-gray, .2%);
+    @include color-svg(lighten($color-dark-gray, 5%));
+  }
+
+  &.btn {
+    padding: 5px;
+  }
+
+  .icon {
+    @include color-svg($color-dark-gray);
+  }
+
+  &--crossOut {
+    svg {
+      transform: rotate(45deg);
+    }
+  }
+}

@@ -18,6 +18,8 @@ const withNullableType = require('./withNullableType');
 const { find } = require('../../collections/operations');
 
 function buildObjectType(name, fields, parentName, baseFields = {}) {
+  const recursiveBuildObjectType = buildObjectType.bind(this);
+
   const fieldToSchemaMap = {
     number: field => ({ type: withNullableType(field, GraphQLFloat) }),
     text: field => ({ type: withNullableType(field, GraphQLString) }),
@@ -199,10 +201,12 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
           ),
         };
       } else {
+        const whereFields = this.collections[relationTo].config.fields;
+
         relationship.args.where = {
           type: this.buildWhereInputType(
             relationshipName,
-            this.collections[relationTo].config.fields,
+            whereFields,
             relationshipName,
           ),
         };
@@ -212,14 +216,14 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
     },
     repeater: (field) => {
       const fullName = combineParentName(parentName, field.label);
-      let type = buildObjectType(fullName, field.fields, fullName);
+      let type = recursiveBuildObjectType(fullName, field.fields, fullName);
       type = new GraphQLList(withNullableType(field, type));
 
       return { type };
     },
     group: (field) => {
       const fullName = combineParentName(parentName, field.label);
-      const type = buildObjectType(fullName, field.fields, fullName);
+      const type = recursiveBuildObjectType(fullName, field.fields, fullName);
 
       return { type };
     },
@@ -248,7 +252,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
       if (fieldSchema) {
         return {
           ...schema,
-          [field.name]: fieldSchema(field),
+          [formatName(field.name)]: fieldSchema(field),
         };
       }
 

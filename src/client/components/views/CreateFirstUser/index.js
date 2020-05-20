@@ -1,25 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import StatusList, { useStatusList } from '../../modules/Status';
-import ContentBlock from '../../layout/ContentBlock';
+import MinimalTemplate from '../../templates/Minimal';
+import StatusList, { useStatusList } from '../../elements/Status';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import * as fieldTypes from '../../forms/field-types';
 import FormSubmit from '../../forms/Submit';
-import config from '../../../securedConfig';
 import { useUser } from '../../data/User';
 
 import './index.scss';
 
-const { serverURL, routes: { admin, api } } = config;
+const {
+  admin: { user: userSlug }, collections, serverURL, routes: { admin, api },
+} = PAYLOAD_CONFIG;
 
-const passwordField = {
-  name: 'password',
-  label: 'Password',
-  type: 'password',
-  required: true,
-};
+const userConfig = collections.find(collection => collection.slug === userSlug);
 
 const baseClass = 'create-first-user';
 
@@ -44,37 +40,39 @@ const CreateFirstUser = (props) => {
     });
   };
 
-  const fields = [...config.User.fields];
-
-  if (config.User.auth.passwordIndex) {
-    fields.splice(config.User.auth.passwordIndex, 0, passwordField);
-  } else {
-    fields.push(passwordField);
-  }
+  const fields = [
+    {
+      name: 'email',
+      label: 'Email Address',
+      type: 'email',
+      required: true,
+    }, {
+      name: 'password',
+      label: 'Password',
+      type: 'password',
+      required: true,
+    },
+    ...userConfig.fields,
+  ];
 
   return (
-    <ContentBlock
-      className={baseClass}
-      width="narrow"
-    >
-      <div className={`${baseClass}__wrap`}>
-        <h1>Welcome to Payload</h1>
-        <p>To begin, create your first user.</p>
-        <StatusList />
-        <Form
-          handleAjaxResponse={handleAjaxResponse}
-          disableSuccessStatus
-          method="POST"
-          action={`${serverURL}${api}/first-register`}
-        >
-          <RenderFields
-            fieldSchema={fields}
-            fieldTypes={fieldTypes}
-          />
-          <FormSubmit>Create</FormSubmit>
-        </Form>
-      </div>
-    </ContentBlock>
+    <MinimalTemplate className={baseClass}>
+      <h1>Welcome to Payload</h1>
+      <p>To begin, create your first user.</p>
+      <StatusList />
+      <Form
+        handleAjaxResponse={handleAjaxResponse}
+        disableSuccessStatus
+        method="POST"
+        action={`${serverURL}${api}/${userSlug}/first-register`}
+      >
+        <RenderFields
+          fieldSchema={fields}
+          fieldTypes={fieldTypes}
+        />
+        <FormSubmit>Create</FormSubmit>
+      </Form>
+    </MinimalTemplate>
   );
 };
 

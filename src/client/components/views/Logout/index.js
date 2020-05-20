@@ -1,18 +1,13 @@
 import React, { useEffect } from 'react';
 import { useUser } from '../../data/User';
-import ContentBlock from '../../layout/ContentBlock';
-import config from '../../../securedConfig';
-import Button from '../../controls/Button';
+import Minimal from '../../templates/Minimal';
+import Button from '../../elements/Button';
 
 import './index.scss';
 
-const baseClass = 'logout';
+const { routes: { admin } } = PAYLOAD_CONFIG;
 
-const {
-  routes: {
-    admin,
-  },
-} = config;
+const baseClass = 'logout';
 
 const Logout = () => {
   const { logOut } = useUser();
@@ -22,10 +17,7 @@ const Logout = () => {
   }, [logOut]);
 
   return (
-    <ContentBlock
-      className={baseClass}
-      width="narrow"
-    >
+    <Minimal className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <h1>You have been logged out.</h1>
         <br />
@@ -37,7 +29,7 @@ const Logout = () => {
           Log back in
         </Button>
       </div>
-    </ContentBlock>
+    </Minimal>
   );
 };
 

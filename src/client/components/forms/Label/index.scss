@@ -2,9 +2,11 @@
 
 label.field-label {
   display: flex;
+  margin-bottom: base(.25);
+  color: $color-gray;
 
   .required {
-    color: $error;
+    color: $color-red;
     margin-left: base(.25);
     margin-right: auto;
   }

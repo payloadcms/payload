@@ -6,9 +6,8 @@ import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
 import { RowModifiedProvider, useRowModified } from '../../Form/RowModified';
 import withCondition from '../../withCondition';
-import Button from '../../../controls/Button';
+import Button from '../../../elements/Button';
 import FormContext from '../../Form/Context';
-import Section from '../../../layout/Section';
 import DraggableSection from '../../DraggableSection';
 import collapsibleReducer from './reducer';
 
@@ -100,50 +99,45 @@ const Repeater = (props) => {
     <RowModifiedProvider lastModified={lastModified}>
       <DragDropContext onDragEnd={onDragEnd}>
         <div className={baseClass}>
-          <Section heading={label}>
-            <>
-              <Droppable droppableId="repeater-drop">
-                {provided => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                  >
-                    {rowCount !== 0
-                      && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
-                        return (
-                          <DraggableSection
-                            fieldTypes={fieldTypes}
-                            key={rowIndex}
-                            parentName={name}
-                            singularLabel={singularLabel}
-                            addRow={() => addRow(rowIndex)}
-                            removeRow={() => removeRow(rowIndex)}
-                            rowIndex={rowIndex}
-                            fieldState={fieldState}
-                            fieldSchema={fields}
-                            defaultValue={lastModified ? undefined : defaultValue[rowIndex]}
-                            dispatchCollapsibleStates={dispatchCollapsibleStates}
-                            collapsibleStates={collapsibleStates}
-                          />
-                        );
-                      })
-                    }
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-
-              <div className={`${baseClass}__add-button-wrap`}>
-                <Button
-                  onClick={() => addRow(rowCount)}
-                  type="secondary"
-                >
-                  {`Add ${singularLabel}`}
-                </Button>
+          <Droppable droppableId="repeater-drop">
+            {provided => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+              >
+                {rowCount !== 0
+                  && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
+                    return (
+                      <DraggableSection
+                        fieldTypes={fieldTypes}
+                        key={rowIndex}
+                        parentName={name}
+                        singularLabel={singularLabel}
+                        addRow={() => addRow(rowIndex)}
+                        removeRow={() => removeRow(rowIndex)}
+                        rowIndex={rowIndex}
+                        fieldState={fieldState}
+                        fieldSchema={fields}
+                        defaultValue={lastModified ? undefined : defaultValue[rowIndex]}
+                        dispatchCollapsibleStates={dispatchCollapsibleStates}
+                        collapsibleStates={collapsibleStates}
+                      />
+                    );
+                  })
+                }
+                {provided.placeholder}
               </div>
-            </>
-          </Section>
+            )}
+          </Droppable>
 
+          <div className={`${baseClass}__add-button-wrap`}>
+            <Button
+              onClick={() => addRow(rowCount)}
+              type="secondary"
+            >
+              {`Add ${singularLabel}`}
+            </Button>
+          </div>
         </div>
       </DragDropContext>
     </RowModifiedProvider>

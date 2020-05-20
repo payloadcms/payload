@@ -1,0 +1,36 @@
+@import '../../../scss/styles.scss';
+
+.btn {
+  background-color: $color-dark-gray;
+  color: white;
+  padding: base(.5) base(.75);
+  line-height: base(1);
+  border-radius: $style-radius-m;
+  font-size: 1rem;
+  margin-top: base(1);
+  margin-bottom: base(1);
+  border: 0;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: none;
+
+  &.btn-secondary {
+    box-shadow: inset 0 0 0 $style-stroke-width $color-dark-gray;
+    color: $color-dark-gray;
+    background: none;
+
+    &:hover {
+      background: lighten($color-dark-gray, 5%);
+      box-shadow: inset 0 0 0 $style-stroke-width lighten($color-dark-gray, 5%);
+      color: white;
+    }
+  }
+
+  &:hover {
+    background: lighten($color-dark-gray, 5%);
+  }
+
+  &:focus, &:active {
+    outline: none;
+  }
+}

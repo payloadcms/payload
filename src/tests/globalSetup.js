@@ -4,14 +4,13 @@ const config = require('../../demo/payload.config');
 const { email, password } = require('./credentials');
 
 const url = config.serverURL;
-const usernameField = config.User.auth.useAsUsername;
 
 const globalSetup = async () => {
   global.PAYLOAD_SERVER = server.start();
 
-  const response = await fetch(`${url}/api/first-register`, {
+  const response = await fetch(`${url}/api/admins/first-register`, {
     body: JSON.stringify({
-      [usernameField]: email,
+      email,
       password,
       roles: ['admin', 'user'],
     }),

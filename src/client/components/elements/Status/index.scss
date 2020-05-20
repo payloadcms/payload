@@ -1,0 +1,40 @@
+@import '../../../scss/styles.scss';
+
+.status-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    background: $color-green;
+    color: $color-dark-gray;
+    border-radius: $style-radius-s;
+    padding: base(.5);
+    margin-bottom: base(.5);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  button {
+    @extend %btn-reset;
+    cursor: pointer;
+
+    svg {
+      width: base(1);
+      height: base(1);
+    }
+
+    &:hover {
+      opacity: .5;
+    }
+  }
+
+  li.status-list__status--error {
+    background: $color-red;
+    color: white;
+
+    button svg {
+      @include color-svg(white);
+    }
+  }
+}

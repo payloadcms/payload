@@ -3,9 +3,8 @@ import PropTypes from 'prop-types';
 import Cookies from 'universal-cookie';
 import some from 'async-some';
 import withCondition from '../../withCondition';
-import ReactSelect from '../../../modules/ReactSelect';
+import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
-import config from '../../../../securedConfig';
 import Label from '../../Label';
 import Error from '../../Error';
 
@@ -13,7 +12,10 @@ import './index.scss';
 
 const cookies = new Cookies();
 
-const { serverURL, routes: { api }, collections } = config;
+const {
+  cookiePrefix, serverURL, routes: { api }, collections,
+} = PAYLOAD_CONFIG;
+const cookieTokenName = `${cookiePrefix}-token`;
 
 const defaultError = 'Please make a selection.';
 
@@ -40,7 +42,7 @@ class Relationship extends Component {
 
   getNextOptions = () => {
     const { relations, lastFullyLoadedRelation, lastLoadedPage } = this.state;
-    const token = cookies.get('token');
+    const token = cookies.get(cookieTokenName);
 
     const relationsToSearch = relations.slice(lastFullyLoadedRelation + 1);
 
@@ -130,7 +132,7 @@ class Relationship extends Component {
         options: [
           ...options,
           ...data.docs.map(doc => ({
-            label: doc[collection.useAsTitle],
+            label: doc[collection.useAsTitle || 'id'],
             value: doc.id,
           })),
         ],
@@ -141,7 +143,7 @@ class Relationship extends Component {
 
       const newOptions = data.docs.map((doc) => {
         return {
-          label: doc[collection.useAsTitle],
+          label: doc[collection.useAsTitle || doc.id],
           value: {
             relationTo: collection.slug,
             value: doc.id,

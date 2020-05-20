@@ -9,42 +9,32 @@
   box-sizing: border-box;
 }
 
-html, body {
+html {
+  font-size: $baseline-body-size;
+  line-height: $baseline-px;
+  background: $color-background-gray;
+}
+
+html, body, #app {
   height: 100%;
 }
 
 body {
   font-family: $font-body;
   font-weight: 400;
-  color: $black;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  color: $color-dark-gray;
   margin: 0;
 }
 
-html {
-  line-height: base(1);
-  font-size: $body;
-
-  @include mid-break {
-    font-size: 18px;
-    line-height: base(1);
-  }
-
-  @include small-break {
-    font-size: 16px;
-    line-height: base(.8)
-  }
-}
 
 ::selection {
-  background: $primary;
-  color: $black;
+  background: $color-green;
+  color: $color-dark-gray;
 }
 
 ::-moz-selection {
-  background: $primary;
-  color: $black;
+  background: $color-green;
+  color: $color-dark-gray;
 }
 
 img {
@@ -78,31 +68,10 @@ p {
 }
 
 ul {
-  padding-left: $base;
-    margin: 0 0 $base;
+  padding-left: $baseline;
+  margin: 0 0 $baseline;
 }
 
 a {
-  text-decoration: none;
-  color: $black;
-  border-bottom: 1px solid $black;
-
-  &:hover {
-    color: $primary;
-    border-bottom: 1px solid $primary;
-  }
-}
-
-.icon {
-  @include color-svg($black);
-
-  path, line, polyline, rect {
-    vector-effect: non-scaling-stroke;
-    shape-rendering:crispEdges;
-    fill: none;
-  }
-
-  .stroke {
-    stroke-width: $stroke-width;
-  }
+  color: $color-dark-gray;
 }

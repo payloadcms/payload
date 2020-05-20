@@ -1,52 +1,35 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import queryString from 'qs';
 import PropTypes from 'prop-types';
+import customComponents from '../../../customComponents';
+import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
-import config from '../../../../securedConfig';
-import DefaultTemplate from '../../../layout/DefaultTemplate';
-import HeadingButton from '../../../modules/HeadingButton';
-import SearchableTable from '../../../modules/SearchableTable';
-import Pagination from '../../../modules/Paginator';
+import Paginator from '../../../elements/Paginator';
 
 import './index.scss';
 
-const { serverURL, routes: { admin, api } } = config;
+const { serverURL, routes: { api, admin } } = PAYLOAD_CONFIG;
 
-const ListView = (props) => {
-  const { collection, columns, getURL } = props;
-  const location = useLocation();
-  const { page } = queryString.parse(location.search, { ignoreQueryPrefix: true });
-
-  const apiURL = [
-    `${serverURL}${api}/${collection.slug}`,
-    page && `?page=${page}&`,
-  ].filter(Boolean).join('');
-
-  const [{ data }] = usePayloadAPI(apiURL);
+const DefaultList = (props) => {
+  const { collection, data } = props;
 
   return (
-    <DefaultTemplate
-      className="collection-list"
-      stepNav={[
-        {
-          label: collection.labels.plural,
-        },
-      ]}
-    >
-      <HeadingButton
-        heading={collection.labels.plural}
-        buttonLabel="Add New"
-        buttonURL={`${admin}/collections/${collection.slug}/create`}
-        buttonType="link"
-      />
-      <SearchableTable
-        getURL={getURL}
-        columns={columns}
-        data={data.docs}
-        collection={collection}
-      />
-      <Pagination
+    <div className="collection-list">
+      {data.docs && (
+        <ul>
+          {data.docs.map((doc) => {
+            return (
+              <li key={doc.id}>
+                <Link to={`${admin}/collections/${collection.slug}/${doc.id}`}>
+                  {doc.id}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <Paginator
         totalDocs={data.totalDocs}
         limit={data.limit}
         totalPages={data.totalPages}
@@ -57,7 +40,64 @@ const ListView = (props) => {
         nextPage={data.nextPage}
         numberOfNeighbors={1}
       />
-    </DefaultTemplate>
+    </div>
+  );
+};
+
+DefaultList.defaultProps = {
+  data: undefined,
+};
+
+DefaultList.propTypes = {
+  collection: PropTypes.shape({
+    labels: PropTypes.shape({
+      plural: PropTypes.string,
+    }),
+    slug: PropTypes.string,
+  }).isRequired,
+  data: PropTypes.shape({
+    docs: PropTypes.arrayOf(
+      PropTypes.shape({}),
+    ),
+    totalDocs: PropTypes.number,
+    prevPage: PropTypes.number,
+    nextPage: PropTypes.number,
+    hasNextPage: PropTypes.bool,
+    hasPrevPage: PropTypes.bool,
+    limit: PropTypes.number,
+    page: PropTypes.number,
+    totalPages: PropTypes.number,
+  }),
+};
+
+const ListView = (props) => {
+  const { collection } = props;
+  const location = useLocation();
+  const { setStepNav } = useStepNav();
+  const { page } = queryString.parse(location.search, { ignoreQueryPrefix: true });
+
+  const apiURL = [
+    `${serverURL}${api}/${collection.slug}`,
+    page && `?page=${page}&`,
+  ].filter(Boolean).join('');
+
+  const [{ data }] = usePayloadAPI(apiURL);
+
+  useEffect(() => {
+    setStepNav([
+      {
+        label: collection.labels.plural,
+      },
+    ]);
+  }, [setStepNav, collection.labels.plural]);
+
+  const List = customComponents?.[collection.slug]?.views?.List || DefaultList;
+
+  return (
+    <List
+      data={data}
+      collection={collection}
+    />
   );
 };
 

@@ -1,6 +1,6 @@
 const mkdirp = require('mkdirp');
 
-const executePolicy = require('../../users/executePolicy');
+const executePolicy = require('../../auth/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
 const { validateCreate } = require('../../fields/validateCreate');
 

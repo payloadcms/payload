@@ -1,12 +1,10 @@
 import React from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import StatusList from '../../modules/Status';
-import ContentBlock from '../../layout/ContentBlock';
+import StatusList from '../../elements/Status';
 import Form from '../../forms/Form';
 import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
-import config from '../../../securedConfig';
-import Button from '../../controls/Button';
+import Button from '../../elements/Button';
 import { useUser } from '../../data/User';
 
 import './index.scss';
@@ -14,7 +12,7 @@ import HiddenInput from '../../forms/field-types/HiddenInput';
 
 const baseClass = 'reset-password';
 
-const { serverURL, routes: { admin, api } } = config;
+const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -24,7 +22,6 @@ const ResetPassword = () => {
   const handleAjaxResponse = (res) => {
     res.json()
       .then((data) => {
-        debugger;
         if (data.token) {
           setToken(data.token);
           history.push(`${admin}`);
@@ -34,10 +31,7 @@ const ResetPassword = () => {
 
   if (user) {
     return (
-      <ContentBlock
-        className={baseClass}
-        width="narrow"
-      >
+      <div className={baseClass}>
         <div className={`${baseClass}__wrap`}>
           <h1>Already logged in</h1>
           <p>
@@ -56,21 +50,18 @@ const ResetPassword = () => {
             Back to Dashboard
           </Button>
         </div>
-      </ContentBlock>
+      </div>
     );
   }
 
   return (
-    <ContentBlock
-      className={baseClass}
-      width="narrow"
-    >
+    <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <StatusList />
         <Form
           handleAjaxResponse={handleAjaxResponse}
           method="POST"
-          action={`${serverURL}${api}/reset-password`}
+          action={`${serverURL}${api}/${userSlug}/reset-password`}
           redirect={admin}
         >
           <Password
@@ -86,7 +77,7 @@ const ResetPassword = () => {
           <FormSubmit>Reset Password</FormSubmit>
         </Form>
       </div>
-    </ContentBlock>
+    </div>
   );
 };
 

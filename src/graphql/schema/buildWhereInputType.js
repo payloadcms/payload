@@ -195,7 +195,7 @@ const buildWhereInputType = (name, fields, parentName) => {
           ...(fieldSchema.reduce((subFields, subField) => {
             return {
               ...subFields,
-              [subField.key]: subField.type,
+              [formatName(subField.key)]: subField.type,
             };
           }, {})),
         };
@@ -203,7 +203,7 @@ const buildWhereInputType = (name, fields, parentName) => {
 
       return {
         ...schema,
-        [field.name]: fieldSchema,
+        [formatName(field.name)]: fieldSchema,
       };
     }
 

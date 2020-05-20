@@ -1,20 +1,20 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import StatusList, { useStatusList } from '../../modules/Status';
-import ContentBlock from '../../layout/ContentBlock';
+import Logo from '../../graphics/Logo';
+import MinimalTemplate from '../../templates/Minimal';
+import StatusList, { useStatusList } from '../../elements/Status';
 import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
-import config from '../../../securedConfig';
-import Button from '../../controls/Button';
+import Button from '../../elements/Button';
 import { useUser } from '../../data/User';
 
 import './index.scss';
 
 const baseClass = 'login';
 
-const { serverURL, routes: { admin, api } } = config;
+const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
 
 const Login = () => {
   const { addStatus } = useStatusList();
@@ -30,7 +30,7 @@ const Login = () => {
         } else {
           addStatus({
             type: 'error',
-            message: 'The username or password you have entered is invalid.',
+            message: 'The email address or password you have entered is invalid.',
           });
         }
       });
@@ -38,10 +38,7 @@ const Login = () => {
 
   if (user) {
     return (
-      <ContentBlock
-        className={baseClass}
-        width="narrow"
-      >
+      <MinimalTemplate className={baseClass}>
         <div className={`${baseClass}__wrap`}>
           <h1>Already logged in</h1>
           <p>
@@ -60,46 +57,40 @@ const Login = () => {
             Back to Dashboard
           </Button>
         </div>
-      </ContentBlock>
+      </MinimalTemplate>
     );
   }
 
   return (
-    <ContentBlock
-      className={baseClass}
-      width="narrow"
-    >
-      <div className={`${baseClass}__wrap`}>
-        <p>
-          <a
-            className=""
-            href={`${admin}/forgot`}
-          >
-            Forgot password?
-          </a>
-        </p>
-        <StatusList />
-        <Form
-          handleAjaxResponse={handleAjaxResponse}
-          method="POST"
-          action={`${serverURL}${api}/login`}
-          redirect={admin}
-        >
-          <Email
-            label="Email Address"
-            name="email"
-            required
-          />
-          <Password
-            error="password"
-            label="Password"
-            name="password"
-            required
-          />
-          <FormSubmit>Login</FormSubmit>
-        </Form>
+    <MinimalTemplate className={baseClass}>
+      <div className={`${baseClass}__brand`}>
+        <Logo />
       </div>
-    </ContentBlock>
+      <StatusList />
+      <Form
+        handleAjaxResponse={handleAjaxResponse}
+        method="POST"
+        action={`${serverURL}${api}/${userSlug}/login`}
+        redirect={admin}
+      >
+        <Email
+          label="Email Address"
+          name="email"
+          autoComplete="email"
+          required
+        />
+        <Password
+          error="password"
+          label="Password"
+          name="password"
+          required
+        />
+        <Link to={`${admin}/forgot`}>
+          Forgot password?
+        </Link>
+        <FormSubmit>Login</FormSubmit>
+      </Form>
+    </MinimalTemplate>
   );
 };
 

@@ -36,9 +36,15 @@ const Password = (props) => {
 
   const fieldWidth = width ? `${width}%` : null;
 
+  const classes = [
+    'field-type',
+    'password',
+    showError && 'error',
+  ].filter(Boolean).join(' ');
+
   return (
     <div
-      className="field-type password"
+      className={classes}
       style={{
         ...style,
         width: fieldWidth,
@@ -58,6 +64,7 @@ const Password = (props) => {
         onChange={onFieldChange}
         disabled={processing ? 'disabled' : undefined}
         type="password"
+        autoComplete="current-password"
         id={name}
         name={name}
       />

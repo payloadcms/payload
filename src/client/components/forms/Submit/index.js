@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import FormContext from '../Form/Context';
-import Button from '../../controls/Button';
+import Button from '../../elements/Button';
 
 import './index.scss';
 

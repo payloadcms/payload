@@ -1,0 +1,9 @@
+@import '../../../scss/styles';
+
+.icon--chevron {
+  path {
+    fill: none;
+    stroke: $color-dark-gray;
+    stroke-width: $style-stroke-width-m;
+  }
+}

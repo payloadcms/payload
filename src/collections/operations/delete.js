@@ -1,6 +1,6 @@
 const fs = require('fs');
-const { NotFound } = require('../../errors');
-const executePolicy = require('../../users/executePolicy');
+const { NotFound, Forbidden } = require('../../errors');
+const executePolicy = require('../../auth/executePolicy');
 
 const deleteQuery = async (args) => {
   try {
@@ -8,9 +8,12 @@ const deleteQuery = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    await executePolicy(args, args.config.policies.delete);
+    const policyResults = await executePolicy(args, args.config.policies.delete);
+    const hasWherePolicy = typeof policyResults === 'object';
 
-    let options = { ...args };
+    let options = {
+      ...args,
+    };
 
     // /////////////////////////////////////
     // 2. Execute before collection hook
@@ -35,9 +38,19 @@ const deleteQuery = async (args) => {
       },
     } = options;
 
-    let resultToDelete = await Model.findOne({ _id: id });
+    let query = { _id: id };
 
-    if (!resultToDelete) throw new NotFound();
+    if (hasWherePolicy) {
+      query = {
+        ...query,
+        ...policyResults,
+      };
+    }
+
+    let resultToDelete = await Model.findOne(query);
+
+    if (!resultToDelete && !hasWherePolicy) throw new NotFound();
+    if (!resultToDelete && hasWherePolicy) throw new Forbidden();
 
     resultToDelete = resultToDelete.toJSON({ virtuals: true });
 
@@ -49,18 +62,20 @@ const deleteQuery = async (args) => {
     // 4. Delete any associated files
     // /////////////////////////////////////
 
-    const { staticDir } = options.req.collection.config.upload;
+    if (options.req.collection.config.upload) {
+      const { staticDir } = options.req.collection.config.upload;
 
-    fs.unlink(`${staticDir}/${resultToDelete.filename}`, (err) => {
-      console.log('Error deleting file:', err);
-    });
-
-    if (resultToDelete.sizes) {
-      Object.values(resultToDelete.sizes).forEach((size) => {
-        fs.unlink(`${staticDir}/${size.filename}`, (err) => {
-          console.log('Error deleting file:', err);
-        });
+      fs.unlink(`${staticDir}/${resultToDelete.filename}`, (err) => {
+        console.log('Error deleting file:', err);
       });
+
+      if (resultToDelete.sizes) {
+        Object.values(resultToDelete.sizes).forEach((size) => {
+          fs.unlink(`${staticDir}/${size.filename}`, (err) => {
+            console.log('Error deleting file:', err);
+          });
+        });
+      }
     }
 
     // /////////////////////////////////////

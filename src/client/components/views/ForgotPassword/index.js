@@ -1,19 +1,25 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import StatusList, { useStatusList } from '../../modules/Status';
-import ContentBlock from '../../layout/ContentBlock';
+import MinimalTemplate from '../../templates/Minimal';
+import StatusList, { useStatusList } from '../../elements/Status';
 import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import FormSubmit from '../../forms/Submit';
-import config from '../../../securedConfig';
-import Button from '../../controls/Button';
+import Button from '../../elements/Button';
 import { useUser } from '../../data/User';
 
 import './index.scss';
 
 const baseClass = 'forgot-password';
 
-const { serverURL, routes: { admin, api } } = config;
+const {
+  admin: { user: userSlug },
+  serverURL,
+  routes: {
+    admin,
+    api,
+  },
+} = PAYLOAD_CONFIG;
 
 const ForgotPassword = () => {
   const { addStatus } = useStatusList();
@@ -34,78 +40,66 @@ const ForgotPassword = () => {
 
   if (user) {
     return (
-      <ContentBlock
-        className={baseClass}
-        width="narrow"
-      >
-        <div className={`${baseClass}__wrap`}>
-          <h1>Already logged in</h1>
-          <p>
-            To log in with another user, you should
-            {' '}
-            <Link to={`${admin}/logout`}>log out</Link>
-            {' '}
-            first.
-          </p>
-          <br />
-          <Button
-            el="link"
-            type="secondary"
-            to={admin}
-          >
-            Back to Dashboard
-          </Button>
-        </div>
-      </ContentBlock>
+      <MinimalTemplate className={baseClass}>
+        <h1>You&apos;re already logged in</h1>
+        <p>
+          To change your password, go to your
+          {' '}
+          <Link to={`${admin}/account`}>account</Link>
+          {' '}
+          and edit your password there.
+        </p>
+        <br />
+        <Button
+          el="link"
+          type="secondary"
+          to={admin}
+        >
+          Back to Dashboard
+        </Button>
+      </MinimalTemplate>
     );
   }
 
   if (hasSubmitted) {
     return (
-      <ContentBlock
-        className={baseClass}
-        width="narrow"
-      >
-        <div className={`${baseClass}__wrap`}>
-          <h1>Email sent</h1>
-          <p>
-            Check your email for a link that will allow you to securely reset your password.
-          </p>
-          <br />
-          <Button
-            el="link"
-            type="secondary"
-            to={`${admin}/login`}
-          >
-            Go to login
-          </Button>
-        </div>
-      </ContentBlock>
+      <MinimalTemplate className={baseClass}>
+        <h1>Email sent</h1>
+        <p>
+          Check your email for a link that will allow you to securely reset your password.
+        </p>
+        <br />
+        <Button
+          el="link"
+          type="secondary"
+          to={`${admin}/login`}
+        >
+          Go to login
+        </Button>
+      </MinimalTemplate>
     );
   }
 
   return (
-    <ContentBlock
-      className={baseClass}
-      width="narrow"
-    >
-      <div className={`${baseClass}__wrap`}>
-        <StatusList />
-        <Form
-          novalidate
-          handleAjaxResponse={handleAjaxResponse}
-          method="POST"
-          action={`${serverURL}${api}/forgot-password`}
-        >
-          <Email
-            label="Email Address"
-            name="email"
-            required
-          />
-          <FormSubmit>Submit</FormSubmit>
-        </Form>
-      </div>
-    </ContentBlock>
+    <MinimalTemplate className={baseClass}>
+      <StatusList />
+      <Form
+        novalidate
+        handleAjaxResponse={handleAjaxResponse}
+        method="POST"
+        action={`${serverURL}${api}/${userSlug}/forgot-password`}
+      >
+        <h1>Forgot Password</h1>
+        <p>Please enter your email below. You will receive an email message with instructions on how to reset your password.</p>
+        <Email
+          label="Email Address"
+          name="email"
+          required
+        />
+        <FormSubmit>Submit</FormSubmit>
+      </Form>
+      <Link to={`${admin}/login`}>Back to login</Link>
+    </MinimalTemplate>
   );
 };
 

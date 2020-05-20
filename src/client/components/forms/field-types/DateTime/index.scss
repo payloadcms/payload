@@ -24,7 +24,7 @@ $cal-icon-width: 18px;
       transform: translateY(-50%);
       width: $cal-icon-width;
       height: auto;
-      @include color-svg($black);
+      @include color-svg($color-dark-gray);
     }
   }
 
@@ -44,7 +44,7 @@ $cal-icon-width: 18px;
 
   &--has-error {
     .react-datepicker__input-container input {
-      background-color: lighten($error, 20%);
+      background-color: lighten($color-red, 20%);
     }
   }
 
@@ -52,7 +52,7 @@ $cal-icon-width: 18px;
     @include shadow-sm;
     background: white;
     display: inline-flex;
-    border: 1px solid $light-gray;
+    border: 1px solid $color-light-gray;
     font-family: $font-body;
     font-weight: 100;
     border-radius: 0;
@@ -68,7 +68,7 @@ $cal-icon-width: 18px;
 
       &--time {
         padding: 10px 0;
-        border-bottom: 1px solid $light-gray;
+        border-bottom: 1px solid $color-light-gray;
         font-weight: bold;
       }
     }
@@ -91,19 +91,19 @@ $cal-icon-width: 18px;
       top: 15px;
 
       &--next {
-        border-left-color: $gray;
+        border-left-color: $color-gray;
 
         &:focus {
-          border-left-color: darken($gray, 30%);
+          border-left-color: darken($color-gray, 30%);
           outline:none;
         }
       }
 
       &--previous {
-        border-right-color: $gray;
+        border-right-color: $color-gray;
 
         &:focus {
-          border-right-color: darken($gray, 30%);
+          border-right-color: darken($color-gray, 30%);
           outline:none;
         }
       }
@@ -114,25 +114,25 @@ $cal-icon-width: 18px;
     }
 
     &__time-container {
-      border-left: 1px solid $light-gray;
+      border-left: 1px solid $color-light-gray;
     }
 
     &__day-names {
-      background-color: $light-gray;
+      background-color: $color-light-gray;
     }
 
     &__day {
-      box-shadow: inset 0px 0px 0px 1px $light-gray, 0px 0px 0px 1px $light-gray;
+      box-shadow: inset 0px 0px 0px 1px $color-light-gray, 0px 0px 0px 1px $color-light-gray;
       font-size: base(.55);
 
       &:focus {
         outline: 0;
-        background: $gray;
+        background: $color-gray;
       }
 
       &--selected {
         &:focus {
-          background-color: $primary;
+          background-color: $color-dark-gray;
         }
       }
 
@@ -140,8 +140,8 @@ $cal-icon-width: 18px;
         color: white;
 
         &:focus {
-          background-color: $light-gray;
-          box-shadow: inset 0px 0px 0px 1px $primary, 0px 0px 0px 1px $primary;
+          background-color: $color-light-gray;
+          box-shadow: inset 0px 0px 0px 1px $color-dark-gray, 0px 0px 0px 1px $color-dark-gray;
         }
       }
     }
@@ -154,16 +154,16 @@ $cal-icon-width: 18px;
   .react-datepicker__day--keyboard-selected,
   .react-datepicker__month-text--keyboard-selected,
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
-    background: $primary;
-    color: $black;
+    background: $color-dark-gray;
+    color: $color-dark-gray;
     font-weight: normal;
     border-radius: 0;
   }
 
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected,
   .react-datepicker__day--selected, .react-datepicker__day--in-selecting-range, .react-datepicker__day--in-range, .react-datepicker__month-text--selected, .react-datepicker__month-text--in-selecting-range, .react-datepicker__month-text--in-range {
-    background: $primary;
-    color: $black;
+    background: $color-dark-gray;
+    color: $color-dark-gray;
     border-radius: 0;
   }
 

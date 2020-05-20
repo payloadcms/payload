@@ -27,7 +27,7 @@ exports.start = (cb) => {
   return server;
 };
 
-// when app.js is launched directly
+// when server.js is launched directly
 if (module.id === require.main.id) {
   exports.start();
 }

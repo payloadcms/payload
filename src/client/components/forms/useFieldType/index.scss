@@ -1,7 +1,6 @@
 @import '../../../scss/styles.scss';
 
 .field-type {
-  @include gutter;
   margin-bottom: base(.5);
   position: relative;
   width: 100%;
@@ -10,7 +9,7 @@
     display: flex;
 
     .required {
-      color: $error;
+      color: $color-red;
       margin-left: base(.25);
       margin-right: auto;
     }
@@ -20,10 +19,10 @@
     left: auto;
     right: base(.5);
     transform: none;
-    background-color: $error;
+    background-color: $color-red;
 
     span {
-      border-top-color: $error;
+      border-top-color: $color-red;
     }
   }
 

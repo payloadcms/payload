@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Tooltip from '../../modules/Tooltip';
+import Tooltip from '../../elements/Tooltip';
 
 const Error = (props) => {
   const { showError, message } = props;

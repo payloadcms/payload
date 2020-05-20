@@ -1,27 +1,50 @@
 const path = require('path');
-const Page = require('./collections/Page');
-const Category = require('./collections/Category');
-const Post = require('./collections/Post');
-const Layout = require('./collections/Layout');
-const User = require('./collections/User');
+const Admin = require('./collections/Admin');
+const AllFields = require('./collections/AllFields');
+const Code = require('./collections/Code');
+const CustomComponents = require('./collections/CustomComponents');
 const File = require('./collections/File');
+const FlexibleContent = require('./collections/FlexibleContent');
+const Hooks = require('./collections/Hooks');
+const HTML = require('./collections/HTML');
+const Localized = require('./collections/Localized');
 const Media = require('./collections/Media');
-const Header = require('./globals/Header');
-const Footer = require('./globals/Footer');
+const Preview = require('./collections/Preview');
+const RelationshipA = require('./collections/RelationshipA');
+const RelationshipB = require('./collections/RelationshipB');
+const RichText = require('./collections/RichText');
+const StrictPolicies = require('./collections/StrictPolicies');
+
+const FlexibleGlobal = require('./globals/FlexibleGlobal');
+const NavigationRepeater = require('./globals/NavigationRepeater');
+const GlobalWithPolicies = require('./globals/GlobalWithPolicies');
 
 module.exports = {
-  // disableAdmin: true,
+  secret: 'SECRET_KEY',
+  admin: {
+    user: 'admins',
+    disable: false,
+  },
   collections: [
-    Page,
-    Category,
-    Post,
-    Layout,
+    Admin,
+    AllFields,
+    Code,
+    CustomComponents,
     File,
+    FlexibleContent,
+    Hooks,
+    HTML,
+    Localized,
     Media,
+    Preview,
+    RelationshipA,
+    RelationshipB,
+    RichText,
+    StrictPolicies,
   ],
-  User,
-  globals: [Header, Footer],
+  globals: [NavigationRepeater, GlobalWithPolicies, FlexibleGlobal],
   port: 3000,
+  cookiePrefix: 'payload',
   serverURL: 'http://localhost:3000',
   cors: ['http://localhost', 'http://localhost:8080', 'http://localhost:8081'],
   routes: {
@@ -32,9 +55,13 @@ module.exports = {
   },
   compression: {},
   paths: {
-    scssOverrides: path.resolve(__dirname, 'client/scss/overrides.scss'),
+    scss: path.resolve(__dirname, 'client/scss/overrides.scss'),
   },
   mongoURL: 'mongodb://localhost/payload',
+  graphQL: {
+    mutations: {},
+    queries: {},
+  },
   localization: {
     locales: [
       'en',
@@ -43,41 +70,6 @@ module.exports = {
     defaultLocale: 'en',
     fallback: true,
   },
-  uploads: {
-    image: {
-      imageSizes: [
-        {
-          name: 'tablet',
-          width: 640,
-          height: 480,
-          crop: 'left top', // would it make sense for this to be set by the uploader?
-        },
-        {
-          name: 'mobile',
-          width: 320,
-          height: 240,
-          crop: 'left top',
-        },
-        { // Is the icon size required for the admin dashboard to work?
-          name: 'icon',
-          width: 16,
-          height: 16,
-        },
-      ],
-    },
-    profile: {
-      imageSizes: [
-        {
-          name: 'full',
-          width: 640,
-          height: 480,
-          crop: 'center',
-        },
-      ],
-    },
-  },
-  staticURL: '/uploads',
-  staticDir: 'demo/upload',
   productionGraphQLPlayground: false,
   email: {
     provider: 'mock',

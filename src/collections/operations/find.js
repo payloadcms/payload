@@ -1,4 +1,5 @@
-const executePolicy = require('../../users/executePolicy');
+const merge = require('lodash.merge');
+const executePolicy = require('../../auth/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
 
 const find = async (args) => {
@@ -7,14 +8,19 @@ const find = async (args) => {
     // 1. Retrieve and execute policy
     // /////////////////////////////////////
 
-    await executePolicy(args, args.config.policies.read);
+    const policyResults = await executePolicy(args, args.config.policies.read);
+    const hasWherePolicy = typeof policyResults === 'object';
 
     const queryToBuild = {};
     if (args.where) queryToBuild.where = args.where;
 
+    if (hasWherePolicy) {
+      queryToBuild.where = merge(args.where, policyResults);
+    }
+
     let options = {
       ...args,
-      query: await args.Model.buildQuery(queryToBuild, args.locale),
+      query: await args.Model.buildQuery(queryToBuild, args.req.locale),
     };
 
     // /////////////////////////////////////
@@ -49,6 +55,7 @@ const find = async (args) => {
       page: page || 1,
       limit: limit || 10,
       sort,
+      collation: sort ? { locale: 'en' } : {}, // case-insensitive sort in MongoDB
       options: {},
     };
 
