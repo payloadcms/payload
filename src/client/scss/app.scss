@@ -21,6 +21,10 @@ html {
   line-height: $baseline-px;
   background: $color-background-gray;
   -webkit-font-smoothing: antialiased;
+
+  @include mid-break {
+    font-size: 12px;
+  }
 }
 
 html, body, #app {

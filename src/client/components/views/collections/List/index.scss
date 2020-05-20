@@ -33,6 +33,12 @@
   @include mid-break {
     padding: $baseline;
 
+    &__header {
+      .pill {
+        top: - base(.0625);
+      }
+    }
+
     &__search-input {
       margin: 0;
     }
