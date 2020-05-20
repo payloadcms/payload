@@ -25,8 +25,7 @@ const ListControls = (props) => {
   const [search, setSearch] = useState('');
   const [columns, setColumns] = useState([]);
   const [where, setWhere] = useState({});
-  const [columnsVisible, setColumnsVisible] = useState(false);
-  const [filtersVisible, setFiltersVisible] = useState(false);
+  const [visibleDrawer, setVisibleDrawer] = useState(false);
 
   useEffect(() => {
     if (useAsTitle) {
@@ -62,16 +61,16 @@ const ListControls = (props) => {
         />
         <Button
           className={`${baseClass}__toggle-columns`}
-          type={columnsVisible ? 'secondary' : undefined}
-          onClick={() => { setFiltersVisible(false); setColumnsVisible(!columnsVisible); }}
+          type={visibleDrawer === 'columns' ? 'secondary' : undefined}
+          onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : false)}
           icon={<Chevron />}
         >
           Columns
         </Button>
         <Button
-          className={`${baseClass}__toggle-filters`}
-          type={filtersVisible ? 'secondary' : undefined}
-          onClick={() => { setColumnsVisible(false); setFiltersVisible(!filtersVisible); }}
+          className={`${baseClass}__toggle-where`}
+          type={visibleDrawer === 'where' ? 'secondary' : undefined}
+          onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : false)}
           icon={<Chevron />}
         >
           Filters
@@ -79,13 +78,13 @@ const ListControls = (props) => {
       </div>
       <AnimateHeight
         className={`${baseClass}__columns`}
-        height={columnsVisible ? 'auto' : 0}
+        height={visibleDrawer === 'columns' ? 'auto' : 0}
       >
         <ColumnSelector handleChange={setColumns} />
       </AnimateHeight>
       <AnimateHeight
-        className={`${baseClass}__filters`}
-        height={filtersVisible ? 'auto' : 0}
+        className={`${baseClass}__where`}
+        height={visibleDrawer === 'where' ? 'auto' : 0}
       >
         <WhereBuilder handleChange={setWhere} />
       </AnimateHeight>
