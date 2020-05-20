@@ -7,6 +7,7 @@ import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Paginator from '../../../elements/Paginator';
 import ListControls from '../../../elements/ListControls';
+import Pill from '../../../elements/Pill';
 
 import './index.scss';
 
@@ -24,6 +25,8 @@ const DefaultList = (props) => {
       },
     },
   } = props;
+
+  const newDocumentURL = `${admin}/collections/${slug}/create`;
 
   const location = useLocation();
   const [listControls, setListControls] = useState({});
@@ -45,7 +48,12 @@ const DefaultList = (props) => {
 
   return (
     <div className={baseClass}>
-      <h1>{pluralLabel}</h1>
+      <header className={`${baseClass}__header`}>
+        <h1>{pluralLabel}</h1>
+        <Pill to={newDocumentURL}>
+          Add New
+        </Pill>
+      </header>
       <ListControls
         handleChange={setListControls}
         collection={collection}
