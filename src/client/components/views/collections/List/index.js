@@ -84,7 +84,7 @@ const DefaultList = (props) => {
           <Search />
         </div>
       </div>
-      {data.docs && (
+      {(data.docs && data.docs.length > 0) && (
         <ul>
           {data.docs.map((doc) => {
             return (
@@ -96,6 +96,15 @@ const DefaultList = (props) => {
             );
           })}
         </ul>
+      )}
+      {(!data.docs || data.docs.length === 0) && (
+        <div className={`${baseClass}__no-results`}>
+          No
+          {' '}
+          {pluralLabel}
+          {' '}
+          found
+        </div>
       )}
       <Paginator
         totalDocs={data.totalDocs}
