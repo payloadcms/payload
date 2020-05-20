@@ -1,5 +1,7 @@
 import React from 'react';
 
+import './index.scss';
+
 const CloseMenu = () => {
   return (
     <svg
@@ -15,7 +17,7 @@ const CloseMenu = () => {
         width="18"
         height="2"
         transform="rotate(-45 5.42896 18.1569)"
-        fill="#333333"
+        className="fill"
       />
       <rect
         x="6.84314"
@@ -23,7 +25,7 @@ const CloseMenu = () => {
         width="18"
         height="2"
         transform="rotate(45 6.84314 5.42892)"
-        fill="#333333"
+        className="fill"
       />
     </svg>
   );

@@ -14,7 +14,7 @@
   font-weight: 600;
   text-decoration: none;
 
-  &.btn-secondary {
+  &--secondary {
     box-shadow: inset 0 0 0 $style-stroke-width $color-dark-gray;
     color: $color-dark-gray;
     background: none;
@@ -23,6 +23,23 @@
       background: lighten($color-dark-gray, 5%);
       box-shadow: inset 0 0 0 $style-stroke-width lighten($color-dark-gray, 5%);
       color: white;
+    }
+  }
+
+  &--icon {
+    span {
+      display: flex;
+    }
+
+    svg {
+      margin-left: base(1);
+      display: block;
+    }
+
+    &.btn--primary {
+      svg {
+        @include color-svg(white);
+      }
     }
   }
 

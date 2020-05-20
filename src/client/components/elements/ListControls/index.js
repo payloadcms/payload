@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 // import customComponents from '../../customComponents';
 import SearchFilter from '../SearchFilter';
+import Button from '../Button';
+import Chevron from '../../icons/Chevron';
 
 import './index.scss';
 
@@ -20,6 +22,8 @@ const ListControls = (props) => {
   const [search, setSearch] = useState('');
   const [columns, setColumns] = useState([]);
   const [filters, setFilters] = useState({});
+  const [columnsVisible, setColumnsVisible] = useState(false);
+  const [filtersVisible, setFiltersVisible] = useState(false);
 
   useEffect(() => {
     if (useAsTitle) {
@@ -43,11 +47,25 @@ const ListControls = (props) => {
 
   return (
     <div className={baseClass}>
-      <SearchFilter
-        handleChange={setSearch}
-        fieldName={titleField ? titleField.name : undefined}
-        fieldLabel={titleField ? titleField.label : undefined}
-      />
+      <div className={`${baseClass}__wrap`}>
+        <SearchFilter
+          handleChange={setSearch}
+          fieldName={titleField ? titleField.name : undefined}
+          fieldLabel={titleField ? titleField.label : undefined}
+        />
+        <Button
+          onClick={() => setColumnsVisible(!columnsVisible)}
+          icon={<Chevron />}
+        >
+          Columns
+        </Button>
+        <Button
+          onClick={() => setFiltersVisible(!filtersVisible)}
+          icon={<Chevron />}
+        >
+          Filters
+        </Button>
+      </div>
     </div>
   );
 };

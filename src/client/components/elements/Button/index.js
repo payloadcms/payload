@@ -6,16 +6,35 @@ import './index.scss';
 
 const baseClass = 'btn';
 
+const ButtonContents = ({ children, icon }) => {
+  return (
+    <span>
+      {children}
+      {icon}
+    </span>
+  );
+};
+
+ButtonContents.defaultProps = {
+  icon: null,
+};
+
+ButtonContents.propTypes = {
+  children: PropTypes.node.isRequired,
+  icon: PropTypes.node,
+};
+
 const Button = (props) => {
   const {
-    className, type, el, to, url, children, onClick, disabled,
+    className, type, el, to, url, children, onClick, disabled, icon,
   } = props;
 
   const classes = [
     baseClass,
     className && className,
-    type && `btn-${type}`,
-    disabled && 'btn-disabled',
+    type && `${baseClass}--${type}`,
+    icon && `${baseClass}--icon`,
+    disabled && `${baseClass}--disabled`,
   ].filter(Boolean).join(' ');
 
   function handleClick(event) {
@@ -24,7 +43,6 @@ const Button = (props) => {
   }
 
   const buttonProps = {
-    ...props,
     className: classes,
     onClick: handleClick,
   };
@@ -36,7 +54,9 @@ const Button = (props) => {
           {...buttonProps}
           to={to || url}
         >
-          {children}
+          <ButtonContents icon={icon}>
+            {children}
+          </ButtonContents>
         </Link>
       );
 
@@ -46,7 +66,9 @@ const Button = (props) => {
           {...buttonProps}
           href={url}
         >
-          {children}
+          <ButtonContents icon={icon}>
+            {children}
+          </ButtonContents>
         </a>
       );
 
@@ -56,7 +78,9 @@ const Button = (props) => {
           type="button"
           {...buttonProps}
         >
-          {children}
+          <ButtonContents icon={icon}>
+            {children}
+          </ButtonContents>
         </button>
       );
   }
@@ -64,24 +88,26 @@ const Button = (props) => {
 
 Button.defaultProps = {
   className: null,
-  type: null,
+  type: 'primary',
   el: null,
   to: null,
   url: null,
   children: null,
   onClick: null,
   disabled: undefined,
+  icon: null,
 };
 
 Button.propTypes = {
   className: PropTypes.string,
-  type: PropTypes.oneOf(['secondary', 'error', undefined]),
+  type: PropTypes.oneOf(['primary', 'secondary', 'error', undefined]),
   el: PropTypes.oneOf(['link', 'anchor', undefined]),
   to: PropTypes.string,
   url: PropTypes.string,
   children: PropTypes.node,
   onClick: PropTypes.func,
   disabled: PropTypes.bool,
+  icon: PropTypes.node,
 };
 
 export default Button;

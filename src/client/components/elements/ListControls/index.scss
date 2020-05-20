@@ -2,4 +2,20 @@
 
 .list-controls {
   margin-bottom: $baseline;
+
+  &__wrap {
+    display: flex;
+  }
+
+  .search-filter {
+    flex-grow: 1;
+
+    input {
+      margin: 0;
+    }
+  }
+
+  .btn {
+    margin: 0 0 0 $baseline;
+  }
 }
