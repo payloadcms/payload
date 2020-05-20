@@ -10,9 +10,10 @@
     margin-bottom: $baseline;
     display: flex;
     align-items: flex-end;
+    flex-wrap: wrap;
 
     h1 {
-      margin: 0;
+      margin: 0 base(.75) 0 0;
     }
 
     a {
@@ -20,9 +21,7 @@
     }
 
     .pill {
-      margin-left: base(.75);
-      position: relative;
-      top: - base(.25);
+      margin: base(.5) 0 base(.25);
     }
   }
 
@@ -35,7 +34,7 @@
 
     &__header {
       .pill {
-        top: - base(.0625);
+        margin-bottom: base(.0625);
       }
     }
 

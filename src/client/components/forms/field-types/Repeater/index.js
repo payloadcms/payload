@@ -133,7 +133,7 @@ const Repeater = (props) => {
           <div className={`${baseClass}__add-button-wrap`}>
             <Button
               onClick={() => addRow(rowCount)}
-              type="secondary"
+              buttonStyle="secondary"
             >
               {`Add ${singularLabel}`}
             </Button>

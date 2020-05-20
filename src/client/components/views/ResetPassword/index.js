@@ -44,7 +44,7 @@ const ResetPassword = () => {
           <br />
           <Button
             el="link"
-            type="secondary"
+            buttonStyle="secondary"
             to={admin}
           >
             Back to Dashboard

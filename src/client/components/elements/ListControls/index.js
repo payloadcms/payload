@@ -38,7 +38,9 @@ const ListControls = (props) => {
   }, [useAsTitle, fields]);
 
   useEffect(() => {
-    const newState = {};
+    const newState = {
+      columns,
+    };
 
     if (search) {
       newState.where = {
@@ -61,7 +63,7 @@ const ListControls = (props) => {
         />
         <Button
           className={`${baseClass}__toggle-columns`}
-          type={visibleDrawer === 'columns' ? 'secondary' : undefined}
+          buttonStyle={visibleDrawer === 'columns' ? 'secondary' : undefined}
           onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : false)}
           icon={<Chevron />}
         >
@@ -69,7 +71,7 @@ const ListControls = (props) => {
         </Button>
         <Button
           className={`${baseClass}__toggle-where`}
-          type={visibleDrawer === 'where' ? 'secondary' : undefined}
+          buttonStyle={visibleDrawer === 'where' ? 'secondary' : undefined}
           onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : false)}
           icon={<Chevron />}
         >
@@ -80,7 +82,10 @@ const ListControls = (props) => {
         className={`${baseClass}__columns`}
         height={visibleDrawer === 'columns' ? 'auto' : 0}
       >
-        <ColumnSelector handleChange={setColumns} />
+        <ColumnSelector
+          fields={fields}
+          handleChange={setColumns}
+        />
       </AnimateHeight>
       <AnimateHeight
         className={`${baseClass}__where`}

@@ -26,13 +26,13 @@ ButtonContents.propTypes = {
 
 const Button = (props) => {
   const {
-    className, type, el, to, url, children, onClick, disabled, icon,
+    className, type, el, to, url, children, onClick, disabled, icon, buttonStyle,
   } = props;
 
   const classes = [
     baseClass,
     className && className,
-    type && `${baseClass}--${type}`,
+    buttonStyle && `${baseClass}--${buttonStyle}`,
     icon && `${baseClass}--icon`,
     disabled && `${baseClass}--disabled`,
   ].filter(Boolean).join(' ');
@@ -43,6 +43,7 @@ const Button = (props) => {
   }
 
   const buttonProps = {
+    type,
     className: classes,
     onClick: handleClick,
   };
@@ -75,7 +76,7 @@ const Button = (props) => {
     default:
       return (
         <button
-          type="button"
+          type="submit"
           {...buttonProps}
         >
           <ButtonContents icon={icon}>
@@ -88,7 +89,8 @@ const Button = (props) => {
 
 Button.defaultProps = {
   className: null,
-  type: 'primary',
+  type: 'submit',
+  buttonStyle: 'primary',
   el: null,
   to: null,
   url: null,
@@ -100,7 +102,8 @@ Button.defaultProps = {
 
 Button.propTypes = {
   className: PropTypes.string,
-  type: PropTypes.oneOf(['primary', 'secondary', 'error', undefined]),
+  type: PropTypes.oneOf(['submit', 'button']),
+  buttonStyle: PropTypes.oneOf(['primary', 'secondary', 'error', undefined]),
   el: PropTypes.oneOf(['link', 'anchor', undefined]),
   to: PropTypes.string,
   url: PropTypes.string,

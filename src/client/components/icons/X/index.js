@@ -2,12 +2,12 @@ import React from 'react';
 
 import './index.scss';
 
-const Close = () => {
+const X = () => {
   return (
     <svg
       width="25"
       height="25"
-      className="icon icon--close"
+      className="icon icon--x"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 25 25"
     >
@@ -29,4 +29,4 @@ const Close = () => {
   );
 };
 
-export default Close;
+export default X;

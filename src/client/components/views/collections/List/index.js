@@ -8,6 +8,7 @@ import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Paginator from '../../../elements/Paginator';
 import ListControls from '../../../elements/ListControls';
 import Pill from '../../../elements/Pill';
+import Button from '../../../elements/Button';
 
 import './index.scss';
 
@@ -21,6 +22,7 @@ const DefaultList = (props) => {
     collection: {
       slug,
       labels: {
+        singular: singularLabel,
         plural: pluralLabel,
       },
     },
@@ -51,7 +53,7 @@ const DefaultList = (props) => {
       <header className={`${baseClass}__header`}>
         <h1>{pluralLabel}</h1>
         <Pill to={newDocumentURL}>
-          Add New
+          Create New
         </Pill>
       </header>
       <ListControls
@@ -73,11 +75,25 @@ const DefaultList = (props) => {
       )}
       {(!data.docs || data.docs.length === 0) && (
         <div className={`${baseClass}__no-results`}>
-          No
-          {' '}
-          {pluralLabel}
-          {' '}
-          found
+          <p>
+            No
+            {' '}
+            {pluralLabel}
+            {' '}
+            found. Either no
+            {' '}
+            {pluralLabel}
+            {' '}
+            exist yet or none match the filters you&apos;ve specified above.
+          </p>
+          <Button
+            el="link"
+            to={newDocumentURL}
+          >
+            Create new
+            {' '}
+            {singularLabel}
+          </Button>
         </div>
       )}
       <Paginator
@@ -98,6 +114,7 @@ const DefaultList = (props) => {
 DefaultList.propTypes = {
   collection: PropTypes.shape({
     labels: PropTypes.shape({
+      singular: PropTypes.string,
       plural: PropTypes.string,
     }),
     slug: PropTypes.string,

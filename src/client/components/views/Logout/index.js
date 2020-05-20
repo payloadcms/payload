@@ -23,7 +23,7 @@ const Logout = () => {
         <br />
         <Button
           el="anchor"
-          type="secondary"
+          buttonStyle="secondary"
           url={`${admin}/login`}
         >
           Log back in
