@@ -10,12 +10,23 @@ import { LocaleProvider } from './utilities/Locale';
 import { StatusListProvider } from './elements/Status';
 import { UserProvider } from './data/User';
 import Routes from './Routes';
+import getCSSVariable from '../../utilities/getCSSVariable';
 
 import '../scss/app.scss';
 
+
 const Index = () => {
+  const windowInfoProps = {};
+
+  windowInfoProps.breakpoints = {
+    xs: parseInt(getCSSVariable('breakpoint-xs-width').replace('px', ''), 10),
+    s: parseInt(getCSSVariable('breakpoint-s-width').replace('px', ''), 10),
+    m: parseInt(getCSSVariable('breakpoint-s-width').replace('px', ''), 10),
+    l: parseInt(getCSSVariable('breakpoint-l-width').replace('px', ''), 10),
+  };
+
   return (
-    <WindowInfoProvider>
+    <WindowInfoProvider {...windowInfoProps}>
       <ScrollInfoProvider>
         <Router>
           <ModalProvider

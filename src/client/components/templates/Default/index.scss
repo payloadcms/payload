@@ -16,4 +16,23 @@
     align-items: center;
     justify-content: space-between;
   }
+
+  @include mid-break {
+    width: 100%;
+    margin-left: 0;
+    padding-top: base(3);
+
+    &__eyebrow {
+      padding: 0 0 $baseline;
+      margin: 0;
+
+      a:first-child {
+        padding-left: $baseline;
+      }
+    }
+
+    &__wrap {
+      padding: 0 $baseline $baseline;
+    }
+  }
 }

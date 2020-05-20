@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import DefaultSidebar from '../../elements/Sidebar';
+import DefaultNav from '../../elements/Nav';
 import StepNav, { StepNavProvider } from '../../elements/StepNav';
 import { StatusListProvider } from '../../elements/Status';
 import customComponents from '../../customComponents';
 
 import './index.scss';
 
-const Sidebar = customComponents?.layout?.Sidebar || DefaultSidebar;
+const Nav = customComponents?.layout?.Nav || DefaultNav;
 
 const baseClass = 'template-default';
 
@@ -21,7 +21,7 @@ const Default = ({ children, className }) => {
     <div className={classes}>
       <StatusListProvider>
         <StepNavProvider>
-          <Sidebar />
+          <Nav />
           <div className={`${baseClass}__eyebrow`}>
             <StepNav />
           </div>

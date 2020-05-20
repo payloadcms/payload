@@ -7,19 +7,17 @@
 // BREAKPOINTS
 /////////////////////////////
 
-$breakpoint-s-width  : 500px;
-$breakpoint-m-width  : 1024px;
-$breakpoint-l-width  : 1440px;
-$breakpoint-s-height : 400px;
-$breakpoint-m-height : 700px;
-$breakpoint-l-height : 900px;
+$breakpoint-xs-width: 400px;
+$breakpoint-s-width: 500px;
+$breakpoint-m-width: 1024px;
+$breakpoint-l-width: 1440px;
 
 //////////////////////////////
 // BASELINE GRID
 //////////////////////////////
 
 $baseline-px         : 25px;
-$baseline-body-size  : 14px;
+$baseline-body-size  : 13px;
 $baseline            : ($baseline-px / $baseline-body-size) + rem;
 
 @function base($multiplier) {

@@ -25,37 +25,44 @@ const Localizer = () => {
           button={locale}
           render={({ close }) => {
             return (
-              <ul>
-                {locales.map((localeOption) => {
-                  const baseLocaleClass = `${baseClass}__locale`;
+              <div>
+                <span>Locales</span>
+                <ul>
+                  {locales.map((localeOption) => {
+                    const baseLocaleClass = `${baseClass}__locale`;
 
-                  const localeClasses = [
-                    baseLocaleClass,
-                    locale === localeOption && `${baseLocaleClass}--active`,
-                  ];
+                    const localeClasses = [
+                      baseLocaleClass,
+                      locale === localeOption && `${baseLocaleClass}--active`,
+                    ];
 
-                  const newParams = {
-                    ...searchParams,
-                    locale: localeOption,
-                  };
+                    const newParams = {
+                      ...searchParams,
+                      locale: localeOption,
+                    };
 
-                  const search = qs.stringify(newParams);
+                    const search = qs.stringify(newParams);
 
-                  return (
-                    <li
-                      key={localeOption}
-                      className={localeClasses}
-                    >
-                      <Link
-                        to={{ search }}
-                        onClick={close}
-                      >
-                        {localeOption}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
+                    if (localeOption !== locale) {
+                      return (
+                        <li
+                          key={localeOption}
+                          className={localeClasses}
+                        >
+                          <Link
+                            to={{ search }}
+                            onClick={close}
+                          >
+                            {localeOption}
+                          </Link>
+                        </li>
+                      );
+                    }
+
+                    return null;
+                  })}
+                </ul>
+              </div>
             );
           }}
         />

@@ -1,6 +1,13 @@
 @import 'fonts';
 @import 'styles';
 
+:root {
+  --breakpoint-xs-width : $breakpoint-xs-width;
+  --breakpoint-s-width  : $breakpoint-s-width;
+  --breakpoint-m-width  : $breakpoint-m-width;
+  --breakpoint-l-width  : $breakpoint-l-width;
+}
+
 /////////////////////////////
 // GLOBAL STYLES
 /////////////////////////////
@@ -13,6 +20,7 @@ html {
   font-size: $baseline-body-size;
   line-height: $baseline-px;
   background: $color-background-gray;
+  -webkit-font-smoothing: antialiased;
 }
 
 html, body, #app {

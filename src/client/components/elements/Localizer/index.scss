@@ -12,10 +12,18 @@
     font-weight: 600;
     cursor: pointer;
 
+    &:hover {
+      text-decoration: underline;
+    }
+
     &:active,
     &:focus {
       outline: none;
     }
+  }
+
+  span {
+    color: $color-gray;
   }
 
   ul {
@@ -23,5 +31,11 @@
     padding: 0;
     text-align: left;
     margin: 0;
+
+    a {
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 }

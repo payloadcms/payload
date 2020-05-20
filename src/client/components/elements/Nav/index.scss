@@ -1,6 +1,6 @@
 @import '../../../scss/styles.scss';
 
-.sidebar {
+.nav {
   position: fixed;
   top: 0;
   left: 0;
@@ -8,7 +8,37 @@
   width: base(10);
   overflow: hidden;
 
-  &__wrap {
+  header {
+    width: 100%;
+    display: flex;
+    margin-bottom: $baseline;
+
+    a, button {
+      display: block;
+      padding: 0;
+
+      svg {
+        display: block;
+      }
+    }
+  }
+
+  &__brand {
+    margin-right: base(1);
+  }
+
+  &__mobile-menu-btn {
+    background: none;
+    border: 0;
+    opacity: 0;
+    visibility: hidden;
+
+    &:active, &:focus {
+      outline: none;
+    }
+  }
+
+  &__scroll {
     height: 100%;
     padding: base(1);
     display: flex;
@@ -18,8 +48,8 @@
     overflow-y: scroll;
   }
 
-  &__brand {
-    margin-bottom: $baseline;
+  &__wrap {
+    width: 100%;
   }
 
   &__label {
@@ -74,6 +104,49 @@
         svg {
           opacity: 1;
         }
+      }
+    }
+  }
+
+  @include mid-break {
+    background: rgba($color-background-gray, .95);
+    width: 100%;
+    height: base(3);
+    z-index: $z-nav;
+
+    &__scroll {
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    header,
+    &__wrap {
+      padding: $baseline;
+    }
+
+    header {
+      justify-content: space-between;
+      margin: 0;
+    }
+
+    &__mobile-menu-btn {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    &__wrap {
+      visibility: hidden;
+      opacity: 0;
+      overflow-y: scroll;
+    }
+
+    &.nav--menu-active {
+      height: 100vh;
+
+      .nav__wrap {
+        visibility: visible;
+        opacity: 1;
       }
     }
   }

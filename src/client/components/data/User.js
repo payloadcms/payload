@@ -38,6 +38,8 @@ const UserProvider = ({ children }) => {
   const history = useHistory();
   const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
 
+  const email = user?.email;
+
   const refreshToken = useCallback(() => {
     // Need to retrieve token straight from cookie so as to keep this function
     // with no dependencies and to make sure we have the exact token that will be used
@@ -97,7 +99,7 @@ const UserProvider = ({ children }) => {
     }
 
     getPermissions();
-  }, [user]);
+  }, [email]);
 
   useEffect(() => {
     let reminder = false;

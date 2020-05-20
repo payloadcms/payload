@@ -12,11 +12,12 @@
     border: 0;
     display: flex;
     align-items: center;
+    font-weight: 600;
+    text-decoration: none;
 
     svg {
       margin-left: base(.35);
-      width: base(.25);
-      height: base(.25);
+      transform: rotate(-90deg);
     }
 
     label {
@@ -24,7 +25,7 @@
     }
 
     &:hover {
-      border-bottom: 0;
+      text-decoration: underline;
     }
   }
 
