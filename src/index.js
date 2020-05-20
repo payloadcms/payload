@@ -70,10 +70,6 @@ class Payload {
       },
     }));
 
-    // this.router.use('', (err, req, res) => {
-    //   console.log('wtf');
-    // });
-
     // Bind router to API
     this.express.use(this.config.routes.api, this.router);
 

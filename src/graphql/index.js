@@ -54,29 +54,23 @@ class GraphQL {
       mutation,
     });
 
-    let errorExtension;
+    let errorExtensions = [];
     let errorExtensionIteration = 0;
 
     const extensions = async (info) => {
       const { result } = info;
       if (result.errors) {
         const afterErrorHook = typeof this.config.hooks.afterError === 'function' ? this.config.hooks.afterError : null;
-
-        errorExtension = await Promise.all(result.errors.map(async (error) => {
-          return errorHandler(error, info, this.config.debug, afterErrorHook);
-        }));
+        errorExtensions = await errorHandler(info, this.config.debug, afterErrorHook);
       }
       return null;
     };
 
     return graphQLHTTP({
       schema,
-      customFormatErrorFn: (err) => {
+      customFormatErrorFn: () => {
         const response = {
-          // message: err.message,
-          // locations: err.locations,
-          // path: err.path,
-          ...errorExtension[errorExtensionIteration],
+          ...errorExtensions[errorExtensionIteration],
         };
         errorExtensionIteration += 1;
         return response;

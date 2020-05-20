@@ -1,28 +1,22 @@
-const httpStatus = require('http-status');
+const errorHandler = async (info, debug, afterErrorHook) => {
+  return Promise.all(info.result.errors.map(async (err) => {
+    // TODO: use payload logging
+    console.error(err.stack);
 
-const errorHandler = async (err, info, debug, afterErrorHook) => {
-  let { status } = info.context.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
-  let response = {
-    ...err,
-  };
+    let response = {
+      ...err,
+    };
 
-  // TODO: use payload logging
-  console.error(err.stack);
+    if (afterErrorHook) {
+      ({ response } = await afterErrorHook(err, response) || { response });
+    }
 
-  if (afterErrorHook) {
-    ({ response, status } = await afterErrorHook(err, response) || { response, status });
-  }
+    if (debug && debug === true) {
+      response.stack = err.stack;
+    }
 
-  if (debug && debug === true) {
-    response.stack = err.stack;
-  }
-
-  // TODO: how to handle collection level hooks for graphQL?
-  // if (req.collection && typeof req.collection.config.hooks.afterError === 'function') {
-  //   ({ response, status } = await req.collection.config.hooks.afterError(err, response) || { response, status });
-  // }
-
-  return response;
+    return response;
+  }));
 };
 
 module.exports = errorHandler;
