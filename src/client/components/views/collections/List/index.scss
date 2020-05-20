@@ -6,21 +6,6 @@
   background: white;
   width: 100%;
 
-  &__search {
-    position: relative;
-
-    svg {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      right: base(.5);
-    }
-  }
-
-  &__search-input {
-    @include formInput;
-  }
-
   &__controls {
     margin-bottom: $baseline;
   }

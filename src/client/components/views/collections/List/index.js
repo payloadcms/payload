@@ -6,7 +6,7 @@ import customComponents from '../../../customComponents';
 import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Paginator from '../../../elements/Paginator';
-import Search from '../../../icons/Search';
+import ListControls from '../../../elements/ListControls';
 
 import './index.scss';
 
@@ -18,9 +18,7 @@ const DefaultList = (props) => {
   const {
     collection,
     collection: {
-      useAsTitle,
       slug,
-      fields,
       labels: {
         plural: pluralLabel,
       },
@@ -28,10 +26,7 @@ const DefaultList = (props) => {
   } = props;
 
   const location = useLocation();
-  const [search, setSearch] = useState('');
-  const [columns, setColumns] = useState(null);
-  const [filters, setFilters] = useState(null);
-  const [titleField, setTitleField] = useState(null);
+  const [listControls, setListControls] = useState({});
 
   const { page } = queryString.parse(location.search, { ignoreQueryPrefix: true });
 
@@ -40,50 +35,21 @@ const DefaultList = (props) => {
   const [{ data }, { setParams }] = usePayloadAPI(apiURL, {});
 
   useEffect(() => {
-    if (useAsTitle) {
-      const foundTitleField = fields.find(field => field.name === useAsTitle);
-
-      if (foundTitleField) {
-        setTitleField(foundTitleField);
-      }
-    }
-  }, [useAsTitle, fields]);
-
-  useEffect(() => {
-    const params = {
-      where: {
-        AND: [],
-      },
-    };
+    const params = {};
 
     if (page) params.page = page;
-
-    if (search) {
-      params.where.AND.push({
-        [useAsTitle || 'id']: {
-          like: search,
-        },
-      });
-    }
+    if (listControls?.where) params.where = listControls.where;
 
     setParams(params);
-  }, [search, setParams, page, useAsTitle]);
+  }, [setParams, page, listControls]);
 
   return (
     <div className={baseClass}>
       <h1>{pluralLabel}</h1>
-      <div className={`${baseClass}__controls`}>
-        <div className={`${baseClass}__search`}>
-          <input
-            className={`${baseClass}__search-input`}
-            placeholder={`Search${` by ${titleField ? titleField.label : 'ID'}`}`}
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          <Search />
-        </div>
-      </div>
+      <ListControls
+        handleChange={setListControls}
+        collection={collection}
+      />
       {(data.docs && data.docs.length > 0) && (
         <ul>
           {data.docs.map((doc) => {

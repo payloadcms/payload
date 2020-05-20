@@ -1,0 +1,17 @@
+@import '../../../scss/styles';
+@import '../../forms/field-types/shared.scss';
+
+.search-filter {
+  position: relative;
+
+  svg {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: base(.5);
+  }
+
+  &__input {
+    @include formInput;
+  }
+}
