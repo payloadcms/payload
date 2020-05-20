@@ -6,7 +6,7 @@ import customComponents from '../../../customComponents';
 import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Paginator from '../../../elements/Paginator';
-import Text from '../../../forms/field-types/Text';
+import Search from '../../../icons/Search';
 
 import './index.scss';
 
@@ -69,19 +69,20 @@ const DefaultList = (props) => {
     setParams(params);
   }, [search, setParams, page, useAsTitle]);
 
-  console.log(fields);
-
   return (
     <div className={baseClass}>
       <h1>{pluralLabel}</h1>
       <div className={`${baseClass}__controls`}>
-        <input
-          className={`${baseClass}__search`}
-          placeholder={`Search${` by ${titleField ? titleField.label : 'ID'}`}`}
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+        <div className={`${baseClass}__search`}>
+          <input
+            className={`${baseClass}__search-input`}
+            placeholder={`Search${` by ${titleField ? titleField.label : 'ID'}`}`}
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <Search />
+        </div>
       </div>
       {data.docs && (
         <ul>

@@ -7,10 +7,29 @@
   height: 300px;
 
   &__search {
+    position: relative;
+
+    svg {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      right: base(.5);
+    }
+  }
+
+  &__search-input {
     @include formInput;
   }
 
+  &__controls {
+    margin-bottom: $baseline;
+  }
+
   @include mid-break {
-    padding: base(1);
+    padding: $baseline;
+
+    &__search-input {
+      margin: 0;
+    }
   }
 }
