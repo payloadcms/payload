@@ -1166,6 +1166,15 @@
   dependencies:
     type-detect "4.0.8"
 
+"@trbl/react-collapsibles@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@trbl/react-collapsibles/-/react-collapsibles-0.1.0.tgz#81c5590b505c1a155a9be68b8f6c00b242e0b555"
+  integrity sha512-fEKPYbRymsxfUJT2gCzubfYkt6l0mxQx5P4LfpBP/NioSBIH40SGtbMek2WCVkxFUoxAhA/VzOoE6YZK8QucmA==
+  dependencies:
+    "@trbl/react-html-element" "^1.0.3"
+    prop-types "^15.7.2"
+    react-animate-height "^2.0.16"
+
 "@trbl/react-html-element@^1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@trbl/react-html-element/-/react-html-element-1.0.3.tgz#5ebd8ff70763b8f49c7a2e5da9abf1e6a7530c17"
@@ -8728,7 +8737,7 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-animate-height@^2.0.20:
+react-animate-height@^2.0.16, react-animate-height@^2.0.20:
   version "2.0.21"
   resolved "https://registry.yarnpkg.com/react-animate-height/-/react-animate-height-2.0.21.tgz#da9223eb0e74457d52f72da477c8626550df2ce6"
   integrity sha512-CZHdjMD8qqp10tYtWmauWYASXxxv9vYeljxFGFtbcrbNXhsUv0w3IjxVK+0yCnyfk7769WfMZKHra4vRcbMnQg==

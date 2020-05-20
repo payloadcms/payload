@@ -17,5 +17,40 @@
 
   .btn {
     margin: 0 0 0 $baseline;
+
+    &.btn--secondary {
+      svg {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  @include mid-break {
+    .btn {
+      margin: 0 0 0 base(.5);
+    }
+  }
+
+  @include small-break {
+    &__wrap {
+      flex-wrap: wrap;
+    }
+
+    .search-filter {
+      margin-bottom: base(.5);
+      width: 100%;
+    }
+
+    .btn {
+      width: calc(50% - #{base(.25)});
+    }
+
+    &__toggle-columns.btn {
+      margin: 0 base(.25) 0 0;
+    }
+
+    &__toggle-filters.btn {
+      margin: 0 0 0 base(.25);
+    }
   }
 }

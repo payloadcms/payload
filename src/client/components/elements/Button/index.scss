@@ -14,26 +14,36 @@
   font-weight: 600;
   text-decoration: none;
 
+  &--primary {
+    &:hover, &:focus {
+      background: lighten($color-dark-gray, 5%);
+    }
+
+    &:active {
+      background: lighten($color-dark-gray, 10%);
+    }
+  }
+
   &--secondary {
     box-shadow: inset 0 0 0 $style-stroke-width $color-dark-gray;
     color: $color-dark-gray;
     background: none;
 
     &:hover {
-      background: lighten($color-dark-gray, 5%);
+      background: rgba($color-dark-gray, .02);
       box-shadow: inset 0 0 0 $style-stroke-width lighten($color-dark-gray, 5%);
-      color: white;
     }
   }
 
   &--icon {
     span {
       display: flex;
+      justify-content: space-between;
     }
 
     svg {
-      margin-left: base(1);
       display: block;
+      margin-left: base(.5);
     }
 
     &.btn--primary {
@@ -43,11 +53,8 @@
     }
   }
 
-  &:hover {
-    background: lighten($color-dark-gray, 5%);
-  }
-
-  &:focus, &:active {
+  &:focus,
+  &:active {
     outline: none;
   }
 }

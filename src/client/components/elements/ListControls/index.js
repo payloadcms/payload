@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import AnimateHeight from 'react-animate-height';
 // import customComponents from '../../customComponents';
 import SearchFilter from '../SearchFilter';
+import ColumnSelector from '../ColumnSelector';
+import WhereBuilder from '../WhereBuilder';
 import Button from '../Button';
 import Chevron from '../../icons/Chevron';
 
@@ -21,7 +24,7 @@ const ListControls = (props) => {
   const [titleField, setTitleField] = useState(null);
   const [search, setSearch] = useState('');
   const [columns, setColumns] = useState([]);
-  const [filters, setFilters] = useState({});
+  const [where, setWhere] = useState({});
   const [columnsVisible, setColumnsVisible] = useState(false);
   const [filtersVisible, setFiltersVisible] = useState(false);
 
@@ -36,14 +39,18 @@ const ListControls = (props) => {
   }, [useAsTitle, fields]);
 
   useEffect(() => {
-    handleChange({
-      where: {
+    const newState = {};
+
+    if (search) {
+      newState.where = {
         AND: [
           search,
         ],
-      },
-    });
-  }, [search, columns, filters, handleChange]);
+      };
+    }
+
+    handleChange(newState);
+  }, [search, columns, where, handleChange]);
 
   return (
     <div className={baseClass}>
@@ -54,18 +61,34 @@ const ListControls = (props) => {
           fieldLabel={titleField ? titleField.label : undefined}
         />
         <Button
-          onClick={() => setColumnsVisible(!columnsVisible)}
+          className={`${baseClass}__toggle-columns`}
+          type={columnsVisible ? 'secondary' : undefined}
+          onClick={() => { setFiltersVisible(false); setColumnsVisible(!columnsVisible); }}
           icon={<Chevron />}
         >
           Columns
         </Button>
         <Button
-          onClick={() => setFiltersVisible(!filtersVisible)}
+          className={`${baseClass}__toggle-filters`}
+          type={filtersVisible ? 'secondary' : undefined}
+          onClick={() => { setColumnsVisible(false); setFiltersVisible(!filtersVisible); }}
           icon={<Chevron />}
         >
           Filters
         </Button>
       </div>
+      <AnimateHeight
+        className={`${baseClass}__columns`}
+        height={columnsVisible ? 'auto' : 0}
+      >
+        <ColumnSelector handleChange={setColumns} />
+      </AnimateHeight>
+      <AnimateHeight
+        className={`${baseClass}__filters`}
+        height={filtersVisible ? 'auto' : 0}
+      >
+        <WhereBuilder handleChange={setWhere} />
+      </AnimateHeight>
     </div>
   );
 };

@@ -16,13 +16,13 @@ const SearchFilter = (props) => {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    setSearch(search);
-
-    handleChange(search ? {
-      [fieldName]: {
-        like: search,
-      },
-    } : {});
+    if (typeof handleChange === 'function') {
+      handleChange(search ? {
+        [fieldName]: {
+          like: search,
+        },
+      } : null);
+    }
   }, [search, handleChange, fieldName]);
 
   return (
