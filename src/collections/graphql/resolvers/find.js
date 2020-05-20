@@ -16,9 +16,6 @@ const findResolver = collection => async (_, args, context) => {
     req: context,
   };
 
-  // TODO: remove faked error
-  // throw new Error('blow up for science');
-
   const results = await find(options);
   return results;
 };

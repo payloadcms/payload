@@ -1,5 +1,4 @@
 const httpStatus = require('http-status');
-// const formatErrorResponse = require('../../express/responses/formatError');
 const formatSuccessResponse = require('../../express/responses/formatSuccess');
 const { create } = require('../operations');
 
