@@ -29,12 +29,19 @@
     margin-bottom: $baseline;
   }
 
+  .table {
+    table {
+      width: 100%;
+    }
+  }
+
   @include mid-break {
     padding: $baseline 0;
 
     &__header,
     .list-controls,
-    .table {
+    .table,
+    &__no-results {
       padding-left: $baseline;
       padding-right: $baseline;
     }
