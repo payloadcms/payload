@@ -1,28 +1,4 @@
-const getInitialColumnState = ({
-  fields, timestamps, useAsTitle, defaultColumns,
-} = {}) => {
-  let availableFields = [...fields].filter((field) => {
-    return field?.hidden !== true && field?.hidden?.admin !== true;
-  });
-
-  availableFields.push({
-    name: 'id',
-    label: 'ID',
-  });
-
-  if (timestamps) {
-    availableFields = availableFields.concat([
-      {
-        name: 'createdAt',
-        label: 'Created At',
-      },
-      {
-        name: 'modifiedAt',
-        label: 'Modified At',
-      },
-    ]);
-  }
-
+const getInitialColumnState = (fields, useAsTitle, defaultColumns) => {
   let initialColumns = [];
 
   if (Array.isArray(defaultColumns)) {
@@ -30,14 +6,14 @@ const getInitialColumnState = ({
   } else if (useAsTitle) {
     initialColumns.push(useAsTitle);
 
-    const remainingColumns = availableFields.filter((field) => {
+    const remainingColumns = fields.filter((field) => {
       return field.name !== useAsTitle;
     }).slice(0, 2).map((field) => {
       return field.name;
     });
     initialColumns = initialColumns.concat(remainingColumns);
   } else {
-    initialColumns = availableFields.slice(0, 3).reduce((columns, field) => {
+    initialColumns = fields.slice(0, 3).reduce((columns, field) => {
       return [
         ...columns,
         field.name,
@@ -47,7 +23,6 @@ const getInitialColumnState = ({
 
   return {
     columns: initialColumns,
-    fields: availableFields,
   };
 };
 

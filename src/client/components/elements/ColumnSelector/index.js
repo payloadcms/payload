@@ -29,11 +29,12 @@ const reducer = (state, { type, payload }) => {
 const ColumnSelector = (props) => {
   const {
     handleChange,
-    collection,
+    fields,
+    useAsTitle,
+    defaultColumns,
   } = props;
 
   const [initialColumns, setInitialColumns] = useState([]);
-  const [availableFields, setAvailableFields] = useState([]);
   const [columns, dispatchColumns] = useReducer(reducer, initialColumns);
 
   useEffect(() => {
@@ -41,10 +42,9 @@ const ColumnSelector = (props) => {
   }, [columns, handleChange]);
 
   useEffect(() => {
-    const { columns: initializedColumns, fields: initializedFields } = getInitialState(collection);
+    const { columns: initializedColumns } = getInitialState(fields, useAsTitle, defaultColumns);
     setInitialColumns(initializedColumns);
-    setAvailableFields(initializedFields);
-  }, [collection]);
+  }, [fields, useAsTitle, defaultColumns]);
 
   useEffect(() => {
     dispatchColumns({ payload: initialColumns, type: 'replace' });
@@ -52,7 +52,7 @@ const ColumnSelector = (props) => {
 
   return (
     <div className={baseClass}>
-      {availableFields && availableFields.map((field) => {
+      {fields && fields.map((field) => {
         const isEnabled = columns.find(column => column === field.name);
         return (
           <Pill
@@ -71,13 +71,19 @@ const ColumnSelector = (props) => {
   );
 };
 
+ColumnSelector.defaultProps = {
+  defaultColumns: undefined,
+  useAsTitle: undefined,
+};
+
 ColumnSelector.propTypes = {
-  collection: PropTypes.shape({
-    fields: PropTypes.arrayOf(
-      PropTypes.shape({}),
-    ),
-    timestamps: PropTypes.bool,
-  }).isRequired,
+  fields: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ).isRequired,
+  defaultColumns: PropTypes.arrayOf(
+    PropTypes.string,
+  ),
+  useAsTitle: PropTypes.string,
   handleChange: PropTypes.func.isRequired,
 };
 

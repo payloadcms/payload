@@ -24,7 +24,6 @@ const Repeater = (props) => {
   const { fields: fieldState, dispatchFields, countRows } = formContext;
 
   const {
-    label,
     name,
     fields,
     defaultValue,

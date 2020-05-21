@@ -9,6 +9,8 @@ import Paginator from '../../../elements/Paginator';
 import ListControls from '../../../elements/ListControls';
 import Pill from '../../../elements/Pill';
 import Button from '../../../elements/Button';
+import SortColumn from '../../../elements/SortColumn';
+import Table from '../../../elements/Table';
 
 import './index.scss';
 
@@ -20,6 +22,7 @@ const DefaultList = (props) => {
   const {
     collection,
     collection: {
+      fields,
       slug,
       labels: {
         singular: singularLabel,
@@ -28,10 +31,10 @@ const DefaultList = (props) => {
     },
   } = props;
 
-  const newDocumentURL = `${admin}/collections/${slug}/create`;
-
   const location = useLocation();
   const [listControls, setListControls] = useState({});
+  const [sort, setSort] = useState(null);
+  const newDocumentURL = `${admin}/collections/${slug}/create`;
 
   const { page } = queryString.parse(location.search, { ignoreQueryPrefix: true });
 
@@ -43,10 +46,11 @@ const DefaultList = (props) => {
     const params = {};
 
     if (page) params.page = page;
+    if (sort) params.sort = sort;
     if (listControls?.where) params.where = listControls.where;
 
     setParams(params);
-  }, [setParams, page, listControls]);
+  }, [setParams, page, sort, listControls]);
 
   return (
     <div className={baseClass}>
@@ -61,17 +65,37 @@ const DefaultList = (props) => {
         collection={collection}
       />
       {(data.docs && data.docs.length > 0) && (
-        <ul>
-          {data.docs.map((doc) => {
-            return (
-              <li key={doc.id}>
-                <Link to={`${admin}/collections/${collection.slug}/${doc.id}`}>
-                  {doc[collection.useAsTitle || 'id']}
-                </Link>
-              </li>
-            );
+        <Table
+          data={data.docs}
+          columns={listControls.columns.map((col, i) => {
+            const field = fields.find(fieldToCheck => fieldToCheck.name === col);
+            return {
+              accessor: field.name,
+              components: {
+                Heading: (
+                  <SortColumn
+                    label={field.label}
+                    name={field.name}
+                    handleChange={setSort}
+                  />
+                ),
+                renderCell: (rowData, cellData) => {
+                  if (i === 0) {
+                    return (
+                      <>
+                        <Link to={`${admin}/collections/${collection.slug}/${rowData.id}`}>
+                          {cellData}
+                        </Link>
+                      </>
+                    );
+                  }
+
+                  return cellData;
+                },
+              },
+            };
           })}
-        </ul>
+        />
       )}
       {(!data.docs || data.docs.length === 0) && (
         <div className={`${baseClass}__no-results`}>
@@ -120,26 +144,43 @@ DefaultList.propTypes = {
     slug: PropTypes.string,
     useAsTitle: PropTypes.string,
     fields: PropTypes.arrayOf(PropTypes.shape),
+    timestamps: PropTypes.bool,
   }).isRequired,
 };
 
 const ListView = (props) => {
-  const { collection } = props;
+  const {
+    collection,
+    collection: {
+      slug,
+      fields,
+      timestamps,
+      labels: {
+        plural,
+      },
+    },
+  } = props;
   const { setStepNav } = useStepNav();
+
+  let allFields = [...fields, { name: 'id', label: 'ID' }];
+
+  if (timestamps) {
+    allFields = allFields.concat([{ name: 'createdAt', label: 'Created At' }, { name: 'modifiedAt', label: 'Modified At' }]);
+  }
 
   useEffect(() => {
     setStepNav([
       {
-        label: collection.labels.plural,
+        label: plural,
       },
     ]);
-  }, [setStepNav, collection.labels.plural]);
+  }, [setStepNav, plural]);
 
-  const List = customComponents?.[collection.slug]?.views?.List || DefaultList;
+  const List = customComponents?.[slug]?.views?.List || DefaultList;
 
   return (
     <>
-      <List collection={collection} />
+      <List collection={{ ...collection, fields: allFields }} />
     </>
   );
 };
@@ -147,9 +188,13 @@ const ListView = (props) => {
 ListView.propTypes = {
   collection: PropTypes.shape({
     labels: PropTypes.shape({
+      singular: PropTypes.string,
       plural: PropTypes.string,
     }),
     slug: PropTypes.string,
+    useAsTitle: PropTypes.string,
+    fields: PropTypes.arrayOf(PropTypes.shape),
+    timestamps: PropTypes.bool,
   }).isRequired,
 };
 

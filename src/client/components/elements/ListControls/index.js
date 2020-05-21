@@ -15,10 +15,10 @@ const baseClass = 'list-controls';
 const ListControls = (props) => {
   const {
     handleChange,
-    collection,
     collection: {
       useAsTitle,
       fields,
+      defaultColumns,
     },
   } = props;
 
@@ -84,7 +84,9 @@ const ListControls = (props) => {
         height={visibleDrawer === 'columns' ? 'auto' : 0}
       >
         <ColumnSelector
-          collection={collection}
+          useAsTitle={useAsTitle}
+          fields={fields}
+          defaultColumns={defaultColumns}
           handleChange={setColumns}
         />
       </AnimateHeight>
@@ -102,6 +104,9 @@ ListControls.propTypes = {
   collection: PropTypes.shape({
     useAsTitle: PropTypes.string,
     fields: PropTypes.arrayOf(PropTypes.shape),
+    defaultColumns: PropTypes.arrayOf(
+      PropTypes.string,
+    ),
   }).isRequired,
   handleChange: PropTypes.func.isRequired,
 };

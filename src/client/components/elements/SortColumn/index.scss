@@ -1,0 +1,42 @@
+@import '../../../scss/styles.scss';
+
+.sort-column {
+  &__label,
+  &__buttons,
+  .btn {
+    vertical-align: middle;
+    display: inline-block;
+  }
+
+  &__label {
+    margin-right: base(.25);
+    cursor: default;
+  }
+
+  &__buttons {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .btn {
+    margin: 0;
+    opacity: .5;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  &__asc {
+    svg {
+      transform: rotate(180deg);
+    }
+  }
+
+  &:hover {
+    .sort-column__buttons {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}

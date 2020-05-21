@@ -26,15 +26,18 @@ ButtonContents.propTypes = {
 
 const Button = (props) => {
   const {
-    className, type, el, to, url, children, onClick, disabled, icon, buttonStyle,
+    className, type, el, to, url, children, onClick, disabled, icon, buttonStyle, round, size,
   } = props;
 
   const classes = [
     baseClass,
     className && className,
-    buttonStyle && `${baseClass}--${buttonStyle}`,
+    buttonStyle && `${baseClass}--style-${buttonStyle}`,
     icon && `${baseClass}--icon`,
+    (icon && !children) && `${baseClass}--icon-only`,
     disabled && `${baseClass}--disabled`,
+    round && `${baseClass}--round`,
+    size && `${baseClass}--size-${size}`,
   ].filter(Boolean).join(' ');
 
   function handleClick(event) {
@@ -98,12 +101,16 @@ Button.defaultProps = {
   onClick: null,
   disabled: undefined,
   icon: null,
+  size: 'medium',
+  round: false,
 };
 
 Button.propTypes = {
+  round: PropTypes.bool,
   className: PropTypes.string,
   type: PropTypes.oneOf(['submit', 'button']),
-  buttonStyle: PropTypes.oneOf(['primary', 'secondary', 'error', undefined]),
+  size: PropTypes.oneOf(['small', 'medium']),
+  buttonStyle: PropTypes.oneOf(['primary', 'secondary', 'transparent', 'error', 'none']),
   el: PropTypes.oneOf(['link', 'anchor', undefined]),
   to: PropTypes.string,
   url: PropTypes.string,

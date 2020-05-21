@@ -1,0 +1,25 @@
+@import '../../../scss/styles.scss';
+
+.table {
+  thead {
+    color: $color-gray;
+
+    th {
+      font-weight: normal;
+      text-align: left;
+    }
+  }
+
+  th, td {
+    padding: base(.75);
+    min-width: 150px;
+  }
+
+  tbody {
+    tr {
+      &:nth-child(1) {
+        background: $color-background-gray;
+      }
+    }
+  }
+}
