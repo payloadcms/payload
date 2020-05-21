@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import withCondition from '../../withCondition';
+import withConditions from '../../withConditions';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
@@ -108,4 +108,4 @@ Email.propTypes = {
   autoComplete: PropTypes.string,
 };
 
-export default withCondition(Email);
+export default withConditions(Email);

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
-import withCondition from '../../withCondition';
+import withConditions from '../../withConditions';
 import Label from '../../Label';
 import Error from '../../Error';
 
@@ -96,4 +96,4 @@ Text.propTypes = {
   label: PropTypes.string,
 };
 
-export default withCondition(Text);
+export default withConditions(Text);

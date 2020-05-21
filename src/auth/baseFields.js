@@ -24,8 +24,10 @@ module.exports = [
     name: 'apiKey',
     type: 'text',
     label: 'User API Key',
-    condition: (_, siblings) => {
-      return siblings.enableAPIKey && siblings.enableAPIKey.value;
+    conditions: {
+      enableAPIKey: {
+        equals: true,
+      },
     },
   },
 ];

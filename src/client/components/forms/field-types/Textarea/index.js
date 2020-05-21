@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
-import withCondition from '../../withCondition';
+import withConditions from '../../withConditions';
 import Label from '../../Label';
 import Error from '../../Error';
 
@@ -95,4 +95,4 @@ Textarea.propTypes = {
   placeholder: PropTypes.string,
 };
 
-export default withCondition(Textarea);
+export default withConditions(Textarea);

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
-import withCondition from '../../withCondition';
+import withConditions from '../../withConditions';
 import Error from '../../Error';
 import StyledCheckbox from './StyledCheckbox';
 
@@ -87,4 +87,4 @@ Checkbox.propTypes = {
   label: PropTypes.string,
 };
 
-export default withCondition(Checkbox);
+export default withConditions(Checkbox);

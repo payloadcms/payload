@@ -14,7 +14,9 @@ const useFieldType = (options) => {
 
   const formContext = useContext(FormContext);
   const { dispatchFields, submitted, processing } = formContext;
-  const mountValue = formContext.fields[name]?.value || null;
+  let mountValue = formContext.fields[name]?.value;
+
+  if (!mountValue && mountValue !== false) mountValue = null;
 
   const sendField = useCallback((valueToSend) => {
     dispatchFields({

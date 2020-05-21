@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
 import { RowModifiedProvider, useRowModified } from '../../Form/RowModified';
-import withCondition from '../../withCondition';
+import withConditions from '../../withConditions';
 import Button from '../../../elements/Button';
 import FormContext from '../../Form/Context';
 import DraggableSection from '../../DraggableSection';
@@ -163,4 +163,4 @@ Repeater.propTypes = {
   fieldTypes: PropTypes.shape({}).isRequired,
 };
 
-export default withCondition(Repeater);
+export default withConditions(Repeater);
