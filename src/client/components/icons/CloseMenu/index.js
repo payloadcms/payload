@@ -5,6 +5,7 @@ import './index.scss';
 const CloseMenu = () => {
   return (
     <svg
+      className="icon icon--close-menu"
       width="25"
       height="25"
       viewBox="0 0 25 25"

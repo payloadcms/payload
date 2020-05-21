@@ -32,6 +32,7 @@
     border: 0;
     opacity: 0;
     visibility: hidden;
+    cursor: pointer;
 
     &:active, &:focus {
       outline: none;
