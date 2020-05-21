@@ -12,7 +12,6 @@
   text-decoration: none;
 
   span {
-    display: flex;
     line-height: base(1);
   }
 
@@ -62,6 +61,7 @@
 
   &--icon {
     span {
+      display: flex;
       justify-content: space-between;
     }
 
@@ -70,7 +70,7 @@
       margin-left: base(.5);
     }
 
-    &.btn--primary {
+    &.btn--style-primary {
       svg {
         @include color-svg(white);
       }

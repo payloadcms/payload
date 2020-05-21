@@ -13,18 +13,8 @@
     cursor: default;
   }
 
-  &__buttons {
-    opacity: 0;
-    visibility: hidden;
-  }
-
   .btn {
     margin: 0;
-    opacity: .5;
-
-    &:hover {
-      opacity: 1;
-    }
   }
 
   &__asc {

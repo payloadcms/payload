@@ -165,7 +165,7 @@ const ListView = (props) => {
   let allFields = [...fields, { name: 'id', label: 'ID' }];
 
   if (timestamps) {
-    allFields = allFields.concat([{ name: 'createdAt', label: 'Created At' }, { name: 'modifiedAt', label: 'Modified At' }]);
+    allFields = allFields.concat([{ name: 'createdAt', label: 'Created At' }, { name: 'updatedAt', label: 'Updated At' }]);
   }
 
   useEffect(() => {
