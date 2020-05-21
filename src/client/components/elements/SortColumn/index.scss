@@ -13,8 +13,18 @@
     cursor: default;
   }
 
-  .btn {
+  button.btn {
     margin: 0;
+    opacity: .3;
+
+    &.sort-column--active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    &:hover {
+      opacity: .7;
+    }
   }
 
   &__asc {
@@ -24,8 +34,8 @@
   }
 
   &:hover {
-    .sort-column__buttons {
-      opacity: 1;
+    .btn {
+      opacity: .4;
       visibility: visible;
     }
   }

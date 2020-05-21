@@ -11,7 +11,6 @@ const baseClass = 'sort-column';
 const SortColumn = (props) => {
   const { label, handleChange, name } = props;
   const [sort, setSort] = useState(null);
-  const [hovered, setHovered] = useState(false);
 
   const { breakpoints: { m } } = useWindowInfo();
 
@@ -22,18 +21,20 @@ const SortColumn = (props) => {
   const desc = `-${name}`;
   const asc = name;
 
+  const ascClasses = [`${baseClass}__asc`];
+  if (sort === asc) ascClasses.push(`${baseClass}--active`);
+
+  const descClasses = [`${baseClass}__desc`];
+  if (sort === desc) descClasses.push(`${baseClass}--active`);
+
   return (
-    <div
-      className={baseClass}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
+    <div className={baseClass}>
       <span className={`${baseClass}__label`}>{label}</span>
       <span className={`${baseClass}__buttons`}>
         <Button
           round
           buttonStyle="none"
-          className={`${baseClass}__asc${sort === asc ? ` ${baseClass}--active` : ''}`}
+          className={ascClasses.join(' ')}
           onClick={() => setSort(asc)}
         >
           <Chevron />
@@ -41,7 +42,7 @@ const SortColumn = (props) => {
         <Button
           round
           buttonStyle="none"
-          className={`${baseClass}__desc${sort === desc ? ` ${baseClass}--active` : ''}`}
+          className={descClasses.join(' ')}
           onClick={() => setSort(desc)}
         >
           <Chevron />
