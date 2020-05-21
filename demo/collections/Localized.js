@@ -18,6 +18,11 @@ module.exports = {
 
     return null;
   },
+  defaultColumns: [
+    'title',
+    'priority',
+    'createdAt',
+  ],
   fields: [
     {
       name: 'title',

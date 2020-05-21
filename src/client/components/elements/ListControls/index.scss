@@ -17,8 +17,9 @@
 
   .btn {
     margin: 0 0 0 $baseline;
+    min-width: 150px;
 
-    &.btn--secondary {
+    &.btn--primary {
       svg {
         transform: rotate(180deg);
       }

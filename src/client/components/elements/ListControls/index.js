@@ -15,6 +15,7 @@ const baseClass = 'list-controls';
 const ListControls = (props) => {
   const {
     handleChange,
+    collection,
     collection: {
       useAsTitle,
       fields,
@@ -63,7 +64,7 @@ const ListControls = (props) => {
         />
         <Button
           className={`${baseClass}__toggle-columns`}
-          buttonStyle={visibleDrawer === 'columns' ? 'secondary' : undefined}
+          buttonStyle={visibleDrawer === 'columns' ? undefined : 'secondary'}
           onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : false)}
           icon={<Chevron />}
         >
@@ -71,7 +72,7 @@ const ListControls = (props) => {
         </Button>
         <Button
           className={`${baseClass}__toggle-where`}
-          buttonStyle={visibleDrawer === 'where' ? 'secondary' : undefined}
+          buttonStyle={visibleDrawer === 'where' ? undefined : 'secondary'}
           onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : false)}
           icon={<Chevron />}
         >
@@ -83,7 +84,7 @@ const ListControls = (props) => {
         height={visibleDrawer === 'columns' ? 'auto' : 0}
       >
         <ColumnSelector
-          fields={fields}
+          collection={collection}
           handleChange={setColumns}
         />
       </AnimateHeight>
