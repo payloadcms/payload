@@ -1,6 +1,18 @@
 @import '../../../scss/styles.scss';
 
 .sort-column {
+  display: flex;
+
+  &__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__buttons {
+    flex-shrink: 0;
+  }
+
   &__label,
   &__buttons,
   .btn {
@@ -9,7 +21,6 @@
   }
 
   &__label {
-    margin-right: base(.25);
     cursor: default;
   }
 

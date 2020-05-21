@@ -5,8 +5,6 @@ import './index.scss';
 const Chevron = () => {
   return (
     <svg
-      width="25px"
-      height="25px"
       className="icon icon--chevron"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 25 25"

@@ -5,8 +5,6 @@ import './index.scss';
 const Plus = () => {
   return (
     <svg
-      width="25"
-      height="25"
       className="icon icon--plus"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 25 25"

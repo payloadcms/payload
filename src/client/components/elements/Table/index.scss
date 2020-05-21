@@ -1,6 +1,9 @@
 @import '../../../scss/styles.scss';
 
 .table {
+  overflow-x: scroll;
+  max-width: 100%;
+
   thead {
     color: $color-gray;
 
@@ -20,6 +23,12 @@
       &:nth-child(1) {
         background: $color-background-gray;
       }
+    }
+  }
+
+  @include mid-break {
+    th, td {
+      max-width: 70vw;
     }
   }
 }

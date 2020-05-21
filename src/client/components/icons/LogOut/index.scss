@@ -1,11 +1,11 @@
-@import '../../../scss/styles';
+@import '../../../scss/styles.scss';
 
-.icon--calendar {
+.icon--logout {
   height: $baseline;
   width: $baseline;
 
   .stroke {
     stroke: $color-dark-gray;
-    stroke-width: $style-stroke-width-s;
+    stroke-width: 2px;
   }
 }
