@@ -38,10 +38,11 @@ const ButtonContents = ({ children, icon }) => {
 
 ButtonContents.defaultProps = {
   icon: null,
+  children: null,
 };
 
 ButtonContents.propTypes = {
-  children: PropTypes.node.isRequired,
+  children: PropTypes.node,
   icon: PropTypes.node,
 };
 

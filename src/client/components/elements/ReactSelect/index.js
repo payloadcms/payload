@@ -79,6 +79,7 @@ ReactSelect.defaultProps = {
   showError: false,
   disabled: false,
   formatValue: null,
+  options: [],
 };
 
 ReactSelect.propTypes = {
@@ -101,7 +102,7 @@ ReactSelect.propTypes = {
         label: PropTypes.string,
       }),
     ),
-  ]).isRequired,
+  ]),
   isMulti: PropTypes.bool,
 };
 

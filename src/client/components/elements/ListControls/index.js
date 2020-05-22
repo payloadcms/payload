@@ -15,6 +15,7 @@ const baseClass = 'list-controls';
 const ListControls = (props) => {
   const {
     handleChange,
+    collection,
     collection: {
       fields,
       useAsTitle,
@@ -84,8 +85,7 @@ const ListControls = (props) => {
         height={visibleDrawer === 'columns' ? 'auto' : 0}
       >
         <ColumnSelector
-          useAsTitle={useAsTitle}
-          fields={fields}
+          collection={collection}
           defaultColumns={defaultColumns}
           handleChange={setColumns}
         />
@@ -94,7 +94,10 @@ const ListControls = (props) => {
         className={`${baseClass}__where`}
         height={visibleDrawer === 'where' ? 'auto' : 0}
       >
-        <WhereBuilder handleChange={setWhere} />
+        <WhereBuilder
+          handleChange={setWhere}
+          collection={collection}
+        />
       </AnimateHeight>
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import Button from '../Button';
 import reducer from './reducer';
+import Condition from './Condition';
 
 import './index.scss';
 
@@ -9,6 +10,12 @@ const baseClass = 'where-builder';
 
 const WhereBuilder = (props) => {
   const {
+    collection: {
+      fields,
+      labels: {
+        plural,
+      } = {},
+    } = {},
     handleChange,
   } = props;
 
@@ -20,18 +27,46 @@ const WhereBuilder = (props) => {
 
   return (
     <div className={baseClass}>
-      {where.length > 0 && where.map((condition) => {
-        if (Array.isArray(condition)) {
-          return (
-            <div className={`${baseClass}__filters`}>
-              <div>Filter pages where</div>
-            </div>
-          );
-        }
-      })}
+      {where.length > 0 && (
+        <>
+          <div className={`${baseClass}__label`}>
+            Filter
+            {' '}
+            {plural}
+            {' '}
+            where
+          </div>
+          <ul className={`${baseClass}__filters`}>
+            {where.map((condition, i) => {
+              if (Array.isArray(condition)) {
+                return (
+                  <li key={i}>
+                    <Condition
+                      relation="and"
+                      fields={fields}
+                      handleChange={() => console.log('handling change')}
+                    />
+                  </li>
+                );
+              }
+
+              return (
+                <li key={i}>
+                  <Condition
+                    hideRelation={i === 0}
+                    relation={i === 0 ? 'and' : 'or'}
+                    fields={fields}
+                    handleChange={() => console.log('handling change')}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
       {where.length === 0 && (
         <div className={`${baseClass}__no-filters`}>
-          <p>No filters set</p>
+          <div className={`${baseClass}__label`}>No filters set</div>
           <Button
             icon="plus"
             buttonStyle="icon-label"
@@ -48,6 +83,14 @@ const WhereBuilder = (props) => {
 
 WhereBuilder.propTypes = {
   handleChange: PropTypes.func.isRequired,
+  collection: PropTypes.shape({
+    fields: PropTypes.arrayOf(
+      PropTypes.shape({}),
+    ),
+    labels: PropTypes.shape({
+      plural: PropTypes.string,
+    }),
+  }).isRequired,
 };
 
 export default WhereBuilder;
