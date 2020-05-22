@@ -50,7 +50,7 @@ class Relationship extends Component {
       some(relationsToSearch, async (relation, callback) => {
         const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}`, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `JWT ${token}`,
           },
         });
 

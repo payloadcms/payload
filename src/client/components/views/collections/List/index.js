@@ -84,7 +84,8 @@ const DefaultList = (props) => {
                     return (
                       <>
                         <Link to={`${admin}/collections/${collection.slug}/${rowData.id}`}>
-                          {cellData}
+                          {typeof cellData === 'string' && cellData}
+                          {typeof cellData === 'object' && JSON.stringify(cellData)}
                         </Link>
                       </>
                     );
