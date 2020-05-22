@@ -1,7 +1,6 @@
 @import '../../../scss/styles.scss';
 
 .template-default {
-  padding-top: $baseline;
   margin-left: base(8);
   width: calc(100% - #{base(8)});
   min-height: 100vh;
@@ -15,10 +14,16 @@
   }
 
   &__eyebrow {
-    margin-bottom: base(1);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding-top: $baseline;
+    padding-bottom: $baseline;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: rgba($color-background-gray, .8);
+    backdrop-filter: saturate(180%) blur(5px);
   }
 
   &__wrap {
@@ -36,6 +41,7 @@
     &__eyebrow {
       padding: 0 0 $baseline;
       margin: 0;
+      position: static;
     }
 
     &__wrap {

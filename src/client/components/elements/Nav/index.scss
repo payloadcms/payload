@@ -113,7 +113,8 @@
   }
 
   @include mid-break {
-    background: rgba($color-background-gray, .95);
+    background: rgba($color-background-gray, .8);
+    backdrop-filter: saturate(180%) blur(5px);
     width: 100%;
     height: base(3);
     z-index: $z-nav;
