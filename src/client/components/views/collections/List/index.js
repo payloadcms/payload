@@ -120,17 +120,28 @@ const DefaultList = (props) => {
           </Button>
         </div>
       )}
-      <Paginator
-        totalDocs={data.totalDocs}
-        limit={data.limit}
-        totalPages={data.totalPages}
-        page={data.page}
-        hasPrevPage={data.hasPrevPage}
-        hasNextPage={data.hasNextPage}
-        prevPage={data.prevPage}
-        nextPage={data.nextPage}
-        numberOfNeighbors={1}
-      />
+      <div className={`${baseClass}__page-controls`}>
+        <Paginator
+          totalDocs={data.totalDocs}
+          limit={data.limit}
+          totalPages={data.totalPages}
+          page={data.page}
+          hasPrevPage={data.hasPrevPage}
+          hasNextPage={data.hasNextPage}
+          prevPage={data.prevPage}
+          nextPage={data.nextPage}
+          numberOfNeighbors={1}
+        />
+        <div className={`${baseClass}__page-info`}>
+          {data.page}
+          -
+          {data.totalPages > 1 ? data.limit : data.totalDocs}
+          {' '}
+          of
+          {' '}
+          {data.totalDocs}
+        </div>
+      </div>
     </div>
   );
 };

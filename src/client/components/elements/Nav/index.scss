@@ -80,7 +80,6 @@
   a {
     padding: base(.125) 0;
     display: flex;
-    font-weight: 600;
     text-decoration: none;
   }
 
@@ -104,6 +103,7 @@
 
       &.active {
         padding-left: base(.6);
+        font-weight: 600;
 
         svg {
           opacity: 1;

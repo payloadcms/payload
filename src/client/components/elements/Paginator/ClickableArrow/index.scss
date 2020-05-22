@@ -2,9 +2,10 @@
 
 .clickable-arrow {
   cursor: pointer;
+  transform: rotate(-90deg);
 
   &--left {
-    transform: rotate(180deg);
+    transform: rotate(90deg);
   }
 
   &--is-disabled {

@@ -2,15 +2,13 @@
 
 .paginator {
   display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  margin-bottom: base(1);
+  margin-bottom: $baseline;
 
   &__page {
     cursor: pointer;
 
     &--is-current {
-      @include shadow-sm;
+      background: $color-background-gray;
       color: $color-gray;
       cursor: default;
     }
@@ -23,11 +21,19 @@
   .clickable-arrow,
   &__page {
     @extend %btn-reset;
-    @extend %small;
+    width: base(2);
+    height: base(2);
+    display: flex;
+    justify-content: center;
+    align-content: center;
     outline: 0;
-    padding: base(.35) base(.45);
+    padding: base(.5);
     color: $color-dark-gray;
     line-height: 1;
+
+    &:hover:not(.clickable-arrow--is-disabled) {
+      background: $color-background-gray;
+    }
   }
 
   &__page,

@@ -1,6 +1,7 @@
 @import '../../../scss/styles.scss';
 
 .table {
+  margin-bottom: $baseline;
   overflow-x: scroll;
   max-width: 100%;
 
@@ -20,7 +21,7 @@
 
   tbody {
     tr {
-      &:nth-child(1) {
+      &:nth-child(odd) {
         background: $color-background-gray;
       }
     }

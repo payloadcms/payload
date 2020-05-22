@@ -25,14 +25,21 @@
     }
   }
 
-  &__controls {
-    margin-bottom: $baseline;
-  }
-
   .table {
     table {
       width: 100%;
     }
+  }
+
+  &__page-controls {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  &__page-info {
+    margin-right: 0;
+    margin-left: auto;
   }
 
   @include mid-break {
@@ -41,7 +48,8 @@
     &__header,
     .list-controls,
     .table,
-    &__no-results {
+    &__no-results,
+    &__page-controls {
       padding-left: $baseline;
       padding-right: $baseline;
     }
@@ -54,6 +62,10 @@
 
     &__search-input {
       margin: 0;
+    }
+
+    &__page-controls {
+      display: block;
     }
   }
 }
