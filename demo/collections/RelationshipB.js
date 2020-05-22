@@ -11,6 +11,7 @@ module.exports = {
       type: 'relationship',
       relationTo: 'relationship-a',
       localized: false,
+      hasMany: true,
     },
   ],
   timestamps: true,
