@@ -16,8 +16,8 @@ const ListControls = (props) => {
   const {
     handleChange,
     collection: {
-      useAsTitle,
       fields,
+      useAsTitle,
       defaultColumns,
     },
   } = props;

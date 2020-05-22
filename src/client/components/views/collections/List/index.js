@@ -11,7 +11,7 @@ import Pill from '../../../elements/Pill';
 import Button from '../../../elements/Button';
 import SortColumn from '../../../elements/SortColumn';
 import Table from '../../../elements/Table';
-import formatAdminFields from '../../../../utilities/formatAdminFields';
+import formatListFields from './formatListFields';
 
 import './index.scss';
 
@@ -173,6 +173,11 @@ const ListView = (props) => {
   } = props;
   const { setStepNav } = useStepNav();
 
+  const [fields, setFields] = useState(collection.fields);
+
+  useEffect(() => {
+    setFields(formatListFields(collection));
+  }, [collection]);
 
   useEffect(() => {
     setStepNav([
@@ -183,11 +188,10 @@ const ListView = (props) => {
   }, [setStepNav, plural]);
 
   const List = customComponents?.[slug]?.views?.List || DefaultList;
-  const formattedFields = formatAdminFields(collection);
 
   return (
     <>
-      <List collection={{ ...collection, fields: formattedFields }} />
+      <List collection={{ ...collection, fields }} />
     </>
   );
 };
