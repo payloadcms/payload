@@ -33,7 +33,7 @@ const StayLoggedInModal = (props) => {
           Stay logged in
         </Button>
         <Button
-          type="secondary"
+          buttonStyle="secondary"
           onClick={() => {
             closeAllModals();
             history.push(`${admin}/logout`);

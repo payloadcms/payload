@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
 import { RowModifiedProvider, useRowModified } from '../../Form/RowModified';
-import withCondition from '../../withCondition';
+import withConditions from '../../withConditions';
 import Button from '../../../elements/Button';
 import FormContext from '../../Form/Context';
 import DraggableSection from '../../DraggableSection';
@@ -24,7 +24,6 @@ const Repeater = (props) => {
   const { fields: fieldState, dispatchFields, countRows } = formContext;
 
   const {
-    label,
     name,
     fields,
     defaultValue,
@@ -133,7 +132,7 @@ const Repeater = (props) => {
           <div className={`${baseClass}__add-button-wrap`}>
             <Button
               onClick={() => addRow(rowCount)}
-              type="secondary"
+              buttonStyle="secondary"
             >
               {`Add ${singularLabel}`}
             </Button>
@@ -163,4 +162,4 @@ Repeater.propTypes = {
   fieldTypes: PropTypes.shape({}).isRequired,
 };
 
-export default withCondition(Repeater);
+export default withConditions(Repeater);

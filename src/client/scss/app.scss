@@ -21,6 +21,10 @@ html {
   line-height: $baseline-px;
   background: $color-background-gray;
   -webkit-font-smoothing: antialiased;
+
+  @include mid-break {
+    font-size: 12px;
+  }
 }
 
 html, body, #app {
@@ -72,7 +76,7 @@ h5 {
 }
 
 p {
-    margin: 0 0 base(.5);
+    margin: 0 0 $baseline;
 }
 
 ul {

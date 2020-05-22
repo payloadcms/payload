@@ -2,7 +2,7 @@ import React, { Component, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Cookies from 'universal-cookie';
 import some from 'async-some';
-import withCondition from '../../withCondition';
+import withConditions from '../../withConditions';
 import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
@@ -50,7 +50,7 @@ class Relationship extends Component {
       some(relationsToSearch, async (relation, callback) => {
         const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}`, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `JWT ${token}`,
           },
         });
 
@@ -338,4 +338,4 @@ const RelationshipFieldType = (props) => {
   );
 };
 
-export default withCondition(RelationshipFieldType);
+export default withConditions(RelationshipFieldType);

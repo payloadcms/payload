@@ -1,7 +1,10 @@
 @import '../../../scss/styles';
 
 .icon--plus {
-  path {
+  width: $baseline;
+  height: $baseline;
+
+  .stroke {
     stroke: $color-dark-gray;
     stroke-width: $style-stroke-width-s;
   }

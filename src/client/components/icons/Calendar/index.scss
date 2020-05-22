@@ -1,7 +1,10 @@
 @import '../../../scss/styles';
 
 .icon--calendar {
-  path {
+  height: $baseline;
+  width: $baseline;
+
+  .stroke {
     stroke: $color-dark-gray;
     stroke-width: $style-stroke-width-s;
   }

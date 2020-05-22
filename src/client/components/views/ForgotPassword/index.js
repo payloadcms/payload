@@ -52,7 +52,7 @@ const ForgotPassword = () => {
         <br />
         <Button
           el="link"
-          type="secondary"
+          buttonStyle="secondary"
           to={admin}
         >
           Back to Dashboard
@@ -71,7 +71,7 @@ const ForgotPassword = () => {
         <br />
         <Button
           el="link"
-          type="secondary"
+          buttonStyle="secondary"
           to={`${admin}/login`}
         >
           Go to login

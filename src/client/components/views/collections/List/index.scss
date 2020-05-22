@@ -1,0 +1,71 @@
+@import '../../../../scss/styles';
+@import '../../../forms/field-types/shared.scss';
+
+.collection-list {
+  padding: base(3);
+  background: white;
+  width: 100%;
+
+  &__header {
+    margin-bottom: $baseline;
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+
+    h1 {
+      margin: 0 base(.75) 0 0;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    .pill {
+      margin: base(.5) 0 base(.25);
+    }
+  }
+
+  .table {
+    table {
+      width: 100%;
+    }
+  }
+
+  &__page-controls {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  &__page-info {
+    margin-right: 0;
+    margin-left: auto;
+  }
+
+  @include mid-break {
+    padding: $baseline 0;
+
+    &__header,
+    .list-controls,
+    .table,
+    &__no-results,
+    &__page-controls {
+      padding-left: $baseline;
+      padding-right: $baseline;
+    }
+
+    &__header {
+      .pill {
+        margin-bottom: base(.0625);
+      }
+    }
+
+    &__search-input {
+      margin: 0;
+    }
+
+    &__page-controls {
+      display: block;
+    }
+  }
+}

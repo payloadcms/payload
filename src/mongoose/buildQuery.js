@@ -44,10 +44,10 @@ class ParamParser {
         if (key === 'where') {
           // We need to determine if the whereKey is an AND, OR, or a schema path
           for (const relationOrPath of Object.keys(this.rawParams.where)) {
-            if (relationOrPath === 'and') {
+            if (relationOrPath.toLowerCase() === 'and') {
               const andConditions = this.rawParams.where[relationOrPath];
               this.query.searchParams.$and = await this.buildAndOrConditions(andConditions);
-            } else if (relationOrPath === 'or' && Array.isArray(this.rawParams.where[relationOrPath])) {
+            } else if (relationOrPath.toLowerCase() === 'or' && Array.isArray(this.rawParams.where[relationOrPath])) {
               const orConditions = this.rawParams.where[relationOrPath];
               this.query.searchParams.$or = await this.buildAndOrConditions(orConditions);
             } else {

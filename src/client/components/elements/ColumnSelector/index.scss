@@ -1,0 +1,11 @@
+@import '../../../scss/styles.scss';
+
+.column-selector {
+  background: $color-background-gray;
+  padding: base(1) base(1) base(.5);
+
+  .pill {
+    margin-right: base(.5);
+    margin-bottom: base(.5);
+  }
+}

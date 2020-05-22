@@ -32,6 +32,7 @@
     border: 0;
     opacity: 0;
     visibility: hidden;
+    cursor: pointer;
 
     &:active, &:focus {
       outline: none;
@@ -40,16 +41,19 @@
 
   &__scroll {
     height: 100%;
-    padding: base(1);
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    padding: base(1);
     width: calc(100% + #{base(1)});
     overflow-y: scroll;
   }
 
   &__wrap {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-grow: 1;
   }
 
   &__label {
@@ -76,7 +80,6 @@
   a {
     padding: base(.125) 0;
     display: flex;
-    font-weight: 600;
     text-decoration: none;
   }
 
@@ -100,6 +103,7 @@
 
       &.active {
         padding-left: base(.6);
+        font-weight: 600;
 
         svg {
           opacity: 1;
@@ -136,6 +140,7 @@
     }
 
     &__wrap {
+      padding-top: 0;
       visibility: hidden;
       opacity: 0;
       overflow-y: scroll;

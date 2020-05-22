@@ -1,0 +1,35 @@
+@import '../../../scss/styles.scss';
+
+.table {
+  margin-bottom: $baseline;
+  overflow: auto;
+  max-width: 100%;
+
+  thead {
+    color: $color-gray;
+
+    th {
+      font-weight: normal;
+      text-align: left;
+    }
+  }
+
+  th, td {
+    padding: base(.75);
+    min-width: 150px;
+  }
+
+  tbody {
+    tr {
+      &:nth-child(odd) {
+        background: $color-background-gray;
+      }
+    }
+  }
+
+  @include mid-break {
+    th, td {
+      max-width: 70vw;
+    }
+  }
+}

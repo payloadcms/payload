@@ -6,7 +6,7 @@ import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { useModal } from '@trbl/react-modal';
 
 import { RowModifiedProvider, useRowModified } from '../../Form/RowModified';
-import withCondition from '../../withCondition';
+import withConditions from '../../withConditions';
 import Button from '../../../elements/Button';
 import FormContext from '../../Form/Context';
 import AddRowModal from './AddRowModal';
@@ -210,4 +210,4 @@ Flexible.propTypes = {
   fieldTypes: PropTypes.shape({}).isRequired,
 };
 
-export default withCondition(Flexible);
+export default withConditions(Flexible);

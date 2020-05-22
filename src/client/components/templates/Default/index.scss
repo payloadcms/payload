@@ -2,12 +2,16 @@
 
 .template-default {
   padding-top: $baseline;
-  margin-left: base(10);
-  width: calc(100% - #{base(10)});
+  margin-left: base(8);
+  width: calc(100% - #{base(8)});
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 
   &__eyebrow,
   &__wrap {
-    padding: 0 base(2);
+    padding-left: base(2);
+    padding-right: base(2);
   }
 
   &__eyebrow {
@@ -15,6 +19,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+
+  &__wrap {
+    display: flex;
+    width: 100%;
+    flex-grow: 1;
+    padding-bottom: base(2);
   }
 
   @include mid-break {
@@ -25,14 +36,10 @@
     &__eyebrow {
       padding: 0 0 $baseline;
       margin: 0;
-
-      a:first-child {
-        padding-left: $baseline;
-      }
     }
 
     &__wrap {
-      padding: 0 $baseline $baseline;
+      padding: 0 0 $baseline;
     }
   }
 }

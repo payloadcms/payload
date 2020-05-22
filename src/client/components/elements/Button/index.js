@@ -6,16 +6,38 @@ import './index.scss';
 
 const baseClass = 'btn';
 
+const ButtonContents = ({ children, icon }) => {
+  return (
+    <span>
+      {children}
+      {icon}
+    </span>
+  );
+};
+
+ButtonContents.defaultProps = {
+  icon: null,
+};
+
+ButtonContents.propTypes = {
+  children: PropTypes.node.isRequired,
+  icon: PropTypes.node,
+};
+
 const Button = (props) => {
   const {
-    className, type, el, to, url, children, onClick, disabled,
+    className, type, el, to, url, children, onClick, disabled, icon, buttonStyle, round, size,
   } = props;
 
   const classes = [
     baseClass,
     className && className,
-    type && `btn-${type}`,
-    disabled && 'btn-disabled',
+    buttonStyle && `${baseClass}--style-${buttonStyle}`,
+    icon && `${baseClass}--icon`,
+    (icon && !children) && `${baseClass}--icon-only`,
+    disabled && `${baseClass}--disabled`,
+    round && `${baseClass}--round`,
+    size && `${baseClass}--size-${size}`,
   ].filter(Boolean).join(' ');
 
   function handleClick(event) {
@@ -24,7 +46,7 @@ const Button = (props) => {
   }
 
   const buttonProps = {
-    ...props,
+    type,
     className: classes,
     onClick: handleClick,
   };
@@ -36,7 +58,9 @@ const Button = (props) => {
           {...buttonProps}
           to={to || url}
         >
-          {children}
+          <ButtonContents icon={icon}>
+            {children}
+          </ButtonContents>
         </Link>
       );
 
@@ -46,17 +70,21 @@ const Button = (props) => {
           {...buttonProps}
           href={url}
         >
-          {children}
+          <ButtonContents icon={icon}>
+            {children}
+          </ButtonContents>
         </a>
       );
 
     default:
       return (
         <button
-          type="button"
+          type="submit"
           {...buttonProps}
         >
-          {children}
+          <ButtonContents icon={icon}>
+            {children}
+          </ButtonContents>
         </button>
       );
   }
@@ -64,24 +92,32 @@ const Button = (props) => {
 
 Button.defaultProps = {
   className: null,
-  type: null,
+  type: 'submit',
+  buttonStyle: 'primary',
   el: null,
   to: null,
   url: null,
   children: null,
   onClick: null,
   disabled: undefined,
+  icon: null,
+  size: 'medium',
+  round: false,
 };
 
 Button.propTypes = {
+  round: PropTypes.bool,
   className: PropTypes.string,
-  type: PropTypes.oneOf(['secondary', 'error', undefined]),
+  type: PropTypes.oneOf(['submit', 'button']),
+  size: PropTypes.oneOf(['small', 'medium']),
+  buttonStyle: PropTypes.oneOf(['primary', 'secondary', 'transparent', 'error', 'none']),
   el: PropTypes.oneOf(['link', 'anchor', undefined]),
   to: PropTypes.string,
   url: PropTypes.string,
   children: PropTypes.node,
   onClick: PropTypes.func,
   disabled: PropTypes.bool,
+  icon: PropTypes.node,
 };
 
 export default Button;

@@ -11,34 +11,40 @@ const RenderFields = ({
       <>
         {fieldSchema.map((field, i) => {
           const { defaultValue } = field;
-          let FieldComponent = field?.hidden?.admin ? fieldTypes.hidden : fieldTypes[field.type];
-          if (customComponents?.[field.name]?.field) {
-            FieldComponent = customComponents[field.name].field;
-          }
-          if (FieldComponent) {
+          if (field?.hidden !== 'api' && field?.hidden !== true) {
+            let FieldComponent = field?.hidden === 'admin' ? fieldTypes.hidden : fieldTypes[field.type];
+
+            if (customComponents?.[field.name]?.field) {
+              FieldComponent = customComponents[field.name].field;
+            }
+
+            if (FieldComponent) {
+              return (
+                <FieldComponent
+                  fieldTypes={fieldTypes}
+                  key={field.name}
+                  {...field}
+                  validate={field.validate ? value => field.validate(value, field) : undefined}
+                  defaultValue={initialData[field.name] || defaultValue}
+                />
+              );
+            }
+
             return (
-              <FieldComponent
-                fieldTypes={fieldTypes}
-                key={field.name}
-                {...field}
-                validate={field.validate ? value => field.validate(value, field) : undefined}
-                defaultValue={initialData[field.name] || defaultValue}
-              />
+              <div
+                className="missing-field"
+                key={i}
+              >
+                No matched field found for
+                {' '}
+                &quot;
+                {field.label}
+                &quot;
+              </div>
             );
           }
 
-          return (
-            <div
-              className="missing-field"
-              key={i}
-            >
-              No matched field found for
-              {' '}
-              &quot;
-              {field.label}
-              &quot;
-            </div>
-          );
+          return null;
         })}
       </>
     );

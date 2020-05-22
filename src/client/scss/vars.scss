@@ -36,7 +36,7 @@ $font-body  : 'Suisse Intl';
 
 $color-dark-gray       : #333333;
 $color-gray            : #9A9A9A;
-$color-light-gray      : #E7E7E7;
+$color-light-gray      : #DADADA;
 $color-background-gray : #F3F3F3;
 $color-red             : #ff6f76;
 $color-yellow          : #FDFFA4;
@@ -58,7 +58,7 @@ $style-stroke-width-m : 2px;
 //////////////////////////////
 
 @mixin shadow-sm {
-  box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),0 2px 20px 0 rgba(0,2,4,.04);
+  box-shadow: 0 2px 3px 0 rgba(0, 2, 4, 0.1), 0 6px 4px -4px rgba(0, 2, 4, 0.02);
 }
 
 @mixin shadow {
@@ -70,20 +70,18 @@ $style-stroke-width-m : 2px;
 }
 
 @mixin inputShadowActive {
-	box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
-					0 10px 20px 0 rgba(0,2,4,.08);
+	box-shadow: 0 2px 3px 0 rgba(0, 2, 4, 0.13), 0 6px 4px -4px rgba(0, 2, 4, 0.1);
 }
 
 @mixin inputShadow {
 	@include shadow-sm;
 
   &:hover {
-		box-shadow: 0 2px 4px 0 rgba(0,2,4,.1), 0 5px 20px 0 rgba(0,2,4,.06);
+		box-shadow: 0 2px 3px 0 rgba(0, 2, 4, 0.1), 0 6px 4px -4px rgba(0, 2, 4, 0.07);
 	}
 
 	&:active, &:focus {
-    box-shadow: 0 2px 4px 0 rgba(0,2,4,.1),
-      0 10px 20px 0 rgba(0,2,4,.08);
+    @include inputShadowActive;
   }
 }
 
