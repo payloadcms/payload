@@ -15,7 +15,8 @@
     }
   }
 
-  .btn {
+  &__toggle-columns,
+  &__toggle-where {
     margin: 0 0 0 $baseline;
     min-width: 150px;
 
@@ -32,7 +33,8 @@
   }
 
   @include mid-break {
-    .btn {
+    &__toggle-columns,
+    &__toggle-where {
       margin: 0 0 0 base(.5);
     }
   }
@@ -47,15 +49,16 @@
       width: 100%;
     }
 
-    .btn {
+    &__toggle-columns,
+    &__toggle-where {
       width: calc(50% - #{base(.25)});
     }
 
-    &__toggle-columns.btn {
+    &__toggle-columns {
       margin: 0 base(.25) 0 0;
     }
 
-    &__toggle-where.btn {
+    &__toggle-where {
       margin: 0 0 0 base(.25);
     }
   }

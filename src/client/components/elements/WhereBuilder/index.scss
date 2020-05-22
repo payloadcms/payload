@@ -1,0 +1,12 @@
+@import '../../../scss/styles.scss';
+
+.where-builder {
+  background: $color-background-gray;
+  padding: $baseline;
+
+  &__no-filters {
+    .btn {
+      margin: 0;
+    }
+  }
+}

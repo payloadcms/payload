@@ -1,16 +1,37 @@
-import React from 'react';
+import React, { isValidElement } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
+import plus from '../../icons/Plus';
+import x from '../../icons/X';
+import chevron from '../../icons/Chevron';
+
 import './index.scss';
+
+const icons = {
+  plus,
+  x,
+  chevron,
+};
 
 const baseClass = 'btn';
 
 const ButtonContents = ({ children, icon }) => {
+  const BuiltInIcon = icons[icon];
+
   return (
-    <span>
-      {children}
-      {icon}
+    <span className={`${baseClass}__content`}>
+      {children && (
+        <span className={`${baseClass}__label`}>
+          {children}
+        </span>
+      )}
+      {icon && (
+        <span className={`${baseClass}__icon`}>
+          {isValidElement(icon) && icon}
+          {BuiltInIcon && <BuiltInIcon />}
+        </span>
+      )}
     </span>
   );
 };
@@ -26,7 +47,19 @@ ButtonContents.propTypes = {
 
 const Button = (props) => {
   const {
-    className, type, el, to, url, children, onClick, disabled, icon, buttonStyle, round, size,
+    className,
+    type,
+    el,
+    to,
+    url,
+    children,
+    onClick,
+    disabled,
+    icon,
+    buttonStyle,
+    round,
+    size,
+    iconPosition,
   } = props;
 
   const classes = [
@@ -38,6 +71,7 @@ const Button = (props) => {
     disabled && `${baseClass}--disabled`,
     round && `${baseClass}--round`,
     size && `${baseClass}--size-${size}`,
+    iconPosition && `${baseClass}--icon-position-${iconPosition}`,
   ].filter(Boolean).join(' ');
 
   function handleClick(event) {
@@ -103,6 +137,7 @@ Button.defaultProps = {
   icon: null,
   size: 'medium',
   round: false,
+  iconPosition: 'right',
 };
 
 Button.propTypes = {
@@ -110,14 +145,18 @@ Button.propTypes = {
   className: PropTypes.string,
   type: PropTypes.oneOf(['submit', 'button']),
   size: PropTypes.oneOf(['small', 'medium']),
-  buttonStyle: PropTypes.oneOf(['primary', 'secondary', 'transparent', 'error', 'none']),
+  buttonStyle: PropTypes.oneOf(['primary', 'secondary', 'transparent', 'error', 'none', 'icon-label']),
   el: PropTypes.oneOf(['link', 'anchor', undefined]),
   to: PropTypes.string,
   url: PropTypes.string,
   children: PropTypes.node,
   onClick: PropTypes.func,
   disabled: PropTypes.bool,
-  icon: PropTypes.node,
+  icon: PropTypes.oneOfType([
+    PropTypes.node,
+    PropTypes.oneOf(['chevron', 'x', 'plus']),
+  ]),
+  iconPosition: PropTypes.oneOf(['left', 'right']),
 };
 
 export default Button;
