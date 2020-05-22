@@ -26,29 +26,31 @@ const Condition = (props) => {
         </div>
       )}
       <div className={`${baseClass}__wrap`}>
-        <div className={`${baseClass}__field`}>
-          <ReactSelect onChange={() => console.log('changing')} />
+        <div className={`${baseClass}__inputs`}>
+          <div className={`${baseClass}__field`}>
+            <ReactSelect onChange={() => console.log('changing')} />
+          </div>
+          <div className={`${baseClass}__operator`}>
+            <ReactSelect onChange={() => console.log('changing')} />
+          </div>
+          <div className={`${baseClass}__value`}>
+            <ReactSelect onChange={() => console.log('changing')} />
+          </div>
         </div>
-        <div className={`${baseClass}__operator`}>
-          <ReactSelect onChange={() => console.log('changing')} />
+        <div className={`${baseClass}__actions`}>
+          <Button
+            icon="x"
+            round
+            buttonStyle="icon-label"
+            onClick={() => console.log('remove')}
+          />
+          <Button
+            icon="plus"
+            round
+            buttonStyle="icon-label"
+            onClick={() => console.log('add')}
+          />
         </div>
-        <div className={`${baseClass}__value`}>
-          <ReactSelect onChange={() => console.log('changing')} />
-        </div>
-      </div>
-      <div className={`${baseClass}__actions`}>
-        <Button
-          icon="x"
-          round
-          buttonStyle="none"
-          onClick={() => console.log('remove')}
-        />
-        <Button
-          icon="plus"
-          round
-          buttonStyle="none"
-          onClick={() => console.log('add')}
-        />
       </div>
     </div>
   );

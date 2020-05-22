@@ -82,6 +82,12 @@
       border-radius: 100%;
     }
 
+    &.btn--icon-only {
+      .btn__icon {
+        margin: 0;
+      }
+    }
+
     &:hover {
       .btn__icon {
         background: $color-dark-gray;
