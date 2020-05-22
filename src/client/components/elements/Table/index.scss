@@ -2,7 +2,7 @@
 
 .table {
   margin-bottom: $baseline;
-  overflow-x: scroll;
+  overflow: auto;
   max-width: 100%;
 
   thead {

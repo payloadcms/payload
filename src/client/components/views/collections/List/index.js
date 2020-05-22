@@ -11,6 +11,7 @@ import Pill from '../../../elements/Pill';
 import Button from '../../../elements/Button';
 import SortColumn from '../../../elements/SortColumn';
 import Table from '../../../elements/Table';
+import formatAdminFields from '../../../../utilities/formatAdminFields';
 
 import './index.scss';
 
@@ -165,8 +166,6 @@ const ListView = (props) => {
     collection,
     collection: {
       slug,
-      fields,
-      timestamps,
       labels: {
         plural,
       },
@@ -174,11 +173,6 @@ const ListView = (props) => {
   } = props;
   const { setStepNav } = useStepNav();
 
-  let allFields = [...fields, { name: 'id', label: 'ID' }];
-
-  if (timestamps) {
-    allFields = allFields.concat([{ name: 'createdAt', label: 'Created At' }, { name: 'updatedAt', label: 'Updated At' }]);
-  }
 
   useEffect(() => {
     setStepNav([
@@ -189,10 +183,11 @@ const ListView = (props) => {
   }, [setStepNav, plural]);
 
   const List = customComponents?.[slug]?.views?.List || DefaultList;
+  const formattedFields = formatAdminFields(collection);
 
   return (
     <>
-      <List collection={{ ...collection, fields: allFields }} />
+      <List collection={{ ...collection, fields: formattedFields }} />
     </>
   );
 };
