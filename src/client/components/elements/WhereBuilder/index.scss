@@ -15,9 +15,12 @@
     padding: 0;
   }
 
-  &__no-filters {
-    .btn {
-      margin: 0;
-    }
+  &__add-or,
+  &__add-first-filter {
+    margin-bottom: 0;
+  }
+
+  &__add-first-filter {
+    margin-top: 0;
   }
 }

@@ -12,6 +12,7 @@ const FormSubmit = ({ children }) => {
   return (
     <div className={baseClass}>
       <Button
+        type="submit"
         disabled={formContext.processing ? true : undefined}
       >
         {children}

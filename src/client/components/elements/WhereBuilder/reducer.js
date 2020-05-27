@@ -1,7 +1,3 @@
-const initialCondition = {
-  operators: [],
-};
-
 const reducer = (state, action = {}) => {
   const newState = [...state];
 
@@ -18,13 +14,13 @@ const reducer = (state, action = {}) => {
   switch (type) {
     case 'add': {
       if (relation === 'and') {
-        newState[orIndex].splice(andIndex, 0, initialCondition);
+        newState[orIndex].splice(andIndex, 0, {});
         return newState;
       }
 
       return [
         ...newState,
-        [initialCondition],
+        [{}],
       ];
     }
 

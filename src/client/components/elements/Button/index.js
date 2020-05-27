@@ -127,7 +127,7 @@ const Button = (props) => {
 
 Button.defaultProps = {
   className: null,
-  type: 'submit',
+  type: 'button',
   buttonStyle: 'primary',
   el: null,
   to: null,

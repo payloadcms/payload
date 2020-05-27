@@ -18,7 +18,7 @@ const NumberField = ({ onChange, value }) => {
 };
 
 NumberField.defaultProps = {
-  value: null,
+  value: '',
 };
 
 NumberField.propTypes = {

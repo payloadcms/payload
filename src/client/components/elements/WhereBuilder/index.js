@@ -44,7 +44,29 @@ const WhereBuilder = (props) => {
   }, [fields]);
 
   useEffect(() => {
-    if (typeof handleChange === 'function') handleChange(where);
+    const whereQuery = {
+      or: [],
+    };
+
+    if (where) {
+      whereQuery.or = where.map((or) => {
+        return or.reduce((and, condition) => {
+          const { field, operator, value } = condition;
+          if (field && operator && value) {
+            return {
+              ...and,
+              [field]: {
+                [operator]: value,
+              },
+            };
+          }
+
+          return and;
+        }, {});
+      });
+    }
+
+    if (typeof handleChange === 'function') handleChange(whereQuery);
   }, [where, handleChange]);
 
   return (
@@ -94,6 +116,7 @@ const WhereBuilder = (props) => {
             })}
           </ul>
           <Button
+            className={`${baseClass}__add-or`}
             icon="plus"
             buttonStyle="icon-label"
             iconPosition="left"
@@ -107,6 +130,7 @@ const WhereBuilder = (props) => {
         <div className={`${baseClass}__no-filters`}>
           <div className={`${baseClass}__label`}>No filters set</div>
           <Button
+            className={`${baseClass}__add-first-filter`}
             icon="plus"
             buttonStyle="icon-label"
             iconPosition="left"
