@@ -48,47 +48,47 @@ const like = {
 
 const fieldTypeConditions = {
   text: {
-    component: 'text',
+    component: 'Text',
     operators: [...base, like],
   },
   email: {
-    component: 'text',
+    component: 'Text',
     operators: [...base, like],
   },
   textarea: {
-    component: 'text',
+    component: 'Text',
     operators: [...base, like],
   },
   wysiwyg: {
-    component: 'text',
+    component: 'Text',
     operators: [...base, like],
   },
   code: {
-    component: 'text',
+    component: 'Text',
     operators: [...base, like],
   },
   number: {
-    component: 'number',
+    component: 'Number',
     operators: [...base, ...numeric],
   },
   date: {
-    component: 'date',
+    component: 'Date',
     operators: [...base, ...numeric],
   },
   upload: {
-    component: 'text',
+    component: 'Text',
     operators: [...base],
   },
   relationship: {
-    component: 'text',
+    component: 'Text',
     operators: [...base],
   },
   select: {
-    component: 'text',
+    component: 'Text',
     operators: [...base],
   },
   checkbox: {
-    component: 'text',
+    component: 'Text',
     operators: boolean,
   },
 };

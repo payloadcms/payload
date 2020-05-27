@@ -2,9 +2,17 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ReactSelect from '../../ReactSelect';
 import Button from '../../Button';
-
+import Date from './Date';
+import Number from './Number';
+import Text from './Text';
 
 import './index.scss';
+
+const valueFields = {
+  Date,
+  Number,
+  Text,
+};
 
 const baseClass = 'condition';
 
@@ -17,13 +25,13 @@ const Condition = (props) => {
     andIndex,
   } = props;
 
-  const [activeOperators, setActiveOperators] = useState([]);
+  const [activeField, setActiveField] = useState({ operators: [] });
 
   useEffect(() => {
-    const activeField = fields.find(field => value.field === field.value);
+    const newActiveField = fields.find(field => value.field === field.value);
 
-    if (activeField) {
-      setActiveOperators(activeField.operators);
+    if (newActiveField) {
+      setActiveField(newActiveField);
     }
   }, [value, fields]);
 
@@ -45,8 +53,8 @@ const Condition = (props) => {
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              value={activeOperators.find(operator => value.operator === operator.value)}
-              options={activeOperators}
+              value={activeField.operators.find(operator => value.operator === operator.value)}
+              options={activeField.operators}
               onChange={operator => dispatch({
                 type: 'update',
                 orIndex,
