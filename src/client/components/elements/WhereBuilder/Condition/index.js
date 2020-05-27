@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ReactSelect from '../../ReactSelect';
 import Button from '../../Button';
@@ -11,10 +11,17 @@ const baseClass = 'condition';
 const Condition = (props) => {
   const {
     fields,
-    operators,
-    handleChange,
+    dispatch,
     value,
+    orIndex,
+    andIndex,
   } = props;
+
+  const [activeOperators, setActiveOperators] = useState([]);
+
+  useEffect(() => {
+
+  }, [value]);
 
   return (
     <div className={baseClass}>
@@ -22,13 +29,15 @@ const Condition = (props) => {
         <div className={`${baseClass}__inputs`}>
           <div className={`${baseClass}__field`}>
             <ReactSelect
+              value={value.field}
               options={fields}
               onChange={newField => console.log('changing field', newField)}
             />
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              options={operators}
+              value={value.field}
+              options={activeOperators}
               onChange={() => console.log('changing')}
             />
           </div>
@@ -49,13 +58,26 @@ const Condition = (props) => {
             icon="x"
             round
             buttonStyle="icon-label"
-            onClick={() => console.log('remove')}
+            onClick={() => dispatch({
+              type: 'remove',
+              payload: {
+                orIndex,
+                andIndex,
+              },
+            })}
           />
           <Button
             icon="plus"
             round
             buttonStyle="icon-label"
-            onClick={() => console.log('add')}
+            onClick={() => dispatch({
+              type: 'add',
+              payload: {
+                relation: 'and',
+                orIndex,
+                andIndex: andIndex + 1,
+              },
+            })}
           />
         </div>
       </div>
@@ -71,7 +93,17 @@ Condition.propTypes = {
       type: PropTypes.string,
     }),
   ).isRequired,
-  handleChange: PropTypes.func.isRequired,
+  value: PropTypes.shape({
+    field: PropTypes.string,
+    operator: PropTypes.string,
+    value: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number,
+    ]),
+  }).isRequired,
+  dispatch: PropTypes.func.isRequired,
+  orIndex: PropTypes.number.isRequired,
+  andIndex: PropTypes.number.isRequired,
 };
 
 export default Condition;

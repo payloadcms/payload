@@ -89,6 +89,14 @@ const WhereBuilder = (props) => {
               );
             })}
           </ul>
+          <Button
+            icon="plus"
+            buttonStyle="icon-label"
+            iconPosition="left"
+            onClick={() => dispatchWhere({ type: 'add' })}
+          >
+            Or
+          </Button>
         </>
       )}
       {where.length === 0 && (
@@ -98,7 +106,7 @@ const WhereBuilder = (props) => {
             icon="plus"
             buttonStyle="icon-label"
             iconPosition="left"
-            onClick={() => dispatchWhere({ type: 'add', payload: { condition: [{}] } })}
+            onClick={() => dispatchWhere({ type: 'add' })}
           >
             Add filter
           </Button>
