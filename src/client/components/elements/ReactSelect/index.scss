@@ -7,7 +7,7 @@ div.react-select {
   }
 
   .rs__value-container {
-    height: base(1.75);
+    height: $baseline;
     padding: 0;
 
     > * {

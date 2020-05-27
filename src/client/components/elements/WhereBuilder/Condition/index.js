@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import ReactSelect from '../../ReactSelect';
 import Button from '../../Button';
+
 
 import './index.scss';
 
@@ -10,31 +11,37 @@ const baseClass = 'condition';
 const Condition = (props) => {
   const {
     fields,
+    operators,
     handleChange,
-    hideRelation,
-    relation,
+    value,
   } = props;
-
-  const [condition, setCondition] = useState({});
 
   return (
     <div className={baseClass}>
-      {!hideRelation && (
-        <div className={`${baseClass}__label`}>
-          {relation === 'and' && 'And'}
-          {relation === 'or' && 'Or'}
-        </div>
-      )}
       <div className={`${baseClass}__wrap`}>
         <div className={`${baseClass}__inputs`}>
           <div className={`${baseClass}__field`}>
-            <ReactSelect onChange={() => console.log('changing')} />
+            <ReactSelect
+              options={fields}
+              onChange={newField => console.log('changing field', newField)}
+            />
           </div>
           <div className={`${baseClass}__operator`}>
-            <ReactSelect onChange={() => console.log('changing')} />
+            <ReactSelect
+              options={operators}
+              onChange={() => console.log('changing')}
+            />
           </div>
           <div className={`${baseClass}__value`}>
-            <ReactSelect onChange={() => console.log('changing')} />
+            <ReactSelect
+              options={[
+                {
+                  label: 'Option 1',
+                  value: 'option-1',
+                },
+              ]}
+              onChange={newValue => console.log('changing value', newValue)}
+            />
           </div>
         </div>
         <div className={`${baseClass}__actions`}>
@@ -56,13 +63,7 @@ const Condition = (props) => {
   );
 };
 
-Condition.defaultProps = {
-  relation: 'and',
-  hideRelation: false,
-};
-
 Condition.propTypes = {
-  hideRelation: PropTypes.bool,
   fields: PropTypes.arrayOf(
     PropTypes.shape({
       label: PropTypes.string,
@@ -71,7 +72,6 @@ Condition.propTypes = {
     }),
   ).isRequired,
   handleChange: PropTypes.func.isRequired,
-  relation: PropTypes.oneOf(['and', 'or']),
 };
 
 export default Condition;

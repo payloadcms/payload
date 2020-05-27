@@ -8,10 +8,20 @@ const formatListFields = (config) => {
       ...formatted,
       field,
     ];
-  }, [{ name: 'id', label: 'ID' }]);
+  }, [{ name: 'id', label: 'ID', type: 'text' }]);
 
   if (config.timestamps) {
-    listFields = listFields.concat([{ name: 'createdAt', label: 'Created At' }, { name: 'updatedAt', label: 'Updated At' }]);
+    listFields = listFields.concat([
+      {
+        name: 'createdAt',
+        label: 'Created At',
+        type: 'date',
+      }, {
+        name: 'updatedAt',
+        label: 'Updated At',
+        type: 'date',
+      },
+    ]);
   }
 
   return listFields;

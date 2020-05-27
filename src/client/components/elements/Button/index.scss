@@ -90,15 +90,22 @@
 
     &:hover {
       .btn__icon {
-        background: $color-dark-gray;
         @include color-svg(white);
+        background: $color-dark-gray;
       }
     }
 
-    &:active, &:focus {
+    &:focus {
       .btn__icon {
-        background: lighten($color-dark-gray, 10%);
+        @include color-svg($color-dark-gray);
+        background: $color-light-gray;
+      }
+    }
+
+    &:active {
+      .btn__icon {
         @include color-svg(white);
+        background: lighten($color-dark-gray, 10%);
       }
     }
   }

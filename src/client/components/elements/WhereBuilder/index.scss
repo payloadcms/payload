@@ -8,7 +8,8 @@
     margin: base(.5) 0;
   }
 
-  &__filters {
+  &__or-filters,
+  &__and-filters {
     list-style: none;
     margin: 0;
     padding: 0;

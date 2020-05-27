@@ -15,8 +15,8 @@
     }
   }
 
-  .condition__field,
-  .condition__operator {
+  &__field,
+  &__operator {
     margin-right: $baseline;
   }
 
@@ -27,5 +27,26 @@
   .btn {
     vertical-align: middle;
     margin: 0 0 0 $baseline;
+  }
+
+  @include mid-break {
+    &__wrap {
+      align-items: initial;
+    }
+
+    &__inputs {
+      display: block;
+    }
+
+    &__actions {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    &__field,
+    &__operator {
+      margin: 0 0 base(.5);
+    }
   }
 }

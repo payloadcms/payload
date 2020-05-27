@@ -38,6 +38,10 @@
     align-items: center;
   }
 
+  .paginator {
+    margin-bottom: 0;
+  }
+
   &__page-info {
     margin-right: 0;
     margin-left: auto;
@@ -67,6 +71,10 @@
 
     &__page-controls {
       display: block;
+    }
+
+    .paginator {
+      margin-bottom: $baseline;
     }
   }
 }
