@@ -1,18 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import MinimalTemplate from '../../../../../../src/client/components/templates/Minimal';
+import DefaultList from '../../../../../../src/client/components/views/collections/List/Default';
 
 import './index.scss';
 
 const CustomListView = (props) => {
-  const { collection } = props;
-
   return (
-    <MinimalTemplate className="custom-list">
-      <h1>{collection.labels.plural}</h1>
+    <div className="custom-list">
       <p>This is a custom Pages list view</p>
       <p>Sup</p>
-    </MinimalTemplate>
+      <DefaultList {...props} />
+    </div>
   );
 };
 

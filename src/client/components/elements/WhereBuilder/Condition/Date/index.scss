@@ -1,0 +1,6 @@
+@import '../../../../../scss/styles.scss';
+@import '../../../../forms/field-types/shared.scss';
+
+.condition-value-date {
+  @include formInput;
+}

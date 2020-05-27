@@ -3,12 +3,10 @@ import PropTypes from 'prop-types';
 
 import './index.scss';
 
-const baseClass = 'condition-value-date';
-
-const DateField = ({ onChange, value }) => {
+const Filter = ({ onChange, value }) => {
   return (
     <input
-      className={baseClass}
+      className="custom-description-filter"
       type="text"
       onChange={e => onChange(e.target.value)}
       value={value}
@@ -16,9 +14,13 @@ const DateField = ({ onChange, value }) => {
   );
 };
 
-DateField.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string.isRequired,
+Filter.defaultProps = {
+  value: '',
 };
 
-export default DateField;
+Filter.propTypes = {
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.string,
+};
+
+export default Filter;

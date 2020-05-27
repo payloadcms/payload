@@ -32,6 +32,7 @@ module.exports = {
       components: {
         field: path.resolve(__dirname, 'components/fields/Description/Field/index.js'),
         cell: path.resolve(__dirname, 'components/fields/Description/Cell/index.js'),
+        filter: path.resolve(__dirname, 'components/fields/Description/Filter/index.js'),
       },
     },
   ],

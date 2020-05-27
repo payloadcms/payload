@@ -51,7 +51,7 @@ const reducer = (state, action = {}) => {
         newState[orIndex][andIndex].field = field;
       }
 
-      if (value) {
+      if (value !== undefined) {
         newState[orIndex][andIndex].value = value;
       }
 

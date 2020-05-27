@@ -13,6 +13,7 @@ const WhereBuilder = (props) => {
   const {
     collection: {
       fields,
+      slug,
       labels: {
         plural,
       } = {},
@@ -26,13 +27,15 @@ const WhereBuilder = (props) => {
   useEffect(() => {
     setReducedFields(fields.reduce((reduced, field) => {
       if (typeof fieldTypes[field.type] === 'object') {
+        const formattedField = {
+          label: field.label,
+          value: field.name,
+          ...fieldTypes[field.type],
+        };
+
         return [
           ...reduced,
-          {
-            label: field.label,
-            value: field.name,
-            ...fieldTypes[field.type],
-          },
+          formattedField,
         ];
       }
 
@@ -74,6 +77,7 @@ const WhereBuilder = (props) => {
                             </div>
                           )}
                           <Condition
+                            collectionSlug={slug}
                             value={where[orIndex][andIndex]}
                             orIndex={orIndex}
                             andIndex={andIndex}
@@ -119,6 +123,7 @@ const WhereBuilder = (props) => {
 WhereBuilder.propTypes = {
   handleChange: PropTypes.func.isRequired,
   collection: PropTypes.shape({
+    slug: PropTypes.string,
     fields: PropTypes.arrayOf(
       PropTypes.shape({}),
     ),

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import ReactSelect from '../../ReactSelect';
 import Button from '../../Button';
 import Date from './Date';
@@ -23,6 +24,7 @@ const Condition = (props) => {
     value,
     orIndex,
     andIndex,
+    collectionSlug,
   } = props;
 
   const [activeField, setActiveField] = useState({ operators: [] });
@@ -34,6 +36,8 @@ const Condition = (props) => {
       setActiveField(newActiveField);
     }
   }, [value, fields]);
+
+  const ValueComponent = valueFields[activeField.component] || valueFields.Text;
 
   return (
     <div className={baseClass}>
@@ -64,15 +68,18 @@ const Condition = (props) => {
             />
           </div>
           <div className={`${baseClass}__value`}>
-            <ReactSelect
-              value={value.value}
-              options={[
-                {
-                  label: 'Option 1',
-                  value: 'option-1',
-                },
-              ]}
-              onChange={newValue => console.log('changing value', newValue)}
+            <RenderCustomComponent
+              path={`${collectionSlug}.fields.${activeField.value}.filter`}
+              DefaultComponent={ValueComponent}
+              componentProps={{
+                value: value.value,
+                onChange: updatedValue => dispatch({
+                  type: 'update',
+                  orIndex,
+                  andIndex,
+                  value: updatedValue || '',
+                }),
+              }}
             />
           </div>
         </div>
@@ -125,6 +132,7 @@ Condition.propTypes = {
   dispatch: PropTypes.func.isRequired,
   orIndex: PropTypes.number.isRequired,
   andIndex: PropTypes.number.isRequired,
+  collectionSlug: PropTypes.string.isRequired,
 };
 
 export default Condition;
