@@ -1,12 +1,10 @@
-import { buildASTSchema } from 'graphql';
-
 const boolean = [
   {
-    label: 'Equals',
+    label: 'equals',
     value: 'equals',
   },
   {
-    label: 'Not Equals',
+    label: 'is not equal to',
     value: 'not-equals',
   },
 ];
@@ -14,11 +12,11 @@ const boolean = [
 const base = [
   ...boolean,
   {
-    label: 'In',
+    label: 'is in',
     value: 'in',
   },
   {
-    label: 'Not In',
+    label: 'is not in',
     value: 'not-in',
   },
 ];
@@ -26,26 +24,26 @@ const base = [
 const numeric = [
   ...base,
   {
-    label: 'Greater Than',
+    label: 'is greater Than',
     value: 'greater_than',
   },
   {
-    label: 'Less Than',
+    label: 'is less than',
     value: 'less_than',
   },
   {
-    label: 'Less Than Equals',
+    label: 'is less than or equal to',
     value: 'less_than_equals',
   },
   {
-    label: 'Greater Than Equals',
+    label: 'is greater than or equal to',
     value: 'greater_than_equals',
   },
 ];
 
 const like = {
-  label: 'like',
-  value: 'Like',
+  label: 'is like',
+  value: 'like',
 };
 
 const fieldTypeConditions = {
@@ -95,4 +93,4 @@ const fieldTypeConditions = {
   },
 };
 
-module.exports = fieldTypeConditions;
+export default fieldTypeConditions;

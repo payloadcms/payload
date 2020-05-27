@@ -31,7 +31,7 @@ const WhereBuilder = (props) => {
           {
             label: field.label,
             value: field.name,
-            operators: fieldTypes[field.type],
+            ...fieldTypes[field.type],
           },
         ];
       }

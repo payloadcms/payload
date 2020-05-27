@@ -20,8 +20,12 @@ const Condition = (props) => {
   const [activeOperators, setActiveOperators] = useState([]);
 
   useEffect(() => {
+    const activeField = fields.find(field => value.field === field.value);
 
-  }, [value]);
+    if (activeField) {
+      setActiveOperators(activeField.operators);
+    }
+  }, [value, fields]);
 
   return (
     <div className={baseClass}>
@@ -29,20 +33,31 @@ const Condition = (props) => {
         <div className={`${baseClass}__inputs`}>
           <div className={`${baseClass}__field`}>
             <ReactSelect
-              value={value.field}
+              value={fields.find(field => value.field === field.value)}
               options={fields}
-              onChange={newField => console.log('changing field', newField)}
+              onChange={field => dispatch({
+                type: 'update',
+                orIndex,
+                andIndex,
+                field,
+              })}
             />
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              value={value.field}
+              value={activeOperators.find(operator => value.operator === operator.value)}
               options={activeOperators}
-              onChange={() => console.log('changing')}
+              onChange={operator => dispatch({
+                type: 'update',
+                orIndex,
+                andIndex,
+                operator,
+              })}
             />
           </div>
           <div className={`${baseClass}__value`}>
             <ReactSelect
+              value={value.value}
               options={[
                 {
                   label: 'Option 1',
@@ -60,10 +75,8 @@ const Condition = (props) => {
             buttonStyle="icon-label"
             onClick={() => dispatch({
               type: 'remove',
-              payload: {
-                orIndex,
-                andIndex,
-              },
+              orIndex,
+              andIndex,
             })}
           />
           <Button
@@ -72,11 +85,9 @@ const Condition = (props) => {
             buttonStyle="icon-label"
             onClick={() => dispatch({
               type: 'add',
-              payload: {
-                relation: 'and',
-                orIndex,
-                andIndex: andIndex + 1,
-              },
+              relation: 'and',
+              orIndex,
+              andIndex: andIndex + 1,
             })}
           />
         </div>
@@ -89,8 +100,10 @@ Condition.propTypes = {
   fields: PropTypes.arrayOf(
     PropTypes.shape({
       label: PropTypes.string,
-      name: PropTypes.string,
-      type: PropTypes.string,
+      value: PropTypes.string,
+      operators: PropTypes.arrayOf(
+        PropTypes.shape({}),
+      ),
     }),
   ).isRequired,
   value: PropTypes.shape({
