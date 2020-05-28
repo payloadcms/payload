@@ -72,6 +72,7 @@ const Condition = (props) => {
               path={`${collectionSlug}.fields.${activeField.value}.filter`}
               DefaultComponent={ValueComponent}
               componentProps={{
+                ...activeField.props,
                 value: value.value,
                 onChange: updatedValue => dispatch({
                   type: 'update',
@@ -127,6 +128,8 @@ Condition.propTypes = {
     value: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.number,
+      PropTypes.instanceOf(Date),
+      PropTypes.shape({}),
     ]),
   }).isRequired,
   dispatch: PropTypes.func.isRequired,

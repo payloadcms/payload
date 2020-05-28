@@ -31,6 +31,9 @@ const WhereBuilder = (props) => {
           label: field.label,
           value: field.name,
           ...fieldTypes[field.type],
+          props: {
+            ...field,
+          },
         };
 
         return [
