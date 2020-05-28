@@ -1,9 +1,11 @@
 const formatErrorResponse = (incoming) => {
   if (incoming) {
+    // mongoose
     if (incoming.errors) {
       return {
         errors: Object.keys(incoming.errors).reduce((acc, key) => {
           acc.push({
+            field: incoming.errors[key].path,
             message: incoming.errors[key].message,
           });
           return acc;

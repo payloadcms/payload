@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const { find } = require('../operations');
 
-const findHandler = async (req, res) => {
+const findHandler = async (req, res, next) => {
   try {
     const options = {
       req,
@@ -17,8 +17,8 @@ const findHandler = async (req, res) => {
     const result = await find(options);
 
     return res.status(httpStatus.OK).json(result);
-  } catch (err) {
-    return res.status(400).json(err);
+  } catch (error) {
+    return next(error);
   }
 };
 

@@ -17,7 +17,6 @@ const findResolver = collection => async (_, args, context) => {
   };
 
   const results = await find(options);
-
   return results;
 };
 

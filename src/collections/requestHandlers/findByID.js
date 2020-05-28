@@ -1,8 +1,6 @@
-const httpStatus = require('http-status');
 const { findByID } = require('../operations');
-const formatErrorResponse = require('../../express/responses/formatError');
 
-const findByIDHandler = async (req, res) => {
+const findByIDHandler = async (req, res, next) => {
   const options = {
     req,
     Model: req.collection.Model,
@@ -14,8 +12,8 @@ const findByIDHandler = async (req, res) => {
   try {
     const doc = await findByID(options);
     return res.json(doc);
-  } catch (err) {
-    return res.status(err.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(err));
+  } catch (error) {
+    return next(error);
   }
 };
 

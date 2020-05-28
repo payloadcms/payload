@@ -1,9 +1,8 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
 const formatSuccessResponse = require('../../express/responses/formatSuccess');
 const { create } = require('../operations');
 
-const createHandler = async (req, res) => {
+const createHandler = async (req, res, next) => {
   try {
     const doc = await create({
       req,
@@ -17,7 +16,7 @@ const createHandler = async (req, res) => {
       doc,
     });
   } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
+    return next(error);
   }
 };
 

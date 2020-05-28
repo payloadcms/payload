@@ -7,9 +7,11 @@ const MissingGlobalLabel = require('./MissingGlobalLabel');
 const NotFound = require('./NotFound');
 const Forbidden = require('./Forbidden');
 const ValidationError = require('./ValidationError');
+const errorHandler = require('../express/middleware/errorHandler');
 const MissingFile = require('./MissingFile');
 
 module.exports = {
+  errorHandler,
   APIError,
   AuthenticationError,
   DuplicateCollection,

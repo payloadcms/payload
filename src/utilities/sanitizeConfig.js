@@ -28,6 +28,7 @@ const sanitizeConfig = (config) => {
   };
 
   sanitizedConfig.components = { ...(config.components || {}) };
+  sanitizedConfig.hooks = { ...(config.hooks || {}) };
 
   return sanitizedConfig;
 };

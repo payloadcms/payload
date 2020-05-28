@@ -83,4 +83,9 @@ module.exports = {
       // Sidebar: path.resolve(__dirname, 'client/components/layout/Sidebar/index.js'),
     },
   },
+  hooks: {
+    afterError: (err, response) => {
+      console.error('global error config handler');
+    },
+  },
 };

@@ -1,6 +1,6 @@
 /**
  * authorize a request by comparing the current user with one or more roles
- * @param roles
+ * @param allRoles
  * @param user
  * @returns {Function}
  */
