@@ -31,14 +31,14 @@ const Pagination = (props) => {
     numberOfNeighbors,
   } = props;
 
+  if (!totalPages || totalPages <= 1) return null;
+
   // uses react router to set the current page
   const updatePage = (page) => {
     const params = queryString.parse(location.search, { ignoreQueryPrefix: true });
     params.page = page;
     history.push({ search: queryString.stringify(params, { addQueryPrefix: true }) });
   };
-
-  if (totalPages <= 1) return null;
 
   // Create array of integers for each page
   const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
@@ -131,7 +131,6 @@ const Pagination = (props) => {
 export default Pagination;
 
 Pagination.defaultProps = {
-  totalDocs: null,
   limit: null,
   totalPages: null,
   page: 1,
@@ -143,7 +142,6 @@ Pagination.defaultProps = {
 };
 
 Pagination.propTypes = {
-  totalDocs: PropTypes.number,
   limit: PropTypes.number,
   totalPages: PropTypes.number,
   page: PropTypes.number,

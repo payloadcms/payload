@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import queryString from 'qs';
 import PropTypes from 'prop-types';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
@@ -9,6 +9,7 @@ import Pill from '../../../elements/Pill';
 import Button from '../../../elements/Button';
 import SortColumn from '../../../elements/SortColumn';
 import Table from '../../../elements/Table';
+import Cell from './Cell';
 
 import './index.scss';
 
@@ -65,7 +66,7 @@ const DefaultList = (props) => {
       {(data.docs && data.docs.length > 0) && (
         <Table
           data={data.docs}
-          columns={listControls.columns.map((col, i) => {
+          columns={listControls.columns.map((col, colIndex) => {
             const field = fields.find(fieldToCheck => fieldToCheck.name === col);
             return {
               accessor: field.name,
@@ -78,25 +79,22 @@ const DefaultList = (props) => {
                   />
                 ),
                 renderCell: (rowData, cellData) => {
-                  if (i === 0) {
-                    return (
-                      <>
-                        <Link to={`${admin}/collections/${collection.slug}/${rowData.id}`}>
-                          {typeof cellData === 'string' && cellData}
-                          {typeof cellData === 'object' && JSON.stringify(cellData)}
-                        </Link>
-                      </>
-                    );
-                  }
-
-                  return cellData;
+                  return (
+                    <Cell
+                      field={field}
+                      colIndex={colIndex}
+                      collection={collection}
+                      rowData={rowData}
+                      cellData={cellData}
+                    />
+                  );
                 },
               },
             };
           })}
         />
       )}
-      {(!data.docs || data.docs.length === 0) && (
+      {data.docs && data.docs.length === 0 && (
         <div className={`${baseClass}__no-results`}>
           <p>
             No
@@ -121,7 +119,6 @@ const DefaultList = (props) => {
       )}
       <div className={`${baseClass}__page-controls`}>
         <Paginator
-          totalDocs={data.totalDocs}
           limit={data.limit}
           totalPages={data.totalPages}
           page={data.page}
@@ -131,15 +128,17 @@ const DefaultList = (props) => {
           nextPage={data.nextPage}
           numberOfNeighbors={1}
         />
-        <div className={`${baseClass}__page-info`}>
-          {data.page}
-          -
-          {data.totalPages > 1 ? data.limit : data.totalDocs}
-          {' '}
-          of
-          {' '}
-          {data.totalDocs}
-        </div>
+        {data?.totalDocs > 0 && (
+          <div className={`${baseClass}__page-info`}>
+            {data.page}
+            -
+            {data.totalPages > 1 ? data.limit : data.totalDocs}
+            {' '}
+            of
+            {' '}
+            {data.totalDocs}
+          </div>
+        )}
       </div>
     </div>
   );
