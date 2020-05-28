@@ -18,6 +18,12 @@
     padding-bottom: base(2);
   }
 
+  @include large-break {
+    &__wrap {
+      padding-left: base(1);
+    }
+  }
+
   @include mid-break {
     width: 100%;
     margin-left: 0;

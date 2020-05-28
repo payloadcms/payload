@@ -5,7 +5,7 @@ const boolean = [
   },
   {
     label: 'is not equal to',
-    value: 'not-equals',
+    value: 'not_equals',
   },
 ];
 
@@ -17,14 +17,14 @@ const base = [
   },
   {
     label: 'is not in',
-    value: 'not-in',
+    value: 'not_in',
   },
 ];
 
 const numeric = [
   ...base,
   {
-    label: 'is greater Than',
+    label: 'is greater than',
     value: 'greater_than',
   },
   {

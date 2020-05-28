@@ -5,7 +5,7 @@
   top: 0;
   left: 0;
   bottom: 0;
-  width: base(10);
+  width: base(9);
   overflow: hidden;
 
   header {
@@ -110,6 +110,10 @@
         }
       }
     }
+  }
+
+  @include large-break {
+    width: base(8);
   }
 
   @include mid-break {
