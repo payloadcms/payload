@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
-// import customComponents from '../../customComponents';
 import SearchFilter from '../SearchFilter';
 import ColumnSelector from '../ColumnSelector';
 import WhereBuilder from '../WhereBuilder';
@@ -15,6 +14,7 @@ const baseClass = 'list-controls';
 const ListControls = (props) => {
   const {
     handleChange,
+    collection,
     collection: {
       fields,
       useAsTitle,
@@ -51,6 +51,16 @@ const ListControls = (props) => {
       };
     }
 
+    if (where) {
+      if (!search) {
+        newState.where = {
+          AND: [],
+        };
+      }
+
+      newState.where.AND.push(where);
+    }
+
     handleChange(newState);
   }, [search, columns, where, handleChange]);
 
@@ -84,8 +94,7 @@ const ListControls = (props) => {
         height={visibleDrawer === 'columns' ? 'auto' : 0}
       >
         <ColumnSelector
-          useAsTitle={useAsTitle}
-          fields={fields}
+          collection={collection}
           defaultColumns={defaultColumns}
           handleChange={setColumns}
         />
@@ -94,7 +103,10 @@ const ListControls = (props) => {
         className={`${baseClass}__where`}
         height={visibleDrawer === 'where' ? 'auto' : 0}
       >
-        <WhereBuilder handleChange={setWhere} />
+        <WhereBuilder
+          handleChange={setWhere}
+          collection={collection}
+        />
       </AnimateHeight>
     </div>
   );

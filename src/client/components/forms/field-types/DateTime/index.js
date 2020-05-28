@@ -1,19 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import DatePicker from 'react-datepicker';
 
+import DatePicker from '../../../elements/DatePicker';
 import withConditions from '../../withConditions';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import CalendarIcon from '../../../icons/Calendar';
 
-import 'react-datepicker/dist/react-datepicker.css';
 import './index.scss';
 
 const defaultError = 'Please fill in the field with a valid date';
 
-const baseClass = 'date-time-picker';
+const baseClass = 'date-time-field';
 
 const DateTime = (props) => {
   const {
@@ -25,17 +23,6 @@ const DateTime = (props) => {
     width,
     errorMessage,
     label,
-    inputDateTimeFormat,
-    useDate,
-    minDate,
-    maxDate,
-    monthsShown,
-    useTime,
-    minTime,
-    maxTime,
-    timeIntervals,
-    timeFormat,
-    placeholder: placeholderText,
   } = props;
 
   const {
@@ -50,34 +37,9 @@ const DateTime = (props) => {
     validate,
   });
 
-  let dateTimeFormat = inputDateTimeFormat;
-  if (!dateTimeFormat) {
-    if (useTime && useDate) dateTimeFormat = 'MMM d, yyy h:mma';
-    else if (useTime) dateTimeFormat = 'h:mma';
-    else dateTimeFormat = 'MMM d, yyy';
-  }
-
-  const dateTimePickerProps = {
-    minDate,
-    maxDate,
-    dateFormat: dateTimeFormat,
-    monthsShown: Math.min(2, monthsShown),
-    showTimeSelect: useTime,
-    minTime,
-    maxTime,
-    timeIntervals,
-    timeFormat,
-    placeholderText,
-    onChange: val => onFieldChange(val),
-    showPopperArrow: false,
-    selected: value && new Date(value),
-    customInputRef: 'ref',
-  };
-
   const classes = [
     'field-type',
     baseClass,
-    !useDate && `${baseClass}--hide-dates`,
     showError && `${baseClass}--has-error`,
     formProcessing && 'processing',
   ].filter(Boolean).join(' ');
@@ -102,8 +64,11 @@ const DateTime = (props) => {
         required={required}
       />
       <div className={`${baseClass}__input-wrapper`}>
-        <DatePicker {...dateTimePickerProps} />
-        <CalendarIcon />
+        <DatePicker
+          {...props}
+          onChange={onFieldChange}
+          value={value}
+        />
       </div>
     </div>
   );
@@ -113,47 +78,21 @@ DateTime.defaultProps = {
   label: null,
   required: false,
   defaultValue: null,
-  placeholder: undefined,
   validate: null,
   errorMessage: defaultError,
   width: 100,
   style: {},
-  // date specific props
-  useDate: true,
-  minDate: new Date(),
-  maxDate: null,
-  monthsShown: 1,
-  inputDateTimeFormat: '',
-  // time specific props
-  useTime: false,
-  minTime: new Date('4040-01-01T01:00:00'),
-  maxTime: new Date('4040-01-01T24:00:00'),
-  timeIntervals: 30,
-  timeFormat: 'h:mm aa',
 };
 
 DateTime.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string,
   required: PropTypes.bool,
-  placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
   validate: PropTypes.func,
   errorMessage: PropTypes.string,
   width: PropTypes.number,
   style: PropTypes.shape({}),
-  // date specific props
-  useDate: PropTypes.bool,
-  minDate: PropTypes.instanceOf(Date),
-  maxDate: PropTypes.instanceOf(Date),
-  monthsShown: PropTypes.number,
-  inputDateTimeFormat: PropTypes.string,
-  // time specific props
-  useTime: PropTypes.bool,
-  minTime: PropTypes.instanceOf(Date),
-  maxTime: PropTypes.instanceOf(Date),
-  timeIntervals: PropTypes.number,
-  timeFormat: PropTypes.string,
 };
 
 export default withConditions(DateTime);

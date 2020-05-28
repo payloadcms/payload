@@ -1,0 +1,26 @@
+@import '../../../scss/styles.scss';
+
+.where-builder {
+  background: $color-background-gray;
+  padding: base(.5) $baseline $baseline;
+
+  &__label {
+    margin: base(.5) 0;
+  }
+
+  &__or-filters,
+  &__and-filters {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__add-or,
+  &__add-first-filter {
+    margin-bottom: 0;
+  }
+
+  &__add-first-filter {
+    margin-top: 0;
+  }
+}

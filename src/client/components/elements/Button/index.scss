@@ -1,6 +1,7 @@
 @import '../../../scss/styles.scss';
 
 .btn {
+  background: transparent;
   line-height: base(1);
   border-radius: $style-radius-m;
   font-size: 1rem;
@@ -65,15 +66,63 @@
       justify-content: space-between;
     }
 
-    svg {
-      display: block;
-      margin-left: base(.5);
-    }
-
     &.btn--style-primary {
-      svg {
+      .icon {
         @include color-svg(white);
       }
+    }
+  }
+
+  &--style-icon-label {
+    padding: 0;
+    font-weight: 600;
+
+    .btn__icon {
+      border: 1px solid $color-dark-gray;
+      border-radius: 100%;
+    }
+
+    &.btn--icon-only {
+      .btn__icon {
+        margin: 0;
+      }
+    }
+
+    &:hover {
+      .btn__icon {
+        @include color-svg(white);
+        background: $color-dark-gray;
+      }
+    }
+
+    &:focus {
+      .btn__icon {
+        @include color-svg($color-dark-gray);
+        background: $color-light-gray;
+      }
+    }
+
+    &:active {
+      .btn__icon {
+        @include color-svg(white);
+        background: lighten($color-dark-gray, 10%);
+      }
+    }
+  }
+
+  &--icon-position-left {
+    .btn__content {
+      flex-direction: row-reverse;
+    }
+
+    .btn__icon {
+      margin-right: base(.5);
+    }
+  }
+
+  &--icon-position-right {
+    .btn__icon {
+      margin-left: base(.5);
     }
   }
 

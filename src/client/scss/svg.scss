@@ -1,6 +1,7 @@
 @mixin color-svg($color) {
 	.stroke {
-		stroke: $color;
+    stroke: $color;
+    fill: none;
 	}
 
 	.fill {

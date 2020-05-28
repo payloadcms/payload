@@ -25,7 +25,7 @@ const usePayloadAPI = (url, options = {}) => {
         const search = queryString.stringify({
           locale,
           ...params,
-        });
+        }, { depth: 10 });
 
         const response = await requests.get(`${url}?${search}`);
         const json = await response.json();

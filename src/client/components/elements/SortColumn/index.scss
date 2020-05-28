@@ -1,8 +1,6 @@
 @import '../../../scss/styles.scss';
 
 .sort-column {
-  display: flex;
-
   &__label {
     overflow: hidden;
     text-overflow: ellipsis;

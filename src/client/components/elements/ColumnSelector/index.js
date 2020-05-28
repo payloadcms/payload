@@ -28,9 +28,11 @@ const reducer = (state, { type, payload }) => {
 
 const ColumnSelector = (props) => {
   const {
+    collection: {
+      fields,
+      useAsTitle,
+    },
     handleChange,
-    fields,
-    useAsTitle,
     defaultColumns,
   } = props;
 
@@ -73,17 +75,18 @@ const ColumnSelector = (props) => {
 
 ColumnSelector.defaultProps = {
   defaultColumns: undefined,
-  useAsTitle: undefined,
 };
 
 ColumnSelector.propTypes = {
-  fields: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
+  collection: PropTypes.shape({
+    fields: PropTypes.arrayOf(
+      PropTypes.shape({}),
+    ),
+    useAsTitle: PropTypes.string,
+  }).isRequired,
   defaultColumns: PropTypes.arrayOf(
     PropTypes.string,
   ),
-  useAsTitle: PropTypes.string,
   handleChange: PropTypes.func.isRequired,
 };
 
