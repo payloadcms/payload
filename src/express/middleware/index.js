@@ -4,6 +4,7 @@ const compression = require('compression');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const cookieParser = require('cookie-parser');
+const qsMiddleware = require('qs-middleware');
 const localizationMiddleware = require('../../localization/middleware');
 const authenticate = require('./authenticate');
 const identifyAPI = require('./identifyAPI');
@@ -15,7 +16,7 @@ const middleware = (config) => {
     express.json(),
     cookieParser(),
     methodOverride('X-HTTP-Method-Override'),
-    express.urlencoded({ extended: true }),
+    qsMiddleware({ depth: 10 }),
     bodyParser.urlencoded({ extended: true }),
     compression(config.compression),
     localizationMiddleware(config.localization),

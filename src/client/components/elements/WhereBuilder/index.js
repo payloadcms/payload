@@ -9,6 +9,14 @@ import './index.scss';
 
 const baseClass = 'where-builder';
 
+const validateWhereQuery = (query) => {
+  if (query.or.length > 0 && query.or[0].and && query.or[0].and.length > 0) {
+    return query;
+  }
+
+  return null;
+};
+
 const WhereBuilder = (props) => {
   const {
     collection: {
@@ -47,27 +55,35 @@ const WhereBuilder = (props) => {
   }, [fields]);
 
   useEffect(() => {
-    const whereQuery = {
+    let whereQuery = {
       or: [],
     };
 
     if (where) {
       whereQuery.or = where.map((or) => {
-        return or.reduce((and, condition) => {
+        return or.reduce((conditions, condition) => {
           const { field, operator, value } = condition;
           if (field && operator && value) {
             return {
-              ...and,
-              [field]: {
-                [operator]: value,
-              },
+              and: [
+                ...conditions.and,
+                {
+                  [field]: {
+                    [operator]: value,
+                  },
+                },
+              ],
             };
           }
 
-          return and;
-        }, {});
+          return conditions;
+        }, {
+          and: [],
+        });
       });
     }
+
+    whereQuery = validateWhereQuery(whereQuery);
 
     if (typeof handleChange === 'function') handleChange(whereQuery);
   }, [where, handleChange]);

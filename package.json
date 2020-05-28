@@ -69,6 +69,7 @@
     "postcss-preset-env": "6.0.6",
     "prop-types": "^15.7.2",
     "qs": "^6.9.1",
+    "qs-middleware": "^1.0.3",
     "react": "^16.13.0",
     "react-animate-height": "^2.0.20",
     "react-beautiful-dnd": "^13.0.0",

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useWindowInfo } from '@trbl/react-window-info';
 import PropTypes from 'prop-types';
 import Chevron from '../../icons/Chevron';
 import Button from '../Button';
@@ -11,8 +10,6 @@ const baseClass = 'sort-column';
 const SortColumn = (props) => {
   const { label, handleChange, name } = props;
   const [sort, setSort] = useState(null);
-
-  const { breakpoints: { m } } = useWindowInfo();
 
   useEffect(() => {
     handleChange(sort);

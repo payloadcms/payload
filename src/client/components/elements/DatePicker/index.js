@@ -55,8 +55,6 @@ const DateTime = (props) => {
     !useDate && `${baseClass}--hide-dates`,
   ].filter(Boolean).join(' ');
 
-  console.log(value);
-
   return (
     <div className={classes}>
       <div className={`${baseClass}__input-wrapper`}>
@@ -76,7 +74,7 @@ DateTime.defaultProps = {
   monthsShown: 1,
   inputDateTimeFormat: '',
   // time specific props
-  useTime: false,
+  useTime: true,
   minTime: new Date('4040-01-01T01:00:00'),
   maxTime: new Date('4040-01-01T24:00:00'),
   timeIntervals: 30,

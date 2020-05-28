@@ -12,7 +12,7 @@ export const getJWTHeader = () => {
 
 export const requests = {
   get: (url, params) => {
-    const query = qs.stringify(params, { addQueryPrefix: true });
+    const query = qs.stringify(params, { addQueryPrefix: true, depth: 10 });
     return fetch(`${url}${query}`, {
       headers: {
         ...getJWTHeader(),

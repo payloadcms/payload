@@ -51,6 +51,16 @@ const ListControls = (props) => {
       };
     }
 
+    if (where) {
+      if (!search) {
+        newState.where = {
+          AND: [],
+        };
+      }
+
+      newState.where.AND.push(where);
+    }
+
     handleChange(newState);
   }, [search, columns, where, handleChange]);
 
