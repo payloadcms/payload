@@ -1,0 +1,19 @@
+@import '../../../scss/styles.scss';
+
+.eyebrow {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: base(1.5) 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba($color-background-gray, .8);
+  backdrop-filter: saturate(180%) blur(5px);
+
+  @include mid-break {
+    padding: 0 0 $baseline;
+    margin: 0;
+    position: static;
+  }
+}

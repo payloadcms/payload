@@ -1,16 +1,28 @@
 @import '../../../../scss/styles.scss';
 
 .collection-edit {
-  &__header {
+  width: 100%;
 
-    h1 {
-      margin: 0;
-    }
+  &__form {
+    display: flex;
   }
 
-  .sticky-header {
-    &:before {
-      left: - base(1.5);
-    }
+  &__main {
+    flex-grow: 1;
+  }
+
+  &__eyebrow {
+    padding: base(1.5) 0;
+    display: flex;
+  }
+
+  &__edit {
+    background: white;
+    padding: base(4);
+  }
+
+  &__sidebar {
+    padding-left: base(2);
+    width: base(13);
   }
 }

@@ -2,9 +2,13 @@
 @import '../../../forms/field-types/shared.scss';
 
 .collection-list {
-  padding: base(3);
-  background: white;
   width: 100%;
+
+  &__wrap {
+    padding: base(3);
+    margin-right: base(2);
+    background: white;
+  }
 
   &__header {
     margin-bottom: $baseline;

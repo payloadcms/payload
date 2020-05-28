@@ -11,7 +11,7 @@
   header {
     width: 100%;
     display: flex;
-    margin-bottom: $baseline;
+    margin-bottom: base(1.5);
 
     a, button {
       display: block;
@@ -43,7 +43,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: base(1);
+    padding: base(1.5) base(1);
     width: calc(100% + #{base(1)});
     overflow-y: scroll;
   }

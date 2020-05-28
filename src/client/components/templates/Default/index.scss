@@ -7,23 +7,8 @@
   display: flex;
   flex-direction: column;
 
-  &__eyebrow,
   &__wrap {
     padding-left: base(2);
-    padding-right: base(2);
-  }
-
-  &__eyebrow {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    padding-top: $baseline;
-    padding-bottom: $baseline;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba($color-background-gray, .8);
-    backdrop-filter: saturate(180%) blur(5px);
   }
 
   &__wrap {
@@ -37,12 +22,6 @@
     width: 100%;
     margin-left: 0;
     padding-top: base(3);
-
-    &__eyebrow {
-      padding: 0 0 $baseline;
-      margin: 0;
-      position: static;
-    }
 
     &__wrap {
       padding: 0 0 $baseline;

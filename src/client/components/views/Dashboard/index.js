@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useStepNav } from '../../elements/StepNav';
+import Eyebrow from '../../elements/Eyebrow';
 
 import './index.scss';
 
@@ -21,6 +22,7 @@ const Dashboard = () => {
 
   return (
     <div className={baseClass}>
+      <Eyebrow />
       <h1>Dashboard</h1>
       <Link to={`${admin}/login`}>Login</Link>
       <br />

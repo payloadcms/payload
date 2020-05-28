@@ -33,7 +33,7 @@ const DefaultCell = (props) => {
       <WrapElement {...wrapElementProps}>
         {(field.type === 'date' && cellData) && (
           <span>
-            {moment(cellData).format('MMMM Do YYYY, h:mm:ss a')}
+            {moment(cellData).format('MMMM Do YYYY, h:mma')}
           </span>
         )}
         {field.type !== 'date' && (

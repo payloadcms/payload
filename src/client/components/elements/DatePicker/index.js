@@ -69,14 +69,14 @@ DateTime.defaultProps = {
   placeholder: undefined,
   // date specific props
   useDate: true,
-  minDate: new Date(),
-  maxDate: null,
+  minDate: undefined,
+  maxDate: undefined,
   monthsShown: 1,
   inputDateTimeFormat: '',
   // time specific props
   useTime: true,
-  minTime: new Date('4040-01-01T01:00:00'),
-  maxTime: new Date('4040-01-01T24:00:00'),
+  minTime: undefined,
+  maxTime: undefined,
   timeIntervals: 30,
   timeFormat: 'h:mm aa',
   value: undefined,

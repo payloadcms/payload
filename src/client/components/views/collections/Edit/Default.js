@@ -1,0 +1,103 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { useRouteMatch } from 'react-router-dom';
+import Eyebrow from '../../../elements/Eyebrow';
+import Form from '../../../forms/Form';
+import PreviewButton from '../../../elements/PreviewButton';
+import FormSubmit from '../../../forms/Submit';
+import RenderFields from '../../../forms/RenderFields';
+import * as fieldTypes from '../../../forms/field-types';
+
+import './index.scss';
+
+const { serverURL, routes: { api } } = PAYLOAD_CONFIG;
+
+const baseClass = 'collection-edit';
+
+const DefaultEditView = (props) => {
+  const { params: { id } = {} } = useRouteMatch();
+
+  const {
+    collection, isEditing, data, onSave,
+  } = props;
+
+  const {
+    slug,
+    preview,
+    fields,
+    labels: {
+      singular: singularLabel,
+    },
+    useAsTitle,
+  } = collection;
+
+  return (
+    <div className={baseClass}>
+      <Form
+        className={`${baseClass}__form`}
+        method={id ? 'put' : 'post'}
+        action={`${serverURL}${api}/${slug}${id ? `/${id}` : ''}`}
+        handleAjaxResponse={onSave}
+      >
+        <div className={`${baseClass}__main`}>
+          <Eyebrow />
+          <div className={`${baseClass}__edit`}>
+            <header className={`${baseClass}__header`}>
+              {isEditing && (
+                <h1>
+                  Edit
+                  {' '}
+                  {Object.keys(data).length > 0
+                    && (data[useAsTitle || 'id'] ? data[useAsTitle || 'id'] : '[Untitled]')
+                  }
+                </h1>
+              )}
+              {!isEditing
+                && (
+                  <h1>
+                    Create New
+                    {' '}
+                    {singularLabel}
+                  </h1>
+                )
+              }
+            </header>
+            <RenderFields
+              fieldTypes={fieldTypes}
+              fieldSchema={fields}
+              initialData={data}
+            />
+          </div>
+        </div>
+        <div className={`${baseClass}__sidebar`}>
+          <PreviewButton generatePreviewURL={preview} />
+          <FormSubmit>Save</FormSubmit>
+        </div>
+      </Form>
+    </div>
+  );
+};
+
+DefaultEditView.defaultProps = {
+  isEditing: false,
+  data: undefined,
+  onSave: null,
+};
+
+DefaultEditView.propTypes = {
+  collection: PropTypes.shape({
+    labels: PropTypes.shape({
+      plural: PropTypes.string,
+      singular: PropTypes.string,
+    }),
+    slug: PropTypes.string,
+    useAsTitle: PropTypes.string,
+    fields: PropTypes.arrayOf(PropTypes.shape({})),
+    preview: PropTypes.func,
+  }).isRequired,
+  isEditing: PropTypes.bool,
+  data: PropTypes.shape({}),
+  onSave: PropTypes.func,
+};
+
+export default DefaultEditView;
