@@ -92,6 +92,7 @@ const propTypes = {
     PropTypes.string,
     PropTypes.number,
     PropTypes.instanceOf(Date),
+    PropTypes.array,
   ]),
   rowData: PropTypes.shape({
     id: PropTypes.string,

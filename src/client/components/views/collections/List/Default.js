@@ -70,32 +70,40 @@ const DefaultList = (props) => {
         {(data.docs && data.docs.length > 0) && (
           <Table
             data={data.docs}
-            columns={listControls.columns.map((col, colIndex) => {
+            columns={listControls.columns.reduce((cols, col, colIndex) => {
               const field = fields.find(fieldToCheck => fieldToCheck.name === col);
-              return {
-                accessor: field.name,
-                components: {
-                  Heading: (
-                    <SortColumn
-                      label={field.label}
-                      name={field.name}
-                      handleChange={setSort}
-                    />
-                  ),
-                  renderCell: (rowData, cellData) => {
-                    return (
-                      <Cell
-                        field={field}
-                        colIndex={colIndex}
-                        collection={collection}
-                        rowData={rowData}
-                        cellData={cellData}
-                      />
-                    );
+
+              if (field) {
+                return [
+                  ...cols,
+                  {
+                    accessor: field.name,
+                    components: {
+                      Heading: (
+                        <SortColumn
+                          label={field.label}
+                          name={field.name}
+                          handleChange={setSort}
+                        />
+                      ),
+                      renderCell: (rowData, cellData) => {
+                        return (
+                          <Cell
+                            field={field}
+                            colIndex={colIndex}
+                            collection={collection}
+                            rowData={rowData}
+                            cellData={cellData}
+                          />
+                        );
+                      },
+                    },
                   },
-                },
-              };
-            })}
+                ];
+              }
+
+              return cols;
+            }, [])}
           />
         )}
         {data.docs && data.docs.length === 0 && (
