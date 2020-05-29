@@ -28,12 +28,12 @@
 
   &__edit {
     background: white;
-    padding: base(6);
+    padding: base(5) base(6) base(6);
   }
 
   &__sidebar {
     padding-bottom: base(1);
-    width: base(20);
+    width: base(22);
     display: flex;
     flex-direction: column;
   }
@@ -84,12 +84,9 @@
     }
   }
 
-  &__sidebar-fields {
-    margin-bottom: base(1.5);
-  }
-
   &__meta {
     margin: auto 0 0 0;
+    padding-top: $baseline;
     list-style: none;
 
     li {
@@ -132,6 +129,10 @@
       padding-left: $baseline;
     }
 
+    &__api-url {
+      margin-bottom: base(.5);
+    }
+
     &__collection-actions {
       margin-top: base(.5);
       padding-left: $baseline;
@@ -139,6 +140,10 @@
       li {
         margin: 0 base(.5) 0 0;
       }
+    }
+
+    &__sidebar {
+      padding-bottom: base(4);
     }
   }
 }

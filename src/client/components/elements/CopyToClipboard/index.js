@@ -48,6 +48,7 @@ const CopyToClipboard = ({ value }) => {
         {!copied && 'Copy'}
       </Tooltip>
       <textarea
+        readOnly
         value={value}
         ref={ref}
       />
