@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import queryString from 'qs';
 import PropTypes from 'prop-types';
+import config from 'payload/config';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import Eyebrow from '../../../elements/Eyebrow';
 import Paginator from '../../../elements/Paginator';
@@ -14,7 +15,7 @@ import Cell from './Cell';
 
 import './index.scss';
 
-const { serverURL, routes: { api, admin } } = PAYLOAD_CONFIG;
+const { serverURL, routes: { api, admin } } = config;
 
 const baseClass = 'collection-list';
 

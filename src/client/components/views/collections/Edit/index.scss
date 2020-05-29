@@ -5,6 +5,7 @@
 
   &__form {
     display: flex;
+    align-items: flex-start;
   }
 
   &__main {
@@ -40,17 +41,26 @@
   }
 
   &__sidebar {
-    padding-left: base(2);
     padding-bottom: base(1);
     width: base(16);
     display: flex;
     flex-direction: column;
   }
 
+  &__document-actions,
+  &__meta {
+    padding-left: base(2);
+  }
+
+  &__document-actions {
+    @include blur-bg;
+    position: sticky;
+    top: 0;
+  }
+
   &__meta {
     margin: auto 0 0 0;
     list-style: none;
-    padding: 0;
 
     li {
       margin-bottom: base(.5);

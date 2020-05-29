@@ -1,6 +1,7 @@
 @import '../../../scss/styles.scss';
 
 .eyebrow {
+  @include blur-bg;
   position: sticky;
   top: 0;
   z-index: 2;
@@ -8,8 +9,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba($color-background-gray, .8);
-  backdrop-filter: saturate(180%) blur(5px);
 
   @include mid-break {
     padding: 0 0 $baseline;

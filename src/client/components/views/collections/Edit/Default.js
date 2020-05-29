@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useRouteMatch } from 'react-router-dom';
 import moment from 'moment';
+import config from 'payload/config';
 import Eyebrow from '../../../elements/Eyebrow';
 import Form from '../../../forms/Form';
 import PreviewButton from '../../../elements/PreviewButton';
@@ -11,7 +12,7 @@ import * as fieldTypes from '../../../forms/field-types';
 
 import './index.scss';
 
-const { serverURL, routes: { api } } = PAYLOAD_CONFIG;
+const { serverURL, routes: { api } } = config;
 
 const baseClass = 'collection-edit';
 

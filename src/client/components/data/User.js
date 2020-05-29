@@ -5,6 +5,7 @@ import { useLocation, useHistory } from 'react-router-dom';
 import jwt from 'jsonwebtoken';
 import PropTypes from 'prop-types';
 import Cookies from 'universal-cookie';
+import config from 'payload/config';
 import { useModal } from '@trbl/react-modal';
 import { requests } from '../../api';
 import StayLoggedInModal from '../modals/StayLoggedIn';
@@ -20,7 +21,7 @@ const {
     admin,
     api,
   },
-} = PAYLOAD_CONFIG;
+} = config;
 
 const cookieTokenName = `${cookiePrefix}-token`;
 

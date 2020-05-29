@@ -4,6 +4,8 @@ const webpack = require('webpack');
 const getStyleLoaders = require('./getStyleLoaders');
 const secureConfig = require('../utilities/secureConfig');
 
+const dependency = 'fuck';
+
 module.exports = (config) => {
   return {
     entry: {
@@ -106,9 +108,6 @@ module.exports = (config) => {
       ],
     },
     plugins: [
-      new webpack.DefinePlugin({
-        PAYLOAD_CONFIG: JSON.stringify(secureConfig(config)),
-      }),
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, '../client/index.html'),
         filename: './index.html',
@@ -118,6 +117,7 @@ module.exports = (config) => {
     resolve: {
       modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
       alias: {
+        'payload/config': config.paths.publicConfig,
         'payload-scss-overrides': config.paths.scss,
       },
     },

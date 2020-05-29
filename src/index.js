@@ -3,6 +3,7 @@ require('isomorphic-fetch');
 
 const express = require('express');
 const graphQLPlayground = require('graphql-playground-middleware-express').default;
+const getConfig = require('./utilities/getConfig');
 const authenticate = require('./express/middleware/authenticate');
 const connectMongoose = require('./mongoose/connect');
 const expressMiddleware = require('./express/middleware');
@@ -19,7 +20,11 @@ const errorHandler = require('./express/middleware/errorHandler');
 
 class Payload {
   constructor(options) {
-    this.config = sanitizeConfig(options.config);
+    const config = getConfig(options);
+
+    this.config = sanitizeConfig(config);
+    this.config.paths.publicConfig = options.config.public;
+
     this.express = options.express;
     this.router = express.Router();
     this.collections = {};

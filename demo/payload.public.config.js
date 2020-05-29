@@ -22,7 +22,6 @@ const NavigationRepeater = require('./globals/NavigationRepeater');
 const GlobalWithPolicies = require('./globals/GlobalWithPolicies');
 
 module.exports = {
-  secret: 'SECRET_KEY',
   admin: {
     user: 'admins',
     disable: false,
@@ -75,9 +74,6 @@ module.exports = {
     fallback: true,
   },
   productionGraphQLPlayground: false,
-  email: {
-    provider: 'mock',
-  },
   components: {
     layout: {
       // Sidebar: path.resolve(__dirname, 'client/components/layout/Sidebar/index.js'),

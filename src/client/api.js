@@ -1,7 +1,8 @@
 import Cookies from 'universal-cookie';
 import qs from 'qs';
+import config from 'payload/config';
 
-const { cookiePrefix } = PAYLOAD_CONFIG;
+const { cookiePrefix } = config;
 const cookieTokenName = `${cookiePrefix}-token`;
 
 export const getJWTHeader = () => {

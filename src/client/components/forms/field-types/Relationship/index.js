@@ -2,7 +2,8 @@ import React, { Component, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Cookies from 'universal-cookie';
 import some from 'async-some';
-import withConditions from '../../withConditions';
+import config from 'payload/config';
+import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
@@ -14,7 +15,8 @@ const cookies = new Cookies();
 
 const {
   cookiePrefix, serverURL, routes: { api }, collections,
-} = PAYLOAD_CONFIG;
+} = config;
+
 const cookieTokenName = `${cookiePrefix}-token`;
 
 const defaultError = 'Please make a selection.';
@@ -338,4 +340,4 @@ const RelationshipFieldType = (props) => {
   );
 };
 
-export default withConditions(RelationshipFieldType);
+export default withCondition(RelationshipFieldType);

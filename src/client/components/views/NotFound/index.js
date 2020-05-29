@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
+import config from 'payload/config';
 import Eyebrow from '../../elements/Eyebrow';
 import { useStepNav } from '../../elements/StepNav';
 import Button from '../../elements/Button';
 
-const { routes: { admin } } = PAYLOAD_CONFIG;
+const { routes: { admin } } = config;
 
 const NotFound = () => {
   const { setStepNav } = useStepNav();

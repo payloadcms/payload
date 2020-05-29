@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
+import config from 'payload/config';
 import MinimalTemplate from '../../templates/Minimal';
 import StatusList, { useStatusList } from '../../elements/Status';
 import Form from '../../forms/Form';
@@ -13,7 +14,7 @@ import './index.scss';
 
 const {
   admin: { user: userSlug }, collections, serverURL, routes: { admin, api },
-} = PAYLOAD_CONFIG;
+} = config;
 
 const userConfig = collections.find(collection => collection.slug === userSlug);
 

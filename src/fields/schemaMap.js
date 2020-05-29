@@ -5,7 +5,7 @@ const formatBaseSchema = (field) => {
     hide: field.hidden === 'api' || field.hidden === true,
     localized: field.localized || false,
     unique: field.unique || false,
-    required: (field.required && !field.localized && !field.hidden && !field.conditions) || false,
+    required: (field.required && !field.localized && !field.hidden && !field.condition) || false,
     default: field.defaultValue || undefined,
   };
 };

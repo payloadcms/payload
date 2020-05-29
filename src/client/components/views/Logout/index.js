@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
+import config from 'payload/config';
 import { useUser } from '../../data/User';
 import Minimal from '../../templates/Minimal';
 import Button from '../../elements/Button';
 
 import './index.scss';
 
-const { routes: { admin } } = PAYLOAD_CONFIG;
+const { routes: { admin } } = config;
 
 const baseClass = 'logout';
 

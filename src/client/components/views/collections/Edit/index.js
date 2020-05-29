@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useRouteMatch, useHistory } from 'react-router-dom';
+import config from 'payload/config';
 import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import DefaultEdit from './Default';
 
-const { serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
+const { serverURL, routes: { admin, api } } = config;
 
 const EditView = (props) => {
   const { params: { id } = {} } = useRouteMatch();

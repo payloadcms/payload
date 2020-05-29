@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
+import config from 'payload/config';
 import List from './views/collections/List';
 import { useUser } from './data/User';
 import DefaultTemplate from './templates/Default';
@@ -21,7 +22,7 @@ import Loading from './elements/Loading';
 
 const {
   admin: { user: userSlug }, routes, collections, globals,
-} = PAYLOAD_CONFIG;
+} = config;
 
 const Routes = () => {
   const [initialized, setInitialized] = useState(null);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
+import config from 'payload/config';
 import { useUser } from '../../data/User';
 import Chevron from '../../icons/Chevron';
 import LogOut from '../../icons/LogOut';
@@ -19,7 +20,7 @@ const {
   routes: {
     admin,
   },
-} = PAYLOAD_CONFIG;
+} = config;
 
 const Nav = () => {
   const { permissions } = useUser();

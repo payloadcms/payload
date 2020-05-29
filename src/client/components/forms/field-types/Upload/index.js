@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import useFieldType from '../../useFieldType';
-import withConditions from '../../withConditions';
+import withCondition from '../../withCondition';
 import UploadMedia from '../../../modules/UploadMedia';
 
 import './index.scss';
@@ -60,4 +60,4 @@ class Media extends Component {
   }
 }
 
-export default withConditions(fieldType(Media, 'media', validate, error));
+export default withCondition(fieldType(Media, 'media', validate, error));

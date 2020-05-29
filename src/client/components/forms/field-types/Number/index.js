@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import withConditions from '../../withConditions';
+import withCondition from '../../withCondition';
 
 import './index.scss';
 
@@ -96,4 +96,4 @@ NumberField.propTypes = {
   label: PropTypes.string,
 };
 
-export default withConditions(NumberField);
+export default withCondition(NumberField);

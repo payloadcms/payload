@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import DatePicker from '../../../elements/DatePicker';
-import withConditions from '../../withConditions';
+import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
@@ -95,4 +95,4 @@ DateTime.propTypes = {
   style: PropTypes.shape({}),
 };
 
-export default withConditions(DateTime);
+export default withCondition(DateTime);

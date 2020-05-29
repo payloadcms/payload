@@ -2,9 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
+import config from 'payload/config';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 
-const { routes: { admin } } = PAYLOAD_CONFIG;
+const { routes: { admin } } = config;
 
 const DefaultCell = (props) => {
   const {
