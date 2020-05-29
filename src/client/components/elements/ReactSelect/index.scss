@@ -4,6 +4,8 @@
 div.react-select {
   div.rs__control {
     @include formInput;
+    padding-top: base(.25);
+    padding-bottom: base(.25);
   }
 
   .rs__value-container {
@@ -73,7 +75,7 @@ div.react-select {
     background: transparent;
     border: $style-stroke-width-s solid $color-dark-gray;
     line-height: base(.8);
-    margin: base(.475) base(.475) base(.475) 0;
+    margin: 0 base(.475) 0 0;
   }
 
   .rs__multi-value__label {

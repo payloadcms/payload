@@ -16,13 +16,54 @@
     display: flex;
   }
 
+  &__header {
+    h1 {
+      word-break: break-all;
+      hyphens: auto;
+    }
+  }
+
+  &__collection-actions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+
+    li {
+      margin-left: $baseline;
+    }
+  }
+
   &__edit {
     background: white;
-    padding: base(4);
+    padding: base(6);
   }
 
   &__sidebar {
     padding-left: base(2);
-    width: base(13);
+    padding-bottom: base(1);
+    width: base(16);
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__meta {
+    margin: auto 0 0 0;
+    list-style: none;
+    padding: 0;
+
+    li {
+      margin-bottom: base(.5);
+    }
+  }
+
+  &__label {
+    color: $color-gray;
+  }
+
+  @include large-break {
+    &__edit {
+      padding: base(4);
+    }
   }
 }

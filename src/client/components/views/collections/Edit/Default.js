@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useRouteMatch } from 'react-router-dom';
+import moment from 'moment';
 import Eyebrow from '../../../elements/Eyebrow';
 import Form from '../../../forms/Form';
 import PreviewButton from '../../../elements/PreviewButton';
@@ -29,6 +30,7 @@ const DefaultEditView = (props) => {
       singular: singularLabel,
     },
     useAsTitle,
+    timestamps,
   } = collection;
 
   return (
@@ -40,7 +42,15 @@ const DefaultEditView = (props) => {
         handleAjaxResponse={onSave}
       >
         <div className={`${baseClass}__main`}>
-          <Eyebrow />
+          <Eyebrow actions={
+            isEditing ? (
+              <ul className={`${baseClass}__collection-actions`}>
+                <li>Add New</li>
+                <li>Duplicate</li>
+                <li>Delete</li>
+              </ul>
+            ) : undefined}
+          />
           <div className={`${baseClass}__edit`}>
             <header className={`${baseClass}__header`}>
               {isEditing && (
@@ -70,8 +80,31 @@ const DefaultEditView = (props) => {
           </div>
         </div>
         <div className={`${baseClass}__sidebar`}>
-          <PreviewButton generatePreviewURL={preview} />
-          <FormSubmit>Save</FormSubmit>
+          <div className={`${baseClass}__document-actions`}>
+            <PreviewButton generatePreviewURL={preview} />
+            <FormSubmit>Save</FormSubmit>
+          </div>
+          {isEditing && (
+            <ul className={`${baseClass}__meta`}>
+              <li>
+                <div className={`${baseClass}__label`}>ID</div>
+                <div>{id}</div>
+              </li>
+              {timestamps && (
+                <>
+                  <li>
+                    <div className={`${baseClass}__label`}>Last Modified</div>
+                    <div>{moment(data.updatedAt).format('MMMM Do YYYY, h:mma')}</div>
+                  </li>
+                  <li>
+                    <div className={`${baseClass}__label`}>Created</div>
+                    <div>{moment(data.createdAt).format('MMMM Do YYYY, h:mma')}</div>
+                  </li>
+                </>
+              )}
+
+            </ul>
+          )}
         </div>
       </Form>
     </div>
@@ -94,9 +127,13 @@ DefaultEditView.propTypes = {
     useAsTitle: PropTypes.string,
     fields: PropTypes.arrayOf(PropTypes.shape({})),
     preview: PropTypes.func,
+    timestamps: PropTypes.bool,
   }).isRequired,
   isEditing: PropTypes.bool,
-  data: PropTypes.shape({}),
+  data: PropTypes.shape({
+    updatedAt: PropTypes.string,
+    createdAt: PropTypes.string,
+  }),
   onSave: PropTypes.func,
 };
 

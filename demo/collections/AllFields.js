@@ -53,6 +53,7 @@ const AllFields = {
       hasMany: true,
     },
   ],
+  timestamps: true,
 };
 
 module.exports = AllFields;
