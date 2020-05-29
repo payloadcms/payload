@@ -8,10 +8,6 @@
     align-items: flex-start;
   }
 
-  &__main {
-    // max-width: base(20);
-  }
-
   &__header {
     h1 {
       word-break: break-all;
@@ -44,7 +40,8 @@
 
   &__document-actions,
   &__meta,
-  &__sidebar-fields {
+  &__sidebar-fields,
+  &__api-url {
     padding-left: base(1.5);
   }
 
@@ -74,6 +71,16 @@
 
     > *:last-child {
       margin-left: base(.5);
+    }
+  }
+
+  &__api-url {
+    margin-bottom: base(1.5);
+
+    a {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
@@ -120,7 +127,8 @@
 
     &__document-actions,
     &__meta,
-    &__sidebar-fields {
+    &__sidebar-fields,
+    &__api-url {
       padding-left: $baseline;
     }
 

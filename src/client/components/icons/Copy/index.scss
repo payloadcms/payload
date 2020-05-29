@@ -1,0 +1,12 @@
+@import '../../../scss/styles';
+
+.icon--copy {
+  height: $baseline;
+  width: $baseline;
+
+  .stroke {
+    fill: none;
+    stroke: $color-dark-gray;
+    stroke-width: $style-stroke-width-s;
+  }
+}

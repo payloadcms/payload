@@ -8,6 +8,7 @@ import Form from '../../../forms/Form';
 import PreviewButton from '../../../elements/PreviewButton';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
+import CopyToClipboard from '../../../elements/CopyToClipboard';
 import * as fieldTypes from '../../../forms/field-types';
 
 import './index.scss';
@@ -33,6 +34,8 @@ const DefaultEditView = (props) => {
     timestamps,
     preview,
   } = collection;
+
+  const apiURL = `${serverURL}${api}/${slug}/${id}`;
 
   return (
     <div className={baseClass}>
@@ -86,6 +89,22 @@ const DefaultEditView = (props) => {
             <PreviewButton generatePreviewURL={preview} />
             <FormSubmit>Save</FormSubmit>
           </div>
+          {isEditing && (
+            <div className={`${baseClass}__api-url`}>
+              <span className={`${baseClass}__label`}>
+                API URL
+                {' '}
+                <CopyToClipboard value={apiURL} />
+              </span>
+              <a
+                href={apiURL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {apiURL}
+              </a>
+            </div>
+          )}
           <div className={`${baseClass}__sidebar-fields`}>
             <RenderFields
               filter={field => field.position === 'sidebar'}
