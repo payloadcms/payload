@@ -8,15 +8,6 @@
     align-items: flex-start;
   }
 
-  &__main {
-    flex-grow: 1;
-  }
-
-  &__eyebrow {
-    padding: base(1.5) 0;
-    display: flex;
-  }
-
   &__header {
     h1 {
       word-break: break-all;
@@ -31,7 +22,7 @@
     display: flex;
 
     li {
-      margin-left: $baseline;
+      margin-left: base(.75);
     }
   }
 
@@ -49,13 +40,36 @@
 
   &__document-actions,
   &__meta {
-    padding-left: base(2);
+    padding-left: base(1.5);
   }
 
   &__document-actions {
     @include blur-bg;
     position: sticky;
     top: 0;
+    padding-right: $baseline;
+
+    .form-submit {
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+
+  &__document-actions--with-preview {
+    display: flex;
+
+    > * {
+      width: calc(50% - #{base(.5)});
+    }
+
+    > *:first-child {
+      margin-right: base(.5);
+    }
+
+    > *:last-child {
+      margin-left: base(.5);
+    }
   }
 
   &__meta {
@@ -74,6 +88,39 @@
   @include large-break {
     &__edit {
       padding: base(4);
+    }
+  }
+
+  @include mid-break {
+    &__form {
+      display: block;
+    }
+
+    &__edit {
+      padding: $baseline;
+      margin-bottom: $baseline;
+    }
+
+    &__document-actions {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: auto;
+    }
+
+    &__document-actions,
+    &__meta {
+      padding-left: $baseline;
+    }
+
+    &__collection-actions {
+      margin-top: base(.5);
+      padding-left: $baseline;
+
+      li {
+        margin: 0 base(.5) 0 0;
+      }
     }
   }
 }

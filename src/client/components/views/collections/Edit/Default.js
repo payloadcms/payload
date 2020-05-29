@@ -25,13 +25,13 @@ const DefaultEditView = (props) => {
 
   const {
     slug,
-    preview,
     fields,
     labels: {
       singular: singularLabel,
     },
     useAsTitle,
     timestamps,
+    preview,
   } = collection;
 
   return (
@@ -81,7 +81,7 @@ const DefaultEditView = (props) => {
           </div>
         </div>
         <div className={`${baseClass}__sidebar`}>
-          <div className={`${baseClass}__document-actions`}>
+          <div className={`${baseClass}__document-actions${preview ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
             <PreviewButton generatePreviewURL={preview} />
             <FormSubmit>Save</FormSubmit>
           </div>

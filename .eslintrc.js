@@ -5,9 +5,6 @@ module.exports = {
     es6: true,
     jest: true,
   },
-  globals: {
-    PAYLOAD_CONFIG: true,
-  },
   extends: 'airbnb',
   parserOptions: {
     ecmaFeatures: {
@@ -21,6 +18,13 @@ module.exports = {
     'react-hooks',
   ],
   rules: {
+    "import/no-unresolved": [
+      2,
+      {
+        ignore: [
+          'payload/config'
+        ]
+      }],
     "react/jsx-filename-extension": [
       1,
       {
