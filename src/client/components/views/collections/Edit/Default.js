@@ -74,6 +74,7 @@ const DefaultEditView = (props) => {
               }
             </header>
             <RenderFields
+              filter={field => (!field.position || (field.position && field.position !== 'sidebar'))}
               fieldTypes={fieldTypes}
               fieldSchema={fields}
               initialData={data}
@@ -84,6 +85,15 @@ const DefaultEditView = (props) => {
           <div className={`${baseClass}__document-actions${preview ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
             <PreviewButton generatePreviewURL={preview} />
             <FormSubmit>Save</FormSubmit>
+          </div>
+          <div className={`${baseClass}__sidebar-fields`}>
+            <RenderFields
+              filter={field => field.position === 'sidebar'}
+              position="sidebar"
+              fieldTypes={fieldTypes}
+              fieldSchema={fields}
+              initialData={data}
+            />
           </div>
           {isEditing && (
             <ul className={`${baseClass}__meta`}>

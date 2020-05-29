@@ -8,6 +8,10 @@
     align-items: flex-start;
   }
 
+  &__main {
+    // max-width: base(20);
+  }
+
   &__header {
     h1 {
       word-break: break-all;
@@ -33,13 +37,14 @@
 
   &__sidebar {
     padding-bottom: base(1);
-    width: base(16);
+    width: base(20);
     display: flex;
     flex-direction: column;
   }
 
   &__document-actions,
-  &__meta {
+  &__meta,
+  &__sidebar-fields {
     padding-left: base(1.5);
   }
 
@@ -70,6 +75,10 @@
     > *:last-child {
       margin-left: base(.5);
     }
+  }
+
+  &__sidebar-fields {
+    margin-bottom: base(1.5);
   }
 
   &__meta {
@@ -110,7 +119,8 @@
     }
 
     &__document-actions,
-    &__meta {
+    &__meta,
+    &__sidebar-fields {
       padding-left: $baseline;
     }
 

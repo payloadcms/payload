@@ -59,6 +59,12 @@ const AllFields = {
       required: true,
       hasMany: true,
     },
+    {
+      name: 'checkbox',
+      type: 'checkbox',
+      label: 'Checkbox',
+      position: 'sidebar',
+    },
   ],
   timestamps: true,
 };
