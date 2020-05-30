@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import config from 'payload/config';
 import { useStepNav } from '../../elements/StepNav';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import Form from '../../forms/Form';
@@ -12,7 +13,7 @@ const {
     admin,
     api,
   },
-} = PAYLOAD_CONFIG;
+} = config;
 
 const baseClass = 'global-edit';
 

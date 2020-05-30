@@ -1,22 +1,27 @@
+const path = require('path');
 const express = require('express');
 const Payload = require('../src');
-const config = require('./payload.config');
+const publicConfig = require('./payload.public.config');
+const privateConfig = require('./payload.private.config');
 
 const expressApp = express();
 
 const payload = new Payload({
-  config,
+  config: {
+    public: path.resolve(__dirname, 'payload.public.config.js'),
+    private: path.resolve(__dirname, 'payload.private.config.js'),
+  },
   express: expressApp,
 });
 
 exports.payload = payload;
 
 exports.start = (cb) => {
-  const server = expressApp.listen(config.port, async () => {
-    console.log(`listening on ${config.port}...`);
+  const server = expressApp.listen(publicConfig.port, async () => {
+    console.log(`listening on ${publicConfig.port}...`);
     if (cb) cb();
 
-    if (config.email.provider === 'mock') {
+    if (privateConfig.email.provider === 'mock') {
       const creds = await payload.getMockEmailCredentials();
       console.log(`Mock email account username: ${creds.user}`);
       console.log(`Mock email account password: ${creds.pass}`);

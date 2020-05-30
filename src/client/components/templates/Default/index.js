@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import DefaultNav from '../../elements/Nav';
-import StepNav, { StepNavProvider } from '../../elements/StepNav';
+import { StepNavProvider } from '../../elements/StepNav';
 import { StatusListProvider } from '../../elements/Status';
 import customComponents from '../../customComponents';
 
@@ -22,9 +22,6 @@ const Default = ({ children, className }) => {
       <StatusListProvider>
         <StepNavProvider>
           <Nav />
-          <div className={`${baseClass}__eyebrow`}>
-            <StepNav />
-          </div>
           <div className={`${baseClass}__wrap`}>
             {children}
           </div>

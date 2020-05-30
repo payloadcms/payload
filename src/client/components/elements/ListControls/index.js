@@ -45,7 +45,7 @@ const ListControls = (props) => {
 
     if (search) {
       newState.where = {
-        AND: [
+        and: [
           search,
         ],
       };
@@ -54,11 +54,11 @@ const ListControls = (props) => {
     if (where) {
       if (!search) {
         newState.where = {
-          AND: [],
+          and: [],
         };
       }
 
-      newState.where.AND.push(where);
+      newState.where.and.push(where);
     }
 
     handleChange(newState);

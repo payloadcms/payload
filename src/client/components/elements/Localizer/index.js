@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import qs from 'qs';
+import config from 'payload/config';
 import { useLocale } from '../../utilities/Locale';
 import { useSearchParams } from '../../utilities/SearchParams';
 import Popup from '../Popup';
@@ -9,7 +10,7 @@ import './index.scss';
 
 const baseClass = 'localizer';
 
-const { localization } = PAYLOAD_CONFIG;
+const { localization } = config;
 
 const Localizer = () => {
   const locale = useLocale();

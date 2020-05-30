@@ -54,6 +54,7 @@
     "method-override": "^3.0.0",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
+    "moment": "^2.26.0",
     "mongodb-memory-server": "^6.5.2",
     "mongoose": "^5.8.9",
     "mongoose-autopopulate": "^0.11.0",

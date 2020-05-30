@@ -1,16 +1,149 @@
 @import '../../../../scss/styles.scss';
 
 .collection-edit {
-  &__header {
+  width: 100%;
 
+  &__form {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  &__header {
     h1 {
-      margin: 0;
+      word-break: break-all;
+      hyphens: auto;
     }
   }
 
-  .sticky-header {
-    &:before {
-      left: - base(1.5);
+  &__collection-actions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+
+    li {
+      margin-left: base(.75);
+    }
+  }
+
+  &__edit {
+    background: white;
+    padding: base(5) base(6) base(6);
+  }
+
+  &__sidebar {
+    padding-bottom: base(1);
+    width: base(22);
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__document-actions,
+  &__meta,
+  &__sidebar-fields,
+  &__api-url {
+    padding-left: base(1.5);
+  }
+
+  &__document-actions {
+    @include blur-bg;
+    position: sticky;
+    top: 0;
+    padding-right: $baseline;
+
+    .form-submit {
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+
+  &__document-actions--with-preview {
+    display: flex;
+
+    > * {
+      width: calc(50% - #{base(.5)});
+    }
+
+    > *:first-child {
+      margin-right: base(.5);
+    }
+
+    > *:last-child {
+      margin-left: base(.5);
+    }
+  }
+
+  &__api-url {
+    margin-bottom: base(1.5);
+
+    a {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  &__meta {
+    margin: auto 0 0 0;
+    padding-top: $baseline;
+    list-style: none;
+
+    li {
+      margin-bottom: base(.5);
+    }
+  }
+
+  &__label {
+    color: $color-gray;
+  }
+
+  @include large-break {
+    &__edit {
+      padding: base(4);
+    }
+  }
+
+  @include mid-break {
+    &__form {
+      display: block;
+    }
+
+    &__edit {
+      padding: $baseline;
+      margin-bottom: $baseline;
+    }
+
+    &__document-actions {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: auto;
+    }
+
+    &__document-actions,
+    &__meta,
+    &__sidebar-fields,
+    &__api-url {
+      padding-left: $baseline;
+    }
+
+    &__api-url {
+      margin-bottom: base(.5);
+    }
+
+    &__collection-actions {
+      margin-top: base(.5);
+      padding-left: $baseline;
+
+      li {
+        margin: 0 base(.5) 0 0;
+      }
+    }
+
+    &__sidebar {
+      padding-bottom: base(4);
     }
   }
 }

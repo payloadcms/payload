@@ -26,68 +26,31 @@ const Conditions = {
       type: 'text',
       label: 'Enable Test is checked',
       required: true,
-      conditions: {
-        'enable-test': {
-          equals: true,
-        },
-      },
+      condition: (_, siblings) => siblings['enable-test'] && siblings['enable-test'].value === true,
     },
     {
       name: 'or-condition',
       type: 'text',
       label: 'Number is greater than 20 OR enable-test is checked',
       required: true,
-      conditions: {
-        or: [
-          {
-            number: {
-              greater_than: 20,
-            },
-          },
-          {
-            'enable-test': {
-              equals: true,
-            },
-          },
-        ],
+      condition: (_, siblings) => {
+        if (siblings.number && siblings['enable-test']) {
+          return siblings.number.value > 20 || siblings['enable-test'].value === true;
+        }
 
+        return false;
       },
     },
     {
       name: 'nested-conditions',
       type: 'text',
       label: 'Number is either greater than 20 AND enable-test is checked, OR number is less than 20 and enable-test is NOT checked',
-      conditions: {
-        or: [
-          {
-            and: [
-              {
-                number: {
-                  greater_than: 20,
-                },
-              },
-              {
-                'enable-test': {
-                  equals: true,
-                },
-              },
-            ],
-          },
-          {
-            and: [
-              {
-                number: {
-                  less_than: 20,
-                },
-              },
-              {
-                'enable-test': {
-                  equals: false,
-                },
-              },
-            ],
-          },
-        ],
+      condition: (_, siblings) => {
+        if (siblings.number && siblings['enable-test']) {
+          return (siblings.number.value > 20 && siblings['enable-test'].value === true) || (siblings.number.value < 20 && siblings['enable-test'].value === false);
+        }
+
+        return false;
       },
     },
   ],

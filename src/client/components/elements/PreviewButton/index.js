@@ -17,7 +17,7 @@ const PreviewButton = ({ generatePreviewURL }) => {
       <Button
         el="anchor"
         className={baseClass}
-        type="secondary"
+        buttonStyle="secondary"
         url={previewURL}
       >
         Preview

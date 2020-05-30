@@ -2,9 +2,14 @@
 @import '../../../forms/field-types/shared.scss';
 
 .collection-list {
-  padding: base(3);
-  background: white;
   width: 100%;
+  margin-bottom: base(2);
+
+  &__wrap {
+    padding: base(3);
+    margin-right: base(2);
+    background: white;
+  }
 
   &__header {
     margin-bottom: $baseline;
@@ -48,7 +53,10 @@
   }
 
   @include mid-break {
-    padding: $baseline 0;
+    &__wrap {
+      padding: $baseline 0;
+      margin-right: 0;
+    }
 
     &__header,
     .list-controls,

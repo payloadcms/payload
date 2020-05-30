@@ -6,7 +6,7 @@
   z-index: 2;
 	top: 0;
 	left: 50%;
-	transform: translateX(-50%);
+	transform: translate3d(-50%, -120%, 0);
 	padding: 0 base(.4);
 	color: white;
 	line-height: $baseline;

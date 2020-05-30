@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
+import config from 'payload/config';
 import StatusList from '../../elements/Status';
 import Form from '../../forms/Form';
 import Password from '../../forms/field-types/Password';
@@ -12,7 +13,7 @@ import HiddenInput from '../../forms/field-types/HiddenInput';
 
 const baseClass = 'reset-password';
 
-const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
+const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = config;
 
 const ResetPassword = () => {
   const { token } = useParams();

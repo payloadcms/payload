@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import DefaultList from './Default';
-import customComponents from '../../../customComponents';
+import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import { useStepNav } from '../../../elements/StepNav';
 import formatListFields from './formatListFields';
-
-import './index.scss';
 
 const ListView = (props) => {
   const {
@@ -33,11 +31,15 @@ const ListView = (props) => {
     ]);
   }, [setStepNav, plural]);
 
-  const List = customComponents?.[slug]?.views?.List || DefaultList;
-
   return (
     <>
-      <List collection={{ ...collection, fields }} />
+      <RenderCustomComponent
+        DefaultComponent={DefaultList}
+        path={`${slug}.views.List`}
+        componentProps={{
+          collection: { ...collection, fields },
+        }}
+      />
     </>
   );
 };

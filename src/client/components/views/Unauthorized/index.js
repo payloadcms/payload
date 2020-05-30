@@ -1,8 +1,9 @@
 import React from 'react';
+import config from 'payload/config';
 import Button from '../../elements/Button';
 import MinimalTemplate from '../../templates/Minimal';
 
-const { routes: { admin } } = PAYLOAD_CONFIG;
+const { routes: { admin } } = config;
 
 const Unauthorized = () => {
   return (

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import './index.scss';
 
 const RenderFields = ({
-  fieldSchema, initialData, customComponents, fieldTypes,
+  fieldSchema, initialData, customComponents, fieldTypes, filter,
 }) => {
   if (fieldSchema) {
     return (
@@ -12,36 +12,40 @@ const RenderFields = ({
         {fieldSchema.map((field, i) => {
           const { defaultValue } = field;
           if (field?.hidden !== 'api' && field?.hidden !== true) {
-            let FieldComponent = field?.hidden === 'admin' ? fieldTypes.hidden : fieldTypes[field.type];
+            if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
+              let FieldComponent = field?.hidden === 'admin' ? fieldTypes.hidden : fieldTypes[field.type];
 
-            if (customComponents?.[field.name]?.field) {
-              FieldComponent = customComponents[field.name].field;
-            }
+              if (customComponents?.[field.name]?.field) {
+                FieldComponent = customComponents[field.name].field;
+              }
 
-            if (FieldComponent) {
+              if (FieldComponent) {
+                return (
+                  <FieldComponent
+                    fieldTypes={fieldTypes}
+                    key={field.name}
+                    {...field}
+                    validate={field.validate ? value => field.validate(value, field) : undefined}
+                    defaultValue={initialData[field.name] || defaultValue}
+                  />
+                );
+              }
+
               return (
-                <FieldComponent
-                  fieldTypes={fieldTypes}
-                  key={field.name}
-                  {...field}
-                  validate={field.validate ? value => field.validate(value, field) : undefined}
-                  defaultValue={initialData[field.name] || defaultValue}
-                />
+                <div
+                  className="missing-field"
+                  key={i}
+                >
+                  No matched field found for
+                  {' '}
+                  &quot;
+                  {field.label}
+                  &quot;
+                </div>
               );
             }
 
-            return (
-              <div
-                className="missing-field"
-                key={i}
-              >
-                No matched field found for
-                {' '}
-                &quot;
-                {field.label}
-                &quot;
-              </div>
-            );
+            return null;
           }
 
           return null;
@@ -56,6 +60,7 @@ const RenderFields = ({
 RenderFields.defaultProps = {
   initialData: {},
   customComponents: {},
+  filter: null,
 };
 
 RenderFields.propTypes = {
@@ -67,6 +72,7 @@ RenderFields.propTypes = {
   fieldTypes: PropTypes.shape({
     hidden: PropTypes.func,
   }).isRequired,
+  filter: PropTypes.func,
 };
 
 export default RenderFields;

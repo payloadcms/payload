@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
+import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import Button from '../Button';
 import reducer from './reducer';
 import Condition from './Condition';
@@ -54,7 +55,7 @@ const WhereBuilder = (props) => {
     }, []));
   }, [fields]);
 
-  useEffect(() => {
+  useThrottledEffect(() => {
     let whereQuery = {
       or: [],
     };
@@ -86,7 +87,7 @@ const WhereBuilder = (props) => {
     whereQuery = validateWhereQuery(whereQuery);
 
     if (typeof handleChange === 'function') handleChange(whereQuery);
-  }, [where, handleChange]);
+  }, 500, [where, handleChange]);
 
   return (
     <div className={baseClass}>

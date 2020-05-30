@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import config from 'payload/config';
 import Logo from '../../graphics/Logo';
 import MinimalTemplate from '../../templates/Minimal';
 import StatusList, { useStatusList } from '../../elements/Status';
@@ -14,7 +15,7 @@ import './index.scss';
 
 const baseClass = 'login';
 
-const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = PAYLOAD_CONFIG;
+const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = config;
 
 const Login = () => {
   const { addStatus } = useStatusList();

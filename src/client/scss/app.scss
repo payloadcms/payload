@@ -21,6 +21,7 @@ html {
   line-height: $baseline-px;
   background: $color-background-gray;
   -webkit-font-smoothing: antialiased;
+  overflow-y: scroll;
 
   @include mid-break {
     font-size: 12px;

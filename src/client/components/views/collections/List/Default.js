@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import queryString from 'qs';
 import PropTypes from 'prop-types';
+import config from 'payload/config';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
+import Eyebrow from '../../../elements/Eyebrow';
 import Paginator from '../../../elements/Paginator';
 import ListControls from '../../../elements/ListControls';
 import Pill from '../../../elements/Pill';
 import Button from '../../../elements/Button';
 import SortColumn from '../../../elements/SortColumn';
 import Table from '../../../elements/Table';
+import Cell from './Cell';
 
 import './index.scss';
 
-const { serverURL, routes: { api, admin } } = PAYLOAD_CONFIG;
+const { serverURL, routes: { api, admin } } = config;
 
 const baseClass = 'collection-list';
 
@@ -52,93 +55,102 @@ const DefaultList = (props) => {
 
   return (
     <div className={baseClass}>
-      <header className={`${baseClass}__header`}>
-        <h1>{pluralLabel}</h1>
-        <Pill to={newDocumentURL}>
-          Create New
-        </Pill>
-      </header>
-      <ListControls
-        handleChange={setListControls}
-        collection={collection}
-      />
-      {(data.docs && data.docs.length > 0) && (
-        <Table
-          data={data.docs}
-          columns={listControls.columns.map((col, i) => {
-            const field = fields.find(fieldToCheck => fieldToCheck.name === col);
-            return {
-              accessor: field.name,
-              components: {
-                Heading: (
-                  <SortColumn
-                    label={field.label}
-                    name={field.name}
-                    handleChange={setSort}
-                  />
-                ),
-                renderCell: (rowData, cellData) => {
-                  if (i === 0) {
-                    return (
-                      <>
-                        <Link to={`${admin}/collections/${collection.slug}/${rowData.id}`}>
-                          {typeof cellData === 'string' && cellData}
-                          {typeof cellData === 'object' && JSON.stringify(cellData)}
-                        </Link>
-                      </>
-                    );
-                  }
+      <Eyebrow />
+      <div className={`${baseClass}__wrap`}>
+        <header className={`${baseClass}__header`}>
+          <h1>{pluralLabel}</h1>
+          <Pill to={newDocumentURL}>
+            Create New
+          </Pill>
+        </header>
+        <ListControls
+          handleChange={setListControls}
+          collection={collection}
+        />
+        {(data.docs && data.docs.length > 0) && (
+          <Table
+            data={data.docs}
+            columns={listControls.columns.reduce((cols, col, colIndex) => {
+              const field = fields.find(fieldToCheck => fieldToCheck.name === col);
 
-                  return cellData;
-                },
-              },
-            };
-          })}
-        />
-      )}
-      {(!data.docs || data.docs.length === 0) && (
-        <div className={`${baseClass}__no-results`}>
-          <p>
-            No
-            {' '}
-            {pluralLabel}
-            {' '}
-            found. Either no
-            {' '}
-            {pluralLabel}
-            {' '}
-            exist yet or none match the filters you&apos;ve specified above.
-          </p>
-          <Button
-            el="link"
-            to={newDocumentURL}
-          >
-            Create new
-            {' '}
-            {singularLabel}
-          </Button>
-        </div>
-      )}
-      <div className={`${baseClass}__page-controls`}>
-        <Paginator
-          totalDocs={data.totalDocs}
-          limit={data.limit}
-          totalPages={data.totalPages}
-          page={data.page}
-          hasPrevPage={data.hasPrevPage}
-          hasNextPage={data.hasNextPage}
-          prevPage={data.prevPage}
-          nextPage={data.nextPage}
-          numberOfNeighbors={1}
-        />
-        <div className={`${baseClass}__page-info`}>
-          {data.page}
-          -
-          {data.totalPages > 1 ? data.limit : data.totalDocs}
-          {' '}
-          of
-          {' '}
-          {data.totalDocs}
+              if (field) {
+                return [
+                  ...cols,
+                  {
+                    accessor: field.name,
+                    components: {
+                      Heading: (
+                        <SortColumn
+                          label={field.label}
+                          name={field.name}
+                          handleChange={setSort}
+                        />
+                      ),
+                      renderCell: (rowData, cellData) => {
+                        return (
+                          <Cell
+                            field={field}
+                            colIndex={colIndex}
+                            collection={collection}
+                            rowData={rowData}
+                            cellData={cellData}
+                          />
+                        );
+                      },
+                    },
+                  },
+                ];
+              }
+
+              return cols;
+            }, [])}
+          />
+        )}
+        {data.docs && data.docs.length === 0 && (
+          <div className={`${baseClass}__no-results`}>
+            <p>
+              No
+              {' '}
+              {pluralLabel}
+              {' '}
+              found. Either no
+              {' '}
+              {pluralLabel}
+              {' '}
+              exist yet or none match the filters you&apos;ve specified above.
+            </p>
+            <Button
+              el="link"
+              to={newDocumentURL}
+            >
+              Create new
+              {' '}
+              {singularLabel}
+            </Button>
+          </div>
+        )}
+        <div className={`${baseClass}__page-controls`}>
+          <Paginator
+            limit={data.limit}
+            totalPages={data.totalPages}
+            page={data.page}
+            hasPrevPage={data.hasPrevPage}
+            hasNextPage={data.hasNextPage}
+            prevPage={data.prevPage}
+            nextPage={data.nextPage}
+            numberOfNeighbors={1}
+          />
+          {data?.totalDocs > 0 && (
+            <div className={`${baseClass}__page-info`}>
+              {data.page}
+              -
+              {data.totalPages > 1 ? data.limit : data.totalDocs}
+              {' '}
+              of
+              {' '}
+              {data.totalDocs}
+            </div>
+          )}
         </div>
       </div>
     </div>

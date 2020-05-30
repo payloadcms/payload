@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import config from 'payload/config';
 import MinimalTemplate from '../../templates/Minimal';
 import StatusList, { useStatusList } from '../../elements/Status';
 import Form from '../../forms/Form';
@@ -19,7 +20,7 @@ const {
     admin,
     api,
   },
-} = PAYLOAD_CONFIG;
+} = config;
 
 const ForgotPassword = () => {
   const { addStatus } = useStatusList();

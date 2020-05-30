@@ -4,6 +4,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { ScrollInfoProvider } from '@trbl/react-scroll-info';
 import { WindowInfoProvider } from '@trbl/react-window-info';
 import { ModalProvider, ModalContainer } from '@trbl/react-modal';
+import config from 'payload/config';
 import Loading from './elements/Loading';
 import { SearchParamsProvider } from './utilities/SearchParams';
 import { LocaleProvider } from './utilities/Locale';
@@ -13,7 +14,6 @@ import Routes from './Routes';
 import getCSSVariable from '../../utilities/getCSSVariable';
 
 import '../scss/app.scss';
-
 
 const Index = () => {
   const windowInfoProps = {};

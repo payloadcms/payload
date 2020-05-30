@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import RenderFields from '../../RenderFields';
-import withConditions from '../../withConditions';
+import withCondition from '../../withCondition';
 
 import './index.scss';
 
@@ -41,4 +41,4 @@ Group.propTypes = {
   fieldTypes: PropTypes.shape({}).isRequired,
 };
 
-export default withConditions(Group);
+export default withCondition(Group);

@@ -1,0 +1,35 @@
+@import '../../../scss/styles.scss';
+
+.copy-to-clipboard {
+  @extend %btn-reset;
+  position: relative;
+  cursor: pointer;
+  vertical-align: middle;
+
+  textarea {
+    position: absolute;
+    opacity: 0;
+    z-index: -1;
+    height: 0px;
+    width: 0px;
+  }
+
+  .tooltip {
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  &:focus,
+  &:active {
+    outline: none;
+  }
+
+  &:hover {
+    .tooltip {
+      opacity: 1;
+      visibility: visible;
+
+    }
+  }
+}

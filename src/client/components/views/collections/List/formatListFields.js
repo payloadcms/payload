@@ -24,6 +24,20 @@ const formatListFields = (config) => {
     ]);
   }
 
+  if (config.auth) {
+    listFields = listFields.concat([
+      {
+        name: 'email',
+        label: 'Email',
+        type: 'email',
+      }, {
+        name: 'enableAPIKey',
+        label: 'Enable API Key for this user',
+        type: 'checkbox',
+      },
+    ]);
+  }
+
   return listFields;
 };
 

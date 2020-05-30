@@ -4,6 +4,13 @@ const AllFields = {
     singular: 'All Fields',
     plural: 'All Fields',
   },
+  preview: (doc, token) => {
+    if (doc.text) {
+      return `http://localhost:3000/previewable-posts/${doc.text.value}?preview=true&token=${token}`;
+    }
+
+    return null;
+  },
   fields: [
     {
       name: 'text',
@@ -52,7 +59,14 @@ const AllFields = {
       required: true,
       hasMany: true,
     },
+    {
+      name: 'checkbox',
+      type: 'checkbox',
+      label: 'Checkbox',
+      position: 'sidebar',
+    },
   ],
+  timestamps: true,
 };
 
 module.exports = AllFields;
