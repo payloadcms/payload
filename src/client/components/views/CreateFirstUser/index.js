@@ -53,7 +53,6 @@ const CreateFirstUser = (props) => {
       type: 'password',
       required: true,
     },
-    ...userConfig.fields,
   ];
 
   return (

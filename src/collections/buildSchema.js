@@ -9,8 +9,11 @@ const buildCollectionSchema = (collection, config, schemaOptions = {}) => {
 
   schema.plugin(paginate)
     .plugin(buildQueryPlugin)
-    .plugin(localizationPlugin, config.localization)
     .plugin(autopopulate);
+
+  if (config.localization) {
+    schema.plugin(localizationPlugin, config.localization);
+  }
 
   return schema;
 };

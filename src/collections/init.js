@@ -8,7 +8,6 @@ const mongooseHidden = require('mongoose-hidden')({
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
 const LocalStrategy = require('passport-local').Strategy;
-const AnonymousStrategy = require('passport-anonymous');
 const jwtStrategy = require('../auth/strategies/jwt');
 const apiKeyStrategy = require('../auth/strategies/apiKey');
 const collectionRoutes = require('./routes');
@@ -133,7 +132,6 @@ function registerCollections() {
       passport.use(`${AuthCollection.config.slug}-jwt`, jwtStrategy(this.config, AuthCollection));
       passport.serializeUser(AuthCollection.Model.serializeUser());
       passport.deserializeUser(AuthCollection.Model.deserializeUser());
-      passport.use(new AnonymousStrategy.Strategy());
 
       this.router.use(authRoutes(AuthCollection, this.config, this.sendEmail));
     } else {

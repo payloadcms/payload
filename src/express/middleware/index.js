@@ -1,5 +1,6 @@
 const express = require('express');
 const passport = require('passport');
+const AnonymousStrategy = require('passport-anonymous');
 const compression = require('compression');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
@@ -10,6 +11,8 @@ const authenticate = require('./authenticate');
 const identifyAPI = require('./identifyAPI');
 
 const middleware = (config) => {
+  passport.use(new AnonymousStrategy.Strategy());
+
   return [
     passport.initialize(),
     passport.session(),

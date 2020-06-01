@@ -20,9 +20,12 @@ class GraphQL {
     this.types = {
       blockTypes: {},
       blockInputTypes: {},
-      localeInputType: buildLocaleInputType(this.config.localization),
-      fallbackLocaleInputType: buildFallbackLocaleInputType(this.config.localization),
     };
+
+    if (this.config.localization) {
+      this.types.localeInputType = buildLocaleInputType(this.config.localization);
+      this.types.fallbackLocaleInputType = buildFallbackLocaleInputType(this.config.localization);
+    }
 
     this.Query = {
       name: 'Query',
