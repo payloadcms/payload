@@ -17,8 +17,8 @@ const payload = new Payload({
 exports.payload = payload;
 
 exports.start = (cb) => {
-  const server = expressApp.listen(publicConfig.port, async () => {
-    console.log(`listening on ${publicConfig.port}...`);
+  const server = expressApp.listen(3000, async () => {
+    console.log(`listening on ${3000}...`);
     if (cb) cb();
 
     if (privateConfig.email.provider === 'mock') {
