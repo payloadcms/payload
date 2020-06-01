@@ -1,8 +1,8 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
+const Dotenv = require('dotenv-webpack');
 const getStyleLoaders = require('./getStyleLoaders');
-const secureConfig = require('../utilities/secureConfig');
 
 module.exports = (config) => {
   const webpackConfig = {
@@ -111,6 +111,7 @@ module.exports = (config) => {
         filename: './index.html',
       }),
       new webpack.HotModuleReplacementPlugin(),
+      new Dotenv(),
     ],
     resolve: {
       modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],

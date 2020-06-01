@@ -35,6 +35,7 @@
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.5",
     "dotenv": "^6.0.0",
+    "dotenv-webpack": "^1.8.0",
     "es6-promise": "^4.2.8",
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6",
