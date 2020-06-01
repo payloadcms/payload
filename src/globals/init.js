@@ -3,9 +3,9 @@ const sanitize = require('./sanitize');
 const routes = require('./routes');
 
 function initGlobals() {
-  this.config.globals = sanitize(this.config.globals);
-
   if (this.config.globals) {
+    this.config.globals = sanitize(this.config.globals);
+
     this.globals = {
       Model: buildModel(this.config),
       config: this.config.globals,

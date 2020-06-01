@@ -7,6 +7,8 @@ const sanitizeConfig = (config) => {
 
   if (!sanitizedConfig.cookiePrefix) sanitizedConfig.cookiePrefix = 'payload';
 
+  if (!sanitizedConfig.globals) sanitizedConfig.globals = [];
+
   if (!sanitizedConfig.admin.user) {
     sanitizedConfig.admin.user = config.admin.user || 'users';
 

@@ -4,10 +4,8 @@ const webpack = require('webpack');
 const getStyleLoaders = require('./getStyleLoaders');
 const secureConfig = require('../utilities/secureConfig');
 
-const dependency = 'fuck';
-
 module.exports = (config) => {
-  return {
+  const webpackConfig = {
     entry: {
       main: [
         path.resolve(__dirname, '../../node_modules/webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000'),
@@ -118,8 +116,15 @@ module.exports = (config) => {
       modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
       alias: {
         'payload/config': config.paths.publicConfig,
-        'payload-scss-overrides': config.paths.scss,
       },
     },
   };
+
+  if (config.paths.scss) {
+    webpackConfig.resolve.alias['payload-scss-overrides'] = config.paths.scss;
+  } else {
+    webpackConfig.resolve.alias['payload-scss-overrides'] = path.resolve(__dirname, '../client/scss/overrides.scss');
+  }
+
+  return webpackConfig;
 };

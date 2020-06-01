@@ -23,6 +23,9 @@ class Payload {
     const config = getConfig(options);
 
     this.config = sanitizeConfig(config);
+
+    if (typeof this.config.paths === 'undefined') this.config.paths = {};
+
     this.config.paths.publicConfig = options.config.public;
 
     this.express = options.express;

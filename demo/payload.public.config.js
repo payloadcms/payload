@@ -46,7 +46,6 @@ module.exports = {
     StrictPolicies,
   ],
   globals: [NavigationRepeater, GlobalWithPolicies, FlexibleGlobal],
-  port: 3000,
   cookiePrefix: 'payload',
   serverURL: 'http://localhost:3000',
   cors: ['http://localhost', 'http://localhost:8080', 'http://localhost:8081'],
