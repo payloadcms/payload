@@ -107,11 +107,11 @@ const DraggableSection = (props) => {
                 fieldTypes={fieldTypes}
                 key={rowIndex}
                 fieldSchema={fieldSchema.map((field) => {
-                  const fieldName = `${parentName}.${rowIndex}.${field.name}`;
+                  const fieldName = `${parentName}.${rowIndex}${field.name ? `.${field.name}` : ''}`;
                   return ({
                     ...field,
                     name: fieldName,
-                    defaultValue: defaultValue?.[field.name],
+                    defaultValue: field.name ? defaultValue?.[field.name] : defaultValue,
                   });
                 })}
               />

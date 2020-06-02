@@ -12,6 +12,7 @@ const Group = (props) => {
 
   return (
     <div className="field-type group">
+      <h3>{label}</h3>
       <RenderFields
         fieldTypes={fieldTypes}
         fieldSchema={fields.map((subField) => {

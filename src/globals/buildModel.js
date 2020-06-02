@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const autopopulate = require('mongoose-autopopulate');
 const mongooseHidden = require('mongoose-hidden');
-const buildSchema = require('../mongoose/schema/buildSchema');
+const buildSchema = require('../mongoose/buildSchema');
 const localizationPlugin = require('../localization/plugin');
 
 const buildModel = (config) => {

@@ -1,9 +1,11 @@
 const executeFieldHooks = async (operation, fields, value, hookName, data = null) => {
   const fullData = value || data;
   if (Array.isArray(data)) {
-    return Promise.all(data.map(async (row) => {
-      return executeFieldHooks(operation, fields, fullData, row, hookName);
+    const rowResults = await Promise.all(data.map(async (row, i) => {
+      return executeFieldHooks(operation, fields, fullData[i], row, hookName);
     }));
+
+    return rowResults;
   }
 
   const hookPromises = [];

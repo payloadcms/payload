@@ -67,7 +67,10 @@ const CreateFirstUser = (props) => {
         action={`${serverURL}${api}/${userSlug}/first-register`}
       >
         <RenderFields
-          fieldSchema={fields}
+          fieldSchema={[
+            ...fields,
+            ...userConfig.fields,
+          ]}
           fieldTypes={fieldTypes}
         />
         <FormSubmit>Create</FormSubmit>
