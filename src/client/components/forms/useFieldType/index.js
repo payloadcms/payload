@@ -15,7 +15,9 @@ const useFieldType = (options) => {
 
   const locale = useLocale();
   const formContext = useContext(FormContext);
-  const { dispatchFields, submitted, processing } = formContext;
+  const {
+    dispatchFields, submitted, processing, fields,
+  } = formContext;
   let mountValue = formContext.fields[name]?.value;
 
   if (!mountValue && mountValue !== false) mountValue = null;
@@ -62,6 +64,7 @@ const useFieldType = (options) => {
     value: valueToRender,
     formSubmitted: submitted,
     formProcessing: processing,
+    fields,
     onFieldChange: (e) => {
       if (e && e.target) {
         sendField(e.target.value);
