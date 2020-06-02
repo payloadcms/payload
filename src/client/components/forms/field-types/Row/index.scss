@@ -10,4 +10,15 @@
     margin-left: base(.5);
     margin-right: base(.5);
   }
+
+  @include mid-break {
+    display: block;
+    margin-left: 0;
+    margin-right: 0;
+
+    > * {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
 }

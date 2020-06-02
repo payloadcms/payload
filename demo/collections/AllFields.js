@@ -103,6 +103,29 @@ const AllFields = {
         },
       ],
     },
+    {
+      type: 'repeater',
+      label: 'Repeater',
+      name: 'repeater',
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'repeaterText1',
+              label: 'Repeater Text 1',
+              type: 'text',
+              required: true,
+            }, {
+              name: 'repeaterText2',
+              label: 'Repeater Text 2',
+              type: 'text',
+              required: true,
+            },
+          ],
+        },
+      ],
+    },
   ],
   timestamps: true,
 };

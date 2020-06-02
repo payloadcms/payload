@@ -32,9 +32,9 @@
 
 %h2 {
   margin: 0 0 base(1);
-  font-size: base(.7);
-  line-height: base(.75);
-  letter-spacing: 0;
+  font-size: base(1.25);
+  line-height: base(1.25);
+  letter-spacing: -.5px;
 
   @include small-break {
     font-size: base(.85);
@@ -44,9 +44,10 @@
 
 %h3 {
   margin: 0 0 base(1);
-  font-size: base(1);
+  font-size: base(.925);
   line-height: 1.25;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: -.5px;
 
   @include small-break {
     font-size: base(.65);

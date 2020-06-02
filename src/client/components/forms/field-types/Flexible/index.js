@@ -173,7 +173,7 @@ const Flexible = (props) => {
           <div className={`${baseClass}__add-button-wrap`}>
             <Button
               onClick={() => openAddRowModal(rowCount)}
-              type="secondary"
+              buttonStyle="secondary"
             >
               {`Add ${singularLabel}`}
             </Button>

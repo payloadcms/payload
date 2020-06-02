@@ -152,19 +152,25 @@ const fieldToSchemaMap = {
     return newFields;
   },
   repeater: (field, fields) => {
-    const schema = buildSchema(field.fields);
+    const schema = buildSchema(field.fields, { _id: false, id: false });
 
     return {
       ...fields,
-      [field.name]: [schema],
+      [field.name]: {
+        ...formatBaseSchema(field),
+        type: [schema],
+      },
     };
   },
   group: (field, fields) => {
-    const schema = buildSchema(field.fields, { _id: false });
+    const schema = buildSchema(field.fields, { _id: false, id: false });
 
     return {
       ...fields,
-      [field.name]: schema,
+      [field.name]: {
+        ...formatBaseSchema(field),
+        type: schema,
+      },
     };
   },
   select: (field, fields) => {
@@ -183,7 +189,7 @@ const fieldToSchemaMap = {
     };
   },
   flexible: (field, fields) => {
-    const flexibleSchema = new Schema({ blockName: String }, { discriminatorKey: 'blockType', _id: false });
+    const flexibleSchema = new Schema({ blockName: String }, { discriminatorKey: 'blockType', _id: false, id: false });
 
     return {
       ...fields,
