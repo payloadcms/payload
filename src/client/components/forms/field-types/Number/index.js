@@ -37,7 +37,7 @@ const NumberField = (props) => {
 
   const classes = [
     'field-type',
-    'text',
+    'number',
     showError && 'error',
   ].filter(Boolean).join(' ');
 

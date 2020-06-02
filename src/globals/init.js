@@ -4,8 +4,6 @@ const routes = require('./routes');
 
 function initGlobals() {
   if (this.config.globals) {
-    this.config.globals = sanitize(this.config.globals);
-
     this.globals = {
       Model: buildModel(this.config),
       config: this.config.globals,

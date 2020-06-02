@@ -7,8 +7,10 @@ const sanitizeFields = (fields) => {
 
     if (!field.type) throw new MissingFieldType(field);
 
-    if (typeof field.validation === 'undefined') {
-      field.validate = validations[field.type];
+    if (typeof field.validate === 'undefined') {
+      const defaultValidate = validations[field.type];
+      const noValidate = () => true;
+      field.validate = defaultValidate || noValidate;
     }
 
     if (!field.hooks) field.hooks = {};

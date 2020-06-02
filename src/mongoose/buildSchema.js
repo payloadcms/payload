@@ -169,6 +169,7 @@ const fieldToSchemaMap = {
       ...fields,
       [field.name]: {
         ...formatBaseSchema(field),
+        required: field.fields.some(subField => subField.required === true),
         type: schema,
       },
     };

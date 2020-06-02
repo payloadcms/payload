@@ -12,13 +12,12 @@ const jwtStrategy = require('../auth/strategies/jwt');
 const apiKeyStrategy = require('../auth/strategies/apiKey');
 const collectionRoutes = require('./routes');
 const buildSchema = require('./buildSchema');
-const sanitize = require('./sanitize');
 const baseAuthFields = require('../auth/baseFields');
 const authRoutes = require('../auth/routes');
 
 function registerCollections() {
   this.config.collections = this.config.collections.map((collection) => {
-    let formattedCollection = collection;
+    const formattedCollection = collection;
 
     if (collection.upload) {
       let uploadFields = [
@@ -108,8 +107,6 @@ function registerCollections() {
         ...formattedCollection.fields,
       ];
     }
-
-    formattedCollection = sanitize(this.collections, formattedCollection);
 
     const schema = buildSchema(formattedCollection, this.config);
 
