@@ -15,21 +15,26 @@ const useFieldType = (options) => {
 
   const locale = useLocale();
   const formContext = useContext(FormContext);
+
   const {
     dispatchFields, submitted, processing, fields,
   } = formContext;
+
   let mountValue = formContext.fields[name]?.value;
 
   if (!mountValue && mountValue !== false) mountValue = null;
 
   const sendField = useCallback((valueToSend) => {
-    dispatchFields({
-      name,
-      value: valueToSend,
-      valid: required && validate
-        ? validate(valueToSend || '')
-        : true,
-    });
+    const fieldToDispatch = { name, value: valueToSend };
+
+    fieldToDispatch.valid = required ? validate(valueToSend || '') : true;
+
+    if (typeof fieldToDispatch.valid === 'string') {
+      fieldToDispatch.errorMessage = fieldToDispatch.valid;
+      fieldToDispatch.valid = false;
+    }
+
+    dispatchFields(fieldToDispatch);
   }, [name, required, dispatchFields, validate]);
 
   // Send value up to form on mount and when value changes
@@ -57,10 +62,15 @@ const useFieldType = (options) => {
 
   const valueToRender = formContext.fields[name] ? formContext.fields[name].value : '';
 
+  // if (!valid) {
+  //   console.log(formContext.fields[name]);
+  // }
+
   return {
     ...options,
     showError,
     sendField,
+    errorMessage: formContext?.fields[name]?.errorMessage,
     value: valueToRender,
     formSubmitted: submitted,
     formProcessing: processing,

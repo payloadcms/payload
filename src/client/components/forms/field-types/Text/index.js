@@ -7,9 +7,6 @@ import Error from '../../Error';
 
 import './index.scss';
 
-const defaultError = 'Please fill in the field';
-const defaultValidate = value => value.length > 0;
-
 const Text = (props) => {
   const {
     name,
@@ -18,7 +15,6 @@ const Text = (props) => {
     validate,
     style,
     width,
-    errorMessage,
     label,
     placeholder,
   } = props;
@@ -28,6 +24,7 @@ const Text = (props) => {
     showError,
     onFieldChange,
     formProcessing,
+    errorMessage,
   } = useFieldType({
     name,
     required,
@@ -76,8 +73,6 @@ Text.defaultProps = {
   required: false,
   defaultValue: null,
   placeholder: undefined,
-  validate: defaultValidate,
-  errorMessage: defaultError,
   width: undefined,
   style: {},
 };
@@ -87,8 +82,7 @@ Text.propTypes = {
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
-  validate: PropTypes.func,
-  errorMessage: PropTypes.string,
+  validate: PropTypes.func.isRequired,
   width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,

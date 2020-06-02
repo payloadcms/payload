@@ -4,17 +4,17 @@
 	background-color: $color-dark-gray;
   position: absolute;
   z-index: 2;
-	top: 0;
+	bottom: 100%;
 	left: 50%;
 	transform: translate3d(-50%, -120%, 0);
-	padding: 0 base(.4);
+	padding: base(.2) base(.4);
 	color: white;
-	line-height: $baseline;
+	line-height: base(.75);
 
 	span {
 		position: absolute;
 		transform: translateX(-50%);
-		top: base(.9);
+		top: calc(100% - #{base(.0625)});
 		left: 50%;
 		height: 0;
 		width: 0;

@@ -17,9 +17,10 @@
 
   .tooltip {
     left: auto;
-    right: base(.5);
+    right: 0;
     transform: none;
     background-color: $color-red;
+    bottom: calc(100% - #{base(1.125)});
 
     span {
       border-top-color: $color-red;
