@@ -16,6 +16,7 @@ const RelationshipA = require('./collections/RelationshipA');
 const RelationshipB = require('./collections/RelationshipB');
 const RichText = require('./collections/RichText');
 const StrictPolicies = require('./collections/StrictPolicies');
+const Validations = require('./collections/Validations');
 
 const FlexibleGlobal = require('./globals/FlexibleGlobal');
 const NavigationRepeater = require('./globals/NavigationRepeater');
@@ -44,6 +45,7 @@ module.exports = {
     RelationshipB,
     RichText,
     StrictPolicies,
+    Validations,
   ],
   globals: [NavigationRepeater, GlobalWithPolicies, FlexibleGlobal],
   cookiePrefix: 'payload',

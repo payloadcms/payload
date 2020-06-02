@@ -46,8 +46,12 @@ exports.iterateFields = async (data, fields, path = '') => {
 };
 
 exports.validateCreate = async (data, fields) => {
-  const errors = await exports.iterateFields(data, fields);
-  if (errors.length > 0) {
-    throw new ValidationError(errors);
+  try {
+    const errors = await exports.iterateFields(data, fields);
+    if (errors.length > 0) {
+      throw new ValidationError(errors);
+    }
+  } catch (error) {
+    throw error;
   }
 };

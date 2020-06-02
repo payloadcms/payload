@@ -1,7 +1,15 @@
 const defaultUser = require('../auth/default');
+const sanitizeCollection = require('../collections/sanitize');
+const sanitizeGlobals = require('../globals/sanitize');
 
 const sanitizeConfig = (config) => {
   const sanitizedConfig = { ...config };
+
+  sanitizedConfig.collections = sanitizedConfig.collections.map(collection => sanitizeCollection(sanitizedConfig.collections, collection));
+
+  if (sanitizedConfig.globals) {
+    sanitizedConfig.globals = sanitizeGlobals(sanitizedConfig.globals);
+  }
 
   sanitizedConfig.admin = config.admin || {};
 
