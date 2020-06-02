@@ -7,17 +7,6 @@ import Error from '../../Error';
 
 import './index.scss';
 
-const defaultError = 'Please enter a valid email.';
-
-const defaultValidate = (value) => {
-  if (value.length === 0) {
-    return false;
-  }
-
-  const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}$/;
-  return pattern.test(value);
-};
-
 const Email = (props) => {
   const {
     name,
@@ -26,7 +15,6 @@ const Email = (props) => {
     validate,
     style,
     width,
-    errorMessage,
     label,
     placeholder,
     autoComplete,
@@ -37,6 +25,7 @@ const Email = (props) => {
     showError,
     processing,
     onFieldChange,
+    errorMessage,
   } = useFieldType({
     name,
     required,
@@ -86,8 +75,6 @@ Email.defaultProps = {
   required: false,
   defaultValue: null,
   placeholder: undefined,
-  validate: defaultValidate,
-  errorMessage: defaultError,
   width: undefined,
   style: {},
   autoComplete: undefined,
@@ -98,8 +85,7 @@ Email.propTypes = {
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
-  validate: PropTypes.func,
-  errorMessage: PropTypes.string,
+  validate: PropTypes.func.isRequired,
   width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,

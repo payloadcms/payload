@@ -117,6 +117,7 @@ function fieldReducer(state, action) {
         [action.name]: {
           value: action.value,
           valid: action.valid,
+          errorMessage: action.errorMessage,
         },
       };
   }

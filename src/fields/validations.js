@@ -1,95 +1,95 @@
 const { iterateFields } = require('./validateCreate');
 
-const fieldToValidatorMap = {
-  number: (value, field) => {
+const optionsToValidatorMap = {
+  number: (value, options = {}) => {
     const parsedValue = parseInt(value, 10);
 
     if (typeof parsedValue !== 'number' || Number.isNaN(parsedValue)) {
-      return `${field.label} value is not a valid number.`;
+      return 'Please enter a valid number.';
     }
 
-    if (field.max && parsedValue > field.max) {
-      return `${field.label} value is greater than the max allowed value of ${field.max}.`;
+    if (options.max && parsedValue > options.max) {
+      return `"${value}" is greater than the max allowed value of ${options.max}.`;
     }
 
-    if (field.min && parsedValue < field.min) {
-      return `${field.label} value is less than the min allowed value of ${field.min}.`;
-    }
-
-    return true;
-  },
-  text: (value, field) => {
-    if (field.maxLength && value.length > field.maxLength) {
-      return `${field.label} length is greater than the max allowed length of ${field.maxLength}.`;
-    }
-
-    if (field.minLength && value.length < field.minLength) {
-      return `${field.label} length is less than the minimum allowed length of ${field.minLength}.`;
+    if (options.min && parsedValue < options.min) {
+      return `"${value}" is less than the min allowed value of ${options.min}.`;
     }
 
     return true;
   },
-  email: (value, field) => {
+  text: (value, options = {}) => {
+    if (options.maxLength && value.length > options.maxLength) {
+      return `This value must be shorter than the max length of ${options.max} characters.`;
+    }
+
+    if (options.minLength && value.length < options.minLength) {
+      return `This value must be longer than the minimum length of ${options.max} characters.`;
+    }
+
+    return Boolean(value);
+  },
+  email: (value) => {
     if (/\S+@\S+\.\S+/.test(value)) {
       return true;
     }
-    return `${field.label} is not a valid email address.`;
+    return 'Please enter a valid email address.';
   },
-  textarea: (value, field) => {
-    if (field.maxLength && value.length > field.maxLength) {
-      return `${field.label} length is greater than the max allowed length of ${field.maxLength}.`;
+  textarea: (value, options = {}) => {
+    if (options.maxLength && value.length > options.maxLength) {
+      return `This value must be shorter than the max length of ${options.max} characters.`;
     }
 
-    if (field.minLength && value.length < field.minLength) {
-      return `${field.label} length is less than the minimum allowed length of ${field.minLength}.`;
+    if (options.minLength && value.length < options.minLength) {
+      return `This value must be longer than the minimum length of ${options.max} characters.`;
     }
 
-    return true;
+    return Boolean(value);
   },
-  wysiwyg: (value, field) => {
+  wysiwyg: (value) => {
     if (value) return true;
 
-    return `${field.label} is required.`;
+    return 'This field is required.';
   },
-  code: (value, field) => {
+  code: (value) => {
     if (value) return true;
 
-    return `${field.label} is required.`;
+    return 'This field is required.';
   },
-  checkbox: (value, field) => {
-    if (value) {
+  checkbox: (value) => {
+    if (typeof value === 'boolean') {
       return true;
     }
 
-    return `${field.label} can only be equal to true or false.`;
+    return 'This field can only be equal to true or false.';
   },
-  date: (value, field) => {
+  date: (value) => {
     if (value instanceof Date) {
       return true;
     }
 
-    return `${field.label} is not a valid date.`;
+    return `"${value}" is not a valid date.`;
   },
-  upload: (value, field) => {
+  upload: (value) => {
     if (value) return true;
-    return `${field.label} is required.`;
+    return 'This field is required.';
   },
-  relationship: (value, field) => {
+  relationship: (value) => {
     if (value) return true;
-    return `${field.label} is required.`;
+    return 'This field is required.';
   },
-  group: (value, field) => {
-    return iterateFields(value, field.fields, `${field.name}.`);
+  group: (value, options) => {
+    return iterateFields(value, options.fields, `${options.name}.`);
   },
-  repeater: (value, field) => {
+  repeater: (value, options) => {
     if (value.length === 0) {
-      return `${field.label} requires at least one row.`;
+      return 'This field requires at least one row.';
     }
 
     let errors = [];
 
     value.forEach((row, i) => {
-      const rowErrors = iterateFields(row, field.fields, `${field.name}.${i}.`);
+      const rowErrors = iterateFields(row, options.fields, `${options.name}.${i}.`);
 
       if (rowErrors.length > 0) {
         errors = errors.concat(rowErrors);
@@ -102,19 +102,19 @@ const fieldToValidatorMap = {
 
     return true;
   },
-  select: (value, field) => {
+  select: (value) => {
     if (value) return true;
-    return `${field.label} is required.`;
+    return 'This field is required.';
   },
-  flexible: (value, field) => {
+  flexible: (value, options) => {
     if (value.length === 0) {
-      return `${field.label} requires at least one ${field.singularLabel}.`;
+      return `${options.label} requires at least one ${options.singularLabel}.`;
     }
 
     let errors = [];
 
     value.forEach((row, i) => {
-      const rowErrors = iterateFields.iterateFields(row, field.fields, `${field.name}.${i}.`);
+      const rowErrors = iterateFields.iterateFields(row, options.fields, `${options.name}.${i}.`);
 
       if (rowErrors.length > 0) {
         errors = errors.concat(rowErrors);
@@ -129,4 +129,4 @@ const fieldToValidatorMap = {
   },
 };
 
-module.exports = fieldToValidatorMap;
+module.exports = optionsToValidatorMap;

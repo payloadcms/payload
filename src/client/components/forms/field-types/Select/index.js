@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
+import fieldToValidatorMap from '../../../../../fields/validations';
 
 import './index.scss';
 
-const defaultError = 'Please make a selection.';
-const defaultValidate = value => value.length > 0;
+const defaultValidate = fieldToValidatorMap.select;
 
 const formatFormValue = (value) => {
   if (Array.isArray(value)) {
@@ -61,7 +61,6 @@ const Select = (props) => {
     validate,
     style,
     width,
-    errorMessage,
     label,
     options,
     hasMany,
@@ -72,8 +71,10 @@ const Select = (props) => {
     showError,
     formProcessing,
     onFieldChange,
+    errorMessage,
   } = useFieldType({
     name,
+    label,
     required,
     defaultValue,
     validate,
@@ -118,7 +119,6 @@ const Select = (props) => {
 Select.defaultProps = {
   style: {},
   required: false,
-  errorMessage: defaultError,
   validate: defaultValidate,
   defaultValue: null,
   hasMany: false,
@@ -128,7 +128,6 @@ Select.defaultProps = {
 Select.propTypes = {
   required: PropTypes.bool,
   style: PropTypes.shape({}),
-  errorMessage: PropTypes.string,
   label: PropTypes.string.isRequired,
   defaultValue: PropTypes.oneOfType([
     PropTypes.string,

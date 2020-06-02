@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
@@ -6,9 +6,6 @@ import Error from '../../Error';
 import withCondition from '../../withCondition';
 
 import './index.scss';
-
-const defaultError = 'Please fill in the field';
-const defaultValidate = value => (/^-?[0-9]\d*$/).test(value);
 
 const NumberField = (props) => {
   const {
@@ -18,22 +15,30 @@ const NumberField = (props) => {
     validate,
     style,
     width,
-    errorMessage,
     label,
     placeholder,
+    max,
+    min,
   } = props;
+
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { min, max });
+    return validationResult;
+  }, [validate, max, min]);
 
   const {
     value,
     showError,
     onFieldChange,
     formProcessing,
+    errorMessage,
   } = useFieldType({
     name,
     required,
     defaultValue,
-    validate,
+    validate: memoizedValidate,
   });
+
 
   const classes = [
     'field-type',
@@ -76,10 +81,10 @@ NumberField.defaultProps = {
   required: false,
   defaultValue: null,
   placeholder: undefined,
-  validate: defaultValidate,
-  errorMessage: defaultError,
   width: undefined,
   style: {},
+  max: undefined,
+  min: undefined,
 };
 
 NumberField.propTypes = {
@@ -87,11 +92,12 @@ NumberField.propTypes = {
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.number,
-  validate: PropTypes.func,
-  errorMessage: PropTypes.string,
+  validate: PropTypes.func.isRequired,
   width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,
+  max: PropTypes.number,
+  min: PropTypes.number,
 };
 
 export default withCondition(NumberField);

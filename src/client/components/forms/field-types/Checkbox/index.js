@@ -7,8 +7,6 @@ import StyledCheckbox from './StyledCheckbox';
 
 import './index.scss';
 
-const defaultError = 'Checkbox is required';
-
 const Checkbox = (props) => {
   const {
     name,
@@ -17,13 +15,13 @@ const Checkbox = (props) => {
     validate,
     style,
     width,
-    errorMessage,
     label,
   } = props;
 
   const {
     value,
     showError,
+    errorMessage,
     onFieldChange,
     formProcessing,
   } = useFieldType({
@@ -69,7 +67,6 @@ Checkbox.defaultProps = {
   required: false,
   defaultValue: false,
   validate: null,
-  errorMessage: defaultError,
   width: undefined,
   style: {},
 };
@@ -79,7 +76,6 @@ Checkbox.propTypes = {
   required: PropTypes.bool,
   defaultValue: PropTypes.bool,
   validate: PropTypes.func,
-  errorMessage: PropTypes.string,
   width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,

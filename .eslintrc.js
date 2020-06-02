@@ -22,7 +22,8 @@ module.exports = {
       2,
       {
         ignore: [
-          'payload/config'
+          'payload/config',
+          'payload/unsanitizedConfig',
         ]
       }],
     "react/jsx-filename-extension": [
