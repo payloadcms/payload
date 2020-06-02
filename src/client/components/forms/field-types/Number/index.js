@@ -41,14 +41,12 @@ const NumberField = (props) => {
     showError && 'error',
   ].filter(Boolean).join(' ');
 
-  const fieldWidth = width ? `${width}%` : undefined;
-
   return (
     <div
       className={classes}
       style={{
         ...style,
-        width: fieldWidth,
+        width,
       }}
     >
       <Error
@@ -80,7 +78,7 @@ NumberField.defaultProps = {
   placeholder: undefined,
   validate: defaultValidate,
   errorMessage: defaultError,
-  width: 100,
+  width: undefined,
   style: {},
 };
 
@@ -91,7 +89,7 @@ NumberField.propTypes = {
   defaultValue: PropTypes.number,
   validate: PropTypes.func,
   errorMessage: PropTypes.string,
-  width: PropTypes.number,
+  width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,
 };

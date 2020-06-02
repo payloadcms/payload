@@ -41,11 +41,12 @@ const withCondition = (Field) => {
 
   WithCondition.defaultProps = {
     condition: null,
+    name: '',
   };
 
   WithCondition.propTypes = {
     condition: PropTypes.func,
-    name: PropTypes.string.isRequired,
+    name: PropTypes.string,
   };
 
   return WithCondition;

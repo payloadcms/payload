@@ -1,5 +1,6 @@
 import { useContext, useCallback, useEffect } from 'react';
 import FormContext from '../Form/Context';
+import { useLocale } from '../../utilities/Locale';
 
 import './index.scss';
 
@@ -12,6 +13,7 @@ const useFieldType = (options) => {
     validate,
   } = options;
 
+  const locale = useLocale();
   const formContext = useContext(FormContext);
   const { dispatchFields, submitted, processing } = formContext;
   let mountValue = formContext.fields[name]?.value;
@@ -32,6 +34,10 @@ const useFieldType = (options) => {
   useEffect(() => {
     sendField(mountValue);
   }, [sendField, mountValue]);
+
+  useEffect(() => {
+    sendField(null);
+  }, [locale, sendField]);
 
   // Remove field from state on "unmount"
   useEffect(() => {

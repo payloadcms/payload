@@ -1,0 +1,13 @@
+@import '../../../../scss/styles.scss';
+
+.field-type.row {
+  display: flex;
+  margin-left: - base(.5);
+  margin-right: - base(.5);
+  width: calc(100% + #{$baseline});
+
+  > * {
+    margin-left: base(.5);
+    margin-right: base(.5);
+  }
+}

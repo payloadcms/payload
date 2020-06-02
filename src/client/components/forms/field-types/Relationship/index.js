@@ -210,9 +210,6 @@ class Relationship extends Component {
       showError && 'error',
     ].filter(Boolean).join(' ');
 
-    // eslint-disable-next-line prefer-template
-    const fieldWidth = width ? width + '%' : null;
-
     const valueToRender = this.findValueInOptions(options, value);
 
     // ///////////////////////////////////////////
@@ -224,7 +221,7 @@ class Relationship extends Component {
         className={classes}
         style={{
           ...style,
-          width: fieldWidth,
+          width,
         }}
       >
         <Error
@@ -258,7 +255,7 @@ Relationship.defaultProps = {
   required: false,
   errorMessage: defaultError,
   hasMany: false,
-  width: 100,
+  width: undefined,
   showError: false,
   value: null,
   formProcessing: false,
@@ -282,7 +279,7 @@ Relationship.propTypes = {
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   formProcessing: PropTypes.bool,
-  width: PropTypes.number,
+  width: PropTypes.string,
   hasMany: PropTypes.bool,
   onFieldChange: PropTypes.func.isRequired,
   hasMultipleRelations: PropTypes.bool.isRequired,

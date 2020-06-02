@@ -14,7 +14,7 @@ const buildModel = (config) => {
     const Globals = mongoose.model('globals', globalsSchema);
 
     Object.values(config.globals).forEach((globalConfig) => {
-      const globalSchema = buildSchema(globalConfig.fields, config);
+      const globalSchema = buildSchema(globalConfig.fields);
 
       globalSchema
         .plugin(localizationPlugin, config.localization)

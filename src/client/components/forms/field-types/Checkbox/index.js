@@ -39,14 +39,12 @@ const Checkbox = (props) => {
     showError && 'error',
   ].filter(Boolean).join(' ');
 
-  const fieldWidth = width ? `${width}%` : undefined;
-
   return (
     <div
       className={classes}
       style={{
         ...style,
-        width: fieldWidth,
+        width,
       }}
     >
       <Error
@@ -72,7 +70,7 @@ Checkbox.defaultProps = {
   defaultValue: false,
   validate: null,
   errorMessage: defaultError,
-  width: 100,
+  width: undefined,
   style: {},
 };
 
@@ -82,7 +80,7 @@ Checkbox.propTypes = {
   defaultValue: PropTypes.bool,
   validate: PropTypes.func,
   errorMessage: PropTypes.string,
-  width: PropTypes.number,
+  width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,
 };

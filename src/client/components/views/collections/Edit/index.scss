@@ -8,10 +8,15 @@
     align-items: flex-start;
   }
 
+  &__main {
+    min-width: 0;
+  }
+
   &__header {
     h1 {
-      word-break: break-all;
-      hyphens: auto;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 

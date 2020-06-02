@@ -100,6 +100,22 @@ function buildMutationInputType(name, fields, parentName) {
       return { type };
     },
     flexible: () => ({ type: GraphQLJSON }),
+    row: (field) => {
+      return field.fields.reduce((acc, rowField) => {
+        const getFieldSchema = fieldToSchemaMap[rowField.type];
+
+        if (getFieldSchema) {
+          const fieldSchema = getFieldSchema(rowField);
+
+          return [
+            ...acc,
+            fieldSchema,
+          ];
+        }
+
+        return null;
+      }, []);
+    },
   };
 
   const fieldTypes = fields.reduce((schema, field) => {
@@ -107,6 +123,15 @@ function buildMutationInputType(name, fields, parentName) {
 
     if (getFieldSchema) {
       const fieldSchema = getFieldSchema(field);
+
+      if (Array.isArray(fieldSchema)) {
+        return fieldSchema.reduce((acc, subField, i) => {
+          return {
+            ...acc,
+            [field.fields[i].name]: subField,
+          };
+        }, schema);
+      }
 
       return {
         ...schema,

@@ -34,8 +34,6 @@ const Password = (props) => {
     validate,
   });
 
-  const fieldWidth = width ? `${width}%` : null;
-
   const classes = [
     'field-type',
     'password',
@@ -47,7 +45,7 @@ const Password = (props) => {
       className={classes}
       style={{
         ...style,
-        width: fieldWidth,
+        width,
       }}
     >
       <Error
@@ -77,7 +75,7 @@ Password.defaultProps = {
   defaultValue: null,
   validate: defaultValidate,
   errorMessage: defaultError,
-  width: 100,
+  width: undefined,
   style: {},
 };
 
@@ -86,7 +84,7 @@ Password.propTypes = {
   required: PropTypes.bool,
   defaultValue: PropTypes.string,
   errorMessage: PropTypes.string,
-  width: PropTypes.number,
+  width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string.isRequired,
   validate: PropTypes.func,

@@ -44,14 +44,12 @@ const DateTime = (props) => {
     formProcessing && 'processing',
   ].filter(Boolean).join(' ');
 
-  const fieldWidth = width ? `${width}%` : undefined;
-
   return (
     <div
       className={classes}
       style={{
         ...style,
-        width: fieldWidth,
+        width,
       }}
     >
       <Error
@@ -80,7 +78,7 @@ DateTime.defaultProps = {
   defaultValue: null,
   validate: null,
   errorMessage: defaultError,
-  width: 100,
+  width: undefined,
   style: {},
 };
 
@@ -91,7 +89,7 @@ DateTime.propTypes = {
   defaultValue: PropTypes.string,
   validate: PropTypes.func,
   errorMessage: PropTypes.string,
-  width: PropTypes.number,
+  width: PropTypes.string,
   style: PropTypes.shape({}),
 };
 
