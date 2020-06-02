@@ -10,7 +10,6 @@ const RenderFields = ({
     return (
       <>
         {fieldSchema.map((field, i) => {
-          const { defaultValue } = field;
           if (field?.hidden !== 'api' && field?.hidden !== true) {
             if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
               let FieldComponent = field?.hidden === 'admin' ? fieldTypes.hidden : fieldTypes[field.type];
@@ -19,14 +18,22 @@ const RenderFields = ({
                 FieldComponent = customComponents[field.name].field;
               }
 
+              let { defaultValue } = field;
+
+              if (!field.name) {
+                defaultValue = initialData;
+              } else if (initialData[field.name]) {
+                defaultValue = initialData[field.name];
+              }
+
               if (FieldComponent) {
                 return (
                   <FieldComponent
                     fieldTypes={fieldTypes}
-                    key={field.name}
+                    key={field.name || `field-${i}`}
                     {...field}
                     validate={field.validate ? value => field.validate(value, field) : undefined}
-                    defaultValue={initialData[field.name] || defaultValue}
+                    defaultValue={defaultValue}
                   />
                 );
               }

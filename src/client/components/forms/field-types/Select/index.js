@@ -22,7 +22,7 @@ const formatFormValue = (value) => {
     });
   }
 
-  if (typeof value === 'object' && value.value) {
+  if (typeof value === 'object' && value !== null && value.value) {
     return value.value;
   }
 
@@ -85,14 +85,12 @@ const Select = (props) => {
     showError && 'error',
   ].filter(Boolean).join(' ');
 
-  const fieldWidth = width ? `${width}%` : undefined;
-
   return (
     <div
       className={classes}
       style={{
         ...style,
-        width: fieldWidth,
+        width,
       }}
     >
       <Error
@@ -124,7 +122,7 @@ Select.defaultProps = {
   validate: defaultValidate,
   defaultValue: null,
   hasMany: false,
-  width: 100,
+  width: undefined,
 };
 
 Select.propTypes = {
@@ -138,7 +136,7 @@ Select.propTypes = {
   ]),
   validate: PropTypes.func,
   name: PropTypes.string.isRequired,
-  width: PropTypes.number,
+  width: PropTypes.string,
   options: PropTypes.oneOfType([
     PropTypes.arrayOf(
       PropTypes.string,

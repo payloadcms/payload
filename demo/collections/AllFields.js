@@ -11,6 +11,9 @@ const AllFields = {
 
     return null;
   },
+  policies: {
+    read: () => true,
+  },
   fields: [
     {
       name: 'text',
@@ -64,6 +67,41 @@ const AllFields = {
       type: 'checkbox',
       label: 'Checkbox',
       position: 'sidebar',
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'email',
+          label: 'Email',
+          type: 'email',
+        }, {
+          name: 'number',
+          label: 'Number',
+          type: 'number',
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: 'Group',
+      name: 'group',
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'nestedText1',
+              label: 'Nested Text 1',
+              type: 'text',
+            }, {
+              name: 'nestedText2',
+              label: 'Nested Text 2',
+              type: 'text',
+            },
+          ],
+        },
+      ],
     },
   ],
   timestamps: true,

@@ -54,13 +54,13 @@ const ColumnSelector = (props) => {
 
   return (
     <div className={baseClass}>
-      {fields && fields.map((field) => {
+      {fields && fields.map((field, i) => {
         const isEnabled = columns.find(column => column === field.name);
         return (
           <Pill
             onClick={() => dispatchColumns({ payload: field.name, type: isEnabled ? 'disable' : 'enable' })}
             alignIcon="left"
-            key={field.name}
+            key={field.name || i}
             icon={isEnabled ? <X /> : <Plus />}
             pillStyle={isEnabled ? 'dark' : undefined}
             className={`${baseClass}__active-column`}

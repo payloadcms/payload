@@ -1,7 +1,6 @@
 const path = require('path');
 const express = require('express');
 const Payload = require('../src');
-const publicConfig = require('./payload.public.config');
 const privateConfig = require('./payload.private.config');
 
 const expressApp = express();

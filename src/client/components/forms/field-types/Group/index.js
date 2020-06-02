@@ -17,8 +17,8 @@ const Group = (props) => {
         fieldSchema={fields.map((subField) => {
           return {
             ...subField,
-            name: `${name}.${subField.name}`,
-            defaultValue: defaultValue[subField.name],
+            name: `${name}${subField.name ? `.${subField.name}` : ''}`,
+            defaultValue: subField.name ? defaultValue[subField.name] : defaultValue,
           };
         })}
       />

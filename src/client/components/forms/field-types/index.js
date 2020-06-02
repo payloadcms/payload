@@ -13,3 +13,4 @@ export { default as checkbox } from './Checkbox';
 export { default as flexible } from './Flexible';
 export { default as group } from './Group';
 export { default as repeater } from './Repeater';
+export { default as row } from './Row';

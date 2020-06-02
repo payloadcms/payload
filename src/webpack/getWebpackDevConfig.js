@@ -111,7 +111,9 @@ module.exports = (config) => {
         filename: './index.html',
       }),
       new webpack.HotModuleReplacementPlugin(),
-      new Dotenv(),
+      new Dotenv({
+        silent: true,
+      }),
     ],
     resolve: {
       modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
