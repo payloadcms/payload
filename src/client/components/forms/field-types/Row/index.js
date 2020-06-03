@@ -7,8 +7,10 @@ import './index.scss';
 
 const Row = (props) => {
   const {
-    fields, fieldTypes, defaultValue, path,
+    fields, fieldTypes, defaultValue, path: pathFromProps, name,
   } = props;
+
+  const path = pathFromProps || name;
 
   return (
     <div className="field-type row">
@@ -37,6 +39,7 @@ Row.propTypes = {
   ).isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
   path: PropTypes.string,
+  name: PropTypes.string.isRequired,
   defaultValue: PropTypes.shape({}),
 };
 

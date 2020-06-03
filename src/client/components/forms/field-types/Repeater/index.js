@@ -27,12 +27,14 @@ const Repeater = (props) => {
 
   const {
     name,
-    path,
+    path: pathFromProps,
     fields,
     defaultValue,
     singularLabel,
     fieldTypes,
   } = props;
+
+  const path = pathFromProps || name;
 
   const addRow = (rowIndex) => {
     dispatchFields({

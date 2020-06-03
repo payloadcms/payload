@@ -10,7 +10,8 @@ import './index.scss';
 
 const Text = (props) => {
   const {
-    path,
+    path: pathFromProps,
+    name,
     required,
     defaultValue,
     validate,
@@ -19,6 +20,8 @@ const Text = (props) => {
     label,
     placeholder,
   } = props;
+
+  const path = pathFromProps || name;
 
   const {
     value,
@@ -77,10 +80,12 @@ Text.defaultProps = {
   width: undefined,
   style: {},
   validate: text,
+  path: '',
 };
 
 Text.propTypes = {
-  path: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  path: PropTypes.string,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,

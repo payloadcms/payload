@@ -22,12 +22,14 @@ const Flexible = (props) => {
   const {
     label,
     name,
-    path,
+    path: pathFromProps,
     blocks,
     defaultValue,
     singularLabel,
     fieldTypes,
   } = props;
+
+  const path = pathFromProps || name;
 
   const parentRowsModified = useRowModified();
   const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
@@ -115,6 +117,7 @@ const Flexible = (props) => {
     <RowModifiedProvider lastModified={lastModified}>
       <DragDropContext onDragEnd={onDragEnd}>
         <div className={baseClass}>
+          <h3>{label}</h3>
           <Droppable droppableId="flexible-drop">
             {provided => (
               <div

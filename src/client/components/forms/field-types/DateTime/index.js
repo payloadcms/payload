@@ -16,7 +16,8 @@ const baseClass = 'date-time-field';
 
 const DateTime = (props) => {
   const {
-    path,
+    path: pathFromProps,
+    name,
     required,
     defaultValue,
     validate,
@@ -25,6 +26,8 @@ const DateTime = (props) => {
     errorMessage,
     label,
   } = props;
+
+  const path = pathFromProps || name;
 
   const {
     value,
@@ -81,11 +84,12 @@ DateTime.defaultProps = {
   errorMessage: defaultError,
   width: undefined,
   style: {},
+  path: '',
 };
 
 DateTime.propTypes = {
   name: PropTypes.string.isRequired,
-  path: PropTypes.string.isRequired,
+  path: PropTypes.string,
   label: PropTypes.string,
   required: PropTypes.bool,
   defaultValue: PropTypes.string,

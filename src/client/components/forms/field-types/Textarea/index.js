@@ -10,7 +10,8 @@ import './index.scss';
 
 const Textarea = (props) => {
   const {
-    path,
+    path: pathFromProps,
+    name,
     required,
     defaultValue,
     validate,
@@ -19,6 +20,8 @@ const Textarea = (props) => {
     label,
     placeholder,
   } = props;
+
+  const path = pathFromProps || name;
 
   const {
     value,
@@ -76,10 +79,12 @@ Textarea.defaultProps = {
   width: undefined,
   style: {},
   placeholder: null,
+  path: '',
 };
 
 Textarea.propTypes = {
-  path: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  path: PropTypes.string,
   required: PropTypes.bool,
   defaultValue: PropTypes.string,
   validate: PropTypes.func,

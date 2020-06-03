@@ -10,7 +10,8 @@ import './index.scss';
 
 const Password = (props) => {
   const {
-    path,
+    path: pathFromProps,
+    name,
     required,
     defaultValue,
     validate,
@@ -18,6 +19,8 @@ const Password = (props) => {
     width,
     label,
   } = props;
+
+  const path = pathFromProps || name;
 
   const {
     value,
@@ -74,10 +77,12 @@ Password.defaultProps = {
   validate: password,
   width: undefined,
   style: {},
+  path: '',
 };
 
 Password.propTypes = {
-  path: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  path: PropTypes.string,
   required: PropTypes.bool,
   defaultValue: PropTypes.string,
   width: PropTypes.string,

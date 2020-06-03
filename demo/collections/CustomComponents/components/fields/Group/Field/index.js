@@ -1,14 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Group } from '../../../../../../../field-types';
 
-const CustomGroup = ({ onChange, value }) => {
+const CustomGroup = (props) => {
   return (
-    <input
-      className="custom-description-filter"
-      type="text"
-      onChange={e => onChange(e.target.value)}
-      value={value}
-    />
+    <div className="custom-group">
+      <Group {...props} />
+    </div>
   );
 };
 

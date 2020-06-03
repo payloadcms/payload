@@ -7,8 +7,10 @@ import './index.scss';
 
 const Group = (props) => {
   const {
-    label, fields, name, path, defaultValue, fieldTypes,
+    label, fields, name, path: pathFromProps, defaultValue, fieldTypes,
   } = props;
+
+  const path = pathFromProps || name;
 
   const { customComponentsPath } = useRenderedFields();
 
@@ -33,6 +35,7 @@ const Group = (props) => {
 Group.defaultProps = {
   label: '',
   defaultValue: {},
+  path: '',
 };
 
 Group.propTypes = {
@@ -42,7 +45,7 @@ Group.propTypes = {
   ).isRequired,
   label: PropTypes.string,
   name: PropTypes.string.isRequired,
-  path: PropTypes.string.isRequired,
+  path: PropTypes.string,
   fieldTypes: PropTypes.shape({}).isRequired,
 };
 

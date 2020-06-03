@@ -53,7 +53,8 @@ const formatRenderValue = (value) => {
 
 const Select = (props) => {
   const {
-    path,
+    path: pathFromProps,
+    name,
     required,
     defaultValue,
     validate,
@@ -63,6 +64,8 @@ const Select = (props) => {
     options,
     hasMany,
   } = props;
+
+  const path = pathFromProps || name;
 
   const {
     value,
@@ -121,6 +124,7 @@ Select.defaultProps = {
   defaultValue: null,
   hasMany: false,
   width: undefined,
+  path: '',
 };
 
 Select.propTypes = {
@@ -132,7 +136,8 @@ Select.propTypes = {
     PropTypes.array,
   ]),
   validate: PropTypes.func,
-  path: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  path: PropTypes.string,
   width: PropTypes.string,
   options: PropTypes.oneOfType([
     PropTypes.arrayOf(

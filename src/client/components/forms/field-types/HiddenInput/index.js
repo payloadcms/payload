@@ -5,10 +5,13 @@ import withCondition from '../../withCondition';
 
 const HiddenInput = (props) => {
   const {
-    path,
+    name,
+    path: pathFromProps,
     required,
     defaultValue,
   } = props;
+
+  const path = pathFromProps || name;
 
   const { value, onChange } = useFieldType({
     path,
@@ -30,10 +33,12 @@ const HiddenInput = (props) => {
 HiddenInput.defaultProps = {
   required: false,
   defaultValue: null,
+  path: '',
 };
 
 HiddenInput.propTypes = {
-  path: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  path: PropTypes.string,
   required: PropTypes.bool,
   defaultValue: PropTypes.string,
 };

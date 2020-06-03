@@ -258,6 +258,7 @@ Relationship.defaultProps = {
   width: undefined,
   showError: false,
   value: null,
+  path: '',
   formProcessing: false,
 };
 
@@ -277,7 +278,8 @@ Relationship.propTypes = {
   errorMessage: PropTypes.string,
   showError: PropTypes.bool,
   label: PropTypes.string.isRequired,
-  path: PropTypes.string.isRequired,
+  path: PropTypes.string,
+  name: PropTypes.string.isRequired,
   formProcessing: PropTypes.bool,
   width: PropTypes.string,
   hasMany: PropTypes.bool,
@@ -293,12 +295,13 @@ Relationship.propTypes = {
 const RelationshipFieldType = (props) => {
   const [formattedDefaultValue, setFormattedDefaultValue] = useState(null);
   const {
-    defaultValue, relationTo, hasMany, validate,
+    defaultValue, relationTo, hasMany, validate, path, name,
   } = props;
   const hasMultipleRelations = Array.isArray(relationTo);
 
   const fieldType = useFieldType({
     ...props,
+    path: path || name,
     defaultValue: formattedDefaultValue,
     validate,
   });
