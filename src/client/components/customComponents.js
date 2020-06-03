@@ -33,10 +33,14 @@ function recursivelyAddFieldComponents(fields) {
           fieldComponents.fields = subFields;
         }
 
-        return {
+        const result = {
           ...allFields,
-          [field.name]: fieldComponents,
+          [field.name]: {
+            ...fieldComponents,
+          },
         };
+
+        return result;
       }
 
       return allFields;
@@ -55,12 +59,6 @@ function customComponents(config) {
       ...(collection.components || {}),
     };
 
-    collection.fields.forEach((field) => {
-      if (field.components) {
-        newComponents[collection.slug].fields[field.name] = field.components;
-      }
-    });
-
     return newComponents;
   }, {});
 
@@ -71,12 +69,6 @@ function customComponents(config) {
       fields: recursivelyAddFieldComponents(global.fields),
       ...(global.components || {}),
     };
-
-    global.fields.forEach((field) => {
-      if (field.components) {
-        newComponents[global.slug].fields[field.name] = field.components;
-      }
-    });
 
     return newComponents;
   }, {}) : {};

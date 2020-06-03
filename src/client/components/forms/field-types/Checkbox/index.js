@@ -10,7 +10,8 @@ import './index.scss';
 
 const Checkbox = (props) => {
   const {
-    path,
+    name,
+    path: pathFromProps,
     required,
     defaultValue,
     validate,
@@ -18,6 +19,8 @@ const Checkbox = (props) => {
     width,
     label,
   } = props;
+
+  const path = pathFromProps || name;
 
   const {
     value,
@@ -70,10 +73,12 @@ Checkbox.defaultProps = {
   validate: checkbox,
   width: undefined,
   style: {},
+  path: '',
 };
 
 Checkbox.propTypes = {
-  path: PropTypes.string.isRequired,
+  path: PropTypes.string,
+  name: PropTypes.string.isRequired,
   required: PropTypes.bool,
   defaultValue: PropTypes.bool,
   validate: PropTypes.func,

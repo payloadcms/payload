@@ -10,7 +10,8 @@ import './index.scss';
 
 const Email = (props) => {
   const {
-    path,
+    name,
+    path: pathFromProps,
     required,
     defaultValue,
     validate,
@@ -20,6 +21,8 @@ const Email = (props) => {
     placeholder,
     autoComplete,
   } = props;
+
+  const path = pathFromProps || name;
 
   const {
     value,
@@ -80,11 +83,12 @@ Email.defaultProps = {
   style: {},
   autoComplete: undefined,
   validate: email,
+  path: '',
 };
 
 Email.propTypes = {
   name: PropTypes.string.isRequired,
-  path: PropTypes.string.isRequired,
+  path: PropTypes.string,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,

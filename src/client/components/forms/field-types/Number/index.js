@@ -9,7 +9,8 @@ import './index.scss';
 
 const NumberField = (props) => {
   const {
-    path,
+    name,
+    path: pathFromProps,
     required,
     defaultValue,
     validate,
@@ -20,6 +21,8 @@ const NumberField = (props) => {
     max,
     min,
   } = props;
+
+  const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { min, max });
@@ -85,10 +88,12 @@ NumberField.defaultProps = {
   style: {},
   max: undefined,
   min: undefined,
+  path: '',
 };
 
 NumberField.propTypes = {
   name: PropTypes.string.isRequired,
+  path: PropTypes.string,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.number,
