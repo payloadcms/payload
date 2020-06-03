@@ -135,7 +135,7 @@ function buildMutationInputType(name, fields, parentName) {
 
       return {
         ...schema,
-        [formatName(field.name)]: fieldSchema,
+        [field.name]: fieldSchema,
       };
     }
 

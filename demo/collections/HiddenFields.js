@@ -12,14 +12,14 @@ const HiddenFields = {
       required: true,
     },
     {
-      name: 'hidden-admin',
+      name: 'hiddenAdmin',
       type: 'text',
       label: 'Hidden on Admin',
       hidden: 'admin',
       required: true,
     },
     {
-      name: 'hidden-api',
+      name: 'hiddenAPI',
       type: 'text',
       label: 'Hidden on API',
       hidden: true,
