@@ -83,4 +83,7 @@ module.exports = {
       console.error('global error config handler');
     },
   },
+  webpack: (config) => {
+    return config;
+  },
 };

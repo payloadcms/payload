@@ -54,6 +54,9 @@ module.exports = {
       name: 'group',
       label: 'Group',
       type: 'group',
+      components: {
+        field: path.resolve(__dirname, 'components/fields/Group/Field/index.js'),
+      },
       fields: [
         {
           type: 'text',

@@ -2,20 +2,20 @@ import { unflatten, flatten } from 'flatley';
 import flattenFilters from './flattenFilters';
 
 //
-const unflattenRowsFromState = (state, name) => {
+const unflattenRowsFromState = (state, path) => {
   // Take a copy of state
   const remainingFlattenedState = { ...state };
 
   const rowsFromStateObject = {};
 
-  const namePrefixToRemove = name.substring(0, name.lastIndexOf('.') + 1);
+  const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1);
 
   // Loop over all keys from state
   // If the key begins with the name of the parent field,
   // Add value to rowsFromStateObject and delete it from remaining state
   Object.keys(state).forEach((key) => {
-    if (key.indexOf(`${name}.`) === 0) {
-      rowsFromStateObject[key.replace(namePrefixToRemove, '')] = state[key];
+    if (key.indexOf(`${path}.`) === 0) {
+      rowsFromStateObject[key.replace(pathPrefixToRemove, '')] = state[key];
       delete remainingFlattenedState[key];
     }
   });
@@ -23,7 +23,7 @@ const unflattenRowsFromState = (state, name) => {
   const unflattenedRows = unflatten(rowsFromStateObject);
 
   return {
-    unflattenedRows: unflattenedRows[name.replace(namePrefixToRemove, '')] || [],
+    unflattenedRows: unflattenedRows[path.replace(pathPrefixToRemove, '')] || [],
     remainingFlattenedState,
   };
 };
@@ -55,19 +55,36 @@ function fieldReducer(state, action) {
       } = action;
       const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, path);
 
-      // Get names of sub fields
+      // Get paths of sub fields
       const subFields = fieldSchema.reduce((acc, field) => {
         if (field.type === 'flexible' || field.type === 'repeater') {
           return acc;
         }
 
-        return {
-          ...acc,
-          [field.path]: {
-            value: null,
-            valid: !field.required,
-          },
-        };
+        if (field.name) {
+          return {
+            ...acc,
+            [field.name]: {
+              value: null,
+              valid: !field.required,
+            },
+          };
+        }
+
+        if (field.fields) {
+          return {
+            ...acc,
+            ...(field.fields.reduce((fields, subField) => ({
+              ...fields,
+              [subField.name]: {
+                value: null,
+                valid: !field.required,
+              },
+            }), {})),
+          };
+        }
+
+        return acc;
       }, {});
 
       if (blockType) {
