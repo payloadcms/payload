@@ -78,22 +78,27 @@ const optionsToValidatorMap = {
     if (value) return true;
     return 'This field is required.';
   },
-  group: (value, options) => {
+  group: async (value, options) => {
     return iterateFields(value, options.fields, `${options.name}.`);
   },
-  repeater: (value, options) => {
-    if (value.length === 0) {
+  repeater: async (value, options) => {
+    if (!value || value.length === 0) {
       return 'This field requires at least one row.';
     }
 
-    let errors = [];
+    const errors = [];
+    const rowPromises = [];
 
     value.forEach((row, i) => {
-      const rowErrors = iterateFields(row, options.fields, `${options.name}.${i}.`);
+      rowPromises.push(iterateFields(row, options.fields, `${options.name}.${i}.`));
+    });
 
-      if (rowErrors.length > 0) {
-        errors = errors.concat(rowErrors);
-      }
+    const rowResults = await Promise.all(rowPromises);
+
+    rowResults.forEach((row) => {
+      row.forEach((fieldError) => {
+        errors.push(fieldError);
+      });
     });
 
     if (errors.length > 0) {
@@ -106,19 +111,24 @@ const optionsToValidatorMap = {
     if (value) return true;
     return 'This field is required.';
   },
-  flexible: (value, options) => {
+  flexible: async (value, options) => {
     if (value.length === 0) {
       return `${options.label} requires at least one ${options.singularLabel}.`;
     }
 
-    let errors = [];
+    const errors = [];
+    const rowPromises = [];
 
     value.forEach((row, i) => {
-      const rowErrors = iterateFields.iterateFields(row, options.fields, `${options.name}.${i}.`);
+      rowPromises.push(iterateFields(row, options.fields, `${options.name}.${i}.`));
+    });
 
-      if (rowErrors.length > 0) {
-        errors = errors.concat(rowErrors);
-      }
+    const rowResults = await Promise.all(rowPromises);
+
+    rowResults.forEach((row) => {
+      row.forEach((fieldError) => {
+        errors.push(fieldError);
+      });
     });
 
     if (errors.length > 0) {
