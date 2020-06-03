@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
 import './index.scss';
 
 const RenderFields = ({
-  fieldSchema, initialData, customComponents, fieldTypes, filter,
+  fieldSchema, initialData, customComponentsPath, fieldTypes, filter,
 }) => {
   if (fieldSchema) {
     return (
@@ -12,11 +13,7 @@ const RenderFields = ({
         {fieldSchema.map((field, i) => {
           if (field?.hidden !== 'api' && field?.hidden !== true) {
             if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
-              let FieldComponent = field?.hidden === 'admin' ? fieldTypes.hidden : fieldTypes[field.type];
-
-              if (customComponents?.[field.name]?.field) {
-                FieldComponent = customComponents[field.name].field;
-              }
+              const FieldComponent = field?.hidden === 'admin' ? fieldTypes.hidden : fieldTypes[field.type];
 
               let { defaultValue } = field;
 
@@ -28,11 +25,15 @@ const RenderFields = ({
 
               if (FieldComponent) {
                 return (
-                  <FieldComponent
-                    fieldTypes={fieldTypes}
+                  <RenderCustomComponent
                     key={field.name || `field-${i}`}
-                    {...field}
-                    defaultValue={defaultValue}
+                    path={`${customComponentsPath}${field.name}.field`}
+                    DefaultComponent={FieldComponent}
+                    componentProps={{
+                      ...field,
+                      fieldTypes,
+                      defaultValue,
+                    }}
                   />
                 );
               }
@@ -65,7 +66,7 @@ const RenderFields = ({
 
 RenderFields.defaultProps = {
   initialData: {},
-  customComponents: {},
+  customComponentsPath: '',
   filter: null,
 };
 
@@ -74,7 +75,7 @@ RenderFields.propTypes = {
     PropTypes.shape({}),
   ).isRequired,
   initialData: PropTypes.shape({}),
-  customComponents: PropTypes.shape({}),
+  customComponentsPath: PropTypes.string,
   fieldTypes: PropTypes.shape({
     hidden: PropTypes.func,
   }).isRequired,
