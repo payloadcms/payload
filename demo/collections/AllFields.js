@@ -125,6 +125,11 @@ const AllFields = {
             },
           ],
         },
+        {
+          type: 'text',
+          name: 'repeaterText3',
+          label: 'Repeater Text 3',
+        },
       ],
     },
   ],
