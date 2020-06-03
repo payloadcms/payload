@@ -4,6 +4,7 @@ const AllFields = {
     singular: 'All Fields',
     plural: 'All Fields',
   },
+  useAsTitle: 'text',
   preview: (doc, token) => {
     if (doc.text) {
       return `http://localhost:3000/previewable-posts/${doc.text.value}?preview=true&token=${token}`;

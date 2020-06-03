@@ -6,6 +6,7 @@ import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
+import { date } from '../../../../../fields/validations';
 
 import './index.scss';
 
@@ -76,7 +77,7 @@ DateTime.defaultProps = {
   label: null,
   required: false,
   defaultValue: null,
-  validate: null,
+  validate: date,
   errorMessage: defaultError,
   width: undefined,
   style: {},

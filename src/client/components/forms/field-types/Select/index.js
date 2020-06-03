@@ -1,15 +1,13 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import fieldToValidatorMap from '../../../../../fields/validations';
+import { select } from '../../../../../fields/validations';
 
 import './index.scss';
-
-const defaultValidate = fieldToValidatorMap.select;
 
 const formatFormValue = (value) => {
   if (Array.isArray(value)) {
@@ -119,7 +117,7 @@ const Select = (props) => {
 Select.defaultProps = {
   style: {},
   required: false,
-  validate: defaultValidate,
+  validate: select,
   defaultValue: null,
   hasMany: false,
   width: undefined,

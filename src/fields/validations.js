@@ -29,6 +29,17 @@ const optionsToValidatorMap = {
 
     return Boolean(value);
   },
+  password: (value, options = {}) => {
+    if (options.maxLength && value.length > options.maxLength) {
+      return `This value must be shorter than the max length of ${options.max} characters.`;
+    }
+
+    if (options.minLength && value.length < options.minLength) {
+      return `This value must be longer than the minimum length of ${options.max} characters.`;
+    }
+
+    return Boolean(value);
+  },
   email: (value) => {
     if (/\S+@\S+\.\S+/.test(value)) {
       return true;

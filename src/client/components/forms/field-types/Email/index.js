@@ -4,6 +4,7 @@ import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
+import { email } from '../../../../../fields/validations';
 
 import './index.scss';
 
@@ -78,6 +79,7 @@ Email.defaultProps = {
   width: undefined,
   style: {},
   autoComplete: undefined,
+  validate: email,
 };
 
 Email.propTypes = {
@@ -85,7 +87,7 @@ Email.propTypes = {
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
-  validate: PropTypes.func.isRequired,
+  validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,

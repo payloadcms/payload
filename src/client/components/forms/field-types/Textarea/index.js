@@ -4,11 +4,9 @@ import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
+import { textarea } from '../../../../../fields/validations';
 
 import './index.scss';
-
-const defaultError = 'Please fill in the field';
-const defaultValidate = value => value.length > 0;
 
 const Textarea = (props) => {
   const {
@@ -18,7 +16,6 @@ const Textarea = (props) => {
     validate,
     style,
     width,
-    errorMessage,
     label,
     placeholder,
   } = props;
@@ -28,6 +25,7 @@ const Textarea = (props) => {
     showError,
     onFieldChange,
     formProcessing,
+    errorMessage,
   } = useFieldType({
     name,
     required,
@@ -74,8 +72,7 @@ Textarea.defaultProps = {
   required: false,
   label: null,
   defaultValue: null,
-  validate: defaultValidate,
-  errorMessage: defaultError,
+  validate: textarea,
   width: undefined,
   style: {},
   placeholder: null,
@@ -86,7 +83,6 @@ Textarea.propTypes = {
   required: PropTypes.bool,
   defaultValue: PropTypes.string,
   validate: PropTypes.func,
-  errorMessage: PropTypes.string,
   width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,
