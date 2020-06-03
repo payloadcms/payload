@@ -18,7 +18,7 @@ const DraggableSection = (props) => {
     addRow,
     removeRow,
     rowIndex,
-    parentName,
+    parentPath,
     fieldSchema,
     defaultValue,
     dispatchCollapsibleStates,
@@ -77,7 +77,7 @@ const DraggableSection = (props) => {
               {blockType === 'flexible'
                 && (
                   <EditableBlockTitle
-                    fieldName={`${parentName}.${rowIndex}.blockName`}
+                    fieldName={`${parentPath}.${rowIndex}.blockName`}
                   />
                 )
               }
@@ -106,15 +106,14 @@ const DraggableSection = (props) => {
               duration={0}
             >
               <RenderFields
+                initialData={defaultValue}
                 customComponentsPath={customComponentsPath}
                 fieldTypes={fieldTypes}
                 key={rowIndex}
                 fieldSchema={fieldSchema.map((field) => {
-                  const fieldName = `${parentName}.${rowIndex}${field.name ? `.${field.name}` : ''}`;
                   return ({
                     ...field,
-                    name: fieldName,
-                    defaultValue: field.name ? defaultValue?.[field.name] : defaultValue,
+                    path: `${parentPath}.${rowIndex}${field.name ? `.${field.name}` : ''}`,
                   });
                 })}
               />
@@ -139,7 +138,7 @@ DraggableSection.propTypes = {
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
   rowIndex: PropTypes.number.isRequired,
-  parentName: PropTypes.string.isRequired,
+  parentPath: PropTypes.string.isRequired,
   singularLabel: PropTypes.string,
   fieldSchema: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   rowCount: PropTypes.number,

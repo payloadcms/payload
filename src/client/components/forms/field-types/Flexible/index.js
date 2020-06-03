@@ -12,6 +12,7 @@ import FormContext from '../../Form/Context';
 import AddRowModal from './AddRowModal';
 import collapsibleReducer from './reducer';
 import DraggableSection from '../../DraggableSection';
+import { useRenderedFields } from '../../RenderFields';
 
 import './index.scss';
 
@@ -21,6 +22,7 @@ const Flexible = (props) => {
   const {
     label,
     name,
+    path,
     blocks,
     defaultValue,
     singularLabel,
@@ -34,7 +36,8 @@ const Flexible = (props) => {
   const [rowCount, setRowCount] = useState(0);
   const [collapsibleStates, dispatchCollapsibleStates] = useReducer(collapsibleReducer, []);
   const formContext = useContext(FormContext);
-  const modalSlug = `flexible-${name}`;
+  const modalSlug = `flexible-${path}`;
+  const { customComponentsPath } = useRenderedFields();
 
   const { fields: fieldState, dispatchFields, countRows } = formContext;
 
@@ -42,7 +45,7 @@ const Flexible = (props) => {
     const blockToAdd = blocks.find(block => block.slug === blockType);
 
     dispatchFields({
-      type: 'ADD_ROW', rowIndex, name, fieldSchema: blockToAdd.fields, blockType,
+      type: 'ADD_ROW', rowIndex, path, fieldSchema: blockToAdd.fields, blockType,
     });
 
     dispatchCollapsibleStates({
@@ -55,7 +58,7 @@ const Flexible = (props) => {
 
   const removeRow = (rowIndex) => {
     dispatchFields({
-      type: 'REMOVE_ROW', rowIndex, name,
+      type: 'REMOVE_ROW', rowIndex, path,
     });
 
     dispatchCollapsibleStates({
@@ -69,7 +72,7 @@ const Flexible = (props) => {
 
   const moveRow = (moveFromIndex, moveToIndex) => {
     dispatchFields({
-      type: 'MOVE_ROW', moveFromIndex, moveToIndex, name,
+      type: 'MOVE_ROW', moveFromIndex, moveToIndex, path,
     });
 
     dispatchCollapsibleStates({
@@ -92,7 +95,7 @@ const Flexible = (props) => {
   };
 
   const updateRowCountOnParentRowModified = () => {
-    const countedRows = countRows(name);
+    const countedRows = countRows(path);
     setRowCount(countedRows);
   };
 
@@ -119,7 +122,7 @@ const Flexible = (props) => {
                 {...provided.droppableProps}
               >
                 {rowCount !== 0 && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
-                  let blockType = fieldState[`${name}.${rowIndex}.blockType`]?.value;
+                  let blockType = fieldState[`${path}.${rowIndex}.blockType`]?.value;
 
                   if (!lastModified && !blockType) {
                     blockType = defaultValue?.[rowIndex]?.blockType;
@@ -132,7 +135,7 @@ const Flexible = (props) => {
                       <DraggableSection
                         fieldTypes={fieldTypes}
                         key={rowIndex}
-                        parentName={name}
+                        parentPath={path}
                         addRow={() => openAddRowModal(rowIndex)}
                         removeRow={() => removeRow(rowIndex)}
                         rowIndex={rowIndex}
@@ -158,6 +161,7 @@ const Flexible = (props) => {
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}
                         blockType="flexible"
+                        customComponentsPath={`${customComponentsPath}${name}.fields.`}
                       />
                     );
                   }
@@ -207,6 +211,7 @@ Flexible.propTypes = {
   label: PropTypes.string,
   singularLabel: PropTypes.string,
   name: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
 };
 

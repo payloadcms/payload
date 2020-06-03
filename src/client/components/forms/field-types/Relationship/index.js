@@ -191,7 +191,7 @@ class Relationship extends Component {
     const { options } = this.state;
 
     const {
-      name,
+      path,
       required,
       style,
       width,
@@ -229,7 +229,7 @@ class Relationship extends Component {
           message={errorMessage}
         />
         <Label
-          htmlFor={name}
+          htmlFor={path}
           label={label}
           required={required}
         />
@@ -277,7 +277,7 @@ Relationship.propTypes = {
   errorMessage: PropTypes.string,
   showError: PropTypes.bool,
   label: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
   formProcessing: PropTypes.bool,
   width: PropTypes.string,
   hasMany: PropTypes.bool,

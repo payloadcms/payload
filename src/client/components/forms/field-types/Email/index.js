@@ -10,7 +10,7 @@ import './index.scss';
 
 const Email = (props) => {
   const {
-    name,
+    path,
     required,
     defaultValue,
     validate,
@@ -28,7 +28,7 @@ const Email = (props) => {
     onFieldChange,
     errorMessage,
   } = useFieldType({
-    name,
+    path,
     required,
     defaultValue,
     validate,
@@ -53,7 +53,7 @@ const Email = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={name}
+        htmlFor={path}
         label={label}
         required={required}
       />
@@ -63,8 +63,8 @@ const Email = (props) => {
         disabled={processing ? 'disabled' : undefined}
         placeholder={placeholder}
         type="email"
-        id={name}
-        name={name}
+        id={path}
+        name={path}
         autoComplete={autoComplete}
       />
     </div>
@@ -84,6 +84,7 @@ Email.defaultProps = {
 
 Email.propTypes = {
   name: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,

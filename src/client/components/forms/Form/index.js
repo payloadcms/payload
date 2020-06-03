@@ -165,7 +165,7 @@ const Form = (props) => {
       }}
       >
         <HiddenInput
-          name="locale"
+          path="locale"
           defaultValue={locale}
         />
         {children}

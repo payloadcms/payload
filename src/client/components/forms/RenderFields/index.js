@@ -15,8 +15,6 @@ const RenderFields = ({
 
   const customComponentsPath = customComponentsPathFromProps || customComponentsPathFromContext;
 
-  // console.log(customComponentsPath);
-
   if (fieldSchema) {
     return (
       <RenderedFieldContext.Provider value={{ customComponentsPath }}>
@@ -29,7 +27,7 @@ const RenderFields = ({
 
               if (!field.name) {
                 defaultValue = initialData;
-              } else if (initialData[field.name]) {
+              } else if (initialData?.[field.name]) {
                 defaultValue = initialData[field.name];
               }
 
@@ -37,10 +35,11 @@ const RenderFields = ({
                 return (
                   <RenderCustomComponent
                     key={field.name || `field-${i}`}
-                    path={`${customComponentsPath}${field.name ? `${field.name.split('.').pop()}.field` : ''}`}
+                    path={`${customComponentsPath}${field.name ? `${field.name}.field` : ''}`}
                     DefaultComponent={FieldComponent}
                     componentProps={{
                       ...field,
+                      path: field.path || field.name,
                       fieldTypes,
                       defaultValue,
                     }}

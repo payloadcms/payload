@@ -16,7 +16,7 @@ const baseClass = 'date-time-field';
 
 const DateTime = (props) => {
   const {
-    name,
+    path,
     required,
     defaultValue,
     validate,
@@ -32,7 +32,7 @@ const DateTime = (props) => {
     onFieldChange,
     formProcessing,
   } = useFieldType({
-    name,
+    path,
     required,
     defaultValue,
     validate,
@@ -58,7 +58,7 @@ const DateTime = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={name}
+        htmlFor={path}
         label={label}
         required={required}
       />
@@ -85,6 +85,7 @@ DateTime.defaultProps = {
 
 DateTime.propTypes = {
   name: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
   label: PropTypes.string,
   required: PropTypes.bool,
   defaultValue: PropTypes.string,

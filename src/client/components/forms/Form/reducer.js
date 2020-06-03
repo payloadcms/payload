@@ -36,12 +36,12 @@ function fieldReducer(state, action) {
       };
 
     case 'REMOVE_ROW': {
-      const { rowIndex, name } = action;
-      const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, name);
+      const { rowIndex, path } = action;
+      const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, path);
 
       unflattenedRows.splice(rowIndex, 1);
 
-      const flattenedRowState = unflattenedRows.length > 0 ? flatten({ [name]: unflattenedRows }, { filters: flattenFilters }) : {};
+      const flattenedRowState = unflattenedRows.length > 0 ? flatten({ [path]: unflattenedRows }, { filters: flattenFilters }) : {};
 
       return {
         ...remainingFlattenedState,
@@ -51,9 +51,9 @@ function fieldReducer(state, action) {
 
     case 'ADD_ROW': {
       const {
-        rowIndex, name, fieldSchema, blockType,
+        rowIndex, path, fieldSchema, blockType,
       } = action;
-      const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, name);
+      const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, path);
 
       // Get names of sub fields
       const subFields = fieldSchema.reduce((acc, field) => {
@@ -63,7 +63,7 @@ function fieldReducer(state, action) {
 
         return {
           ...acc,
-          [field.name]: {
+          [field.path]: {
             value: null,
             valid: !field.required,
           },
@@ -82,15 +82,15 @@ function fieldReducer(state, action) {
 
       const newState = {
         ...remainingFlattenedState,
-        ...(flatten({ [name]: unflattenedRows }, { filters: flattenFilters })),
+        ...(flatten({ [path]: unflattenedRows }, { filters: flattenFilters })),
       };
 
       return newState;
     }
 
     case 'MOVE_ROW': {
-      const { moveFromIndex, moveToIndex, name } = action;
-      const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, name);
+      const { moveFromIndex, moveToIndex, path } = action;
+      const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, path);
 
       // copy the row to move
       const copyOfMovingRow = unflattenedRows[moveFromIndex];
@@ -101,20 +101,20 @@ function fieldReducer(state, action) {
 
       return {
         ...remainingFlattenedState,
-        ...(flatten({ [name]: unflattenedRows }, { filters: flattenFilters })),
+        ...(flatten({ [path]: unflattenedRows }, { filters: flattenFilters })),
       };
     }
 
     case 'REMOVE': {
       const newState = { ...state };
-      delete newState[action.name];
+      delete newState[action.path];
       return newState;
     }
 
     default:
       return {
         ...state,
-        [action.name]: {
+        [action.path]: {
           value: action.value,
           valid: action.valid,
           errorMessage: action.errorMessage,

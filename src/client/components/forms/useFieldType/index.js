@@ -6,7 +6,7 @@ import './index.scss';
 
 const useFieldType = (options) => {
   const {
-    name,
+    path,
     required,
     defaultValue,
     onChange,
@@ -20,12 +20,12 @@ const useFieldType = (options) => {
     dispatchFields, submitted, processing, fields,
   } = formContext;
 
-  let mountValue = formContext.fields[name]?.value;
+  let mountValue = formContext.fields[path]?.value;
 
   if (!mountValue && mountValue !== false) mountValue = null;
 
   const sendField = useCallback((valueToSend) => {
-    const fieldToDispatch = { name, value: valueToSend };
+    const fieldToDispatch = { path, value: valueToSend };
 
     fieldToDispatch.valid = (required && typeof validate === 'function') ? validate(valueToSend || '') : true;
 
@@ -35,7 +35,7 @@ const useFieldType = (options) => {
     }
 
     dispatchFields(fieldToDispatch);
-  }, [name, required, dispatchFields, validate]);
+  }, [path, required, dispatchFields, validate]);
 
   // Send value up to form on mount and when value changes
   useEffect(() => {
@@ -48,8 +48,8 @@ const useFieldType = (options) => {
 
   // Remove field from state on "unmount"
   useEffect(() => {
-    return () => dispatchFields({ name, type: 'REMOVE' });
-  }, [dispatchFields, name]);
+    return () => dispatchFields({ path, type: 'REMOVE' });
+  }, [dispatchFields, path]);
 
   // Send up new value when default is loaded
   // only if it's not null
@@ -57,20 +57,17 @@ const useFieldType = (options) => {
     if (defaultValue != null) sendField(defaultValue);
   }, [defaultValue, sendField]);
 
-  const valid = formContext.fields[name] ? formContext.fields[name].valid : true;
+  const valid = formContext.fields[path] ? formContext.fields[path].valid : true;
   const showError = valid === false && formContext.submitted;
 
-  const valueToRender = formContext.fields[name] ? formContext.fields[name].value : '';
+  const valueToRender = formContext.fields[path] ? formContext.fields[path].value : '';
 
-  // if (!valid) {
-  //   console.log(formContext.fields[name]);
-  // }
 
   return {
     ...options,
     showError,
     sendField,
-    errorMessage: formContext?.fields[name]?.errorMessage,
+    errorMessage: formContext?.fields[path]?.errorMessage,
     value: valueToRender,
     formSubmitted: submitted,
     formProcessing: processing,

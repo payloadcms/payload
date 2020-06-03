@@ -53,7 +53,7 @@ const formatRenderValue = (value) => {
 
 const Select = (props) => {
   const {
-    name,
+    path,
     required,
     defaultValue,
     validate,
@@ -71,7 +71,7 @@ const Select = (props) => {
     onFieldChange,
     errorMessage,
   } = useFieldType({
-    name,
+    path,
     label,
     required,
     defaultValue,
@@ -97,7 +97,7 @@ const Select = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={name}
+        htmlFor={path}
         label={label}
         required={required}
       />
@@ -132,7 +132,7 @@ Select.propTypes = {
     PropTypes.array,
   ]),
   validate: PropTypes.func,
-  name: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
   width: PropTypes.string,
   options: PropTypes.oneOfType([
     PropTypes.arrayOf(

@@ -9,7 +9,7 @@ import './index.scss';
 
 const NumberField = (props) => {
   const {
-    name,
+    path,
     required,
     defaultValue,
     validate,
@@ -33,7 +33,7 @@ const NumberField = (props) => {
     formProcessing,
     errorMessage,
   } = useFieldType({
-    name,
+    path,
     required,
     defaultValue,
     validate: memoizedValidate,
@@ -59,7 +59,7 @@ const NumberField = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={name}
+        htmlFor={path}
         label={label}
         required={required}
       />
@@ -69,8 +69,8 @@ const NumberField = (props) => {
         disabled={formProcessing ? 'disabled' : undefined}
         placeholder={placeholder}
         type="number"
-        id={name}
-        name={name}
+        id={path}
+        name={path}
       />
     </div>
   );

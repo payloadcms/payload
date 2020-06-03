@@ -10,7 +10,7 @@ import './index.scss';
 
 const Text = (props) => {
   const {
-    name,
+    path,
     required,
     defaultValue,
     validate,
@@ -27,7 +27,7 @@ const Text = (props) => {
     formProcessing,
     errorMessage,
   } = useFieldType({
-    name,
+    path,
     required,
     defaultValue,
     validate,
@@ -52,7 +52,7 @@ const Text = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={name}
+        htmlFor={path}
         label={label}
         required={required}
       />
@@ -62,8 +62,8 @@ const Text = (props) => {
         disabled={formProcessing ? 'disabled' : undefined}
         placeholder={placeholder}
         type="text"
-        id={name}
-        name={name}
+        id={path}
+        name={path}
       />
     </div>
   );
@@ -80,7 +80,7 @@ Text.defaultProps = {
 };
 
 Text.propTypes = {
-  name: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
