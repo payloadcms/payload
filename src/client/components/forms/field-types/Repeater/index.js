@@ -27,6 +27,7 @@ const Repeater = (props) => {
 
   const {
     name,
+    path,
     fields,
     defaultValue,
     singularLabel,
@@ -35,7 +36,7 @@ const Repeater = (props) => {
 
   const addRow = (rowIndex) => {
     dispatchFields({
-      type: 'ADD_ROW', rowIndex, name, fieldSchema: fields,
+      type: 'ADD_ROW', rowIndex, path, fieldSchema: fields,
     });
 
     dispatchCollapsibleStates({
@@ -48,7 +49,7 @@ const Repeater = (props) => {
 
   const removeRow = (rowIndex) => {
     dispatchFields({
-      type: 'REMOVE_ROW', rowIndex, name, fields,
+      type: 'REMOVE_ROW', rowIndex, path, fields,
     });
 
     dispatchCollapsibleStates({
@@ -62,7 +63,7 @@ const Repeater = (props) => {
 
   const moveRow = (moveFromIndex, moveToIndex) => {
     dispatchFields({
-      type: 'MOVE_ROW', moveFromIndex, moveToIndex, name,
+      type: 'MOVE_ROW', moveFromIndex, moveToIndex, path,
     });
 
     dispatchCollapsibleStates({
@@ -83,7 +84,7 @@ const Repeater = (props) => {
   }, [defaultValue]);
 
   const updateRowCountOnParentRowModified = () => {
-    const countedRows = countRows(name);
+    const countedRows = countRows(path);
     setRowCount(countedRows);
   };
 
@@ -112,7 +113,7 @@ const Repeater = (props) => {
                       <DraggableSection
                         fieldTypes={fieldTypes}
                         key={rowIndex}
-                        parentName={name}
+                        parentPath={path}
                         singularLabel={singularLabel}
                         addRow={() => addRow(rowIndex)}
                         removeRow={() => removeRow(rowIndex)}
@@ -122,7 +123,7 @@ const Repeater = (props) => {
                         defaultValue={lastModified ? undefined : defaultValue[rowIndex]}
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}
-                        customComponentsPath={customComponentsPath}
+                        customComponentsPath={`${customComponentsPath}${name}.fields.`}
                       />
                     );
                   })
@@ -162,6 +163,7 @@ Repeater.propTypes = {
   label: PropTypes.string,
   singularLabel: PropTypes.string,
   name: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
 };
 

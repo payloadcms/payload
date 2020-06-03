@@ -7,7 +7,7 @@ import './index.scss';
 
 const Row = (props) => {
   const {
-    fields, fieldTypes, name, defaultValue,
+    fields, fieldTypes, defaultValue, path,
   } = props;
 
   return (
@@ -17,7 +17,7 @@ const Row = (props) => {
         fieldSchema={fields.map((field) => {
           return {
             ...field,
-            name: `${name ? `${name}.` : ''}${field.name}`,
+            path: `${path ? `${path}.` : ''}${field.name}`,
             defaultValue: defaultValue ? defaultValue[field.name] : null,
           };
         })}
@@ -27,7 +27,7 @@ const Row = (props) => {
 };
 
 Row.defaultProps = {
-  name: '',
+  path: '',
   defaultValue: null,
 };
 
@@ -36,7 +36,7 @@ Row.propTypes = {
     PropTypes.shape({}),
   ).isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
-  name: PropTypes.string,
+  path: PropTypes.string,
   defaultValue: PropTypes.shape({}),
 };
 

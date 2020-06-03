@@ -10,7 +10,7 @@ import './index.scss';
 
 const Textarea = (props) => {
   const {
-    name,
+    path,
     required,
     defaultValue,
     validate,
@@ -27,7 +27,7 @@ const Textarea = (props) => {
     formProcessing,
     errorMessage,
   } = useFieldType({
-    name,
+    path,
     required,
     defaultValue,
     validate,
@@ -52,7 +52,7 @@ const Textarea = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={name}
+        htmlFor={path}
         label={label}
         required={required}
       />
@@ -61,8 +61,8 @@ const Textarea = (props) => {
         onChange={onFieldChange}
         disabled={formProcessing ? 'disabled' : undefined}
         placeholder={placeholder}
-        id={name}
-        name={name}
+        id={path}
+        name={path}
       />
     </div>
   );
@@ -79,7 +79,7 @@ Textarea.defaultProps = {
 };
 
 Textarea.propTypes = {
-  name: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
   required: PropTypes.bool,
   defaultValue: PropTypes.string,
   validate: PropTypes.func,

@@ -10,7 +10,7 @@ import './index.scss';
 
 const Checkbox = (props) => {
   const {
-    name,
+    path,
     required,
     defaultValue,
     validate,
@@ -26,7 +26,7 @@ const Checkbox = (props) => {
     onFieldChange,
     formProcessing,
   } = useFieldType({
-    name,
+    path,
     required,
     defaultValue,
     validate,
@@ -53,7 +53,7 @@ const Checkbox = (props) => {
       <StyledCheckbox
         onClick={onFieldChange}
         isChecked={value || false}
-        name={name}
+        name={path}
         label={label}
         isDisabled={formProcessing}
         hasError={showError}
@@ -73,7 +73,7 @@ Checkbox.defaultProps = {
 };
 
 Checkbox.propTypes = {
-  name: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
   required: PropTypes.bool,
   defaultValue: PropTypes.bool,
   validate: PropTypes.func,

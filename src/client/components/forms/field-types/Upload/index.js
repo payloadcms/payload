@@ -44,8 +44,8 @@ class Media extends Component {
           value={this.props.value || ''}
           onChange={this.props.onChange}
           type="hidden"
-          id={this.props.id ? this.props.id : this.props.name}
-          name={this.props.name}
+          id={this.props.id ? this.props.id : this.props.path}
+          name={this.props.path}
         />
         {!this.props.value
           && (

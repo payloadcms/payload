@@ -7,7 +7,7 @@ import './index.scss';
 
 const Group = (props) => {
   const {
-    label, fields, name, defaultValue, fieldTypes,
+    label, fields, name, path, defaultValue, fieldTypes,
   } = props;
 
   const { customComponentsPath } = useRenderedFields();
@@ -16,13 +16,13 @@ const Group = (props) => {
     <div className="field-type group">
       <h3>{label}</h3>
       <RenderFields
+        initialData={defaultValue}
         fieldTypes={fieldTypes}
         customComponentsPath={`${customComponentsPath}${name}.fields.`}
         fieldSchema={fields.map((subField) => {
           return {
             ...subField,
-            name: `${name}${subField.name ? `.${subField.name}` : ''}`,
-            defaultValue: subField.name ? defaultValue[subField.name] : defaultValue,
+            path: `${path}${subField.name ? `.${subField.name}` : ''}`,
           };
         })}
       />
@@ -42,6 +42,7 @@ Group.propTypes = {
   ).isRequired,
   label: PropTypes.string,
   name: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
 };
 
