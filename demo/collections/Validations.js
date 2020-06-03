@@ -41,7 +41,7 @@ module.exports = {
             return true;
           },
         }, {
-          name: 'gte10lt50',
+          name: 'greaterThan10LessThan50',
           label: 'Greater than 10, Less than 50',
           type: 'number',
           required: true,
@@ -56,7 +56,7 @@ module.exports = {
       name: 'atLeast3Rows',
       required: true,
       validate: (value) => {
-        const result = value && value.length > 3;
+        const result = value && value.length >= 3;
 
         if (!result) {
           return 'This repeater needs to have at least 3 rows.';
@@ -75,6 +75,29 @@ module.exports = {
 
             if (!result) {
               return 'This value of this field needs to be greater than 30.';
+            }
+
+            return true;
+          },
+        },
+      ],
+    },
+    {
+      type: 'repeater',
+      label: 'Default repeater validation',
+      name: 'repeater',
+      required: true,
+      fields: [
+        {
+          type: 'number',
+          name: 'lessThan20',
+          label: 'Number should be less than 20',
+          required: true,
+          validate: (value) => {
+            const result = value < 30;
+
+            if (!result) {
+              return 'This value of this field needs to be less than 20.';
             }
 
             return true;

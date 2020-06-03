@@ -6,16 +6,20 @@ exports.iterateFields = async (data, fields, path = '') => {
 
   fields.forEach((field) => {
     const requiresAtLeastOneSubfield = field.fields && field.fields.some(subField => (subField.required && !subField.localized));
+    const dataToValidate = data || {};
 
     if (field.required || requiresAtLeastOneSubfield) {
-      if (data && data[field.name] !== null) {
-        validationPromises.push(field.validate(data[field.name], field));
-        validatedFields.push(field);
-      } else {
-        validationPromises.push({
-          field: `${path}${field.name}`,
-          message: `${path}${field.name} is required.`,
+      // If this field does not have a name, it is for
+      // admin panel composition only and should not be
+      // validated against directly
+      if (field.name === undefined && field.fields) {
+        field.fields.forEach((subField) => {
+          validationPromises.push(subField.validate(dataToValidate[subField.name], subField));
+          validatedFields.push(subField);
         });
+      } else {
+        validationPromises.push(field.validate(dataToValidate[field.name], field));
+        validatedFields.push(field);
       }
     }
   });
