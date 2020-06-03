@@ -27,7 +27,7 @@ const useFieldType = (options) => {
   const sendField = useCallback((valueToSend) => {
     const fieldToDispatch = { name, value: valueToSend };
 
-    fieldToDispatch.valid = required ? validate(valueToSend || '') : true;
+    fieldToDispatch.valid = (required && typeof validate === 'function') ? validate(valueToSend || '') : true;
 
     if (typeof fieldToDispatch.valid === 'string') {
       fieldToDispatch.errorMessage = fieldToDispatch.valid;
