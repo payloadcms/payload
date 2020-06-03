@@ -6,6 +6,8 @@ import Loading from '../../elements/Loading';
 const RenderCustomComponent = (props) => {
   const { path, DefaultComponent, componentProps } = props;
 
+  console.log(path);
+
   if (path) {
     const CustomComponent = path.split('.').reduce((res, prop) => {
       const potentialRowIndex = parseInt(prop, 10);

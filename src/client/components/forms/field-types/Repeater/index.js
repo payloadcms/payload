@@ -122,7 +122,7 @@ const Repeater = (props) => {
                         defaultValue={lastModified ? undefined : defaultValue[rowIndex]}
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}
-                        customComponentsPath={customComponentsPath}
+                        customComponentsPath={`${customComponentsPath}${name}.fields.`}
                       />
                     );
                   })
