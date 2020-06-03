@@ -70,10 +70,10 @@ const fieldToSchemaMap = {
       [field.name]: { ...formatBaseSchema(field), type: String },
     };
   },
-  wysiwyg: (field, fields) => {
+  richText: (field, fields) => {
     return {
       ...fields,
-      [field.name]: { ...formatBaseSchema(field), type: String },
+      [field.name]: { ...formatBaseSchema(field), type: Schema.Types.Mixed },
     };
   },
   code: (field, fields) => {

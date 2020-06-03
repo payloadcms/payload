@@ -20,7 +20,7 @@ function buildMutationInputType(name, fields, parentName) {
     text: field => ({ type: withNullableType(field, GraphQLString) }),
     email: field => ({ type: withNullableType(field, GraphQLString) }),
     textarea: field => ({ type: withNullableType(field, GraphQLString) }),
-    wysiwyg: field => ({ type: withNullableType(field, GraphQLString) }),
+    richText: field => ({ type: withNullableType(field, GraphQLJSON) }),
     code: field => ({ type: withNullableType(field, GraphQLString) }),
     date: field => ({ type: withNullableType(field, GraphQLString) }),
     upload: field => ({ type: withNullableType(field, GraphQLString) }),

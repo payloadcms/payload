@@ -57,9 +57,8 @@ const optionsToValidatorMap = {
 
     return Boolean(value);
   },
-  wysiwyg: (value) => {
+  richText: (value) => {
     if (value) return true;
-
     return 'This field is required.';
   },
   code: (value) => {
