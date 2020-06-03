@@ -6,7 +6,7 @@ const RichText = {
   },
   fields: [
     {
-      name: 'rich-text',
+      name: 'richText',
       type: 'rich-text',
       label: 'Rich Text',
       required: true,

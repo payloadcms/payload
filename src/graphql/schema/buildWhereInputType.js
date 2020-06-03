@@ -181,6 +181,32 @@ const buildWhereInputType = (name, fields, parentName) => {
     }),
     repeater: field => recursivelyBuildNestedPaths(field),
     group: field => recursivelyBuildNestedPaths(field),
+    row: (field) => {
+      return field.fields.reduce((rowSchema, rowField) => {
+        const getFieldSchema = fieldToSchemaMap[rowField.type];
+
+        if (getFieldSchema) {
+          const rowFieldSchema = getFieldSchema(rowField);
+
+          if (Array.isArray(rowFieldSchema)) {
+            return [
+              ...rowSchema,
+              ...rowFieldSchema,
+            ];
+          }
+
+          return [
+            ...rowSchema,
+            {
+              key: rowField.name,
+              type: rowFieldSchema,
+            },
+          ];
+        }
+
+        return rowSchema;
+      }, []);
+    },
   };
 
   const fieldTypes = fields.reduce((schema, field) => {

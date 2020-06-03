@@ -12,7 +12,7 @@ const Conditions = {
       required: true,
     },
     {
-      name: 'enable-test',
+      name: 'enableTest',
       type: 'checkbox',
       label: 'Enable Test',
     },
@@ -22,32 +22,32 @@ const Conditions = {
       label: 'Number Field',
     },
     {
-      name: 'simple-condition',
+      name: 'simpleCondition',
       type: 'text',
       label: 'Enable Test is checked',
       required: true,
-      condition: (_, siblings) => siblings['enable-test'] && siblings['enable-test'].value === true,
+      condition: (_, siblings) => siblings.enableTest && siblings.enableTest.value === true,
     },
     {
-      name: 'or-condition',
+      name: 'orCondition',
       type: 'text',
-      label: 'Number is greater than 20 OR enable-test is checked',
+      label: 'Number is greater than 20 OR enableTest is checked',
       required: true,
       condition: (_, siblings) => {
-        if (siblings.number && siblings['enable-test']) {
-          return siblings.number.value > 20 || siblings['enable-test'].value === true;
+        if (siblings.number && siblings.enableTest) {
+          return siblings.number.value > 20 || siblings.enableTest.value === true;
         }
 
         return false;
       },
     },
     {
-      name: 'nested-conditions',
+      name: 'nestedConditions',
       type: 'text',
-      label: 'Number is either greater than 20 AND enable-test is checked, OR number is less than 20 and enable-test is NOT checked',
+      label: 'Number is either greater than 20 AND enableTest is checked, OR number is less than 20 and enableTest is NOT checked',
       condition: (_, siblings) => {
-        if (siblings.number && siblings['enable-test']) {
-          return (siblings.number.value > 20 && siblings['enable-test'].value === true) || (siblings.number.value < 20 && siblings['enable-test'].value === false);
+        if (siblings.number && siblings.enableTest) {
+          return (siblings.number.value > 20 && siblings.enableTest.value === true) || (siblings.number.value < 20 && siblings.enableTest.value === false);
         }
 
         return false;

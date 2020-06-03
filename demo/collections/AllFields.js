@@ -42,7 +42,7 @@ const AllFields = {
       required: true,
     },
     {
-      name: 'select-many',
+      name: 'selectMany',
       label: 'Select w/ hasMany',
       type: 'select',
       options: [{
