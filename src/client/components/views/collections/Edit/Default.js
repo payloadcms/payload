@@ -69,7 +69,7 @@ const DefaultEditView = (props) => {
               {!isEditing
                 && (
                   <h1>
-                    Create New
+                    New
                     {' '}
                     {singularLabel}
                   </h1>

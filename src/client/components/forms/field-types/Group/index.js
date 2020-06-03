@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import RenderFields from '../../RenderFields';
+import RenderFields, { useRenderedFields } from '../../RenderFields';
 import withCondition from '../../withCondition';
 
 import './index.scss';
@@ -10,11 +10,14 @@ const Group = (props) => {
     label, fields, name, defaultValue, fieldTypes,
   } = props;
 
+  const { customComponentsPath } = useRenderedFields();
+
   return (
     <div className="field-type group">
       <h3>{label}</h3>
       <RenderFields
         fieldTypes={fieldTypes}
+        customComponentsPath={`${customComponentsPath}${name}.fields.`}
         fieldSchema={fields.map((subField) => {
           return {
             ...subField,

@@ -10,6 +10,7 @@ import Button from '../../../elements/Button';
 import FormContext from '../../Form/Context';
 import DraggableSection from '../../DraggableSection';
 import collapsibleReducer from './reducer';
+import { useRenderedFields } from '../../RenderFields';
 
 import './index.scss';
 
@@ -22,6 +23,7 @@ const Repeater = (props) => {
   const [rowCount, setRowCount] = useState(0);
   const [lastModified, setLastModified] = useState(null);
   const { fields: fieldState, dispatchFields, countRows } = formContext;
+  const { customComponentsPath } = useRenderedFields();
 
   const {
     name,
@@ -120,6 +122,7 @@ const Repeater = (props) => {
                         defaultValue={lastModified ? undefined : defaultValue[rowIndex]}
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}
+                        customComponentsPath={customComponentsPath}
                       />
                     );
                   })

@@ -26,7 +26,9 @@ const DraggableSection = (props) => {
     singularLabel,
     blockType,
     fieldTypes,
+    customComponentsPath,
   } = props;
+
   const draggableRef = useRef(null);
 
   const handleCollapseClick = () => {
@@ -104,6 +106,7 @@ const DraggableSection = (props) => {
               duration={0}
             >
               <RenderFields
+                customComponentsPath={customComponentsPath}
                 fieldTypes={fieldTypes}
                 key={rowIndex}
                 fieldSchema={fieldSchema.map((field) => {
@@ -129,6 +132,7 @@ DraggableSection.defaultProps = {
   collapsibleStates: [],
   singularLabel: '',
   blockType: '',
+  customComponentsPath: '',
 };
 
 DraggableSection.propTypes = {
@@ -144,6 +148,7 @@ DraggableSection.propTypes = {
   collapsibleStates: PropTypes.arrayOf(PropTypes.bool),
   blockType: PropTypes.string,
   fieldTypes: PropTypes.shape({}).isRequired,
+  customComponentsPath: PropTypes.string,
 };
 
 export default DraggableSection;

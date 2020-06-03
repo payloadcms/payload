@@ -8,6 +8,12 @@ const RenderCustomComponent = (props) => {
 
   if (path) {
     const CustomComponent = path.split('.').reduce((res, prop) => {
+      const potentialRowIndex = parseInt(prop, 10);
+
+      if (!Number.isNaN(potentialRowIndex) && res.fields) {
+        return res.fields;
+      }
+
       if (res) {
         return res[prop];
       }

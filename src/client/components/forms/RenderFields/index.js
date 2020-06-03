@@ -1,15 +1,25 @@
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import PropTypes from 'prop-types';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
 import './index.scss';
 
+const RenderedFieldContext = createContext({});
+
+export const useRenderedFields = () => useContext(RenderedFieldContext);
+
 const RenderFields = ({
-  fieldSchema, initialData, customComponentsPath, fieldTypes, filter,
+  fieldSchema, initialData, customComponentsPath: customComponentsPathFromProps, fieldTypes, filter,
 }) => {
+  const { customComponentsPath: customComponentsPathFromContext } = useRenderedFields();
+
+  const customComponentsPath = customComponentsPathFromProps || customComponentsPathFromContext;
+
+  // console.log(customComponentsPath);
+
   if (fieldSchema) {
     return (
-      <>
+      <RenderedFieldContext.Provider value={{ customComponentsPath }}>
         {fieldSchema.map((field, i) => {
           if (field?.hidden !== 'api' && field?.hidden !== true) {
             if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
@@ -27,7 +37,7 @@ const RenderFields = ({
                 return (
                   <RenderCustomComponent
                     key={field.name || `field-${i}`}
-                    path={`${customComponentsPath}${field.name}.field`}
+                    path={`${customComponentsPath}${field.name ? `${field.name.split('.').pop()}.field` : ''}`}
                     DefaultComponent={FieldComponent}
                     componentProps={{
                       ...field,
@@ -57,7 +67,7 @@ const RenderFields = ({
 
           return null;
         })}
-      </>
+      </RenderedFieldContext.Provider>
     );
   }
 
