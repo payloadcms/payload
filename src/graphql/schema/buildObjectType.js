@@ -243,6 +243,20 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
 
       return { type };
     },
+    row: (field) => {
+      return field.fields.reduce((subFieldSchema, subField) => {
+        const buildSchemaType = fieldToSchemaMap[subField.type];
+
+        if (buildSchemaType) {
+          return {
+            ...subFieldSchema,
+            [formatName(subField.name)]: buildSchemaType(subField),
+          };
+        }
+
+        return subFieldSchema;
+      }, {});
+    },
   };
 
   const objectSchema = {
@@ -250,9 +264,16 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
     fields: () => fields.reduce((schema, field) => {
       const fieldSchema = fieldToSchemaMap[field.type];
       if (fieldSchema) {
+        if (field.name) {
+          return {
+            ...schema,
+            [formatName(field.name)]: fieldSchema(field),
+          };
+        }
+
         return {
           ...schema,
-          [formatName(field.name)]: fieldSchema(field),
+          ...fieldSchema(field),
         };
       }
 
