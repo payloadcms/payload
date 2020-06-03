@@ -8,7 +8,6 @@ const File = require('./collections/File');
 const FlexibleContent = require('./collections/FlexibleContent');
 const HiddenFields = require('./collections/HiddenFields');
 const Hooks = require('./collections/Hooks');
-const HTML = require('./collections/HTML');
 const Localized = require('./collections/Localized');
 const Media = require('./collections/Media');
 const Preview = require('./collections/Preview');
@@ -37,7 +36,6 @@ module.exports = {
     FlexibleContent,
     HiddenFields,
     Hooks,
-    HTML,
     Localized,
     Media,
     Preview,

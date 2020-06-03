@@ -4,6 +4,7 @@ import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Error from '../../Error';
 import StyledCheckbox from './StyledCheckbox';
+import { checkbox } from '../../../../../fields/validations';
 
 import './index.scss';
 
@@ -66,7 +67,7 @@ Checkbox.defaultProps = {
   label: null,
   required: false,
   defaultValue: false,
-  validate: null,
+  validate: checkbox,
   width: undefined,
   style: {},
 };

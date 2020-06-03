@@ -4,6 +4,7 @@ import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
+import { text } from '../../../../../fields/validations';
 
 import './index.scss';
 
@@ -75,6 +76,7 @@ Text.defaultProps = {
   placeholder: undefined,
   width: undefined,
   style: {},
+  validate: text,
 };
 
 Text.propTypes = {
@@ -82,7 +84,7 @@ Text.propTypes = {
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
-  validate: PropTypes.func.isRequired,
+  validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,

@@ -1,8 +1,11 @@
+const validations = require('../fields/validations');
+
 module.exports = [
   {
     name: 'email',
     label: 'Email',
     type: 'email',
+    validate: validations.email,
   },
   {
     name: 'resetPasswordToken',
@@ -19,6 +22,7 @@ module.exports = [
     label: 'Enable API key for this user',
     type: 'checkbox',
     defaultValue: false,
+    validate: validations.checkbox,
   },
   {
     name: 'apiKey',
@@ -27,5 +31,6 @@ module.exports = [
     condition: (_, siblings) => {
       return siblings.enableAPIKey && siblings.enableAPIKey.value;
     },
+    validate: validations.text,
   },
 ];

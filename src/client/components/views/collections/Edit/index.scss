@@ -5,7 +5,7 @@
 
   &__form {
     display: flex;
-    align-items: flex-start;
+    align-items: stretch;
   }
 
   &__main {
@@ -91,7 +91,7 @@
   }
 
   &__meta {
-    margin: auto 0 0 0;
+    margin: 0;
     padding-top: $baseline;
     list-style: none;
 

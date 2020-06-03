@@ -4,11 +4,9 @@ import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
 import withCondition from '../../withCondition';
+import { password } from '../../../../../fields/validations';
 
 import './index.scss';
-
-const defaultError = 'Please enter a password.';
-const defaultValidate = value => value.length > 3;
 
 const Password = (props) => {
   const {
@@ -18,7 +16,6 @@ const Password = (props) => {
     validate,
     style,
     width,
-    errorMessage,
     label,
   } = props;
 
@@ -27,6 +24,7 @@ const Password = (props) => {
     showError,
     processing,
     onFieldChange,
+    errorMessage,
   } = useFieldType({
     name,
     required,
@@ -73,8 +71,7 @@ const Password = (props) => {
 Password.defaultProps = {
   required: false,
   defaultValue: null,
-  validate: defaultValidate,
-  errorMessage: defaultError,
+  validate: password,
   width: undefined,
   style: {},
 };
@@ -83,7 +80,6 @@ Password.propTypes = {
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
   defaultValue: PropTypes.string,
-  errorMessage: PropTypes.string,
   width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string.isRequired,
