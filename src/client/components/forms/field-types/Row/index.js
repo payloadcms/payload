@@ -7,7 +7,7 @@ import './index.scss';
 
 const Row = (props) => {
   const {
-    fields, fieldTypes, defaultValue, path: pathFromProps, name,
+    fields, fieldTypes, initialData, path: pathFromProps, name,
   } = props;
 
   const path = pathFromProps || name;
@@ -20,7 +20,7 @@ const Row = (props) => {
           return {
             ...field,
             path: `${path ? `${path}.` : ''}${field.name}`,
-            defaultValue: defaultValue ? defaultValue[field.name] : null,
+            initialData: initialData ? initialData[field.name] : null,
           };
         })}
       />
@@ -30,7 +30,7 @@ const Row = (props) => {
 
 Row.defaultProps = {
   path: '',
-  defaultValue: null,
+  initialData: null,
 };
 
 Row.propTypes = {
@@ -40,7 +40,7 @@ Row.propTypes = {
   fieldTypes: PropTypes.shape({}).isRequired,
   path: PropTypes.string,
   name: PropTypes.string.isRequired,
-  defaultValue: PropTypes.shape({}),
+  initialData: PropTypes.shape({}),
 };
 
 export default withCondition(Row);

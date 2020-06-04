@@ -14,6 +14,7 @@ const Text = (props) => {
     name,
     required,
     defaultValue,
+    initialData,
     validate,
     style,
     width,
@@ -32,7 +33,7 @@ const Text = (props) => {
   } = useFieldType({
     path,
     required,
-    defaultValue,
+    initialData: initialData || defaultValue,
     validate,
   });
 
@@ -76,6 +77,7 @@ Text.defaultProps = {
   label: null,
   required: false,
   defaultValue: null,
+  initialData: null,
   placeholder: undefined,
   width: undefined,
   style: {},
@@ -89,6 +91,7 @@ Text.propTypes = {
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
+  initialData: PropTypes.string,
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),

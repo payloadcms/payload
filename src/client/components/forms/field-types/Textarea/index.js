@@ -14,6 +14,7 @@ const Textarea = (props) => {
     name,
     required,
     defaultValue,
+    initialData,
     validate,
     style,
     width,
@@ -32,7 +33,7 @@ const Textarea = (props) => {
   } = useFieldType({
     path,
     required,
-    defaultValue,
+    initialData: initialData || defaultValue,
     validate,
   });
 
@@ -75,6 +76,7 @@ Textarea.defaultProps = {
   required: false,
   label: null,
   defaultValue: null,
+  initialData: null,
   validate: textarea,
   width: undefined,
   style: {},
@@ -87,6 +89,7 @@ Textarea.propTypes = {
   path: PropTypes.string,
   required: PropTypes.bool,
   defaultValue: PropTypes.string,
+  initialData: PropTypes.string,
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),

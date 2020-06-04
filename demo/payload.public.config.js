@@ -6,6 +6,7 @@ const Conditions = require('./collections/Conditions');
 const CustomComponents = require('./collections/CustomComponents');
 const File = require('./collections/File');
 const FlexibleContent = require('./collections/FlexibleContent');
+const FormTest = require('./collections/FormTest');
 const HiddenFields = require('./collections/HiddenFields');
 const Hooks = require('./collections/Hooks');
 const Localized = require('./collections/Localized');
@@ -34,6 +35,7 @@ module.exports = {
     CustomComponents,
     File,
     FlexibleContent,
+    FormTest,
     HiddenFields,
     Hooks,
     Localized,

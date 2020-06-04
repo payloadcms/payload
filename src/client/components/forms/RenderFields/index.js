@@ -23,12 +23,12 @@ const RenderFields = ({
             if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
               const FieldComponent = field?.hidden === 'admin' ? fieldTypes.hidden : fieldTypes[field.type];
 
-              let { defaultValue } = field;
+              let initialFieldData = null;
 
               if (!field.name) {
-                defaultValue = initialData;
+                initialFieldData = initialData;
               } else if (initialData?.[field.name]) {
-                defaultValue = initialData[field.name];
+                initialFieldData = initialData[field.name];
               }
 
               if (FieldComponent) {
@@ -41,7 +41,7 @@ const RenderFields = ({
                       ...field,
                       path: field.path || field.name,
                       fieldTypes,
-                      defaultValue,
+                      initialData: initialFieldData,
                     }}
                   />
                 );
@@ -86,7 +86,7 @@ RenderFields.propTypes = {
   initialData: PropTypes.shape({}),
   customComponentsPath: PropTypes.string,
   fieldTypes: PropTypes.shape({
-    hidden: PropTypes.func,
+    hidden: PropTypes.shape({}),
   }).isRequired,
   filter: PropTypes.func,
 };

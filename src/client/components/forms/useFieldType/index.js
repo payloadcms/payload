@@ -1,6 +1,6 @@
 import { useContext, useCallback, useEffect } from 'react';
 import FormContext from '../Form/Context';
-import { useLocale } from '../../utilities/Locale';
+// import { useLocale } from '../../utilities/Locale';
 
 import './index.scss';
 
@@ -8,19 +8,21 @@ const useFieldType = (options) => {
   const {
     path,
     required,
-    defaultValue,
+    initialData,
     onChange,
     validate,
   } = options;
 
-  const locale = useLocale();
+  // const locale = useLocale();
   const formContext = useContext(FormContext);
 
   const {
-    dispatchFields, submitted, processing, fields,
+    dispatchFields, submitted, processing, getFields,
   } = formContext;
 
-  let mountValue = formContext.fields[path]?.value;
+  const fields = getFields();
+
+  let mountValue = fields[path]?.value;
 
   if (!mountValue && mountValue !== false) mountValue = null;
 
@@ -37,50 +39,47 @@ const useFieldType = (options) => {
     dispatchFields(fieldToDispatch);
   }, [path, required, dispatchFields, validate]);
 
+  const onFieldChange = useCallback((e) => {
+    if (e && e.target) {
+      sendField(e.target.value);
+    } else {
+      sendField(e);
+    }
+
+    if (onChange && typeof onChange === 'function') onChange(e);
+  }, [onChange, sendField]);
+
   // Send value up to form on mount and when value changes
   useEffect(() => {
     sendField(mountValue);
   }, [sendField, mountValue]);
-
-  useEffect(() => {
-    sendField(null);
-  }, [locale, sendField]);
 
   // Remove field from state on "unmount"
   useEffect(() => {
     return () => dispatchFields({ path, type: 'REMOVE' });
   }, [dispatchFields, path]);
 
-  // Send up new value when default is loaded
+  // Send up new value when initial data is loaded
   // only if it's not null
   useEffect(() => {
-    if (defaultValue != null) sendField(defaultValue);
-  }, [defaultValue, sendField]);
+    if (initialData != null) sendField(initialData);
+  }, [initialData, sendField]);
 
-  const valid = formContext.fields[path] ? formContext.fields[path].valid : true;
-  const showError = valid === false && formContext.submitted;
+  const valid = fields[path] ? fields[path].valid : true;
+  const showError = valid === false && submitted;
 
-  const valueToRender = formContext.fields[path] ? formContext.fields[path].value : '';
+  const valueToRender = fields[path] ? fields[path].value : '';
 
 
   return {
     ...options,
     showError,
     sendField,
-    errorMessage: formContext?.fields[path]?.errorMessage,
+    errorMessage: fields[path]?.errorMessage,
     value: valueToRender,
     formSubmitted: submitted,
     formProcessing: processing,
-    fields,
-    onFieldChange: (e) => {
-      if (e && e.target) {
-        sendField(e.target.value);
-      } else {
-        sendField(e);
-      }
-
-      if (onChange && typeof onChange === 'function') onChange(e);
-    },
+    onFieldChange,
   };
 };
 

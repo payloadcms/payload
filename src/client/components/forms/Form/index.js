@@ -1,4 +1,4 @@
-import React, { useState, useReducer } from 'react';
+import React, { useState, useReducer, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { unflatten } from 'flatley';
@@ -24,6 +24,29 @@ const Form = (props) => {
   const { addStatus } = useStatusList();
   const { refreshToken } = useUser();
 
+  const getFields = useCallback(() => {
+    return fields;
+  }, [fields]);
+
+  const countRows = useCallback((rowName) => {
+    const namePrefixToRemove = rowName.substring(0, rowName.lastIndexOf('.') + 1);
+
+    const rows = Object.keys(fields).reduce((matchedRows, key) => {
+      if (key.indexOf(`${rowName}.`) === 0) {
+        return {
+          ...matchedRows,
+          [key.replace(namePrefixToRemove, '')]: fields[key],
+        };
+      }
+
+      return matchedRows;
+    }, {});
+
+    const unflattenedRows = unflatten(rows);
+    const rowCount = unflattenedRows[rowName.replace(namePrefixToRemove, '')]?.length || 0;
+    return rowCount;
+  }, [fields]);
+
   const {
     onSubmit,
     ajax,
@@ -36,7 +59,7 @@ const Form = (props) => {
     disableSuccessStatus,
   } = props;
 
-  const submit = (e) => {
+  const submit = useCallback((e) => {
     setSubmitted(true);
 
     let isValid = true;
@@ -89,7 +112,7 @@ const Form = (props) => {
 
             setProcessing(false);
 
-            res.json().then((json) => {
+            return res.json().then((json) => {
               if (!disableSuccessStatus) {
                 addStatus({
                   message: json.message,
@@ -97,17 +120,16 @@ const Form = (props) => {
                 });
               }
             });
-          } else {
-            res.json().then((json) => {
-              setProcessing(false);
-              json.errors.forEach((err) => {
-                addStatus({
-                  message: err.message,
-                  type: 'error',
-                });
+          }
+          return res.json().then((json) => {
+            setProcessing(false);
+            json.errors.forEach((err) => {
+              addStatus({
+                message: err.message,
+                type: 'error',
               });
             });
-          }
+          });
         },
         (error) => {
           setProcessing(false);
@@ -120,7 +142,7 @@ const Form = (props) => {
     }
 
     // If valid and not AJAX submit as usual
-  };
+  }, [action, addStatus, ajax, disableSuccessStatus, fields, handleAjaxResponse, history, method, onSubmit, redirect]);
 
   useThrottledEffect(() => {
     refreshToken();
@@ -141,27 +163,10 @@ const Form = (props) => {
     >
       <FormContext.Provider value={{
         dispatchFields,
-        fields,
+        getFields,
         processing,
         submitted,
-        countRows: (rowName) => {
-          const namePrefixToRemove = rowName.substring(0, rowName.lastIndexOf('.') + 1);
-
-          const rows = Object.keys(fields).reduce((matchedRows, key) => {
-            if (key.indexOf(`${rowName}.`) === 0) {
-              return {
-                ...matchedRows,
-                [key.replace(namePrefixToRemove, '')]: fields[key],
-              };
-            }
-
-            return matchedRows;
-          }, {});
-
-          const unflattenedRows = unflatten(rows);
-          const rowCount = unflattenedRows[rowName.replace(namePrefixToRemove, '')]?.length || 0;
-          return rowCount;
-        },
+        countRows,
       }}
       >
         <HiddenInput

@@ -22,19 +22,23 @@ const Repeater = (props) => {
   const formContext = useContext(FormContext);
   const [rowCount, setRowCount] = useState(0);
   const [lastModified, setLastModified] = useState(null);
-  const { fields: fieldState, dispatchFields, countRows } = formContext;
+  const { getFields, dispatchFields, countRows } = formContext;
   const { customComponentsPath } = useRenderedFields();
+
+  const fieldState = getFields();
 
   const {
     name,
     path: pathFromProps,
     fields,
     defaultValue,
+    initialData,
     singularLabel,
     fieldTypes,
   } = props;
 
   const path = pathFromProps || name;
+  const dataToInitialize = initialData || defaultValue;
 
   const addRow = (rowIndex) => {
     dispatchFields({
@@ -76,14 +80,14 @@ const Repeater = (props) => {
   };
 
   useEffect(() => {
-    setRowCount(defaultValue.length);
+    setRowCount(dataToInitialize.length);
     setLastModified(null);
 
     dispatchCollapsibleStates({
       type: 'SET_ALL_COLLAPSIBLES',
-      payload: Array.from(Array(defaultValue.length).keys()).reduce(acc => ([...acc, true]), []), // sets all collapsibles to open on first load
+      payload: Array.from(Array(dataToInitialize.length).keys()).reduce(acc => ([...acc, true]), []), // sets all collapsibles to open on first load
     });
-  }, [defaultValue]);
+  }, [dataToInitialize]);
 
   const updateRowCountOnParentRowModified = () => {
     const countedRows = countRows(path);
@@ -122,7 +126,7 @@ const Repeater = (props) => {
                         rowIndex={rowIndex}
                         fieldState={fieldState}
                         fieldSchema={fields}
-                        defaultValue={lastModified ? undefined : defaultValue[rowIndex]}
+                        initialData={lastModified ? undefined : dataToInitialize[rowIndex]}
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}
                         customComponentsPath={`${customComponentsPath}${name}.fields.`}
@@ -153,10 +157,14 @@ Repeater.defaultProps = {
   label: '',
   singularLabel: 'Row',
   defaultValue: [],
+  initialData: [],
 };
 
 Repeater.propTypes = {
   defaultValue: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ),
+  initialData: PropTypes.arrayOf(
     PropTypes.shape({}),
   ),
   fields: PropTypes.arrayOf(

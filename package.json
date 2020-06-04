@@ -78,6 +78,7 @@
     "react-datepicker": "^2.13.0",
     "react-document-meta": "^3.0.0-beta.2",
     "react-dom": "^16.13.0",
+    "react-hook-form": "^5.7.2",
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.1.2",
     "react-select": "^3.0.8",

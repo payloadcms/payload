@@ -14,6 +14,7 @@ const Email = (props) => {
     path: pathFromProps,
     required,
     defaultValue,
+    initialData,
     validate,
     style,
     width,
@@ -33,7 +34,7 @@ const Email = (props) => {
   } = useFieldType({
     path,
     required,
-    defaultValue,
+    initialData: initialData || defaultValue,
     validate,
   });
 
@@ -78,6 +79,7 @@ Email.defaultProps = {
   label: null,
   required: false,
   defaultValue: null,
+  initialData: null,
   placeholder: undefined,
   width: undefined,
   style: {},
@@ -92,6 +94,7 @@ Email.propTypes = {
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
+  initialData: PropTypes.string,
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),

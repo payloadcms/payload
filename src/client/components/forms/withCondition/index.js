@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 
 import useForm from '../Form/useForm';
 
 const withCondition = (Field) => {
-  const WithCondition = (props) => {
+  const WithCondition = memo((props) => {
     const { condition, name } = props;
-    const { fields } = useForm();
+    const { getFields } = useForm();
 
     if (condition) {
+      const fields = getFields();
+
       let siblingFields = fields;
 
       // If this field is nested
@@ -37,7 +39,7 @@ const withCondition = (Field) => {
     }
 
     return <Field {...props} />;
-  };
+  });
 
   WithCondition.defaultProps = {
     condition: null,
