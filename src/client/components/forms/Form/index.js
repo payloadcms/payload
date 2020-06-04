@@ -74,16 +74,14 @@ const Form = (props) => {
     return rowCount;
   }, [fields]);
 
+  const validateForm = useCallback(() => {
+    return !Object.values(fields).some(field => field.valid === false);
+  }, [fields]);
+
   const submit = useCallback((e) => {
     setSubmitted(true);
 
-    let isValid = true;
-
-    Object.keys(fields).forEach((field) => {
-      if (!fields[field].valid) {
-        isValid = false;
-      }
-    });
+    const isValid = validateForm();
 
     // If not valid, prevent submission
     if (!isValid) {
@@ -208,6 +206,8 @@ const Form = (props) => {
     redirect,
     handleAjaxError,
     getData,
+    clearStatus,
+    validateForm,
   ]);
 
   useThrottledEffect(() => {
@@ -235,6 +235,7 @@ const Form = (props) => {
         submitted,
         countRows,
         getData,
+        validateForm,
       }}
       >
         <HiddenInput
