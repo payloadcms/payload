@@ -42,9 +42,13 @@ const statusReducer = (state, action) => {
 
 const useStatusList = () => useContext(Context);
 
-const HandleLocationStatus = () => {
-  const { state } = useLocation();
-  const { addStatus, clearStatus } = useStatusList();
+const StatusListProvider = ({ children }) => {
+  const [statusList, dispatchStatus] = useReducer(statusReducer, initialStatus);
+  const { pathname, state } = useLocation();
+
+  const removeStatus = useCallback(i => dispatchStatus({ type: 'REMOVE', payload: i }), []);
+  const addStatus = useCallback(status => dispatchStatus({ type: 'ADD', payload: status }), []);
+  const clearStatus = useCallback(() => dispatchStatus({ type: 'CLEAR' }), []);
 
   useEffect(() => {
     if (state && state.status) {
@@ -56,17 +60,7 @@ const HandleLocationStatus = () => {
     } else {
       clearStatus();
     }
-  }, [addStatus, clearStatus, state]);
-
-  return null;
-};
-
-const StatusListProvider = ({ children }) => {
-  const [statusList, dispatchStatus] = useReducer(statusReducer, initialStatus);
-
-  const removeStatus = useCallback(i => dispatchStatus({ type: 'REMOVE', payload: i }), []);
-  const addStatus = useCallback(status => dispatchStatus({ type: 'ADD', payload: status }), []);
-  const clearStatus = useCallback(() => dispatchStatus({ type: 'CLEAR' }), []);
+  }, [addStatus, clearStatus, state, pathname]);
 
   return (
     <Context.Provider value={{
@@ -77,7 +71,6 @@ const StatusListProvider = ({ children }) => {
     }}
     >
       {children}
-      <HandleLocationStatus />
     </Context.Provider>
   );
 };
@@ -130,7 +123,6 @@ const StatusList = () => {
 export {
   StatusListProvider,
   useStatusList,
-  HandleLocationStatus,
 };
 
 export default StatusList;
