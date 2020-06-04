@@ -1,6 +1,7 @@
 @import '../../../scss/styles.scss';
 
 .nav {
+  flex-shrink: 0;
   position: sticky;
   top: 0;
   left: 0;
@@ -92,9 +93,8 @@
       svg {
         opacity: 0;
         position: absolute;
-        top: 50%;
         left: - base(.5);
-        transform: translateY(-50%) rotate(-90deg);
+        transform: rotate(-90deg);
       }
 
       &:hover {

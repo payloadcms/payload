@@ -96,7 +96,9 @@ const optionsToValidatorMap = {
   group: async (value, options) => {
     return iterateFields(value, options.fields, `${options.name}.`);
   },
-  repeater: async (value, options) => {
+  repeater: async (value, options = {}) => {
+    const path = options.path || options.name;
+
     if (!value || value.length === 0) {
       return 'This field requires at least one row.';
     }
@@ -105,7 +107,7 @@ const optionsToValidatorMap = {
     const rowPromises = [];
 
     value.forEach((row, i) => {
-      rowPromises.push(iterateFields(row, options.fields, `${options.name}.${i}.`));
+      rowPromises.push(iterateFields(row, options.fields, `${path}.${i}.`));
     });
 
     const rowResults = await Promise.all(rowPromises);

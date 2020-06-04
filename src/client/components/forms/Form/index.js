@@ -34,7 +34,7 @@ const Form = (props) => {
   const [processing, setProcessing] = useState(false);
   const history = useHistory();
   const locale = useLocale();
-  const { addStatus } = useStatusList();
+  const { addStatus, clearStatus } = useStatusList();
   const { refreshToken } = useUser();
 
   const getFields = useCallback(() => {
@@ -111,6 +111,8 @@ const Form = (props) => {
           'Content-Type': 'application/json',
         },
       }).then((res) => {
+        clearStatus();
+
         window.scrollTo({
           top: 0,
           behavior: 'smooth',

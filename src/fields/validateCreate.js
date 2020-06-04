@@ -1,11 +1,26 @@
 const { ValidationError } = require('../errors');
 
+const findRequiredSubfields = (fields) => {
+  if (fields) {
+    return fields.some((subField) => {
+      if (!subField.name && subField.fields) {
+        return findRequiredSubfields(subField.fields);
+      }
+
+      return subField.required && !subField.localized;
+    });
+  }
+
+  return false;
+};
+
 exports.iterateFields = async (data, fields, path = '') => {
   const validationPromises = [];
   const validatedFields = [];
 
   fields.forEach((field) => {
-    const requiresAtLeastOneSubfield = field.fields && field.fields.some(subField => (subField.required && !subField.localized));
+    const requiresAtLeastOneSubfield = findRequiredSubfields(field.fields);
+
     const dataToValidate = data || {};
 
     if (field.required || requiresAtLeastOneSubfield) {
@@ -14,7 +29,10 @@ exports.iterateFields = async (data, fields, path = '') => {
       // validated against directly
       if (field.name === undefined && field.fields) {
         field.fields.forEach((subField) => {
-          validationPromises.push(subField.validate(dataToValidate[subField.name], subField));
+          validationPromises.push(subField.validate(dataToValidate[subField.name], {
+            ...subField,
+            path: `${path}${subField.name}`,
+          }));
           validatedFields.push(subField);
         });
       } else {
