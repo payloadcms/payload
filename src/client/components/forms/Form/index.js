@@ -16,6 +16,19 @@ import './index.scss';
 const baseClass = 'form';
 
 const Form = (props) => {
+  const {
+    onSubmit,
+    ajax,
+    method,
+    action,
+    handleAjaxResponse,
+    children,
+    className,
+    redirect,
+    disableSuccessStatus,
+    onError,
+  } = props;
+
   const [fields, dispatchFields] = useReducer(fieldReducer, {});
   const [submitted, setSubmitted] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -51,19 +64,7 @@ const Form = (props) => {
     return rowCount;
   }, [fields]);
 
-  const {
-    onSubmit,
-    ajax,
-    method,
-    action,
-    handleAjaxResponse,
-    children,
-    className,
-    redirect,
-    disableSuccessStatus,
-  } = props;
-
-  const submit = useCallback((e) => {
+  const submit = useCallback(async (e) => {
     setSubmitted(true);
 
     let isValid = true;
@@ -96,57 +97,78 @@ const Form = (props) => {
 
       setProcessing(true);
 
-      // Make the API call from the action
-      requests[method.toLowerCase()](action, {
-        body: JSON.stringify(unflatten(data)),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }).then(
-        (res) => {
-          if (res.status < 400) {
-            // If prop handleAjaxResponse is passed, pass it the response
-            if (handleAjaxResponse && typeof handleAjaxResponse === 'function') {
-              return handleAjaxResponse(res);
-            }
+      try {
+        // Make the API call from the action
+        const res = await requests[method.toLowerCase()](action, {
+          body: JSON.stringify(unflatten(data)),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-            if (redirect) {
-              return history.push(redirect, data);
-            }
+        if (res.status < 400) {
+          // If prop handleAjaxResponse is passed, pass it the response
+          if (typeof handleAjaxResponse === 'function') handleAjaxResponse(res);
 
-            setProcessing(false);
+          if (redirect) {
+            return history.push(redirect, data);
+          }
 
-            return res.json().then((json) => {
-              if (!disableSuccessStatus) {
-                addStatus({
-                  message: json.message,
-                  type: 'success',
-                });
-              }
+          setProcessing(false);
+
+          const json = await res.json();
+
+          if (!disableSuccessStatus) {
+            addStatus({
+              message: json.message,
+              type: 'success',
             });
           }
-          return res.json().then((json) => {
-            setProcessing(false);
-            json.errors.forEach((err) => {
-              addStatus({
-                message: err.message,
-                type: 'error',
-              });
-            });
-          });
-        },
-        (error) => {
-          setProcessing(false);
+        } else {
+          throw res;
+        }
+      } catch (error) {
+        setProcessing(false);
+
+        if (typeof onError === 'function') onError(error);
+
+        const json = await error.json();
+
+        if (json.message) {
           addStatus({
-            message: error.message,
+            message: json.message,
             type: 'error',
           });
-        },
-      );
-    }
+        } else if (Array.isArray(json.errors)) {
+          const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => {
+            return err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]];
+          }, [[], []]);
 
+          fieldErrors.forEach((err) => {
+            dispatchFields({
+              valid: false,
+              errorMessage: err.message,
+              path: err.field,
+              value: fields[err.field].value,
+            });
+          });
+
+          nonFieldErrors.forEach((err) => {
+            addStatus({
+              message: err.message || 'An unknown error occurred.',
+              type: 'error',
+            });
+          });
+        } else {
+          addStatus({
+            message: 'An unknown error occurred.',
+            type: 'error',
+          });
+        }
+      }
+    }
     // If valid and not AJAX submit as usual
-  }, [action, addStatus, ajax, disableSuccessStatus, fields, handleAjaxResponse, history, method, onSubmit, redirect]);
+  }, [action, addStatus, ajax, disableSuccessStatus, fields, handleAjaxResponse, history, method, onSubmit, redirect, onError]);
 
   useThrottledEffect(() => {
     refreshToken();
@@ -191,6 +213,7 @@ Form.defaultProps = {
   method: 'POST',
   action: '',
   handleAjaxResponse: null,
+  onError: null,
   className: '',
   disableSuccessStatus: false,
 };
@@ -202,6 +225,7 @@ Form.propTypes = {
   method: PropTypes.oneOf(['post', 'POST', 'get', 'GET', 'put', 'PUT', 'delete', 'DELETE']),
   action: PropTypes.string,
   handleAjaxResponse: PropTypes.func,
+  onError: PropTypes.func,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,

@@ -25,19 +25,21 @@ const Text = (props) => {
 
   const path = pathFromProps || name;
 
-  const {
-    value,
-    showError,
-    setValue,
-    formProcessing,
-    errorMessage,
-  } = useFieldType({
+  const fieldType = useFieldType({
     path,
     required,
     initialData,
     defaultValue,
     validate,
   });
+
+  const {
+    value,
+    showError,
+    setValue,
+    formProcessing,
+    errorMessage,
+  } = fieldType;
 
   const classes = [
     'field-type',

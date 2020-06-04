@@ -28,10 +28,10 @@ const useFieldType = (options) => {
   } = formContext;
 
   const field = getField(path);
-  const valid = field?.valid || true;
+
+  const valid = (field && typeof field.valid === 'boolean') ? field.valid : true;
   const valueFromForm = field?.value;
   const showError = valid === false && submitted;
-
 
   // Method to send update field values from field component(s)
   // Should only be used internally
@@ -53,7 +53,7 @@ const useFieldType = (options) => {
   // update internal field values from field component(s)
   // as fast as they arrive. NOTE - this method is NOT debounced
   const setValue = useCallback((e) => {
-    if (e?.target?.value) {
+    if (e && e.target) {
       setInternalValue(e.target.value);
     } else if (e !== undefined) {
       setInternalValue(e);

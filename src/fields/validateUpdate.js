@@ -9,7 +9,7 @@ const validateUpdate = async (data, fields) => {
 
     const field = fields.find(matchedField => matchedField.name === key);
 
-    if (field && dataToValidate) {
+    if (field && dataToValidate !== undefined) {
       validationPromises.push(field.validate(dataToValidate, field));
       validatedFields.push(field);
     }
