@@ -1,8 +1,8 @@
 import { Transforms, Editor, Text } from 'slate';
 import isHotKey from 'is-hotkey';
 
-// Check keystroke command
-export const KEYSTROKE_COMMANDS = {
+// Keypress commands
+export const KEYPRESS_COMMANDS = {
   bold: isHotKey('mod+b'),
   code: isHotKey('mod+shift+c'),
   italic: isHotKey('mod+i'),
@@ -38,9 +38,9 @@ const editorCheck = {
     return !!match;
   },
 
-  isCodeBlockActive(editor) {
+  isCodeMarkActive(editor) {
     const [match] = Editor.nodes(editor, {
-      match: node => node.type === 'code',
+      match: node => node.code === true,
     });
 
     return !!match;
@@ -49,14 +49,17 @@ const editorCheck = {
 
 // Editor Commands
 export const editorCommands = {
-  // Inline Marks
+  // Inline Marks/Leafs
   toggleBoldMark(editor) {
     const isActive = editorCheck.isBoldMarkActive(editor);
 
     Transforms.setNodes(
       editor,
       { bold: isActive ? null : true },
-      { match: node => Text.isText(node), split: true },
+      {
+        match: node => Text.isText(node),
+        split: true,
+      },
     );
   },
 
@@ -66,7 +69,10 @@ export const editorCommands = {
     Transforms.setNodes(
       editor,
       { italic: isActive ? null : true },
-      { match: node => Text.isText(node), split: true },
+      {
+        match: node => Text.isText(node),
+        split: true,
+      },
     );
   },
 
@@ -76,18 +82,23 @@ export const editorCommands = {
     Transforms.setNodes(
       editor,
       { underline: isActive ? null : true },
-      { match: node => Text.isText(node), split: true },
+      {
+        match: node => Text.isText(node),
+        split: true,
+      },
     );
   },
 
-  // Blocks
-  toggleCodeBlock(editor) {
-    const isActive = editorCheck.isCodeBlockActive(editor);
+  toggleCodeMark(editor) {
+    const isActive = editorCheck.isCodeMarkActive(editor);
 
     Transforms.setNodes(
       editor,
-      { type: isActive ? null : 'code' },
-      { match: node => Editor.isBlock(editor, node) },
+      { code: isActive ? null : true },
+      {
+        match: node => Text.isText(node),
+        split: true,
+      },
     );
   },
 };
