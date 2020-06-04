@@ -65,7 +65,7 @@ function fieldReducer(state, action) {
           return {
             ...acc,
             [field.name]: {
-              value: null,
+              value: undefined,
               valid: !field.required,
             },
           };
@@ -77,7 +77,7 @@ function fieldReducer(state, action) {
             ...(field.fields.reduce((fields, subField) => ({
               ...fields,
               [subField.name]: {
-                value: null,
+                value: undefined,
                 valid: !field.required,
               },
             }), {})),

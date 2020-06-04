@@ -23,7 +23,7 @@ const RenderFields = ({
             if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
               const FieldComponent = field?.hidden === 'admin' ? fieldTypes.hidden : fieldTypes[field.type];
 
-              let initialFieldData = null;
+              let initialFieldData;
 
               if (!field.name) {
                 initialFieldData = initialData;
@@ -86,7 +86,7 @@ RenderFields.propTypes = {
   initialData: PropTypes.shape({}),
   customComponentsPath: PropTypes.string,
   fieldTypes: PropTypes.shape({
-    hidden: PropTypes.shape({}),
+    hidden: PropTypes.function,
   }).isRequired,
   filter: PropTypes.func,
 };

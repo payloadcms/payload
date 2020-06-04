@@ -1,10 +1,10 @@
-import React, { memo } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import useForm from '../Form/useForm';
 
 const withCondition = (Field) => {
-  const WithCondition = memo((props) => {
+  const WithCondition = (props) => {
     const { condition, name } = props;
     const { getFields } = useForm();
 
@@ -39,7 +39,7 @@ const withCondition = (Field) => {
     }
 
     return <Field {...props} />;
-  });
+  };
 
   WithCondition.defaultProps = {
     condition: null,

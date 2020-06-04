@@ -15,12 +15,12 @@ const Row = (props) => {
   return (
     <div className="field-type row">
       <RenderFields
+        initialData={initialData}
         fieldTypes={fieldTypes}
         fieldSchema={fields.map((field) => {
           return {
             ...field,
             path: `${path ? `${path}.` : ''}${field.name}`,
-            initialData: initialData ? initialData[field.name] : null,
           };
         })}
       />

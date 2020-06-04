@@ -1,6 +1,6 @@
 import { useContext, useCallback, useEffect } from 'react';
 import FormContext from '../Form/Context';
-// import { useLocale } from '../../utilities/Locale';
+import { useLocale } from '../../utilities/Locale';
 
 import './index.scss';
 
@@ -13,7 +13,7 @@ const useFieldType = (options) => {
     validate,
   } = options;
 
-  // const locale = useLocale();
+  const locale = useLocale();
   const formContext = useContext(FormContext);
 
   const {
@@ -21,10 +21,6 @@ const useFieldType = (options) => {
   } = formContext;
 
   const fields = getFields();
-
-  let mountValue = fields[path]?.value;
-
-  if (!mountValue && mountValue !== false) mountValue = null;
 
   const sendField = useCallback((valueToSend) => {
     const fieldToDispatch = { path, value: valueToSend };
@@ -49,27 +45,21 @@ const useFieldType = (options) => {
     if (onChange && typeof onChange === 'function') onChange(e);
   }, [onChange, sendField]);
 
-  // Send value up to form on mount and when value changes
-  useEffect(() => {
-    sendField(mountValue);
-  }, [sendField, mountValue]);
-
   // Remove field from state on "unmount"
   useEffect(() => {
     return () => dispatchFields({ path, type: 'REMOVE' });
   }, [dispatchFields, path]);
 
   // Send up new value when initial data is loaded
-  // only if it's not null
+  // only if it's defined
   useEffect(() => {
-    if (initialData != null) sendField(initialData);
-  }, [initialData, sendField]);
+    if (initialData !== undefined) sendField(initialData);
+  }, [initialData, sendField, locale]);
 
   const valid = fields[path] ? fields[path].valid : true;
   const showError = valid === false && submitted;
 
-  const valueToRender = fields[path] ? fields[path].value : '';
-
+  const valueToRender = fields?.[path]?.value || initialData?.[path];
 
   return {
     ...options,
