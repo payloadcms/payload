@@ -15,16 +15,24 @@ const initialStatus = [];
 
 const statusReducer = (state, action) => {
   switch (action.type) {
-    case 'ADD':
-      return [
+    case 'ADD': {
+      const newState = [
         ...state,
         action.payload,
       ];
+
+      return newState;
+    }
+
 
     case 'REMOVE': {
       const statusList = [...state];
       statusList.splice(action.payload, 1);
       return statusList;
+    }
+
+    case 'CLEAR': {
+      return [];
     }
 
     default:
@@ -36,7 +44,7 @@ const useStatusList = () => useContext(Context);
 
 const HandleLocationStatus = () => {
   const { state } = useLocation();
-  const { addStatus } = useStatusList();
+  const { addStatus, clearStatus } = useStatusList();
 
   useEffect(() => {
     if (state && state.status) {
@@ -45,8 +53,10 @@ const HandleLocationStatus = () => {
       } else {
         addStatus(state.status);
       }
+    } else {
+      clearStatus();
     }
-  }, [addStatus, state]);
+  }, [addStatus, clearStatus, state]);
 
   return null;
 };
@@ -56,12 +66,14 @@ const StatusListProvider = ({ children }) => {
 
   const removeStatus = useCallback(i => dispatchStatus({ type: 'REMOVE', payload: i }), []);
   const addStatus = useCallback(status => dispatchStatus({ type: 'ADD', payload: status }), []);
+  const clearStatus = useCallback(() => dispatchStatus({ type: 'CLEAR' }), []);
 
   return (
     <Context.Provider value={{
       statusList,
       removeStatus,
       addStatus,
+      clearStatus,
     }}
     >
       {children}

@@ -22,6 +22,7 @@ const AllFields = {
       label: 'Text',
       required: true,
       defaultValue: 'Default Value',
+      unique: true,
     },
     {
       name: 'select',

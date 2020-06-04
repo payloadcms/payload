@@ -32,6 +32,11 @@ html, body, #app {
   height: 100%;
 }
 
+#app {
+  position: sticky;
+  top: 0;
+}
+
 body {
   font-family: $font-body;
   font-weight: 400;

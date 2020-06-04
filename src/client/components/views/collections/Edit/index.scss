@@ -37,10 +37,12 @@
   }
 
   &__sidebar {
+    padding-top: base(3);
     padding-bottom: base(1);
     width: base(22);
     display: flex;
     flex-direction: column;
+    min-width: 0;
   }
 
   &__collection-actions,
@@ -60,7 +62,8 @@
 
     .form-submit {
       .btn {
-        width: 100%;
+        padding-left: base(2);
+        padding-right: base(2);
       }
     }
   }
@@ -83,6 +86,7 @@
 
   &__api-url {
     margin-bottom: base(1.5);
+    padding-right: base(1.5);
 
     a {
       display: block;
@@ -115,6 +119,12 @@
       &:hover {
         text-decoration: underline;
       }
+    }
+  }
+
+  &--is-editing {
+    .collection-edit__sidebar {
+      padding-top: 0;
     }
   }
 

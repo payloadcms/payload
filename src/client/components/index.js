@@ -1,13 +1,12 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ScrollInfoProvider } from '@trbl/react-scroll-info';
 import { WindowInfoProvider } from '@trbl/react-window-info';
 import { ModalProvider, ModalContainer } from '@trbl/react-modal';
-import Loading from './elements/Loading';
 import { SearchParamsProvider } from './utilities/SearchParams';
 import { LocaleProvider } from './utilities/Locale';
-import { StatusListProvider } from './elements/Status';
+import StatusList, { StatusListProvider } from './elements/Status';
 import { UserProvider } from './data/User';
 import Routes from './Routes';
 import getCSSVariable from '../../utilities/getCSSVariable';
@@ -36,9 +35,8 @@ const Index = () => {
               <StatusListProvider>
                 <SearchParamsProvider>
                   <LocaleProvider>
-                    <Suspense fallback={<Loading />}>
-                      <Routes />
-                    </Suspense>
+                    <StatusList />
+                    <Routes />
                   </LocaleProvider>
                 </SearchParamsProvider>
               </StatusListProvider>

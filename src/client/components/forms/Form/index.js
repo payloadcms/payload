@@ -26,7 +26,7 @@ const Form = (props) => {
     className,
     redirect,
     disableSuccessStatus,
-    onError,
+    handleAjaxError,
   } = props;
 
   const [fields, dispatchFields] = useReducer(fieldReducer, {});
@@ -74,7 +74,7 @@ const Form = (props) => {
     return rowCount;
   }, [fields]);
 
-  const submit = useCallback(async (e) => {
+  const submit = useCallback((e) => {
     setSubmitted(true);
 
     let isValid = true;
@@ -104,14 +104,16 @@ const Form = (props) => {
       const data = getData();
 
       setProcessing(true);
-
-      try {
-        // Make the API call from the action
-        const res = await requests[method.toLowerCase()](action, {
-          body: JSON.stringify(data),
-          headers: {
-            'Content-Type': 'application/json',
-          },
+      // Make the API call from the action
+      return requests[method.toLowerCase()](action, {
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then((res) => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth',
         });
 
         if (res.status < 400) {
@@ -124,80 +126,72 @@ const Form = (props) => {
 
           setProcessing(false);
 
-          const json = await res.json();
-
-          if (!disableSuccessStatus) {
-            addStatus({
-              message: json.message,
-              type: 'success',
-            });
-          }
-
-          return res;
+          return res.json().then((json) => {
+            if (!disableSuccessStatus) {
+              addStatus({
+                message: json.message,
+                type: 'success',
+                disappear: 3000,
+              });
+            }
+          });
         }
 
-        throw res;
-      } catch (error) {
-        setProcessing(false);
+        if (typeof handleAjaxError === 'function') return handleAjaxError(res);
 
-        if (typeof onError === 'function') onError(error);
+        return res.json().then((json) => {
+          setProcessing(false);
 
-        const json = await error.json();
+          if (json.message) {
+            addStatus({
+              message: json.message,
+              type: 'error',
+            });
 
-        if (json.message) {
+            return json;
+          }
+
+          if (Array.isArray(json.errors)) {
+            const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => {
+              return err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]];
+            }, [[], []]);
+
+            fieldErrors.forEach((err) => {
+              dispatchFields({
+                valid: false,
+                errorMessage: err.message,
+                path: err.field,
+                value: fields?.[err.field]?.value,
+              });
+            });
+
+            nonFieldErrors.forEach((err) => {
+              addStatus({
+                message: err.message || 'An unknown error occurred.',
+                type: 'error',
+              });
+            });
+
+            if (fieldErrors.length > 0 && nonFieldErrors.length === 0) {
+              addStatus({
+                message: 'Please correct the fields below.',
+                type: 'error',
+              });
+            }
+
+            return json;
+          }
+
           addStatus({
-            message: json.message,
+            message: 'An unknown error occurred.',
             type: 'error',
           });
 
           return json;
-        }
-
-        if (Array.isArray(json.errors)) {
-          const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => {
-            return err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]];
-          }, [[], []]);
-
-          fieldErrors.forEach((err) => {
-            dispatchFields({
-              valid: false,
-              errorMessage: err.message,
-              path: err.field,
-              value: fields[err.field].value,
-            });
-          });
-
-          nonFieldErrors.forEach((err) => {
-            addStatus({
-              message: err.message || 'An unknown error occurred.',
-              type: 'error',
-            });
-          });
-
-          if (fieldErrors.length > 0 && nonFieldErrors.length === 0) {
-            addStatus({
-              message: 'Please correct the fields below.',
-              type: 'error',
-            });
-          }
-
-          window.scrollTo({
-            top: 0,
-            behavior: 'smooth',
-          });
-
-          return json;
-        }
-
-        addStatus({
-          message: 'An unknown error occurred.',
-          type: 'error',
         });
-
-        return json;
-      }
+      });
     }
-    // If valid and not AJAX submit as usual
+
     return true;
   }, [
     action,
@@ -210,7 +204,7 @@ const Form = (props) => {
     method,
     onSubmit,
     redirect,
-    onError,
+    handleAjaxError,
     getData,
   ]);
 
@@ -258,7 +252,7 @@ Form.defaultProps = {
   method: 'POST',
   action: '',
   handleAjaxResponse: null,
-  onError: null,
+  handleAjaxError: null,
   className: '',
   disableSuccessStatus: false,
 };
@@ -270,7 +264,7 @@ Form.propTypes = {
   method: PropTypes.oneOf(['post', 'POST', 'get', 'GET', 'put', 'PUT', 'delete', 'DELETE']),
   action: PropTypes.string,
   handleAjaxResponse: PropTypes.func,
-  onError: PropTypes.func,
+  handleAjaxError: PropTypes.func,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,

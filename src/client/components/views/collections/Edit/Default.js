@@ -38,8 +38,13 @@ const DefaultEditView = (props) => {
 
   const dataToRender = locationState?.data || data;
 
+  const classes = [
+    baseClass,
+    isEditing && `${baseClass}--is-editing`,
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className={baseClass}>
+    <div className={classes}>
       <Form
         className={`${baseClass}__form`}
         method={id ? 'put' : 'post'}
@@ -71,8 +76,10 @@ const DefaultEditView = (props) => {
               <li>Delete</li>
             </ul>
           ) : undefined}
-          <div className={`${baseClass}__document-actions${preview ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
-            <PreviewButton generatePreviewURL={preview} />
+          <div className={`${baseClass}__document-actions${(preview && isEditing) ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
+            {isEditing && (
+              <PreviewButton generatePreviewURL={preview} />
+            )}
             <FormSubmit>Save</FormSubmit>
           </div>
           {isEditing && (

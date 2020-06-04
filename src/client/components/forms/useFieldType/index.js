@@ -21,7 +21,7 @@ const useFieldType = (options) => {
   const locale = useLocale();
   const formContext = useContext(FormContext);
   const [internalValue, setInternalValue] = useState(initialData);
-  const debouncedValue = useDebounce(internalValue, 400);
+  const debouncedValue = useDebounce(internalValue, 200);
 
   const {
     dispatchFields, submitted, processing, getField,
