@@ -21,6 +21,7 @@ const NumberField = (props) => {
     placeholder,
     max,
     min,
+    readOnly,
   } = props;
 
   const path = pathFromProps || name;
@@ -48,6 +49,7 @@ const NumberField = (props) => {
     'field-type',
     'number',
     showError && 'error',
+    readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
   return (
@@ -70,7 +72,7 @@ const NumberField = (props) => {
       <input
         value={value || ''}
         onChange={e => setValue(parseInt(e.target.value, 10))}
-        disabled={formProcessing ? 'disabled' : undefined}
+        disabled={(readOnly || formProcessing) ? 'disabled' : undefined}
         placeholder={placeholder}
         type="number"
         id={path}
@@ -91,6 +93,7 @@ NumberField.defaultProps = {
   max: undefined,
   min: undefined,
   path: '',
+  readOnly: false,
 };
 
 NumberField.propTypes = {
@@ -106,6 +109,7 @@ NumberField.propTypes = {
   label: PropTypes.string,
   max: PropTypes.number,
   min: PropTypes.number,
+  readOnly: PropTypes.bool,
 };
 
 export default withCondition(NumberField);

@@ -20,6 +20,7 @@ const Textarea = (props) => {
     width,
     label,
     placeholder,
+    readOnly,
   } = props;
 
   const path = pathFromProps || name;
@@ -42,6 +43,7 @@ const Textarea = (props) => {
     'field-type',
     'textarea',
     showError && 'error',
+    readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
   return (
@@ -64,7 +66,7 @@ const Textarea = (props) => {
       <textarea
         value={value || ''}
         onChange={setValue}
-        disabled={formProcessing ? 'disabled' : undefined}
+        disabled={(readOnly || formProcessing) ? 'disabled' : undefined}
         placeholder={placeholder}
         id={path}
         name={path}
@@ -83,6 +85,7 @@ Textarea.defaultProps = {
   style: {},
   placeholder: null,
   path: '',
+  readOnly: false,
 };
 
 Textarea.propTypes = {
@@ -96,6 +99,7 @@ Textarea.propTypes = {
   style: PropTypes.shape({}),
   label: PropTypes.string,
   placeholder: PropTypes.string,
+  readOnly: PropTypes.bool,
 };
 
 export default withCondition(Textarea);

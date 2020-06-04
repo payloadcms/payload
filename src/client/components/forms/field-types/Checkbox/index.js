@@ -19,6 +19,7 @@ const Checkbox = (props) => {
     style,
     width,
     label,
+    readOnly,
   } = props;
 
   const path = pathFromProps || name;
@@ -41,6 +42,7 @@ const Checkbox = (props) => {
     'field-type',
     'checkbox',
     showError && 'error',
+    readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
   return (
@@ -60,7 +62,7 @@ const Checkbox = (props) => {
         isChecked={value || false}
         name={path}
         label={label}
-        isDisabled={formProcessing}
+        isDisabled={formProcessing || readOnly}
         hasError={showError}
       />
       {label}
@@ -71,6 +73,7 @@ const Checkbox = (props) => {
 Checkbox.defaultProps = {
   label: null,
   required: false,
+  readOnly: false,
   defaultValue: false,
   initialData: false,
   validate: checkbox,
@@ -82,6 +85,7 @@ Checkbox.defaultProps = {
 Checkbox.propTypes = {
   path: PropTypes.string,
   name: PropTypes.string.isRequired,
+  readOnly: PropTypes.bool,
   required: PropTypes.bool,
   defaultValue: PropTypes.bool,
   initialData: PropTypes.bool,

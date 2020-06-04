@@ -201,12 +201,14 @@ class Relationship extends Component {
       showError,
       formProcessing,
       setValue,
+      readOnly,
     } = this.props;
 
     const classes = [
       'field-type',
       'relationship',
       showError && 'error',
+      readOnly && 'read-only',
     ].filter(Boolean).join(' ');
 
     const valueToRender = this.findValueInOptions(options, value);
@@ -234,7 +236,7 @@ class Relationship extends Component {
         />
         <ReactSelect
           onInputChange={this.handleInputChange}
-          onChange={setValue}
+          onChange={(readOnly || formProcessing) ? setValue : undefined}
           formatValue={this.formatSelectedValue}
           onMenuScrollToBottom={this.handleMenuScrollToBottom}
           findValueInOptions={this.findValueInOptions}

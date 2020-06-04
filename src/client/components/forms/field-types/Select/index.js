@@ -64,6 +64,7 @@ const Select = (props) => {
     label,
     options,
     hasMany,
+    readOnly,
   } = props;
 
   const path = pathFromProps || name;
@@ -109,7 +110,7 @@ const Select = (props) => {
         required={required}
       />
       <ReactSelect
-        onChange={setValue}
+        onChange={(readOnly || formProcessing) ? setValue : undefined}
         value={valueToRender}
         formatValue={formatFormValue}
         showError={showError}
@@ -130,10 +131,12 @@ Select.defaultProps = {
   hasMany: false,
   width: undefined,
   path: '',
+  readOnly: false,
 };
 
 Select.propTypes = {
   required: PropTypes.bool,
+  readOnly: PropTypes.bool,
   style: PropTypes.shape({}),
   label: PropTypes.string.isRequired,
   defaultValue: PropTypes.oneOfType([

@@ -26,6 +26,7 @@ const DateTime = (props) => {
     width,
     errorMessage,
     label,
+    readOnly,
   } = props;
 
   const path = pathFromProps || name;
@@ -48,6 +49,7 @@ const DateTime = (props) => {
     baseClass,
     showError && `${baseClass}--has-error`,
     formProcessing && 'processing',
+    readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
   return (
@@ -70,7 +72,7 @@ const DateTime = (props) => {
       <div className={`${baseClass}__input-wrapper`}>
         <DatePicker
           {...props}
-          onChange={setValue}
+          onChange={readOnly || formProcessing ? setValue : undefined}
           value={value}
         />
       </div>

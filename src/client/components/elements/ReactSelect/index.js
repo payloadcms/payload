@@ -80,6 +80,7 @@ ReactSelect.defaultProps = {
   disabled: false,
   formatValue: null,
   options: [],
+  onChange: () => { },
 };
 
 ReactSelect.propTypes = {
@@ -88,7 +89,7 @@ ReactSelect.propTypes = {
     PropTypes.array,
     PropTypes.shape({}),
   ]),
-  onChange: PropTypes.func.isRequired,
+  onChange: PropTypes.func,
   disabled: PropTypes.bool,
   showError: PropTypes.bool,
   formatValue: PropTypes.func,

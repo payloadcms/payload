@@ -21,6 +21,7 @@ const Email = (props) => {
     label,
     placeholder,
     autoComplete,
+    readOnly,
   } = props;
 
   const path = pathFromProps || name;
@@ -43,6 +44,7 @@ const Email = (props) => {
     'field-type',
     'email',
     showError && 'error',
+    readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
   return (
@@ -65,7 +67,7 @@ const Email = (props) => {
       <input
         value={value || ''}
         onChange={setValue}
-        disabled={processing ? 'disabled' : undefined}
+        disabled={(readOnly || processing) ? 'disabled' : undefined}
         placeholder={placeholder}
         type="email"
         id={path}
@@ -87,6 +89,7 @@ Email.defaultProps = {
   autoComplete: undefined,
   validate: email,
   path: '',
+  readOnly: false,
 };
 
 Email.propTypes = {
@@ -101,6 +104,7 @@ Email.propTypes = {
   style: PropTypes.shape({}),
   label: PropTypes.string,
   autoComplete: PropTypes.string,
+  readOnly: PropTypes.bool,
 };
 
 export default withCondition(Email);

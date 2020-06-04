@@ -20,6 +20,7 @@ const Text = (props) => {
     width,
     label,
     placeholder,
+    readOnly,
   } = props;
 
   const path = pathFromProps || name;
@@ -42,6 +43,7 @@ const Text = (props) => {
     'field-type',
     'text',
     showError && 'error',
+    readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
   return (
@@ -64,7 +66,7 @@ const Text = (props) => {
       <input
         value={value || ''}
         onChange={setValue}
-        disabled={formProcessing ? 'disabled' : undefined}
+        disabled={(readOnly || formProcessing) ? 'disabled' : undefined}
         placeholder={placeholder}
         type="text"
         id={path}
@@ -77,6 +79,7 @@ const Text = (props) => {
 Text.defaultProps = {
   label: null,
   required: false,
+  readOnly: false,
   defaultValue: undefined,
   initialData: undefined,
   placeholder: undefined,
@@ -90,6 +93,7 @@ Text.propTypes = {
   name: PropTypes.string.isRequired,
   path: PropTypes.string,
   required: PropTypes.bool,
+  readOnly: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
   initialData: PropTypes.string,
