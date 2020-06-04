@@ -159,6 +159,18 @@ const Form = (props) => {
               type: 'error',
             });
           });
+
+          if (fieldErrors.length > 0 && nonFieldErrors.length === 0) {
+            addStatus({
+              message: 'Please correct the fields below.',
+              type: 'error',
+            });
+          }
+
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+          });
         } else {
           addStatus({
             message: 'An unknown error occurred.',
