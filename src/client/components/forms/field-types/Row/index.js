@@ -7,18 +7,20 @@ import './index.scss';
 
 const Row = (props) => {
   const {
-    fields, fieldTypes, name, defaultValue,
+    fields, fieldTypes, initialData, path: pathFromProps, name,
   } = props;
+
+  const path = pathFromProps || name;
 
   return (
     <div className="field-type row">
       <RenderFields
+        initialData={initialData}
         fieldTypes={fieldTypes}
         fieldSchema={fields.map((field) => {
           return {
             ...field,
-            name: `${name ? `${name}.` : ''}${field.name}`,
-            defaultValue: defaultValue ? defaultValue[field.name] : null,
+            path: `${path ? `${path}.` : ''}${field.name}`,
           };
         })}
       />
@@ -27,8 +29,8 @@ const Row = (props) => {
 };
 
 Row.defaultProps = {
-  name: '',
-  defaultValue: null,
+  path: '',
+  initialData: undefined,
 };
 
 Row.propTypes = {
@@ -36,8 +38,9 @@ Row.propTypes = {
     PropTypes.shape({}),
   ).isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
-  name: PropTypes.string,
-  defaultValue: PropTypes.shape({}),
+  path: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  initialData: PropTypes.shape({}),
 };
 
 export default withCondition(Row);

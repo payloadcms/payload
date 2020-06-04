@@ -10,33 +10,42 @@ import './index.scss';
 
 const Text = (props) => {
   const {
+    path: pathFromProps,
     name,
     required,
     defaultValue,
+    initialData,
     validate,
     style,
     width,
     label,
     placeholder,
+    readOnly,
   } = props;
+
+  const path = pathFromProps || name;
+
+  const fieldType = useFieldType({
+    path,
+    required,
+    initialData,
+    defaultValue,
+    validate,
+  });
 
   const {
     value,
     showError,
-    onFieldChange,
+    setValue,
     formProcessing,
     errorMessage,
-  } = useFieldType({
-    name,
-    required,
-    defaultValue,
-    validate,
-  });
+  } = fieldType;
 
   const classes = [
     'field-type',
     'text',
     showError && 'error',
+    readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
   return (
@@ -52,18 +61,18 @@ const Text = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={name}
+        htmlFor={path}
         label={label}
         required={required}
       />
       <input
         value={value || ''}
-        onChange={onFieldChange}
-        disabled={formProcessing ? 'disabled' : undefined}
+        onChange={setValue}
+        disabled={(readOnly || formProcessing) ? 'disabled' : undefined}
         placeholder={placeholder}
         type="text"
-        id={name}
-        name={name}
+        id={path}
+        name={path}
       />
     </div>
   );
@@ -72,18 +81,24 @@ const Text = (props) => {
 Text.defaultProps = {
   label: null,
   required: false,
-  defaultValue: null,
+  readOnly: false,
+  defaultValue: undefined,
+  initialData: undefined,
   placeholder: undefined,
   width: undefined,
   style: {},
   validate: text,
+  path: '',
 };
 
 Text.propTypes = {
   name: PropTypes.string.isRequired,
+  path: PropTypes.string,
   required: PropTypes.bool,
+  readOnly: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
+  initialData: PropTypes.string,
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),

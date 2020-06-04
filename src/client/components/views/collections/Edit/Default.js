@@ -69,7 +69,7 @@ const DefaultEditView = (props) => {
               {!isEditing
                 && (
                   <h1>
-                    Create New
+                    New
                     {' '}
                     {singularLabel}
                   </h1>
@@ -81,6 +81,7 @@ const DefaultEditView = (props) => {
               fieldTypes={fieldTypes}
               fieldSchema={fields}
               initialData={data}
+              customComponentsPath={`${slug}.fields.`}
             />
           </div>
         </div>
@@ -112,6 +113,7 @@ const DefaultEditView = (props) => {
               fieldTypes={fieldTypes}
               fieldSchema={fields}
               initialData={data}
+              customComponentsPath={`${slug}.fields.`}
             />
           </div>
           {isEditing && (

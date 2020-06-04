@@ -10,8 +10,10 @@ import './index.scss';
 const NumberField = (props) => {
   const {
     name,
+    path: pathFromProps,
     required,
     defaultValue,
+    initialData,
     validate,
     style,
     width,
@@ -19,7 +21,10 @@ const NumberField = (props) => {
     placeholder,
     max,
     min,
+    readOnly,
   } = props;
+
+  const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { min, max });
@@ -29,21 +34,22 @@ const NumberField = (props) => {
   const {
     value,
     showError,
-    onFieldChange,
+    setValue,
     formProcessing,
     errorMessage,
   } = useFieldType({
-    name,
+    path,
     required,
+    initialData,
     defaultValue,
     validate: memoizedValidate,
   });
-
 
   const classes = [
     'field-type',
     'number',
     showError && 'error',
+    readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
   return (
@@ -59,18 +65,18 @@ const NumberField = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={name}
+        htmlFor={path}
         label={label}
         required={required}
       />
       <input
         value={value || ''}
-        onChange={e => onFieldChange(parseInt(e.target.value, 10))}
-        disabled={formProcessing ? 'disabled' : undefined}
+        onChange={e => setValue(parseInt(e.target.value, 10))}
+        disabled={(readOnly || formProcessing) ? 'disabled' : undefined}
         placeholder={placeholder}
         type="number"
-        id={name}
-        name={name}
+        id={path}
+        name={path}
       />
     </div>
   );
@@ -79,25 +85,31 @@ const NumberField = (props) => {
 NumberField.defaultProps = {
   label: null,
   required: false,
-  defaultValue: null,
+  defaultValue: undefined,
+  initialData: undefined,
   placeholder: undefined,
   width: undefined,
   style: {},
   max: undefined,
   min: undefined,
+  path: '',
+  readOnly: false,
 };
 
 NumberField.propTypes = {
   name: PropTypes.string.isRequired,
+  path: PropTypes.string,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.number,
+  initialData: PropTypes.number,
   validate: PropTypes.func.isRequired,
   width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,
   max: PropTypes.number,
   min: PropTypes.number,
+  readOnly: PropTypes.bool,
 };
 
 export default withCondition(NumberField);

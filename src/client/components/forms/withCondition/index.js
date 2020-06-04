@@ -6,9 +6,11 @@ import useForm from '../Form/useForm';
 const withCondition = (Field) => {
   const WithCondition = (props) => {
     const { condition, name } = props;
-    const { fields } = useForm();
+    const { getFields } = useForm();
 
     if (condition) {
+      const fields = getFields();
+
       let siblingFields = fields;
 
       // If this field is nested

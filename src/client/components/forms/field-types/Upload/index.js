@@ -29,6 +29,8 @@ class Media extends Component {
   }
 
   render() {
+    const path = this.props.path || this.props.name;
+
     return (
       <div
         className={this.props.className}
@@ -44,8 +46,8 @@ class Media extends Component {
           value={this.props.value || ''}
           onChange={this.props.onChange}
           type="hidden"
-          id={this.props.id ? this.props.id : this.props.name}
-          name={this.props.name}
+          id={this.props.id ? this.props.id : path}
+          name={path}
         />
         {!this.props.value
           && (

@@ -10,24 +10,29 @@ import './index.scss';
 
 const Password = (props) => {
   const {
+    path: pathFromProps,
     name,
     required,
     defaultValue,
+    initialData,
     validate,
     style,
     width,
     label,
   } = props;
 
+  const path = pathFromProps || name;
+
   const {
     value,
     showError,
     processing,
-    onFieldChange,
+    setValue,
     errorMessage,
   } = useFieldType({
-    name,
+    path,
     required,
+    initialData,
     defaultValue,
     validate,
   });
@@ -51,18 +56,18 @@ const Password = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={name}
+        htmlFor={path}
         label={label}
         required={required}
       />
       <input
         value={value || ''}
-        onChange={onFieldChange}
+        onChange={setValue}
         disabled={processing ? 'disabled' : undefined}
         type="password"
         autoComplete="current-password"
-        id={name}
-        name={name}
+        id={path}
+        name={path}
       />
     </div>
   );
@@ -70,15 +75,19 @@ const Password = (props) => {
 
 Password.defaultProps = {
   required: false,
-  defaultValue: null,
+  initialData: undefined,
+  defaultValue: undefined,
   validate: password,
   width: undefined,
   style: {},
+  path: '',
 };
 
 Password.propTypes = {
   name: PropTypes.string.isRequired,
+  path: PropTypes.string,
   required: PropTypes.bool,
+  initialData: PropTypes.string,
   defaultValue: PropTypes.string,
   width: PropTypes.string,
   style: PropTypes.shape({}),

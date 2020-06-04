@@ -1,31 +1,42 @@
-import { useContext, useCallback, useEffect } from 'react';
+import {
+  useContext, useCallback, useEffect, useState,
+} from 'react';
 import FormContext from '../Form/Context';
 import { useLocale } from '../../utilities/Locale';
+import useDebounce from '../../../hooks/useDebounce';
 
 import './index.scss';
 
 const useFieldType = (options) => {
   const {
-    name,
+    path,
     required,
+    initialData: data,
     defaultValue,
     onChange,
     validate,
   } = options;
 
+  const initialData = data !== undefined ? data : defaultValue;
   const locale = useLocale();
   const formContext = useContext(FormContext);
+  const [internalValue, setInternalValue] = useState(initialData);
+  const debouncedValue = useDebounce(internalValue, 400);
 
   const {
-    dispatchFields, submitted, processing, fields,
+    dispatchFields, submitted, processing, getField,
   } = formContext;
 
-  let mountValue = formContext.fields[name]?.value;
+  const field = getField(path);
 
-  if (!mountValue && mountValue !== false) mountValue = null;
+  const valid = (field && typeof field.valid === 'boolean') ? field.valid : true;
+  const valueFromForm = field?.value;
+  const showError = valid === false && submitted;
 
+  // Method to send update field values from field component(s)
+  // Should only be used internally
   const sendField = useCallback((valueToSend) => {
-    const fieldToDispatch = { name, value: valueToSend };
+    const fieldToDispatch = { path, value: valueToSend };
 
     fieldToDispatch.valid = (required && typeof validate === 'function') ? validate(valueToSend || '') : true;
 
@@ -35,55 +46,56 @@ const useFieldType = (options) => {
     }
 
     dispatchFields(fieldToDispatch);
-  }, [name, required, dispatchFields, validate]);
+  }, [path, required, dispatchFields, validate]);
 
-  // Send value up to form on mount and when value changes
-  useEffect(() => {
-    sendField(mountValue);
-  }, [sendField, mountValue]);
 
-  useEffect(() => {
-    sendField(null);
-  }, [locale, sendField]);
+  // Method to return from `useFieldType`, used to
+  // update internal field values from field component(s)
+  // as fast as they arrive. NOTE - this method is NOT debounced
+  const setValue = useCallback((e) => {
+    if (e && e.target) {
+      setInternalValue(e.target.value);
+    } else if (e !== undefined) {
+      setInternalValue(e);
+    }
+
+    if (onChange && typeof onChange === 'function') onChange(e);
+  }, [onChange, setInternalValue]);
 
   // Remove field from state on "unmount"
+  // This is mostly used for repeater / flex content row modifications
   useEffect(() => {
-    return () => dispatchFields({ name, type: 'REMOVE' });
-  }, [dispatchFields, name]);
+    return () => dispatchFields({ path, type: 'REMOVE' });
+  }, [dispatchFields, path]);
 
-  // Send up new value when default is loaded
-  // only if it's not null
+  // The only time that the form value should be updated
+  // is when the debounced value updates. So, when the debounced value updates,
+  // send it up to the form
   useEffect(() => {
-    if (defaultValue != null) sendField(defaultValue);
-  }, [defaultValue, sendField]);
+    if (debouncedValue !== undefined) {
+      sendField(debouncedValue);
+    }
+  }, [debouncedValue, sendField]);
 
-  const valid = formContext.fields[name] ? formContext.fields[name].valid : true;
-  const showError = valid === false && formContext.submitted;
+  // Whenever the value from form updates,
+  // update internal value as well
+  useEffect(() => {
+    if (valueFromForm !== undefined) setValue(valueFromForm);
+  }, [valueFromForm, setValue]);
 
-  const valueToRender = formContext.fields[name] ? formContext.fields[name].value : '';
-
-  // if (!valid) {
-  //   console.log(formContext.fields[name]);
-  // }
+  useEffect(() => {
+    if (initialData !== undefined) setValue(initialData);
+  }, [initialData, setValue, locale]);
 
   return {
     ...options,
     showError,
     sendField,
-    errorMessage: formContext?.fields[name]?.errorMessage,
-    value: valueToRender,
+    errorMessage: field?.errorMessage,
+    value: internalValue,
     formSubmitted: submitted,
     formProcessing: processing,
-    fields,
-    onFieldChange: (e) => {
-      if (e && e.target) {
-        sendField(e.target.value);
-      } else {
-        sendField(e);
-      }
-
-      if (onChange && typeof onChange === 'function') onChange(e);
-    },
+    setValue,
   };
 };
 

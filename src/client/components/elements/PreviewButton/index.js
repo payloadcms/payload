@@ -8,7 +8,8 @@ const baseClass = 'preview-btn';
 
 const PreviewButton = ({ generatePreviewURL }) => {
   const { token } = useUser();
-  const { fields } = useForm();
+  const { getFields } = useForm();
+  const fields = getFields();
 
   const previewURL = (generatePreviewURL && typeof generatePreviewURL === 'function') ? generatePreviewURL(fields, token) : null;
 

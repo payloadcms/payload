@@ -35,6 +35,56 @@ module.exports = {
         filter: path.resolve(__dirname, 'components/fields/Description/Filter/index.js'),
       },
     },
+    {
+      name: 'repeater',
+      label: 'Repeater',
+      type: 'repeater',
+      fields: [
+        {
+          type: 'text',
+          name: 'nestedRepeaterCustomField',
+          label: 'Nested Repeater Custom Field',
+          components: {
+            field: path.resolve(__dirname, 'components/fields/NestedRepeaterCustomField/Field/index.js'),
+          },
+        },
+      ],
+    },
+    {
+      name: 'group',
+      label: 'Group',
+      type: 'group',
+      components: {
+        field: path.resolve(__dirname, 'components/fields/Group/Field/index.js'),
+      },
+      fields: [
+        {
+          type: 'text',
+          name: 'nestedGroupCustomField',
+          label: 'Nested Group Custom Field',
+          components: {
+            field: path.resolve(__dirname, 'components/fields/NestedGroupCustomField/Field/index.js'),
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'nestedText1',
+          label: 'Nested Text 1',
+          type: 'text',
+          components: {
+            field: path.resolve(__dirname, 'components/fields/NestedText1/Field/index.js'),
+          },
+        }, {
+          name: 'nestedText2',
+          label: 'Nested Text 2',
+          type: 'text',
+        },
+      ],
+    },
   ],
   timestamps: true,
   components: {

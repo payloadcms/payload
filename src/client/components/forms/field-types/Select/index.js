@@ -53,27 +53,33 @@ const formatRenderValue = (value) => {
 
 const Select = (props) => {
   const {
+    path: pathFromProps,
     name,
     required,
     defaultValue,
+    initialData,
     validate,
     style,
     width,
     label,
     options,
     hasMany,
+    readOnly,
   } = props;
+
+  const path = pathFromProps || name;
 
   const {
     value,
     showError,
     formProcessing,
-    onFieldChange,
+    setValue,
     errorMessage,
   } = useFieldType({
-    name,
+    path,
     label,
     required,
+    initialData,
     defaultValue,
     validate,
   });
@@ -83,6 +89,8 @@ const Select = (props) => {
     'select',
     showError && 'error',
   ].filter(Boolean).join(' ');
+
+  const valueToRender = formatRenderValue(value);
 
   return (
     <div
@@ -97,13 +105,13 @@ const Select = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={name}
+        htmlFor={path}
         label={label}
         required={required}
       />
       <ReactSelect
-        onChange={onFieldChange}
-        value={formatRenderValue(value)}
+        onChange={(readOnly || formProcessing) ? setValue : undefined}
+        value={valueToRender}
         formatValue={formatFormValue}
         showError={showError}
         disabled={formProcessing}
@@ -118,21 +126,30 @@ Select.defaultProps = {
   style: {},
   required: false,
   validate: select,
-  defaultValue: null,
+  defaultValue: undefined,
+  initialData: undefined,
   hasMany: false,
   width: undefined,
+  path: '',
+  readOnly: false,
 };
 
 Select.propTypes = {
   required: PropTypes.bool,
+  readOnly: PropTypes.bool,
   style: PropTypes.shape({}),
   label: PropTypes.string.isRequired,
   defaultValue: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.array,
   ]),
+  initialData: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.array,
+  ]),
   validate: PropTypes.func,
   name: PropTypes.string.isRequired,
+  path: PropTypes.string,
   width: PropTypes.string,
   options: PropTypes.oneOfType([
     PropTypes.arrayOf(

@@ -11,25 +11,31 @@ import './index.scss';
 const Email = (props) => {
   const {
     name,
+    path: pathFromProps,
     required,
     defaultValue,
+    initialData,
     validate,
     style,
     width,
     label,
     placeholder,
     autoComplete,
+    readOnly,
   } = props;
+
+  const path = pathFromProps || name;
 
   const {
     value,
     showError,
     processing,
-    onFieldChange,
+    setValue,
     errorMessage,
   } = useFieldType({
-    name,
+    path,
     required,
+    initialData,
     defaultValue,
     validate,
   });
@@ -38,6 +44,7 @@ const Email = (props) => {
     'field-type',
     'email',
     showError && 'error',
+    readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
   return (
@@ -53,18 +60,18 @@ const Email = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={name}
+        htmlFor={path}
         label={label}
         required={required}
       />
       <input
         value={value || ''}
-        onChange={onFieldChange}
-        disabled={processing ? 'disabled' : undefined}
+        onChange={setValue}
+        disabled={(readOnly || processing) ? 'disabled' : undefined}
         placeholder={placeholder}
         type="email"
-        id={name}
-        name={name}
+        id={path}
+        name={path}
         autoComplete={autoComplete}
       />
     </div>
@@ -74,24 +81,30 @@ const Email = (props) => {
 Email.defaultProps = {
   label: null,
   required: false,
-  defaultValue: null,
+  defaultValue: undefined,
+  initialData: undefined,
   placeholder: undefined,
   width: undefined,
   style: {},
   autoComplete: undefined,
   validate: email,
+  path: '',
+  readOnly: false,
 };
 
 Email.propTypes = {
   name: PropTypes.string.isRequired,
+  path: PropTypes.string,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
+  initialData: PropTypes.string,
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,
   autoComplete: PropTypes.string,
+  readOnly: PropTypes.bool,
 };
 
 export default withCondition(Email);

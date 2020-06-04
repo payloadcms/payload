@@ -10,6 +10,7 @@ import Button from '../../../elements/Button';
 import FormContext from '../../Form/Context';
 import DraggableSection from '../../DraggableSection';
 import collapsibleReducer from './reducer';
+import { useRenderedFields } from '../../RenderFields';
 
 import './index.scss';
 
@@ -21,19 +22,27 @@ const Repeater = (props) => {
   const formContext = useContext(FormContext);
   const [rowCount, setRowCount] = useState(0);
   const [lastModified, setLastModified] = useState(null);
-  const { fields: fieldState, dispatchFields, countRows } = formContext;
+  const { getFields, dispatchFields, countRows } = formContext;
+  const { customComponentsPath } = useRenderedFields();
+
+  const fieldState = getFields();
 
   const {
     name,
+    path: pathFromProps,
     fields,
     defaultValue,
+    initialData,
     singularLabel,
     fieldTypes,
   } = props;
 
+  const path = pathFromProps || name;
+  const dataToInitialize = initialData || defaultValue;
+
   const addRow = (rowIndex) => {
     dispatchFields({
-      type: 'ADD_ROW', rowIndex, name, fieldSchema: fields,
+      type: 'ADD_ROW', rowIndex, path, fieldSchema: fields,
     });
 
     dispatchCollapsibleStates({
@@ -46,7 +55,7 @@ const Repeater = (props) => {
 
   const removeRow = (rowIndex) => {
     dispatchFields({
-      type: 'REMOVE_ROW', rowIndex, name, fields,
+      type: 'REMOVE_ROW', rowIndex, path, fields,
     });
 
     dispatchCollapsibleStates({
@@ -60,7 +69,7 @@ const Repeater = (props) => {
 
   const moveRow = (moveFromIndex, moveToIndex) => {
     dispatchFields({
-      type: 'MOVE_ROW', moveFromIndex, moveToIndex, name,
+      type: 'MOVE_ROW', moveFromIndex, moveToIndex, path,
     });
 
     dispatchCollapsibleStates({
@@ -71,17 +80,17 @@ const Repeater = (props) => {
   };
 
   useEffect(() => {
-    setRowCount(defaultValue.length);
+    setRowCount(dataToInitialize.length);
     setLastModified(null);
 
     dispatchCollapsibleStates({
       type: 'SET_ALL_COLLAPSIBLES',
-      payload: Array.from(Array(defaultValue.length).keys()).reduce(acc => ([...acc, true]), []), // sets all collapsibles to open on first load
+      payload: Array.from(Array(dataToInitialize.length).keys()).reduce(acc => ([...acc, true]), []), // sets all collapsibles to open on first load
     });
-  }, [defaultValue]);
+  }, [dataToInitialize]);
 
   const updateRowCountOnParentRowModified = () => {
-    const countedRows = countRows(name);
+    const countedRows = countRows(path);
     setRowCount(countedRows);
   };
 
@@ -110,16 +119,17 @@ const Repeater = (props) => {
                       <DraggableSection
                         fieldTypes={fieldTypes}
                         key={rowIndex}
-                        parentName={name}
+                        parentPath={path}
                         singularLabel={singularLabel}
                         addRow={() => addRow(rowIndex)}
                         removeRow={() => removeRow(rowIndex)}
                         rowIndex={rowIndex}
                         fieldState={fieldState}
                         fieldSchema={fields}
-                        defaultValue={lastModified ? undefined : defaultValue[rowIndex]}
+                        initialData={lastModified ? undefined : dataToInitialize[rowIndex]}
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}
+                        customComponentsPath={`${customComponentsPath}${name}.fields.`}
                       />
                     );
                   })
@@ -147,10 +157,14 @@ Repeater.defaultProps = {
   label: '',
   singularLabel: 'Row',
   defaultValue: [],
+  initialData: [],
 };
 
 Repeater.propTypes = {
   defaultValue: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ),
+  initialData: PropTypes.arrayOf(
     PropTypes.shape({}),
   ),
   fields: PropTypes.arrayOf(
@@ -159,6 +173,7 @@ Repeater.propTypes = {
   label: PropTypes.string,
   singularLabel: PropTypes.string,
   name: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
 };
 

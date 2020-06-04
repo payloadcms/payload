@@ -10,25 +10,31 @@ import './index.scss';
 
 const Textarea = (props) => {
   const {
+    path: pathFromProps,
     name,
     required,
     defaultValue,
+    initialData,
     validate,
     style,
     width,
     label,
     placeholder,
+    readOnly,
   } = props;
+
+  const path = pathFromProps || name;
 
   const {
     value,
     showError,
-    onFieldChange,
+    setValue,
     formProcessing,
     errorMessage,
   } = useFieldType({
-    name,
+    path,
     required,
+    initialData,
     defaultValue,
     validate,
   });
@@ -37,6 +43,7 @@ const Textarea = (props) => {
     'field-type',
     'textarea',
     showError && 'error',
+    readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
   return (
@@ -52,17 +59,17 @@ const Textarea = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={name}
+        htmlFor={path}
         label={label}
         required={required}
       />
       <textarea
         value={value || ''}
-        onChange={onFieldChange}
-        disabled={formProcessing ? 'disabled' : undefined}
+        onChange={setValue}
+        disabled={(readOnly || formProcessing) ? 'disabled' : undefined}
         placeholder={placeholder}
-        id={name}
-        name={name}
+        id={path}
+        name={path}
       />
     </div>
   );
@@ -71,22 +78,28 @@ const Textarea = (props) => {
 Textarea.defaultProps = {
   required: false,
   label: null,
-  defaultValue: null,
+  defaultValue: undefined,
+  initialData: undefined,
   validate: textarea,
   width: undefined,
   style: {},
   placeholder: null,
+  path: '',
+  readOnly: false,
 };
 
 Textarea.propTypes = {
   name: PropTypes.string.isRequired,
+  path: PropTypes.string,
   required: PropTypes.bool,
   defaultValue: PropTypes.string,
+  initialData: PropTypes.string,
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,
   placeholder: PropTypes.string,
+  readOnly: PropTypes.bool,
 };
 
 export default withCondition(Textarea);

@@ -6,7 +6,7 @@ const AllFields = {
   },
   useAsTitle: 'text',
   preview: (doc, token) => {
-    if (doc.text) {
+    if (doc && doc.text) {
       return `http://localhost:3000/previewable-posts/${doc.text.value}?preview=true&token=${token}`;
     }
 
@@ -124,6 +124,12 @@ const AllFields = {
               required: true,
             },
           ],
+        },
+        {
+          type: 'text',
+          name: 'repeaterText3',
+          label: 'Repeater Text 3',
+          readOnly: true,
         },
       ],
     },

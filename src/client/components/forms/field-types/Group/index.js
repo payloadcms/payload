@@ -1,25 +1,30 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import RenderFields from '../../RenderFields';
+import RenderFields, { useRenderedFields } from '../../RenderFields';
 import withCondition from '../../withCondition';
 
 import './index.scss';
 
 const Group = (props) => {
   const {
-    label, fields, name, defaultValue, fieldTypes,
+    label, fields, name, path: pathFromProps, fieldTypes, initialData,
   } = props;
+
+  const path = pathFromProps || name;
+
+  const { customComponentsPath } = useRenderedFields();
 
   return (
     <div className="field-type group">
       <h3>{label}</h3>
       <RenderFields
+        initialData={initialData}
         fieldTypes={fieldTypes}
+        customComponentsPath={`${customComponentsPath}${name}.fields.`}
         fieldSchema={fields.map((subField) => {
           return {
             ...subField,
-            name: `${name}${subField.name ? `.${subField.name}` : ''}`,
-            defaultValue: subField.name ? defaultValue[subField.name] : defaultValue,
+            path: `${path}${subField.name ? `.${subField.name}` : ''}`,
           };
         })}
       />
@@ -29,16 +34,18 @@ const Group = (props) => {
 
 Group.defaultProps = {
   label: '',
-  defaultValue: {},
+  initialData: {},
+  path: '',
 };
 
 Group.propTypes = {
-  defaultValue: PropTypes.shape({}),
+  initialData: PropTypes.shape({}),
   fields: PropTypes.arrayOf(
     PropTypes.shape({}),
   ).isRequired,
   label: PropTypes.string,
   name: PropTypes.string.isRequired,
+  path: PropTypes.string,
   fieldTypes: PropTypes.shape({}).isRequired,
 };
 

@@ -11,23 +11,29 @@ import './index.scss';
 const Checkbox = (props) => {
   const {
     name,
+    path: pathFromProps,
     required,
     defaultValue,
+    initialData,
     validate,
     style,
     width,
     label,
+    readOnly,
   } = props;
+
+  const path = pathFromProps || name;
 
   const {
     value,
     showError,
     errorMessage,
-    onFieldChange,
+    setValue,
     formProcessing,
   } = useFieldType({
-    name,
+    path,
     required,
+    initialData,
     defaultValue,
     validate,
   });
@@ -36,6 +42,7 @@ const Checkbox = (props) => {
     'field-type',
     'checkbox',
     showError && 'error',
+    readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
   return (
@@ -51,11 +58,11 @@ const Checkbox = (props) => {
         message={errorMessage}
       />
       <StyledCheckbox
-        onClick={onFieldChange}
+        onClick={setValue}
         isChecked={value || false}
-        name={name}
+        name={path}
         label={label}
-        isDisabled={formProcessing}
+        isDisabled={formProcessing || readOnly}
         hasError={showError}
       />
       {label}
@@ -66,16 +73,22 @@ const Checkbox = (props) => {
 Checkbox.defaultProps = {
   label: null,
   required: false,
+  readOnly: false,
   defaultValue: false,
+  initialData: false,
   validate: checkbox,
   width: undefined,
   style: {},
+  path: '',
 };
 
 Checkbox.propTypes = {
+  path: PropTypes.string,
   name: PropTypes.string.isRequired,
+  readOnly: PropTypes.bool,
   required: PropTypes.bool,
   defaultValue: PropTypes.bool,
+  initialData: PropTypes.bool,
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),

@@ -18,15 +18,17 @@ const DraggableSection = (props) => {
     addRow,
     removeRow,
     rowIndex,
-    parentName,
+    parentPath,
     fieldSchema,
-    defaultValue,
+    initialData,
     dispatchCollapsibleStates,
     collapsibleStates,
     singularLabel,
     blockType,
     fieldTypes,
+    customComponentsPath,
   } = props;
+
   const draggableRef = useRef(null);
 
   const handleCollapseClick = () => {
@@ -75,7 +77,7 @@ const DraggableSection = (props) => {
               {blockType === 'flexible'
                 && (
                   <EditableBlockTitle
-                    fieldName={`${parentName}.${rowIndex}.blockName`}
+                    fieldName={`${parentPath}.${rowIndex}.blockName`}
                   />
                 )
               }
@@ -104,14 +106,14 @@ const DraggableSection = (props) => {
               duration={0}
             >
               <RenderFields
+                initialData={initialData}
+                customComponentsPath={customComponentsPath}
                 fieldTypes={fieldTypes}
                 key={rowIndex}
                 fieldSchema={fieldSchema.map((field) => {
-                  const fieldName = `${parentName}.${rowIndex}${field.name ? `.${field.name}` : ''}`;
                   return ({
                     ...field,
-                    name: fieldName,
-                    defaultValue: field.name ? defaultValue?.[field.name] : defaultValue,
+                    path: `${parentPath}.${rowIndex}${field.name ? `.${field.name}` : ''}`,
                   });
                 })}
               />
@@ -125,25 +127,27 @@ const DraggableSection = (props) => {
 
 DraggableSection.defaultProps = {
   rowCount: null,
-  defaultValue: null,
+  initialData: undefined,
   collapsibleStates: [],
   singularLabel: '',
   blockType: '',
+  customComponentsPath: '',
 };
 
 DraggableSection.propTypes = {
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
   rowIndex: PropTypes.number.isRequired,
-  parentName: PropTypes.string.isRequired,
+  parentPath: PropTypes.string.isRequired,
   singularLabel: PropTypes.string,
   fieldSchema: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   rowCount: PropTypes.number,
-  defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
+  initialData: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
   dispatchCollapsibleStates: PropTypes.func.isRequired,
   collapsibleStates: PropTypes.arrayOf(PropTypes.bool),
   blockType: PropTypes.string,
   fieldTypes: PropTypes.shape({}).isRequired,
+  customComponentsPath: PropTypes.string,
 };
 
 export default DraggableSection;

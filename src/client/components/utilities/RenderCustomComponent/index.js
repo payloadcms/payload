@@ -6,20 +6,28 @@ import Loading from '../../elements/Loading';
 const RenderCustomComponent = (props) => {
   const { path, DefaultComponent, componentProps } = props;
 
-  const CustomComponent = path.split('.').reduce((res, prop) => {
-    if (res) {
-      return res[prop];
+  if (path) {
+    const CustomComponent = path.split('.').reduce((res, prop) => {
+      const potentialRowIndex = parseInt(prop, 10);
+
+      if (!Number.isNaN(potentialRowIndex) && res.fields) {
+        return res.fields;
+      }
+
+      if (res) {
+        return res[prop];
+      }
+
+      return false;
+    }, customComponents);
+
+    if (CustomComponent) {
+      return (
+        <Suspense fallback={<Loading />}>
+          <CustomComponent {...componentProps} />
+        </Suspense>
+      );
     }
-
-    return false;
-  }, customComponents);
-
-  if (CustomComponent) {
-    return (
-      <Suspense fallback={<Loading />}>
-        <CustomComponent {...componentProps} />
-      </Suspense>
-    );
   }
 
   return (
@@ -27,9 +35,14 @@ const RenderCustomComponent = (props) => {
   );
 };
 
+RenderCustomComponent.defaultProps = {
+  path: undefined,
+};
+
 RenderCustomComponent.propTypes = {
-  path: PropTypes.string.isRequired,
+  path: PropTypes.string,
   DefaultComponent: PropTypes.oneOfType([
+    PropTypes.shape({}),
     PropTypes.func,
     PropTypes.node,
     PropTypes.element,

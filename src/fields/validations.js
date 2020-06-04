@@ -27,7 +27,11 @@ const optionsToValidatorMap = {
       return `This value must be longer than the minimum length of ${options.max} characters.`;
     }
 
-    return Boolean(value);
+    if (typeof value !== 'string' || value.length === 0) {
+      return 'This field is required.';
+    }
+
+    return true;
   },
   password: (value, options = {}) => {
     if (options.maxLength && value.length > options.maxLength) {
