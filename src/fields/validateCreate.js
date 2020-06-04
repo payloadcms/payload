@@ -23,7 +23,7 @@ exports.iterateFields = async (data, fields, path = '') => {
 
     const dataToValidate = data || {};
 
-    if (field.required || requiresAtLeastOneSubfield) {
+    if ((field.required && !field.localized) || requiresAtLeastOneSubfield) {
       // If this field does not have a name, it is for
       // admin panel composition only and should not be
       // validated against directly

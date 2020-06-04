@@ -19,15 +19,15 @@ const optionsToValidatorMap = {
     return true;
   },
   text: (value, options = {}) => {
-    if (options.maxLength && value.length > options.maxLength) {
+    if (options.maxLength && (value && value.length > options.maxLength)) {
       return `This value must be shorter than the max length of ${options.max} characters.`;
     }
 
-    if (options.minLength && value.length < options.minLength) {
+    if (options.minLength && (value && value.length < options.minLength)) {
       return `This value must be longer than the minimum length of ${options.max} characters.`;
     }
 
-    if (typeof value !== 'string' || value.length === 0) {
+    if (typeof value !== 'string' || (typeof value === 'string' && value.length === 0)) {
       return 'This field is required.';
     }
 
