@@ -72,7 +72,7 @@ const Select = (props) => {
     value,
     showError,
     formProcessing,
-    onFieldChange,
+    setValue,
     errorMessage,
   } = useFieldType({
     path,
@@ -108,7 +108,7 @@ const Select = (props) => {
         required={required}
       />
       <ReactSelect
-        onChange={onFieldChange}
+        onChange={setValue}
         value={valueToRender}
         formatValue={formatFormValue}
         showError={showError}

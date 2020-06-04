@@ -1,6 +1,9 @@
-import { useContext, useCallback, useEffect } from 'react';
+import {
+  useContext, useCallback, useEffect, useState,
+} from 'react';
 import FormContext from '../Form/Context';
 import { useLocale } from '../../utilities/Locale';
+import useDebounce from '../../../hooks/useDebounce';
 
 import './index.scss';
 
@@ -15,12 +18,16 @@ const useFieldType = (options) => {
 
   const locale = useLocale();
   const formContext = useContext(FormContext);
+  const [internalValue, setInternalValue] = useState(initialData);
+  const debouncedValue = useDebounce(internalValue, 400);
 
   const {
-    dispatchFields, submitted, processing, getFields,
+    dispatchFields, submitted, processing, getField,
   } = formContext;
 
-  const fields = getFields();
+  const field = getField(path);
+  const valid = field?.valid || true;
+  const showError = valid === false && submitted;
 
   const sendField = useCallback((valueToSend) => {
     const fieldToDispatch = { path, value: valueToSend };
@@ -35,41 +42,36 @@ const useFieldType = (options) => {
     dispatchFields(fieldToDispatch);
   }, [path, required, dispatchFields, validate]);
 
-  const onFieldChange = useCallback((e) => {
-    if (e && e.target) {
-      sendField(e.target.value);
-    } else {
-      sendField(e);
+  const setValue = useCallback((e) => {
+    if (e?.target?.value) {
+      setInternalValue(e.target.value);
+    } else if (e !== undefined) {
+      setInternalValue(e);
     }
 
     if (onChange && typeof onChange === 'function') onChange(e);
-  }, [onChange, sendField]);
+  }, [onChange, setInternalValue]);
 
   // Remove field from state on "unmount"
   useEffect(() => {
     return () => dispatchFields({ path, type: 'REMOVE' });
   }, [dispatchFields, path]);
 
-  // Send up new value when initial data is loaded
-  // only if it's defined
   useEffect(() => {
-    if (initialData !== undefined) sendField(initialData);
-  }, [initialData, sendField, locale]);
-
-  const valid = fields[path] ? fields[path].valid : true;
-  const showError = valid === false && submitted;
-
-  const valueToRender = fields?.[path]?.value || initialData?.[path];
+    if (debouncedValue !== undefined) {
+      sendField(debouncedValue);
+    }
+  }, [debouncedValue, sendField, locale]);
 
   return {
     ...options,
     showError,
     sendField,
-    errorMessage: fields[path]?.errorMessage,
-    value: valueToRender,
+    errorMessage: field?.errorMessage,
+    value: internalValue,
     formSubmitted: submitted,
     formProcessing: processing,
-    onFieldChange,
+    setValue,
   };
 };
 

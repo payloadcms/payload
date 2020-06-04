@@ -33,7 +33,7 @@ const DateTime = (props) => {
   const {
     value,
     showError,
-    onFieldChange,
+    setValue,
     formProcessing,
   } = useFieldType({
     path,
@@ -69,7 +69,7 @@ const DateTime = (props) => {
       <div className={`${baseClass}__input-wrapper`}>
         <DatePicker
           {...props}
-          onChange={onFieldChange}
+          onChange={setValue}
           value={value}
         />
       </div>

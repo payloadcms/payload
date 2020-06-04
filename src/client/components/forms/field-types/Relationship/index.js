@@ -200,7 +200,7 @@ class Relationship extends Component {
       value,
       showError,
       formProcessing,
-      onFieldChange,
+      setValue,
     } = this.props;
 
     const classes = [
@@ -234,7 +234,7 @@ class Relationship extends Component {
         />
         <ReactSelect
           onInputChange={this.handleInputChange}
-          onChange={onFieldChange}
+          onChange={setValue}
           formatValue={this.formatSelectedValue}
           onMenuScrollToBottom={this.handleMenuScrollToBottom}
           findValueInOptions={this.findValueInOptions}
@@ -281,7 +281,7 @@ Relationship.propTypes = {
   formProcessing: PropTypes.bool,
   width: PropTypes.string,
   hasMany: PropTypes.bool,
-  onFieldChange: PropTypes.func.isRequired,
+  setValue: PropTypes.func.isRequired,
   hasMultipleRelations: PropTypes.bool.isRequired,
   value: PropTypes.oneOfType([
     PropTypes.string,

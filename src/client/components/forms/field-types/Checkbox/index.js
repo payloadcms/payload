@@ -27,7 +27,7 @@ const Checkbox = (props) => {
     value,
     showError,
     errorMessage,
-    onFieldChange,
+    setValue,
     formProcessing,
   } = useFieldType({
     path,
@@ -55,7 +55,7 @@ const Checkbox = (props) => {
         message={errorMessage}
       />
       <StyledCheckbox
-        onClick={onFieldChange}
+        onClick={setValue}
         isChecked={value || false}
         name={path}
         label={label}

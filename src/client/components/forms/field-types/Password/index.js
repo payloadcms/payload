@@ -27,7 +27,7 @@ const Password = (props) => {
     value,
     showError,
     processing,
-    onFieldChange,
+    setValue,
     errorMessage,
   } = useFieldType({
     path,
@@ -61,7 +61,7 @@ const Password = (props) => {
       />
       <input
         value={value || ''}
-        onChange={onFieldChange}
+        onChange={setValue}
         disabled={processing ? 'disabled' : undefined}
         type="password"
         autoComplete="current-password"
