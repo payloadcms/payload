@@ -23,11 +23,11 @@
   &__collection-actions {
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: base(1.5) 0 base(.5);
     display: flex;
 
     li {
-      margin-left: base(.75);
+      margin-right: base(.75);
     }
   }
 
@@ -43,6 +43,7 @@
     flex-direction: column;
   }
 
+  &__collection-actions,
   &__document-actions,
   &__meta,
   &__sidebar-fields,
@@ -104,6 +105,19 @@
     color: $color-gray;
   }
 
+  &__collection-actions,
+  &__api-url {
+    a, button {
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
   @include large-break {
     &__edit {
       padding: base(4);
@@ -142,6 +156,8 @@
     &__collection-actions {
       margin-top: base(.5);
       padding-left: $baseline;
+      padding-bottom: 0;
+      order: 1;
 
       li {
         margin: 0 base(.5) 0 0;

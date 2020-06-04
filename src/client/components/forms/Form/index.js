@@ -45,6 +45,16 @@ const Form = (props) => {
     return fields[path];
   }, [fields]);
 
+  const getData = useCallback(() => {
+    const data = {};
+
+    Object.keys(fields).forEach((key) => {
+      data[key] = fields[key].value;
+    });
+
+    return unflatten(data);
+  }, [fields]);
+
   const countRows = useCallback((rowName) => {
     const namePrefixToRemove = rowName.substring(0, rowName.lastIndexOf('.') + 1);
 
@@ -77,30 +87,28 @@ const Form = (props) => {
 
     // If not valid, prevent submission
     if (!isValid) {
+      return e.preventDefault();
+    }
+
+    // If submit handler comes through via props, run that
+    if (onSubmit) {
       e.preventDefault();
 
-      // If submit handler comes through via props, run that
-    } else if (onSubmit) {
+      return onSubmit(fields);
+    }
+
+    // If form is AJAX, fetch data
+    if (ajax !== false) {
       e.preventDefault();
 
-      onSubmit(fields);
-
-      // If form is AJAX, fetch data
-    } else if (ajax !== false) {
-      e.preventDefault();
-      const data = {};
-
-      // Clean up data passed from field state
-      Object.keys(fields).forEach((key) => {
-        data[key] = fields[key].value;
-      });
+      const data = getData();
 
       setProcessing(true);
 
       try {
         // Make the API call from the action
         const res = await requests[method.toLowerCase()](action, {
-          body: JSON.stringify(unflatten(data)),
+          body: JSON.stringify(data),
           headers: {
             'Content-Type': 'application/json',
           },
@@ -124,9 +132,11 @@ const Form = (props) => {
               type: 'success',
             });
           }
-        } else {
-          throw res;
+
+          return res;
         }
+
+        throw res;
       } catch (error) {
         setProcessing(false);
 
@@ -139,7 +149,11 @@ const Form = (props) => {
             message: json.message,
             type: 'error',
           });
-        } else if (Array.isArray(json.errors)) {
+
+          return json;
+        }
+
+        if (Array.isArray(json.errors)) {
           const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => {
             return err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]];
           }, [[], []]);
@@ -171,16 +185,34 @@ const Form = (props) => {
             top: 0,
             behavior: 'smooth',
           });
-        } else {
-          addStatus({
-            message: 'An unknown error occurred.',
-            type: 'error',
-          });
+
+          return json;
         }
+
+        addStatus({
+          message: 'An unknown error occurred.',
+          type: 'error',
+        });
+
+        return json;
       }
     }
     // If valid and not AJAX submit as usual
-  }, [action, addStatus, ajax, disableSuccessStatus, fields, handleAjaxResponse, history, method, onSubmit, redirect, onError]);
+    return true;
+  }, [
+    action,
+    addStatus,
+    ajax,
+    disableSuccessStatus,
+    fields,
+    handleAjaxResponse,
+    history,
+    method,
+    onSubmit,
+    redirect,
+    onError,
+    getData,
+  ]);
 
   useThrottledEffect(() => {
     refreshToken();
@@ -206,6 +238,7 @@ const Form = (props) => {
         processing,
         submitted,
         countRows,
+        getData,
       }}
       >
         <HiddenInput
