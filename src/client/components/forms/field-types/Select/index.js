@@ -57,6 +57,7 @@ const Select = (props) => {
     name,
     required,
     defaultValue,
+    initialData,
     validate,
     style,
     width,
@@ -77,7 +78,7 @@ const Select = (props) => {
     path,
     label,
     required,
-    defaultValue,
+    initialData: initialData || defaultValue,
     validate,
   });
 
@@ -86,6 +87,8 @@ const Select = (props) => {
     'select',
     showError && 'error',
   ].filter(Boolean).join(' ');
+
+  const valueToRender = formatRenderValue(value);
 
   return (
     <div
@@ -106,7 +109,7 @@ const Select = (props) => {
       />
       <ReactSelect
         onChange={onFieldChange}
-        value={formatRenderValue(value)}
+        value={valueToRender}
         formatValue={formatFormValue}
         showError={showError}
         disabled={formProcessing}
@@ -121,7 +124,8 @@ Select.defaultProps = {
   style: {},
   required: false,
   validate: select,
-  defaultValue: null,
+  defaultValue: undefined,
+  initialData: undefined,
   hasMany: false,
   width: undefined,
   path: '',
@@ -132,6 +136,10 @@ Select.propTypes = {
   style: PropTypes.shape({}),
   label: PropTypes.string.isRequired,
   defaultValue: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.array,
+  ]),
+  initialData: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.array,
   ]),

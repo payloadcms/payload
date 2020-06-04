@@ -8,6 +8,7 @@ import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
+import { relationship } from '../../../../../fields/validations';
 
 import './index.scss';
 
@@ -18,8 +19,6 @@ const {
 } = config;
 
 const cookieTokenName = `${cookiePrefix}-token`;
-
-const defaultError = 'Please make a selection.';
 
 const maxResultsPerRequest = 10;
 
@@ -65,7 +64,7 @@ class Relationship extends Component {
           });
         }
 
-        callback({ relation, data });
+        return callback({ relation, data });
       }, (lastPage, nextPage) => {
         if (nextPage) {
           const { data, relation } = nextPage;
@@ -127,7 +126,7 @@ class Relationship extends Component {
   addOptions = (data, relation) => {
     const { hasMultipleRelations } = this.props;
     const { lastLoadedPage, options } = this.state;
-    const collection = collections.find(collection => collection.slug === relation);
+    const collection = collections.find(coll => coll.slug === relation);
 
     if (!hasMultipleRelations) {
       this.setState({
@@ -177,10 +176,10 @@ class Relationship extends Component {
     });
   }
 
-  handleInputChange = (search) => {
-    this.setState({
-      search,
-    });
+  handleInputChange = () => {
+    // this.setState({
+    //   search,
+    // });
   }
 
   handleMenuScrollToBottom = () => {
@@ -253,7 +252,7 @@ class Relationship extends Component {
 Relationship.defaultProps = {
   style: {},
   required: false,
-  errorMessage: defaultError,
+  errorMessage: '',
   hasMany: false,
   width: undefined,
   showError: false,
@@ -279,7 +278,6 @@ Relationship.propTypes = {
   showError: PropTypes.bool,
   label: PropTypes.string.isRequired,
   path: PropTypes.string,
-  name: PropTypes.string.isRequired,
   formProcessing: PropTypes.bool,
   width: PropTypes.string,
   hasMany: PropTypes.bool,
@@ -293,21 +291,24 @@ Relationship.propTypes = {
 };
 
 const RelationshipFieldType = (props) => {
-  const [formattedDefaultValue, setFormattedDefaultValue] = useState(null);
+  const [formattedInitialData, setFormattedInitialData] = useState(null);
+
   const {
-    defaultValue, relationTo, hasMany, validate, path, name,
+    defaultValue, relationTo, hasMany, validate, path, name, initialData,
   } = props;
+
   const hasMultipleRelations = Array.isArray(relationTo);
+  const dataToInitialize = initialData || defaultValue;
 
   const fieldType = useFieldType({
     ...props,
     path: path || name,
-    defaultValue: formattedDefaultValue,
+    initialData: formattedInitialData,
     validate,
   });
 
   useEffect(() => {
-    const formatDefaultValue = (valueToFormat) => {
+    const formatInitialData = (valueToFormat) => {
       if (hasMultipleRelations) {
         return {
           ...valueToFormat,
@@ -318,18 +319,20 @@ const RelationshipFieldType = (props) => {
       return valueToFormat.id;
     };
 
-    if (defaultValue) {
-      if (hasMany && Array.isArray(defaultValue)) {
-        const formattedDefaultValue = [];
-        defaultValue.forEach((individualValue) => {
-          formattedDefaultValue.push(formatDefaultValue(individualValue));
+    if (dataToInitialize) {
+      if (hasMany && Array.isArray(dataToInitialize)) {
+        const newFormattedInitialData = [];
+
+        dataToInitialize.forEach((individualValue) => {
+          newFormattedInitialData.push(formatInitialData(individualValue));
         });
-        setFormattedDefaultValue(formattedDefaultValue);
+
+        setFormattedInitialData(newFormattedInitialData);
       } else {
-        setFormattedDefaultValue(formatDefaultValue(defaultValue));
+        setFormattedInitialData(formatInitialData(dataToInitialize));
       }
     }
-  }, [defaultValue]);
+  }, [dataToInitialize, hasMany, hasMultipleRelations]);
 
   return (
     <Relationship
@@ -338,6 +341,40 @@ const RelationshipFieldType = (props) => {
       hasMultipleRelations={hasMultipleRelations}
     />
   );
+};
+
+RelationshipFieldType.defaultProps = {
+  initialData: undefined,
+  defaultValue: undefined,
+  validate: relationship,
+  path: '',
+  hasMany: false,
+};
+
+RelationshipFieldType.propTypes = {
+  defaultValue: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.array,
+    PropTypes.shape({}),
+  ]),
+  initialData: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.array,
+    PropTypes.shape({
+      relationTo: PropTypes.string,
+      value: PropTypes.string,
+    }),
+  ]),
+  relationTo: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(
+      PropTypes.string,
+    ),
+  ]).isRequired,
+  hasMany: PropTypes.bool,
+  validate: PropTypes.func,
+  name: PropTypes.string.isRequired,
+  path: PropTypes.string,
 };
 
 export default withCondition(RelationshipFieldType);

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
 import { email } from '../../../../../fields/validations';
+import useDebounce from '../../../../hooks/useDebounce';
 
 import './index.scss';
 
@@ -14,6 +15,7 @@ const Email = (props) => {
     path: pathFromProps,
     required,
     defaultValue,
+    initialData,
     validate,
     style,
     width,
@@ -22,10 +24,13 @@ const Email = (props) => {
     autoComplete,
   } = props;
 
+  const [value, setValue] = useState(undefined);
+  const debouncedValue = useDebounce(value, 400);
+
   const path = pathFromProps || name;
+  const initialValue = initialData || defaultValue;
 
   const {
-    value,
     showError,
     processing,
     onFieldChange,
@@ -33,9 +38,17 @@ const Email = (props) => {
   } = useFieldType({
     path,
     required,
-    defaultValue,
+    initialData: initialValue,
     validate,
   });
+
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
+  useEffect(() => {
+    onFieldChange(debouncedValue);
+  }, [onFieldChange, debouncedValue]);
 
   const classes = [
     'field-type',
@@ -62,7 +75,7 @@ const Email = (props) => {
       />
       <input
         value={value || ''}
-        onChange={onFieldChange}
+        onChange={e => setValue(e.target.value)}
         disabled={processing ? 'disabled' : undefined}
         placeholder={placeholder}
         type="email"
@@ -77,7 +90,8 @@ const Email = (props) => {
 Email.defaultProps = {
   label: null,
   required: false,
-  defaultValue: null,
+  defaultValue: undefined,
+  initialData: undefined,
   placeholder: undefined,
   width: undefined,
   style: {},
@@ -92,6 +106,7 @@ Email.propTypes = {
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
+  initialData: PropTypes.string,
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),

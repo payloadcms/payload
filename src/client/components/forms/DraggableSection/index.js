@@ -20,7 +20,7 @@ const DraggableSection = (props) => {
     rowIndex,
     parentPath,
     fieldSchema,
-    defaultValue,
+    initialData,
     dispatchCollapsibleStates,
     collapsibleStates,
     singularLabel,
@@ -106,7 +106,7 @@ const DraggableSection = (props) => {
               duration={0}
             >
               <RenderFields
-                initialData={defaultValue}
+                initialData={initialData}
                 customComponentsPath={customComponentsPath}
                 fieldTypes={fieldTypes}
                 key={rowIndex}
@@ -127,7 +127,7 @@ const DraggableSection = (props) => {
 
 DraggableSection.defaultProps = {
   rowCount: null,
-  defaultValue: null,
+  initialData: undefined,
   collapsibleStates: [],
   singularLabel: '',
   blockType: '',
@@ -142,7 +142,7 @@ DraggableSection.propTypes = {
   singularLabel: PropTypes.string,
   fieldSchema: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   rowCount: PropTypes.number,
-  defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
+  initialData: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
   dispatchCollapsibleStates: PropTypes.func.isRequired,
   collapsibleStates: PropTypes.arrayOf(PropTypes.bool),
   blockType: PropTypes.string,

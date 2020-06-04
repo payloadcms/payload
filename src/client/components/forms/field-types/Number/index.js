@@ -13,6 +13,7 @@ const NumberField = (props) => {
     path: pathFromProps,
     required,
     defaultValue,
+    initialData,
     validate,
     style,
     width,
@@ -38,10 +39,9 @@ const NumberField = (props) => {
   } = useFieldType({
     path,
     required,
-    defaultValue,
+    initialData: initialData || defaultValue,
     validate: memoizedValidate,
   });
-
 
   const classes = [
     'field-type',
@@ -82,7 +82,8 @@ const NumberField = (props) => {
 NumberField.defaultProps = {
   label: null,
   required: false,
-  defaultValue: null,
+  defaultValue: undefined,
+  initialData: undefined,
   placeholder: undefined,
   width: undefined,
   style: {},
@@ -97,6 +98,7 @@ NumberField.propTypes = {
   required: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.number,
+  initialData: PropTypes.number,
   validate: PropTypes.func.isRequired,
   width: PropTypes.string,
   style: PropTypes.shape({}),

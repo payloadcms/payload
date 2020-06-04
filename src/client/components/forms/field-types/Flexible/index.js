@@ -25,6 +25,7 @@ const Flexible = (props) => {
     path: pathFromProps,
     blocks,
     defaultValue,
+    initialData,
     singularLabel,
     fieldTypes,
   } = props;
@@ -41,7 +42,9 @@ const Flexible = (props) => {
   const modalSlug = `flexible-${path}`;
   const { customComponentsPath } = useRenderedFields();
 
-  const { fields: fieldState, dispatchFields, countRows } = formContext;
+  const { dispatchFields, countRows, getFields } = formContext;
+  const fieldState = getFields();
+  const dataToInitialize = initialData || defaultValue;
 
   const addRow = (rowIndex, blockType) => {
     const blockToAdd = blocks.find(block => block.slug === blockType);
@@ -104,14 +107,14 @@ const Flexible = (props) => {
   useEffect(updateRowCountOnParentRowModified, [parentRowsModified]);
 
   useEffect(() => {
-    setRowCount(defaultValue.length);
+    setRowCount(dataToInitialize.length);
     setLastModified(null);
 
     dispatchCollapsibleStates({
       type: 'SET_ALL_COLLAPSIBLES',
-      payload: Array.from(Array(defaultValue.length).keys()).reduce(acc => ([...acc, true]), []), // sets all collapsibles to open on first load
+      payload: Array.from(Array(dataToInitialize.length).keys()).reduce(acc => ([...acc, true]), []), // sets all collapsibles to open on first load
     });
-  }, [defaultValue]);
+  }, [dataToInitialize]);
 
   return (
     <RowModifiedProvider lastModified={lastModified}>
@@ -128,7 +131,7 @@ const Flexible = (props) => {
                   let blockType = fieldState[`${path}.${rowIndex}.blockType`]?.value;
 
                   if (!lastModified && !blockType) {
-                    blockType = defaultValue?.[rowIndex]?.blockType;
+                    blockType = dataToInitialize?.[rowIndex]?.blockType;
                   }
 
                   const blockToRender = blocks.find(block => block.slug === blockType);
@@ -160,7 +163,7 @@ const Flexible = (props) => {
                           },
                         ]}
                         singularLabel={blockType}
-                        defaultValue={lastModified ? undefined : defaultValue[rowIndex]}
+                        initialData={lastModified ? undefined : dataToInitialize[rowIndex]}
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}
                         blockType="flexible"
@@ -201,11 +204,15 @@ const Flexible = (props) => {
 Flexible.defaultProps = {
   label: '',
   defaultValue: [],
+  initialData: [],
   singularLabel: 'Block',
 };
 
 Flexible.propTypes = {
   defaultValue: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ),
+  initialData: PropTypes.arrayOf(
     PropTypes.shape({}),
   ),
   blocks: PropTypes.arrayOf(

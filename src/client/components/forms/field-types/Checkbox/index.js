@@ -14,6 +14,7 @@ const Checkbox = (props) => {
     path: pathFromProps,
     required,
     defaultValue,
+    initialData,
     validate,
     style,
     width,
@@ -31,7 +32,7 @@ const Checkbox = (props) => {
   } = useFieldType({
     path,
     required,
-    defaultValue,
+    initialData: initialData || defaultValue,
     validate,
   });
 
@@ -70,6 +71,7 @@ Checkbox.defaultProps = {
   label: null,
   required: false,
   defaultValue: false,
+  initialData: false,
   validate: checkbox,
   width: undefined,
   style: {},
@@ -81,6 +83,7 @@ Checkbox.propTypes = {
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
   defaultValue: PropTypes.bool,
+  initialData: PropTypes.bool,
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),

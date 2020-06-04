@@ -42,6 +42,7 @@ RenderCustomComponent.defaultProps = {
 RenderCustomComponent.propTypes = {
   path: PropTypes.string,
   DefaultComponent: PropTypes.oneOfType([
+    PropTypes.shape({}),
     PropTypes.func,
     PropTypes.node,
     PropTypes.element,
