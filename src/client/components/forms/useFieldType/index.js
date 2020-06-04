@@ -1,6 +1,9 @@
-import { useContext, useCallback, useEffect } from 'react';
+import {
+  useContext, useCallback, useEffect, useState,
+} from 'react';
 import FormContext from '../Form/Context';
 import { useLocale } from '../../utilities/Locale';
+import useDebounce from '../../../hooks/useDebounce';
 
 import './index.scss';
 
@@ -8,20 +11,30 @@ const useFieldType = (options) => {
   const {
     path,
     required,
-    initialData,
+    initialData: data,
+    defaultValue,
     onChange,
     validate,
   } = options;
 
+  const initialData = data !== undefined ? data : defaultValue;
   const locale = useLocale();
   const formContext = useContext(FormContext);
+  const [internalValue, setInternalValue] = useState(initialData);
+  const debouncedValue = useDebounce(internalValue, 400);
 
   const {
-    dispatchFields, submitted, processing, getFields,
+    dispatchFields, submitted, processing, getField,
   } = formContext;
 
-  const fields = getFields();
+  const field = getField(path);
+  const valid = field?.valid || true;
+  const valueFromForm = field?.value;
+  const showError = valid === false && submitted;
 
+
+  // Method to send update field values from field component(s)
+  // Should only be used internally
   const sendField = useCallback((valueToSend) => {
     const fieldToDispatch = { path, value: valueToSend };
 
@@ -35,41 +48,54 @@ const useFieldType = (options) => {
     dispatchFields(fieldToDispatch);
   }, [path, required, dispatchFields, validate]);
 
-  const onFieldChange = useCallback((e) => {
-    if (e && e.target) {
-      sendField(e.target.value);
-    } else {
-      sendField(e);
+
+  // Method to return from `useFieldType`, used to
+  // update internal field values from field component(s)
+  // as fast as they arrive. NOTE - this method is NOT debounced
+  const setValue = useCallback((e) => {
+    if (e?.target?.value) {
+      setInternalValue(e.target.value);
+    } else if (e !== undefined) {
+      setInternalValue(e);
     }
 
     if (onChange && typeof onChange === 'function') onChange(e);
-  }, [onChange, sendField]);
+  }, [onChange, setInternalValue]);
 
   // Remove field from state on "unmount"
+  // This is mostly used for repeater / flex content row modifications
   useEffect(() => {
     return () => dispatchFields({ path, type: 'REMOVE' });
   }, [dispatchFields, path]);
 
-  // Send up new value when initial data is loaded
-  // only if it's defined
+  // The only time that the form value should be updated
+  // is when the debounced value updates. So, when the debounced value updates,
+  // send it up to the form
   useEffect(() => {
-    if (initialData !== undefined) sendField(initialData);
-  }, [initialData, sendField, locale]);
+    if (debouncedValue !== undefined) {
+      sendField(debouncedValue);
+    }
+  }, [debouncedValue, sendField]);
 
-  const valid = fields[path] ? fields[path].valid : true;
-  const showError = valid === false && submitted;
+  // Whenever the value from form updates,
+  // update internal value as well
+  useEffect(() => {
+    if (valueFromForm !== undefined) setValue(valueFromForm);
+  }, [valueFromForm, setValue]);
 
-  const valueToRender = fields?.[path]?.value || initialData?.[path];
+  useEffect(() => {
+    if (initialData !== undefined) setValue(initialData);
+  }, [initialData, setValue, locale]);
 
   return {
     ...options,
     showError,
     sendField,
-    errorMessage: fields[path]?.errorMessage,
-    value: valueToRender,
+    errorMessage: field?.errorMessage,
+    value: internalValue,
     formSubmitted: submitted,
     formProcessing: processing,
-    onFieldChange,
+    setValue,
   };
 };
 

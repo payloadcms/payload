@@ -128,7 +128,7 @@ function fieldReducer(state, action) {
       return newState;
     }
 
-    default:
+    default: {
       return {
         ...state,
         [action.path]: {
@@ -137,6 +137,7 @@ function fieldReducer(state, action) {
           errorMessage: action.errorMessage,
         },
       };
+    }
   }
 }
 

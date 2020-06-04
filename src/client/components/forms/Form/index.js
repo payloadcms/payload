@@ -28,6 +28,10 @@ const Form = (props) => {
     return fields;
   }, [fields]);
 
+  const getField = useCallback((path) => {
+    return fields[path];
+  }, [fields]);
+
   const countRows = useCallback((rowName) => {
     const namePrefixToRemove = rowName.substring(0, rowName.lastIndexOf('.') + 1);
 
@@ -164,6 +168,7 @@ const Form = (props) => {
       <FormContext.Provider value={{
         dispatchFields,
         getFields,
+        getField,
         processing,
         submitted,
         countRows,

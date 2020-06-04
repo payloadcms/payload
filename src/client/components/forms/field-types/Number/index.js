@@ -33,13 +33,14 @@ const NumberField = (props) => {
   const {
     value,
     showError,
-    onFieldChange,
+    setValue,
     formProcessing,
     errorMessage,
   } = useFieldType({
     path,
     required,
-    initialData: initialData || defaultValue,
+    initialData,
+    defaultValue,
     validate: memoizedValidate,
   });
 
@@ -68,7 +69,7 @@ const NumberField = (props) => {
       />
       <input
         value={value || ''}
-        onChange={e => onFieldChange(parseInt(e.target.value, 10))}
+        onChange={e => setValue(parseInt(e.target.value, 10))}
         disabled={formProcessing ? 'disabled' : undefined}
         placeholder={placeholder}
         type="number"
