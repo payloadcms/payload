@@ -344,8 +344,8 @@ const RelationshipFieldType = (props) => {
 };
 
 RelationshipFieldType.defaultProps = {
-  initialData: null,
-  defaultValue: null,
+  initialData: undefined,
+  defaultValue: undefined,
   validate: relationship,
   path: '',
   hasMany: false,

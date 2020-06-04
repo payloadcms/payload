@@ -74,8 +74,8 @@ const Password = (props) => {
 
 Password.defaultProps = {
   required: false,
-  initialData: null,
-  defaultValue: null,
+  initialData: undefined,
+  defaultValue: undefined,
   validate: password,
   width: undefined,
   style: {},

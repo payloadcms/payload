@@ -33,8 +33,8 @@ const HiddenInput = (props) => {
 
 HiddenInput.defaultProps = {
   required: false,
-  defaultValue: null,
-  initialData: null,
+  defaultValue: undefined,
+  initialData: undefined,
   path: '',
 };
 

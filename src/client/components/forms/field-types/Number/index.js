@@ -43,7 +43,6 @@ const NumberField = (props) => {
     validate: memoizedValidate,
   });
 
-
   const classes = [
     'field-type',
     'number',
@@ -83,8 +82,8 @@ const NumberField = (props) => {
 NumberField.defaultProps = {
   label: null,
   required: false,
-  defaultValue: null,
-  initialData: null,
+  defaultValue: undefined,
+  initialData: undefined,
   placeholder: undefined,
   width: undefined,
   style: {},

@@ -124,7 +124,7 @@ Select.defaultProps = {
   style: {},
   required: false,
   validate: select,
-  defaultValue: null,
+  defaultValue: undefined,
   initialData: undefined,
   hasMany: false,
   width: undefined,

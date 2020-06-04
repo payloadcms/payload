@@ -15,7 +15,6 @@ CustomGroup.defaultProps = {
 };
 
 CustomGroup.propTypes = {
-  onChange: PropTypes.func.isRequired,
   value: PropTypes.string,
 };
 

@@ -80,8 +80,8 @@ const DateTime = (props) => {
 DateTime.defaultProps = {
   label: null,
   required: false,
-  defaultValue: null,
-  initialData: null,
+  defaultValue: undefined,
+  initialData: undefined,
   validate: date,
   errorMessage: defaultError,
   width: undefined,

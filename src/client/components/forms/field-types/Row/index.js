@@ -30,7 +30,7 @@ const Row = (props) => {
 
 Row.defaultProps = {
   path: '',
-  initialData: null,
+  initialData: undefined,
 };
 
 Row.propTypes = {

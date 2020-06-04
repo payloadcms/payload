@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
 import { textarea } from '../../../../../fields/validations';
+import useDebounce from '../../../../hooks/useDebounce';
 
 import './index.scss';
 
@@ -22,10 +23,13 @@ const Textarea = (props) => {
     placeholder,
   } = props;
 
+  const [value, setValue] = useState(undefined);
+  const debouncedValue = useDebounce(value, 400);
+
   const path = pathFromProps || name;
+  const initialValue = initialData || defaultValue;
 
   const {
-    value,
     showError,
     onFieldChange,
     formProcessing,
@@ -33,9 +37,17 @@ const Textarea = (props) => {
   } = useFieldType({
     path,
     required,
-    initialData: initialData || defaultValue,
+    initialData: initialValue,
     validate,
   });
+
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
+  useEffect(() => {
+    onFieldChange(debouncedValue);
+  }, [onFieldChange, debouncedValue]);
 
   const classes = [
     'field-type',
@@ -62,7 +74,7 @@ const Textarea = (props) => {
       />
       <textarea
         value={value || ''}
-        onChange={onFieldChange}
+        onChange={e => setValue(e.target.value)}
         disabled={formProcessing ? 'disabled' : undefined}
         placeholder={placeholder}
         id={path}
@@ -75,8 +87,8 @@ const Textarea = (props) => {
 Textarea.defaultProps = {
   required: false,
   label: null,
-  defaultValue: null,
-  initialData: null,
+  defaultValue: undefined,
+  initialData: undefined,
   validate: textarea,
   width: undefined,
   style: {},
