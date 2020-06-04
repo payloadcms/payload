@@ -27,7 +27,7 @@ const RenderFields = ({
 
               if (!field.name) {
                 initialFieldData = initialData;
-              } else if (initialData?.[field.name]) {
+              } else if (initialData?.[field.name] !== undefined) {
                 initialFieldData = initialData[field.name];
               }
 

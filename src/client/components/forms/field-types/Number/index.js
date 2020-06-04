@@ -39,7 +39,8 @@ const NumberField = (props) => {
   } = useFieldType({
     path,
     required,
-    initialData: initialData || defaultValue,
+    initialData,
+    defaultValue,
     validate: memoizedValidate,
   });
 

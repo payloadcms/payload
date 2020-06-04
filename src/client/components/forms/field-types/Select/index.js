@@ -78,7 +78,8 @@ const Select = (props) => {
     path,
     label,
     required,
-    initialData: initialData || defaultValue,
+    initialData,
+    defaultValue,
     validate,
   });
 

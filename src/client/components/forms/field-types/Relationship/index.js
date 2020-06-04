@@ -304,6 +304,7 @@ const RelationshipFieldType = (props) => {
     ...props,
     path: path || name,
     initialData: formattedInitialData,
+    defaultValue,
     validate,
   });
 

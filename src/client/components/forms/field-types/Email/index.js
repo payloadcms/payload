@@ -29,12 +29,13 @@ const Email = (props) => {
     value,
     showError,
     processing,
-    onFieldChange,
+    setValue,
     errorMessage,
   } = useFieldType({
     path,
     required,
-    initialData: initialData || defaultValue,
+    initialData,
+    defaultValue,
     validate,
   });
 
@@ -63,7 +64,7 @@ const Email = (props) => {
       />
       <input
         value={value || ''}
-        onChange={onFieldChange}
+        onChange={setValue}
         disabled={processing ? 'disabled' : undefined}
         placeholder={placeholder}
         type="email"

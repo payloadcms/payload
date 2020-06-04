@@ -27,13 +27,14 @@ const Textarea = (props) => {
   const {
     value,
     showError,
-    onFieldChange,
+    setValue,
     formProcessing,
     errorMessage,
   } = useFieldType({
     path,
     required,
-    initialData: initialData || defaultValue,
+    initialData,
+    defaultValue,
     validate,
   });
 
@@ -62,7 +63,7 @@ const Textarea = (props) => {
       />
       <textarea
         value={value || ''}
-        onChange={onFieldChange}
+        onChange={setValue}
         disabled={formProcessing ? 'disabled' : undefined}
         placeholder={placeholder}
         id={path}

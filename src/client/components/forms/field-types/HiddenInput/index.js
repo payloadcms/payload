@@ -17,7 +17,8 @@ const HiddenInput = (props) => {
   const { value, onChange } = useFieldType({
     path,
     required,
-    initialData: initialData || defaultValue,
+    initialData,
+    defaultValue,
   });
 
   return (
