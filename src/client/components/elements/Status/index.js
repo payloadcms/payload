@@ -35,6 +35,10 @@ const statusReducer = (state, action) => {
       return [];
     }
 
+    case 'REPLACE': {
+      return action.payload;
+    }
+
     default:
       return state;
   }
@@ -49,18 +53,19 @@ const StatusListProvider = ({ children }) => {
   const removeStatus = useCallback(i => dispatchStatus({ type: 'REMOVE', payload: i }), []);
   const addStatus = useCallback(status => dispatchStatus({ type: 'ADD', payload: status }), []);
   const clearStatus = useCallback(() => dispatchStatus({ type: 'CLEAR' }), []);
+  const replaceStatus = useCallback(status => dispatchStatus({ type: 'REPLACE', payload: status }), []);
 
   useEffect(() => {
     if (state && state.status) {
       if (Array.isArray(state.status)) {
-        state.status.forEach(individualStatus => addStatus(individualStatus));
+        replaceStatus(state.status);
       } else {
-        addStatus(state.status);
+        replaceStatus([state.status]);
       }
     } else {
       clearStatus();
     }
-  }, [addStatus, clearStatus, state, pathname]);
+  }, [addStatus, replaceStatus, clearStatus, state, pathname]);
 
   return (
     <Context.Provider value={{
@@ -68,6 +73,7 @@ const StatusListProvider = ({ children }) => {
       removeStatus,
       addStatus,
       clearStatus,
+      replaceStatus,
     }}
     >
       {children}

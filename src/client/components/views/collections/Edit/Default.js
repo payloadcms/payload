@@ -9,7 +9,8 @@ import PreviewButton from '../../../elements/PreviewButton';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
 import CopyToClipboard from '../../../elements/CopyToClipboard';
-import Duplicate from '../../../elements/Duplicate';
+import DuplicateDocument from '../../../elements/DuplicateDocument';
+import DeleteDocument from '../../../elements/DeleteDocument';
 import * as fieldTypes from '../../../forms/field-types';
 
 import './index.scss';
@@ -72,8 +73,13 @@ const DefaultEditView = (props) => {
           {isEditing ? (
             <ul className={`${baseClass}__collection-actions`}>
               <li><Link to={`${admin}/collections/${slug}/create`}>Create New</Link></li>
-              <li><Duplicate slug={slug} /></li>
-              <li>Delete</li>
+              <li><DuplicateDocument slug={slug} /></li>
+              <li>
+                <DeleteDocument
+                  collection={collection}
+                  id={id}
+                />
+              </li>
             </ul>
           ) : undefined}
           <div className={`${baseClass}__document-actions${(preview && isEditing) ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
