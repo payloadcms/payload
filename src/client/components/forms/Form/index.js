@@ -26,7 +26,6 @@ const Form = (props) => {
     className,
     redirect,
     disableSuccessStatus,
-    handleAjaxError,
   } = props;
 
   const [fields, dispatchFields] = useReducer(fieldReducer, {});
@@ -109,24 +108,25 @@ const Form = (props) => {
           'Content-Type': 'application/json',
         },
       }).then((res) => {
-        clearStatus();
-
         window.scrollTo({
           top: 0,
           behavior: 'smooth',
         });
 
-        if (res.status < 400) {
-          // If prop handleAjaxResponse is passed, pass it the response
-          if (typeof handleAjaxResponse === 'function') handleAjaxResponse(res);
+        if (typeof handleAjaxResponse === 'function') handleAjaxResponse(res);
 
-          if (redirect) {
-            return history.push(redirect, data);
-          }
+        return res.json().then((json) => {
+          clearStatus();
 
-          setProcessing(false);
+          if (res.status < 400) {
+            // If prop handleAjaxResponse is passed, pass it the response
 
-          return res.json().then((json) => {
+            if (redirect) {
+              return history.push(redirect, data);
+            }
+
+            setProcessing(false);
+
             if (!disableSuccessStatus) {
               addStatus({
                 message: json.message,
@@ -134,60 +134,61 @@ const Form = (props) => {
                 disappear: 3000,
               });
             }
-          });
-        }
+          } else {
+            setProcessing(false);
 
-        if (typeof handleAjaxError === 'function') return handleAjaxError(res);
-
-        return res.json().then((json) => {
-          setProcessing(false);
-
-          if (json.message) {
-            addStatus({
-              message: json.message,
-              type: 'error',
-            });
-
-            return json;
-          }
-
-          if (Array.isArray(json.errors)) {
-            const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => {
-              return err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]];
-            }, [[], []]);
-
-            fieldErrors.forEach((err) => {
-              dispatchFields({
-                valid: false,
-                errorMessage: err.message,
-                path: err.field,
-                value: fields?.[err.field]?.value,
-              });
-            });
-
-            nonFieldErrors.forEach((err) => {
+            if (json.message) {
               addStatus({
-                message: err.message || 'An unknown error occurred.',
+                message: json.message,
                 type: 'error',
               });
-            });
 
-            if (fieldErrors.length > 0 && nonFieldErrors.length === 0) {
-              addStatus({
-                message: 'Please correct the fields below.',
-                type: 'error',
-              });
+              return json;
             }
 
-            return json;
+            if (Array.isArray(json.errors)) {
+              const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => {
+                return err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]];
+              }, [[], []]);
+
+              fieldErrors.forEach((err) => {
+                dispatchFields({
+                  valid: false,
+                  errorMessage: err.message,
+                  path: err.field,
+                  value: fields?.[err.field]?.value,
+                });
+              });
+
+              nonFieldErrors.forEach((err) => {
+                addStatus({
+                  message: err.message || 'An unknown error occurred.',
+                  type: 'error',
+                });
+              });
+
+              if (fieldErrors.length > 0 && nonFieldErrors.length === 0) {
+                addStatus({
+                  message: 'Please correct the fields below.',
+                  type: 'error',
+                });
+              }
+
+              return json;
+            }
+
+            addStatus({
+              message: 'An unknown error occurred.',
+              type: 'error',
+            });
           }
 
-          addStatus({
-            message: 'An unknown error occurred.',
-            type: 'error',
-          });
-
           return json;
+        });
+      }).catch((err) => {
+        addStatus({
+          message: JSON.stringify(err),
+          type: 'error',
         });
       });
     }
@@ -204,7 +205,6 @@ const Form = (props) => {
     method,
     onSubmit,
     redirect,
-    handleAjaxError,
     getData,
     clearStatus,
     validateForm,
@@ -255,7 +255,6 @@ Form.defaultProps = {
   method: 'POST',
   action: '',
   handleAjaxResponse: null,
-  handleAjaxError: null,
   className: '',
   disableSuccessStatus: false,
 };
@@ -267,7 +266,6 @@ Form.propTypes = {
   method: PropTypes.oneOf(['post', 'POST', 'get', 'GET', 'put', 'PUT', 'delete', 'DELETE']),
   action: PropTypes.string,
   handleAjaxResponse: PropTypes.func,
-  handleAjaxError: PropTypes.func,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,
