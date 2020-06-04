@@ -28,6 +28,7 @@ const Repeater = (props) => {
   const fieldState = getFields();
 
   const {
+    label,
     name,
     path: pathFromProps,
     fields,
@@ -107,6 +108,7 @@ const Repeater = (props) => {
     <RowModifiedProvider lastModified={lastModified}>
       <DragDropContext onDragEnd={onDragEnd}>
         <div className={baseClass}>
+          <h3>{label}</h3>
           <Droppable droppableId="repeater-drop">
             {provided => (
               <div
