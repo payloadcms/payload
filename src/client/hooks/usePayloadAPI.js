@@ -16,17 +16,17 @@ const usePayloadAPI = (url, options = {}) => {
   const [isError, setIsError] = useState(false);
   const locale = useLocale();
 
+  const search = queryString.stringify({
+    locale,
+    ...params,
+  }, { depth: 10 });
+
   useEffect(() => {
     const fetchData = async () => {
       setIsError(false);
       setIsLoading(true);
 
       try {
-        const search = queryString.stringify({
-          locale,
-          ...params,
-        }, { depth: 10 });
-
         const response = await requests.get(`${url}?${search}`);
         const json = await response.json();
         setData(json);
@@ -38,7 +38,7 @@ const usePayloadAPI = (url, options = {}) => {
     };
 
     if (url) fetchData();
-  }, [url, locale, params, onLoad]);
+  }, [url, locale, search, onLoad]);
 
   return [{ data, isLoading, isError }, { setParams }];
 };

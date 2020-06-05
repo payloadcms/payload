@@ -133,7 +133,7 @@ const optionsToValidatorMap = {
     return true;
   },
   select: (value) => {
-    if (value) return true;
+    if (value && value.length > 0) return true;
     return 'This field is required.';
   },
   flexible: async (value, options) => {
