@@ -88,6 +88,7 @@ const Select = (props) => {
     'field-type',
     'select',
     showError && 'error',
+    readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
   const valueToRender = formatRenderValue(value);
@@ -110,11 +111,11 @@ const Select = (props) => {
         required={required}
       />
       <ReactSelect
-        onChange={(readOnly || formProcessing) ? setValue : undefined}
+        onChange={!readOnly ? setValue : undefined}
         value={valueToRender}
         formatValue={formatFormValue}
         showError={showError}
-        disabled={formProcessing}
+        disabled={readOnly}
         options={options}
         isMulti={hasMany}
       />

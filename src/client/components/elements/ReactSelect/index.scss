@@ -4,12 +4,12 @@
 div.react-select {
   div.rs__control {
     @include formInput;
+    height: auto;
     padding-top: base(.25);
     padding-bottom: base(.25);
   }
 
   .rs__value-container {
-    height: $baseline;
     padding: 0;
 
     > * {
@@ -29,8 +29,11 @@ div.react-select {
       margin-left: base(.5);
       transform: rotate(90deg);
       width: base(.3);
-      height: base(.3);
     }
+  }
+
+  .rs__indicator {
+    padding: 0px 4px;
   }
 
   .rs__indicator-separator {
@@ -38,6 +41,9 @@ div.react-select {
   }
 
   .rs__input {
+    margin-top: base(.25);
+    margin-bottom: base(.25);
+
     input {
       font-family: $font-body;
       width: 100% !important;
@@ -74,8 +80,8 @@ div.react-select {
     padding: 0;
     background: transparent;
     border: $style-stroke-width-s solid $color-dark-gray;
-    line-height: base(.8);
-    margin: 0 base(.475) 0 0;
+    line-height: calc(#{$baseline} - #{$style-stroke-width-s * 2});
+    margin: base(.25) base(.5) base(.25) 0;
   }
 
   .rs__multi-value__label {

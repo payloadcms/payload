@@ -137,6 +137,7 @@ const Form = (props) => {
 
         return res.json().then((json) => {
           clearStatus();
+          setProcessing(false);
 
           if (res.status < 400) {
             if (typeof onSuccess === 'function') onSuccess(json);
@@ -145,7 +146,7 @@ const Form = (props) => {
               return history.push(redirect, data);
             }
 
-            setProcessing(false);
+            setModified(false);
 
             if (!disableSuccessStatus) {
               replaceStatus([{
@@ -155,8 +156,6 @@ const Form = (props) => {
               }]);
             }
           } else {
-            setProcessing(false);
-
             if (json.message) {
               addStatus({
                 message: json.message,
