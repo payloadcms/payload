@@ -107,7 +107,7 @@ const optionsToValidatorMap = {
       return `This field requires at least ${options.minRows} row(s).`;
     }
 
-    if (options.maxRows && value.length < options.maxRows) {
+    if (options.maxRows && value.length > options.maxRows) {
       return `This field requires no more than ${options.maxRows} row(s).`;
     }
 

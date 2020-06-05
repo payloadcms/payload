@@ -1,4 +1,6 @@
-import React, { useState, useReducer, useCallback } from 'react';
+import React, {
+  useState, useReducer, useCallback, useEffect,
+} from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { unflatten } from 'flatley';
@@ -31,6 +33,7 @@ const Form = (props) => {
 
   const [fields, dispatchFields] = useReducer(fieldReducer, {});
   const [submitted, setSubmitted] = useState(false);
+  const [modified, setModified] = useState(false);
   const [processing, setProcessing] = useState(false);
   const history = useHistory();
   const locale = useLocale();
@@ -233,6 +236,10 @@ const Form = (props) => {
     refreshToken();
   }, 15000, [fields]);
 
+  useEffect(() => {
+    setModified(false);
+  }, [locale]);
+
   const classes = [
     className,
     baseClass,
@@ -255,6 +262,8 @@ const Form = (props) => {
         countRows,
         getData,
         validateForm,
+        modified,
+        setModified,
       }}
       >
         <HiddenInput

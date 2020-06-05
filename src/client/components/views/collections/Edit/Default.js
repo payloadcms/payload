@@ -13,6 +13,7 @@ import DuplicateDocument from '../../../elements/DuplicateDocument';
 import DeleteDocument from '../../../elements/DeleteDocument';
 import * as fieldTypes from '../../../forms/field-types';
 import RenderTitle from './RenderTitle';
+import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving';
 
 import './index.scss';
 
@@ -55,6 +56,7 @@ const DefaultEditView = (props) => {
       >
         <div className={`${baseClass}__main`}>
           <Eyebrow />
+          <LeaveWithoutSaving />
           <div className={`${baseClass}__edit`}>
             <header className={`${baseClass}__header`}>
               <h1>
