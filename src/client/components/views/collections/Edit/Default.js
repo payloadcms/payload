@@ -58,7 +58,7 @@ const DefaultEditView = (props) => {
           <div className={`${baseClass}__edit`}>
             <header className={`${baseClass}__header`}>
               <h1>
-                <RenderTitle {...{ id, useAsTitle, fallback: '[Untitled]' }} />
+                <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
               </h1>
             </header>
             <RenderFields
@@ -85,25 +85,25 @@ const DefaultEditView = (props) => {
           ) : undefined}
           <div className={`${baseClass}__document-actions${(preview && isEditing) ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
             {isEditing && (
-            <PreviewButton generatePreviewURL={preview} />
+              <PreviewButton generatePreviewURL={preview} />
             )}
             <FormSubmit>Save</FormSubmit>
           </div>
           {isEditing && (
-          <div className={`${baseClass}__api-url`}>
-            <span className={`${baseClass}__label`}>
-              API URL
-              {' '}
-              <CopyToClipboard value={apiURL} />
-            </span>
-            <a
-              href={apiURL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {apiURL}
-            </a>
-          </div>
+            <div className={`${baseClass}__api-url`}>
+              <span className={`${baseClass}__label`}>
+                API URL
+                {' '}
+                <CopyToClipboard value={apiURL} />
+              </span>
+              <a
+                href={apiURL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {apiURL}
+              </a>
+            </div>
           )}
           <div className={`${baseClass}__sidebar-fields`}>
             <RenderFields
@@ -116,25 +116,25 @@ const DefaultEditView = (props) => {
             />
           </div>
           {isEditing && (
-          <ul className={`${baseClass}__meta`}>
-            <li>
-              <div className={`${baseClass}__label`}>ID</div>
-              <div>{id}</div>
-            </li>
-            {timestamps && (
-              <>
-                <li>
-                  <div className={`${baseClass}__label`}>Last Modified</div>
-                  <div>{moment(data.updatedAt).format('MMMM Do YYYY, h:mma')}</div>
-                </li>
-                <li>
-                  <div className={`${baseClass}__label`}>Created</div>
-                  <div>{moment(data.createdAt).format('MMMM Do YYYY, h:mma')}</div>
-                </li>
-              </>
-            )}
+            <ul className={`${baseClass}__meta`}>
+              <li>
+                <div className={`${baseClass}__label`}>ID</div>
+                <div>{id}</div>
+              </li>
+              {timestamps && (
+                <>
+                  <li>
+                    <div className={`${baseClass}__label`}>Last Modified</div>
+                    <div>{moment(data.updatedAt).format('MMMM Do YYYY, h:mma')}</div>
+                  </li>
+                  <li>
+                    <div className={`${baseClass}__label`}>Created</div>
+                    <div>{moment(data.createdAt).format('MMMM Do YYYY, h:mma')}</div>
+                  </li>
+                </>
+              )}
 
-          </ul>
+            </ul>
           )}
         </div>
       </Form>

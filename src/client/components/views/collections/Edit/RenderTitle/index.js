@@ -4,11 +4,16 @@ import useTitle from '../../../../../hooks/useTitle';
 
 const RenderTitle = (props) => {
   const {
-    useAsTitle, title: titleFromProps, id, fallback,
+    useAsTitle, title: titleFromProps, data, fallback,
   } = props;
 
-  let title = useTitle(useAsTitle) || id;
-  title = title || fallback;
+  const titleFromForm = useTitle(useAsTitle);
+  const titleFromData = data && data[useAsTitle];
+
+  let title = titleFromData;
+  if (!title) title = titleFromForm;
+  if (!title) title = data.id;
+  if (!title) title = fallback;
   title = titleFromProps || title;
 
   return <>{title}</>;
@@ -17,11 +22,15 @@ const RenderTitle = (props) => {
 RenderTitle.defaultProps = {
   title: undefined,
   fallback: '[Untitled]',
+  useAsTitle: null,
+  data: null,
 };
 
 RenderTitle.propTypes = {
-  useAsTitle: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
+  useAsTitle: PropTypes.string,
+  data: PropTypes.shape({
+    id: PropTypes.string,
+  }),
   title: PropTypes.string,
   fallback: PropTypes.string,
 };

@@ -1,29 +1,13 @@
 const { ValidationError } = require('../errors');
 
-const findRequiredSubfields = (fields) => {
-  if (fields) {
-    return fields.some((subField) => {
-      if (!subField.name && subField.fields) {
-        return findRequiredSubfields(subField.fields);
-      }
-
-      return subField.required && !subField.localized;
-    });
-  }
-
-  return false;
-};
-
 exports.iterateFields = async (data, fields, path = '') => {
   const validationPromises = [];
   const validatedFields = [];
 
   fields.forEach((field) => {
-    const requiresAtLeastOneSubfield = findRequiredSubfields(field.fields);
-
     const dataToValidate = data || {};
 
-    if ((field.required && !field.localized) || requiresAtLeastOneSubfield) {
+    if ((field.required && !field.localized && !field.condition)) {
       // If this field does not have a name, it is for
       // admin panel composition only and should not be
       // validated against directly

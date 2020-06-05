@@ -34,7 +34,7 @@ const Form = (props) => {
   const [processing, setProcessing] = useState(false);
   const history = useHistory();
   const locale = useLocale();
-  const { addStatus, clearStatus } = useStatusList();
+  const { replaceStatus, addStatus, clearStatus } = useStatusList();
   const { refreshToken } = useUser();
 
   const getFields = useCallback(() => {
@@ -49,7 +49,9 @@ const Form = (props) => {
     const data = {};
 
     Object.keys(fields).forEach((key) => {
-      data[key] = fields[key].value;
+      if (!fields[key].disableFormData) {
+        data[key] = fields[key].value;
+      }
     });
 
     return unflatten(data);
@@ -75,7 +77,9 @@ const Form = (props) => {
   }, [fields]);
 
   const validateForm = useCallback(() => {
-    return !Object.values(fields).some(field => field.valid === false);
+    return !Object.values(fields).some((field) => {
+      return field.valid === false;
+    });
   }, [fields]);
 
   const submit = useCallback((e) => {
@@ -114,7 +118,7 @@ const Form = (props) => {
           behavior: 'smooth',
         });
 
-        if (typeof handleAjaxResponse === 'function') handleAjaxResponse(res);
+        if (typeof handleAjaxResponse === 'function') return handleAjaxResponse(res);
 
         return res.json().then((json) => {
           clearStatus();
@@ -129,11 +133,11 @@ const Form = (props) => {
             setProcessing(false);
 
             if (!disableSuccessStatus) {
-              addStatus({
+              replaceStatus([{
                 message: json.message,
                 type: 'success',
                 disappear: 3000,
-              });
+              }]);
             }
           } else {
             setProcessing(false);
@@ -188,7 +192,7 @@ const Form = (props) => {
         });
       }).catch((err) => {
         addStatus({
-          message: JSON.stringify(err),
+          message: err,
           type: 'error',
         });
       });
@@ -210,6 +214,7 @@ const Form = (props) => {
     clearStatus,
     validateForm,
     onSuccess,
+    replaceStatus,
   ]);
 
   useThrottledEffect(() => {

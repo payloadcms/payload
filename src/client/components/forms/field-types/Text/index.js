@@ -37,7 +37,6 @@ const Text = (props) => {
     value,
     showError,
     setValue,
-    formProcessing,
     errorMessage,
   } = fieldType;
 

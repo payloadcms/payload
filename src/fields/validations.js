@@ -103,6 +103,14 @@ const optionsToValidatorMap = {
       return 'This field requires at least one row.';
     }
 
+    if (options.minRows && value.length < options.minRows) {
+      return `This field requires at least ${options.minRows} row(s).`;
+    }
+
+    if (options.maxRows && value.length < options.maxRows) {
+      return `This field requires no more than ${options.maxRows} row(s).`;
+    }
+
     const errors = [];
     const rowPromises = [];
 

@@ -110,6 +110,8 @@ const AllFields = {
       type: 'repeater',
       label: 'Repeater',
       name: 'repeater',
+      minRows: 2,
+      maxRows: 4,
       fields: [
         {
           type: 'row',
