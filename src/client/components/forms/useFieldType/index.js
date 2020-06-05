@@ -35,8 +35,8 @@ const useFieldType = (options) => {
   const [internalInitialValue, setInternalInitialValue] = useState(initialData);
   const [internalValue, setInternalValue] = useState(initialData);
 
-  // Debounce internal values to update form state only every 100ms
-  const debouncedValue = useDebounce(internalValue, 100);
+  // Debounce internal values to update form state only every 60ms
+  const debouncedValue = useDebounce(internalValue, 60);
 
   // Get field by path
   const field = getField(path);

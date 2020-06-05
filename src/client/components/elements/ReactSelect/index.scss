@@ -85,11 +85,12 @@ div.react-select {
   }
 
   .rs__multi-value__label {
-    padding: 0 base(.375);
+    padding: 0 base(.125) 0 base(.25);
+    max-width: 150px;
   }
 
   .rs__multi-value__remove {
-    padding: 0 base(.25);
+    padding: 0 base(.125);
     cursor: pointer;
 
     &:hover {

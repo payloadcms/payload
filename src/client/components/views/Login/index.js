@@ -3,7 +3,6 @@ import { Link, useHistory } from 'react-router-dom';
 import config from 'payload/config';
 import Logo from '../../graphics/Logo';
 import MinimalTemplate from '../../templates/Minimal';
-import StatusList, { useStatusList } from '../../elements/Status';
 import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import Password from '../../forms/field-types/Password';
@@ -18,23 +17,14 @@ const baseClass = 'login';
 const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = config;
 
 const Login = () => {
-  const { addStatus } = useStatusList();
   const history = useHistory();
   const { user, setToken } = useUser();
 
-  const handleAjaxResponse = (res) => {
-    res.json()
-      .then((data) => {
-        if (data.token) {
-          setToken(data.token);
-          history.push(`${admin}`);
-        } else {
-          addStatus({
-            type: 'error',
-            message: 'The email address or password you have entered is invalid.',
-          });
-        }
-      });
+  const onSuccess = (data) => {
+    if (data.token) {
+      setToken(data.token);
+      history.push(`${admin}`);
+    }
   };
 
   if (user) {
@@ -67,9 +57,8 @@ const Login = () => {
       <div className={`${baseClass}__brand`}>
         <Logo />
       </div>
-      <StatusList />
       <Form
-        handleAjaxResponse={handleAjaxResponse}
+        onSuccess={onSuccess}
         method="POST"
         action={`${serverURL}${api}/${userSlug}/login`}
         redirect={admin}
