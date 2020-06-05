@@ -24,14 +24,12 @@ const EditView = (props) => {
     useAsTitle,
   } = collection;
 
-  const onSave = !isEditing ? (res) => {
-    res.json().then((json) => {
-      history.push(`${admin}/collections/${collection.slug}/${json.doc.id}`, {
-        status: {
-          message: json.message,
-          type: 'success',
-        },
-      });
+  const onSave = !isEditing ? (json) => {
+    history.push(`${admin}/collections/${collection.slug}/${json.doc.id}`, {
+      status: {
+        message: json.message,
+        type: 'success',
+      },
     });
   } : null;
 

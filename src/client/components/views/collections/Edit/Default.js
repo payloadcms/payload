@@ -50,7 +50,7 @@ const DefaultEditView = (props) => {
         className={`${baseClass}__form`}
         method={id ? 'put' : 'post'}
         action={`${serverURL}${api}/${slug}${id ? `/${id}` : ''}`}
-        handleAjaxResponse={onSave}
+        onSuccess={onSave}
       >
         <div className={`${baseClass}__main`}>
           <Eyebrow />

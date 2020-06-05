@@ -22,6 +22,7 @@ const Form = (props) => {
     method,
     action,
     handleAjaxResponse,
+    onSuccess,
     children,
     className,
     redirect,
@@ -119,7 +120,7 @@ const Form = (props) => {
           clearStatus();
 
           if (res.status < 400) {
-            // If prop handleAjaxResponse is passed, pass it the response
+            if (typeof onSuccess === 'function') onSuccess(json);
 
             if (redirect) {
               return history.push(redirect, data);
@@ -208,6 +209,7 @@ const Form = (props) => {
     getData,
     clearStatus,
     validateForm,
+    onSuccess,
   ]);
 
   useThrottledEffect(() => {
@@ -255,6 +257,7 @@ Form.defaultProps = {
   method: 'POST',
   action: '',
   handleAjaxResponse: null,
+  onSuccess: null,
   className: '',
   disableSuccessStatus: false,
 };
@@ -266,6 +269,7 @@ Form.propTypes = {
   method: PropTypes.oneOf(['post', 'POST', 'get', 'GET', 'put', 'PUT', 'delete', 'DELETE']),
   action: PropTypes.string,
   handleAjaxResponse: PropTypes.func,
+  onSuccess: PropTypes.func,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,
