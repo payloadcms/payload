@@ -89,7 +89,19 @@ const Form = (props) => {
 
     // If not valid, prevent submission
     if (!isValid) {
-      return e.preventDefault();
+      e.preventDefault();
+
+      addStatus({
+        message: 'Please correct the fields below.',
+        type: 'error',
+      });
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+
+      return false;
     }
 
     // If submit handler comes through via props, run that
@@ -103,6 +115,11 @@ const Form = (props) => {
     if (ajax !== false) {
       e.preventDefault();
 
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+
       const data = getData();
 
       setProcessing(true);
@@ -113,11 +130,6 @@ const Form = (props) => {
           'Content-Type': 'application/json',
         },
       }).then((res) => {
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth',
-        });
-
         if (typeof handleAjaxResponse === 'function') return handleAjaxResponse(res);
 
         return res.json().then((json) => {
