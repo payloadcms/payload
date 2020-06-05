@@ -15,7 +15,7 @@ const EditableBlockTitle = (props) => {
 
   const {
     value,
-    onFieldChange,
+    setValue,
   } = useFieldType({
     name,
   });
@@ -39,7 +39,7 @@ const EditableBlockTitle = (props) => {
           placeholder="Untitled"
           type="text"
           name={name}
-          onChange={onFieldChange}
+          onChange={setValue}
           onKeyDown={onKeyDown}
           style={{
             width: `${inputWidth}px`,

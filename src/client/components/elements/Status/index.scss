@@ -8,9 +8,8 @@
   li {
     background: $color-green;
     color: $color-dark-gray;
-    border-radius: $style-radius-s;
-    padding: base(.5);
-    margin-bottom: base(.5);
+    padding: base(.5) $baseline;
+    margin-bottom: 1px;
     display: flex;
     justify-content: space-between;
   }
@@ -26,6 +25,12 @@
 
     &:hover {
       opacity: .5;
+    }
+
+    &:active,
+    &:focus {
+      outline: none;
+      border: 0;
     }
   }
 

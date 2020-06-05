@@ -129,13 +129,17 @@ function fieldReducer(state, action) {
     }
 
     default: {
+      const newField = {
+        value: action.value,
+        valid: action.valid,
+        errorMessage: action.errorMessage,
+      };
+
+      if (action.disableFormData) newField.disableFormData = action.disableFormData;
+
       return {
         ...state,
-        [action.path]: {
-          value: action.value,
-          valid: action.valid,
-          errorMessage: action.errorMessage,
-        },
+        [action.path]: newField,
       };
     }
   }

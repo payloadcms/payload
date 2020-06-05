@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useRouteMatch } from 'react-router-dom';
+import { Link, useRouteMatch, useLocation } from 'react-router-dom';
 import moment from 'moment';
 import config from 'payload/config';
 import Eyebrow from '../../../elements/Eyebrow';
@@ -9,16 +9,20 @@ import PreviewButton from '../../../elements/PreviewButton';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
 import CopyToClipboard from '../../../elements/CopyToClipboard';
+import DuplicateDocument from '../../../elements/DuplicateDocument';
+import DeleteDocument from '../../../elements/DeleteDocument';
 import * as fieldTypes from '../../../forms/field-types';
+import RenderTitle from './RenderTitle';
 
 import './index.scss';
 
-const { serverURL, routes: { api } } = config;
+const { serverURL, routes: { api, admin } } = config;
 
 const baseClass = 'collection-edit';
 
 const DefaultEditView = (props) => {
   const { params: { id } = {} } = useRouteMatch();
+  const { state: locationState } = useLocation();
 
   const {
     collection, isEditing, data, onSave,
@@ -27,9 +31,6 @@ const DefaultEditView = (props) => {
   const {
     slug,
     fields,
-    labels: {
-      singular: singularLabel,
-    },
     useAsTitle,
     timestamps,
     preview,
@@ -37,57 +38,55 @@ const DefaultEditView = (props) => {
 
   const apiURL = `${serverURL}${api}/${slug}/${id}`;
 
+  const dataToRender = locationState?.data || data;
+
+  const classes = [
+    baseClass,
+    isEditing && `${baseClass}--is-editing`,
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className={baseClass}>
+    <div className={classes}>
       <Form
         className={`${baseClass}__form`}
         method={id ? 'put' : 'post'}
         action={`${serverURL}${api}/${slug}${id ? `/${id}` : ''}`}
-        handleAjaxResponse={onSave}
+        onSuccess={onSave}
       >
         <div className={`${baseClass}__main`}>
-          <Eyebrow actions={
-            isEditing ? (
-              <ul className={`${baseClass}__collection-actions`}>
-                <li>Add New</li>
-                <li>Duplicate</li>
-                <li>Delete</li>
-              </ul>
-            ) : undefined}
-          />
+          <Eyebrow />
           <div className={`${baseClass}__edit`}>
             <header className={`${baseClass}__header`}>
-              {isEditing && (
-                <h1>
-                  Edit
-                  {' '}
-                  {Object.keys(data).length > 0
-                    && (data[useAsTitle || 'id'] ? data[useAsTitle || 'id'] : '[Untitled]')
-                  }
-                </h1>
-              )}
-              {!isEditing
-                && (
-                  <h1>
-                    New
-                    {' '}
-                    {singularLabel}
-                  </h1>
-                )
-              }
+              <h1>
+                <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
+              </h1>
             </header>
             <RenderFields
               filter={field => (!field.position || (field.position && field.position !== 'sidebar'))}
               fieldTypes={fieldTypes}
               fieldSchema={fields}
-              initialData={data}
+              initialData={dataToRender}
               customComponentsPath={`${slug}.fields.`}
             />
           </div>
         </div>
         <div className={`${baseClass}__sidebar`}>
-          <div className={`${baseClass}__document-actions${preview ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
-            <PreviewButton generatePreviewURL={preview} />
+          {isEditing ? (
+            <ul className={`${baseClass}__collection-actions`}>
+              <li><Link to={`${admin}/collections/${slug}/create`}>Create New</Link></li>
+              <li><DuplicateDocument slug={slug} /></li>
+              <li>
+                <DeleteDocument
+                  collection={collection}
+                  id={id}
+                />
+              </li>
+            </ul>
+          ) : undefined}
+          <div className={`${baseClass}__document-actions${(preview && isEditing) ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
+            {isEditing && (
+              <PreviewButton generatePreviewURL={preview} />
+            )}
             <FormSubmit>Save</FormSubmit>
           </div>
           {isEditing && (
@@ -112,7 +111,7 @@ const DefaultEditView = (props) => {
               position="sidebar"
               fieldTypes={fieldTypes}
               fieldSchema={fields}
-              initialData={data}
+              initialData={dataToRender}
               customComponentsPath={`${slug}.fields.`}
             />
           </div>

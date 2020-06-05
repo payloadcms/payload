@@ -37,7 +37,6 @@ const Text = (props) => {
     value,
     showError,
     setValue,
-    formProcessing,
     errorMessage,
   } = fieldType;
 
@@ -68,7 +67,7 @@ const Text = (props) => {
       <input
         value={value || ''}
         onChange={setValue}
-        disabled={(readOnly || formProcessing) ? 'disabled' : undefined}
+        disabled={readOnly ? 'disabled' : undefined}
         placeholder={placeholder}
         type="text"
         id={path}

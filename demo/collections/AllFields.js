@@ -21,6 +21,8 @@ const AllFields = {
       type: 'text',
       label: 'Text',
       required: true,
+      defaultValue: 'Default Value',
+      unique: true,
     },
     {
       name: 'select',
@@ -108,6 +110,8 @@ const AllFields = {
       type: 'repeater',
       label: 'Repeater',
       name: 'repeater',
+      minRows: 2,
+      maxRows: 4,
       fields: [
         {
           type: 'row',

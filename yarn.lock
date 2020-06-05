@@ -1182,13 +1182,13 @@
   dependencies:
     prop-types "^15.7.2"
 
-"@trbl/react-modal@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@trbl/react-modal/-/react-modal-0.1.1.tgz#c406728ccf8b340a2400a7ca1c56ae5fa22a0d9a"
-  integrity sha512-6+A42NMNuTF0WCvfxwarCEzsVsxH4hLZ/6IaF8h7Uu9GmdKUjcCGH+wySFXV1k23FXIG/dsofxvrnW+JYv/XeQ==
+"@trbl/react-modal@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@trbl/react-modal/-/react-modal-1.0.4.tgz#50f92d42489d414f863e6897720d8d26efab7611"
+  integrity sha512-jY1/EHrcY5hGUDkeF3eTWE/FN+TTFYBF70teUTt8AKK8gCOmX4lMq8UvTucrmtLOsrh5ITaNDhakoEyWSmIzFA==
   dependencies:
     "@trbl/react-html-element" "^1.0.3"
-    minify-css-string "^1.0.0"
+    body-scroll-lock "^3.0.1"
     prop-types "^15.7.2"
     qs "^6.9.1"
     react-transition-group "^4.3.0"
@@ -2139,6 +2139,11 @@ body-parser@1.19.0, body-parser@^1.19.0:
     qs "6.7.0"
     raw-body "2.4.0"
     type-is "~1.6.17"
+
+body-scroll-lock@^3.0.1:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/body-scroll-lock/-/body-scroll-lock-3.0.3.tgz#221d87435bcfb50e27ab5d4508735f622aed11a2"
+  integrity sha512-EUryImgD6Gv87HOjJB/yB2WIGECiZMhmcUK+DrqVRFDDa64xR+FsK0LgvLPnBxZDTxIl+W80/KJ8i6gp2IwOHQ==
 
 boolbase@^1.0.0, boolbase@~1.0.0:
   version "1.0.0"
@@ -6756,11 +6761,6 @@ mini-create-react-context@^0.3.0:
     "@babel/runtime" "^7.4.0"
     gud "^1.0.0"
     tiny-warning "^1.0.2"
-
-minify-css-string@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/minify-css-string/-/minify-css-string-1.0.0.tgz#201bd949271e19f6e0af0a1dc0ccc583de47c630"
-  integrity sha1-IBvZSSceGfbgrwodwMzFg95HxjA=
 
 minimalistic-assert@^1.0.0, minimalistic-assert@^1.0.1:
   version "1.0.1"

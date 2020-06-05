@@ -1,14 +1,12 @@
 @import '../../../scss/styles.scss';
 
 .template-default {
-  margin-left: base(8);
-  width: calc(100% - #{base(8)});
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
 
   &__wrap {
     padding-left: base(2);
+    min-width: 0;
   }
 
   &__wrap {
@@ -24,9 +22,9 @@
   }
 
   @include mid-break {
+    display: block;
     width: 100%;
     margin-left: 0;
-    padding-top: base(3);
 
     &__wrap {
       padding: 0 0 $baseline;

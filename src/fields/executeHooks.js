@@ -23,7 +23,7 @@ const executeFieldHooks = async (operation, fields, value, hookName, data = null
       hookPromises.push(hookPromise());
     }
 
-    if (field.fields && data[field.name]) {
+    if (field.fields && data && data[field.name]) {
       const hookPromise = async () => {
         fullData[field.name] = await executeFieldHooks(operation, field.fields, fullData[field.name], hookName, data[field.name]);
       };

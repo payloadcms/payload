@@ -1,6 +1,3 @@
-/* eslint-disable no-underscore-dangle */
-const path = require('path');
-
 module.exports = {
   slug: 'localized-posts',
   labels: {

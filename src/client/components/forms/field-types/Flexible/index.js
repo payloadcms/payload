@@ -1,5 +1,5 @@
 import React, {
-  useContext, useEffect, useReducer, useState,
+  useContext, useEffect, useReducer, useState, useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
@@ -13,6 +13,9 @@ import AddRowModal from './AddRowModal';
 import collapsibleReducer from './reducer';
 import DraggableSection from '../../DraggableSection';
 import { useRenderedFields } from '../../RenderFields';
+import Error from '../../Error';
+import useFieldType from '../../useFieldType';
+import { flexible } from '../../../../../fields/validations';
 
 import './index.scss';
 
@@ -28,9 +31,32 @@ const Flexible = (props) => {
     initialData,
     singularLabel,
     fieldTypes,
+    maxRows,
+    minRows,
+    required,
+    validate,
   } = props;
 
   const path = pathFromProps || name;
+
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { minRows, maxRows });
+    return validationResult;
+  }, [validate, maxRows, minRows]);
+
+  const {
+    showError,
+    errorMessage,
+    setValue,
+    value,
+  } = useFieldType({
+    path,
+    validate: memoizedValidate,
+    disableFormData: true,
+    initialData,
+    defaultValue,
+    required,
+  });
 
   const parentRowsModified = useRowModified();
   const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
@@ -116,11 +142,27 @@ const Flexible = (props) => {
     });
   }, [dataToInitialize]);
 
+  useEffect(() => {
+    let i;
+    const newValue = [];
+    for (i = 0; i < rowCount; i += 1) {
+      newValue.push({});
+    }
+
+    setValue(newValue);
+  }, [rowCount, setValue]);
+
   return (
     <RowModifiedProvider lastModified={lastModified}>
       <DragDropContext onDragEnd={onDragEnd}>
         <div className={baseClass}>
-          <h3>{label}</h3>
+          <header className={`${baseClass}__header`}>
+            <h3>{label}</h3>
+            <Error
+              showError={showError}
+              message={errorMessage}
+            />
+          </header>
           <Droppable droppableId="flexible-drop">
             {provided => (
               <div
@@ -163,7 +205,7 @@ const Flexible = (props) => {
                           },
                         ]}
                         singularLabel={blockType}
-                        initialData={lastModified ? undefined : dataToInitialize[rowIndex]}
+                        initialData={lastModified ? undefined : value[rowIndex]}
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}
                         blockType="flexible"
@@ -206,6 +248,10 @@ Flexible.defaultProps = {
   defaultValue: [],
   initialData: [],
   singularLabel: 'Block',
+  validate: flexible,
+  required: false,
+  maxRows: undefined,
+  minRows: undefined,
 };
 
 Flexible.propTypes = {
@@ -223,6 +269,10 @@ Flexible.propTypes = {
   name: PropTypes.string.isRequired,
   path: PropTypes.string.isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
+  validate: PropTypes.func,
+  required: PropTypes.bool,
+  maxRows: PropTypes.number,
+  minRows: PropTypes.number,
 };
 
 export default withCondition(Flexible);

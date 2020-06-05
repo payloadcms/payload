@@ -1,0 +1,16 @@
+@import '../../../scss/styles.scss';
+
+.delete-document {
+  background: rgba(white, .97);
+  display: flex;
+  align-items: center;
+  height: 100%;
+
+  &__toggle {
+    @extend %btn-reset;
+  }
+
+  .btn {
+    margin-right: $baseline;
+  }
+}

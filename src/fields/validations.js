@@ -19,15 +19,15 @@ const optionsToValidatorMap = {
     return true;
   },
   text: (value, options = {}) => {
-    if (options.maxLength && value.length > options.maxLength) {
+    if (options.maxLength && (value && value.length > options.maxLength)) {
       return `This value must be shorter than the max length of ${options.max} characters.`;
     }
 
-    if (options.minLength && value.length < options.minLength) {
+    if (options.minLength && (value && value.length < options.minLength)) {
       return `This value must be longer than the minimum length of ${options.max} characters.`;
     }
 
-    if (typeof value !== 'string' || value.length === 0) {
+    if (typeof value !== 'string' || (typeof value === 'string' && value.length === 0)) {
       return 'This field is required.';
     }
 
@@ -95,16 +95,26 @@ const optionsToValidatorMap = {
   group: async (value, options) => {
     return iterateFields(value, options.fields, `${options.name}.`);
   },
-  repeater: async (value, options) => {
+  repeater: async (value, options = {}) => {
+    const path = options.path || options.name;
+
     if (!value || value.length === 0) {
       return 'This field requires at least one row.';
+    }
+
+    if (options.minRows && value.length < options.minRows) {
+      return `This field requires at least ${options.minRows} row(s).`;
+    }
+
+    if (options.maxRows && value.length < options.maxRows) {
+      return `This field requires no more than ${options.maxRows} row(s).`;
     }
 
     const errors = [];
     const rowPromises = [];
 
     value.forEach((row, i) => {
-      rowPromises.push(iterateFields(row, options.fields, `${options.name}.${i}.`));
+      rowPromises.push(iterateFields(row, options.fields, `${path}.${i}.`));
     });
 
     const rowResults = await Promise.all(rowPromises);

@@ -15,16 +15,28 @@ const initialStatus = [];
 
 const statusReducer = (state, action) => {
   switch (action.type) {
-    case 'ADD':
-      return [
+    case 'ADD': {
+      const newState = [
         ...state,
         action.payload,
       ];
+
+      return newState;
+    }
+
 
     case 'REMOVE': {
       const statusList = [...state];
       statusList.splice(action.payload, 1);
       return statusList;
+    }
+
+    case 'CLEAR': {
+      return [];
+    }
+
+    case 'REPLACE': {
+      return action.payload;
     }
 
     default:
@@ -34,38 +46,37 @@ const statusReducer = (state, action) => {
 
 const useStatusList = () => useContext(Context);
 
-const HandleLocationStatus = () => {
-  const { state } = useLocation();
-  const { addStatus } = useStatusList();
+const StatusListProvider = ({ children }) => {
+  const [statusList, dispatchStatus] = useReducer(statusReducer, initialStatus);
+  const { pathname, state } = useLocation();
+
+  const removeStatus = useCallback(i => dispatchStatus({ type: 'REMOVE', payload: i }), []);
+  const addStatus = useCallback(status => dispatchStatus({ type: 'ADD', payload: status }), []);
+  const clearStatus = useCallback(() => dispatchStatus({ type: 'CLEAR' }), []);
+  const replaceStatus = useCallback(status => dispatchStatus({ type: 'REPLACE', payload: status }), []);
 
   useEffect(() => {
     if (state && state.status) {
       if (Array.isArray(state.status)) {
-        state.status.forEach(individualStatus => addStatus(individualStatus));
+        replaceStatus(state.status);
       } else {
-        addStatus(state.status);
+        replaceStatus([state.status]);
       }
+    } else {
+      clearStatus();
     }
-  }, [addStatus, state]);
-
-  return null;
-};
-
-const StatusListProvider = ({ children }) => {
-  const [statusList, dispatchStatus] = useReducer(statusReducer, initialStatus);
-
-  const removeStatus = useCallback(i => dispatchStatus({ type: 'REMOVE', payload: i }), []);
-  const addStatus = useCallback(status => dispatchStatus({ type: 'ADD', payload: status }), []);
+  }, [addStatus, replaceStatus, clearStatus, state, pathname]);
 
   return (
     <Context.Provider value={{
       statusList,
       removeStatus,
       addStatus,
+      clearStatus,
+      replaceStatus,
     }}
     >
       {children}
-      <HandleLocationStatus />
     </Context.Provider>
   );
 };
@@ -118,7 +129,6 @@ const StatusList = () => {
 export {
   StatusListProvider,
   useStatusList,
-  HandleLocationStatus,
 };
 
 export default StatusList;

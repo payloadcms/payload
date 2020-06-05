@@ -66,7 +66,7 @@ const Textarea = (props) => {
       <textarea
         value={value || ''}
         onChange={setValue}
-        disabled={(readOnly || formProcessing) ? 'disabled' : undefined}
+        disabled={readOnly ? 'disabled' : undefined}
         placeholder={placeholder}
         id={path}
         name={path}

@@ -22,11 +22,11 @@ const Form = (props) => {
     method,
     action,
     handleAjaxResponse,
+    onSuccess,
     children,
     className,
     redirect,
     disableSuccessStatus,
-    onError,
   } = props;
 
   const [fields, dispatchFields] = useReducer(fieldReducer, {});
@@ -34,7 +34,7 @@ const Form = (props) => {
   const [processing, setProcessing] = useState(false);
   const history = useHistory();
   const locale = useLocale();
-  const { addStatus } = useStatusList();
+  const { replaceStatus, addStatus, clearStatus } = useStatusList();
   const { refreshToken } = useUser();
 
   const getFields = useCallback(() => {
@@ -43,6 +43,18 @@ const Form = (props) => {
 
   const getField = useCallback((path) => {
     return fields[path];
+  }, [fields]);
+
+  const getData = useCallback(() => {
+    const data = {};
+
+    Object.keys(fields).forEach((key) => {
+      if (!fields[key].disableFormData) {
+        data[key] = fields[key].value;
+      }
+    });
+
+    return unflatten(data);
   }, [fields]);
 
   const countRows = useCallback((rowName) => {
@@ -64,123 +76,158 @@ const Form = (props) => {
     return rowCount;
   }, [fields]);
 
-  const submit = useCallback(async (e) => {
+  const validateForm = useCallback(() => {
+    return !Object.values(fields).some((field) => {
+      return field.valid === false;
+    });
+  }, [fields]);
+
+  const submit = useCallback((e) => {
     setSubmitted(true);
 
-    let isValid = true;
-
-    Object.keys(fields).forEach((field) => {
-      if (!fields[field].valid) {
-        isValid = false;
-      }
-    });
+    const isValid = validateForm();
 
     // If not valid, prevent submission
     if (!isValid) {
       e.preventDefault();
 
-      // If submit handler comes through via props, run that
-    } else if (onSubmit) {
-      e.preventDefault();
-
-      onSubmit(fields);
-
-      // If form is AJAX, fetch data
-    } else if (ajax !== false) {
-      e.preventDefault();
-      const data = {};
-
-      // Clean up data passed from field state
-      Object.keys(fields).forEach((key) => {
-        data[key] = fields[key].value;
+      addStatus({
+        message: 'Please correct the fields below.',
+        type: 'error',
       });
 
-      setProcessing(true);
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
 
-      try {
-        // Make the API call from the action
-        const res = await requests[method.toLowerCase()](action, {
-          body: JSON.stringify(unflatten(data)),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (res.status < 400) {
-          // If prop handleAjaxResponse is passed, pass it the response
-          if (typeof handleAjaxResponse === 'function') handleAjaxResponse(res);
-
-          if (redirect) {
-            return history.push(redirect, data);
-          }
-
-          setProcessing(false);
-
-          const json = await res.json();
-
-          if (!disableSuccessStatus) {
-            addStatus({
-              message: json.message,
-              type: 'success',
-            });
-          }
-        } else {
-          throw res;
-        }
-      } catch (error) {
-        setProcessing(false);
-
-        if (typeof onError === 'function') onError(error);
-
-        const json = await error.json();
-
-        if (json.message) {
-          addStatus({
-            message: json.message,
-            type: 'error',
-          });
-        } else if (Array.isArray(json.errors)) {
-          const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => {
-            return err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]];
-          }, [[], []]);
-
-          fieldErrors.forEach((err) => {
-            dispatchFields({
-              valid: false,
-              errorMessage: err.message,
-              path: err.field,
-              value: fields[err.field].value,
-            });
-          });
-
-          nonFieldErrors.forEach((err) => {
-            addStatus({
-              message: err.message || 'An unknown error occurred.',
-              type: 'error',
-            });
-          });
-
-          if (fieldErrors.length > 0 && nonFieldErrors.length === 0) {
-            addStatus({
-              message: 'Please correct the fields below.',
-              type: 'error',
-            });
-          }
-
-          window.scrollTo({
-            top: 0,
-            behavior: 'smooth',
-          });
-        } else {
-          addStatus({
-            message: 'An unknown error occurred.',
-            type: 'error',
-          });
-        }
-      }
+      return false;
     }
-    // If valid and not AJAX submit as usual
-  }, [action, addStatus, ajax, disableSuccessStatus, fields, handleAjaxResponse, history, method, onSubmit, redirect, onError]);
+
+    // If submit handler comes through via props, run that
+    if (onSubmit) {
+      e.preventDefault();
+
+      return onSubmit(fields);
+    }
+
+    // If form is AJAX, fetch data
+    if (ajax !== false) {
+      e.preventDefault();
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+
+      const data = getData();
+
+      setProcessing(true);
+      // Make the API call from the action
+      return requests[method.toLowerCase()](action, {
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then((res) => {
+        if (typeof handleAjaxResponse === 'function') return handleAjaxResponse(res);
+
+        return res.json().then((json) => {
+          clearStatus();
+
+          if (res.status < 400) {
+            if (typeof onSuccess === 'function') onSuccess(json);
+
+            if (redirect) {
+              return history.push(redirect, data);
+            }
+
+            setProcessing(false);
+
+            if (!disableSuccessStatus) {
+              replaceStatus([{
+                message: json.message,
+                type: 'success',
+                disappear: 3000,
+              }]);
+            }
+          } else {
+            setProcessing(false);
+
+            if (json.message) {
+              addStatus({
+                message: json.message,
+                type: 'error',
+              });
+
+              return json;
+            }
+
+            if (Array.isArray(json.errors)) {
+              const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => {
+                return err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]];
+              }, [[], []]);
+
+              fieldErrors.forEach((err) => {
+                dispatchFields({
+                  valid: false,
+                  errorMessage: err.message,
+                  path: err.field,
+                  value: fields?.[err.field]?.value,
+                });
+              });
+
+              nonFieldErrors.forEach((err) => {
+                addStatus({
+                  message: err.message || 'An unknown error occurred.',
+                  type: 'error',
+                });
+              });
+
+              if (fieldErrors.length > 0 && nonFieldErrors.length === 0) {
+                addStatus({
+                  message: 'Please correct the fields below.',
+                  type: 'error',
+                });
+              }
+
+              return json;
+            }
+
+            addStatus({
+              message: 'An unknown error occurred.',
+              type: 'error',
+            });
+          }
+
+          return json;
+        });
+      }).catch((err) => {
+        addStatus({
+          message: err,
+          type: 'error',
+        });
+      });
+    }
+
+    return true;
+  }, [
+    action,
+    addStatus,
+    ajax,
+    disableSuccessStatus,
+    fields,
+    handleAjaxResponse,
+    history,
+    method,
+    onSubmit,
+    redirect,
+    getData,
+    clearStatus,
+    validateForm,
+    onSuccess,
+    replaceStatus,
+  ]);
 
   useThrottledEffect(() => {
     refreshToken();
@@ -206,6 +253,8 @@ const Form = (props) => {
         processing,
         submitted,
         countRows,
+        getData,
+        validateForm,
       }}
       >
         <HiddenInput
@@ -225,7 +274,7 @@ Form.defaultProps = {
   method: 'POST',
   action: '',
   handleAjaxResponse: null,
-  onError: null,
+  onSuccess: null,
   className: '',
   disableSuccessStatus: false,
 };
@@ -237,7 +286,7 @@ Form.propTypes = {
   method: PropTypes.oneOf(['post', 'POST', 'get', 'GET', 'put', 'PUT', 'delete', 'DELETE']),
   action: PropTypes.string,
   handleAjaxResponse: PropTypes.func,
-  onError: PropTypes.func,
+  onSuccess: PropTypes.func,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,

@@ -72,7 +72,7 @@ const NumberField = (props) => {
       <input
         value={value || ''}
         onChange={e => setValue(parseInt(e.target.value, 10))}
-        disabled={(readOnly || formProcessing) ? 'disabled' : undefined}
+        disabled={readOnly ? 'disabled' : undefined}
         placeholder={placeholder}
         type="number"
         id={path}

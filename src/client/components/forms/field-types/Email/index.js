@@ -67,7 +67,7 @@ const Email = (props) => {
       <input
         value={value || ''}
         onChange={setValue}
-        disabled={(readOnly || processing) ? 'disabled' : undefined}
+        disabled={readOnly ? 'disabled' : undefined}
         placeholder={placeholder}
         type="email"
         id={path}

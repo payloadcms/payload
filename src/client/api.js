@@ -48,6 +48,18 @@ export const requests = {
       },
     };
 
-    return fetch(`${url}`, formattedOptions);
+    return fetch(url, formattedOptions);
+  },
+
+  delete: (url, options = {}) => {
+    const headers = options && options.headers ? { ...options.headers } : {};
+    return fetch(url, {
+      ...options,
+      method: 'delete',
+      headers: {
+        ...headers,
+        ...getJWTHeader(),
+      },
+    });
   },
 };

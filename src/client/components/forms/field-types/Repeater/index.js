@@ -1,5 +1,5 @@
 import React, {
-  useContext, useState, useEffect, useReducer,
+  useContext, useState, useEffect, useReducer, useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
@@ -11,12 +11,30 @@ import FormContext from '../../Form/Context';
 import DraggableSection from '../../DraggableSection';
 import collapsibleReducer from './reducer';
 import { useRenderedFields } from '../../RenderFields';
+import useFieldType from '../../useFieldType';
+import Error from '../../Error';
+import { repeater } from '../../../../../fields/validations';
 
 import './index.scss';
 
 const baseClass = 'field-type repeater';
 
 const Repeater = (props) => {
+  const {
+    label,
+    name,
+    path: pathFromProps,
+    fields,
+    defaultValue,
+    initialData,
+    singularLabel,
+    fieldTypes,
+    validate,
+    required,
+    maxRows,
+    minRows,
+  } = props;
+
   const parentRowsModified = useRowModified();
   const [collapsibleStates, dispatchCollapsibleStates] = useReducer(collapsibleReducer, []);
   const formContext = useContext(FormContext);
@@ -25,19 +43,28 @@ const Repeater = (props) => {
   const { getFields, dispatchFields, countRows } = formContext;
   const { customComponentsPath } = useRenderedFields();
 
-  const fieldState = getFields();
+  const path = pathFromProps || name;
+
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { minRows, maxRows });
+    return validationResult;
+  }, [validate, maxRows, minRows]);
 
   const {
-    name,
-    path: pathFromProps,
-    fields,
-    defaultValue,
+    showError,
+    errorMessage,
+    setValue,
+    value,
+  } = useFieldType({
+    path,
+    validate: memoizedValidate,
+    disableFormData: true,
     initialData,
-    singularLabel,
-    fieldTypes,
-  } = props;
+    defaultValue,
+    required,
+  });
 
-  const path = pathFromProps || name;
+  const fieldState = getFields();
   const dataToInitialize = initialData || defaultValue;
 
   const addRow = (rowIndex) => {
@@ -79,6 +106,18 @@ const Repeater = (props) => {
     setLastModified(Date.now());
   };
 
+  const updateRowCountOnParentRowModified = () => {
+    const countedRows = countRows(path);
+    setRowCount(countedRows);
+  };
+
+  const onDragEnd = (result) => {
+    if (!result.destination) return;
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+    moveRow(sourceIndex, destinationIndex);
+  };
+
   useEffect(() => {
     setRowCount(dataToInitialize.length);
     setLastModified(null);
@@ -89,24 +128,29 @@ const Repeater = (props) => {
     });
   }, [dataToInitialize]);
 
-  const updateRowCountOnParentRowModified = () => {
-    const countedRows = countRows(path);
-    setRowCount(countedRows);
-  };
-
   useEffect(updateRowCountOnParentRowModified, [parentRowsModified]);
 
-  const onDragEnd = (result) => {
-    if (!result.destination) return;
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-    moveRow(sourceIndex, destinationIndex);
-  };
+  useEffect(() => {
+    let i;
+    const newValue = [];
+    for (i = 0; i < rowCount; i += 1) {
+      newValue.push({});
+    }
+
+    setValue(newValue);
+  }, [rowCount, setValue]);
 
   return (
     <RowModifiedProvider lastModified={lastModified}>
       <DragDropContext onDragEnd={onDragEnd}>
         <div className={baseClass}>
+          <header className={`${baseClass}__header`}>
+            <h3>{label}</h3>
+            <Error
+              showError={showError}
+              message={errorMessage}
+            />
+          </header>
           <Droppable droppableId="repeater-drop">
             {provided => (
               <div
@@ -126,7 +170,7 @@ const Repeater = (props) => {
                         rowIndex={rowIndex}
                         fieldState={fieldState}
                         fieldSchema={fields}
-                        initialData={lastModified ? undefined : dataToInitialize[rowIndex]}
+                        initialData={lastModified ? undefined : value[rowIndex]}
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}
                         customComponentsPath={`${customComponentsPath}${name}.fields.`}
@@ -158,6 +202,10 @@ Repeater.defaultProps = {
   singularLabel: 'Row',
   defaultValue: [],
   initialData: [],
+  validate: repeater,
+  required: false,
+  maxRows: undefined,
+  minRows: undefined,
 };
 
 Repeater.propTypes = {
@@ -175,6 +223,10 @@ Repeater.propTypes = {
   name: PropTypes.string.isRequired,
   path: PropTypes.string.isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
+  validate: PropTypes.func,
+  required: PropTypes.bool,
+  maxRows: PropTypes.number,
+  minRows: PropTypes.number,
 };
 
 export default withCondition(Repeater);
