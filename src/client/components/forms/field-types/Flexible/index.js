@@ -52,7 +52,6 @@ const Flexible = (props) => {
   const {
     showError,
     errorMessage,
-    setValue,
     value,
   } = useFieldType({
     path,
@@ -195,7 +194,7 @@ const Flexible = (props) => {
                             hidden: 'admin',
                           },
                         ]}
-                        singularLabel={blockType}
+                        singularLabel={blockToRender?.labels?.singular}
                         initialData={lastModified ? undefined : value[rowIndex]}
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}
