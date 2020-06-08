@@ -1,0 +1,7 @@
+@import '../../../../../scss/styles.scss';
+
+.commands-toolbar {
+  border-bottom: 1px solid $color-light-gray;
+  padding: base(.5);
+  background: $color-background-gray;
+}

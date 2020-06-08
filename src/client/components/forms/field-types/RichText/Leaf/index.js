@@ -1,15 +1,15 @@
 import React from 'react';
 
-const InlineMark = (props) => {
-  const { children, attributes, leaf: marks } = props;
+const Leaf = (props) => {
+  const { children, attributes, leaf } = props;
 
   const styles = {
-    fontWeight: marks.bold ? 'bold' : 'normal',
-    fontStyle: marks.italic ? 'italic' : 'normal',
-    textDecoration: marks.underline ? 'underline' : 'none',
+    fontWeight: leaf.bold ? 'bold' : 'normal',
+    fontStyle: leaf.italic ? 'italic' : 'normal',
+    textDecoration: leaf.underline ? 'underline' : 'none',
   };
 
-  if (marks.code) {
+  if (leaf.code) {
     return (
       <code {...attributes}>
         <span style={styles}>
@@ -29,4 +29,4 @@ const InlineMark = (props) => {
   );
 };
 
-export default InlineMark;
+export default Leaf;
