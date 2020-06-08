@@ -193,15 +193,11 @@ const Flexible = (props) => {
                           {
                             name: 'blockType',
                             type: 'text',
-                            hidden: {
-                              admin: true,
-                            },
+                            hidden: 'admin',
                           }, {
                             name: 'blockName',
                             type: 'text',
-                            hidden: {
-                              admin: true,
-                            },
+                            hidden: 'admin',
                           },
                         ]}
                         singularLabel={blockType}

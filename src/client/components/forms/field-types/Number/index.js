@@ -4,6 +4,7 @@ import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
 import withCondition from '../../withCondition';
+import { number } from '../../../../../fields/validations';
 
 import './index.scss';
 
@@ -35,7 +36,6 @@ const NumberField = (props) => {
     value,
     showError,
     setValue,
-    formProcessing,
     errorMessage,
   } = useFieldType({
     path,
@@ -94,6 +94,7 @@ NumberField.defaultProps = {
   min: undefined,
   path: '',
   readOnly: false,
+  validate: number,
 };
 
 NumberField.propTypes = {
@@ -103,7 +104,7 @@ NumberField.propTypes = {
   placeholder: PropTypes.string,
   defaultValue: PropTypes.number,
   initialData: PropTypes.number,
-  validate: PropTypes.func.isRequired,
+  validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,

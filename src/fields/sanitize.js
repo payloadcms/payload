@@ -21,6 +21,14 @@ const sanitizeFields = (fields) => {
 
     if (field.fields) field.fields = sanitizeFields(field.fields);
 
+    if (field.blocks) {
+      field.blocks = field.blocks.map((block) => {
+        const unsanitizedBlock = { ...block };
+        unsanitizedBlock.fields = sanitizeFields(block.fields);
+        return unsanitizedBlock;
+      });
+    }
+
     return field;
   });
 };

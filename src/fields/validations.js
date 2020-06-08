@@ -145,7 +145,14 @@ const optionsToValidatorMap = {
     const rowPromises = [];
 
     value.forEach((row, i) => {
-      rowPromises.push(iterateFields(row, options.fields, `${options.name}.${i}.`));
+      const { blockType } = row;
+      const block = options.blocks.find(availableBlock => availableBlock.slug === blockType);
+
+      if (!block) {
+        return errors.push(`Block ${i + 1} is missing a block type.`);
+      }
+
+      rowPromises.push(iterateFields(row, block.fields, `${options.name}.${i}.`));
     });
 
     const rowResults = await Promise.all(rowPromises);
