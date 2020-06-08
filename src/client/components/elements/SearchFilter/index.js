@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Search from '../../icons/Search';
+import useDebounce from '../../../hooks/useDebounce';
 
 import './index.scss';
 
@@ -14,16 +15,17 @@ const SearchFilter = (props) => {
   } = props;
 
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
 
   useEffect(() => {
     if (typeof handleChange === 'function') {
-      handleChange(search ? {
+      handleChange(debouncedSearch ? {
         [fieldName]: {
-          like: search,
+          like: debouncedSearch,
         },
       } : null);
     }
-  }, [search, handleChange, fieldName]);
+  }, [debouncedSearch, handleChange, fieldName]);
 
   return (
     <div className={baseClass}>

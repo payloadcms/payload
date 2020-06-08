@@ -13,23 +13,36 @@ const useFieldType = (options) => {
     required,
     initialData: data,
     defaultValue,
-    onChange,
     validate,
     disableFormData,
   } = options;
 
+  // Determine what the initial data is to be used
+  // If initialData is defined, that means that data has been provided
+  // via the API and should override any default values present.
+  // If no initialData, use default value
   const initialData = data !== undefined ? data : defaultValue;
+
   const locale = useLocale();
   const formContext = useContext(FormContext);
-  const [internalValue, setInternalValue] = useState(initialData);
-  const debouncedValue = useDebounce(internalValue, 100);
-
   const {
-    dispatchFields, submitted, processing, getField,
+    dispatchFields, submitted, processing, getField, setModified, modified,
   } = formContext;
 
+  // Maintain an internal initial value AND value to ensure that the form
+  // can successfully differentiate between updates sent from fields
+  // that are meant to be initial values vs. values that are deliberately changed
+  const [internalInitialValue, setInternalInitialValue] = useState(initialData);
+  const [internalValue, setInternalValue] = useState(initialData);
+
+  // Debounce internal values to update form state only every 60ms
+  const debouncedValue = useDebounce(internalValue, 60);
+
+  // Get field by path
   const field = getField(path);
   const fieldExists = Boolean(field);
+
+  // Valid could be a string equal to an error message
   const valid = (field && typeof field.valid === 'boolean') ? field.valid : true;
   const valueFromForm = field?.value;
   const showError = valid === false && submitted;
@@ -58,14 +71,16 @@ const useFieldType = (options) => {
   // update internal field values from field component(s)
   // as fast as they arrive. NOTE - this method is NOT debounced
   const setValue = useCallback((e) => {
-    if (e && e.target) {
-      setInternalValue(e.target.value);
-    } else {
-      setInternalValue(e);
-    }
+    const value = (e && e.target) ? e.target.value : e;
 
-    if (onChange && typeof onChange === 'function') onChange(e);
-  }, [onChange, setInternalValue]);
+    if (!modified) setModified(true);
+
+    setInternalValue(value);
+  }, [setModified, modified]);
+
+  const setInitialValue = useCallback((value) => {
+    setInternalInitialValue(value);
+  }, []);
 
   // Remove field from state on "unmount"
   // This is mostly used for repeater / flex content row modifications
@@ -86,15 +101,24 @@ const useFieldType = (options) => {
   // update internal value as well
   useEffect(() => {
     if (valueFromForm !== undefined) {
-      setValue(valueFromForm);
+      setInternalInitialValue(valueFromForm);
     }
-  }, [valueFromForm, setValue]);
+  }, [valueFromForm, setInternalInitialValue]);
 
+  // When locale changes, and / or initialData changes,
+  // reset internal initial value
   useEffect(() => {
     if (initialData !== undefined) {
-      setValue(initialData);
+      setInternalInitialValue(initialData);
     }
-  }, [initialData, setValue, locale]);
+  }, [initialData, setInternalInitialValue, locale]);
+
+
+  // When internal initial value changes, set internal value
+  // This is necessary to bypass changing the form to a modified:true state
+  useEffect(() => {
+    setInternalValue(internalInitialValue);
+  }, [setInternalValue, internalInitialValue]);
 
   return {
     ...options,
@@ -105,6 +129,7 @@ const useFieldType = (options) => {
     formSubmitted: submitted,
     formProcessing: processing,
     setValue,
+    setInitialValue,
   };
 };
 

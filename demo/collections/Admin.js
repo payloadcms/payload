@@ -21,7 +21,7 @@ module.exports = {
     admin: () => true,
   },
   auth: {
-    tokenExpiration: 7200,
+    tokenExpiration: 300,
   },
   fields: [
     {

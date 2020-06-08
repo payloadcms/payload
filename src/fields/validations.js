@@ -106,7 +106,7 @@ const optionsToValidatorMap = {
       return `This field requires at least ${options.minRows} row(s).`;
     }
 
-    if (options.maxRows && value.length < options.maxRows) {
+    if (options.maxRows && value.length > options.maxRows) {
       return `This field requires no more than ${options.maxRows} row(s).`;
     }
 
@@ -132,7 +132,7 @@ const optionsToValidatorMap = {
     return true;
   },
   select: (value) => {
-    if (value) return true;
+    if (value && value.length > 0) return true;
     return 'This field is required.';
   },
   flexible: async (value, options) => {

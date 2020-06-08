@@ -9,7 +9,7 @@ import config from 'payload/config';
 import { useModal } from '@trbl/react-modal';
 import { requests } from '../../api';
 import StayLoggedInModal from '../modals/StayLoggedIn';
-import useThrottledEffect from '../../hooks/useThrottledEffect';
+import useDebounce from '../../hooks/useDebounce';
 
 const {
   cookiePrefix,
@@ -30,15 +30,17 @@ const Context = createContext({});
 
 const isNotExpired = decodedJWT => (decodedJWT?.exp || 0) > Date.now() / 1000;
 
-
 const UserProvider = ({ children }) => {
   const [token, setToken] = useState('');
   const [user, setUser] = useState(null);
   const [permissions, setPermissions] = useState({});
-  const location = useLocation();
+  const { pathname } = useLocation();
   const history = useHistory();
-  const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
+  const { open: openModal, closeAll: closeAllModals } = useModal();
+  const [lastLocationChange, setLastLocationChange] = useState(0);
+  const debouncedLocationChange = useDebounce(lastLocationChange, 10000);
 
+  const exp = user?.exp || 0;
   const email = user?.email;
 
   const refreshToken = useCallback(() => {
@@ -73,9 +75,13 @@ const UserProvider = ({ children }) => {
   }, []);
 
   // When location changes, refresh token
-  useThrottledEffect(() => {
+  useEffect(() => {
     refreshToken();
-  }, 15000, [location, refreshToken]);
+  }, [debouncedLocationChange, refreshToken]);
+
+  useEffect(() => {
+    setLastLocationChange(Date.now());
+  }, [pathname]);
 
   // When token changes, set cookie, decode and set user
   useEffect(() => {
@@ -104,28 +110,38 @@ const UserProvider = ({ children }) => {
 
   useEffect(() => {
     let reminder = false;
-    let forceLogOut = false;
-
-    const exp = user?.exp || 0;
     const now = Math.round((new Date()).getTime() / 1000);
     const remainingTime = exp - now;
 
     if (remainingTime > 0) {
       reminder = setTimeout(() => {
-        toggleModal('stay-logged-in');
+        openModal('stay-logged-in');
       }, ((remainingTime - 60) * 1000));
+    }
 
+    return () => {
+      if (reminder) clearTimeout(reminder);
+    };
+  }, [exp, openModal]);
+
+  useEffect(() => {
+    let forceLogOut = false;
+    const now = Math.round((new Date()).getTime() / 1000);
+    const remainingTime = exp - now;
+
+    if (remainingTime > 0) {
       forceLogOut = setTimeout(() => {
+        console.log('logging out');
+        logOut();
         history.push(`${admin}/logout`);
         closeAllModals();
       }, remainingTime * 1000);
     }
 
     return () => {
-      if (reminder) clearTimeout(reminder);
       if (forceLogOut) clearTimeout(forceLogOut);
     };
-  }, [user, history, toggleModal, closeAllModals]);
+  }, [exp, history, closeAllModals]);
 
   return (
     <Context.Provider value={{

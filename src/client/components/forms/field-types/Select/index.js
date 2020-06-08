@@ -9,6 +9,21 @@ import { select } from '../../../../../fields/validations';
 
 import './index.scss';
 
+const findFullOption = (value, options) => {
+  const matchedOption = options.find(option => option?.value === value);
+
+  if (matchedOption) {
+    if (typeof matchedOption === 'object' && matchedOption.label && matchedOption.value) {
+      return matchedOption;
+    }
+  }
+
+  return {
+    label: value,
+    value,
+  };
+};
+
 const formatFormValue = (value) => {
   if (Array.isArray(value)) {
     return value.map((subValue) => {
@@ -27,14 +42,11 @@ const formatFormValue = (value) => {
   return value;
 };
 
-const formatRenderValue = (value) => {
+const formatRenderValue = (value, options) => {
   if (Array.isArray(value)) {
     return value.map((subValue) => {
       if (typeof subValue === 'string') {
-        return {
-          label: subValue,
-          value: subValue,
-        };
+        return findFullOption(subValue, options);
       }
 
       return subValue;
@@ -42,10 +54,7 @@ const formatRenderValue = (value) => {
   }
 
   if (typeof value === 'string') {
-    return {
-      label: value,
-      value,
-    };
+    return findFullOption(value, options);
   }
 
   return value;
@@ -72,7 +81,6 @@ const Select = (props) => {
   const {
     value,
     showError,
-    formProcessing,
     setValue,
     errorMessage,
   } = useFieldType({
@@ -88,9 +96,10 @@ const Select = (props) => {
     'field-type',
     'select',
     showError && 'error',
+    readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
-  const valueToRender = formatRenderValue(value);
+  const valueToRender = formatRenderValue(value, options);
 
   return (
     <div
@@ -110,11 +119,11 @@ const Select = (props) => {
         required={required}
       />
       <ReactSelect
-        onChange={(readOnly || formProcessing) ? setValue : undefined}
+        onChange={!readOnly ? setValue : undefined}
         value={valueToRender}
         formatValue={formatFormValue}
         showError={showError}
-        disabled={formProcessing}
+        disabled={readOnly}
         options={options}
         isMulti={hasMany}
       />

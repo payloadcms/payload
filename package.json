@@ -82,6 +82,7 @@
     "react-hook-form": "^5.7.2",
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.1.2",
+    "react-router-navigation-prompt": "^1.8.11",
     "react-select": "^3.0.8",
     "sanitize-filename": "^1.6.3",
     "sharp": "^0.25.2",

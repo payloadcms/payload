@@ -14,7 +14,7 @@ const HiddenInput = (props) => {
 
   const path = pathFromProps || name;
 
-  const { value, onChange } = useFieldType({
+  const { value, setValue } = useFieldType({
     path,
     required,
     initialData,
@@ -25,7 +25,7 @@ const HiddenInput = (props) => {
     <input
       type="hidden"
       value={value || ''}
-      onChange={onChange}
+      onChange={setValue}
       id={path}
       name={path}
     />

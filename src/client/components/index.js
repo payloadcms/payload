@@ -27,10 +27,7 @@ const Index = () => {
     <WindowInfoProvider {...windowInfoProps}>
       <ScrollInfoProvider>
         <Router>
-          <ModalProvider
-            classPrefix="payload"
-            transTime={0}
-          >
+          <ModalProvider classPrefix="payload">
             <UserProvider>
               <StatusListProvider>
                 <SearchParamsProvider>

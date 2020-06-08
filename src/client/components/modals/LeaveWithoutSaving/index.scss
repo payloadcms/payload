@@ -1,0 +1,15 @@
+@import '../../../scss/styles.scss';
+
+.leave-without-saving {
+  background-color: rgba(white, .95);
+  position: fixed;
+  z-index: $z-modal;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  .btn {
+    margin-right: $baseline;
+  }
+}

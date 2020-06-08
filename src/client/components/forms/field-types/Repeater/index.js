@@ -53,7 +53,6 @@ const Repeater = (props) => {
   const {
     showError,
     errorMessage,
-    setValue,
     value,
   } = useFieldType({
     path,
@@ -129,16 +128,6 @@ const Repeater = (props) => {
   }, [dataToInitialize]);
 
   useEffect(updateRowCountOnParentRowModified, [parentRowsModified]);
-
-  useEffect(() => {
-    let i;
-    const newValue = [];
-    for (i = 0; i < rowCount; i += 1) {
-      newValue.push({});
-    }
-
-    setValue(newValue);
-  }, [rowCount, setValue]);
 
   return (
     <RowModifiedProvider lastModified={lastModified}>

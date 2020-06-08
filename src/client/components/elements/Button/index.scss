@@ -22,7 +22,7 @@
   }
 
   &--size-medium {
-    padding: base(.5) base(1.25);
+    padding: base(.5) $baseline;
   }
 
   &--size-small {

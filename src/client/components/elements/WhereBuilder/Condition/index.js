@@ -6,6 +6,7 @@ import Button from '../../Button';
 import Date from './Date';
 import Number from './Number';
 import Text from './Text';
+import useDebounce from '../../../../hooks/useDebounce';
 
 import './index.scss';
 
@@ -28,6 +29,8 @@ const Condition = (props) => {
   } = props;
 
   const [activeField, setActiveField] = useState({ operators: [] });
+  const [internalValue, setInternalValue] = useState(value.value);
+  const debouncedValue = useDebounce(internalValue, 300);
 
   useEffect(() => {
     const newActiveField = fields.find(field => value.field === field.value);
@@ -36,6 +39,15 @@ const Condition = (props) => {
       setActiveField(newActiveField);
     }
   }, [value, fields]);
+
+  useEffect(() => {
+    dispatch({
+      type: 'update',
+      orIndex,
+      andIndex,
+      value: debouncedValue || '',
+    });
+  }, [debouncedValue, dispatch, orIndex, andIndex]);
 
   const ValueComponent = valueFields[activeField.component] || valueFields.Text;
 
@@ -73,13 +85,8 @@ const Condition = (props) => {
               DefaultComponent={ValueComponent}
               componentProps={{
                 ...activeField.props,
-                value: value.value,
-                onChange: updatedValue => dispatch({
-                  type: 'update',
-                  orIndex,
-                  andIndex,
-                  value: updatedValue || '',
-                }),
+                value: internalValue,
+                onChange: setInternalValue,
               }}
             />
           </div>
