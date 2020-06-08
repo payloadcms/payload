@@ -15,10 +15,6 @@ const sanitizeFields = (fields) => {
 
     if (!field.hooks) field.hooks = {};
 
-    if (field.localized && field.required) {
-      field.required = false;
-    }
-
     if (field.fields) field.fields = sanitizeFields(field.fields);
 
     if (field.blocks) {

@@ -138,7 +138,7 @@ const optionsToValidatorMap = {
   },
   flexible: async (value, options) => {
     if (value.length === 0) {
-      return `${options.label} requires at least one ${options.singularLabel}.`;
+      return `This field requires at least one ${options.singularLabel}.`;
     }
 
     const errors = [];
@@ -149,10 +149,13 @@ const optionsToValidatorMap = {
       const block = options.blocks.find(availableBlock => availableBlock.slug === blockType);
 
       if (!block) {
-        return errors.push(`Block ${i + 1} is missing a block type.`);
+        return errors.push({
+          message: `Block ${i + 1} is missing a block type.`,
+          field: options.name,
+        });
       }
 
-      rowPromises.push(iterateFields(row, block.fields, `${options.name}.${i}.`));
+      return rowPromises.push(iterateFields(row, block.fields, `${options.name}.${i}.`));
     });
 
     const rowResults = await Promise.all(rowPromises);

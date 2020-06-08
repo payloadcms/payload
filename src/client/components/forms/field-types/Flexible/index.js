@@ -40,9 +40,14 @@ const Flexible = (props) => {
   const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { minRows, maxRows });
+    const validationResult = validate(
+      value,
+      {
+        minRows, maxRows, singularLabel, blocks,
+      },
+    );
     return validationResult;
-  }, [validate, maxRows, minRows]);
+  }, [validate, maxRows, minRows, singularLabel, blocks]);
 
   const {
     showError,
@@ -141,16 +146,6 @@ const Flexible = (props) => {
       payload: Array.from(Array(dataToInitialize.length).keys()).reduce(acc => ([...acc, true]), []), // sets all collapsibles to open on first load
     });
   }, [dataToInitialize]);
-
-  useEffect(() => {
-    let i;
-    const newValue = [];
-    for (i = 0; i < rowCount; i += 1) {
-      newValue.push({});
-    }
-
-    setValue(newValue);
-  }, [rowCount, setValue]);
 
   return (
     <RowModifiedProvider lastModified={lastModified}>

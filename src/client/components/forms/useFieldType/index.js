@@ -113,7 +113,6 @@ const useFieldType = (options) => {
     }
   }, [initialData, setInternalInitialValue, locale]);
 
-
   // When internal initial value changes, set internal value
   // This is necessary to bypass changing the form to a modified:true state
   useEffect(() => {

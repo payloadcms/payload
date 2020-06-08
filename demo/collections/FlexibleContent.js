@@ -16,6 +16,7 @@ module.exports = {
       type: 'flexible',
       blocks: [Email, NumberBlock, Quote],
       localized: true,
+      required: true,
     },
   ],
   timestamps: true,
