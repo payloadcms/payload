@@ -4,14 +4,13 @@ const policies = async (args) => {
   try {
     const {
       config,
-      collection: {
-        config: collectionConfig,
-      },
       req,
       req: { user },
     } = args;
 
     const isLoggedIn = !!(user);
+
+    const collectionConfig = (user && user.collection) ? config.collections.find(collection => collection.slug === user.collection) : null;
 
     const returnPolicyResults = (entity, operations) => {
       const results = {};
@@ -36,9 +35,13 @@ const policies = async (args) => {
       return results;
     };
 
-    const policyResults = {
-      canAccessAdmin: collectionConfig.policies.admin ? collectionConfig.policies.admin(args) : isLoggedIn,
-    };
+    const policyResults = {};
+
+    if (collectionConfig) {
+      policyResults.canAccessAdmin = collectionConfig.policies.admin ? collectionConfig.policies.admin(args) : isLoggedIn;
+    } else {
+      policyResults.canAccessAdmin = false;
+    }
 
     config.collections.forEach((collection) => {
       policyResults[collection.slug] = returnPolicyResults(collection, allOperations);

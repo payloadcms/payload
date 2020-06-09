@@ -2,6 +2,8 @@ const { MissingFieldType } = require('../errors');
 const validations = require('./validations');
 
 const sanitizeFields = (fields) => {
+  if (!fields) return [];
+
   return fields.map((unsanitizedField) => {
     const field = { ...unsanitizedField };
 

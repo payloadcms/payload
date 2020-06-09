@@ -11,7 +11,6 @@ const {
   forgotPassword,
   resetPassword,
   update,
-  policies,
 } = require('./requestHandlers');
 
 const {
@@ -43,10 +42,6 @@ const authRoutes = (collection, config, sendEmail) => {
   router
     .route(`/${slug}/me`)
     .get(me);
-
-  router
-    .route(`/${slug}/policies`)
-    .get(policies(config));
 
   router
     .route(`/${slug}/first-register`)

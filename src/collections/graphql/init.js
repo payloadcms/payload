@@ -12,7 +12,7 @@ const {
 } = require('./resolvers');
 
 const {
-  login, me, init, refresh, register, forgotPassword, resetPassword, policies,
+  login, me, init, refresh, register, forgotPassword, resetPassword,
 } = require('../../auth/graphql/resolvers');
 
 const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
@@ -129,20 +129,20 @@ function registerCollections() {
 
     if (collection.config.auth) {
       collection.graphQL.jwt = this.buildObjectType(
-        'JWT',
+        formatName(`${slug}JWT`),
         collection.config.fields.filter(field => field.saveToJWT).concat([
           {
             name: 'email',
             type: 'email',
             required: true,
           },
+          {
+            name: 'collection',
+            type: 'text',
+            required: true,
+          },
         ]),
       );
-
-      this.Query.fields[`policies${singularLabel}`] = {
-        type: this.buildPoliciesType(),
-        resolve: policies(this.config, collection),
-      };
 
       this.Query.fields[`me${singularLabel}`] = {
         type: collection.graphQL.jwt,

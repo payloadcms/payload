@@ -13,6 +13,7 @@ const apiKeyStrategy = require('../auth/strategies/apiKey');
 const collectionRoutes = require('./routes');
 const buildSchema = require('./buildSchema');
 const baseAuthFields = require('../auth/baseFields');
+const baseAPIKeyFields = require('../auth/baseAPIKeyFields');
 const authRoutes = require('../auth/routes');
 
 function registerCollections() {
@@ -106,6 +107,13 @@ function registerCollections() {
         ...baseAuthFields,
         ...formattedCollection.fields,
       ];
+
+      if (collection.auth.useAPIKey) {
+        formattedCollection.fields = [
+          ...formattedCollection.fields,
+          ...baseAPIKeyFields,
+        ];
+      }
     }
 
     const schema = buildSchema(formattedCollection, this.config);
@@ -123,9 +131,12 @@ function registerCollections() {
 
     if (collection.auth) {
       const AuthCollection = this.collections[formattedCollection.slug];
-
       passport.use(new LocalStrategy(AuthCollection.Model.authenticate()));
-      passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(AuthCollection));
+
+      if (collection.auth.useAPIKey) {
+        passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(AuthCollection));
+      }
+
       passport.use(`${AuthCollection.config.slug}-jwt`, jwtStrategy(this.config, AuthCollection));
       passport.serializeUser(AuthCollection.Model.serializeUser());
       passport.deserializeUser(AuthCollection.Model.deserializeUser());

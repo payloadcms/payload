@@ -29,7 +29,7 @@ const ReactSelect = (props) => {
         if (formatValue) {
           onChange(formatValue(selected));
         } else {
-          let valueToChange = null;
+          let valueToChange;
 
           if (isMulti) {
             if (selected) {
@@ -75,7 +75,7 @@ const ReactSelect = (props) => {
 
 ReactSelect.defaultProps = {
   isMulti: false,
-  value: null,
+  value: undefined,
   showError: false,
   disabled: false,
   formatValue: null,

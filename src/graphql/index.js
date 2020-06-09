@@ -11,6 +11,7 @@ const initCollections = require('../collections/graphql/init');
 const initGlobals = require('../globals/graphql/init');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 const errorHandler = require('./errorHandler');
+const { policies } = require('../auth/graphql/resolvers');
 
 class GraphQL {
   constructor(init) {
@@ -48,6 +49,11 @@ class GraphQL {
   init() {
     this.initCollections();
     this.initGlobals();
+
+    this.Query.fields.Policies = {
+      type: this.buildPoliciesType(),
+      resolve: policies(this.config),
+    };
 
     this.Query = {
       ...this.Query,

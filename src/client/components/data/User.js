@@ -97,7 +97,7 @@ const UserProvider = ({ children }) => {
   // When user changes, get new policies
   useEffect(() => {
     async function getPermissions() {
-      const request = await requests.get(`${serverURL}${api}/${userSlug}/policies`);
+      const request = await requests.get(`${serverURL}${api}/policies`);
 
       if (request.status === 200) {
         const json = await request.json();

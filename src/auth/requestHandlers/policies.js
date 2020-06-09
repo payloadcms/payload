@@ -7,7 +7,6 @@ const policiesHandler = config => async (req, res) => {
     const policyResults = await policies({
       req,
       config,
-      collection: req.collection,
     });
 
     return res.status(httpStatus.OK)

@@ -3,11 +3,16 @@ const passport = require('passport');
 module.exports = (config) => {
   const methods = config.collections.reduce((enabledMethods, collection) => {
     if (collection.auth) {
-      return [
-        `${collection.slug}-api-key`,
+      const collectionMethods = [
         `${collection.slug}-jwt`,
         ...enabledMethods,
       ];
+
+      if (collection.auth.enableAPIKey) {
+        collectionMethods.unshift(`${collection.slug}-api-key`);
+      }
+
+      return collectionMethods;
     }
 
     return enabledMethods;

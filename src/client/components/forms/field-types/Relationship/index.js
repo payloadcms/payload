@@ -120,7 +120,7 @@ class Relationship extends Component {
       }
     }
 
-    return foundValue || null;
+    return foundValue || undefined;
   }
 
   addOptions = (data, relation) => {
@@ -236,7 +236,7 @@ class Relationship extends Component {
         />
         <ReactSelect
           onInputChange={this.handleInputChange}
-          onChange={(readOnly || formProcessing) ? setValue : undefined}
+          onChange={!readOnly ? setValue : undefined}
           formatValue={this.formatSelectedValue}
           onMenuScrollToBottom={this.handleMenuScrollToBottom}
           findValueInOptions={this.findValueInOptions}
@@ -258,12 +258,14 @@ Relationship.defaultProps = {
   hasMany: false,
   width: undefined,
   showError: false,
-  value: null,
+  value: undefined,
   path: '',
   formProcessing: false,
+  readOnly: false,
 };
 
 Relationship.propTypes = {
+  readOnly: PropTypes.bool,
   relationTo: PropTypes.oneOfType([
     PropTypes.oneOf(Object.keys(collections).map((key) => {
       return collections[key].slug;
@@ -293,10 +295,10 @@ Relationship.propTypes = {
 };
 
 const RelationshipFieldType = (props) => {
-  const [formattedInitialData, setFormattedInitialData] = useState(null);
+  const [formattedInitialData, setFormattedInitialData] = useState(undefined);
 
   const {
-    defaultValue, relationTo, hasMany, validate, path, name, initialData,
+    defaultValue, relationTo, hasMany, validate, path, name, initialData, required,
   } = props;
 
   const hasMultipleRelations = Array.isArray(relationTo);
@@ -308,6 +310,7 @@ const RelationshipFieldType = (props) => {
     initialData: formattedInitialData,
     defaultValue,
     validate,
+    required,
   });
 
   useEffect(() => {
@@ -352,9 +355,11 @@ RelationshipFieldType.defaultProps = {
   validate: relationship,
   path: '',
   hasMany: false,
+  required: false,
 };
 
 RelationshipFieldType.propTypes = {
+  required: PropTypes.bool,
   defaultValue: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.array,
@@ -363,10 +368,7 @@ RelationshipFieldType.propTypes = {
   initialData: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.array,
-    PropTypes.shape({
-      relationTo: PropTypes.string,
-      value: PropTypes.string,
-    }),
+    PropTypes.shape({}),
   ]),
   relationTo: PropTypes.oneOfType([
     PropTypes.string,
