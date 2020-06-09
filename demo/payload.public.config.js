@@ -4,6 +4,7 @@ const AllFields = require('./collections/AllFields');
 const Code = require('./collections/Code');
 const Conditions = require('./collections/Conditions');
 const CustomComponents = require('./collections/CustomComponents');
+const Customers = require('./collections/Customers');
 const File = require('./collections/File');
 const FlexibleContent = require('./collections/FlexibleContent');
 const HiddenFields = require('./collections/HiddenFields');
@@ -32,6 +33,7 @@ module.exports = {
     Code,
     Conditions,
     CustomComponents,
+    Customers,
     File,
     FlexibleContent,
     HiddenFields,

@@ -17,6 +17,7 @@ const sanitizeConfig = require('./utilities/sanitizeConfig');
 const buildEmail = require('./email/build');
 const identifyAPI = require('./express/middleware/identifyAPI');
 const errorHandler = require('./express/middleware/errorHandler');
+const { policies } = require('./auth/requestHandlers');
 
 class Payload {
   constructor(options) {
@@ -56,6 +57,9 @@ class Payload {
     if (!this.config.admin.disable && process.env.NODE_ENV !== 'test') {
       this.express.use(initWebpack(this.config));
     }
+
+    // Init policies route
+    this.router.get('/policies', policies(this.config));
 
     // Init GraphQL
     this.router.use(
