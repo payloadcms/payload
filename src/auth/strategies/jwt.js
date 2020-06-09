@@ -11,7 +11,11 @@ module.exports = (config, collection) => {
   return new JwtStrategy(opts, async (token, done) => {
     try {
       const user = await collection.Model.findByUsername(token.email);
-      return done(null, user);
+
+      const json = user.toJSON({ virtuals: true });
+      json.collection = collection.config.slug;
+
+      return done(null, json);
     } catch (err) {
       return done(null, false);
     }
