@@ -22,6 +22,7 @@ module.exports = {
   },
   auth: {
     tokenExpiration: 300,
+    useAPIKey: true,
   },
   fields: [
     {

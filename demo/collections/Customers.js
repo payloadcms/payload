@@ -8,6 +8,7 @@ module.exports = {
   },
   useAsTitle: 'email',
   policies: {
+    admin: () => false,
     create: () => true,
     read: ({ req: { user } }) => {
       if (checkRole(['admin'], user)) {
