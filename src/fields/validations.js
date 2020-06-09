@@ -137,14 +137,24 @@ const optionsToValidatorMap = {
   },
   flexible: async (value, options) => {
     if (value.length === 0) {
-      return `${options.label} requires at least one ${options.singularLabel}.`;
+      return `This field requires at least one ${options.singularLabel}.`;
     }
 
     const errors = [];
     const rowPromises = [];
 
     value.forEach((row, i) => {
-      rowPromises.push(iterateFields(row, options.fields, `${options.name}.${i}.`));
+      const { blockType } = row;
+      const block = options.blocks.find(availableBlock => availableBlock.slug === blockType);
+
+      if (!block) {
+        return errors.push({
+          message: `Block ${i + 1} is missing a block type.`,
+          field: options.name,
+        });
+      }
+
+      return rowPromises.push(iterateFields(row, block.fields, `${options.name}.${i}.`));
     });
 
     const rowResults = await Promise.all(rowPromises);

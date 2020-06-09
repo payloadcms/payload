@@ -64,7 +64,6 @@ const DeleteDocument = (props) => {
           });
         }
 
-        setDeleting(false);
         closeAll();
         if (json.errors) {
           replaceStatus(json.errors);

@@ -137,6 +137,25 @@ const AllFields = {
         },
       ],
     },
+    {
+      type: 'relationship',
+      label: 'Relationship to One Collection',
+      name: 'relationship',
+      relationTo: 'conditions',
+    },
+    {
+      type: 'relationship',
+      label: 'Relationship hasMany',
+      name: 'relationshipHasMany',
+      relationTo: 'localized-posts',
+      hasMany: true,
+    },
+    {
+      type: 'relationship',
+      label: 'Relationship to Multiple Collections',
+      name: 'relationshipMultipleCollections',
+      relationTo: ['localized-posts', 'conditions'],
+    },
   ],
   timestamps: true,
 };

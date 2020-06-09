@@ -136,8 +136,9 @@ const Form = (props) => {
         if (typeof handleAjaxResponse === 'function') return handleAjaxResponse(res);
 
         return res.json().then((json) => {
-          clearStatus();
           setProcessing(false);
+          setModified(false);
+          clearStatus();
 
           if (res.status < 400) {
             if (typeof onSuccess === 'function') onSuccess(json);
@@ -145,8 +146,6 @@ const Form = (props) => {
             if (redirect) {
               return history.push(redirect, data);
             }
-
-            setModified(false);
 
             if (!disableSuccessStatus) {
               replaceStatus([{

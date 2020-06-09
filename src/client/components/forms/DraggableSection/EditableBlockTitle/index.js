@@ -8,7 +8,7 @@ import './index.scss';
 const baseClass = 'editable-block-title';
 
 const EditableBlockTitle = (props) => {
-  const { fieldName: name } = props;
+  const { path, initialData } = props;
   const inputRef = useRef(null);
   const inputCloneRef = useRef(null);
   const [inputWidth, setInputWidth] = useState(0);
@@ -17,7 +17,8 @@ const EditableBlockTitle = (props) => {
     value,
     setValue,
   } = useFieldType({
-    name,
+    path,
+    initialData,
   });
 
   useEffect(() => {
@@ -34,11 +35,11 @@ const EditableBlockTitle = (props) => {
       <div className={baseClass}>
         <input
           ref={inputRef}
-          id={name}
+          id={path}
           value={value || ''}
           placeholder="Untitled"
           type="text"
-          name={name}
+          name={path}
           onChange={setValue}
           onKeyDown={onKeyDown}
           style={{
@@ -56,8 +57,13 @@ const EditableBlockTitle = (props) => {
   );
 };
 
+EditableBlockTitle.defaultProps = {
+  initialData: undefined,
+};
+
 EditableBlockTitle.propTypes = {
-  fieldName: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
+  initialData: PropTypes.string,
 };
 
 export default EditableBlockTitle;

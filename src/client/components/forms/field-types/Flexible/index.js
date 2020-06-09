@@ -40,14 +40,18 @@ const Flexible = (props) => {
   const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { minRows, maxRows });
+    const validationResult = validate(
+      value,
+      {
+        minRows, maxRows, singularLabel, blocks,
+      },
+    );
     return validationResult;
-  }, [validate, maxRows, minRows]);
+  }, [validate, maxRows, minRows, singularLabel, blocks]);
 
   const {
     showError,
     errorMessage,
-    setValue,
     value,
   } = useFieldType({
     path,
@@ -142,16 +146,6 @@ const Flexible = (props) => {
     });
   }, [dataToInitialize]);
 
-  useEffect(() => {
-    let i;
-    const newValue = [];
-    for (i = 0; i < rowCount; i += 1) {
-      newValue.push({});
-    }
-
-    setValue(newValue);
-  }, [rowCount, setValue]);
-
   return (
     <RowModifiedProvider lastModified={lastModified}>
       <DragDropContext onDragEnd={onDragEnd}>
@@ -193,18 +187,14 @@ const Flexible = (props) => {
                           {
                             name: 'blockType',
                             type: 'text',
-                            hidden: {
-                              admin: true,
-                            },
+                            hidden: 'admin',
                           }, {
                             name: 'blockName',
                             type: 'text',
-                            hidden: {
-                              admin: true,
-                            },
+                            hidden: 'admin',
                           },
                         ]}
-                        singularLabel={blockType}
+                        singularLabel={blockToRender?.labels?.singular}
                         initialData={lastModified ? undefined : value[rowIndex]}
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}

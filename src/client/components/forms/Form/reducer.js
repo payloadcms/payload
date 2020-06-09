@@ -92,6 +92,11 @@ function fieldReducer(state, action) {
           value: blockType,
           valid: true,
         };
+
+        subFields.blockName = {
+          value: null,
+          valid: true,
+        };
       }
 
       // Add new object containing subfield names to unflattenedRows array
