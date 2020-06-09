@@ -126,9 +126,9 @@ const fieldToSchemaMap = {
     }
 
     if (field.hasMany) {
-      return {
+      schema = {
         type: [schema],
-        localized: field.localized,
+        localized: field.localized || false,
       };
     }
 
