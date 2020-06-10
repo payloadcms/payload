@@ -1,10 +1,13 @@
 @import '../../../../scss/styles.scss';
 
-.rich-text-editor {
-  border: 1px solid $color-light-gray;
-  min-height: 250px;
+.rich-text {
 
-  &__editable-content-container {
+  &__wrapper {
+    border: 1px solid $color-light-gray;
+  }
+
+  &__editor {
+    min-height: 200px;
     padding: base(.5);
 
     p,

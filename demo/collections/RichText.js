@@ -10,6 +10,9 @@ const RichText = {
       type: 'richText',
       label: 'Rich Text',
       required: true,
+      disabledPlugins: [],
+      disabledMarks: [],
+      maxHeadingLevel: 1,
     },
   ],
 };

@@ -1,0 +1,22 @@
+@import '../../../../../scss/styles';
+
+.command-toolbar {
+  border-bottom: 1px solid $color-light-gray;
+  padding: base(.5);
+  background: $color-background-gray;
+
+  &__marks,
+  &__blocks,
+  .react-select {
+    display: inline-block;
+  }
+
+  .react-select {
+    margin-right: base(.25);
+  }
+
+  hr {
+    border: none;
+    border-bottom: 1px solid $color-light-gray;
+  }
+}

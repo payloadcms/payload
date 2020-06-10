@@ -62,7 +62,13 @@ const optionsToValidatorMap = {
     return Boolean(value);
   },
   richText: (value) => {
-    if (value) return true;
+    //! Need better way to share an empty text node
+    //! it is used here and in field-types/RichText
+    const emptyRichTextNode = [{
+      children: [{ text: '' }],
+    }];
+    const blankSlateJSNode = JSON.stringify(emptyRichTextNode);
+    if (value && JSON.stringify(value) !== blankSlateJSNode) return true;
     return 'This field is required.';
   },
   code: (value) => {
