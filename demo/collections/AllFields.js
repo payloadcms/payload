@@ -71,7 +71,7 @@ const AllFields = {
       type: 'radioGroup',
       options: [{
         value: 'option-1',
-        label: 'Options 1 Value',
+        label: 'Options 1 Label',
       }, {
         value: 'option-2',
         label: 'Option 2 Label',
