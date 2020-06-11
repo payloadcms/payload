@@ -66,6 +66,23 @@ const AllFields = {
       hasMany: true,
     },
     {
+      name: 'radioGroupExample',
+      label: 'Radio Group Example',
+      type: 'radioGroup',
+      options: [{
+        value: 'option-1',
+        label: 'Options 1 Value',
+      }, {
+        value: 'option-2',
+        label: 'Option 2 Label',
+      }, {
+        value: 'option-3',
+        label: 'Option 3 Label',
+      }],
+      defaultValue: 'option-2',
+      required: true,
+    },
+    {
       name: 'checkbox',
       type: 'checkbox',
       label: 'Checkbox',
