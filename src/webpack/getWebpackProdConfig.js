@@ -1,5 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+// const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const path = require('path');
 const getStyleLoaders = require('./getStyleLoaders');
 
@@ -36,8 +36,6 @@ module.exports = (config) => {
                   require.resolve('@babel/preset-env'),
                   {
                     modules: 'commonjs',
-                    targets: '> 1%, not dead',
-
                   },
                 ],
                 require.resolve('@babel/preset-react'),
@@ -98,9 +96,7 @@ module.exports = (config) => {
       ],
     },
     plugins: [
-      new BundleAnalyzerPlugin({
-        generateStatsFile: true,
-      }),
+      // new BundleAnalyzerPlugin(),
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, '../client/index.html'),
         filename: './index.html',

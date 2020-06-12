@@ -119,5 +119,11 @@
     "sass-loader": "7.1.0",
     "style-loader": "^0.21.0",
     "webpack-cli": "^3.3.11"
-  }
+  },
+  "browserslist": [
+    "defaults",
+    "not IE 11",
+    "not IE_Mob 11",
+    "maintained node versions"
+  ]
 }

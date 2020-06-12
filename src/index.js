@@ -1,6 +1,7 @@
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
+const path = require('path');
 const express = require('express');
 const graphQLPlayground = require('graphql-playground-middleware-express').default;
 const getConfig = require('./utilities/getConfig');
@@ -39,6 +40,7 @@ class Payload {
     this.sendEmail = this.sendEmail.bind(this);
     this.getMockEmailCredentials = this.getMockEmailCredentials.bind(this);
     this.initStatic = initStatic.bind(this);
+    this.initWebpack = initWebpack.bind(this);
 
     // Configure email service
     this.email = this.buildEmail();
@@ -53,9 +55,13 @@ class Payload {
     // Register globals
     this.initGlobals();
 
-    // Enable client
+    // Initialize Admin panel
     if (!this.config.admin.disable && process.env.NODE_ENV !== 'test') {
-      this.express.use(initWebpack(this.config));
+      if (process.env.NODE_ENV === 'production') {
+        this.express.use(this.config.routes.admin, express.static(path.resolve(process.cwd(), 'build')));
+      } else {
+        this.express.use(initWebpack());
+      }
     }
 
     // Init policies route

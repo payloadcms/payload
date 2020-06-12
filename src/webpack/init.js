@@ -6,8 +6,8 @@ const getWebpackDevConfig = require('./getWebpackDevConfig');
 
 const router = express.Router();
 
-const initWebpack = (config) => {
-  const webpackDevConfig = getWebpackDevConfig(config);
+const initWebpack = () => {
+  const webpackDevConfig = getWebpackDevConfig(this.config);
   const compiler = webpack(webpackDevConfig);
 
   router.use(webpackDevMiddleware(compiler, {
@@ -16,7 +16,7 @@ const initWebpack = (config) => {
 
   router.use(webpackHotMiddleware(compiler));
 
-  router.get(`${config.routes.admin}*`, (req, res, next) => {
+  router.get(`${this.config.routes.admin}*`, (req, res, next) => {
     compiler.outputFileSystem.readFile('/index.html', (err, result) => {
       if (err) {
         return next(err);
