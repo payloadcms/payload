@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import moment from 'moment';
+import { format } from 'date-fns';
 import config from 'payload/config';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 
@@ -34,7 +34,7 @@ const DefaultCell = (props) => {
       <WrapElement {...wrapElementProps}>
         {(field.type === 'date' && cellData) && (
           <span>
-            {moment(cellData).format('MMMM Do YYYY, h:mma')}
+            {format(new Date(cellData), 'MMMM do yyyy, h:mma')}
           </span>
         )}
         {field.type !== 'date' && (

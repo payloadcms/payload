@@ -1,20 +1,30 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const path = require('path');
 const getStyleLoaders = require('./getStyleLoaders');
 
 module.exports = (config) => {
-  return {
+  const webpackConfig = {
     entry: {
-      main: [path.resolve(__dirname, '../components/index.js')],
+      main: [path.resolve(__dirname, '../client/components/index.js')],
     },
     output: {
       path: path.resolve(process.cwd(), 'build'),
       filename: '[name].[chunkhash].js',
     },
     mode: 'production',
-    resolveLoader: { modules: [path.join(__dirname, '../../../node_modules')] },
+    resolveLoader: { modules: [path.join(__dirname, '../../node_modules')] },
     module: {
       rules: [
+        {
+          test: require.resolve('../client/components/customComponents'),
+          use: [
+            {
+              loader: 'val-loader',
+              options: config,
+            },
+          ],
+        },
         {
           test: /\.js$/,
           exclude: /node_modules/,
@@ -26,13 +36,14 @@ module.exports = (config) => {
                   require.resolve('@babel/preset-env'),
                   {
                     modules: 'commonjs',
+                    targets: '> 1%, not dead',
+
                   },
                 ],
                 require.resolve('@babel/preset-react'),
               ],
               plugins: [
                 require.resolve('@babel/plugin-proposal-class-properties'),
-                require.resolve('babel-plugin-add-module-exports'),
                 [
                   require.resolve('@babel/plugin-transform-runtime'),
                   {
@@ -87,17 +98,29 @@ module.exports = (config) => {
       ],
     },
     plugins: [
+      new BundleAnalyzerPlugin({
+        generateStatsFile: true,
+      }),
       new HtmlWebpackPlugin({
-        template: path.resolve(__dirname, '../index.html'),
+        template: path.resolve(__dirname, '../client/index.html'),
         filename: './index.html',
         minify: true,
       }),
     ],
     resolve: {
-      modules: ['node_modules', path.resolve(__dirname, '../../../node_modules')],
+      modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
       alias: {
-        'payload-scss-overrides': config.paths.scss,
+        'payload/unsanitizedConfig': config.paths.config,
+        'payload/config': path.resolve(__dirname, '../client/config.js'),
       },
     },
   };
+
+  if (config.paths.scss) {
+    webpackConfig.resolve.alias['payload-scss-overrides'] = config.paths.scss;
+  } else {
+    webpackConfig.resolve.alias['payload-scss-overrides'] = path.resolve(__dirname, '../client/scss/overrides.scss');
+  }
+
+  return webpackConfig;
 };

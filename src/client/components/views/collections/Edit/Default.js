@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link, useRouteMatch, useLocation } from 'react-router-dom';
-import moment from 'moment';
+import { format } from 'date-fns';
 import config from 'payload/config';
 import Eyebrow from '../../../elements/Eyebrow';
 import Form from '../../../forms/Form';
@@ -127,11 +127,11 @@ const DefaultEditView = (props) => {
                 <>
                   <li>
                     <div className={`${baseClass}__label`}>Last Modified</div>
-                    <div>{moment(data.updatedAt).format('MMMM Do YYYY, h:mma')}</div>
+                    <div>{format(data.updatedAt, 'MMMM do yyyy, h:mma')}</div>
                   </li>
                   <li>
                     <div className={`${baseClass}__label`}>Created</div>
-                    <div>{moment(data.createdAt).format('MMMM Do YYYY, h:mma')}</div>
+                    <div>{format(data.createdAt, 'MMMM do yyyy, h:mma')}</div>
                   </li>
                 </>
               )}
