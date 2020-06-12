@@ -68,7 +68,7 @@ const AllFields = {
     {
       name: 'radioGroupExample',
       label: 'Radio Group Example',
-      type: 'radioGroup',
+      type: 'radio',
       options: [{
         value: 'option-1',
         label: 'Options 1 Label',

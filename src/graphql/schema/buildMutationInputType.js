@@ -26,7 +26,7 @@ function buildMutationInputType(name, fields, parentName) {
     upload: field => ({ type: withNullableType(field, GraphQLString) }),
     'rich-text': field => ({ type: withNullableType(field, GraphQLString) }),
     html: field => ({ type: withNullableType(field, GraphQLString) }),
-    radioGroup: field => ({ type: withNullableType(field, GraphQLString) }),
+    radio: field => ({ type: withNullableType(field, GraphQLString) }),
     checkbox: () => ({ type: GraphQLBoolean }),
     select: (field) => {
       const formattedName = `${combineParentName(parentName, field.name)}_MutationInput`;

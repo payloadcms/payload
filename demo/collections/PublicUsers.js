@@ -1,10 +1,10 @@
 const checkRole = require('../policies/checkRole');
 
 module.exports = {
-  slug: 'customers',
+  slug: 'public-users',
   labels: {
-    singular: 'Customer',
-    plural: 'Customers',
+    singular: 'Public User',
+    plural: 'Public Users',
   },
   useAsTitle: 'email',
   policies: {

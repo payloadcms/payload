@@ -82,7 +82,7 @@ const fieldToSchemaMap = {
       [field.name]: { ...formatBaseSchema(field), type: String },
     };
   },
-  radioGroup: (field, fields) => {
+  radio: (field, fields) => {
     return {
       ...fields,
       [field.name]: { ...formatBaseSchema(field), type: String },

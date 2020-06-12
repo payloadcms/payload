@@ -6,7 +6,7 @@ import withCondition from '../../withCondition';
 import Error from '../../Error';
 import Label from '../../Label';
 import RadioInput from './RadioInput';
-import { radioGroup } from '../../../../../fields/validations';
+import { radio } from '../../../../../fields/validations';
 
 import './index.scss';
 
@@ -87,7 +87,7 @@ RadioGroup.defaultProps = {
   readOnly: false,
   defaultValue: null,
   initialData: false,
-  validate: radioGroup,
+  validate: radio,
   width: undefined,
   style: {},
   path: '',

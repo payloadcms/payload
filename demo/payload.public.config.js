@@ -4,7 +4,6 @@ const AllFields = require('./collections/AllFields');
 const Code = require('./collections/Code');
 const Conditions = require('./collections/Conditions');
 const CustomComponents = require('./collections/CustomComponents');
-const Customers = require('./collections/Customers');
 const File = require('./collections/File');
 const FlexibleContent = require('./collections/FlexibleContent');
 const HiddenFields = require('./collections/HiddenFields');
@@ -12,6 +11,7 @@ const Hooks = require('./collections/Hooks');
 const Localized = require('./collections/Localized');
 const Media = require('./collections/Media');
 const Preview = require('./collections/Preview');
+const PublicUsers = require('./collections/PublicUsers');
 const RelationshipA = require('./collections/RelationshipA');
 const RelationshipB = require('./collections/RelationshipB');
 const RichText = require('./collections/RichText');
@@ -33,7 +33,6 @@ module.exports = {
     Code,
     Conditions,
     CustomComponents,
-    Customers,
     File,
     FlexibleContent,
     HiddenFields,
@@ -41,6 +40,7 @@ module.exports = {
     Localized,
     Media,
     Preview,
+    PublicUsers,
     RelationshipA,
     RelationshipB,
     RichText,

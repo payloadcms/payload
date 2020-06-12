@@ -136,7 +136,7 @@ const optionsToValidatorMap = {
     if (value && value.length > 0) return true;
     return 'This field is required.';
   },
-  radioGroup: (value) => {
+  radio: (value) => {
     if (value) return true;
     return 'This field is required.';
   },

@@ -123,7 +123,7 @@ const buildWhereInputType = (name, fields, parentName) => {
         ),
       };
     },
-    radioGroup: (field) => {
+    radio: (field) => {
       const type = GraphQLString;
       return {
         type: withOperators(
