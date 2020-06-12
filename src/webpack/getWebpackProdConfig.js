@@ -4,7 +4,7 @@ const path = require('path');
 const getStyleLoaders = require('./getStyleLoaders');
 
 module.exports = (config) => {
-  const webpackConfig = {
+  let webpackConfig = {
     entry: {
       main: [path.resolve(__dirname, '../client/components/index.js')],
     },
@@ -116,6 +116,10 @@ module.exports = (config) => {
     webpackConfig.resolve.alias['payload-scss-overrides'] = config.paths.scss;
   } else {
     webpackConfig.resolve.alias['payload-scss-overrides'] = path.resolve(__dirname, '../client/scss/overrides.scss');
+  }
+
+  if (config.webpack && typeof config.webpack === 'function') {
+    webpackConfig = config.webpack(webpackConfig);
   }
 
   return webpackConfig;
