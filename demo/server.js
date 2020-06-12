@@ -11,7 +11,6 @@ const payload = new Payload({
   secret: 'SECRET_KEY',
   mongoURL: 'mongodb://localhost/payload',
   express: expressApp,
-  config: path.resolve(__dirname, 'payload.config.js'),
 });
 
 exports.payload = payload;

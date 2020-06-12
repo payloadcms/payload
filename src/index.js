@@ -28,8 +28,6 @@ class Payload {
 
     if (typeof this.config.paths === 'undefined') this.config.paths = {};
 
-    this.config.paths.publicConfig = options.config.public;
-
     this.express = options.express;
     this.router = express.Router();
     this.collections = {};
