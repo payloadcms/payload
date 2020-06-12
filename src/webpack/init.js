@@ -6,7 +6,7 @@ const getWebpackDevConfig = require('./getWebpackDevConfig');
 
 const router = express.Router();
 
-const initWebpack = () => {
+function initWebpack() {
   const webpackDevConfig = getWebpackDevConfig(this.config);
   const compiler = webpack(webpackDevConfig);
 
@@ -26,6 +26,6 @@ const initWebpack = () => {
   });
 
   return router;
-};
+}
 
 module.exports = initWebpack;

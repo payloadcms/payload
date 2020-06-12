@@ -60,7 +60,7 @@ class Payload {
       if (process.env.NODE_ENV === 'production') {
         this.express.use(this.config.routes.admin, express.static(path.resolve(process.cwd(), 'build')));
       } else {
-        this.express.use(initWebpack());
+        this.express.use(this.initWebpack());
       }
     }
 
