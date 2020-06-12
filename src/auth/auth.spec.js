@@ -6,7 +6,7 @@ const { email, password } = require('../tests/credentials');
  * @jest-environment node
  */
 
-const config = require('../../demo/payload.public.config');
+const config = require('../../demo/payload.config');
 
 const url = config.serverURL;
 

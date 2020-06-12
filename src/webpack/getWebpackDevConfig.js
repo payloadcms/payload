@@ -118,7 +118,7 @@ module.exports = (config) => {
     resolve: {
       modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
       alias: {
-        'payload/unsanitizedConfig': config.paths.publicConfig,
+        'payload/unsanitizedConfig': config.paths.config,
         'payload/config': path.resolve(__dirname, '../client/config.js'),
       },
     },
