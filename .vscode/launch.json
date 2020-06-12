@@ -13,6 +13,9 @@
         "${workspaceRoot}/node_modules/.bin/jest",
         "--runInBand"
       ],
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "demo/payload.config.js"
+      },
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "port": 9229
@@ -21,8 +24,13 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "demo/payload.config.js"
+      },
       "program": "${workspaceFolder}/demo/server.js",
-      "skipFiles": ["<node_internals>/**"]
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
     },
     {
       "type": "chrome",
