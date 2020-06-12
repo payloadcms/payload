@@ -9,8 +9,10 @@ const findConfig = () => {
       throw new Error('Error: cannot find Payload config. Please create a configuration file located at the root of your project called "payload.config.js".');
     }
 
-    if (fs.existsSync(process.env.PAYLOAD_CONFIG_PATH)) {
-      configPath = process.env.PAYLOAD_CONFIG_PATH;
+    const pathFromENV = path.resolve(process.cwd(), process.env.PAYLOAD_CONFIG_PATH);
+
+    if (fs.existsSync(pathFromENV)) {
+      configPath = pathFromENV;
     }
   }
 

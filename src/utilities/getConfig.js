@@ -1,5 +1,3 @@
-const path = require('path');
-const fs = require('fs');
 const findConfig = require('./findConfig');
 
 /* eslint-disable import/no-dynamic-require */

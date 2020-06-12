@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test:unit": "cross-env NODE_ENV=test jest",
-    "test:int": "cross-env NODE_ENV=test jest --forceExit --runInBand",
+    "test:unit": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js NODE_ENV=test jest",
+    "test:int": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js NODE_ENV=test jest --forceExit --runInBand",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
-    "dev": "PAYLOAD_CONFIG_PATH=/Users/jmikrut/www/payload/demo/payload.config.js nodemon demo/server.js",
+    "dev": "PAYLOAD_CONFIG_PATH=demo/payload.config.js nodemon demo/server.js",
     "lint": "eslint **/*.js",
     "debug": "nodemon --inspect demo/server.js",
     "debug:test:int": "node --inspect-brk node_modules/.bin/jest --runInBand"
