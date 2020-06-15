@@ -1,0 +1,45 @@
+@import '../../../../../scss/styles';
+
+.radio-input {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin: base(.10) 0;
+
+  input[type=radio] {
+    display: none;
+  }
+
+  &__styled-radio {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: white;
+    box-shadow:
+      inset 0px 0px 0px 1px $color-dark-gray,
+      inset 0px 0px 0px 4px white;
+  }
+
+  &__label {
+    margin-left: base(.5);
+  }
+
+  &--is-selected {
+    .radio-input {
+      &__styled-radio {
+        background-color: $color-dark-gray;
+      }
+    }
+  }
+
+  &:not(&--is-selected) {
+    &:hover {
+      .radio-input {
+        &__styled-radio {
+          background-color: rgba($color-dark-gray, .4);
+        }
+      }
+    }
+  }
+}

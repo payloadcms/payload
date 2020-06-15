@@ -10,7 +10,7 @@ const register = async (args) => {
     // /////////////////////////////////////
 
     if (!args.overridePolicy) {
-      await executePolicy(args, args.collection.config.policies.register);
+      await executePolicy(args, args.collection.config.policies.create);
     }
 
     let options = { ...args };

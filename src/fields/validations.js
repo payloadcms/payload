@@ -141,6 +141,10 @@ const optionsToValidatorMap = {
     if (value && value.length > 0) return true;
     return 'This field is required.';
   },
+  radio: (value) => {
+    if (value) return true;
+    return 'This field is required.';
+  },
   flexible: async (value, options) => {
     if (value.length === 0) {
       return `This field requires at least one ${options.singularLabel}.`;

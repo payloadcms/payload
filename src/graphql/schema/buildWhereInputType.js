@@ -124,6 +124,17 @@ const buildWhereInputType = (name, fields, parentName) => {
         ),
       };
     },
+    radio: (field) => {
+      const type = GraphQLString;
+      return {
+        type: withOperators(
+          field.name,
+          type,
+          parentName,
+          ['equals', 'like', 'not_equals'],
+        ),
+      };
+    },
     date: (field) => {
       const type = GraphQLString;
       return {

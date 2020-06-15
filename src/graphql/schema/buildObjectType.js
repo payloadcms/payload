@@ -30,6 +30,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
     code: field => ({ type: withNullableType(field, GraphQLString) }),
     date: field => ({ type: withNullableType(field, GraphQLString) }),
     upload: field => ({ type: withNullableType(field, GraphQLString) }),
+    radio: field => ({ type: withNullableType(field, GraphQLString) }),
     checkbox: field => ({ type: withNullableType(field, GraphQLBoolean) }),
     select: (field) => {
       const fullName = combineParentName(parentName, field.name);

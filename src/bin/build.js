@@ -1,16 +1,24 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
 
-const path = require('path');
 const webpack = require('webpack');
 const getWebpackProdConfig = require('../webpack/getWebpackProdConfig');
+const findConfig = require('../utilities/findConfig');
 
-module.exports = (args) => {
-  const configPath = path.resolve(process.cwd(), (args.config || './payload.config.js'));
+module.exports = () => {
+  const configPath = findConfig();
 
   try {
     const config = require(configPath);
-    const webpackProdConfig = getWebpackProdConfig(config);
+
+    const webpackProdConfig = getWebpackProdConfig({
+      ...config,
+      paths: {
+        ...(config.paths || {}),
+        config: configPath,
+      },
+    });
+
     webpack(webpackProdConfig, (err, stats) => { // Stats Object
       if (err || stats.hasErrors()) {
         // Handle errors here
@@ -24,6 +32,7 @@ module.exports = (args) => {
       // Done processing
     });
   } catch (err) {
+    console.log(err);
     console.error(`Error: can't find the configuration file located at ${configPath}.`);
   }
 

@@ -1,17 +1,29 @@
+const findConfig = require('./findConfig');
+
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 
-const getConfig = (options) => {
-  if (!options.config || !options.config.public || !options.config.private) {
-    throw new Error('Error: missing config paths. Please specify where to find your configuration files while initializing Payload.');
+const getConfig = (options = {}) => {
+  if (!options.secret) {
+    throw new Error('Error: missing secret key. A secret key is needed to secure Payload.');
   }
 
-  const publicConfig = require(options.config.public);
-  const privateConfig = require(options.config.private);
+  if (!options.mongoURL) {
+    throw new Error('Error: missing MongoDB connection URL.');
+  }
+
+  const configPath = findConfig();
+  const publicConfig = require(configPath);
 
   return {
     ...publicConfig,
-    ...privateConfig,
+    secret: options.secret,
+    mongoURL: options.mongoURL,
+    email: options.email,
+    paths: {
+      ...(publicConfig.paths || {}),
+      config: configPath,
+    },
   };
 };
 
