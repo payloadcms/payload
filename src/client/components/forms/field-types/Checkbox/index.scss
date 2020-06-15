@@ -1,12 +1,29 @@
 @import '../shared';
 
-.field-type.checkbox {
+.checkbox {
+  position: relative;
+
   .tooltip {
     right: auto;
+  }
 
-    span {
-      left: calc(#{base(1.25)} / 2);
-      transform: none;
-    }
+  button {
+    @extend %btn-reset;
+    display: flex;
+  }
+
+  &__input {
+    position: relative;
+    width: $baseline;
+    height: $baseline;
+  }
+
+  input {
+    margin: 0;
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 }
