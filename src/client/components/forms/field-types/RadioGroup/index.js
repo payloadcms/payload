@@ -73,7 +73,7 @@ const RadioGroup = (props) => {
             key={option.value}
             isSelected={isSelected}
             option={option}
-            onChange={readOnly || formProcessing ? undefined : setValue}
+            onChange={readOnly ? undefined : setValue}
           />
         );
       })}
@@ -86,7 +86,7 @@ RadioGroup.defaultProps = {
   required: false,
   readOnly: false,
   defaultValue: null,
-  initialData: false,
+  initialData: undefined,
   validate: radio,
   width: undefined,
   style: {},
@@ -99,7 +99,7 @@ RadioGroup.propTypes = {
   readOnly: PropTypes.bool,
   required: PropTypes.bool,
   defaultValue: PropTypes.string,
-  initialData: PropTypes.bool,
+  initialData: PropTypes.string,
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),

@@ -36,35 +36,6 @@
       color: $color-gray;
     }
 
-    // Autofill event polyfill
-    // Thanks, Klarna:
-    // https://stackoverflow.com/questions/11708092/detecting-browser-autofill/11710295#11710295
-
-    @keyframes onAutoFillStart {
-      from {/**/}
-      to {/**/}
-    }
-
-    @keyframes onAutoFillCancel {
-      from {/**/}
-      to {/**/}
-    }
-
-    &:-internal-autofill-selected {
-      // Expose a hook for JavaScript when auto fill is shown.
-      // JavaScript can capture 'animationstart' events
-      animation-name: onAutoFillStart;
-
-      // Make the backgound color become yellow _really slowly_
-      transition: background-color 50000s ease-in-out 0s;
-    }
-
-    &:not(:-internal-autofill-selected) {
-      // Expose a hook for JS onAutoFillCancel
-      // JavaScript can capture 'animationstart' events
-      animation-name: onAutoFillCancel;
-    }
-
     @include small-break {
         margin-bottom: base(.5);
     }

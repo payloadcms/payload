@@ -23,7 +23,7 @@ const RadioInput = (props) => {
           id={option.label}
           type="radio"
           checked={isSelected}
-          onChange={() => onChange(option.value)}
+          onChange={() => (typeof onChange === 'function' ? onChange(option.value) : null)}
         />
         <span className={`${baseClass}__styled-radio`} />
         <span className={`${baseClass}__label`}>{option.label}</span>
@@ -34,6 +34,7 @@ const RadioInput = (props) => {
 
 RadioInput.defaultProps = {
   isSelected: false,
+  onChange: undefined,
 };
 
 RadioInput.propTypes = {
@@ -42,7 +43,7 @@ RadioInput.propTypes = {
     label: PropTypes.string,
     value: PropTypes.string,
   }).isRequired,
-  onChange: PropTypes.func.isRequired,
+  onChange: PropTypes.func,
 };
 
 export default RadioInput;
