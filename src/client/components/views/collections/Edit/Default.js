@@ -12,7 +12,7 @@ import CopyToClipboard from '../../../elements/CopyToClipboard';
 import DuplicateDocument from '../../../elements/DuplicateDocument';
 import DeleteDocument from '../../../elements/DeleteDocument';
 import * as fieldTypes from '../../../forms/field-types';
-import RenderTitle from './RenderTitle';
+import RenderTitle from '../../../elements/RenderTitle';
 import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving';
 
 import './index.scss';
@@ -35,11 +35,16 @@ const DefaultEditView = (props) => {
     useAsTitle,
     timestamps,
     preview,
+    auth,
   } = collection;
 
   const apiURL = `${serverURL}${api}/${slug}/${id}`;
-
   const dataToRender = locationState?.data || data;
+  let action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}`;
+
+  if (auth && !isEditing) {
+    action = `${action}/register`;
+  }
 
   const classes = [
     baseClass,
@@ -51,7 +56,7 @@ const DefaultEditView = (props) => {
       <Form
         className={`${baseClass}__form`}
         method={id ? 'put' : 'post'}
-        action={`${serverURL}${api}/${slug}${id ? `/${id}` : ''}`}
+        action={action}
         onSuccess={onSave}
       >
         <div className={`${baseClass}__main`}>
@@ -165,6 +170,7 @@ DefaultEditView.propTypes = {
     fields: PropTypes.arrayOf(PropTypes.shape({})),
     preview: PropTypes.func,
     timestamps: PropTypes.bool,
+    auth: PropTypes.shape({}),
   }).isRequired,
   isEditing: PropTypes.bool,
   data: PropTypes.shape({

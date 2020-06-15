@@ -1,7 +1,7 @@
 @import '../../../scss/styles.scss';
 
 .delete-document {
-  background: rgba(white, .97);
+  @include blur-bg;
   display: flex;
   align-items: center;
   height: 100%;

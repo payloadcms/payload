@@ -10,20 +10,51 @@
   button {
     @extend %btn-reset;
     display: flex;
+    align-items: center;
+    cursor: pointer;
+
+    &:focus,
+    &:active {
+      outline: none;
+    }
+
+    &:hover {
+      svg {
+        opacity: .2;
+      }
+
+      .checkbox__input {
+        background: darken($color-light-gray, 2%);
+      }
+    }
   }
 
   &__input {
     position: relative;
     width: $baseline;
     height: $baseline;
+    background: $color-light-gray;
+    margin-right: base(.5);
+
+    svg {
+      opacity: 0;
+    }
   }
 
   input {
-    margin: 0;
-    opacity: 0;
-    visibility: hidden;
     position: absolute;
     top: 0;
     left: 0;
+    opacity: 0;
+  }
+
+  &--checked {
+    button {
+      .checkbox__input {
+        svg {
+          opacity: 1;
+        }
+      }
+    }
   }
 }

@@ -86,7 +86,7 @@ $style-stroke-width-m : 2px;
 }
 
 @mixin blur-bg {
-  background: rgba($color-background-gray, .8);
+  background: rgba($color-background-gray, .7);
   backdrop-filter: saturate(180%) blur(5px);
 }
 

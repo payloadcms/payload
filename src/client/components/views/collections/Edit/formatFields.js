@@ -1,4 +1,4 @@
-const formatFields = (config) => {
+const formatFields = (config, isEditing) => {
   let fields = [...config.fields];
 
   if (config.auth) {
@@ -6,6 +6,7 @@ const formatFields = (config) => {
       {
         type: 'auth',
         useAPIKey: config.auth.useAPIKey,
+        requirePassword: !isEditing,
       },
     ];
 

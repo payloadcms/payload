@@ -113,8 +113,13 @@ describe('Users REST API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(201);
-    expect(data).toHaveProperty('email');
-    expect(data).toHaveProperty('roles');
-    expect(data).toHaveProperty('createdAt');
+    expect(data).toHaveProperty('message');
+    expect(data).toHaveProperty('doc');
+
+    const { doc } = data;
+
+    expect(doc).toHaveProperty('email');
+    expect(doc).toHaveProperty('createdAt');
+    expect(doc).toHaveProperty('roles');
   });
 });

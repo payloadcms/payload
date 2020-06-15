@@ -5,14 +5,19 @@ import Password from '../Password';
 import Checkbox from '../Checkbox';
 import Button from '../../../elements/Button';
 import ConfirmPassword from '../ConfirmPassword';
+import useForm from '../../Form/useForm';
+import APIKey from './APIKey';
 
 import './index.scss';
 
 const baseClass = 'auth-fields';
 
 const Auth = (props) => {
-  const { initialData, useAPIKey } = props;
-  const [changingPassword, setChangingPassword] = useState(false);
+  const { initialData, useAPIKey, requirePassword } = props;
+  const [changingPassword, setChangingPassword] = useState(requirePassword);
+  const { getField } = useForm();
+
+  const enableAPIKey = getField('enableAPIKey');
 
   return (
     <div className={baseClass}>
@@ -21,25 +26,29 @@ const Auth = (props) => {
         name="email"
         label="Email"
         initialData={initialData?.email}
+        autoComplete="email"
       />
       {changingPassword && (
         <div className={`${baseClass}__changing-password`}>
           <Password
+            autoComplete="off"
             required
             name="password"
             label="New Password"
           />
           <ConfirmPassword />
-          <Button
-            size="small"
-            buttonStyle="secondary"
-            onClick={() => setChangingPassword(false)}
-          >
-            Cancel
-          </Button>
+          {!requirePassword && (
+            <Button
+              size="small"
+              buttonStyle="secondary"
+              onClick={() => setChangingPassword(false)}
+            >
+              Cancel
+            </Button>
+          )}
         </div>
       )}
-      {!changingPassword && (
+      {(!changingPassword && !requirePassword) && (
         <Button
           size="small"
           buttonStyle="secondary"
@@ -51,9 +60,13 @@ const Auth = (props) => {
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <Checkbox
+            initialData={initialData?.enableAPIKey}
             label="Enable API Key"
             name="enableAPIKey"
           />
+          {enableAPIKey?.value && (
+            <APIKey initialData={initialData?.apiKey} />
+          )}
         </div>
       )}
     </div>

@@ -4,7 +4,7 @@ import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Error from '../../Error';
 import { checkbox } from '../../../../../fields/validations';
-import X from '../../../icons/X';
+import Check from '../../../icons/Check';
 
 import './index.scss';
 
@@ -46,6 +46,7 @@ const Checkbox = (props) => {
     'field-type',
     baseClass,
     showError && 'error',
+    value && `${baseClass}--checked`,
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
@@ -70,10 +71,13 @@ const Checkbox = (props) => {
       />
       <button
         type="button"
-        onClick={() => setValue(!value)}
+        onClick={() => {
+          setValue(!value);
+          if (typeof onChange === 'function') onChange(!value);
+        }}
       >
         <span className={`${baseClass}__input`}>
-          {value && <X />}
+          <Check />
         </span>
         <span className={`${baseClass}__label`}>
           {label}
