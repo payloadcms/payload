@@ -1,53 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Transforms } from 'slate';
 import { useSlate, useFocused } from 'slate-react';
 import { ToolbarElement, ToolbarMark, ToolbarList } from '@udecode/slate-plugins';
 
-import { nodeTypes, headingTypes } from '../types';
 import Icons from '../icons';
+import { nodeTypes } from '../types';
 
 import './index.scss';
 
 const baseClass = 'command-toolbar';
 
-const enabledHeadings = [{ label: 'Normal Text', value: 'p' }];
-
-const CommandToolbar = (props) => {
-  const { enabledPluginList, maxHeadingLevel, disabledMarks } = props;
+const CommandToolbar = () => {
   const editor = useSlate();
   const editorFocus = useFocused();
   const [editorFocusedSelection, setEditorFocusedSelection] = useState(editorFocus);
-  const headingsAreEnabled = enabledPluginList?.heading;
-  const blockquoteIsEnabled = enabledPluginList?.blockquote;
-
-  const onHeadingSelectChange = (headingType) => {
-    if (editorFocusedSelection) {
-      Transforms.select(editor, editorFocusedSelection);
-      editor.toggleType(headingType);
-    }
-  };
 
   useEffect(() => {
-    if (editorFocus && editor.selection) setEditorFocusedSelection(editor.selection);
+    if (editorFocus && editor.selection) {
+      setEditorFocusedSelection(editor.selection);
+    }
   }, [editorFocus, editorFocusedSelection, editor.selection]);
-
-  useEffect(() => {
-    if (headingsAreEnabled) {
-      Array.from(Array(maxHeadingLevel)).forEach((_, index) => {
-        enabledHeadings.push({
-          label: `Heading ${index + 1}`,
-          value: headingTypes[index],
-        });
-      });
-    }
-  }, [headingsAreEnabled, maxHeadingLevel]);
 
   return (
     <div className={baseClass}>
-
-      <div className={`${baseClass}__toggles`}>
-
+      <div className={`${baseClass}__elements toggle-section`}>
         <ToolbarElement
           type={nodeTypes.typeH1}
           icon={<Icons.H1 />}
@@ -79,8 +55,20 @@ const CommandToolbar = (props) => {
         />
 
         <ToolbarElement
+          type={nodeTypes.typeCodeBlock}
+          icon={<Icons.CodeBlock />}
+        />
+
+        <ToolbarElement
           type={nodeTypes.typeBlockquote}
           icon={<Icons.Blockquote />}
+        />
+      </div>
+
+      <div className={`${baseClass}__marks toggle-section`}>
+        <ToolbarMark
+          type={nodeTypes.typeCode}
+          icon={<Icons.Code />}
         />
 
         <ToolbarMark
@@ -102,7 +90,9 @@ const CommandToolbar = (props) => {
           type={nodeTypes.typeStrikethrough}
           icon={<Icons.Strikethrough />}
         />
+      </div>
 
+      <div className={`${baseClass}__lists toggle-section`}>
         <ToolbarList
           {...nodeTypes}
           typeList={nodeTypes.typeUl}

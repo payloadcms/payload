@@ -10,17 +10,19 @@ import {
 import { nodeTypes } from '../../types';
 
 const ToolbarList = (props) => {
-  const { typeList, ...rest } = props;
-  const editor = useSlate();
+  const { typeList } = props;
+  // const editor = useSlate();
+  console.log('render');
 
+  return null;
   return (
     <ToolbarElement
       type={typeList}
       onMouseDown={getPreventDefaultHandler(toggleList, editor, {
-        ...rest,
+        ...props,
         typeList,
       })}
-      {...rest}
+      {...props}
     />
   );
 };

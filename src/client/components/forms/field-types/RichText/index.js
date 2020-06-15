@@ -7,8 +7,8 @@ import {
   BlockquotePlugin,
   BoldPlugin,
   CodePlugin,
+  CodeBlockPlugin,
   EditablePlugins,
-  ExitBreakPlugin,
   HeadingPlugin,
   ImagePlugin,
   ItalicPlugin,
@@ -19,13 +19,10 @@ import {
   StrikethroughPlugin,
   UnderlinePlugin,
   withList,
-  withResetBlockType,
   withToggleType,
 } from '@udecode/slate-plugins';
 
-// import BlockquotePlugin from './plugins/Elements/Blockquote/BlockquotePlugin';
-
-import { nodeTypes, headingTypes } from './types';
+import { nodeTypes } from './types';
 import { richText } from '../../../../../fields/validations';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
@@ -38,29 +35,36 @@ const emptyRichTextNode = [{
   children: [{ text: '' }],
 }];
 
-const enabledPluginList = {
-  blockquote: options => BlockquotePlugin(options),
-  bold: options => BoldPlugin(options),
-  code: options => CodePlugin(options),
-  heading: options => HeadingPlugin(options),
-  image: options => ImagePlugin(options),
-  italic: options => ItalicPlugin(options),
-  list: options => ListPlugin(options),
-  paragraph: options => ParagraphPlugin(options),
-  strikethrough: options => StrikethroughPlugin(options),
-  underline: options => UnderlinePlugin(options),
-};
+const plugins = [
+  BlockquotePlugin(),
+  BoldPlugin(),
+  CodePlugin({ hotkey: 'mod+shift+c' }),
+  CodeBlockPlugin(),
+  HeadingPlugin(),
+  ImagePlugin(),
+  ItalicPlugin(),
+  ListPlugin(),
+  ParagraphPlugin(),
+  StrikethroughPlugin(),
+  UnderlinePlugin(),
+  SoftBreakPlugin({
+    rules: [
+      { hotkey: 'shift+enter' },
+      {
+        hotkey: 'enter',
+        query: {
+          allow: [nodeTypes.typeCodeBlock, nodeTypes.typeBlockquote],
+        },
+      },
+    ],
+  }),
+];
 
-const enabledPluginFunctions = [];
 const withPlugins = [
   withReact,
   withHistory,
   withList(nodeTypes),
   withToggleType({ defaultType: nodeTypes.typeP }),
-  withResetBlockType({
-    types: [nodeTypes.typeActionItem],
-    defaultType: nodeTypes.typeP,
-  }),
 ];
 
 const baseClass = 'rich-text';
@@ -78,9 +82,6 @@ const RichText = (props) => {
     label,
     placeholder,
     readOnly,
-    disabledPlugins,
-    disabledMarks,
-    maxHeadingLevel,
   } = props;
 
   const editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
@@ -108,60 +109,12 @@ const RichText = (props) => {
   useEffect(() => { setValue(internalState); }, [setValue, internalState]);
 
   useEffect(() => {
+    // ! could use review
     if (value !== undefined && !valueHasLoaded) {
       setInternalState(value);
       setValueHasLoaded(true);
     }
   }, [value, valueHasLoaded]);
-
-  useEffect(() => {
-    // remove plugins disabled in config
-    if (disabledPlugins.length > 0) {
-      disabledPlugins.forEach((pluginKey) => {
-        delete enabledPluginList[pluginKey];
-      });
-    }
-
-    // push the rest to enabledPlugins
-    Object.keys(enabledPluginList).forEach((plugin) => {
-      const options = { editor };
-      if (plugin === 'heading' && maxHeadingLevel < 6) {
-        options.levels = maxHeadingLevel;
-      }
-
-      enabledPluginFunctions.push(enabledPluginList[plugin](options));
-      enabledPluginFunctions.push(SoftBreakPlugin({
-        rules: [
-          { hotkey: 'shift+enter' },
-          {
-            hotkey: 'enter',
-            query: {
-              allow: [nodeTypes.typeCodeBlock, nodeTypes.typeBlockquote],
-            },
-          },
-        ],
-      }));
-    });
-    enabledPluginFunctions.push(ExitBreakPlugin({
-      rules: [
-        {
-          hotkey: 'mod+enter',
-        },
-        {
-          hotkey: 'mod+shift+enter',
-          before: true,
-        },
-        // {
-        //   hotkey: 'enter',
-        //   query: {
-        //     start: true,
-        //     end: true,
-        //     allow: headingTypes,
-        //   },
-        // },
-      ],
-    }));
-  }, [disabledPlugins, maxHeadingLevel]);
 
   const classes = [
     baseClass,
@@ -193,14 +146,10 @@ const RichText = (props) => {
           value={internalState ?? emptyRichTextNode}
           onChange={val => setInternalState(val)}
         >
-          <CommandToolbar
-            enabledPluginList={enabledPluginList}
-            disabledMarks={disabledMarks}
-            maxHeadingLevel={maxHeadingLevel}
-          />
+          <CommandToolbar enabledPluginList={plugins} />
 
           <EditablePlugins
-            plugins={enabledPluginFunctions}
+            plugins={plugins}
             placeholder={placeholder}
             className={`${baseClass}__editor`}
           />
@@ -221,9 +170,6 @@ RichText.defaultProps = {
   style: {},
   validate: richText,
   path: '',
-  disabledPlugins: [],
-  disabledMarks: [],
-  maxHeadingLevel: 6,
 };
 
 RichText.propTypes = {
@@ -238,9 +184,6 @@ RichText.propTypes = {
   width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,
-  disabledPlugins: PropTypes.arrayOf(PropTypes.string),
-  disabledMarks: PropTypes.arrayOf(PropTypes.string),
-  maxHeadingLevel: PropTypes.number,
 };
 
 export default RichText;

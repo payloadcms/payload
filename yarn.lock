@@ -1524,10 +1524,10 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@udecode/slate-plugins@^0.59.1":
-  version "0.59.1"
-  resolved "https://registry.yarnpkg.com/@udecode/slate-plugins/-/slate-plugins-0.59.1.tgz#996f023ac3f081a676c3c4fb76cbeb5f18361d7a"
-  integrity sha512-bz+ziUELANDBEYI8cGb5jXOKPol/l/WJJ3M7EJPdx647Gf79DM/qne4/MP201iZZ4TMuLSBovaBGNfQh+/wVmg==
+"@udecode/slate-plugins@^0.59.2":
+  version "0.59.2"
+  resolved "https://registry.yarnpkg.com/@udecode/slate-plugins/-/slate-plugins-0.59.2.tgz#d72765520271647419228c49e78d4c0bca86d4a1"
+  integrity sha512-rBrdK5j67YYIJmkjSNX4GXrhDvmX4/rrBBTLMd8h7BN1gR90qbon5oS6yIkW8c25eQFfMtVulP6LeuPkMnTREw==
   dependencies:
     "@tippyjs/react" "^4.0.2"
     "@uifabric/styling" "^7.12.11"

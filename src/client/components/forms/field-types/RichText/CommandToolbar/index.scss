@@ -4,23 +4,28 @@
   border-bottom: 1px solid $color-light-gray;
   padding: base(.5);
   background: $color-background-gray;
+  display: flex;
 
-  &__marks,
-  &__blocks,
-  .react-select {
-    display: inline-block;
-  }
+  .toggle-section {
+    display: inline-flex;
+    padding: 0 base(.5);
 
-  .react-select {
-    margin-right: base(.25);
-  }
+    &:first-child {
+      padding-left: 0;
+    }
 
-  hr {
-    border: none;
-    border-bottom: 1px solid $color-light-gray;
+    + .toggle-section {
+      border-left: $style-stroke-width-m solid $color-light-gray;
+    }
   }
 
   .slate-ToolbarButton {
-    display: inline-block;
+    display: inline-flex;
+    @include color-svg($color-gray);
+
+    &-active {
+      border-radius: $style-radius-s;
+      @include color-svg($color-dark-gray);
+    }
   }
 }
