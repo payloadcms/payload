@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import DefaultList from './Default';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import { useStepNav } from '../../../elements/StepNav';
-import formatListFields from './formatListFields';
+import formatFields from './formatFields';
 
 const ListView = (props) => {
   const {
@@ -20,7 +20,7 @@ const ListView = (props) => {
   const [fields, setFields] = useState(collection.fields);
 
   useEffect(() => {
-    setFields(formatListFields(collection));
+    setFields(formatFields(collection));
   }, [collection]);
 
   useEffect(() => {

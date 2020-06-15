@@ -1,5 +1,5 @@
-const formatListFields = (config) => {
-  let listFields = config.fields.reduce((formatted, field) => {
+const formatFields = (config) => {
+  let fields = config.fields.reduce((formatted, field) => {
     if (field.hidden === true || field?.hidden?.admin === true) {
       return formatted;
     }
@@ -11,7 +11,7 @@ const formatListFields = (config) => {
   }, [{ name: 'id', label: 'ID', type: 'text' }]);
 
   if (config.timestamps) {
-    listFields = listFields.concat([
+    fields = fields.concat([
       {
         name: 'createdAt',
         label: 'Created At',
@@ -25,7 +25,7 @@ const formatListFields = (config) => {
   }
 
   if (config.auth) {
-    listFields = listFields.concat([
+    fields = fields.concat([
       {
         name: 'email',
         label: 'Email',
@@ -38,7 +38,7 @@ const formatListFields = (config) => {
     ]);
   }
 
-  return listFields;
+  return fields;
 };
 
-export default formatListFields;
+export default formatFields;

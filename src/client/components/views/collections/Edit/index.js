@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import config from 'payload/config';
 import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
+import formatFields from './formatFields';
 
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import DefaultEdit from './Default';
@@ -14,8 +15,10 @@ const EditView = (props) => {
   const { params: { id } = {} } = useRouteMatch();
   const history = useHistory();
   const { setStepNav } = useStepNav();
+  const [fields, setFields] = useState([]);
 
   const { collection, isEditing } = props;
+
   const {
     slug,
     labels: {
@@ -57,13 +60,17 @@ const EditView = (props) => {
     setStepNav(nav);
   }, [setStepNav, isEditing, pluralLabel, data, slug, useAsTitle]);
 
+  useEffect(() => {
+    setFields(formatFields(collection));
+  }, [collection]);
+
   return (
     <RenderCustomComponent
       DefaultComponent={DefaultEdit}
       path={`${slug}.views.Edit`}
       componentProps={{
         data,
-        collection,
+        collection: { ...collection, fields },
         isEditing,
         onSave,
       }}

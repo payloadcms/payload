@@ -1,3 +1,5 @@
+export { default as auth } from './Auth';
+
 export { default as email } from './Email';
 export { default as hidden } from './HiddenInput';
 export { default as text } from './Text';

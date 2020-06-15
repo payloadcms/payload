@@ -32,7 +32,6 @@ const RadioGroup = (props) => {
     showError,
     errorMessage,
     setValue,
-    formProcessing,
   } = useFieldType({
     path,
     required,
