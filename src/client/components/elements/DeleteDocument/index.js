@@ -50,8 +50,9 @@ const DeleteDocument = (props) => {
       headers: {
         'Content-Type': 'application/json',
       },
-    }).then((res) => {
-      return res.json().then((json) => {
+    }).then(async (res) => {
+      try {
+        const json = await res.json();
         if (res.status < 400) {
           closeAll();
           return history.push({
@@ -65,72 +66,77 @@ const DeleteDocument = (props) => {
         }
 
         closeAll();
+
         if (json.errors) {
           replaceStatus(json.errors);
         }
         addDefaultError();
-
         return false;
-      }).catch(() => {
-        addDefaultError();
-      });
+      } catch (e) {
+        return addDefaultError();
+      }
     });
   }, [addDefaultError, closeAll, history, id, replaceStatus, singular, slug, title]);
 
-  return (
-    <>
-      <button
-        type="button"
-        slug={modalSlug}
-        className={`${baseClass}__toggle`}
-        onClick={(e) => {
-          e.preventDefault();
-          toggle(modalSlug);
-        }}
-      >
-        Delete
-      </button>
-      <Modal
-        slug={modalSlug}
-        className={baseClass}
-      >
-        <MinimalTemplate>
-          <h1>Confirm deletion</h1>
-          <p>
-            You are about to delete the
-            {' '}
-            {singular}
-            {' '}
-            &quot;
-            <strong>
-              {titleToRender}
-            </strong>
-            &quot;. Are you sure?
-          </p>
-          {!deleting && (
+  if (id) {
+    return (
+      <>
+        <button
+          type="button"
+          slug={modalSlug}
+          className={`${baseClass}__toggle`}
+          onClick={(e) => {
+            e.preventDefault();
+            toggle(modalSlug);
+          }}
+        >
+          Delete
+        </button>
+        <Modal
+          slug={modalSlug}
+          className={baseClass}
+        >
+          <MinimalTemplate>
+            <h1>Confirm deletion</h1>
+            <p>
+              You are about to delete the
+              {' '}
+              {singular}
+              {' '}
+              &quot;
+              <strong>
+                {titleToRender}
+              </strong>
+              &quot;. Are you sure?
+            </p>
+            {!deleting && (
+              <Button
+                buttonStyle="secondary"
+                type="button"
+                onClick={() => {
+                  toggle(modalSlug);
+                }}
+              >
+                Cancel
+              </Button>
+            )}
             <Button
-              buttonStyle="secondary"
-              type="button"
-              onClick={() => {
-                toggle(modalSlug);
-              }}
+              onClick={deleting ? undefined : handleDelete}
             >
-              Cancel
+              {deleting ? 'Deleting...' : 'Confirm'}
             </Button>
-          )}
-          <Button
-            onClick={deleting ? undefined : handleDelete}
-          >
-            {deleting ? 'Deleting...' : 'Confirm'}
-          </Button>
-        </MinimalTemplate>
-      </Modal>
-    </>
-  );
+          </MinimalTemplate>
+        </Modal>
+      </>
+    );
+  }
+
+  return null;
 };
 
 DeleteDocument.defaultProps = {
   title: undefined,
+  id: undefined,
 };
 
 DeleteDocument.propTypes = {
@@ -141,7 +147,7 @@ DeleteDocument.propTypes = {
       singular: PropTypes.string,
     }),
   }).isRequired,
-  id: PropTypes.string.isRequired,
+  id: PropTypes.string,
   title: PropTypes.string,
 };
 

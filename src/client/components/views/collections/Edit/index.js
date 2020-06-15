@@ -61,8 +61,8 @@ const EditView = (props) => {
   }, [setStepNav, isEditing, pluralLabel, data, slug, useAsTitle]);
 
   useEffect(() => {
-    setFields(formatFields(collection));
-  }, [collection]);
+    setFields(formatFields(collection, isEditing));
+  }, [collection, isEditing]);
 
   return (
     <RenderCustomComponent

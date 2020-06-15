@@ -13,8 +13,8 @@ import './index.scss';
 const baseClass = 'auth-fields';
 
 const Auth = (props) => {
-  const { initialData, useAPIKey } = props;
-  const [changingPassword, setChangingPassword] = useState(false);
+  const { initialData, useAPIKey, requirePassword } = props;
+  const [changingPassword, setChangingPassword] = useState(requirePassword);
   const { getField } = useForm();
 
   const enableAPIKey = getField('enableAPIKey');
@@ -37,16 +37,18 @@ const Auth = (props) => {
             label="New Password"
           />
           <ConfirmPassword />
-          <Button
-            size="small"
-            buttonStyle="secondary"
-            onClick={() => setChangingPassword(false)}
-          >
-            Cancel
-          </Button>
+          {!requirePassword && (
+            <Button
+              size="small"
+              buttonStyle="secondary"
+              onClick={() => setChangingPassword(false)}
+            >
+              Cancel
+            </Button>
+          )}
         </div>
       )}
-      {!changingPassword && (
+      {(!changingPassword && !requirePassword) && (
         <Button
           size="small"
           buttonStyle="secondary"
