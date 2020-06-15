@@ -102,7 +102,10 @@ Text.propTypes = {
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),
-  label: PropTypes.string,
+  label: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.node,
+  ]),
 };
 
 export default withCondition(Text);

@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import Email from '../Email';
 import Password from '../Password';
 import Checkbox from '../Checkbox';
+import Text from '../Text';
 import Button from '../../../elements/Button';
 import ConfirmPassword from '../ConfirmPassword';
 import useForm from '../../Form/useForm';
+import CopyToClipboard from '../../../elements/CopyToClipboard';
 
 import './index.scss';
 
@@ -17,6 +19,18 @@ const Auth = (props) => {
   const { getField } = useForm();
 
   const enableAPIKey = getField('enableAPIKey');
+  const apiKey = getField('apiKey');
+
+  const apiKeyValue = apiKey?.value;
+
+  const APIKeyLabel = useMemo(() => (
+    <div className={`${baseClass}__api-key-label`}>
+      <span>
+        API Key
+      </span>
+      <CopyToClipboard value={apiKeyValue} />
+    </div>
+  ), [apiKeyValue]);
 
   return (
     <div className={baseClass}>
@@ -63,7 +77,12 @@ const Auth = (props) => {
           />
           {enableAPIKey?.value && (
             <div className={`${baseClass}__api-key-generator`}>
-              Generate one
+              <Text
+                label={APIKeyLabel}
+                initialData={initialData?.apiKey}
+                name="apiKey"
+                readOnly
+              />
             </div>
           )}
         </div>

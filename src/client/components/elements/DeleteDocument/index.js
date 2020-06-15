@@ -101,8 +101,6 @@ const DeleteDocument = (props) => {
             {' '}
             {singular}
             {' '}
-            document
-            {' '}
             &quot;
             <strong>
               {titleToRender}

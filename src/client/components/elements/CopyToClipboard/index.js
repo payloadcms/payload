@@ -20,44 +20,52 @@ const CopyToClipboard = ({ value }) => {
     }
   }, [copied, hovered]);
 
-  return (
-    <button
-      onMouseEnter={() => {
-        setHovered(true);
-        setCopied(false);
-      }}
-      onMouseLeave={() => {
-        setHovered(false);
-        setCopied(false);
-      }}
-      type="button"
-      className={baseClass}
-      onClick={() => {
-        if (ref && ref.current) {
-          ref.current.select();
-          ref.current.setSelectionRange(0, value.length + 1);
-          document.execCommand('copy');
+  if (value) {
+    return (
+      <button
+        onMouseEnter={() => {
+          setHovered(true);
+          setCopied(false);
+        }}
+        onMouseLeave={() => {
+          setHovered(false);
+          setCopied(false);
+        }}
+        type="button"
+        className={baseClass}
+        onClick={() => {
+          if (ref && ref.current) {
+            ref.current.select();
+            ref.current.setSelectionRange(0, value.length + 1);
+            document.execCommand('copy');
 
-          setCopied(true);
-        }
-      }}
-    >
-      <Copy />
-      <Tooltip>
-        {copied && 'Copied'}
-        {!copied && 'Copy'}
-      </Tooltip>
-      <textarea
-        readOnly
-        value={value}
-        ref={ref}
-      />
-    </button>
-  );
+            setCopied(true);
+          }
+        }}
+      >
+        <Copy />
+        <Tooltip>
+          {copied && 'Copied'}
+          {!copied && 'Copy'}
+        </Tooltip>
+        <textarea
+          readOnly
+          value={value}
+          ref={ref}
+        />
+      </button>
+    );
+  }
+
+  return null;
+};
+
+CopyToClipboard.defaultProps = {
+  value: '',
 };
 
 CopyToClipboard.propTypes = {
-  value: PropTypes.string.isRequired,
+  value: PropTypes.string,
 };
 
 export default CopyToClipboard;
