@@ -7,5 +7,7 @@ module.exports = [
   {
     name: 'apiKey',
     type: 'text',
+    minLength: 24,
+    maxLength: 48,
   },
 ];

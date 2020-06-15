@@ -8,6 +8,7 @@ import Button from '../../../elements/Button';
 import ConfirmPassword from '../ConfirmPassword';
 import useForm from '../../Form/useForm';
 import CopyToClipboard from '../../../elements/CopyToClipboard';
+import APIKey from './APIKey';
 
 import './index.scss';
 
@@ -76,14 +77,7 @@ const Auth = (props) => {
             name="enableAPIKey"
           />
           {enableAPIKey?.value && (
-            <div className={`${baseClass}__api-key-generator`}>
-              <Text
-                label={APIKeyLabel}
-                initialData={initialData?.apiKey}
-                name="apiKey"
-                readOnly
-              />
-            </div>
+            <APIKey initialData={initialData?.apiKey} />
           )}
         </div>
       )}
