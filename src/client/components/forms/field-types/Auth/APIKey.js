@@ -1,21 +1,38 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Button from '../../../elements/Button';
+import CopyToClipboard from '../../../elements/CopyToClipboard';
 import generateAPIKey from './generateAPIKey';
 import { text } from '../../../../../fields/validations';
+import useForm from '../../Form/useForm';
 
 import './index.scss';
 
 const path = 'apiKey';
-
+const baseClass = 'api-key';
 const validate = val => text(val, { minLength: 24, maxLength: 48 });
 
 const APIKey = (props) => {
   const {
     initialData,
   } = props;
+
+  const { getField } = useForm();
+
+  const apiKey = getField(path);
+
+  const apiKeyValue = apiKey?.value;
+
+  const APIKeyLabel = useMemo(() => (
+    <div className={`${baseClass}__label`}>
+      <span>
+        API Key
+      </span>
+      <CopyToClipboard value={apiKeyValue} />
+    </div>
+  ), [apiKeyValue]);
 
   const fieldType = useFieldType({
     path: 'apiKey',
@@ -39,7 +56,7 @@ const APIKey = (props) => {
       <div className={classes}>
         <Label
           htmlFor={path}
-          label="API Key"
+          label={APIKeyLabel}
         />
         <input
           value={value || ''}
