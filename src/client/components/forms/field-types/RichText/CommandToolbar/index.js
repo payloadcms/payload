@@ -109,19 +109,8 @@ const CommandToolbar = () => {
   );
 };
 
-CommandToolbar.defaultProps = {
-  maxHeadingLevel: 6,
-  enabledPluginList: {},
-  disabledMarks: [],
-};
+CommandToolbar.defaultProps = {};
 
-CommandToolbar.propTypes = {
-  maxHeadingLevel: PropTypes.number,
-  enabledPluginList: PropTypes.shape({
-    heading: PropTypes.string,
-    blockquote: PropTypes.string,
-  }),
-  disabledMarks: PropTypes.arrayOf(PropTypes.string),
-};
+CommandToolbar.propTypes = {};
 
 export default CommandToolbar;
