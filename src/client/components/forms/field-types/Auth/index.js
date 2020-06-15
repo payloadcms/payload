@@ -21,10 +21,12 @@ const Auth = (props) => {
         name="email"
         label="Email"
         initialData={initialData?.email}
+        autoComplete="email"
       />
       {changingPassword && (
         <div className={`${baseClass}__changing-password`}>
           <Password
+            autoComplete="off"
             required
             name="password"
             label="New Password"

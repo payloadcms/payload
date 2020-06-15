@@ -18,6 +18,7 @@ const Password = (props) => {
     validate,
     style,
     width,
+    autoComplete,
     label,
   } = props;
 
@@ -65,7 +66,7 @@ const Password = (props) => {
         onChange={setValue}
         disabled={processing ? 'disabled' : undefined}
         type="password"
-        autoComplete="current-password"
+        autoComplete={autoComplete}
         id={path}
         name={path}
       />
@@ -81,6 +82,7 @@ Password.defaultProps = {
   width: undefined,
   style: {},
   path: '',
+  autoComplete: 'off',
 };
 
 Password.propTypes = {
@@ -93,6 +95,7 @@ Password.propTypes = {
   style: PropTypes.shape({}),
   label: PropTypes.string.isRequired,
   validate: PropTypes.func,
+  autoComplete: PropTypes.string,
 };
 
 export default withCondition(Password);
