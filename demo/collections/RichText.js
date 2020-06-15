@@ -12,7 +12,6 @@ const RichText = {
       required: true,
       disabledPlugins: [],
       disabledMarks: [],
-      maxHeadingLevel: 1,
     },
   ],
 };

@@ -2,16 +2,12 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Transforms } from 'slate';
 import { useSlate, useFocused } from 'slate-react';
-import {
-  StrikethroughIcon, BlockquoteIcon, OrderedListIcon, UnorderedListIcon, ItalicIcon, UnderlineIcon, CodeIcon,
-} from '../icons';
+import { ToolbarElement, ToolbarMark, ToolbarList } from '@udecode/slate-plugins';
 
 import { nodeTypes, headingTypes } from '../types';
-import CommandButton from '../CommandButton';
-import ReactSelect from '../../../../elements/ReactSelect';
+import Icons from '../icons';
 
 import './index.scss';
-import BoldIcon from '../icons/Bold';
 
 const baseClass = 'command-toolbar';
 
@@ -22,8 +18,8 @@ const CommandToolbar = (props) => {
   const editor = useSlate();
   const editorFocus = useFocused();
   const [editorFocusedSelection, setEditorFocusedSelection] = useState(editorFocus);
-  const headingsAreEnabled = enabledPluginList.heading !== undefined;
-  const blockquoteIsEnabled = enabledPluginList.blockquote !== undefined;
+  const headingsAreEnabled = enabledPluginList?.heading;
+  const blockquoteIsEnabled = enabledPluginList?.blockquote;
 
   const onHeadingSelectChange = (headingType) => {
     if (editorFocusedSelection) {
@@ -51,63 +47,73 @@ const CommandToolbar = (props) => {
     <div className={baseClass}>
 
       <div className={`${baseClass}__toggles`}>
-        {headingsAreEnabled && (
-          <ReactSelect
-            options={enabledHeadings}
-            onChange={onHeadingSelectChange}
-          />
-        )}
 
-        {blockquoteIsEnabled && (
-          <CommandButton element={nodeTypes.typeBlockquote}>
-            <BlockquoteIcon />
-          </CommandButton>
-        )}
+        <ToolbarElement
+          type={nodeTypes.typeH1}
+          icon={<Icons.H1 />}
+        />
 
-        {!disabledMarks.includes(nodeTypes.typeOl) && (
-          <CommandButton listElement={nodeTypes.typeOl}>
-            <OrderedListIcon />
-          </CommandButton>
-        )}
+        <ToolbarElement
+          type={nodeTypes.typeH2}
+          icon={<Icons.H2 />}
+        />
 
+        <ToolbarElement
+          type={nodeTypes.typeH3}
+          icon={<Icons.H3 />}
+        />
 
-        {!disabledMarks.includes(nodeTypes.typeUl) && (
-          <CommandButton listElement={nodeTypes.typeUl}>
-            <UnorderedListIcon />
-          </CommandButton>
-        )}
+        <ToolbarElement
+          type={nodeTypes.typeH4}
+          icon={<Icons.H4 />}
+        />
 
-        {!disabledMarks.includes(nodeTypes.typeBold) && (
-          <CommandButton mark={nodeTypes.typeBold}>
-            <BoldIcon />
-          </CommandButton>
-        )}
+        <ToolbarElement
+          type={nodeTypes.typeH5}
+          icon={<Icons.H5 />}
+        />
 
-        {!disabledMarks.includes(nodeTypes.typeItalic) && (
-          <CommandButton mark={nodeTypes.typeItalic}>
-            <ItalicIcon />
-          </CommandButton>
-        )}
+        <ToolbarElement
+          type={nodeTypes.typeH6}
+          icon={<Icons.H6 />}
+        />
 
-        {!disabledMarks.includes(nodeTypes.typeUnderline) && (
-          <CommandButton mark={nodeTypes.typeUnderline}>
-            <UnderlineIcon />
-          </CommandButton>
-        )}
+        <ToolbarElement
+          type={nodeTypes.typeBlockquote}
+          icon={<Icons.Blockquote />}
+        />
 
-        {!disabledMarks.includes(nodeTypes.typeStrikethrough) && (
-          <CommandButton mark={nodeTypes.typeStrikethrough}>
-            <StrikethroughIcon />
-          </CommandButton>
-        )}
+        <ToolbarMark
+          type={nodeTypes.typeBold}
+          icon={<Icons.Bold />}
+        />
 
-        {!disabledMarks.includes(nodeTypes.typeCode) && (
-          <CommandButton mark={nodeTypes.typeCode}>
-            <CodeIcon />
-          </CommandButton>
-        )}
+        <ToolbarMark
+          type={nodeTypes.typeItalic}
+          icon={<Icons.Italic />}
+        />
 
-        <CommandButton clearStyles>X</CommandButton>
+        <ToolbarMark
+          type={nodeTypes.typeUnderline}
+          icon={<Icons.Underline />}
+        />
+
+        <ToolbarMark
+          type={nodeTypes.typeStrikethrough}
+          icon={<Icons.Strikethrough />}
+        />
+
+        <ToolbarList
+          {...nodeTypes}
+          typeList={nodeTypes.typeUl}
+          icon={<Icons.UnorderedList />}
+        />
+
+        <ToolbarList
+          {...nodeTypes}
+          typeList={nodeTypes.typeOl}
+          icon={<Icons.OrderedList />}
+        />
       </div>
     </div>
   );

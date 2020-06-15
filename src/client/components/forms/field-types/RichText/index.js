@@ -8,18 +8,24 @@ import {
   BoldPlugin,
   CodePlugin,
   EditablePlugins,
+  ExitBreakPlugin,
   HeadingPlugin,
   ImagePlugin,
   ItalicPlugin,
   ListPlugin,
   ParagraphPlugin,
   pipe,
+  SoftBreakPlugin,
   StrikethroughPlugin,
   UnderlinePlugin,
   withList,
+  withResetBlockType,
   withToggleType,
 } from '@udecode/slate-plugins';
 
+// import BlockquotePlugin from './plugins/Elements/Blockquote/BlockquotePlugin';
+
+import { nodeTypes, headingTypes } from './types';
 import { richText } from '../../../../../fields/validations';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
@@ -46,7 +52,16 @@ const enabledPluginList = {
 };
 
 const enabledPluginFunctions = [];
-const withPlugins = [withReact, withHistory];
+const withPlugins = [
+  withReact,
+  withHistory,
+  withList(nodeTypes),
+  withToggleType({ defaultType: nodeTypes.typeP }),
+  withResetBlockType({
+    types: [nodeTypes.typeActionItem],
+    defaultType: nodeTypes.typeP,
+  }),
+];
 
 const baseClass = 'rich-text';
 
@@ -68,24 +83,7 @@ const RichText = (props) => {
     maxHeadingLevel,
   } = props;
 
-  useEffect(() => {
-    // remove config disabled plugins
-    if (disabledPlugins.length > 0) {
-      disabledPlugins.forEach((pluginKey) => {
-        delete enabledPluginList[pluginKey];
-      });
-    }
-
-    // push the rest to enabledPlugins
-    Object.keys(enabledPluginList).forEach((plugin) => {
-      const options = {};
-      if (plugin === 'heading' && maxHeadingLevel < 6) {
-        options.levels = maxHeadingLevel;
-      }
-
-      enabledPluginFunctions.push(enabledPluginList[plugin](options));
-    });
-  }, [disabledPlugins, maxHeadingLevel]);
+  const editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
 
   const path = pathFromProps || name;
 
@@ -104,8 +102,6 @@ const RichText = (props) => {
     errorMessage,
   } = fieldType;
 
-  const editor = useMemo(() => pipe(createEditor(), ...withPlugins, withToggleType(), withList()), []);
-
   const [internalState, setInternalState] = useState(value);
   const [valueHasLoaded, setValueHasLoaded] = useState(false);
 
@@ -117,6 +113,55 @@ const RichText = (props) => {
       setValueHasLoaded(true);
     }
   }, [value, valueHasLoaded]);
+
+  useEffect(() => {
+    // remove plugins disabled in config
+    if (disabledPlugins.length > 0) {
+      disabledPlugins.forEach((pluginKey) => {
+        delete enabledPluginList[pluginKey];
+      });
+    }
+
+    // push the rest to enabledPlugins
+    Object.keys(enabledPluginList).forEach((plugin) => {
+      const options = { editor };
+      if (plugin === 'heading' && maxHeadingLevel < 6) {
+        options.levels = maxHeadingLevel;
+      }
+
+      enabledPluginFunctions.push(enabledPluginList[plugin](options));
+      enabledPluginFunctions.push(SoftBreakPlugin({
+        rules: [
+          { hotkey: 'shift+enter' },
+          {
+            hotkey: 'enter',
+            query: {
+              allow: [nodeTypes.typeCodeBlock, nodeTypes.typeBlockquote],
+            },
+          },
+        ],
+      }));
+    });
+    enabledPluginFunctions.push(ExitBreakPlugin({
+      rules: [
+        {
+          hotkey: 'mod+enter',
+        },
+        {
+          hotkey: 'mod+shift+enter',
+          before: true,
+        },
+        // {
+        //   hotkey: 'enter',
+        //   query: {
+        //     start: true,
+        //     end: true,
+        //     allow: headingTypes,
+        //   },
+        // },
+      ],
+    }));
+  }, [disabledPlugins, maxHeadingLevel]);
 
   const classes = [
     baseClass,

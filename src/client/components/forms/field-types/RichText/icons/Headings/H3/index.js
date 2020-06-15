@@ -1,6 +1,6 @@
 import React from 'react';
 
-const UnderlineIcon = () => {
+const H3Icon = () => {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -8,7 +8,7 @@ const UnderlineIcon = () => {
       focusable="false"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
-      className="graphic underline-icon"
+      className="graphic h3-icon"
     >
       <path
         fill="none"
@@ -16,10 +16,10 @@ const UnderlineIcon = () => {
       />
       <path
         className="fill"
-        d="M12 17c3.31 0 6-2.69 6-6V3h-2.5v8c0 1.93-1.57 3.5-3.5 3.5S8.5 12.93 8.5 11V3H6v8c0 3.31 2.69 6 6 6zm-7 2v2h14v-2H5z"
+        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 8a2 2 0 01-2 2h-2v2h4v2H9v-4a2 2 0 012-2h2V9H9V7h4a2 2 0 012 2v2z"
       />
     </svg>
   );
 };
 
-export default UnderlineIcon;
+export default H3Icon;
