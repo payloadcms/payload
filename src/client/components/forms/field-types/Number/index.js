@@ -43,6 +43,7 @@ const NumberField = (props) => {
     initialData,
     defaultValue,
     validate: memoizedValidate,
+    enableDebouncedValue: true,
   });
 
   const classes = [

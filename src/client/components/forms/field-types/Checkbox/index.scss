@@ -20,11 +20,11 @@
 
     &:hover {
       svg {
-        opacity: .25;
+        opacity: .2;
       }
 
       .checkbox__input {
-        background: darken($color-light-gray, 5%);
+        background: darken($color-light-gray, 2%);
       }
     }
   }

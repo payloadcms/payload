@@ -27,6 +27,7 @@ const ConfirmPassword = () => {
     disableFormData: true,
     required: true,
     validate,
+    enableDebouncedValue: true,
   });
 
   const classes = [

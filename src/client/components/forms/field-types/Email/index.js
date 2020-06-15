@@ -37,6 +37,7 @@ const Email = (props) => {
     initialData,
     defaultValue,
     validate,
+    enableDebouncedValue: true,
   });
 
   const classes = [

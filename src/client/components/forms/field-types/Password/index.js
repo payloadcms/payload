@@ -36,6 +36,7 @@ const Password = (props) => {
     initialData,
     defaultValue,
     validate,
+    enableDebouncedValue: true,
   });
 
   const classes = [

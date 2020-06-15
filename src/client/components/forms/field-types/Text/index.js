@@ -31,6 +31,7 @@ const Text = (props) => {
     initialData,
     defaultValue,
     validate,
+    enableDebouncedValue: true,
   });
 
   const {

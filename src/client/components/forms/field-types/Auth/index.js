@@ -5,6 +5,7 @@ import Password from '../Password';
 import Checkbox from '../Checkbox';
 import Button from '../../../elements/Button';
 import ConfirmPassword from '../ConfirmPassword';
+import useForm from '../../Form/useForm';
 
 import './index.scss';
 
@@ -13,6 +14,9 @@ const baseClass = 'auth-fields';
 const Auth = (props) => {
   const { initialData, useAPIKey } = props;
   const [changingPassword, setChangingPassword] = useState(false);
+  const { getField } = useForm();
+
+  const enableAPIKey = getField('enableAPIKey');
 
   return (
     <div className={baseClass}>
@@ -53,9 +57,15 @@ const Auth = (props) => {
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <Checkbox
+            initialData={initialData?.enableAPIKey}
             label="Enable API Key"
             name="enableAPIKey"
           />
+          {enableAPIKey?.value && (
+            <div className={`${baseClass}__api-key-generator`}>
+              Generate one
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -29,7 +29,6 @@ const Textarea = (props) => {
     value,
     showError,
     setValue,
-    formProcessing,
     errorMessage,
   } = useFieldType({
     path,
@@ -37,6 +36,7 @@ const Textarea = (props) => {
     initialData,
     defaultValue,
     validate,
+    enableDebouncedValue: true,
   });
 
   const classes = [

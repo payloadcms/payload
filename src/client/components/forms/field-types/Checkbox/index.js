@@ -71,7 +71,10 @@ const Checkbox = (props) => {
       />
       <button
         type="button"
-        onClick={() => setValue(!value)}
+        onClick={() => {
+          setValue(!value);
+          if (typeof onChange === 'function') onChange(!value);
+        }}
       >
         <span className={`${baseClass}__input`}>
           <Check />

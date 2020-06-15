@@ -1,7 +1,7 @@
 @import '../../../scss/styles.scss';
 
 .leave-without-saving {
-  background-color: rgba(white, .95);
+  @include blur-bg;
   position: fixed;
   z-index: $z-modal;
   top: 0;
