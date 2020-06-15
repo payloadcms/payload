@@ -1,6 +1,4 @@
-import React, {
-  useRef, useState, useEffect, useCallback,
-} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
@@ -28,9 +26,6 @@ const Email = (props) => {
 
   const path = pathFromProps || name;
 
-  const ref = useRef(null);
-  const [autofilled, setAutofilled] = useState(null);
-
   const {
     value,
     showError,
@@ -50,29 +45,6 @@ const Email = (props) => {
     showError && 'error',
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');
-
-  const autofillListener = useCallback((e) => {
-    switch (e?.animationName) {
-      case 'onAutoFillStart':
-        return setAutofilled(true);
-
-      default:
-        return setAutofilled(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const input = ref.current;
-    input.addEventListener('animationstart', autofillListener);
-
-    return () => input.removeEventListener('animationstart', autofillListener);
-  }, [autofillListener]);
-
-  useEffect(() => {
-    if (autofilled) {
-      setValue(value);
-    }
-  }, [autofilled, value, setValue]);
 
   return (
     <div
@@ -100,7 +72,6 @@ const Email = (props) => {
         id={path}
         name={path}
         autoComplete={autoComplete}
-        ref={ref}
       />
     </div>
   );

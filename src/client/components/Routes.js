@@ -26,7 +26,7 @@ const {
 
 const Routes = () => {
   const [initialized, setInitialized] = useState(null);
-  const { user, permissions, permissions: { canAccessAdmin } } = useUser();
+  const { user, permissions: { canAccessAdmin } } = useUser();
 
   useEffect(() => {
     requests.get(`${routes.api}/${userSlug}/init`).then(res => res.json().then((data) => {

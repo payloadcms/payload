@@ -125,14 +125,18 @@ const DefaultEditView = (props) => {
               </li>
               {timestamps && (
                 <>
-                  <li>
-                    <div className={`${baseClass}__label`}>Last Modified</div>
-                    <div>{format(new Date(data.updatedAt), 'MMMM do yyyy, h:mma')}</div>
-                  </li>
-                  <li>
-                    <div className={`${baseClass}__label`}>Created</div>
-                    <div>{format(new Date(data.createdAt), 'MMMM do yyyy, h:mma')}</div>
-                  </li>
+                  {data.updatedAt && (
+                    <li>
+                      <div className={`${baseClass}__label`}>Last Modified</div>
+                      <div>{format(new Date(data.updatedAt), 'MMMM do yyyy, h:mma')}</div>
+                    </li>
+                  )}
+                  {data.createdAt && (
+                    <li>
+                      <div className={`${baseClass}__label`}>Created</div>
+                      <div>{format(new Date(data.createdAt), 'MMMM do yyyy, h:mma')}</div>
+                    </li>
+                  )}
                 </>
               )}
 
