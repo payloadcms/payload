@@ -33,7 +33,9 @@ const isNotExpired = decodedJWT => (decodedJWT?.exp || 0) > Date.now() / 1000;
 const UserProvider = ({ children }) => {
   const [token, setToken] = useState('');
   const [user, setUser] = useState(null);
-  const [permissions, setPermissions] = useState({});
+
+  const [permissions, setPermissions] = useState({ canAccessAdmin: null });
+
   const { pathname } = useLocation();
   const history = useHistory();
   const { open: openModal, closeAll: closeAllModals } = useModal();
@@ -105,7 +107,9 @@ const UserProvider = ({ children }) => {
       }
     }
 
-    getPermissions();
+    if (email) {
+      getPermissions();
+    }
   }, [email]);
 
   useEffect(() => {
@@ -131,7 +135,6 @@ const UserProvider = ({ children }) => {
 
     if (remainingTime > 0) {
       forceLogOut = setTimeout(() => {
-        console.log('logging out');
         logOut();
         history.push(`${admin}/logout`);
         closeAllModals();
