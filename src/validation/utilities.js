@@ -1,5 +1,5 @@
 exports.createValidationPromise = async (data, field) => {
-  const result = await field.validate(data, field);
+  const result = await field.validate ? field.validate(data, field) : true;
   return { result, field };
 };
 
