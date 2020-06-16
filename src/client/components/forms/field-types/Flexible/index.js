@@ -16,7 +16,7 @@ import { useRenderedFields } from '../../RenderFields';
 import { useLocale } from '../../../utilities/Locale';
 import Error from '../../Error';
 import useFieldType from '../../useFieldType';
-import { flexible } from '../../../../../fields/validations';
+import { flexible } from '../../../../../validation/validations';
 
 import './index.scss';
 
@@ -44,11 +44,11 @@ const Flexible = (props) => {
     const validationResult = validate(
       value,
       {
-        minRows, maxRows, singularLabel, blocks,
+        minRows, maxRows, singularLabel, blocks, required,
       },
     );
     return validationResult;
-  }, [validate, maxRows, minRows, singularLabel, blocks]);
+  }, [validate, maxRows, minRows, singularLabel, blocks, required]);
 
   const {
     showError,

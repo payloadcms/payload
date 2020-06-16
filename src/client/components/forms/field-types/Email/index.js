@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import { email } from '../../../../../fields/validations';
+import { email } from '../../../../../validation/validations';
 
 import './index.scss';
 
@@ -26,6 +26,11 @@ const Email = (props) => {
 
   const path = pathFromProps || name;
 
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { required });
+    return validationResult;
+  }, [validate, required]);
+
   const {
     value,
     showError,
@@ -36,7 +41,7 @@ const Email = (props) => {
     required,
     initialData,
     defaultValue,
-    validate,
+    validate: memoizedValidate,
     enableDebouncedValue: true,
   });
 

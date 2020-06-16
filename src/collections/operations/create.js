@@ -2,7 +2,7 @@ const mkdirp = require('mkdirp');
 
 const executePolicy = require('../../auth/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
-const { validateCreate } = require('../../fields/validateCreate');
+const validateCreate = require('../../validation/validateCreate');
 
 const { MissingFile } = require('../../errors');
 const resizeAndSave = require('../../uploads/imageResizer');

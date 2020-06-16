@@ -4,7 +4,7 @@ import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
-import { text } from '../../../../../fields/validations';
+import { text } from '../../../../../validation/validations';
 
 import './index.scss';
 
@@ -28,9 +28,9 @@ const Text = (props) => {
   const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { minLength, maxLength });
+    const validationResult = validate(value, { minLength, maxLength, required });
     return validationResult;
-  }, [validate, maxLength, minLength]);
+  }, [validate, maxLength, minLength, required]);
 
   const fieldType = useFieldType({
     path,

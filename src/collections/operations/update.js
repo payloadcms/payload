@@ -1,7 +1,7 @@
 const executePolicy = require('../../auth/executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
 const { NotFound, Forbidden } = require('../../errors');
-const validate = require('../../fields/validateUpdate');
+const validate = require('../../validation/validateUpdate');
 
 const resizeAndSave = require('../../uploads/imageResizer');
 

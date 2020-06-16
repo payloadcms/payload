@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Error from '../../Error';
-import { checkbox } from '../../../../../fields/validations';
+import { checkbox } from '../../../../../validation/validations';
 import Check from '../../../icons/Check';
 
 import './index.scss';
@@ -28,6 +28,11 @@ const Checkbox = (props) => {
 
   const path = pathFromProps || name;
 
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { required });
+    return validationResult;
+  }, [validate, required]);
+
   const {
     value,
     showError,
@@ -38,7 +43,7 @@ const Checkbox = (props) => {
     required,
     initialData,
     defaultValue,
-    validate,
+    validate: memoizedValidate,
     disableFormData,
   });
 

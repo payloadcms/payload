@@ -1,8 +1,10 @@
+const defaultMessage = 'This field is required.';
+
 const optionsToValidatorMap = {
   number: (value, options = {}) => {
     const parsedValue = parseInt(value, 10);
 
-    if (typeof parsedValue !== 'number' || Number.isNaN(parsedValue)) {
+    if (value && (typeof parsedValue !== 'number' || Number.isNaN(parsedValue))) {
       return 'Please enter a valid number.';
     }
 
@@ -12,6 +14,10 @@ const optionsToValidatorMap = {
 
     if (options.min && parsedValue < options.min) {
       return `"${value}" is less than the min allowed value of ${options.min}.`;
+    }
+
+    if (options.required && typeof parsedValue !== 'number') {
+      return defaultMessage;
     }
 
     return true;
@@ -25,8 +31,10 @@ const optionsToValidatorMap = {
       return `This value must be longer than the minimum length of ${options.max} characters.`;
     }
 
-    if (typeof value !== 'string' || (typeof value === 'string' && value.length === 0)) {
-      return 'This field is required.';
+    if (options.required) {
+      if (typeof value !== 'string' || (typeof value === 'string' && value.length === 0)) {
+        return defaultMessage;
+      }
     }
 
     return true;
@@ -40,13 +48,19 @@ const optionsToValidatorMap = {
       return `This value must be longer than the minimum length of ${options.max} characters.`;
     }
 
-    return Boolean(value);
-  },
-  email: (value) => {
-    if (/\S+@\S+\.\S+/.test(value)) {
-      return true;
+    if (options.required && !value) {
+      return defaultMessage;
     }
-    return 'Please enter a valid email address.';
+
+    return true;
+  },
+  email: (value, options = {}) => {
+    if ((value && !/\S+@\S+\.\S+/.test(value))
+      || (!value && options.required)) {
+      return 'Please enter a valid email address.';
+    }
+
+    return true;
   },
   textarea: (value, options = {}) => {
     if (options.maxLength && value.length > options.maxLength) {
@@ -57,39 +71,52 @@ const optionsToValidatorMap = {
       return `This value must be longer than the minimum length of ${options.max} characters.`;
     }
 
-    return Boolean(value);
-  },
-  wysiwyg: (value) => {
-    if (value) return true;
+    if (options.required && !value) {
+      return defaultMessage;
+    }
 
-    return 'This field is required.';
+    return true;
   },
-  code: (value) => {
-    if (value) return true;
+  wysiwyg: (value, options = {}) => {
+    if (options.required && !value) {
+      return defaultMessage;
+    }
 
-    return 'This field is required.';
+    return true;
   },
-  checkbox: (value) => {
-    if (typeof value === 'boolean') {
+  code: (value, options = {}) => {
+    if (options.required && !value) {
+      return defaultMessage;
+    }
+
+    return true;
+  },
+  checkbox: (value, options = {}) => {
+    if ((value && typeof value !== 'boolean')
+      || (options.required && typeof value !== 'boolean')) {
+      return 'This field can only be equal to true or false.';
+    }
+
+    return true;
+  },
+  date: (value, options = {}) => {
+    if (value && value instanceof Date) {
       return true;
     }
 
-    return 'This field can only be equal to true or false.';
-  },
-  date: (value) => {
-    if (value instanceof Date) {
-      return true;
+    if (options.required) {
+      return defaultMessage;
     }
 
     return `"${value}" is not a valid date.`;
   },
-  upload: (value) => {
-    if (value) return true;
-    return 'This field is required.';
+  upload: (value, options = {}) => {
+    if (value || !options.required) return true;
+    return defaultMessage;
   },
-  relationship: (value) => {
-    if (value) return true;
-    return 'This field is required.';
+  relationship: (value, options = {}) => {
+    if (value || !options.required) return true;
+    return defaultMessage;
   },
   repeater: (value, options = {}) => {
     if (options.minRows && value < options.minRows) {
@@ -100,19 +127,19 @@ const optionsToValidatorMap = {
       return `This field requires no more than ${options.maxRows} row(s).`;
     }
 
-    if (!value) {
+    if (!value && options.required) {
       return 'This field requires at least one row.';
     }
 
     return true;
   },
-  select: (value) => {
-    if (value && value.length > 0) return true;
-    return 'This field is required.';
+  select: (value, options = {}) => {
+    if (value || !options.required) return true;
+    return defaultMessage;
   },
-  radio: (value) => {
-    if (value) return true;
-    return 'This field is required.';
+  radio: (value, options = {}) => {
+    if (value || !options.required) return true;
+    return defaultMessage;
   },
   flexible: (value, options) => {
     if (options.minRows && value < options.minRows) {
@@ -123,7 +150,7 @@ const optionsToValidatorMap = {
       return `This field requires no more than ${options.maxRows} row(s).`;
     }
 
-    if (!value) {
+    if (!value && options.required) {
       return 'This field requires at least one row.';
     }
 

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
-import { textarea } from '../../../../../fields/validations';
+import { textarea } from '../../../../../validation/validations';
 
 import './index.scss';
 
@@ -21,9 +21,16 @@ const Textarea = (props) => {
     label,
     placeholder,
     readOnly,
+    minLength,
+    maxLength,
   } = props;
 
   const path = pathFromProps || name;
+
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { minLength, maxLength, required });
+    return validationResult;
+  }, [validate, maxLength, minLength, required]);
 
   const {
     value,
@@ -35,7 +42,7 @@ const Textarea = (props) => {
     required,
     initialData,
     defaultValue,
-    validate,
+    validate: memoizedValidate,
     enableDebouncedValue: true,
   });
 
@@ -86,6 +93,8 @@ Textarea.defaultProps = {
   placeholder: null,
   path: '',
   readOnly: false,
+  minLength: undefined,
+  maxLength: undefined,
 };
 
 Textarea.propTypes = {
@@ -100,6 +109,8 @@ Textarea.propTypes = {
   label: PropTypes.string,
   placeholder: PropTypes.string,
   readOnly: PropTypes.bool,
+  minLength: PropTypes.number,
+  maxLength: PropTypes.number,
 };
 
 export default withCondition(Textarea);

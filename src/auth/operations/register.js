@@ -1,7 +1,7 @@
 const passport = require('passport');
 const executePolicy = require('../executePolicy');
 const executeFieldHooks = require('../../fields/executeHooks');
-const { validateCreate } = require('../../fields/validateCreate');
+const validateCreate = require('../../validation/validateCreate');
 
 const register = async (args) => {
   try {

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
 import withCondition from '../../withCondition';
-import { password } from '../../../../../fields/validations';
+import { password } from '../../../../../validation/validations';
 
 import './index.scss';
 
@@ -24,6 +24,11 @@ const Password = (props) => {
 
   const path = pathFromProps || name;
 
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { required });
+    return validationResult;
+  }, [validate, required]);
+
   const {
     value,
     showError,
@@ -35,7 +40,7 @@ const Password = (props) => {
     required,
     initialData,
     defaultValue,
-    validate,
+    validate: memoizedValidate,
     enableDebouncedValue: true,
   });
 
