@@ -19,7 +19,6 @@
     padding: base(.1) base(.2);
     font-family: $font-body;
     font-weight: bold;
-    font-size: base(.5);
     margin-right: base(.5);
   }
 
@@ -33,7 +32,7 @@
     &:hover,
     &:focus {
       outline: 0;
-      background: rgba($color-gray, .25);
+      background-color: $color-light-gray;
     }
   }
 }

@@ -6,9 +6,17 @@
   position: relative;
   margin-bottom: base(.5);
 
+  .icon--chevron {
+    transform: rotate(180deg);
+  }
+
   &.is-open {
     &:hover {
       box-shadow: none;
+    }
+
+    .icon--chevron {
+      transform: rotate(0deg);
     }
   }
 
@@ -20,20 +28,6 @@
 
   &:hover {
     @include shadow-sm;
-  }
-
-  &__collapse__icon {
-    &--open {
-      svg {
-        transform: rotate(90deg);
-      }
-    }
-
-    &--closed {
-      svg {
-        transform: rotate(-90deg);
-      }
-    }
   }
 
   &__header {
@@ -67,9 +61,12 @@
     .editable-block-title__text-clone,
     .editable-block-title input {
       font-family: $font-body;
+      font-size: 1rem;
       font-weight: bold;
-      font-size: base(.5);
-      margin-right: base(.5);
+      margin-right: 1rem;
+      line-height: base(1);
+      padding-top: 0;
+      padding-bottom: 0;
     }
 
     &__heading {

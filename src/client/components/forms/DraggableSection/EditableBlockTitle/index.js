@@ -43,7 +43,7 @@ const EditableBlockTitle = (props) => {
           onChange={setValue}
           onKeyDown={onKeyDown}
           style={{
-            width: `${inputWidth}px`,
+            width: `${inputWidth + 1}px`,
           }}
         />
       </div>

@@ -69,7 +69,7 @@ const DraggableSection = (props) => {
 
               <div className={`${baseClass}__header__row-block-type-label`}>
                 {blockType === 'flexible'
-                  ? <Pill>{singularLabel}</Pill>
+                  ? <Pill pillStyle="dark-outline">{singularLabel}</Pill>
                   : `${singularLabel} ${rowIndex + 1}`
                 }
               </div>
@@ -97,7 +97,7 @@ const DraggableSection = (props) => {
                   size="small"
                 />
 
-                <Chevron isOpen={draggableIsOpen} />
+                <Chevron />
               </div>
             </div>
 
