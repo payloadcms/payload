@@ -2,19 +2,21 @@ import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
-import RenderFields from '../RenderFields';
 
-import IconButton from '../../elements/IconButton';
+import RenderFields from '../RenderFields';
 import Pill from '../../elements/Pill';
 import Chevron from '../../icons/Chevron';
+import EditableBlockTitle from './EditableBlockTitle';
+import PositionHandle from './PositionHandle';
+import ActionHandle from './ActionHandle';
 
 import './index.scss';
-import EditableBlockTitle from './EditableBlockTitle';
 
 const baseClass = 'draggable-section';
 
 const DraggableSection = (props) => {
   const {
+    moveRow,
     addRow,
     removeRow,
     rowIndex,
@@ -57,51 +59,37 @@ const DraggableSection = (props) => {
             className={classes}
             {...providedDrag.draggableProps}
           >
-            <div className={`${baseClass}__header`}>
-              <div
-                {...providedDrag.dragHandleProps}
-                className={`${baseClass}__header__drag-handle`}
-                onClick={() => handleCollapseClick(providedDrag)}
-                role="button"
-                tabIndex={0}
-                ref={draggableRef}
+
+            {/* Render DragPoint - with MoveRow Action Points */}
+            <PositionHandle
+              dragHandleProps={providedDrag.dragHandleProps}
+              moveRow={moveRow}
+              positionIndex={rowIndex}
+            />
+
+            <div className={`${baseClass}__render-fields-wrapper`}>
+              {/* Render fields */}
+              <RenderFields
+                initialData={initialData}
+                customComponentsPath={customComponentsPath}
+                fieldTypes={fieldTypes}
+                key={rowIndex}
+                fieldSchema={fieldSchema.map((field) => {
+                  return ({
+                    ...field,
+                    path: `${parentPath}.${rowIndex}${field.name ? `.${field.name}` : ''}`,
+                  });
+                })}
               />
-
-              <div className={`${baseClass}__header__row-block-type-label`}>
-                {blockType === 'flexible'
-                  ? <Pill pillStyle="dark-outline">{singularLabel}</Pill>
-                  : `${singularLabel} ${rowIndex + 1}`
-                }
-              </div>
-
-              {blockType === 'flexible'
-                && (
-                  <EditableBlockTitle
-                    initialData={initialData?.[`${parentPath}.${rowIndex}.blockName`]}
-                    path={`${parentPath}.${rowIndex}.blockName`}
-                  />
-                )
-              }
-
-              <div className={`${baseClass}__header__controls`}>
-
-                <IconButton
-                  iconName="Plus"
-                  onClick={addRow}
-                  size="small"
-                />
-
-                <IconButton
-                  iconName="X"
-                  onClick={removeRow}
-                  size="small"
-                />
-
-                <Chevron />
-              </div>
             </div>
 
-            <AnimateHeight
+            {/* Render Add/Remove/Collapse */}
+            <ActionHandle
+              removeRow={removeRow}
+              addRow={addRow}
+            />
+
+            {/* <AnimateHeight
               className={`${baseClass}__content`}
               height={draggableIsOpen ? 'auto' : 0}
               duration={0}
@@ -118,7 +106,7 @@ const DraggableSection = (props) => {
                   });
                 })}
               />
-            </AnimateHeight>
+            </AnimateHeight> */}
           </div>
         );
       }}
@@ -136,6 +124,7 @@ DraggableSection.defaultProps = {
 };
 
 DraggableSection.propTypes = {
+  moveRow: PropTypes.func.isRequired,
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
   rowIndex: PropTypes.number.isRequired,

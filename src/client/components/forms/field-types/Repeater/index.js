@@ -164,6 +164,7 @@ const Repeater = (props) => {
                         key={rowIndex}
                         parentPath={path}
                         singularLabel={singularLabel}
+                        moveRow={moveRow}
                         addRow={() => addRow(rowIndex)}
                         removeRow={() => removeRow(rowIndex)}
                         rowIndex={rowIndex}

@@ -187,6 +187,7 @@ const Flexible = (props) => {
                         fieldTypes={fieldTypes}
                         key={rowIndex}
                         parentPath={path}
+                        moveRow={moveRow}
                         addRow={() => openAddRowModal(rowIndex)}
                         removeRow={() => removeRow(rowIndex)}
                         rowIndex={rowIndex}
