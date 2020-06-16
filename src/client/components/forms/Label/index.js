@@ -31,7 +31,10 @@ Label.defaultProps = {
 };
 
 Label.propTypes = {
-  label: PropTypes.string,
+  label: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.node,
+  ]),
   htmlFor: PropTypes.string.isRequired,
   required: PropTypes.bool,
 };

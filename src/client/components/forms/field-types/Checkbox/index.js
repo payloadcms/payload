@@ -3,10 +3,12 @@ import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Error from '../../Error';
-import StyledCheckbox from './StyledCheckbox';
 import { checkbox } from '../../../../../fields/validations';
+import Check from '../../../icons/Check';
 
 import './index.scss';
+
+const baseClass = 'checkbox';
 
 const Checkbox = (props) => {
   const {
@@ -20,6 +22,8 @@ const Checkbox = (props) => {
     width,
     label,
     readOnly,
+    onChange,
+    disableFormData,
   } = props;
 
   const path = pathFromProps || name;
@@ -29,19 +33,20 @@ const Checkbox = (props) => {
     showError,
     errorMessage,
     setValue,
-    formProcessing,
   } = useFieldType({
     path,
     required,
     initialData,
     defaultValue,
     validate,
+    disableFormData,
   });
 
   const classes = [
     'field-type',
-    'checkbox',
+    baseClass,
     showError && 'error',
+    value && `${baseClass}--checked`,
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
@@ -57,15 +62,27 @@ const Checkbox = (props) => {
         showError={showError}
         message={errorMessage}
       />
-      <StyledCheckbox
-        onClick={setValue}
-        isChecked={value || false}
+      <input
+        type="checkbox"
         name={path}
-        label={label}
-        isDisabled={formProcessing || readOnly}
-        hasError={showError}
+        id={path}
+        checked={value ? 'on' : false}
+        readOnly
       />
-      {label}
+      <button
+        type="button"
+        onClick={() => {
+          setValue(!value);
+          if (typeof onChange === 'function') onChange(!value);
+        }}
+      >
+        <span className={`${baseClass}__input`}>
+          <Check />
+        </span>
+        <span className={`${baseClass}__label`}>
+          {label}
+        </span>
+      </button>
     </div>
   );
 };
@@ -80,6 +97,8 @@ Checkbox.defaultProps = {
   width: undefined,
   style: {},
   path: '',
+  onChange: undefined,
+  disableFormData: false,
 };
 
 Checkbox.propTypes = {
@@ -93,6 +112,8 @@ Checkbox.propTypes = {
   width: PropTypes.string,
   style: PropTypes.shape({}),
   label: PropTypes.string,
+  onChange: PropTypes.func,
+  disableFormData: PropTypes.bool,
 };
 
 export default withCondition(Checkbox);

@@ -52,6 +52,7 @@ const login = async (args) => {
       return signedFields;
     }, {
       email,
+      id: user.id,
     });
 
     fieldsToSign.collection = collectionConfig.slug;

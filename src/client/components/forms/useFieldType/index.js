@@ -15,6 +15,7 @@ const useFieldType = (options) => {
     defaultValue,
     validate,
     disableFormData,
+    enableDebouncedValue,
   } = options;
 
   // Determine what the initial data is to be used
@@ -36,7 +37,7 @@ const useFieldType = (options) => {
   const [internalValue, setInternalValue] = useState(initialData);
 
   // Debounce internal values to update form state only every 60ms
-  const debouncedValue = useDebounce(internalValue, 60);
+  const debouncedValue = useDebounce(internalValue, 120);
 
   // Get field by path
   const field = getField(path);
@@ -88,15 +89,6 @@ const useFieldType = (options) => {
     return () => dispatchFields({ path, type: 'REMOVE' });
   }, [dispatchFields, path]);
 
-  // The only time that the form value should be updated
-  // is when the debounced value updates. So, when the debounced value updates,
-  // send it up to the form
-  useEffect(() => {
-    if (!fieldExists || debouncedValue !== undefined) {
-      sendField(debouncedValue);
-    }
-  }, [debouncedValue, sendField, fieldExists]);
-
   // Whenever the value from form updates,
   // update internal value as well
   useEffect(() => {
@@ -118,6 +110,18 @@ const useFieldType = (options) => {
   useEffect(() => {
     setInternalValue(internalInitialValue);
   }, [setInternalValue, internalInitialValue]);
+
+  // The only time that the FORM value should be updated
+  // is when the debounced value updates. So, when the debounced value updates,
+  // send it up to the form
+
+  const formValue = enableDebouncedValue ? debouncedValue : internalValue;
+
+  useEffect(() => {
+    if (!fieldExists || formValue !== undefined) {
+      sendField(formValue);
+    }
+  }, [formValue, sendField, fieldExists]);
 
   return {
     ...options,

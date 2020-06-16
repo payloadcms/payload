@@ -1,5 +1,6 @@
 const httpStatus = require('http-status');
 const formatErrorResponse = require('../../express/responses/formatError');
+const formatSuccessResponse = require('../../express/responses/formatSuccess');
 const { register } = require('../operations');
 
 const registerHandler = config => async (req, res) => {
@@ -11,7 +12,10 @@ const registerHandler = config => async (req, res) => {
       data: req.body,
     });
 
-    return res.status(201).json(user);
+    return res.status(httpStatus.CREATED).json({
+      ...formatSuccessResponse(`${req.collection.config.labels.singular} successfully created.`, 'message'),
+      doc: user,
+    });
   } catch (error) {
     return res.status(error.status || httpStatus.UNAUTHORIZED).json(formatErrorResponse(error));
   }

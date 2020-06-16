@@ -1,0 +1,22 @@
+@import '../../../../scss/styles.scss';
+@import '../shared.scss';
+
+.auth-fields {
+  padding: base(2) base(2) base(1.5);
+  margin-bottom: base(2);
+  background: $color-background-gray;
+
+  .btn {
+    margin-top: 0;
+  }
+
+  &__api-key-label {
+    position: relative;
+  }
+}
+
+.field-type.api-key {
+  input {
+    @include formInput;
+  }
+}

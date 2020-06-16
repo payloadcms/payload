@@ -12,6 +12,7 @@ import DraggableSection from '../../DraggableSection';
 import collapsibleReducer from './reducer';
 import { useRenderedFields } from '../../RenderFields';
 import useFieldType from '../../useFieldType';
+import { useLocale } from '../../../utilities/Locale';
 import Error from '../../Error';
 import { repeater } from '../../../../../fields/validations';
 
@@ -42,6 +43,7 @@ const Repeater = (props) => {
   const [lastModified, setLastModified] = useState(null);
   const { getFields, dispatchFields, countRows } = formContext;
   const { customComponentsPath } = useRenderedFields();
+  const locale = useLocale();
 
   const path = pathFromProps || name;
 
@@ -54,12 +56,13 @@ const Repeater = (props) => {
     showError,
     errorMessage,
     value,
+    setValue,
   } = useFieldType({
     path,
     validate: memoizedValidate,
     disableFormData: true,
-    initialData,
-    defaultValue,
+    initialData: initialData?.length,
+    defaultValue: defaultValue?.length,
     required,
   });
 
@@ -77,6 +80,7 @@ const Repeater = (props) => {
 
     setRowCount(rowCount + 1);
     setLastModified(Date.now());
+    setValue(value + 1);
   };
 
   const removeRow = (rowIndex) => {
@@ -91,6 +95,8 @@ const Repeater = (props) => {
 
     setRowCount(rowCount - 1);
     setLastModified(Date.now());
+
+    setValue(value - 1);
   };
 
   const moveRow = (moveFromIndex, moveToIndex) => {
@@ -129,6 +135,10 @@ const Repeater = (props) => {
 
   useEffect(updateRowCountOnParentRowModified, [parentRowsModified]);
 
+  useEffect(() => {
+    setLastModified(null);
+  }, [locale]);
+
   return (
     <RowModifiedProvider lastModified={lastModified}>
       <DragDropContext onDragEnd={onDragEnd}>
@@ -159,7 +169,7 @@ const Repeater = (props) => {
                         rowIndex={rowIndex}
                         fieldState={fieldState}
                         fieldSchema={fields}
-                        initialData={lastModified ? undefined : value[rowIndex]}
+                        initialData={lastModified ? undefined : dataToInitialize?.[rowIndex]}
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}
                         customComponentsPath={`${customComponentsPath}${name}.fields.`}

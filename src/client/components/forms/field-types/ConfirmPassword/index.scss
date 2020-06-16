@@ -1,0 +1,15 @@
+@import '../shared';
+
+.field-type.confirm-password {
+	position: relative;
+
+	input {
+		@include formInput;
+	}
+
+	&.error {
+		input {
+      background-color: lighten($color-red, 20%);
+		}
+	}
+}

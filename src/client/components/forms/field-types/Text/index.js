@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
@@ -21,16 +21,24 @@ const Text = (props) => {
     label,
     placeholder,
     readOnly,
+    minLength,
+    maxLength,
   } = props;
 
   const path = pathFromProps || name;
+
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { minLength, maxLength });
+    return validationResult;
+  }, [validate, maxLength, minLength]);
 
   const fieldType = useFieldType({
     path,
     required,
     initialData,
     defaultValue,
-    validate,
+    validate: memoizedValidate,
+    enableDebouncedValue: true,
   });
 
   const {
@@ -88,6 +96,8 @@ Text.defaultProps = {
   style: {},
   validate: text,
   path: '',
+  minLength: undefined,
+  maxLength: undefined,
 };
 
 Text.propTypes = {
@@ -101,7 +111,12 @@ Text.propTypes = {
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),
-  label: PropTypes.string,
+  label: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.node,
+  ]),
+  minLength: PropTypes.number,
+  maxLength: PropTypes.number,
 };
 
 export default withCondition(Text);

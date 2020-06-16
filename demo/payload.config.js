@@ -9,6 +9,7 @@ const FlexibleContent = require('./collections/FlexibleContent');
 const HiddenFields = require('./collections/HiddenFields');
 const Hooks = require('./collections/Hooks');
 const Localized = require('./collections/Localized');
+const LocalizedRepeaters = require('./collections/LocalizedRepeater');
 const Media = require('./collections/Media');
 const Preview = require('./collections/Preview');
 const PublicUsers = require('./collections/PublicUsers');
@@ -38,6 +39,7 @@ module.exports = {
     HiddenFields,
     Hooks,
     Localized,
+    LocalizedRepeaters,
     Media,
     Preview,
     PublicUsers,
