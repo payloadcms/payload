@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useRouteMatch, useHistory } from 'react-router-dom';
+import { useRouteMatch, useHistory, useLocation } from 'react-router-dom';
 import config from 'payload/config';
 import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
@@ -13,6 +13,7 @@ const { serverURL, routes: { admin, api } } = config;
 
 const EditView = (props) => {
   const { params: { id } = {} } = useRouteMatch();
+  const { state: locationState } = useLocation();
   const history = useHistory();
   const { setStepNav } = useStepNav();
   const [fields, setFields] = useState([]);
@@ -41,6 +42,8 @@ const EditView = (props) => {
     { initialParams: { 'fallback-locale': 'null' } },
   );
 
+  const dataToRender = locationState?.data || data;
+
   useEffect(() => {
     const nav = [{
       url: `${admin}/collections/${slug}`,
@@ -49,7 +52,7 @@ const EditView = (props) => {
 
     if (isEditing) {
       nav.push({
-        label: data ? data[useAsTitle || 'id'] : '',
+        label: dataToRender ? dataToRender[useAsTitle || 'id'] : '',
       });
     } else {
       nav.push({
@@ -58,7 +61,7 @@ const EditView = (props) => {
     }
 
     setStepNav(nav);
-  }, [setStepNav, isEditing, pluralLabel, data, slug, useAsTitle]);
+  }, [setStepNav, isEditing, pluralLabel, dataToRender, slug, useAsTitle]);
 
   useEffect(() => {
     setFields(formatFields(collection, isEditing));
@@ -69,7 +72,7 @@ const EditView = (props) => {
       DefaultComponent={DefaultEdit}
       path={`${slug}.views.Edit`}
       componentProps={{
-        data,
+        data: dataToRender,
         collection: { ...collection, fields },
         isEditing,
         onSave,

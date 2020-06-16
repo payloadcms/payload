@@ -64,11 +64,12 @@ const Flexible = (props) => {
     required,
   });
 
+  const dataToInitialize = initialData || defaultValue;
   const parentRowsModified = useRowModified();
   const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
   const [rowIndexBeingAdded, setRowIndexBeingAdded] = useState(null);
   const [lastModified, setLastModified] = useState(null);
-  const [rowCount, setRowCount] = useState(0);
+  const [rowCount, setRowCount] = useState(dataToInitialize?.length || 0);
   const [collapsibleStates, dispatchCollapsibleStates] = useReducer(collapsibleReducer, []);
   const formContext = useContext(FormContext);
   const modalSlug = `flexible-${path}`;
@@ -77,7 +78,6 @@ const Flexible = (props) => {
 
   const { dispatchFields, countRows, getFields } = formContext;
   const fieldState = getFields();
-  const dataToInitialize = initialData || defaultValue;
 
   const addRow = (rowIndex, blockType) => {
     const blockToAdd = blocks.find(block => block.slug === blockType);
@@ -134,12 +134,10 @@ const Flexible = (props) => {
     moveRow(sourceIndex, destinationIndex);
   };
 
-  const updateRowCountOnParentRowModified = () => {
+  useEffect(() => {
     const countedRows = countRows(path);
     setRowCount(countedRows);
-  };
-
-  useEffect(updateRowCountOnParentRowModified, [parentRowsModified]);
+  }, [countRows, path, parentRowsModified]);
 
   useEffect(() => {
     setRowCount(dataToInitialize.length);

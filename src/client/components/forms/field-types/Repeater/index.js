@@ -36,10 +36,11 @@ const Repeater = (props) => {
     minRows,
   } = props;
 
+  const dataToInitialize = initialData || defaultValue;
   const parentRowsModified = useRowModified();
   const [collapsibleStates, dispatchCollapsibleStates] = useReducer(collapsibleReducer, []);
   const formContext = useContext(FormContext);
-  const [rowCount, setRowCount] = useState(0);
+  const [rowCount, setRowCount] = useState(dataToInitialize?.length || 0);
   const [lastModified, setLastModified] = useState(null);
   const { getFields, dispatchFields, countRows } = formContext;
   const { customComponentsPath } = useRenderedFields();
@@ -67,7 +68,6 @@ const Repeater = (props) => {
   });
 
   const fieldState = getFields();
-  const dataToInitialize = initialData || defaultValue;
 
   const addRow = (rowIndex) => {
     dispatchFields({
@@ -111,11 +111,6 @@ const Repeater = (props) => {
     setLastModified(Date.now());
   };
 
-  const updateRowCountOnParentRowModified = () => {
-    const countedRows = countRows(path);
-    setRowCount(countedRows);
-  };
-
   const onDragEnd = (result) => {
     if (!result.destination) return;
     const sourceIndex = result.source.index;
@@ -133,7 +128,10 @@ const Repeater = (props) => {
     });
   }, [dataToInitialize]);
 
-  useEffect(updateRowCountOnParentRowModified, [parentRowsModified]);
+  useEffect(() => {
+    const countedRows = countRows(path);
+    setRowCount(countedRows);
+  }, [countRows, path, parentRowsModified]);
 
   useEffect(() => {
     setLastModified(null);
