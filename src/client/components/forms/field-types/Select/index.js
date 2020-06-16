@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import { select } from '../../../../../fields/validations';
+import { select } from '../../../../../validation/validations';
 
 import './index.scss';
 
@@ -78,6 +78,11 @@ const Select = (props) => {
 
   const path = pathFromProps || name;
 
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { required });
+    return validationResult;
+  }, [validate, required]);
+
   const {
     value,
     showError,
@@ -89,7 +94,7 @@ const Select = (props) => {
     required,
     initialData,
     defaultValue,
-    validate,
+    validate: memoizedValidate,
   });
 
   const classes = [

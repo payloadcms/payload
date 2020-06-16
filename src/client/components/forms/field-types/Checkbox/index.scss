@@ -22,18 +22,16 @@
       svg {
         opacity: .2;
       }
-
-      .checkbox__input {
-        background: darken($color-light-gray, 2%);
-      }
     }
   }
 
   &__input {
+    @include formInput;
+    padding: 0;
+    line-height: 0;
     position: relative;
     width: $baseline;
     height: $baseline;
-    background: $color-light-gray;
     margin-right: base(.5);
 
     svg {

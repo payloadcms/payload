@@ -1,4 +1,6 @@
-import React, { Component, useState, useEffect } from 'react';
+import React, {
+  Component, useState, useEffect, useCallback,
+} from 'react';
 import PropTypes from 'prop-types';
 import Cookies from 'universal-cookie';
 import some from 'async-some';
@@ -8,7 +10,7 @@ import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import { relationship } from '../../../../../fields/validations';
+import { relationship } from '../../../../../validation/validations';
 
 import './index.scss';
 
@@ -304,12 +306,18 @@ const RelationshipFieldType = (props) => {
   const hasMultipleRelations = Array.isArray(relationTo);
   const dataToInitialize = initialData || defaultValue;
 
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { required });
+    return validationResult;
+  }, [validate, required]);
+
+
   const fieldType = useFieldType({
     ...props,
     path: path || name,
     initialData: formattedInitialData,
     defaultValue,
-    validate,
+    validate: memoizedValidate,
     required,
   });
 

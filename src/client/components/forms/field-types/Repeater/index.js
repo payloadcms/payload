@@ -14,7 +14,7 @@ import { useRenderedFields } from '../../RenderFields';
 import useFieldType from '../../useFieldType';
 import { useLocale } from '../../../utilities/Locale';
 import Error from '../../Error';
-import { repeater } from '../../../../../fields/validations';
+import { repeater } from '../../../../../validation/validations';
 
 import './index.scss';
 
@@ -48,9 +48,9 @@ const Repeater = (props) => {
   const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { minRows, maxRows });
+    const validationResult = validate(value, { minRows, maxRows, required });
     return validationResult;
-  }, [validate, maxRows, minRows]);
+  }, [validate, maxRows, minRows, required]);
 
   const {
     showError,

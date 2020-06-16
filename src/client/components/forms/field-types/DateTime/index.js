@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import DatePicker from '../../../elements/DatePicker';
@@ -6,7 +6,7 @@ import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import { date } from '../../../../../fields/validations';
+import { date } from '../../../../../validation/validations';
 
 import './index.scss';
 
@@ -31,24 +31,27 @@ const DateTime = (props) => {
 
   const path = pathFromProps || name;
 
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { required });
+    return validationResult;
+  }, [validate, required]);
+
   const {
     value,
     showError,
     setValue,
-    formProcessing,
   } = useFieldType({
     path,
     required,
     initialData,
     defaultValue,
-    validate,
+    validate: memoizedValidate,
   });
 
   const classes = [
     'field-type',
     baseClass,
     showError && `${baseClass}--has-error`,
-    formProcessing && 'processing',
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
@@ -72,7 +75,7 @@ const DateTime = (props) => {
       <div className={`${baseClass}__input-wrapper`}>
         <DatePicker
           {...props}
-          onChange={readOnly || formProcessing ? setValue : undefined}
+          onChange={readOnly ? setValue : undefined}
           value={value}
         />
       </div>
@@ -90,6 +93,7 @@ DateTime.defaultProps = {
   width: undefined,
   style: {},
   path: '',
+  readOnly: false,
 };
 
 DateTime.propTypes = {
@@ -103,6 +107,7 @@ DateTime.propTypes = {
   errorMessage: PropTypes.string,
   width: PropTypes.string,
   style: PropTypes.shape({}),
+  readOnly: PropTypes.bool,
 };
 
 export default withCondition(DateTime);

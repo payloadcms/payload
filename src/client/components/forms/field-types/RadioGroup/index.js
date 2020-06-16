@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import useFieldType from '../../useFieldType';
@@ -6,7 +6,7 @@ import withCondition from '../../withCondition';
 import Error from '../../Error';
 import Label from '../../Label';
 import RadioInput from './RadioInput';
-import { radio } from '../../../../../fields/validations';
+import { radio } from '../../../../../validation/validations';
 
 import './index.scss';
 
@@ -27,6 +27,11 @@ const RadioGroup = (props) => {
 
   const path = pathFromProps || name;
 
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { required });
+    return validationResult;
+  }, [validate, required]);
+
   const {
     value,
     showError,
@@ -37,7 +42,7 @@ const RadioGroup = (props) => {
     required,
     initialData,
     defaultValue,
-    validate,
+    validate: memoizedValidate,
   });
 
   const classes = [

@@ -11,6 +11,7 @@ const Hooks = require('./collections/Hooks');
 const Localized = require('./collections/Localized');
 const LocalizedRepeaters = require('./collections/LocalizedRepeater');
 const Media = require('./collections/Media');
+const NestedRepeaters = require('./collections/NestedRepeater');
 const Preview = require('./collections/Preview');
 const PublicUsers = require('./collections/PublicUsers');
 const RelationshipA = require('./collections/RelationshipA');
@@ -41,6 +42,7 @@ module.exports = {
     Localized,
     LocalizedRepeaters,
     Media,
+    NestedRepeaters,
     Preview,
     PublicUsers,
     RelationshipA,

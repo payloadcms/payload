@@ -1,4 +1,4 @@
-const validations = require('../fields/validations');
+const validations = require('../validation/validations');
 
 module.exports = [
   {
