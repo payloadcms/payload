@@ -29,7 +29,7 @@
     "@trbl/react-modal": "^1.0.4",
     "@trbl/react-scroll-info": "^1.1.1",
     "@trbl/react-window-info": "^1.2.2",
-    "@udecode/slate-plugins": "^0.59.2",
+    "@udecode/slate-plugins": "^0.60.0",
     "async-some": "^1.0.2",
     "babel-loader": "^8.0.6",
     "body-parser": "^1.19.0",
