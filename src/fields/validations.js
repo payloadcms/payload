@@ -1,5 +1,3 @@
-const { iterateFields } = require('./validateCreate');
-
 const optionsToValidatorMap = {
   number: (value, options = {}) => {
     const parsedValue = parseInt(value, 10);
@@ -93,41 +91,17 @@ const optionsToValidatorMap = {
     if (value) return true;
     return 'This field is required.';
   },
-  group: async (value, options) => {
-    return iterateFields(value, options.fields, `${options.name}.`);
-  },
-  repeater: async (value, options = {}) => {
-    const path = options.path || options.name;
-
-    if (!value || value.length === 0) {
-      return 'This field requires at least one row.';
-    }
-
-    if (options.minRows && value.length < options.minRows) {
+  repeater: (value, options = {}) => {
+    if (options.minRows && value < options.minRows) {
       return `This field requires at least ${options.minRows} row(s).`;
     }
 
-    if (options.maxRows && value.length > options.maxRows) {
+    if (options.maxRows && value > options.maxRows) {
       return `This field requires no more than ${options.maxRows} row(s).`;
     }
 
-    const errors = [];
-    const rowPromises = [];
-
-    value.forEach((row, i) => {
-      rowPromises.push(iterateFields(row, options.fields, `${path}.${i}.`));
-    });
-
-    const rowResults = await Promise.all(rowPromises);
-
-    rowResults.forEach((row) => {
-      row.forEach((fieldError) => {
-        errors.push(fieldError);
-      });
-    });
-
-    if (errors.length > 0) {
-      return errors;
+    if (!value) {
+      return 'This field requires at least one row.';
     }
 
     return true;
@@ -140,38 +114,17 @@ const optionsToValidatorMap = {
     if (value) return true;
     return 'This field is required.';
   },
-  flexible: async (value, options) => {
-    if (value.length === 0) {
-      return `This field requires at least one ${options.singularLabel}.`;
+  flexible: (value, options) => {
+    if (options.minRows && value < options.minRows) {
+      return `This field requires at least ${options.minRows} row(s).`;
     }
 
-    const errors = [];
-    const rowPromises = [];
+    if (options.maxRows && value > options.maxRows) {
+      return `This field requires no more than ${options.maxRows} row(s).`;
+    }
 
-    value.forEach((row, i) => {
-      const { blockType } = row;
-      const block = options.blocks.find(availableBlock => availableBlock.slug === blockType);
-
-      if (!block) {
-        return errors.push({
-          message: `Block ${i + 1} is missing a block type.`,
-          field: options.name,
-        });
-      }
-
-      return rowPromises.push(iterateFields(row, block.fields, `${options.name}.${i}.`));
-    });
-
-    const rowResults = await Promise.all(rowPromises);
-
-    rowResults.forEach((row) => {
-      row.forEach((fieldError) => {
-        errors.push(fieldError);
-      });
-    });
-
-    if (errors.length > 0) {
-      return errors;
+    if (!value) {
+      return 'This field requires at least one row.';
     }
 
     return true;

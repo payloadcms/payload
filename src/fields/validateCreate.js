@@ -1,8 +1,12 @@
 const { ValidationError } = require('../errors');
 
+const createValidationPromise = async (data, field) => {
+  const result = await field.validate(data, field);
+  return { result, field };
+};
+
 exports.iterateFields = async (data, fields, path = '') => {
   const validationPromises = [];
-  const validatedFields = [];
 
   fields.forEach((field) => {
     const dataToValidate = data || {};
@@ -13,34 +17,47 @@ exports.iterateFields = async (data, fields, path = '') => {
       // validated against directly
       if (field.name === undefined && field.fields) {
         field.fields.forEach((subField) => {
-          validationPromises.push(subField.validate(dataToValidate[subField.name], {
-            ...subField,
-            path: `${path}${subField.name}`,
-          }));
-          validatedFields.push(subField);
+          validationPromises.push(createValidationPromise(dataToValidate[subField.name], subField));
         });
+      } else if (field.fields) {
+        if (field.type === 'repeater' || field.type === 'flexible') {
+          const rowCount = Array.isArray(dataToValidate[field.name]) ? dataToValidate[field.name].length : 0;
+          validationPromises.push(createValidationPromise(rowCount, field));
+
+          if (Array.isArray(dataToValidate[field.name])) {
+            dataToValidate[field.name].forEach((rowData, i) => {
+              validationPromises.push(exports.iterateFields(rowData, field.fields, `${path}${field.name}.${i}.`));
+            });
+          }
+        } else {
+          validationPromises.push(exports.iterateFields(dataToValidate[field.name], field.fields, `${path}${field.name}`));
+        }
       } else {
-        validationPromises.push(field.validate(dataToValidate[field.name], field));
-        validatedFields.push(field);
+        validationPromises.push(createValidationPromise(dataToValidate[field.name], field));
       }
     }
   });
 
   const validationResults = await Promise.all(validationPromises);
 
-  const errors = validationResults.reduce((results, result, i) => {
-    const field = validatedFields[i];
+  const errors = validationResults.reduce((results, result) => {
+    const { field, result: validationResult } = result;
+
     if (Array.isArray(result)) {
       return [
         ...results,
         ...result,
       ];
-    } if (result !== true) {
+    }
+
+    if (validationResult === false || typeof validationResult === 'string') {
+      const fieldPath = `${path}${field.name}`;
+
       return [
         ...results,
         {
-          field: `${path}${field.name}`,
-          message: result,
+          field: fieldPath,
+          message: validationResult,
         },
       ];
     }

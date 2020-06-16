@@ -1,8 +1,8 @@
-const LocalizedRepeaters = {
-  slug: 'localized-repeaters',
+const NestedRepeater = {
+  slug: 'nested-repeaters',
   labels: {
-    singular: 'Localized Repeater',
-    plural: 'Localized Repeaters',
+    singular: 'Nested Repeater',
+    plural: 'Nested Repeaters',
   },
   policies: {
     read: () => true,
@@ -12,13 +12,14 @@ const LocalizedRepeaters = {
       type: 'repeater',
       label: 'Repeater',
       name: 'repeater',
-      localized: true,
       required: true,
       minRows: 2,
       maxRows: 4,
       fields: [
         {
-          type: 'row',
+          type: 'repeater',
+          name: 'nestedRepeater',
+          required: true,
           fields: [
             {
               name: 'repeaterText1',
@@ -33,16 +34,10 @@ const LocalizedRepeaters = {
             },
           ],
         },
-        {
-          type: 'text',
-          name: 'repeaterText3',
-          label: 'Repeater Text 3',
-          readOnly: true,
-        },
       ],
     },
   ],
   timestamps: true,
 };
 
-module.exports = LocalizedRepeaters;
+module.exports = NestedRepeater;
