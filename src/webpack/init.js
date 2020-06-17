@@ -16,15 +16,6 @@ function initWebpack() {
 
   router.use(webpackHotMiddleware(compiler));
 
-  router.get(`${this.config.routes.admin}*`, (req, res, next) => {
-    compiler.outputFileSystem.readFile('/index.html', (err, result) => {
-      if (err) {
-        return next(err);
-      }
-      return res.set('content-type', 'text/html').send(result);
-    });
-  });
-
   return router;
 }
 

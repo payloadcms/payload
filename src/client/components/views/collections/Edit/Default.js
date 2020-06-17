@@ -23,7 +23,6 @@ const baseClass = 'collection-edit';
 
 const DefaultEditView = (props) => {
   const { params: { id } = {} } = useRouteMatch();
-  const { state: locationState } = useLocation();
 
   const {
     collection, isEditing, data, onSave,
@@ -39,7 +38,6 @@ const DefaultEditView = (props) => {
   } = collection;
 
   const apiURL = `${serverURL}${api}/${slug}/${id}`;
-  const dataToRender = locationState?.data || data;
   let action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}`;
 
   if (auth && !isEditing) {
@@ -72,7 +70,7 @@ const DefaultEditView = (props) => {
               filter={field => (!field.position || (field.position && field.position !== 'sidebar'))}
               fieldTypes={fieldTypes}
               fieldSchema={fields}
-              initialData={dataToRender}
+              initialData={data}
               customComponentsPath={`${slug}.fields.`}
             />
           </div>
@@ -118,7 +116,7 @@ const DefaultEditView = (props) => {
               position="sidebar"
               fieldTypes={fieldTypes}
               fieldSchema={fields}
-              initialData={dataToRender}
+              initialData={data}
               customComponentsPath={`${slug}.fields.`}
             />
           </div>

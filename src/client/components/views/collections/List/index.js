@@ -15,6 +15,7 @@ const ListView = (props) => {
       },
     },
   } = props;
+
   const { setStepNav } = useStepNav();
 
   const [fields, setFields] = useState(collection.fields);
@@ -32,15 +33,13 @@ const ListView = (props) => {
   }, [setStepNav, plural]);
 
   return (
-    <>
-      <RenderCustomComponent
-        DefaultComponent={DefaultList}
-        path={`${slug}.views.List`}
-        componentProps={{
-          collection: { ...collection, fields },
-        }}
-      />
-    </>
+    <RenderCustomComponent
+      DefaultComponent={DefaultList}
+      path={`${slug}.views.List`}
+      componentProps={{
+        collection: { ...collection, fields },
+      }}
+    />
   );
 };
 
