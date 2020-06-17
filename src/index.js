@@ -3,6 +3,7 @@ require('isomorphic-fetch');
 
 const path = require('path');
 const express = require('express');
+const history = require('connect-history-api-fallback');
 const graphQLPlayground = require('graphql-playground-middleware-express').default;
 const getConfig = require('./utilities/getConfig');
 const authenticate = require('./express/middleware/authenticate');
@@ -55,8 +56,10 @@ class Payload {
 
     // Initialize Admin panel
     if (!this.config.admin.disable && process.env.NODE_ENV !== 'test') {
+      this.express.use(`${this.config.routes.admin}`, history());
+
       if (process.env.NODE_ENV === 'production') {
-        this.express.use(this.config.routes.admin, express.static(path.resolve(process.cwd(), 'build')));
+        this.express.use(`${this.config.routes.admin}`, express.static(path.resolve(process.cwd(), 'build')));
       } else {
         this.express.use(this.initWebpack());
       }

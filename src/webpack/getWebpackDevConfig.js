@@ -14,7 +14,7 @@ module.exports = (config) => {
     },
     output: {
       path: '/',
-      publicPath: '/static',
+      publicPath: config.routes.admin,
       filename: '[name].js',
     },
     devServer: {
