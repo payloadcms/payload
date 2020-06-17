@@ -29,7 +29,7 @@ const EditView = (props) => {
   } = collection;
 
   const onSave = !isEditing ? (json) => {
-    history.push(`${admin}/collections/${collection.slug}/${json.doc.id}`, {
+    history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`, {
       status: {
         message: json.message,
         type: 'success',

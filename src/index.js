@@ -56,10 +56,10 @@ class Payload {
 
     // Initialize Admin panel
     if (!this.config.admin.disable && process.env.NODE_ENV !== 'test') {
-      this.express.use(`${this.config.routes.admin}`, history());
+      this.express.use(this.config.routes.admin, history());
 
       if (process.env.NODE_ENV === 'production') {
-        this.express.use(`${this.config.routes.admin}`, express.static(path.resolve(process.cwd(), 'build')));
+        this.express.use(this.config.routes.admin, express.static(path.resolve(process.cwd(), 'build')));
       } else {
         this.express.use(this.initWebpack());
       }

@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const Dotenv = require('dotenv-webpack');
 // const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const path = require('path');
 const getStyleLoaders = require('./getStyleLoaders');
@@ -10,6 +11,7 @@ module.exports = (config) => {
     },
     output: {
       path: path.resolve(process.cwd(), 'build'),
+      publicPath: `${config.routes.admin}/`,
       filename: '[name].[chunkhash].js',
     },
     mode: 'production',
@@ -41,6 +43,7 @@ module.exports = (config) => {
                 require.resolve('@babel/preset-react'),
               ],
               plugins: [
+                require.resolve('@babel/plugin-proposal-optional-chaining'),
                 require.resolve('@babel/plugin-proposal-class-properties'),
                 [
                   require.resolve('@babel/plugin-transform-runtime'),
@@ -101,6 +104,9 @@ module.exports = (config) => {
         template: path.resolve(__dirname, '../client/index.html'),
         filename: './index.html',
         minify: true,
+      }),
+      new Dotenv({
+        silent: true,
       }),
     ],
     resolve: {
