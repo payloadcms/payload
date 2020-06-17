@@ -64,14 +64,21 @@ const findOne = async (args) => {
 
     let json = result.toJSON({ virtuals: true });
 
+
     // /////////////////////////////////////
-    // 4. Execute after collection field-level hooks
+    // 4. Execute field-level policies
+    // /////////////////////////////////////
+
+    // Field-level policies here
+
+    // /////////////////////////////////////
+    // 5. Execute after collection field-level hooks
     // /////////////////////////////////////
 
     result = await executeFieldHooks(options, args.config.fields, result, 'afterRead', result);
 
     // /////////////////////////////////////
-    // 5. Execute after collection hook
+    // 6. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterRead } = args.config.hooks;
@@ -81,7 +88,7 @@ const findOne = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 6. Return results
+    // 7. Return results
     // /////////////////////////////////////
 
     return json;

@@ -23,6 +23,9 @@ const AllFields = {
       required: true,
       defaultValue: 'Default Value',
       unique: true,
+      policies: {
+        read: ({ req: { user } }) => Boolean(user),
+      },
     },
     {
       name: 'select',

@@ -45,8 +45,10 @@ module.exports = {
       return value;
     },
     afterRead: (operation) => {
-      const { json } = operation;
-      json.afterReadHook = true;
+      const { doc } = operation;
+      doc.afterReadHook = true;
+
+      return doc;
     },
     afterUpdate: (operation, value) => {
       if (operation.req.headers.hook === 'afterUpdate') {

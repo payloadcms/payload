@@ -16,19 +16,25 @@ const register = async (args) => {
     let options = { ...args };
 
     // /////////////////////////////////////
-    // 2. Validate incoming data
+    // 2. Execute field-level policies
+    // /////////////////////////////////////
+
+    // Field-level policies here
+
+    // /////////////////////////////////////
+    // 3. Validate incoming data
     // /////////////////////////////////////
 
     await validateCreate(args.data, args.collection.config.fields);
 
     // /////////////////////////////////////
-    // 3. Execute before register field-level hooks
+    // 4. Execute before register field-level hooks
     // /////////////////////////////////////
 
     options.data = await executeFieldHooks(options, args.collection.config.fields, args.data, 'beforeCreate');
 
     // /////////////////////////////////////
-    // 4. Execute before register hook
+    // 5. Execute before register hook
     // /////////////////////////////////////
 
     const { beforeRegister } = args.collection.config.hooks;
@@ -38,7 +44,7 @@ const register = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 5. Perform register
+    // 6. Perform register
     // /////////////////////////////////////
 
     const {
@@ -68,7 +74,7 @@ const register = async (args) => {
     await passport.authenticate('local');
 
     // /////////////////////////////////////
-    // 6. Execute after register hook
+    // 7. Execute after register hook
     // /////////////////////////////////////
 
     const afterRegister = args.collection.config.hooks;
@@ -78,7 +84,7 @@ const register = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 7. Return user
+    // 8. Return user
     // /////////////////////////////////////
 
     return result.toJSON({ virtuals: true });

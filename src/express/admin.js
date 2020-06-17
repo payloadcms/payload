@@ -25,6 +25,7 @@ function initAdmin() {
 
       this.express.use(this.config.routes.admin, router);
     } else {
+      this.express.use(this.config.routes.admin, history());
       this.express.use(this.initWebpack());
     }
   }
