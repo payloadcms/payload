@@ -1,16 +1,14 @@
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
-const path = require('path');
 const express = require('express');
-const history = require('connect-history-api-fallback');
 const graphQLPlayground = require('graphql-playground-middleware-express').default;
 const getConfig = require('./utilities/getConfig');
 const authenticate = require('./express/middleware/authenticate');
 const connectMongoose = require('./mongoose/connect');
 const expressMiddleware = require('./express/middleware');
 const createAuthHeaderFromCookie = require('./express/middleware/createAuthHeaderFromCookie');
-const initWebpack = require('./webpack/init');
+const initAdmin = require('./express/admin');
 const initCollections = require('./collections/init');
 const initGlobals = require('./globals/init');
 const initStatic = require('./express/static');
@@ -39,7 +37,7 @@ class Payload {
     this.sendEmail = this.sendEmail.bind(this);
     this.getMockEmailCredentials = this.getMockEmailCredentials.bind(this);
     this.initStatic = initStatic.bind(this);
-    this.initWebpack = initWebpack.bind(this);
+    this.initAdmin = initAdmin.bind(this);
 
     // Configure email service
     this.email = this.buildEmail();
@@ -48,27 +46,12 @@ class Payload {
     connectMongoose(this.config.mongoURL);
     this.router.use(...expressMiddleware(this.config));
 
-    // Register collections
     this.initCollections();
-
-    // Register globals
     this.initGlobals();
+    this.initAdmin();
 
-    // Initialize Admin panel
-    if (!this.config.admin.disable && process.env.NODE_ENV !== 'test') {
-      this.express.use(this.config.routes.admin, history());
-
-      if (process.env.NODE_ENV === 'production') {
-        this.express.use(this.config.routes.admin, express.static(path.resolve(process.cwd(), 'build')));
-      } else {
-        this.express.use(this.initWebpack());
-      }
-    }
-
-    // Init policies route
     this.router.get('/policies', policies(this.config));
 
-    // Init GraphQL
     this.router.use(
       this.config.routes.graphQL,
       identifyAPI('GraphQL'),
