@@ -17,13 +17,8 @@ const NestedRepeater = {
       maxRows: 4,
       fields: [
         {
-          name: 'textField1',
-          label: 'Text Field 1',
-          type: 'text',
-          required: true,
-        }, {
-          name: 'textField2',
-          label: 'Text Text 2',
+          name: 'parentIdentifier',
+          label: 'Parent Identifier',
           type: 'text',
           required: true,
         },
@@ -33,13 +28,8 @@ const NestedRepeater = {
           required: true,
           fields: [
             {
-              name: 'repeaterText1',
-              label: 'Repeater Text 1',
-              type: 'text',
-              required: true,
-            }, {
-              name: 'repeaterText2',
-              label: 'Repeater Text 2',
+              name: 'childIdentifier',
+              label: 'Child Identifier',
               type: 'text',
               required: true,
             },

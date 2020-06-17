@@ -120,6 +120,10 @@ function fieldReducer(state, action) {
       unflattenedRows.splice(moveFromIndex, 1);
       // insert row copyOfMovingRow back in
       unflattenedRows.splice(moveToIndex, 0, copyOfMovingRow);
+      console.log(path);
+      console.log('unflattenedRows', unflattenedRows);
+      console.log('remainingFlattenedState', remainingFlattenedState);
+      console.log('after flat', flatten({ [path]: unflattenedRows }));
 
       return {
         ...remainingFlattenedState,

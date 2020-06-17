@@ -38,7 +38,6 @@ const iterateFields = async (data, fields, path = '') => {
   return getErrorResults(validationPromises, path);
 };
 
-
 module.exports = async (data, fields) => {
   try {
     const errors = await iterateFields(data, fields);
