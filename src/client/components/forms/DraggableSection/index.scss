@@ -8,9 +8,27 @@
     width: 100%;
   }
 
-  &:hover {
-    .position-handle {
-      border-right: $style-stroke-width-m solid $color-dark-gray;
+  &.is-hovered {
+    > .position-handle {
+      .position-handle__border-wrap {
+        box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
+      }
+
+      .position-handle__move-forward,
+      .position-handle__move-backward {
+        opacity: 1;
+      }
+
+      .position-handle__current-position {
+        color: $color-dark-gray;
+      }
+    }
+
+    > .action-handle {
+      .action-handle__add-row,
+      .action-handle__remove-row {
+        opacity: 1;
+      }
     }
   }
 }

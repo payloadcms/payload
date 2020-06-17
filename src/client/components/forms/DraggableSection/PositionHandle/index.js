@@ -17,23 +17,25 @@ const PositionHandle = (props) => {
       className={baseClass}
       {...dragHandleProps}
     >
-      <Button
-        className={`${baseClass}__move-backward`}
-        icon="chevron"
-        buttonStyle="icon-label"
-        onClick={() => moveRow(positionIndex, positionIndex - 1)}
-        removeIconBorder
-      />
+      <div className={`${baseClass}__border-wrap`}>
+        <Button
+          className={`${baseClass}__move-backward`}
+          icon="chevron"
+          buttonStyle="icon-label"
+          onClick={() => moveRow(positionIndex, positionIndex - 1)}
+          removeIconBorder
+        />
 
-      <div className={`${baseClass}__current-position`}>{adjustedIndex >= 10 ? adjustedIndex : `0${adjustedIndex}`}</div>
+        <div className={`${baseClass}__current-position`}>{adjustedIndex >= 10 ? adjustedIndex : `0${adjustedIndex}`}</div>
 
-      <Button
-        className={`${baseClass}__move-forward`}
-        icon="chevron"
-        buttonStyle="icon-label"
-        onClick={() => moveRow(positionIndex, positionIndex + 1)}
-        removeIconBorder
-      />
+        <Button
+          className={`${baseClass}__move-forward`}
+          icon="chevron"
+          buttonStyle="icon-label"
+          onClick={() => moveRow(positionIndex, positionIndex + 1)}
+          removeIconBorder
+        />
+      </div>
     </div>
   );
 };

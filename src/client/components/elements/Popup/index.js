@@ -10,7 +10,7 @@ const baseClass = 'popup';
 
 const Popup = (props) => {
   const {
-    render, align, size, button, children,
+    render, align, size, color, pointerAlignment, button, children, showOnHover,
   } = props;
 
   const [active, setActive] = useState(false);
@@ -54,18 +54,34 @@ const Popup = (props) => {
     baseClass,
     `${baseClass}--align-${align}`,
     `${baseClass}--size-${size}`,
+    `${baseClass}--color-${color}`,
+    `${baseClass}--pointer-alignment-${pointerAlignment}`,
     `${baseClass}--vertical-align-${verticalAlign}`,
     active && `${baseClass}--active`,
   ].filter(Boolean).join(' ');
 
   return (
     <div className={classes}>
-      <button
-        type="button"
-        onClick={() => setActive(!active)}
-      >
-        {button}
-      </button>
+      {showOnHover
+        ? (
+          <div
+            className={`${baseClass}__on-hover-watch`}
+            onMouseEnter={() => setActive(true)}
+            onMouseLeave={() => setActive(false)}
+          >
+            {button}
+          </div>
+        )
+        : (
+          <button
+            type="button"
+            onClick={() => setActive(!active)}
+          >
+            {button}
+          </button>
+        )
+      }
+
       <div
         className={`${baseClass}__content`}
         ref={ref}
@@ -84,16 +100,23 @@ const Popup = (props) => {
 Popup.defaultProps = {
   align: 'center',
   size: 'small',
+  color: 'light',
+  pointerAlignment: 'left',
   children: undefined,
   render: undefined,
+  button: undefined,
+  showOnHover: false,
 };
 
 Popup.propTypes = {
   render: PropTypes.func,
   children: PropTypes.node,
   align: PropTypes.oneOf(['left', 'center', 'right']),
-  size: PropTypes.oneOf(['small', 'large']),
-  button: PropTypes.node.isRequired,
+  pointerAlignment: PropTypes.oneOf(['left', 'center', 'right']),
+  size: PropTypes.oneOf(['small', 'large', 'wide']),
+  color: PropTypes.oneOf(['light', 'dark']),
+  button: PropTypes.node,
+  showOnHover: PropTypes.bool,
 };
 
 export default Popup;

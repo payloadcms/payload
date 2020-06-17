@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
@@ -32,6 +32,7 @@ const DraggableSection = (props) => {
   } = props;
 
   const draggableRef = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleCollapseClick = () => {
     draggableRef.current.focus();
@@ -45,6 +46,7 @@ const DraggableSection = (props) => {
   const classes = [
     baseClass,
     draggableIsOpen && 'is-open',
+    isHovered && 'is-hovered',
   ].filter(Boolean).join(' ');
 
   return (
@@ -57,6 +59,8 @@ const DraggableSection = (props) => {
           <div
             ref={providedDrag.innerRef}
             className={classes}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             {...providedDrag.draggableProps}
           >
 
@@ -87,6 +91,7 @@ const DraggableSection = (props) => {
             <ActionHandle
               removeRow={removeRow}
               addRow={addRow}
+              singularLabel={singularLabel}
             />
             {/* <AnimateHeight
               className={`${baseClass}__content`}
