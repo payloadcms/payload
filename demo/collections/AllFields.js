@@ -143,6 +143,9 @@ const AllFields = {
               label: 'Repeater Text 2',
               type: 'text',
               required: true,
+              policies: {
+                read: ({ req: { user } }) => Boolean(user),
+              },
             },
           ],
         },
