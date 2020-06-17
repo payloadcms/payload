@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import Button from '../../../elements/Button';
+
 import './index.scss';
 
 const baseClass = 'position-handle';
@@ -15,27 +17,23 @@ const PositionHandle = (props) => {
       className={baseClass}
       {...dragHandleProps}
     >
-      <div
+      <Button
         className={`${baseClass}__move-backward`}
+        icon="chevron"
+        buttonStyle="icon-label"
         onClick={() => moveRow(positionIndex, positionIndex - 1)}
-        role="button"
-        tabIndex={0}
-      >
-        {'<'}
-      </div>
+        removeIconBorder
+      />
 
       <div className={`${baseClass}__current-position`}>{adjustedIndex >= 10 ? adjustedIndex : `0${adjustedIndex}`}</div>
 
-      <div
+      <Button
         className={`${baseClass}__move-forward`}
-        role="button"
-        tabIndex={0}
+        icon="chevron"
+        buttonStyle="icon-label"
         onClick={() => moveRow(positionIndex, positionIndex + 1)}
-      >
-        {'>'}
-      </div>
-
-      <div className={`${baseClass}__edge-line`} />
+        removeIconBorder
+      />
     </div>
   );
 };

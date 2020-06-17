@@ -2,11 +2,28 @@
 
 .draggable-section {
   display: flex;
-  width: calc(100% + #{base(4)});
-  margin-left: base(2);
-  margin-right: base(2);
+  position: relative;
 
   &__render-fields-wrapper {
     width: 100%;
+  }
+
+  &:hover {
+    .position-handle {
+      border-right: $style-stroke-width-m solid $color-dark-gray;
+    }
+  }
+}
+
+
+.field-type.repeater .field-type.repeater {
+  .position-handle {
+    position: relative;
+    right: 0;
+  }
+
+  .action-handle {
+    position: relative;
+    left: 0;
   }
 }

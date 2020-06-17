@@ -185,8 +185,10 @@ const Repeater = (props) => {
 
           <div className={`${baseClass}__add-button-wrap`}>
             <Button
+              buttonStyle="icon-label"
+              icon="plus"
+              iconPosition="left"
               onClick={() => addRow(rowCount)}
-              buttonStyle="secondary"
             >
               {`Add ${singularLabel}`}
             </Button>

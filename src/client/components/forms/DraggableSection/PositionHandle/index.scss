@@ -1,20 +1,27 @@
 @import '../../../../scss/styles';
 
 .position-handle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: base(.5) base(.5) base(.5) 0;
+  margin-right: base(.75);
+  margin-bottom: base(1);
+  border-right: $style-stroke-width solid $color-light-gray;
+  position: absolute;
+  top: 0; right: 100%; bottom: 0;
 
   &__move-backward {
-
+    transform: rotate(.5turn);
+    margin: 0 0 base(.25);
   }
 
   &__move-forward {
-
+    margin: base(.25) 0 0;
   }
 
   &__current-position {
-
-  }
-
-  &__edge-line {
-
+    text-align: center;
   }
 }

@@ -17,6 +17,7 @@ const ActionHandle = (props) => {
         icon="x"
         buttonStyle="icon-label"
         iconPosition="left"
+        iconColor="light-gray"
         onClick={() => removeRow()}
       />
 
@@ -25,6 +26,7 @@ const ActionHandle = (props) => {
         icon="plus"
         buttonStyle="icon-label"
         iconPosition="left"
+        iconColor="light-gray"
         onClick={() => addRow()}
       />
     </div>

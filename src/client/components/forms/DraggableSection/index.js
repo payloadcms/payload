@@ -88,7 +88,6 @@ const DraggableSection = (props) => {
               removeRow={removeRow}
               addRow={addRow}
             />
-
             {/* <AnimateHeight
               className={`${baseClass}__content`}
               height={draggableIsOpen ? 'auto' : 0}

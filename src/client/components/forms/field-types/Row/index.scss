@@ -9,6 +9,7 @@
   > * {
     margin-left: base(.5);
     margin-right: base(.5);
+    margin-bottom: 0;
   }
 
   @include mid-break {
