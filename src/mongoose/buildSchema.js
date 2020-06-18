@@ -2,11 +2,13 @@
 const { Schema } = require('mongoose');
 
 const formatBaseSchema = (field) => {
+  const createPolicy = field.policies && field.policies.create;
+
   return {
     hide: field.hidden === 'api' || field.hidden === true,
     localized: field.localized || false,
     unique: field.unique || false,
-    required: (field.required && !field.localized && !field.hidden && !field.condition && !field.policies.create) || false,
+    required: (field.required && !field.localized && !field.hidden && !field.condition && !createPolicy) || false,
     default: field.defaultValue || undefined,
   };
 };
