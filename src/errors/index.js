@@ -9,6 +9,7 @@ const Forbidden = require('./Forbidden');
 const ValidationError = require('./ValidationError');
 const errorHandler = require('../express/middleware/errorHandler');
 const MissingFile = require('./MissingFile');
+const MissingSelectOptions = require('./MissingSelectOptions');
 
 module.exports = {
   errorHandler,
@@ -22,4 +23,5 @@ module.exports = {
   Forbidden,
   ValidationError,
   MissingFile,
+  MissingSelectOptions,
 };

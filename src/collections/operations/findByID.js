@@ -87,7 +87,13 @@ const findByID = async (args) => {
     result = await executeFieldHooks(options, options.config.fields, result, 'afterRead', result);
 
     // /////////////////////////////////////
-    // 5. Execute after collection hook
+    // 5. Execute field-level policies
+    // /////////////////////////////////////
+
+    // Field-level policies here
+
+    // /////////////////////////////////////
+    // 6. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterRead } = args.config.hooks;
@@ -96,12 +102,12 @@ const findByID = async (args) => {
       json = await afterRead({
         ...options,
         result,
-        json,
+        doc: json,
       }) || json;
     }
 
     // /////////////////////////////////////
-    // 6. Return results
+    // 7. Return results
     // /////////////////////////////////////
 
     return json;

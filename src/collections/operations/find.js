@@ -1,5 +1,6 @@
 const merge = require('lodash.merge');
 const executePolicy = require('../../auth/executePolicy');
+const executeFieldPolicies = require('../../auth/executeFieldPolicies');
 const executeFieldHooks = require('../../fields/executeHooks');
 
 const find = async (args) => {
@@ -75,7 +76,7 @@ const find = async (args) => {
     let result = await Model.paginate(query, optionsToExecute);
 
     // /////////////////////////////////////
-    // 4. Execute field-level afterRead hooks
+    // 4. Execute field-level policies
     // /////////////////////////////////////
 
     result = {
@@ -84,12 +85,25 @@ const find = async (args) => {
         if (locale && doc.setLocale) {
           doc.setLocale(locale, fallbackLocale);
         }
+
+        const json = doc.toJSON({ virtuals: true });
+        return executeFieldPolicies(args, json, args.config.fields, 'read');
+      })),
+    };
+
+    // /////////////////////////////////////
+    // 5. Execute field-level afterRead hooks
+    // /////////////////////////////////////
+
+    result = {
+      ...result,
+      docs: await Promise.all(result.docs.map(async (doc) => {
         return executeFieldHooks(options, args.config.fields, doc, 'afterRead', doc);
       })),
     };
 
     // /////////////////////////////////////
-    // 5. Execute afterRead collection hook
+    // 6. Execute afterRead collection hook
     // /////////////////////////////////////
 
     const { afterRead } = args.config.hooks;
@@ -99,24 +113,19 @@ const find = async (args) => {
       afterReadResult = {
         ...result,
         docs: await Promise.all(result.docs.map(async (doc) => {
-          const json = doc.toJSON({ virtuals: true });
           return afterRead({
             options,
             doc,
-            json,
-          }) || json;
+          }) || doc;
         })),
       };
     }
 
     // /////////////////////////////////////
-    // 6. Return results
+    // 7. Return results
     // /////////////////////////////////////
 
-    return afterReadResult || {
-      ...result,
-      docs: result.docs.map(doc => doc.toJSON({ virtuals: true })),
-    };
+    return afterReadResult || result;
   } catch (err) {
     throw err;
   }

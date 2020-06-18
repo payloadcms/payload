@@ -17,19 +17,25 @@ const update = async (args) => {
     let options = { ...args };
 
     // /////////////////////////////////////
-    // 2. Validate incoming data
+    // 2. Execute field-level policies
+    // /////////////////////////////////////
+
+    // Field-level policies here
+
+    // /////////////////////////////////////
+    // 3. Validate incoming data
     // /////////////////////////////////////
 
     await validate(args.data, args.config.fields);
 
     // /////////////////////////////////////
-    // 3. Execute before update field-level hooks
+    // 4. Execute before update field-level hooks
     // /////////////////////////////////////
 
     options.data = await executeFieldHooks(options, args.config.fields, args.data, 'beforeUpdate', args.data);
 
     // /////////////////////////////////////
-    // 4. Execute before collection hook
+    // 5. Execute before collection hook
     // /////////////////////////////////////
 
     const { beforeUpdate } = args.config.hooks;
@@ -39,7 +45,7 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 5. Perform database operation
+    // 6. Perform database operation
     // /////////////////////////////////////
 
     let {
@@ -74,7 +80,7 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 6. Upload and resize any files that may be present
+    // 7. Upload and resize any files that may be present
     // /////////////////////////////////////
 
     if (args.config.upload) {
@@ -105,7 +111,7 @@ const update = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 7. Execute after collection hook
+    // 8. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterUpdate } = args.config.hooks;
@@ -115,7 +121,7 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 8. Return results
+    // 9. Return results
     // /////////////////////////////////////
 
     return result;

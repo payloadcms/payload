@@ -1,6 +1,7 @@
 
 const { NotFound } = require('../../errors');
 const executePolicy = require('../executePolicy');
+const validate = require('../../validation/validateUpdate');
 
 const update = async (args) => {
   try {
@@ -10,12 +11,23 @@ const update = async (args) => {
 
     await executePolicy(args, args.config.policies.update);
 
-    // Await validation here
 
     let options = { ...args };
 
     // /////////////////////////////////////
-    // 1. Execute before update hook
+    // 2. Execute field-level policies
+    // /////////////////////////////////////
+
+    // Field-level policies here
+
+    // /////////////////////////////////////
+    // 3. Validate incoming data
+    // /////////////////////////////////////
+
+    await validate(args.data, args.config.fields);
+
+    // /////////////////////////////////////
+    // 4. Execute before update hook
     // /////////////////////////////////////
 
     const { beforeUpdate } = args.config.hooks;
@@ -25,7 +37,7 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 2. Perform update
+    // 5. Perform update
     // /////////////////////////////////////
 
     const {
@@ -61,7 +73,7 @@ const update = async (args) => {
     user = user.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 3. Execute after update hook
+    // 6. Execute after update hook
     // /////////////////////////////////////
 
     const afterUpdateHook = args.config.hooks && args.config.hooks.afterUpdate;
@@ -71,7 +83,7 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 4. Return user
+    // 7. Return user
     // /////////////////////////////////////
 
     return user;

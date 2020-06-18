@@ -19,20 +19,26 @@ const create = async (args) => {
     let options = { ...args };
 
     // /////////////////////////////////////
-    // 2. Validate incoming data
+    // 2. Execute field-level policies
+    // /////////////////////////////////////
+
+    // Field-level policies here
+
+    // /////////////////////////////////////
+    // 3. Validate incoming data
     // /////////////////////////////////////
 
     await validateCreate(args.data, args.config.fields);
 
     // /////////////////////////////////////
-    // 3. Execute before create field-level hooks
+    // 4. Execute before create field-level hooks
     // /////////////////////////////////////
 
     options.data = await executeFieldHooks(options, args.config.fields, args.data, 'beforeCreate', args.data);
 
 
     // /////////////////////////////////////
-    // 4. Upload and resize any files that may be present
+    // 5. Upload and resize any files that may be present
     // /////////////////////////////////////
 
     if (args.config.upload) {
@@ -65,7 +71,7 @@ const create = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 5. Execute before collection hook
+    // 6. Execute before collection hook
     // /////////////////////////////////////
 
     const { beforeCreate } = args.config.hooks;
@@ -75,7 +81,7 @@ const create = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 6. Perform database operation
+    // 7. Perform database operation
     // /////////////////////////////////////
 
     const {
@@ -99,7 +105,7 @@ const create = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 7. Execute after collection hook
+    // 8. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterCreate } = args.config.hooks;
@@ -109,7 +115,7 @@ const create = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 8. Return results
+    // 9. Return results
     // /////////////////////////////////////
 
     return result;

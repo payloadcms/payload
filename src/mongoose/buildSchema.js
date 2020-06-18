@@ -1,12 +1,15 @@
 /* eslint-disable no-use-before-define */
 const { Schema } = require('mongoose');
+const { MissingSelectOptions } = require('../errors');
 
 const formatBaseSchema = (field) => {
+  const createPolicy = field.policies && field.policies.create;
+
   return {
     hide: field.hidden === 'api' || field.hidden === true,
     localized: field.localized || false,
     unique: field.unique || false,
-    required: (field.required && !field.localized && !field.hidden && !field.condition) || false,
+    required: (field.required && !field.localized && !field.hidden && !field.condition && !createPolicy) || false,
     default: field.defaultValue || undefined,
   };
 };
@@ -181,6 +184,10 @@ const fieldToSchemaMap = {
     };
   },
   select: (field, fields) => {
+    if (!field.options || field.options.length === 0) {
+      throw new MissingSelectOptions(field);
+    }
+
     const schema = {
       ...formatBaseSchema(field),
       type: String,

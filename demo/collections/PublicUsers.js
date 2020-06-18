@@ -1,5 +1,7 @@
 const checkRole = require('../policies/checkRole');
 
+const policy = ({ req: { user } }) => checkRole(['admin'], user);
+
 module.exports = {
   slug: 'public-users',
   labels: {
@@ -43,5 +45,18 @@ module.exports = {
   auth: {
     tokenExpiration: 300,
   },
+  fields: [
+    {
+      name: 'adminOnly',
+      label: 'This field should only be readable and editable by Admins with "admin" role',
+      type: 'text',
+      defaultValue: 'test',
+      policies: {
+        create: policy,
+        read: policy,
+        update: policy,
+      },
+    },
+  ],
   timestamps: true,
 };
