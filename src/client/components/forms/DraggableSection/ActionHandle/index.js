@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import Button from '../../../elements/Button';
@@ -11,9 +11,6 @@ const baseClass = 'action-handle';
 const ActionHandle = (props) => {
   const { addRow, removeRow, singularLabel } = props;
 
-  const [addRowPopupActive, setAddRowPopupActive] = useState(false);
-  const [removeRowPopupActive, setRemoveRowPopupActive] = useState(false);
-
   return (
     <div className={baseClass}>
       <Popup
@@ -24,16 +21,17 @@ const ActionHandle = (props) => {
         button={(
           <Button
             className={`${baseClass}__remove-row`}
+            round
+            buttonStyle="none"
             icon="x"
-            buttonStyle="icon-label"
             iconPosition="left"
-            iconColor="light-gray"
+            iconStyle="with-border"
             onClick={() => removeRow()}
           />
         )}
       >
         Remove&nbsp;
-        {`${singularLabel ?? 'Row'}`}
+        {singularLabel}
       </Popup>
 
       <Popup
@@ -44,24 +42,28 @@ const ActionHandle = (props) => {
         button={(
           <Button
             className={`${baseClass}__add-row`}
+            round
+            buttonStyle="none"
             icon="plus"
-            buttonStyle="icon-label"
             iconPosition="left"
-            iconColor="light-gray"
+            iconStyle="with-border"
             onClick={() => addRow()}
           />
         )}
       >
         Add&nbsp;
-        {`${singularLabel ?? 'Row'}`}
+        {singularLabel}
       </Popup>
     </div>
   );
 };
 
-ActionHandle.defaultProps = {};
+ActionHandle.defaultProps = {
+  singularLabel: 'Row',
+};
 
 ActionHandle.propTypes = {
+  singularLabel: PropTypes.string,
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
 };

@@ -183,8 +183,10 @@ const Repeater = (props) => {
 
           <div className={`${baseClass}__add-button-wrap`}>
             <Button
-              buttonStyle="icon-label"
+              buttonFormat="icon-label"
+              buttonStyle="none"
               icon="plus"
+              iconStyle="with-border"
               iconPosition="left"
               onClick={() => addRow(rowCount)}
             >

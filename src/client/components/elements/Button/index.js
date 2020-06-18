@@ -57,9 +57,8 @@ const Button = (props) => {
     onClick,
     disabled,
     icon,
-    removeIconBorder,
+    iconStyle,
     buttonStyle,
-    iconColor,
     round,
     size,
     iconPosition,
@@ -69,9 +68,8 @@ const Button = (props) => {
     baseClass,
     className && className,
     buttonStyle && `${baseClass}--style-${buttonStyle}`,
-    iconColor && `${baseClass}--icon-color-light-gray`,
     icon && `${baseClass}--icon`,
-    removeIconBorder && `${baseClass}--icon-without-border`,
+    iconStyle && `${baseClass}--icon-style-${iconStyle}`,
     (icon && !children) && `${baseClass}--icon-only`,
     disabled && `${baseClass}--disabled`,
     round && `${baseClass}--round`,
@@ -139,12 +137,11 @@ Button.defaultProps = {
   children: null,
   onClick: null,
   disabled: undefined,
-  removeIconBorder: false,
   icon: null,
   size: 'medium',
   round: false,
-  iconColor: undefined,
   iconPosition: 'right',
+  iconStyle: 'without-border',
 };
 
 Button.propTypes = {
@@ -159,8 +156,10 @@ Button.propTypes = {
   children: PropTypes.node,
   onClick: PropTypes.func,
   disabled: PropTypes.bool,
-  removeIconBorder: PropTypes.bool,
-  iconColor: PropTypes.oneOf(['light-gray', undefined]),
+  iconStyle: PropTypes.oneOfType([
+    'with-border',
+    'without-border',
+  ]),
   icon: PropTypes.oneOfType([
     PropTypes.node,
     PropTypes.oneOf(['chevron', 'x', 'plus']),

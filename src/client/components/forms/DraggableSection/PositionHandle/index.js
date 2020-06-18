@@ -20,20 +20,20 @@ const PositionHandle = (props) => {
       <div className={`${baseClass}__border-wrap`}>
         <Button
           className={`${baseClass}__move-backward`}
+          buttonStyle="none"
           icon="chevron"
-          buttonStyle="icon-label"
+          round
           onClick={() => moveRow(positionIndex, positionIndex - 1)}
-          removeIconBorder
         />
 
         <div className={`${baseClass}__current-position`}>{adjustedIndex >= 10 ? adjustedIndex : `0${adjustedIndex}`}</div>
 
         <Button
           className={`${baseClass}__move-forward`}
+          buttonStyle="none"
           icon="chevron"
-          buttonStyle="icon-label"
+          round
           onClick={() => moveRow(positionIndex, positionIndex + 1)}
-          removeIconBorder
         />
       </div>
     </div>

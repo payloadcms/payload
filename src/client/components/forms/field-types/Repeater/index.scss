@@ -5,7 +5,12 @@
 
   &__add-button-wrap {
     .btn {
+      color: $color-gray;
       margin: 0;
+
+      &:hover {
+        color: $color-dark-gray;
+      }
     }
   }
 
