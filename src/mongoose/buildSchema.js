@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 const { Schema } = require('mongoose');
+const { MissingSelectOptions } = require('../errors');
 
 const formatBaseSchema = (field) => {
   const createPolicy = field.policies && field.policies.create;
@@ -183,6 +184,10 @@ const fieldToSchemaMap = {
     };
   },
   select: (field, fields) => {
+    if (!field.options || field.options.length === 0) {
+      throw new MissingSelectOptions(field);
+    }
+
     const schema = {
       ...formatBaseSchema(field),
       type: String,
