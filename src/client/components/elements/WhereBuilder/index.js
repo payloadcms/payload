@@ -140,6 +140,7 @@ const WhereBuilder = (props) => {
             icon="plus"
             buttonStyle="icon-label"
             iconPosition="left"
+            iconStyle="with-border"
             onClick={() => dispatchWhere({ type: 'add' })}
           >
             Or
@@ -154,6 +155,7 @@ const WhereBuilder = (props) => {
             icon="plus"
             buttonStyle="icon-label"
             iconPosition="left"
+            iconStyle="with-border"
             onClick={() => dispatchWhere({ type: 'add' })}
           >
             Add filter

@@ -29,6 +29,8 @@ const DraggableSection = (props) => {
     blockType,
     fieldTypes,
     customComponentsPath,
+    positionHandleVerticalAlignment,
+    actionHandleVerticalAlignment,
   } = props;
 
   const draggableRef = useRef(null);
@@ -69,6 +71,7 @@ const DraggableSection = (props) => {
               dragHandleProps={providedDrag.dragHandleProps}
               moveRow={moveRow}
               positionIndex={rowIndex}
+              verticalAlignment={positionHandleVerticalAlignment}
             />
 
             <div className={`${baseClass}__render-fields-wrapper`}>
@@ -91,7 +94,9 @@ const DraggableSection = (props) => {
             <ActionHandle
               removeRow={removeRow}
               addRow={addRow}
+              rowIndex={rowIndex}
               singularLabel={singularLabel}
+              verticalAlignment={actionHandleVerticalAlignment}
             />
             {/* <AnimateHeight
               className={`${baseClass}__content`}
@@ -125,6 +130,8 @@ DraggableSection.defaultProps = {
   singularLabel: '',
   blockType: '',
   customComponentsPath: '',
+  positionHandleVerticalAlignment: 'center',
+  actionHandleVerticalAlignment: 'center',
 };
 
 DraggableSection.propTypes = {
@@ -142,6 +149,8 @@ DraggableSection.propTypes = {
   blockType: PropTypes.string,
   fieldTypes: PropTypes.shape({}).isRequired,
   customComponentsPath: PropTypes.string,
+  positionHandleVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
+  actionHandleVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
 };
 
 export default DraggableSection;

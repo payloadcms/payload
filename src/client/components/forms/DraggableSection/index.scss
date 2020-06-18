@@ -1,5 +1,17 @@
 @import '../../../scss/styles.scss';
 
+@mixin realtively-position-handles {
+  .position-handle {
+    position: relative;
+    right: 0;
+  }
+
+  .action-handle {
+    position: relative;
+    left: 0;
+  }
+}
+
 .draggable-section {
   display: flex;
   position: relative;
@@ -10,7 +22,7 @@
 
   &.is-hovered {
     > .position-handle {
-      .position-handle__border-wrap {
+      .position-handle__controls-container {
         box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
       }
 
@@ -31,17 +43,15 @@
       }
     }
   }
-}
 
+  @include mid-break {
+    @include realtively-position-handles;
+  }
+}
 
 .field-type.repeater .field-type.repeater {
-  .position-handle {
-    position: relative;
-    right: 0;
-  }
-
-  .action-handle {
-    position: relative;
-    left: 0;
-  }
+  @include realtively-position-handles;
 }
+
+
+

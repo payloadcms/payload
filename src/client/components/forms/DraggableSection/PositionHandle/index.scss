@@ -1,22 +1,37 @@
 @import '../../../../scss/styles';
 
 .position-handle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: base(.5) base(.75) 0 0;
-  margin-bottom: base(1);
+  padding: base(.5) base(.75) base(.5) 0;
+  margin-bottom: base(.5);
   position: absolute;
   top: 0; right: 100%; bottom: 0;
 
-  &__border-wrap {
+  &__controls-container {
+    position: relative;
+    height: 100%;
+    box-shadow: #{$style-stroke-width-s} 0px 0px 0px $color-light-gray;
+  }
+
+  &__controls {
+    padding-right: base(.5);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    box-shadow: #{$style-stroke-width-s} 0px 0px 0px $color-light-gray;
-    padding-right: base(.5);
     height: 100%;
+  }
+
+  &--vertical-alignment-top {
+    .position-handle__controls {
+      justify-content: flex-start;
+    }
+  }
+
+  &--vertical-alignment-sticky {
+    .position-handle__controls {
+      position: sticky;
+      top: 120px;
+      height: unset;
+    }
   }
 
   &__move-backward {

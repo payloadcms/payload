@@ -172,6 +172,8 @@ const Repeater = (props) => {
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}
                         customComponentsPath={`${customComponentsPath}${name}.fields.`}
+                        positionHandleVerticalAlignment="sticky"
+                        actionHandleVerticalAlignment="sticky"
                       />
                     );
                   })
@@ -183,8 +185,7 @@ const Repeater = (props) => {
 
           <div className={`${baseClass}__add-button-wrap`}>
             <Button
-              buttonFormat="icon-label"
-              buttonStyle="none"
+              buttonStyle="icon-label"
               icon="plus"
               iconStyle="with-border"
               iconPosition="left"

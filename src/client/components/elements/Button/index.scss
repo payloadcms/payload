@@ -24,6 +24,12 @@
     }
   }
 
+  &--icon-style-none {
+    .btn__icon {
+      border: none;
+    }
+  }
+
   span {
     line-height: base(1);
   }
@@ -88,6 +94,10 @@
   &--style-icon-label {
     padding: 0;
     font-weight: 600;
+
+    .icon {
+      @include color-svg(currentColor);
+    }
   }
 
   &--style-light-gray {
@@ -117,24 +127,26 @@
     }
   }
 
-  &:hover {
-    .btn__icon {
-      @include color-svg(white);
-      background: $color-dark-gray;
+  &:not(.btn--icon-style-none) {
+    &:hover {
+      .btn__icon {
+        @include color-svg(white);
+        background: $color-dark-gray;
+      }
     }
-  }
 
-  &:focus {
-    .btn__icon {
-      @include color-svg($color-dark-gray);
-      background: $color-light-gray;
+    &:focus {
+      .btn__icon {
+        @include color-svg($color-dark-gray);
+        background: $color-light-gray;
+      }
     }
-  }
 
-  &:active {
-    .btn__icon {
-      @include color-svg(white);
-      background: lighten($color-dark-gray, 10%);
+    &:active {
+      .btn__icon {
+        @include color-svg(white);
+        background: lighten($color-dark-gray, 10%);
+      }
     }
   }
 
@@ -143,7 +155,3 @@
     outline: none;
   }
 }
-
-
-
-

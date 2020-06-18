@@ -9,14 +9,15 @@ import { RowModifiedProvider, useRowModified } from '../../Form/RowModified';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import FormContext from '../../Form/Context';
-import AddRowModal from './AddRowModal';
 import collapsibleReducer from './reducer';
 import DraggableSection from '../../DraggableSection';
 import { useRenderedFields } from '../../RenderFields';
 import { useLocale } from '../../../utilities/Locale';
+import { flexible } from '../../../../../validation/validations';
 import Error from '../../Error';
 import useFieldType from '../../useFieldType';
-import { flexible } from '../../../../../validation/validations';
+import Popup from '../../../elements/Popup';
+import BlocksContainer from './BlockSelector/BlocksContainer';
 
 import './index.scss';
 
@@ -66,13 +67,11 @@ const Flexible = (props) => {
 
   const dataToInitialize = initialData || defaultValue;
   const parentRowsModified = useRowModified();
-  const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
-  const [rowIndexBeingAdded, setRowIndexBeingAdded] = useState(null);
+  const [addRowIndex, setAddRowIndex] = useState(null);
   const [lastModified, setLastModified] = useState(null);
   const [rowCount, setRowCount] = useState(dataToInitialize?.length || 0);
   const [collapsibleStates, dispatchCollapsibleStates] = useReducer(collapsibleReducer, []);
   const formContext = useContext(FormContext);
-  const modalSlug = `flexible-${path}`;
   const { customComponentsPath } = useRenderedFields();
   const locale = useLocale();
 
@@ -81,6 +80,7 @@ const Flexible = (props) => {
 
   const addRow = (rowIndex, blockType) => {
     const blockToAdd = blocks.find(block => block.slug === blockType);
+    setAddRowIndex(current => current + 1);
 
     dispatchFields({
       type: 'ADD_ROW', rowIndex, path, fieldSchema: blockToAdd.fields, blockType,
@@ -96,6 +96,8 @@ const Flexible = (props) => {
   };
 
   const removeRow = (rowIndex) => {
+    setAddRowIndex(current => current - 1);
+
     dispatchFields({
       type: 'REMOVE_ROW', rowIndex, path,
     });
@@ -120,11 +122,6 @@ const Flexible = (props) => {
     });
 
     setLastModified(Date.now());
-  };
-
-  const openAddRowModal = (rowIndex) => {
-    setRowIndexBeingAdded(rowIndex);
-    toggleModal(modalSlug);
   };
 
   const onDragEnd = (result) => {
@@ -182,11 +179,12 @@ const Flexible = (props) => {
                   if (blockToRender) {
                     return (
                       <DraggableSection
+                        blockType="flexible"
                         fieldTypes={fieldTypes}
                         key={rowIndex}
                         parentPath={path}
                         moveRow={moveRow}
-                        addRow={() => openAddRowModal(rowIndex)}
+                        addRow={() => addRow(rowIndex, blockType)}
                         removeRow={() => removeRow(rowIndex)}
                         rowIndex={rowIndex}
                         fieldState={fieldState}
@@ -206,8 +204,9 @@ const Flexible = (props) => {
                         initialData={lastModified ? undefined : dataToInitialize?.[rowIndex]}
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}
-                        blockType="flexible"
                         customComponentsPath={`${customComponentsPath}${name}.fields.`}
+                        positionHandleVerticalAlignment="top"
+                        actionHandleVerticalAlignment="top"
                       />
                     );
                   }
@@ -221,22 +220,28 @@ const Flexible = (props) => {
           </Droppable>
 
           <div className={`${baseClass}__add-button-wrap`}>
-            <Button
-              onClick={() => openAddRowModal(rowCount)}
-              buttonStyle="secondary"
+            <Popup
+              buttonType="custom"
+              button={(
+                <Button
+                  buttonStyle="icon-label"
+                  icon="plus"
+                  iconPosition="left"
+                  iconStyle="with-border"
+                >
+                  {`Add ${singularLabel}`}
+                </Button>
+              )}
             >
-              {`Add ${singularLabel}`}
-            </Button>
+              <BlocksContainer
+                blocks={blocks}
+                addRow={addRow}
+                addRowIndex={addRowIndex}
+              />
+            </Popup>
           </div>
         </div>
       </DragDropContext>
-      <AddRowModal
-        closeAllModals={closeAllModals}
-        addRow={addRow}
-        rowIndexBeingAdded={rowIndexBeingAdded}
-        slug={modalSlug}
-        blocks={blocks}
-      />
     </RowModifiedProvider>
   );
 };

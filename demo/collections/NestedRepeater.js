@@ -33,6 +33,19 @@ const NestedRepeater = {
               type: 'text',
               required: true,
             },
+            {
+              type: 'repeater',
+              name: 'deeplyNestedRepeater',
+              required: true,
+              fields: [
+                {
+                  name: 'grandchildIdentifier',
+                  label: 'Grandchild Identifier',
+                  type: 'text',
+                  required: true,
+                },
+              ],
+            },
           ],
         },
       ],

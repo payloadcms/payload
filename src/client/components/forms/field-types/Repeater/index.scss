@@ -4,6 +4,8 @@
   background: white;
 
   &__add-button-wrap {
+    margin-left: 0;
+
     .btn {
       color: $color-gray;
       margin: 0;
@@ -21,6 +23,12 @@
   .section__content {
     > div > div {
       width: 100%;
+    }
+  }
+
+  .field-type.repeater {
+    .field-type.repeater__add-button-wrap {
+      margin-left: base(2.25);
     }
   }
 }

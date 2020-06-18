@@ -1,14 +1,37 @@
 @import '../../../../scss/styles';
 
 .action-handle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: base(.5) base(.5) base(.5) base(.5);
-  margin-bottom: base(1);
+  padding: base(.5);
+  padding-left: base(.75);
+  margin-bottom: base(.5);
   position: absolute;
   top: 0; bottom: 0; left: 100%;
+
+  &__controls-container {
+    position: relative;
+    height: 100%;
+  }
+
+  &__controls {
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    flex-direction: column;
+  }
+
+  &--vertical-alignment-top {
+    .action-handle__controls {
+      justify-content: flex-start;
+    }
+  }
+
+  &--vertical-alignment-sticky {
+    .action-handle__controls {
+      position: sticky;
+      top: 120px;
+      height: unset;
+    }
+  }
 
   &__remove-row {
     margin: 0 0 base(.3);

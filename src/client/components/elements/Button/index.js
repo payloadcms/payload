@@ -159,6 +159,7 @@ Button.propTypes = {
   iconStyle: PropTypes.oneOfType([
     'with-border',
     'without-border',
+    'none',
   ]),
   icon: PropTypes.oneOfType([
     PropTypes.node,

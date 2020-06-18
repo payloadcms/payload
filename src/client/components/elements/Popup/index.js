@@ -8,19 +8,45 @@ import './index.scss';
 
 const baseClass = 'popup';
 
+const ClickableButton = ({
+  buttonType, button, setActive, active,
+}) => {
+  if (buttonType === 'custom') {
+    return (
+      <div
+        role="button"
+        tabIndex="0"
+        onClick={() => setActive(!active)}
+      >
+        {button}
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setActive(!active)}
+    >
+      {button}
+    </button>
+  );
+};
+
 const Popup = (props) => {
   const {
-    render, align, size, color, pointerAlignment, button, children, showOnHover,
+    render, align, size, color, pointerAlignment, button, buttonType, children, showOnHover,
   } = props;
 
   const [active, setActive] = useState(false);
   const [verticalAlign, setVerticalAlign] = useState('top');
   const { height: windowHeight } = useWindowInfo();
   const { y: scrollY } = useScrollInfo();
-  const ref = useRef(null);
+  const buttonRef = useRef(null);
+  const contentRef = useRef(null);
 
   const handleClickOutside = (e) => {
-    if (ref.current.contains(e.target)) {
+    if (contentRef.current.contains(e.target)) {
       return;
     }
 
@@ -28,15 +54,17 @@ const Popup = (props) => {
   };
 
   useThrottledEffect(() => {
-    if (ref.current) {
-      const { height, y } = ref.current.getBoundingClientRect();
-      if (height > y) {
-        setVerticalAlign('bottom');
-      } else {
+    if (contentRef.current && buttonRef.current) {
+      const { height: contentHeight } = contentRef.current.getBoundingClientRect();
+      const { y: buttonOffsetTop } = buttonRef.current.getBoundingClientRect();
+
+      if (buttonOffsetTop > contentHeight) {
         setVerticalAlign('top');
+      } else {
+        setVerticalAlign('bottom');
       }
     }
-  }, 500, [setVerticalAlign, ref, scrollY, windowHeight]);
+  }, 500, [setVerticalAlign, contentRef, scrollY, windowHeight]);
 
   useEffect(() => {
     if (active) {
@@ -62,29 +90,36 @@ const Popup = (props) => {
 
   return (
     <div className={classes}>
-      {showOnHover
-        ? (
-          <div
-            className={`${baseClass}__on-hover-watch`}
-            onMouseEnter={() => setActive(true)}
-            onMouseLeave={() => setActive(false)}
-          >
-            {button}
-          </div>
-        )
-        : (
-          <button
-            type="button"
-            onClick={() => setActive(!active)}
-          >
-            {button}
-          </button>
-        )
-      }
+      <div ref={buttonRef}>
+        {showOnHover
+          ? (
+            <div
+              className={`${baseClass}__on-hover-watch`}
+              onMouseEnter={() => setActive(true)}
+              onMouseLeave={() => setActive(false)}
+            >
+              <ClickableButton
+                buttonType={buttonType}
+                button={button}
+                setActive={setActive}
+                active={active}
+              />
+            </div>
+          )
+          : (
+            <ClickableButton
+              buttonType={buttonType}
+              button={button}
+              setActive={setActive}
+              active={active}
+            />
+          )
+        }
+      </div>
 
       <div
         className={`${baseClass}__content`}
-        ref={ref}
+        ref={contentRef}
       >
         <div className={`${baseClass}__wrap`}>
           <div className={`${baseClass}__scroll`}>
@@ -104,6 +139,7 @@ Popup.defaultProps = {
   pointerAlignment: 'left',
   children: undefined,
   render: undefined,
+  buttonType: 'default',
   button: undefined,
   showOnHover: false,
 };
@@ -115,6 +151,7 @@ Popup.propTypes = {
   pointerAlignment: PropTypes.oneOf(['left', 'center', 'right']),
   size: PropTypes.oneOf(['small', 'large', 'wide']),
   color: PropTypes.oneOf(['light', 'dark']),
+  buttonType: PropTypes.oneOf(['default', 'custom']),
   button: PropTypes.node,
   showOnHover: PropTypes.bool,
 };
