@@ -1,12 +1,12 @@
 const mkdirp = require('mkdirp');
 
 const executePolicy = require('../../auth/executePolicy');
-const executeFieldHooks = require('../../fields/executeHooks');
-const validateCreate = require('../../validation/validateCreate');
 
 const { MissingFile } = require('../../errors');
 const resizeAndSave = require('../../uploads/imageResizer');
 const getSafeFilename = require('../../uploads/getSafeFilename');
+
+const recurseFields = require('../../fields/recurseBeforeOperation');
 
 const create = async (args) => {
   try {
@@ -22,20 +22,7 @@ const create = async (args) => {
     // 2. Execute field-level policies
     // /////////////////////////////////////
 
-    // Field-level policies here
-
-    // /////////////////////////////////////
-    // 3. Validate incoming data
-    // /////////////////////////////////////
-
-    await validateCreate(args.data, args.config.fields);
-
-    // /////////////////////////////////////
-    // 4. Execute before create field-level hooks
-    // /////////////////////////////////////
-
-    options.data = await executeFieldHooks(options, args.config.fields, args.data, 'beforeCreate', args.data);
-
+    options.data = await recurseFields(args.config, { ...options, hook: 'beforeCreate', operationName: 'create' });
 
     // /////////////////////////////////////
     // 5. Upload and resize any files that may be present
