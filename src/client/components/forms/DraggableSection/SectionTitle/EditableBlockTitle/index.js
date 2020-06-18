@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
-import useFieldType from '../../useFieldType';
+import useFieldType from '../../../useFieldType';
 
 import './index.scss';
 

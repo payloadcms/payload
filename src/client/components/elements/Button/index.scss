@@ -12,10 +12,12 @@
   font-weight: normal;
   text-decoration: none;
   text-align: center;
+  color: inherit;
 
   .btn__icon {
     border: 1px solid;
     border-radius: 100%;
+    @include color-svg(currentColor);
   }
 
   &--icon-style-without-border {
@@ -94,10 +96,6 @@
   &--style-icon-label {
     padding: 0;
     font-weight: 600;
-
-    .icon {
-      @include color-svg(currentColor);
-    }
   }
 
   &--style-light-gray {
@@ -127,26 +125,24 @@
     }
   }
 
-  &:not(.btn--icon-style-none) {
-    &:hover {
-      .btn__icon {
-        @include color-svg(white);
-        background: $color-dark-gray;
-      }
+  &:hover {
+    .btn__icon {
+      @include color-svg(white);
+      background: $color-dark-gray;
     }
+  }
 
-    &:focus {
-      .btn__icon {
-        @include color-svg($color-dark-gray);
-        background: $color-light-gray;
-      }
+  &:focus {
+    .btn__icon {
+      @include color-svg($color-dark-gray);
+      background: $color-light-gray;
     }
+  }
 
-    &:active {
-      .btn__icon {
-        @include color-svg(white);
-        background: lighten($color-dark-gray, 10%);
-      }
+  &:active {
+    .btn__icon {
+      @include color-svg(white);
+      background: lighten($color-dark-gray, 10%);
     }
   }
 

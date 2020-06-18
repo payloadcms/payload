@@ -3,12 +3,11 @@ import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
 
-import RenderFields from '../RenderFields';
-import Pill from '../../elements/Pill';
-import Chevron from '../../icons/Chevron';
-import EditableBlockTitle from './EditableBlockTitle';
-import PositionHandle from './PositionHandle';
 import ActionHandle from './ActionHandle';
+import Chevron from '../../icons/Chevron';
+import SectionTitle from './SectionTitle';
+import PositionHandle from './PositionHandle';
+import RenderFields from '../RenderFields';
 
 import './index.scss';
 
@@ -66,7 +65,6 @@ const DraggableSection = (props) => {
             {...providedDrag.draggableProps}
           >
 
-            {/* Render DragPoint - with MoveRow Action Points */}
             <PositionHandle
               dragHandleProps={providedDrag.dragHandleProps}
               moveRow={moveRow}
@@ -75,6 +73,15 @@ const DraggableSection = (props) => {
             />
 
             <div className={`${baseClass}__render-fields-wrapper`}>
+
+              {blockType === 'flexible' && (
+                <SectionTitle
+                  label={singularLabel}
+                  initialData={initialData?.[`${parentPath}.${rowIndex}.blockName`]}
+                  path={`${parentPath}.${rowIndex}.blockName`}
+                />
+              )}
+
               {/* Render fields */}
               <RenderFields
                 initialData={initialData}
@@ -90,7 +97,6 @@ const DraggableSection = (props) => {
               />
             </div>
 
-            {/* Render Add/Remove/Collapse */}
             <ActionHandle
               removeRow={removeRow}
               addRow={addRow}

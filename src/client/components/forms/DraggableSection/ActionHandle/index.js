@@ -38,7 +38,7 @@ const ActionHandle = (props) => {
                 iconStyle="with-border"
                 onClick={() => removeRow()}
               />
-        )}
+            )}
           >
             Remove&nbsp;
             {singularLabel}

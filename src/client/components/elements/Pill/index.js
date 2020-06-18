@@ -63,7 +63,7 @@ Pill.propTypes = {
   icon: PropTypes.node,
   alignIcon: PropTypes.oneOf(['left', 'right']),
   onClick: PropTypes.func,
-  pillStyle: PropTypes.oneOf(['light', 'dark']),
+  pillStyle: PropTypes.oneOf(['light', 'dark', 'light-gray']),
 };
 
 export default Pill;

@@ -4,8 +4,6 @@
   padding: base(.5);
   padding-left: base(.75);
   margin-bottom: base(.5);
-  position: absolute;
-  top: 0; bottom: 0; left: 100%;
 
   &__controls-container {
     position: relative;
@@ -17,6 +15,7 @@
     justify-content: center;
     height: 100%;
     flex-direction: column;
+    color: $color-gray;
   }
 
   &--vertical-alignment-top {

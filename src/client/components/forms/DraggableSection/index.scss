@@ -1,5 +1,9 @@
 @import '../../../scss/styles.scss';
 
+//////////////////////
+// HELPER MIXINS
+//////////////////////
+
 @mixin realtively-position-handles {
   .position-handle {
     position: relative;
@@ -12,15 +16,35 @@
   }
 }
 
+@mixin absolutely-position-handles {
+  .position-handle {
+    position: absolute;
+    top: 0; right: 100%; bottom: 0;
+  }
+
+  .action-handle {
+    position: absolute;
+    top: 0; bottom: 0; left: 100%;
+  }
+}
+
+//////////////////////
+// COMPONENT STYLES
+//////////////////////
+
 .draggable-section {
   display: flex;
   position: relative;
+  padding-top: base(.75);
+  padding-bottom: base(.75);
+  margin-bottom: base(.75);
 
   &__render-fields-wrapper {
     width: 100%;
   }
 
-  &.is-hovered {
+  &.is-hovered,
+  &:focus-within {
     > .position-handle {
       .position-handle__controls-container {
         box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
@@ -45,12 +69,20 @@
   }
 
   @include mid-break {
-    @include realtively-position-handles;
+    @include realtively-position-handles();
   }
 }
 
+//////////////////////
+// EXTERNAL SCOPES
+//////////////////////
+
+.collection-edit {
+  @include absolutely-position-handles();
+}
+
 .field-type.repeater .field-type.repeater {
-  @include realtively-position-handles;
+  @include realtively-position-handles();
 }
 
 

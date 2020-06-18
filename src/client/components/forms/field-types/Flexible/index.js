@@ -205,8 +205,8 @@ const Flexible = (props) => {
                         dispatchCollapsibleStates={dispatchCollapsibleStates}
                         collapsibleStates={collapsibleStates}
                         customComponentsPath={`${customComponentsPath}${name}.fields.`}
-                        positionHandleVerticalAlignment="top"
-                        actionHandleVerticalAlignment="top"
+                        positionHandleVerticalAlignment="sticky"
+                        actionHandleVerticalAlignment="sticky"
                       />
                     );
                   }
