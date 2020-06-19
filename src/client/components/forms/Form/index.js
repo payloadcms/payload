@@ -81,11 +81,9 @@ const Form = (props) => {
 
         return siblings;
       }, {});
-
-      siblingFields = reduceFieldsToValues(siblingFields);
     }
 
-    return siblingFields;
+    return reduceFieldsToValues(siblingFields);
   }, [fields]);
 
   const countRows = useCallback((rowName) => {
