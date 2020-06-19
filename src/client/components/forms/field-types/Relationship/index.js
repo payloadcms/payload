@@ -105,7 +105,7 @@ class Relationship extends Component {
     if (hasMultipleRelations) {
       options.forEach((option) => {
         const potentialValue = option.options.find((subOption) => {
-          if (subOption.value && subOption.value.value && value && value.value) {
+          if (subOption?.value?.value && value?.value) {
             return subOption.value.value === value.value;
           }
 

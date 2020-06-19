@@ -39,6 +39,10 @@
     &:disabled {
       background: $color-light-gray;
       color: $color-gray;
+
+      &:hover {
+        border-color: $color-light-gray;
+      }
     }
 
     @include small-break {

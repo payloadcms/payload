@@ -108,7 +108,7 @@ const Repeater = (props) => {
         },
       ]), []),
     });
-  }, [dataToInitialize, setValue]);
+  }, [dataToInitialize]);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -143,6 +143,8 @@ const Repeater = (props) => {
                     initialData={row.data}
                     dispatchRows={dispatchRows}
                     customComponentsPath={`${customComponentsPath}${name}.fields.`}
+                    positionHandleVerticalAlignment="sticky"
+                    actionHandleVerticalAlignment="sticky"
                   />
                 );
               })

@@ -26,8 +26,7 @@ const reduceFieldsToValues = (fields) => {
     }
   });
 
-  const unflattened = unflatten(data);
-
+  const unflattened = unflatten(data, { safe: true });
   return unflattened;
 };
 
