@@ -77,7 +77,7 @@ const DraggableSection = (props) => {
               {blockType === 'flexible'
                 && (
                   <EditableBlockTitle
-                    initialData={initialData?.[`${parentPath}.${rowIndex}.blockName`]}
+                    initialData={initialData?.blockName}
                     path={`${parentPath}.${rowIndex}.blockName`}
                   />
                 )

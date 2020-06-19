@@ -9,7 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import AddRowModal from './AddRowModal';
-import reducer from './reducer';
+import reducer from '../rowReducer';
+import useForm from '../../Form/useForm';
 import DraggableSection from '../../DraggableSection';
 import { useRenderedFields } from '../../RenderFields';
 import Error from '../../Error';
@@ -65,31 +66,38 @@ const Flexible = (props) => {
   const dataToInitialize = initialData || defaultValue;
   const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
   const [rowIndexBeingAdded, setRowIndexBeingAdded] = useState(null);
-  const [rowCount, setRowCount] = useState(dataToInitialize?.length || 0);
   const [rows, dispatchRows] = useReducer(reducer, []);
   const modalSlug = `flexible-${path}`;
   const { customComponentsPath } = useRenderedFields();
+  const { getDataByPath } = useForm();
 
   const addRow = (index, blockType) => {
+    const data = getDataByPath(path)?.[name];
+
     dispatchRows({
-      type: 'ADD', index, data: { blockType },
+      type: 'ADD', index, data, initialRowData: { blockType },
     });
 
     setValue(value + 1);
   };
 
   const removeRow = (index) => {
+    const data = getDataByPath(path)?.[name];
+
     dispatchRows({
       type: 'REMOVE',
       index,
+      data,
     });
 
     setValue(value - 1);
   };
 
   const moveRow = (moveFromIndex, moveToIndex) => {
+    const data = getDataByPath(path)?.[name];
+
     dispatchRows({
-      type: 'MOVE', index: moveFromIndex, moveToIndex,
+      type: 'MOVE', index: moveFromIndex, moveToIndex, data,
     });
   };
 
@@ -106,11 +114,9 @@ const Flexible = (props) => {
   };
 
   useEffect(() => {
-    setRowCount(dataToInitialize.length);
-
     dispatchRows({
       type: 'SET_ALL',
-      payload: dataToInitialize.reduce((acc, data) => ([
+      rows: dataToInitialize.reduce((acc, data) => ([
         ...acc,
         {
           key: uuidv4(),
@@ -139,7 +145,7 @@ const Flexible = (props) => {
                 {...provided.droppableProps}
               >
                 {rows.length > 0 && rows.map((row, i) => {
-                  let { blockType } = row;
+                  let { blockType } = row.data;
 
                   if (!blockType) {
                     blockType = dataToInitialize?.[i]?.blockType;
@@ -189,7 +195,7 @@ const Flexible = (props) => {
 
           <div className={`${baseClass}__add-button-wrap`}>
             <Button
-              onClick={() => openAddRowModal(rowCount)}
+              onClick={() => openAddRowModal(value)}
               buttonStyle="secondary"
             >
               {`Add ${singularLabel}`}
