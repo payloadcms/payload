@@ -5,30 +5,12 @@ import useForm from '../Form/useForm';
 
 const withCondition = (Field) => {
   const WithCondition = (props) => {
-    const { condition, name } = props;
-    const { getFields } = useForm();
+    const { condition, name, path } = props;
+    const { getData, getSiblingData } = useForm();
 
     if (condition) {
-      const fields = getFields();
-
-      let siblingFields = fields;
-
-      // If this field is nested
-      // We can provide a list of sibling fields
-      if (name.indexOf('.') > 0) {
-        const parentFieldPath = name.substring(0, name.lastIndexOf('.') + 1);
-        siblingFields = Object.keys(fields).reduce((siblings, fieldKey) => {
-          if (fieldKey.indexOf(parentFieldPath) === 0) {
-            return {
-              ...siblings,
-              [fieldKey.replace(parentFieldPath, '')]: fields[fieldKey],
-            };
-          }
-
-          return siblings;
-        }, {});
-      }
-
+      const fields = getData();
+      const siblingFields = getSiblingData(path || name);
       const passesCondition = condition ? condition(fields, siblingFields) : true;
 
       if (passesCondition) {
@@ -44,11 +26,13 @@ const withCondition = (Field) => {
   WithCondition.defaultProps = {
     condition: null,
     name: '',
+    path: '',
   };
 
   WithCondition.propTypes = {
     condition: PropTypes.func,
     name: PropTypes.string,
+    path: PropTypes.string,
   };
 
   return WithCondition;

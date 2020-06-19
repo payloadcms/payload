@@ -17,6 +17,18 @@ import './index.scss';
 
 const baseClass = 'form';
 
+const reduceFieldsToValues = (fields) => {
+  const data = {};
+
+  Object.keys(fields).forEach((key) => {
+    if (!fields[key].disableFormData) {
+      data[key] = fields[key].value;
+    }
+  });
+
+  return unflatten(data);
+};
+
 const Form = (props) => {
   const {
     onSubmit,
@@ -49,15 +61,31 @@ const Form = (props) => {
   }, [fields]);
 
   const getData = useCallback(() => {
-    const data = {};
+    return reduceFieldsToValues(fields);
+  }, [fields]);
 
-    Object.keys(fields).forEach((key) => {
-      if (!fields[key].disableFormData) {
-        data[key] = fields[key].value;
-      }
-    });
+  const getSiblingData = useCallback((path) => {
+    let siblingFields = fields;
 
-    return unflatten(data);
+    // If this field is nested
+    // We can provide a list of sibling fields
+    if (path.indexOf('.') > 0) {
+      const parentFieldPath = path.substring(0, path.lastIndexOf('.') + 1);
+      siblingFields = Object.keys(fields).reduce((siblings, fieldKey) => {
+        if (fieldKey.indexOf(parentFieldPath) === 0) {
+          return {
+            ...siblings,
+            [fieldKey.replace(parentFieldPath, '')]: fields[fieldKey],
+          };
+        }
+
+        return siblings;
+      }, {});
+
+      siblingFields = reduceFieldsToValues(siblingFields);
+    }
+
+    return siblingFields;
   }, [fields]);
 
   const countRows = useCallback((rowName) => {
@@ -262,6 +290,7 @@ const Form = (props) => {
         validateForm,
         modified,
         setModified,
+        getSiblingData,
       }}
       >
         <HiddenInput
