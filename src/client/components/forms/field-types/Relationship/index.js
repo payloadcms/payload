@@ -166,7 +166,7 @@ class Relationship extends Component {
 
       const newOptions = data.docs.map((doc) => {
         return {
-          label: doc[collection.useAsTitle || doc.id],
+          label: doc[collection.useAsTitle || 'id'],
           value: {
             relationTo: collection.slug,
             value: doc.id,
