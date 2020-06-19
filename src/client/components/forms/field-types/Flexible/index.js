@@ -1,19 +1,17 @@
 import React, {
-  useContext, useEffect, useReducer, useState, useCallback,
+  useEffect, useReducer, useState, useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { useModal } from '@trbl/react-modal';
+import { v4 as uuidv4 } from 'uuid';
 
-import { RowModifiedProvider, useRowModified } from '../../Form/RowModified';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
-import FormContext from '../../Form/Context';
 import AddRowModal from './AddRowModal';
-import collapsibleReducer from './reducer';
+import reducer from './reducer';
 import DraggableSection from '../../DraggableSection';
 import { useRenderedFields } from '../../RenderFields';
-import { useLocale } from '../../../utilities/Locale';
 import Error from '../../Error';
 import useFieldType from '../../useFieldType';
 import { flexible } from '../../../../../validation/validations';
@@ -65,65 +63,38 @@ const Flexible = (props) => {
   });
 
   const dataToInitialize = initialData || defaultValue;
-  const parentRowsModified = useRowModified();
   const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
   const [rowIndexBeingAdded, setRowIndexBeingAdded] = useState(null);
-  const [lastModified, setLastModified] = useState(null);
   const [rowCount, setRowCount] = useState(dataToInitialize?.length || 0);
-  const [collapsibleStates, dispatchCollapsibleStates] = useReducer(collapsibleReducer, []);
-  const formContext = useContext(FormContext);
+  const [rows, dispatchRows] = useReducer(reducer, []);
   const modalSlug = `flexible-${path}`;
   const { customComponentsPath } = useRenderedFields();
-  const locale = useLocale();
 
-  const { dispatchFields, countRows, getFields } = formContext;
-  const fieldState = getFields();
-
-  const addRow = (rowIndex, blockType) => {
-    const blockToAdd = blocks.find(block => block.slug === blockType);
-
-    dispatchFields({
-      type: 'ADD_ROW', rowIndex, path, fieldSchema: blockToAdd.fields, blockType,
-    });
-
-    dispatchCollapsibleStates({
-      type: 'ADD_COLLAPSIBLE', collapsibleIndex: rowIndex,
+  const addRow = (index, blockType) => {
+    dispatchRows({
+      type: 'ADD', index, data: { blockType },
     });
 
     setValue(value + 1);
-    setRowCount(rowCount + 1);
-    setLastModified(Date.now());
   };
 
-  const removeRow = (rowIndex) => {
-    dispatchFields({
-      type: 'REMOVE_ROW', rowIndex, path,
+  const removeRow = (index) => {
+    dispatchRows({
+      type: 'REMOVE',
+      index,
     });
 
-    dispatchCollapsibleStates({
-      type: 'REMOVE_COLLAPSIBLE',
-      collapsibleIndex: rowIndex,
-    });
-
-    setRowCount(rowCount - 1);
-    setLastModified(Date.now());
     setValue(value - 1);
   };
 
   const moveRow = (moveFromIndex, moveToIndex) => {
-    dispatchFields({
-      type: 'MOVE_ROW', moveFromIndex, moveToIndex, path,
+    dispatchRows({
+      type: 'MOVE', index: moveFromIndex, moveToIndex,
     });
-
-    dispatchCollapsibleStates({
-      type: 'MOVE_COLLAPSIBLE', collapsibleIndex: moveFromIndex, moveToIndex,
-    });
-
-    setLastModified(Date.now());
   };
 
-  const openAddRowModal = (rowIndex) => {
-    setRowIndexBeingAdded(rowIndex);
+  const openAddRowModal = (index) => {
+    setRowIndexBeingAdded(index);
     toggleModal(modalSlug);
   };
 
@@ -135,26 +106,23 @@ const Flexible = (props) => {
   };
 
   useEffect(() => {
-    const countedRows = countRows(path);
-    setRowCount(countedRows);
-  }, [countRows, path, parentRowsModified]);
-
-  useEffect(() => {
     setRowCount(dataToInitialize.length);
-    setLastModified(null);
 
-    dispatchCollapsibleStates({
-      type: 'SET_ALL_COLLAPSIBLES',
-      payload: Array.from(Array(dataToInitialize.length).keys()).reduce(acc => ([...acc, true]), []), // sets all collapsibles to open on first load
+    dispatchRows({
+      type: 'SET_ALL',
+      payload: dataToInitialize.reduce((acc, data) => ([
+        ...acc,
+        {
+          key: uuidv4(),
+          open: true,
+          data,
+        },
+      ]), []),
     });
   }, [dataToInitialize]);
 
-  useEffect(() => {
-    setLastModified(null);
-  }, [locale]);
-
   return (
-    <RowModifiedProvider lastModified={lastModified}>
+    <>
       <DragDropContext onDragEnd={onDragEnd}>
         <div className={baseClass}>
           <header className={`${baseClass}__header`}>
@@ -170,11 +138,11 @@ const Flexible = (props) => {
                 ref={provided.innerRef}
                 {...provided.droppableProps}
               >
-                {rowCount !== 0 && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
-                  let blockType = fieldState[`${path}.${rowIndex}.blockType`]?.value;
+                {rows.length > 0 && rows.map((row, i) => {
+                  let { blockType } = row;
 
-                  if (!lastModified && !blockType) {
-                    blockType = dataToInitialize?.[rowIndex]?.blockType;
+                  if (!blockType) {
+                    blockType = dataToInitialize?.[i]?.blockType;
                   }
 
                   const blockToRender = blocks.find(block => block.slug === blockType);
@@ -182,13 +150,14 @@ const Flexible = (props) => {
                   if (blockToRender) {
                     return (
                       <DraggableSection
+                        isOpen={row.open}
                         fieldTypes={fieldTypes}
-                        key={rowIndex}
+                        key={row.key}
+                        id={row.key}
                         parentPath={path}
-                        addRow={() => openAddRowModal(rowIndex)}
-                        removeRow={() => removeRow(rowIndex)}
-                        rowIndex={rowIndex}
-                        fieldState={fieldState}
+                        addRow={() => openAddRowModal(i)}
+                        removeRow={() => removeRow(i)}
+                        rowIndex={i}
                         fieldSchema={[
                           ...blockToRender.fields,
                           {
@@ -202,9 +171,8 @@ const Flexible = (props) => {
                           },
                         ]}
                         singularLabel={blockToRender?.labels?.singular}
-                        initialData={lastModified ? undefined : dataToInitialize?.[rowIndex]}
-                        dispatchCollapsibleStates={dispatchCollapsibleStates}
-                        collapsibleStates={collapsibleStates}
+                        initialData={row.data}
+                        dispatchRows={dispatchRows}
                         blockType="flexible"
                         customComponentsPath={`${customComponentsPath}${name}.fields.`}
                       />
@@ -236,7 +204,7 @@ const Flexible = (props) => {
         slug={modalSlug}
         blocks={blocks}
       />
-    </RowModifiedProvider>
+    </>
   );
 };
 

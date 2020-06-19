@@ -1,30 +1,38 @@
-const collapsibleReducer = (currentState, action) => {
+import { v4 as uuidv4 } from 'uuid';
+
+const reducer = (currentState, action) => {
   const {
-    type, collapsibleIndex, moveToIndex, payload,
+    type, index, moveToIndex, payload, data,
   } = action;
 
   const stateCopy = [...currentState];
-  const movingCollapsibleState = stateCopy[collapsibleIndex];
+
+  const movingRowState = stateCopy[index];
 
   switch (type) {
-    case 'SET_ALL_COLLAPSIBLES':
+    case 'SET_ALL':
       return payload;
 
-    case 'ADD_COLLAPSIBLE':
-      stateCopy.splice(collapsibleIndex + 1, 0, true);
+    case 'ADD':
+      stateCopy.splice(index + 1, 0, {
+        open: true,
+        key: uuidv4(),
+        data,
+      });
+
       return stateCopy;
 
-    case 'REMOVE_COLLAPSIBLE':
-      stateCopy.splice(collapsibleIndex, 1);
+    case 'REMOVE':
+      stateCopy.splice(index, 1);
       return stateCopy;
 
     case 'UPDATE_COLLAPSIBLE_STATUS':
-      stateCopy[collapsibleIndex] = !movingCollapsibleState;
+      stateCopy[index].open = !movingRowState.open;
       return stateCopy;
 
-    case 'MOVE_COLLAPSIBLE':
-      stateCopy.splice(collapsibleIndex, 1);
-      stateCopy.splice(moveToIndex, 0, movingCollapsibleState);
+    case 'MOVE':
+      stateCopy.splice(index, 1);
+      stateCopy.splice(moveToIndex, 0, movingRowState);
       return stateCopy;
 
     default:
@@ -32,4 +40,4 @@ const collapsibleReducer = (currentState, action) => {
   }
 };
 
-export default collapsibleReducer;
+export default reducer;

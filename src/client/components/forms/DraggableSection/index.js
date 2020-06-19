@@ -21,33 +21,33 @@ const DraggableSection = (props) => {
     parentPath,
     fieldSchema,
     initialData,
-    dispatchCollapsibleStates,
-    collapsibleStates,
+    dispatchRows,
     singularLabel,
     blockType,
     fieldTypes,
     customComponentsPath,
+    isOpen,
+    id,
   } = props;
 
   const draggableRef = useRef(null);
 
   const handleCollapseClick = () => {
     draggableRef.current.focus();
-    dispatchCollapsibleStates({
+    dispatchRows({
       type: 'UPDATE_COLLAPSIBLE_STATUS',
-      collapsibleIndex: rowIndex,
+      index: rowIndex,
     });
   };
 
-  const draggableIsOpen = collapsibleStates[rowIndex];
   const classes = [
     baseClass,
-    draggableIsOpen && 'is-open',
+    isOpen && 'is-open',
   ].filter(Boolean).join(' ');
 
   return (
     <Draggable
-      draggableId={`row-${rowIndex}`}
+      draggableId={id}
       index={rowIndex}
     >
       {(providedDrag) => {
@@ -97,13 +97,13 @@ const DraggableSection = (props) => {
                   size="small"
                 />
 
-                <Chevron isOpen={draggableIsOpen} />
+                <Chevron isOpen={isOpen} />
               </div>
             </div>
 
             <AnimateHeight
               className={`${baseClass}__content`}
-              height={draggableIsOpen ? 'auto' : 0}
+              height={isOpen ? 'auto' : 0}
               duration={0}
             >
               <RenderFields
@@ -129,10 +129,10 @@ const DraggableSection = (props) => {
 DraggableSection.defaultProps = {
   rowCount: null,
   initialData: undefined,
-  collapsibleStates: [],
   singularLabel: '',
   blockType: '',
   customComponentsPath: '',
+  isOpen: true,
 };
 
 DraggableSection.propTypes = {
@@ -144,11 +144,12 @@ DraggableSection.propTypes = {
   fieldSchema: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   rowCount: PropTypes.number,
   initialData: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
-  dispatchCollapsibleStates: PropTypes.func.isRequired,
-  collapsibleStates: PropTypes.arrayOf(PropTypes.bool),
+  dispatchRows: PropTypes.func.isRequired,
+  isOpen: PropTypes.bool,
   blockType: PropTypes.string,
   fieldTypes: PropTypes.shape({}).isRequired,
   customComponentsPath: PropTypes.string,
+  id: PropTypes.string.isRequired,
 };
 
 export default DraggableSection;
