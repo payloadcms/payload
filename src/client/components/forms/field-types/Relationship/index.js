@@ -10,7 +10,7 @@ import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import { relationship } from '../../../../../validation/validations';
+import { relationship } from '../../../../../fields/validations';
 
 import './index.scss';
 

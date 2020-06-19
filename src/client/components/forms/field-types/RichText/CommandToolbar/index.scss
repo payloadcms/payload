@@ -1,0 +1,31 @@
+@import '../../../../../scss/styles';
+
+.command-toolbar {
+  border-bottom: 1px solid $color-light-gray;
+  padding: base(.5);
+  background: $color-background-gray;
+  display: flex;
+
+  .toggle-section {
+    display: inline-flex;
+    padding: 0 base(.5);
+
+    &:first-child {
+      padding-left: 0;
+    }
+
+    + .toggle-section {
+      border-left: $style-stroke-width-m solid $color-light-gray;
+    }
+  }
+
+  .slate-ToolbarButton {
+    display: inline-flex;
+    @include color-svg($color-gray);
+
+    &-active {
+      border-radius: $style-radius-s;
+      @include color-svg($color-dark-gray);
+    }
+  }
+}

@@ -11,6 +11,7 @@ export { default as textarea } from './Textarea';
 export { default as select } from './Select';
 export { default as number } from './Number';
 export { default as checkbox } from './Checkbox';
+export { default as richText } from './RichText';
 export { default as radio } from './RadioGroup';
 
 export { default as flexible } from './Flexible';

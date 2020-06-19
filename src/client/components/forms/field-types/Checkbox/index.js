@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Error from '../../Error';
-import { checkbox } from '../../../../../validation/validations';
+import { checkbox } from '../../../../../fields/validations';
 import Check from '../../../icons/Check';
 
 import './index.scss';

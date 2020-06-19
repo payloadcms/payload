@@ -1,0 +1,20 @@
+@import '../../../../scss/styles.scss';
+
+.rich-text {
+
+  &__wrapper {
+    border: 1px solid $color-light-gray;
+  }
+
+  &__editor {
+    min-height: 200px;
+    padding: base(.5);
+
+    p,
+    h1,
+    h2,
+    h3 {
+      margin-bottom: base(.25);
+    }
+  }
+}

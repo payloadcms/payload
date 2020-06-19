@@ -4,7 +4,7 @@ import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import { email } from '../../../../../validation/validations';
+import { email } from '../../../../../fields/validations';
 
 import './index.scss';
 

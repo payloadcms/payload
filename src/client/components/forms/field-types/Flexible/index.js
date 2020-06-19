@@ -15,7 +15,7 @@ import Error from '../../Error';
 import useFieldType from '../../useFieldType';
 import Popup from '../../../elements/Popup';
 import BlocksContainer from './BlockSelector/BlocksContainer';
-import { flexible } from '../../../../../validation/validations';
+import { flexible } from '../../../../../fields/validations';
 
 import './index.scss';
 

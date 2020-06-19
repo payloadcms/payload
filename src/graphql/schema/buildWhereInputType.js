@@ -8,6 +8,7 @@ const {
   GraphQLEnumType,
   GraphQLInputObjectType,
 } = require('graphql');
+const { GraphQLJSON } = require('graphql-type-json');
 
 const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
@@ -101,8 +102,8 @@ const buildWhereInputType = (name, fields, parentName) => {
         ),
       };
     },
-    wysiwyg: (field) => {
-      const type = GraphQLString;
+    richText: (field) => {
+      const type = GraphQLJSON;
       return {
         type: withOperators(
           field.name,

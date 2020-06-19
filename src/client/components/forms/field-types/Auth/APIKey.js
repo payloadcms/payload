@@ -5,7 +5,7 @@ import Label from '../../Label';
 import Button from '../../../elements/Button';
 import CopyToClipboard from '../../../elements/CopyToClipboard';
 import generateAPIKey from './generateAPIKey';
-import { text } from '../../../../../validation/validations';
+import { text } from '../../../../../fields/validations';
 import useForm from '../../Form/useForm';
 
 import './index.scss';

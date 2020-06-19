@@ -4,7 +4,7 @@ import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
-import { textarea } from '../../../../../validation/validations';
+import { textarea } from '../../../../../fields/validations';
 
 import './index.scss';
 

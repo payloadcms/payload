@@ -5,7 +5,7 @@ import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import { select } from '../../../../../validation/validations';
+import { select } from '../../../../../fields/validations';
 
 import './index.scss';
 

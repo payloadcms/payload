@@ -4,7 +4,7 @@ import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
 import withCondition from '../../withCondition';
-import { password } from '../../../../../validation/validations';
+import { password } from '../../../../../fields/validations';
 
 import './index.scss';
 

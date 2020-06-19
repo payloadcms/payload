@@ -11,7 +11,7 @@ import { useRenderedFields } from '../../RenderFields';
 import useForm from '../../Form/useForm';
 import useFieldType from '../../useFieldType';
 import Error from '../../Error';
-import { repeater } from '../../../../../validation/validations';
+import { repeater } from '../../../../../fields/validations';
 
 import './index.scss';
 

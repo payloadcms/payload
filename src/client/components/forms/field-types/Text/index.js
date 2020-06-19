@@ -1,10 +1,10 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
-import { text } from '../../../../../validation/validations';
+import { text } from '../../../../../fields/validations';
 
 import './index.scss';
 

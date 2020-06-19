@@ -6,7 +6,7 @@ import withCondition from '../../withCondition';
 import Error from '../../Error';
 import Label from '../../Label';
 import RadioInput from './RadioInput';
-import { radio } from '../../../../../validation/validations';
+import { radio } from '../../../../../fields/validations';
 
 import './index.scss';
 

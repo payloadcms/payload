@@ -7,9 +7,11 @@ const RichText = {
   fields: [
     {
       name: 'richText',
-      type: 'rich-text',
+      type: 'richText',
       label: 'Rich Text',
       required: true,
+      disabledElements: [],
+      disabledMarks: [],
     },
   ],
 };
