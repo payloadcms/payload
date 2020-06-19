@@ -6,7 +6,7 @@ const { MissingFile } = require('../../errors');
 const resizeAndSave = require('../../uploads/imageResizer');
 const getSafeFilename = require('../../uploads/getSafeFilename');
 
-const recurseFields = require('../../fields/recurseBeforeOperation');
+const performFieldOperations = require('../../fields/performFieldOperations');
 
 const create = async (args) => {
   try {
@@ -19,13 +19,23 @@ const create = async (args) => {
     let options = { ...args };
 
     // /////////////////////////////////////
-    // 2. Execute field-level policies
+    // 2. Execute before collection hook
     // /////////////////////////////////////
 
-    options.data = await recurseFields(args.config, { ...options, hook: 'beforeCreate', operationName: 'create' });
+    const { beforeCreate } = args.config.hooks;
+
+    if (typeof beforeCreate === 'function') {
+      options = await beforeCreate(options);
+    }
 
     // /////////////////////////////////////
-    // 5. Upload and resize any files that may be present
+    // 3. Execute field-level policies, hooks, and validation
+    // /////////////////////////////////////
+
+    options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeCreate', operationName: 'create' });
+
+    // /////////////////////////////////////
+    // 4. Upload and resize any files that may be present
     // /////////////////////////////////////
 
     if (args.config.upload) {
@@ -58,17 +68,7 @@ const create = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 6. Execute before collection hook
-    // /////////////////////////////////////
-
-    const { beforeCreate } = args.config.hooks;
-
-    if (typeof beforeCreate === 'function') {
-      options = await beforeCreate(options);
-    }
-
-    // /////////////////////////////////////
-    // 7. Perform database operation
+    // 5. Perform database operation
     // /////////////////////////////////////
 
     const {
@@ -92,7 +92,7 @@ const create = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 8. Execute after collection hook
+    // 6. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterCreate } = args.config.hooks;
@@ -102,7 +102,7 @@ const create = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 9. Return results
+    // 7. Return results
     // /////////////////////////////////////
 
     return result;

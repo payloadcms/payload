@@ -1,6 +1,6 @@
 const { Forbidden, NotFound } = require('../../errors');
 const executePolicy = require('../../auth/executePolicy');
-const executeFieldHooks = require('../../fields/executeHooks');
+const performFieldOperations = require('../../fields/performFieldOperations');
 
 const findByID = async (args) => {
   try {
@@ -78,39 +78,36 @@ const findByID = async (args) => {
       result.setLocale(locale, fallbackLocale);
     }
 
-    let json = result.toJSON({ virtuals: true });
+    let data = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 4. Execute after collection field-level hooks
+    // 4. Execute field-level hooks and policies
     // /////////////////////////////////////
 
-    result = await executeFieldHooks(options, options.config.fields, result, 'afterRead', result);
+    result = performFieldOperations(args.config, {
+      ...options, data, hook: 'afterRead', operationName: 'read',
+    });
+
 
     // /////////////////////////////////////
-    // 5. Execute field-level policies
-    // /////////////////////////////////////
-
-    // Field-level policies here
-
-    // /////////////////////////////////////
-    // 6. Execute after collection hook
+    // 5. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterRead } = args.config.hooks;
 
     if (typeof afterRead === 'function') {
-      json = await afterRead({
+      data = await afterRead({
         ...options,
         result,
-        doc: json,
-      }) || json;
+        doc: data,
+      }) || data;
     }
 
     // /////////////////////////////////////
-    // 7. Return results
+    // 6. Return results
     // /////////////////////////////////////
 
-    return json;
+    return data;
   } catch (err) {
     throw err;
   }

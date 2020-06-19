@@ -1,6 +1,6 @@
 const executePolicy = require('../../auth/executePolicy');
 const { NotFound } = require('../../errors');
-const executeFieldHooks = require('../../fields/executeHooks');
+const performFieldOperations = require('../../fields/performFieldOperations');
 
 const findOne = async (args) => {
   try {
@@ -62,36 +62,31 @@ const findOne = async (args) => {
       result.setLocale(locale, fallbackLocale);
     }
 
-    let json = result.toJSON({ virtuals: true });
-
-
-    // /////////////////////////////////////
-    // 4. Execute field-level policies
-    // /////////////////////////////////////
-
-    // Field-level policies here
+    let data = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 5. Execute after collection field-level hooks
+    // 4. Execute field-level hooks and policies
     // /////////////////////////////////////
 
-    result = await executeFieldHooks(options, args.config.fields, result, 'afterRead', result);
+    result = performFieldOperations(args.config, {
+      ...options, data, hook: 'afterRead', operationName: 'read',
+    });
 
     // /////////////////////////////////////
-    // 6. Execute after collection hook
+    // 5. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterRead } = args.config.hooks;
 
     if (typeof afterRead === 'function') {
-      json = await afterRead(options, result, json) || json;
+      data = await afterRead(options, result, data) || data;
     }
 
     // /////////////////////////////////////
-    // 7. Return results
+    // 6. Return results
     // /////////////////////////////////////
 
-    return json;
+    return data;
   } catch (error) {
     throw error;
   }

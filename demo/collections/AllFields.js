@@ -24,6 +24,10 @@ const AllFields = {
       defaultValue: 'Default Value',
       unique: true,
       policies: {
+        create: () => {
+          console.log('trying to set text');
+          return false;
+        },
         read: ({ req: { user } }) => Boolean(user),
       },
     },

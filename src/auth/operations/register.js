@@ -1,7 +1,6 @@
 const passport = require('passport');
 const executePolicy = require('../executePolicy');
-const executeFieldHooks = require('../../fields/executeHooks');
-const validateCreate = require('../../validation/validateCreate');
+const performFieldOperations = require('../../fields/performFieldOperations');
 
 const register = async (args) => {
   try {
@@ -16,25 +15,7 @@ const register = async (args) => {
     let options = { ...args };
 
     // /////////////////////////////////////
-    // 2. Execute field-level policies
-    // /////////////////////////////////////
-
-    // Field-level policies here
-
-    // /////////////////////////////////////
-    // 3. Validate incoming data
-    // /////////////////////////////////////
-
-    await validateCreate(args.data, args.collection.config.fields);
-
-    // /////////////////////////////////////
-    // 4. Execute before register field-level hooks
-    // /////////////////////////////////////
-
-    options.data = await executeFieldHooks(options, args.collection.config.fields, args.data, 'beforeCreate');
-
-    // /////////////////////////////////////
-    // 5. Execute before register hook
+    // 2. Execute before register hook
     // /////////////////////////////////////
 
     const { beforeRegister } = args.collection.config.hooks;
@@ -42,6 +23,12 @@ const register = async (args) => {
     if (typeof beforeRegister === 'function') {
       options = await beforeRegister(options);
     }
+
+    // /////////////////////////////////////
+    // 3. Execute field-level hooks, policies, and validation
+    // /////////////////////////////////////
+
+    options.data = await performFieldOperations(args.collection.config, { ...options, hook: 'beforeCreate', operationName: 'create' });
 
     // /////////////////////////////////////
     // 6. Perform register

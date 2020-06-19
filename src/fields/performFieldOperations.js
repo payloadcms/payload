@@ -67,13 +67,15 @@ module.exports = async (config, operation) => {
         }
       }
 
-      if (field.type === 'repeater' || field.type === 'flexible') {
-        const hasRowsOfData = Array.isArray(data[field.name]);
-        const rowCount = hasRowsOfData ? data[field.name].length : 0;
+      if (operationName === 'create' || (operationName === 'update' && data[field.name] !== undefined)) {
+        if (field.type === 'repeater' || field.type === 'flexible') {
+          const hasRowsOfData = Array.isArray(data[field.name]);
+          const rowCount = hasRowsOfData ? data[field.name].length : 0;
 
-        validationPromises.push(createValidationPromise(rowCount, field, path));
-      } else {
-        validationPromises.push(createValidationPromise(data[field.name], field, path));
+          validationPromises.push(createValidationPromise(rowCount, field, path));
+        } else {
+          validationPromises.push(createValidationPromise(data[field.name], field, path));
+        }
       }
     });
   };

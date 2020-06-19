@@ -1,7 +1,7 @@
 
 const { NotFound } = require('../../errors');
 const executePolicy = require('../executePolicy');
-const validate = require('../../validation/validateUpdate');
+const performFieldOperations = require('../../fields/performFieldOperations');
 
 const update = async (args) => {
   try {
@@ -15,19 +15,7 @@ const update = async (args) => {
     let options = { ...args };
 
     // /////////////////////////////////////
-    // 2. Execute field-level policies
-    // /////////////////////////////////////
-
-    // Field-level policies here
-
-    // /////////////////////////////////////
-    // 3. Validate incoming data
-    // /////////////////////////////////////
-
-    await validate(args.data, args.config.fields);
-
-    // /////////////////////////////////////
-    // 4. Execute before update hook
+    // 2. Execute before update hook
     // /////////////////////////////////////
 
     const { beforeUpdate } = args.config.hooks;
@@ -37,7 +25,13 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 5. Perform update
+    // 3. Execute field-level hooks, policies, and validation
+    // /////////////////////////////////////
+
+    options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeUpdate', operationName: 'update' });
+
+    // /////////////////////////////////////
+    // 4. Perform update
     // /////////////////////////////////////
 
     const {
@@ -73,7 +67,7 @@ const update = async (args) => {
     user = user.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 6. Execute after update hook
+    // 5. Execute after update hook
     // /////////////////////////////////////
 
     const afterUpdateHook = args.config.hooks && args.config.hooks.afterUpdate;
@@ -83,7 +77,7 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 7. Return user
+    // 6. Return user
     // /////////////////////////////////////
 
     return user;
