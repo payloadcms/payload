@@ -74,8 +74,12 @@ class ParamParser {
         if (typeof pathOperators === 'object') {
           for (const operator of Object.keys(pathOperators)) {
             if (validOperators.includes(operator)) {
-              const [searchParamKey, searchParamValue] = await this.buildSearchParam(this.model.schema, relationOrPath, pathOperators[operator], operator);
-              result = addSearchParam(searchParamKey, searchParamValue, result);
+              const searchParam = await this.buildSearchParam(this.model.schema, relationOrPath, pathOperators[operator], operator);
+
+              if (Array.isArray(searchParam)) {
+                const [key, value] = searchParam;
+                result = addSearchParam(key, value, result);
+              }
             }
           }
         }
@@ -110,6 +114,10 @@ class ParamParser {
 
     if (key === '_id' || key === 'id') {
       localizedKey = '_id';
+
+      if (!mongoose.Types.ObjectId.isValid(val)) {
+        return null;
+      }
     }
 
     if (key.includes('.') || key.includes('__')) {

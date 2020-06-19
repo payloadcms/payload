@@ -43,15 +43,35 @@ class Relationship extends Component {
     this.getNextOptions();
   }
 
-  getNextOptions = () => {
-    const { relations, lastFullyLoadedRelation, lastLoadedPage } = this.state;
+  componentDidUpdate(prevProps, prevState) {
+    const { search } = this.state;
+    if (search !== prevState.search) {
+      this.getNextOptions({ clear: true });
+    }
+  }
+
+  getNextOptions = (params = {}) => {
+    const { clear } = params;
+
+    if (clear) {
+      this.setState({
+        options: [],
+      });
+    }
+
+    const {
+      relations, lastFullyLoadedRelation, lastLoadedPage, search,
+    } = this.state;
     const token = cookies.get(cookieTokenName);
 
     const relationsToSearch = relations.slice(lastFullyLoadedRelation + 1);
 
     if (relationsToSearch.length > 0) {
       some(relationsToSearch, async (relation, callback) => {
-        const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}`, {
+        const collection = collections.find(coll => coll.slug === relation);
+        const fieldToSearch = collection.useAsTitle || 'id';
+        const searchParam = search ? `&where[${fieldToSearch}][like]=${search}` : '';
+        const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}${searchParam}`, {
           headers: {
             Authorization: `JWT ${token}`,
           },
@@ -178,10 +198,12 @@ class Relationship extends Component {
     });
   }
 
-  handleInputChange = () => {
-    // this.setState({
-    //   search,
-    // });
+  handleInputChange = (search) => {
+    this.setState({
+      search,
+      lastFullyLoadedRelation: -1,
+      lastLoadedPage: 1,
+    });
   }
 
   handleMenuScrollToBottom = () => {
