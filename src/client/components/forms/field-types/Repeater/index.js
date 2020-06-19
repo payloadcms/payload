@@ -97,8 +97,6 @@ const Repeater = (props) => {
   };
 
   useEffect(() => {
-    setValue(dataToInitialize.length + 1);
-
     dispatchRows({
       type: 'SET_ALL',
       rows: dataToInitialize.reduce((acc, data) => ([

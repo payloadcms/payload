@@ -88,6 +88,12 @@ const useFieldType = (options) => {
     }
   }, [formValue, sendField]);
 
+  useEffect(() => {
+    if (initialData !== undefined) {
+      setInternalValue(initialData);
+    }
+  }, [initialData]);
+
   return {
     ...options,
     showError,
