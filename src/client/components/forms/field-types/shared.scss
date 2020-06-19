@@ -26,9 +26,14 @@
       font-size: 1rem;
     }
 
+    &:hover {
+      border-color: darken($color-light-gray, 10%);
+    }
+
     &:focus,
     &:active {
-        outline: 0;
+      border-color: $color-gray;
+      outline: 0;
     }
 
     &:disabled {

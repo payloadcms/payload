@@ -70,14 +70,14 @@ $style-stroke-width-m : 2px;
 }
 
 @mixin inputShadowActive {
-	box-shadow: 0 2px 3px 0 rgba(0, 2, 4, 0.13), 0 6px 4px -4px rgba(0, 2, 4, 0.1);
+	box-shadow: 0 2px 3px 0 rgba(0, 2, 4, 0.16), 0 6px 4px -4px rgba(0, 2, 4, 0.13);
 }
 
 @mixin inputShadow {
 	@include shadow-sm;
 
   &:hover {
-		box-shadow: 0 2px 3px 0 rgba(0, 2, 4, 0.1), 0 6px 4px -4px rgba(0, 2, 4, 0.07);
+		box-shadow: 0 2px 3px 0 rgba(0, 2, 4, 0.13), 0 6px 4px -4px rgba(0, 2, 4, 0.1);
 	}
 
 	&:active, &:focus {
