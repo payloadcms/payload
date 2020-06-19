@@ -26,13 +26,6 @@ const StayLoggedInModal = (props) => {
         <h1>Stay logged in</h1>
         <p>You haven&apos;t been active in a little while and will shortly be automatically logged out for your own security. Would you like to stay logged in?</p>
         <div className={`${baseClass}__actions`}>
-          <Button onClick={() => {
-            refreshToken();
-            closeAllModals();
-          }}
-          >
-            Stay logged in
-          </Button>
           <Button
             buttonStyle="secondary"
             onClick={() => {
@@ -41,6 +34,13 @@ const StayLoggedInModal = (props) => {
             }}
           >
             Log out
+          </Button>
+          <Button onClick={() => {
+            refreshToken();
+            closeAllModals();
+          }}
+          >
+            Stay logged in
           </Button>
         </div>
       </MinimalTemplate>

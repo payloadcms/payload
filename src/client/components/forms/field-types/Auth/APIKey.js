@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { v4 as uuidv4 } from 'uuid';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Button from '../../../elements/Button';
 import CopyToClipboard from '../../../elements/CopyToClipboard';
-import generateAPIKey from './generateAPIKey';
 import { text } from '../../../../../fields/validations';
 import useForm from '../../Form/useForm';
 
@@ -67,7 +67,7 @@ const APIKey = (props) => {
         />
       </div>
       <Button
-        onClick={() => setValue(generateAPIKey())}
+        onClick={() => setValue(uuidv4())}
         size="small"
         buttonStyle="secondary"
       >
