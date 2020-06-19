@@ -1,0 +1,50 @@
+@import '../../../../scss/styles';
+
+.position-handle {
+  padding-right: base(1);
+  margin-bottom: base(.5);
+
+  &__controls-container {
+    position: relative;
+    height: 100%;
+    box-shadow: #{$style-stroke-width-s} 0px 0px 0px $color-light-gray;
+  }
+
+  &__controls {
+    padding-right: base(.75);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+  }
+
+  &--vertical-alignment-top {
+    .position-handle__controls {
+      justify-content: flex-start;
+    }
+  }
+
+  &--vertical-alignment-sticky {
+    .position-handle__controls {
+      position: sticky;
+      top: 120px;
+      height: unset;
+    }
+  }
+
+  &__move-backward {
+    transform: rotate(.5turn);
+    margin: 0 0 base(.25);
+    opacity: 0;
+  }
+
+  &__move-forward {
+    margin: base(.25) 0 0;
+    opacity: 0;
+  }
+
+  &__current-position {
+    text-align: center;
+    color: $color-gray;
+  }
+}

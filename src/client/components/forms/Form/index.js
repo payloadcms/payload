@@ -21,12 +21,14 @@ const reduceFieldsToValues = (fields) => {
   const data = {};
 
   Object.keys(fields).forEach((key) => {
-    if (!fields[key].disableFormData) {
+    if (!fields[key].disableFormData && fields[key].value !== undefined) {
       data[key] = fields[key].value;
     }
   });
 
-  return unflatten(data);
+  const unflattened = unflatten(data);
+
+  return unflattened;
 };
 
 const Form = (props) => {
@@ -86,23 +88,23 @@ const Form = (props) => {
     return reduceFieldsToValues(siblingFields);
   }, [fields]);
 
-  const countRows = useCallback((rowName) => {
-    const namePrefixToRemove = rowName.substring(0, rowName.lastIndexOf('.') + 1);
+  const getDataByPath = useCallback((path) => {
+    const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1);
 
     const rows = Object.keys(fields).reduce((matchedRows, key) => {
-      if (key.indexOf(`${rowName}.`) === 0) {
+      if (key.indexOf(`${path}.`) === 0) {
         return {
           ...matchedRows,
-          [key.replace(namePrefixToRemove, '')]: fields[key],
+          [key.replace(pathPrefixToRemove, '')]: fields[key],
         };
       }
 
       return matchedRows;
     }, {});
 
-    const unflattenedRows = unflatten(rows);
-    const rowCount = unflattenedRows[rowName.replace(namePrefixToRemove, '')]?.length || 0;
-    return rowCount;
+    const rowValues = reduceFieldsToValues(rows);
+    const unflattenedRows = unflatten(rowValues);
+    return unflattenedRows;
   }, [fields]);
 
   const validateForm = useCallback(() => {
@@ -283,12 +285,12 @@ const Form = (props) => {
         getField,
         processing,
         submitted,
-        countRows,
+        getDataByPath,
         getData,
+        getSiblingData,
         validateForm,
         modified,
         setModified,
-        getSiblingData,
       }}
       >
         <HiddenInput

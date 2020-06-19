@@ -1,21 +1,20 @@
 import React, {
-  useContext, useEffect, useReducer, useState, useCallback,
+  useEffect, useReducer, useState, useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-import { useModal } from '@trbl/react-modal';
+import { v4 as uuidv4 } from 'uuid';
 
-import { RowModifiedProvider, useRowModified } from '../../Form/RowModified';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
-import FormContext from '../../Form/Context';
-import AddRowModal from './AddRowModal';
-import collapsibleReducer from './reducer';
+import reducer from '../rowReducer';
+import useForm from '../../Form/useForm';
 import DraggableSection from '../../DraggableSection';
 import { useRenderedFields } from '../../RenderFields';
-import { useLocale } from '../../../utilities/Locale';
 import Error from '../../Error';
 import useFieldType from '../../useFieldType';
+import Popup from '../../../elements/Popup';
+import BlocksContainer from './BlockSelector/BlocksContainer';
 import { flexible } from '../../../../../validation/validations';
 
 import './index.scss';
@@ -65,66 +64,41 @@ const Flexible = (props) => {
   });
 
   const dataToInitialize = initialData || defaultValue;
-  const parentRowsModified = useRowModified();
-  const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
-  const [rowIndexBeingAdded, setRowIndexBeingAdded] = useState(null);
-  const [lastModified, setLastModified] = useState(null);
-  const [rowCount, setRowCount] = useState(dataToInitialize?.length || 0);
-  const [collapsibleStates, dispatchCollapsibleStates] = useReducer(collapsibleReducer, []);
-  const formContext = useContext(FormContext);
-  const modalSlug = `flexible-${path}`;
+  const [addRowIndex, setAddRowIndex] = useState(null);
+  const [rows, dispatchRows] = useReducer(reducer, []);
   const { customComponentsPath } = useRenderedFields();
-  const locale = useLocale();
+  const { getDataByPath } = useForm();
 
-  const { dispatchFields, countRows, getFields } = formContext;
-  const fieldState = getFields();
+  const addRow = (index, blockType) => {
+    setAddRowIndex(current => current + 1);
 
-  const addRow = (rowIndex, blockType) => {
-    const blockToAdd = blocks.find(block => block.slug === blockType);
+    const data = getDataByPath(path)?.[name];
 
-    dispatchFields({
-      type: 'ADD_ROW', rowIndex, path, fieldSchema: blockToAdd.fields, blockType,
-    });
-
-    dispatchCollapsibleStates({
-      type: 'ADD_COLLAPSIBLE', collapsibleIndex: rowIndex,
+    dispatchRows({
+      type: 'ADD', index, data, initialRowData: { blockType },
     });
 
     setValue(value + 1);
-    setRowCount(rowCount + 1);
-    setLastModified(Date.now());
   };
 
-  const removeRow = (rowIndex) => {
-    dispatchFields({
-      type: 'REMOVE_ROW', rowIndex, path,
+  const removeRow = (index) => {
+    const data = getDataByPath(path)?.[name];
+
+    dispatchRows({
+      type: 'REMOVE',
+      index,
+      data,
     });
 
-    dispatchCollapsibleStates({
-      type: 'REMOVE_COLLAPSIBLE',
-      collapsibleIndex: rowIndex,
-    });
-
-    setRowCount(rowCount - 1);
-    setLastModified(Date.now());
     setValue(value - 1);
   };
 
   const moveRow = (moveFromIndex, moveToIndex) => {
-    dispatchFields({
-      type: 'MOVE_ROW', moveFromIndex, moveToIndex, path,
+    const data = getDataByPath(path)?.[name];
+
+    dispatchRows({
+      type: 'MOVE', index: moveFromIndex, moveToIndex, data,
     });
-
-    dispatchCollapsibleStates({
-      type: 'MOVE_COLLAPSIBLE', collapsibleIndex: moveFromIndex, moveToIndex,
-    });
-
-    setLastModified(Date.now());
-  };
-
-  const openAddRowModal = (rowIndex) => {
-    setRowIndexBeingAdded(rowIndex);
-    toggleModal(modalSlug);
   };
 
   const onDragEnd = (result) => {
@@ -135,26 +109,23 @@ const Flexible = (props) => {
   };
 
   useEffect(() => {
-    const countedRows = countRows(path);
-    setRowCount(countedRows);
-  }, [countRows, path, parentRowsModified]);
+    setValue(dataToInitialize.length + 1);
 
-  useEffect(() => {
-    setRowCount(dataToInitialize.length);
-    setLastModified(null);
-
-    dispatchCollapsibleStates({
-      type: 'SET_ALL_COLLAPSIBLES',
-      payload: Array.from(Array(dataToInitialize.length).keys()).reduce(acc => ([...acc, true]), []), // sets all collapsibles to open on first load
+    dispatchRows({
+      type: 'SET_ALL',
+      rows: dataToInitialize.reduce((acc, data) => ([
+        ...acc,
+        {
+          key: uuidv4(),
+          open: true,
+          data,
+        },
+      ]), []),
     });
-  }, [dataToInitialize]);
-
-  useEffect(() => {
-    setLastModified(null);
-  }, [locale]);
+  }, [dataToInitialize, setValue]);
 
   return (
-    <RowModifiedProvider lastModified={lastModified}>
+    <>
       <DragDropContext onDragEnd={onDragEnd}>
         <div className={baseClass}>
           <header className={`${baseClass}__header`}>
@@ -170,11 +141,11 @@ const Flexible = (props) => {
                 ref={provided.innerRef}
                 {...provided.droppableProps}
               >
-                {rowCount !== 0 && Array.from(Array(rowCount).keys()).map((_, rowIndex) => {
-                  let blockType = fieldState[`${path}.${rowIndex}.blockType`]?.value;
+                {rows.length > 0 && rows.map((row, i) => {
+                  let { blockType } = row.data;
 
-                  if (!lastModified && !blockType) {
-                    blockType = dataToInitialize?.[rowIndex]?.blockType;
+                  if (!blockType) {
+                    blockType = dataToInitialize?.[i]?.blockType;
                   }
 
                   const blockToRender = blocks.find(block => block.slug === blockType);
@@ -182,13 +153,15 @@ const Flexible = (props) => {
                   if (blockToRender) {
                     return (
                       <DraggableSection
+                        isOpen={row.open}
                         fieldTypes={fieldTypes}
-                        key={rowIndex}
+                        key={row.key}
+                        id={row.key}
                         parentPath={path}
-                        addRow={() => openAddRowModal(rowIndex)}
-                        removeRow={() => removeRow(rowIndex)}
-                        rowIndex={rowIndex}
-                        fieldState={fieldState}
+                        moveRow={moveRow}
+                        addRow={() => addRow(i, blockType)}
+                        removeRow={() => removeRow(i)}
+                        rowIndex={i}
                         fieldSchema={[
                           ...blockToRender.fields,
                           {
@@ -202,11 +175,12 @@ const Flexible = (props) => {
                           },
                         ]}
                         singularLabel={blockToRender?.labels?.singular}
-                        initialData={lastModified ? undefined : dataToInitialize?.[rowIndex]}
-                        dispatchCollapsibleStates={dispatchCollapsibleStates}
-                        collapsibleStates={collapsibleStates}
+                        initialData={row.data}
+                        dispatchRows={dispatchRows}
                         blockType="flexible"
                         customComponentsPath={`${customComponentsPath}${name}.fields.`}
+                        positionHandleVerticalAlignment="sticky"
+                        actionHandleVerticalAlignment="sticky"
                       />
                     );
                   }
@@ -220,23 +194,29 @@ const Flexible = (props) => {
           </Droppable>
 
           <div className={`${baseClass}__add-button-wrap`}>
-            <Button
-              onClick={() => openAddRowModal(rowCount)}
-              buttonStyle="secondary"
+            <Popup
+              buttonType="custom"
+              button={(
+                <Button
+                  buttonStyle="icon-label"
+                  icon="plus"
+                  iconPosition="left"
+                  iconStyle="with-border"
+                >
+                  {`Add ${singularLabel}`}
+                </Button>
+              )}
             >
-              {`Add ${singularLabel}`}
-            </Button>
+              <BlocksContainer
+                blocks={blocks}
+                addRow={addRow}
+                addRowIndex={addRowIndex}
+              />
+            </Popup>
           </div>
         </div>
       </DragDropContext>
-      <AddRowModal
-        closeAllModals={closeAllModals}
-        addRow={addRow}
-        rowIndexBeingAdded={rowIndexBeingAdded}
-        slug={modalSlug}
-        blocks={blocks}
-      />
-    </RowModifiedProvider>
+    </>
   );
 };
 

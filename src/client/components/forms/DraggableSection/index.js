@@ -1,53 +1,57 @@
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import AnimateHeight from 'react-animate-height';
+// import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
+
+import ActionHandle from './ActionHandle';
+import SectionTitle from './SectionTitle';
+import PositionHandle from './PositionHandle';
 import RenderFields from '../RenderFields';
 
-import IconButton from '../../elements/IconButton';
-import Pill from '../../elements/Pill';
-import Chevron from '../../icons/Chevron';
-
 import './index.scss';
-import EditableBlockTitle from './EditableBlockTitle';
 
 const baseClass = 'draggable-section';
 
 const DraggableSection = (props) => {
   const {
+    moveRow,
     addRow,
     removeRow,
     rowIndex,
     parentPath,
     fieldSchema,
     initialData,
-    dispatchCollapsibleStates,
-    collapsibleStates,
+    // dispatchRows,
     singularLabel,
     blockType,
     fieldTypes,
     customComponentsPath,
+    isOpen,
+    id,
+    positionHandleVerticalAlignment,
+    actionHandleVerticalAlignment,
   } = props;
 
-  const draggableRef = useRef(null);
+  // const draggableRef = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
 
-  const handleCollapseClick = () => {
-    draggableRef.current.focus();
-    dispatchCollapsibleStates({
-      type: 'UPDATE_COLLAPSIBLE_STATUS',
-      collapsibleIndex: rowIndex,
-    });
-  };
+  // const handleCollapseClick = () => {
+  //   draggableRef.current.focus();
+  //   dispatchRows({
+  //     type: 'UPDATE_COLLAPSIBLE_STATUS',
+  //     index: rowIndex,
+  //   });
+  // };
 
-  const draggableIsOpen = collapsibleStates[rowIndex];
   const classes = [
     baseClass,
-    draggableIsOpen && 'is-open',
+    isOpen && 'is-open',
+    isHovered && 'is-hovered',
   ].filter(Boolean).join(' ');
 
   return (
     <Draggable
-      draggableId={`row-${rowIndex}`}
+      draggableId={id}
       index={rowIndex}
     >
       {(providedDrag) => {
@@ -55,57 +59,29 @@ const DraggableSection = (props) => {
           <div
             ref={providedDrag.innerRef}
             className={classes}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             {...providedDrag.draggableProps}
           >
-            <div className={`${baseClass}__header`}>
-              <div
-                {...providedDrag.dragHandleProps}
-                className={`${baseClass}__header__drag-handle`}
-                onClick={() => handleCollapseClick(providedDrag)}
-                role="button"
-                tabIndex={0}
-                ref={draggableRef}
-              />
 
-              <div className={`${baseClass}__header__row-block-type-label`}>
-                {blockType === 'flexible'
-                  ? <Pill>{singularLabel}</Pill>
-                  : `${singularLabel} ${rowIndex + 1}`
-                }
-              </div>
+            <PositionHandle
+              dragHandleProps={providedDrag.dragHandleProps}
+              moveRow={moveRow}
+              positionIndex={rowIndex}
+              verticalAlignment={positionHandleVerticalAlignment}
+            />
 
-              {blockType === 'flexible'
-                && (
-                  <EditableBlockTitle
-                    initialData={initialData?.[`${parentPath}.${rowIndex}.blockName`]}
-                    path={`${parentPath}.${rowIndex}.blockName`}
-                  />
-                )
-              }
+            <div className={`${baseClass}__render-fields-wrapper`}>
 
-              <div className={`${baseClass}__header__controls`}>
-
-                <IconButton
-                  iconName="Plus"
-                  onClick={addRow}
-                  size="small"
+              {blockType === 'flexible' && (
+                <SectionTitle
+                  label={singularLabel}
+                  initialData={initialData?.blockName}
+                  path={`${parentPath}.${rowIndex}.blockName`}
                 />
+              )}
 
-                <IconButton
-                  iconName="X"
-                  onClick={removeRow}
-                  size="small"
-                />
-
-                <Chevron isOpen={draggableIsOpen} />
-              </div>
-            </div>
-
-            <AnimateHeight
-              className={`${baseClass}__content`}
-              height={draggableIsOpen ? 'auto' : 0}
-              duration={0}
-            >
+              {/* Render fields */}
               <RenderFields
                 initialData={initialData}
                 customComponentsPath={customComponentsPath}
@@ -118,7 +94,15 @@ const DraggableSection = (props) => {
                   });
                 })}
               />
-            </AnimateHeight>
+            </div>
+
+            <ActionHandle
+              removeRow={removeRow}
+              addRow={addRow}
+              rowIndex={rowIndex}
+              singularLabel={singularLabel}
+              verticalAlignment={actionHandleVerticalAlignment}
+            />
           </div>
         );
       }}
@@ -129,13 +113,16 @@ const DraggableSection = (props) => {
 DraggableSection.defaultProps = {
   rowCount: null,
   initialData: undefined,
-  collapsibleStates: [],
   singularLabel: '',
   blockType: '',
   customComponentsPath: '',
+  isOpen: true,
+  positionHandleVerticalAlignment: 'center',
+  actionHandleVerticalAlignment: 'center',
 };
 
 DraggableSection.propTypes = {
+  moveRow: PropTypes.func.isRequired,
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
   rowIndex: PropTypes.number.isRequired,
@@ -144,11 +131,14 @@ DraggableSection.propTypes = {
   fieldSchema: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   rowCount: PropTypes.number,
   initialData: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
-  dispatchCollapsibleStates: PropTypes.func.isRequired,
-  collapsibleStates: PropTypes.arrayOf(PropTypes.bool),
+  dispatchRows: PropTypes.func.isRequired,
+  isOpen: PropTypes.bool,
   blockType: PropTypes.string,
   fieldTypes: PropTypes.shape({}).isRequired,
   customComponentsPath: PropTypes.string,
+  id: PropTypes.string.isRequired,
+  positionHandleVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
+  actionHandleVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
 };
 
 export default DraggableSection;

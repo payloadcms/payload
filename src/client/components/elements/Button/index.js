@@ -57,6 +57,7 @@ const Button = (props) => {
     onClick,
     disabled,
     icon,
+    iconStyle,
     buttonStyle,
     round,
     size,
@@ -68,6 +69,7 @@ const Button = (props) => {
     className && className,
     buttonStyle && `${baseClass}--style-${buttonStyle}`,
     icon && `${baseClass}--icon`,
+    iconStyle && `${baseClass}--icon-style-${iconStyle}`,
     (icon && !children) && `${baseClass}--icon-only`,
     disabled && `${baseClass}--disabled`,
     round && `${baseClass}--round`,
@@ -139,6 +141,7 @@ Button.defaultProps = {
   size: 'medium',
   round: false,
   iconPosition: 'right',
+  iconStyle: 'without-border',
 };
 
 Button.propTypes = {
@@ -153,6 +156,11 @@ Button.propTypes = {
   children: PropTypes.node,
   onClick: PropTypes.func,
   disabled: PropTypes.bool,
+  iconStyle: PropTypes.oneOf([
+    'with-border',
+    'without-border',
+    'none',
+  ]),
   icon: PropTypes.oneOfType([
     PropTypes.node,
     PropTypes.oneOf(['chevron', 'x', 'plus']),

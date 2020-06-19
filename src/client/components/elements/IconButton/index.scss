@@ -2,22 +2,18 @@
 
 .icon-button {
   line-height: 0;
-  background: transparent;
-  border: $style-stroke-width-s solid $color-dark-gray;
+  background-color: transparent;
   margin-top: 0;
+  @include color-svg($color-gray );
 
-  &:hover {
-    background: lighten($color-dark-gray, 50%);
-    border-color: lighten($color-dark-gray, .2%);
-    @include color-svg(lighten($color-dark-gray, 5%));
+  &:hover,
+  &:focus {
+    background-color: transparent;
+    @include color-svg($color-dark-gray);
   }
 
   &.btn {
     padding: 5px;
-  }
-
-  .icon {
-    @include color-svg($color-dark-gray);
   }
 
   &--crossOut {

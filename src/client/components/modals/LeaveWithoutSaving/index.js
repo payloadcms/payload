@@ -19,11 +19,13 @@ const LeaveWithoutSaving = () => {
             <MinimalTemplate>
               <h1>Leave without saving</h1>
               <p>Your changes have not been saved. If you leave now, you will lose your changes.</p>
-              <Button onClick={onCancel}>
-                Go back
+              <Button
+                onClick={onCancel}
+                buttonStyle="secondary"
+              >
+                Stay on this page
               </Button>
               <Button
-                buttonStyle="secondary"
                 onClick={onConfirm}
               >
                 Leave anyway
