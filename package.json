@@ -37,6 +37,7 @@
     "connect-history-api-fallback": "^1.6.0",
     "cookie-parser": "^1.4.5",
     "date-fns": "^2.14.0",
+    "deepmerge": "^4.2.2",
     "dotenv": "^6.0.0",
     "dotenv-webpack": "^1.8.0",
     "es6-promise": "^4.2.8",

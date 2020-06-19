@@ -1,3 +1,5 @@
+const deepmerge = require('deepmerge');
+const combineMerge = require('../../utilities/combineMerge');
 const executePolicy = require('../../auth/executePolicy');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
@@ -12,6 +14,31 @@ const update = async (args) => {
     let options = { ...args };
 
     // /////////////////////////////////////
+    // 2. Retrieve document
+    // /////////////////////////////////////
+
+    const {
+      Model,
+      slug,
+      req: {
+        locale,
+        fallbackLocale,
+      },
+    } = options;
+
+    let global = await Model.findOne({ globalType: slug });
+
+    if (!global) {
+      global = new Model();
+    }
+
+    if (locale && global.setLocale) {
+      global.setLocale(locale, fallbackLocale);
+    }
+
+    const globalJSON = global.toJSON({ virtuals: true });
+
+    // /////////////////////////////////////
     // 2. Execute before global hook
     // /////////////////////////////////////
 
@@ -22,7 +49,13 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 3. Execute field-level hooks, policies, and validation
+    // 3. Merge updates into existing data
+    // /////////////////////////////////////
+
+    options.data = deepmerge(globalJSON, options.data, { arrayMerge: combineMerge });
+
+    // /////////////////////////////////////
+    // 4. Execute field-level hooks, policies, and validation
     // /////////////////////////////////////
 
     options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeUpdate', operationName: 'update' });
@@ -31,39 +64,18 @@ const update = async (args) => {
     // 4. Perform database operation
     // /////////////////////////////////////
 
-    const {
-      Model,
-      slug,
-      data,
-      req: {
-        locale,
-        fallbackLocale,
-      },
-    } = options;
+    Object.assign(global, { ...options.data, globalType: slug });
 
+    global.save();
 
-    let result = await Model.findOne({ globalType: slug });
-
-    if (!result) {
-      result = new Model();
-    }
-
-    if (locale && result.setLocale) {
-      result.setLocale(locale, fallbackLocale);
-    }
-
-    Object.assign(result, { ...data, globalType: slug });
-
-    result.save();
-
-    result = result.toJSON({ virtuals: true });
+    global = global.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
     // 5. Execute field-level hooks and policies
     // /////////////////////////////////////
 
-    result = performFieldOperations(args.config, {
-      ...options, data: result, hook: 'afterRead', operationName: 'read',
+    global = performFieldOperations(args.config, {
+      ...options, data: global, hook: 'afterRead', operationName: 'read',
     });
 
     // /////////////////////////////////////
@@ -73,14 +85,14 @@ const update = async (args) => {
     const { afterUpdate } = args.config.hooks;
 
     if (typeof afterUpdate === 'function') {
-      result = await afterUpdate(options, result);
+      global = await afterUpdate(options, global);
     }
 
     // /////////////////////////////////////
-    // 7. Return results
+    // 7. Return global
     // /////////////////////////////////////
 
-    return result;
+    return global;
   } catch (error) {
     throw error;
   }

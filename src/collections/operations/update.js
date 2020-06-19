@@ -1,3 +1,5 @@
+const deepmerge = require('deepmerge');
+const combineMerge = require('../../utilities/combineMerge');
 const executePolicy = require('../../auth/executePolicy');
 const { NotFound, Forbidden } = require('../../errors');
 const performFieldOperations = require('../../fields/performFieldOperations');
@@ -7,7 +9,7 @@ const resizeAndSave = require('../../uploads/imageResizer');
 const update = async (args) => {
   try {
     // /////////////////////////////////////
-    // 1. Retrieve and execute policy
+    // 1. Execute policy
     // /////////////////////////////////////
 
     const policyResults = await executePolicy(args, args.config.policies.update);
@@ -16,28 +18,8 @@ const update = async (args) => {
     let options = { ...args };
 
     // /////////////////////////////////////
-    // 2. Execute before update hook
+    // 2. Retrieve document
     // /////////////////////////////////////
-
-    const { beforeUpdate } = args.config.hooks;
-
-    if (typeof beforeUpdate === 'function') {
-      options = await beforeUpdate(options);
-    }
-
-    // /////////////////////////////////////
-    // 3. Execute field-level hooks, policies, and validation
-    // /////////////////////////////////////
-
-    options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeUpdate', operationName: 'update' });
-
-    // /////////////////////////////////////
-    // 4. Perform database operation
-    // /////////////////////////////////////
-
-    let {
-      data,
-    } = options;
 
     const {
       Model,
@@ -57,14 +39,38 @@ const update = async (args) => {
       };
     }
 
-    let result = await Model.findOne(query);
+    let doc = await Model.findOne(query);
 
-    if (!result && !hasWherePolicy) throw new NotFound();
-    if (!result && hasWherePolicy) throw new Forbidden();
+    if (!doc && !hasWherePolicy) throw new NotFound();
+    if (!doc && hasWherePolicy) throw new Forbidden();
 
-    if (locale && result.setLocale) {
-      result.setLocale(locale, fallbackLocale);
+    if (locale && doc.setLocale) {
+      doc.setLocale(locale, fallbackLocale);
     }
+
+    const docJSON = doc.toJSON({ virtuals: true });
+
+    // /////////////////////////////////////
+    // 2. Execute before update hook
+    // /////////////////////////////////////
+
+    const { beforeUpdate } = args.config.hooks;
+
+    if (typeof beforeUpdate === 'function') {
+      options = await beforeUpdate(options);
+    }
+
+    // /////////////////////////////////////
+    // 3. Merge updates into existing data
+    // /////////////////////////////////////
+
+    options.data = deepmerge(docJSON, options.data, { arrayMerge: combineMerge });
+
+    // /////////////////////////////////////
+    // 4. Execute field-level hooks, policies, and validation
+    // /////////////////////////////////////
+
+    options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeUpdate', operationName: 'update' });
 
     // /////////////////////////////////////
     // 5. Upload and resize any files that may be present
@@ -84,42 +90,46 @@ const update = async (args) => {
           fileData.sizes = await resizeAndSave(options.config, options.req.files.file.name);
         }
 
-        data = {
-          ...data,
+        options.data = {
+          ...options.data,
           ...fileData,
         };
       }
     }
 
-    Object.assign(result, data);
-
-    await result.save();
-
-    result = result.toJSON({ virtuals: true });
-
     // /////////////////////////////////////
-    // 6. Execute field-level hooks and policies
+    // 6. Perform database operation
     // /////////////////////////////////////
 
-    result = await performFieldOperations(args.config, {
-      ...options, data: result, hook: 'afterRead', operationName: 'read',
+    Object.assign(doc, options.data);
+
+    await doc.save();
+
+    doc = doc.toJSON({ virtuals: true });
+
+    // /////////////////////////////////////
+    // 7. Execute field-level hooks and policies
+    // /////////////////////////////////////
+
+    doc = await performFieldOperations(args.config, {
+      ...options, data: doc, hook: 'afterRead', operationName: 'read',
     });
 
     // /////////////////////////////////////
-    // 7. Execute after collection hook
+    // 8. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterUpdate } = args.config.hooks;
 
     if (typeof afterUpdate === 'function') {
-      result = await afterUpdate(options, result);
+      doc = await afterUpdate(options, doc) || doc;
     }
 
     // /////////////////////////////////////
-    // 7. Return results
+    // 7. Return updated document
     // /////////////////////////////////////
 
-    return result;
+    return doc;
   } catch (err) {
     throw err;
   }

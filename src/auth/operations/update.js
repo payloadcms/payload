@@ -1,18 +1,52 @@
-
-const { NotFound } = require('../../errors');
+const deepmerge = require('deepmerge');
+const combineMerge = require('../../utilities/combineMerge');
+const { NotFound, Forbidden } = require('../../errors');
 const executePolicy = require('../executePolicy');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const update = async (args) => {
   try {
     // /////////////////////////////////////
-    // 1. Retrieve and execute policy
+    // 1. Execute policy
     // /////////////////////////////////////
 
-    await executePolicy(args, args.config.policies.update);
-
+    const policyResults = await executePolicy(args, args.config.policies.update);
+    const hasWherePolicy = typeof policyResults === 'object';
 
     let options = { ...args };
+
+    // /////////////////////////////////////
+    // 2. Retrieve document
+    // /////////////////////////////////////
+
+    const {
+      Model,
+      id,
+      req: {
+        locale,
+        fallbackLocale,
+      },
+    } = options;
+
+    let query = { _id: id };
+
+    if (hasWherePolicy) {
+      query = {
+        ...query,
+        ...policyResults,
+      };
+    }
+
+    let user = await Model.findOne(query);
+
+    if (!user && !hasWherePolicy) throw new NotFound();
+    if (!user && hasWherePolicy) throw new Forbidden();
+
+    if (locale && user.setLocale) {
+      user.setLocale(locale, fallbackLocale);
+    }
+
+    const userJSON = user.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
     // 2. Execute before update hook
@@ -25,40 +59,32 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 3. Execute field-level hooks, policies, and validation
+    // 3. Merge updates into existing data
+    // /////////////////////////////////////
+
+    options.data = deepmerge(userJSON, options.data, { arrayMerge: combineMerge });
+
+    // /////////////////////////////////////
+    // 4. Execute field-level hooks, policies, and validation
     // /////////////////////////////////////
 
     options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeUpdate', operationName: 'update' });
 
     // /////////////////////////////////////
-    // 4. Perform update
+    // 5. Handle password update
     // /////////////////////////////////////
 
-    const {
-      Model,
-      data,
-      id,
-      req: {
-        locale,
-        fallbackLocale,
-      },
-    } = options;
-
-    const dataToUpdate = { ...data };
+    const dataToUpdate = { ...options.data };
     const { password } = dataToUpdate;
-
-    let user = await Model.findOne({ _id: id });
-
-    if (!user) throw new NotFound();
-
-    if (locale && user.setLocale) {
-      user.setLocale(locale, fallbackLocale);
-    }
 
     if (password) {
       delete dataToUpdate.password;
       await user.setPassword(password);
     }
+
+    // /////////////////////////////////////
+    // 6. Perform database operation
+    // /////////////////////////////////////
 
     Object.assign(user, dataToUpdate);
 
@@ -67,7 +93,7 @@ const update = async (args) => {
     user = user.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 5. Execute field-level hooks and policies
+    // 7. Execute field-level hooks and policies
     // /////////////////////////////////////
 
     user = performFieldOperations(args.config, {
@@ -75,7 +101,7 @@ const update = async (args) => {
     });
 
     // /////////////////////////////////////
-    // 6. Execute after update hook
+    // 8. Execute after update hook
     // /////////////////////////////////////
 
     const afterUpdateHook = args.config.hooks && args.config.hooks.afterUpdate;
@@ -85,7 +111,7 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 6. Return user
+    // 9. Return user
     // /////////////////////////////////////
 
     return user;
