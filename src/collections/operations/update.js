@@ -98,7 +98,15 @@ const update = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 6. Execute after collection hook
+    // 6. Execute field-level hooks and policies
+    // /////////////////////////////////////
+
+    result = await performFieldOperations(args.config, {
+      ...options, data: result, hook: 'afterRead', operationName: 'read',
+    });
+
+    // /////////////////////////////////////
+    // 7. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterUpdate } = args.config.hooks;

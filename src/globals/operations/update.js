@@ -59,7 +59,15 @@ const update = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 5. Execute after global hook
+    // 5. Execute field-level hooks and policies
+    // /////////////////////////////////////
+
+    result = performFieldOperations(args.config, {
+      ...options, data: result, hook: 'afterRead', operationName: 'read',
+    });
+
+    // /////////////////////////////////////
+    // 6. Execute after global hook
     // /////////////////////////////////////
 
     const { afterUpdate } = args.config.hooks;
@@ -69,7 +77,7 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 6. Return results
+    // 7. Return results
     // /////////////////////////////////////
 
     return result;

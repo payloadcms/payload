@@ -60,8 +60,18 @@ const register = async (args) => {
 
     await passport.authenticate('local');
 
+    result = result.toJSON({ virtuals: true });
+
     // /////////////////////////////////////
-    // 7. Execute after register hook
+    // 7. Execute field-level hooks and policies
+    // /////////////////////////////////////
+
+    result = await performFieldOperations(args.collection.config, {
+      ...options, data: result, hook: 'afterRead', operationName: 'read',
+    });
+
+    // /////////////////////////////////////
+    // 8. Execute after register hook
     // /////////////////////////////////////
 
     const afterRegister = args.collection.config.hooks;
@@ -71,10 +81,10 @@ const register = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 8. Return user
+    // 9. Return user
     // /////////////////////////////////////
 
-    return result.toJSON({ virtuals: true });
+    return result;
   } catch (error) {
     throw error;
   }

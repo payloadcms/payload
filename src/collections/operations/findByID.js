@@ -78,14 +78,14 @@ const findByID = async (args) => {
       result.setLocale(locale, fallbackLocale);
     }
 
-    let data = result.toJSON({ virtuals: true });
+    result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
     // 4. Execute field-level hooks and policies
     // /////////////////////////////////////
 
-    result = performFieldOperations(args.config, {
-      ...options, data, hook: 'afterRead', operationName: 'read',
+    result = await performFieldOperations(args.config, {
+      ...options, data: result, hook: 'afterRead', operationName: 'read',
     });
 
 
@@ -96,18 +96,17 @@ const findByID = async (args) => {
     const { afterRead } = args.config.hooks;
 
     if (typeof afterRead === 'function') {
-      data = await afterRead({
+      result = await afterRead({
         ...options,
-        result,
-        doc: data,
-      }) || data;
+        doc: result,
+      }) || result;
     }
 
     // /////////////////////////////////////
     // 6. Return results
     // /////////////////////////////////////
 
-    return data;
+    return result;
   } catch (err) {
     throw err;
   }

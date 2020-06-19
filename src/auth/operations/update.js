@@ -67,7 +67,15 @@ const update = async (args) => {
     user = user.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 5. Execute after update hook
+    // 5. Execute field-level hooks and policies
+    // /////////////////////////////////////
+
+    user = performFieldOperations(args.config, {
+      ...options, data: user, hook: 'afterRead', operationName: 'read',
+    });
+
+    // /////////////////////////////////////
+    // 6. Execute after update hook
     // /////////////////////////////////////
 
     const afterUpdateHook = args.config.hooks && args.config.hooks.afterUpdate;

@@ -72,6 +72,9 @@ module.exports = {
       required: true,
       unique: true,
       localized: true,
+      hooks: {
+        afterRead: value => (value ? value.toUpperCase() : null),
+      },
     },
     {
       name: 'description',
