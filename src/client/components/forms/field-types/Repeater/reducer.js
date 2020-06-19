@@ -2,16 +2,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 const reducer = (currentState, action) => {
   const {
-    type, index, moveToIndex, payload, data,
+    type, index, moveToIndex, rows, data,
   } = action;
 
   const stateCopy = [...currentState];
 
-  const movingRowState = stateCopy[index];
-
   switch (type) {
     case 'SET_ALL':
-      return payload;
+      return rows;
 
     case 'ADD':
       stateCopy.splice(index + 1, 0, {
@@ -20,20 +18,40 @@ const reducer = (currentState, action) => {
         data,
       });
 
-      return stateCopy;
+      data.splice(index + 1, 0, {});
+
+      return stateCopy.map((row, i) => {
+        return {
+          ...row,
+          data: {
+            ...(data[i] || {}),
+          },
+        };
+      });
 
     case 'REMOVE':
       stateCopy.splice(index, 1);
       return stateCopy;
 
     case 'UPDATE_COLLAPSIBLE_STATUS':
-      stateCopy[index].open = !movingRowState.open;
+      stateCopy[index].open = !stateCopy[index].open;
       return stateCopy;
 
-    case 'MOVE':
-      stateCopy.splice(index, 1);
-      stateCopy.splice(moveToIndex, 0, movingRowState);
-      return stateCopy;
+    case 'MOVE': {
+      const stateCopyWithNewData = stateCopy.map((row, i) => {
+        return {
+          ...row,
+          data: {
+            ...(data[i] || {}),
+          },
+        };
+      });
+
+      const movingRowState = { ...stateCopyWithNewData[index] };
+      stateCopyWithNewData.splice(index, 1);
+      stateCopyWithNewData.splice(moveToIndex, 0, movingRowState);
+      return stateCopyWithNewData;
+    }
 
     default:
       return currentState;

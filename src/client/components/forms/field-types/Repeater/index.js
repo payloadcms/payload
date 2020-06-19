@@ -8,6 +8,7 @@ import Button from '../../../elements/Button';
 import DraggableSection from '../../DraggableSection';
 import reducer from './reducer';
 import { useRenderedFields } from '../../RenderFields';
+import useForm from '../../Form/useForm';
 import useFieldType from '../../useFieldType';
 import Error from '../../Error';
 import { repeater } from '../../../../../validation/validations';
@@ -35,6 +36,7 @@ const Repeater = (props) => {
   const dataToInitialize = initialData || defaultValue;
   const [rows, dispatchRows] = useReducer(reducer, []);
   const { customComponentsPath } = useRenderedFields();
+  const { getDataByPath } = useForm();
 
   const path = pathFromProps || name;
 
@@ -58,25 +60,32 @@ const Repeater = (props) => {
   });
 
   const addRow = (rowIndex) => {
+    const data = getDataByPath(path)?.[name];
+
     dispatchRows({
-      type: 'ADD', index: rowIndex,
+      type: 'ADD', index: rowIndex, data,
     });
 
     setValue(value + 1);
   };
 
   const removeRow = (rowIndex) => {
+    const data = getDataByPath(path)?.[name];
+
     dispatchRows({
       type: 'REMOVE',
       index: rowIndex,
+      data,
     });
 
     setValue(value - 1);
   };
 
   const moveRow = (moveFromIndex, moveToIndex) => {
+    const data = getDataByPath(path)?.[name];
+
     dispatchRows({
-      type: 'MOVE', index: moveFromIndex, moveToIndex,
+      type: 'MOVE', index: moveFromIndex, moveToIndex, data,
     });
   };
 
@@ -90,7 +99,7 @@ const Repeater = (props) => {
   useEffect(() => {
     dispatchRows({
       type: 'SET_ALL',
-      payload: dataToInitialize.reduce((acc, data) => ([
+      rows: dataToInitialize.reduce((acc, data) => ([
         ...acc,
         {
           key: uuidv4(),
