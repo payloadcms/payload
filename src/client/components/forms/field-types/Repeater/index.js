@@ -97,6 +97,8 @@ const Repeater = (props) => {
   };
 
   useEffect(() => {
+    setValue(dataToInitialize.length + 1);
+
     dispatchRows({
       type: 'SET_ALL',
       rows: dataToInitialize.reduce((acc, data) => ([
@@ -108,7 +110,7 @@ const Repeater = (props) => {
         },
       ]), []),
     });
-  }, [dataToInitialize]);
+  }, [dataToInitialize, setValue]);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -136,6 +138,7 @@ const Repeater = (props) => {
                     parentPath={path}
                     singularLabel={singularLabel}
                     addRow={() => addRow(i)}
+                    moveRow={moveRow}
                     removeRow={() => removeRow(i)}
                     rowIndex={i}
                     fieldSchema={fields}
@@ -154,7 +157,10 @@ const Repeater = (props) => {
         <div className={`${baseClass}__add-button-wrap`}>
           <Button
             onClick={() => addRow(value)}
-            buttonStyle="secondary"
+            buttonStyle="icon-label"
+            icon="plus"
+            iconStyle="with-border"
+            iconPosition="left"
           >
             {`Add ${singularLabel}`}
           </Button>

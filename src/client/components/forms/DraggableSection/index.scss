@@ -1,133 +1,89 @@
 @import '../../../scss/styles.scss';
 
-.draggable-section {
-  background: $color-background-gray;
-  flex-direction: column;
-  position: relative;
-  margin-bottom: base(.5);
+//////////////////////
+// HELPER MIXINS
+//////////////////////
 
-  &.is-open {
-    &:hover {
-      box-shadow: none;
-    }
-  }
-
-  .field-type,
-  .missing-field {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  &:hover {
-    @include shadow-sm;
-  }
-
-  &__collapse__icon {
-    &--open {
-      svg {
-        transform: rotate(90deg);
-      }
-    }
-
-    &--closed {
-      svg {
-        transform: rotate(-90deg);
-      }
-    }
-  }
-
-  &__header {
-    padding: base(.75) base(1);
-    display: flex;
-    align-items: center;
+@mixin realtively-position-handles {
+  .position-handle {
     position: relative;
-
-    &__drag-handle {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0; left: 0;
-      z-index: 1;
-      outline: 0;
-
-      &:hover {
-        cursor: pointer;
-      }
-    }
-
-    // elements above the drag handle
-    &__controls .btn,
-    &__header__row-index,
-    &__row-block-type-label {
-      position: relative;
-      z-index: 2;
-    }
-
-    &__row-block-type-label,
-    .editable-block-title__text-clone,
-    .editable-block-title input {
-      font-family: $font-body;
-      font-weight: bold;
-      font-size: base(.5);
-      margin-right: base(.5);
-    }
-
-    &__heading {
-      font-family: $font-body;
-      margin: 0;
-      font-size: base(.65);
-    }
-
-    &__controls {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-
-      .btn {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .icon-button--crossOut,
-      .icon-button--crosshair {
-        margin-right: base(.25);
-      }
-
-      .icon-button--crosshair {
-        border-color: $color-dark-gray;
-        @include color-svg($color-dark-gray);
-
-        &:hover {
-          background: $color-dark-gray;
-          @include color-svg($color-dark-gray);
-        }
-      }
-
-      .icon-button--crossOut {
-        border-color: $color-dark-gray;
-        @include color-svg($color-dark-gray);
-
-        &:hover {
-          background: $color-dark-gray;
-          @include color-svg(white);
-        }
-      }
-
-      .chevron {
-        margin-left: base(.5);
-
-        &__is--open {
-          transform: rotate(180deg);
-        }
-      }
-    }
+    right: 0;
   }
 
-  &__content {
-    box-shadow: inset 0px 1px 0px white;
-
-    > div {
-      padding: base(1) base(1) base(.5);
-    }
+  .action-handle {
+    position: relative;
+    left: 0;
   }
 }
+
+@mixin absolutely-position-handles {
+  .position-handle {
+    position: absolute;
+    top: 0; right: 100%; bottom: 0;
+  }
+
+  .action-handle {
+    position: absolute;
+    top: 0; bottom: 0; left: 100%;
+  }
+}
+
+//////////////////////
+// COMPONENT STYLES
+//////////////////////
+
+.draggable-section {
+  display: flex;
+  position: relative;
+  padding-top: base(.75);
+  padding-bottom: base(.75);
+  margin-bottom: base(.75);
+
+  &__render-fields-wrapper {
+    width: 100%;
+  }
+
+  &.is-hovered,
+  &:focus-within {
+    > .position-handle {
+      .position-handle__controls-container {
+        box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
+      }
+
+      .position-handle__move-forward,
+      .position-handle__move-backward {
+        opacity: 1;
+      }
+
+      .position-handle__current-position {
+        color: $color-dark-gray;
+      }
+    }
+
+    > .action-handle {
+      .action-handle__add-row,
+      .action-handle__remove-row {
+        opacity: 1;
+      }
+    }
+  }
+
+  @include mid-break {
+    @include realtively-position-handles();
+  }
+}
+
+//////////////////////
+// EXTERNAL SCOPES
+//////////////////////
+
+.collection-edit {
+  @include absolutely-position-handles();
+}
+
+.field-type.repeater .field-type.repeater {
+  @include realtively-position-handles();
+}
+
+
+

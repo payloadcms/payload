@@ -76,7 +76,8 @@ const ListControls = (props) => {
           className={`${baseClass}__toggle-columns`}
           buttonStyle={visibleDrawer === 'columns' ? undefined : 'secondary'}
           onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : false)}
-          icon={<Chevron />}
+          icon="chevron"
+          iconStyle="none"
         >
           Columns
         </Button>
@@ -84,7 +85,8 @@ const ListControls = (props) => {
           className={`${baseClass}__toggle-where`}
           buttonStyle={visibleDrawer === 'where' ? undefined : 'secondary'}
           onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : false)}
-          icon={<Chevron />}
+          icon="chevron"
+          iconStyle="none"
         >
           Filters
         </Button>

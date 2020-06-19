@@ -3,18 +3,18 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-import { useModal } from '@trbl/react-modal';
 import { v4 as uuidv4 } from 'uuid';
 
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
-import AddRowModal from './AddRowModal';
 import reducer from '../rowReducer';
 import useForm from '../../Form/useForm';
 import DraggableSection from '../../DraggableSection';
 import { useRenderedFields } from '../../RenderFields';
 import Error from '../../Error';
 import useFieldType from '../../useFieldType';
+import Popup from '../../../elements/Popup';
+import BlocksContainer from './BlockSelector/BlocksContainer';
 import { flexible } from '../../../../../validation/validations';
 
 import './index.scss';
@@ -64,14 +64,14 @@ const Flexible = (props) => {
   });
 
   const dataToInitialize = initialData || defaultValue;
-  const { toggle: toggleModal, closeAll: closeAllModals } = useModal();
-  const [rowIndexBeingAdded, setRowIndexBeingAdded] = useState(null);
+  const [addRowIndex, setAddRowIndex] = useState(null);
   const [rows, dispatchRows] = useReducer(reducer, []);
-  const modalSlug = `flexible-${path}`;
   const { customComponentsPath } = useRenderedFields();
   const { getDataByPath } = useForm();
 
   const addRow = (index, blockType) => {
+    setAddRowIndex(current => current + 1);
+
     const data = getDataByPath(path)?.[name];
 
     dispatchRows({
@@ -101,11 +101,6 @@ const Flexible = (props) => {
     });
   };
 
-  const openAddRowModal = (index) => {
-    setRowIndexBeingAdded(index);
-    toggleModal(modalSlug);
-  };
-
   const onDragEnd = (result) => {
     if (!result.destination) return;
     const sourceIndex = result.source.index;
@@ -114,6 +109,8 @@ const Flexible = (props) => {
   };
 
   useEffect(() => {
+    setValue(dataToInitialize.length + 1);
+
     dispatchRows({
       type: 'SET_ALL',
       rows: dataToInitialize.reduce((acc, data) => ([
@@ -125,7 +122,7 @@ const Flexible = (props) => {
         },
       ]), []),
     });
-  }, [dataToInitialize]);
+  }, [dataToInitialize, setValue]);
 
   return (
     <>
@@ -161,7 +158,8 @@ const Flexible = (props) => {
                         key={row.key}
                         id={row.key}
                         parentPath={path}
-                        addRow={() => openAddRowModal(i)}
+                        moveRow={moveRow}
+                        addRow={() => addRow(i, blockType)}
                         removeRow={() => removeRow(i)}
                         rowIndex={i}
                         fieldSchema={[
@@ -181,6 +179,8 @@ const Flexible = (props) => {
                         dispatchRows={dispatchRows}
                         blockType="flexible"
                         customComponentsPath={`${customComponentsPath}${name}.fields.`}
+                        positionHandleVerticalAlignment="sticky"
+                        actionHandleVerticalAlignment="sticky"
                       />
                     );
                   }
@@ -194,22 +194,28 @@ const Flexible = (props) => {
           </Droppable>
 
           <div className={`${baseClass}__add-button-wrap`}>
-            <Button
-              onClick={() => openAddRowModal(value)}
-              buttonStyle="secondary"
+            <Popup
+              buttonType="custom"
+              button={(
+                <Button
+                  buttonStyle="icon-label"
+                  icon="plus"
+                  iconPosition="left"
+                  iconStyle="with-border"
+                >
+                  {`Add ${singularLabel}`}
+                </Button>
+              )}
             >
-              {`Add ${singularLabel}`}
-            </Button>
+              <BlocksContainer
+                blocks={blocks}
+                addRow={addRow}
+                addRowIndex={addRowIndex}
+              />
+            </Popup>
           </div>
         </div>
       </DragDropContext>
-      <AddRowModal
-        closeAllModals={closeAllModals}
-        addRow={addRow}
-        rowIndexBeingAdded={rowIndexBeingAdded}
-        slug={modalSlug}
-        blocks={blocks}
-      />
     </>
   );
 };

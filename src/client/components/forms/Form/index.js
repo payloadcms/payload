@@ -21,12 +21,14 @@ const reduceFieldsToValues = (fields) => {
   const data = {};
 
   Object.keys(fields).forEach((key) => {
-    if (!fields[key].disableFormData) {
+    if (!fields[key].disableFormData && fields[key].value !== undefined) {
       data[key] = fields[key].value;
     }
   });
 
-  return unflatten(data);
+  const unflattened = unflatten(data);
+
+  return unflattened;
 };
 
 const Form = (props) => {

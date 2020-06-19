@@ -96,6 +96,7 @@ const Condition = (props) => {
             icon="x"
             round
             buttonStyle="icon-label"
+            iconStyle="with-border"
             onClick={() => dispatch({
               type: 'remove',
               orIndex,
@@ -106,6 +107,7 @@ const Condition = (props) => {
             icon="plus"
             round
             buttonStyle="icon-label"
+            iconStyle="with-border"
             onClick={() => dispatch({
               type: 'add',
               relation: 'and',

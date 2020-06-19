@@ -34,7 +34,6 @@ const useFieldType = (options) => {
 
   // Get field by path
   const field = getField(path);
-  const fieldExists = Boolean(field);
 
   // Valid could be a string equal to an error message
   const valid = (field && typeof field.valid === 'boolean') ? field.valid : true;
@@ -84,15 +83,14 @@ const useFieldType = (options) => {
   const formValue = enableDebouncedValue ? debouncedValue : internalValue;
 
   useEffect(() => {
-    if (!fieldExists || formValue !== undefined) {
+    if (formValue !== undefined) {
       sendField(formValue);
     }
-  }, [formValue, sendField, fieldExists]);
+  }, [formValue, sendField]);
 
   return {
     ...options,
     showError,
-    sendField,
     errorMessage: field?.errorMessage,
     value: internalValue,
     formSubmitted: submitted,

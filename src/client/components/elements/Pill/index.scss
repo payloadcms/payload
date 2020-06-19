@@ -46,6 +46,11 @@
     }
   }
 
+  &--style-light-gray {
+    background: $color-background-gray;
+    color: $color-dark-gray;
+  }
+
   &--style-dark {
     background: $color-dark-gray;
     color: white;

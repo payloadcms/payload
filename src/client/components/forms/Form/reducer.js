@@ -5,12 +5,6 @@ function fieldReducer(state, action) {
         ...action.value,
       };
 
-    case 'REMOVE': {
-      const newState = { ...state };
-      delete newState[action.path];
-      return newState;
-    }
-
     default: {
       const newField = {
         value: action.value,

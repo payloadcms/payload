@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const reducer = (currentState, action) => {
   const {
-    type, index, moveToIndex, rows, data, initialRowData = {},
+    type, index, moveToIndex, rows, data = [], initialRowData = {},
   } = action;
 
   const stateCopy = [...currentState];
@@ -51,7 +51,6 @@ const reducer = (currentState, action) => {
       stateCopyWithNewData.splice(index, 1);
       stateCopyWithNewData.splice(moveToIndex, 0, movingRowState);
 
-      console.log(stateCopyWithNewData);
       return stateCopyWithNewData;
     }
 

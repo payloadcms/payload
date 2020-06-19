@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
-import useFieldType from '../../useFieldType';
+import useFieldType from '../../../useFieldType';
 
 import './index.scss';
 
@@ -43,7 +43,7 @@ const EditableBlockTitle = (props) => {
           onChange={setValue}
           onKeyDown={onKeyDown}
           style={{
-            width: `${inputWidth}px`,
+            width: `${inputWidth + 1}px`,
           }}
         />
       </div>
