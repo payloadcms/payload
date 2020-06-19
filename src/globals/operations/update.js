@@ -1,6 +1,5 @@
 const executePolicy = require('../../auth/executePolicy');
-const executeFieldHooks = require('../../fields/executeHooks');
-const validate = require('../../validation/validateUpdate');
+const performFieldOperations = require('../../fields/performFieldOperations');
 
 const update = async (args) => {
   try {
@@ -13,25 +12,7 @@ const update = async (args) => {
     let options = { ...args };
 
     // /////////////////////////////////////
-    // 2. Execute field-level policies
-    // /////////////////////////////////////
-
-    // Field-level policies here
-
-    // /////////////////////////////////////
-    // 3. Validate incoming data
-    // /////////////////////////////////////
-
-    await validate(args.data, args.config.fields);
-
-    // /////////////////////////////////////
-    // 4. Execute before update field-level hooks
-    // /////////////////////////////////////
-
-    options.data = await executeFieldHooks(options, args.config.fields, args.data, 'beforeUpdate', args.data);
-
-    // /////////////////////////////////////
-    // 5. Execute before global hook
+    // 2. Execute before global hook
     // /////////////////////////////////////
 
     const { beforeUpdate } = args.config.hooks;
@@ -41,7 +22,13 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 6. Perform database operation
+    // 3. Execute field-level hooks, policies, and validation
+    // /////////////////////////////////////
+
+    options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeUpdate', operationName: 'update' });
+
+    // /////////////////////////////////////
+    // 4. Perform database operation
     // /////////////////////////////////////
 
     const {
@@ -72,7 +59,15 @@ const update = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 7. Execute after global hook
+    // 5. Execute field-level hooks and policies
+    // /////////////////////////////////////
+
+    result = performFieldOperations(args.config, {
+      ...options, data: result, hook: 'afterRead', operationName: 'read',
+    });
+
+    // /////////////////////////////////////
+    // 6. Execute after global hook
     // /////////////////////////////////////
 
     const { afterUpdate } = args.config.hooks;
@@ -82,7 +77,7 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 8. Return results
+    // 7. Return results
     // /////////////////////////////////////
 
     return result;

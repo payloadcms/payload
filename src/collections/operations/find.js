@@ -1,7 +1,6 @@
 const merge = require('lodash.merge');
 const executePolicy = require('../../auth/executePolicy');
-const executeFieldPolicies = require('../../auth/executeFieldPolicies');
-const executeFieldHooks = require('../../fields/executeHooks');
+const performFieldOperations = require('../../fields/performFieldOperations');
 
 const find = async (args) => {
   try {
@@ -86,19 +85,11 @@ const find = async (args) => {
           doc.setLocale(locale, fallbackLocale);
         }
 
-        const json = doc.toJSON({ virtuals: true });
-        return executeFieldPolicies(args, json, args.config.fields, 'read');
-      })),
-    };
+        const data = doc.toJSON({ virtuals: true });
 
-    // /////////////////////////////////////
-    // 5. Execute field-level afterRead hooks
-    // /////////////////////////////////////
-
-    result = {
-      ...result,
-      docs: await Promise.all(result.docs.map(async (doc) => {
-        return executeFieldHooks(options, args.config.fields, doc, 'afterRead', doc);
+        return performFieldOperations(args.config, {
+          ...options, data, hook: 'afterRead', operationName: 'read',
+        });
       })),
     };
 

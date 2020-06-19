@@ -19,6 +19,7 @@ const NestedRepeater = {
         {
           name: 'parentIdentifier',
           label: 'Parent Identifier',
+          defaultValue: 'test',
           type: 'text',
           required: true,
         },
@@ -32,6 +33,9 @@ const NestedRepeater = {
               label: 'Child Identifier',
               type: 'text',
               required: true,
+              hooks: {
+                afterRead: value => (value ? value.toUpperCase() : null),
+              },
             },
           ],
         },

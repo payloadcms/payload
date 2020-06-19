@@ -1,12 +1,12 @@
 const mkdirp = require('mkdirp');
 
 const executePolicy = require('../../auth/executePolicy');
-const executeFieldHooks = require('../../fields/executeHooks');
-const validateCreate = require('../../validation/validateCreate');
 
 const { MissingFile } = require('../../errors');
 const resizeAndSave = require('../../uploads/imageResizer');
 const getSafeFilename = require('../../uploads/getSafeFilename');
+
+const performFieldOperations = require('../../fields/performFieldOperations');
 
 const create = async (args) => {
   try {
@@ -19,26 +19,23 @@ const create = async (args) => {
     let options = { ...args };
 
     // /////////////////////////////////////
-    // 2. Execute field-level policies
+    // 2. Execute before collection hook
     // /////////////////////////////////////
 
-    // Field-level policies here
+    const { beforeCreate } = args.config.hooks;
+
+    if (typeof beforeCreate === 'function') {
+      options = await beforeCreate(options);
+    }
 
     // /////////////////////////////////////
-    // 3. Validate incoming data
+    // 3. Execute field-level policies, hooks, and validation
     // /////////////////////////////////////
 
-    await validateCreate(args.data, args.config.fields);
+    options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeCreate', operationName: 'create' });
 
     // /////////////////////////////////////
-    // 4. Execute before create field-level hooks
-    // /////////////////////////////////////
-
-    options.data = await executeFieldHooks(options, args.config.fields, args.data, 'beforeCreate', args.data);
-
-
-    // /////////////////////////////////////
-    // 5. Upload and resize any files that may be present
+    // 4. Upload and resize any files that may be present
     // /////////////////////////////////////
 
     if (args.config.upload) {
@@ -71,17 +68,7 @@ const create = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 6. Execute before collection hook
-    // /////////////////////////////////////
-
-    const { beforeCreate } = args.config.hooks;
-
-    if (typeof beforeCreate === 'function') {
-      options = await beforeCreate(options);
-    }
-
-    // /////////////////////////////////////
-    // 7. Perform database operation
+    // 5. Perform database operation
     // /////////////////////////////////////
 
     const {
@@ -105,7 +92,15 @@ const create = async (args) => {
     result = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 8. Execute after collection hook
+    // 6. Execute field-level hooks and policies
+    // /////////////////////////////////////
+
+    result = await performFieldOperations(args.config, {
+      ...options, data: result, hook: 'afterRead', operationName: 'read',
+    });
+
+    // /////////////////////////////////////
+    // 7. Execute after collection hook
     // /////////////////////////////////////
 
     const { afterCreate } = args.config.hooks;
@@ -115,7 +110,7 @@ const create = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 9. Return results
+    // 8. Return results
     // /////////////////////////////////////
 
     return result;
