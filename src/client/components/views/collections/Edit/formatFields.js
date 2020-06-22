@@ -13,6 +13,16 @@ const formatFields = (config, isEditing) => {
     fields = authFields.concat(fields);
   }
 
+  if (config.upload) {
+    const uploadFields = [
+      {
+        type: 'file',
+      },
+    ];
+
+    fields = uploadFields.concat(fields);
+  }
+
   return fields;
 };
 

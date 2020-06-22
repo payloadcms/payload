@@ -6,7 +6,6 @@ import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import formatFields from '../collections/Edit/formatFields';
 import DefaultAccount from './Default';
 
-
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
 const { serverURL, routes: { api } } = config;
