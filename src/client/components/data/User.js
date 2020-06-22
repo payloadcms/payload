@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import PropTypes from 'prop-types';
 import Cookies from 'universal-cookie';
 import config from 'payload/config';
-import { useModal } from '@trbl/react-modal';
+import { useModal } from '@faceless-ui/modal';
 import { requests } from '../../api';
 import StayLoggedInModal from '../modals/StayLoggedIn';
 import useDebounce from '../../hooks/useDebounce';
@@ -28,7 +28,7 @@ const cookieTokenName = `${cookiePrefix}-token`;
 const cookies = new Cookies();
 const Context = createContext({});
 
-const isNotExpired = decodedJWT => (decodedJWT?.exp || 0) > Date.now() / 1000;
+const isNotExpired = (decodedJWT) => (decodedJWT?.exp || 0) > Date.now() / 1000;
 
 const UserProvider = ({ children }) => {
   const [token, setToken] = useState('');

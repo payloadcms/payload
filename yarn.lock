@@ -1100,6 +1100,41 @@
   resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.2.5.tgz#8eed982e2ee6f7f4e44c253e12962980791efd46"
   integrity sha512-6U71C2Wp7r5XtFtQzYrW5iKFT67OixrSxjI4MptCHzdSVlgabczzqLe0ZSgnub/5Kp4hSbpDB1tMytZY9pwxxA==
 
+"@faceless-ui/collapsibles@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@faceless-ui/collapsibles/-/collapsibles-0.1.0.tgz#2a7a14e5870a035f3458a660bbe7aa3f22621809"
+  integrity sha512-CY20DkmEEohLM14F/TftisUsgeB3H9vbwtC7N4euMHBvBOkcbF5+Ssu6ACqxnvGmlAxqsHj9aBK0Yda9ad3HRw==
+  dependencies:
+    "@trbl/react-html-element" "^1.0.3"
+    prop-types "^15.7.2"
+    react-animate-height "^2.0.16"
+    react-transition-group "^4.3.0"
+
+"@faceless-ui/modal@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@faceless-ui/modal/-/modal-1.0.4.tgz#69ea4b3a16670fc86ddc37a00cecfc9ce0bf9a86"
+  integrity sha512-cJpOEecVO0saTbviFc5V7BJq7glyavaYKL75ZXh0wzB3FOynLqtJQE3UUfRUGn1mK8wGjRRfeRL7fj9YESy5zg==
+  dependencies:
+    "@trbl/react-html-element" "^1.0.3"
+    body-scroll-lock "^3.0.1"
+    prop-types "^15.7.2"
+    qs "^6.9.1"
+    react-transition-group "^4.3.0"
+
+"@faceless-ui/scroll-info@^1.1.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@faceless-ui/scroll-info/-/scroll-info-1.2.1.tgz#3b28fad3ae70c6b54d226b0a60988bd08849b9b7"
+  integrity sha512-9lHOIcT1mWukecZ7jl7dVvwGx+3YxqvoipcLp7qJPHf4For3N/Ysn8ZNFwQGLT8q9wwlNxzuFUfHgA8jhMWpKQ==
+  dependencies:
+    prop-types "^15.7.2"
+
+"@faceless-ui/window-info@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@faceless-ui/window-info/-/window-info-1.2.2.tgz#3308de7087a8bb134dc171c12c84479eb13cfb5e"
+  integrity sha512-N/zd4PzC7iLbS1HMYn1vhVDgFMBmyOVX8XIlx3oJvBTCpOVJnM1YbNTZzIXh9MlGsmz/lSjNqC7rGXCgxcEVCA==
+  dependencies:
+    prop-types "^15.7.2"
+
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@istanbuljs/load-nyc-config/-/load-nyc-config-1.0.0.tgz#10602de5570baea82f8afbfa2630b24e7a8cfe5b"
@@ -1306,44 +1341,10 @@
     object.assign "^4.1.0"
     object.entries "^1.1.1"
 
-"@trbl/react-collapsibles@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@trbl/react-collapsibles/-/react-collapsibles-0.1.0.tgz#81c5590b505c1a155a9be68b8f6c00b242e0b555"
-  integrity sha512-fEKPYbRymsxfUJT2gCzubfYkt6l0mxQx5P4LfpBP/NioSBIH40SGtbMek2WCVkxFUoxAhA/VzOoE6YZK8QucmA==
-  dependencies:
-    "@trbl/react-html-element" "^1.0.3"
-    prop-types "^15.7.2"
-    react-animate-height "^2.0.16"
-
 "@trbl/react-html-element@^1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@trbl/react-html-element/-/react-html-element-1.0.3.tgz#5ebd8ff70763b8f49c7a2e5da9abf1e6a7530c17"
   integrity sha512-RxESgsj4Sg7czeB3HzLqBw11wWLuXpy7/S0WyHpOIviw1JlxOK1HCEEMHLHgwwkLChmrESIxEVqzdeZq3VOp8w==
-  dependencies:
-    prop-types "^15.7.2"
-
-"@trbl/react-modal@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@trbl/react-modal/-/react-modal-1.0.4.tgz#50f92d42489d414f863e6897720d8d26efab7611"
-  integrity sha512-jY1/EHrcY5hGUDkeF3eTWE/FN+TTFYBF70teUTt8AKK8gCOmX4lMq8UvTucrmtLOsrh5ITaNDhakoEyWSmIzFA==
-  dependencies:
-    "@trbl/react-html-element" "^1.0.3"
-    body-scroll-lock "^3.0.1"
-    prop-types "^15.7.2"
-    qs "^6.9.1"
-    react-transition-group "^4.3.0"
-
-"@trbl/react-scroll-info@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@trbl/react-scroll-info/-/react-scroll-info-1.1.1.tgz#31eac3b41825f6719313a3ab895df370a12554e7"
-  integrity sha512-1c79T7hHgM0mCt7z9/MZR5qzazGVJHUECYm4U6RrUIIaYikw71+VuTNOfPvFIzCOTjeW4CD0dT2iFM6bA0LO/A==
-  dependencies:
-    prop-types "^15.7.2"
-
-"@trbl/react-window-info@^1.2.2":
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/@trbl/react-window-info/-/react-window-info-1.2.2.tgz#dc38086610ee0e7ea68d1f36afce7a4767d626f3"
-  integrity sha512-Ehy23q5EXv78w1ky4HVYxkazq7lqFwuULd2QXfRZZ4qriml+xZ6O3rUa1wTKb3EkzzmioH03ifFsU4my3coI2A==
   dependencies:
     prop-types "^15.7.2"
 
