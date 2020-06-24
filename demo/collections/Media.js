@@ -8,6 +8,7 @@ module.exports = {
   upload: {
     staticURL: '/media',
     staticDir: 'demo/media',
+    adminThumbnail: 'mobile',
     imageSizes: [
       {
         name: 'tablet',

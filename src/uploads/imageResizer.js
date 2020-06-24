@@ -40,8 +40,9 @@ module.exports = async function resizeAndSave(config, savedFilename, mimeType) {
         const outputImage = getOutputImage(savedFilename, desiredSize);
         const imageNameWithDimensions = `${outputImage.name}-${outputImage.width}x${outputImage.height}.${outputImage.extension}`;
         const imagePath = `${staticDir}/${imageNameWithDimensions}`;
+        const fileAlreadyExists = await fileExists(imagePath);
 
-        if (fileExists(imagePath)) {
+        if (fileAlreadyExists) {
           fs.unlinkSync(imagePath);
         }
 

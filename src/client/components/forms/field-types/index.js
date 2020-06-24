@@ -1,4 +1,5 @@
 export { default as auth } from './Auth';
+export { default as file } from './File';
 
 export { default as email } from './Email';
 export { default as hidden } from './HiddenInput';

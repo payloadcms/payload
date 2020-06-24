@@ -38,6 +38,14 @@ const formatFields = (config) => {
     ]);
   }
 
+  if (config.upload) {
+    fields = fields.concat({
+      name: 'filename',
+      label: 'Filename',
+      type: 'text',
+    });
+  }
+
   return fields;
 };
 

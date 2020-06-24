@@ -141,6 +141,7 @@ const Repeater = (props) => {
                     rowIndex={i}
                     fieldSchema={fields}
                     initialData={row.data}
+                    initNull={row.initNull}
                     dispatchRows={dispatchRows}
                     customComponentsPath={`${customComponentsPath}${name}.fields.`}
                     positionHandleVerticalAlignment="sticky"
