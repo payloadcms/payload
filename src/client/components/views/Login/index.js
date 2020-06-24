@@ -23,7 +23,7 @@ const Login = () => {
   const onSuccess = (data) => {
     if (data.token) {
       setToken(data.token);
-      history.push(`${admin}`);
+      history.push(admin);
     }
   };
 
@@ -58,10 +58,10 @@ const Login = () => {
         <Logo />
       </div>
       <Form
+        disableSuccessStatus
         onSuccess={onSuccess}
         method="POST"
         action={`${serverURL}${api}/${userSlug}/login`}
-        redirect={admin}
       >
         <Email
           label="Email Address"

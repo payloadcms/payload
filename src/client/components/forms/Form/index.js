@@ -172,18 +172,18 @@ const Form = (props) => {
       return requests[method.toLowerCase()](action, {
         body: formData,
       }).then((res) => {
+        setModified(false);
         if (typeof handleAjaxResponse === 'function') return handleAjaxResponse(res);
 
         return res.json().then((json) => {
           setProcessing(false);
-          setModified(false);
           clearStatus();
 
           if (res.status < 400) {
             if (typeof onSuccess === 'function') onSuccess(json);
 
             if (redirect) {
-              return history.push(redirect, data);
+              return history.push(redirect, json);
             }
 
             if (!disableSuccessStatus) {

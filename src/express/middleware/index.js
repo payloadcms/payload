@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const cookieParser = require('cookie-parser');
 const qsMiddleware = require('qs-middleware');
+const fileUpload = require('express-fileupload');
 const localizationMiddleware = require('../../localization/middleware');
 const authenticate = require('./authenticate');
 const identifyAPI = require('./identifyAPI');
@@ -25,6 +26,7 @@ const middleware = (config) => {
     localizationMiddleware(config.localization),
     authenticate(config),
     identifyAPI('REST'),
+    fileUpload(),
     (req, res, next) => {
       if (config.cors) {
         if (config.cors.indexOf(req.headers.origin) > -1) {
