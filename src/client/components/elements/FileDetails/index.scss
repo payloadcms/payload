@@ -4,17 +4,18 @@
   header {
     display: flex;
     align-items: flex-start;
+  }
 
-    .btn {
-      margin: $baseline;
-    }
+  &__remove {
+    margin: $baseline $baseline $baseline 0;
   }
 
   &__thumbnail {
-    width: base(6);
-    height: base(4.8);
+    min-height: base(5);
+    width: base(7);
+    align-self: stretch;
 
-    img {
+    img, svg {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -22,8 +23,36 @@
   }
 
   &__main-detail {
-    padding: $baseline;
+    padding: $baseline base(1.5);
     width: auto;
     flex-grow: 1;
+    min-width: 0;
+    align-self: center;
+  }
+
+  &__url {
+    display: flex;
+
+    a {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &__url a,
+  &__toggle-more-info {
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__toggle-more-info.open {
+    .icon--chevron {
+      transform: rotate(180deg);
+    }
   }
 }

@@ -18,7 +18,7 @@ module.exports = {
       type: 'select',
       options: [{
         value: 'Type 1',
-        label: 'Type 2',
+        label: 'Type 1 Label',
       }, {
         value: 'Type 2',
         label: 'Type 2 Label',

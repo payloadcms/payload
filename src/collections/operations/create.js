@@ -41,7 +41,7 @@ const create = async (args) => {
     // /////////////////////////////////////
 
     if (args.config.upload) {
-      const { staticDir } = options.req.collection.config.upload;
+      const { staticDir, imageSizes } = options.req.collection.config.upload;
 
       const fileData = {};
 
@@ -60,7 +60,9 @@ const create = async (args) => {
         fileData.width = dimensions.width;
         fileData.height = dimensions.height;
 
-        fileData.sizes = await resizeAndSave(options.config, fsSafeName, fileData.mimeType);
+        if (Array.isArray(imageSizes)) {
+          fileData.sizes = await resizeAndSave(options.config, fsSafeName, fileData.mimeType);
+        }
       }
 
       fileData.filename = fsSafeName;

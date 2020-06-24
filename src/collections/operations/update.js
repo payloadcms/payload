@@ -82,7 +82,7 @@ const update = async (args) => {
     if (args.config.upload) {
       const fileData = {};
 
-      const { staticDir } = args.config.upload;
+      const { staticDir, imageSizes } = args.config.upload;
 
       if (args.req.files || args.req.files.file) {
         const fsSafeName = await getSafeFilename(staticDir, options.req.files.file.name);
@@ -90,13 +90,17 @@ const update = async (args) => {
         await options.req.files.file.mv(`${staticDir}/${fsSafeName}`);
 
         fileData.filename = fsSafeName;
+        fileData.filesize = options.req.files.file.size;
+        fileData.mimeType = options.req.files.file.mimetype;
 
         if (imageMIMETypes.indexOf(options.req.files.file.mimetype) > -1) {
           const dimensions = await getImageSize(`${staticDir}/${fsSafeName}`);
           fileData.width = dimensions.width;
           fileData.height = dimensions.height;
 
-          fileData.sizes = await resizeAndSave(options.config, fsSafeName, fileData.mimeType);
+          if (Array.isArray(imageSizes)) {
+            fileData.sizes = await resizeAndSave(options.config, fsSafeName, fileData.mimeType);
+          }
         }
 
         options.data = {

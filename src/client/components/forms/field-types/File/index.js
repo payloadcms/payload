@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import Button from '../../../elements/Button';
 import FileDetails from '../../../elements/FileDetails';
+import Error from '../../Error';
 
 import './index.scss';
 
@@ -16,7 +17,7 @@ const handleDrag = (e) => {
 };
 
 const validate = (value) => {
-  if (!value) {
+  if (!value && value !== undefined) {
     return 'A file is required.';
   }
 
@@ -30,6 +31,7 @@ const File = (props) => {
   const [selectingFile, setSelectingFile] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
+
   const {
     initialData = {}, adminThumbnail, imageSizes, staticURL,
   } = props;
@@ -39,6 +41,8 @@ const File = (props) => {
   const {
     value,
     setValue,
+    showError,
+    errorMessage,
   } = useFieldType({
     path: 'file',
     validate,
@@ -110,15 +114,6 @@ const File = (props) => {
   }, [handleDragIn, handleDragOut, handleDrop, dropRef]);
 
   useEffect(() => {
-    const input = inputRef.current;
-    input.addEventListener('change', handleInputChange, false);
-
-    return () => {
-      input.removeEventListener('change', handleInputChange);
-    };
-  }, [inputRef, handleInputChange]);
-
-  useEffect(() => {
     if (inputRef.current && fileList !== undefined) {
       inputRef.current.files = fileList;
     }
@@ -127,15 +122,19 @@ const File = (props) => {
   const classes = [
     baseClass,
     dragging && `${baseClass}--dragging`,
+    'field-type',
   ].filter(Boolean).join(' ');
 
   return (
     <div className={classes}>
+      <Error
+        showError={showError}
+        message={errorMessage}
+      />
       {filename && (
         <FileDetails
           {...initialData}
           staticURL={staticURL}
-          imageSizes={imageSizes}
           adminThumbnail={adminThumbnail}
         />
       )}
@@ -177,6 +176,7 @@ const File = (props) => {
           <input
             ref={inputRef}
             type="file"
+            onChange={handleInputChange}
           />
         </div>
       )}

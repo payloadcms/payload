@@ -1,8 +1,14 @@
 @import '../../../../scss/styles.scss';
 
 .file-field {
-  margin-bottom: base(2);
+  position: relative;
+  margin: base(1.5) 0 base(2);
   background: $color-background-gray;
+
+  .tooltip.error-message {
+    z-index: 3;
+    bottom: calc(100% - #{base(.5)});
+  }
 
   &__upload {
     position: relative;
