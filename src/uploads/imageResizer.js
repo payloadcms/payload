@@ -1,11 +1,8 @@
 const fs = require('fs');
 const sharp = require('sharp');
 const sanitize = require('sanitize-filename');
-const { promisify } = require('util');
-const imageSize = require('image-size');
+const getImageSize = require('./getImageSize');
 const fileExists = require('./fileExists');
-
-const sizeOf = promisify(imageSize);
 
 function getOutputImage(sourceImage, size) {
   const extension = sourceImage.split('.').pop();
@@ -33,7 +30,7 @@ module.exports = async function resizeAndSave(config, savedFilename, mimeType) {
   const sourceImage = `${staticDir}/${savedFilename}`;
   let sizes;
   try {
-    const dimensions = await sizeOf(sourceImage);
+    const dimensions = await getImageSize(sourceImage);
     sizes = imageSizes
       .filter(desiredSize => desiredSize.width < dimensions.width)
       .map(async (desiredSize) => {

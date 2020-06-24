@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = {
   slug: 'files',
   labels: {
@@ -6,7 +8,7 @@ module.exports = {
   },
   upload: {
     staticURL: '/files',
-    staticDir: 'demo/files',
+    staticDir: path.resolve(__dirname, '../files'),
   },
   useAsTitle: 'filename',
   fields: [

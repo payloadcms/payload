@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = {
   slug: 'media',
   labels: {
@@ -10,7 +12,7 @@ module.exports = {
   },
   upload: {
     staticURL: '/media',
-    staticDir: 'demo/media',
+    staticDir: path.resolve(__dirname, '../media'),
     adminThumbnail: 'mobile',
     imageSizes: [
       {

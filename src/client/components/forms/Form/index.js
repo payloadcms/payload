@@ -17,7 +17,7 @@ import './index.scss';
 
 const baseClass = 'form';
 
-const reduceFieldsToValues = (fields) => {
+const reduceFieldsToValues = (fields, flatten) => {
   const data = {};
 
   Object.keys(fields).forEach((key) => {
@@ -26,8 +26,11 @@ const reduceFieldsToValues = (fields) => {
     }
   });
 
-  const unflattened = unflatten(data, { safe: true });
-  return unflattened;
+  if (flatten) {
+    return unflatten(data, { safe: true });
+  }
+
+  return data;
 };
 
 const Form = (props) => {
@@ -62,7 +65,7 @@ const Form = (props) => {
   }, [fields]);
 
   const getData = useCallback(() => {
-    return reduceFieldsToValues(fields);
+    return reduceFieldsToValues(fields, true);
   }, [fields]);
 
   const getSiblingData = useCallback((path) => {
@@ -84,7 +87,7 @@ const Form = (props) => {
       }, {});
     }
 
-    return reduceFieldsToValues(siblingFields);
+    return reduceFieldsToValues(siblingFields, true);
   }, [fields]);
 
   const getDataByPath = useCallback((path) => {
@@ -102,7 +105,7 @@ const Form = (props) => {
       return matchedData;
     }, {});
 
-    const values = reduceFieldsToValues(data);
+    const values = reduceFieldsToValues(data, true);
     const unflattenedData = unflatten(values);
     return unflattenedData?.[name];
   }, [fields]);

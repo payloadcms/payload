@@ -3,6 +3,9 @@ const overwriteMerge = require('../../utilities/overwriteMerge');
 const executePolicy = require('../../auth/executePolicy');
 const { NotFound, Forbidden } = require('../../errors');
 const performFieldOperations = require('../../fields/performFieldOperations');
+const imageMIMETypes = require('../../uploads/imageMIMETypes');
+const getImageSize = require('../../uploads/getImageSize');
+const getSafeFilename = require('../../uploads/getSafeFilename');
 
 const resizeAndSave = require('../../uploads/imageResizer');
 
@@ -79,15 +82,21 @@ const update = async (args) => {
     if (args.config.upload) {
       const fileData = {};
 
-      const { staticDir, imageSizes } = args.config.upload;
+      const { staticDir } = args.config.upload;
 
       if (args.req.files || args.req.files.file) {
-        await options.req.files.file.mv(`${staticDir}/${options.req.files.file.name}`);
+        const fsSafeName = await getSafeFilename(staticDir, options.req.files.file.name);
 
-        fileData.filename = options.req.files.file.name;
+        await options.req.files.file.mv(`${staticDir}/${fsSafeName}`);
 
-        if (imageSizes) {
-          fileData.sizes = await resizeAndSave(options.config, options.req.files.file.name);
+        fileData.filename = fsSafeName;
+
+        if (imageMIMETypes.indexOf(options.req.files.file.mimetype) > -1) {
+          const dimensions = await getImageSize(`${staticDir}/${fsSafeName}`);
+          fileData.width = dimensions.width;
+          fileData.height = dimensions.height;
+
+          fileData.sizes = await resizeAndSave(options.config, fsSafeName, fileData.mimeType);
         }
 
         options.data = {

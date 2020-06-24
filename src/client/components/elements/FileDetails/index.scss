@@ -1,0 +1,29 @@
+@import '../../../scss/styles.scss';
+
+.file-details {
+  header {
+    display: flex;
+    align-items: flex-start;
+
+    .btn {
+      margin: $baseline;
+    }
+  }
+
+  &__thumbnail {
+    width: base(6);
+    height: base(4.8);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__main-detail {
+    padding: $baseline;
+    width: auto;
+    flex-grow: 1;
+  }
+}

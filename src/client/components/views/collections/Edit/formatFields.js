@@ -17,6 +17,7 @@ const formatFields = (config, isEditing) => {
     const uploadFields = [
       {
         type: 'file',
+        ...config.upload,
       },
     ];
 

@@ -30,7 +30,10 @@ const File = (props) => {
   const [selectingFile, setSelectingFile] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
-  const { initialData = {} } = props;
+  const {
+    initialData = {}, adminThumbnail, imageSizes, staticURL,
+  } = props;
+
   const { filename } = initialData;
 
   const {
@@ -129,7 +132,12 @@ const File = (props) => {
   return (
     <div className={classes}>
       {filename && (
-        <FileDetails {...initialData} />
+        <FileDetails
+          {...initialData}
+          staticURL={staticURL}
+          imageSizes={imageSizes}
+          adminThumbnail={adminThumbnail}
+        />
       )}
       {!filename && (
         <div className={`${baseClass}__upload`}>
@@ -178,6 +186,7 @@ const File = (props) => {
 
 File.defaultProps = {
   initialData: undefined,
+  adminThumbnail: undefined,
 };
 
 File.propTypes = {
@@ -187,6 +196,8 @@ File.propTypes = {
     mimeType: PropTypes.string,
     filesize: PropTypes.number,
   }),
+  staticURL: PropTypes.string.isRequired,
+  adminThumbnail: PropTypes.string,
 };
 
 export default File;
