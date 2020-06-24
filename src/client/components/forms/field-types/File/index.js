@@ -1,21 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import FileGraphic from '../../../graphics/File';
 import Button from '../../../elements/Button';
-import useForm from '../../Form/useForm';
+import FileDetails from '../../../elements/FileDetails';
 
 import './index.scss';
 
 const baseClass = 'file-field';
 
 const File = (props) => {
-  const { initialData } = props;
+  const inputRef = useRef(null);
+  const [selectingFile, setSelectingFile] = useState(false);
+  const { initialData = {} } = props;
+  const { filename } = initialData;
 
-  console.log(initialData);
+  useEffect(() => {
+    if (selectingFile) {
+      inputRef.current.click();
+      setSelectingFile(false);
+    }
+  }, [selectingFile, inputRef, setSelectingFile]);
 
   return (
     <div className={baseClass}>
-      <FileGraphic />
+      {filename && (
+        <FileDetails {...initialData} />
+      )}
+      {!filename && (
+        <div className={`${baseClass}__upload`}>
+          <div className={`${baseClass}__drop-zone`}>
+            <Button
+              size="small"
+              buttonStyle="secondary"
+              onClick={() => setSelectingFile(true)}
+            >
+              Select a file
+            </Button>
+            <div>or drag and drop a file here</div>
+          </div>
+          <input
+            ref={inputRef}
+            type="file"
+          />
+        </div>
+      )}
     </div>
   );
 };
@@ -26,7 +53,11 @@ File.defaultProps = {
 
 File.propTypes = {
   fieldTypes: PropTypes.shape({}).isRequired,
-  initialData: PropTypes.shape({}),
+  initialData: PropTypes.shape({
+    filename: PropTypes.string,
+    mimeType: PropTypes.string,
+    filesize: PropTypes.number,
+  }),
 };
 
 export default File;

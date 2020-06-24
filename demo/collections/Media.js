@@ -5,6 +5,9 @@ module.exports = {
     plural: 'Media',
   },
   useAsTitle: 'filename',
+  policies: {
+    read: () => true,
+  },
   upload: {
     staticURL: '/media',
     staticDir: 'demo/media',
