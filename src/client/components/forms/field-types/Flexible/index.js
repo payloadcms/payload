@@ -72,7 +72,7 @@ const Flexible = (props) => {
   const addRow = (index, blockType) => {
     setAddRowIndex(current => current + 1);
 
-    const data = getDataByPath(path)?.[name];
+    const data = getDataByPath(path);
 
     dispatchRows({
       type: 'ADD', index, data, initialRowData: { blockType },
@@ -82,7 +82,7 @@ const Flexible = (props) => {
   };
 
   const removeRow = (index) => {
-    const data = getDataByPath(path)?.[name];
+    const data = getDataByPath(path);
 
     dispatchRows({
       type: 'REMOVE',
@@ -94,7 +94,7 @@ const Flexible = (props) => {
   };
 
   const moveRow = (moveFromIndex, moveToIndex) => {
-    const data = getDataByPath(path)?.[name];
+    const data = getDataByPath(path);
 
     dispatchRows({
       type: 'MOVE', index: moveFromIndex, moveToIndex, data,
