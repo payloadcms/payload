@@ -39,6 +39,19 @@
   padding-bottom: base(.75);
   margin-bottom: base(.75);
 
+  &__section-header {
+    display: flex;
+
+    .toggle-collapse {
+      margin: 0 0 0 auto;
+      transform: rotate(.5turn);
+
+      &--is-closed {
+        transform: rotate(0turn);
+      }
+    }
+  }
+
   &__render-fields-wrapper {
     width: 100%;
   }

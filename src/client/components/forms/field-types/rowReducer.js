@@ -11,6 +11,10 @@ const reducer = (currentState, action) => {
     case 'SET_ALL':
       return rows;
 
+    case 'TOGGLE_COLLAPSE':
+      stateCopy[index].open = !stateCopy[index].open;
+      return stateCopy;
+
     case 'ADD':
       stateCopy.splice(index + 1, 0, {
         open: true,
@@ -31,10 +35,6 @@ const reducer = (currentState, action) => {
 
     case 'REMOVE':
       stateCopy.splice(index, 1);
-      return stateCopy;
-
-    case 'UPDATE_COLLAPSIBLE_STATUS':
-      stateCopy[index].open = !stateCopy[index].open;
       return stateCopy;
 
     case 'MOVE': {

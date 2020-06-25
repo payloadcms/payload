@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-// import AnimateHeight from 'react-animate-height';
+import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
 
 import ActionHandle from './ActionHandle';
@@ -9,6 +9,7 @@ import PositionHandle from './PositionHandle';
 import RenderFields from '../RenderFields';
 
 import './index.scss';
+import Button from '../../elements/Button';
 
 const baseClass = 'draggable-section';
 
@@ -21,7 +22,6 @@ const DraggableSection = (props) => {
     parentPath,
     fieldSchema,
     initialData,
-    // dispatchRows,
     singularLabel,
     blockType,
     fieldTypes,
@@ -30,18 +30,10 @@ const DraggableSection = (props) => {
     id,
     positionHandleVerticalAlignment,
     actionHandleVerticalAlignment,
+    toggleRowCollapse,
   } = props;
 
-  // const draggableRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
-
-  // const handleCollapseClick = () => {
-  //   draggableRef.current.focus();
-  //   dispatchRows({
-  //     type: 'UPDATE_COLLAPSIBLE_STATUS',
-  //     index: rowIndex,
-  //   });
-  // };
 
   const classes = [
     baseClass,
@@ -74,26 +66,40 @@ const DraggableSection = (props) => {
             <div className={`${baseClass}__render-fields-wrapper`}>
 
               {blockType === 'flexible' && (
-                <SectionTitle
-                  label={singularLabel}
-                  initialData={initialData?.blockName}
-                  path={`${parentPath}.${rowIndex}.blockName`}
-                />
+                <div className={`${baseClass}__section-header`}>
+                  <SectionTitle
+                    label={singularLabel}
+                    initialData={initialData?.blockName}
+                    path={`${parentPath}.${rowIndex}.blockName`}
+                  />
+
+                  <Button
+                    icon="chevron"
+                    onClick={toggleRowCollapse}
+                    buttonStyle="icon-label"
+                    className={`toggle-collapse toggle-collapse--is-${isOpen ? 'open' : 'closed'}`}
+                    round
+                  />
+                </div>
               )}
 
-              {/* Render fields */}
-              <RenderFields
-                initialData={initialData}
-                customComponentsPath={customComponentsPath}
-                fieldTypes={fieldTypes}
-                key={rowIndex}
-                fieldSchema={fieldSchema.map((field) => {
-                  return ({
-                    ...field,
-                    path: `${parentPath}.${rowIndex}${field.name ? `.${field.name}` : ''}`,
-                  });
-                })}
-              />
+              <AnimateHeight
+                height={isOpen ? 'auto' : 0}
+                duration={0}
+              >
+                <RenderFields
+                  initialData={initialData}
+                  customComponentsPath={customComponentsPath}
+                  fieldTypes={fieldTypes}
+                  key={rowIndex}
+                  fieldSchema={fieldSchema.map((field) => {
+                    return ({
+                      ...field,
+                      path: `${parentPath}.${rowIndex}${field.name ? `.${field.name}` : ''}`,
+                    });
+                  })}
+                />
+              </AnimateHeight>
             </div>
 
             <ActionHandle
@@ -111,6 +117,7 @@ const DraggableSection = (props) => {
 };
 
 DraggableSection.defaultProps = {
+  toggleRowCollapse: undefined,
   rowCount: null,
   initialData: undefined,
   singularLabel: '',
@@ -125,13 +132,13 @@ DraggableSection.propTypes = {
   moveRow: PropTypes.func.isRequired,
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
+  toggleRowCollapse: PropTypes.func,
   rowIndex: PropTypes.number.isRequired,
   parentPath: PropTypes.string.isRequired,
   singularLabel: PropTypes.string,
   fieldSchema: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   rowCount: PropTypes.number,
   initialData: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
-  dispatchRows: PropTypes.func.isRequired,
   isOpen: PropTypes.bool,
   blockType: PropTypes.string,
   fieldTypes: PropTypes.shape({}).isRequired,
