@@ -84,7 +84,7 @@ const update = async (args) => {
 
       const { staticDir, imageSizes } = args.config.upload;
 
-      if (args.req.files || args.req.files.file) {
+      if (args.req.files || (args.req.files && args.req.files.file)) {
         const fsSafeName = await getSafeFilename(staticDir, options.req.files.file.name);
 
         await options.req.files.file.mv(`${staticDir}/${fsSafeName}`);

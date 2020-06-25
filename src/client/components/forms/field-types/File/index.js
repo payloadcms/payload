@@ -33,7 +33,7 @@ const File = (props) => {
   const [dragCounter, setDragCounter] = useState(0);
 
   const {
-    initialData = {}, adminThumbnail, imageSizes, staticURL,
+    initialData = {}, adminThumbnail, staticURL,
   } = props;
 
   const { filename } = initialData;

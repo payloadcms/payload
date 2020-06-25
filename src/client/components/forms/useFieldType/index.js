@@ -45,7 +45,7 @@ const useFieldType = (options) => {
   const sendField = useCallback(async (valueToSend) => {
     const fieldToDispatch = { path, value: valueToSend };
 
-    fieldToDispatch.valid = typeof validate === 'function' ? await validate(valueToSend || '') : true;
+    fieldToDispatch.valid = typeof validate === 'function' ? await validate(valueToSend) : true;
 
     if (typeof fieldToDispatch.valid === 'string') {
       fieldToDispatch.errorMessage = fieldToDispatch.valid;

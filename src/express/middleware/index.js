@@ -26,7 +26,9 @@ const middleware = (config) => {
     localizationMiddleware(config.localization),
     authenticate(config),
     identifyAPI('REST'),
-    fileUpload(),
+    fileUpload({
+      parseNested: true,
+    }),
     (req, res, next) => {
       if (config.cors) {
         if (config.cors.indexOf(req.headers.origin) > -1) {
