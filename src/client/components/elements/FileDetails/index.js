@@ -93,6 +93,7 @@ const FileDetails = (props) => {
                   </div>
                   <Meta
                     {...val}
+                    mimeType={mimeType}
                     staticURL={staticURL}
                   />
                 </li>

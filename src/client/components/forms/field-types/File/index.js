@@ -31,6 +31,7 @@ const File = (props) => {
   const [selectingFile, setSelectingFile] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
+  const [deletingFile, setDeletingFile] = useState(false);
 
   const {
     initialData = {}, adminThumbnail, staticURL,
@@ -119,6 +120,10 @@ const File = (props) => {
     }
   }, [fileList]);
 
+  useEffect(() => {
+    setDeletingFile(false);
+  }, [initialData]);
+
   const classes = [
     baseClass,
     dragging && `${baseClass}--dragging`,
@@ -131,15 +136,19 @@ const File = (props) => {
         showError={showError}
         message={errorMessage}
       />
-      {filename && (
+      {(filename && !deletingFile) && (
         <FileDetails
           {...initialData}
           staticURL={staticURL}
           adminThumbnail={adminThumbnail}
-          handleRemove={() => true}
+          handleRemove={() => {
+            setDeletingFile(true);
+            setFileList(null);
+            setValue(null);
+          }}
         />
       )}
-      {!filename && (
+      {(!filename || deletingFile) && (
         <div className={`${baseClass}__upload`}>
           {value && (
             <div className={`${baseClass}__file-selected`}>
