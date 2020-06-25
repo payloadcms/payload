@@ -79,6 +79,21 @@
         opacity: 1;
       }
     }
+
+    .toggle-collapse {
+      .btn__icon {
+        background-color: $color-gray;
+
+        &:hover {
+          background-color: $color-dark-gray;
+        }
+
+      }
+
+      &:focus {
+        @include color-svg(white);
+      }
+    }
   }
 
   @include mid-break {

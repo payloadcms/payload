@@ -126,18 +126,20 @@ const Flexible = (props) => {
         },
       ]), []),
     });
-  }, [dataToInitialize, setValue]);
+  }, [dataToInitialize]);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className={baseClass}>
         <header className={`${baseClass}__header`}>
           <h3>{label}</h3>
+
           <Error
             showError={showError}
             message={errorMessage}
           />
         </header>
+
         <Droppable droppableId="flexible-drop">
           {provided => (
             <div
