@@ -136,6 +136,7 @@ const File = (props) => {
           {...initialData}
           staticURL={staticURL}
           adminThumbnail={adminThumbnail}
+          handleRemove={() => true}
         />
       )}
       {!filename && (

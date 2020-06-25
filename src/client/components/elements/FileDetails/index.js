@@ -5,8 +5,8 @@ import FileGraphic from '../../graphics/File';
 import config from '../../../config';
 import getThumbnail from '../../../../uploads/getThumbnail';
 import Button from '../Button';
-import formatFilesize from '../../../../uploads/formatFilesize';
-import CopyToClipboard from '../CopyToClipboard';
+import Meta from './Meta';
+
 import Chevron from '../../icons/Chevron';
 
 import './index.scss';
@@ -24,8 +24,6 @@ const FileDetails = (props) => {
 
   const thumbnail = getThumbnail(mimeType, staticURL, filename, sizes, adminThumbnail);
 
-  const imageURL = `${serverURL}${staticURL}/${filename}`;
-
   return (
     <div className={baseClass}>
       <header>
@@ -41,36 +39,14 @@ const FileDetails = (props) => {
           )}
         </div>
         <div className={`${baseClass}__main-detail`}>
-          <div className={`${baseClass}__url`}>
-            <a
-              href={imageURL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {filename}
-            </a>
-            <CopyToClipboard
-              value={imageURL}
-              defaultMessage="Copy URL"
-            />
-          </div>
-          <div className={`${baseClass}__meta`}>
-            {formatFilesize(filesize)}
-            {(width && height) && (
-              <>
-                &nbsp;-&nbsp;
-                {width}
-                x
-                {height}
-              </>
-            )}
-            {mimeType && (
-              <>
-                &nbsp;-&nbsp;
-                {mimeType}
-              </>
-            )}
-          </div>
+          <Meta
+            staticURL={staticURL}
+            filename={filename}
+            filesize={filesize}
+            width={width}
+            height={height}
+            mimeType={mimeType}
+          />
           {sizes && (
             <Button
               className={`${baseClass}__toggle-more-info${moreInfoOpen ? ' open' : ''}`}
@@ -103,12 +79,29 @@ const FileDetails = (props) => {
           />
         )}
       </header>
-      <AnimateHeight
-        className={`${baseClass}__more-info`}
-        height={moreInfoOpen ? 'auto' : 0}
-      >
-        test
-      </AnimateHeight>
+      {sizes && (
+        <AnimateHeight
+          className={`${baseClass}__more-info`}
+          height={moreInfoOpen ? 'auto' : 0}
+        >
+          <ul className={`${baseClass}__sizes`}>
+            {Object.entries(sizes).map(([key, val]) => {
+              return (
+                <li key={key}>
+                  <div className={`${baseClass}__size-label`}>
+                    {key}
+                  </div>
+                  <Meta
+                    {...val}
+                    staticURL={staticURL}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        </AnimateHeight>
+      )}
+
     </div>
   );
 };
