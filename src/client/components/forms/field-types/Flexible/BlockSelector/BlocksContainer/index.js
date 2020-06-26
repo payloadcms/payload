@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import SelectableBlock from '../SelectableBlock';
+import BlockSelection from '../BlockSelection';
 
 import './index.scss';
 
@@ -14,14 +14,13 @@ const BlocksContainer = (props) => {
     <div className={baseClass}>
       {blocks?.map((block, index) => {
         return (
-          <SelectableBlock
+          <BlockSelection
             key={index}
             block={block}
             {...remainingProps}
           />
         );
       })}
-      Blocks to choose from...
     </div>
   );
 };

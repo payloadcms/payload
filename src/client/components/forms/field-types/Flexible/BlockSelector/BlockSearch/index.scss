@@ -1,1 +1,20 @@
-@import '../../../../../../scss/styles';
+@import '../../../shared.scss';
+
+$icon-width: base(1);
+$icon-margin: base(.25);
+
+.block-search {
+  position: relative;
+
+  &__input {
+    @include formInput;
+    padding-right: calc(#{$icon-width} + #{$icon-margin} * 2);
+  }
+
+  .search {
+    position: absolute;
+    right: 0;
+    width: $icon-width;
+    margin: 0 $icon-margin;
+  }
+}

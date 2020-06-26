@@ -1,22 +1,21 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
+import SearchIcon from '../../../../../graphics/Search';
 
 import './index.scss';
 
 const baseClass = 'block-search';
 
-const BlockSearch = (props) => {
-  const {} = props;
-
+const BlockSearch = () => {
   return (
     <div className={baseClass}>
-      Search...
+      <input
+        className={`${baseClass}__input`}
+        placeholder="Search for a block"
+      />
+      <SearchIcon />
     </div>
   );
 };
-
-BlockSearch.defaultProps = {};
-
-BlockSearch.propTypes = {};
 
 export default BlockSearch;

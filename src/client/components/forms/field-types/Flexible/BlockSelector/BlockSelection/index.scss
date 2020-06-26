@@ -1,0 +1,26 @@
+@import '../../../../../../scss/styles';
+
+.block-selection {
+  display: inline-flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  width: 33%;
+  padding: base(.75) base(.5);
+  cursor: pointer;
+
+  &:hover {
+    background-color: $color-background-gray;
+  }
+
+  &__image {
+    svg {
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  &__label {
+    margin-top: base(.25);
+    font-weight: 600;
+  }
+}

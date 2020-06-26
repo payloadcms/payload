@@ -14,7 +14,7 @@ import { useRenderedFields } from '../../RenderFields';
 import Error from '../../Error';
 import useFieldType from '../../useFieldType';
 import Popup from '../../../elements/Popup';
-import BlocksContainer from './BlockSelector/BlocksContainer';
+import BlockSelector from './BlockSelector';
 import { flexible } from '../../../../../fields/validations';
 
 import './index.scss';
@@ -213,7 +213,7 @@ const Flexible = (props) => {
               </Button>
               )}
           >
-            <BlocksContainer
+            <BlockSelector
               blocks={blocks}
               addRow={addRow}
               addRowIndex={addRowIndex}
