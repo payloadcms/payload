@@ -5,6 +5,8 @@ $icon-margin: base(.25);
 
 .block-search {
   position: relative;
+  display: flex;
+  align-items: center;
 
   &__input {
     @include formInput;

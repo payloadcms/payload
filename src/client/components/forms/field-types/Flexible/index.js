@@ -212,13 +212,15 @@ const Flexible = (props) => {
                 {`Add ${singularLabel}`}
               </Button>
               )}
-          >
-            <BlockSelector
-              blocks={blocks}
-              addRow={addRow}
-              addRowIndex={addRowIndex}
-            />
-          </Popup>
+            render={({ close }) => (
+              <BlockSelector
+                blocks={blocks}
+                addRow={addRow}
+                addRowIndex={addRowIndex}
+                close={close}
+              />
+            )}
+          />
         </div>
       </div>
     </DragDropContext>

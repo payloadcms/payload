@@ -1,4 +1,5 @@
 module.exports = {
+  blockImage: '/static/assets/images/generic-block-image.svg',
   slug: 'quote',
   labels: {
     singular: 'Quote',

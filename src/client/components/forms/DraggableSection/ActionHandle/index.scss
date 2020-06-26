@@ -3,11 +3,12 @@
 .action-handle {
   padding: base(.5);
   padding-left: base(.75);
-  margin-bottom: base(.5);
+  margin-bottom: base(.75);
 
   &__controls-container {
     position: relative;
     height: 100%;
+    z-index: $z-nav;
   }
 
   &__controls {

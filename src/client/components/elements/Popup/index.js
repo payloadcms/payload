@@ -2,36 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useWindowInfo } from '@trbl/react-window-info';
 import { useScrollInfo } from '@trbl/react-scroll-info';
+
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
+import PopupButton from './PopupButton';
 
 import './index.scss';
 
 const baseClass = 'popup';
-
-const ClickableButton = ({
-  buttonType, button, setActive, active,
-}) => {
-  if (buttonType === 'custom') {
-    return (
-      <div
-        role="button"
-        tabIndex="0"
-        onClick={() => setActive(!active)}
-      >
-        {button}
-      </div>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={() => setActive(!active)}
-    >
-      {button}
-    </button>
-  );
-};
 
 const Popup = (props) => {
   const {
@@ -90,7 +67,10 @@ const Popup = (props) => {
 
   return (
     <div className={classes}>
-      <div ref={buttonRef}>
+      <div
+        ref={buttonRef}
+        className={`${baseClass}__wrapper`}
+      >
         {showOnHover
           ? (
             <div
@@ -98,7 +78,7 @@ const Popup = (props) => {
               onMouseEnter={() => setActive(true)}
               onMouseLeave={() => setActive(false)}
             >
-              <ClickableButton
+              <PopupButton
                 buttonType={buttonType}
                 button={button}
                 setActive={setActive}
@@ -107,7 +87,7 @@ const Popup = (props) => {
             </div>
           )
           : (
-            <ClickableButton
+            <PopupButton
               buttonType={buttonType}
               button={button}
               setActive={setActive}

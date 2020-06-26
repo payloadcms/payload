@@ -8,18 +8,28 @@ import './index.scss';
 const baseClass = 'block-selection';
 
 const BlockSelection = (props) => {
-  const { addRow, addRowIndex, block } = props;
+  const {
+    addRow, addRowIndex, block, close,
+  } = props;
 
   const { labels, slug, blockImage } = block;
+
+  console.log(blockImage);
+
+  const handleBlockSelection = () => {
+    close();
+    addRow(addRowIndex, slug);
+  };
 
   return (
     <div
       className={baseClass}
       role="button"
       tabIndex={0}
-      onClick={() => addRow(addRowIndex, slug)}
+      onClick={handleBlockSelection}
     >
       <div className={`${baseClass}__image`}>
+        {/* <img src={blockImage} /> */}
         <FallbackBlockImage />
       </div>
       <div className={`${baseClass}__label`}>{labels.singular}</div>
@@ -42,6 +52,7 @@ BlockSelection.propTypes = {
     slug: PropTypes.string,
     blockImage: PropTypes.string,
   }).isRequired,
+  close: PropTypes.func.isRequired,
 };
 
 export default BlockSelection;

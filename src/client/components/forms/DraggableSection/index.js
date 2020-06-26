@@ -51,8 +51,9 @@ const DraggableSection = (props) => {
           <div
             ref={providedDrag.innerRef}
             className={classes}
-            onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onMouseOver={() => setIsHovered(true)}
+            onFocus={() => setIsHovered(true)}
             {...providedDrag.draggableProps}
           >
 
@@ -105,7 +106,6 @@ const DraggableSection = (props) => {
             <ActionHandle
               removeRow={removeRow}
               addRow={addRow}
-              rowIndex={rowIndex}
               singularLabel={singularLabel}
               verticalAlignment={actionHandleVerticalAlignment}
             />

@@ -56,8 +56,7 @@
     width: 100%;
   }
 
-  &.is-hovered,
-  &:focus-within {
+  &.is-hovered {
     > .position-handle {
       .position-handle__controls-container {
         box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
@@ -81,17 +80,14 @@
     }
 
     .toggle-collapse {
+      @include color-svg(white);
+
       .btn__icon {
         background-color: $color-gray;
 
         &:hover {
           background-color: $color-dark-gray;
         }
-
-      }
-
-      &:focus {
-        @include color-svg(white);
       }
     }
   }
@@ -107,6 +103,10 @@
 
 .collection-edit {
   @include absolutely-position-handles();
+
+  @include mid-break {
+    @include realtively-position-handles();
+  }
 }
 
 .field-type.repeater .field-type.repeater {

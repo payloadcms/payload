@@ -36,7 +36,7 @@ const ActionHandle = (props) => {
                 icon="x"
                 iconPosition="left"
                 iconStyle="with-border"
-                onClick={() => removeRow()}
+                onClick={removeRow}
               />
             )}
           >
@@ -58,7 +58,7 @@ const ActionHandle = (props) => {
                 icon="plus"
                 iconPosition="left"
                 iconStyle="with-border"
-                onClick={() => addRow()}
+                onClick={addRow}
               />
             )}
           >

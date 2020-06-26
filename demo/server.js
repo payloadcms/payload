@@ -4,6 +4,8 @@ const Payload = require('../src');
 
 const expressApp = express();
 
+expressApp.use('/static', express.static(path.resolve(__dirname, 'client/static')));
+
 const payload = new Payload({
   email: {
     provider: 'mock',
