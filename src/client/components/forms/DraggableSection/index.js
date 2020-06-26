@@ -58,7 +58,7 @@ const DraggableSection = (props) => {
           >
 
             <PositionPanel
-              dragPanelProps={providedDrag.dragPanelProps}
+              dragHandleProps={providedDrag.dragHandleProps}
               moveRow={moveRow}
               positionIndex={rowIndex}
               verticalAlignment={positionPanelVerticalAlignment}
