@@ -31,7 +31,7 @@ const File = (props) => {
   const [selectingFile, setSelectingFile] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
-  const [deletingFile, setDeletingFile] = useState(false);
+  const [replacingFile, setReplacingFile] = useState(false);
 
   const {
     initialData = {}, adminThumbnail, staticURL,
@@ -121,7 +121,7 @@ const File = (props) => {
   }, [fileList]);
 
   useEffect(() => {
-    setDeletingFile(false);
+    setReplacingFile(false);
   }, [initialData]);
 
   const classes = [
@@ -136,19 +136,19 @@ const File = (props) => {
         showError={showError}
         message={errorMessage}
       />
-      {(filename && !deletingFile) && (
+      {(filename && !replacingFile) && (
         <FileDetails
           {...initialData}
           staticURL={staticURL}
           adminThumbnail={adminThumbnail}
           handleRemove={() => {
-            setDeletingFile(true);
+            setReplacingFile(true);
             setFileList(null);
             setValue(null);
           }}
         />
       )}
-      {(!filename || deletingFile) && (
+      {(!filename || replacingFile) && (
         <div className={`${baseClass}__upload`}>
           {value && (
             <div className={`${baseClass}__file-selected`}>
