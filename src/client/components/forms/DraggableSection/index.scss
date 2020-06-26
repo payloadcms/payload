@@ -4,25 +4,25 @@
 // HELPER MIXINS
 //////////////////////
 
-@mixin realtively-position-handles {
-  .position-handle {
+@mixin realtively-position-panels {
+  .position-panel {
     position: relative;
     right: 0;
   }
 
-  .action-handle {
+  .action-panel {
     position: relative;
     left: 0;
   }
 }
 
-@mixin absolutely-position-handles {
-  .position-handle {
+@mixin absolutely-position-panels {
+  .position-panel {
     position: absolute;
     top: 0; right: 100%; bottom: 0;
   }
 
-  .action-handle {
+  .action-panel {
     position: absolute;
     top: 0; bottom: 0; left: 100%;
   }
@@ -57,24 +57,24 @@
   }
 
   &.is-hovered {
-    > .position-handle {
-      .position-handle__controls-container {
+    > .position-panel {
+      .position-panel__controls-container {
         box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
       }
 
-      .position-handle__move-forward,
-      .position-handle__move-backward {
+      .position-panel__move-forward,
+      .position-panel__move-backward {
         opacity: 1;
       }
 
-      .position-handle__current-position {
+      .position-panel__current-position {
         color: $color-dark-gray;
       }
     }
 
-    > .action-handle {
-      .action-handle__add-row,
-      .action-handle__remove-row {
+    > .action-panel {
+      .action-panel__add-row,
+      .action-panel__remove-row {
         opacity: 1;
       }
     }
@@ -93,7 +93,7 @@
   }
 
   @include mid-break {
-    @include realtively-position-handles();
+    @include realtively-position-panels();
   }
 }
 
@@ -102,15 +102,15 @@
 //////////////////////
 
 .collection-edit {
-  @include absolutely-position-handles();
+  @include absolutely-position-panels();
 
   @include mid-break {
-    @include realtively-position-handles();
+    @include realtively-position-panels();
   }
 }
 
 .field-type.repeater .field-type.repeater {
-  @include realtively-position-handles();
+  @include realtively-position-panels();
 }
 
 

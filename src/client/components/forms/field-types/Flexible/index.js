@@ -185,8 +185,6 @@ const Flexible = (props) => {
                       dispatchRows={dispatchRows}
                       blockType="flexible"
                       customComponentsPath={`${customComponentsPath}${name}.fields.`}
-                      positionHandleVerticalAlignment="sticky"
-                      actionHandleVerticalAlignment="sticky"
                     />
                   );
                 }

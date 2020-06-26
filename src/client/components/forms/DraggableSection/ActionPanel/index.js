@@ -6,9 +6,9 @@ import Popup from '../../../elements/Popup';
 
 import './index.scss';
 
-const baseClass = 'action-handle';
+const baseClass = 'action-panel';
 
-const ActionHandle = (props) => {
+const ActionPanel = (props) => {
   const {
     addRow, removeRow, singularLabel, verticalAlignment,
   } = props;
@@ -71,16 +71,16 @@ const ActionHandle = (props) => {
   );
 };
 
-ActionHandle.defaultProps = {
+ActionPanel.defaultProps = {
   singularLabel: 'Row',
   verticalAlignment: 'center',
 };
 
-ActionHandle.propTypes = {
+ActionPanel.propTypes = {
   singularLabel: PropTypes.string,
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
   verticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
 };
 
-export default ActionHandle;
+export default ActionPanel;

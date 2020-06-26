@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
 
-import ActionHandle from './ActionHandle';
+import ActionPanel from './ActionPanel';
 import SectionTitle from './SectionTitle';
-import PositionHandle from './PositionHandle';
+import PositionPanel from './PositionPanel';
 import RenderFields from '../RenderFields';
 
 import './index.scss';
@@ -28,8 +28,8 @@ const DraggableSection = (props) => {
     customComponentsPath,
     isOpen,
     id,
-    positionHandleVerticalAlignment,
-    actionHandleVerticalAlignment,
+    positionPanelVerticalAlignment,
+    actionPanelVerticalAlignment,
     toggleRowCollapse,
   } = props;
 
@@ -57,11 +57,11 @@ const DraggableSection = (props) => {
             {...providedDrag.draggableProps}
           >
 
-            <PositionHandle
-              dragHandleProps={providedDrag.dragHandleProps}
+            <PositionPanel
+              dragPanelProps={providedDrag.dragPanelProps}
               moveRow={moveRow}
               positionIndex={rowIndex}
-              verticalAlignment={positionHandleVerticalAlignment}
+              verticalAlignment={positionPanelVerticalAlignment}
             />
 
             <div className={`${baseClass}__render-fields-wrapper`}>
@@ -103,11 +103,11 @@ const DraggableSection = (props) => {
               </AnimateHeight>
             </div>
 
-            <ActionHandle
+            <ActionPanel
               removeRow={removeRow}
               addRow={addRow}
               singularLabel={singularLabel}
-              verticalAlignment={actionHandleVerticalAlignment}
+              verticalAlignment={actionPanelVerticalAlignment}
             />
           </div>
         );
@@ -124,8 +124,8 @@ DraggableSection.defaultProps = {
   blockType: '',
   customComponentsPath: '',
   isOpen: true,
-  positionHandleVerticalAlignment: 'center',
-  actionHandleVerticalAlignment: 'center',
+  positionPanelVerticalAlignment: 'sticky',
+  actionPanelVerticalAlignment: 'sticky',
 };
 
 DraggableSection.propTypes = {
@@ -144,8 +144,8 @@ DraggableSection.propTypes = {
   fieldTypes: PropTypes.shape({}).isRequired,
   customComponentsPath: PropTypes.string,
   id: PropTypes.string.isRequired,
-  positionHandleVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
-  actionHandleVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
+  positionPanelVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
+  actionPanelVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
 };
 
 export default DraggableSection;

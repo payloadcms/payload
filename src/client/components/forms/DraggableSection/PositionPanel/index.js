@@ -5,9 +5,9 @@ import Button from '../../../elements/Button';
 
 import './index.scss';
 
-const baseClass = 'position-handle';
+const baseClass = 'position-panel';
 
-const PositionHandle = (props) => {
+const PositionPanel = (props) => {
   const {
     dragHandleProps, moveRow, positionIndex, verticalAlignment,
   } = props;
@@ -49,15 +49,15 @@ const PositionHandle = (props) => {
   );
 };
 
-PositionHandle.defaultProps = {
+PositionPanel.defaultProps = {
   verticalAlignment: 'center',
 };
 
-PositionHandle.propTypes = {
+PositionPanel.propTypes = {
   dragHandleProps: PropTypes.shape({}).isRequired,
   positionIndex: PropTypes.number.isRequired,
   moveRow: PropTypes.func.isRequired,
   verticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
 };
 
-export default PositionHandle;
+export default PositionPanel;
