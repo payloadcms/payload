@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = {
   slug: 'files',
   labels: {
@@ -6,7 +8,7 @@ module.exports = {
   },
   upload: {
     staticURL: '/files',
-    staticDir: 'demo/files',
+    staticDir: path.resolve(__dirname, '../files'),
   },
   useAsTitle: 'filename',
   fields: [
@@ -16,7 +18,7 @@ module.exports = {
       type: 'select',
       options: [{
         value: 'Type 1',
-        label: 'Type 2',
+        label: 'Type 1 Label',
       }, {
         value: 'Type 2',
         label: 'Type 2 Label',

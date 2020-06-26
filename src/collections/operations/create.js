@@ -5,6 +5,8 @@ const executePolicy = require('../../auth/executePolicy');
 const { MissingFile } = require('../../errors');
 const resizeAndSave = require('../../uploads/imageResizer');
 const getSafeFilename = require('../../uploads/getSafeFilename');
+const getImageSize = require('../../uploads/getImageSize');
+const imageMIMETypes = require('../../uploads/imageMIMETypes');
 
 const performFieldOperations = require('../../fields/performFieldOperations');
 
@@ -53,13 +55,19 @@ const create = async (args) => {
 
       await options.req.files.file.mv(`${staticDir}/${fsSafeName}`);
 
+      if (imageMIMETypes.indexOf(options.req.files.file.mimetype) > -1) {
+        const dimensions = await getImageSize(`${staticDir}/${fsSafeName}`);
+        fileData.width = dimensions.width;
+        fileData.height = dimensions.height;
+
+        if (Array.isArray(imageSizes)) {
+          fileData.sizes = await resizeAndSave(options.config, fsSafeName, fileData.mimeType);
+        }
+      }
+
       fileData.filename = fsSafeName;
       fileData.filesize = options.req.files.file.size;
       fileData.mimeType = options.req.files.file.mimetype;
-
-      if (imageSizes) {
-        fileData.sizes = await resizeAndSave(options.config, fsSafeName, fileData.mimeType);
-      }
 
       options.data = {
         ...options.data,

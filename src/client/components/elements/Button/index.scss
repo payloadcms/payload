@@ -37,7 +37,7 @@
   }
 
   span, svg {
-    vertical-align: middle;
+    vertical-align: top;
   }
 
   &--size-medium {
@@ -74,6 +74,7 @@
 
   &--style-none {
     padding: 0;
+    margin: 0;
   }
 
   &--round {

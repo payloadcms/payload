@@ -60,7 +60,7 @@ const Repeater = (props) => {
   });
 
   const addRow = (rowIndex) => {
-    const data = getDataByPath(path)?.[name];
+    const data = getDataByPath(path);
 
     dispatchRows({
       type: 'ADD', index: rowIndex, data,
@@ -70,7 +70,7 @@ const Repeater = (props) => {
   };
 
   const removeRow = (rowIndex) => {
-    const data = getDataByPath(path)?.[name];
+    const data = getDataByPath(path);
 
     dispatchRows({
       type: 'REMOVE',
@@ -82,7 +82,7 @@ const Repeater = (props) => {
   };
 
   const moveRow = (moveFromIndex, moveToIndex) => {
-    const data = getDataByPath(path)?.[name];
+    const data = getDataByPath(path);
 
     dispatchRows({
       type: 'MOVE', index: moveFromIndex, moveToIndex, data,
@@ -141,6 +141,7 @@ const Repeater = (props) => {
                     rowIndex={i}
                     fieldSchema={fields}
                     initialData={row.data}
+                    initNull={row.initNull}
                     dispatchRows={dispatchRows}
                     customComponentsPath={`${customComponentsPath}${name}.fields.`}
                     positionHandleVerticalAlignment="sticky"

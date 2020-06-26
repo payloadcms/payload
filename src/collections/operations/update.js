@@ -1,8 +1,11 @@
 const deepmerge = require('deepmerge');
-const combineMerge = require('../../utilities/combineMerge');
+const overwriteMerge = require('../../utilities/overwriteMerge');
 const executePolicy = require('../../auth/executePolicy');
 const { NotFound, Forbidden } = require('../../errors');
 const performFieldOperations = require('../../fields/performFieldOperations');
+const imageMIMETypes = require('../../uploads/imageMIMETypes');
+const getImageSize = require('../../uploads/getImageSize');
+const getSafeFilename = require('../../uploads/getSafeFilename');
 
 const resizeAndSave = require('../../uploads/imageResizer');
 
@@ -64,7 +67,7 @@ const update = async (args) => {
     // 3. Merge updates into existing data
     // /////////////////////////////////////
 
-    options.data = deepmerge(docJSON, options.data, { arrayMerge: combineMerge });
+    options.data = deepmerge(docJSON, options.data, { arrayMerge: overwriteMerge });
 
     // /////////////////////////////////////
     // 4. Execute field-level hooks, policies, and validation
@@ -81,18 +84,34 @@ const update = async (args) => {
 
       const { staticDir, imageSizes } = args.config.upload;
 
-      if (args.req.files || args.req.files.file) {
-        await options.req.files.file.mv(`${staticDir}/${options.req.files.file.name}`);
+      if (options.req.files && options.req.files.file) {
+        const fsSafeName = await getSafeFilename(staticDir, options.req.files.file.name);
 
-        fileData.filename = options.req.files.file.name;
+        await options.req.files.file.mv(`${staticDir}/${fsSafeName}`);
 
-        if (imageSizes) {
-          fileData.sizes = await resizeAndSave(options.config, options.req.files.file.name);
+        fileData.filename = fsSafeName;
+        fileData.filesize = options.req.files.file.size;
+        fileData.mimeType = options.req.files.file.mimetype;
+
+        if (imageMIMETypes.indexOf(options.req.files.file.mimetype) > -1) {
+          const dimensions = await getImageSize(`${staticDir}/${fsSafeName}`);
+          fileData.width = dimensions.width;
+          fileData.height = dimensions.height;
+
+          if (Array.isArray(imageSizes)) {
+            fileData.sizes = await resizeAndSave(options.config, fsSafeName, fileData.mimeType);
+          }
         }
 
         options.data = {
           ...options.data,
           ...fileData,
+        };
+      } else if (options.data.file === null) {
+        options.data = {
+          ...options.data,
+          filename: null,
+          sizes: null,
         };
       }
     }

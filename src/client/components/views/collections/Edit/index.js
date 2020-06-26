@@ -28,14 +28,15 @@ const EditView = (props) => {
     useAsTitle,
   } = collection;
 
-  const onSave = !isEditing ? (json) => {
+  const onSave = (json) => {
     history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`, {
       status: {
         message: json.message,
         type: 'success',
       },
+      data: json.doc,
     });
-  } : null;
+  };
 
   const [{ data }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),

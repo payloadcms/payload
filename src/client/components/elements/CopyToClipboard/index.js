@@ -7,7 +7,7 @@ import './index.scss';
 
 const baseClass = 'copy-to-clipboard';
 
-const CopyToClipboard = ({ value }) => {
+const CopyToClipboard = ({ value, defaultMessage, successMessage }) => {
   const ref = useRef(null);
   const [copied, setCopied] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -45,8 +45,8 @@ const CopyToClipboard = ({ value }) => {
       >
         <Copy />
         <Tooltip>
-          {copied && 'Copied'}
-          {!copied && 'Copy'}
+          {copied && successMessage}
+          {!copied && defaultMessage}
         </Tooltip>
         <textarea
           readOnly
@@ -62,10 +62,14 @@ const CopyToClipboard = ({ value }) => {
 
 CopyToClipboard.defaultProps = {
   value: '',
+  defaultMessage: 'Copy',
+  successMessage: 'Copied',
 };
 
 CopyToClipboard.propTypes = {
   value: PropTypes.string,
+  defaultMessage: PropTypes.string,
+  successMessage: PropTypes.string,
 };
 
 export default CopyToClipboard;

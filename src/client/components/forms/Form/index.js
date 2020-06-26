@@ -17,7 +17,7 @@ import './index.scss';
 
 const baseClass = 'form';
 
-const reduceFieldsToValues = (fields) => {
+const reduceFieldsToValues = (fields, flatten) => {
   const data = {};
 
   Object.keys(fields).forEach((key) => {
@@ -26,8 +26,11 @@ const reduceFieldsToValues = (fields) => {
     }
   });
 
-  const unflattened = unflatten(data, { safe: true });
-  return unflattened;
+  if (flatten) {
+    return unflatten(data, { safe: true });
+  }
+
+  return data;
 };
 
 const Form = (props) => {
@@ -62,7 +65,7 @@ const Form = (props) => {
   }, [fields]);
 
   const getData = useCallback(() => {
-    return reduceFieldsToValues(fields);
+    return reduceFieldsToValues(fields, true);
   }, [fields]);
 
   const getSiblingData = useCallback((path) => {
@@ -84,32 +87,48 @@ const Form = (props) => {
       }, {});
     }
 
-    return reduceFieldsToValues(siblingFields);
+    return reduceFieldsToValues(siblingFields, true);
   }, [fields]);
 
   const getDataByPath = useCallback((path) => {
     const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1);
+    const name = path.split('.').pop();
 
-    const rows = Object.keys(fields).reduce((matchedRows, key) => {
+    const data = Object.keys(fields).reduce((matchedData, key) => {
       if (key.indexOf(`${path}.`) === 0) {
         return {
-          ...matchedRows,
+          ...matchedData,
           [key.replace(pathPrefixToRemove, '')]: fields[key],
         };
       }
 
-      return matchedRows;
+      return matchedData;
     }, {});
 
-    const rowValues = reduceFieldsToValues(rows);
-    const unflattenedRows = unflatten(rowValues);
-    return unflattenedRows;
+    const values = reduceFieldsToValues(data, true);
+    const unflattenedData = unflatten(values);
+    return unflattenedData?.[name];
+  }, [fields]);
+
+  const getUnflattenedValues = useCallback(() => {
+    return reduceFieldsToValues(fields);
   }, [fields]);
 
   const validateForm = useCallback(() => {
     return !Object.values(fields).some((field) => {
       return field.valid === false;
     });
+  }, [fields]);
+
+  const createFormData = useCallback(() => {
+    const formData = new FormData();
+    const data = reduceFieldsToValues(fields);
+
+    Object.entries(data).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
+    return formData;
   }, [fields]);
 
   const submit = useCallback((e) => {
@@ -137,7 +156,6 @@ const Form = (props) => {
     // If submit handler comes through via props, run that
     if (onSubmit) {
       e.preventDefault();
-
       return onSubmit(fields);
     }
 
@@ -150,28 +168,25 @@ const Form = (props) => {
         behavior: 'smooth',
       });
 
-      const data = getData();
+      const formData = createFormData();
 
       setProcessing(true);
       // Make the API call from the action
       return requests[method.toLowerCase()](action, {
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        body: formData,
       }).then((res) => {
+        setModified(false);
         if (typeof handleAjaxResponse === 'function') return handleAjaxResponse(res);
 
         return res.json().then((json) => {
           setProcessing(false);
-          setModified(false);
           clearStatus();
 
           if (res.status < 400) {
             if (typeof onSuccess === 'function') onSuccess(json);
 
             if (redirect) {
-              return history.push(redirect, data);
+              return history.push(redirect, json);
             }
 
             if (!disableSuccessStatus) {
@@ -250,11 +265,11 @@ const Form = (props) => {
     method,
     onSubmit,
     redirect,
-    getData,
     clearStatus,
     validateForm,
     onSuccess,
     replaceStatus,
+    createFormData,
   ]);
 
   useThrottledEffect(() => {
@@ -288,6 +303,7 @@ const Form = (props) => {
         getData,
         getSiblingData,
         validateForm,
+        getUnflattenedValues,
         modified,
         setModified,
       }}

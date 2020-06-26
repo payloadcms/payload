@@ -4,50 +4,17 @@ import React, {
 import { useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import X from '../../icons/X';
-
+import reducer from './reducer';
 import './index.scss';
 
 const baseClass = 'status-list';
 
 const Context = createContext({});
 
-const initialStatus = [];
-
-const statusReducer = (state, action) => {
-  switch (action.type) {
-    case 'ADD': {
-      const newState = [
-        ...state,
-        action.payload,
-      ];
-
-      return newState;
-    }
-
-
-    case 'REMOVE': {
-      const statusList = [...state];
-      statusList.splice(action.payload, 1);
-      return statusList;
-    }
-
-    case 'CLEAR': {
-      return [];
-    }
-
-    case 'REPLACE': {
-      return action.payload;
-    }
-
-    default:
-      return state;
-  }
-};
-
 const useStatusList = () => useContext(Context);
 
 const StatusListProvider = ({ children }) => {
-  const [statusList, dispatchStatus] = useReducer(statusReducer, initialStatus);
+  const [statusList, dispatchStatus] = useReducer(reducer, []);
   const { pathname, state } = useLocation();
 
   const removeStatus = useCallback(i => dispatchStatus({ type: 'REMOVE', payload: i }), []);
