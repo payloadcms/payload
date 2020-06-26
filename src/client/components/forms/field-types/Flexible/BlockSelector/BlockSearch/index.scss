@@ -4,9 +4,11 @@ $icon-width: base(1);
 $icon-margin: base(.25);
 
 .block-search {
-  position: relative;
+  position: sticky;
+  top: 0;
   display: flex;
   align-items: center;
+  z-index: 1;
 
   &__input {
     @include formInput;

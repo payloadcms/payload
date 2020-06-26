@@ -1,6 +1,6 @@
 import React from 'react';
 
-const FallbackBlockImage = () => {
+const DefaultBlockImage = () => {
   return (
     <svg
       width="82"
@@ -37,4 +37,4 @@ const FallbackBlockImage = () => {
   );
 };
 
-export default FallbackBlockImage;
+export default DefaultBlockImage;

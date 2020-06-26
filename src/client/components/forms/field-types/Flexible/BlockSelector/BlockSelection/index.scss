@@ -7,16 +7,10 @@
   width: 33%;
   padding: base(.75) base(.5);
   cursor: pointer;
+  align-items: center;
 
   &:hover {
     background-color: $color-background-gray;
-  }
-
-  &__image {
-    svg {
-      width: 100%;
-      height: auto;
-    }
   }
 
   &__label {

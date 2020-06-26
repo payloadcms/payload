@@ -3,4 +3,10 @@
 .blocks-container {
   width: 100%;
   margin-top: base(1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  max-width: 450px;
+  max-height: 300px;
+  position: relative;
 }
