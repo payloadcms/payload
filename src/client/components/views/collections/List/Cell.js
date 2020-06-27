@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import format from 'date-fns/format';
 import config from 'payload/config';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
+import Thumbnail from '../../../elements/Thumbnail';
 
 const { routes: { admin } } = config;
 
@@ -13,10 +14,17 @@ const DefaultCell = (props) => {
     colIndex,
     collection: {
       slug,
+      upload: {
+        staticURL,
+        adminThumbnail,
+      } = {},
     },
     cellData,
     rowData: {
       id,
+      filename,
+      mimeType,
+      sizes,
     } = {},
   } = props;
 
@@ -29,22 +37,38 @@ const DefaultCell = (props) => {
     wrapElementProps.to = `${admin}/collections/${slug}/${id}`;
   }
 
-  return (
-    <>
+  if (field.type === 'thumbnail') {
+    return (
       <WrapElement {...wrapElementProps}>
-        {(field.type === 'date' && cellData) && (
-          <span>
-            {format(new Date(cellData), 'MMMM do yyyy, h:mma')}
-          </span>
-        )}
-        {field.type !== 'date' && (
-          <>
-            {typeof cellData === 'string' && cellData}
-            {typeof cellData === 'object' && JSON.stringify(cellData)}
-          </>
-        )}
+        <Thumbnail
+          size="small"
+          {...{
+            mimeType, adminThumbnail, sizes, staticURL, filename,
+          }}
+        />
       </WrapElement>
-    </>
+    );
+  }
+
+  if (field.type === 'date' && cellData) {
+    return (
+      <WrapElement {...wrapElementProps}>
+        <span>
+          {format(new Date(cellData), 'MMMM do yyyy, h:mma')}
+        </span>
+      </WrapElement>
+    );
+  }
+
+  return (
+    <WrapElement {...wrapElementProps}>
+      {field.type !== 'date' && (
+        <>
+          {typeof cellData === 'string' && cellData}
+          {typeof cellData === 'object' && JSON.stringify(cellData)}
+        </>
+      )}
+    </WrapElement>
   );
 };
 
@@ -86,6 +110,10 @@ const propTypes = {
   colIndex: PropTypes.number.isRequired,
   collection: PropTypes.shape({
     slug: PropTypes.string,
+    upload: PropTypes.shape({
+      staticDir: PropTypes.string,
+      adminThumbnail: PropTypes.string,
+    }),
   }).isRequired,
   cellData: PropTypes.oneOfType([
     PropTypes.shape({}),

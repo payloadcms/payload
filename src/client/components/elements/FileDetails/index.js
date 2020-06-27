@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
-import FileGraphic from '../../graphics/File';
-import config from '../../../config';
-import getThumbnail from '../../../../uploads/getThumbnail';
+import Thumbnail from '../Thumbnail';
 import Button from '../Button';
 import Meta from './Meta';
 
 import Chevron from '../../icons/Chevron';
 
 import './index.scss';
-
-const { serverURL } = config;
 
 const baseClass = 'file-details';
 
@@ -22,22 +18,13 @@ const FileDetails = (props) => {
 
   const [moreInfoOpen, setMoreInfoOpen] = useState(false);
 
-  const thumbnail = getThumbnail(mimeType, staticURL, filename, sizes, adminThumbnail);
-
   return (
     <div className={baseClass}>
       <header>
-        <div className={`${baseClass}__thumbnail`}>
-          {thumbnail && (
-            <img
-              src={`${serverURL}${thumbnail}`}
-              alt={filename}
-            />
-          )}
-          {!thumbnail && (
-            <FileGraphic />
-          )}
-        </div>
+        <Thumbnail {...{
+          mimeType, adminThumbnail, sizes, staticURL, filename,
+        }}
+        />
         <div className={`${baseClass}__main-detail`}>
           <Meta
             staticURL={staticURL}

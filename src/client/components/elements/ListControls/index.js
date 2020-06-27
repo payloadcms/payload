@@ -5,7 +5,6 @@ import SearchFilter from '../SearchFilter';
 import ColumnSelector from '../ColumnSelector';
 import WhereBuilder from '../WhereBuilder';
 import Button from '../Button';
-import Chevron from '../../icons/Chevron';
 
 import './index.scss';
 

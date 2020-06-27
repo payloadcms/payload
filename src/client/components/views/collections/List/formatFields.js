@@ -39,11 +39,19 @@ const formatFields = (config) => {
   }
 
   if (config.upload) {
-    fields = fields.concat({
-      name: 'filename',
-      label: 'Filename',
-      type: 'text',
-    });
+    fields = fields.concat([
+      {
+        name: 'thumbnail',
+        type: 'thumbnail',
+        label: 'Thumbnail',
+        disableSort: true,
+      },
+      {
+        name: 'filename',
+        label: 'Filename',
+        type: 'text',
+      },
+    ]);
   }
 
   return fields;
