@@ -1,65 +1,156 @@
-import React, { Component } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
+import { useModal } from '@trbl/react-modal';
+import config from '../../../../config';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
-import UploadMedia from '../../../modules/UploadMedia';
+import Button from '../../../elements/Button';
+import Label from '../../Label';
+import Error from '../../Error';
+import { upload } from '../../../../../fields/validations';
+import SelectedUpload from './Selected';
+import AddModal from './Add';
+import SelectExistingModal from './SelectExisting';
 
 import './index.scss';
 
-const defaultError = 'There was a problem uploading your file.';
+const { collections } = config;
 
-const defaultValidate = () => true;
+const baseClass = 'upload';
 
-class Media extends Component {
-  constructor(props) {
-    super(props);
+const Upload = (props) => {
+  const { closeAll, toggle } = useModal();
 
-    this.state = {
-      file: this.props.initialValue,
-    };
+  const {
+    path: pathFromProps,
+    name,
+    required,
+    defaultValue,
+    initialData,
+    style,
+    width,
+    label,
+    readOnly,
+    validate,
+    relationTo,
+  } = props;
 
-    this.inputRef = React.createRef();
-  }
+  const collection = collections.find(coll => coll.slug === relationTo);
 
-  handleDrop = (file) => {
-    this.inputRef.current.files = file;
-  }
+  const path = pathFromProps || name;
+  const addModalSlug = `${path}-add`;
+  const selectExistingModalSlug = `${path}-select-existing`;
 
-  handleSelectFile = () => {
-    this.inputRef.current.click();
-  }
+  const fieldType = useFieldType({
+    path,
+    required,
+    initialData,
+    defaultValue,
+    validate,
+  });
 
-  render() {
-    const path = this.props.path || this.props.name;
+  const {
+    value,
+    showError,
+    setValue,
+    errorMessage,
+  } = fieldType;
 
-    return (
-      <div
-        className={this.props.className}
-        style={{
-          width: this.props.width ? `${this.props.width}%` : null,
-          ...this.props.style,
-        }}
-      >
-        {this.props.label}
-        <input
-          style={{ display: 'none' }}
-          ref={this.inputRef}
-          value={this.props.value || ''}
-          onChange={this.props.onChange}
-          type="hidden"
-          id={this.props.id ? this.props.id : path}
-          name={path}
-        />
-        {!this.props.value
-          && (
-            <UploadMedia
-              handleDrop={this.handleDrop}
-              handleSelectFile={this.handleSelectFile}
+  const classes = [
+    'field-type',
+    baseClass,
+    showError && 'error',
+    readOnly && 'read-only',
+  ].filter(Boolean).join(' ');
+
+  return (
+    <div
+      className={classes}
+      style={{
+        ...style,
+        width,
+      }}
+    >
+      <Error
+        showError={showError}
+        message={errorMessage}
+      />
+      <Label
+        htmlFor={path}
+        label={label}
+        required={required}
+      />
+      {collection && (
+        <>
+          {value && (
+            <SelectedUpload
+              collection={collection}
+              value={value}
             />
-          )
-        }
-      </div>
-    );
-  }
-}
+          )}
+          {!value && (
+            <div className={`${baseClass}__wrap`}>
+              <Button
+                buttonStyle="secondary"
+                onClick={() => {
+                  toggle(addModalSlug);
+                }}
+              >
+                Upload new
+                {' '}
+                {collection.labels.singular}
+              </Button>
+              <Button
+                buttonStyle="secondary"
+                onClick={() => {
+                  toggle(selectExistingModalSlug);
+                }}
+              >
+                Choose from existing
+              </Button>
+            </div>
+          )}
+          <AddModal {...{
+            collection, slug: addModalSlug, setValue,
+          }}
+          />
+          <SelectExistingModal {...{
+            collection, slug: selectExistingModalSlug, setValue, addModalSlug,
+          }}
+          />
+        </>
+      )}
+    </div>
+  );
+};
 
-export default withCondition(fieldType(Media, 'media', validate, error));
+Upload.defaultProps = {
+  label: null,
+  required: false,
+  readOnly: false,
+  defaultValue: undefined,
+  initialData: undefined,
+  width: undefined,
+  style: {},
+  validate: upload,
+  path: '',
+};
+
+Upload.propTypes = {
+  name: PropTypes.string.isRequired,
+  path: PropTypes.string,
+  required: PropTypes.bool,
+  readOnly: PropTypes.bool,
+  defaultValue: PropTypes.string,
+  initialData: PropTypes.string,
+  validate: PropTypes.func,
+  width: PropTypes.string,
+  style: PropTypes.shape({}),
+  relationTo: PropTypes.string.isRequired,
+  label: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.node,
+  ]),
+};
+
+export default withCondition(Upload);
