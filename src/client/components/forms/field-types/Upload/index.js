@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useModal } from '@trbl/react-modal';
 import config from '../../../../config';
@@ -8,7 +8,7 @@ import Button from '../../../elements/Button';
 import Label from '../../Label';
 import Error from '../../Error';
 import { upload } from '../../../../../fields/validations';
-import SelectedUpload from './Selected';
+import FileDetails from '../../../elements/FileDetails';
 import AddModal from './Add';
 import SelectExistingModal from './SelectExisting';
 
@@ -19,7 +19,8 @@ const { collections } = config;
 const baseClass = 'upload';
 
 const Upload = (props) => {
-  const { closeAll, toggle } = useModal();
+  const { toggle } = useModal();
+  const [internalValue, setInternalValue] = useState(undefined);
 
   const {
     path: pathFromProps,
@@ -63,6 +64,12 @@ const Upload = (props) => {
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
+  useEffect(() => {
+    if (initialData) {
+      setInternalValue(initialData);
+    }
+  }, [initialData]);
+
   return (
     <div
       className={classes}
@@ -80,12 +87,16 @@ const Upload = (props) => {
         label={label}
         required={required}
       />
-      {collection && (
+      {collection?.upload && (
         <>
-          {value && (
-            <SelectedUpload
-              collection={collection}
-              value={value}
+          {internalValue && (
+            <FileDetails
+              {...collection.upload}
+              {...internalValue}
+              handleRemove={() => {
+                setInternalValue(undefined);
+                setValue(null);
+              }}
             />
           )}
           {!value && (
@@ -111,11 +122,22 @@ const Upload = (props) => {
             </div>
           )}
           <AddModal {...{
-            collection, slug: addModalSlug, setValue,
+            collection,
+            slug: addModalSlug,
+            setValue: (val) => {
+              setValue(val.id);
+              setInternalValue(val);
+            },
           }}
           />
           <SelectExistingModal {...{
-            collection, slug: selectExistingModalSlug, setValue, addModalSlug,
+            collection,
+            slug: selectExistingModalSlug,
+            setValue: (val) => {
+              setValue(val.id);
+              setInternalValue(val);
+            },
+            addModalSlug,
           }}
           />
         </>
@@ -142,7 +164,7 @@ Upload.propTypes = {
   required: PropTypes.bool,
   readOnly: PropTypes.bool,
   defaultValue: PropTypes.string,
-  initialData: PropTypes.string,
+  initialData: PropTypes.shape({}),
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),

@@ -9,6 +9,7 @@ import formatFields from '../../../../views/collections/List/formatFields';
 import usePayloadAPI from '../../../../../hooks/usePayloadAPI';
 import ListControls from '../../../../elements/ListControls';
 import Paginator from '../../../../elements/Paginator';
+import UploadGallery from '../../../../elements/UploadGallery';
 
 import './index.scss';
 
@@ -18,22 +19,17 @@ const baseClass = 'select-existing-upload-modal';
 
 const SelectExistingUploadModal = (props) => {
   const {
+    setValue,
     collection,
     collection: {
       slug: collectionSlug,
-      labels: {
-        plural: pluralLabel,
-        singular: singularLabel,
-      },
     } = {},
     slug: modalSlug,
-    addModalSlug,
   } = props;
 
-  const { closeAll, toggle } = useModal();
+  const { closeAll } = useModal();
   const [fields, setFields] = useState(collection.fields);
   const [listControls, setListControls] = useState({});
-  const [sort, setSort] = useState(null);
   const [page, setPage] = useState(null);
 
   const classes = [
@@ -52,11 +48,10 @@ const SelectExistingUploadModal = (props) => {
     const params = {};
 
     if (page) params.page = page;
-    if (sort) params.sort = sort;
     if (listControls?.where) params.where = listControls.where;
 
     setParams(params);
-  }, [setParams, page, sort, listControls]);
+  }, [setParams, page, listControls]);
 
   return (
     <Modal
@@ -65,7 +60,7 @@ const SelectExistingUploadModal = (props) => {
     >
       <MinimalTemplate width="wide">
         <Form>
-          <header>
+          <header className={`${baseClass}__header`}>
             <h1>
               {' '}
               Select existing
@@ -87,41 +82,14 @@ const SelectExistingUploadModal = (props) => {
               fields,
             }}
           />
-          {(data.docs && data.docs.length > 0) && (
-            <ul>
-              {data.docs.map((doc, i) => {
-                return (
-                  <li key={i}>
-                    doc.id
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-          {data.docs && data.docs.length === 0 && (
-            <div className={`${baseClass}__no-results`}>
-              <p>
-                No
-                {' '}
-                {pluralLabel}
-                {' '}
-                found. Either no
-                {' '}
-                {pluralLabel}
-                {' '}
-                exist yet or none match the filters you&apos;ve specified above.
-              </p>
-              <Button
-                onClick={() => {
-                  toggle(addModalSlug);
-                }}
-              >
-                Upload new
-                {' '}
-                {singularLabel}
-              </Button>
-            </div>
-          )}
+          <UploadGallery
+            docs={data?.docs}
+            collection={collection}
+            onCardClick={(doc) => {
+              setValue(doc);
+              closeAll();
+            }}
+          />
           <div className={`${baseClass}__page-controls`}>
             <Paginator
               limit={data.limit}
@@ -132,6 +100,8 @@ const SelectExistingUploadModal = (props) => {
               prevPage={data.prevPage}
               nextPage={data.nextPage}
               numberOfNeighbors={1}
+              onChange={setPage}
+              disableHistoryChange
             />
             {data?.totalDocs > 0 && (
               <div className={`${baseClass}__page-info`}>
@@ -152,13 +122,16 @@ const SelectExistingUploadModal = (props) => {
 };
 
 SelectExistingUploadModal.propTypes = {
+  setValue: PropTypes.func.isRequired,
   collection: PropTypes.shape({
     labels: PropTypes.shape({
       singular: PropTypes.string,
     }),
+    fields: PropTypes.arrayOf(
+      PropTypes.shape({}),
+    ),
   }).isRequired,
   slug: PropTypes.string.isRequired,
-  addModalSlug: PropTypes.string.isRequired,
 };
 
 export default SelectExistingUploadModal;

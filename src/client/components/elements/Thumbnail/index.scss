@@ -12,13 +12,29 @@
     object-fit: cover;
   }
 
+  &--size-expand {
+    max-height: 100%;
+    width: 100%;
+    padding-top: 100%;
+    position: relative;
+
+    img, svg {
+      position: absolute;
+    }
+  }
+
+  &--size-large {
+    max-height: base(9);
+    width: base(9);
+  }
+
   &--size-medium {
-    max-height: base(6);
+    max-height: base(7);
     width: base(7);
   }
 
   &--size-small {
-    max-height: base(4);
+    max-height: base(5);
     width: base(5);
   }
 

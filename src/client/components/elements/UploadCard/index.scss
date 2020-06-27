@@ -1,0 +1,19 @@
+@import '../../../scss/styles.scss';
+
+.upload-card {
+  @include shadow;
+  background: white;
+  max-width: base(9);
+  margin-bottom: base(.5);
+
+  &__filename {
+    padding: base(.5);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &--has-on-click {
+    cursor: pointer;
+  }
+}

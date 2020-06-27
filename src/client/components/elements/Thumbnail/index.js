@@ -50,7 +50,7 @@ Thumbnail.propTypes = {
   adminThumbnail: PropTypes.string,
   mimeType: PropTypes.string,
   staticURL: PropTypes.string.isRequired,
-  size: PropTypes.oneOf(['small', 'medium', 'large']),
+  size: PropTypes.oneOf(['small', 'medium', 'large', 'expand']),
 };
 
 export default Thumbnail;

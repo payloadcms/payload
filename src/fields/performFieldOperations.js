@@ -50,6 +50,17 @@ module.exports = async (config, operation) => {
 
   const traverseFields = (fields, data = {}, path) => {
     fields.forEach((field) => {
+      const dataCopy = data;
+
+      if (field.type === 'upload') {
+        if (data[field.name] === '') dataCopy[field.name] = null;
+      }
+
+      if (field.type === 'checkbox') {
+        if (data[field.name] === 'true') dataCopy[field.name] = true;
+        if (data[field.name] === 'false') dataCopy[field.name] = false;
+      }
+
       policyPromises.push(createPolicyPromise(data, field));
       hookPromises.push(createHookPromise(data, field));
 

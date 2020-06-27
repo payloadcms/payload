@@ -6,7 +6,12 @@
   align-items: center;
   height: 100%;
 
-  header {
+  .template-minimal {
+    padding-top: base(6);
+    align-items: flex-start;
+  }
+
+  &__header {
     display: flex;
     margin-bottom: $baseline;
 
