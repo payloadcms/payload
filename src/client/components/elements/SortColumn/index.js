@@ -8,7 +8,9 @@ import './index.scss';
 const baseClass = 'sort-column';
 
 const SortColumn = (props) => {
-  const { label, handleChange, name } = props;
+  const {
+    label, handleChange, name, disable,
+  } = props;
   const [sort, setSort] = useState(null);
 
   useEffect(() => {
@@ -27,32 +29,39 @@ const SortColumn = (props) => {
   return (
     <div className={baseClass}>
       <span className={`${baseClass}__label`}>{label}</span>
-      <span className={`${baseClass}__buttons`}>
-        <Button
-          round
-          buttonStyle="none"
-          className={ascClasses.join(' ')}
-          onClick={() => setSort(asc)}
-        >
-          <Chevron />
-        </Button>
-        <Button
-          round
-          buttonStyle="none"
-          className={descClasses.join(' ')}
-          onClick={() => setSort(desc)}
-        >
-          <Chevron />
-        </Button>
-      </span>
+      {!disable && (
+        <span className={`${baseClass}__buttons`}>
+          <Button
+            round
+            buttonStyle="none"
+            className={ascClasses.join(' ')}
+            onClick={() => setSort(asc)}
+          >
+            <Chevron />
+          </Button>
+          <Button
+            round
+            buttonStyle="none"
+            className={descClasses.join(' ')}
+            onClick={() => setSort(desc)}
+          >
+            <Chevron />
+          </Button>
+        </span>
+      )}
     </div>
   );
+};
+
+SortColumn.defaultProps = {
+  disable: false,
 };
 
 SortColumn.propTypes = {
   label: PropTypes.string.isRequired,
   handleChange: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
+  disable: PropTypes.bool,
 };
 
 export default SortColumn;

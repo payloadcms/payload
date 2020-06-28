@@ -84,6 +84,7 @@ const DefaultList = (props) => {
                           label={field.label}
                           name={field.name}
                           handleChange={setSort}
+                          disable={field.disableSort || undefined}
                         />
                       ),
                       renderCell: (rowData, cellData) => {

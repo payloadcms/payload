@@ -11,19 +11,7 @@
     margin: $baseline $baseline $baseline 0;
   }
 
-  &__thumbnail {
-    max-height: base(6);
-    min-height: 100%;
-    width: base(7);
-    flex-shrink: 0;
-    align-self: stretch;
 
-    img, svg {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
 
   &__main-detail {
     padding: $baseline base(1.5);
@@ -67,10 +55,6 @@
   }
 
   @include large-break {
-    &__thumbnail {
-      width: base(5);
-    }
-
     &__main-detail {
       padding: $baseline;
     }
@@ -91,7 +75,7 @@
       flex-wrap: wrap;
     }
 
-    &__thumbnail {
+    .thumbnail {
       width: 50%;
       order: 1;
     }

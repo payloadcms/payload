@@ -31,8 +31,9 @@ const sanitizeCollection = (collections, collection) => {
   if (!sanitizedCollectionConfig.policies) sanitizedCollectionConfig.policies = {};
 
   if (sanitizedCollectionConfig.upload) {
-    if (!sanitizedCollectionConfig.upload.staticDir) sanitizedCollectionConfig.upload.staticDir = '/static';
-    if (!sanitizedCollectionConfig.upload.staticURL) sanitizedCollectionConfig.upload.staticURL = '/static';
+    if (!sanitizedCollectionConfig.upload.staticDir) sanitizedCollectionConfig.upload.staticDir = sanitizedCollectionConfig.slug;
+    if (!sanitizedCollectionConfig.upload.staticURL) sanitizedCollectionConfig.upload.staticURL = sanitizedCollectionConfig.slug;
+    if (!sanitizedCollectionConfig.useAsTitle) sanitizedCollectionConfig.useAsTitle = 'filename';
   }
 
   // /////////////////////////////////

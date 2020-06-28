@@ -2,15 +2,25 @@
 
 .template-minimal {
   display: flex;
+  width: 100%;
   height: 100%;
   justify-content: center;
   align-items: center;
-  padding: $baseline;
+  padding: base(3) $baseline;
   margin-left: auto;
   margin-right: auto;
 
-  &__wrap {
-    max-width: 500px;
-    width: 100%;
+  &--width-normal {
+    .template-minimal__wrap {
+      max-width: 500px;
+      width: 100%;
+    }
+  }
+
+  &--width-wide {
+    .template-minimal__wrap {
+      max-width: 1024px;
+      width: 100%;
+    }
   }
 }

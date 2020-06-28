@@ -110,7 +110,7 @@ const fieldToSchemaMap = {
         ...formatBaseSchema(field),
         type: Schema.Types.ObjectId,
         autopopulate: true,
-        ref: field.type,
+        ref: field.relationTo,
       },
     };
   },

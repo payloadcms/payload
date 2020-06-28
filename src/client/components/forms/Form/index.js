@@ -1,6 +1,7 @@
 import React, {
   useState, useReducer, useCallback, useEffect,
 } from 'react';
+import { objectToFormData } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { unflatten } from 'flatley';
@@ -121,14 +122,8 @@ const Form = (props) => {
   }, [fields]);
 
   const createFormData = useCallback(() => {
-    const formData = new FormData();
     const data = reduceFieldsToValues(fields);
-
-    Object.entries(data).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
-
-    return formData;
+    return objectToFormData(data, { indices: true });
   }, [fields]);
 
   const submit = useCallback((e) => {

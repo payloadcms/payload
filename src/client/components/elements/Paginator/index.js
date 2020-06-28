@@ -29,15 +29,21 @@ const Pagination = (props) => {
     prevPage,
     nextPage,
     numberOfNeighbors,
+    disableHistoryChange,
+    onChange,
   } = props;
 
   if (!totalPages || totalPages <= 1) return null;
 
   // uses react router to set the current page
   const updatePage = (page) => {
-    const params = queryString.parse(location.search, { ignoreQueryPrefix: true });
-    params.page = page;
-    history.push({ search: queryString.stringify(params, { addQueryPrefix: true }) });
+    if (!disableHistoryChange) {
+      const params = queryString.parse(location.search, { ignoreQueryPrefix: true });
+      params.page = page;
+      history.push({ search: queryString.stringify(params, { addQueryPrefix: true }) });
+    }
+
+    if (typeof onChange === 'function') onChange(page);
   };
 
   // Create array of integers for each page
@@ -139,6 +145,8 @@ Pagination.defaultProps = {
   prevPage: null,
   nextPage: null,
   numberOfNeighbors: 1,
+  disableHistoryChange: false,
+  onChange: undefined,
 };
 
 Pagination.propTypes = {
@@ -150,4 +158,6 @@ Pagination.propTypes = {
   prevPage: PropTypes.number,
   nextPage: PropTypes.number,
   numberOfNeighbors: PropTypes.number,
+  disableHistoryChange: PropTypes.bool,
+  onChange: PropTypes.func,
 };

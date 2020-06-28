@@ -7,12 +7,13 @@ const baseClass = 'template-minimal';
 
 const Minimal = (props) => {
   const {
-    className, style, children,
+    className, style, children, width,
   } = props;
 
   const classes = [
     className,
     baseClass,
+    `${baseClass}--width-${width}`,
   ].filter(Boolean).join(' ');
 
   return (
@@ -30,12 +31,14 @@ const Minimal = (props) => {
 Minimal.defaultProps = {
   className: null,
   style: {},
+  width: 'normal',
 };
 
 Minimal.propTypes = {
   className: PropTypes.string,
   style: PropTypes.shape({}),
   children: PropTypes.node.isRequired,
+  width: PropTypes.oneOf(['normal', 'wide']),
 };
 
 export default Minimal;

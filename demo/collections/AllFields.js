@@ -32,6 +32,12 @@ const AllFields = {
       },
     },
     {
+      name: 'image',
+      type: 'upload',
+      label: 'Image',
+      relationTo: 'media',
+    },
+    {
       name: 'select',
       label: 'Select',
       type: 'select',

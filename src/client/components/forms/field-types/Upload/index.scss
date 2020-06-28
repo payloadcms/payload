@@ -1,0 +1,14 @@
+@import '../shared';
+
+.upload {
+	position: relative;
+
+  &__wrap {
+    padding: base(1.5);
+    background: $color-background-gray;
+
+    .btn {
+      margin: 0 $baseline 0 0;
+    }
+  }
+}

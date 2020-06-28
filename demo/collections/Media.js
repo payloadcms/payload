@@ -6,7 +6,6 @@ module.exports = {
     singular: 'Media',
     plural: 'Media',
   },
-  useAsTitle: 'filename',
   policies: {
     read: () => true,
   },
