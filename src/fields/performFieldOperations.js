@@ -56,6 +56,8 @@ module.exports = async (config, operation) => {
         if (data[field.name] === '') dataCopy[field.name] = null;
       }
 
+      // TODO: sanitize additional field types as necessary i.e. relationships
+
       if (field.type === 'checkbox') {
         if (data[field.name] === 'true') dataCopy[field.name] = true;
         if (data[field.name] === 'false') dataCopy[field.name] = false;
