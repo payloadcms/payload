@@ -1,9 +1,9 @@
 @import '../../../../scss/styles';
 
 .action-panel {
-  padding: base(.5);
+  padding: 0 base(.5);
   padding-left: base(.75);
-  margin-bottom: base(.75);
+  margin-bottom: base(1);
 
   &__controls-container {
     position: relative;

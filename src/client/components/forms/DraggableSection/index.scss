@@ -33,11 +33,19 @@
 //////////////////////
 
 .draggable-section {
-  display: flex;
-  position: relative;
-  padding-top: base(.75);
-  padding-bottom: base(.75);
-  margin-bottom: base(.75);
+
+  &__content-wrapper {
+    display: flex;
+    position: relative;
+    padding-top: base(.75);
+    margin-bottom: base(.5);
+  }
+
+  &.is-closed {
+    .draggable-section__content-wrapper {
+      margin-bottom: base(1.75);
+    }
+  }
 
   &__section-header {
     display: flex;
@@ -56,7 +64,7 @@
     width: 100%;
   }
 
-  &.is-hovered {
+  &.is-hovered > div {
     > .position-panel {
       .position-panel__controls-container {
         box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
@@ -92,6 +100,11 @@
     }
   }
 
+  label.field-label {
+    line-height: 1;
+    padding-bottom: base(.75)
+  }
+
   @include mid-break {
     @include realtively-position-panels();
   }
@@ -113,5 +126,21 @@
   @include realtively-position-panels();
 }
 
+.field-type.repeater > div,
+.field-type.flexible > div {
+  > .draggable-section {
+    &:last-child &:not(.is-closed) {
+      .draggable-section__content-wrapper {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
 
-
+.field-type.repeater {
+  .draggable-section {
+    &__content-wrapper {
+      padding-top: 0;
+    }
+  }
+}

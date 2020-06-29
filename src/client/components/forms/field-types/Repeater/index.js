@@ -25,12 +25,14 @@ const Repeater = (props) => {
     fields,
     defaultValue,
     initialData,
-    singularLabel,
     fieldTypes,
     validate,
     required,
     maxRows,
     minRows,
+    labels: {
+      singular: singularLabel,
+    },
   } = props;
 
   const dataToInitialize = initialData || defaultValue;
@@ -171,13 +173,15 @@ const Repeater = (props) => {
 
 Repeater.defaultProps = {
   label: '',
-  singularLabel: 'Row',
   defaultValue: [],
   initialData: [],
   validate: repeater,
   required: false,
   maxRows: undefined,
   minRows: undefined,
+  labels: {
+    singular: 'Row',
+  },
 };
 
 Repeater.propTypes = {
@@ -191,7 +195,9 @@ Repeater.propTypes = {
     PropTypes.shape({}),
   ).isRequired,
   label: PropTypes.string,
-  singularLabel: PropTypes.string,
+  labels: PropTypes.shape({
+    singular: PropTypes.string,
+  }),
   name: PropTypes.string.isRequired,
   path: PropTypes.string.isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,

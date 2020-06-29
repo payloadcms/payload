@@ -64,14 +64,11 @@ const Flexible = (props) => {
   });
 
   const dataToInitialize = initialData || defaultValue;
-  const [addRowIndex, setAddRowIndex] = useState(null);
   const [rows, dispatchRows] = useReducer(reducer, []);
   const { customComponentsPath } = useRenderedFields();
   const { getDataByPath } = useForm();
 
   const addRow = (index, blockType) => {
-    setAddRowIndex(current => current + 1);
-
     const data = getDataByPath(path);
 
     dispatchRows({
@@ -164,7 +161,7 @@ const Flexible = (props) => {
                       id={row.key}
                       parentPath={path}
                       moveRow={moveRow}
-                      addRow={() => addRow(i, blockType)}
+                      addRow={addRow}
                       removeRow={() => removeRow(i)}
                       toggleRowCollapse={() => toggleCollapse(i)}
                       rowIndex={i}
@@ -185,6 +182,8 @@ const Flexible = (props) => {
                       dispatchRows={dispatchRows}
                       blockType="flexible"
                       customComponentsPath={`${customComponentsPath}${name}.fields.`}
+                      useFlexibleBlockSelection
+                      blocks={blocks}
                     />
                   );
                 }
@@ -214,7 +213,7 @@ const Flexible = (props) => {
               <BlockSelector
                 blocks={blocks}
                 addRow={addRow}
-                addRowIndex={addRowIndex}
+                addRowIndex={value}
                 close={close}
               />
             )}

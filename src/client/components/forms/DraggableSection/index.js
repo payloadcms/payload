@@ -31,13 +31,15 @@ const DraggableSection = (props) => {
     positionPanelVerticalAlignment,
     actionPanelVerticalAlignment,
     toggleRowCollapse,
+    blocks,
+    useCustomBlockSelection,
   } = props;
 
   const [isHovered, setIsHovered] = useState(false);
 
   const classes = [
     baseClass,
-    isOpen && 'is-open',
+    isOpen ? 'is-open' : 'is-closed',
     isHovered && 'is-hovered',
   ].filter(Boolean).join(' ');
 
@@ -57,16 +59,17 @@ const DraggableSection = (props) => {
             {...providedDrag.draggableProps}
           >
 
-            <PositionPanel
-              dragHandleProps={providedDrag.dragHandleProps}
-              moveRow={moveRow}
-              positionIndex={rowIndex}
-              verticalAlignment={positionPanelVerticalAlignment}
-            />
+            <div className={`${baseClass}__content-wrapper`}>
+              <PositionPanel
+                dragHandleProps={providedDrag.dragHandleProps}
+                moveRow={moveRow}
+                positionIndex={rowIndex}
+                verticalAlignment={positionPanelVerticalAlignment}
+              />
 
-            <div className={`${baseClass}__render-fields-wrapper`}>
+              <div className={`${baseClass}__render-fields-wrapper`}>
 
-              {blockType === 'flexible' && (
+                {blockType === 'flexible' && (
                 <div className={`${baseClass}__section-header`}>
                   <SectionTitle
                     label={singularLabel}
@@ -82,33 +85,36 @@ const DraggableSection = (props) => {
                     round
                   />
                 </div>
-              )}
+                )}
 
-              <AnimateHeight
-                height={isOpen ? 'auto' : 0}
-                duration={0}
-              >
-                <RenderFields
-                  initialData={initialData}
-                  customComponentsPath={customComponentsPath}
-                  fieldTypes={fieldTypes}
-                  key={rowIndex}
-                  fieldSchema={fieldSchema.map((field) => {
-                    return ({
-                      ...field,
-                      path: `${parentPath}.${rowIndex}${field.name ? `.${field.name}` : ''}`,
-                    });
-                  })}
-                />
-              </AnimateHeight>
+                <AnimateHeight
+                  height={isOpen ? 'auto' : 0}
+                  duration={0}
+                >
+                  <RenderFields
+                    initialData={initialData}
+                    customComponentsPath={customComponentsPath}
+                    fieldTypes={fieldTypes}
+                    key={rowIndex}
+                    fieldSchema={fieldSchema.map((field) => {
+                      return ({
+                        ...field,
+                        path: `${parentPath}.${rowIndex}${field.name ? `.${field.name}` : ''}`,
+                      });
+                    })}
+                  />
+                </AnimateHeight>
+              </div>
+
+              <ActionPanel
+                rowIndex={rowIndex}
+                removeRow={removeRow}
+                addRow={addRow}
+                singularLabel={singularLabel}
+                verticalAlignment={actionPanelVerticalAlignment}
+                {...props}
+              />
             </div>
-
-            <ActionPanel
-              removeRow={removeRow}
-              addRow={addRow}
-              singularLabel={singularLabel}
-              verticalAlignment={actionPanelVerticalAlignment}
-            />
           </div>
         );
       }}

@@ -4,7 +4,7 @@
   background: white;
 
   &__add-button-wrap {
-    margin-left: 0;
+    margin-left: base(0);
 
     .btn {
       color: $color-gray;
@@ -28,7 +28,11 @@
 
   .field-type.repeater {
     .field-type.repeater__add-button-wrap {
-      margin-left: base(2.25);
+      margin-left: base(2.75);
+    }
+
+    .field-type.repeater__header  {
+      display: none;
     }
   }
 }

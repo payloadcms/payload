@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import Button from '../../../elements/Button';
 import Popup from '../../../elements/Popup';
+import BlockSelector from '../../field-types/Flexible/BlockSelector';
 
 import './index.scss';
 
@@ -10,8 +11,10 @@ const baseClass = 'action-panel';
 
 const ActionPanel = (props) => {
   const {
-    addRow, removeRow, singularLabel, verticalAlignment,
+    addRow, removeRow, singularLabel, verticalAlignment, useFlexibleBlockSelection, blocks, rowIndex,
   } = props;
+
+  console.log(blocks);
 
   const classes = [
     baseClass,
@@ -44,27 +47,54 @@ const ActionPanel = (props) => {
             {singularLabel}
           </Popup>
 
-          <Popup
-            showOnHover
-            size="wide"
-            color="dark"
-            pointerAlignment="center"
-            buttonType="custom"
-            button={(
-              <Button
-                className={`${baseClass}__add-row`}
-                round
-                buttonStyle="none"
-                icon="plus"
-                iconPosition="left"
-                iconStyle="with-border"
-                onClick={addRow}
+          {useFlexibleBlockSelection
+            ? (
+              <Popup
+                buttonType="custom"
+                button={(
+                  <Button
+                    className={`${baseClass}__add-row`}
+                    round
+                    buttonStyle="none"
+                    icon="plus"
+                    iconPosition="left"
+                    iconStyle="with-border"
+                  />
+                )}
+                render={({ close }) => (
+                  <BlockSelector
+                    blocks={blocks}
+                    addRow={addRow}
+                    addRowIndex={rowIndex}
+                    close={close}
+                  />
+                )}
               />
-            )}
-          >
-            Add&nbsp;
-            {singularLabel}
-          </Popup>
+            )
+            : (
+              <Popup
+                showOnHover
+                size="wide"
+                color="dark"
+                pointerAlignment="center"
+                buttonType="custom"
+                button={(
+                  <Button
+                    className={`${baseClass}__add-row`}
+                    round
+                    buttonStyle="none"
+                    icon="plus"
+                    iconPosition="left"
+                    iconStyle="with-border"
+                    onClick={addRow}
+                  />
+                )}
+              >
+                Add&nbsp;
+                {singularLabel}
+              </Popup>
+            )
+          }
         </div>
       </div>
     </div>
@@ -74,12 +104,14 @@ const ActionPanel = (props) => {
 ActionPanel.defaultProps = {
   singularLabel: 'Row',
   verticalAlignment: 'center',
+  useFlexibleBlockSelection: false,
 };
 
 ActionPanel.propTypes = {
   singularLabel: PropTypes.string,
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
+  useFlexibleBlockSelection: PropTypes.bool,
   verticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
 };
 

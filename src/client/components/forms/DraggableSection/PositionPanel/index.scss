@@ -1,12 +1,14 @@
 @import '../../../../scss/styles';
 
+$controls-top-adjustment: base(.1);
+
 .position-panel {
   padding-right: base(1);
-  margin-bottom: base(.75);
+  margin-bottom: base(1);
 
   &__controls-container {
     position: relative;
-    height: 100%;
+    min-height: 100%;
     box-shadow: #{$style-stroke-width-s} 0px 0px 0px $color-light-gray;
   }
 
@@ -34,17 +36,30 @@
 
   &__move-backward {
     transform: rotate(.5turn);
-    margin: 0 0 base(.25);
+    margin: 0;
     opacity: 0;
   }
 
   &__move-forward {
-    margin: base(.25) 0 0;
+    margin: 0;
     opacity: 0;
   }
 
   &__current-position {
     text-align: center;
     color: $color-gray;
+  }
+}
+
+
+.field-type.flexible {
+  .position-panel {
+    &__controls-container {
+      min-height: calc(100% + #{$controls-top-adjustment});
+    }
+
+    &__controls {
+      margin-top: - $controls-top-adjustment;
+    }
   }
 }

@@ -12,6 +12,10 @@ const NestedRepeater = {
       type: 'repeater',
       label: 'Repeater',
       name: 'repeater',
+      labels: {
+        singular: 'Parent Row',
+        plural: 'Parent Rows',
+      },
       required: true,
       minRows: 2,
       maxRows: 4,
@@ -19,13 +23,17 @@ const NestedRepeater = {
         {
           name: 'parentIdentifier',
           label: 'Parent Identifier',
-          defaultValue: 'test',
+          defaultValue: '',
           type: 'text',
           required: true,
         },
         {
           type: 'repeater',
           name: 'nestedRepeater',
+          labels: {
+            singular: 'Child Row',
+            plural: 'Child Rows',
+          },
           required: true,
           fields: [
             {
@@ -37,6 +45,10 @@ const NestedRepeater = {
             {
               type: 'repeater',
               name: 'deeplyNestedRepeater',
+              labels: {
+                singular: 'Grandchild Row',
+                plural: 'Grandchild Rows',
+              },
               required: true,
               fields: [
                 {
