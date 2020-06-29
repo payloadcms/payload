@@ -31,8 +31,6 @@ const DraggableSection = (props) => {
     positionPanelVerticalAlignment,
     actionPanelVerticalAlignment,
     toggleRowCollapse,
-    blocks,
-    useCustomBlockSelection,
   } = props;
 
   const [isHovered, setIsHovered] = useState(false);
@@ -112,6 +110,7 @@ const DraggableSection = (props) => {
                 addRow={addRow}
                 singularLabel={singularLabel}
                 verticalAlignment={actionPanelVerticalAlignment}
+                isHovered={isHovered}
                 {...props}
               />
             </div>

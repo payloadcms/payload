@@ -12,7 +12,7 @@ const baseClass = 'popup';
 
 const Popup = (props) => {
   const {
-    render, align, size, color, pointerAlignment, button, buttonType, children, showOnHover,
+    render, align, size, color, button, buttonType, children, showOnHover, horizontalAlign,
   } = props;
 
   const [active, setActive] = useState(false);
@@ -60,8 +60,8 @@ const Popup = (props) => {
     `${baseClass}--align-${align}`,
     `${baseClass}--size-${size}`,
     `${baseClass}--color-${color}`,
-    `${baseClass}--pointer-alignment-${pointerAlignment}`,
-    `${baseClass}--vertical-align-${verticalAlign}`,
+    `${baseClass}--v-align-${verticalAlign}`,
+    `${baseClass}--h-align-${horizontalAlign}`,
     active && `${baseClass}--active`,
   ].filter(Boolean).join(' ');
 
@@ -116,19 +116,19 @@ Popup.defaultProps = {
   align: 'center',
   size: 'small',
   color: 'light',
-  pointerAlignment: 'left',
   children: undefined,
   render: undefined,
   buttonType: 'default',
   button: undefined,
   showOnHover: false,
+  horizontalAlign: 'left',
 };
 
 Popup.propTypes = {
   render: PropTypes.func,
   children: PropTypes.node,
   align: PropTypes.oneOf(['left', 'center', 'right']),
-  pointerAlignment: PropTypes.oneOf(['left', 'center', 'right']),
+  horizontalAlign: PropTypes.oneOf(['left', 'center', 'right']),
   size: PropTypes.oneOf(['small', 'large', 'wide']),
   color: PropTypes.oneOf(['light', 'dark']),
   buttonType: PropTypes.oneOf(['default', 'custom']),

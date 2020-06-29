@@ -17,6 +17,7 @@ const BlockSelection = (props) => {
   } = block;
 
   const handleBlockSelection = () => {
+    console.log('adding');
     close();
     addRow(addRowIndex, slug);
   };

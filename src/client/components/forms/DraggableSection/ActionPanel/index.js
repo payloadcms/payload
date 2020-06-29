@@ -11,10 +11,15 @@ const baseClass = 'action-panel';
 
 const ActionPanel = (props) => {
   const {
-    addRow, removeRow, singularLabel, verticalAlignment, useFlexibleBlockSelection, blocks, rowIndex,
+    addRow,
+    removeRow,
+    singularLabel,
+    verticalAlignment,
+    useFlexibleBlockSelection,
+    blocks,
+    rowIndex,
+    isHovered,
   } = props;
-
-  console.log(blocks);
 
   const classes = [
     baseClass,
@@ -29,7 +34,7 @@ const ActionPanel = (props) => {
             showOnHover
             size="wide"
             color="dark"
-            pointerAlignment="center"
+            horizontalAlign="center"
             buttonType="custom"
             button={(
               <Button
@@ -51,6 +56,8 @@ const ActionPanel = (props) => {
             ? (
               <Popup
                 buttonType="custom"
+                size="large"
+                horizontalAlign="right"
                 button={(
                   <Button
                     className={`${baseClass}__add-row`}
@@ -67,6 +74,8 @@ const ActionPanel = (props) => {
                     addRow={addRow}
                     addRowIndex={rowIndex}
                     close={close}
+                    parentIsHovered={isHovered}
+                    watchParentHover
                   />
                 )}
               />
@@ -76,7 +85,7 @@ const ActionPanel = (props) => {
                 showOnHover
                 size="wide"
                 color="dark"
-                pointerAlignment="center"
+                horizontalAlign="right"
                 buttonType="custom"
                 button={(
                   <Button
@@ -105,6 +114,7 @@ ActionPanel.defaultProps = {
   singularLabel: 'Row',
   verticalAlignment: 'center',
   useFlexibleBlockSelection: false,
+  isHovered: false,
 };
 
 ActionPanel.propTypes = {
@@ -113,6 +123,7 @@ ActionPanel.propTypes = {
   removeRow: PropTypes.func.isRequired,
   useFlexibleBlockSelection: PropTypes.bool,
   verticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
+  isHovered: PropTypes.bool,
 };
 
 export default ActionPanel;

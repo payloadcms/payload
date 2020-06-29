@@ -7,10 +7,13 @@ import BlocksContainer from './BlocksContainer';
 const baseClass = 'block-selector';
 
 const BlockSelector = (props) => {
-  const { blocks, ...remainingProps } = props;
+  const {
+    blocks, close, parentIsHovered, watchParentHover, ...remainingProps
+  } = props;
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredBlocks, setFilteredBlocks] = useState(blocks);
+  const [isBlockSelectorHovered, setBlockSelectorHovered] = useState(false);
 
   useEffect(() => {
     const matchingBlocks = blocks.reduce((matchedBlocks, block) => {
@@ -21,21 +24,37 @@ const BlockSelector = (props) => {
     setFilteredBlocks(matchingBlocks);
   }, [searchTerm, blocks]);
 
+  useEffect(() => {
+    if (!parentIsHovered && !isBlockSelectorHovered && close && watchParentHover) close();
+  }, [isBlockSelectorHovered, parentIsHovered, close, watchParentHover]);
+
   return (
-    <div className={baseClass}>
+    <div
+      className={baseClass}
+      onMouseEnter={() => setBlockSelectorHovered(true)}
+      onMouseLeave={() => setBlockSelectorHovered(false)}
+    >
       <BlockSearch setSearchTerm={setSearchTerm} />
       <BlocksContainer
         blocks={filteredBlocks}
+        close={close}
         {...remainingProps}
       />
     </div>
   );
 };
 
-BlockSelector.defaultProps = {};
+BlockSelector.defaultProps = {
+  close: null,
+  parentIsHovered: false,
+  watchParentHover: false,
+};
 
 BlockSelector.propTypes = {
   blocks: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  close: PropTypes.func,
+  watchParentHover: PropTypes.bool,
+  parentIsHovered: PropTypes.bool,
 };
 
 export default BlockSelector;

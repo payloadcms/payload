@@ -8,15 +8,17 @@
   &__controls-container {
     position: relative;
     height: 100%;
-    z-index: $z-nav;
   }
 
   &__controls {
+    z-index: $z-nav;
     display: flex;
     justify-content: center;
     height: 100%;
     flex-direction: column;
     color: $color-gray;
+    opacity: 0;
+    visibility: hidden;
   }
 
   &--vertical-alignment-top {
@@ -35,11 +37,9 @@
 
   &__remove-row {
     margin: 0 0 base(.3);
-    opacity: 0;
   }
 
   &__add-row {
     margin: base(.3) 0 0;
-    opacity: 0;
   }
 }

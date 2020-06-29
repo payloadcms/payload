@@ -199,6 +199,8 @@ const Flexible = (props) => {
         <div className={`${baseClass}__add-button-wrap`}>
           <Popup
             buttonType="custom"
+            size="large"
+            horizontalAlign="left"
             button={(
               <Button
                 buttonStyle="icon-label"

@@ -21,4 +21,10 @@ $icon-margin: base(.25);
     width: $icon-width;
     margin: 0 $icon-margin;
   }
+
+  @include mid-break {
+    &__input {
+      margin-bottom: 0;
+    }
+  }
 }

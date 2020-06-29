@@ -41,6 +41,10 @@
     margin-bottom: base(.5);
   }
 
+  .draggable-section__content-wrapper {
+    margin-bottom: 0;
+  }
+
   &.is-closed {
     .draggable-section__content-wrapper {
       margin-bottom: base(1.75);
@@ -81,9 +85,9 @@
     }
 
     > .action-panel {
-      .action-panel__add-row,
-      .action-panel__remove-row {
+      .action-panel__controls {
         opacity: 1;
+        visibility: visible;
       }
     }
 
