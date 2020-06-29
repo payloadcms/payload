@@ -34,6 +34,7 @@ const Upload = (props) => {
     readOnly,
     validate,
     relationTo,
+    fieldTypes,
   } = props;
 
   const collection = collections.find(coll => coll.slug === relationTo);
@@ -124,6 +125,7 @@ const Upload = (props) => {
           <AddModal {...{
             collection,
             slug: addModalSlug,
+            fieldTypes,
             setValue: (val) => {
               setValue(val.id);
               setInternalValue(val);
@@ -169,6 +171,7 @@ Upload.propTypes = {
   width: PropTypes.string,
   style: PropTypes.shape({}),
   relationTo: PropTypes.string.isRequired,
+  fieldTypes: PropTypes.shape({}).isRequired,
   label: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.node,

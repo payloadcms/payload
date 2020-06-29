@@ -31,7 +31,7 @@ const UploadCard = (props) => {
       onClick={typeof onClick === 'function' ? onClick : undefined}
     >
       <Thumbnail
-        size="large"
+        size="expand"
         {...{
           mimeType, adminThumbnail, sizes, staticURL, filename,
         }}

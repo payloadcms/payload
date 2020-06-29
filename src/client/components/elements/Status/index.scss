@@ -1,6 +1,8 @@
 @import '../../../scss/styles.scss';
 
 .status-list {
+  position: relative;
+  z-index: $z-status;
   list-style: none;
   padding: 0;
   margin: 0;

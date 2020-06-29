@@ -127,6 +127,7 @@ const Form = (props) => {
   }, [fields]);
 
   const submit = useCallback((e) => {
+    e.stopPropagation();
     setSubmitted(true);
 
     const isValid = validateForm();

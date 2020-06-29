@@ -1,5 +1,8 @@
 module.exports = {
   slug: 'relationship-a',
+  policies: {
+    read: () => true,
+  },
   labels: {
     singular: 'Relationship A',
     plural: 'Relationship A',

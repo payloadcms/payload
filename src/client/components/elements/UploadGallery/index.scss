@@ -3,10 +3,30 @@
 .upload-gallery {
   list-style: none;
   padding: 0;
-  margin: base(2) 0;
+  margin: base(2) -#{base(.5)};
+  width: calc(100% + #{$baseline});
   display: flex;
+  flex-wrap: wrap;
+
+  li {
+    min-width: 0;
+    width: 25%;
+  }
 
   .upload-card {
-    margin-right: base(.5);
+    margin: base(.5);
+    max-width: initial;
+  }
+
+  @include large-break {
+    li {
+      width: 33.33%;
+    }
+  }
+
+  @include mid-break {
+    li {
+      width: 50%;
+    }
   }
 }

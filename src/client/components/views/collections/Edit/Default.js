@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Link, useRouteMatch, useLocation } from 'react-router-dom';
+import { Link, useRouteMatch } from 'react-router-dom';
 import format from 'date-fns/format';
 import config from 'payload/config';
 import Eyebrow from '../../../elements/Eyebrow';

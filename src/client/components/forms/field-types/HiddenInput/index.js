@@ -26,7 +26,6 @@ const HiddenInput = (props) => {
       type="hidden"
       value={value || ''}
       onChange={setValue}
-      id={path}
       name={path}
     />
   );

@@ -27,7 +27,10 @@ const Index = () => {
     <WindowInfoProvider {...windowInfoProps}>
       <ScrollInfoProvider>
         <Router>
-          <ModalProvider classPrefix="payload">
+          <ModalProvider
+            classPrefix="payload"
+            zIndex={parseInt(getCSSVariable('z-modal'), 10)}
+          >
             <UserProvider>
               <StatusListProvider>
                 <SearchParamsProvider>
