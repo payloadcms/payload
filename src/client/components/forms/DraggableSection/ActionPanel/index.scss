@@ -42,4 +42,17 @@
   &__add-row {
     margin: base(.3) 0 0;
   }
+
+  @include mid-break {
+    &__controls {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    &--vertical-alignment-sticky {
+      .action-panel__controls {
+        top: 100px;
+      }
+    }
+  }
 }

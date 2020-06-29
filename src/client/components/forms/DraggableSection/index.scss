@@ -111,6 +111,11 @@
 
   @include mid-break {
     @include realtively-position-panels();
+
+    .position-panel__move-forward,
+    .position-panel__move-backward {
+      opacity: 1;
+    }
   }
 }
 
