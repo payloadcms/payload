@@ -33,16 +33,16 @@
 //////////////////////
 
 .draggable-section {
+  padding-bottom: base(.5);
+
+  .draggable-section {
+    padding-bottom: 0;
+  }
 
   &__content-wrapper {
     display: flex;
     position: relative;
     padding-top: base(.75);
-    margin-bottom: base(.5);
-  }
-
-  .draggable-section__content-wrapper {
-    margin-bottom: 0;
   }
 
   &.is-closed {
@@ -135,17 +135,8 @@
   @include realtively-position-panels();
 }
 
-.field-type.repeater > div,
-.field-type.flexible > div {
-  > .draggable-section {
-    &:last-child &:not(.is-closed) {
-      .draggable-section__content-wrapper {
-        margin-bottom: 0;
-      }
-    }
-  }
-}
-
+// remove padding above repeater rows to level
+// the line with the top of the input label
 .field-type.repeater {
   .draggable-section {
     &__content-wrapper {
