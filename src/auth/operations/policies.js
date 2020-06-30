@@ -1,57 +1,93 @@
 const allOperations = ['create', 'read', 'update', 'delete'];
 
 const policies = async (args) => {
-  try {
-    const {
-      config,
-      req,
-      req: { user },
-    } = args;
+  const {
+    config,
+    req,
+    req: { user },
+  } = args;
 
-    const isLoggedIn = !!(user);
+  const results = {};
+  const promises = [];
 
-    const collectionConfig = (user && user.collection) ? config.collections.find(collection => collection.slug === user.collection) : null;
+  const isLoggedIn = !!(user);
+  const collectionConfig = (user && user.collection) ? config.collections.find(collection => collection.slug === user.collection) : null;
 
-    const returnPolicyResults = (entity, operations) => {
-      const results = {};
+  const createPolicyPromise = async (obj, policy, operation) => {
+    const updatedObj = obj;
+    const result = await policy({ req });
 
-      operations.forEach(async (operation) => {
-        results[operation] = {};
+    if (typeof result === 'object') {
+      updatedObj[operation] = {
+        permission: true,
+        where: result,
+      };
+    } else {
+      updatedObj[operation] = {
+        permission: !!(result),
+      };
+    }
+  };
 
-        if (typeof entity.policies[operation] === 'function') {
-          const result = await entity.policies[operation]({ req });
+  const executeFieldPolicies = (obj, fields, operation) => {
+    const updatedObj = obj;
 
-          if (typeof result === 'object') {
-            results[operation].permission = true;
-            results[operation].where = result;
-          } else {
-            results[operation].permission = !!(result);
-          }
+    fields.forEach((field) => {
+      if (field.name) {
+        if (!updatedObj[field.name]) updatedObj[field.name] = {};
+
+        if (field.policies && typeof field.policies[operation] === 'function') {
+          promises.push(createPolicyPromise(updatedObj[field.name], field.policies[operation], operation));
         } else {
-          results[operation].permission = isLoggedIn;
+          updatedObj[field.name][operation] = {
+            permission: isLoggedIn,
+          };
         }
-      });
 
-      return results;
+        if (field.fields) {
+          updatedObj[field.name].fields = {};
+          executeFieldPolicies(updatedObj[field.name].fields, field.fields, operation);
+        }
+      }
+    });
+  };
+
+  const executeEntityPolicies = (entity, operations) => {
+    results[entity.slug] = {
+      fields: {},
     };
 
-    const policyResults = {};
+    operations.forEach((operation) => {
+      executeFieldPolicies(results[entity.slug].fields, entity.fields, operation);
 
+      if (typeof entity.policies[operation] === 'function') {
+        promises.push(createPolicyPromise(results[entity.slug], entity.policies[operation], operation));
+      } else {
+        results[entity.slug][operation] = {
+          permission: isLoggedIn,
+        };
+      }
+    });
+  };
+
+  try {
     if (collectionConfig) {
-      policyResults.canAccessAdmin = collectionConfig.policies.admin ? collectionConfig.policies.admin(args) : isLoggedIn;
+      results.canAccessAdmin = collectionConfig.policies.admin ? collectionConfig.policies.admin(args) : isLoggedIn;
     } else {
-      policyResults.canAccessAdmin = false;
+      results.canAccessAdmin = false;
     }
 
     config.collections.forEach((collection) => {
-      policyResults[collection.slug] = returnPolicyResults(collection, allOperations);
+      executeEntityPolicies(collection, allOperations);
     });
 
     config.globals.forEach((global) => {
-      policyResults[global.slug] = returnPolicyResults(global, ['read', 'update']);
+      executeEntityPolicies(global, ['read', 'update']);
     });
 
-    return policyResults;
+    await Promise.all(promises);
+
+    return results;
   } catch (error) {
     throw error;
   }
