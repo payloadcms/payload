@@ -9,6 +9,7 @@
     opacity: 0;
     visibility: hidden;
     z-index: $z-modal;
+    max-width: calc(100vw - #{$baseline});
 
     &:after {
       content: ' ';
@@ -26,6 +27,7 @@
   &__scroll {
     padding: base(1);
     overflow-y: scroll;
+    white-space: nowrap;
   }
 
   &:focus,
@@ -124,6 +126,30 @@
     }
   }
 
+  &--force-h-align-left {
+    .popup__content {
+      left: - base(1.75);
+
+      &:after {
+        left: base(1.75);
+        right: unset;
+        transform: unset;
+      }
+    }
+  }
+
+  &--force-h-align-right {
+    .popup__content {
+      right: - base(1.75);
+
+      &:after {
+        right: base(1.75);
+        left: unset;
+        transform: unset;
+      }
+    }
+  }
+
   ////////////////////////////////
   // VERTICAL ALIGNMENT
   ////////////////////////////////
@@ -208,6 +234,34 @@
 
         &:after {
           right: base(.5);
+        }
+      }
+    }
+
+    &--force-h-align-left {
+      .popup__content {
+        left: - base(.5);
+        right: unset;
+        transform: unset;
+
+        &:after {
+          left: base(.5);
+          right: unset;
+          transform: unset;
+        }
+      }
+    }
+
+    &--force-h-align-right {
+      .popup__content {
+        right: - base(.5);
+        left: unset;
+        transform: unset;
+
+        &:after {
+          right: base(.5);
+          left: unset;
+          transform: unset;
         }
       }
     }

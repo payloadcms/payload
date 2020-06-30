@@ -15,12 +15,14 @@ const Popup = (props) => {
     render, align, size, color, button, buttonType, children, showOnHover, horizontalAlign,
   } = props;
 
-  const [active, setActive] = useState(false);
-  const [verticalAlign, setVerticalAlign] = useState('top');
-  const { height: windowHeight } = useWindowInfo();
-  const { y: scrollY } = useScrollInfo();
   const buttonRef = useRef(null);
   const contentRef = useRef(null);
+  const [active, setActive] = useState(false);
+  const [verticalAlign, setVerticalAlign] = useState('top');
+  const [forceHorizontalAlign, setForceHorizontalAlign] = useState(null);
+
+  const { y: scrollY } = useScrollInfo();
+  const { height: windowHeight } = useWindowInfo();
 
   const handleClickOutside = (e) => {
     if (contentRef.current.contains(e.target)) {
@@ -32,10 +34,26 @@ const Popup = (props) => {
 
   useThrottledEffect(() => {
     if (contentRef.current && buttonRef.current) {
-      const { height: contentHeight } = contentRef.current.getBoundingClientRect();
-      const { y: buttonOffsetTop } = buttonRef.current.getBoundingClientRect();
+      const {
+        height: contentHeight,
+        width: contentWidth,
+        right: contentRightEdge,
+      } = contentRef.current.getBoundingClientRect();
+      const { y: buttonYCoord } = buttonRef.current.getBoundingClientRect();
 
-      if (buttonOffsetTop > contentHeight) {
+      const windowWidth = window.innerWidth;
+      const distanceToRightEdge = windowWidth - contentRightEdge;
+      const distanceToLeftEdge = contentRightEdge - contentWidth;
+
+      if (distanceToRightEdge <= 0) {
+        setForceHorizontalAlign('right');
+      }
+
+      if (distanceToLeftEdge <= 0) {
+        setForceHorizontalAlign('left');
+      }
+
+      if (buttonYCoord > contentHeight) {
         setVerticalAlign('top');
       } else {
         setVerticalAlign('bottom');
@@ -62,6 +80,7 @@ const Popup = (props) => {
     `${baseClass}--color-${color}`,
     `${baseClass}--v-align-${verticalAlign}`,
     `${baseClass}--h-align-${horizontalAlign}`,
+    forceHorizontalAlign && `${baseClass}--force-h-align-${forceHorizontalAlign}`,
     active && `${baseClass}--active`,
   ].filter(Boolean).join(' ');
 

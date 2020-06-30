@@ -5,13 +5,16 @@
   padding-left: base(.75);
   margin-bottom: base(1);
 
+  &:hover {
+    z-index: $z-nav;
+  }
+
   &__controls-container {
     position: relative;
     height: 100%;
   }
 
   &__controls {
-    z-index: $z-nav;
     display: flex;
     justify-content: center;
     height: 100%;
