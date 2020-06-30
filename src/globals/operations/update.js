@@ -1,5 +1,5 @@
 const deepmerge = require('deepmerge');
-const combineMerge = require('../../utilities/combineMerge');
+const overwriteMerge = require('../../utilities/overwriteMerge');
 const executePolicy = require('../../auth/executePolicy');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
@@ -52,7 +52,7 @@ const update = async (args) => {
     // 3. Merge updates into existing data
     // /////////////////////////////////////
 
-    options.data = deepmerge(globalJSON, options.data, { arrayMerge: combineMerge });
+    options.data = deepmerge(globalJSON, options.data, { arrayMerge: overwriteMerge });
 
     // /////////////////////////////////////
     // 4. Execute field-level hooks, policies, and validation

@@ -56,7 +56,6 @@
     "isomorphic-fetch": "^2.2.1",
     "jest": "^25.3.0",
     "jsonwebtoken": "^8.5.1",
-    "lodash.merge": "^4.6.2",
     "method-override": "^3.0.0",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",

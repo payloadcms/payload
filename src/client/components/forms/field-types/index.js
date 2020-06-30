@@ -5,7 +5,7 @@ export { default as email } from './Email';
 export { default as hidden } from './HiddenInput';
 export { default as text } from './Text';
 export { default as date } from './DateTime';
-// import upload from './Upload';
+
 export { default as password } from './Password';
 export { default as relationship } from './Relationship';
 export { default as textarea } from './Textarea';

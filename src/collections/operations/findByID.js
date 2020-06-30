@@ -11,21 +11,26 @@ const findByID = async (args) => {
     const policyResults = await executePolicy(args, args.config.policies.read);
     const hasWherePolicy = typeof policyResults === 'object';
 
-    let options = {
-      ...args,
-      query: { _id: args.id },
+    const queryToBuild = {
+      where: {
+        and: [
+          {
+            _id: {
+              equals: args.id,
+            },
+          },
+        ],
+      },
     };
 
     if (hasWherePolicy) {
-      options.query = await args.Model.buildQuery({
-        where: {
-          ...policyResults,
-          _id: {
-            equals: args.id,
-          },
-        },
-      }, args.locale);
+      queryToBuild.where.and.push(policyResults);
     }
+
+    let options = {
+      ...args,
+      query: await args.Model.buildQuery(queryToBuild, args.req.locale),
+    };
 
     // /////////////////////////////////////
     // 2. Execute before collection hook

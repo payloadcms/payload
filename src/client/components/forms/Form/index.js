@@ -281,6 +281,8 @@ const Form = (props) => {
     baseClass,
   ].filter(Boolean).join(' ');
 
+  console.log('test');
+
   return (
     <form
       noValidate

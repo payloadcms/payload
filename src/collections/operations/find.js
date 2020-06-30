@@ -1,4 +1,5 @@
-const merge = require('lodash.merge');
+const deepmerge = require('deepmerge');
+const combineMerge = require('../../utilities/combineMerge');
 const executePolicy = require('../../auth/executePolicy');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
@@ -12,10 +13,23 @@ const find = async (args) => {
     const hasWherePolicy = typeof policyResults === 'object';
 
     const queryToBuild = {};
-    if (args.where) queryToBuild.where = args.where;
+
+    if (args.where) {
+      queryToBuild.where = {
+        and: [args.where],
+      };
+    }
 
     if (hasWherePolicy) {
-      queryToBuild.where = merge(args.where, policyResults);
+      if (!args.where) {
+        queryToBuild.where = {
+          and: [
+            policyResults,
+          ],
+        };
+      } else {
+        queryToBuild.where.and.push(policyResults);
+      }
     }
 
     let options = {
