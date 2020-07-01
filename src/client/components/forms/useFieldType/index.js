@@ -1,7 +1,7 @@
 import {
   useContext, useCallback, useEffect, useState,
 } from 'react';
-import FormContext from '../Form/Context';
+import FormContext from '../Form/FormContext';
 import useDebounce from '../../../hooks/useDebounce';
 
 import './index.scss';

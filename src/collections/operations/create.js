@@ -60,7 +60,7 @@ const create = async (args) => {
         fileData.width = dimensions.width;
         fileData.height = dimensions.height;
 
-        if (Array.isArray(imageSizes)) {
+        if (Array.isArray(imageSizes) && options.req.files.file.mimetype !== 'image/svg+xml') {
           fileData.sizes = await resizeAndSave(options.config, fsSafeName, fileData.mimeType);
         }
       }

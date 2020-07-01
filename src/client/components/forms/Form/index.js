@@ -6,7 +6,8 @@ import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { unflatten } from 'flatley';
 import HiddenInput from '../field-types/HiddenInput';
-import FormContext from './Context';
+import FormContext from './FormContext';
+import FieldContext from './FieldContext';
 import { useLocale } from '../../utilities/Locale';
 import { useStatusList } from '../../elements/Status';
 import { requests } from '../../../api';
@@ -58,6 +59,7 @@ const Form = (props) => {
   const { current: contextValue } = contextRef;
 
   const [fields, dispatchFields] = useReducer(fieldReducer, {});
+  contextValue.fields = fields;
   contextValue.dispatchFields = dispatchFields;
 
   contextValue.submit = (e) => {
@@ -282,8 +284,6 @@ const Form = (props) => {
 
   const { submit } = contextValue;
 
-  console.log(fields);
-
   return (
     <form
       noValidate
@@ -293,11 +293,16 @@ const Form = (props) => {
       className={classes}
     >
       <FormContext.Provider value={contextValue}>
-        <HiddenInput
-          path="locale"
-          defaultValue={locale}
-        />
-        {children}
+        <FieldContext.Provider value={{
+          fields,
+          ...contextValue,
+        }}>
+          <HiddenInput
+            path="locale"
+            defaultValue={locale}
+          />
+          {children}
+        </FieldContext.Provider>
       </FormContext.Provider>
     </form>
   );

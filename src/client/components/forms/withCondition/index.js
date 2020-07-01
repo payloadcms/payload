@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import useForm from '../Form/useForm';
+import useFormFields from '../Form/useFormFields';
 
 const withCondition = (Field) => {
   const CheckForCondition = (props) => {
@@ -28,11 +28,12 @@ const withCondition = (Field) => {
 
   const WithCondition = (props) => {
     const { condition, name, path } = props;
-    const { getData, getSiblingData } = useForm();
 
-    const fields = getData();
-    const siblingFields = getSiblingData(path || name);
-    const passesCondition = condition ? condition(fields, siblingFields) : true;
+    const { getData, getSiblingData } = useFormFields();
+
+    const data = getData();
+    const siblingData = getSiblingData(path || name);
+    const passesCondition = condition ? condition(data, siblingData) : true;
 
     if (passesCondition) {
       return <Field {...props} />;
