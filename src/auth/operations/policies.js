@@ -11,7 +11,7 @@ const policies = async (args) => {
   const promises = [];
 
   const isLoggedIn = !!(user);
-  const collectionConfig = (user && user.collection) ? config.collections.find(collection => collection.slug === user.collection) : null;
+  const userCollectionConfig = (user && user.collection) ? config.collections.find(collection => collection.slug === user.collection) : null;
 
   const createPolicyPromise = async (obj, policy, operation) => {
     const updatedObj = obj;
@@ -71,8 +71,8 @@ const policies = async (args) => {
   };
 
   try {
-    if (collectionConfig) {
-      results.canAccessAdmin = collectionConfig.policies.admin ? collectionConfig.policies.admin(args) : isLoggedIn;
+    if (userCollectionConfig) {
+      results.canAccessAdmin = userCollectionConfig.policies.admin ? userCollectionConfig.policies.admin(args) : isLoggedIn;
     } else {
       results.canAccessAdmin = false;
     }

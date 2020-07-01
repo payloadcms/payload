@@ -31,12 +31,7 @@ const Email = (props) => {
     return validationResult;
   }, [validate, required]);
 
-  const {
-    value,
-    showError,
-    setValue,
-    errorMessage,
-  } = useFieldType({
+  const fieldType = useFieldType({
     path,
     required,
     initialData,
@@ -44,6 +39,13 @@ const Email = (props) => {
     validate: memoizedValidate,
     enableDebouncedValue: true,
   });
+
+  const {
+    value,
+    showError,
+    setValue,
+    errorMessage,
+  } = fieldType;
 
   const classes = [
     'field-type',

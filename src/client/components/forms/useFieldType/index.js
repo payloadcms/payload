@@ -23,6 +23,7 @@ const useFieldType = (options) => {
   const initialData = data !== undefined ? data : defaultValue;
 
   const formContext = useContext(FormContext);
+
   const {
     dispatchFields, submitted, processing, getField, setModified, modified,
   } = formContext;
