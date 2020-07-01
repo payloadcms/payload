@@ -1,4 +1,4 @@
-export default ({ dispatchFields }) => ({
+export default {
   processing: false,
   modified: false,
   submitted: false,
@@ -11,6 +11,6 @@ export default ({ dispatchFields }) => ({
   validateForm: () => { },
   createFormData: () => { },
   submit: () => { },
-  dispatchFields,
+  dispatchFields: () => { },
   setModified: () => { },
-});
+};

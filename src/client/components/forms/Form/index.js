@@ -1,5 +1,5 @@
 import React, {
-  useReducer, useEffect, useState, useRef,
+  useReducer, useEffect, useRef,
 } from 'react';
 import { objectToFormData } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
@@ -49,260 +49,230 @@ const Form = (props) => {
     disableSuccessStatus,
   } = props;
 
-  const [fields, dispatchFields] = useReducer(fieldReducer, {});
-  const [contextState, setContextState] = useState(initContextState({ dispatchFields }));
-  const fieldsRef = useRef(fields);
-  fieldsRef.current = fields;
-
-  const {
-    createFormData, validateForm, setSubmitted, setModified, setProcessing, submit,
-  } = contextState;
-
   const history = useHistory();
   const locale = useLocale();
   const { replaceStatus, addStatus, clearStatus } = useStatusList();
   const { refreshToken } = useUser();
 
-  useEffect(() => {
-    const handleSubmit = (e) => {
-      e.stopPropagation();
-      setSubmitted(true);
+  const contextRef = useRef(initContextState);
+  const { current: context } = contextRef;
 
-      const isValid = validateForm();
+  const [fields, dispatchFields] = useReducer(fieldReducer, {});
+  context.dispatchFields = dispatchFields;
 
-      // If not valid, prevent submission
-      if (!isValid) {
-        e.preventDefault();
+  context.submit = (e) => {
+    e.stopPropagation();
+    context.setSubmitted(true);
 
-        addStatus({
-          message: 'Please correct the fields below.',
-          type: 'error',
-        });
+    const isValid = context.validateForm();
 
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth',
-        });
+    // If not valid, prevent submission
+    if (!isValid) {
+      e.preventDefault();
 
-        return false;
-      }
+      addStatus({
+        message: 'Please correct the fields below.',
+        type: 'error',
+      });
 
-      // If submit handler comes through via props, run that
-      if (onSubmit) {
-        e.preventDefault();
-        return onSubmit(fields);
-      }
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
 
-      // If form is AJAX, fetch data
-      if (ajax !== false) {
-        e.preventDefault();
+      return false;
+    }
 
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth',
-        });
+    // If submit handler comes through via props, run that
+    if (onSubmit) {
+      e.preventDefault();
+      return onSubmit(fields);
+    }
 
-        const formData = createFormData();
-        setProcessing(true);
+    // If form is AJAX, fetch data
+    if (ajax !== false) {
+      e.preventDefault();
 
-        // Make the API call from the action
-        return requests[method.toLowerCase()](action, {
-          body: formData,
-        }).then((res) => {
-          setModified(false);
-          if (typeof handleAjaxResponse === 'function') return handleAjaxResponse(res);
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
 
-          return res.json().then((json) => {
-            setProcessing(false);
-            clearStatus();
+      const formData = context.createFormData();
+      context.setProcessing(true);
 
-            if (res.status < 400) {
-              if (typeof onSuccess === 'function') onSuccess(json);
+      // Make the API call from the action
+      return requests[method.toLowerCase()](action, {
+        body: formData,
+      }).then((res) => {
+        context.setModified(false);
+        if (typeof handleAjaxResponse === 'function') return handleAjaxResponse(res);
 
-              if (redirect) {
-                return history.push(redirect, json);
-              }
+        return res.json().then((json) => {
+          context.setProcessing(false);
+          clearStatus();
 
-              if (!disableSuccessStatus) {
-                replaceStatus([{
-                  message: json.message,
-                  type: 'success',
-                  disappear: 3000,
-                }]);
-              }
-            } else {
-              if (json.message) {
-                addStatus({
-                  message: json.message,
-                  type: 'error',
-                });
+          if (res.status < 400) {
+            if (typeof onSuccess === 'function') onSuccess(json);
 
-                return json;
-              }
-
-              if (Array.isArray(json.errors)) {
-                const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => {
-                  return err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]];
-                }, [[], []]);
-
-                fieldErrors.forEach((err) => {
-                  dispatchFields({
-                    valid: false,
-                    errorMessage: err.message,
-                    path: err.field,
-                    value: fields?.[err.field]?.value,
-                  });
-                });
-
-                nonFieldErrors.forEach((err) => {
-                  addStatus({
-                    message: err.message || 'An unknown error occurred.',
-                    type: 'error',
-                  });
-                });
-
-                if (fieldErrors.length > 0 && nonFieldErrors.length === 0) {
-                  addStatus({
-                    message: 'Please correct the fields below.',
-                    type: 'error',
-                  });
-                }
-
-                return json;
-              }
-
-              addStatus({
-                message: 'An unknown error occurred.',
-                type: 'error',
-              });
+            if (redirect) {
+              return history.push(redirect, json);
             }
 
-            return json;
-          });
-        }).catch((err) => {
-          addStatus({
-            message: err,
-            type: 'error',
-          });
-        });
-      }
+            if (!disableSuccessStatus) {
+              replaceStatus([{
+                message: json.message,
+                type: 'success',
+                disappear: 3000,
+              }]);
+            }
+          } else {
+            if (json.message) {
+              addStatus({
+                message: json.message,
+                type: 'error',
+              });
 
-      return true;
-    };
-    contextState.submit = handleSubmit;
-    setContextState(contextState);
-  }, [
-    contextState,
-    action,
-    addStatus,
-    ajax,
-    disableSuccessStatus,
-    fields,
-    handleAjaxResponse,
-    history,
-    method,
-    onSubmit,
-    redirect,
-    clearStatus,
-    validateForm,
-    onSuccess,
-    replaceStatus,
-    createFormData,
-    setProcessing,
-    setModified,
-    setSubmitted,
-  ]);
+              return json;
+            }
 
-  useEffect(() => {
-    contextState.getFields = () => {
-      return fieldsRef.current;
-    };
+            if (Array.isArray(json.errors)) {
+              const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => {
+                return err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]];
+              }, [[], []]);
 
-    contextState.getField = (path) => {
-      return fieldsRef.current[path];
-    };
+              fieldErrors.forEach((err) => {
+                dispatchFields({
+                  valid: false,
+                  errorMessage: err.message,
+                  path: err.field,
+                  value: fields?.[err.field]?.value,
+                });
+              });
 
-    contextState.getData = () => {
-      return reduceFieldsToValues(fieldsRef.current, true);
-    };
+              nonFieldErrors.forEach((err) => {
+                addStatus({
+                  message: err.message || 'An unknown error occurred.',
+                  type: 'error',
+                });
+              });
 
-    contextState.getSiblingData = (path) => {
-      let siblingFields = fieldsRef.current;
+              if (fieldErrors.length > 0 && nonFieldErrors.length === 0) {
+                addStatus({
+                  message: 'Please correct the fields below.',
+                  type: 'error',
+                });
+              }
 
-      // If this field is nested
-      // We can provide a list of sibling fields
-      if (path.indexOf('.') > 0) {
-        const parentFieldPath = path.substring(0, path.lastIndexOf('.') + 1);
-        siblingFields = Object.keys(fieldsRef.current).reduce((siblings, fieldKey) => {
-          if (fieldKey.indexOf(parentFieldPath) === 0) {
-            return {
-              ...siblings,
-              [fieldKey.replace(parentFieldPath, '')]: fieldsRef.current[fieldKey],
-            };
+              return json;
+            }
+
+            addStatus({
+              message: 'An unknown error occurred.',
+              type: 'error',
+            });
           }
 
-          return siblings;
-        }, {});
-      }
+          return json;
+        });
+      }).catch((err) => {
+        addStatus({
+          message: err,
+          type: 'error',
+        });
+      });
+    }
 
-      return reduceFieldsToValues(siblingFields, true);
-    };
+    return true;
+  };
 
-    contextState.getDataByPath = (path) => {
-      const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1);
-      const name = path.split('.').pop();
+  context.getFields = () => {
+    return fields;
+  };
 
-      const data = Object.keys(fieldsRef.current).reduce((matchedData, key) => {
-        if (key.indexOf(`${path}.`) === 0) {
+  context.getField = (path) => {
+    return fields[path];
+  };
+
+  context.getData = () => {
+    return reduceFieldsToValues(fields, true);
+  };
+
+  context.getSiblingData = (path) => {
+    let siblingFields = fields;
+
+    // If this field is nested
+    // We can provide a list of sibling fields
+    if (path.indexOf('.') > 0) {
+      const parentFieldPath = path.substring(0, path.lastIndexOf('.') + 1);
+      siblingFields = Object.keys(fields).reduce((siblings, fieldKey) => {
+        if (fieldKey.indexOf(parentFieldPath) === 0) {
           return {
-            ...matchedData,
-            [key.replace(pathPrefixToRemove, '')]: fieldsRef.current[key],
+            ...siblings,
+            [fieldKey.replace(parentFieldPath, '')]: fields[fieldKey],
           };
         }
 
-        return matchedData;
+        return siblings;
       }, {});
-
-      const values = reduceFieldsToValues(data, true);
-      const unflattenedData = unflatten(values);
-      return unflattenedData?.[name];
-    };
-
-    contextState.getUnflattenedValues = () => {
-      return reduceFieldsToValues(fieldsRef.current);
-    };
-
-    contextState.validateForm = () => {
-      return !Object.values(fieldsRef.current).some((field) => {
-        return field.valid === false;
-      });
-    };
-
-    contextState.createFormData = () => {
-      const data = reduceFieldsToValues(fieldsRef.current);
-      return objectToFormData(data, { indices: true });
-    };
-
-    setContextState(contextState);
-  }, [fieldsRef, contextState]);
-
-  useEffect(() => {
-    function setModifiedState(modified) {
-      contextState.modified = modified;
     }
 
-    function setSubmittedState(submitted) {
-      contextState.submitted = submitted;
-    }
+    return reduceFieldsToValues(siblingFields, true);
+  };
 
-    function setProcessingState(processing) {
-      contextState.processing = processing;
-    }
+  context.getDataByPath = (path) => {
+    const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1);
+    const name = path.split('.').pop();
 
-    contextState.setModified = setModifiedState;
-    contextState.setSubmitted = setSubmittedState;
-    contextState.setProcessing = setProcessingState;
-  }, [contextState]);
+    const data = Object.keys(fields).reduce((matchedData, key) => {
+      if (key.indexOf(`${path}.`) === 0) {
+        return {
+          ...matchedData,
+          [key.replace(pathPrefixToRemove, '')]: fields[key],
+        };
+      }
+
+      return matchedData;
+    }, {});
+
+    const values = reduceFieldsToValues(data, true);
+    const unflattenedData = unflatten(values);
+    return unflattenedData?.[name];
+  };
+
+  context.getUnflattenedValues = () => {
+    return reduceFieldsToValues(fields);
+  };
+
+  context.validateForm = () => {
+    return !Object.values(fields).some((field) => {
+      return field.valid === false;
+    });
+  };
+
+  context.createFormData = () => {
+    const data = reduceFieldsToValues(fields);
+    return objectToFormData(data, { indices: true });
+  };
+
+
+  function setModified(modified) {
+    context.modified = modified;
+  }
+
+  context.setModified = setModified;
+
+  function setSubmitted(submitted) {
+    context.submitted = submitted;
+  }
+
+  context.setSubmitted = setSubmitted;
+
+  function setProcessing(processing) {
+    context.processing = processing;
+  }
+
+  context.setProcessing = setProcessing;
 
   useThrottledEffect(() => {
     refreshToken();
@@ -310,12 +280,14 @@ const Form = (props) => {
 
   useEffect(() => {
     setModified(false);
-  }, [locale, setModified]);
+  }, [locale]);
 
   const classes = [
     className,
     baseClass,
   ].filter(Boolean).join(' ');
+
+  const { submit } = context;
 
   return (
     <form
@@ -325,7 +297,7 @@ const Form = (props) => {
       action={action}
       className={classes}
     >
-      <FormContext.Provider value={contextState}>
+      <FormContext.Provider value={context}>
         <HiddenInput
           path="locale"
           defaultValue={locale}
