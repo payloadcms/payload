@@ -24,7 +24,7 @@ const refresh = async (args) => {
     const opts = {};
     opts.expiresIn = options.collection.config.auth.tokenExpiration;
 
-    const token = options.authorization.replace('JWT ', '');
+    const token = options.authorization.replace(`${options.collection.config.labels.singular} JWT `, '');
     const payload = jwt.verify(token, secret, {});
     delete payload.iat;
     delete payload.exp;

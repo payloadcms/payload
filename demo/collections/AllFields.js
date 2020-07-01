@@ -189,6 +189,11 @@ const AllFields = {
       name: 'relationshipMultipleCollections',
       relationTo: ['localized-posts', 'conditions'],
     },
+    {
+      type: 'textarea',
+      label: 'Textarea',
+      name: 'textarea',
+    },
   ],
   timestamps: true,
 };

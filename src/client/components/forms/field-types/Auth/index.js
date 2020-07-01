@@ -5,7 +5,7 @@ import Password from '../Password';
 import Checkbox from '../Checkbox';
 import Button from '../../../elements/Button';
 import ConfirmPassword from '../ConfirmPassword';
-import useForm from '../../Form/useForm';
+import useFormFields from '../../Form/useFormFields';
 import APIKey from './APIKey';
 
 import './index.scss';
@@ -15,7 +15,7 @@ const baseClass = 'auth-fields';
 const Auth = (props) => {
   const { initialData, useAPIKey, requirePassword } = props;
   const [changingPassword, setChangingPassword] = useState(requirePassword);
-  const { getField } = useForm();
+  const { getField } = useFormFields();
 
   const enableAPIKey = getField('enableAPIKey');
 
@@ -76,12 +76,14 @@ const Auth = (props) => {
 Auth.defaultProps = {
   initialData: undefined,
   useAPIKey: false,
+  requirePassword: false,
 };
 
 Auth.propTypes = {
   fieldTypes: PropTypes.shape({}).isRequired,
   initialData: PropTypes.shape({}),
   useAPIKey: PropTypes.bool,
+  requirePassword: PropTypes.bool,
 };
 
 export default Auth;

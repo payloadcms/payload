@@ -26,7 +26,7 @@ const {
 
 const Routes = () => {
   const [initialized, setInitialized] = useState(null);
-  const { user, permissions: { canAccessAdmin } } = useUser();
+  const { user, permissions, permissions: { canAccessAdmin } } = useUser();
 
   useEffect(() => {
     requests.get(`${routes.api}/${userSlug}/init`).then(res => res.json().then((data) => {
@@ -88,77 +88,93 @@ const Routes = () => {
                             </Route>
 
                             {collections.map((collection) => {
-                              return (
-                                <Route
-                                  key={`${collection.slug}-list`}
-                                  path={`${match.url}/collections/${collection.slug}`}
-                                  exact
-                                  render={(routeProps) => {
-                                    return (
-                                      <List
-                                        {...routeProps}
-                                        collection={collection}
-                                      />
-                                    );
-                                  }}
-                                />
-                              );
+                              if (permissions?.[collection.slug]?.read?.permission) {
+                                return (
+                                  <Route
+                                    key={`${collection.slug}-list`}
+                                    path={`${match.url}/collections/${collection.slug}`}
+                                    exact
+                                    render={(routeProps) => {
+                                      return (
+                                        <List
+                                          {...routeProps}
+                                          collection={collection}
+                                        />
+                                      );
+                                    }}
+                                  />
+                                );
+                              }
+
+                              return null;
                             })}
 
                             {collections.map((collection) => {
-                              return (
-                                <Route
-                                  key={`${collection.slug}-create`}
-                                  path={`${match.url}/collections/${collection.slug}/create`}
-                                  exact
-                                  render={(routeProps) => {
-                                    return (
-                                      <Edit
-                                        {...routeProps}
-                                        collection={collection}
-                                      />
-                                    );
-                                  }}
-                                />
-                              );
+                              if (permissions?.[collection.slug]?.create?.permission) {
+                                return (
+                                  <Route
+                                    key={`${collection.slug}-create`}
+                                    path={`${match.url}/collections/${collection.slug}/create`}
+                                    exact
+                                    render={(routeProps) => {
+                                      return (
+                                        <Edit
+                                          {...routeProps}
+                                          collection={collection}
+                                        />
+                                      );
+                                    }}
+                                  />
+                                );
+                              }
+
+                              return null;
                             })}
 
                             {collections.map((collection) => {
-                              return (
-                                <Route
-                                  key={`${collection.slug}-edit`}
-                                  path={`${match.url}/collections/${collection.slug}/:id`}
-                                  exact
-                                  render={(routeProps) => {
-                                    return (
-                                      <Edit
-                                        isEditing
-                                        {...routeProps}
-                                        collection={collection}
-                                      />
-                                    );
-                                  }}
-                                />
-                              );
+                              if (permissions?.[collection.slug]?.read?.permission) {
+                                return (
+                                  <Route
+                                    key={`${collection.slug}-edit`}
+                                    path={`${match.url}/collections/${collection.slug}/:id`}
+                                    exact
+                                    render={(routeProps) => {
+                                      return (
+                                        <Edit
+                                          isEditing
+                                          {...routeProps}
+                                          collection={collection}
+                                        />
+                                      );
+                                    }}
+                                  />
+                                );
+                              }
+
+                              return null;
                             })}
 
                             {globals && globals.map((global) => {
-                              return (
-                                <Route
-                                  key={`${global.slug}`}
-                                  path={`${match.url}/globals/${global.slug}`}
-                                  exact
-                                  render={(routeProps) => {
-                                    return (
-                                      <EditGlobal
-                                        {...routeProps}
-                                        global={global}
-                                      />
-                                    );
-                                  }}
-                                />
-                              );
+                              if (permissions?.[global.slug]?.read?.permission) {
+                                return (
+                                  <Route
+                                    key={`${global.slug}`}
+                                    path={`${match.url}/globals/${global.slug}`}
+                                    exact
+                                    render={(routeProps) => {
+                                      return (
+                                        <EditGlobal
+                                          {...routeProps}
+                                          global={global}
+                                        />
+                                      );
+                                    }}
+                                  />
+                                );
+                              }
+                              return null;
                             })}
+
                             <Route path={`${match.url}*`}>
                               <NotFound />
                             </Route>

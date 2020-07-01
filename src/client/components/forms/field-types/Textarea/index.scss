@@ -5,6 +5,7 @@
 
   textarea {
     @include formInput();
+    height: auto;
     min-height: base(3);
   }
 

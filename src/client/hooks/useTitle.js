@@ -1,7 +1,7 @@
-import useForm from '../components/forms/Form/useForm';
+import useFormFields from '../components/forms/Form/useFormFields';
 
 const useTitle = (useAsTitle) => {
-  const { getField } = useForm();
+  const { getField } = useFormFields();
   const titleField = getField(useAsTitle);
   return titleField?.value;
 };

@@ -6,7 +6,7 @@ import Label from '../../Label';
 import Button from '../../../elements/Button';
 import CopyToClipboard from '../../../elements/CopyToClipboard';
 import { text } from '../../../../../fields/validations';
-import useForm from '../../Form/useForm';
+import useFormFields from '../../Form/useFormFields';
 
 import './index.scss';
 
@@ -19,7 +19,7 @@ const APIKey = (props) => {
     initialData,
   } = props;
 
-  const { getField } = useForm();
+  const { getField } = useFormFields();
 
   const apiKey = getField(path);
 
@@ -36,7 +36,7 @@ const APIKey = (props) => {
 
   const fieldType = useFieldType({
     path: 'apiKey',
-    initialData: initialData || generateAPIKey(),
+    initialData: initialData || uuidv4(),
     validate,
   });
 

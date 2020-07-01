@@ -2,12 +2,12 @@ import React, { useCallback } from 'react';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import useForm from '../../Form/useForm';
+import useFormFields from '../../Form/useFormFields';
 
 import './index.scss';
 
 const ConfirmPassword = () => {
-  const { getField } = useForm();
+  const { getField } = useFormFields();
   const password = getField('password');
 
   const validate = useCallback((value) => {

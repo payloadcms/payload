@@ -3,7 +3,7 @@ const PassportAPIKey = require('passport-headerapikey').HeaderAPIKeyStrategy;
 module.exports = ({ Model, config }) => {
   const opts = {
     header: 'Authorization',
-    prefix: 'API-Key ',
+    prefix: `${config.labels.singular} API-Key `,
   };
 
   return new PassportAPIKey(opts, false, (apiKey, done) => {

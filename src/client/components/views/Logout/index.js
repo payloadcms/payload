@@ -20,7 +20,7 @@ const Logout = () => {
   return (
     <Minimal className={baseClass}>
       <div className={`${baseClass}__wrap`}>
-        <h1>You have been logged out.</h1>
+        <h2>You have been logged out successfully.</h2>
         <br />
         <Button
           el="anchor"

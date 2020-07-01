@@ -23,6 +23,7 @@ const Textarea = (props) => {
     readOnly,
     minLength,
     maxLength,
+    rows,
   } = props;
 
   const path = pathFromProps || name;
@@ -77,6 +78,7 @@ const Textarea = (props) => {
         placeholder={placeholder}
         id={path}
         name={path}
+        rows={rows}
       />
     </div>
   );
@@ -95,6 +97,7 @@ Textarea.defaultProps = {
   readOnly: false,
   minLength: undefined,
   maxLength: undefined,
+  rows: 8,
 };
 
 Textarea.propTypes = {
@@ -111,6 +114,7 @@ Textarea.propTypes = {
   readOnly: PropTypes.bool,
   minLength: PropTypes.number,
   maxLength: PropTypes.number,
+  rows: PropTypes.number,
 };
 
 export default withCondition(Textarea);

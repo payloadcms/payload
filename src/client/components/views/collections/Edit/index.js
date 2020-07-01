@@ -4,6 +4,7 @@ import { useRouteMatch, useHistory, useLocation } from 'react-router-dom';
 import config from 'payload/config';
 import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
+import { useUser } from '../../../data/User';
 import formatFields from './formatFields';
 
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
@@ -17,6 +18,7 @@ const EditView = (props) => {
   const history = useHistory();
   const { setStepNav } = useStepNav();
   const [fields, setFields] = useState([]);
+  const { permissions } = useUser();
 
   const { collection, isEditing } = props;
 
@@ -75,6 +77,7 @@ const EditView = (props) => {
       componentProps={{
         data: dataToRender,
         collection: { ...collection, fields },
+        permissions: permissions?.[collection.slug],
         isEditing,
         onSave,
       }}

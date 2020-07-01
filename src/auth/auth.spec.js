@@ -51,7 +51,7 @@ describe('Users REST API', () => {
   it('should return a logged in user from /me', async () => {
     const response = await fetch(`${url}/api/admins/me`, {
       headers: {
-        Authorization: `JWT ${token}`,
+        Authorization: `Admin JWT ${token}`,
       },
     });
 
@@ -65,7 +65,7 @@ describe('Users REST API', () => {
     const response = await fetch(`${url}/api/admins/refresh-token`, {
       method: 'post',
       headers: {
-        Authorization: `JWT ${token}`,
+        Authorization: `Admin JWT ${token}`,
       },
     });
 
@@ -104,7 +104,7 @@ describe('Users REST API', () => {
         roles: ['editor'],
       }),
       headers: {
-        Authorization: `JWT ${token}`,
+        Authorization: `Admin JWT ${token}`,
         'Content-Type': 'application/json',
       },
       method: 'post',

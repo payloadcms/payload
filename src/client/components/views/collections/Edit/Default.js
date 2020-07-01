@@ -25,7 +25,7 @@ const DefaultEditView = (props) => {
   const { params: { id } = {} } = useRouteMatch();
 
   const {
-    collection, isEditing, data, onSave,
+    collection, isEditing, data, onSave, permissions,
   } = props;
 
   const {
@@ -176,6 +176,20 @@ DefaultEditView.propTypes = {
     createdAt: PropTypes.string,
   }),
   onSave: PropTypes.func,
+  permissions: PropTypes.shape({
+    create: PropTypes.shape({
+      permission: PropTypes.bool,
+    }),
+    read: PropTypes.shape({
+      permission: PropTypes.bool,
+    }),
+    update: PropTypes.shape({
+      permission: PropTypes.bool,
+    }),
+    delete: PropTypes.shape({
+      permission: PropTypes.bool,
+    }),
+  }).isRequired,
 };
 
 export default DefaultEditView;

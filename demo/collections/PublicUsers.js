@@ -12,21 +12,7 @@ module.exports = {
   policies: {
     admin: () => false,
     create: () => true,
-    read: ({ req: { user } }) => {
-      if (checkRole(['admin'], user)) {
-        return true;
-      }
-
-      if (user) {
-        return {
-          id: {
-            equals: user.id,
-          },
-        };
-      }
-
-      return false;
-    },
+    read: () => true,
     update: ({ req: { user } }) => {
       if (checkRole(['admin'], user)) {
         return true;
