@@ -131,21 +131,22 @@ const Repeater = (props) => {
               {rows.length > 0 && rows.map((row, i) => {
                 return (
                   <DraggableSection
-                    isOpen={row.open}
-                    fieldTypes={fieldTypes}
                     key={row.key}
                     id={row.key}
-                    parentPath={path}
+                    blockType="repeater"
                     singularLabel={singularLabel}
-                    addRow={() => addRow(i)}
-                    moveRow={moveRow}
-                    removeRow={() => removeRow(i)}
+                    isOpen={row.open}
+                    rowCount={rows.length}
                     rowIndex={i}
-                    fieldSchema={fields}
+                    addRow={() => addRow(i)}
+                    removeRow={() => removeRow(i)}
+                    moveRow={moveRow}
+                    parentPath={path}
                     initialData={row.data}
                     initNull={row.initNull}
-                    dispatchRows={dispatchRows}
                     customComponentsPath={`${customComponentsPath}${name}.fields.`}
+                    fieldTypes={fieldTypes}
+                    fieldSchema={fields}
                   />
                 );
               })

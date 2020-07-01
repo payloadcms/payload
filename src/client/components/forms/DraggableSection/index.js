@@ -19,6 +19,7 @@ const DraggableSection = (props) => {
     addRow,
     removeRow,
     rowIndex,
+    rowCount,
     parentPath,
     fieldSchema,
     initialData,
@@ -61,6 +62,7 @@ const DraggableSection = (props) => {
               <PositionPanel
                 dragHandleProps={providedDrag.dragHandleProps}
                 moveRow={moveRow}
+                rowCount={rowCount}
                 positionIndex={rowIndex}
                 verticalAlignment={positionPanelVerticalAlignment}
               />
@@ -106,8 +108,8 @@ const DraggableSection = (props) => {
 
               <ActionPanel
                 rowIndex={rowIndex}
-                removeRow={removeRow}
                 addRow={addRow}
+                removeRow={removeRow}
                 singularLabel={singularLabel}
                 verticalAlignment={actionPanelVerticalAlignment}
                 isHovered={isHovered}

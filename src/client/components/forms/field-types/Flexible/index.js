@@ -155,16 +155,22 @@ const Flexible = (props) => {
                 if (blockToRender) {
                   return (
                     <DraggableSection
-                      isOpen={row.open}
-                      fieldTypes={fieldTypes}
                       key={row.key}
                       id={row.key}
-                      parentPath={path}
-                      moveRow={moveRow}
+                      blockType="flexible"
+                      blocks={blocks}
+                      singularLabel={blockToRender?.labels?.singular}
+                      isOpen={row.open}
+                      rowCount={rows.length}
+                      rowIndex={i}
                       addRow={addRow}
                       removeRow={() => removeRow(i)}
+                      moveRow={moveRow}
                       toggleRowCollapse={() => toggleCollapse(i)}
-                      rowIndex={i}
+                      parentPath={path}
+                      initialData={row.data}
+                      customComponentsPath={`${customComponentsPath}${name}.fields.`}
+                      fieldTypes={fieldTypes}
                       fieldSchema={[
                         ...blockToRender.fields,
                         {
@@ -177,13 +183,6 @@ const Flexible = (props) => {
                           hidden: 'admin',
                         },
                       ]}
-                      singularLabel={blockToRender?.labels?.singular}
-                      initialData={row.data}
-                      dispatchRows={dispatchRows}
-                      blockType="flexible"
-                      customComponentsPath={`${customComponentsPath}${name}.fields.`}
-                      useFlexibleBlockSelection
-                      blocks={blocks}
                     />
                   );
                 }

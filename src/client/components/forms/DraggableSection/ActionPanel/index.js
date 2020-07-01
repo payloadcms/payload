@@ -15,7 +15,7 @@ const ActionPanel = (props) => {
     removeRow,
     singularLabel,
     verticalAlignment,
-    useFlexibleBlockSelection,
+    blockType,
     blocks,
     rowIndex,
     isHovered,
@@ -52,7 +52,7 @@ const ActionPanel = (props) => {
             {singularLabel}
           </Popup>
 
-          {useFlexibleBlockSelection
+          {blockType === 'flexible'
             ? (
               <Popup
                 buttonType="custom"
@@ -113,7 +113,7 @@ const ActionPanel = (props) => {
 ActionPanel.defaultProps = {
   singularLabel: 'Row',
   verticalAlignment: 'center',
-  useFlexibleBlockSelection: false,
+  blockType: null,
   isHovered: false,
 };
 
@@ -121,9 +121,10 @@ ActionPanel.propTypes = {
   singularLabel: PropTypes.string,
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
-  useFlexibleBlockSelection: PropTypes.bool,
+  blockType: PropTypes.oneOf(['flexible', 'repeater']),
   verticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
   isHovered: PropTypes.bool,
+  rowIndex: PropTypes.number.isRequired,
 };
 
 export default ActionPanel;
