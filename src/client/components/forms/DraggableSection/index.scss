@@ -77,6 +77,12 @@
       .position-panel__move-forward,
       .position-panel__move-backward {
         opacity: 1;
+
+        &.first-row,
+        &.last-row {
+          opacity: .15;
+          pointer-events: none;
+        }
       }
 
       .position-panel__current-position {

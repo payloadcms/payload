@@ -38,19 +38,11 @@ $controls-top-adjustment: base(.1);
     transform: rotate(.5turn);
     margin: 0;
     opacity: 0;
-
-    &.first-row {
-      visibility: hidden;
-    }
   }
 
   &__move-forward {
     margin: 0;
     opacity: 0;
-
-    &.last-row {
-      visibility: hidden;
-    }
   }
 
   &__current-position {

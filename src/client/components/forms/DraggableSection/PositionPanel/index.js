@@ -19,8 +19,6 @@ const PositionPanel = (props) => {
     `${baseClass}--vertical-alignment-${verticalAlignment}`,
   ].filter(Boolean).join(' ');
 
-  console.log(rowCount);
-  console.log(positionIndex);
   return (
     <div
       className={classes}
