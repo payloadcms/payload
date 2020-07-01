@@ -94,6 +94,7 @@
       .action-panel__controls {
         opacity: 1;
         visibility: visible;
+        z-index: $z-nav;
       }
     }
 

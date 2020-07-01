@@ -13,7 +13,7 @@ $controls-top-adjustment: base(.1);
   }
 
   &__controls {
-    padding-right: base(1.25);
+    padding-right: base(.65);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -49,9 +49,18 @@ $controls-top-adjustment: base(.1);
     text-align: center;
     color: $color-gray;
   }
+
+  @include large-break {
+    padding-right: base(1);
+
+    &__controls {
+      padding-right: base(.75);
+    }
+  }
 }
 
 
+// External scopes
 .field-type.flexible {
   .position-panel {
     &__controls-container {

@@ -1,0 +1,8 @@
+@import '../../../../../scss/styles.scss';
+
+.block-selector {
+
+  @include mid-break {
+    min-width: 80vw;
+  }
+}

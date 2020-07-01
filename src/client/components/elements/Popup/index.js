@@ -42,13 +42,16 @@ const Popup = (props) => {
       const { y: buttonYCoord } = buttonRef.current.getBoundingClientRect();
 
       const windowWidth = window.innerWidth;
-      const distanceToRightEdge = windowWidth - (contentRightEdge + contentWidth);
+      const distanceToRightEdge = windowWidth - contentRightEdge;
       const distanceToLeftEdge = contentRightEdge - contentWidth;
 
-      if (distanceToRightEdge <= 0) {
+      if (horizontalAlign === 'left' && distanceToRightEdge <= 0) {
         setForceHorizontalAlign('right');
-      } else if (distanceToLeftEdge <= 0) {
+      } else if (horizontalAlign === 'right' && distanceToLeftEdge <= 0) {
         setForceHorizontalAlign('left');
+      } else if (horizontalAlign === 'center' && (distanceToLeftEdge <= contentWidth / 2 || distanceToRightEdge <= contentWidth / 2)) {
+        if (distanceToRightEdge > distanceToLeftEdge) setForceHorizontalAlign('left');
+        else setForceHorizontalAlign('right');
       } else {
         setForceHorizontalAlign(null);
       }
