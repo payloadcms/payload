@@ -54,17 +54,17 @@ const Form = (props) => {
   const { replaceStatus, addStatus, clearStatus } = useStatusList();
   const { refreshToken } = useUser();
 
-  const contextRef = useRef(initContextState);
-  const { current: context } = contextRef;
+  const contextRef = useRef({ ...initContextState });
+  const { current: contextValue } = contextRef;
 
   const [fields, dispatchFields] = useReducer(fieldReducer, {});
-  context.dispatchFields = dispatchFields;
+  contextValue.dispatchFields = dispatchFields;
 
-  context.submit = (e) => {
+  contextValue.submit = (e) => {
     e.stopPropagation();
-    context.setSubmitted(true);
+    contextValue.setSubmitted(true);
 
-    const isValid = context.validateForm();
+    const isValid = contextValue.validateForm();
 
     // If not valid, prevent submission
     if (!isValid) {
@@ -98,18 +98,18 @@ const Form = (props) => {
         behavior: 'smooth',
       });
 
-      const formData = context.createFormData();
-      context.setProcessing(true);
+      const formData = contextValue.createFormData();
+      contextValue.setProcessing(true);
 
       // Make the API call from the action
       return requests[method.toLowerCase()](action, {
         body: formData,
       }).then((res) => {
-        context.setModified(false);
+        contextValue.setModified(false);
         if (typeof handleAjaxResponse === 'function') return handleAjaxResponse(res);
 
         return res.json().then((json) => {
-          context.setProcessing(false);
+          contextValue.setProcessing(false);
           clearStatus();
 
           if (res.status < 400) {
@@ -186,19 +186,19 @@ const Form = (props) => {
     return true;
   };
 
-  context.getFields = () => {
+  contextValue.getFields = () => {
     return fields;
   };
 
-  context.getField = (path) => {
+  contextValue.getField = (path) => {
     return fields[path];
   };
 
-  context.getData = () => {
+  contextValue.getData = () => {
     return reduceFieldsToValues(fields, true);
   };
 
-  context.getSiblingData = (path) => {
+  contextValue.getSiblingData = (path) => {
     let siblingFields = fields;
 
     // If this field is nested
@@ -220,7 +220,7 @@ const Form = (props) => {
     return reduceFieldsToValues(siblingFields, true);
   };
 
-  context.getDataByPath = (path) => {
+  contextValue.getDataByPath = (path) => {
     const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1);
     const name = path.split('.').pop();
 
@@ -240,54 +240,49 @@ const Form = (props) => {
     return unflattenedData?.[name];
   };
 
-  context.getUnflattenedValues = () => {
+  contextValue.getUnflattenedValues = () => {
     return reduceFieldsToValues(fields);
   };
 
-  context.validateForm = () => {
+  contextValue.validateForm = () => {
     return !Object.values(fields).some((field) => {
       return field.valid === false;
     });
   };
 
-  context.createFormData = () => {
+  contextValue.createFormData = () => {
     const data = reduceFieldsToValues(fields);
     return objectToFormData(data, { indices: true });
   };
 
+  contextValue.setModified = (modified) => {
+    contextValue.modified = modified;
+  };
 
-  function setModified(modified) {
-    context.modified = modified;
-  }
+  contextValue.setSubmitted = (submitted) => {
+    contextValue.submitted = submitted;
+  };
 
-  context.setModified = setModified;
-
-  function setSubmitted(submitted) {
-    context.submitted = submitted;
-  }
-
-  context.setSubmitted = setSubmitted;
-
-  function setProcessing(processing) {
-    context.processing = processing;
-  }
-
-  context.setProcessing = setProcessing;
+  contextValue.setProcessing = (processing) => {
+    contextValue.processing = processing;
+  };
 
   useThrottledEffect(() => {
     refreshToken();
   }, 15000, [fields]);
 
   useEffect(() => {
-    setModified(false);
-  }, [locale]);
+    contextValue.modified = false;
+  }, [locale, contextValue.modified]);
 
   const classes = [
     className,
     baseClass,
   ].filter(Boolean).join(' ');
 
-  const { submit } = context;
+  const { submit } = contextValue;
+
+  console.log(fields);
 
   return (
     <form
@@ -297,7 +292,7 @@ const Form = (props) => {
       action={action}
       className={classes}
     >
-      <FormContext.Provider value={context}>
+      <FormContext.Provider value={contextValue}>
         <HiddenInput
           path="locale"
           defaultValue={locale}
