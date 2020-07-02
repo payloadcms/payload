@@ -57,22 +57,21 @@ const Form = (props) => {
   const { refreshToken } = useUser();
 
   const contextRef = useRef({ ...initContextState });
-  const { current: contextValue } = contextRef;
 
   const [fields, dispatchFields] = useReducer(fieldReducer, {});
-  contextValue.fields = fields;
-  contextValue.dispatchFields = dispatchFields;
+  contextRef.current.fields = { ...fields };
+  contextRef.current.dispatchFields = dispatchFields;
 
-  contextValue.submit = (e) => {
+  contextRef.current.submit = (e) => {
     if (disabled) {
       e.preventDefault();
       return false;
     }
 
     e.stopPropagation();
-    contextValue.setSubmitted(true);
+    contextRef.current.setSubmitted(true);
 
-    const isValid = contextValue.validateForm();
+    const isValid = contextRef.current.validateForm();
 
     // If not valid, prevent submission
     if (!isValid) {
@@ -106,18 +105,18 @@ const Form = (props) => {
         behavior: 'smooth',
       });
 
-      const formData = contextValue.createFormData();
-      contextValue.setProcessing(true);
+      const formData = contextRef.current.createFormData();
+      contextRef.current.setProcessing(true);
 
       // Make the API call from the action
       return requests[method.toLowerCase()](action, {
         body: formData,
       }).then((res) => {
-        contextValue.setModified(false);
+        contextRef.current.setModified(false);
         if (typeof handleAjaxResponse === 'function') return handleAjaxResponse(res);
 
         return res.json().then((json) => {
-          contextValue.setProcessing(false);
+          contextRef.current.setProcessing(false);
           clearStatus();
 
           if (res.status < 400) {
@@ -154,7 +153,7 @@ const Form = (props) => {
                   valid: false,
                   errorMessage: err.message,
                   path: err.field,
-                  value: fields?.[err.field]?.value,
+                  value: contextRef.current.fields?.[err.field]?.value,
                 });
               });
 
@@ -194,30 +193,30 @@ const Form = (props) => {
     return true;
   };
 
-  contextValue.getFields = () => {
-    return fields;
+  contextRef.current.getFields = () => {
+    return contextRef.current.fields;
   };
 
-  contextValue.getField = (path) => {
-    return fields[path];
+  contextRef.current.getField = (path) => {
+    return contextRef.current.fields[path];
   };
 
-  contextValue.getData = () => {
-    return reduceFieldsToValues(fields, true);
+  contextRef.current.getData = () => {
+    return reduceFieldsToValues(contextRef.current.fields, true);
   };
 
-  contextValue.getSiblingData = (path) => {
-    let siblingFields = fields;
+  contextRef.current.getSiblingData = (path) => {
+    let siblingFields = contextRef.current.fields;
 
     // If this field is nested
     // We can provide a list of sibling fields
     if (path.indexOf('.') > 0) {
       const parentFieldPath = path.substring(0, path.lastIndexOf('.') + 1);
-      siblingFields = Object.keys(fields).reduce((siblings, fieldKey) => {
+      siblingFields = Object.keys(contextRef.current.fields).reduce((siblings, fieldKey) => {
         if (fieldKey.indexOf(parentFieldPath) === 0) {
           return {
             ...siblings,
-            [fieldKey.replace(parentFieldPath, '')]: fields[fieldKey],
+            [fieldKey.replace(parentFieldPath, '')]: contextRef.current.fields[fieldKey],
           };
         }
 
@@ -228,15 +227,15 @@ const Form = (props) => {
     return reduceFieldsToValues(siblingFields, true);
   };
 
-  contextValue.getDataByPath = (path) => {
+  contextRef.current.getDataByPath = (path) => {
     const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1);
     const name = path.split('.').pop();
 
-    const data = Object.keys(fields).reduce((matchedData, key) => {
+    const data = Object.keys(contextRef.current.fields).reduce((matchedData, key) => {
       if (key.indexOf(`${path}.`) === 0) {
         return {
           ...matchedData,
-          [key.replace(pathPrefixToRemove, '')]: fields[key],
+          [key.replace(pathPrefixToRemove, '')]: contextRef.current.fields[key],
         };
       }
 
@@ -248,12 +247,12 @@ const Form = (props) => {
     return unflattenedData?.[name];
   };
 
-  contextValue.getUnflattenedValues = () => {
-    return reduceFieldsToValues(fields);
+  contextRef.current.getUnflattenedValues = () => {
+    return reduceFieldsToValues(contextRef.current.fields);
   };
 
-  contextValue.validateForm = () => {
-    return !Object.values(fields).some((field) => {
+  contextRef.current.validateForm = () => {
+    return !Object.values(contextRef.current.fields).some((field) => {
       if (field.valid === false) {
         console.log(field, ' is not valid');
       }
@@ -261,21 +260,21 @@ const Form = (props) => {
     });
   };
 
-  contextValue.createFormData = () => {
-    const data = reduceFieldsToValues(fields);
+  contextRef.current.createFormData = () => {
+    const data = reduceFieldsToValues(contextRef.current.fields);
     return objectToFormData(data, { indices: true });
   };
 
-  contextValue.setModified = (modified) => {
-    contextValue.modified = modified;
+  contextRef.current.setModified = (modified) => {
+    contextRef.current.modified = modified;
   };
 
-  contextValue.setSubmitted = (submitted) => {
-    contextValue.submitted = submitted;
+  contextRef.current.setSubmitted = (submitted) => {
+    contextRef.current.submitted = submitted;
   };
 
-  contextValue.setProcessing = (processing) => {
-    contextValue.processing = processing;
+  contextRef.current.setProcessing = (processing) => {
+    contextRef.current.processing = processing;
   };
 
   useThrottledEffect(() => {
@@ -283,28 +282,26 @@ const Form = (props) => {
   }, 15000, [fields]);
 
   useEffect(() => {
-    contextValue.modified = false;
-  }, [locale, contextValue.modified]);
+    contextRef.current.modified = false;
+  }, [locale, contextRef.current.modified]);
 
   const classes = [
     className,
     baseClass,
   ].filter(Boolean).join(' ');
 
-  const { submit } = contextValue;
-
   return (
     <form
       noValidate
-      onSubmit={submit}
+      onSubmit={contextRef.current.submit}
       method={method}
       action={action}
       className={classes}
     >
-      <FormContext.Provider value={contextValue}>
+      <FormContext.Provider value={contextRef.current}>
         <FieldContext.Provider value={{
           fields,
-          ...contextValue,
+          ...contextRef.current,
         }}
         >
           <HiddenInput
