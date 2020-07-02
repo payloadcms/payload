@@ -3,6 +3,7 @@ import {
 } from 'react';
 import FormContext from '../Form/FormContext';
 import useDebounce from '../../../hooks/useDebounce';
+import useUnmountEffect from '../../../hooks/useUnmountEffect';
 
 import './index.scss';
 
@@ -74,9 +75,9 @@ const useFieldType = (options) => {
 
   // Remove field from state on "unmount"
   // This is mostly used for repeater / flex content row modifications
-  useEffect(() => {
-    return () => dispatchFields({ path, type: 'REMOVE' });
-  }, [dispatchFields, path]);
+  useUnmountEffect(() => {
+    formContext.dispatchFields({ path, type: 'REMOVE' });
+  });
 
   // The only time that the FORM value should be updated
   // is when the debounced value updates. So, when the debounced value updates,

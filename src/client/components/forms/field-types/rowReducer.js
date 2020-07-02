@@ -15,7 +15,7 @@ const reducer = (currentState, action) => {
       stateCopy[index].open = !stateCopy[index].open;
       return stateCopy;
 
-    case 'ADD':
+    case 'ADD': {
       stateCopy.splice(index + 1, 0, {
         open: true,
         key: uuidv4(),
@@ -24,7 +24,7 @@ const reducer = (currentState, action) => {
 
       data.splice(index + 1, 0, initialRowData);
 
-      return stateCopy.map((row, i) => {
+      const result = stateCopy.map((row, i) => {
         return {
           ...row,
           data: {
@@ -32,6 +32,10 @@ const reducer = (currentState, action) => {
           },
         };
       });
+
+      return result;
+    }
+
 
     case 'REMOVE':
       stateCopy.splice(index, 1);
@@ -50,7 +54,6 @@ const reducer = (currentState, action) => {
       const movingRowState = { ...stateCopyWithNewData[index] };
       stateCopyWithNewData.splice(index, 1);
       stateCopyWithNewData.splice(moveToIndex, 0, movingRowState);
-
       return stateCopyWithNewData;
     }
 

@@ -9,6 +9,9 @@ module.exports = {
     singular: 'Flexible Content',
     plural: 'Flexible Content',
   },
+  policies: {
+    read: () => true,
+  },
   fields: [
     {
       name: 'layout',

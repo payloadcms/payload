@@ -17,6 +17,7 @@ const middleware = (config) => {
   return [
     passport.initialize(),
     passport.session(),
+    authenticate(config),
     express.json(),
     cookieParser(),
     methodOverride('X-HTTP-Method-Override'),
@@ -24,7 +25,6 @@ const middleware = (config) => {
     bodyParser.urlencoded({ extended: true }),
     compression(config.compression),
     localizationMiddleware(config.localization),
-    authenticate(config),
     identifyAPI('REST'),
     fileUpload({
       parseNested: true,

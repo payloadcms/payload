@@ -1,6 +1,7 @@
 const createAuthHeaderFromCookie = config => (req, _, next) => {
-  if (process.env.NODE_ENV !== 'production' || config.productionGraphQLPlayground) {
-    const existingAuthHeader = req.get('Authorization');
+  const existingAuthHeader = req.get('Authorization');
+
+  if (req.cookies) {
     const token = req.cookies[`${config.cookiePrefix}-token`];
 
     if (!existingAuthHeader && token) {
