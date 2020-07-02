@@ -59,7 +59,7 @@ const Form = (props) => {
   const contextRef = useRef({ ...initContextState });
 
   const [fields, dispatchFields] = useReducer(fieldReducer, {});
-  contextRef.current.fields = { ...fields };
+  contextRef.current.fields = fields;
   contextRef.current.dispatchFields = dispatchFields;
 
   contextRef.current.submit = (e) => {

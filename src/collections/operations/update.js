@@ -33,16 +33,25 @@ const update = async (args) => {
       },
     } = options;
 
-    let query = { _id: id };
+    const queryToBuild = {
+      where: {
+        and: [
+          {
+            id: {
+              equals: id,
+            },
+          },
+        ],
+      },
+    };
 
     if (hasWherePolicy) {
-      query = {
-        ...query,
-        ...policyResults,
-      };
+      queryToBuild.where.and.push(hasWherePolicy);
     }
 
-    let doc = await Model.findOne(query);
+    options.query = await args.Model.buildQuery(queryToBuild, locale);
+
+    let doc = await Model.findOne(options.query);
 
     if (!doc && !hasWherePolicy) throw new NotFound();
     if (!doc && hasWherePolicy) throw new Forbidden();
