@@ -13,11 +13,11 @@ const policies = async (args) => {
   const isLoggedIn = !!(user);
   const userCollectionConfig = (user && user.collection) ? config.collections.find(collection => collection.slug === user.collection) : null;
 
-  const createPolicyPromise = async (obj, policy, operation) => {
+  const createPolicyPromise = async (obj, policy, operation, disableWhere = false) => {
     const updatedObj = obj;
     const result = await policy({ req });
 
-    if (typeof result === 'object') {
+    if (typeof result === 'object' && !disableWhere) {
       updatedObj[operation] = {
         permission: true,
         where: result,
@@ -37,7 +37,7 @@ const policies = async (args) => {
         if (!updatedObj[field.name]) updatedObj[field.name] = {};
 
         if (field.policies && typeof field.policies[operation] === 'function') {
-          promises.push(createPolicyPromise(updatedObj[field.name], field.policies[operation], operation));
+          promises.push(createPolicyPromise(updatedObj[field.name], field.policies[operation], operation, true));
         } else {
           updatedObj[field.name][operation] = {
             permission: isLoggedIn,

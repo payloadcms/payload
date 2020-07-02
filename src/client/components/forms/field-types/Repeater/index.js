@@ -25,12 +25,15 @@ const Repeater = (props) => {
     fields,
     defaultValue,
     initialData,
-    singularLabel,
     fieldTypes,
     validate,
     required,
     maxRows,
     minRows,
+    labels: {
+      singular: singularLabel,
+    },
+    permissions,
   } = props;
 
   const dataToInitialize = initialData || defaultValue;
@@ -129,23 +132,23 @@ const Repeater = (props) => {
               {rows.length > 0 && rows.map((row, i) => {
                 return (
                   <DraggableSection
-                    isOpen={row.open}
-                    fieldTypes={fieldTypes}
                     key={row.key}
                     id={row.key}
-                    parentPath={path}
+                    blockType="repeater"
                     singularLabel={singularLabel}
-                    addRow={() => addRow(i)}
-                    moveRow={moveRow}
-                    removeRow={() => removeRow(i)}
+                    isOpen={row.open}
+                    rowCount={rows.length}
                     rowIndex={i}
-                    fieldSchema={fields}
+                    addRow={() => addRow(i)}
+                    removeRow={() => removeRow(i)}
+                    moveRow={moveRow}
+                    parentPath={path}
                     initialData={row.data}
                     initNull={row.initNull}
-                    dispatchRows={dispatchRows}
                     customComponentsPath={`${customComponentsPath}${name}.fields.`}
-                    positionHandleVerticalAlignment="sticky"
-                    actionHandleVerticalAlignment="sticky"
+                    fieldTypes={fieldTypes}
+                    fieldSchema={fields}
+                    permissions={permissions.fields}
                   />
                 );
               })
@@ -173,13 +176,16 @@ const Repeater = (props) => {
 
 Repeater.defaultProps = {
   label: '',
-  singularLabel: 'Row',
   defaultValue: [],
   initialData: [],
   validate: repeater,
   required: false,
   maxRows: undefined,
   minRows: undefined,
+  labels: {
+    singular: 'Row',
+  },
+  permissions: {},
 };
 
 Repeater.propTypes = {
@@ -193,7 +199,9 @@ Repeater.propTypes = {
     PropTypes.shape({}),
   ).isRequired,
   label: PropTypes.string,
-  singularLabel: PropTypes.string,
+  labels: PropTypes.shape({
+    singular: PropTypes.string,
+  }),
   name: PropTypes.string.isRequired,
   path: PropTypes.string.isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
@@ -201,6 +209,9 @@ Repeater.propTypes = {
   required: PropTypes.bool,
   maxRows: PropTypes.number,
   minRows: PropTypes.number,
+  permissions: PropTypes.shape({
+    fields: PropTypes.shape({}),
+  }),
 };
 
 export default withCondition(Repeater);

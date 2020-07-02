@@ -136,6 +136,10 @@
   }
 
   @include mid-break {
+    &__sidebar {
+      width: unset;
+    }
+
     &__form {
       display: block;
     }

@@ -4,25 +4,25 @@
 // HELPER MIXINS
 //////////////////////
 
-@mixin realtively-position-handles {
-  .position-handle {
+@mixin realtively-position-panels {
+  .position-panel {
     position: relative;
     right: 0;
   }
 
-  .action-handle {
+  .action-panel {
     position: relative;
     left: 0;
   }
 }
 
-@mixin absolutely-position-handles {
-  .position-handle {
+@mixin absolutely-position-panels {
+  .position-panel {
     position: absolute;
     top: 0; right: 100%; bottom: 0;
   }
 
-  .action-handle {
+  .action-panel {
     position: absolute;
     top: 0; bottom: 0; left: 100%;
   }
@@ -33,43 +33,96 @@
 //////////////////////
 
 .draggable-section {
-  display: flex;
-  position: relative;
-  padding-top: base(.75);
-  padding-bottom: base(.75);
-  margin-bottom: base(.75);
+  padding-bottom: base(.5);
+
+  .draggable-section {
+    padding-bottom: 0;
+  }
+
+  &__content-wrapper {
+    display: flex;
+    position: relative;
+    padding-top: base(.75);
+  }
+
+  &.is-closed {
+    .draggable-section__content-wrapper {
+      margin-bottom: base(1.75);
+    }
+  }
+
+  &__section-header {
+    display: flex;
+
+    .toggle-collapse {
+      margin: 0 0 0 auto;
+      transform: rotate(.5turn);
+
+      &--is-closed {
+        transform: rotate(0turn);
+      }
+    }
+  }
 
   &__render-fields-wrapper {
     width: 100%;
   }
 
-  &.is-hovered,
-  &:focus-within {
-    > .position-handle {
-      .position-handle__controls-container {
+  &.is-hovered > div {
+    > .position-panel {
+      .position-panel__controls-container {
         box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
       }
 
-      .position-handle__move-forward,
-      .position-handle__move-backward {
+      .position-panel__move-forward,
+      .position-panel__move-backward {
         opacity: 1;
+
+        &.first-row,
+        &.last-row {
+          opacity: .15;
+          pointer-events: none;
+        }
       }
 
-      .position-handle__current-position {
+      .position-panel__current-position {
         color: $color-dark-gray;
       }
     }
 
-    > .action-handle {
-      .action-handle__add-row,
-      .action-handle__remove-row {
+    > .action-panel {
+      .action-panel__controls {
         opacity: 1;
+        visibility: visible;
+        z-index: $z-nav;
+      }
+    }
+
+    .toggle-collapse {
+      @include color-svg(white);
+
+      .btn__icon {
+        background-color: $color-gray;
+
+        &:hover {
+          background-color: $color-dark-gray;
+        }
       }
     }
   }
 
+  label.field-label {
+    line-height: 1;
+    padding-bottom: base(.75)
+  }
+
   @include mid-break {
-    @include realtively-position-handles();
+    @include realtively-position-panels();
+
+    .position-panel__move-forward,
+    .position-panel__move-backward {
+      opacity: 1;
+    }
   }
 }
 
@@ -78,12 +131,23 @@
 //////////////////////
 
 .collection-edit {
-  @include absolutely-position-handles();
+  @include absolutely-position-panels();
+
+  @include mid-break {
+    @include realtively-position-panels();
+  }
 }
 
 .field-type.repeater .field-type.repeater {
-  @include realtively-position-handles();
+  @include realtively-position-panels();
 }
 
-
-
+// remove padding above repeater rows to level
+// the line with the top of the input label
+.field-type.repeater {
+  .draggable-section {
+    &__content-wrapper {
+      padding-top: 0;
+    }
+  }
+}

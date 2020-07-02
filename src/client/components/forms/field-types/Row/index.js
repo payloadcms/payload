@@ -7,14 +7,13 @@ import './index.scss';
 
 const Row = (props) => {
   const {
-    fields, fieldTypes, initialData, path: pathFromProps, name,
+    fields, fieldTypes, initialData, path, permissions,
   } = props;
-
-  const path = pathFromProps || name;
 
   return (
     <div className="field-type row">
       <RenderFields
+        permissions={permissions}
         initialData={initialData}
         fieldTypes={fieldTypes}
         fieldSchema={fields.map((field) => {
@@ -31,6 +30,7 @@ const Row = (props) => {
 Row.defaultProps = {
   path: '',
   initialData: undefined,
+  permissions: {},
 };
 
 Row.propTypes = {
@@ -39,8 +39,8 @@ Row.propTypes = {
   ).isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
   path: PropTypes.string,
-  name: PropTypes.string.isRequired,
   initialData: PropTypes.shape({}),
+  permissions: PropTypes.shape({}),
 };
 
 export default withCondition(Row);

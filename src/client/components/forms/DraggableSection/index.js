@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-// import AnimateHeight from 'react-animate-height';
+import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
 
-import ActionHandle from './ActionHandle';
+import ActionPanel from './ActionPanel';
 import SectionTitle from './SectionTitle';
-import PositionHandle from './PositionHandle';
+import PositionPanel from './PositionPanel';
 import RenderFields from '../RenderFields';
 
 import './index.scss';
+import Button from '../../elements/Button';
 
 const baseClass = 'draggable-section';
 
@@ -18,35 +19,27 @@ const DraggableSection = (props) => {
     addRow,
     removeRow,
     rowIndex,
+    rowCount,
     parentPath,
     fieldSchema,
     initialData,
-    // dispatchRows,
     singularLabel,
     blockType,
     fieldTypes,
     customComponentsPath,
     isOpen,
     id,
-    positionHandleVerticalAlignment,
-    actionHandleVerticalAlignment,
+    positionPanelVerticalAlignment,
+    actionPanelVerticalAlignment,
+    toggleRowCollapse,
     permissions,
   } = props;
 
-  // const draggableRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
-
-  // const handleCollapseClick = () => {
-  //   draggableRef.current.focus();
-  //   dispatchRows({
-  //     type: 'UPDATE_COLLAPSIBLE_STATUS',
-  //     index: rowIndex,
-  //   });
-  // };
 
   const classes = [
     baseClass,
-    isOpen && 'is-open',
+    isOpen ? 'is-open' : 'is-closed',
     isHovered && 'is-hovered',
   ].filter(Boolean).join(' ');
 
@@ -60,50 +53,71 @@ const DraggableSection = (props) => {
           <div
             ref={providedDrag.innerRef}
             className={classes}
-            onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onMouseOver={() => setIsHovered(true)}
+            onFocus={() => setIsHovered(true)}
             {...providedDrag.draggableProps}
           >
 
-            <PositionHandle
-              dragHandleProps={providedDrag.dragHandleProps}
-              moveRow={moveRow}
-              positionIndex={rowIndex}
-              verticalAlignment={positionHandleVerticalAlignment}
-            />
+            <div className={`${baseClass}__content-wrapper`}>
+              <PositionPanel
+                dragHandleProps={providedDrag.dragHandleProps}
+                moveRow={moveRow}
+                rowCount={rowCount}
+                positionIndex={rowIndex}
+                verticalAlignment={positionPanelVerticalAlignment}
+              />
 
-            <div className={`${baseClass}__render-fields-wrapper`}>
+              <div className={`${baseClass}__render-fields-wrapper`}>
 
-              {blockType === 'flexible' && (
-                <SectionTitle
-                  label={singularLabel}
-                  initialData={initialData?.blockName}
-                  path={`${parentPath}.${rowIndex}.blockName`}
-                />
-              )}
+                {blockType === 'flexible' && (
+                  <div className={`${baseClass}__section-header`}>
+                    <SectionTitle
+                      label={singularLabel}
+                      initialData={initialData?.blockName}
+                      path={`${parentPath}.${rowIndex}.blockName`}
+                    />
 
-              {/* Render fields */}
-              <RenderFields
-                initialData={initialData}
-                customComponentsPath={customComponentsPath}
-                fieldTypes={fieldTypes}
-                key={rowIndex}
-                fieldSchema={fieldSchema.map((field) => {
-                  return ({
-                    ...field,
-                    path: `${parentPath}.${rowIndex}${field.name ? `.${field.name}` : ''}`,
-                  });
-                })}
+                    <Button
+                      icon="chevron"
+                      onClick={toggleRowCollapse}
+                      buttonStyle="icon-label"
+                      className={`toggle-collapse toggle-collapse--is-${isOpen ? 'open' : 'closed'}`}
+                      round
+                    />
+                  </div>
+                )}
+
+                <AnimateHeight
+                  height={isOpen ? 'auto' : 0}
+                  duration={0}
+                >
+                  <RenderFields
+                    initialData={initialData}
+                    customComponentsPath={customComponentsPath}
+                    fieldTypes={fieldTypes}
+                    key={rowIndex}
+                    permissions={permissions}
+                    fieldSchema={fieldSchema.map((field) => {
+                      return ({
+                        ...field,
+                        path: `${parentPath}.${rowIndex}${field.name ? `.${field.name}` : ''}`,
+                      });
+                    })}
+                  />
+                </AnimateHeight>
+              </div>
+
+              <ActionPanel
+                rowIndex={rowIndex}
+                addRow={addRow}
+                removeRow={removeRow}
+                singularLabel={singularLabel}
+                verticalAlignment={actionPanelVerticalAlignment}
+                isHovered={isHovered}
+                {...props}
               />
             </div>
-
-            <ActionHandle
-              removeRow={removeRow}
-              addRow={addRow}
-              rowIndex={rowIndex}
-              singularLabel={singularLabel}
-              verticalAlignment={actionHandleVerticalAlignment}
-            />
           </div>
         );
       }}
@@ -112,34 +126,37 @@ const DraggableSection = (props) => {
 };
 
 DraggableSection.defaultProps = {
+  toggleRowCollapse: undefined,
   rowCount: null,
   initialData: undefined,
   singularLabel: '',
   blockType: '',
   customComponentsPath: '',
   isOpen: true,
-  positionHandleVerticalAlignment: 'center',
-  actionHandleVerticalAlignment: 'center',
+  positionPanelVerticalAlignment: 'sticky',
+  actionPanelVerticalAlignment: 'sticky',
+  permissions: {},
 };
 
 DraggableSection.propTypes = {
   moveRow: PropTypes.func.isRequired,
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
+  toggleRowCollapse: PropTypes.func,
   rowIndex: PropTypes.number.isRequired,
   parentPath: PropTypes.string.isRequired,
   singularLabel: PropTypes.string,
   fieldSchema: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   rowCount: PropTypes.number,
   initialData: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
-  dispatchRows: PropTypes.func.isRequired,
   isOpen: PropTypes.bool,
   blockType: PropTypes.string,
   fieldTypes: PropTypes.shape({}).isRequired,
   customComponentsPath: PropTypes.string,
   id: PropTypes.string.isRequired,
-  positionHandleVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
-  actionHandleVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
+  positionPanelVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
+  actionPanelVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
+  permissions: PropTypes.shape({}),
 };
 
 export default DraggableSection;

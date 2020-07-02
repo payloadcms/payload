@@ -1,4 +1,8 @@
 const checkRole = require('../policies/checkRole');
+const Email = require('../content-blocks/Email');
+const Quote = require('../content-blocks/Quote');
+const NumberBlock = require('../content-blocks/Number');
+const CallToAction = require('../content-blocks/CallToAction');
 
 const AllFields = {
   slug: 'all-fields',
@@ -164,6 +168,7 @@ const AllFields = {
               required: true,
               policies: {
                 read: ({ req: { user } }) => Boolean(user),
+                update: () => false,
               },
             },
           ],
@@ -175,6 +180,17 @@ const AllFields = {
           readOnly: true,
         },
       ],
+    },
+    {
+      type: 'flexible',
+      label: 'Flexible Content',
+      name: 'flexible',
+      minRows: 2,
+      singularLabel: 'Block',
+      blocks: [Email, NumberBlock, Quote, CallToAction],
+      localized: true,
+      required: true,
+      timestamps: true,
     },
     {
       type: 'relationship',

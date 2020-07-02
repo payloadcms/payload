@@ -61,6 +61,14 @@ $style-stroke-width-m : 2px;
   box-shadow: 0 2px 3px 0 rgba(0, 2, 4, 0.1), 0 6px 4px -4px rgba(0, 2, 4, 0.02);
 }
 
+@mixin shadow-lg {
+  box-shadow: 0 2px 20px 7px rgba(0, 2, 4, 0.1), 0 6px 4px -4px rgba(0, 2, 4, 0.02);
+}
+
+@mixin shadow-lg-top {
+  box-shadow: 0 -2px 20px 7px rgba(0, 2, 4, 0.1), 0 6px 4px -4px rgba(0, 2, 4, 0.02);
+}
+
 @mixin shadow {
   box-shadow: 0 12px 45px rgba(0,0,0,.03);
 

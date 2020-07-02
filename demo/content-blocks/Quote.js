@@ -1,4 +1,5 @@
 module.exports = {
+  blockImage: '/static/assets/images/generic-block-image.svg',
   slug: 'quote',
   labels: {
     singular: 'Quote',
@@ -25,12 +26,6 @@ module.exports = {
       type: 'text',
       maxLength: 7,
       required: true,
-    },
-    {
-      name: 'photo',
-      label: 'Photo',
-      type: 'upload',
-      relationTo: 'media',
     },
   ],
 };

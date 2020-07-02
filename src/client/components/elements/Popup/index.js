@@ -2,48 +2,27 @@ import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useWindowInfo } from '@trbl/react-window-info';
 import { useScrollInfo } from '@trbl/react-scroll-info';
+
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
+import PopupButton from './PopupButton';
 
 import './index.scss';
 
 const baseClass = 'popup';
 
-const ClickableButton = ({
-  buttonType, button, setActive, active,
-}) => {
-  if (buttonType === 'custom') {
-    return (
-      <div
-        role="button"
-        tabIndex="0"
-        onClick={() => setActive(!active)}
-      >
-        {button}
-      </div>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={() => setActive(!active)}
-    >
-      {button}
-    </button>
-  );
-};
-
 const Popup = (props) => {
   const {
-    render, align, size, color, pointerAlignment, button, buttonType, children, showOnHover,
+    render, align, size, color, button, buttonType, children, showOnHover, horizontalAlign,
   } = props;
 
-  const [active, setActive] = useState(false);
-  const [verticalAlign, setVerticalAlign] = useState('top');
-  const { height: windowHeight } = useWindowInfo();
-  const { y: scrollY } = useScrollInfo();
   const buttonRef = useRef(null);
   const contentRef = useRef(null);
+  const [active, setActive] = useState(false);
+  const [verticalAlign, setVerticalAlign] = useState('top');
+  const [forceHorizontalAlign, setForceHorizontalAlign] = useState(null);
+
+  const { y: scrollY } = useScrollInfo();
+  const { height: windowHeight } = useWindowInfo();
 
   const handleClickOutside = (e) => {
     if (contentRef.current.contains(e.target)) {
@@ -55,10 +34,29 @@ const Popup = (props) => {
 
   useThrottledEffect(() => {
     if (contentRef.current && buttonRef.current) {
-      const { height: contentHeight } = contentRef.current.getBoundingClientRect();
-      const { y: buttonOffsetTop } = buttonRef.current.getBoundingClientRect();
+      const {
+        height: contentHeight,
+        width: contentWidth,
+        right: contentRightEdge,
+      } = contentRef.current.getBoundingClientRect();
+      const { y: buttonYCoord } = buttonRef.current.getBoundingClientRect();
 
-      if (buttonOffsetTop > contentHeight) {
+      const windowWidth = window.innerWidth;
+      const distanceToRightEdge = windowWidth - contentRightEdge;
+      const distanceToLeftEdge = contentRightEdge - contentWidth;
+
+      if (horizontalAlign === 'left' && distanceToRightEdge <= 0) {
+        setForceHorizontalAlign('right');
+      } else if (horizontalAlign === 'right' && distanceToLeftEdge <= 0) {
+        setForceHorizontalAlign('left');
+      } else if (horizontalAlign === 'center' && (distanceToLeftEdge <= contentWidth / 2 || distanceToRightEdge <= contentWidth / 2)) {
+        if (distanceToRightEdge > distanceToLeftEdge) setForceHorizontalAlign('left');
+        else setForceHorizontalAlign('right');
+      } else {
+        setForceHorizontalAlign(null);
+      }
+
+      if (buttonYCoord > contentHeight) {
         setVerticalAlign('top');
       } else {
         setVerticalAlign('bottom');
@@ -83,14 +81,18 @@ const Popup = (props) => {
     `${baseClass}--align-${align}`,
     `${baseClass}--size-${size}`,
     `${baseClass}--color-${color}`,
-    `${baseClass}--pointer-alignment-${pointerAlignment}`,
-    `${baseClass}--vertical-align-${verticalAlign}`,
+    `${baseClass}--v-align-${verticalAlign}`,
+    `${baseClass}--h-align-${horizontalAlign}`,
+    forceHorizontalAlign && `${baseClass}--force-h-align-${forceHorizontalAlign}`,
     active && `${baseClass}--active`,
   ].filter(Boolean).join(' ');
 
   return (
     <div className={classes}>
-      <div ref={buttonRef}>
+      <div
+        ref={buttonRef}
+        className={`${baseClass}__wrapper`}
+      >
         {showOnHover
           ? (
             <div
@@ -98,7 +100,7 @@ const Popup = (props) => {
               onMouseEnter={() => setActive(true)}
               onMouseLeave={() => setActive(false)}
             >
-              <ClickableButton
+              <PopupButton
                 buttonType={buttonType}
                 button={button}
                 setActive={setActive}
@@ -107,7 +109,7 @@ const Popup = (props) => {
             </div>
           )
           : (
-            <ClickableButton
+            <PopupButton
               buttonType={buttonType}
               button={button}
               setActive={setActive}
@@ -136,19 +138,19 @@ Popup.defaultProps = {
   align: 'center',
   size: 'small',
   color: 'light',
-  pointerAlignment: 'left',
   children: undefined,
   render: undefined,
   buttonType: 'default',
   button: undefined,
   showOnHover: false,
+  horizontalAlign: 'left',
 };
 
 Popup.propTypes = {
   render: PropTypes.func,
   children: PropTypes.node,
   align: PropTypes.oneOf(['left', 'center', 'right']),
-  pointerAlignment: PropTypes.oneOf(['left', 'center', 'right']),
+  horizontalAlign: PropTypes.oneOf(['left', 'center', 'right']),
   size: PropTypes.oneOf(['small', 'large', 'wide']),
   color: PropTypes.oneOf(['light', 'dark']),
   buttonType: PropTypes.oneOf(['default', 'custom']),

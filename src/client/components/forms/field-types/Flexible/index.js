@@ -1,5 +1,5 @@
 import React, {
-  useEffect, useReducer, useState, useCallback,
+  useEffect, useReducer, useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
@@ -14,7 +14,7 @@ import { useRenderedFields } from '../../RenderFields';
 import Error from '../../Error';
 import useFieldType from '../../useFieldType';
 import Popup from '../../../elements/Popup';
-import BlocksContainer from './BlockSelector/BlocksContainer';
+import BlockSelector from './BlockSelector';
 import { flexible } from '../../../../../fields/validations';
 
 import './index.scss';
@@ -65,14 +65,11 @@ const Flexible = (props) => {
   });
 
   const dataToInitialize = initialData || defaultValue;
-  const [addRowIndex, setAddRowIndex] = useState(null);
   const [rows, dispatchRows] = useReducer(reducer, []);
   const { customComponentsPath } = useRenderedFields();
   const { getDataByPath } = useForm();
 
   const addRow = (index, blockType) => {
-    setAddRowIndex(current => current + 1);
-
     const data = getDataByPath(path);
 
     dispatchRows({
@@ -102,6 +99,12 @@ const Flexible = (props) => {
     });
   };
 
+  const toggleCollapse = (index) => {
+    dispatchRows({
+      type: 'TOGGLE_COLLAPSE', index, rows,
+    });
+  };
+
   const onDragEnd = (result) => {
     if (!result.destination) return;
     const sourceIndex = result.source.index;
@@ -121,102 +124,106 @@ const Flexible = (props) => {
         },
       ]), []),
     });
-  }, [dataToInitialize, setValue]);
+  }, [dataToInitialize]);
 
   return (
-    <>
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div className={baseClass}>
-          <header className={`${baseClass}__header`}>
-            <h3>{label}</h3>
-            <Error
-              showError={showError}
-              message={errorMessage}
-            />
-          </header>
-          <Droppable droppableId="flexible-drop">
-            {provided => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-              >
-                {rows.length > 0 && rows.map((row, i) => {
-                  let { blockType } = row.data;
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div className={baseClass}>
+        <header className={`${baseClass}__header`}>
+          <h3>{label}</h3>
 
-                  if (!blockType) {
-                    blockType = dataToInitialize?.[i]?.blockType;
-                  }
+          <Error
+            showError={showError}
+            message={errorMessage}
+          />
+        </header>
 
-                  const blockToRender = blocks.find(block => block.slug === blockType);
-
-                  if (blockToRender) {
-                    return (
-                      <DraggableSection
-                        isOpen={row.open}
-                        fieldTypes={fieldTypes}
-                        key={row.key}
-                        id={row.key}
-                        parentPath={path}
-                        moveRow={moveRow}
-                        addRow={() => addRow(i, blockType)}
-                        removeRow={() => removeRow(i)}
-                        rowIndex={i}
-                        permissions={permissions.fields}
-                        fieldSchema={[
-                          ...blockToRender.fields,
-                          {
-                            name: 'blockType',
-                            type: 'text',
-                            hidden: 'admin',
-                          }, {
-                            name: 'blockName',
-                            type: 'text',
-                            hidden: 'admin',
-                          },
-                        ]}
-                        singularLabel={blockToRender?.labels?.singular}
-                        initialData={row.data}
-                        dispatchRows={dispatchRows}
-                        blockType="flexible"
-                        customComponentsPath={`${customComponentsPath}${name}.fields.`}
-                        positionHandleVerticalAlignment="sticky"
-                        actionHandleVerticalAlignment="sticky"
-                      />
-                    );
-                  }
-
-                  return null;
-                })
-                }
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-
-          <div className={`${baseClass}__add-button-wrap`}>
-            <Popup
-              buttonType="custom"
-              button={(
-                <Button
-                  buttonStyle="icon-label"
-                  icon="plus"
-                  iconPosition="left"
-                  iconStyle="with-border"
-                >
-                  {`Add ${singularLabel}`}
-                </Button>
-              )}
+        <Droppable droppableId="flexible-drop">
+          {provided => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
             >
-              <BlocksContainer
+              {rows.length > 0 && rows.map((row, i) => {
+                let { blockType } = row.data;
+
+                if (!blockType) {
+                  blockType = dataToInitialize?.[i]?.blockType;
+                }
+
+                const blockToRender = blocks.find(block => block.slug === blockType);
+
+                if (blockToRender) {
+                  return (
+                    <DraggableSection
+                      key={row.key}
+                      id={row.key}
+                      blockType="flexible"
+                      blocks={blocks}
+                      singularLabel={blockToRender?.labels?.singular}
+                      isOpen={row.open}
+                      rowCount={rows.length}
+                      rowIndex={i}
+                      addRow={addRow}
+                      removeRow={() => removeRow(i)}
+                      moveRow={moveRow}
+                      toggleRowCollapse={() => toggleCollapse(i)}
+                      parentPath={path}
+                      initialData={row.data}
+                      customComponentsPath={`${customComponentsPath}${name}.fields.`}
+                      fieldTypes={fieldTypes}
+                      permissions={permissions.fields}
+                      fieldSchema={[
+                        ...blockToRender.fields,
+                        {
+                          name: 'blockType',
+                          type: 'text',
+                          hidden: 'admin',
+                        }, {
+                          name: 'blockName',
+                          type: 'text',
+                          hidden: 'admin',
+                        },
+                      ]}
+                    />
+                  );
+                }
+
+                return null;
+              })
+              }
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+
+        <div className={`${baseClass}__add-button-wrap`}>
+          <Popup
+            buttonType="custom"
+            size="large"
+            horizontalAlign="left"
+            button={(
+              <Button
+                buttonStyle="icon-label"
+                icon="plus"
+                iconPosition="left"
+                iconStyle="with-border"
+              >
+                {`Add ${singularLabel}`}
+              </Button>
+            )}
+            render={({ close }) => (
+              <BlockSelector
                 blocks={blocks}
                 addRow={addRow}
-                addRowIndex={addRowIndex}
+                addRowIndex={value}
+                close={close}
               />
-            </Popup>
-          </div>
+            )}
+          />
         </div>
-      </DragDropContext>
-    </>
+      </div>
+    </DragDropContext>
   );
 };
 

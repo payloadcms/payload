@@ -17,16 +17,17 @@ const RenderFields = (props) => {
     filter,
     permissions,
     readOnly: readOnlyOverride,
-    operation,
+    operation: operationFromProps,
   } = props;
 
-  const { customComponentsPath: customComponentsPathFromContext } = useRenderedFields();
+  const { customComponentsPath: customComponentsPathFromContext, operation: operationFromContext } = useRenderedFields();
 
   const customComponentsPath = customComponentsPathFromProps || customComponentsPathFromContext;
+  const operation = operationFromProps || operationFromContext;
 
   if (fieldSchema) {
     return (
-      <RenderedFieldContext.Provider value={{ customComponentsPath }}>
+      <RenderedFieldContext.Provider value={{ customComponentsPath, operation }}>
         {fieldSchema.map((field, i) => {
           if (field?.hidden !== 'api' && field?.hidden !== true) {
             if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
@@ -117,7 +118,6 @@ RenderFields.propTypes = {
   filter: PropTypes.func,
   permissions: PropTypes.shape({}),
   readOnly: PropTypes.bool,
-  operation: PropTypes.oneOf(['create', 'read', 'update', 'delete']),
 };
 
 export default RenderFields;

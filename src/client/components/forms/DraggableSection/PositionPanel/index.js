@@ -5,11 +5,11 @@ import Button from '../../../elements/Button';
 
 import './index.scss';
 
-const baseClass = 'position-handle';
+const baseClass = 'position-panel';
 
-const PositionHandle = (props) => {
+const PositionPanel = (props) => {
   const {
-    dragHandleProps, moveRow, positionIndex, verticalAlignment,
+    dragHandleProps, moveRow, positionIndex, verticalAlignment, rowCount,
   } = props;
 
   const adjustedIndex = positionIndex + 1;
@@ -26,8 +26,9 @@ const PositionHandle = (props) => {
     >
       <div className={`${baseClass}__controls-container`}>
         <div className={`${baseClass}__controls`}>
+
           <Button
-            className={`${baseClass}__move-backward`}
+            className={`${baseClass}__move-backward ${positionIndex === 0 ? 'first-row' : ''}`}
             buttonStyle="none"
             icon="chevron"
             round
@@ -37,27 +38,29 @@ const PositionHandle = (props) => {
           <div className={`${baseClass}__current-position`}>{adjustedIndex >= 10 ? adjustedIndex : `0${adjustedIndex}`}</div>
 
           <Button
-            className={`${baseClass}__move-forward`}
+            className={`${baseClass}__move-forward ${(positionIndex === rowCount - 1) ? 'last-row' : ''}`}
             buttonStyle="none"
             icon="chevron"
             round
             onClick={() => moveRow(positionIndex, positionIndex + 1)}
           />
+
         </div>
       </div>
     </div>
   );
 };
 
-PositionHandle.defaultProps = {
+PositionPanel.defaultProps = {
   verticalAlignment: 'center',
 };
 
-PositionHandle.propTypes = {
+PositionPanel.propTypes = {
   dragHandleProps: PropTypes.shape({}).isRequired,
   positionIndex: PropTypes.number.isRequired,
   moveRow: PropTypes.func.isRequired,
   verticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
+  rowCount: PropTypes.number.isRequired,
 };
 
-export default PositionHandle;
+export default PositionPanel;
