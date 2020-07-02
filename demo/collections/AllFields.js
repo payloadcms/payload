@@ -1,3 +1,5 @@
+const checkRole = require('../policies/checkRole');
+
 const AllFields = {
   slug: 'all-fields',
   labels: {
@@ -27,6 +29,10 @@ const AllFields = {
         create: () => {
           console.log('trying to set text');
           return false;
+        },
+        update: ({ req: { user } }) => {
+          const result = checkRole(['admin'], user);
+          return result;
         },
         read: ({ req: { user } }) => Boolean(user),
       },

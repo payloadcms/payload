@@ -70,6 +70,8 @@ const EditView = (props) => {
     setFields(formatFields(collection, isEditing));
   }, [collection, isEditing]);
 
+  const collectionPermissions = permissions?.[slug];
+
   return (
     <RenderCustomComponent
       DefaultComponent={DefaultEdit}
@@ -77,7 +79,7 @@ const EditView = (props) => {
       componentProps={{
         data: dataToRender,
         collection: { ...collection, fields },
-        permissions: permissions?.[collection.slug],
+        permissions: collectionPermissions,
         isEditing,
         onSave,
       }}

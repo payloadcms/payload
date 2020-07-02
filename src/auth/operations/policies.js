@@ -48,6 +48,8 @@ const policies = async (args) => {
           if (!updatedObj[field.name].fields) updatedObj[field.name].fields = {};
           executeFieldPolicies(updatedObj[field.name].fields, field.fields, operation);
         }
+      } else if (field.fields) {
+        executeFieldPolicies(updatedObj, field.fields, operation);
       }
     });
   };

@@ -8,9 +8,18 @@ const RenderedFieldContext = createContext({});
 
 export const useRenderedFields = () => useContext(RenderedFieldContext);
 
-const RenderFields = ({
-  fieldSchema, initialData, customComponentsPath: customComponentsPathFromProps, fieldTypes, filter,
-}) => {
+const RenderFields = (props) => {
+  const {
+    fieldSchema,
+    initialData,
+    customComponentsPath: customComponentsPathFromProps,
+    fieldTypes,
+    filter,
+    permissions,
+    readOnly: readOnlyOverride,
+    operation,
+  } = props;
+
   const { customComponentsPath: customComponentsPathFromContext } = useRenderedFields();
 
   const customComponentsPath = customComponentsPathFromProps || customComponentsPathFromContext;
@@ -24,41 +33,55 @@ const RenderFields = ({
               const FieldComponent = field?.hidden === 'admin' ? fieldTypes.hidden : fieldTypes[field.type];
 
               let initialFieldData;
+              let fieldPermissions = permissions[field.name];
 
               if (!field.name) {
                 initialFieldData = initialData;
+                fieldPermissions = permissions;
               } else if (initialData?.[field.name] !== undefined) {
                 initialFieldData = initialData[field.name];
               }
 
-              if (FieldComponent) {
+              let { readOnly } = field;
+
+              if (readOnlyOverride) readOnly = true;
+
+              if (permissions?.[field?.name]?.read?.permission !== false) {
+                if (permissions?.[field?.name]?.[operation]?.permission === false) {
+                  readOnly = true;
+                }
+
+                if (FieldComponent) {
+                  return (
+                    <RenderCustomComponent
+                      key={field.name || `field-${i}`}
+                      path={`${customComponentsPath}${field.name ? `${field.name}.field` : ''}`}
+                      DefaultComponent={FieldComponent}
+                      componentProps={{
+                        ...field,
+                        path: field.path || field.name,
+                        fieldTypes,
+                        initialData: initialFieldData,
+                        readOnly,
+                        permissions: fieldPermissions,
+                      }}
+                    />
+                  );
+                }
+
                 return (
-                  <RenderCustomComponent
-                    key={field.name || `field-${i}`}
-                    path={`${customComponentsPath}${field.name ? `${field.name}.field` : ''}`}
-                    DefaultComponent={FieldComponent}
-                    componentProps={{
-                      ...field,
-                      path: field.path || field.name,
-                      fieldTypes,
-                      initialData: initialFieldData,
-                    }}
-                  />
+                  <div
+                    className="missing-field"
+                    key={i}
+                  >
+                    No matched field found for
+                    {' '}
+                    &quot;
+                    {field.label}
+                    &quot;
+                  </div>
                 );
               }
-
-              return (
-                <div
-                  className="missing-field"
-                  key={i}
-                >
-                  No matched field found for
-                  {' '}
-                  &quot;
-                  {field.label}
-                  &quot;
-                </div>
-              );
             }
 
             return null;
@@ -77,6 +100,9 @@ RenderFields.defaultProps = {
   initialData: {},
   customComponentsPath: '',
   filter: null,
+  readOnly: false,
+  permissions: {},
+  operation: undefined,
 };
 
 RenderFields.propTypes = {
@@ -89,6 +115,9 @@ RenderFields.propTypes = {
     hidden: PropTypes.function,
   }).isRequired,
   filter: PropTypes.func,
+  permissions: PropTypes.shape({}),
+  readOnly: PropTypes.bool,
+  operation: PropTypes.oneOf(['create', 'read', 'update', 'delete']),
 };
 
 export default RenderFields;

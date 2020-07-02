@@ -31,7 +31,9 @@ module.exports = {
 
       if (user) {
         return {
-          owner: user.id,
+          owner: {
+            equals: user.id,
+          },
         };
       }
 

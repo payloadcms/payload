@@ -38,6 +38,7 @@ const reduceFieldsToValues = (fields, flatten) => {
 
 const Form = (props) => {
   const {
+    disabled,
     onSubmit,
     ajax,
     method,
@@ -63,6 +64,11 @@ const Form = (props) => {
   contextValue.dispatchFields = dispatchFields;
 
   contextValue.submit = (e) => {
+    if (disabled) {
+      e.preventDefault();
+      return false;
+    }
+
     e.stopPropagation();
     contextValue.setSubmitted(true);
 
@@ -296,7 +302,8 @@ const Form = (props) => {
         <FieldContext.Provider value={{
           fields,
           ...contextValue,
-        }}>
+        }}
+        >
           <HiddenInput
             path="locale"
             defaultValue={locale}
@@ -318,6 +325,7 @@ Form.defaultProps = {
   onSuccess: null,
   className: '',
   disableSuccessStatus: false,
+  disabled: false,
 };
 
 Form.propTypes = {
@@ -334,6 +342,7 @@ Form.propTypes = {
   ]).isRequired,
   className: PropTypes.string,
   redirect: PropTypes.string,
+  disabled: PropTypes.bool,
 };
 
 export default Form;

@@ -39,6 +39,7 @@ const DefaultEditView = (props) => {
 
   const apiURL = `${serverURL}${api}/${slug}/${id}`;
   let action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}`;
+  const hasSavePermission = (isEditing && permissions?.update?.permission) || (!isEditing && permissions?.update?.permission);
 
   if (auth && !isEditing) {
     action = `${action}/register`;
@@ -56,6 +57,7 @@ const DefaultEditView = (props) => {
         method={id ? 'put' : 'post'}
         action={action}
         onSuccess={onSave}
+        disabled={!hasSavePermission}
       >
         <div className={`${baseClass}__main`}>
           <Eyebrow />
@@ -67,6 +69,9 @@ const DefaultEditView = (props) => {
               </h1>
             </header>
             <RenderFields
+              operation={isEditing ? 'update' : 'create'}
+              readOnly={!hasSavePermission}
+              permissions={permissions.fields}
               filter={field => (!field.position || (field.position && field.position !== 'sidebar'))}
               fieldTypes={fieldTypes}
               fieldSchema={fields}
@@ -78,21 +83,29 @@ const DefaultEditView = (props) => {
         <div className={`${baseClass}__sidebar`}>
           {isEditing ? (
             <ul className={`${baseClass}__collection-actions`}>
-              <li><Link to={`${admin}/collections/${slug}/create`}>Create New</Link></li>
-              <li><DuplicateDocument slug={slug} /></li>
-              <li>
-                <DeleteDocument
-                  collection={collection}
-                  id={id}
-                />
-              </li>
+              {permissions?.create?.permission && (
+                <>
+                  <li><Link to={`${admin}/collections/${slug}/create`}>Create New</Link></li>
+                  <li><DuplicateDocument slug={slug} /></li>
+                </>
+              )}
+              {permissions?.delete?.permission && (
+                <li>
+                  <DeleteDocument
+                    collection={collection}
+                    id={id}
+                  />
+                </li>
+              )}
             </ul>
           ) : undefined}
           <div className={`${baseClass}__document-actions${(preview && isEditing) ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
             {isEditing && (
               <PreviewButton generatePreviewURL={preview} />
             )}
-            <FormSubmit>Save</FormSubmit>
+            {hasSavePermission && (
+              <FormSubmit>Save</FormSubmit>
+            )}
           </div>
           {isEditing && (
             <div className={`${baseClass}__api-url`}>
@@ -112,6 +125,9 @@ const DefaultEditView = (props) => {
           )}
           <div className={`${baseClass}__sidebar-fields`}>
             <RenderFields
+              operation={isEditing ? 'update' : 'create'}
+              readOnly={!hasSavePermission}
+              permissions={permissions.fields}
               filter={field => field.position === 'sidebar'}
               position="sidebar"
               fieldTypes={fieldTypes}
@@ -180,15 +196,13 @@ DefaultEditView.propTypes = {
     create: PropTypes.shape({
       permission: PropTypes.bool,
     }),
-    read: PropTypes.shape({
-      permission: PropTypes.bool,
-    }),
     update: PropTypes.shape({
       permission: PropTypes.bool,
     }),
     delete: PropTypes.shape({
       permission: PropTypes.bool,
     }),
+    fields: PropTypes.shape({}),
   }).isRequired,
 };
 

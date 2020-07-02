@@ -30,6 +30,7 @@ const DraggableSection = (props) => {
     id,
     positionHandleVerticalAlignment,
     actionHandleVerticalAlignment,
+    permissions,
   } = props;
 
   // const draggableRef = useRef(null);

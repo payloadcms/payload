@@ -35,6 +35,7 @@ const Flexible = (props) => {
     minRows,
     required,
     validate,
+    permissions,
   } = props;
 
   const path = pathFromProps || name;
@@ -160,6 +161,7 @@ const Flexible = (props) => {
                         addRow={() => addRow(i, blockType)}
                         removeRow={() => removeRow(i)}
                         rowIndex={i}
+                        permissions={permissions.fields}
                         fieldSchema={[
                           ...blockToRender.fields,
                           {
@@ -227,6 +229,7 @@ Flexible.defaultProps = {
   required: false,
   maxRows: undefined,
   minRows: undefined,
+  permissions: {},
 };
 
 Flexible.propTypes = {
@@ -248,6 +251,9 @@ Flexible.propTypes = {
   required: PropTypes.bool,
   maxRows: PropTypes.number,
   minRows: PropTypes.number,
+  permissions: PropTypes.shape({
+    fields: PropTypes.shape({}),
+  }),
 };
 
 export default withCondition(Flexible);
