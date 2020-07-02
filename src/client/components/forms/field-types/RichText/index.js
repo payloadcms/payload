@@ -15,6 +15,7 @@ import {
   ListPlugin,
   ParagraphPlugin,
   pipe,
+  ExitBreakPlugin,
   SoftBreakPlugin,
   StrikethroughPlugin,
   UnderlinePlugin,
@@ -54,6 +55,25 @@ const plugins = [
         hotkey: 'enter',
         query: {
           allow: [nodeTypes.typeCodeBlock, nodeTypes.typeBlockquote],
+        },
+      },
+    ],
+  }),
+  ExitBreakPlugin({
+    rules: [
+      {
+        hotkey: 'mod+enter',
+      },
+      {
+        hotkey: 'mod+shift+enter',
+        before: true,
+      },
+      {
+        hotkey: 'enter',
+        query: {
+          start: true,
+          end: true,
+          allow: nodeTypes.headingTypes,
         },
       },
     ],
