@@ -51,7 +51,7 @@ const update = async (args) => {
       doc.setLocale(locale, fallbackLocale);
     }
 
-    const docJSON = doc.toJSON({ virtuals: true });
+    options.originalDoc = doc.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
     // 2. Execute before update hook
@@ -67,7 +67,7 @@ const update = async (args) => {
     // 3. Merge updates into existing data
     // /////////////////////////////////////
 
-    options.data = deepmerge(docJSON, options.data, { arrayMerge: overwriteMerge });
+    options.data = deepmerge(options.originalDoc, options.data, { arrayMerge: overwriteMerge });
 
     // /////////////////////////////////////
     // 4. Execute field-level hooks, policies, and validation

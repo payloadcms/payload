@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import reducer from '../rowReducer';
-import useForm from '../../Form/useForm';
+import useFormFields from '../../Form/useFormFields';
 import DraggableSection from '../../DraggableSection';
 import { useRenderedFields } from '../../RenderFields';
 import Error from '../../Error';
@@ -67,7 +67,7 @@ const Flexible = (props) => {
   const dataToInitialize = initialData || defaultValue;
   const [rows, dispatchRows] = useReducer(reducer, []);
   const { customComponentsPath } = useRenderedFields();
-  const { getDataByPath } = useForm();
+  const { getDataByPath } = useFormFields();
 
   const addRow = (index, blockType) => {
     const data = getDataByPath(path);

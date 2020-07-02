@@ -3,13 +3,14 @@ const { ValidationError } = require('../errors');
 module.exports = async (config, operation) => {
   const {
     data: fullData,
+    originalDoc: fullOriginalDoc,
     operationName,
     hook,
   } = operation;
 
   // Maintain a top-level list of promises
   // so that all async field policies / validations / hooks
-  // can run in tandem
+  // can run in parallel
   const validationPromises = [];
   const policyPromises = [];
   const hookPromises = [];
@@ -28,14 +29,18 @@ module.exports = async (config, operation) => {
     }
   };
 
-  const createPolicyPromise = async (data, field) => {
+  const createPolicyPromise = async (data, originalDoc, field) => {
     const resultingData = data;
 
     if (field.policies && field.policies[operationName]) {
       const result = await field.policies[operationName](operation);
 
-      if (!result) {
+      if (!result && operationName === 'create') {
         delete resultingData[field.name];
+      }
+
+      if (!result && operationName === 'update' && originalDoc[field.name] !== undefined) {
+        resultingData[field.name] = originalDoc[field.name];
       }
     }
   };
@@ -48,7 +53,7 @@ module.exports = async (config, operation) => {
     }
   };
 
-  const traverseFields = (fields, data = {}, path) => {
+  const traverseFields = (fields, data = {}, originalDoc = {}, path) => {
     fields.forEach((field) => {
       const dataCopy = data;
 
@@ -63,20 +68,21 @@ module.exports = async (config, operation) => {
         if (data[field.name] === 'false') dataCopy[field.name] = false;
       }
 
-      policyPromises.push(createPolicyPromise(data, field));
+      policyPromises.push(createPolicyPromise(data, originalDoc, field));
       hookPromises.push(createHookPromise(data, field));
 
       if (field.fields) {
         if (field.name === undefined) {
-          traverseFields(field.fields, data, path);
+          traverseFields(field.fields, data, originalDoc, path);
         } else if (field.type === 'repeater' || field.type === 'flexible') {
           if (Array.isArray(data[field.name])) {
             data[field.name].forEach((rowData, i) => {
-              traverseFields(field.fields, rowData, `${path}${field.name}.${i}.`);
+              const originalDocRow = originalDoc && originalDoc[field.name] && originalDoc[field.name][i];
+              traverseFields(field.fields, rowData, originalDocRow || undefined, `${path}${field.name}.${i}.`);
             });
           }
         } else {
-          traverseFields(field.fields, data[field.name], `${path}${field.name}.`);
+          traverseFields(field.fields, data[field.name], originalDoc[field.name], `${path}${field.name}.`);
         }
       }
 
@@ -98,7 +104,7 @@ module.exports = async (config, operation) => {
   // //////////////////////////////////////////
 
   try {
-    traverseFields(config.fields, fullData, '');
+    traverseFields(config.fields, fullData, fullOriginalDoc, '');
     await Promise.all(validationPromises);
 
     if (errors.length > 0) {

@@ -46,7 +46,7 @@ const Upload = (props) => {
   const fieldType = useFieldType({
     path,
     required,
-    initialData,
+    initialData: initialData?.id,
     defaultValue,
     validate,
   });
@@ -166,7 +166,9 @@ Upload.propTypes = {
   required: PropTypes.bool,
   readOnly: PropTypes.bool,
   defaultValue: PropTypes.string,
-  initialData: PropTypes.shape({}),
+  initialData: PropTypes.shape({
+    id: PropTypes.string,
+  }),
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),

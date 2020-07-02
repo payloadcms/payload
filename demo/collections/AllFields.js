@@ -168,7 +168,9 @@ const AllFields = {
               required: true,
               policies: {
                 read: ({ req: { user } }) => Boolean(user),
-                update: () => false,
+                update: ({ req: { user } }) => {
+                  return checkRole(['admin'], user);
+                },
               },
             },
           ],

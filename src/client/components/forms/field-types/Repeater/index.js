@@ -8,7 +8,7 @@ import Button from '../../../elements/Button';
 import DraggableSection from '../../DraggableSection';
 import reducer from '../rowReducer';
 import { useRenderedFields } from '../../RenderFields';
-import useForm from '../../Form/useForm';
+import useFormFields from '../../Form/useFormFields';
 import useFieldType from '../../useFieldType';
 import Error from '../../Error';
 import { repeater } from '../../../../../fields/validations';
@@ -39,7 +39,7 @@ const Repeater = (props) => {
   const dataToInitialize = initialData || defaultValue;
   const [rows, dispatchRows] = useReducer(reducer, []);
   const { customComponentsPath } = useRenderedFields();
-  const { getDataByPath } = useForm();
+  const { getDataByPath } = useFormFields();
 
   const path = pathFromProps || name;
 

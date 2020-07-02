@@ -254,6 +254,9 @@ const Form = (props) => {
 
   contextValue.validateForm = () => {
     return !Object.values(fields).some((field) => {
+      if (field.valid === false) {
+        console.log(field, ' is not valid');
+      }
       return field.valid === false;
     });
   };
