@@ -35,12 +35,10 @@ module.exports = async (config, operation) => {
     if (field.policies && field.policies[operationName]) {
       const result = await field.policies[operationName](operation);
 
-      if (!result && operationName === 'create') {
-        delete resultingData[field.name];
-      }
-
       if (!result && operationName === 'update' && originalDoc[field.name] !== undefined) {
         resultingData[field.name] = originalDoc[field.name];
+      } else if (!result) {
+        delete resultingData[field.name];
       }
     }
   };
