@@ -189,6 +189,10 @@ const Routes = () => {
 
                     return <Loading />;
                   }
+
+                  if (user === undefined) {
+                    return <Loading />;
+                  }
                   return <Redirect to={`${match.url}/login`} />;
                 }}
               />

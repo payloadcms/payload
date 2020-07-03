@@ -4,7 +4,7 @@ const { refresh } = require('../operations');
 
 const refreshHandler = config => async (req, res) => {
   try {
-    const refreshedToken = await refresh({
+    const result = await refresh({
       req,
       collection: req.collection,
       config,
@@ -13,7 +13,7 @@ const refreshHandler = config => async (req, res) => {
 
     return res.status(200).json({
       message: 'Token refresh successful',
-      refreshedToken,
+      ...result,
     });
   } catch (error) {
     return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));

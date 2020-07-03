@@ -8,9 +8,11 @@ const resetPassword = require('./resetPassword');
 const registerFirstUser = require('./registerFirstUser');
 const update = require('./update');
 const policies = require('./policies');
+const logout = require('./logout');
 
 module.exports = {
   login,
+  logout,
   me,
   refresh,
   init,

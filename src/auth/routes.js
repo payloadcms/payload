@@ -4,6 +4,7 @@ const bindCollectionMiddleware = require('../collections/bindCollection');
 const {
   init,
   login,
+  logout,
   refresh,
   me,
   register,
@@ -34,6 +35,10 @@ const authRoutes = (collection, config, sendEmail) => {
   router
     .route(`/${slug}/login`)
     .post(login(config));
+
+  router
+    .route(`/${slug}/logout`)
+    .get(logout(config));
 
   router
     .route(`/${slug}/refresh-token`)

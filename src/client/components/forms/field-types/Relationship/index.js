@@ -2,7 +2,6 @@ import React, {
   Component, useState, useEffect, useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
-import Cookies from 'universal-cookie';
 import some from 'async-some';
 import config from 'payload/config';
 import withCondition from '../../withCondition';
@@ -14,13 +13,9 @@ import { relationship } from '../../../../../fields/validations';
 
 import './index.scss';
 
-const cookies = new Cookies();
-
 const {
-  cookiePrefix, serverURL, routes: { api }, collections,
+  serverURL, routes: { api }, collections,
 } = config;
-
-const cookieTokenName = `${cookiePrefix}-token`;
 
 const maxResultsPerRequest = 10;
 
@@ -62,7 +57,6 @@ class Relationship extends Component {
     const {
       relations, lastFullyLoadedRelation, lastLoadedPage, search,
     } = this.state;
-    const token = cookies.get(cookieTokenName);
 
     const relationsToSearch = relations.slice(lastFullyLoadedRelation + 1);
 
@@ -71,11 +65,7 @@ class Relationship extends Component {
         const collection = collections.find(coll => coll.slug === relation);
         const fieldToSearch = collection.useAsTitle || 'id';
         const searchParam = search ? `&where[${fieldToSearch}][like]=${search}` : '';
-        const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}${searchParam}`, {
-          headers: {
-            Authorization: `JWT ${token}`,
-          },
-        });
+        const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}${searchParam}`);
 
         const data = await response.json();
 

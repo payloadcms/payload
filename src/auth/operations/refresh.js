@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { Forbidden } = require('../../errors');
 
 const refresh = async (args) => {
   try {
@@ -24,6 +25,8 @@ const refresh = async (args) => {
     const opts = {};
     opts.expiresIn = options.collection.config.auth.tokenExpiration;
 
+    if (typeof options.authorization !== 'string') throw new Forbidden();
+
     const token = options.authorization.replace('JWT ', '');
     const payload = jwt.verify(token, secret, {});
     delete payload.iat;
@@ -44,7 +47,12 @@ const refresh = async (args) => {
     // 4. Return refreshed token
     // /////////////////////////////////////
 
-    return refreshedToken;
+    payload.exp = jwt.decode(refreshedToken).exp;
+
+    return {
+      refreshedToken,
+      user: payload,
+    };
   } catch (error) {
     throw error;
   }

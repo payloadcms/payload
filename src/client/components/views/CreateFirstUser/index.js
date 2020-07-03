@@ -23,7 +23,7 @@ const baseClass = 'create-first-user';
 const CreateFirstUser = (props) => {
   const { setInitialized } = props;
   const { addStatus } = useStatusList();
-  const { setToken } = useUser();
+  const { setCookieToken } = useUser();
   const history = useHistory();
 
   const handleAjaxResponse = (res) => {

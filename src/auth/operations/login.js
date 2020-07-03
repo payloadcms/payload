@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { Unauthorized, AuthenticationError } = require('../../errors');
+const { AuthenticationError } = require('../../errors');
 
 const login = async (args) => {
   try {
@@ -64,6 +64,10 @@ const login = async (args) => {
         expiresIn: collectionConfig.auth.tokenExpiration,
       },
     );
+
+    if (args.res) {
+      args.res.cookie(`${config.cookiePrefix}-token`, token, { path: '/', httpOnly: true });
+    }
 
     // /////////////////////////////////////
     // 3. Execute after login hook

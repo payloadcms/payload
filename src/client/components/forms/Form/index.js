@@ -54,7 +54,7 @@ const Form = (props) => {
   const history = useHistory();
   const locale = useLocale();
   const { replaceStatus, addStatus, clearStatus } = useStatusList();
-  const { refreshToken } = useUser();
+  const { refreshCookie } = useUser();
 
   const contextRef = useRef({ ...initContextState });
 
@@ -278,7 +278,7 @@ const Form = (props) => {
   };
 
   useThrottledEffect(() => {
-    refreshToken();
+    refreshCookie();
   }, 15000, [fields]);
 
   useEffect(() => {

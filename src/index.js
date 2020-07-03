@@ -7,7 +7,6 @@ const getConfig = require('./utilities/getConfig');
 const authenticate = require('./express/middleware/authenticate');
 const connectMongoose = require('./mongoose/connect');
 const expressMiddleware = require('./express/middleware');
-const createAuthHeaderFromCookie = require('./express/middleware/createAuthHeaderFromCookie');
 const initAdmin = require('./express/admin');
 const initCollections = require('./collections/init');
 const initGlobals = require('./globals/init');
@@ -55,7 +54,6 @@ class Payload {
     this.router.use(
       this.config.routes.graphQL,
       identifyAPI('GraphQL'),
-      createAuthHeaderFromCookie(this.config),
       authenticate(this.config),
       new GraphQL(this).init(),
     );

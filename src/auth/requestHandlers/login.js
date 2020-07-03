@@ -6,6 +6,7 @@ const loginHandler = config => async (req, res) => {
   try {
     const token = await login({
       req,
+      res,
       collection: req.collection,
       config,
       data: req.body,

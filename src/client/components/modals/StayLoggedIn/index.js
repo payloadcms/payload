@@ -13,7 +13,7 @@ const baseClass = 'stay-logged-in';
 const { routes: { admin } } = config;
 
 const StayLoggedInModal = (props) => {
-  const { refreshToken } = props;
+  const { refreshCookie } = props;
   const history = useHistory();
   const { closeAll: closeAllModals } = useModal();
 
@@ -36,7 +36,7 @@ const StayLoggedInModal = (props) => {
             Log out
           </Button>
           <Button onClick={() => {
-            refreshToken();
+            refreshCookie();
             closeAllModals();
           }}
           >
@@ -49,7 +49,7 @@ const StayLoggedInModal = (props) => {
 };
 
 StayLoggedInModal.propTypes = {
-  refreshToken: PropTypes.func.isRequired,
+  refreshCookie: PropTypes.func.isRequired,
 };
 
 export default StayLoggedInModal;

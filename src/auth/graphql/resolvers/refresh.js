@@ -9,9 +9,9 @@ const refreshResolver = (config, collection) => async (_, __, context) => {
     req: context,
   };
 
-  const refreshedToken = await refresh(options);
+  const result = await refresh(options);
 
-  return refreshedToken;
+  return result;
 };
 
 module.exports = refreshResolver;
