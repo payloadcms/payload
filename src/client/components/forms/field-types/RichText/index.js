@@ -59,25 +59,6 @@ const plugins = [
       },
     ],
   }),
-  ExitBreakPlugin({
-    rules: [
-      {
-        hotkey: 'mod+enter',
-      },
-      {
-        hotkey: 'mod+shift+enter',
-        before: true,
-      },
-      {
-        hotkey: 'enter',
-        query: {
-          start: true,
-          end: true,
-          allow: nodeTypes.headingTypes,
-        },
-      },
-    ],
-  }),
 ];
 
 const withPlugins = [
@@ -123,19 +104,6 @@ const RichText = (props) => {
     errorMessage,
   } = fieldType;
 
-  const [internalState, setInternalState] = useState(value);
-  const [valueHasLoaded, setValueHasLoaded] = useState(false);
-
-  useEffect(() => { setValue(internalState); }, [setValue, internalState]);
-
-  useEffect(() => {
-    // ! could use review
-    if (value !== undefined && !valueHasLoaded) {
-      setInternalState(value);
-      setValueHasLoaded(true);
-    }
-  }, [value, valueHasLoaded]);
-
   const classes = [
     baseClass,
     'field-type',
@@ -163,8 +131,8 @@ const RichText = (props) => {
       <div className={`${baseClass}__wrapper`}>
         <Slate
           editor={editor}
-          value={internalState ?? emptyRichTextNode}
-          onChange={val => setInternalState(val)}
+          value={value ?? emptyRichTextNode}
+          onChange={val => setValue(val)}
         >
           <CommandToolbar enabledPluginList={plugins} />
 
