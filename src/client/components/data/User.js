@@ -125,7 +125,6 @@ const UserProvider = ({ children }) => {
 
     if (remainingTime > 0) {
       forceLogOut = setTimeout(() => {
-        logOut();
         history.push(`${admin}/logout`);
         closeAllModals();
       }, remainingTime * 1000);

@@ -6,6 +6,7 @@ const refreshHandler = config => async (req, res) => {
   try {
     const result = await refresh({
       req,
+      res,
       collection: req.collection,
       config,
       authorization: req.headers.authorization,

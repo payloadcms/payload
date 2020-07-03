@@ -21,7 +21,7 @@ const refresh = async (args) => {
     // 2. Perform refresh
     // /////////////////////////////////////
 
-    const { secret } = options.config;
+    const { secret, cookiePrefix } = options.config;
     const opts = {};
     opts.expiresIn = options.collection.config.auth.tokenExpiration;
 
@@ -32,6 +32,10 @@ const refresh = async (args) => {
     delete payload.iat;
     delete payload.exp;
     const refreshedToken = jwt.sign(payload, secret, opts);
+
+    if (args.res) {
+      args.res.cookie(`${cookiePrefix}-token`, refreshedToken, { path: '/', httpOnly: true });
+    }
 
     // /////////////////////////////////////
     // 3. Execute after login hook
