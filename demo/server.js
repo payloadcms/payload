@@ -1,5 +1,4 @@
 const express = require('express');
-const passport = require('passport');
 const path = require('path');
 const Payload = require('../src');
 
@@ -19,7 +18,6 @@ const payload = new Payload({
 const externalRouter = express.Router();
 
 externalRouter.use(payload.authenticate());
-
 externalRouter.get('/', (req, res) => {
   if (req.user) {
     return res.send(`Authenticated successfully as ${req.user.email}.`);

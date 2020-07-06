@@ -74,6 +74,7 @@ const SelectExistingUploadModal = (props) => {
           />
         </header>
         <ListControls
+          disableColumns
           handleChange={setListControls}
           collection={{
             ...collection,

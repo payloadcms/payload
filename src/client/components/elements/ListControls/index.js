@@ -14,6 +14,7 @@ const ListControls = (props) => {
   const {
     handleChange,
     collection,
+    disableColumns,
     collection: {
       fields,
       useAsTitle,
@@ -71,35 +72,43 @@ const ListControls = (props) => {
           fieldName={titleField ? titleField.name : undefined}
           fieldLabel={titleField ? titleField.label : undefined}
         />
-        <Button
-          className={`${baseClass}__toggle-columns`}
-          buttonStyle={visibleDrawer === 'columns' ? undefined : 'secondary'}
-          onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : false)}
-          icon="chevron"
-          iconStyle="none"
-        >
-          Columns
-        </Button>
-        <Button
-          className={`${baseClass}__toggle-where`}
-          buttonStyle={visibleDrawer === 'where' ? undefined : 'secondary'}
-          onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : false)}
-          icon="chevron"
-          iconStyle="none"
-        >
-          Filters
-        </Button>
+        <div className={`${baseClass}__buttons`}>
+          <div className={`${baseClass}__buttons-wrap`}>
+            {!disableColumns && (
+              <Button
+                className={`${baseClass}__toggle-columns`}
+                buttonStyle={visibleDrawer === 'columns' ? undefined : 'secondary'}
+                onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : false)}
+                icon="chevron"
+                iconStyle="none"
+              >
+                Columns
+              </Button>
+            )}
+            <Button
+              className={`${baseClass}__toggle-where`}
+              buttonStyle={visibleDrawer === 'where' ? undefined : 'secondary'}
+              onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : false)}
+              icon="chevron"
+              iconStyle="none"
+            >
+              Filters
+            </Button>
+          </div>
+        </div>
       </div>
-      <AnimateHeight
-        className={`${baseClass}__columns`}
-        height={visibleDrawer === 'columns' ? 'auto' : 0}
-      >
-        <ColumnSelector
-          collection={collection}
-          defaultColumns={defaultColumns}
-          handleChange={setColumns}
-        />
-      </AnimateHeight>
+      {!disableColumns && (
+        <AnimateHeight
+          className={`${baseClass}__columns`}
+          height={visibleDrawer === 'columns' ? 'auto' : 0}
+        >
+          <ColumnSelector
+            collection={collection}
+            defaultColumns={defaultColumns}
+            handleChange={setColumns}
+          />
+        </AnimateHeight>
+      )}
       <AnimateHeight
         className={`${baseClass}__where`}
         height={visibleDrawer === 'where' ? 'auto' : 0}
@@ -113,7 +122,12 @@ const ListControls = (props) => {
   );
 };
 
+ListControls.defaultProps = {
+  disableColumns: false,
+};
+
 ListControls.propTypes = {
+  disableColumns: PropTypes.bool,
   collection: PropTypes.shape({
     useAsTitle: PropTypes.string,
     fields: PropTypes.arrayOf(PropTypes.shape),
