@@ -14,7 +14,7 @@ const ListControls = (props) => {
   const {
     handleChange,
     collection,
-    disableColumns,
+    enableColumns,
     collection: {
       fields,
       useAsTitle,
@@ -74,7 +74,7 @@ const ListControls = (props) => {
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
-            {!disableColumns && (
+            {enableColumns && (
               <Button
                 className={`${baseClass}__toggle-columns`}
                 buttonStyle={visibleDrawer === 'columns' ? undefined : 'secondary'}
@@ -97,7 +97,7 @@ const ListControls = (props) => {
           </div>
         </div>
       </div>
-      {!disableColumns && (
+      {enableColumns && (
         <AnimateHeight
           className={`${baseClass}__columns`}
           height={visibleDrawer === 'columns' ? 'auto' : 0}
@@ -123,11 +123,11 @@ const ListControls = (props) => {
 };
 
 ListControls.defaultProps = {
-  disableColumns: false,
+  enableColumns: true,
 };
 
 ListControls.propTypes = {
-  disableColumns: PropTypes.bool,
+  enableColumns: PropTypes.bool,
   collection: PropTypes.shape({
     useAsTitle: PropTypes.string,
     fields: PropTypes.arrayOf(PropTypes.shape),

@@ -69,7 +69,7 @@ const DefaultList = (props) => {
         <ListControls
           handleChange={setListControls}
           collection={collection}
-          disableColumns={Boolean(upload)}
+          enableColumns={!upload}
         />
         {(data.docs && data.docs.length > 0) && (
           <>
