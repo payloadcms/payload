@@ -92,6 +92,10 @@ class Payload {
     const email = await this.email;
     return email.account;
   }
+
+  authenticate() {
+    return authenticate(this.config);
+  }
 }
 
 module.exports = Payload;
