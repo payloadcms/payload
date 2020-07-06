@@ -1,3 +1,5 @@
+const parseCookies = require('../utilities/parseCookies');
+
 const getExtractJWT = config => (req) => {
   const jwtFromHeader = req.get('Authorization');
 
@@ -5,12 +7,12 @@ const getExtractJWT = config => (req) => {
     return jwtFromHeader.replace('JWT ', '');
   }
 
-  if (req.cookies) {
-    const jwt = req.cookies[`${config.cookiePrefix}-token`];
+  const cookies = parseCookies(req);
+  const tokenCookieName = `${config.cookiePrefix}-token`;
 
-    if (jwt) {
-      return jwt;
-    }
+  if (cookies && cookies[tokenCookieName]) {
+    const token = cookies[tokenCookieName];
+    return token;
   }
 
   return null;

@@ -3,7 +3,6 @@ const passport = require('passport');
 const compression = require('compression');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
-const cookieParser = require('cookie-parser');
 const qsMiddleware = require('qs-middleware');
 const fileUpload = require('express-fileupload');
 const localizationMiddleware = require('../../localization/middleware');
@@ -12,7 +11,6 @@ const identifyAPI = require('./identifyAPI');
 
 const middleware = (config) => {
   return [
-    cookieParser(),
     passport.initialize(),
     authenticate(config),
     express.json(),
