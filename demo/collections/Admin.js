@@ -23,6 +23,7 @@ module.exports = {
   auth: {
     tokenExpiration: 300,
     useAPIKey: true,
+    secureCookie: process.env.NODE_ENV === 'production',
   },
   fields: [
     {

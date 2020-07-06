@@ -33,8 +33,18 @@ const refresh = async (args) => {
     const refreshedToken = jwt.sign(payload, secret, opts);
 
     if (args.res) {
-      args.res.cookie(`${cookiePrefix}-token`, refreshedToken, { path: '/', httpOnly: true });
+      const cookieOptions = {
+        path: '/',
+        httpOnly: true,
+      };
+
+      if (options.collection.config.auth.secureCookie) {
+        cookieOptions.secure = true;
+      }
+
+      args.res.cookie(`${cookiePrefix}-token`, refreshedToken, cookieOptions);
     }
+
 
     // /////////////////////////////////////
     // 3. Execute after login hook

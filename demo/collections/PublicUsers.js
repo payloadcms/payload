@@ -30,6 +30,7 @@ module.exports = {
   },
   auth: {
     tokenExpiration: 300,
+    secureCookie: process.env.NODE_ENV === 'production',
   },
   fields: [
     {

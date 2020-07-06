@@ -66,7 +66,16 @@ const login = async (args) => {
     );
 
     if (args.res) {
-      args.res.cookie(`${config.cookiePrefix}-token`, token, { path: '/', httpOnly: true });
+      const cookieOptions = {
+        path: '/',
+        httpOnly: true,
+      };
+
+      if (collectionConfig.auth.secureCookie) {
+        cookieOptions.secure = true;
+      }
+
+      args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
     }
 
     // /////////////////////////////////////
