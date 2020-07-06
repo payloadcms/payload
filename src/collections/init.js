@@ -8,7 +8,6 @@ const mongooseHidden = require('mongoose-hidden')({
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
 const LocalStrategy = require('passport-local').Strategy;
-const jwtStrategy = require('../auth/strategies/jwt');
 const apiKeyStrategy = require('../auth/strategies/apiKey');
 const collectionRoutes = require('./routes');
 const buildSchema = require('./buildSchema');
@@ -136,10 +135,6 @@ function registerCollections() {
       if (collection.auth.useAPIKey) {
         passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(AuthCollection));
       }
-
-      passport.use(`${AuthCollection.config.slug}-jwt`, jwtStrategy(this.config, this.collections));
-      passport.serializeUser(AuthCollection.Model.serializeUser());
-      passport.deserializeUser(AuthCollection.Model.deserializeUser());
 
       this.router.use(authRoutes(AuthCollection, this.config, this.sendEmail));
     } else {

@@ -8,6 +8,7 @@ const authenticate = require('./express/middleware/authenticate');
 const connectMongoose = require('./mongoose/connect');
 const expressMiddleware = require('./express/middleware');
 const initAdmin = require('./express/admin');
+const initAuth = require('./auth/init');
 const initCollections = require('./collections/init');
 const initGlobals = require('./globals/init');
 const initStatic = require('./express/static');
@@ -30,6 +31,7 @@ class Payload {
     this.router = express.Router();
     this.collections = {};
 
+    this.initAuth = initAuth.bind(this);
     this.initCollections = initCollections.bind(this);
     this.initGlobals = initGlobals.bind(this);
     this.buildEmail = buildEmail.bind(this);
@@ -43,8 +45,10 @@ class Payload {
 
     // Setup & initialization
     connectMongoose(this.config.mongoURL);
-    this.router.use(...expressMiddleware(this.config));
 
+    this.router.use(...expressMiddleware(this.config, this.collections));
+
+    this.initAuth();
     this.initCollections();
     this.initGlobals();
     this.initAdmin();

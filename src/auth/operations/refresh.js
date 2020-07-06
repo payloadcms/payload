@@ -25,10 +25,9 @@ const refresh = async (args) => {
     const opts = {};
     opts.expiresIn = options.collection.config.auth.tokenExpiration;
 
-    if (typeof options.authorization !== 'string') throw new Forbidden();
+    if (typeof options.token !== 'string') throw new Forbidden();
 
-    const token = options.authorization.replace('JWT ', '');
-    const payload = jwt.verify(token, secret, {});
+    const payload = jwt.verify(options.token, secret, {});
     delete payload.iat;
     delete payload.exp;
     const refreshedToken = jwt.sign(payload, secret, opts);

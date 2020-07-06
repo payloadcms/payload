@@ -1,6 +1,5 @@
 const express = require('express');
 const passport = require('passport');
-const AnonymousStrategy = require('passport-anonymous');
 const compression = require('compression');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
@@ -8,18 +7,13 @@ const cookieParser = require('cookie-parser');
 const qsMiddleware = require('qs-middleware');
 const fileUpload = require('express-fileupload');
 const localizationMiddleware = require('../../localization/middleware');
-const createAuthHeaderFromCookie = require('./createAuthHeaderFromCookie');
 const authenticate = require('./authenticate');
 const identifyAPI = require('./identifyAPI');
 
 const middleware = (config) => {
-  passport.use(new AnonymousStrategy.Strategy());
-
   return [
     cookieParser(),
-    createAuthHeaderFromCookie(config),
     passport.initialize(),
-    passport.session(),
     authenticate(config),
     express.json(),
     methodOverride('X-HTTP-Method-Override'),

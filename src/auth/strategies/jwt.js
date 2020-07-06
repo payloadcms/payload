@@ -1,11 +1,16 @@
 const passportJwt = require('passport-jwt');
+const getExtractJWT = require('../getExtractJWT');
 
 const JwtStrategy = passportJwt.Strategy;
-const { ExtractJwt } = passportJwt;
 
 module.exports = (config, collections) => {
-  const opts = {};
-  opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('JWT');
+  const opts = {
+    session: false,
+  };
+
+  const extractJWT = getExtractJWT(config);
+
+  opts.jwtFromRequest = extractJWT;
   opts.secretOrKey = config.secret;
 
   return new JwtStrategy(opts, async (token, done) => {
@@ -17,9 +22,9 @@ module.exports = (config, collections) => {
       const json = user.toJSON({ virtuals: true });
       json.collection = collection.config.slug;
 
-      return done(null, json);
+      done(null, json);
     } catch (err) {
-      return done(null, false);
+      done(null, false);
     }
   });
 };

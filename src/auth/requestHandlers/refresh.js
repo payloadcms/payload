@@ -1,15 +1,19 @@
 const httpStatus = require('http-status');
 const formatErrorResponse = require('../../express/responses/formatError');
 const { refresh } = require('../operations');
+const getExtractJWT = require('../getExtractJWT');
 
 const refreshHandler = config => async (req, res) => {
   try {
+    const extractJWT = getExtractJWT(config);
+    const token = extractJWT(req);
+
     const result = await refresh({
       req,
       res,
       collection: req.collection,
       config,
-      authorization: req.headers.authorization,
+      token,
     });
 
     return res.status(200).json({

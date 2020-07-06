@@ -1,11 +1,15 @@
 /* eslint-disable no-param-reassign */
 const { refresh } = require('../../operations');
+const getExtractJWT = require('../../getExtractJWT');
 
 const refreshResolver = (config, collection) => async (_, __, context) => {
+  const extractJWT = getExtractJWT(config);
+  const token = extractJWT(context);
+
   const options = {
     config,
     collection,
-    authorization: context.headers.authorization,
+    token,
     req: context,
   };
 

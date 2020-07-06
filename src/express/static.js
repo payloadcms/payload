@@ -3,7 +3,6 @@ const passport = require('passport');
 const cookieParser = require('cookie-parser');
 const getExecuteStaticPolicy = require('../auth/getExecuteStaticPolicy');
 const authenticate = require('./middleware/authenticate');
-const createAuthHeaderFromCookie = require('./middleware/createAuthHeaderFromCookie');
 
 function initStatic() {
   Object.entries(this.collections).forEach(([_, collection]) => {
@@ -13,9 +12,7 @@ function initStatic() {
       const router = express.Router();
 
       router.use(cookieParser());
-      router.use(createAuthHeaderFromCookie(this.config));
       router.use(passport.initialize());
-      router.use(passport.session());
       router.use(authenticate(this.config));
 
       router.use(getExecuteStaticPolicy(collection));
