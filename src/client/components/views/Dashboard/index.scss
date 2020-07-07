@@ -1,3 +1,33 @@
-.dashboard {
+@import '../../../scss/styles';
 
+.dashboard {
+  width: 100%;
+  padding-right: base(2);
+
+  &__wrap {
+    padding: base(2);
+    background: white;
+  }
+
+  &__label {
+    @extend %body;
+    color: $color-gray;
+  }
+
+  &__card-list {
+    width: calc(100% + #{$baseline});
+    margin: 0 - base(.5);
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+
+    li {
+      width: 25%;
+    }
+
+    .card {
+      margin: 0 base(.5) $baseline;
+    }
+  }
 }

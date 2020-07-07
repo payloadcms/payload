@@ -18,8 +18,7 @@
 }
 
 html {
-  font-size: $baseline-body-size;
-  line-height: $baseline-px;
+  @extend %body;
   background: $color-background-gray;
   -webkit-font-smoothing: antialiased;
   overflow-y: scroll;

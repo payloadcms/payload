@@ -76,27 +76,31 @@ const Nav = () => {
               return null;
             })}
           </nav>
-          <span className={`${baseClass}__label`}>Globals</span>
-          <nav>
-            {globals && globals.map((global, i) => {
-              const href = `${admin}/globals/${global.slug}`;
+          {(globals && globals.length > 0) && (
+            <>
+              <span className={`${baseClass}__label`}>Globals</span>
+              <nav>
+                {globals.map((global, i) => {
+                  const href = `${admin}/globals/${global.slug}`;
 
-              if (permissions?.[global.slug].read.permission) {
-                return (
-                  <NavLink
-                    activeClassName="active"
-                    key={i}
-                    to={href}
-                  >
-                    <Chevron />
-                    {global.label}
-                  </NavLink>
-                );
-              }
+                  if (permissions?.[global.slug].read.permission) {
+                    return (
+                      <NavLink
+                        activeClassName="active"
+                        key={i}
+                        to={href}
+                      >
+                        <Chevron />
+                        {global.label}
+                      </NavLink>
+                    );
+                  }
 
-              return null;
-            })}
-          </nav>
+                  return null;
+                })}
+              </nav>
+            </>
+          )}
           <div className={`${baseClass}__controls`}>
             <Localizer />
             <Link
