@@ -23,11 +23,44 @@
     flex-wrap: wrap;
 
     li {
-      width: 25%;
+      width: 20%;
     }
 
     .card {
       margin: 0 base(.5) $baseline;
+    }
+  }
+
+  @include large-break {
+    li {
+      width: 25%;
+    }
+  }
+
+  @include mid-break {
+    padding-right: 0;
+
+    &__wrap {
+      padding: $baseline;
+    }
+
+    li {
+      width: 33.33%;
+    }
+  }
+
+  @include small-break {
+    &__card-list {
+      width: calc(100% + #{base(.5)});
+      margin: 0 - base(.25);
+    }
+
+    li {
+      width: 50%;
+    }
+
+    .card {
+      margin: 0 base(.25) base(.5);
     }
   }
 }

@@ -106,12 +106,6 @@ const AllFields = {
       required: true,
     },
     {
-      name: 'checkbox',
-      type: 'checkbox',
-      label: 'Checkbox',
-      position: 'sidebar',
-    },
-    {
       type: 'row',
       fields: [
         {
@@ -217,6 +211,18 @@ const AllFields = {
       type: 'textarea',
       label: 'Textarea',
       name: 'textarea',
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      label: 'Slug',
+      position: 'sidebar',
+    },
+    {
+      name: 'checkbox',
+      type: 'checkbox',
+      label: 'Checkbox',
+      position: 'sidebar',
     },
   ],
   timestamps: true,
