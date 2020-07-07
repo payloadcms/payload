@@ -111,7 +111,7 @@ const File = (props) => {
       };
     }
 
-    return null;
+    return () => { };
   }, [handleDragIn, handleDragOut, handleDrop, dropRef]);
 
   useEffect(() => {

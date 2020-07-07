@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import config from 'payload/config';
+import Button from '../Button';
 import useForm from '../../forms/Form/useForm';
 
 import './index.scss';
@@ -11,21 +12,28 @@ const { routes: { admin } } = config;
 const baseClass = 'duplicate';
 
 const Duplicate = ({ slug }) => {
+  const { push } = useHistory();
   const { getData } = useForm();
-  const data = getData();
+
+  const handleClick = useCallback(() => {
+    const data = getData();
+
+    push({
+      pathname: `${admin}/collections/${slug}/create`,
+      state: {
+        data,
+      },
+    });
+  }, [push, getData, slug]);
 
   return (
-    <Link
+    <Button
+      buttonStyle="none"
       className={baseClass}
-      to={{
-        pathname: `${admin}/collections/${slug}/create`,
-        state: {
-          data,
-        },
-      }}
+      onClick={handleClick}
     >
       Duplicate
-    </Link>
+    </Button>
   );
 };
 

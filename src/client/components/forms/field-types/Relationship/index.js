@@ -336,13 +336,15 @@ const RelationshipFieldType = (props) => {
   useEffect(() => {
     const formatInitialData = (valueToFormat) => {
       if (hasMultipleRelations) {
+        const id = valueToFormat?.value?.id || valueToFormat?.value;
+
         return {
           ...valueToFormat,
-          value: valueToFormat.value.id,
+          value: id,
         };
       }
 
-      return valueToFormat.id;
+      return valueToFormat?.id || valueToFormat;
     };
 
     if (dataToInitialize) {

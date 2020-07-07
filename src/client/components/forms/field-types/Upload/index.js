@@ -14,7 +14,7 @@ import SelectExistingModal from './SelectExisting';
 
 import './index.scss';
 
-const { collections } = config;
+const { collections, serverURL, routes: { api } } = config;
 
 const baseClass = 'upload';
 
@@ -43,10 +43,12 @@ const Upload = (props) => {
   const addModalSlug = `${path}-add`;
   const selectExistingModalSlug = `${path}-select-existing`;
 
+  const dataToInitialize = (typeof initialData === 'object' && initialData.id) ? initialData.id : initialData;
+
   const fieldType = useFieldType({
     path,
     required,
-    initialData: initialData?.id,
+    initialData: dataToInitialize,
     defaultValue,
     validate,
   });
@@ -66,10 +68,23 @@ const Upload = (props) => {
   ].filter(Boolean).join(' ');
 
   useEffect(() => {
-    if (initialData) {
+    if (typeof initialData === 'object' && initialData?.id) {
       setInternalValue(initialData);
     }
-  }, [initialData]);
+
+    if (typeof initialData === 'string') {
+      const fetchFile = async () => {
+        const response = await fetch(`${serverURL}${api}/${relationTo}/${initialData}`);
+
+        if (response.ok) {
+          const json = await response.json();
+          setInternalValue(json);
+        }
+      };
+
+      fetchFile();
+    }
+  }, [initialData, setInternalValue, relationTo]);
 
   return (
     <div
@@ -166,9 +181,12 @@ Upload.propTypes = {
   required: PropTypes.bool,
   readOnly: PropTypes.bool,
   defaultValue: PropTypes.string,
-  initialData: PropTypes.shape({
-    id: PropTypes.string,
-  }),
+  initialData: PropTypes.oneOfType([
+    PropTypes.shape({
+      id: PropTypes.string,
+    }),
+    PropTypes.string,
+  ]),
   validate: PropTypes.func,
   width: PropTypes.string,
   style: PropTypes.shape({}),
