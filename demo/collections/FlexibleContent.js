@@ -23,5 +23,4 @@ module.exports = {
       required: true,
     },
   ],
-  timestamps: true,
 };

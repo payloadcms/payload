@@ -30,14 +30,8 @@ const AllFields = {
       defaultValue: 'Default Value',
       unique: true,
       policies: {
-        create: () => {
-          console.log('trying to set text');
-          return false;
-        },
-        update: ({ req: { user } }) => {
-          const result = checkRole(['admin'], user);
-          return result;
-        },
+        create: ({ req: { user } }) => checkRole(['admin'], user),
+        update: ({ req: { user } }) => checkRole(['admin'], user),
         read: ({ req: { user } }) => Boolean(user),
       },
     },
@@ -217,6 +211,9 @@ const AllFields = {
       type: 'text',
       label: 'Slug',
       position: 'sidebar',
+      localized: true,
+      unique: true,
+      required: true,
     },
     {
       name: 'checkbox',

@@ -1,5 +1,3 @@
-const deepmerge = require('deepmerge');
-const combineMerge = require('../../utilities/combineMerge');
 const executePolicy = require('../../auth/executePolicy');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
@@ -55,7 +53,6 @@ const find = async (args) => {
       query,
       page,
       limit,
-      sort,
       depth,
       Model,
       req: {
@@ -63,7 +60,18 @@ const find = async (args) => {
         fallbackLocale,
         payloadAPI,
       },
+      config,
     } = options;
+
+    let { sort } = options;
+
+    if (!sort) {
+      if (config.timestamps) {
+        sort = '-createdAt';
+      } else {
+        sort = '-_id';
+      }
+    }
 
     const optionsToExecute = {
       page: page || 1,
