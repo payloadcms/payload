@@ -7,15 +7,30 @@ const buildFields = (label, fieldsToBuild) => {
     if (field.name) {
       const fieldName = formatName(field.name);
 
-      if (field.fields) {
+      const objectTypeFields = ['create', 'read', 'update', 'delete'].reduce((operations, operation) => {
+        const capitalizedOperation = operation.charAt(0).toUpperCase() + operation.slice(1);
+
         return {
-          ...builtFields,
-          [field.name]: {
+          ...operations,
+          [operation]: {
             type: new GraphQLObjectType({
-              name: `${label}${fieldName}Fields`,
-              fields: buildFields(`${label}${fieldName}`, field.fields),
+              name: `${label}_${fieldName}_${capitalizedOperation}`,
+              fields: {
+                permission: {
+                  type: new GraphQLNonNull(GraphQLBoolean),
+                },
+              },
             }),
           },
+        };
+      }, {});
+
+      if (field.fields) {
+        objectTypeFields.fields = {
+          type: new GraphQLObjectType({
+            name: `${label}_${fieldName}_Fields`,
+            fields: buildFields(`${label}_${fieldName}`, field.fields),
+          }),
         };
       }
 
@@ -23,24 +38,8 @@ const buildFields = (label, fieldsToBuild) => {
         ...builtFields,
         [field.name]: {
           type: new GraphQLObjectType({
-            name: `${label}${fieldName}Policies`,
-            fields: ['create', 'read', 'update', 'delete'].reduce((operations, operation) => {
-              const capitalizedOperation = operation.charAt(0).toUpperCase() + operation.slice(1);
-
-              return {
-                ...operations,
-                [operation]: {
-                  type: new GraphQLObjectType({
-                    name: `${label}${fieldName}${capitalizedOperation}Policy`,
-                    fields: {
-                      permission: {
-                        type: new GraphQLNonNull(GraphQLBoolean),
-                      },
-                    },
-                  }),
-                },
-              };
-            }, {}),
+            name: `${label}_${fieldName}`,
+            fields: objectTypeFields,
           }),
         },
       };
