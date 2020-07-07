@@ -1,0 +1,41 @@
+@import '../../../scss/styles';
+
+.card {
+  background: $color-background-gray;
+  padding: base(1.25) $baseline;
+  position: relative;
+
+  h5 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__actions {
+    position: relative;
+    z-index: 2;
+    margin-top: base(.5);
+    display: inline-flex;
+
+    .btn {
+      margin: 0;
+    }
+  }
+
+  &--has-onclick {
+    cursor: pointer;
+
+    &:hover {
+      background: darken($color-background-gray, 3%);
+    }
+  }
+
+  &__click {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}

@@ -63,9 +63,9 @@
 
 %h5 {
   margin: 0;
-  font-size: base(.5);
+  font-size: base(.5625);
   line-height: 1.5;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 %small {
@@ -92,6 +92,12 @@
     font-size: base(.55);
     line-height: base(.75);
   }
+}
+
+%body {
+  font-size: $baseline-body-size;
+  line-height: $baseline-px;
+  font-weight: normal;
 }
 
 %code {
