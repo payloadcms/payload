@@ -103,15 +103,11 @@ const DefaultGlobalView = (props) => {
           </div>
           {data && (
             <ul className={`${baseClass}__meta`}>
-              {data && (
-                <>
-                  {data.updatedAt && (
-                    <li>
-                      <div className={`${baseClass}__label`}>Last Modified</div>
-                      <div>{format(new Date(data.updatedAt), 'MMMM do yyyy, h:mma')}</div>
-                    </li>
-                  )}
-                </>
+              {data.updatedAt && (
+                <li>
+                  <div className={`${baseClass}__label`}>Last Modified</div>
+                  <div>{format(new Date(data.updatedAt), 'MMMM do yyyy, h:mma')}</div>
+                </li>
               )}
             </ul>
           )}

@@ -1,5 +1,4 @@
 const executePolicy = require('../../auth/executePolicy');
-const { NotFound } = require('../../errors');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const findOne = async (args) => {
