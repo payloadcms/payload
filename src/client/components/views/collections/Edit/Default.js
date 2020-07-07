@@ -5,6 +5,7 @@ import format from 'date-fns/format';
 import config from 'payload/config';
 import Eyebrow from '../../../elements/Eyebrow';
 import Form from '../../../forms/Form';
+import Loading from '../../../elements/Loading';
 import PreviewButton from '../../../elements/PreviewButton';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
@@ -25,7 +26,7 @@ const DefaultEditView = (props) => {
   const { params: { id } = {} } = useRouteMatch();
 
   const {
-    collection, isEditing, data, onSave, permissions,
+    collection, isEditing, data, onSave, permissions, isLoading,
   } = props;
 
   const {
@@ -63,21 +64,28 @@ const DefaultEditView = (props) => {
           <Eyebrow />
           <LeaveWithoutSaving />
           <div className={`${baseClass}__edit`}>
-            <header className={`${baseClass}__header`}>
-              <h1>
-                <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
-              </h1>
-            </header>
-            <RenderFields
-              operation={isEditing ? 'update' : 'create'}
-              readOnly={!hasSavePermission}
-              permissions={permissions.fields}
-              filter={field => (!field.position || (field.position && field.position !== 'sidebar'))}
-              fieldTypes={fieldTypes}
-              fieldSchema={fields}
-              initialData={data}
-              customComponentsPath={`${slug}.fields.`}
-            />
+            {isLoading && (
+              <Loading />
+            )}
+            {!isLoading && (
+              <>
+                <header className={`${baseClass}__header`}>
+                  <h1>
+                    <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
+                  </h1>
+                </header>
+                <RenderFields
+                  operation={isEditing ? 'update' : 'create'}
+                  readOnly={!hasSavePermission}
+                  permissions={permissions.fields}
+                  filter={field => (!field.position || (field.position && field.position !== 'sidebar'))}
+                  fieldTypes={fieldTypes}
+                  fieldSchema={fields}
+                  initialData={data}
+                  customComponentsPath={`${slug}.fields.`}
+                />
+              </>
+            )}
           </div>
         </div>
         <div className={`${baseClass}__sidebar`}>
@@ -123,43 +131,47 @@ const DefaultEditView = (props) => {
               </a>
             </div>
           )}
-          <div className={`${baseClass}__sidebar-fields`}>
-            <RenderFields
-              operation={isEditing ? 'update' : 'create'}
-              readOnly={!hasSavePermission}
-              permissions={permissions.fields}
-              filter={field => field.position === 'sidebar'}
-              position="sidebar"
-              fieldTypes={fieldTypes}
-              fieldSchema={fields}
-              initialData={data}
-              customComponentsPath={`${slug}.fields.`}
-            />
-          </div>
-          {isEditing && (
-            <ul className={`${baseClass}__meta`}>
-              <li>
-                <div className={`${baseClass}__label`}>ID</div>
-                <div>{id}</div>
-              </li>
-              {timestamps && (
-                <>
-                  {data.updatedAt && (
-                    <li>
-                      <div className={`${baseClass}__label`}>Last Modified</div>
-                      <div>{format(new Date(data.updatedAt), 'MMMM do yyyy, h:mma')}</div>
-                    </li>
+          {!isLoading && (
+            <>
+              <div className={`${baseClass}__sidebar-fields`}>
+                <RenderFields
+                  operation={isEditing ? 'update' : 'create'}
+                  readOnly={!hasSavePermission}
+                  permissions={permissions.fields}
+                  filter={field => field.position === 'sidebar'}
+                  position="sidebar"
+                  fieldTypes={fieldTypes}
+                  fieldSchema={fields}
+                  initialData={data}
+                  customComponentsPath={`${slug}.fields.`}
+                />
+              </div>
+              {isEditing && (
+                <ul className={`${baseClass}__meta`}>
+                  <li>
+                    <div className={`${baseClass}__label`}>ID</div>
+                    <div>{id}</div>
+                  </li>
+                  {timestamps && (
+                    <>
+                      {data.updatedAt && (
+                        <li>
+                          <div className={`${baseClass}__label`}>Last Modified</div>
+                          <div>{format(new Date(data.updatedAt), 'MMMM do yyyy, h:mma')}</div>
+                        </li>
+                      )}
+                      {data.createdAt && (
+                        <li>
+                          <div className={`${baseClass}__label`}>Created</div>
+                          <div>{format(new Date(data.createdAt), 'MMMM do yyyy, h:mma')}</div>
+                        </li>
+                      )}
+                    </>
                   )}
-                  {data.createdAt && (
-                    <li>
-                      <div className={`${baseClass}__label`}>Created</div>
-                      <div>{format(new Date(data.createdAt), 'MMMM do yyyy, h:mma')}</div>
-                    </li>
-                  )}
-                </>
-              )}
 
-            </ul>
+                </ul>
+              )}
+            </>
           )}
         </div>
       </Form>
@@ -169,10 +181,12 @@ const DefaultEditView = (props) => {
 
 DefaultEditView.defaultProps = {
   isEditing: false,
+  isLoading: true,
   data: undefined,
 };
 
 DefaultEditView.propTypes = {
+  isLoading: PropTypes.bool,
   collection: PropTypes.shape({
     labels: PropTypes.shape({
       plural: PropTypes.string,

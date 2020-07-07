@@ -40,7 +40,7 @@ const EditView = (props) => {
     });
   };
 
-  const [{ data }] = usePayloadAPI(
+  const [{ data, isLoading }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
     { initialParams: { 'fallback-locale': 'null' } },
   );
@@ -77,6 +77,7 @@ const EditView = (props) => {
       DefaultComponent={DefaultEdit}
       path={`${slug}.views.Edit`}
       componentProps={{
+        isLoading,
         data: dataToRender,
         collection: { ...collection, fields },
         permissions: collectionPermissions,

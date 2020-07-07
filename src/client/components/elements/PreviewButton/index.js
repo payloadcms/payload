@@ -11,9 +11,9 @@ const PreviewButton = ({ generatePreviewURL }) => {
   const { getFields } = useForm();
   const fields = getFields();
 
-  const previewURL = (generatePreviewURL && typeof generatePreviewURL === 'function') ? generatePreviewURL(fields, token) : null;
+  if (generatePreviewURL && typeof generatePreviewURL === 'function') {
+    const previewURL = generatePreviewURL(fields, token);
 
-  if (previewURL) {
     return (
       <Button
         el="anchor"

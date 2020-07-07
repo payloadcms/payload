@@ -130,6 +130,7 @@
 // EXTERNAL SCOPES
 //////////////////////
 
+.global-edit,
 .collection-edit {
   @include absolutely-position-panels();
 
