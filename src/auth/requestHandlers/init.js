@@ -1,13 +1,11 @@
-const httpStatus = require('http-status');
 const { init } = require('../operations');
-const formatError = require('../../express/responses/formatError');
 
-const initHandler = async (req, res) => {
+const initHandler = async (req, res, next) => {
   try {
     const initialized = await init({ Model: req.collection.Model });
     return res.status(200).json({ initialized });
   } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatError(error));
+    return next(error);
   }
 };
 

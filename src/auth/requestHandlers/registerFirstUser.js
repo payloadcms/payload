@@ -1,8 +1,6 @@
-const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
 const { registerFirstUser } = require('../operations');
 
-const registerFirstUserHandler = config => async (req, res) => {
+const registerFirstUserHandler = config => async (req, res, next) => {
   try {
     const firstUser = await registerFirstUser({
       req,
@@ -13,7 +11,7 @@ const registerFirstUserHandler = config => async (req, res) => {
 
     return res.status(201).json(firstUser);
   } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
+    return next(error);
   }
 };
 

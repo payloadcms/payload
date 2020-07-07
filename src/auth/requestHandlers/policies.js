@@ -1,8 +1,7 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
 const { policies } = require('../operations');
 
-const policiesHandler = config => async (req, res) => {
+const policiesHandler = config => async (req, res, next) => {
   try {
     const policyResults = await policies({
       req,
@@ -12,7 +11,7 @@ const policiesHandler = config => async (req, res) => {
     return res.status(httpStatus.OK)
       .json(policyResults);
   } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
+    return next(error);
   }
 };
 

@@ -1,8 +1,7 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
 const { resetPassword } = require('../operations');
 
-const resetPasswordHandler = config => async (req, res) => {
+const resetPasswordHandler = config => async (req, res, next) => {
   try {
     const token = await resetPassword({
       req,
@@ -17,8 +16,7 @@ const resetPasswordHandler = config => async (req, res) => {
         token,
       });
   } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR)
-      .json(formatErrorResponse(error));
+    return next(error);
   }
 };
 

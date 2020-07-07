@@ -1,9 +1,8 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
 const formatSuccessResponse = require('../../express/responses/formatSuccess');
 const { update } = require('../operations');
 
-const updateHandler = async (req, res) => {
+const updateHandler = async (req, res, next) => {
   try {
     const user = await update({
       req,
@@ -18,7 +17,7 @@ const updateHandler = async (req, res) => {
       doc: user,
     });
   } catch (error) {
-    return res.status(httpStatus.UNAUTHORIZED).json(formatErrorResponse(error));
+    return next(error);
   }
 };
 

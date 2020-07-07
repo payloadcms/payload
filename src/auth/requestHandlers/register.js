@@ -1,9 +1,8 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
 const formatSuccessResponse = require('../../express/responses/formatSuccess');
 const { register } = require('../operations');
 
-const registerHandler = config => async (req, res) => {
+const registerHandler = config => async (req, res, next) => {
   try {
     const user = await register({
       config,
@@ -17,7 +16,7 @@ const registerHandler = config => async (req, res) => {
       doc: user,
     });
   } catch (error) {
-    return res.status(error.status || httpStatus.UNAUTHORIZED).json(formatErrorResponse(error));
+    return next(error);
   }
 };
 

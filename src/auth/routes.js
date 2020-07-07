@@ -46,7 +46,7 @@ const authRoutes = (collection, config, sendEmail) => {
 
   router
     .route(`/${slug}/me`)
-    .get(me);
+    .get(me(config));
 
   router
     .route(`/${slug}/first-register`)

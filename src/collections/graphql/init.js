@@ -141,12 +141,16 @@ function registerCollections() {
             type: 'text',
             required: true,
           },
+          {
+            name: 'exp',
+            type: 'number',
+          },
         ]),
       );
 
       this.Query.fields[`me${singularLabel}`] = {
         type: collection.graphQL.jwt,
-        resolve: me,
+        resolve: me(this.config),
       };
 
       this.Query.fields[`initialized${singularLabel}`] = {

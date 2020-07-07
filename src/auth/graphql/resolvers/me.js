@@ -1,6 +1,7 @@
-/* eslint-disable no-param-reassign */
-const meResolver = async (_, args, context) => {
-  return context.user;
+const { me } = require('../../operations');
+
+const meResolver = config => async (_, __, context) => {
+  return me({ req: context, config });
 };
 
 module.exports = meResolver;

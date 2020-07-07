@@ -1,9 +1,7 @@
-const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
 const { refresh } = require('../operations');
 const getExtractJWT = require('../getExtractJWT');
 
-const refreshHandler = config => async (req, res) => {
+const refreshHandler = config => async (req, res, next) => {
   try {
     const extractJWT = getExtractJWT(config);
     const token = extractJWT(req);
@@ -21,7 +19,7 @@ const refreshHandler = config => async (req, res) => {
       ...result,
     });
   } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
+    return next(error);
   }
 };
 

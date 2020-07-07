@@ -1,8 +1,7 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
 const { forgotPassword } = require('../operations');
 
-const forgotPasswordHandler = (config, email) => async (req, res) => {
+const forgotPasswordHandler = (config, email) => async (req, res, next) => {
   try {
     await forgotPassword({
       req,
@@ -17,7 +16,7 @@ const forgotPasswordHandler = (config, email) => async (req, res) => {
         message: 'Success',
       });
   } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
+    return next(error);
   }
 };
 

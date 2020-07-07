@@ -1,8 +1,7 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
 const { login } = require('../operations');
 
-const loginHandler = config => async (req, res) => {
+const loginHandler = config => async (req, res, next) => {
   try {
     const token = await login({
       req,
@@ -18,7 +17,7 @@ const loginHandler = config => async (req, res) => {
         token,
       });
   } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
+    return next(error);
   }
 };
 
