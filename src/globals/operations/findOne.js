@@ -55,14 +55,18 @@ const findOne = async (args) => {
     }
 
     let result = await Model.findOne({ globalType: slug });
+    let data = {};
 
-    if (!result) throw new NotFound();
+    if (!result) {
+      result = {};
+    } else {
+      if (locale && result.setLocale) {
+        result.setLocale(locale, fallbackLocale);
+      }
 
-    if (locale && result.setLocale) {
-      result.setLocale(locale, fallbackLocale);
+      data = result.toJSON({ virtuals: true });
     }
 
-    let data = result.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
     // 4. Execute field-level hooks and policies

@@ -154,7 +154,7 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 7. Return updated document
+    // 9. Return updated document
     // /////////////////////////////////////
 
     return doc;

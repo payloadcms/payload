@@ -1,8 +1,7 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
 const { update } = require('../operations');
 
-const updateHandler = (Model, config) => async (req, res) => {
+const updateHandler = (Model, config) => async (req, res, next) => {
   try {
     const { slug } = config;
 
@@ -12,11 +11,12 @@ const updateHandler = (Model, config) => async (req, res) => {
       config,
       slug,
       depth: req.query.depth,
+      data: req.body,
     });
 
     return res.status(httpStatus.OK).json({ message: 'Global saved successfully.', result });
   } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
+    return next(error);
   }
 };
 

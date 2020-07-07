@@ -1,68 +1,76 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useHistory, useLocation } from 'react-router-dom';
 import config from 'payload/config';
 import { useStepNav } from '../../elements/StepNav';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
-import Form from '../../forms/Form';
-import RenderFields from '../../forms/RenderFields';
-import * as fieldTypes from '../../forms/field-types';
+import { useUser } from '../../data/User';
 
-const {
-  serverURL,
-  routes: {
-    admin,
-    api,
-  },
-} = config;
+import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import DefaultGlobal from './Default';
 
-const baseClass = 'global-edit';
+const { serverURL, routes: { admin, api } } = config;
 
-const Global = (props) => {
-  const { global: { slug, label, fields } } = props;
+const GlobalView = (props) => {
+  const { state: locationState } = useLocation();
+  const history = useHistory();
   const { setStepNav } = useStepNav();
+  const { permissions } = useUser();
+
+  const { global } = props;
+
+  const {
+    slug,
+    label,
+  } = global;
+
+  const onSave = (json) => {
+    history.push(`${admin}/globals/${global.slug}`, {
+      status: {
+        message: json.message,
+        type: 'success',
+      },
+      data: json.doc,
+    });
+  };
 
   const [{ data }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
     { initialParams: { 'fallback-locale': 'null' } },
   );
 
+  const dataToRender = locationState?.data || data;
+
   useEffect(() => {
-    setStepNav([{
-      url: `${admin}/globals/${slug}`,
+    const nav = [{
       label,
-    }]);
-  }, [setStepNav, slug, label]);
+    }];
+
+    setStepNav(nav);
+  }, [setStepNav, label]);
+
+  const globalPermissions = permissions?.[slug];
 
   return (
-    <div className={baseClass}>
-      <header className={`${baseClass}__header`}>
-        <h1>
-          Edit
-          {' '}
-          {label}
-        </h1>
-      </header>
-      <Form
-        className={`${baseClass}__form`}
-        method={data ? 'put' : 'post'}
-        action={`${serverURL}${api}/globals/${slug}`}
-      >
-        <RenderFields
-          fieldTypes={fieldTypes}
-          fieldSchema={fields}
-          initialData={data}
-        />
-      </Form>
-    </div>
+    <RenderCustomComponent
+      DefaultComponent={DefaultGlobal}
+      path={`${slug}.views.Edit`}
+      componentProps={{
+        data: dataToRender,
+        permissions: globalPermissions,
+        global,
+        onSave,
+      }}
+    />
   );
 };
 
-Global.propTypes = {
+GlobalView.propTypes = {
   global: PropTypes.shape({
-    label: PropTypes.string,
-    slug: PropTypes.string,
+    label: PropTypes.string.isRequired,
+    slug: PropTypes.string.isRequired,
     fields: PropTypes.arrayOf(PropTypes.shape({})),
   }).isRequired,
 };
 
-export default Global;
+export default GlobalView;

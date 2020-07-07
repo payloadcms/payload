@@ -10,8 +10,7 @@ const registerGlobals = (globalConfigs, Globals) => {
     router
       .route(`/globals/${global.slug}`)
       .get(findOne(Globals, global))
-      .post(update(Globals, global))
-      .put(update(Globals, global));
+      .post(update(Globals, global));
   });
 
   return router;

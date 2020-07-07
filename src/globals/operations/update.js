@@ -29,7 +29,7 @@ const update = async (args) => {
     let global = await Model.findOne({ globalType: slug });
 
     if (!global) {
-      global = new Model();
+      global = new Model({ globalType: slug });
     }
 
     if (locale && global.setLocale) {
@@ -39,7 +39,7 @@ const update = async (args) => {
     const globalJSON = global.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 2. Execute before global hook
+    // 3. Execute before global hook
     // /////////////////////////////////////
 
     const { beforeUpdate } = args.config.hooks;
@@ -49,37 +49,37 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 3. Merge updates into existing data
+    // 4. Merge updates into existing data
     // /////////////////////////////////////
 
     options.data = deepmerge(globalJSON, options.data, { arrayMerge: overwriteMerge });
 
     // /////////////////////////////////////
-    // 4. Execute field-level hooks, policies, and validation
+    // 5. Execute field-level hooks, policies, and validation
     // /////////////////////////////////////
 
     options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeUpdate', operationName: 'update' });
 
     // /////////////////////////////////////
-    // 4. Perform database operation
+    // 6. Perform database operation
     // /////////////////////////////////////
 
-    Object.assign(global, { ...options.data, globalType: slug });
+    Object.assign(global, options.data);
 
-    global.save();
+    await global.save();
 
     global = global.toJSON({ virtuals: true });
 
     // /////////////////////////////////////
-    // 5. Execute field-level hooks and policies
+    // 7. Execute field-level hooks and policies
     // /////////////////////////////////////
 
-    global = performFieldOperations(args.config, {
+    global = await performFieldOperations(args.config, {
       ...options, data: global, hook: 'afterRead', operationName: 'read',
     });
 
     // /////////////////////////////////////
-    // 6. Execute after global hook
+    // 8. Execute after global hook
     // /////////////////////////////////////
 
     const { afterUpdate } = args.config.hooks;
@@ -89,7 +89,7 @@ const update = async (args) => {
     }
 
     // /////////////////////////////////////
-    // 7. Return global
+    // 9. Return global
     // /////////////////////////////////////
 
     return global;

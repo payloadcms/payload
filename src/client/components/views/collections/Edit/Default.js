@@ -39,7 +39,7 @@ const DefaultEditView = (props) => {
 
   const apiURL = `${serverURL}${api}/${slug}/${id}`;
   let action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}`;
-  const hasSavePermission = (isEditing && permissions?.update?.permission) || (!isEditing && permissions?.update?.permission);
+  const hasSavePermission = (isEditing && permissions?.update?.permission) || (!isEditing && permissions?.create?.permission);
 
   if (auth && !isEditing) {
     action = `${action}/register`;
@@ -170,7 +170,6 @@ const DefaultEditView = (props) => {
 DefaultEditView.defaultProps = {
   isEditing: false,
   data: undefined,
-  onSave: null,
 };
 
 DefaultEditView.propTypes = {
@@ -191,7 +190,7 @@ DefaultEditView.propTypes = {
     updatedAt: PropTypes.string,
     createdAt: PropTypes.string,
   }),
-  onSave: PropTypes.func,
+  onSave: PropTypes.func.isRequired,
   permissions: PropTypes.shape({
     create: PropTypes.shape({
       permission: PropTypes.bool,

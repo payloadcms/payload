@@ -1,8 +1,7 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
 const { findOne } = require('../operations');
 
-const findOneHandler = (Model, config) => async (req, res) => {
+const findOneHandler = (Model, config) => async (req, res, next) => {
   try {
     const { slug } = config;
 
@@ -16,7 +15,7 @@ const findOneHandler = (Model, config) => async (req, res) => {
 
     return res.status(httpStatus.OK).json(result);
   } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
+    return next(error);
   }
 };
 

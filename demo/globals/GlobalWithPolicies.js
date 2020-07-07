@@ -12,7 +12,6 @@ module.exports = {
       name: 'title',
       label: 'Site Title',
       type: 'text',
-      localized: true,
       maxLength: 100,
       required: true,
     },

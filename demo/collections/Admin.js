@@ -21,7 +21,7 @@ module.exports = {
     admin: () => true,
   },
   auth: {
-    tokenExpiration: 300,
+    tokenExpiration: 7200,
     useAPIKey: true,
     secureCookie: process.env.NODE_ENV === 'production',
   },

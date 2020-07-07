@@ -1,5 +1,4 @@
 const buildModel = require('./buildModel');
-const sanitize = require('./sanitize');
 const routes = require('./routes');
 
 function initGlobals() {
