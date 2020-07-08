@@ -1,8 +1,10 @@
 @import '../../../../scss/styles.scss';
 
-.field-type.flexible {
+.field-type.array {
+  background: white;
 
   &__add-button-wrap {
+    margin-left: base(0);
 
     .btn {
       color: $color-gray;
@@ -21,6 +23,16 @@
   .section__content {
     > div > div {
       width: 100%;
+    }
+  }
+
+  .field-type.array {
+    .field-type.repeater__add-button-wrap {
+      margin-left: base(2.65);
+    }
+
+    .field-type.repeater__header  {
+      display: none;
     }
   }
 }

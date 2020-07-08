@@ -128,7 +128,7 @@ const optionsToValidatorMap = {
     if (value || !options.required) return true;
     return defaultMessage;
   },
-  repeater: (value, options = {}) => {
+  array: (value, options = {}) => {
     if (options.minRows && value < options.minRows) {
       return `This field requires at least ${options.minRows} row(s).`;
     }
@@ -151,7 +151,7 @@ const optionsToValidatorMap = {
     if (value || !options.required) return true;
     return defaultMessage;
   },
-  flexible: (value, options) => {
+  blocks: (value, options) => {
     if (options.minRows && value < options.minRows) {
       return `This field requires at least ${options.minRows} row(s).`;
     }

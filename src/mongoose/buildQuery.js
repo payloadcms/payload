@@ -161,7 +161,7 @@ class ParamParser {
           const matchingSubDocuments = await subModel.find(subQuery);
 
           return [localizedPath, {
-            $in: matchingSubDocuments.map(subDoc => subDoc.id),
+            $in: matchingSubDocuments.map((subDoc) => subDoc.id),
           }];
         }
       }

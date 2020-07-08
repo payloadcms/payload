@@ -15,13 +15,13 @@ import Error from '../../Error';
 import useFieldType from '../../useFieldType';
 import Popup from '../../../elements/Popup';
 import BlockSelector from './BlockSelector';
-import { flexible } from '../../../../../fields/validations';
+import { blocks } from '../../../../../fields/validations';
 
 import './index.scss';
 
-const baseClass = 'field-type flexible';
+const baseClass = 'field-type blocks';
 
-const Flexible = (props) => {
+const Blocks = (props) => {
   const {
     label,
     name,
@@ -138,7 +138,7 @@ const Flexible = (props) => {
           />
         </header>
 
-        <Droppable droppableId="flexible-drop">
+        <Droppable droppableId="blocks-drop">
           {(provided) => (
             <div
               ref={provided.innerRef}
@@ -158,7 +158,7 @@ const Flexible = (props) => {
                     <DraggableSection
                       key={row.key}
                       id={row.key}
-                      blockType="flexible"
+                      blockType="blocks"
                       blocks={blocks}
                       singularLabel={blockToRender?.labels?.singular}
                       isOpen={row.open}
@@ -222,19 +222,19 @@ const Flexible = (props) => {
   );
 };
 
-Flexible.defaultProps = {
+Blocks.defaultProps = {
   label: '',
   defaultValue: [],
   initialData: [],
   singularLabel: 'Block',
-  validate: flexible,
+  validate: blocks,
   required: false,
   maxRows: undefined,
   minRows: undefined,
   permissions: {},
 };
 
-Flexible.propTypes = {
+Blocks.propTypes = {
   defaultValue: PropTypes.arrayOf(
     PropTypes.shape({}),
   ),
@@ -258,4 +258,4 @@ Flexible.propTypes = {
   }),
 };
 
-export default withCondition(Flexible);
+export default withCondition(Blocks);

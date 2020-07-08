@@ -1,17 +1,17 @@
 const checkRole = require('../access/checkRole');
 
 module.exports = {
-  slug: 'navigation-repeater',
-  label: 'Navigation Repeater',
+  slug: 'navigation-array',
+  label: 'Navigation Array',
   access: {
     update: ({ req: { user } }) => checkRole(['admin', 'user'], user),
     read: () => true,
   },
   fields: [
     {
-      name: 'repeater',
-      label: 'Repeater',
-      type: 'repeater',
+      name: 'array',
+      label: 'Array',
+      type: 'array',
       localized: true,
       fields: [{
         name: 'text',

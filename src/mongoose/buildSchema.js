@@ -28,7 +28,7 @@ const buildSchema = (configFields, options = {}) => {
   const schema = new Schema(fields, options);
 
   configFields.forEach((field) => {
-    if (field.type === 'flexible' && field.blocks && field.blocks.length > 0) {
+    if (field.type === 'blocks' && field.blocks && field.blocks.length > 0) {
       field.blocks.forEach((block) => {
         let blockSchemaFields = {};
 
@@ -140,7 +140,7 @@ const fieldToSchemaMap = {
 
     return newFields;
   },
-  repeater: (field, fields) => {
+  array: (field, fields) => {
     const schema = buildSchema(field.fields, { _id: false, id: false });
 
     return {
@@ -182,7 +182,7 @@ const fieldToSchemaMap = {
       [field.name]: field.hasMany ? [schema] : schema,
     };
   },
-  flexible: (field, fields) => {
+  blocks: (field, fields) => {
     const flexibleSchema = new Schema({ blockName: String }, { discriminatorKey: 'blockType', _id: false, id: false });
 
     return {

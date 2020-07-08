@@ -10,7 +10,7 @@ import { select } from '../../../../../fields/validations';
 import './index.scss';
 
 const findFullOption = (value, options) => {
-  const matchedOption = options.find(option => option?.value === value);
+  const matchedOption = options.find((option) => option?.value === value);
 
   if (matchedOption) {
     if (typeof matchedOption === 'object' && matchedOption.label && matchedOption.value) {

@@ -63,10 +63,10 @@ const DefaultCell = (props) => {
   return (
     <WrapElement {...wrapElementProps}>
       {field.type !== 'date' && (
-        <>
+        <React.Fragment>
           {typeof cellData === 'string' && cellData}
           {typeof cellData === 'object' && JSON.stringify(cellData)}
-        </>
+        </React.Fragment>
       )}
     </WrapElement>
   );

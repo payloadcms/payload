@@ -51,7 +51,7 @@ module.exports = {
       ],
     },
     {
-      type: 'repeater',
+      type: 'array',
       label: 'Should have at least 3 rows',
       name: 'atLeast3Rows',
       required: true,
@@ -59,7 +59,7 @@ module.exports = {
         const result = value && value.length >= 3;
 
         if (!result) {
-          return 'This repeater needs to have at least 3 rows.';
+          return 'This array needs to have at least 3 rows.';
         }
 
         return true;
@@ -83,9 +83,9 @@ module.exports = {
       ],
     },
     {
-      type: 'repeater',
-      label: 'Default repeater validation',
-      name: 'repeater',
+      type: 'array',
+      label: 'Default array validation',
+      name: 'array',
       required: true,
       fields: [
         {

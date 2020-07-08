@@ -16,17 +16,17 @@ const combineParentName = require('../utilities/combineParentName');
 
 function buildMutationInputType(name, fields, parentName) {
   const fieldToSchemaMap = {
-    number: field => ({ type: withNullableType(field, GraphQLFloat) }),
-    text: field => ({ type: withNullableType(field, GraphQLString) }),
-    email: field => ({ type: withNullableType(field, GraphQLString) }),
-    textarea: field => ({ type: withNullableType(field, GraphQLString) }),
-    richText: field => ({ type: withNullableType(field, GraphQLJSON) }),
-    code: field => ({ type: withNullableType(field, GraphQLString) }),
-    date: field => ({ type: withNullableType(field, GraphQLString) }),
-    upload: field => ({ type: withNullableType(field, GraphQLString) }),
-    'rich-text': field => ({ type: withNullableType(field, GraphQLString) }),
-    html: field => ({ type: withNullableType(field, GraphQLString) }),
-    radio: field => ({ type: withNullableType(field, GraphQLString) }),
+    number: (field) => ({ type: withNullableType(field, GraphQLFloat) }),
+    text: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    email: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    textarea: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    richText: (field) => ({ type: withNullableType(field, GraphQLJSON) }),
+    code: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    date: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    upload: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    'rich-text': (field) => ({ type: withNullableType(field, GraphQLString) }),
+    html: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    radio: (field) => ({ type: withNullableType(field, GraphQLString) }),
     checkbox: () => ({ type: GraphQLBoolean }),
     select: (field) => {
       const formattedName = `${combineParentName(parentName, field.name)}_MutationInput`;
@@ -87,36 +87,34 @@ function buildMutationInputType(name, fields, parentName) {
 
       return { type: field.hasMany ? new GraphQLList(type) : type };
     },
-    repeater: (field) => {
+    array: (field) => {
       const fullName = combineParentName(parentName, field.label);
       let type = buildMutationInputType(fullName, field.fields, fullName);
       type = new GraphQLList(withNullableType(field, type));
       return { type };
     },
     group: (field) => {
-      const requiresAtLeastOneField = field.fields.some(subField => (subField.required && !subField.localized));
+      const requiresAtLeastOneField = field.fields.some((subField) => (subField.required && !subField.localized));
       const fullName = combineParentName(parentName, field.label);
       let type = buildMutationInputType(fullName, field.fields, fullName);
       if (requiresAtLeastOneField) type = new GraphQLNonNull(type);
       return { type };
     },
-    flexible: () => ({ type: GraphQLJSON }),
-    row: (field) => {
-      return field.fields.reduce((acc, rowField) => {
-        const getFieldSchema = fieldToSchemaMap[rowField.type];
+    blocks: () => ({ type: GraphQLJSON }),
+    row: (field) => field.fields.reduce((acc, rowField) => {
+      const getFieldSchema = fieldToSchemaMap[rowField.type];
 
-        if (getFieldSchema) {
-          const fieldSchema = getFieldSchema(rowField);
+      if (getFieldSchema) {
+        const fieldSchema = getFieldSchema(rowField);
 
-          return [
-            ...acc,
-            fieldSchema,
-          ];
-        }
+        return [
+          ...acc,
+          fieldSchema,
+        ];
+      }
 
-        return null;
-      }, []);
-    },
+      return null;
+    }, []),
   };
 
   const fieldTypes = fields.reduce((schema, field) => {
@@ -126,12 +124,10 @@ function buildMutationInputType(name, fields, parentName) {
       const fieldSchema = getFieldSchema(field);
 
       if (Array.isArray(fieldSchema)) {
-        return fieldSchema.reduce((acc, subField, i) => {
-          return {
-            ...acc,
-            [field.fields[i].name]: subField,
-          };
-        }, schema);
+        return fieldSchema.reduce((acc, subField, i) => ({
+          ...acc,
+          [field.fields[i].name]: subField,
+        }), schema);
       }
 
       return {

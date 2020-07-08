@@ -11,13 +11,13 @@ import { useRenderedFields } from '../../RenderFields';
 import { useForm } from '../../Form/context';
 import useFieldType from '../../useFieldType';
 import Error from '../../Error';
-import { repeater } from '../../../../../fields/validations';
+import { array } from '../../../../../fields/validations';
 
 import './index.scss';
 
-const baseClass = 'field-type repeater';
+const baseClass = 'field-type array';
 
-const Repeater = (props) => {
+const Array = (props) => {
   const {
     label,
     name,
@@ -123,7 +123,7 @@ const Repeater = (props) => {
             message={errorMessage}
           />
         </header>
-        <Droppable droppableId="repeater-drop">
+        <Droppable droppableId="array-drop">
           {(provided) => (
             <div
               ref={provided.innerRef}
@@ -133,7 +133,7 @@ const Repeater = (props) => {
                 <DraggableSection
                   key={row.key}
                   id={row.key}
-                  blockType="repeater"
+                  blockType="array"
                   singularLabel={singularLabel}
                   isOpen={row.open}
                   rowCount={rows.length}
@@ -171,11 +171,11 @@ const Repeater = (props) => {
   );
 };
 
-Repeater.defaultProps = {
+Array.defaultProps = {
   label: '',
   defaultValue: [],
   initialData: [],
-  validate: repeater,
+  validate: array,
   required: false,
   maxRows: undefined,
   minRows: undefined,
@@ -185,7 +185,7 @@ Repeater.defaultProps = {
   permissions: {},
 };
 
-Repeater.propTypes = {
+Array.propTypes = {
   defaultValue: PropTypes.arrayOf(
     PropTypes.shape({}),
   ),
@@ -211,4 +211,4 @@ Repeater.propTypes = {
   }),
 };
 
-export default withCondition(Repeater);
+export default withCondition(Array);

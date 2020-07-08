@@ -62,7 +62,7 @@ class Relationship extends Component {
 
     if (relationsToSearch.length > 0) {
       some(relationsToSearch, async (relation, callback) => {
-        const collection = collections.find(coll => coll.slug === relation);
+        const collection = collections.find((coll) => coll.slug === relation);
         const fieldToSearch = collection.useAsTitle || 'id';
         const searchParam = search ? `&where[${fieldToSearch}][like]=${search}` : '';
         const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}${searchParam}`);
@@ -99,7 +99,7 @@ class Relationship extends Component {
     const { hasMany } = this.props;
 
     if (hasMany && Array.isArray(selectedValue)) {
-      return selectedValue.map(val => val.value);
+      return selectedValue.map((val) => val.value);
     }
 
     return selectedValue ? selectedValue.value : selectedValue;
@@ -126,9 +126,9 @@ class Relationship extends Component {
       });
     } else if (value) {
       if (hasMany) {
-        foundValue = value.map(val => options.find(option => option.value === val));
+        foundValue = value.map((val) => options.find((option) => option.value === val));
       } else {
-        foundValue = options.find(option => option.value === value);
+        foundValue = options.find((option) => option.value === value);
       }
     }
 
@@ -138,13 +138,13 @@ class Relationship extends Component {
   addOptions = (data, relation) => {
     const { hasMultipleRelations } = this.props;
     const { lastLoadedPage, options } = this.state;
-    const collection = collections.find(coll => coll.slug === relation);
+    const collection = collections.find((coll) => coll.slug === relation);
 
     if (!hasMultipleRelations) {
       this.setState({
         options: [
           ...options,
-          ...data.docs.map(doc => ({
+          ...data.docs.map((doc) => ({
             label: doc[collection.useAsTitle || 'id'],
             value: doc.id,
           })),
@@ -152,17 +152,15 @@ class Relationship extends Component {
       });
     } else {
       const allOptionGroups = [...options];
-      const optionsToAddTo = allOptionGroups.find(optionGroup => optionGroup.label === collection.labels.plural);
+      const optionsToAddTo = allOptionGroups.find((optionGroup) => optionGroup.label === collection.labels.plural);
 
-      const newOptions = data.docs.map((doc) => {
-        return {
-          label: doc[collection.useAsTitle || 'id'],
-          value: {
-            relationTo: collection.slug,
-            value: doc.id,
-          },
-        };
-      });
+      const newOptions = data.docs.map((doc) => ({
+        label: doc[collection.useAsTitle || 'id'],
+        value: {
+          relationTo: collection.slug,
+          value: doc.id,
+        },
+      }));
 
       if (optionsToAddTo) {
         optionsToAddTo.options = [
@@ -281,13 +279,9 @@ Relationship.defaultProps = {
 Relationship.propTypes = {
   readOnly: PropTypes.bool,
   relationTo: PropTypes.oneOfType([
-    PropTypes.oneOf(Object.keys(collections).map((key) => {
-      return collections[key].slug;
-    })),
+    PropTypes.oneOf(Object.keys(collections).map((key) => collections[key].slug)),
     PropTypes.arrayOf(
-      PropTypes.oneOf(Object.keys(collections).map((key) => {
-        return collections[key].slug;
-      })),
+      PropTypes.oneOf(Object.keys(collections).map((key) => collections[key].slug)),
     ),
   ]).isRequired,
   required: PropTypes.bool,
