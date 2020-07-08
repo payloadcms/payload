@@ -20,7 +20,7 @@ const sanitizeGlobals = (globals) => {
     // /////////////////////////////////
 
     if (!sanitizedGlobal.hooks) sanitizedGlobal.hooks = {};
-    if (!sanitizedGlobal.policies) sanitizedGlobal.policies = {};
+    if (!sanitizedGlobal.access) sanitizedGlobal.access = {};
 
     // /////////////////////////////////
     // Sanitize fields

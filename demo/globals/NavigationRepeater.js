@@ -1,9 +1,9 @@
-const checkRole = require('../policies/checkRole');
+const checkRole = require('../access/checkRole');
 
 module.exports = {
   slug: 'navigation-repeater',
   label: 'Navigation Repeater',
-  policies: {
+  access: {
     update: ({ req: { user } }) => checkRole(['admin', 'user'], user),
     read: () => true,
   },

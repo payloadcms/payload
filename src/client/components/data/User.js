@@ -86,10 +86,10 @@ const UserProvider = ({ children }) => {
     setLastLocationChange(Date.now());
   }, [pathname]);
 
-  // When user changes, get new policies
+  // When user changes, get new access
   useEffect(() => {
     async function getPermissions() {
-      const request = await requests.get(`${serverURL}${api}/policies`);
+      const request = await requests.get(`${serverURL}${api}/access`);
 
       if (request.status === 200) {
         const json = await request.json();

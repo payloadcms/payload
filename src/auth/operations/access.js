@@ -1,6 +1,6 @@
 const allOperations = ['create', 'read', 'update', 'delete'];
 
-const policies = async (args) => {
+const access = async (args) => {
   const {
     config,
     req,
@@ -13,9 +13,9 @@ const policies = async (args) => {
   const isLoggedIn = !!(user);
   const userCollectionConfig = (user && user.collection) ? config.collections.find((collection) => collection.slug === user.collection) : null;
 
-  const createPolicyPromise = async (obj, policy, operation, disableWhere = false) => {
+  const createPolicyPromise = async (obj, access, operation, disableWhere = false) => {
     const updatedObj = obj;
-    const result = await policy({ req });
+    const result = await access({ req });
 
     if (typeof result === 'object' && !disableWhere) {
       updatedObj[operation] = {
@@ -36,8 +36,8 @@ const policies = async (args) => {
       if (field.name) {
         if (!updatedObj[field.name]) updatedObj[field.name] = {};
 
-        if (field.policies && typeof field.policies[operation] === 'function') {
-          promises.push(createPolicyPromise(updatedObj[field.name], field.policies[operation], operation, true));
+        if (field.access && typeof field.access[operation] === 'function') {
+          promises.push(createPolicyPromise(updatedObj[field.name], field.access[operation], operation, true));
         } else {
           updatedObj[field.name][operation] = {
             permission: isLoggedIn,
@@ -62,8 +62,8 @@ const policies = async (args) => {
     operations.forEach((operation) => {
       executeFieldPolicies(results[entity.slug].fields, entity.fields, operation);
 
-      if (typeof entity.policies[operation] === 'function') {
-        promises.push(createPolicyPromise(results[entity.slug], entity.policies[operation], operation));
+      if (typeof entity.access[operation] === 'function') {
+        promises.push(createPolicyPromise(results[entity.slug], entity.access[operation], operation));
       } else {
         results[entity.slug][operation] = {
           permission: isLoggedIn,
@@ -73,7 +73,7 @@ const policies = async (args) => {
   };
 
   if (userCollectionConfig) {
-    results.canAccessAdmin = userCollectionConfig.policies.admin ? userCollectionConfig.policies.admin(args) : isLoggedIn;
+    results.canAccessAdmin = userCollectionConfig.access.admin ? userCollectionConfig.access.admin(args) : isLoggedIn;
   } else {
     results.canAccessAdmin = false;
   }
@@ -91,4 +91,4 @@ const policies = async (args) => {
   return results;
 };
 
-module.exports = policies;
+module.exports = access;

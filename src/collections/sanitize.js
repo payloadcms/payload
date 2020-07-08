@@ -28,7 +28,7 @@ const sanitizeCollection = (collections, collection) => {
   // /////////////////////////////////
 
   if (!sanitizedCollectionConfig.hooks) sanitizedCollectionConfig.hooks = {};
-  if (!sanitizedCollectionConfig.policies) sanitizedCollectionConfig.policies = {};
+  if (!sanitizedCollectionConfig.access) sanitizedCollectionConfig.access = {};
 
   if (sanitizedCollectionConfig.upload) {
     if (!sanitizedCollectionConfig.upload.staticDir) sanitizedCollectionConfig.upload.staticDir = sanitizedCollectionConfig.slug;

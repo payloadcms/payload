@@ -22,7 +22,7 @@ const Validations = require('./collections/Validations');
 
 const FlexibleGlobal = require('./globals/FlexibleGlobal');
 const NavigationRepeater = require('./globals/NavigationRepeater');
-const GlobalWithPolicies = require('./globals/GlobalWithPolicies');
+const GlobalWithStrictAccess = require('./globals/GlobalWithStrictAccess');
 
 module.exports = {
   admin: {
@@ -53,7 +53,7 @@ module.exports = {
   ],
   globals: [
     NavigationRepeater,
-    GlobalWithPolicies,
+    GlobalWithStrictAccess,
     FlexibleGlobal,
   ],
   cookiePrefix: 'payload',
@@ -89,11 +89,9 @@ module.exports = {
     },
   },
   hooks: {
-    afterError: (err, response) => {
+    afterError: () => {
       console.error('global error config handler');
     },
   },
-  webpack: (config) => {
-    return config;
-  },
+  webpack: (config) => config,
 };

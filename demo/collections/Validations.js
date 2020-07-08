@@ -4,7 +4,7 @@ module.exports = {
     singular: 'Validation',
     plural: 'Validations',
   },
-  policies: {
+  access: {
     read: () => true,
   },
   fields: [

@@ -1,14 +1,14 @@
 const passport = require('passport');
-const executePolicy = require('../executePolicy');
+const executeStatic = require('../executeAccess');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const register = async (args) => {
   // /////////////////////////////////////
-  // 1. Retrieve and execute policy
+  // 1. Retrieve and execute access
   // /////////////////////////////////////
 
   if (!args.overridePolicy) {
-    await executePolicy(args, args.collection.config.policies.create);
+    await executeStatic(args, args.collection.config.access.create);
   }
 
   let options = { ...args };
@@ -24,7 +24,7 @@ const register = async (args) => {
   }
 
   // /////////////////////////////////////
-  // 3. Execute field-level hooks, policies, and validation
+  // 3. Execute field-level hooks, access, and validation
   // /////////////////////////////////////
 
   options.data = await performFieldOperations(args.collection.config, { ...options, hook: 'beforeCreate', operationName: 'create' });
@@ -62,7 +62,7 @@ const register = async (args) => {
   result = result.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 7. Execute field-level hooks and policies
+  // 7. Execute field-level hooks and access
   // /////////////////////////////////////
 
   result = await performFieldOperations(args.collection.config, {

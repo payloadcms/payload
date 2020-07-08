@@ -5,7 +5,7 @@ module.exports = {
     plural: 'Localized Posts',
   },
   useAsTitle: 'title',
-  policies: {
+  access: {
     read: () => true,
   },
   preview: (doc, token) => {

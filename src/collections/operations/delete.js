@@ -1,13 +1,13 @@
 const fs = require('fs');
 const { NotFound, Forbidden, ErrorDeletingFile } = require('../../errors');
-const executePolicy = require('../../auth/executePolicy');
+const executeStatic = require('../../auth/executeAccess');
 
 const deleteQuery = async (args) => {
   // /////////////////////////////////////
-  // 1. Retrieve and execute policy
+  // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  const policyResults = await executePolicy(args, args.config.policies.delete);
+  const policyResults = await executeStatic(args, args.config.access.delete);
   const hasWherePolicy = typeof policyResults === 'object';
 
   let options = {

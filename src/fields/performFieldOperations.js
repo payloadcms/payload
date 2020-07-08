@@ -9,7 +9,7 @@ module.exports = async (config, operation) => {
   } = operation;
 
   // Maintain a top-level list of promises
-  // so that all async field policies / validations / hooks
+  // so that all async field access / validations / hooks
   // can run in parallel
   const validationPromises = [];
   const policyPromises = [];
@@ -32,8 +32,8 @@ module.exports = async (config, operation) => {
   const createPolicyPromise = async (data, originalDoc, field) => {
     const resultingData = data;
 
-    if (field.policies && field.policies[operationName]) {
-      const result = await field.policies[operationName](operation);
+    if (field.access && field.access[operationName]) {
+      const result = await field.access[operationName](operation);
 
       if (!result && operationName === 'update' && originalDoc[field.name] !== undefined) {
         resultingData[field.name] = originalDoc[field.name];

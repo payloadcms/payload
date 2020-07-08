@@ -1,12 +1,12 @@
-const executePolicy = require('../../auth/executePolicy');
+const executeStatic = require('../../auth/executeAccess');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const findOne = async (args) => {
   // /////////////////////////////////////
-  // 1. Retrieve and execute policy
+  // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  await executePolicy(args, args.config.policies.read);
+  await executeStatic(args, args.config.access.read);
 
   let options = { ...args };
 
@@ -67,7 +67,7 @@ const findOne = async (args) => {
 
 
   // /////////////////////////////////////
-  // 4. Execute field-level hooks and policies
+  // 4. Execute field-level hooks and access
   // /////////////////////////////////////
 
   result = performFieldOperations(args.config, {

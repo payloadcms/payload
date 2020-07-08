@@ -9,7 +9,7 @@ module.exports = {
     singular: 'Flexible Content',
     plural: 'Flexible Content',
   },
-  policies: {
+  access: {
     read: () => true,
   },
   fields: [

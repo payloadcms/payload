@@ -4,7 +4,7 @@ const LocalizedRepeaters = {
     singular: 'Localized Repeater',
     plural: 'Localized Repeaters',
   },
-  policies: {
+  access: {
     read: () => true,
   },
   fields: [

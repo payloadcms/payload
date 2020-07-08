@@ -4,7 +4,7 @@ const NestedRepeater = {
     singular: 'Nested Repeater',
     plural: 'Nested Repeaters',
   },
-  policies: {
+  access: {
     read: () => true,
   },
   fields: [

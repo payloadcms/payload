@@ -1,4 +1,4 @@
-const checkRole = require('../policies/checkRole');
+const checkRole = require('../access/checkRole');
 const Email = require('../content-blocks/Email');
 const Quote = require('../content-blocks/Quote');
 const NumberBlock = require('../content-blocks/Number');
@@ -18,7 +18,7 @@ const AllFields = {
 
     return null;
   },
-  policies: {
+  access: {
     read: () => true,
   },
   fields: [
@@ -29,7 +29,7 @@ const AllFields = {
       required: true,
       defaultValue: 'Default Value',
       unique: true,
-      policies: {
+      access: {
         create: ({ req: { user } }) => checkRole(['admin'], user),
         update: ({ req: { user } }) => checkRole(['admin'], user),
         read: ({ req: { user } }) => Boolean(user),
@@ -154,7 +154,7 @@ const AllFields = {
               label: 'Repeater Text 2',
               type: 'text',
               required: true,
-              policies: {
+              access: {
                 read: ({ req: { user } }) => Boolean(user),
                 update: ({ req: { user } }) => {
                   return checkRole(['admin'], user);

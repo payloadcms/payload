@@ -6,7 +6,7 @@ const init = require('./init');
 const forgotPassword = require('./forgotPassword');
 const resetPassword = require('./resetPassword');
 const update = require('./update');
-const policies = require('./policies');
+const access = require('./access');
 
 module.exports = {
   login,
@@ -17,5 +17,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   update,
-  policies,
+  access,
 };

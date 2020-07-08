@@ -1,6 +1,6 @@
 module.exports = {
   slug: 'relationship-a',
-  policies: {
+  access: {
     read: () => true,
   },
   labels: {

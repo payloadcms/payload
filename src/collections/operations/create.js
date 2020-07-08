@@ -1,6 +1,6 @@
 const mkdirp = require('mkdirp');
 
-const executePolicy = require('../../auth/executePolicy');
+const executeStatic = require('../../auth/executeAccess');
 
 const { MissingFile } = require('../../errors');
 const resizeAndSave = require('../../uploads/imageResizer');
@@ -12,10 +12,10 @@ const performFieldOperations = require('../../fields/performFieldOperations');
 
 const create = async (args) => {
   // /////////////////////////////////////
-  // 1. Retrieve and execute policy
+  // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  await executePolicy(args, args.config.policies.create);
+  await executeStatic(args, args.config.access.create);
 
   let options = { ...args };
 
@@ -30,7 +30,7 @@ const create = async (args) => {
   }
 
   // /////////////////////////////////////
-  // 3. Execute field-level policies, hooks, and validation
+  // 3. Execute field-level access, hooks, and validation
   // /////////////////////////////////////
 
   options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeCreate', operationName: 'create' });
@@ -99,7 +99,7 @@ const create = async (args) => {
   result = result.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 6. Execute field-level hooks and policies
+  // 6. Execute field-level hooks and access
   // /////////////////////////////////////
 
   result = await performFieldOperations(args.config, {

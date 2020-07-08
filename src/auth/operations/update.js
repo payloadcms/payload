@@ -1,15 +1,15 @@
 const deepmerge = require('deepmerge');
 const overwriteMerge = require('../../utilities/overwriteMerge');
 const { NotFound, Forbidden } = require('../../errors');
-const executePolicy = require('../executePolicy');
+const executeStatic = require('../executeAccess');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const update = async (args) => {
   // /////////////////////////////////////
-  // 1. Execute policy
+  // 1. Execute access
   // /////////////////////////////////////
 
-  const policyResults = await executePolicy(args, args.config.policies.update);
+  const policyResults = await executeStatic(args, args.config.access.update);
   const hasWherePolicy = typeof policyResults === 'object';
 
   let options = { ...args };
@@ -64,7 +64,7 @@ const update = async (args) => {
   options.data = deepmerge(userJSON, options.data, { arrayMerge: overwriteMerge });
 
   // /////////////////////////////////////
-  // 4. Execute field-level hooks, policies, and validation
+  // 4. Execute field-level hooks, access, and validation
   // /////////////////////////////////////
 
   options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeUpdate', operationName: 'update' });
@@ -92,7 +92,7 @@ const update = async (args) => {
   user = user.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 7. Execute field-level hooks and policies
+  // 7. Execute field-level hooks and access
   // /////////////////////////////////////
 
   user = performFieldOperations(args.config, {

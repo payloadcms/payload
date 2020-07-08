@@ -1,12 +1,12 @@
-const executePolicy = require('../../auth/executePolicy');
+const executeStatic = require('../../auth/executeAccess');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const find = async (args) => {
   // /////////////////////////////////////
-  // 1. Retrieve and execute policy
+  // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  const policyResults = await executePolicy(args, args.config.policies.read);
+  const policyResults = await executeStatic(args, args.config.access.read);
   const hasWherePolicy = typeof policyResults === 'object';
 
   const queryToBuild = {};
@@ -96,7 +96,7 @@ const find = async (args) => {
   let result = await Model.paginate(query, optionsToExecute);
 
   // /////////////////////////////////////
-  // 4. Execute field-level policies
+  // 4. Execute field-level access
   // /////////////////////////////////////
 
   result = {

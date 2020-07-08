@@ -1,11 +1,11 @@
-const checkRole = require('../policies/checkRole');
+const checkRole = require('../access/checkRole');
 const Quote = require('../content-blocks/Quote');
 const CallToAction = require('../content-blocks/CallToAction');
 
 module.exports = {
   slug: 'flexible-global',
   label: 'Flexible Global',
-  policies: {
+  access: {
     update: ({ req: { user } }) => checkRole(['admin'], user),
     read: () => true,
   },

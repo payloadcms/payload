@@ -1,10 +1,10 @@
-const executePolicy = require('./executeAccess');
+const executeStatic = require('./executeAccess');
 const { Forbidden } = require('../errors');
 
 const getExecuteStaticPolicy = ({ config, Model }) => async (req, res, next) => {
   try {
     if (req.path) {
-      const policyResult = await executePolicy({ req, isReadingStaticFile: true }, config.policies.read);
+      const policyResult = await executeStatic({ req, isReadingStaticFile: true }, config.access.read);
 
       if (typeof policyResult === 'object') {
         const filename = decodeURI(req.path).replace(/^\/|\/$/g, '');
