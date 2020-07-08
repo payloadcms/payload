@@ -54,7 +54,10 @@ const registerFirstUser = async (args) => {
     result = await afterRegister(options, result);
   }
 
-  return result;
+  return {
+    message: 'Registered successfully. Welcome to Payload!',
+    user: result,
+  };
 };
 
 module.exports = registerFirstUser;

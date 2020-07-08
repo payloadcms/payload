@@ -27,7 +27,7 @@ const ForgotPassword = () => {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const { user } = useUser();
 
-  const handleAjaxResponse = (res) => {
+  const handleResponse = (res) => {
     res.json()
       .then(() => {
         setHasSubmitted(true);
@@ -86,7 +86,7 @@ const ForgotPassword = () => {
       <StatusList />
       <Form
         novalidate
-        handleAjaxResponse={handleAjaxResponse}
+        handleResponse={handleResponse}
         method="POST"
         action={`${serverURL}${api}/${userSlug}/forgot-password`}
       >

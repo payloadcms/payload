@@ -114,6 +114,7 @@ ActionPanel.defaultProps = {
   verticalAlignment: 'center',
   blockType: null,
   isHovered: false,
+  blocks: [],
 };
 
 ActionPanel.propTypes = {
@@ -121,6 +122,9 @@ ActionPanel.propTypes = {
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
   blockType: PropTypes.oneOf(['blocks', 'array']),
+  blocks: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ),
   verticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
   isHovered: PropTypes.bool,
   rowIndex: PropTypes.number.isRequired,

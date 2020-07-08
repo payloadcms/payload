@@ -127,10 +127,23 @@ const Form = (props) => {
             if (typeof onSuccess === 'function') onSuccess(json);
 
             if (redirect) {
-              return history.push(redirect, json);
-            }
+              const destination = {
+                pathname: redirect,
+              };
 
-            if (!disableSuccessStatus) {
+              if (json.message && !disableSuccessStatus) {
+                destination.state = {
+                  status: [
+                    {
+                      message: json.message,
+                      type: 'success',
+                    },
+                  ],
+                };
+              }
+
+              history.push(destination);
+            } else if (!disableSuccessStatus) {
               replaceStatus([{
                 message: json.message,
                 type: 'success',

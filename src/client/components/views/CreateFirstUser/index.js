@@ -1,9 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useHistory } from 'react-router-dom';
 import config from 'payload/config';
 import MinimalTemplate from '../../templates/Minimal';
-import StatusList, { useStatusList } from '../../elements/Status';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import * as fieldTypes from '../../forms/field-types';
@@ -16,29 +14,20 @@ const {
   admin: { user: userSlug }, collections, serverURL, routes: { admin, api },
 } = config;
 
-const userConfig = collections.find(collection => collection.slug === userSlug);
+const userConfig = collections.find((collection) => collection.slug === userSlug);
 
 const baseClass = 'create-first-user';
 
 const CreateFirstUser = (props) => {
   const { setInitialized } = props;
-  const { addStatus } = useStatusList();
-  const { setCookieToken } = useUser();
-  const history = useHistory();
+  const { setToken } = useUser();
 
-  const handleAjaxResponse = (res) => {
-    res.json().then((data) => {
-      if (data.token) {
-        setToken(data.token);
-        setInitialized(true);
-        history.push(`${admin}`);
-      } else {
-        addStatus({
-          type: 'error',
-          message: 'There was a problem creating your first user.',
-        });
-      }
-    });
+  const onSuccess = (json) => {
+    if (json?.user?.token) {
+      setToken(json.user.token);
+    }
+
+    setInitialized(true);
   };
 
   const fields = [
@@ -59,11 +48,10 @@ const CreateFirstUser = (props) => {
     <MinimalTemplate className={baseClass}>
       <h1>Welcome to Payload</h1>
       <p>To begin, create your first user.</p>
-      <StatusList />
       <Form
-        handleAjaxResponse={handleAjaxResponse}
-        disableSuccessStatus
+        onSuccess={onSuccess}
         method="POST"
+        redirect={admin}
         action={`${serverURL}${api}/${userSlug}/first-register`}
       >
         <RenderFields

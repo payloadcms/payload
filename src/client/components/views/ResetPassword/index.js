@@ -20,7 +20,7 @@ const ResetPassword = () => {
   const history = useHistory();
   const { user, setToken } = useUser();
 
-  const handleAjaxResponse = (res) => {
+  const handleResponse = (res) => {
     res.json()
       .then((data) => {
         if (data.token) {
@@ -60,7 +60,7 @@ const ResetPassword = () => {
       <div className={`${baseClass}__wrap`}>
         <StatusList />
         <Form
-          handleAjaxResponse={handleAjaxResponse}
+          handleResponse={handleResponse}
           method="POST"
           action={`${serverURL}${api}/${userSlug}/reset-password`}
           redirect={admin}
