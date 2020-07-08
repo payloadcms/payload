@@ -22,7 +22,7 @@ const globalSetup = async () => {
 
   const data = await response.json();
 
-  if (!data.token) {
+  if (!data.user || !data.user.token) {
     throw new Error('Failed to register first user');
   }
 };
