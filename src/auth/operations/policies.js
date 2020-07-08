@@ -11,7 +11,7 @@ const policies = async (args) => {
   const promises = [];
 
   const isLoggedIn = !!(user);
-  const userCollectionConfig = (user && user.collection) ? config.collections.find(collection => collection.slug === user.collection) : null;
+  const userCollectionConfig = (user && user.collection) ? config.collections.find((collection) => collection.slug === user.collection) : null;
 
   const createPolicyPromise = async (obj, policy, operation, disableWhere = false) => {
     const updatedObj = obj;
@@ -72,27 +72,23 @@ const policies = async (args) => {
     });
   };
 
-  try {
-    if (userCollectionConfig) {
-      results.canAccessAdmin = userCollectionConfig.policies.admin ? userCollectionConfig.policies.admin(args) : isLoggedIn;
-    } else {
-      results.canAccessAdmin = false;
-    }
-
-    config.collections.forEach((collection) => {
-      executeEntityPolicies(collection, allOperations);
-    });
-
-    config.globals.forEach((global) => {
-      executeEntityPolicies(global, ['read', 'update']);
-    });
-
-    await Promise.all(promises);
-
-    return results;
-  } catch (error) {
-    throw error;
+  if (userCollectionConfig) {
+    results.canAccessAdmin = userCollectionConfig.policies.admin ? userCollectionConfig.policies.admin(args) : isLoggedIn;
+  } else {
+    results.canAccessAdmin = false;
   }
+
+  config.collections.forEach((collection) => {
+    executeEntityPolicies(collection, allOperations);
+  });
+
+  config.globals.forEach((global) => {
+    executeEntityPolicies(global, ['read', 'update']);
+  });
+
+  await Promise.all(promises);
+
+  return results;
 };
 
 module.exports = policies;

@@ -1,17 +1,13 @@
 const init = async (args) => {
-  try {
-    const {
-      Model,
-    } = args;
+  const {
+    Model,
+  } = args;
 
-    const count = await Model.countDocuments({});
+  const count = await Model.countDocuments({});
 
-    if (count >= 1) return true;
+  if (count >= 1) return true;
 
-    return false;
-  } catch (error) {
-    throw error;
-  }
+  return false;
 };
 
 module.exports = init;

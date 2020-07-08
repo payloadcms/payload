@@ -101,19 +101,15 @@ module.exports = async (config, operation) => {
   // Entry point for field validation
   // //////////////////////////////////////////
 
-  try {
-    traverseFields(config.fields, fullData, fullOriginalDoc, '');
-    await Promise.all(validationPromises);
+  traverseFields(config.fields, fullData, fullOriginalDoc, '');
+  await Promise.all(validationPromises);
 
-    if (errors.length > 0) {
-      throw new ValidationError(errors);
-    }
-
-    await Promise.all(policyPromises);
-    await Promise.all(hookPromises);
-
-    return fullData;
-  } catch (error) {
-    throw error;
+  if (errors.length > 0) {
+    throw new ValidationError(errors);
   }
+
+  await Promise.all(policyPromises);
+  await Promise.all(hookPromises);
+
+  return fullData;
 };

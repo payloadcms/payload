@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const { login } = require('../operations');
 
-const loginHandler = config => async (req, res, next) => {
+const loginHandler = (config) => async (req, res, next) => {
   try {
     const token = await login({
       req,
