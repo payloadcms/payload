@@ -77,7 +77,9 @@ const find = async (args) => {
     limit: limit || 10,
     sort,
     collation: sort ? { locale: 'en' } : {}, // case-insensitive sort in MongoDB
-    options: {},
+    options: {
+      autopopulate: false,
+    },
   };
 
   // Only allow depth override within REST.
@@ -88,8 +90,6 @@ const find = async (args) => {
       optionsToExecute.options.autopopulate = {
         maxDepth: parseInt(depth, 10),
       };
-    } else {
-      optionsToExecute.options.autopopulate = false;
     }
   }
 

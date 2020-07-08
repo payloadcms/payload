@@ -57,7 +57,9 @@ const findByID = async (args) => {
   } = options;
 
   const queryOptionsToExecute = {
-    options: {},
+    options: {
+      autopopulate: false,
+    },
   };
 
   // Only allow depth override within REST.
@@ -68,8 +70,6 @@ const findByID = async (args) => {
       queryOptionsToExecute.options.autopopulate = {
         maxDepth: parseInt(depth, 10),
       };
-    } else {
-      queryOptionsToExecute.options.autopopulate = false;
     }
   }
 
