@@ -1,5 +1,6 @@
 const {
   GraphQLString,
+  GraphQLObjectType,
   GraphQLBoolean,
   GraphQLNonNull,
   GraphQLInt,
@@ -78,12 +79,10 @@ function registerCollections() {
 
     collection.graphQL.updateMutationInputType = new GraphQLNonNull(this.buildMutationInputType(
       `${singularLabel}Update`,
-      fields.map((field) => {
-        return {
-          ...field,
-          required: false,
-        };
-      }),
+      fields.map((field) => ({
+        ...field,
+        required: false,
+      })),
       `${singularLabel}Update`,
     ));
 
@@ -128,28 +127,36 @@ function registerCollections() {
     };
 
     if (collection.config.auth) {
-      collection.graphQL.jwt = this.buildObjectType(
-        formatName(`${slug}JWT`),
-        collection.config.fields.filter(field => field.saveToJWT).concat([
-          {
-            name: 'email',
-            type: 'email',
-            required: true,
-          },
-          {
-            name: 'collection',
-            type: 'text',
-            required: true,
-          },
-          {
-            name: 'exp',
-            type: 'number',
-          },
-        ]),
-      );
-
       this.Query.fields[`me${singularLabel}`] = {
-        type: collection.graphQL.jwt,
+        type: new GraphQLObjectType({
+          name: formatName(`${slug}Me`),
+          fields: {
+            token: {
+              type: GraphQLString,
+            },
+            user: {
+              type: this.buildObjectType(
+                formatName(`${slug}MeUser`),
+                collection.config.fields.concat([
+                  {
+                    name: 'email',
+                    type: 'email',
+                    required: true,
+                  },
+                  {
+                    name: 'collection',
+                    type: 'text',
+                    required: true,
+                  },
+                  {
+                    name: 'exp',
+                    type: 'number',
+                  },
+                ]),
+              ),
+            },
+          },
+        }),
         resolve: me(this.config),
       };
 

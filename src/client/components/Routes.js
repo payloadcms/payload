@@ -29,7 +29,7 @@ const Routes = () => {
   const { user, permissions, permissions: { canAccessAdmin } } = useUser();
 
   useEffect(() => {
-    requests.get(`${routes.api}/${userSlug}/init`).then(res => res.json().then((data) => {
+    requests.get(`${routes.api}/${userSlug}/init`).then((res) => res.json().then((data) => {
       if (data && 'initialized' in data) {
         setInitialized(data.initialized);
       }
@@ -61,6 +61,9 @@ const Routes = () => {
               </Route>
               <Route path={`${match.url}/logout`}>
                 <Logout />
+              </Route>
+              <Route path={`${match.url}/logout-inactivity`}>
+                <Logout inactivity />
               </Route>
               <Route path={`${match.url}/forgot`}>
                 <ForgotPassword />
@@ -94,14 +97,12 @@ const Routes = () => {
                                     key={`${collection.slug}-list`}
                                     path={`${match.url}/collections/${collection.slug}`}
                                     exact
-                                    render={(routeProps) => {
-                                      return (
-                                        <List
-                                          {...routeProps}
-                                          collection={collection}
-                                        />
-                                      );
-                                    }}
+                                    render={(routeProps) => (
+                                      <List
+                                        {...routeProps}
+                                        collection={collection}
+                                      />
+                                    )}
                                   />
                                 );
                               }
@@ -116,14 +117,12 @@ const Routes = () => {
                                     key={`${collection.slug}-create`}
                                     path={`${match.url}/collections/${collection.slug}/create`}
                                     exact
-                                    render={(routeProps) => {
-                                      return (
-                                        <Edit
-                                          {...routeProps}
-                                          collection={collection}
-                                        />
-                                      );
-                                    }}
+                                    render={(routeProps) => (
+                                      <Edit
+                                        {...routeProps}
+                                        collection={collection}
+                                      />
+                                    )}
                                   />
                                 );
                               }
@@ -138,15 +137,13 @@ const Routes = () => {
                                     key={`${collection.slug}-edit`}
                                     path={`${match.url}/collections/${collection.slug}/:id`}
                                     exact
-                                    render={(routeProps) => {
-                                      return (
-                                        <Edit
-                                          isEditing
-                                          {...routeProps}
-                                          collection={collection}
-                                        />
-                                      );
-                                    }}
+                                    render={(routeProps) => (
+                                      <Edit
+                                        isEditing
+                                        {...routeProps}
+                                        collection={collection}
+                                      />
+                                    )}
                                   />
                                 );
                               }
@@ -161,14 +158,12 @@ const Routes = () => {
                                     key={`${global.slug}`}
                                     path={`${match.url}/globals/${global.slug}`}
                                     exact
-                                    render={(routeProps) => {
-                                      return (
-                                        <EditGlobal
-                                          {...routeProps}
-                                          global={global}
-                                        />
-                                      );
-                                    }}
+                                    render={(routeProps) => (
+                                      <EditGlobal
+                                        {...routeProps}
+                                        global={global}
+                                      />
+                                    )}
                                   />
                                 );
                               }
