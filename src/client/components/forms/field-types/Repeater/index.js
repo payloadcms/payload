@@ -8,7 +8,7 @@ import Button from '../../../elements/Button';
 import DraggableSection from '../../DraggableSection';
 import reducer from '../rowReducer';
 import { useRenderedFields } from '../../RenderFields';
-import useForm from '../../Form/useForm';
+import { useForm } from '../../Form/context';
 import useFieldType from '../../useFieldType';
 import Error from '../../Error';
 import { repeater } from '../../../../../fields/validations';
@@ -124,35 +124,32 @@ const Repeater = (props) => {
           />
         </header>
         <Droppable droppableId="repeater-drop">
-          {provided => (
+          {(provided) => (
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
             >
-              {rows.length > 0 && rows.map((row, i) => {
-                return (
-                  <DraggableSection
-                    key={row.key}
-                    id={row.key}
-                    blockType="repeater"
-                    singularLabel={singularLabel}
-                    isOpen={row.open}
-                    rowCount={rows.length}
-                    rowIndex={i}
-                    addRow={() => addRow(i)}
-                    removeRow={() => removeRow(i)}
-                    moveRow={moveRow}
-                    parentPath={path}
-                    initialData={row.data}
-                    initNull={row.initNull}
-                    customComponentsPath={`${customComponentsPath}${name}.fields.`}
-                    fieldTypes={fieldTypes}
-                    fieldSchema={fields}
-                    permissions={permissions.fields}
-                  />
-                );
-              })
-              }
+              {rows.length > 0 && rows.map((row, i) => (
+                <DraggableSection
+                  key={row.key}
+                  id={row.key}
+                  blockType="repeater"
+                  singularLabel={singularLabel}
+                  isOpen={row.open}
+                  rowCount={rows.length}
+                  rowIndex={i}
+                  addRow={() => addRow(i)}
+                  removeRow={() => removeRow(i)}
+                  moveRow={moveRow}
+                  parentPath={path}
+                  initialData={row.data}
+                  initNull={row.initNull}
+                  customComponentsPath={`${customComponentsPath}${name}.fields.`}
+                  fieldTypes={fieldTypes}
+                  fieldSchema={fields}
+                  permissions={permissions.fields}
+                />
+              ))}
               {provided.placeholder}
             </div>
           )}

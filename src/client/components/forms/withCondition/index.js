@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import useFormFields from '../Form/useFormFields';
+import { useFormFields } from '../Form/context';
 
 const withCondition = (Field) => {
   const CheckForCondition = (props) => {

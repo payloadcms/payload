@@ -28,9 +28,9 @@ const NumberField = (props) => {
   const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { min, max });
+    const validationResult = validate(value, { min, max, required });
     return validationResult;
-  }, [validate, max, min]);
+  }, [validate, max, min, required]);
 
   const {
     value,
@@ -45,6 +45,12 @@ const NumberField = (props) => {
     validate: memoizedValidate,
     enableDebouncedValue: true,
   });
+
+  const handleChange = useCallback((e) => {
+    let val = parseInt(e.target.value, 10);
+    if (Number.isNaN(val)) val = '';
+    setValue(val);
+  }, [setValue]);
 
   const classes = [
     'field-type',
@@ -72,7 +78,7 @@ const NumberField = (props) => {
       />
       <input
         value={value || ''}
-        onChange={e => setValue(parseInt(e.target.value, 10))}
+        onChange={handleChange}
         disabled={readOnly ? 'disabled' : undefined}
         placeholder={placeholder}
         type="number"

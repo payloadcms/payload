@@ -1,7 +1,7 @@
 import {
-  useContext, useCallback, useEffect, useState,
+  useCallback, useEffect, useState,
 } from 'react';
-import FormContext from '../Form/FormContext';
+import { useFormProcessing, useFormSubmitted, useFormModified, useForm } from '../Form/context';
 import useDebounce from '../../../hooks/useDebounce';
 import useUnmountEffect from '../../../hooks/useUnmountEffect';
 
@@ -23,10 +23,13 @@ const useFieldType = (options) => {
   // If no initialData, use default value
   const initialData = data !== undefined ? data : defaultValue;
 
-  const formContext = useContext(FormContext);
+  const formContext = useForm();
+  const submitted = useFormSubmitted();
+  const processing = useFormProcessing();
+  const modified = useFormModified();
 
   const {
-    dispatchFields, submitted, processing, getField, setModified, modified,
+    dispatchFields, getField, setModified,
   } = formContext;
 
   const [internalValue, setInternalValue] = useState(initialData);

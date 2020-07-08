@@ -4,7 +4,7 @@ const optionsToValidatorMap = {
   number: (value, options = {}) => {
     const parsedValue = parseInt(value, 10);
 
-    if (value && (typeof parsedValue !== 'number' || Number.isNaN(parsedValue))) {
+    if ((value && typeof parsedValue !== 'number') || (options.required && Number.isNaN(parsedValue))) {
       return 'Please enter a valid number.';
     }
 

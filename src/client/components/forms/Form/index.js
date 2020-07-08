@@ -1,13 +1,11 @@
 import React, {
-  useReducer, useEffect, useRef,
+  useReducer, useEffect, useRef, useState,
 } from 'react';
 import { objectToFormData } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { unflatten } from 'flatley';
 import HiddenInput from '../field-types/HiddenInput';
-import FormContext from './FormContext';
-import FieldContext from './FieldContext';
 import { useLocale } from '../../utilities/Locale';
 import { useStatusList } from '../../elements/Status';
 import { requests } from '../../../api';
@@ -15,6 +13,8 @@ import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import { useUser } from '../../data/User';
 import fieldReducer from './fieldReducer';
 import initContextState from './initContextState';
+
+import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FieldContext } from './context';
 
 import './index.scss';
 
@@ -43,7 +43,7 @@ const Form = (props) => {
     ajax,
     method,
     action,
-    handleAjaxResponse,
+    handleResponse,
     onSuccess,
     children,
     className,
@@ -55,6 +55,10 @@ const Form = (props) => {
   const locale = useLocale();
   const { replaceStatus, addStatus, clearStatus } = useStatusList();
   const { refreshCookie } = useUser();
+
+  const [modified, setModified] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const contextRef = useRef({ ...initContextState });
 
@@ -69,7 +73,7 @@ const Form = (props) => {
     }
 
     e.stopPropagation();
-    contextRef.current.setSubmitted(true);
+    setSubmitted(true);
 
     const isValid = contextRef.current.validateForm();
 
@@ -106,17 +110,17 @@ const Form = (props) => {
       });
 
       const formData = contextRef.current.createFormData();
-      contextRef.current.setProcessing(true);
+      setProcessing(true);
 
       // Make the API call from the action
       return requests[method.toLowerCase()](action, {
         body: formData,
       }).then((res) => {
-        contextRef.current.setModified(false);
-        if (typeof handleAjaxResponse === 'function') return handleAjaxResponse(res);
+        setModified(false);
+        if (typeof handleResponse === 'function') return handleResponse(res);
 
         return res.json().then((json) => {
-          contextRef.current.setProcessing(false);
+          setProcessing(false);
           clearStatus();
 
           if (res.status < 400) {
@@ -144,9 +148,7 @@ const Form = (props) => {
             }
 
             if (Array.isArray(json.errors)) {
-              const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => {
-                return err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]];
-              }, [[], []]);
+              const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => (err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]]), [[], []]);
 
               fieldErrors.forEach((err) => {
                 dispatchFields({
@@ -193,17 +195,11 @@ const Form = (props) => {
     return true;
   };
 
-  contextRef.current.getFields = () => {
-    return contextRef.current.fields;
-  };
+  contextRef.current.getFields = () => contextRef.current.fields;
 
-  contextRef.current.getField = (path) => {
-    return contextRef.current.fields[path];
-  };
+  contextRef.current.getField = (path) => contextRef.current.fields[path];
 
-  contextRef.current.getData = () => {
-    return reduceFieldsToValues(contextRef.current.fields, true);
-  };
+  contextRef.current.getData = () => reduceFieldsToValues(contextRef.current.fields, true);
 
   contextRef.current.getSiblingData = (path) => {
     let siblingFields = contextRef.current.fields;
@@ -247,40 +243,26 @@ const Form = (props) => {
     return unflattenedData?.[name];
   };
 
-  contextRef.current.getUnflattenedValues = () => {
-    return reduceFieldsToValues(contextRef.current.fields);
-  };
+  contextRef.current.getUnflattenedValues = () => reduceFieldsToValues(contextRef.current.fields);
 
-  contextRef.current.validateForm = () => {
-    return !Object.values(contextRef.current.fields).some((field) => {
-      return field.valid === false;
-    });
-  };
+  contextRef.current.validateForm = () => !Object.values(contextRef.current.fields).some((field) => field.valid === false);
 
   contextRef.current.createFormData = () => {
     const data = reduceFieldsToValues(contextRef.current.fields);
     return objectToFormData(data, { indices: true });
   };
 
-  contextRef.current.setModified = (modified) => {
-    contextRef.current.modified = modified;
-  };
-
-  contextRef.current.setSubmitted = (submitted) => {
-    contextRef.current.submitted = submitted;
-  };
-
-  contextRef.current.setProcessing = (processing) => {
-    contextRef.current.processing = processing;
-  };
+  contextRef.current.setModified = setModified;
+  contextRef.current.setProcessing = setProcessing;
+  contextRef.current.setSubmitted = setSubmitted;
 
   useThrottledEffect(() => {
     refreshCookie();
   }, 15000, [fields]);
 
   useEffect(() => {
-    contextRef.current.modified = false;
-  }, [locale, contextRef.current.modified]);
+    setModified(false);
+  }, [locale]);
 
   const classes = [
     className,
@@ -301,13 +283,20 @@ const Form = (props) => {
           ...contextRef.current,
         }}
         >
-          <HiddenInput
-            path="locale"
-            defaultValue={locale}
-          />
-          {children}
+          <SubmittedContext.Provider value={submitted}>
+            <ProcessingContext.Provider value={processing}>
+              <ModifiedContext.Provider value={modified}>
+                <HiddenInput
+                  path="locale"
+                  defaultValue={locale}
+                />
+                {children}
+              </ModifiedContext.Provider>
+            </ProcessingContext.Provider>
+          </SubmittedContext.Provider>
         </FieldContext.Provider>
       </FormContext.Provider>
+
     </form>
   );
 };
@@ -318,7 +307,7 @@ Form.defaultProps = {
   ajax: true,
   method: 'POST',
   action: '',
-  handleAjaxResponse: null,
+  handleResponse: null,
   onSuccess: null,
   className: '',
   disableSuccessStatus: false,
@@ -331,7 +320,7 @@ Form.propTypes = {
   ajax: PropTypes.bool,
   method: PropTypes.oneOf(['post', 'POST', 'get', 'GET', 'put', 'PUT', 'delete', 'DELETE']),
   action: PropTypes.string,
-  handleAjaxResponse: PropTypes.func,
+  handleResponse: PropTypes.func,
   onSuccess: PropTypes.func,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),

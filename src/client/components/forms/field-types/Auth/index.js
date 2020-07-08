@@ -5,7 +5,7 @@ import Password from '../Password';
 import Checkbox from '../Checkbox';
 import Button from '../../../elements/Button';
 import ConfirmPassword from '../ConfirmPassword';
-import useFormFields from '../../Form/useFormFields';
+import { useFormFields } from '../../Form/context';
 import APIKey from './APIKey';
 
 import './index.scss';
@@ -81,7 +81,11 @@ Auth.defaultProps = {
 
 Auth.propTypes = {
   fieldTypes: PropTypes.shape({}).isRequired,
-  initialData: PropTypes.shape({}),
+  initialData: PropTypes.shape({
+    enableAPIKey: PropTypes.bool,
+    apiKey: PropTypes.string,
+    email: PropTypes.string,
+  }),
   useAPIKey: PropTypes.bool,
   requirePassword: PropTypes.bool,
 };

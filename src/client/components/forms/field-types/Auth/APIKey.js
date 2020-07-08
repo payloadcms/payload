@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
 import useFieldType from '../../useFieldType';
@@ -6,18 +6,20 @@ import Label from '../../Label';
 import Button from '../../../elements/Button';
 import CopyToClipboard from '../../../elements/CopyToClipboard';
 import { text } from '../../../../../fields/validations';
-import useFormFields from '../../Form/useFormFields';
+import { useFormFields } from '../../Form/context';
 
 import './index.scss';
 
 const path = 'apiKey';
 const baseClass = 'api-key';
-const validate = val => text(val, { minLength: 24, maxLength: 48 });
+const validate = (val) => text(val, { minLength: 24, maxLength: 48 });
 
 const APIKey = (props) => {
   const {
     initialData,
   } = props;
+
+  const [initialAPIKey, setInitialAPIKey] = useState(null);
 
   const { getField } = useFormFields();
 
@@ -36,7 +38,7 @@ const APIKey = (props) => {
 
   const fieldType = useFieldType({
     path: 'apiKey',
-    initialData: initialData || uuidv4(),
+    initialData: initialData || initialAPIKey,
     validate,
   });
 
@@ -45,6 +47,10 @@ const APIKey = (props) => {
     setValue,
   } = fieldType;
 
+  useEffect(() => {
+    setInitialAPIKey(uuidv4());
+  }, []);
+
   const classes = [
     'field-type',
     'api-key',
@@ -52,7 +58,7 @@ const APIKey = (props) => {
   ].filter(Boolean).join(' ');
 
   return (
-    <>
+    <React.Fragment>
       <div className={classes}>
         <Label
           htmlFor={path}
@@ -73,7 +79,7 @@ const APIKey = (props) => {
       >
         Generate new API Key
       </Button>
-    </>
+    </React.Fragment>
   );
 };
 

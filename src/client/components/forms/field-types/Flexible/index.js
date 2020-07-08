@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import reducer from '../rowReducer';
-import useForm from '../../Form/useForm';
+import { useForm } from '../../Form/context';
 import DraggableSection from '../../DraggableSection';
 import { useRenderedFields } from '../../RenderFields';
 import Error from '../../Error';
@@ -139,7 +139,7 @@ const Flexible = (props) => {
         </header>
 
         <Droppable droppableId="flexible-drop">
-          {provided => (
+          {(provided) => (
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
@@ -151,7 +151,7 @@ const Flexible = (props) => {
                   blockType = dataToInitialize?.[i]?.blockType;
                 }
 
-                const blockToRender = blocks.find(block => block.slug === blockType);
+                const blockToRender = blocks.find((block) => block.slug === blockType);
 
                 if (blockToRender) {
                   return (
@@ -186,8 +186,7 @@ const Flexible = (props) => {
                 }
 
                 return null;
-              })
-              }
+              })}
               {provided.placeholder}
             </div>
           )}
