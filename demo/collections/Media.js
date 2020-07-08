@@ -6,7 +6,7 @@ module.exports = {
     singular: 'Media',
     plural: 'Media',
   },
-  policies: {
+  access: {
     read: () => true,
   },
   upload: {

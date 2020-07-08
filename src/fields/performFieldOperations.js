@@ -9,7 +9,7 @@ module.exports = async (config, operation) => {
   } = operation;
 
   // Maintain a top-level list of promises
-  // so that all async field policies / validations / hooks
+  // so that all async field access / validations / hooks
   // can run in parallel
   const validationPromises = [];
   const policyPromises = [];
@@ -32,8 +32,8 @@ module.exports = async (config, operation) => {
   const createPolicyPromise = async (data, originalDoc, field) => {
     const resultingData = data;
 
-    if (field.policies && field.policies[operationName]) {
-      const result = await field.policies[operationName](operation);
+    if (field.access && field.access[operationName]) {
+      const result = await field.access[operationName](operation);
 
       if (!result && operationName === 'update' && originalDoc[field.name] !== undefined) {
         resultingData[field.name] = originalDoc[field.name];
@@ -72,7 +72,7 @@ module.exports = async (config, operation) => {
       if (field.fields) {
         if (field.name === undefined) {
           traverseFields(field.fields, data, originalDoc, path);
-        } else if (field.type === 'repeater' || field.type === 'flexible') {
+        } else if (field.type === 'array' || field.type === 'blocks') {
           if (Array.isArray(data[field.name])) {
             data[field.name].forEach((rowData, i) => {
               const originalDocRow = originalDoc && originalDoc[field.name] && originalDoc[field.name][i];
@@ -85,7 +85,7 @@ module.exports = async (config, operation) => {
       }
 
       if (operationName === 'create' || (operationName === 'update' && data[field.name] !== undefined)) {
-        if (field.type === 'repeater' || field.type === 'flexible') {
+        if (field.type === 'array' || field.type === 'blocks') {
           const hasRowsOfData = Array.isArray(data[field.name]);
           const rowCount = hasRowsOfData ? data[field.name].length : 0;
 

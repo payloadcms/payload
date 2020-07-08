@@ -6,7 +6,7 @@ module.exports = {
     plural: 'Hooks',
   },
   useAsTitle: 'title',
-  policies: {
+  access: {
     create: () => true,
     read: () => true,
     update: () => true,

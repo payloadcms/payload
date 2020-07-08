@@ -1,8 +1,8 @@
-const checkRole = require('../policies/checkRole');
-const Email = require('../content-blocks/Email');
-const Quote = require('../content-blocks/Quote');
-const NumberBlock = require('../content-blocks/Number');
-const CallToAction = require('../content-blocks/CallToAction');
+const checkRole = require('../access/checkRole');
+const Email = require('../blocks/Email');
+const Quote = require('../blocks/Quote');
+const NumberBlock = require('../blocks/Number');
+const CallToAction = require('../blocks/CallToAction');
 
 const AllFields = {
   slug: 'all-fields',
@@ -18,7 +18,7 @@ const AllFields = {
 
     return null;
   },
-  policies: {
+  access: {
     read: () => true,
   },
   fields: [
@@ -29,7 +29,7 @@ const AllFields = {
       required: true,
       defaultValue: 'Default Value',
       unique: true,
-      policies: {
+      access: {
         create: ({ req: { user } }) => checkRole(['admin'], user),
         update: ({ req: { user } }) => checkRole(['admin'], user),
         read: ({ req: { user } }) => Boolean(user),
@@ -135,9 +135,9 @@ const AllFields = {
       ],
     },
     {
-      type: 'repeater',
-      label: 'Repeater',
-      name: 'repeater',
+      type: 'array',
+      label: 'Array',
+      name: 'array',
       minRows: 2,
       maxRows: 4,
       fields: [
@@ -145,36 +145,34 @@ const AllFields = {
           type: 'row',
           fields: [
             {
-              name: 'repeaterText1',
-              label: 'Repeater Text 1',
+              name: 'arrayText1',
+              label: 'Array Text 1',
               type: 'text',
               required: true,
             }, {
-              name: 'repeaterText2',
-              label: 'Repeater Text 2',
+              name: 'arrayText2',
+              label: 'Array Text 2',
               type: 'text',
               required: true,
-              policies: {
+              access: {
                 read: ({ req: { user } }) => Boolean(user),
-                update: ({ req: { user } }) => {
-                  return checkRole(['admin'], user);
-                },
+                update: ({ req: { user } }) => checkRole(['admin'], user),
               },
             },
           ],
         },
         {
           type: 'text',
-          name: 'repeaterText3',
-          label: 'Repeater Text 3',
+          name: 'arrayText3',
+          label: 'Array Text 3',
           readOnly: true,
         },
       ],
     },
     {
-      type: 'flexible',
-      label: 'Flexible Content',
-      name: 'flexible',
+      type: 'blocks',
+      label: 'Blocks Content',
+      name: 'blocks',
       minRows: 2,
       singularLabel: 'Block',
       blocks: [Email, NumberBlock, Quote, CallToAction],

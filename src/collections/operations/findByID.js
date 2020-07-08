@@ -1,13 +1,13 @@
 const { Forbidden, NotFound } = require('../../errors');
-const executePolicy = require('../../auth/executePolicy');
+const executeStatic = require('../../auth/executeAccess');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const findByID = async (args) => {
   // /////////////////////////////////////
-  // 1. Retrieve and execute policy
+  // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  const policyResults = await executePolicy(args, args.config.policies.read);
+  const policyResults = await executeStatic(args, args.config.access.read);
   const hasWherePolicy = typeof policyResults === 'object';
 
   const queryToBuild = {
@@ -85,7 +85,7 @@ const findByID = async (args) => {
   result = result.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 4. Execute field-level hooks and policies
+  // 4. Execute field-level hooks and access
   // /////////////////////////////////////
 
   result = await performFieldOperations(args.config, {

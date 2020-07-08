@@ -17,7 +17,7 @@ const sanitizeConfig = require('./utilities/sanitizeConfig');
 const buildEmail = require('./email/build');
 const identifyAPI = require('./express/middleware/identifyAPI');
 const errorHandler = require('./express/middleware/errorHandler');
-const { policies } = require('./auth/requestHandlers');
+const { access } = require('./auth/requestHandlers');
 
 class Payload {
   constructor(options) {
@@ -53,7 +53,7 @@ class Payload {
     this.initGlobals();
     this.initAdmin();
 
-    this.router.get('/policies', policies(this.config));
+    this.router.get('/access', access(this.config));
 
     this.router.use(
       this.config.routes.graphQL,

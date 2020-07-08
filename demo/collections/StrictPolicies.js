@@ -1,13 +1,13 @@
-const checkRole = require('../policies/checkRole');
+const checkRole = require('../access/checkRole');
 
 module.exports = {
-  slug: 'strict-policies',
+  slug: 'strict-access',
   labels: {
-    singular: 'Strict Policy',
-    plural: 'Strict Policies',
+    singular: 'Strict Access',
+    plural: 'Strict Access',
   },
   useAsTitle: 'email',
-  policies: {
+  access: {
     create: () => true,
     read: ({ req: { user } }) => {
       if (checkRole(['admin'], user)) {

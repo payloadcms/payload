@@ -1,9 +1,9 @@
 const httpStatus = require('http-status');
-const { policies } = require('../operations');
+const { access } = require('../operations');
 
 const policiesHandler = config => async (req, res, next) => {
   try {
-    const policyResults = await policies({
+    const policyResults = await access({
       req,
       config,
     });

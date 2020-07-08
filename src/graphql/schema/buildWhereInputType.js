@@ -152,7 +152,7 @@ const buildWhereInputType = (name, fields, parentName) => {
         type,
       };
     },
-    checkbox: field => ({
+    checkbox: (field) => ({
       type: withOperators(
         field.name,
         GraphQLBoolean,
@@ -160,7 +160,7 @@ const buildWhereInputType = (name, fields, parentName) => {
         ['equals', 'not_equals'],
       ),
     }),
-    select: field => ({
+    select: (field) => ({
       type: withOperators(
         field.name,
         new GraphQLEnumType({
@@ -191,34 +191,32 @@ const buildWhereInputType = (name, fields, parentName) => {
         ['in', 'not_in', 'all', 'equals', 'not_equals'],
       ),
     }),
-    repeater: field => recursivelyBuildNestedPaths(field),
-    group: field => recursivelyBuildNestedPaths(field),
-    row: (field) => {
-      return field.fields.reduce((rowSchema, rowField) => {
-        const getFieldSchema = fieldToSchemaMap[rowField.type];
+    array: (field) => recursivelyBuildNestedPaths(field),
+    group: (field) => recursivelyBuildNestedPaths(field),
+    row: (field) => field.fields.reduce((rowSchema, rowField) => {
+      const getFieldSchema = fieldToSchemaMap[rowField.type];
 
-        if (getFieldSchema) {
-          const rowFieldSchema = getFieldSchema(rowField);
+      if (getFieldSchema) {
+        const rowFieldSchema = getFieldSchema(rowField);
 
-          if (Array.isArray(rowFieldSchema)) {
-            return [
-              ...rowSchema,
-              ...rowFieldSchema,
-            ];
-          }
-
+        if (Array.isArray(rowFieldSchema)) {
           return [
             ...rowSchema,
-            {
-              key: rowField.name,
-              type: rowFieldSchema,
-            },
+            ...rowFieldSchema,
           ];
         }
 
-        return rowSchema;
-      }, []);
-    },
+        return [
+          ...rowSchema,
+          {
+            key: rowField.name,
+            type: rowFieldSchema,
+          },
+        ];
+      }
+
+      return rowSchema;
+    }, []),
   };
 
   const fieldTypes = fields.reduce((schema, field) => {
@@ -230,12 +228,10 @@ const buildWhereInputType = (name, fields, parentName) => {
       if (Array.isArray(fieldSchema)) {
         return {
           ...schema,
-          ...(fieldSchema.reduce((subFields, subField) => {
-            return {
-              ...subFields,
-              [formatName(subField.key)]: subField.type,
-            };
-          }, {})),
+          ...(fieldSchema.reduce((subFields, subField) => ({
+            ...subFields,
+            [formatName(subField.key)]: subField.type,
+          }), {})),
         };
       }
 

@@ -61,7 +61,7 @@ $controls-top-adjustment: base(.1);
 
 
 // External scopes
-.field-type.flexible {
+.field-type.blocks {
   .position-panel {
     &__controls-container {
       min-height: calc(100% + #{$controls-top-adjustment});

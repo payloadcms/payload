@@ -1,8 +1,8 @@
 const { Forbidden } = require('../errors');
 
-const executePolicy = async (operation, policy) => {
-  if (policy) {
-    const result = await policy(operation);
+const executeAccess = async (operation, access) => {
+  if (access) {
+    const result = await access(operation);
 
     if (!result) {
       throw new Forbidden();
@@ -18,4 +18,4 @@ const executePolicy = async (operation, policy) => {
   throw new Forbidden();
 };
 
-module.exports = executePolicy;
+module.exports = executeAccess;

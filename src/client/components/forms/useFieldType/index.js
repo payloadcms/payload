@@ -77,7 +77,7 @@ const useFieldType = (options) => {
   }, [setModified, modified]);
 
   // Remove field from state on "unmount"
-  // This is mostly used for repeater / flex content row modifications
+  // This is mostly used for array / flex content row modifications
   useUnmountEffect(() => {
     formContext.dispatchFields({ path, type: 'REMOVE' });
   });

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import Button from '../../../elements/Button';
 import Popup from '../../../elements/Popup';
-import BlockSelector from '../../field-types/Flexible/BlockSelector';
+import BlockSelector from '../../field-types/Blocks/BlockSelector';
 
 import './index.scss';
 
@@ -52,7 +52,7 @@ const ActionPanel = (props) => {
             {singularLabel}
           </Popup>
 
-          {blockType === 'flexible'
+          {blockType === 'blocks'
             ? (
               <Popup
                 buttonType="custom"
@@ -102,8 +102,7 @@ const ActionPanel = (props) => {
                 Add&nbsp;
                 {singularLabel}
               </Popup>
-            )
-          }
+            )}
         </div>
       </div>
     </div>
@@ -121,7 +120,7 @@ ActionPanel.propTypes = {
   singularLabel: PropTypes.string,
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
-  blockType: PropTypes.oneOf(['flexible', 'repeater']),
+  blockType: PropTypes.oneOf(['blocks', 'array']),
   verticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
   isHovered: PropTypes.bool,
   rowIndex: PropTypes.number.isRequired,

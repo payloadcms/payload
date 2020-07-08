@@ -70,7 +70,7 @@ const DraggableSection = (props) => {
 
               <div className={`${baseClass}__render-fields-wrapper`}>
 
-                {blockType === 'flexible' && (
+                {blockType === 'blocks' && (
                   <div className={`${baseClass}__section-header`}>
                     <SectionTitle
                       label={singularLabel}

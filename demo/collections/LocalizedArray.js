@@ -1,17 +1,17 @@
-const LocalizedRepeaters = {
-  slug: 'localized-repeaters',
+const LocalizedArrays = {
+  slug: 'localized-arrays',
   labels: {
-    singular: 'Localized Repeater',
-    plural: 'Localized Repeaters',
+    singular: 'Localized Array',
+    plural: 'Localized Arrays',
   },
-  policies: {
+  access: {
     read: () => true,
   },
   fields: [
     {
-      type: 'repeater',
-      label: 'Repeater',
-      name: 'repeater',
+      type: 'array',
+      label: 'Array',
+      name: 'array',
       localized: true,
       required: true,
       minRows: 2,
@@ -21,13 +21,13 @@ const LocalizedRepeaters = {
           type: 'row',
           fields: [
             {
-              name: 'repeaterText1',
-              label: 'Repeater Text 1',
+              name: 'arrayText1',
+              label: 'Array Text 1',
               type: 'text',
               required: true,
             }, {
-              name: 'repeaterText2',
-              label: 'Repeater Text 2',
+              name: 'arrayText2',
+              label: 'Array Text 2',
               type: 'text',
               required: true,
             },
@@ -35,8 +35,8 @@ const LocalizedRepeaters = {
         },
         {
           type: 'text',
-          name: 'repeaterText3',
-          label: 'Repeater Text 3',
+          name: 'arrayText3',
+          label: 'Array Text 3',
           readOnly: true,
         },
       ],
@@ -45,4 +45,4 @@ const LocalizedRepeaters = {
   timestamps: true,
 };
 
-module.exports = LocalizedRepeaters;
+module.exports = LocalizedArrays;

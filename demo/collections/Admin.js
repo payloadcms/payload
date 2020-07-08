@@ -1,7 +1,7 @@
-const roles = require('../policies/roles');
-const checkRole = require('../policies/checkRole');
+const roles = require('../access/roles');
+const checkRole = require('../access/checkRole');
 
-const policy = ({ req: { user } }) => {
+const access = ({ req: { user } }) => {
   const result = checkRole(['admin'], user);
   return result;
 };
@@ -13,11 +13,11 @@ module.exports = {
     plural: 'Admins',
   },
   useAsTitle: 'email',
-  policies: {
-    create: policy,
-    read: policy,
-    update: policy,
-    delete: policy,
+  access: {
+    create: access,
+    read: access,
+    update: access,
+    delete: access,
     admin: () => true,
   },
   auth: {

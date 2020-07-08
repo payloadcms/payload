@@ -1,5 +1,5 @@
 const { MissingFieldType } = require('../errors');
-const validations = require('../fields/validations');
+const validations = require('./validations');
 
 const sanitizeFields = (fields) => {
   if (!fields) return [];
@@ -16,7 +16,7 @@ const sanitizeFields = (fields) => {
     }
 
     if (!field.hooks) field.hooks = {};
-    if (!field.policies) field.policies = {};
+    if (!field.access) field.access = {};
 
     if (field.fields) field.fields = sanitizeFields(field.fields);
 

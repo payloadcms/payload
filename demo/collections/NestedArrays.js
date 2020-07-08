@@ -1,17 +1,17 @@
-const NestedRepeater = {
-  slug: 'nested-repeaters',
+const NestedArray = {
+  slug: 'nested-arrays',
   labels: {
-    singular: 'Nested Repeater',
-    plural: 'Nested Repeaters',
+    singular: 'Nested Array',
+    plural: 'Nested Arrays',
   },
-  policies: {
+  access: {
     read: () => true,
   },
   fields: [
     {
-      type: 'repeater',
-      label: 'Repeater',
-      name: 'repeater',
+      type: 'array',
+      label: 'Array',
+      name: 'array',
       labels: {
         singular: 'Parent Row',
         plural: 'Parent Rows',
@@ -28,8 +28,8 @@ const NestedRepeater = {
           required: true,
         },
         {
-          type: 'repeater',
-          name: 'nestedRepeater',
+          type: 'array',
+          name: 'nestedArray',
           labels: {
             singular: 'Child Row',
             plural: 'Child Rows',
@@ -43,8 +43,8 @@ const NestedRepeater = {
               required: true,
             },
             {
-              type: 'repeater',
-              name: 'deeplyNestedRepeater',
+              type: 'array',
+              name: 'deeplyNestedArray',
               labels: {
                 singular: 'Grandchild Row',
                 plural: 'Grandchild Rows',
@@ -67,4 +67,4 @@ const NestedRepeater = {
   timestamps: true,
 };
 
-module.exports = NestedRepeater;
+module.exports = NestedArray;

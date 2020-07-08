@@ -6,7 +6,7 @@ slides.1.heroInfo.title
 fields: [
  {
   name: slides,
-  type: repeater,
+  type: array,
   fields: [
    {
     type: group,

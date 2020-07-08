@@ -1,9 +1,9 @@
-const checkRole = require('../policies/checkRole');
+const checkRole = require('../access/checkRole');
 
 module.exports = {
-  slug: 'global-with-policies',
-  label: 'Global with Policies',
-  policies: {
+  slug: 'global-with-access',
+  label: 'Global with Strict Access',
+  access: {
     update: ({ req: { user } }) => checkRole(['admin'], user),
     read: ({ req: { user } }) => checkRole(['admin'], user),
   },

@@ -139,13 +139,13 @@
   }
 }
 
-.field-type.repeater .field-type.repeater {
+.field-type.array .field-type.array {
   @include realtively-position-panels();
 }
 
-// remove padding above repeater rows to level
+// remove padding above array rows to level
 // the line with the top of the input label
-.field-type.repeater {
+.field-type.array {
   .draggable-section {
     &__content-wrapper {
       padding-top: 0;

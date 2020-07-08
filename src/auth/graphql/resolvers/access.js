@@ -1,4 +1,4 @@
-const { policies } = require('../../operations');
+const { access } = require('../../operations');
 const formatName = require('../../../graphql/utilities/formatName');
 
 const formatConfigNames = (results, configs) => {
@@ -19,7 +19,7 @@ const policyResolver = config => async (_, __, context) => {
     req: context,
   };
 
-  let policyResults = await policies(options);
+  let policyResults = await access(options);
 
   policyResults = formatConfigNames(policyResults, config.collections);
   policyResults = formatConfigNames(policyResults, config.globals);

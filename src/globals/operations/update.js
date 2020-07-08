@@ -1,14 +1,14 @@
 const deepmerge = require('deepmerge');
 const overwriteMerge = require('../../utilities/overwriteMerge');
-const executePolicy = require('../../auth/executePolicy');
+const executeStatic = require('../../auth/executeAccess');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const update = async (args) => {
   // /////////////////////////////////////
-  // 1. Retrieve and execute policy
+  // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  await executePolicy(args, args.config.policies.update);
+  await executeStatic(args, args.config.access.update);
 
   let options = { ...args };
 
@@ -54,7 +54,7 @@ const update = async (args) => {
   options.data = deepmerge(globalJSON, options.data, { arrayMerge: overwriteMerge });
 
   // /////////////////////////////////////
-  // 5. Execute field-level hooks, policies, and validation
+  // 5. Execute field-level hooks, access, and validation
   // /////////////////////////////////////
 
   options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeUpdate', operationName: 'update' });
@@ -70,7 +70,7 @@ const update = async (args) => {
   global = global.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 7. Execute field-level hooks and policies
+  // 7. Execute field-level hooks and access
   // /////////////////////////////////////
 
   global = await performFieldOperations(args.config, {

@@ -17,9 +17,9 @@ module.exports = {
       unique: true,
       localized: true,
       hooks: {
-        beforeCreate: operation => operation.value,
-        beforeUpdate: operation => operation.value,
-        afterRead: operation => operation.value,
+        beforeCreate: (operation) => operation.value,
+        beforeUpdate: (operation) => operation.value,
+        afterRead: (operation) => operation.value,
       },
     },
     {
@@ -36,16 +36,16 @@ module.exports = {
       },
     },
     {
-      name: 'repeater',
-      label: 'Repeater',
-      type: 'repeater',
+      name: 'array',
+      label: 'Array',
+      type: 'array',
       fields: [
         {
           type: 'text',
-          name: 'nestedRepeaterCustomField',
-          label: 'Nested Repeater Custom Field',
+          name: 'nestedArrayCustomField',
+          label: 'Nested Array Custom Field',
           components: {
-            field: path.resolve(__dirname, 'components/fields/NestedRepeaterCustomField/Field/index.js'),
+            field: path.resolve(__dirname, 'components/fields/NestedArrayCustomField/Field/index.js'),
           },
         },
       ],
