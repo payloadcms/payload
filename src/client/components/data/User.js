@@ -45,9 +45,11 @@ const UserProvider = ({ children }) => {
       if (request.status === 200) {
         const json = await request.json();
         setUser(json.user);
+      } else {
+        history.push(`${admin}/logout-inactivity`);
       }
     }, 1000);
-  }, [setUser]);
+  }, [setUser, history]);
 
   const setToken = useCallback((token) => {
     const decoded = jwt.decode(token);
@@ -68,12 +70,19 @@ const UserProvider = ({ children }) => {
 
       if (request.status === 200) {
         const json = await request.json();
-        setUser(json);
+
+        if (json.user) {
+          setUser(json.user);
+        }
+
+        if (json.token) {
+          setToken(json.token);
+        }
       }
     };
 
     fetchMe();
-  }, []);
+  }, [setToken]);
 
   // When location changes, refresh cookie
   useEffect(() => {
