@@ -44,7 +44,7 @@ module.exports = function localizationPlugin(schema, options) {
         const locale = owner.getLocale();
         const localeSubDoc = this.$__getValue(path);
 
-        if (localeSubDoc === null || localeSubDoc === void 0) {
+        if (localeSubDoc === null || localeSubDoc === undefined) {
           return localeSubDoc;
         }
 

@@ -11,7 +11,7 @@ const payload = new Payload({
     provider: 'mock',
   },
   secret: 'SECRET_KEY',
-  mongoURL: 'mongodb://localhost/payload',
+  mongoURL: 'mongodb://localhost/test',
   express: expressApp,
 });
 
