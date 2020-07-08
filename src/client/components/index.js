@@ -1,9 +1,9 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { ScrollInfoProvider } from '@trbl/react-scroll-info';
-import { WindowInfoProvider } from '@trbl/react-window-info';
-import { ModalProvider, ModalContainer } from '@trbl/react-modal';
+import { ScrollInfoProvider } from '@faceless-ui/scroll-info';
+import { WindowInfoProvider } from '@faceless-ui/window-info';
+import { ModalProvider, ModalContainer } from '@faceless-ui/modal';
 import { SearchParamsProvider } from './utilities/SearchParams';
 import { LocaleProvider } from './utilities/Locale';
 import StatusList, { StatusListProvider } from './elements/Status';

@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import config from 'payload/config';
 import { useHistory } from 'react-router-dom';
-import { Modal, useModal } from '@trbl/react-modal';
+import { Modal, useModal } from '@faceless-ui/modal';
 import Button from '../Button';
 import MinimalTemplate from '../../templates/Minimal';
 import useTitle from '../../../hooks/useTitle';

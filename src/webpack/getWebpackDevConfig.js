@@ -34,7 +34,7 @@ module.exports = (config) => {
         {
           test: /\.js$/,
           exclude: /node_modules/,
-          use: {
+          use: [{
             loader: 'babel-loader',
             options: {
               presets: [
@@ -58,6 +58,14 @@ module.exports = (config) => {
               ],
             },
           },
+            // {
+            //   loader: 'eslint-loader',
+            //   options: {
+            //     fix: true,
+            //     emitWarning: true,
+            //   },
+            // }
+          ],
         },
         {
           // "oneOf" will traverse all following loaders until one will

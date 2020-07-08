@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useModal } from '@trbl/react-modal';
+import { useModal } from '@faceless-ui/modal';
 import config from '../../../../config';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
@@ -37,7 +37,7 @@ const Upload = (props) => {
     fieldTypes,
   } = props;
 
-  const collection = collections.find(coll => coll.slug === relationTo);
+  const collection = collections.find((coll) => coll.slug === relationTo);
 
   const path = pathFromProps || name;
   const addModalSlug = `${path}-add`;
@@ -104,7 +104,7 @@ const Upload = (props) => {
         required={required}
       />
       {collection?.upload && (
-        <>
+        <React.Fragment>
           {internalValue && (
             <FileDetails
               {...collection.upload}
@@ -157,7 +157,7 @@ const Upload = (props) => {
             addModalSlug,
           }}
           />
-        </>
+        </React.Fragment>
       )}
     </div>
   );

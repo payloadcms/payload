@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, useModal } from '@trbl/react-modal';
+import { Modal, useModal } from '@faceless-ui/modal';
 import config from '../../../../../config';
 import MinimalTemplate from '../../../../templates/Minimal';
 import Form from '../../../Form';
@@ -67,7 +67,7 @@ const AddUploadModal = (props) => {
             />
           </header>
           <RenderFields
-            filter={field => (!field.position || (field.position && field.position !== 'sidebar'))}
+            filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
             fieldTypes={fieldTypes}
             fieldSchema={fields}
             customComponentsPath={`${collection.slug}.fields.`}

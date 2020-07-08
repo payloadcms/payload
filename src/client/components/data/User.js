@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import { useLocation, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import config from 'payload/config';
-import { useModal } from '@trbl/react-modal';
+import { useModal } from '@faceless-ui/modal';
 import { requests } from '../../api';
 import StayLoggedInModal from '../modals/StayLoggedIn';
 import useDebounce from '../../hooks/useDebounce';

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { useWindowInfo } from '@trbl/react-window-info';
-import { useScrollInfo } from '@trbl/react-scroll-info';
+import { useWindowInfo } from '@faceless-ui/window-info';
+import { useScrollInfo } from '@faceless-ui/scroll-info';
 
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import PopupButton from './PopupButton';
@@ -115,8 +115,7 @@ const Popup = (props) => {
               setActive={setActive}
               active={active}
             />
-          )
-        }
+          )}
       </div>
 
       <div

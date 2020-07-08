@@ -37,6 +37,7 @@ const RenderCustomComponent = (props) => {
 
 RenderCustomComponent.defaultProps = {
   path: undefined,
+  componentProps: {},
 };
 
 RenderCustomComponent.propTypes = {
@@ -47,7 +48,7 @@ RenderCustomComponent.propTypes = {
     PropTypes.node,
     PropTypes.element,
   ]).isRequired,
-  componentProps: PropTypes.shape({}).isRequired,
+  componentProps: PropTypes.shape({}),
 };
 
 export default RenderCustomComponent;
