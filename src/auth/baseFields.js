@@ -7,21 +7,17 @@ module.exports = [
     type: 'email',
     validate: validations.email,
     admin: {
-      disable: true,
+      disabled: true,
     },
   },
   {
     name: 'resetPasswordToken',
     type: 'text',
-    admin: {
-      disable: true,
-    },
+    hidden: true,
   },
   {
     name: 'resetPasswordExpiration',
     type: 'date',
-    admin: {
-      disable: true,
-    },
+    hidden: true,
   },
 ];

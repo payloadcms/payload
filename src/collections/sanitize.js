@@ -96,7 +96,7 @@ const sanitizeCollection = (collections, collection) => {
         unique: true,
         readOnly: true,
         admin: {
-          disable: true,
+          disabled: true,
         },
       }, {
         name: 'mimeType',
@@ -104,7 +104,7 @@ const sanitizeCollection = (collections, collection) => {
         type: 'text',
         readOnly: true,
         admin: {
-          disable: true,
+          disabled: true,
         },
       }, {
         name: 'filesize',
@@ -112,7 +112,7 @@ const sanitizeCollection = (collections, collection) => {
         type: 'number',
         readOnly: true,
         admin: {
-          disable: true,
+          disabled: true,
         },
       },
     ];
@@ -125,7 +125,7 @@ const sanitizeCollection = (collections, collection) => {
           type: 'number',
           readOnly: true,
           admin: {
-            disable: true,
+            disabled: true,
           },
         }, {
           name: 'height',
@@ -133,7 +133,7 @@ const sanitizeCollection = (collections, collection) => {
           type: 'number',
           readOnly: true,
           admin: {
-            disable: true,
+            disabled: true,
           },
         },
         {
@@ -141,14 +141,14 @@ const sanitizeCollection = (collections, collection) => {
           label: 'Sizes',
           type: 'group',
           admin: {
-            disable: true,
+            disabled: true,
           },
           fields: collection.upload.imageSizes.map((size) => ({
             label: size.name,
             name: size.name,
             type: 'group',
             admin: {
-              disable: true,
+              disabled: true,
             },
             fields: [
               {
@@ -157,7 +157,7 @@ const sanitizeCollection = (collections, collection) => {
                 type: 'number',
                 readOnly: true,
                 admin: {
-                  disable: true,
+                  disabled: true,
                 },
               }, {
                 name: 'height',
@@ -165,7 +165,7 @@ const sanitizeCollection = (collections, collection) => {
                 type: 'number',
                 readOnly: true,
                 admin: {
-                  disable: true,
+                  disabled: true,
                 },
               }, {
                 name: 'mimeType',
@@ -173,7 +173,7 @@ const sanitizeCollection = (collections, collection) => {
                 type: 'text',
                 readOnly: true,
                 admin: {
-                  disable: true,
+                  disabled: true,
                 },
               }, {
                 name: 'filesize',
@@ -181,7 +181,7 @@ const sanitizeCollection = (collections, collection) => {
                 type: 'number',
                 readOnly: true,
                 admin: {
-                  disable: true,
+                  disabled: true,
                 },
               }, {
                 name: 'filename',
@@ -189,7 +189,7 @@ const sanitizeCollection = (collections, collection) => {
                 type: 'text',
                 readOnly: true,
                 admin: {
-                  disable: true,
+                  disabled: true,
                 },
               },
             ],

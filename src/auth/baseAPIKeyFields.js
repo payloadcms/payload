@@ -4,7 +4,7 @@ module.exports = [
     type: 'checkbox',
     defaultValue: false,
     admin: {
-      disable: true,
+      disabled: true,
     },
   },
   {
@@ -13,7 +13,7 @@ module.exports = [
     minLength: 24,
     maxLength: 48,
     admin: {
-      disable: true,
+      disabled: true,
     },
   },
 ];

@@ -44,9 +44,13 @@ module.exports = {
             return true;
           }
 
-          return {
-            email: user.email,
-          };
+          if (user) {
+            return {
+              email: user.email,
+            };
+          }
+
+          return false;
         },
       },
     },

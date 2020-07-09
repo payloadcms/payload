@@ -17,6 +17,7 @@ const sanitizeFields = (fields) => {
 
     if (!field.hooks) field.hooks = {};
     if (!field.access) field.access = {};
+    if (!field.admin) field.admin = {};
 
     if (field.fields) field.fields = sanitizeFields(field.fields);
 
