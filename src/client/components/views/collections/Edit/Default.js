@@ -68,7 +68,7 @@ const DefaultEditView = (props) => {
               <Loading />
             )}
             {!isLoading && (
-              <>
+              <React.Fragment>
                 <header className={`${baseClass}__header`}>
                   <h1>
                     <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
@@ -78,13 +78,13 @@ const DefaultEditView = (props) => {
                   operation={isEditing ? 'update' : 'create'}
                   readOnly={!hasSavePermission}
                   permissions={permissions.fields}
-                  filter={field => (!field.position || (field.position && field.position !== 'sidebar'))}
+                  filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
                   initialData={data}
                   customComponentsPath={`${slug}.fields.`}
                 />
-              </>
+              </React.Fragment>
             )}
           </div>
         </div>
@@ -92,10 +92,10 @@ const DefaultEditView = (props) => {
           {isEditing ? (
             <ul className={`${baseClass}__collection-actions`}>
               {permissions?.create?.permission && (
-                <>
+                <React.Fragment>
                   <li><Link to={`${admin}/collections/${slug}/create`}>Create New</Link></li>
                   <li><DuplicateDocument slug={slug} /></li>
-                </>
+                </React.Fragment>
               )}
               {permissions?.delete?.permission && (
                 <li>
@@ -132,13 +132,13 @@ const DefaultEditView = (props) => {
             </div>
           )}
           {!isLoading && (
-            <>
+            <React.Fragment>
               <div className={`${baseClass}__sidebar-fields`}>
                 <RenderFields
                   operation={isEditing ? 'update' : 'create'}
                   readOnly={!hasSavePermission}
                   permissions={permissions.fields}
-                  filter={field => field.position === 'sidebar'}
+                  filter={(field) => field.position === 'sidebar'}
                   position="sidebar"
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
@@ -153,7 +153,7 @@ const DefaultEditView = (props) => {
                     <div>{id}</div>
                   </li>
                   {timestamps && (
-                    <>
+                    <React.Fragment>
                       {data.updatedAt && (
                         <li>
                           <div className={`${baseClass}__label`}>Last Modified</div>
@@ -166,12 +166,12 @@ const DefaultEditView = (props) => {
                           <div>{format(new Date(data.createdAt), 'MMMM do yyyy, h:mma')}</div>
                         </li>
                       )}
-                    </>
+                    </React.Fragment>
                   )}
 
                 </ul>
               )}
-            </>
+            </React.Fragment>
           )}
         </div>
       </Form>

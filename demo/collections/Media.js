@@ -1,11 +1,5 @@
 const path = require('path');
-const roles = require('../access/roles');
 const checkRole = require('../access/checkRole');
-
-const access = ({ req: { user } }) => {
-  const result = checkRole(['admin'], user);
-  return result;
-};
 
 module.exports = {
   slug: 'media',
@@ -54,7 +48,10 @@ module.exports = {
         {
           name: 'icon',
           access: {
-            read: access,
+            read: ({ req: { user } }) => {
+              const result = checkRole(['admin'], user);
+              return result;
+            },
           },
         },
       ],
