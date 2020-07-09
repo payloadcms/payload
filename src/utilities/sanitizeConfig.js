@@ -5,21 +5,20 @@ const sanitizeGlobals = require('../globals/sanitize');
 const sanitizeConfig = (config) => {
   const sanitizedConfig = { ...config };
 
-  sanitizedConfig.collections = sanitizedConfig.collections.map(collection => sanitizeCollection(sanitizedConfig.collections, collection));
+  sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig.collections, collection));
 
   if (sanitizedConfig.globals) {
     sanitizedConfig.globals = sanitizeGlobals(sanitizedConfig.globals);
+  } else {
+    sanitizedConfig.globals = [];
   }
-
-  sanitizedConfig.admin = config.admin || {};
 
   if (!sanitizedConfig.cookiePrefix) sanitizedConfig.cookiePrefix = 'payload';
 
-  if (!sanitizedConfig.globals) sanitizedConfig.globals = [];
+  sanitizedConfig.admin = config.admin || {};
 
   if (!sanitizedConfig.admin.user) {
     sanitizedConfig.admin.user = config.admin.user || 'users';
-
     sanitizedConfig.collections.push(defaultUser);
   }
 
