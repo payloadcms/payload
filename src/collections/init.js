@@ -11,109 +11,11 @@ const LocalStrategy = require('passport-local').Strategy;
 const apiKeyStrategy = require('../auth/strategies/apiKey');
 const collectionRoutes = require('./routes');
 const buildSchema = require('./buildSchema');
-const baseAuthFields = require('../auth/baseFields');
-const baseAPIKeyFields = require('../auth/baseAPIKeyFields');
 const authRoutes = require('../auth/routes');
 
 function registerCollections() {
   this.config.collections = this.config.collections.map((collection) => {
     const formattedCollection = collection;
-
-    if (collection.upload) {
-      let uploadFields = [
-        {
-          name: 'filename',
-          label: 'Filename',
-          type: 'text',
-          required: true,
-          unique: true,
-          readOnly: true,
-        }, {
-          name: 'mimeType',
-          label: 'MIME Type',
-          type: 'text',
-          readOnly: true,
-        }, {
-          name: 'filesize',
-          label: 'File Size',
-          type: 'number',
-          readOnly: true,
-        },
-      ];
-
-      if (collection.upload.imageSizes && Array.isArray(collection.upload.imageSizes)) {
-        uploadFields = uploadFields.concat([
-          {
-            name: 'width',
-            label: 'Width',
-            type: 'number',
-            readOnly: true,
-          }, {
-            name: 'height',
-            label: 'Height',
-            type: 'number',
-            readOnly: true,
-          },
-          {
-            name: 'sizes',
-            label: 'Sizes',
-            type: 'group',
-            fields: collection.upload.imageSizes.map(size => ({
-              label: size.name,
-              name: size.name,
-              type: 'group',
-              fields: [
-                {
-                  name: 'width',
-                  label: 'Width',
-                  type: 'number',
-                  readOnly: true,
-                }, {
-                  name: 'height',
-                  label: 'Height',
-                  type: 'number',
-                  readOnly: true,
-                }, {
-                  name: 'mimeType',
-                  label: 'MIME Type',
-                  type: 'text',
-                  readOnly: true,
-                }, {
-                  name: 'filesize',
-                  label: 'File Size',
-                  type: 'number',
-                  readOnly: true,
-                }, {
-                  name: 'filename',
-                  label: 'File Name',
-                  type: 'text',
-                  readOnly: true,
-                },
-              ],
-            })),
-          },
-        ]);
-      }
-
-      formattedCollection.fields = [
-        ...formattedCollection.fields,
-        ...uploadFields,
-      ];
-    }
-
-    if (collection.auth) {
-      formattedCollection.fields = [
-        ...baseAuthFields,
-        ...formattedCollection.fields,
-      ];
-
-      if (collection.auth.useAPIKey) {
-        formattedCollection.fields = [
-          ...formattedCollection.fields,
-          ...baseAPIKeyFields,
-        ];
-      }
-    }
 
     const schema = buildSchema(formattedCollection, this.config);
 

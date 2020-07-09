@@ -6,10 +6,10 @@ const formatBaseSchema = (field) => {
   const createPolicy = field.access && field.access.create;
 
   return {
-    hide: field.hidden === 'api' || field.hidden === true,
+    hide: field.hidden,
     localized: field.localized || false,
     unique: field.unique || false,
-    required: (field.required && !field.localized && !field.hidden && !field.condition && !createPolicy) || false,
+    required: (field.required && !field.localized && !field.condition && !createPolicy) || false,
     default: field.defaultValue || undefined,
   };
 };

@@ -178,7 +178,9 @@ const Blocks = (props) => {
                         {
                           name: 'blockType',
                           type: 'text',
-                          hidden: 'admin',
+                          admin: {
+                            hidden: true,
+                          },
                         },
                       ]}
                     />

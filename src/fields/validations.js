@@ -114,11 +114,15 @@ const optionsToValidatorMap = {
       return true;
     }
 
+    if (value) {
+      return `"${value}" is not a valid date.`;
+    }
+
     if (options.required) {
       return defaultMessage;
     }
 
-    return `"${value}" is not a valid date.`;
+    return true;
   },
   upload: (value, options = {}) => {
     if (value || !options.required) return true;

@@ -29,9 +29,9 @@ const RenderFields = (props) => {
     return (
       <RenderedFieldContext.Provider value={{ customComponentsPath, operation }}>
         {fieldSchema.map((field, i) => {
-          if (field?.hidden !== 'api' && field?.hidden !== true) {
+          if (!field?.hidden && field?.admin?.disabled !== true) {
             if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
-              const FieldComponent = field?.hidden === 'admin' ? fieldTypes.hidden : fieldTypes[field.type];
+              const FieldComponent = field?.admin?.hidden ? fieldTypes.hidden : fieldTypes[field.type];
 
               let initialFieldData;
               let fieldPermissions = permissions[field.name];
@@ -118,6 +118,7 @@ RenderFields.propTypes = {
   filter: PropTypes.func,
   permissions: PropTypes.shape({}),
   readOnly: PropTypes.bool,
+  operation: PropTypes.string,
 };
 
 export default RenderFields;
