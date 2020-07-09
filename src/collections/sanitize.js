@@ -95,19 +95,25 @@ const sanitizeCollection = (collections, collection) => {
         required: true,
         unique: true,
         readOnly: true,
-        hidden: 'admin',
+        admin: {
+          disable: true,
+        },
       }, {
         name: 'mimeType',
         label: 'MIME Type',
         type: 'text',
         readOnly: true,
-        hidden: 'admin',
+        admin: {
+          disable: true,
+        },
       }, {
         name: 'filesize',
         label: 'File Size',
         type: 'number',
         readOnly: true,
-        hidden: 'admin',
+        admin: {
+          disable: true,
+        },
       },
     ];
 
@@ -118,54 +124,73 @@ const sanitizeCollection = (collections, collection) => {
           label: 'Width',
           type: 'number',
           readOnly: true,
-          hidden: 'admin',
+          admin: {
+            disable: true,
+          },
         }, {
           name: 'height',
           label: 'Height',
           type: 'number',
           readOnly: true,
-          hidden: 'admin',
+          admin: {
+            disable: true,
+          },
         },
         {
           name: 'sizes',
           label: 'Sizes',
           type: 'group',
-          hidden: 'admin',
+          admin: {
+            disable: true,
+          },
           fields: collection.upload.imageSizes.map((size) => ({
             label: size.name,
             name: size.name,
             type: 'group',
+            admin: {
+              disable: true,
+            },
             fields: [
               {
                 name: 'width',
                 label: 'Width',
                 type: 'number',
                 readOnly: true,
-                hidden: 'admin',
+                admin: {
+                  disable: true,
+                },
               }, {
                 name: 'height',
                 label: 'Height',
                 type: 'number',
                 readOnly: true,
-                hidden: 'admin',
+                admin: {
+                  disable: true,
+                },
               }, {
                 name: 'mimeType',
                 label: 'MIME Type',
                 type: 'text',
                 readOnly: true,
-                hidden: 'admin',
+                admin: {
+                  disable: true,
+                },
               }, {
                 name: 'filesize',
                 label: 'File Size',
                 type: 'number',
                 readOnly: true,
-                hidden: 'admin',
+                admin: {
+                  disable: true,
+                },
               }, {
                 name: 'filename',
                 label: 'File Name',
                 type: 'text',
                 readOnly: true,
-                hidden: 'admin',
+                admin: {
+                  disable: true,
+                },
               },
             ],
           })),

@@ -6,16 +6,22 @@ module.exports = [
     label: 'Email',
     type: 'email',
     validate: validations.email,
-    hidden: 'admin',
+    admin: {
+      disable: true,
+    },
   },
   {
     name: 'resetPasswordToken',
     type: 'text',
-    hidden: true,
+    admin: {
+      disable: true,
+    },
   },
   {
     name: 'resetPasswordExpiration',
     type: 'date',
-    hidden: true,
+    admin: {
+      disable: true,
+    },
   },
 ];

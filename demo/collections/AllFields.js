@@ -178,7 +178,6 @@ const AllFields = {
       blocks: [Email, NumberBlock, Quote, CallToAction],
       localized: true,
       required: true,
-      timestamps: true,
     },
     {
       type: 'relationship',
@@ -208,7 +207,9 @@ const AllFields = {
       name: 'slug',
       type: 'text',
       label: 'Slug',
-      position: 'sidebar',
+      admin: {
+        position: 'sidebar',
+      },
       localized: true,
       unique: true,
       required: true,
@@ -217,7 +218,9 @@ const AllFields = {
       name: 'checkbox',
       type: 'checkbox',
       label: 'Checkbox',
-      position: 'sidebar',
+      admin: {
+        position: 'sidebar',
+      },
     },
   ],
   timestamps: true,
