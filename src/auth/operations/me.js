@@ -23,7 +23,9 @@ const me = async ({ req, config }) => {
     return response;
   }
 
-  return null;
+  return {
+    user: null,
+  };
 };
 
 module.exports = me;

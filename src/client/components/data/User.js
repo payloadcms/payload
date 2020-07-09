@@ -71,11 +71,9 @@ const UserProvider = ({ children }) => {
       if (request.status === 200) {
         const json = await request.json();
 
-        if (json.user) {
-          setUser(json.user);
-        }
+        setUser(json?.user || null);
 
-        if (json.token) {
+        if (json?.token) {
           setToken(json.token);
         }
       }
