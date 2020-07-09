@@ -14,11 +14,15 @@ const payload = new Payload({
   secret: 'SECRET_KEY',
   mongoURL: 'mongodb://localhost/payload',
   express: expressApp,
+  onInit: () => {
+    console.log('Payload is started');
+  },
 });
 
 const externalRouter = express.Router();
 
 externalRouter.use(payload.authenticate());
+
 externalRouter.get('/', (req, res) => {
   if (req.user) {
     return res.send(`Authenticated successfully as ${req.user.email}.`);

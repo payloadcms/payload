@@ -75,16 +75,14 @@ class Payload {
     this.initStatic();
 
     this.router.use(errorHandler(this.config));
+
+    if (typeof options.onInit === 'function') options.onInit();
   }
 
   async sendEmail(message) {
-    try {
-      const email = await this.email;
-      const result = email.transport.sendMail(message);
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    const email = await this.email;
+    const result = email.transport.sendMail(message);
+    return result;
   }
 
   async getMockEmailCredentials() {
