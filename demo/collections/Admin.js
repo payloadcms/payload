@@ -36,6 +36,20 @@ module.exports = {
       saveToJWT: true,
       hasMany: true,
     },
+    {
+      name: 'apiKey',
+      access: {
+        read: ({ req: { user } }) => {
+          if (checkRole(['admin'], user)) {
+            return true;
+          }
+
+          return {
+            email: user.email,
+          };
+        },
+      },
+    },
   ],
   timestamps: true,
 };

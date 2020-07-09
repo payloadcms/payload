@@ -1,8 +1,52 @@
+const merge = require('deepmerge');
 const { DuplicateCollection, MissingCollectionLabel } = require('../errors');
 const sanitizeFields = require('../fields/sanitize');
 const toKebabCase = require('../utilities/toKebabCase');
 const baseAuthFields = require('../auth/baseFields');
 const baseAPIKeyFields = require('../auth/baseAPIKeyFields');
+
+const mergeBaseFields = (fields, baseFields) => {
+  const mergedFields = [];
+
+  if (fields) {
+    baseFields.forEach((baseField) => {
+      let matchedIndex = null;
+
+      const match = fields.find((field, i) => {
+        if (field.name === baseField.name) {
+          matchedIndex = i;
+          return true;
+        }
+
+        return false;
+      });
+
+      if (match) {
+        const matchCopy = { ...match };
+        fields.splice(matchedIndex, 1);
+
+        let mergedField = {
+          ...baseField,
+          ...matchCopy,
+        };
+
+        if (baseField.fields && matchCopy.fields) {
+          mergedField.fields = mergeBaseFields(matchCopy.fields, baseField.fields);
+          return mergedFields.push(mergedField);
+        }
+
+        mergedField = merge(mergedField, matchCopy, { arrayMerge: (_, source) => source });
+        return mergedFields.push(mergedField);
+      }
+
+      return mergedFields.push(baseField);
+    });
+
+    return mergedFields;
+  }
+
+  return baseFields;
+};
 
 const sanitizeCollection = (collections, collection) => {
   // /////////////////////////////////
@@ -51,16 +95,19 @@ const sanitizeCollection = (collections, collection) => {
         required: true,
         unique: true,
         readOnly: true,
+        hidden: 'admin',
       }, {
         name: 'mimeType',
         label: 'MIME Type',
         type: 'text',
         readOnly: true,
+        hidden: 'admin',
       }, {
         name: 'filesize',
         label: 'File Size',
         type: 'number',
         readOnly: true,
+        hidden: 'admin',
       },
     ];
 
@@ -71,16 +118,19 @@ const sanitizeCollection = (collections, collection) => {
           label: 'Width',
           type: 'number',
           readOnly: true,
+          hidden: 'admin',
         }, {
           name: 'height',
           label: 'Height',
           type: 'number',
           readOnly: true,
+          hidden: 'admin',
         },
         {
           name: 'sizes',
           label: 'Sizes',
           type: 'group',
+          hidden: 'admin',
           fields: collection.upload.imageSizes.map((size) => ({
             label: size.name,
             name: size.name,
@@ -91,26 +141,31 @@ const sanitizeCollection = (collections, collection) => {
                 label: 'Width',
                 type: 'number',
                 readOnly: true,
+                hidden: 'admin',
               }, {
                 name: 'height',
                 label: 'Height',
                 type: 'number',
                 readOnly: true,
+                hidden: 'admin',
               }, {
                 name: 'mimeType',
                 label: 'MIME Type',
                 type: 'text',
                 readOnly: true,
+                hidden: 'admin',
               }, {
                 name: 'filesize',
                 label: 'File Size',
                 type: 'number',
                 readOnly: true,
+                hidden: 'admin',
               }, {
                 name: 'filename',
                 label: 'File Name',
                 type: 'text',
                 readOnly: true,
+                hidden: 'admin',
               },
             ],
           })),
@@ -118,31 +173,34 @@ const sanitizeCollection = (collections, collection) => {
       ]);
     }
 
+    uploadFields = mergeBaseFields(sanitizedCollection.fields, uploadFields);
+
     sanitizedCollection.fields = [
-      ...sanitizedCollection.fields,
       ...uploadFields,
+      ...sanitizedCollection.fields,
     ];
   }
 
   if (collection.auth) {
-    sanitizedCollection.fields = [
-      ...baseAuthFields,
-      ...sanitizedCollection.fields,
-    ];
+    let authFields = baseAuthFields;
 
     if (collection.auth.useAPIKey) {
-      sanitizedCollection.fields = [
-        ...sanitizedCollection.fields,
-        ...baseAPIKeyFields,
-      ];
+      authFields = authFields.concat(baseAPIKeyFields);
     }
+
+    authFields = mergeBaseFields(sanitizedCollection.fields, authFields);
+
+    sanitizedCollection.fields = [
+      ...authFields,
+      ...sanitizedCollection.fields,
+    ];
   }
 
   // /////////////////////////////////
   // Sanitize fields
   // /////////////////////////////////
 
-  sanitizedCollection.fields = sanitizeFields(collection.fields);
+  sanitizedCollection.fields = sanitizeFields(sanitizedCollection.fields);
 
   return sanitizedCollection;
 };

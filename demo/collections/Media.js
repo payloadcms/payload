@@ -41,6 +41,17 @@ module.exports = {
       required: true,
       localized: true,
     },
+    {
+      name: 'sizes',
+      fields: [
+        {
+          name: 'icon',
+          access: {
+            read: ({ req: { user } }) => Boolean(user),
+          },
+        },
+      ],
+    },
   ],
   timestamps: true,
 };

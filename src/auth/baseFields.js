@@ -6,6 +6,7 @@ module.exports = [
     label: 'Email',
     type: 'email',
     validate: validations.email,
+    hidden: 'admin',
   },
   {
     name: 'resetPasswordToken',
