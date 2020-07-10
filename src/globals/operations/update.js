@@ -69,6 +69,7 @@ const update = async (args) => {
     req,
     hook: 'beforeUpdate',
     operationName: 'update',
+    originalDoc: globalJSON,
   });
 
   // /////////////////////////////////////

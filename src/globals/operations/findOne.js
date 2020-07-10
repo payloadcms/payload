@@ -53,17 +53,16 @@ const findOne = async (args) => {
     }
   }
 
-  let result = await Model.findOne({ globalType: slug });
-  let doc = {};
+  let doc = await Model.findOne({ globalType: slug });
 
-  if (!result) {
-    result = {};
+  if (!doc) {
+    doc = {};
   } else {
-    if (locale && result.setLocale) {
-      result.setLocale(locale, fallbackLocale);
+    if (locale && doc.setLocale) {
+      doc.setLocale(locale, fallbackLocale);
     }
 
-    doc = result.toJSON({ virtuals: true });
+    doc = doc.toJSON({ virtuals: true });
   }
 
 
@@ -72,7 +71,7 @@ const findOne = async (args) => {
   // /////////////////////////////////////
 
   doc = performFieldOperations(config, globalConfig, {
-    doc,
+    data: doc,
     hook: 'afterRead',
     operationName: 'read',
     req,

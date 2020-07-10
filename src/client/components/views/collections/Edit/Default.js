@@ -78,7 +78,7 @@ const DefaultEditView = (props) => {
                   operation={isEditing ? 'update' : 'create'}
                   readOnly={!hasSavePermission}
                   permissions={permissions.fields}
-                  filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
+                  filter={(field) => (!field?.admin?.position || (field?.admin?.position !== 'sidebar'))}
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
                   initialData={data}
@@ -107,72 +107,74 @@ const DefaultEditView = (props) => {
               )}
             </ul>
           ) : undefined}
-          <div className={`${baseClass}__document-actions${(preview && isEditing) ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
+          <div className={`${baseClass}__sidebar-sticky`}>
+            <div className={`${baseClass}__document-actions${(preview && isEditing) ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
+              {isEditing && (
+                <PreviewButton generatePreviewURL={preview} />
+              )}
+              {hasSavePermission && (
+                <FormSubmit>Save</FormSubmit>
+              )}
+            </div>
             {isEditing && (
-              <PreviewButton generatePreviewURL={preview} />
+              <div className={`${baseClass}__api-url`}>
+                <span className={`${baseClass}__label`}>
+                  API URL
+                  {' '}
+                  <CopyToClipboard value={apiURL} />
+                </span>
+                <a
+                  href={apiURL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {apiURL}
+                </a>
+              </div>
             )}
-            {hasSavePermission && (
-              <FormSubmit>Save</FormSubmit>
+            {!isLoading && (
+              <React.Fragment>
+                <div className={`${baseClass}__sidebar-fields`}>
+                  <RenderFields
+                    operation={isEditing ? 'update' : 'create'}
+                    readOnly={!hasSavePermission}
+                    permissions={permissions.fields}
+                    filter={(field) => field?.admin?.position === 'sidebar'}
+                    position="sidebar"
+                    fieldTypes={fieldTypes}
+                    fieldSchema={fields}
+                    initialData={data}
+                    customComponentsPath={`${slug}.fields.`}
+                  />
+                </div>
+                {isEditing && (
+                  <ul className={`${baseClass}__meta`}>
+                    <li>
+                      <div className={`${baseClass}__label`}>ID</div>
+                      <div>{id}</div>
+                    </li>
+                    {timestamps && (
+                      <React.Fragment>
+                        {data.updatedAt && (
+                          <li>
+                            <div className={`${baseClass}__label`}>Last Modified</div>
+                            <div>{format(new Date(data.updatedAt), 'MMMM do yyyy, h:mma')}</div>
+                          </li>
+                        )}
+                        {data.createdAt && (
+                          <li>
+                            <div className={`${baseClass}__label`}>Created</div>
+                            <div>{format(new Date(data.createdAt), 'MMMM do yyyy, h:mma')}</div>
+                          </li>
+                        )}
+                      </React.Fragment>
+                    )}
+
+                  </ul>
+                )}
+              </React.Fragment>
             )}
           </div>
-          {isEditing && (
-            <div className={`${baseClass}__api-url`}>
-              <span className={`${baseClass}__label`}>
-                API URL
-                {' '}
-                <CopyToClipboard value={apiURL} />
-              </span>
-              <a
-                href={apiURL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {apiURL}
-              </a>
-            </div>
-          )}
-          {!isLoading && (
-            <React.Fragment>
-              <div className={`${baseClass}__sidebar-fields`}>
-                <RenderFields
-                  operation={isEditing ? 'update' : 'create'}
-                  readOnly={!hasSavePermission}
-                  permissions={permissions.fields}
-                  filter={(field) => field.position === 'sidebar'}
-                  position="sidebar"
-                  fieldTypes={fieldTypes}
-                  fieldSchema={fields}
-                  initialData={data}
-                  customComponentsPath={`${slug}.fields.`}
-                />
-              </div>
-              {isEditing && (
-                <ul className={`${baseClass}__meta`}>
-                  <li>
-                    <div className={`${baseClass}__label`}>ID</div>
-                    <div>{id}</div>
-                  </li>
-                  {timestamps && (
-                    <React.Fragment>
-                      {data.updatedAt && (
-                        <li>
-                          <div className={`${baseClass}__label`}>Last Modified</div>
-                          <div>{format(new Date(data.updatedAt), 'MMMM do yyyy, h:mma')}</div>
-                        </li>
-                      )}
-                      {data.createdAt && (
-                        <li>
-                          <div className={`${baseClass}__label`}>Created</div>
-                          <div>{format(new Date(data.createdAt), 'MMMM do yyyy, h:mma')}</div>
-                        </li>
-                      )}
-                    </React.Fragment>
-                  )}
-
-                </ul>
-              )}
-            </React.Fragment>
-          )}
         </div>
       </Form>
     </div>

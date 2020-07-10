@@ -3,7 +3,7 @@ const { findOne } = require('../operations');
 
 const findOneHandler = (config, Model, globalConfig) => async (req, res, next) => {
   try {
-    const { slug } = config;
+    const { slug } = globalConfig;
 
     const result = await findOne({
       req,
