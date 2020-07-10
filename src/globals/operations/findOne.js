@@ -1,39 +1,40 @@
-const executeStatic = require('../../auth/executeAccess');
+const executeAccess = require('../../auth/executeAccess');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const findOne = async (args) => {
-  // /////////////////////////////////////
-  // 1. Retrieve and execute access
-  // /////////////////////////////////////
-
-  await executeStatic(args, args.config.access.read);
-
-  let options = { ...args };
-
-  // /////////////////////////////////////
-  // 2. Execute before collection hook
-  // /////////////////////////////////////
-
-  const { beforeRead } = args.config.hooks;
-
-  if (typeof beforeRead === 'function') {
-    options = await beforeRead(options);
-  }
-
-  // /////////////////////////////////////
-  // 3. Perform database operation
-  // /////////////////////////////////////
-
   const {
-    depth,
+    config,
+    globalConfig,
     Model,
-    slug,
+    req,
     req: {
       payloadAPI,
       locale,
       fallbackLocale,
     },
-  } = options;
+    slug,
+    depth,
+  } = args;
+
+  // /////////////////////////////////////
+  // 1. Retrieve and execute access
+  // /////////////////////////////////////
+
+  await executeAccess({ req }, globalConfig.access.read);
+
+  // /////////////////////////////////////
+  // 2. Execute before collection hook
+  // /////////////////////////////////////
+
+  const { beforeRead } = globalConfig.hooks;
+
+  if (typeof beforeRead === 'function') {
+    await beforeRead({ req });
+  }
+
+  // /////////////////////////////////////
+  // 3. Perform database operation
+  // /////////////////////////////////////
 
   const queryOptionsToExecute = {
     options: {},
@@ -53,7 +54,7 @@ const findOne = async (args) => {
   }
 
   let result = await Model.findOne({ globalType: slug });
-  let data = {};
+  let doc = {};
 
   if (!result) {
     result = {};
@@ -62,7 +63,7 @@ const findOne = async (args) => {
       result.setLocale(locale, fallbackLocale);
     }
 
-    data = result.toJSON({ virtuals: true });
+    doc = result.toJSON({ virtuals: true });
   }
 
 
@@ -70,25 +71,31 @@ const findOne = async (args) => {
   // 4. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  result = performFieldOperations(args.config, {
-    ...options, data, hook: 'afterRead', operationName: 'read',
+  doc = performFieldOperations(config, globalConfig, {
+    doc,
+    hook: 'afterRead',
+    operationName: 'read',
+    req,
   });
 
   // /////////////////////////////////////
   // 5. Execute after collection hook
   // /////////////////////////////////////
 
-  const { afterRead } = args.config.hooks;
+  const { afterRead } = globalConfig.hooks;
 
   if (typeof afterRead === 'function') {
-    data = await afterRead(options, result, data) || data;
+    doc = await afterRead({
+      req,
+      doc,
+    }) || doc;
   }
 
   // /////////////////////////////////////
   // 6. Return results
   // /////////////////////////////////////
 
-  return data;
+  return doc;
 };
 
 module.exports = findOne;

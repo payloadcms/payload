@@ -1,12 +1,12 @@
 const httpStatus = require('http-status');
 const { find } = require('../operations');
 
-const findHandler = async (req, res, next) => {
+const findHandler = (config) => async (req, res, next) => {
   try {
     const options = {
       req,
-      Model: req.collection.Model,
-      config: req.collection.config,
+      collection: req.collection,
+      config,
       where: req.query.where,
       page: req.query.page,
       limit: req.query.limit,

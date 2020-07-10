@@ -1,55 +1,55 @@
 const fs = require('fs');
 const { NotFound, Forbidden, ErrorDeletingFile } = require('../../errors');
-const executeStatic = require('../../auth/executeAccess');
+const executeAccess = require('../../auth/executeAccess');
 
 const deleteQuery = async (args) => {
+  const {
+    collection: {
+      Model,
+      config: collectionConfig,
+    },
+    id,
+    req,
+    req: {
+      locale,
+      fallbackLocale,
+    },
+  } = args;
+
   // /////////////////////////////////////
   // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  const policyResults = await executeStatic(args, args.config.access.delete);
-  const hasWherePolicy = typeof policyResults === 'object';
-
-  let options = {
-    ...args,
-  };
+  const accessResults = await executeAccess({ req, id }, collectionConfig.access.delete);
+  const hasWhereAccess = typeof accessResults === 'object';
 
   // /////////////////////////////////////
   // 2. Execute before collection hook
   // /////////////////////////////////////
 
-  const { beforeDelete } = args.config.hooks;
+  const { beforeDelete } = collectionConfig.hooks;
 
   if (typeof beforeDelete === 'function') {
-    options = await beforeDelete(options);
+    await beforeDelete({ req, id });
   }
 
   // /////////////////////////////////////
   // 3. Get existing document
   // /////////////////////////////////////
 
-  const {
-    Model,
-    id,
-    req: {
-      locale,
-      fallbackLocale,
-    },
-  } = options;
-
   let query = { _id: id };
 
-  if (hasWherePolicy) {
+  if (hasWhereAccess) {
     query = {
       ...query,
-      ...policyResults,
+      ...accessResults,
     };
   }
 
   let resultToDelete = await Model.findOne(query);
 
-  if (!resultToDelete && !hasWherePolicy) throw new NotFound();
-  if (!resultToDelete && hasWherePolicy) throw new Forbidden();
+  if (!resultToDelete && !hasWhereAccess) throw new NotFound();
+  if (!resultToDelete && hasWhereAccess) throw new Forbidden();
 
   resultToDelete = resultToDelete.toJSON({ virtuals: true });
 
@@ -61,8 +61,8 @@ const deleteQuery = async (args) => {
   // 4. Delete any associated files
   // /////////////////////////////////////
 
-  if (options.req.collection.config.upload) {
-    const { staticDir } = options.req.collection.config.upload;
+  if (collectionConfig.upload) {
+    const { staticDir } = collectionConfig.upload;
 
     fs.unlink(`${staticDir}/${resultToDelete.filename}`, () => {
       throw new ErrorDeletingFile();
@@ -93,10 +93,10 @@ const deleteQuery = async (args) => {
   // 4. Execute after collection hook
   // /////////////////////////////////////
 
-  const { afterDelete } = args.config.hooks;
+  const { afterDelete } = collectionConfig.hooks;
 
   if (typeof afterDelete === 'function') {
-    result = await afterDelete(options, result) || result;
+    result = await afterDelete({ req, id, doc: result }) || result;
   }
 
   // /////////////////////////////////////

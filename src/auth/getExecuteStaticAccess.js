@@ -1,12 +1,12 @@
-const executeStatic = require('./executeAccess');
+const executeAccess = require('./executeAccess');
 const { Forbidden } = require('../errors');
 
-const getExecuteStaticPolicy = ({ config, Model }) => async (req, res, next) => {
+const getExecuteStaticAccess = ({ config, Model }) => async (req, res, next) => {
   try {
     if (req.path) {
-      const policyResult = await executeStatic({ req, isReadingStaticFile: true }, config.access.read);
+      const accessResult = await executeAccess({ req, isReadingStaticFile: true }, config.access.read);
 
-      if (typeof policyResult === 'object') {
+      if (typeof accessResult === 'object') {
         const filename = decodeURI(req.path).replace(/^\/|\/$/g, '');
 
         const queryToBuild = {
@@ -17,7 +17,7 @@ const getExecuteStaticPolicy = ({ config, Model }) => async (req, res, next) => 
                   equals: filename,
                 },
               },
-              policyResult,
+              accessResult,
             ],
           },
         };
@@ -37,4 +37,4 @@ const getExecuteStaticPolicy = ({ config, Model }) => async (req, res, next) => 
   }
 };
 
-module.exports = getExecuteStaticPolicy;
+module.exports = getExecuteStaticAccess;

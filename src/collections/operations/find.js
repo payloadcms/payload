@@ -1,71 +1,72 @@
-const executeStatic = require('../../auth/executeAccess');
+const executeAccess = require('../../auth/executeAccess');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const find = async (args) => {
+  const {
+    where,
+    page,
+    limit,
+    depth,
+    config,
+    collection: {
+      Model,
+      config: collectionConfig,
+    },
+    req,
+    req: {
+      locale,
+      fallbackLocale,
+      payloadAPI,
+    },
+  } = args;
+
   // /////////////////////////////////////
   // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  const policyResults = await executeStatic(args, args.config.access.read);
-  const hasWherePolicy = typeof policyResults === 'object';
+  const accessResults = await executeAccess({ req }, collectionConfig.access.read);
+  const hasWhereAccess = typeof accessResults === 'object';
 
   const queryToBuild = {};
 
-  if (args.where) {
+  if (where) {
     queryToBuild.where = {
-      and: [args.where],
+      and: [where],
     };
   }
 
-  if (hasWherePolicy) {
-    if (!args.where) {
+  if (hasWhereAccess) {
+    if (!where) {
       queryToBuild.where = {
         and: [
-          policyResults,
+          accessResults,
         ],
       };
     } else {
-      queryToBuild.where.and.push(policyResults);
+      queryToBuild.where.and.push(accessResults);
     }
   }
 
-  let options = {
-    ...args,
-    query: await args.Model.buildQuery(queryToBuild, args.req.locale),
-  };
+  const query = await Model.buildQuery(queryToBuild, locale);
 
   // /////////////////////////////////////
   // 2. Execute before collection hook
   // /////////////////////////////////////
 
-  const { beforeRead } = args.config.hooks;
+  const { beforeRead } = collectionConfig.hooks;
 
   if (typeof beforeRead === 'function') {
-    options = await beforeRead(options);
+    await beforeRead({ req, query });
   }
 
   // /////////////////////////////////////
   // 3. Perform database operation
   // /////////////////////////////////////
 
-  const {
-    query,
-    page,
-    limit,
-    depth,
-    Model,
-    req: {
-      locale,
-      fallbackLocale,
-      payloadAPI,
-    },
-    config,
-  } = options;
-
-  let { sort } = options;
+  let { sort } = args;
 
   if (!sort) {
-    if (config.timestamps) {
+    if (collectionConfig.timestamps) {
       sort = '-createdAt';
     } else {
       sort = '-_id';
@@ -108,8 +109,11 @@ const find = async (args) => {
 
       const data = doc.toJSON({ virtuals: true });
 
-      return performFieldOperations(args.config, {
-        ...options, data, hook: 'afterRead', operationName: 'read',
+      return performFieldOperations(config, collectionConfig, {
+        data,
+        req,
+        hook: 'afterRead',
+        operationName: 'read',
       });
     })),
   };
@@ -118,14 +122,16 @@ const find = async (args) => {
   // 6. Execute afterRead collection hook
   // /////////////////////////////////////
 
-  const { afterRead } = args.config.hooks;
-  let afterReadResult = null;
+  const { afterRead } = collectionConfig.hooks;
+
+  let afterReadResult = result;
 
   if (typeof afterRead === 'function') {
     afterReadResult = {
       ...result,
-      docs: await Promise.all(result.docs.map(async (doc) => afterRead({
-        options,
+      docs: await Promise.all(result.docs.map(async (doc) => await afterRead({
+        req,
+        query,
         doc,
       }) || doc)),
     };
@@ -135,7 +141,7 @@ const find = async (args) => {
   // 7. Return results
   // /////////////////////////////////////
 
-  return afterReadResult || result;
+  return afterReadResult;
 };
 
 module.exports = find;

@@ -1,79 +1,94 @@
 const deepmerge = require('deepmerge');
 const overwriteMerge = require('../../utilities/overwriteMerge');
 const { NotFound, Forbidden } = require('../../errors');
-const executeStatic = require('../executeAccess');
+const executeAccess = require('../executeAccess');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const update = async (args) => {
+  const {
+    config,
+    collection: {
+      Model,
+      config: collectionConfig,
+    },
+    id,
+    req,
+    req: {
+      locale,
+      fallbackLocale,
+    },
+  } = args;
+
   // /////////////////////////////////////
   // 1. Execute access
   // /////////////////////////////////////
 
-  const policyResults = await executeStatic(args, args.config.access.update);
-  const hasWherePolicy = typeof policyResults === 'object';
-
-  let options = { ...args };
+  const accessResults = await executeAccess({ req }, collectionConfig.access.update);
+  const hasWhereAccess = typeof accessResults === 'object';
 
   // /////////////////////////////////////
   // 2. Retrieve document
   // /////////////////////////////////////
 
-  const {
-    Model,
-    id,
-    req: {
-      locale,
-      fallbackLocale,
-    },
-  } = options;
-
   let query = { _id: id };
 
-  if (hasWherePolicy) {
+  if (hasWhereAccess) {
     query = {
       ...query,
-      ...policyResults,
+      ...accessResults,
     };
   }
 
   let user = await Model.findOne(query);
 
-  if (!user && !hasWherePolicy) throw new NotFound();
-  if (!user && hasWherePolicy) throw new Forbidden();
+  if (!user && !hasWhereAccess) throw new NotFound();
+  if (!user && hasWhereAccess) throw new Forbidden();
 
   if (locale && user.setLocale) {
     user.setLocale(locale, fallbackLocale);
   }
 
-  const userJSON = user.toJSON({ virtuals: true });
+  const originalDoc = user.toJSON({ virtuals: true });
+
+  let { data } = args;
 
   // /////////////////////////////////////
   // 2. Execute before update hook
   // /////////////////////////////////////
 
-  const { beforeUpdate } = args.config.hooks;
+  const { beforeUpdate } = collectionConfig.hooks;
 
   if (typeof beforeUpdate === 'function') {
-    options = await beforeUpdate(options);
+    data = (await beforeUpdate({
+      data,
+      req,
+      originalDoc,
+    })) || data;
   }
 
   // /////////////////////////////////////
   // 3. Merge updates into existing data
   // /////////////////////////////////////
 
-  options.data = deepmerge(userJSON, options.data, { arrayMerge: overwriteMerge });
+  data = deepmerge(originalDoc, data, { arrayMerge: overwriteMerge });
 
   // /////////////////////////////////////
   // 4. Execute field-level hooks, access, and validation
   // /////////////////////////////////////
 
-  options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeUpdate', operationName: 'update' });
+  data = await performFieldOperations(config, collectionConfig, {
+    data,
+    req,
+    hook: 'beforeUpdate',
+    operationName: 'update',
+    originalDoc,
+  });
 
   // /////////////////////////////////////
   // 5. Handle password update
   // /////////////////////////////////////
 
-  const dataToUpdate = { ...options.data };
+  const dataToUpdate = { ...data };
   const { password } = dataToUpdate;
 
   if (password) {
@@ -95,18 +110,24 @@ const update = async (args) => {
   // 7. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  user = performFieldOperations(args.config, {
-    ...options, data: user, hook: 'afterRead', operationName: 'read',
+  user = performFieldOperations(config, collectionConfig, {
+    data: user,
+    hook: 'afterRead',
+    operationName: 'read',
+    req,
   });
 
   // /////////////////////////////////////
   // 8. Execute after update hook
   // /////////////////////////////////////
 
-  const afterUpdateHook = args.config.hooks && args.config.hooks.afterUpdate;
+  const { afterUpdate } = collectionConfig.hooks;
 
-  if (typeof afterUpdateHook === 'function') {
-    user = await afterUpdateHook(options, user);
+  if (typeof afterUpdate === 'function') {
+    user = (await afterUpdate({
+      data: user,
+      req,
+    })) || user;
   }
 
   // /////////////////////////////////////

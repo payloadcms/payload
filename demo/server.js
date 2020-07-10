@@ -15,7 +15,7 @@ const payload = new Payload({
   mongoURL: 'mongodb://localhost/payload',
   express: expressApp,
   onInit: () => {
-    console.log('Payload is started');
+    console.log('Payload is initialized');
   },
 });
 

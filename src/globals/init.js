@@ -8,7 +8,7 @@ function initGlobals() {
       config: this.config.globals,
     };
 
-    this.router.use(routes(this.config.globals, this.globals.Model));
+    this.router.use(routes(this.config, this.globals.Model));
   }
 }
 

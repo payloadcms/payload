@@ -1,13 +1,13 @@
 /* eslint-disable no-param-reassign */
 const { findByID } = require('../../operations');
 
-const findByIDResolver = (collection) => async (_, args, context) => {
+const findByIDResolver = (config, collection) => async (_, args, context) => {
   if (args.locale) context.req.locale = args.locale;
   if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
   const options = {
-    config: collection.config,
-    Model: collection.Model,
+    config,
+    collection,
     id: args.id,
     req: context.req,
   };

@@ -1,6 +1,6 @@
 const deepmerge = require('deepmerge');
 const overwriteMerge = require('../../utilities/overwriteMerge');
-const executeStatic = require('../../auth/executeAccess');
+const executeAccess = require('../../auth/executeAccess');
 const { NotFound, Forbidden } = require('../../errors');
 const performFieldOperations = require('../../fields/performFieldOperations');
 const imageMIMETypes = require('../../uploads/imageMIMETypes');
@@ -10,27 +10,30 @@ const getSafeFilename = require('../../uploads/getSafeFilename');
 const resizeAndSave = require('../../uploads/imageResizer');
 
 const update = async (args) => {
-  // /////////////////////////////////////
-  // 1. Execute access
-  // /////////////////////////////////////
-
-  const policyResults = await executeStatic(args, args.config.access.update);
-  const hasWherePolicy = typeof policyResults === 'object';
-
-  let options = { ...args };
-
-  // /////////////////////////////////////
-  // 2. Retrieve document
-  // /////////////////////////////////////
-
   const {
-    Model,
+    config,
+    collection: {
+      Model,
+      config: collectionConfig,
+    },
     id,
+    req,
     req: {
       locale,
       fallbackLocale,
     },
-  } = options;
+  } = args;
+
+  // /////////////////////////////////////
+  // 1. Execute access
+  // /////////////////////////////////////
+
+  const policyResults = await executeAccess({ req }, collectionConfig.access.update);
+  const hasWherePolicy = typeof policyResults === 'object';
+
+  // /////////////////////////////////////
+  // 2. Retrieve document
+  // /////////////////////////////////////
 
   const queryToBuild = {
     where: {
@@ -48,9 +51,9 @@ const update = async (args) => {
     queryToBuild.where.and.push(hasWherePolicy);
   }
 
-  options.query = await args.Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery(queryToBuild, locale);
 
-  let doc = await Model.findOne(options.query);
+  let doc = await Model.findOne(query);
 
   if (!doc && !hasWherePolicy) throw new NotFound();
   if (!doc && hasWherePolicy) throw new Forbidden();
@@ -59,65 +62,77 @@ const update = async (args) => {
     doc.setLocale(locale, fallbackLocale);
   }
 
-  options.originalDoc = doc.toJSON({ virtuals: true });
+  const originalDoc = doc.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
   // 2. Execute before update hook
   // /////////////////////////////////////
 
-  const { beforeUpdate } = args.config.hooks;
+  let { data } = args;
+
+  const { beforeUpdate } = collectionConfig.hooks;
 
   if (typeof beforeUpdate === 'function') {
-    options = await beforeUpdate(options);
+    data = await beforeUpdate({
+      data,
+      req,
+      originalDoc,
+    }) || data;
   }
 
   // /////////////////////////////////////
   // 3. Merge updates into existing data
   // /////////////////////////////////////
 
-  options.data = deepmerge(options.originalDoc, options.data, { arrayMerge: overwriteMerge });
+  data = deepmerge(originalDoc, data, { arrayMerge: overwriteMerge });
 
   // /////////////////////////////////////
   // 4. Execute field-level hooks, access, and validation
   // /////////////////////////////////////
 
-  options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeUpdate', operationName: 'update' });
+  data = await performFieldOperations(config, collectionConfig, {
+    data,
+    req,
+    originalDoc,
+    hook: 'beforeUpdate',
+    operationName: 'update',
+  });
 
   // /////////////////////////////////////
   // 5. Upload and resize any files that may be present
   // /////////////////////////////////////
 
-  if (args.config.upload) {
+  if (collectionConfig.upload) {
     const fileData = {};
 
-    const { staticDir, imageSizes } = args.config.upload;
+    const { staticDir, imageSizes } = collectionConfig.upload;
 
-    if (options.req.files && options.req.files.file) {
-      const fsSafeName = await getSafeFilename(staticDir, options.req.files.file.name);
+    if (req.files && req.files.file) {
+      const fsSafeName = await getSafeFilename(staticDir, req.files.file.name);
 
-      await options.req.files.file.mv(`${staticDir}/${fsSafeName}`);
+      await req.files.file.mv(`${staticDir}/${fsSafeName}`);
 
       fileData.filename = fsSafeName;
-      fileData.filesize = options.req.files.file.size;
-      fileData.mimeType = options.req.files.file.mimetype;
+      fileData.filesize = req.files.file.size;
+      fileData.mimeType = req.files.file.mimetype;
 
-      if (imageMIMETypes.indexOf(options.req.files.file.mimetype) > -1) {
+      if (imageMIMETypes.indexOf(req.files.file.mimetype) > -1) {
         const dimensions = await getImageSize(`${staticDir}/${fsSafeName}`);
         fileData.width = dimensions.width;
         fileData.height = dimensions.height;
 
-        if (Array.isArray(imageSizes) && options.req.files.file.mimetype !== 'image/svg+xml') {
-          fileData.sizes = await resizeAndSave(options.config, fsSafeName, fileData.mimeType);
+        if (Array.isArray(imageSizes) && req.files.file.mimetype !== 'image/svg+xml') {
+          fileData.sizes = await resizeAndSave(collectionConfig, fsSafeName, fileData.mimeType);
         }
       }
 
-      options.data = {
-        ...options.data,
+      data = {
+        ...data,
         ...fileData,
       };
-    } else if (options.data.file === null) {
-      options.data = {
-        ...options.data,
+    } else if (data.file === null) {
+      data = {
+        ...data,
         filename: null,
         sizes: null,
       };
@@ -128,7 +143,7 @@ const update = async (args) => {
   // 6. Perform database operation
   // /////////////////////////////////////
 
-  Object.assign(doc, options.data);
+  Object.assign(doc, data);
 
   await doc.save();
 
@@ -138,18 +153,24 @@ const update = async (args) => {
   // 7. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  doc = await performFieldOperations(args.config, {
-    ...options, data: doc, hook: 'afterRead', operationName: 'read',
+  doc = await performFieldOperations(config, collectionConfig, {
+    data: doc,
+    hook: 'afterRead',
+    operationName: 'read',
+    req,
   });
 
   // /////////////////////////////////////
   // 8. Execute after collection hook
   // /////////////////////////////////////
 
-  const { afterUpdate } = args.config.hooks;
+  const { afterUpdate } = collectionConfig.hooks;
 
   if (typeof afterUpdate === 'function') {
-    doc = await afterUpdate(options, doc) || doc;
+    doc = (await afterUpdate({
+      doc,
+      req,
+    })) || doc;
   }
 
   // /////////////////////////////////////

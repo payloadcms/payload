@@ -36,7 +36,7 @@ function registerGlobals() {
           locale: { type: this.types.localeInputType },
           fallbackLocale: { type: this.types.fallbackLocaleInputType },
         },
-        resolve: findOne(this.globals.Model, global),
+        resolve: findOne(this.config, this.globals.Model, global),
       };
 
       this.Mutation.fields[`update${formattedLabel}`] = {
@@ -44,7 +44,7 @@ function registerGlobals() {
         args: {
           data: { type: global.graphQL.mutationInputType },
         },
-        resolve: update(this.globals.Model, global),
+        resolve: update(this.config, this.globals.Model, global),
       };
     });
   }

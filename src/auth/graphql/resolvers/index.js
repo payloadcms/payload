@@ -7,6 +7,7 @@ const forgotPassword = require('./forgotPassword');
 const resetPassword = require('./resetPassword');
 const update = require('./update');
 const access = require('./access');
+const logout = require('./logout');
 
 module.exports = {
   login,
@@ -18,4 +19,5 @@ module.exports = {
   resetPassword,
   update,
   access,
+  logout,
 };

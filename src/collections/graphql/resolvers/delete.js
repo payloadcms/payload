@@ -6,8 +6,7 @@ const deleteResolver = (collection) => async (_, args, context) => {
   if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
   const options = {
-    config: collection.config,
-    Model: collection.Model,
+    collection,
     id: args.id,
     req: context.req,
   };

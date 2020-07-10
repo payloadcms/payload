@@ -9,17 +9,17 @@ const {
 
 const router = express.Router();
 
-const registerRoutes = ({ Model, config }) => {
-  router.all(`/${config.slug}*`, bindCollectionMiddleware({ Model, config }));
+const registerRoutes = (collection, config) => {
+  router.all(`/${collection.config.slug}*`, bindCollectionMiddleware(collection));
 
-  router.route(`/${config.slug}`)
-    .get(find)
-    .post(create);
+  router.route(`/${collection.config.slug}`)
+    .get(find(config))
+    .post(create(config));
 
-  router.route(`/${config.slug}/:id`)
-    .get(findByID)
-    .put(update)
-    .delete(deleteHandler);
+  router.route(`/${collection.config.slug}/:id`)
+    .get(findByID(config))
+    .put(update(config))
+    .delete(deleteHandler(config));
 
   return router;
 };

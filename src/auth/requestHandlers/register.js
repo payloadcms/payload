@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const formatSuccessResponse = require('../../express/responses/formatSuccess');
 const { register } = require('../operations');
 
-const registerHandler = config => async (req, res, next) => {
+const registerHandler = (config) => async (req, res, next) => {
   try {
     const user = await register({
       config,

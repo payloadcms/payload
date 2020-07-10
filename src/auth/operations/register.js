@@ -1,48 +1,59 @@
 const passport = require('passport');
-const executeStatic = require('../executeAccess');
+const executeAccess = require('../executeAccess');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const register = async (args) => {
+  const {
+    overrideAccess,
+    config,
+    collection: {
+      Model,
+      config: collectionConfig,
+    },
+    req,
+    req: {
+      locale,
+      fallbackLocale,
+    },
+  } = args;
+
+  let { data } = args;
+
   // /////////////////////////////////////
   // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  if (!args.overridePolicy) {
-    await executeStatic(args, args.collection.config.access.create);
+  if (!overrideAccess) {
+    await executeAccess({ req }, collectionConfig.access.create);
   }
-
-  let options = { ...args };
 
   // /////////////////////////////////////
   // 2. Execute before register hook
   // /////////////////////////////////////
 
-  const { beforeRegister } = args.collection.config.hooks;
+  const { beforeRegister } = collectionConfig.hooks;
 
   if (typeof beforeRegister === 'function') {
-    options = await beforeRegister(options);
+    data = (await beforeRegister({
+      data,
+      req,
+    })) || data;
   }
 
   // /////////////////////////////////////
   // 3. Execute field-level hooks, access, and validation
   // /////////////////////////////////////
 
-  options.data = await performFieldOperations(args.collection.config, { ...options, hook: 'beforeCreate', operationName: 'create' });
+  data = await performFieldOperations(config, collectionConfig, {
+    data,
+    hook: 'beforeCreate',
+    operationName: 'create',
+    req,
+  });
 
   // /////////////////////////////////////
   // 6. Perform register
   // /////////////////////////////////////
-
-  const {
-    collection: {
-      Model,
-    },
-    data,
-    req: {
-      locale,
-      fallbackLocale,
-    },
-  } = options;
 
   const modelData = { ...data };
   delete modelData.password;
@@ -65,18 +76,24 @@ const register = async (args) => {
   // 7. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  result = await performFieldOperations(args.collection.config, {
-    ...options, data: result, hook: 'afterRead', operationName: 'read',
+  result = await performFieldOperations(config, collectionConfig, {
+    data: result,
+    hook: 'afterRead',
+    operationName: 'read',
+    req,
   });
 
   // /////////////////////////////////////
   // 8. Execute after register hook
   // /////////////////////////////////////
 
-  const afterRegister = args.collection.config.hooks;
+  const { afterRegister } = collectionConfig.hooks;
 
   if (typeof afterRegister === 'function') {
-    result = await afterRegister(options, result);
+    result = (await afterRegister({
+      data: result,
+      req: args.req,
+    })) || result;
   }
 
   // /////////////////////////////////////

@@ -1,10 +1,10 @@
 const { findByID } = require('../operations');
 
-const findByIDHandler = async (req, res, next) => {
+const findByIDHandler = (config) => async (req, res, next) => {
   const options = {
     req,
-    Model: req.collection.Model,
-    config: req.collection.config,
+    collection: req.collection,
+    config,
     id: req.params.id,
     depth: req.query.depth,
   };

@@ -1,22 +1,17 @@
-const logoutHandler = config => async (req, res) => {
-  const { collection } = req;
+const { logout } = require('../operations');
 
-  const cookieOptions = {
-    expires: new Date(0),
-    httpOnly: true,
-    path: '/',
-    overwrite: true,
-  };
+const logoutHandler = (config) => async (req, res, next) => {
+  try {
+    const message = await logout({
+      config,
+      collection: req.collection,
+      res,
+    });
 
-  if (collection.auth && collection.auth.secureCookie) {
-    cookieOptions.secure = true;
+    return res.status(200).json({ message });
+  } catch (error) {
+    return next(error);
   }
-
-  res.cookie(`${config.cookiePrefix}-token`, '', cookieOptions);
-
-  return res.status(200).json({
-    message: 'Logged out successfully.',
-  });
 };
 
 module.exports = logoutHandler;

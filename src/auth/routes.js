@@ -66,12 +66,12 @@ const authRoutes = (collection, config, sendEmail) => {
 
   router
     .route(`/${slug}`)
-    .get(find);
+    .get(find(config));
 
   router.route(`/${slug}/:id`)
-    .get(findByID)
-    .put(update)
-    .delete(deleteHandler);
+    .get(findByID(config))
+    .put(update(config))
+    .delete(deleteHandler(config));
 
   return router;
 };

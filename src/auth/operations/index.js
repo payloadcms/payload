@@ -8,6 +8,7 @@ const registerFirstUser = require('./registerFirstUser');
 const update = require('./update');
 const access = require('./access');
 const me = require('./me');
+const logout = require('./logout');
 
 module.exports = {
   login,
@@ -20,4 +21,5 @@ module.exports = {
   registerFirstUser,
   access,
   me,
+  logout,
 };

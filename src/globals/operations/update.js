@@ -1,29 +1,30 @@
 const deepmerge = require('deepmerge');
 const overwriteMerge = require('../../utilities/overwriteMerge');
-const executeStatic = require('../../auth/executeAccess');
+const executeAccess = require('../../auth/executeAccess');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const update = async (args) => {
-  // /////////////////////////////////////
-  // 1. Retrieve and execute access
-  // /////////////////////////////////////
-
-  await executeStatic(args, args.config.access.update);
-
-  let options = { ...args };
-
-  // /////////////////////////////////////
-  // 2. Retrieve document
-  // /////////////////////////////////////
-
   const {
+    config,
+    globalConfig,
     Model,
     slug,
+    req,
     req: {
       locale,
       fallbackLocale,
     },
-  } = options;
+  } = args;
+
+  // /////////////////////////////////////
+  // 1. Retrieve and execute access
+  // /////////////////////////////////////
+
+  await executeAccess(args, globalConfig.access.update);
+
+  // /////////////////////////////////////
+  // 2. Retrieve document
+  // /////////////////////////////////////
 
   let global = await Model.findOne({ globalType: slug });
 
@@ -41,29 +42,40 @@ const update = async (args) => {
   // 3. Execute before global hook
   // /////////////////////////////////////
 
-  const { beforeUpdate } = args.config.hooks;
+  let { data } = args;
+
+  const { beforeUpdate } = globalConfig.hooks;
 
   if (typeof beforeUpdate === 'function') {
-    options = await beforeUpdate(options);
+    data = await beforeUpdate({
+      data,
+      req,
+      originalDoc: global,
+    }) || data;
   }
 
   // /////////////////////////////////////
   // 4. Merge updates into existing data
   // /////////////////////////////////////
 
-  options.data = deepmerge(globalJSON, options.data, { arrayMerge: overwriteMerge });
+  data = deepmerge(globalJSON, data, { arrayMerge: overwriteMerge });
 
   // /////////////////////////////////////
   // 5. Execute field-level hooks, access, and validation
   // /////////////////////////////////////
 
-  options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeUpdate', operationName: 'update' });
+  data = await performFieldOperations(config, globalConfig, {
+    data,
+    req,
+    hook: 'beforeUpdate',
+    operationName: 'update',
+  });
 
   // /////////////////////////////////////
   // 6. Perform database operation
   // /////////////////////////////////////
 
-  Object.assign(global, options.data);
+  Object.assign(global, data);
 
   await global.save();
 
@@ -73,8 +85,11 @@ const update = async (args) => {
   // 7. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  global = await performFieldOperations(args.config, {
-    ...options, data: global, hook: 'afterRead', operationName: 'read',
+  global = await performFieldOperations(config, globalConfig, {
+    data: global,
+    hook: 'afterRead',
+    operationName: 'read',
+    req,
   });
 
   // /////////////////////////////////////
@@ -84,7 +99,10 @@ const update = async (args) => {
   const { afterUpdate } = args.config.hooks;
 
   if (typeof afterUpdate === 'function') {
-    global = await afterUpdate(options, global);
+    global = await afterUpdate({
+      doc: global,
+      req,
+    }) || global;
   }
 
   // /////////////////////////////////////

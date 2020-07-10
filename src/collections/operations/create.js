@@ -1,6 +1,6 @@
 const mkdirp = require('mkdirp');
 
-const executeStatic = require('../../auth/executeAccess');
+const executeAccess = require('../../auth/executeAccess');
 
 const { MissingFile } = require('../../errors');
 const resizeAndSave = require('../../uploads/imageResizer');
@@ -11,65 +11,86 @@ const imageMIMETypes = require('../../uploads/imageMIMETypes');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const create = async (args) => {
+  const {
+    collection: {
+      Model,
+      config: collectionConfig,
+    },
+    req,
+    req: {
+      locale,
+      fallbackLocale,
+    },
+    config,
+  } = args;
+
+  let { data } = args;
+
   // /////////////////////////////////////
   // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  await executeStatic(args, args.config.access.create);
-
-  let options = { ...args };
+  await executeAccess({ req }, collectionConfig.access.create);
 
   // /////////////////////////////////////
   // 2. Execute before collection hook
   // /////////////////////////////////////
 
-  const { beforeCreate } = args.config.hooks;
+  const { beforeCreate } = collectionConfig.hooks;
 
   if (typeof beforeCreate === 'function') {
-    options = await beforeCreate(options);
+    data = (await beforeCreate({
+      data,
+      req,
+    })) || data;
   }
 
   // /////////////////////////////////////
   // 3. Execute field-level access, hooks, and validation
   // /////////////////////////////////////
 
-  options.data = await performFieldOperations(args.config, { ...options, hook: 'beforeCreate', operationName: 'create' });
+  data = await performFieldOperations(config, collectionConfig, {
+    data,
+    hook: 'beforeCreate',
+    operationName: 'create',
+    req,
+  });
 
   // /////////////////////////////////////
   // 4. Upload and resize any files that may be present
   // /////////////////////////////////////
 
-  if (args.config.upload) {
-    const { staticDir, imageSizes } = options.req.collection.config.upload;
+  if (collectionConfig.upload) {
+    const { staticDir, imageSizes } = collectionConfig.upload;
 
     const fileData = {};
 
-    if (!args.req.files || Object.keys(args.req.files).length === 0) {
+    if (!req.files || Object.keys(req.files).length === 0) {
       throw new MissingFile();
     }
 
     await mkdirp(staticDir);
 
-    const fsSafeName = await getSafeFilename(staticDir, options.req.files.file.name);
+    const fsSafeName = await getSafeFilename(staticDir, req.files.file.name);
 
-    await options.req.files.file.mv(`${staticDir}/${fsSafeName}`);
+    await req.files.file.mv(`${staticDir}/${fsSafeName}`);
 
-    if (imageMIMETypes.indexOf(options.req.files.file.mimetype) > -1) {
+    if (imageMIMETypes.indexOf(req.files.file.mimetype) > -1) {
       const dimensions = await getImageSize(`${staticDir}/${fsSafeName}`);
       fileData.width = dimensions.width;
       fileData.height = dimensions.height;
 
-      if (Array.isArray(imageSizes) && options.req.files.file.mimetype !== 'image/svg+xml') {
-        fileData.sizes = await resizeAndSave(options.config, fsSafeName, fileData.mimeType);
+      if (Array.isArray(imageSizes) && req.files.file.mimetype !== 'image/svg+xml') {
+        fileData.sizes = await resizeAndSave(collectionConfig, fsSafeName, fileData.mimeType);
       }
     }
 
     fileData.filename = fsSafeName;
-    fileData.filesize = options.req.files.file.size;
-    fileData.mimeType = options.req.files.file.mimetype;
+    fileData.filesize = req.files.file.size;
+    fileData.mimeType = req.files.file.mimetype;
 
-    options.data = {
-      ...options.data,
+    data = {
+      ...data,
       ...fileData,
     };
   }
@@ -77,15 +98,6 @@ const create = async (args) => {
   // /////////////////////////////////////
   // 5. Perform database operation
   // /////////////////////////////////////
-
-  const {
-    Model,
-    data,
-    req: {
-      locale,
-      fallbackLocale,
-    },
-  } = options;
 
   let result = new Model();
 
@@ -102,18 +114,24 @@ const create = async (args) => {
   // 6. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  result = await performFieldOperations(args.config, {
-    ...options, data: result, hook: 'afterRead', operationName: 'read',
+  result = await performFieldOperations(config, collectionConfig, {
+    data: result,
+    hook: 'afterRead',
+    operationName: 'read',
+    req,
   });
 
   // /////////////////////////////////////
   // 7. Execute after collection hook
   // /////////////////////////////////////
 
-  const { afterCreate } = args.config.hooks;
+  const { afterCreate } = collectionConfig.hooks;
 
   if (typeof afterCreate === 'function') {
-    result = await afterCreate(options, result);
+    result = await afterCreate({
+      doc: result,
+      req: args.req,
+    }) || result;
   }
 
   // /////////////////////////////////////

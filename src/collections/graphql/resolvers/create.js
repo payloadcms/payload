@@ -1,14 +1,14 @@
 /* eslint-disable no-param-reassign */
 const { create } = require('../../operations');
 
-const createResolver = (collection) => async (_, args, context) => {
+const createResolver = (config, collection) => async (_, args, context) => {
   if (args.locale) {
     context.req.locale = args.locale;
   }
 
   const options = {
-    config: collection.config,
-    Model: collection.Model,
+    config,
+    collection,
     data: args.data,
     req: context.req,
   };

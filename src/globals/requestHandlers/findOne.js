@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const { findOne } = require('../operations');
 
-const findOneHandler = (Model, config) => async (req, res, next) => {
+const findOneHandler = (config, Model, globalConfig) => async (req, res, next) => {
   try {
     const { slug } = config;
 
@@ -9,6 +9,7 @@ const findOneHandler = (Model, config) => async (req, res, next) => {
       req,
       Model,
       config,
+      globalConfig,
       slug,
       depth: req.query.depth,
     });

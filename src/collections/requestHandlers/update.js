@@ -2,12 +2,12 @@ const httpStatus = require('http-status');
 const formatSuccessResponse = require('../../express/responses/formatSuccess');
 const { update } = require('../operations');
 
-const updateHandler = async (req, res, next) => {
+const updateHandler = (config) => async (req, res, next) => {
   try {
     const doc = await update({
       req,
-      Model: req.collection.Model,
-      config: req.collection.config,
+      collection: req.collection,
+      config,
       id: req.params.id,
       data: req.body,
     });

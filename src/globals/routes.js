@@ -5,12 +5,12 @@ const { update, findOne } = requestHandlers;
 
 const router = express.Router();
 
-const registerGlobals = (globalConfigs, Globals) => {
-  globalConfigs.forEach((global) => {
+const registerGlobals = (config, Globals) => {
+  config.globals.forEach((global) => {
     router
       .route(`/globals/${global.slug}`)
-      .get(findOne(Globals, global))
-      .post(update(Globals, global));
+      .get(findOne(config, Globals, global))
+      .post(update(config, Globals, global));
   });
 
   return router;

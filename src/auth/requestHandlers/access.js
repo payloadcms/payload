@@ -1,15 +1,15 @@
 const httpStatus = require('http-status');
 const { access } = require('../operations');
 
-const policiesHandler = config => async (req, res, next) => {
+const policiesHandler = (config) => async (req, res, next) => {
   try {
-    const policyResults = await access({
+    const accessResults = await access({
       req,
       config,
     });
 
     return res.status(httpStatus.OK)
-      .json(policyResults);
+      .json(accessResults);
   } catch (error) {
     return next(error);
   }

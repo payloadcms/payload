@@ -1,60 +1,62 @@
 const { Forbidden, NotFound } = require('../../errors');
-const executeStatic = require('../../auth/executeAccess');
+const executeAccess = require('../../auth/executeAccess');
 const performFieldOperations = require('../../fields/performFieldOperations');
 
 const findByID = async (args) => {
+  const {
+    config,
+    depth,
+    collection: {
+      Model,
+      config: collectionConfig,
+    },
+    id,
+    req,
+    req: {
+      locale,
+      fallbackLocale,
+      payloadAPI,
+    },
+  } = args;
+
   // /////////////////////////////////////
   // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  const policyResults = await executeStatic(args, args.config.access.read);
-  const hasWherePolicy = typeof policyResults === 'object';
+  const accessResults = await executeAccess({ req }, collectionConfig.access.read);
+  const hasWhereAccess = typeof accessResults === 'object';
 
   const queryToBuild = {
     where: {
       and: [
         {
           _id: {
-            equals: args.id,
+            equals: id,
           },
         },
       ],
     },
   };
 
-  if (hasWherePolicy) {
-    queryToBuild.where.and.push(policyResults);
+  if (hasWhereAccess) {
+    queryToBuild.where.and.push(accessResults);
   }
 
-  let options = {
-    ...args,
-    query: await args.Model.buildQuery(queryToBuild, args.req.locale),
-  };
+  const query = await Model.buildQuery(queryToBuild, locale);
 
   // /////////////////////////////////////
   // 2. Execute before collection hook
   // /////////////////////////////////////
 
-  const { beforeRead } = args.config.hooks;
+  const { beforeRead } = collectionConfig.hooks;
 
   if (typeof beforeRead === 'function') {
-    options = await beforeRead(options);
+    await beforeRead({ req, query });
   }
 
   // /////////////////////////////////////
   // 3. Perform database operation
   // /////////////////////////////////////
-
-  const {
-    depth,
-    Model,
-    query,
-    req: {
-      locale,
-      fallbackLocale,
-      payloadAPI,
-    },
-  } = options;
 
   const queryOptionsToExecute = {
     options: {
@@ -75,8 +77,8 @@ const findByID = async (args) => {
 
   let result = await Model.findOne(query, {}, queryOptionsToExecute);
 
-  if (!result && !hasWherePolicy) throw new NotFound();
-  if (!result && hasWherePolicy) throw new Forbidden();
+  if (!result && !hasWhereAccess) throw new NotFound();
+  if (!result && hasWhereAccess) throw new Forbidden();
 
   if (locale && result.setLocale) {
     result.setLocale(locale, fallbackLocale);
@@ -88,8 +90,11 @@ const findByID = async (args) => {
   // 4. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  result = await performFieldOperations(args.config, {
-    ...options, data: result, hook: 'afterRead', operationName: 'read',
+  result = await performFieldOperations(config, collectionConfig, {
+    req,
+    data: result,
+    hook: 'afterRead',
+    operationName: 'read',
   });
 
 
@@ -97,11 +102,12 @@ const findByID = async (args) => {
   // 5. Execute after collection hook
   // /////////////////////////////////////
 
-  const { afterRead } = args.config.hooks;
+  const { afterRead } = collectionConfig.hooks;
 
   if (typeof afterRead === 'function') {
     result = await afterRead({
-      ...options,
+      req,
+      query,
       doc: result,
     }) || result;
   }

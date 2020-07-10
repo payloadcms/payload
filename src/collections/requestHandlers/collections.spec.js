@@ -206,7 +206,7 @@ describe('Collections - REST', () => {
 
       expect(getResponse.status).toBe(200);
       expect(data.docs[0].description).toBe(desc);
-      expect(data.docs.length).toBe(1);
+      expect(data.docs).toHaveLength(1);
     });
   });
 
@@ -324,7 +324,7 @@ describe('Collections - REST', () => {
       const data = await getResponse.json();
 
       expect(getResponse.status).toBe(200);
-      expect(data.docs.length).toEqual(2);
+      expect(data.docs).toHaveLength(2);
       expect(data.docs[0].id).toEqual(id1);
       expect(data.docs[1].id).toEqual(id2);
 
@@ -333,7 +333,7 @@ describe('Collections - REST', () => {
       const sortedData = await getResponseSorted.json();
 
       expect(getResponse.status).toBe(200);
-      expect(sortedData.docs.length).toEqual(2);
+      expect(sortedData.docs).toHaveLength(2);
       // Opposite order from first request
       expect(sortedData.docs[0].id).toEqual(id2);
       expect(sortedData.docs[1].id).toEqual(id1);
@@ -359,20 +359,6 @@ describe('Collections - REST', () => {
         const data = await response.json();
         expect(response.status).toBe(201);
         expect(data.doc.description).toEqual('Original-beforeCreateSuffix');
-      });
-
-      it('beforeRead', async () => {
-        const response = await fetch(`${url}/api/hooks`, {
-          headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
-            hook: 'beforeRead', // Used by hook
-          },
-          method: 'get',
-        });
-        const data = await response.json();
-        expect(response.status).toBe(200);
-        expect(data.limit).toEqual(1); // Set in our beforeRead hook
       });
 
       it('beforeUpdate', async () => {

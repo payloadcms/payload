@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const { update } = require('../operations');
 
-const updateHandler = (Model, config) => async (req, res, next) => {
+const updateHandler = (config, Model, globalConfig) => async (req, res, next) => {
   try {
     const { slug } = config;
 
@@ -9,6 +9,7 @@ const updateHandler = (Model, config) => async (req, res, next) => {
       req,
       Model,
       config,
+      globalConfig,
       slug,
       depth: req.query.depth,
       data: req.body,

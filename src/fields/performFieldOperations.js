@@ -1,18 +1,20 @@
 const { ValidationError } = require('../errors');
 
-module.exports = async (config, operation) => {
+module.exports = async (config, entityConfig, operation) => {
   const {
     data: fullData,
     originalDoc: fullOriginalDoc,
     operationName,
     hook,
+    req,
   } = operation;
 
   // Maintain a top-level list of promises
   // so that all async field access / validations / hooks
   // can run in parallel
   const validationPromises = [];
-  const policyPromises = [];
+  const accessPromises = [];
+  const relationshipAccessPromises = [];
   const hookPromises = [];
   const errors = [];
 
@@ -29,17 +31,39 @@ module.exports = async (config, operation) => {
     }
   };
 
-  const createPolicyPromise = async (data, originalDoc, field) => {
+  const createRelationshipAccessPromise = async (data, field, access) => {
+    const resultingData = data;
+
+    const result = await access({ req });
+
+    if (result === false) {
+      delete resultingData[field.name];
+    }
+  };
+
+  const createAccessPromise = async (data, originalDoc, field) => {
     const resultingData = data;
 
     if (field.access && field.access[operationName]) {
-      const result = await field.access[operationName](operation);
+      const result = await field.access[operationName]({ req });
 
       if (!result && operationName === 'update' && originalDoc[field.name] !== undefined) {
         resultingData[field.name] = originalDoc[field.name];
       } else if (!result) {
         delete resultingData[field.name];
       }
+    }
+
+    if (field.type === 'relationship' && operationName === 'read') {
+      const relatedCollections = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo];
+
+      relatedCollections.forEach((slug) => {
+        const collection = config.collections.find((coll) => coll.slug === slug);
+
+        if (collection && collection.access && collection.access.read) {
+          relationshipAccessPromises.push(createRelationshipAccessPromise(data, field, collection.access.read));
+        }
+      });
     }
   };
 
@@ -66,7 +90,7 @@ module.exports = async (config, operation) => {
         if (data[field.name] === 'false') dataCopy[field.name] = false;
       }
 
-      policyPromises.push(createPolicyPromise(data, originalDoc, field));
+      accessPromises.push(createAccessPromise(data, originalDoc, field));
       hookPromises.push(createHookPromise(data, field));
 
       if (field.fields) {
@@ -101,14 +125,14 @@ module.exports = async (config, operation) => {
   // Entry point for field validation
   // //////////////////////////////////////////
 
-  traverseFields(config.fields, fullData, fullOriginalDoc, '');
+  traverseFields(entityConfig.fields, fullData, fullOriginalDoc, '');
   await Promise.all(validationPromises);
 
   if (errors.length > 0) {
     throw new ValidationError(errors);
   }
 
-  await Promise.all(policyPromises);
+  await Promise.all(accessPromises);
   await Promise.all(hookPromises);
 
   return fullData;

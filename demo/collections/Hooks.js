@@ -17,32 +17,30 @@ module.exports = {
       if (operation.req.headers.hook === 'beforeCreate') {
         operation.req.body.description += '-beforeCreateSuffix';
       }
-      return operation;
+      return operation.data;
     },
     beforeRead: (operation) => {
       if (operation.req.headers.hook === 'beforeRead') {
-        operation.limit = 1;
+        console.log('before reading Hooks document');
       }
-      return operation;
     },
     beforeUpdate: (operation) => {
       if (operation.req.headers.hook === 'beforeUpdate') {
         operation.req.body.description += '-beforeUpdateSuffix';
       }
-      return operation;
+      return operation.data;
     },
     beforeDelete: (operation) => {
       if (operation.req.headers.hook === 'beforeDelete') {
         // TODO: Find a better hook operation to assert against in tests
         operation.req.headers.hook = 'afterDelete';
       }
-      return operation;
     },
-    afterCreate: (operation, value) => {
+    afterCreate: (operation) => {
       if (operation.req.headers.hook === 'afterCreate') {
-        value.afterCreateHook = true;
+        operation.doc.afterCreateHook = true;
       }
-      return value;
+      return operation.doc;
     },
     afterRead: (operation) => {
       const { doc } = operation;
@@ -50,17 +48,17 @@ module.exports = {
 
       return doc;
     },
-    afterUpdate: (operation, value) => {
+    afterUpdate: (operation) => {
       if (operation.req.headers.hook === 'afterUpdate') {
-        value.afterUpdateHook = true;
+        operation.doc.afterUpdateHook = true;
       }
-      return value;
+      return operation.doc;
     },
-    afterDelete: (operation, value) => {
+    afterDelete: (operation) => {
       if (operation.req.headers.hook === 'afterDelete') {
-        value.afterDeleteHook = true;
+        operation.doc.afterDeleteHook = true;
       }
-      return value;
+      return operation.doc;
     },
   },
   fields: [
@@ -73,7 +71,7 @@ module.exports = {
       unique: true,
       localized: true,
       hooks: {
-        afterRead: value => (value ? value.toUpperCase() : null),
+        afterRead: (value) => (value ? value.toUpperCase() : null),
       },
     },
     {

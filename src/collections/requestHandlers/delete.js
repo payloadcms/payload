@@ -2,12 +2,12 @@ const httpStatus = require('http-status');
 const { NotFound } = require('../../errors');
 const { deleteQuery } = require('../operations');
 
-const deleteHandler = async (req, res, next) => {
+const deleteHandler = (config) => async (req, res, next) => {
   try {
     const doc = await deleteQuery({
       req,
-      Model: req.collection.Model,
-      config: req.collection.config,
+      collection: req.collection,
+      config,
       id: req.params.id,
     });
 

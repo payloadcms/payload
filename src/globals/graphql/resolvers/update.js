@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 const { update } = require('../../operations');
 
-const updateResolver = (Model, config) => async (_, args, context) => {
+const updateResolver = (config, Model, globalConfig) => async (_, args, context) => {
   if (args.locale) context.req.locale = args.locale;
   if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
@@ -9,6 +9,7 @@ const updateResolver = (Model, config) => async (_, args, context) => {
 
   const options = {
     config,
+    globalConfig,
     Model,
     data: args.data,
     slug,

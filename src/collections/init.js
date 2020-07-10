@@ -40,7 +40,7 @@ function registerCollections() {
 
       this.router.use(authRoutes(AuthCollection, this.config, this.sendEmail));
     } else {
-      this.router.use(collectionRoutes(this.collections[formattedCollection.slug]));
+      this.router.use(collectionRoutes(this.collections[formattedCollection.slug], this.config));
     }
 
     return formattedCollection;

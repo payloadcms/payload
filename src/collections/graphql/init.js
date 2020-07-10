@@ -13,7 +13,7 @@ const {
 } = require('./resolvers');
 
 const {
-  login, me, init, refresh, register, forgotPassword, resetPassword,
+  login, logout, me, init, refresh, register, forgotPassword, resetPassword,
 } = require('../../auth/graphql/resolvers');
 
 const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
@@ -93,7 +93,7 @@ function registerCollections() {
         locale: { type: this.types.localeInputType },
         fallbackLocale: { type: this.types.fallbackLocaleInputType },
       },
-      resolve: findByID(collection),
+      resolve: findByID(this.config, collection),
     };
 
     this.Query.fields[pluralLabel] = {
@@ -106,7 +106,7 @@ function registerCollections() {
         limit: { type: GraphQLInt },
         sort: { type: GraphQLString },
       },
-      resolve: find(collection),
+      resolve: find(this.config, collection),
     };
 
     this.Mutation.fields[`update${singularLabel}`] = {
@@ -115,7 +115,7 @@ function registerCollections() {
         id: { type: new GraphQLNonNull(GraphQLString) },
         data: { type: collection.graphQL.updateMutationInputType },
       },
-      resolve: update(collection),
+      resolve: update(this.config, collection),
     };
 
     this.Mutation.fields[`delete${singularLabel}`] = {
@@ -174,6 +174,11 @@ function registerCollections() {
         resolve: login(this.config, collection),
       };
 
+      this.Mutation.fields[`logout${singularLabel}`] = {
+        type: GraphQLString,
+        resolve: logout(this.config, collection),
+      };
+
       this.Mutation.fields[`register${singularLabel}`] = {
         type: collection.graphQL.type,
         args: {
@@ -209,7 +214,7 @@ function registerCollections() {
         args: {
           data: { type: collection.graphQL.mutationInputType },
         },
-        resolve: create(collection),
+        resolve: create(this.config, collection),
       };
     }
   });

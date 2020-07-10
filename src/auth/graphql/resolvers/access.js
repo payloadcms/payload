@@ -13,18 +13,18 @@ const formatConfigNames = (results, configs) => {
   return formattedResults;
 };
 
-const policyResolver = (config) => async (_, __, context) => {
+const accessResolver = (config) => async (_, __, context) => {
   const options = {
     config,
     req: context.req,
   };
 
-  let policyResults = await access(options);
+  let accessResults = await access(options);
 
-  policyResults = formatConfigNames(policyResults, config.collections);
-  policyResults = formatConfigNames(policyResults, config.globals);
+  accessResults = formatConfigNames(accessResults, config.collections);
+  accessResults = formatConfigNames(accessResults, config.globals);
 
-  return policyResults;
+  return accessResults;
 };
 
-module.exports = policyResolver;
+module.exports = accessResolver;

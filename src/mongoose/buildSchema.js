@@ -3,13 +3,13 @@ const { Schema } = require('mongoose');
 const { MissingSelectOptions } = require('../errors');
 
 const formatBaseSchema = (field) => {
-  const createPolicy = field.access && field.access.create;
+  const createAccess = field.access && field.access.create;
 
   return {
     hide: field.hidden,
     localized: field.localized || false,
     unique: field.unique || false,
-    required: (field.required && !field.localized && !field.condition && !createPolicy) || false,
+    required: (field.required && !field.localized && !field.condition && !createAccess) || false,
     default: field.defaultValue || undefined,
   };
 };
