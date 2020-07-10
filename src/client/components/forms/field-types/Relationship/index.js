@@ -19,6 +19,8 @@ const {
 
 const maxResultsPerRequest = 10;
 
+const baseClass = 'relationship';
+
 class Relationship extends Component {
   constructor(props) {
     super(props);
@@ -31,6 +33,7 @@ class Relationship extends Component {
       lastFullyLoadedRelation: -1,
       lastLoadedPage: 1,
       options: [],
+      errorLoading: false,
     };
   }
 
@@ -46,6 +49,7 @@ class Relationship extends Component {
   }
 
   getNextOptions = (params = {}) => {
+    const { errorLoading } = this.state;
     const { clear } = params;
 
     if (clear) {
@@ -54,42 +58,55 @@ class Relationship extends Component {
       });
     }
 
-    const {
-      relations, lastFullyLoadedRelation, lastLoadedPage, search,
-    } = this.state;
+    if (!errorLoading) {
+      const {
+        relations, lastFullyLoadedRelation, lastLoadedPage, search,
+      } = this.state;
 
-    const relationsToSearch = relations.slice(lastFullyLoadedRelation + 1);
+      const relationsToSearch = relations.slice(lastFullyLoadedRelation + 1);
 
-    if (relationsToSearch.length > 0) {
-      some(relationsToSearch, async (relation, callback) => {
-        const collection = collections.find((coll) => coll.slug === relation);
-        const fieldToSearch = collection.useAsTitle || 'id';
-        const searchParam = search ? `&where[${fieldToSearch}][like]=${search}` : '';
-        const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}${searchParam}`);
+      if (relationsToSearch.length > 0) {
+        some(relationsToSearch, async (relation, callback) => {
+          const collection = collections.find((coll) => coll.slug === relation);
+          const fieldToSearch = collection.useAsTitle || 'id';
+          const searchParam = search ? `&where[${fieldToSearch}][like]=${search}` : '';
+          const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}${searchParam}`);
+          const data = await response.json();
 
-        const data = await response.json();
+          if (response.ok) {
+            if (data.hasNextPage) {
+              return callback(false, {
+                data,
+                relation,
+              });
+            }
 
-        if (data.hasNextPage) {
-          return callback(false, {
-            data,
-            relation,
-          });
-        }
+            return callback({ relation, data });
+          }
 
-        return callback({ relation, data });
-      }, (lastPage, nextPage) => {
-        if (nextPage) {
-          const { data, relation } = nextPage;
-          this.addOptions(data, relation);
-        } else {
-          const { data, relation } = lastPage;
-          this.addOptions(data, relation);
+          let error = 'There was a problem loading options for this field.';
+
+          if (response.status === 403) {
+            error = 'You do not have permission to load options for this field.';
+          }
+
           this.setState({
-            lastFullyLoadedRelation: relations.indexOf(relation),
-            lastLoadedPage: 1,
+            errorLoading: error,
           });
-        }
-      });
+        }, (lastPage, nextPage) => {
+          if (nextPage) {
+            const { data, relation } = nextPage;
+            this.addOptions(data, relation);
+          } else {
+            const { data, relation } = lastPage;
+            this.addOptions(data, relation);
+            this.setState({
+              lastFullyLoadedRelation: relations.indexOf(relation),
+              lastLoadedPage: 1,
+            });
+          }
+        });
+      }
     }
   }
 
@@ -199,7 +216,7 @@ class Relationship extends Component {
   }
 
   render() {
-    const { options } = this.state;
+    const { options, errorLoading } = this.state;
 
     const {
       path,
@@ -218,8 +235,9 @@ class Relationship extends Component {
 
     const classes = [
       'field-type',
-      'relationship',
+      baseClass,
       showError && 'error',
+      errorLoading && 'error-loading',
       readOnly && 'read-only',
     ].filter(Boolean).join(' ');
 
@@ -246,18 +264,25 @@ class Relationship extends Component {
           label={label}
           required={required}
         />
-        <ReactSelect
-          onInputChange={this.handleInputChange}
-          onChange={!readOnly ? setValue : undefined}
-          formatValue={this.formatSelectedValue}
-          onMenuScrollToBottom={this.handleMenuScrollToBottom}
-          findValueInOptions={this.findValueInOptions}
-          value={valueToRender}
-          showError={showError}
-          disabled={formProcessing}
-          options={options}
-          isMulti={hasMany}
-        />
+        {!errorLoading && (
+          <ReactSelect
+            onInputChange={this.handleInputChange}
+            onChange={!readOnly ? setValue : undefined}
+            formatValue={this.formatSelectedValue}
+            onMenuScrollToBottom={this.handleMenuScrollToBottom}
+            findValueInOptions={this.findValueInOptions}
+            value={valueToRender}
+            showError={showError}
+            disabled={formProcessing}
+            options={options}
+            isMulti={hasMany}
+          />
+        )}
+        {errorLoading && (
+          <div className={`${baseClass}__error-loading`}>
+            {errorLoading}
+          </div>
+        )}
       </div>
     );
   }

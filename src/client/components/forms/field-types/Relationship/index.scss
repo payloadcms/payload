@@ -3,3 +3,11 @@
 .field-type.relationship {
   position: relative;
 }
+
+.relationship__error-loading {
+  border: 1px solid $color-red;
+  height: base(2);
+  padding: base(.5) base(.75);
+  background-color: $color-red;
+  color: white;
+}
