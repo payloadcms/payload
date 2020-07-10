@@ -159,5 +159,11 @@
         opacity: 1;
       }
     }
+
+    nav a {
+      font-size: base(.875);
+      line-height: base(1.25);
+      font-weight: 600;
+    }
   }
 }
