@@ -2,8 +2,8 @@
 const { update } = require('../../operations');
 
 const updateResolver = (Model, config) => async (_, args, context) => {
-  if (args.locale) context.locale = args.locale;
-  if (args.fallbackLocale) context.fallbackLocale = args.fallbackLocale;
+  if (args.locale) context.req.locale = args.locale;
+  if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
   const { slug } = config;
 
@@ -13,7 +13,7 @@ const updateResolver = (Model, config) => async (_, args, context) => {
     data: args.data,
     slug,
     depth: 0,
-    req: context,
+    req: context.req,
   };
 
   const result = await update(options);

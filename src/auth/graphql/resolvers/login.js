@@ -9,7 +9,8 @@ const loginResolver = (config, collection) => async (_, args, context) => {
       email: args.email,
       password: args.password,
     },
-    req: context,
+    req: context.req,
+    res: context.res,
   };
 
   const token = await login(options);

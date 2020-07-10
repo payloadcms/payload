@@ -14,9 +14,11 @@ const errorHandler = require('./errorHandler');
 const { access } = require('../auth/graphql/resolvers');
 
 class GraphQL {
-  constructor(init) {
+  constructor(init, req, res) {
     Object.assign(this, init);
     this.init = this.init.bind(this);
+    this.req = req;
+    this.res = res;
 
     this.types = {
       blockTypes: {},
@@ -94,6 +96,7 @@ class GraphQL {
         return response;
       },
       extensions,
+      context: { req: this.req, res: this.res },
     });
   }
 }

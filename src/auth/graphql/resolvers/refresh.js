@@ -10,7 +10,8 @@ const refreshResolver = (config, collection) => async (_, __, context) => {
     config,
     collection,
     token,
-    req: context,
+    req: context.req,
+    res: context.res,
   };
 
   const result = await refresh(options);

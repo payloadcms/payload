@@ -4,7 +4,7 @@ const { init } = require('../../operations');
 const initResolver = ({ Model }) => async (_, __, context) => {
   const options = {
     Model,
-    req: context,
+    req: context.req,
   };
 
   const result = await init(options);

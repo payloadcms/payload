@@ -7,7 +7,7 @@ const forgotPasswordResolver = (config, collection, email) => async (_, args, co
     collection,
     data: args,
     email,
-    req: context,
+    req: context.req,
   };
 
   await forgotPassword(options);

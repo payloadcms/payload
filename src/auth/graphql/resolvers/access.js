@@ -13,10 +13,10 @@ const formatConfigNames = (results, configs) => {
   return formattedResults;
 };
 
-const policyResolver = config => async (_, __, context) => {
+const policyResolver = (config) => async (_, __, context) => {
   const options = {
     config,
-    req: context,
+    req: context.req,
   };
 
   let policyResults = await access(options);

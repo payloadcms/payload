@@ -2,16 +2,15 @@
 const { resetPassword } = require('../../operations');
 
 const resetPasswordResolver = (config, collection) => async (_, args, context) => {
-  if (args.locale) context.locale = args.locale;
-  if (args.fallbackLocale) context.fallbackLocale = args.fallbackLocale;
+  if (args.locale) context.req.locale = args.locale;
+  if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
   const options = {
     collection,
     config,
     data: args,
-    req: context,
+    req: context.req,
     api: 'GraphQL',
-    user: context.user,
   };
 
   const token = await resetPassword(options);

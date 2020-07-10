@@ -7,16 +7,16 @@ const registerResolver = (config, collection) => async (_, args, context) => {
     collection,
     data: args.data,
     depth: 0,
-    req: context,
+    req: context.req,
   };
 
   if (args.locale) {
-    context.locale = args.locale;
+    context.req.locale = args.locale;
     options.locale = args.locale;
   }
 
   if (args.fallbackLocale) {
-    context.fallbackLocale = args.fallbackLocale;
+    context.req.fallbackLocale = args.fallbackLocale;
     options.fallbackLocale = args.fallbackLocale;
   }
 
