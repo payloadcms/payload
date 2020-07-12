@@ -120,6 +120,7 @@
     "eslint-plugin-react-hooks": "^2.3.0",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "faker": "^4.1.0",
+    "graphql-request": "^2.0.0",
     "node-sass": "^4.13.1",
     "node-sass-chokidar": "^1.4.0",
     "nodemon": "^1.19.4",
