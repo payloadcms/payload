@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-
+// eslint-disable-next-line no-unused-vars
 const fetch = require('isomorphic-fetch');
 const { request, GraphQLClient } = require('graphql-request');
 const faker = require('faker');
@@ -13,13 +13,8 @@ const url = `${config.serverURL}${config.routes.api}${config.routes.graphQL}`;
 let client = null;
 let token = null;
 
-let localizedPostID;
-// const englishPostDesc = faker.lorem.lines(2);
-// const spanishPostDesc = faker.lorem.lines(2);
-
 describe('GrahpQL Resolvers', () => {
   beforeAll(async (done) => {
-    // language=GraphQL
     const query = `
       mutation {
         loginAdmin(
@@ -61,8 +56,45 @@ describe('GrahpQL Resolvers', () => {
       const timestampRegex = /^(\d{4})(?:-?W(\d+)(?:-?(\d+)D?)?|(?:-(\d+))?-(\d+))(?:[T ](\d+):(\d+)(?::(\d+)(?:\.(\d+))?)?)?(?:Z(-?\d*))?$/;
       expect(data.doc.createdAt).toStrictEqual(expect.stringMatching(timestampRegex));
       expect(data.doc.updatedAt).toStrictEqual(expect.stringMatching(timestampRegex));
+    });
+  });
 
-      localizedPostID = data.id;
+  describe('Update', () => {
+    it('should allow updating an existing post', async () => {
+      const title = faker.lorem.words(1);
+      const description = 'original description';
+
+      const query = `
+      mutation {
+          createLocalizedPost(
+            data: { title: "${title}",
+            description: "${description}",
+            priority: 10}
+            ) {
+          id
+          title
+          description
+          priority
+        }
+      }`;
+
+      const createResponse = await client.request(query);
+
+      const createData = createResponse.createLocalizedPost;
+      const { id } = createData;
+
+      const updatedDesc = 'updated description';
+      const update = `
+      mutation {
+        updateLocalizedPost(id: "${id}" data: {description: "${updatedDesc}"}) {
+        description
+      }
+      `;
+
+      const response = await client.request(update);
+      const data = response.updateLocalizedPost;
+
+      expect(data.description).toBe(updatedDesc);
     });
   });
 });
