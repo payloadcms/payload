@@ -55,10 +55,12 @@ class Payload {
 
     this.router.get('/access', access(this.config));
 
+    const graphQLHandler = new GraphQL(this);
+
     this.router.use(
       this.config.routes.graphQL,
       identifyAPI('GraphQL'),
-      (req, res) => new GraphQL(this, req, res).init()(req, res),
+      (req, res) => graphQLHandler.init(req, res)(req, res),
     );
 
     this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
