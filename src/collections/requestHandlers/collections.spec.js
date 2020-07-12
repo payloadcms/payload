@@ -15,26 +15,26 @@ let localizedPostID;
 const englishPostDesc = faker.lorem.lines(2);
 const spanishPostDesc = faker.lorem.lines(2);
 
-beforeAll(async (done) => {
-  const response = await fetch(`${url}/api/admins/login`, {
-    body: JSON.stringify({
-      email,
-      password,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    method: 'post',
+describe('Collections - REST', () => {
+  beforeAll(async (done) => {
+    const response = await fetch(`${url}/api/admins/login`, {
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'post',
+    });
+
+    const data = await response.json();
+
+    ({ token } = data);
+
+    done();
   });
 
-  const data = await response.json();
-
-  ({ token } = data);
-
-  done();
-});
-
-describe('Collections - REST', () => {
   describe('Create', () => {
     it('should allow a localized post to be created', async () => {
       const response = await fetch(`${url}/api/localized-posts`, {
@@ -56,8 +56,8 @@ describe('Collections - REST', () => {
       expect(data.doc.title).not.toBeNull();
       expect(data.doc.id).not.toBeNull();
       const timestampRegex = /^(\d{4})(?:-?W(\d+)(?:-?(\d+)D?)?|(?:-(\d+))?-(\d+))(?:[T ](\d+):(\d+)(?::(\d+)(?:\.(\d+))?)?)?(?:Z(-?\d*))?$/;
-      expect(data.doc.createdAt).toEqual(expect.stringMatching(timestampRegex));
-      expect(data.doc.updatedAt).toEqual(expect.stringMatching(timestampRegex));
+      expect(data.doc.createdAt).toStrictEqual(expect.stringMatching(timestampRegex));
+      expect(data.doc.updatedAt).toStrictEqual(expect.stringMatching(timestampRegex));
 
       localizedPostID = data.doc.id;
     });
