@@ -28,6 +28,7 @@ function registerCollections() {
           plural,
         },
         fields: initialFields,
+        timestamps,
       },
     } = collection;
 
@@ -48,18 +49,48 @@ function registerCollections() {
 
     collection.graphQL = {};
 
+    const baseFields = {
+      id: {
+        type: new GraphQLNonNull(GraphQLString),
+      },
+    };
+
+    const whereInputFields = [
+      ...fields,
+    ];
+
+    if (timestamps) {
+      baseFields.createdAt = {
+        type: new GraphQLNonNull(GraphQLString),
+      };
+
+      baseFields.updatedAt = {
+        type: new GraphQLNonNull(GraphQLString),
+      };
+
+      whereInputFields.push({
+        name: 'createdAt',
+        label: 'Created At',
+        type: 'date',
+      });
+
+      whereInputFields.push({
+        name: 'updatedAt',
+        label: 'Upated At',
+        type: 'date',
+      });
+    }
+
     collection.graphQL.type = this.buildObjectType(
       singularLabel,
       fields,
       singularLabel,
-      {
-        id: { type: GraphQLString },
-      },
+      baseFields,
     );
 
     collection.graphQL.whereInputType = this.buildWhereInputType(
       singularLabel,
-      fields,
+      whereInputFields,
       singularLabel,
     );
 

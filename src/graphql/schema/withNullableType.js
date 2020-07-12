@@ -1,7 +1,9 @@
 const { GraphQLNonNull } = require('graphql');
 
 const withNullableType = (field, type) => {
-  if (field.required && !field.localized) {
+  const hasReadAccessControl = field.access && field.access.read;
+
+  if (field.required && !field.localized && !hasReadAccessControl) {
     return new GraphQLNonNull(type);
   }
 
