@@ -39,7 +39,10 @@ const UserProvider = ({ children }) => {
   const email = user?.email;
 
   const refreshCookie = useCallback(() => {
-    if (email) {
+    const now = Math.round((new Date()).getTime() / 1000);
+    const remainingTime = (exp || 0) - now;
+
+    if (exp && remainingTime < 120) {
       setTimeout(async () => {
         const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`);
 
@@ -51,7 +54,7 @@ const UserProvider = ({ children }) => {
         }
       }, 1000);
     }
-  }, [setUser, history, email]);
+  }, [setUser, history, exp]);
 
   const setToken = useCallback((token) => {
     const decoded = jwt.decode(token);
