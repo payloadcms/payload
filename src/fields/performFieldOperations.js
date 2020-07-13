@@ -113,6 +113,11 @@ module.exports = async (config, entityConfig, operation) => {
           const hasRowsOfData = Array.isArray(data[field.name]);
           const rowCount = hasRowsOfData ? data[field.name].length : 0;
 
+          if (data[field.name] === '0' || data[field.name] === 0 || data[field.name] === null) {
+            const updatedData = data;
+            updatedData[field.name] = [];
+          }
+
           validationPromises.push(createValidationPromise(rowCount, field, path));
         } else {
           validationPromises.push(createValidationPromise(data[field.name], field, path));

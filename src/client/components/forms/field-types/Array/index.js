@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useCallback } from 'react';
+import React, { useEffect, useReducer, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,7 +17,7 @@ import './index.scss';
 
 const baseClass = 'field-type array';
 
-const Array = (props) => {
+const ArrayFieldType = (props) => {
   const {
     label,
     name,
@@ -48,6 +48,8 @@ const Array = (props) => {
     return validationResult;
   }, [validate, maxRows, minRows, required]);
 
+  const [disableFormData, setDisableFormData] = useState(false);
+
   const {
     showError,
     errorMessage,
@@ -56,7 +58,7 @@ const Array = (props) => {
   } = useFieldType({
     path,
     validate: memoizedValidate,
-    disableFormData: true,
+    disableFormData,
     initialData: initialData?.length,
     defaultValue: defaultValue?.length,
     required,
@@ -112,6 +114,16 @@ const Array = (props) => {
       ]), []),
     });
   }, [dataToInitialize]);
+
+  useEffect(() => {
+    if (value === 0 && dataToInitialize.length > 0 && disableFormData) {
+      setDisableFormData(false);
+      setValue(value);
+    } else if (value > 0 && !disableFormData) {
+      setDisableFormData(true);
+      setValue(value);
+    }
+  }, [value, setValue, disableFormData, dataToInitialize]);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -171,7 +183,7 @@ const Array = (props) => {
   );
 };
 
-Array.defaultProps = {
+ArrayFieldType.defaultProps = {
   label: '',
   defaultValue: [],
   initialData: [],
@@ -185,7 +197,7 @@ Array.defaultProps = {
   permissions: {},
 };
 
-Array.propTypes = {
+ArrayFieldType.propTypes = {
   defaultValue: PropTypes.arrayOf(
     PropTypes.shape({}),
   ),
@@ -211,4 +223,4 @@ Array.propTypes = {
   }),
 };
 
-export default withCondition(Array);
+export default withCondition(ArrayFieldType);

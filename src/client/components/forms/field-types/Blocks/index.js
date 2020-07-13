@@ -1,5 +1,5 @@
 import React, {
-  useEffect, useReducer, useCallback,
+  useEffect, useReducer, useCallback, useState,
 } from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
@@ -50,6 +50,8 @@ const Blocks = (props) => {
     return validationResult;
   }, [validate, maxRows, minRows, singularLabel, blocks, required]);
 
+  const [disableFormData, setDisableFormData] = useState(false);
+
   const {
     showError,
     errorMessage,
@@ -58,7 +60,7 @@ const Blocks = (props) => {
   } = useFieldType({
     path,
     validate: memoizedValidate,
-    disableFormData: true,
+    disableFormData,
     initialData: initialData?.length,
     defaultValue: defaultValue?.length,
     required,
@@ -125,6 +127,17 @@ const Blocks = (props) => {
       ]), []),
     });
   }, [dataToInitialize]);
+
+  useEffect(() => {
+    if (value === 0 && dataToInitialize.length > 0 && disableFormData) {
+      setDisableFormData(false);
+      setValue(value);
+    } else if (value > 0 && !disableFormData) {
+      setDisableFormData(true);
+      setValue(value);
+    }
+  }, [value, setValue, disableFormData, dataToInitialize]);
+
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -237,6 +250,9 @@ Blocks.defaultProps = {
 };
 
 Blocks.propTypes = {
+  blocks: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ).isRequired,
   defaultValue: PropTypes.arrayOf(
     PropTypes.shape({}),
   ),
