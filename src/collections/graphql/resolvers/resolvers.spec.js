@@ -37,6 +37,7 @@ describe('GrahpQL Resolvers', () => {
       const title = faker.lorem.words(1);
       const description = faker.lorem.words(1);
 
+      // language=graphQL
       const query = `mutation {
           createLocalizedPost(data: {title: "${title}", description: "${description}", priority: 10}) {
           title
@@ -54,8 +55,8 @@ describe('GrahpQL Resolvers', () => {
       expect(data.title).toBe(title);
       expect(data.id).not.toBeNull();
       const timestampRegex = /^(\d{4})(?:-?W(\d+)(?:-?(\d+)D?)?|(?:-(\d+))?-(\d+))(?:[T ](\d+):(\d+)(?::(\d+)(?:\.(\d+))?)?)?(?:Z(-?\d*))?$/;
-      expect(data.doc.createdAt).toStrictEqual(expect.stringMatching(timestampRegex));
-      expect(data.doc.updatedAt).toStrictEqual(expect.stringMatching(timestampRegex));
+      expect(data.createdAt).toStrictEqual(expect.stringMatching(timestampRegex));
+      expect(data.updatedAt).toStrictEqual(expect.stringMatching(timestampRegex));
     });
   });
 
@@ -64,13 +65,9 @@ describe('GrahpQL Resolvers', () => {
       const title = faker.lorem.words(1);
       const description = 'original description';
 
-      const query = `
-      mutation {
-          createLocalizedPost(
-            data: { title: "${title}",
-            description: "${description}",
-            priority: 10}
-            ) {
+      // language=graphQL
+      const query = `mutation {
+          createLocalizedPost(data: { title: "${title}", description: "${description}", priority: 10}) {
           id
           title
           description
@@ -82,14 +79,15 @@ describe('GrahpQL Resolvers', () => {
 
       const createData = createResponse.createLocalizedPost;
       const { id } = createData;
-
       const updatedDesc = 'updated description';
+
+      // language=graphQL
       const update = `
       mutation {
         updateLocalizedPost(id: "${id}" data: {description: "${updatedDesc}"}) {
         description
       }
-      `;
+      }`;
 
       const response = await client.request(update);
       const data = response.updateLocalizedPost;
