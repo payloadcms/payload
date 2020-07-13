@@ -15,7 +15,7 @@ module.exports = (config) => {
       filename: '[name].[chunkhash].js',
     },
     mode: 'production',
-    resolveLoader: { modules: [path.join(__dirname, '../../node_modules')] },
+    resolveLoader: { modules: ['node_modules', path.join(__dirname, '../../node_modules')] },
     module: {
       rules: [
         {

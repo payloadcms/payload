@@ -8,7 +8,7 @@ module.exports = (config) => {
   let webpackConfig = {
     entry: {
       main: [
-        path.resolve(__dirname, '../../node_modules/webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000'),
+        'webpack-hot-middleware/client',
         path.resolve(__dirname, '../client/components/index.js'),
       ],
     },
@@ -19,7 +19,7 @@ module.exports = (config) => {
     },
     devtool: 'source-map',
     mode: 'development',
-    resolveLoader: { modules: [path.join(__dirname, '../../node_modules')] },
+    resolveLoader: { modules: ['node_modules', path.join(__dirname, '../../node_modules')] },
     module: {
       rules: [
         {
@@ -33,7 +33,7 @@ module.exports = (config) => {
         },
         {
           test: /\.js$/,
-          exclude: /node_modules/,
+          exclude: /node_modules\/(?!(@payloadcms\/payload)\/).*/,
           use: [{
             loader: 'babel-loader',
             options: {
