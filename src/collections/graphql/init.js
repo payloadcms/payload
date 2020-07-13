@@ -185,6 +185,7 @@ function registerCollections() {
                     type: 'number',
                   },
                 ]),
+                formatName(`${slug}MeUser`),
               ),
             },
           },
