@@ -29,7 +29,7 @@ module.exports = (config) => {
         },
         {
           test: /\.js$/,
-          exclude: /node_modules/,
+          exclude: /node_modules\/(?!(@payloadcms\/payload)\/).*/,
           use: {
             loader: 'babel-loader',
             options: {
