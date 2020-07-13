@@ -41,6 +41,12 @@ module.exports = (config) => {
                 [
                   require.resolve('@babel/preset-env'),
                   {
+                    targets: [
+                      'defaults',
+                      'not IE 11',
+                      'not IE_Mob 11',
+                      'maintained node versions',
+                    ],
                     modules: 'commonjs',
                   },
                 ],

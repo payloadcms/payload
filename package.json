@@ -17,12 +17,6 @@
     "test:int": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js NODE_ENV=test jest --forceExit --runInBand",
     "test:unit": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js NODE_ENV=test jest"
   },
-  "browserslist": [
-    "defaults",
-    "not IE 11",
-    "not IE_Mob 11",
-    "maintained node versions"
-  ],
   "dependencies": {
     "@babel/core": "^7.8.3",
     "@babel/plugin-proposal-class-properties": "^7.8.3",
