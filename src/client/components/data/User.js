@@ -39,17 +39,19 @@ const UserProvider = ({ children }) => {
   const email = user?.email;
 
   const refreshCookie = useCallback(() => {
-    setTimeout(async () => {
-      const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`);
+    if (email) {
+      setTimeout(async () => {
+        const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`);
 
-      if (request.status === 200) {
-        const json = await request.json();
-        setUser(json.user);
-      } else {
-        history.push(`${admin}/logout-inactivity`);
-      }
-    }, 1000);
-  }, [setUser, history]);
+        if (request.status === 200) {
+          const json = await request.json();
+          setUser(json.user);
+        } else {
+          history.push(`${admin}/logout-inactivity`);
+        }
+      }, 1000);
+    }
+  }, [setUser, history, email]);
 
   const setToken = useCallback((token) => {
     const decoded = jwt.decode(token);
