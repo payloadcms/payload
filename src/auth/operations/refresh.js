@@ -41,7 +41,16 @@ const refresh = async (args) => {
       cookieOptions.secure = true;
     }
 
-    args.res.cookie(`${cookiePrefix}-token`, refreshedToken, cookieOptions);
+    if (Array.isArray(options.collection.config.auth.cookieDomains)) {
+      options.collection.config.auth.cookieDomains.forEach((domain) => {
+        args.res.cookie(`${cookiePrefix}-token`, refreshedToken, {
+          ...cookieOptions,
+          domain,
+        });
+      });
+    } else {
+      args.res.cookie(`${cookiePrefix}-token`, refreshedToken, cookieOptions);
+    }
   }
 
 

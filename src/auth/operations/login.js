@@ -74,7 +74,16 @@ const login = async (args) => {
       cookieOptions.secure = true;
     }
 
-    args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
+    if (Array.isArray(collectionConfig.auth.cookieDomains)) {
+      collectionConfig.auth.cookieDomains.forEach((domain) => {
+        args.res.cookie(`${config.cookiePrefix}-token`, token, {
+          ...cookieOptions,
+          domain,
+        });
+      });
+    } else {
+      args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
+    }
   }
 
   // /////////////////////////////////////

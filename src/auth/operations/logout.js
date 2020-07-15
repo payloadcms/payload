@@ -18,7 +18,16 @@ const logout = async (args) => {
     cookieOptions.secure = true;
   }
 
-  res.cookie(`${config.cookiePrefix}-token`, '', cookieOptions);
+  if (Array.isArray(collectionConfig.auth.cookieDomains)) {
+    collectionConfig.auth.cookieDomains.forEach((domain) => {
+      args.res.cookie(`${config.cookiePrefix}-token`, '', {
+        ...cookieOptions,
+        domain,
+      });
+    });
+  } else {
+    args.res.cookie(`${config.cookiePrefix}-token`, '', cookieOptions);
+  }
 
   return 'Logged out successfully.';
 };
