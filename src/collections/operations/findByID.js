@@ -98,7 +98,7 @@ const findByID = async (args) => {
   // 5. Execute after collection hook
   // /////////////////////////////////////
 
-  collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
     await priorHook;
 
     result = await hook({

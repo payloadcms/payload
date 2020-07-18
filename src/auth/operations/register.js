@@ -87,7 +87,7 @@ const register = async (args) => {
   // 8. Execute after create hook
   // /////////////////////////////////////
 
-  collectionConfig.hooks.afterCreate.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.afterCreate.reduce(async (priorHook, hook) => {
     await priorHook;
 
     result = await hook({

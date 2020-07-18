@@ -77,7 +77,7 @@ const findOne = async (args) => {
   // 5. Execute after collection hook
   // /////////////////////////////////////
 
-  globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+  await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
     await priorHook;
 
     doc = await hook({

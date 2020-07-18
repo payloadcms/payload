@@ -97,7 +97,7 @@ const update = async (args) => {
   // 8. Execute after global hook
   // /////////////////////////////////////
 
-  globalConfig.hooks.afterUpdate.reduce(async (priorHook, hook) => {
+  await globalConfig.hooks.afterUpdate.reduce(async (priorHook, hook) => {
     await priorHook;
 
     global = await hook({

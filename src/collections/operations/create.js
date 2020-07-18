@@ -36,7 +36,7 @@ const create = async (args) => {
   // 2. Execute before collection hook
   // /////////////////////////////////////
 
-  collectionConfig.hooks.beforeCreate.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.beforeCreate.reduce(async (priorHook, hook) => {
     await priorHook;
 
     data = (await hook({
@@ -125,7 +125,7 @@ const create = async (args) => {
   // 7. Execute after collection hook
   // /////////////////////////////////////
 
-  collectionConfig.hooks.afterCreate.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.afterCreate.reduce(async (priorHook, hook) => {
     await priorHook;
 
     result = await hook({

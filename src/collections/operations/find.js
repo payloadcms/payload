@@ -126,7 +126,7 @@ const find = async (args) => {
       docs: await Promise.all(result.docs.map(async (doc) => {
         let docRef = doc;
 
-        collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+        await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
           await priorHook;
 
           docRef = await hook({ req, query, doc }) || doc;

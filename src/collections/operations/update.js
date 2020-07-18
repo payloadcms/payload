@@ -164,7 +164,7 @@ const update = async (args) => {
   // 8. Execute after collection hook
   // /////////////////////////////////////
 
-  collectionConfig.hooks.afterUpdate.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.afterUpdate.reduce(async (priorHook, hook) => {
     await priorHook;
 
     doc = await hook({
