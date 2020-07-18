@@ -1,7 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 // const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-const { IgnorePlugin } = require('webpack');
+const webpack = require('webpack');
 const path = require('path');
 const getStyleLoaders = require('./getStyleLoaders');
 
@@ -124,20 +124,21 @@ module.exports = (config) => {
     new Dotenv({
       silent: true,
     }),
+    new webpack.optimize.UglifyJSPlugin(),
   ];
 
   if (config.webpackIgnorePlugin instanceof RegExp) {
-    plugins.push(new IgnorePlugin(config.webpackIgnorePlugin));
+    plugins.push(new webpack.IgnorePlugin(config.webpackIgnorePlugin));
   } else if (typeof config.webpackIgnorePlugin === 'string') {
-    plugins.push(new IgnorePlugin(new RegExp(`^${config.webpackIgnorePlugin}$`, 'is')));
+    plugins.push(new webpack.IgnorePlugin(new RegExp(`^${config.webpackIgnorePlugin}$`, 'is')));
   }
 
   if (Array.isArray(config.webpackIgnorePlugin)) {
     config.webpackIgnorePlugin.forEach((ignorePath) => {
       if (ignorePath instanceof RegExp) {
-        plugins.push(new IgnorePlugin(ignorePath));
+        plugins.push(new webpack.IgnorePlugin(ignorePath));
       } else if (typeof ignorePath === 'string') {
-        plugins.push(new IgnorePlugin(new RegExp(`^${ignorePath}$`, 'is')));
+        plugins.push(new webpack.IgnorePlugin(new RegExp(`^${ignorePath}$`, 'is')));
       }
     });
   }

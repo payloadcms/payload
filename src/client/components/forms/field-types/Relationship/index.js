@@ -68,7 +68,7 @@ class Relationship extends Component {
       if (relationsToSearch.length > 0) {
         some(relationsToSearch, async (relation, callback) => {
           const collection = collections.find((coll) => coll.slug === relation);
-          const fieldToSearch = collection.useAsTitle || 'id';
+          const fieldToSearch = collection?.admin?.useAsTitle || 'id';
           const searchParam = search ? `&where[${fieldToSearch}][like]=${search}` : '';
           const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}${searchParam}`);
           const data = await response.json();
@@ -162,7 +162,7 @@ class Relationship extends Component {
         options: [
           ...options,
           ...data.docs.map((doc) => ({
-            label: doc[collection.useAsTitle || 'id'],
+            label: doc[collection?.admin?.useAsTitle || 'id'],
             value: doc.id,
           })),
         ],
@@ -172,7 +172,7 @@ class Relationship extends Component {
       const optionsToAddTo = allOptionGroups.find((optionGroup) => optionGroup.label === collection.labels.plural);
 
       const newOptions = data.docs.map((doc) => ({
-        label: doc[collection.useAsTitle || 'id'],
+        label: doc[collection?.admin?.useAsTitle || 'id'],
         value: {
           relationTo: collection.slug,
           value: doc.id,
@@ -221,8 +221,6 @@ class Relationship extends Component {
     const {
       path,
       required,
-      style,
-      width,
       errorMessage,
       label,
       hasMany,
@@ -230,7 +228,11 @@ class Relationship extends Component {
       showError,
       formProcessing,
       setValue,
-      readOnly,
+      admin: {
+        readOnly,
+        style,
+        width,
+      } = {},
     } = this.props;
 
     const classes = [
@@ -289,20 +291,17 @@ class Relationship extends Component {
 }
 
 Relationship.defaultProps = {
-  style: {},
   required: false,
   errorMessage: '',
   hasMany: false,
-  width: undefined,
   showError: false,
   value: undefined,
   path: '',
   formProcessing: false,
-  readOnly: false,
+  admin: {},
 };
 
 Relationship.propTypes = {
-  readOnly: PropTypes.bool,
   relationTo: PropTypes.oneOfType([
     PropTypes.oneOf(Object.keys(collections).map((key) => collections[key].slug)),
     PropTypes.arrayOf(
@@ -310,13 +309,16 @@ Relationship.propTypes = {
     ),
   ]).isRequired,
   required: PropTypes.bool,
-  style: PropTypes.shape({}),
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
   errorMessage: PropTypes.string,
   showError: PropTypes.bool,
   label: PropTypes.string.isRequired,
   path: PropTypes.string,
   formProcessing: PropTypes.bool,
-  width: PropTypes.string,
   hasMany: PropTypes.bool,
   setValue: PropTypes.func.isRequired,
   hasMultipleRelations: PropTypes.bool.isRequired,

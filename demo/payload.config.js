@@ -28,6 +28,11 @@ module.exports = {
   admin: {
     user: 'admins',
     disable: false,
+    components: {
+      layout: {
+        // Sidebar: path.resolve(__dirname, 'client/components/layout/Sidebar/index.js'),
+      },
+    },
   },
   collections: [
     Admin,
@@ -82,11 +87,6 @@ module.exports = {
     fallback: true,
   },
   productionGraphQLPlayground: false,
-  components: {
-    layout: {
-      // Sidebar: path.resolve(__dirname, 'client/components/layout/Sidebar/index.js'),
-    },
-  },
   hooks: {
     afterError: () => {
       console.error('global error config handler');

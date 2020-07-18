@@ -16,13 +16,15 @@ const NumberField = (props) => {
     defaultValue,
     initialData,
     validate,
-    style,
-    width,
     label,
     placeholder,
     max,
     min,
-    readOnly,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
   } = props;
 
   const path = pathFromProps || name;
@@ -91,17 +93,15 @@ const NumberField = (props) => {
 
 NumberField.defaultProps = {
   label: null,
+  path: undefined,
   required: false,
   defaultValue: undefined,
   initialData: undefined,
   placeholder: undefined,
-  width: undefined,
-  style: {},
   max: undefined,
   min: undefined,
-  path: '',
-  readOnly: false,
   validate: number,
+  admin: {},
 };
 
 NumberField.propTypes = {
@@ -112,12 +112,14 @@ NumberField.propTypes = {
   defaultValue: PropTypes.number,
   initialData: PropTypes.number,
   validate: PropTypes.func,
-  width: PropTypes.string,
-  style: PropTypes.shape({}),
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
   label: PropTypes.string,
   max: PropTypes.number,
   min: PropTypes.number,
-  readOnly: PropTypes.bool,
 };
 
 export default withCondition(NumberField);

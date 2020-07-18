@@ -50,7 +50,6 @@ ListView.propTypes = {
       plural: PropTypes.string,
     }),
     slug: PropTypes.string,
-    useAsTitle: PropTypes.string,
     fields: PropTypes.arrayOf(PropTypes.shape),
     timestamps: PropTypes.bool,
   }).isRequired,

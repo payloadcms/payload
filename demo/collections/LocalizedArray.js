@@ -37,7 +37,9 @@ const LocalizedArrays = {
           type: 'text',
           name: 'arrayText3',
           label: 'Array Text 3',
-          readOnly: true,
+          admin: {
+            readOnly: true,
+          },
         },
       ],
     },

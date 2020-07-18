@@ -26,7 +26,7 @@ function recursivelyAddFieldComponents(fields) {
 
       if (field.components || field.fields) {
         const fieldComponents = {
-          ...(field.components || {}),
+          ...(field.admin.components || {}),
         };
 
         if (field.fields) {
@@ -56,7 +56,7 @@ function customComponents(config) {
 
     newComponents[collection.slug] = {
       fields: recursivelyAddFieldComponents(collection.fields),
-      ...(collection.components || {}),
+      ...(collection.admin.components || {}),
     };
 
     return newComponents;
@@ -67,7 +67,7 @@ function customComponents(config) {
 
     newComponents[global.slug] = {
       fields: recursivelyAddFieldComponents(global.fields),
-      ...(global.components || {}),
+      ...(global.admin.components || {}),
     };
 
     return newComponents;
@@ -76,7 +76,7 @@ function customComponents(config) {
   const string = stringify({
     ...(allCollectionComponents || {}),
     ...(allGlobalComponents || {}),
-    ...(config.components || {}),
+    ...(config.admin.components || {}),
   }).replace(/\\/g, '\\\\');
 
   return {

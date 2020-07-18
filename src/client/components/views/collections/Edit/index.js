@@ -27,7 +27,9 @@ const EditView = (props) => {
     labels: {
       plural: pluralLabel,
     },
-    useAsTitle,
+    admin: {
+      useAsTitle,
+    },
   } = collection;
 
   const onSave = (json) => {
@@ -99,7 +101,9 @@ EditView.propTypes = {
       singular: PropTypes.string,
     }),
     slug: PropTypes.string,
-    useAsTitle: PropTypes.string,
+    admin: PropTypes.shape({
+      useAsTitle: PropTypes.string,
+    }),
     fields: PropTypes.arrayOf(PropTypes.shape({})),
     preview: PropTypes.func,
   }).isRequired,

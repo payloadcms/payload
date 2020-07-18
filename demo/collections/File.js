@@ -33,7 +33,6 @@ module.exports = {
     update: access,
     delete: access,
   },
-  useAsTitle: 'filename',
   fields: [
     {
       name: 'type',
@@ -61,4 +60,7 @@ module.exports = {
     },
   ],
   timestamps: true,
+  admin: {
+    useAsTitle: 'filename',
+  },
 };

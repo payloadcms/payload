@@ -17,8 +17,10 @@ const ListControls = (props) => {
     enableColumns,
     collection: {
       fields,
-      useAsTitle,
-      defaultColumns,
+      admin: {
+        useAsTitle,
+        defaultColumns,
+      },
     },
   } = props;
 
@@ -30,7 +32,7 @@ const ListControls = (props) => {
 
   useEffect(() => {
     if (useAsTitle) {
-      const foundTitleField = fields.find(field => field.name === useAsTitle);
+      const foundTitleField = fields.find((field) => field.name === useAsTitle);
 
       if (foundTitleField) {
         setTitleField(foundTitleField);
@@ -129,11 +131,13 @@ ListControls.defaultProps = {
 ListControls.propTypes = {
   enableColumns: PropTypes.bool,
   collection: PropTypes.shape({
-    useAsTitle: PropTypes.string,
+    admin: PropTypes.shape({
+      useAsTitle: PropTypes.string,
+      defaultColumns: PropTypes.arrayOf(
+        PropTypes.string,
+      ),
+    }),
     fields: PropTypes.arrayOf(PropTypes.shape),
-    defaultColumns: PropTypes.arrayOf(
-      PropTypes.string,
-    ),
   }).isRequired,
   handleChange: PropTypes.func.isRequired,
 };

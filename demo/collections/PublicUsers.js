@@ -8,7 +8,9 @@ module.exports = {
     singular: 'Public User',
     plural: 'Public Users',
   },
-  useAsTitle: 'email',
+  admin: {
+    useAsTitle: 'email',
+  },
   access: {
     admin: () => false,
     create: () => true,

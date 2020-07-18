@@ -75,6 +75,7 @@ const sanitizeCollection = (collections, collection) => {
 
   if (!sanitized.hooks) sanitized.hooks = {};
   if (!sanitized.access) sanitized.access = {};
+  if (!sanitized.admin) sanitized.admin = {};
 
   if (!sanitized.hooks.beforeCreate) sanitized.hooks.beforeCreate = [];
   if (!sanitized.hooks.afterCreate) sanitized.hooks.afterCreate = [];
@@ -89,7 +90,7 @@ const sanitizeCollection = (collections, collection) => {
   if (sanitized.upload) {
     if (!sanitized.upload.staticDir) sanitized.upload.staticDir = sanitized.slug;
     if (!sanitized.upload.staticURL) sanitized.upload.staticURL = sanitized.slug;
-    if (!sanitized.useAsTitle) sanitized.useAsTitle = 'filename';
+    if (!sanitized.admin.useAsTitle) sanitized.admin.useAsTitle = 'filename';
   }
 
   // /////////////////////////////////
@@ -104,24 +105,24 @@ const sanitizeCollection = (collections, collection) => {
         type: 'text',
         required: true,
         unique: true,
-        readOnly: true,
         admin: {
           disabled: true,
+          readOnly: true,
         },
       }, {
         name: 'mimeType',
         label: 'MIME Type',
         type: 'text',
-        readOnly: true,
         admin: {
+          readOnly: true,
           disabled: true,
         },
       }, {
         name: 'filesize',
         label: 'File Size',
         type: 'number',
-        readOnly: true,
         admin: {
+          readOnly: true,
           disabled: true,
         },
       },
@@ -133,16 +134,16 @@ const sanitizeCollection = (collections, collection) => {
           name: 'width',
           label: 'Width',
           type: 'number',
-          readOnly: true,
           admin: {
+            readOnly: true,
             disabled: true,
           },
         }, {
           name: 'height',
           label: 'Height',
           type: 'number',
-          readOnly: true,
           admin: {
+            readOnly: true,
             disabled: true,
           },
         },
@@ -165,40 +166,40 @@ const sanitizeCollection = (collections, collection) => {
                 name: 'width',
                 label: 'Width',
                 type: 'number',
-                readOnly: true,
                 admin: {
+                  readOnly: true,
                   disabled: true,
                 },
               }, {
                 name: 'height',
                 label: 'Height',
                 type: 'number',
-                readOnly: true,
                 admin: {
+                  readOnly: true,
                   disabled: true,
                 },
               }, {
                 name: 'mimeType',
                 label: 'MIME Type',
                 type: 'text',
-                readOnly: true,
                 admin: {
+                  readOnly: true,
                   disabled: true,
                 },
               }, {
                 name: 'filesize',
                 label: 'File Size',
                 type: 'number',
-                readOnly: true,
                 admin: {
+                  readOnly: true,
                   disabled: true,
                 },
               }, {
                 name: 'filename',
                 label: 'File Name',
                 type: 'text',
-                readOnly: true,
                 admin: {
+                  readOnly: true,
                   disabled: true,
                 },
               },

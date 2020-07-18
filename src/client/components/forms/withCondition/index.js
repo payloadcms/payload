@@ -5,7 +5,11 @@ import { useFormFields } from '../Form/context';
 
 const withCondition = (Field) => {
   const CheckForCondition = (props) => {
-    const { condition } = props;
+    const {
+      admin: {
+        condition,
+      } = {},
+    } = props;
 
     if (condition) {
       return <WithCondition {...props} />;
@@ -15,19 +19,27 @@ const withCondition = (Field) => {
   };
 
   CheckForCondition.defaultProps = {
-    condition: null,
+    admin: undefined,
     name: '',
     path: '',
   };
 
   CheckForCondition.propTypes = {
-    condition: PropTypes.func,
+    admin: PropTypes.shape({
+      condition: PropTypes.func,
+    }),
     name: PropTypes.string,
     path: PropTypes.string,
   };
 
   const WithCondition = (props) => {
-    const { condition, name, path } = props;
+    const {
+      name,
+      path,
+      admin: {
+        condition,
+      } = {},
+    } = props;
 
     const { getData, getSiblingData } = useFormFields();
 
@@ -43,13 +55,15 @@ const withCondition = (Field) => {
   };
 
   WithCondition.defaultProps = {
-    condition: null,
+    admin: undefined,
     name: '',
     path: '',
   };
 
   WithCondition.propTypes = {
-    condition: PropTypes.func,
+    admin: PropTypes.shape({
+      condition: PropTypes.func,
+    }),
     name: PropTypes.string,
     path: PropTypes.string,
   };

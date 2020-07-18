@@ -43,7 +43,7 @@ const RenderFields = (props) => {
                 initialFieldData = initialData[field.name];
               }
 
-              let { readOnly } = field;
+              let { admin: { readOnly } = {} } = field;
 
               if (readOnlyOverride) readOnly = true;
 
@@ -63,7 +63,10 @@ const RenderFields = (props) => {
                         path: field.path || field.name,
                         fieldTypes,
                         initialData: initialFieldData,
-                        readOnly,
+                        admin: {
+                          ...(field.admin || {}),
+                          readOnly,
+                        },
                         permissions: fieldPermissions,
                       }}
                     />

@@ -4,7 +4,14 @@ module.exports = {
     singular: 'Localized Post',
     plural: 'Localized Posts',
   },
-  useAsTitle: 'title',
+  admin: {
+    useAsTitle: 'title',
+    defaultColumns: [
+      'title',
+      'priority',
+      'createdAt',
+    ],
+  },
   access: {
     read: () => true,
   },
@@ -15,11 +22,6 @@ module.exports = {
 
     return null;
   },
-  defaultColumns: [
-    'title',
-    'priority',
-    'createdAt',
-  ],
   fields: [
     {
       name: 'title',

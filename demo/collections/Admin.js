@@ -12,7 +12,6 @@ module.exports = {
     singular: 'Admin',
     plural: 'Admins',
   },
-  useAsTitle: 'email',
   access: {
     create: access,
     read: access,
@@ -56,4 +55,7 @@ module.exports = {
     },
   ],
   timestamps: true,
+  admin: {
+    useAsTitle: 'email',
+  },
 };

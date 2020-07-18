@@ -18,10 +18,12 @@ const RadioGroup = (props) => {
     defaultValue,
     initialData,
     validate,
-    style,
-    width,
     label,
-    readOnly,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
     options,
   } = props;
 
@@ -88,25 +90,25 @@ const RadioGroup = (props) => {
 RadioGroup.defaultProps = {
   label: null,
   required: false,
-  readOnly: false,
   defaultValue: null,
   initialData: undefined,
   validate: radio,
-  width: undefined,
-  style: {},
+  admin: {},
   path: '',
 };
 
 RadioGroup.propTypes = {
   path: PropTypes.string,
   name: PropTypes.string.isRequired,
-  readOnly: PropTypes.bool,
   required: PropTypes.bool,
   defaultValue: PropTypes.string,
   initialData: PropTypes.string,
   validate: PropTypes.func,
-  width: PropTypes.string,
-  style: PropTypes.shape({}),
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
   label: PropTypes.string,
   options: PropTypes.arrayOf(
     PropTypes.shape({

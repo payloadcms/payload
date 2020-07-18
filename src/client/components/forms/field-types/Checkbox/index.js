@@ -18,12 +18,14 @@ const Checkbox = (props) => {
     defaultValue,
     initialData,
     validate,
-    style,
-    width,
     label,
-    readOnly,
     onChange,
     disableFormData,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
   } = props;
 
   const path = pathFromProps || name;
@@ -95,12 +97,10 @@ const Checkbox = (props) => {
 Checkbox.defaultProps = {
   label: null,
   required: false,
-  readOnly: false,
+  admin: {},
   defaultValue: false,
   initialData: false,
   validate: checkbox,
-  width: undefined,
-  style: {},
   path: '',
   onChange: undefined,
   disableFormData: false,
@@ -109,13 +109,15 @@ Checkbox.defaultProps = {
 Checkbox.propTypes = {
   path: PropTypes.string,
   name: PropTypes.string.isRequired,
-  readOnly: PropTypes.bool,
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
   required: PropTypes.bool,
   defaultValue: PropTypes.bool,
   initialData: PropTypes.bool,
   validate: PropTypes.func,
-  width: PropTypes.string,
-  style: PropTypes.shape({}),
   label: PropTypes.string,
   onChange: PropTypes.func,
   disableFormData: PropTypes.bool,

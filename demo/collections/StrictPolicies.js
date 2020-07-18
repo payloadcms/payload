@@ -6,7 +6,9 @@ module.exports = {
     singular: 'Strict Access',
     plural: 'Strict Access',
   },
-  useAsTitle: 'email',
+  admin: {
+    useAsTitle: 'email',
+  },
   access: {
     create: () => true,
     read: ({ req: { user } }) => {

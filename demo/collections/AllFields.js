@@ -10,7 +10,9 @@ const AllFields = {
     singular: 'All Fields',
     plural: 'All Fields',
   },
-  useAsTitle: 'text',
+  admin: {
+    useAsTitle: 'text',
+  },
   preview: (doc, token) => {
     if (doc && doc.text) {
       return `http://localhost:3000/previewable-posts/${doc.text.value}?preview=true&token=${token}`;
@@ -165,7 +167,9 @@ const AllFields = {
           type: 'text',
           name: 'arrayText3',
           label: 'Array Text 3',
-          readOnly: true,
+          admin: {
+            readOnly: true,
+          },
         },
       ],
     },

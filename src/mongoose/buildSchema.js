@@ -5,11 +5,13 @@ const { MissingSelectOptions } = require('../errors');
 const formatBaseSchema = (field) => {
   const createAccess = field.access && field.access.create;
 
+  const condition = field.admin && field.admin.condition;
+
   return {
     hide: field.hidden,
     localized: field.localized || false,
     unique: field.unique || false,
-    required: (field.required && !field.localized && !field.condition && !createAccess) || false,
+    required: (field.required && !field.localized && !condition && !createAccess) || false,
     default: field.defaultValue || undefined,
   };
 };

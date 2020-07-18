@@ -5,7 +5,9 @@ module.exports = {
     singular: 'Hook',
     plural: 'Hooks',
   },
-  useAsTitle: 'title',
+  admin: {
+    useAsTitle: 'title',
+  },
   access: {
     create: () => true,
     read: () => true,

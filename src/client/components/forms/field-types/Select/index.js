@@ -68,12 +68,14 @@ const Select = (props) => {
     defaultValue,
     initialData,
     validate,
-    style,
-    width,
     label,
     options,
     hasMany,
-    readOnly,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
   } = props;
 
   const path = pathFromProps || name;
@@ -137,21 +139,22 @@ const Select = (props) => {
 };
 
 Select.defaultProps = {
-  style: {},
+  admin: {},
   required: false,
   validate: select,
   defaultValue: undefined,
   initialData: undefined,
   hasMany: false,
-  width: undefined,
   path: '',
-  readOnly: false,
 };
 
 Select.propTypes = {
   required: PropTypes.bool,
-  readOnly: PropTypes.bool,
-  style: PropTypes.shape({}),
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
   label: PropTypes.string.isRequired,
   defaultValue: PropTypes.oneOfType([
     PropTypes.string,
@@ -164,7 +167,6 @@ Select.propTypes = {
   validate: PropTypes.func,
   name: PropTypes.string.isRequired,
   path: PropTypes.string,
-  width: PropTypes.string,
   options: PropTypes.oneOfType([
     PropTypes.arrayOf(
       PropTypes.string,

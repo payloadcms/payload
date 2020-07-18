@@ -21,6 +21,7 @@ const sanitizeGlobals = (globals) => {
 
     if (!sanitizedGlobal.hooks) sanitizedGlobal.hooks = {};
     if (!sanitizedGlobal.access) sanitizedGlobal.access = {};
+    if (!sanitizedGlobal.admin) sanitizedGlobal.admin = {};
 
     if (!sanitizedGlobal.hooks.beforeUpdate) sanitizedGlobal.hooks.beforeUpdate = [];
     if (!sanitizedGlobal.hooks.afterUpdate) sanitizedGlobal.hooks.afterUpdate = [];

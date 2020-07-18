@@ -19,7 +19,8 @@ module.exports = async (config, entityConfig, operation) => {
   const errors = [];
 
   const createValidationPromise = async (data, field, path) => {
-    const shouldValidate = field.validate && !field.condition;
+    const hasCondition = field.admin && field.admin.condition;
+    const shouldValidate = field.validate && !hasCondition;
     const dataToValidate = data || field.defaultValue;
     const result = shouldValidate ? await field.validate(dataToValidate, field) : true;
 

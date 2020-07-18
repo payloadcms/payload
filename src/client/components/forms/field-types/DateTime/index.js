@@ -22,11 +22,13 @@ const DateTime = (props) => {
     defaultValue,
     initialData,
     validate,
-    style,
-    width,
     errorMessage,
     label,
-    readOnly,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
   } = props;
 
   const path = pathFromProps || name;
@@ -90,10 +92,8 @@ DateTime.defaultProps = {
   initialData: undefined,
   validate: date,
   errorMessage: defaultError,
-  width: undefined,
-  style: {},
+  admin: {},
   path: '',
-  readOnly: false,
 };
 
 DateTime.propTypes = {
@@ -105,9 +105,11 @@ DateTime.propTypes = {
   initialData: PropTypes.string,
   validate: PropTypes.func,
   errorMessage: PropTypes.string,
-  width: PropTypes.string,
-  style: PropTypes.shape({}),
-  readOnly: PropTypes.bool,
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
 };
 
 export default withCondition(DateTime);

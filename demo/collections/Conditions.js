@@ -26,21 +26,25 @@ const Conditions = {
       type: 'text',
       label: 'Enable Test is checked',
       required: true,
-      condition: (_, siblings) => siblings.enableTest === true,
+      admin: {
+        condition: (_, siblings) => siblings.enableTest === true,
+      },
     },
     {
       name: 'orCondition',
       type: 'text',
       label: 'Number is greater than 20 OR enableTest is checked',
       required: true,
-      condition: (_, siblings) => siblings.number > 20 || siblings.enableTest === true,
+      admin: {
+        condition: (_, siblings) => siblings.number > 20 || siblings.enableTest === true,
+      },
     },
     {
       name: 'nestedConditions',
       type: 'text',
       label: 'Number is either greater than 20 AND enableTest is checked, OR number is less than 20 and enableTest is NOT checked',
-      condition: (_, siblings) => {
-        return (siblings.number > 20 && siblings.enableTest === true) || (siblings.number < 20 && siblings.enableTest === false);
+      admin: {
+        condition: (_, siblings) => (siblings.number > 20 && siblings.enableTest === true) || (siblings.number < 20 && siblings.enableTest === false),
       },
     },
   ],

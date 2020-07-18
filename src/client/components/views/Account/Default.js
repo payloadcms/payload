@@ -31,7 +31,9 @@ const DefaultAccount = (props) => {
   const {
     slug,
     fields,
-    useAsTitle,
+    admin: {
+      useAsTitle,
+    },
     timestamps,
     preview,
   } = collection;
@@ -61,7 +63,7 @@ const DefaultAccount = (props) => {
               </h1>
             </header>
             <RenderFields
-              filter={field => (!field.position || (field.position && field.position !== 'sidebar'))}
+              filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
               fieldTypes={fieldTypes}
               fieldSchema={fields}
               initialData={dataToRender}
@@ -100,7 +102,7 @@ const DefaultAccount = (props) => {
           </div>
           <div className={`${baseClass}__sidebar-fields`}>
             <RenderFields
-              filter={field => field.position === 'sidebar'}
+              filter={(field) => field.position === 'sidebar'}
               position="sidebar"
               fieldTypes={fieldTypes}
               fieldSchema={fields}
@@ -114,7 +116,7 @@ const DefaultAccount = (props) => {
               <div>{data?.id}</div>
             </li>
             {timestamps && (
-              <>
+              <React.Fragment>
                 {data.updatedAt && (
                   <li>
                     <div className={`${baseClass}__label`}>Last Modified</div>
@@ -127,7 +129,7 @@ const DefaultAccount = (props) => {
                     <div>{format(new Date(data.createdAt), 'MMMM do yyyy, h:mma')}</div>
                   </li>
                 )}
-              </>
+              </React.Fragment>
             )}
 
           </ul>
@@ -150,7 +152,9 @@ DefaultAccount.propTypes = {
       singular: PropTypes.string,
     }),
     slug: PropTypes.string,
-    useAsTitle: PropTypes.string,
+    admin: PropTypes.shape({
+      useAsTitle: PropTypes.string,
+    }),
     fields: PropTypes.arrayOf(PropTypes.shape({})),
     preview: PropTypes.func,
     timestamps: PropTypes.bool,

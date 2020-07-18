@@ -77,11 +77,13 @@ const RichText = (props) => {
     defaultValue,
     initialData,
     validate,
-    style,
-    width,
     label,
     placeholder,
-    readOnly,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
   } = props;
 
   const editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
@@ -144,7 +146,7 @@ const RichText = (props) => {
         <Slate
           editor={editor}
           value={internalState ?? emptyRichTextNode}
-          onChange={val => setInternalState(val)}
+          onChange={(val) => setInternalState(val)}
         >
           <CommandToolbar enabledPluginList={plugins} />
 
@@ -162,12 +164,10 @@ const RichText = (props) => {
 RichText.defaultProps = {
   label: null,
   required: false,
-  readOnly: false,
   defaultValue: undefined,
   initialData: undefined,
   placeholder: undefined,
-  width: undefined,
-  style: {},
+  admin: {},
   validate: richText,
   path: '',
 };
@@ -176,13 +176,15 @@ RichText.propTypes = {
   name: PropTypes.string.isRequired,
   path: PropTypes.string,
   required: PropTypes.bool,
-  readOnly: PropTypes.bool,
   placeholder: PropTypes.string,
   defaultValue: PropTypes.string,
   initialData: PropTypes.arrayOf(PropTypes.shape({})),
   validate: PropTypes.func,
-  width: PropTypes.string,
-  style: PropTypes.shape({}),
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
   label: PropTypes.string,
 };
 

@@ -72,12 +72,12 @@ const DefaultList = (props) => {
           enableColumns={!upload}
         />
         {(data.docs && data.docs.length > 0) && (
-          <>
+          <React.Fragment>
             {!upload && (
               <Table
                 data={data.docs}
                 columns={listControls.columns.reduce((cols, col, colIndex) => {
-                  const field = fields.find(fieldToCheck => fieldToCheck.name === col);
+                  const field = fields.find((fieldToCheck) => fieldToCheck.name === col);
 
                   if (field) {
                     return [
@@ -93,17 +93,15 @@ const DefaultList = (props) => {
                               disable={field.disableSort || undefined}
                             />
                           ),
-                          renderCell: (rowData, cellData) => {
-                            return (
-                              <Cell
-                                field={field}
-                                colIndex={colIndex}
-                                collection={collection}
-                                rowData={rowData}
-                                cellData={cellData}
-                              />
-                            );
-                          },
+                          renderCell: (rowData, cellData) => (
+                            <Cell
+                              field={field}
+                              colIndex={colIndex}
+                              collection={collection}
+                              rowData={rowData}
+                              cellData={cellData}
+                            />
+                          ),
                         },
                       },
                     ];
@@ -117,10 +115,10 @@ const DefaultList = (props) => {
               <UploadGallery
                 docs={data.docs}
                 collection={collection}
-                onCardClick={doc => history.push(`${admin}/collections/${slug}/${doc.id}`)}
+                onCardClick={(doc) => history.push(`${admin}/collections/${slug}/${doc.id}`)}
               />
             )}
-          </>
+          </React.Fragment>
         )}
         {data.docs && data.docs.length === 0 && (
           <div className={`${baseClass}__no-results`}>
@@ -181,7 +179,9 @@ DefaultList.propTypes = {
       plural: PropTypes.string,
     }),
     slug: PropTypes.string,
-    useAsTitle: PropTypes.string,
+    admin: PropTypes.shape({
+      useAsTitle: PropTypes.string,
+    }),
     fields: PropTypes.arrayOf(PropTypes.shape),
     timestamps: PropTypes.bool,
   }).isRequired,

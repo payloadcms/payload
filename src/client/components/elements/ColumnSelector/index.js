@@ -23,17 +23,19 @@ const reducer = (state, { type, payload }) => {
     ];
   }
 
-  return state.filter(remainingColumn => remainingColumn !== payload);
+  return state.filter((remainingColumn) => remainingColumn !== payload);
 };
 
 const ColumnSelector = (props) => {
   const {
     collection: {
       fields,
-      useAsTitle,
+      admin: {
+        useAsTitle,
+        defaultColumns,
+      },
     },
     handleChange,
-    defaultColumns,
   } = props;
 
   const [initialColumns, setInitialColumns] = useState([]);
@@ -55,7 +57,7 @@ const ColumnSelector = (props) => {
   return (
     <div className={baseClass}>
       {fields && fields.map((field, i) => {
-        const isEnabled = columns.find(column => column === field.name);
+        const isEnabled = columns.find((column) => column === field.name);
         return (
           <Pill
             onClick={() => dispatchColumns({ payload: field.name, type: isEnabled ? 'disable' : 'enable' })}
@@ -73,20 +75,18 @@ const ColumnSelector = (props) => {
   );
 };
 
-ColumnSelector.defaultProps = {
-  defaultColumns: undefined,
-};
-
 ColumnSelector.propTypes = {
   collection: PropTypes.shape({
     fields: PropTypes.arrayOf(
       PropTypes.shape({}),
     ),
-    useAsTitle: PropTypes.string,
+    admin: PropTypes.shape({
+      defaultColumns: PropTypes.arrayOf(
+        PropTypes.string,
+      ),
+      useAsTitle: PropTypes.string,
+    }),
   }).isRequired,
-  defaultColumns: PropTypes.arrayOf(
-    PropTypes.string,
-  ),
   handleChange: PropTypes.func.isRequired,
 };
 

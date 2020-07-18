@@ -28,10 +28,12 @@ const Upload = (props) => {
     required,
     defaultValue,
     initialData,
-    style,
-    width,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
     label,
-    readOnly,
     validate,
     relationTo,
     fieldTypes,
@@ -166,11 +168,9 @@ const Upload = (props) => {
 Upload.defaultProps = {
   label: null,
   required: false,
-  readOnly: false,
   defaultValue: undefined,
   initialData: undefined,
-  width: undefined,
-  style: {},
+  admin: {},
   validate: upload,
   path: '',
 };
@@ -179,7 +179,6 @@ Upload.propTypes = {
   name: PropTypes.string.isRequired,
   path: PropTypes.string,
   required: PropTypes.bool,
-  readOnly: PropTypes.bool,
   defaultValue: PropTypes.string,
   initialData: PropTypes.oneOfType([
     PropTypes.shape({
@@ -188,8 +187,11 @@ Upload.propTypes = {
     PropTypes.string,
   ]),
   validate: PropTypes.func,
-  width: PropTypes.string,
-  style: PropTypes.shape({}),
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
   relationTo: PropTypes.string.isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
   label: PropTypes.oneOfType([
