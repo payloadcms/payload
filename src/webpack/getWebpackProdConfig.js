@@ -2,6 +2,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 // const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const webpack = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const path = require('path');
 const getStyleLoaders = require('./getStyleLoaders');
 
@@ -14,6 +15,9 @@ module.exports = (config) => {
       path: path.resolve(process.cwd(), 'build'),
       publicPath: `${config.routes.admin}/`,
       filename: '[name].[chunkhash].js',
+    },
+    optimization: {
+      minimizer: [new UglifyJsPlugin()],
     },
     mode: 'production',
     resolveLoader: { modules: ['node_modules', path.join(__dirname, '../../node_modules')] },
@@ -124,7 +128,6 @@ module.exports = (config) => {
     new Dotenv({
       silent: true,
     }),
-    new webpack.optimize.UglifyJSPlugin(),
   ];
 
   if (config.webpackIgnorePlugin instanceof RegExp) {

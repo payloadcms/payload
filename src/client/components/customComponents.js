@@ -24,7 +24,7 @@ function recursivelyAddFieldComponents(fields) {
         };
       }
 
-      if (field.components || field.fields) {
+      if (field.admin.components || field.fields) {
         const fieldComponents = {
           ...(field.admin.components || {}),
         };
