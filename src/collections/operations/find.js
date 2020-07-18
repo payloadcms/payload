@@ -125,15 +125,13 @@ const find = async (args) => {
       ...result,
       docs: await Promise.all(result.docs.map(async (doc) => {
         let docRef = doc;
-        const afterReadHooks = [];
 
-        collectionConfig.hooks.afterRead.forEach((hook) => {
-          afterReadHooks.push(async () => {
-            docRef = await hook({ req, query, doc }) || doc;
-          });
-        });
+        collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+          await priorHook;
 
-        await Promise.all(afterReadHooks);
+          docRef = await hook({ req, query, doc }) || doc;
+        }, Promise.resolve());
+
         return docRef;
       })),
     };

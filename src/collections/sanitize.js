@@ -219,8 +219,6 @@ const sanitizeCollection = (collections, collection) => {
   if (collection.auth) {
     if (!sanitized.hooks.beforeLogin) sanitized.hooks.beforeLogin = [];
     if (!sanitized.hooks.afterLogin) sanitized.hooks.afterLogin = [];
-    if (!sanitized.hooks.beforeRegister) sanitized.hooks.beforeRegister = [];
-    if (!sanitized.hooks.afterRegister) sanitized.hooks.afterRegister = [];
 
     let authFields = baseAuthFields;
 

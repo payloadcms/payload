@@ -44,13 +44,15 @@ const update = async (args) => {
 
   let { data } = args;
 
-  globalConfig.hooks.beforeUpdate.forEach(async (hook) => {
+  await globalConfig.hooks.beforeUpdate.reduce(async (priorHook, hook) => {
+    await priorHook;
+
     data = (await hook({
       data,
       req,
       originalDoc: global,
     })) || data;
-  });
+  }, Promise.resolve());
 
   // /////////////////////////////////////
   // 4. Merge updates into existing data
@@ -95,12 +97,14 @@ const update = async (args) => {
   // 8. Execute after global hook
   // /////////////////////////////////////
 
-  globalConfig.hooks.afterUpdate.forEach(async (hook) => {
+  globalConfig.hooks.afterUpdate.reduce(async (priorHook, hook) => {
+    await priorHook;
+
     global = await hook({
       doc: global,
       req,
     }) || global;
-  });
+  }, Promise.resolve());
 
   // /////////////////////////////////////
   // 9. Return global

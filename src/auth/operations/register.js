@@ -28,15 +28,17 @@ const register = async (args) => {
   }
 
   // /////////////////////////////////////
-  // 2. Execute before register hook
+  // 2. Execute before create hook
   // /////////////////////////////////////
 
-  collectionConfig.hooks.beforeRegister.forEach(async (hook) => {
+  await collectionConfig.hooks.beforeCreate.reduce(async (priorHook, hook) => {
+    await priorHook;
+
     data = (await hook({
       data,
       req,
     })) || data;
-  });
+  }, Promise.resolve());
 
   // /////////////////////////////////////
   // 3. Execute field-level hooks, access, and validation
@@ -82,15 +84,17 @@ const register = async (args) => {
   });
 
   // /////////////////////////////////////
-  // 8. Execute after register hook
+  // 8. Execute after create hook
   // /////////////////////////////////////
 
-  collectionConfig.hooks.afterRegister.forEach(async (hook) => {
+  collectionConfig.hooks.afterCreate.reduce(async (priorHook, hook) => {
+    await priorHook;
+
     result = await hook({
       doc: result,
       req: args.req,
     }) || result;
-  });
+  }, Promise.resolve());
 
   // /////////////////////////////////////
   // 9. Return user

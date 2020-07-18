@@ -98,13 +98,15 @@ const findByID = async (args) => {
   // 5. Execute after collection hook
   // /////////////////////////////////////
 
-  collectionConfig.hooks.afterRead.forEach(async (hook) => {
+  collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+    await priorHook;
+
     result = await hook({
       req,
       query,
       doc: result,
     }) || result;
-  });
+  }, Promise.resolve());
 
   // /////////////////////////////////////
   // 6. Return results

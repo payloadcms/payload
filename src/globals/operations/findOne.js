@@ -77,12 +77,14 @@ const findOne = async (args) => {
   // 5. Execute after collection hook
   // /////////////////////////////////////
 
-  globalConfig.hooks.afterRead.forEach(async (hook) => {
+  globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+    await priorHook;
+
     doc = await hook({
       req,
       doc,
     }) || doc;
-  });
+  }, Promise.resolve());
 
   // /////////////////////////////////////
   // 6. Return results

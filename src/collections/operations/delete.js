@@ -89,9 +89,11 @@ const deleteQuery = async (args) => {
   // 4. Execute after collection hook
   // /////////////////////////////////////
 
-  collectionConfig.hooks.afterDelete.forEach(async (hook) => {
+  collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
+    await priorHook;
+
     result = await hook({ req, id, doc: result }) || result;
-  });
+  }, Promise.resolve());
 
   // /////////////////////////////////////
   // 5. Return results
