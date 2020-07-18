@@ -6,6 +6,7 @@ const logoutHandler = (config) => async (req, res, next) => {
       config,
       collection: req.collection,
       res,
+      req,
     });
 
     return res.status(200).json({ message });

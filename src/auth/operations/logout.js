@@ -5,6 +5,7 @@ const logout = async (args) => {
       config: collectionConfig,
     },
     res,
+    req,
   } = args;
 
   const cookieOptions = {
@@ -18,16 +19,13 @@ const logout = async (args) => {
     cookieOptions.secure = true;
   }
 
-  if (Array.isArray(collectionConfig.auth.cookieDomains)) {
-    collectionConfig.auth.cookieDomains.forEach((domain) => {
-      args.res.cookie(`${config.cookiePrefix}-token`, '', {
-        ...cookieOptions,
-        domain,
-      });
-    });
-  } else {
-    args.res.cookie(`${config.cookiePrefix}-token`, '', cookieOptions);
+  if (req.headers.origin && req.headers.origin.indexOf('localhost') === -1) {
+    let domain = req.headers.origin.replace('https://', '');
+    domain = req.headers.origin.replace('http://', '');
+    cookieOptions.domain = domain;
   }
+
+  res.cookie(`${config.cookiePrefix}-token`, '', cookieOptions);
 
   return 'Logged out successfully.';
 };

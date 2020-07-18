@@ -31,14 +31,12 @@ const register = async (args) => {
   // 2. Execute before register hook
   // /////////////////////////////////////
 
-  const { beforeRegister } = collectionConfig.hooks;
-
-  if (typeof beforeRegister === 'function') {
-    data = (await beforeRegister({
+  collectionConfig.hooks.beforeRegister.forEach(async (hook) => {
+    data = (await hook({
       data,
       req,
     })) || data;
-  }
+  });
 
   // /////////////////////////////////////
   // 3. Execute field-level hooks, access, and validation
@@ -87,14 +85,12 @@ const register = async (args) => {
   // 8. Execute after register hook
   // /////////////////////////////////////
 
-  const { afterRegister } = collectionConfig.hooks;
-
-  if (typeof afterRegister === 'function') {
-    result = (await afterRegister({
-      data: result,
+  collectionConfig.hooks.afterRegister.forEach(async (hook) => {
+    result = await hook({
+      doc: result,
       req: args.req,
-    })) || result;
-  }
+    }) || result;
+  });
 
   // /////////////////////////////////////
   // 9. Return user

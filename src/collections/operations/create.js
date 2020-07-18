@@ -36,14 +36,12 @@ const create = async (args) => {
   // 2. Execute before collection hook
   // /////////////////////////////////////
 
-  const { beforeCreate } = collectionConfig.hooks;
-
-  if (typeof beforeCreate === 'function') {
-    data = (await beforeCreate({
+  collectionConfig.hooks.beforeCreate.forEach(async (hook) => {
+    data = (await hook({
       data,
       req,
     })) || data;
-  }
+  });
 
   // /////////////////////////////////////
   // 3. Execute field-level access, hooks, and validation
@@ -125,14 +123,12 @@ const create = async (args) => {
   // 7. Execute after collection hook
   // /////////////////////////////////////
 
-  const { afterCreate } = collectionConfig.hooks;
-
-  if (typeof afterCreate === 'function') {
-    result = await afterCreate({
+  collectionConfig.hooks.afterCreate.forEach(async (hook) => {
+    result = await hook({
       doc: result,
       req: args.req,
     }) || result;
-  }
+  });
 
   // /////////////////////////////////////
   // 8. Return results

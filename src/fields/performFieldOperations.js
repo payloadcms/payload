@@ -71,7 +71,9 @@ module.exports = async (config, entityConfig, operation) => {
     const resultingData = data;
 
     if (field.hooks && field.hooks[hook]) {
-      resultingData[field.name] = await field.hooks[hook](data[field.name]);
+      field.hooks[hook].forEach(async (fieldHook) => {
+        resultingData[field.name] = await fieldHook(data[field.name]);
+      });
     }
   };
 

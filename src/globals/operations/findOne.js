@@ -26,11 +26,7 @@ const findOne = async (args) => {
   // 2. Execute before collection hook
   // /////////////////////////////////////
 
-  const { beforeRead } = globalConfig.hooks;
-
-  if (typeof beforeRead === 'function') {
-    await beforeRead({ req });
-  }
+  globalConfig.hooks.beforeRead.forEach((hook) => hook({ req }));
 
   // /////////////////////////////////////
   // 3. Perform database operation
@@ -81,14 +77,12 @@ const findOne = async (args) => {
   // 5. Execute after collection hook
   // /////////////////////////////////////
 
-  const { afterRead } = globalConfig.hooks;
-
-  if (typeof afterRead === 'function') {
-    doc = await afterRead({
+  globalConfig.hooks.afterRead.forEach(async (hook) => {
+    doc = await hook({
       req,
       doc,
     }) || doc;
-  }
+  });
 
   // /////////////////////////////////////
   // 6. Return results

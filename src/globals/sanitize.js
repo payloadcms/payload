@@ -22,6 +22,11 @@ const sanitizeGlobals = (globals) => {
     if (!sanitizedGlobal.hooks) sanitizedGlobal.hooks = {};
     if (!sanitizedGlobal.access) sanitizedGlobal.access = {};
 
+    if (!sanitizedGlobal.hooks.beforeUpdate) sanitizedGlobal.hooks.beforeUpdate = [];
+    if (!sanitizedGlobal.hooks.afterUpdate) sanitizedGlobal.hooks.afterUpdate = [];
+    if (!sanitizedGlobal.hooks.beforeRead) sanitizedGlobal.hooks.beforeRead = [];
+    if (!sanitizedGlobal.hooks.afterRead) sanitizedGlobal.hooks.afterRead = [];
+
     // /////////////////////////////////
     // Sanitize fields
     // /////////////////////////////////

@@ -27,11 +27,7 @@ const deleteQuery = async (args) => {
   // 2. Execute before collection hook
   // /////////////////////////////////////
 
-  const { beforeDelete } = collectionConfig.hooks;
-
-  if (typeof beforeDelete === 'function') {
-    await beforeDelete({ req, id });
-  }
+  collectionConfig.hooks.beforeDelete.forEach((hook) => hook({ req, id }));
 
   // /////////////////////////////////////
   // 3. Get existing document
@@ -93,11 +89,9 @@ const deleteQuery = async (args) => {
   // 4. Execute after collection hook
   // /////////////////////////////////////
 
-  const { afterDelete } = collectionConfig.hooks;
-
-  if (typeof afterDelete === 'function') {
-    result = await afterDelete({ req, id, doc: result }) || result;
-  }
+  collectionConfig.hooks.afterDelete.forEach(async (hook) => {
+    result = await hook({ req, id, doc: result }) || result;
+  });
 
   // /////////////////////////////////////
   // 5. Return results

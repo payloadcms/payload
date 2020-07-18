@@ -4,17 +4,13 @@ const { AuthenticationError } = require('../../errors');
 const login = async (args) => {
   // Await validation here
 
-  let options = { ...args };
+  const options = { ...args };
 
   // /////////////////////////////////////
   // 1. Execute before login hook
   // /////////////////////////////////////
 
-  const beforeLoginHook = args.collection.config.hooks.beforeLogin;
-
-  if (typeof beforeLoginHook === 'function') {
-    options = await beforeLoginHook(options);
-  }
+  args.collection.config.hooks.beforeLogin.forEach((hook) => hook({ req: args.req }));
 
   // /////////////////////////////////////
   // 2. Perform login
@@ -74,27 +70,20 @@ const login = async (args) => {
       cookieOptions.secure = true;
     }
 
-    if (Array.isArray(collectionConfig.auth.cookieDomains)) {
-      collectionConfig.auth.cookieDomains.forEach((domain) => {
-        args.res.cookie(`${config.cookiePrefix}-token`, token, {
-          ...cookieOptions,
-          domain,
-        });
-      });
-    } else {
-      args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
+    if (args.req.headers.origin && args.req.headers.origin.indexOf('localhost') === -1) {
+      let domain = args.req.headers.origin.replace('https://', '');
+      domain = args.req.headers.origin.replace('http://', '');
+      cookieOptions.domain = domain;
     }
+
+    args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
   }
 
   // /////////////////////////////////////
   // 3. Execute after login hook
   // /////////////////////////////////////
 
-  const afterLoginHook = args.collection.config.hooks.afterLogin;
-
-  if (typeof afterLoginHook === 'function') {
-    await afterLoginHook({ ...options, token, user });
-  }
+  args.collection.config.hooks.afterLogin.forEach((hook) => hook({ token, user, req: args.req }));
 
   // /////////////////////////////////////
   // 4. Return token

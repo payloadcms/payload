@@ -6,6 +6,7 @@ const logoutResolver = (config, collection) => async (_, __, context) => {
     config,
     collection,
     res: context.res,
+    req: context.req,
   };
 
   const result = await logout(options);

@@ -48,11 +48,7 @@ const findByID = async (args) => {
   // 2. Execute before collection hook
   // /////////////////////////////////////
 
-  const { beforeRead } = collectionConfig.hooks;
-
-  if (typeof beforeRead === 'function') {
-    await beforeRead({ req, query });
-  }
+  collectionConfig.hooks.beforeRead.forEach((hook) => hook({ req, query }));
 
   // /////////////////////////////////////
   // 3. Perform database operation
@@ -102,15 +98,13 @@ const findByID = async (args) => {
   // 5. Execute after collection hook
   // /////////////////////////////////////
 
-  const { afterRead } = collectionConfig.hooks;
-
-  if (typeof afterRead === 'function') {
-    result = await afterRead({
+  collectionConfig.hooks.afterRead.forEach(async (hook) => {
+    result = await hook({
       req,
       query,
       doc: result,
     }) || result;
-  }
+  });
 
   // /////////////////////////////////////
   // 6. Return results

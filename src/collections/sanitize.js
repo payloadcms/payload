@@ -65,21 +65,31 @@ const sanitizeCollection = (collections, collection) => {
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitizedCollection = { ...collection };
+  const sanitized = { ...collection };
 
-  sanitizedCollection.slug = toKebabCase(sanitizedCollection.slug);
+  sanitized.slug = toKebabCase(sanitized.slug);
 
   // /////////////////////////////////
   // Ensure that collection has required object structure
   // /////////////////////////////////
 
-  if (!sanitizedCollection.hooks) sanitizedCollection.hooks = {};
-  if (!sanitizedCollection.access) sanitizedCollection.access = {};
+  if (!sanitized.hooks) sanitized.hooks = {};
+  if (!sanitized.access) sanitized.access = {};
 
-  if (sanitizedCollection.upload) {
-    if (!sanitizedCollection.upload.staticDir) sanitizedCollection.upload.staticDir = sanitizedCollection.slug;
-    if (!sanitizedCollection.upload.staticURL) sanitizedCollection.upload.staticURL = sanitizedCollection.slug;
-    if (!sanitizedCollection.useAsTitle) sanitizedCollection.useAsTitle = 'filename';
+  if (!sanitized.hooks.beforeCreate) sanitized.hooks.beforeCreate = [];
+  if (!sanitized.hooks.afterCreate) sanitized.hooks.afterCreate = [];
+  if (!sanitized.hooks.beforeUpdate) sanitized.hooks.beforeUpdate = [];
+  if (!sanitized.hooks.afterUpdate) sanitized.hooks.afterUpdate = [];
+  if (!sanitized.hooks.beforeRead) sanitized.hooks.beforeRead = [];
+  if (!sanitized.hooks.afterRead) sanitized.hooks.afterRead = [];
+  if (!sanitized.hooks.beforeDelete) sanitized.hooks.beforeDelete = [];
+  if (!sanitized.hooks.afterDelete) sanitized.hooks.afterDelete = [];
+
+
+  if (sanitized.upload) {
+    if (!sanitized.upload.staticDir) sanitized.upload.staticDir = sanitized.slug;
+    if (!sanitized.upload.staticURL) sanitized.upload.staticURL = sanitized.slug;
+    if (!sanitized.useAsTitle) sanitized.useAsTitle = 'filename';
   }
 
   // /////////////////////////////////
@@ -198,26 +208,31 @@ const sanitizeCollection = (collections, collection) => {
       ]);
     }
 
-    uploadFields = mergeBaseFields(sanitizedCollection.fields, uploadFields);
+    uploadFields = mergeBaseFields(sanitized.fields, uploadFields);
 
-    sanitizedCollection.fields = [
+    sanitized.fields = [
       ...uploadFields,
-      ...sanitizedCollection.fields,
+      ...sanitized.fields,
     ];
   }
 
   if (collection.auth) {
+    if (!sanitized.hooks.beforeLogin) sanitized.hooks.beforeLogin = [];
+    if (!sanitized.hooks.afterLogin) sanitized.hooks.afterLogin = [];
+    if (!sanitized.hooks.beforeRegister) sanitized.hooks.beforeRegister = [];
+    if (!sanitized.hooks.afterRegister) sanitized.hooks.afterRegister = [];
+
     let authFields = baseAuthFields;
 
     if (collection.auth.useAPIKey) {
       authFields = authFields.concat(baseAPIKeyFields);
     }
 
-    authFields = mergeBaseFields(sanitizedCollection.fields, authFields);
+    authFields = mergeBaseFields(sanitized.fields, authFields);
 
-    sanitizedCollection.fields = [
+    sanitized.fields = [
       ...authFields,
-      ...sanitizedCollection.fields,
+      ...sanitized.fields,
     ];
   }
 
@@ -225,9 +240,9 @@ const sanitizeCollection = (collections, collection) => {
   // Sanitize fields
   // /////////////////////////////////
 
-  sanitizedCollection.fields = sanitizeFields(sanitizedCollection.fields);
+  sanitized.fields = sanitizeFields(sanitized.fields);
 
-  return sanitizedCollection;
+  return sanitized;
 };
 
 module.exports = sanitizeCollection;

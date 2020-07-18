@@ -41,16 +41,13 @@ const refresh = async (args) => {
       cookieOptions.secure = true;
     }
 
-    if (Array.isArray(options.collection.config.auth.cookieDomains)) {
-      options.collection.config.auth.cookieDomains.forEach((domain) => {
-        args.res.cookie(`${cookiePrefix}-token`, refreshedToken, {
-          ...cookieOptions,
-          domain,
-        });
-      });
-    } else {
-      args.res.cookie(`${cookiePrefix}-token`, refreshedToken, cookieOptions);
+    if (args.req.headers.origin && args.req.headers.origin.indexOf('localhost') === -1) {
+      let domain = args.req.headers.origin.replace('https://', '');
+      domain = args.req.headers.origin.replace('http://', '');
+      cookieOptions.domain = domain;
     }
+
+    args.res.cookie(`${cookiePrefix}-token`, refreshedToken, cookieOptions);
   }
 
 

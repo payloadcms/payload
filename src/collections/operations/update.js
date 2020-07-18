@@ -70,15 +70,13 @@ const update = async (args) => {
 
   let { data } = args;
 
-  const { beforeUpdate } = collectionConfig.hooks;
-
-  if (typeof beforeUpdate === 'function') {
-    data = await beforeUpdate({
+  collectionConfig.hooks.beforeUpdate.forEach(async (hook) => {
+    data = (await hook({
       data,
       req,
       originalDoc,
-    }) || data;
-  }
+    })) || data;
+  });
 
   // /////////////////////////////////////
   // 3. Merge updates into existing data
@@ -164,14 +162,12 @@ const update = async (args) => {
   // 8. Execute after collection hook
   // /////////////////////////////////////
 
-  const { afterUpdate } = collectionConfig.hooks;
-
-  if (typeof afterUpdate === 'function') {
-    doc = (await afterUpdate({
+  collectionConfig.hooks.afterUpdate.forEach(async (hook) => {
+    doc = await hook({
       doc,
       req,
-    })) || doc;
-  }
+    }) || doc;
+  });
 
   // /////////////////////////////////////
   // 9. Return updated document

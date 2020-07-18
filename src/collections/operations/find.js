@@ -53,11 +53,7 @@ const find = async (args) => {
   // 2. Execute before collection hook
   // /////////////////////////////////////
 
-  const { beforeRead } = collectionConfig.hooks;
-
-  if (typeof beforeRead === 'function') {
-    await beforeRead({ req, query });
-  }
+  collectionConfig.hooks.beforeRead.forEach((hook) => hook({ req, query }));
 
   // /////////////////////////////////////
   // 3. Perform database operation
@@ -122,18 +118,24 @@ const find = async (args) => {
   // 6. Execute afterRead collection hook
   // /////////////////////////////////////
 
-  const { afterRead } = collectionConfig.hooks;
-
   let afterReadResult = result;
 
   if (typeof afterRead === 'function') {
     afterReadResult = {
       ...result,
-      docs: await Promise.all(result.docs.map(async (doc) => await afterRead({
-        req,
-        query,
-        doc,
-      }) || doc)),
+      docs: await Promise.all(result.docs.map(async (doc) => {
+        let docRef = doc;
+        const afterReadHooks = [];
+
+        collectionConfig.hooks.afterRead.forEach((hook) => {
+          afterReadHooks.push(async () => {
+            docRef = await hook({ req, query, doc }) || doc;
+          });
+        });
+
+        await Promise.all(afterReadHooks);
+        return docRef;
+      })),
     };
   }
 

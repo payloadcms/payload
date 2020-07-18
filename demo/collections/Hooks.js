@@ -13,53 +13,69 @@ module.exports = {
     delete: () => true,
   },
   hooks: {
-    beforeCreate: (operation) => {
-      if (operation.req.headers.hook === 'beforeCreate') {
-        operation.req.body.description += '-beforeCreateSuffix';
-      }
-      return operation.data;
-    },
-    beforeRead: (operation) => {
-      if (operation.req.headers.hook === 'beforeRead') {
-        console.log('before reading Hooks document');
-      }
-    },
-    beforeUpdate: (operation) => {
-      if (operation.req.headers.hook === 'beforeUpdate') {
-        operation.req.body.description += '-beforeUpdateSuffix';
-      }
-      return operation.data;
-    },
-    beforeDelete: (operation) => {
-      if (operation.req.headers.hook === 'beforeDelete') {
-        // TODO: Find a better hook operation to assert against in tests
-        operation.req.headers.hook = 'afterDelete';
-      }
-    },
-    afterCreate: (operation) => {
-      if (operation.req.headers.hook === 'afterCreate') {
-        operation.doc.afterCreateHook = true;
-      }
-      return operation.doc;
-    },
-    afterRead: (operation) => {
-      const { doc } = operation;
-      doc.afterReadHook = true;
+    beforeCreate: [
+      (operation) => {
+        if (operation.req.headers.hook === 'beforeCreate') {
+          operation.req.body.description += '-beforeCreateSuffix';
+        }
+        return operation.data;
+      },
+    ],
+    beforeRead: [
+      (operation) => {
+        if (operation.req.headers.hook === 'beforeRead') {
+          console.log('before reading Hooks document');
+        }
+      },
+    ],
+    beforeUpdate: [
+      (operation) => {
+        if (operation.req.headers.hook === 'beforeUpdate') {
+          operation.req.body.description += '-beforeUpdateSuffix';
+        }
+        return operation.data;
+      },
+    ],
+    beforeDelete: [
+      (operation) => {
+        if (operation.req.headers.hook === 'beforeDelete') {
+          // TODO: Find a better hook operation to assert against in tests
+          operation.req.headers.hook = 'afterDelete';
+        }
+      },
+    ],
+    afterCreate: [
+      (operation) => {
+        if (operation.req.headers.hook === 'afterCreate') {
+          operation.doc.afterCreateHook = true;
+        }
+        return operation.doc;
+      },
+    ],
+    afterRead: [
+      (operation) => {
+        const { doc } = operation;
+        doc.afterReadHook = true;
 
-      return doc;
-    },
-    afterUpdate: (operation) => {
-      if (operation.req.headers.hook === 'afterUpdate') {
-        operation.doc.afterUpdateHook = true;
-      }
-      return operation.doc;
-    },
-    afterDelete: (operation) => {
-      if (operation.req.headers.hook === 'afterDelete') {
-        operation.doc.afterDeleteHook = true;
-      }
-      return operation.doc;
-    },
+        return doc;
+      },
+    ],
+    afterUpdate: [
+      (operation) => {
+        if (operation.req.headers.hook === 'afterUpdate') {
+          operation.doc.afterUpdateHook = true;
+        }
+        return operation.doc;
+      },
+    ],
+    afterDelete: [
+      (operation) => {
+        if (operation.req.headers.hook === 'afterDelete') {
+          operation.doc.afterDeleteHook = true;
+        }
+        return operation.doc;
+      },
+    ],
   },
   fields: [
     {
@@ -71,7 +87,9 @@ module.exports = {
       unique: true,
       localized: true,
       hooks: {
-        afterRead: (value) => (value ? value.toUpperCase() : null),
+        afterRead: [
+          (value) => (value ? value.toUpperCase() : null),
+        ],
       },
     },
     {
