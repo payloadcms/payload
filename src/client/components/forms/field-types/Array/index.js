@@ -30,9 +30,7 @@ const ArrayFieldType = (props) => {
     required,
     maxRows,
     minRows,
-    labels: {
-      singular: singularLabel,
-    },
+    singularLabel,
     permissions,
   } = props;
 
@@ -191,9 +189,7 @@ ArrayFieldType.defaultProps = {
   required: false,
   maxRows: undefined,
   minRows: undefined,
-  labels: {
-    singular: 'Row',
-  },
+  singularLabel: 'Row',
   permissions: {},
 };
 
@@ -208,9 +204,7 @@ ArrayFieldType.propTypes = {
     PropTypes.shape({}),
   ).isRequired,
   label: PropTypes.string,
-  labels: PropTypes.shape({
-    singular: PropTypes.string,
-  }),
+  singularLabel: PropTypes.string,
   name: PropTypes.string.isRequired,
   path: PropTypes.string.isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
