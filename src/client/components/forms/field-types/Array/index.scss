@@ -25,13 +25,16 @@
       width: 100%;
     }
   }
+}
 
+.field-type.array,
+.field-type.blocks {
   .field-type.array {
-    .field-type.repeater__add-button-wrap {
+    .field-type.array__add-button-wrap {
       margin-left: base(2.65);
     }
 
-    .field-type.repeater__header  {
+    .field-type.array__header  {
       display: none;
     }
   }

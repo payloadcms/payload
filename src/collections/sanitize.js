@@ -89,7 +89,7 @@ const sanitizeCollection = (collections, collection) => {
 
   if (sanitized.upload) {
     if (!sanitized.upload.staticDir) sanitized.upload.staticDir = sanitized.slug;
-    if (!sanitized.upload.staticURL) sanitized.upload.staticURL = sanitized.slug;
+    if (!sanitized.upload.staticURL) sanitized.upload.staticURL = `/${sanitized.slug}`;
     if (!sanitized.admin.useAsTitle) sanitized.admin.useAsTitle = 'filename';
   }
 

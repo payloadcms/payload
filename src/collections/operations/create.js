@@ -46,18 +46,7 @@ const create = async (args) => {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 3. Execute field-level access, hooks, and validation
-  // /////////////////////////////////////
-
-  data = await performFieldOperations(config, collectionConfig, {
-    data,
-    hook: 'beforeCreate',
-    operationName: 'create',
-    req,
-  });
-
-  // /////////////////////////////////////
-  // 4. Upload and resize any files that may be present
+  // 3. Upload and resize any files that may be present
   // /////////////////////////////////////
 
   if (collectionConfig.upload) {
@@ -69,7 +58,7 @@ const create = async (args) => {
       throw new MissingFile();
     }
 
-    await mkdirp(staticDir);
+    mkdirp.sync(staticDir);
 
     const fsSafeName = await getSafeFilename(staticDir, req.files.file.name);
 
@@ -94,6 +83,17 @@ const create = async (args) => {
       ...fileData,
     };
   }
+
+  // /////////////////////////////////////
+  // 4. Execute field-level access, hooks, and validation
+  // /////////////////////////////////////
+
+  data = await performFieldOperations(config, collectionConfig, {
+    data,
+    hook: 'beforeCreate',
+    operationName: 'create',
+    req,
+  });
 
   // /////////////////////////////////////
   // 5. Perform database operation

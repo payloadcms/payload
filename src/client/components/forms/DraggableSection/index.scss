@@ -4,7 +4,7 @@
 // HELPER MIXINS
 //////////////////////
 
-@mixin realtively-position-panels {
+@mixin relatively-position-panels {
   .position-panel {
     position: relative;
     right: 0;
@@ -117,7 +117,7 @@
   }
 
   @include mid-break {
-    @include realtively-position-panels();
+    @include relatively-position-panels();
 
     .position-panel__move-forward,
     .position-panel__move-backward {
@@ -135,12 +135,15 @@
   @include absolutely-position-panels();
 
   @include mid-break {
-    @include realtively-position-panels();
+    @include relatively-position-panels();
   }
 }
 
-.field-type.array .field-type.array {
-  @include realtively-position-panels();
+.field-type.blocks .field-type.array,
+.field-type.array .field-type.array,
+.field-type.array .field-type.blocks,
+.field-type.blocks .field-type.blocks {
+  @include relatively-position-panels();
 }
 
 // remove padding above array rows to level

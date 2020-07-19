@@ -60,14 +60,18 @@ const deleteQuery = async (args) => {
   if (collectionConfig.upload) {
     const { staticDir } = collectionConfig.upload;
 
-    fs.unlink(`${staticDir}/${resultToDelete.filename}`, () => {
-      throw new ErrorDeletingFile();
+    fs.unlink(`${staticDir}/${resultToDelete.filename}`, (err) => {
+      if (err) {
+        throw new ErrorDeletingFile();
+      }
     });
 
     if (resultToDelete.sizes) {
       Object.values(resultToDelete.sizes).forEach((size) => {
-        fs.unlink(`${staticDir}/${size.filename}`, () => {
-          throw new ErrorDeletingFile();
+        fs.unlink(`${staticDir}/${size.filename}`, (err) => {
+          if (err) {
+            throw new ErrorDeletingFile();
+          }
         });
       });
     }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useModal } from '@faceless-ui/modal';
 import config from '../../../../config';
@@ -47,12 +47,17 @@ const Upload = (props) => {
 
   const dataToInitialize = (typeof initialData === 'object' && initialData.id) ? initialData.id : initialData;
 
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { required });
+    return validationResult;
+  }, [validate, required]);
+
   const fieldType = useFieldType({
     path,
     required,
     initialData: dataToInitialize,
     defaultValue,
-    validate,
+    validate: memoizedValidate,
   });
 
   const {
