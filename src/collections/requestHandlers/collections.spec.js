@@ -208,6 +208,87 @@ describe('Collections - REST', () => {
       expect(data.docs[0].description).toBe(desc);
       expect(data.docs).toHaveLength(1);
     });
+
+    it('should allow querying with OR', async () => {
+      const title1 = 'Or1';
+      const title2 = 'Or2';
+      const response = await fetch(`${url}/api/localized-posts`, {
+        body: JSON.stringify({
+          title: title1,
+          description: 'desc',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+
+      const response2 = await fetch(`${url}/api/localized-posts`, {
+        body: JSON.stringify({
+          title: title2,
+          description: 'desc',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+
+      expect(response.status).toBe(201);
+      expect(response2.status).toBe(201);
+
+      const queryResponse = await fetch(`${url}/api/localized-posts?where[or][0][title][equals]=${title1}&where[or][1][title][equals]=${title2}`);
+      const data = await queryResponse.json();
+
+      expect(queryResponse.status).toBe(200);
+      expect(data.docs).toHaveLength(2);
+      expect(data.docs).toContainEqual(expect.objectContaining({ title: title1 }));
+      expect(data.docs).toContainEqual(expect.objectContaining({ title: title2 }));
+    });
+
+    it('should allow querying with OR, 1 result', async () => {
+      const title1 = 'OrNegative1';
+      const title2 = 'OrNegative2';
+      const response = await fetch(`${url}/api/localized-posts`, {
+        body: JSON.stringify({
+          title: title1,
+          description: 'desc',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+
+      const response2 = await fetch(`${url}/api/localized-posts`, {
+        body: JSON.stringify({
+          title: title2,
+          description: 'desc',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+
+      expect(response.status).toBe(201);
+      expect(response2.status).toBe(201);
+
+      const queryResponse = await fetch(`${url}/api/localized-posts?where[or][0][title][equals]=${title1}&where[or][1][title][equals]=nonexistent`);
+      const data = await queryResponse.json();
+
+      expect(queryResponse.status).toBe(200);
+      expect(data.docs).toHaveLength(1);
+      expect(data.docs[0].title).toBe(title1);
+    });
   });
 
   describe('Delete', () => {
