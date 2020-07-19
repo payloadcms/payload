@@ -18,11 +18,15 @@ module.exports = async (config, entityConfig, operation) => {
   const hookPromises = [];
   const errors = [];
 
-  const createValidationPromise = async (data, field, path) => {
+  const createValidationPromise = async (newValue, existingValue, field, path) => {
     const hasCondition = field.admin && field.admin.condition;
     const shouldValidate = field.validate && !hasCondition;
-    const dataToValidate = data || field.defaultValue;
-    const result = shouldValidate ? await field.validate(dataToValidate, field) : true;
+
+    let valueToValidate = newValue;
+    if (valueToValidate === undefined) valueToValidate = existingValue;
+    if (valueToValidate === undefined) valueToValidate = field.defaultValue;
+
+    const result = shouldValidate ? await field.validate(valueToValidate, field) : true;
 
     if (!result || typeof result === 'string') {
       errors.push({
@@ -111,19 +115,23 @@ module.exports = async (config, entityConfig, operation) => {
         }
       }
 
-      if (operationName === 'create' || (operationName === 'update' && data[field.name] !== undefined)) {
+      if (operationName === 'create' || operationName === 'update') {
         if (field.type === 'array' || field.type === 'blocks') {
-          const hasRowsOfData = Array.isArray(data[field.name]);
-          const rowCount = hasRowsOfData ? data[field.name].length : 0;
+          const hasRowsOfNewData = Array.isArray(data[field.name]);
+          const newRowCount = hasRowsOfNewData ? data[field.name].length : 0;
 
+          // Handle cases of arrays being intentionally set to 0
           if (data[field.name] === '0' || data[field.name] === 0 || data[field.name] === null) {
             const updatedData = data;
             updatedData[field.name] = [];
           }
 
-          validationPromises.push(createValidationPromise(rowCount, field, path));
-        } else {
-          validationPromises.push(createValidationPromise(data[field.name], field, path));
+          const hasRowsOfExistingData = Array.isArray(originalDoc[field.name]);
+          const existingRowCount = hasRowsOfExistingData ? originalDoc[field.name].length : 0;
+
+          validationPromises.push(createValidationPromise(newRowCount, existingRowCount, field, path));
+        } else if (field.name) {
+          validationPromises.push(createValidationPromise(data[field.name], originalDoc[field.name], field, path));
         }
       }
     });
