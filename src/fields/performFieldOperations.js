@@ -16,7 +16,7 @@ async function performFieldOperations(entityConfig, operation) {
   const currentDepth = operation.currentDepth || 0;
 
   const populateRelationship = async (dataReference, data, field, i) => {
-    let dataToUpdate = dataReference;
+    const dataToUpdate = dataReference;
 
     const relation = Array.isArray(field.relationTo) ? data.relationTo : field.relationTo;
     const relatedCollection = this.collections[relation];
@@ -45,9 +45,9 @@ async function performFieldOperations(entityConfig, operation) {
           dataToUpdate[field.name][i] = populatedRelationship;
         }
       } else if (Array.isArray(field.relationTo)) {
-        dataToUpdate.value = populatedRelationship;
+        dataToUpdate[field.name].value = populatedRelationship;
       } else {
-        dataToUpdate = populatedRelationship;
+        dataToUpdate[field.name] = populatedRelationship;
       }
     }
   };
@@ -188,9 +188,8 @@ async function performFieldOperations(entityConfig, operation) {
             relation = data[field.name].relationTo;
           }
 
-          const relatedCollection = this.collections[relation].config;
-
-          if (relatedCollection) {
+          if (typeof relation === 'string') {
+            const relatedCollection = this.collections[relation].config;
             let relatedDocumentData = data[field.name];
             let dataToHook = resultingData[field.name];
 
