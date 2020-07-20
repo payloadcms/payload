@@ -43,14 +43,6 @@ function registerCollections() {
       delete: deleteHandler,
     } = this.requestHandlers.collections;
 
-    router.route(`/${slug}`)
-      .get(find)
-      .put(update);
-
-    router.route(`/${slug}/:id`)
-      .get(findByID)
-      .delete(deleteHandler);
-
     if (collection.auth) {
       const AuthCollection = this.collections[formattedCollection.slug];
       passport.use(new LocalStrategy(AuthCollection.Model.authenticate()));
@@ -108,12 +100,22 @@ function registerCollections() {
         .route(`/${slug}/register`)
         .post(register);
 
+      router.route(`/${slug}`)
+        .get(find);
+
       router.route(`/${slug}/:id`)
-        .put(authUpdate);
+        .get(findByID)
+        .put(authUpdate)
+        .delete(deleteHandler);
     } else {
       router.route(`/${slug}`)
         .get(find)
         .post(create);
+
+      router.route(`/${slug}/:id`)
+        .put(update)
+        .get(findByID)
+        .delete(deleteHandler);
     }
 
     this.router.use(router);

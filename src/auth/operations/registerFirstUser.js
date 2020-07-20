@@ -1,5 +1,3 @@
-const register = require('./register');
-const login = require('./login');
 const { Forbidden } = require('../../errors');
 
 async function registerFirstUser(args) {
@@ -17,7 +15,7 @@ async function registerFirstUser(args) {
   // 2. Perform register first user
   // /////////////////////////////////////
 
-  let result = await register({
+  let result = await this.operations.collections.auth.register({
     ...args,
     overrideAccess: true,
   });
@@ -27,7 +25,7 @@ async function registerFirstUser(args) {
   // 3. Log in new user
   // /////////////////////////////////////
 
-  const token = await login({
+  const token = await this.operations.collections.auth.login({
     ...args,
   });
 

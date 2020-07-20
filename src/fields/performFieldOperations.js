@@ -21,7 +21,7 @@ async function performFieldOperations(entityConfig, operation) {
     depth = (operation.depth || operation.depth === 0) ? parseInt(operation.depth, 10) : this.config.defaultDepth;
   }
 
-  const currentDepth = operation.currentDepth || 0;
+  const currentDepth = operation.currentDepth || 1;
 
   const populateRelationship = async (dataReference, data, field, i) => {
     const dataToUpdate = dataReference;
@@ -40,6 +40,7 @@ async function performFieldOperations(entityConfig, operation) {
         id: Array.isArray(field.relationTo) ? data.value : data,
         currentDepth: currentDepth + 1,
         disableErrors: true,
+        depth,
       });
     }
 

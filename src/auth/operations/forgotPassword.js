@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const { APIError } = require('../../errors');
 
 async function forgotPassword(args) {
-  const { config, email } = this;
+  const { config, sendEmail: email } = this;
 
   if (!Object.prototype.hasOwnProperty.call(args.data, 'email')) {
     throw new APIError('Missing email.');

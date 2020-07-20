@@ -3,7 +3,7 @@ const { NotFound } = require('../../errors');
 
 async function deleteHandler(req, res, next) {
   try {
-    const doc = await this.operations.collections.deleteQuery({
+    const doc = await this.operations.collections.delete({
       req,
       collection: req.collection,
       id: req.params.id,
