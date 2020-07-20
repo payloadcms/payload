@@ -1,5 +1,5 @@
-const { me } = require('../../operations');
+async function me(_, __, context) {
+  return this.operations.collections.auth.me({ req: context.req });
+}
 
-const meResolver = (config) => async (_, __, context) => me({ req: context.req, config });
-
-module.exports = meResolver;
+module.exports = me;

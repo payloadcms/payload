@@ -1,21 +1,23 @@
 /* eslint-disable no-param-reassign */
-const { resetPassword } = require('../../operations');
+function resetPassword(collection) {
+  async function resolver(_, args, context) {
+    if (args.locale) context.req.locale = args.locale;
+    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
-const resetPasswordResolver = (config, collection) => async (_, args, context) => {
-  if (args.locale) context.req.locale = args.locale;
-  if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
+    const options = {
+      collection,
+      data: args,
+      req: context.req,
+      api: 'GraphQL',
+    };
 
-  const options = {
-    collection,
-    config,
-    data: args,
-    req: context.req,
-    api: 'GraphQL',
-  };
+    const token = await this.operations.collections.auth.resetPassword(options);
 
-  const token = await resetPassword(options);
+    return token;
+  }
 
-  return token;
-};
+  const resetPasswordResolver = resolver.bind(this);
+  return resetPasswordResolver;
+}
 
-module.exports = resetPasswordResolver;
+module.exports = resetPassword;

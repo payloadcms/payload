@@ -8,11 +8,19 @@ async function performFieldOperations(entityConfig, operation) {
     operationName,
     hook,
     req,
+    req: {
+      payloadAPI,
+    },
   } = operation;
 
   const recursivePerformFieldOperations = performFieldOperations.bind(this);
 
-  const depth = (operation.depth || operation.depth === 0) ? parseInt(operation.depth, 10) : this.config.defaultDepth;
+  let depth = 0;
+
+  if (payloadAPI === 'REST') {
+    depth = (operation.depth || operation.depth === 0) ? parseInt(operation.depth, 10) : this.config.defaultDepth;
+  }
+
   const currentDepth = operation.currentDepth || 0;
 
   const populateRelationship = async (dataReference, data, field, i) => {

@@ -1,4 +1,3 @@
-const { access } = require('../../operations');
 const formatName = require('../../../graphql/utilities/formatName');
 
 const formatConfigNames = (results, configs) => {
@@ -13,18 +12,17 @@ const formatConfigNames = (results, configs) => {
   return formattedResults;
 };
 
-const accessResolver = (config) => async (_, __, context) => {
+async function access(_, __, context) {
   const options = {
-    config,
     req: context.req,
   };
 
-  let accessResults = await access(options);
+  let accessResults = await this.operations.collections.auth.access(options);
 
-  accessResults = formatConfigNames(accessResults, config.collections);
-  accessResults = formatConfigNames(accessResults, config.globals);
+  accessResults = formatConfigNames(accessResults, this.config.collections);
+  accessResults = formatConfigNames(accessResults, this.config.globals);
 
   return accessResults;
-};
+}
 
-module.exports = accessResolver;
+module.exports = access;

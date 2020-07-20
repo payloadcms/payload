@@ -9,17 +9,17 @@ const GraphQLDate = require('graphql-date');
 
 const formatName = require('../../graphql/utilities/formatName');
 
-const {
-  create, find, findByID, deleteResolver, update,
-} = require('./resolvers');
-
-const {
-  login, logout, me, init, refresh, register, forgotPassword, resetPassword,
-} = require('../../auth/graphql/resolvers');
-
 const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
 
 function registerCollections() {
+  const {
+    create, find, findByID, deleteResolver, update,
+  } = this.graphQL.resolvers.collections;
+
+  const {
+    login, logout, me, init, refresh, register, forgotPassword, resetPassword, update: authUpdate,
+  } = this.graphQL.resolvers.collections.auth;
+
   Object.keys(this.collections).forEach((slug) => {
     const collection = this.collections[slug];
     const {
@@ -125,7 +125,7 @@ function registerCollections() {
         locale: { type: this.types.localeInputType },
         fallbackLocale: { type: this.types.fallbackLocaleInputType },
       },
-      resolve: findByID(this.config, collection),
+      resolve: findByID(collection),
     };
 
     this.Query.fields[pluralLabel] = {
@@ -138,16 +138,7 @@ function registerCollections() {
         limit: { type: GraphQLInt },
         sort: { type: GraphQLString },
       },
-      resolve: find(this.config, collection),
-    };
-
-    this.Mutation.fields[`update${singularLabel}`] = {
-      type: collection.graphQL.type,
-      args: {
-        id: { type: new GraphQLNonNull(GraphQLString) },
-        data: { type: collection.graphQL.updateMutationInputType },
-      },
-      resolve: update(this.config, collection),
+      resolve: find(collection),
     };
 
     this.Mutation.fields[`delete${singularLabel}`] = {
@@ -190,7 +181,7 @@ function registerCollections() {
             },
           },
         }),
-        resolve: me(this.config),
+        resolve: me,
       };
 
       this.Query.fields[`initialized${singularLabel}`] = {
@@ -204,12 +195,12 @@ function registerCollections() {
           email: { type: GraphQLString },
           password: { type: GraphQLString },
         },
-        resolve: login(this.config, collection),
+        resolve: login(collection),
       };
 
       this.Mutation.fields[`logout${singularLabel}`] = {
         type: GraphQLString,
-        resolve: logout(this.config, collection),
+        resolve: logout(collection),
       };
 
       this.Mutation.fields[`register${singularLabel}`] = {
@@ -217,7 +208,7 @@ function registerCollections() {
         args: {
           data: { type: collection.graphQL.mutationInputType },
         },
-        resolve: register(this.config, collection),
+        resolve: register(collection),
       };
 
       this.Mutation.fields[`forgotPassword${singularLabel}`] = {
@@ -225,7 +216,7 @@ function registerCollections() {
         args: {
           email: { type: new GraphQLNonNull(GraphQLString) },
         },
-        resolve: forgotPassword(this.config, collection.Model, this.sendEmail),
+        resolve: forgotPassword(collection),
       };
 
       this.Mutation.fields[`resetPassword${singularLabel}`] = {
@@ -239,7 +230,16 @@ function registerCollections() {
 
       this.Mutation.fields[`refreshToken${singularLabel}`] = {
         type: GraphQLString,
-        resolve: refresh(this.config, collection),
+        resolve: refresh(collection),
+      };
+
+      this.Mutation.fields[`update${singularLabel}`] = {
+        type: collection.graphQL.type,
+        args: {
+          id: { type: new GraphQLNonNull(GraphQLString) },
+          data: { type: collection.graphQL.updateMutationInputType },
+        },
+        resolve: authUpdate(collection),
       };
     } else {
       this.Mutation.fields[`create${singularLabel}`] = {
@@ -247,7 +247,16 @@ function registerCollections() {
         args: {
           data: { type: collection.graphQL.mutationInputType },
         },
-        resolve: create(this.config, collection),
+        resolve: create(collection),
+      };
+
+      this.Mutation.fields[`update${singularLabel}`] = {
+        type: collection.graphQL.type,
+        args: {
+          id: { type: new GraphQLNonNull(GraphQLString) },
+          data: { type: collection.graphQL.updateMutationInputType },
+        },
+        resolve: update(collection),
       };
     }
   });

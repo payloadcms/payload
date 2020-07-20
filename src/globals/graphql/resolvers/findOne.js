@@ -1,23 +1,25 @@
 /* eslint-disable no-param-reassign */
-const { findOne } = require('../../operations');
 
-const findOneResolver = (config, Model, globalConfig) => async (_, args, context) => {
-  if (args.locale) context.req.locale = args.locale;
-  if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
+function findOne(globalConfig) {
+  async function resolver(_, args, context) {
+    if (args.locale) context.req.locale = args.locale;
+    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
-  const { slug } = globalConfig;
+    const { slug } = globalConfig;
 
-  const options = {
-    Model,
-    config,
-    globalConfig,
-    slug,
-    depth: 0,
-    req: context.req,
-  };
+    const options = {
+      globalConfig,
+      slug,
+      depth: 0,
+      req: context.req,
+    };
 
-  const result = await findOne(options);
-  return result;
-};
+    const result = await this.operations.globals.findOne(options);
+    return result;
+  }
 
-module.exports = findOneResolver;
+  const findOneResolver = resolver.bind(this);
+  return findOneResolver;
+}
+
+module.exports = findOne;

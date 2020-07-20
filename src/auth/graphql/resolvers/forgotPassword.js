@@ -1,18 +1,18 @@
-/* eslint-disable no-param-reassign */
-const { forgotPassword } = require('../../operations');
+function forgotPassword(collection) {
+  async function resolver(_, args, context) {
+    const options = {
+      collection,
+      data: args,
+      req: context.req,
+    };
 
-const forgotPasswordResolver = (config, collection, email) => async (_, args, context) => {
-  const options = {
-    config,
-    collection,
-    data: args,
-    email,
-    req: context.req,
-  };
+    await this.operations.collections.auth.forgotPassword(options);
+    return true;
+  }
 
-  await forgotPassword(options);
+  const forgotPasswordResolver = resolver.bind(this);
 
-  return true;
-};
+  return forgotPasswordResolver;
+}
 
-module.exports = forgotPasswordResolver;
+module.exports = forgotPassword;

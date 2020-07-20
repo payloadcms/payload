@@ -11,7 +11,7 @@ const initCollections = require('../collections/graphql/init');
 const initGlobals = require('../globals/graphql/init');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 const errorHandler = require('./errorHandler');
-const { access } = require('../auth/graphql/resolvers');
+const access = require('../auth/graphql/resolvers/access');
 
 class GraphQL {
   constructor(init) {
@@ -50,7 +50,7 @@ class GraphQL {
 
     this.Query.fields.Access = {
       type: this.buildPoliciesType(),
-      resolve: access(this.config),
+      resolve: access,
     };
 
     this.Query = {

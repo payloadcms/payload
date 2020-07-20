@@ -1,25 +1,26 @@
 /* eslint-disable no-param-reassign */
-const { update } = require('../../operations');
 
-const updateResolver = (config, Model, globalConfig) => async (_, args, context) => {
-  if (args.locale) context.req.locale = args.locale;
-  if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
+function update(globalConfig) {
+  async function resolver(_, args, context) {
+    if (args.locale) context.req.locale = args.locale;
+    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
-  const { slug } = config;
+    const { slug } = globalConfig;
 
-  const options = {
-    config,
-    globalConfig,
-    Model,
-    data: args.data,
-    slug,
-    depth: 0,
-    req: context.req,
-  };
+    const options = {
+      globalConfig,
+      slug,
+      depth: 0,
+      data: args.data,
+      req: context.req,
+    };
 
-  const result = await update(options);
+    const result = await this.operations.globals.update(options);
+    return result;
+  }
 
-  return result;
-};
+  const findOneResolver = resolver.bind(this);
+  return findOneResolver;
+}
 
-module.exports = updateResolver;
+module.exports = update;

@@ -1,22 +1,24 @@
-/* eslint-disable no-param-reassign */
-const { refresh } = require('../../operations');
 const getExtractJWT = require('../../getExtractJWT');
 
-const refreshResolver = (config, collection) => async (_, __, context) => {
-  const extractJWT = getExtractJWT(config);
-  const token = extractJWT(context);
+function refresh(collection) {
+  async function resolver(_, __, context) {
+    const extractJWT = getExtractJWT(this.config);
+    const token = extractJWT(context);
 
-  const options = {
-    config,
-    collection,
-    token,
-    req: context.req,
-    res: context.res,
-  };
+    const options = {
+      collection,
+      token,
+      req: context.req,
+      res: context.res,
+    };
 
-  const result = await refresh(options);
+    const result = await this.operations.collections.auth.refresh(options);
 
-  return result;
-};
+    return result;
+  }
 
-module.exports = refreshResolver;
+  const refreshResolver = resolver.bind(this);
+  return refreshResolver;
+}
+
+module.exports = refresh;

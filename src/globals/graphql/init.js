@@ -1,12 +1,12 @@
 const { GraphQLNonNull } = require('graphql');
 const formatName = require('../../graphql/utilities/formatName');
 
-const {
-  findOne, update,
-} = require('./resolvers');
-
 function registerGlobals() {
   if (this.config.globals) {
+    const {
+      findOne, update,
+    } = this.graphQL.resolvers.globals;
+
     Object.keys(this.globals.config).forEach((slug) => {
       const global = this.globals.config[slug];
       const {
@@ -36,7 +36,7 @@ function registerGlobals() {
           locale: { type: this.types.localeInputType },
           fallbackLocale: { type: this.types.fallbackLocaleInputType },
         },
-        resolve: findOne(this.config, this.globals.Model, global),
+        resolve: findOne(global),
       };
 
       this.Mutation.fields[`update${formattedLabel}`] = {
@@ -44,7 +44,7 @@ function registerGlobals() {
         args: {
           data: { type: global.graphQL.mutationInputType },
         },
-        resolve: update(this.config, this.globals.Model, global),
+        resolve: update(global),
       };
     });
   }

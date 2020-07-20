@@ -1,19 +1,22 @@
 /* eslint-disable no-param-reassign */
-const { deleteQuery } = require('../../operations');
+function getDeleteResolver(collection) {
+  async function resolver(_, args, context) {
+    if (args.locale) context.req.locale = args.locale;
+    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
-const deleteResolver = (collection) => async (_, args, context) => {
-  if (args.locale) context.req.locale = args.locale;
-  if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
+    const options = {
+      collection,
+      id: args.id,
+      req: context.req,
+    };
 
-  const options = {
-    collection,
-    id: args.id,
-    req: context.req,
-  };
+    const result = await this.operations.collections.delete(options);
 
-  const result = await deleteQuery(options);
+    return result;
+  }
 
-  return result;
-};
+  const deleteResolver = resolver.bind(this);
+  return deleteResolver;
+}
 
-module.exports = deleteResolver;
+module.exports = getDeleteResolver;
