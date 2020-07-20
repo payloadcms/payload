@@ -87,6 +87,10 @@ const find = async (args) => {
       optionsToExecute.options.autopopulate = {
         maxDepth: parseInt(depth, 10),
       };
+    } else {
+      optionsToExecute.options.autopopulate = {
+        maxDepth: 2,
+      };
     }
   }
 

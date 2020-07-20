@@ -1,6 +1,6 @@
 const { ValidationError } = require('../errors');
 
-module.exports = async (config, entityConfig, operation) => {
+const performFieldOperations = async (config, entityConfig, operation) => {
   const {
     data: fullData,
     originalDoc: fullOriginalDoc,
@@ -74,10 +74,116 @@ module.exports = async (config, entityConfig, operation) => {
 
   const createHookPromise = async (data, field) => {
     const resultingData = data;
+    const findRelatedCollection = (relation) => config.collections.find((collection) => collection.slug === relation);
+    // Todo:
+    // Check for afterRead operation and if found,
+    // Run relationship and upload-based hooks here
+    // Handle following scenarios:
+    //
+    // hasMany
+    // relationTo hasMany
+    // single
+
+    if (hook === 'afterRead') {
+      if ((field.type === 'relationship' || field.type === 'upload')) {
+        const hasManyRelations = Array.isArray(field.relationTo);
+
+        // If there are many related documents
+        if (field.hasMany && Array.isArray(data[field.name])) {
+          // Loop through relations
+          data[field.name].forEach(async (value, i) => {
+            let relation = field.relationTo;
+
+            // If this field can be related to many collections,
+            // Set relationTo based on value
+            if (hasManyRelations && value && value.relationTo) {
+              relation = value.relationTo;
+            }
+
+            if (relation) {
+              const relatedCollection = findRelatedCollection(relation);
+
+              if (relatedCollection) {
+                let relatedDocumentData = data[field.name][i];
+                let dataToHook = resultingData[field.name][i];
+
+                if (hasManyRelations) {
+                  relatedDocumentData = data[field.name][i].value;
+                  dataToHook = resultingData[field.name][i].value;
+                }
+
+                // Only run hooks for populated sub documents - NOT IDs
+                if (relatedDocumentData && typeof relatedDocumentData !== 'string') {
+                  // Perform field hooks on related collection
+                  dataToHook = await performFieldOperations(config, relatedCollection, {
+                    req,
+                    data: relatedDocumentData,
+                    hook: 'afterRead',
+                    operationName: 'read',
+                  });
+
+                  await relatedCollection.hooks.afterRead.reduce(async (priorHook, currentHook) => {
+                    await priorHook;
+
+                    dataToHook = await currentHook({
+                      req,
+                      doc: relatedDocumentData,
+                    }) || dataToHook;
+                  }, Promise.resolve());
+                }
+              }
+            }
+          });
+
+          // Otherwise, there is only one related document
+        } else {
+          let relation = field.relationTo;
+
+          if (hasManyRelations && data[field.name] && data[field.name].relationTo) {
+            relation = data[field.name].relationTo;
+          }
+
+          const relatedCollection = findRelatedCollection(relation);
+
+          if (relatedCollection) {
+            let relatedDocumentData = data[field.name];
+            let dataToHook = resultingData[field.name];
+
+            if (hasManyRelations) {
+              relatedDocumentData = data[field.name].value;
+              dataToHook = resultingData[field.name].value;
+            }
+
+            // Only run hooks for populated sub documents - NOT IDs
+            if (relatedDocumentData && typeof relatedDocumentData !== 'string') {
+              // Perform field hooks on related collection
+              dataToHook = await performFieldOperations(config, relatedCollection, {
+                req,
+                data: relatedDocumentData,
+                hook: 'afterRead',
+                operationName: 'read',
+              });
+
+              await relatedCollection.hooks.afterRead.reduce(async (priorHook, currentHook) => {
+                await priorHook;
+
+                dataToHook = await currentHook({
+                  req,
+                  doc: relatedDocumentData,
+                }) || dataToHook;
+              }, Promise.resolve());
+            }
+          }
+        }
+      }
+    }
 
     if (field.hooks && field.hooks[hook]) {
       field.hooks[hook].forEach(async (fieldHook) => {
-        resultingData[field.name] = await fieldHook(data[field.name]);
+        resultingData[field.name] = await fieldHook({
+          value: data[field.name],
+          req,
+        });
       });
     }
   };
@@ -153,3 +259,6 @@ module.exports = async (config, entityConfig, operation) => {
 
   return fullData;
 };
+
+
+module.exports = performFieldOperations;

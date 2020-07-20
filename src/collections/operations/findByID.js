@@ -55,9 +55,7 @@ const findByID = async (args) => {
   // /////////////////////////////////////
 
   const queryOptionsToExecute = {
-    options: {
-      autopopulate: false,
-    },
+    autopopulate: false,
   };
 
   // Only allow depth override within REST.
@@ -65,8 +63,12 @@ const findByID = async (args) => {
   // as a full object will be returned instead of an ID string
   if (payloadAPI === 'REST') {
     if (depth && depth !== '0') {
-      queryOptionsToExecute.options.autopopulate = {
+      queryOptionsToExecute.autopopulate = {
         maxDepth: parseInt(depth, 10),
+      };
+    } else {
+      queryOptionsToExecute.autopopulate = {
+        maxDepth: 2,
       };
     }
   }

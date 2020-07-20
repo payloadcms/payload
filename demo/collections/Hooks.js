@@ -90,7 +90,7 @@ module.exports = {
       localized: true,
       hooks: {
         afterRead: [
-          (value) => (value ? value.toUpperCase() : null),
+          ({ value }) => (value ? value.toUpperCase() : null),
         ],
       },
     },

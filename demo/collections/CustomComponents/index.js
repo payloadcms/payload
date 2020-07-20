@@ -15,11 +15,6 @@ module.exports = {
       required: true,
       unique: true,
       localized: true,
-      hooks: {
-        beforeCreate: (operation) => operation.value,
-        beforeUpdate: (operation) => operation.value,
-        afterRead: (operation) => operation.value,
-      },
     },
     {
       name: 'description',
