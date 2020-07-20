@@ -9,6 +9,7 @@ const createHandler = (config) => async (req, res, next) => {
       collection: req.collection,
       config,
       data: req.body,
+      depth: req.query.depth,
     });
 
     return res.status(httpStatus.CREATED).json({

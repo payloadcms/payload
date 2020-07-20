@@ -14,6 +14,7 @@ const update = async (args) => {
       locale,
       fallbackLocale,
     },
+    depth,
   } = args;
 
   // /////////////////////////////////////
@@ -91,6 +92,7 @@ const update = async (args) => {
     hook: 'afterRead',
     operationName: 'read',
     req,
+    depth,
   });
 
   // /////////////////////////////////////

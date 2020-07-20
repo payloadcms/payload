@@ -10,6 +10,7 @@ const updateHandler = (config) => async (req, res, next) => {
       config,
       id: req.params.id,
       data: req.body,
+      depth: req.query.depth,
     });
 
     return res.status(httpStatus.OK).json({

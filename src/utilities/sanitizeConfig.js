@@ -5,6 +5,8 @@ const sanitizeGlobals = require('../globals/sanitize');
 const sanitizeConfig = (config) => {
   const sanitizedConfig = { ...config };
 
+  if (sanitizedConfig.defaultDepth === undefined) sanitizedConfig.defaultDepth = 2;
+
   sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig.collections, collection));
 
   if (sanitizedConfig.globals) {

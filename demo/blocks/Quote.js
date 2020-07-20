@@ -9,8 +9,8 @@ module.exports = {
     {
       name: 'author',
       label: 'Author',
-      type: 'text',
-      maxLength: 100,
+      type: 'relationship',
+      relationTo: 'public-users',
       required: true,
     },
     {

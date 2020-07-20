@@ -8,7 +8,6 @@ const findOne = async (args) => {
     Model,
     req,
     req: {
-      payloadAPI,
       locale,
       fallbackLocale,
     },
@@ -32,23 +31,6 @@ const findOne = async (args) => {
   // 3. Perform database operation
   // /////////////////////////////////////
 
-  const queryOptionsToExecute = {
-    options: {},
-  };
-
-  // Only allow depth override within REST.
-  // If allowed in GraphQL, it would break resolvers
-  // as a full object will be returned instead of an ID string
-  if (payloadAPI === 'REST') {
-    if (depth && depth !== '0') {
-      queryOptionsToExecute.options.autopopulate = {
-        maxDepth: parseInt(depth, 10),
-      };
-    } else {
-      queryOptionsToExecute.options.autopopulate = false;
-    }
-  }
-
   let doc = await Model.findOne({ globalType: slug });
 
   if (!doc) {
@@ -71,6 +53,7 @@ const findOne = async (args) => {
     hook: 'afterRead',
     operationName: 'read',
     req,
+    depth,
   });
 
   // /////////////////////////////////////

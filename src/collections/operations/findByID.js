@@ -15,7 +15,6 @@ const findByID = async (args) => {
     req: {
       locale,
       fallbackLocale,
-      payloadAPI,
     },
   } = args;
 
@@ -54,26 +53,7 @@ const findByID = async (args) => {
   // 3. Perform database operation
   // /////////////////////////////////////
 
-  const queryOptionsToExecute = {
-    autopopulate: false,
-  };
-
-  // Only allow depth override within REST.
-  // If allowed in GraphQL, it would break resolvers
-  // as a full object will be returned instead of an ID string
-  if (payloadAPI === 'REST') {
-    if (depth && depth !== '0') {
-      queryOptionsToExecute.autopopulate = {
-        maxDepth: parseInt(depth, 10),
-      };
-    } else {
-      queryOptionsToExecute.autopopulate = {
-        maxDepth: 2,
-      };
-    }
-  }
-
-  let result = await Model.findOne(query, {}, queryOptionsToExecute);
+  let result = await Model.findOne(query, {});
 
   if (!result && !hasWhereAccess) throw new NotFound();
   if (!result && hasWhereAccess) throw new Forbidden();
@@ -89,6 +69,7 @@ const findByID = async (args) => {
   // /////////////////////////////////////
 
   result = await performFieldOperations(config, collectionConfig, {
+    depth,
     req,
     data: result,
     hook: 'afterRead',

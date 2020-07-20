@@ -2,8 +2,11 @@ const fs = require('fs');
 const { NotFound, Forbidden, ErrorDeletingFile } = require('../../errors');
 const executeAccess = require('../../auth/executeAccess');
 
+const performFieldOperations = require('../../fields/performFieldOperations');
+
 const deleteQuery = async (args) => {
   const {
+    depth,
     collection: {
       Model,
       config: collectionConfig,
@@ -14,6 +17,7 @@ const deleteQuery = async (args) => {
       locale,
       fallbackLocale,
     },
+    config,
   } = args;
 
   // /////////////////////////////////////
@@ -90,7 +94,19 @@ const deleteQuery = async (args) => {
   }
 
   // /////////////////////////////////////
-  // 4. Execute after collection hook
+  // 6. Execute field-level hooks and access
+  // /////////////////////////////////////
+
+  result = await performFieldOperations(config, collectionConfig, {
+    data: result,
+    hook: 'afterRead',
+    operationName: 'read',
+    req,
+    depth,
+  });
+
+  // /////////////////////////////////////
+  // 7. Execute after collection hook
   // /////////////////////////////////////
 
   await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
@@ -100,7 +116,7 @@ const deleteQuery = async (args) => {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 5. Return results
+  // 8. Return results
   // /////////////////////////////////////
 
   return result;

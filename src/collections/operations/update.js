@@ -12,6 +12,7 @@ const resizeAndSave = require('../../uploads/imageResizer');
 const update = async (args) => {
   const {
     config,
+    depth,
     collection: {
       Model,
       config: collectionConfig,
@@ -158,6 +159,7 @@ const update = async (args) => {
     hook: 'afterRead',
     operationName: 'read',
     req,
+    depth,
   });
 
   // /////////////////////////////////////

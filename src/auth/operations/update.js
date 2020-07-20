@@ -6,6 +6,7 @@ const performFieldOperations = require('../../fields/performFieldOperations');
 
 const update = async (args) => {
   const {
+    depth,
     config,
     collection: {
       Model,
@@ -115,6 +116,7 @@ const update = async (args) => {
     hook: 'afterRead',
     operationName: 'read',
     req,
+    depth,
   });
 
   // /////////////////////////////////////

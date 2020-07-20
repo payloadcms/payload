@@ -15,5 +15,20 @@ module.exports = {
       maxLength: 100,
       required: true,
     },
+    {
+      name: 'relationship',
+      label: 'Test Relationship',
+      type: 'relationship',
+      relationTo: 'localized-posts',
+      hasMany: true,
+      required: true,
+    },
+    {
+      name: 'singleRelationship',
+      label: 'Test Single Relationship',
+      type: 'relationship',
+      relationTo: 'localized-posts',
+      required: true,
+    },
   ],
 };

@@ -6,8 +6,8 @@ const find = async (args) => {
     where,
     page,
     limit,
-    depth,
     config,
+    depth,
     collection: {
       Model,
       config: collectionConfig,
@@ -16,7 +16,6 @@ const find = async (args) => {
     req: {
       locale,
       fallbackLocale,
-      payloadAPI,
     },
   } = args;
 
@@ -74,25 +73,7 @@ const find = async (args) => {
     limit: limit || 10,
     sort,
     collation: sort ? { locale: 'en' } : {}, // case-insensitive sort in MongoDB
-    options: {
-      autopopulate: false,
-    },
   };
-
-  // Only allow depth override within REST.
-  // If allowed in GraphQL, it would break resolvers
-  // as a full object will be returned instead of an ID string
-  if (payloadAPI === 'REST') {
-    if (depth && depth !== '0') {
-      optionsToExecute.options.autopopulate = {
-        maxDepth: parseInt(depth, 10),
-      };
-    } else {
-      optionsToExecute.options.autopopulate = {
-        maxDepth: 2,
-      };
-    }
-  }
 
   let result = await Model.paginate(query, optionsToExecute);
 
@@ -110,6 +91,7 @@ const find = async (args) => {
       const data = doc.toJSON({ virtuals: true });
 
       return performFieldOperations(config, collectionConfig, {
+        depth,
         data,
         req,
         hook: 'afterRead',

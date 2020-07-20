@@ -9,6 +9,7 @@ const deleteHandler = (config) => async (req, res, next) => {
       collection: req.collection,
       config,
       id: req.params.id,
+      depth: req.query.depth,
     });
 
     if (!doc) {

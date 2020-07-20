@@ -4,6 +4,7 @@ const performFieldOperations = require('../../fields/performFieldOperations');
 
 const register = async (args) => {
   const {
+    depth,
     overrideAccess,
     config,
     collection: {
@@ -81,6 +82,7 @@ const register = async (args) => {
     hook: 'afterRead',
     operationName: 'read',
     req,
+    depth,
   });
 
   // /////////////////////////////////////
