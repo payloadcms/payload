@@ -5,8 +5,7 @@ module.exports = {
   label: 'Global with Strict Access',
   access: {
     update: ({ req: { user } }) => checkRole(['admin'], user),
-    // read: ({ req: { user } }) => checkRole(['admin'], user),
-    read: () => true,
+    read: ({ req: { user } }) => checkRole(['admin'], user),
   },
   fields: [
     {
