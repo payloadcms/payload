@@ -1,11 +1,10 @@
 const executeAccess = require('../../auth/executeAccess');
-const performFieldOperations = require('../../fields/performFieldOperations');
 
-const findOne = async (args) => {
+async function findOne(args) {
+  const { globals: { Model } } = this;
+
   const {
-    config,
     globalConfig,
-    Model,
     req,
     req: {
       locale,
@@ -48,7 +47,7 @@ const findOne = async (args) => {
   // 4. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  doc = performFieldOperations(config, globalConfig, {
+  doc = this.performFieldOperations(globalConfig, {
     data: doc,
     hook: 'afterRead',
     operationName: 'read',
@@ -74,6 +73,6 @@ const findOne = async (args) => {
   // /////////////////////////////////////
 
   return doc;
-};
+}
 
 module.exports = findOne;

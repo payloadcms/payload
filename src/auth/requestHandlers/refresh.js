@@ -1,16 +1,14 @@
-const { refresh } = require('../operations');
 const getExtractJWT = require('../getExtractJWT');
 
-const refreshHandler = config => async (req, res, next) => {
+async function refreshHandler(req, res, next) {
   try {
-    const extractJWT = getExtractJWT(config);
+    const extractJWT = getExtractJWT(this.config);
     const token = extractJWT(req);
 
-    const result = await refresh({
+    const result = await this.operations.collections.auth.refresh({
       req,
       res,
       collection: req.collection,
-      config,
       token,
     });
 
@@ -21,6 +19,6 @@ const refreshHandler = config => async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
-};
+}
 
 module.exports = refreshHandler;

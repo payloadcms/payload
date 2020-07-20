@@ -1,7 +1,5 @@
 /* eslint-disable no-param-reassign */
-const { findByID } = require('../../operations');
-
-const findByIDResolver = (config, collection) => async (_, args, context) => {
+const findByIDResolver = (collection) => async (_, args, context) => {
   if (args.locale) context.req.locale = args.locale;
   if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 

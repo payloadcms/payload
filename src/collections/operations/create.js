@@ -8,9 +8,9 @@ const getSafeFilename = require('../../uploads/getSafeFilename');
 const getImageSize = require('../../uploads/getImageSize');
 const imageMIMETypes = require('../../uploads/imageMIMETypes');
 
-const performFieldOperations = require('../../fields/performFieldOperations');
+async function create(args) {
+  const { performFieldOperations } = this;
 
-const create = async (args) => {
   const {
     collection: {
       Model,
@@ -21,7 +21,7 @@ const create = async (args) => {
       locale,
       fallbackLocale,
     },
-    config,
+    depth,
   } = args;
 
   let { data } = args;
@@ -88,7 +88,7 @@ const create = async (args) => {
   // 4. Execute field-level access, hooks, and validation
   // /////////////////////////////////////
 
-  data = await performFieldOperations(config, collectionConfig, {
+  data = await performFieldOperations(collectionConfig, {
     data,
     hook: 'beforeCreate',
     operationName: 'create',
@@ -114,11 +114,12 @@ const create = async (args) => {
   // 6. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  result = await performFieldOperations(config, collectionConfig, {
+  result = await performFieldOperations(collectionConfig, {
     data: result,
     hook: 'afterRead',
     operationName: 'read',
     req,
+    depth,
   });
 
   // /////////////////////////////////////
@@ -139,6 +140,6 @@ const create = async (args) => {
   // /////////////////////////////////////
 
   return result;
-};
+}
 
 module.exports = create;

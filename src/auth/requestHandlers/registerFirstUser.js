@@ -1,11 +1,8 @@
-const { registerFirstUser } = require('../operations');
-
-const registerFirstUserHandler = (config) => async (req, res, next) => {
+async function registerFirstUser(req, res, next) {
   try {
-    const firstUser = await registerFirstUser({
+    const firstUser = await this.operations.collections.auth.registerFirstUser({
       req,
       res,
-      config,
       collection: req.collection,
       data: req.body,
     });
@@ -14,6 +11,6 @@ const registerFirstUserHandler = (config) => async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
-};
+}
 
-module.exports = registerFirstUserHandler;
+module.exports = registerFirstUser;

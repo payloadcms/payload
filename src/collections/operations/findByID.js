@@ -1,10 +1,8 @@
 const { Forbidden, NotFound } = require('../../errors');
 const executeAccess = require('../../auth/executeAccess');
-const performFieldOperations = require('../../fields/performFieldOperations');
 
-const findByID = async (args) => {
+async function findByID(args) {
   const {
-    config,
     depth,
     collection: {
       Model,
@@ -16,13 +14,15 @@ const findByID = async (args) => {
       locale,
       fallbackLocale,
     },
+    disableErrors,
+    currentDepth,
   } = args;
 
   // /////////////////////////////////////
   // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  const accessResults = await executeAccess({ req }, collectionConfig.access.read);
+  const accessResults = await executeAccess({ req, disableErrors }, collectionConfig.access.read);
   const hasWhereAccess = typeof accessResults === 'object';
 
   const queryToBuild = {
@@ -55,8 +55,14 @@ const findByID = async (args) => {
 
   let result = await Model.findOne(query, {});
 
-  if (!result && !hasWhereAccess) throw new NotFound();
-  if (!result && hasWhereAccess) throw new Forbidden();
+  if (!result) {
+    if (!disableErrors) {
+      if (!hasWhereAccess) throw new NotFound();
+      if (hasWhereAccess) throw new Forbidden();
+    }
+
+    return null;
+  }
 
   if (locale && result.setLocale) {
     result.setLocale(locale, fallbackLocale);
@@ -68,12 +74,13 @@ const findByID = async (args) => {
   // 4. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  result = await performFieldOperations(config, collectionConfig, {
+  result = await this.performFieldOperations(collectionConfig, {
     depth,
     req,
     data: result,
     hook: 'afterRead',
     operationName: 'read',
+    currentDepth,
   });
 
 
@@ -96,6 +103,6 @@ const findByID = async (args) => {
   // /////////////////////////////////////
 
   return result;
-};
+}
 
 module.exports = findByID;

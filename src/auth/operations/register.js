@@ -1,12 +1,12 @@
 const passport = require('passport');
 const executeAccess = require('../executeAccess');
-const performFieldOperations = require('../../fields/performFieldOperations');
 
-const register = async (args) => {
+async function register(args) {
+  const { config } = this;
+
   const {
     depth,
     overrideAccess,
-    config,
     collection: {
       Model,
       config: collectionConfig,
@@ -45,7 +45,7 @@ const register = async (args) => {
   // 3. Execute field-level hooks, access, and validation
   // /////////////////////////////////////
 
-  data = await performFieldOperations(config, collectionConfig, {
+  data = await this.performFieldOperations(collectionConfig, {
     data,
     hook: 'beforeCreate',
     operationName: 'create',
@@ -77,7 +77,7 @@ const register = async (args) => {
   // 7. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  result = await performFieldOperations(config, collectionConfig, {
+  result = await this.performFieldOperations(collectionConfig, {
     data: result,
     hook: 'afterRead',
     operationName: 'read',
@@ -103,6 +103,6 @@ const register = async (args) => {
   // /////////////////////////////////////
 
   return result;
-};
+}
 
 module.exports = register;

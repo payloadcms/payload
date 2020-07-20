@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { AuthenticationError } = require('../../errors');
 
-const login = async (args) => {
-  // Await validation here
+async function login(args) {
+  const { config } = this;
 
   const options = { ...args };
 
@@ -21,7 +21,6 @@ const login = async (args) => {
       Model,
       config: collectionConfig,
     },
-    config,
     data,
   } = options;
 
@@ -90,6 +89,6 @@ const login = async (args) => {
   // /////////////////////////////////////
 
   return token;
-};
+}
 
 module.exports = login;

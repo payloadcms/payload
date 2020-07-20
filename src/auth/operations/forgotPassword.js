@@ -1,7 +1,9 @@
 const crypto = require('crypto');
 const { APIError } = require('../../errors');
 
-const forgotPassword = async (args) => {
+async function forgotPassword(args) {
+  const { config, email } = this;
+
   if (!Object.prototype.hasOwnProperty.call(args.data, 'email')) {
     throw new APIError('Missing email.');
   }
@@ -26,9 +28,7 @@ const forgotPassword = async (args) => {
     collection: {
       Model,
     },
-    config,
     data,
-    email,
   } = options;
 
   let token = await crypto.randomBytes(20);
@@ -66,6 +66,6 @@ const forgotPassword = async (args) => {
   if (typeof afterForgotPassword === 'function') {
     await afterForgotPassword(options);
   }
-};
+}
 
 module.exports = forgotPassword;

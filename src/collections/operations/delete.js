@@ -2,9 +2,7 @@ const fs = require('fs');
 const { NotFound, Forbidden, ErrorDeletingFile } = require('../../errors');
 const executeAccess = require('../../auth/executeAccess');
 
-const performFieldOperations = require('../../fields/performFieldOperations');
-
-const deleteQuery = async (args) => {
+async function deleteQuery(args) {
   const {
     depth,
     collection: {
@@ -17,7 +15,6 @@ const deleteQuery = async (args) => {
       locale,
       fallbackLocale,
     },
-    config,
   } = args;
 
   // /////////////////////////////////////
@@ -97,7 +94,7 @@ const deleteQuery = async (args) => {
   // 6. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  result = await performFieldOperations(config, collectionConfig, {
+  result = await this.performFieldOperations(collectionConfig, {
     data: result,
     hook: 'afterRead',
     operationName: 'read',
@@ -120,6 +117,6 @@ const deleteQuery = async (args) => {
   // /////////////////////////////////////
 
   return result;
-};
+}
 
 module.exports = deleteQuery;

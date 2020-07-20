@@ -2,16 +2,14 @@ const deepmerge = require('deepmerge');
 const overwriteMerge = require('../../utilities/overwriteMerge');
 const executeAccess = require('../../auth/executeAccess');
 const { NotFound, Forbidden } = require('../../errors');
-const performFieldOperations = require('../../fields/performFieldOperations');
 const imageMIMETypes = require('../../uploads/imageMIMETypes');
 const getImageSize = require('../../uploads/getImageSize');
 const getSafeFilename = require('../../uploads/getSafeFilename');
 
 const resizeAndSave = require('../../uploads/imageResizer');
 
-const update = async (args) => {
+async function update(args) {
   const {
-    config,
     depth,
     collection: {
       Model,
@@ -91,7 +89,7 @@ const update = async (args) => {
   // 4. Execute field-level hooks, access, and validation
   // /////////////////////////////////////
 
-  data = await performFieldOperations(config, collectionConfig, {
+  data = await this.performFieldOperations(collectionConfig, {
     data,
     req,
     originalDoc,
@@ -154,7 +152,7 @@ const update = async (args) => {
   // 7. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  doc = await performFieldOperations(config, collectionConfig, {
+  doc = await this.performFieldOperations(collectionConfig, {
     data: doc,
     hook: 'afterRead',
     operationName: 'read',
@@ -180,6 +178,6 @@ const update = async (args) => {
   // /////////////////////////////////////
 
   return doc;
-};
+}
 
 module.exports = update;

@@ -1,9 +1,6 @@
-const { logout } = require('../operations');
-
-const logoutHandler = (config) => async (req, res, next) => {
+async function logoutHandler(req, res, next) {
   try {
-    const message = await logout({
-      config,
+    const message = await this.operations.collections.auth.logout({
       collection: req.collection,
       res,
       req,
@@ -13,6 +10,6 @@ const logoutHandler = (config) => async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
-};
+}
 
 module.exports = logoutHandler;

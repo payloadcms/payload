@@ -1,8 +1,9 @@
 const allOperations = ['create', 'read', 'update', 'delete'];
 
-const accessOperation = async (args) => {
+async function accessOperation(args) {
+  const { config } = this;
+
   const {
-    config,
     req,
     req: { user },
   } = args;
@@ -101,6 +102,6 @@ const accessOperation = async (args) => {
   await Promise.all(promises);
 
   return results;
-};
+}
 
 module.exports = accessOperation;

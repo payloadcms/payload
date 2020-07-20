@@ -1,4 +1,4 @@
-const init = async (args) => {
+async function init(args) {
   const {
     Model,
   } = args;
@@ -8,6 +8,6 @@ const init = async (args) => {
   if (count >= 1) return true;
 
   return false;
-};
+}
 
 module.exports = init;

@@ -1,11 +1,9 @@
 const httpStatus = require('http-status');
-const { access } = require('../operations');
 
-const policiesHandler = (config) => async (req, res, next) => {
+async function policiesHandler(req, res, next) {
   try {
-    const accessResults = await access({
+    const accessResults = await this.operations.collections.auth.access({
       req,
-      config,
     });
 
     return res.status(httpStatus.OK)
@@ -13,6 +11,6 @@ const policiesHandler = (config) => async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
-};
+}
 
 module.exports = policiesHandler;

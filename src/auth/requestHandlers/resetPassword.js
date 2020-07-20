@@ -1,12 +1,10 @@
 const httpStatus = require('http-status');
-const { resetPassword } = require('../operations');
 
-const resetPasswordHandler = config => async (req, res, next) => {
+async function resetPassword(req, res, next) {
   try {
-    const token = await resetPassword({
+    const token = await this.operations.collections.auth.resetPassword({
       req,
       collection: req.collection,
-      config,
       data: req.body,
     });
 
@@ -18,6 +16,6 @@ const resetPasswordHandler = config => async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
-};
+}
 
-module.exports = resetPasswordHandler;
+module.exports = resetPassword;

@@ -1,13 +1,11 @@
 const httpStatus = require('http-status');
-const { login } = require('../operations');
 
-const loginHandler = (config) => async (req, res, next) => {
+async function loginHandler(req, res, next) {
   try {
-    const token = await login({
+    const token = await this.operations.collections.auth.login({
       req,
       res,
       collection: req.collection,
-      config,
       data: req.body,
     });
 
@@ -19,6 +17,6 @@ const loginHandler = (config) => async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
-};
+}
 
 module.exports = loginHandler;

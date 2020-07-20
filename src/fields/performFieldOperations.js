@@ -1,6 +1,7 @@
 const { ValidationError } = require('../errors');
+const executeAccess = require('../auth/executeAccess');
 
-const performFieldOperations = async (config, entityConfig, operation) => {
+async function performFieldOperations(entityConfig, operation) {
   const {
     data: fullData,
     originalDoc: fullOriginalDoc,
@@ -9,12 +10,54 @@ const performFieldOperations = async (config, entityConfig, operation) => {
     req,
   } = operation;
 
+  const recursivePerformFieldOperations = performFieldOperations.bind(this);
+
+  const depth = (operation.depth || operation.depth === 0) ? parseInt(operation.depth, 10) : this.config.defaultDepth;
+  const currentDepth = operation.currentDepth || 0;
+
+  const populateRelationship = async (dataReference, data, field, i) => {
+    let dataToUpdate = dataReference;
+
+    const relation = Array.isArray(field.relationTo) ? data.relationTo : field.relationTo;
+    const relatedCollection = this.collections[relation];
+
+    const accessResult = await executeAccess({ req, disableErrors: true }, relatedCollection.config.access.read);
+
+    let populatedRelationship = null;
+
+    if (accessResult && (depth && currentDepth <= depth)) {
+      populatedRelationship = await this.operations.collections.findByID({
+        req,
+        collection: relatedCollection,
+        id: Array.isArray(field.relationTo) ? data.value : data,
+        currentDepth: currentDepth + 1,
+        disableErrors: true,
+      });
+    }
+
+    // If access control fails, update value to null
+    // If populatedRelationship comes back, update value
+    if (!accessResult || populatedRelationship) {
+      if (typeof i === 'number') {
+        if (Array.isArray(field.relationTo)) {
+          dataToUpdate[field.name][i].value = populatedRelationship;
+        } else {
+          dataToUpdate[field.name][i] = populatedRelationship;
+        }
+      } else if (Array.isArray(field.relationTo)) {
+        dataToUpdate.value = populatedRelationship;
+      } else {
+        dataToUpdate = populatedRelationship;
+      }
+    }
+  };
+
   // Maintain a top-level list of promises
   // so that all async field access / validations / hooks
   // can run in parallel
   const validationPromises = [];
   const accessPromises = [];
-  const relationshipAccessPromises = [];
+  const relationshipPopulationPromises = [];
   const hookPromises = [];
   const errors = [];
 
@@ -36,13 +79,25 @@ const performFieldOperations = async (config, entityConfig, operation) => {
     }
   };
 
-  const createRelationshipAccessPromise = async (data, field, access) => {
+  const createRelationshipPopulationPromise = async (data, field) => {
     const resultingData = data;
 
-    const result = await access({ req });
+    if (field.hasMany && Array.isArray(data[field.name])) {
+      const rowPromises = [];
 
-    if (result === false) {
-      delete resultingData[field.name];
+      data[field.name].forEach((relatedDoc, i) => {
+        const rowPromise = async () => {
+          if (relatedDoc) {
+            await populateRelationship(resultingData, relatedDoc, field, i);
+          }
+        };
+
+        rowPromises.push(rowPromise());
+      });
+
+      await Promise.all(rowPromises);
+    } else if (data[field.name]) {
+      await populateRelationship(resultingData, data[field.name], field);
     }
   };
 
@@ -59,30 +114,13 @@ const performFieldOperations = async (config, entityConfig, operation) => {
       }
     }
 
-    if (field.type === 'relationship' && operationName === 'read') {
-      const relatedCollections = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo];
-
-      relatedCollections.forEach((slug) => {
-        const collection = config.collections.find((coll) => coll.slug === slug);
-
-        if (collection && collection.access && collection.access.read) {
-          relationshipAccessPromises.push(createRelationshipAccessPromise(data, field, collection.access.read));
-        }
-      });
+    if ((field.type === 'relationship' || field.type === 'upload') && hook === 'afterRead') {
+      relationshipPopulationPromises.push(createRelationshipPopulationPromise(data, field));
     }
   };
 
   const createHookPromise = async (data, field) => {
     const resultingData = data;
-    const findRelatedCollection = (relation) => config.collections.find((collection) => collection.slug === relation);
-    // Todo:
-    // Check for afterRead operation and if found,
-    // Run relationship and upload-based hooks here
-    // Handle following scenarios:
-    //
-    // hasMany
-    // relationTo hasMany
-    // single
 
     if (hook === 'afterRead') {
       if ((field.type === 'relationship' || field.type === 'upload')) {
@@ -90,50 +128,57 @@ const performFieldOperations = async (config, entityConfig, operation) => {
 
         // If there are many related documents
         if (field.hasMany && Array.isArray(data[field.name])) {
+          const relationshipDocPromises = [];
           // Loop through relations
-          data[field.name].forEach(async (value, i) => {
-            let relation = field.relationTo;
+          data[field.name].forEach((value, i) => {
+            const generateRelationshipDocPromise = async () => {
+              let relation = field.relationTo;
 
-            // If this field can be related to many collections,
-            // Set relationTo based on value
-            if (hasManyRelations && value && value.relationTo) {
-              relation = value.relationTo;
-            }
+              // If this field can be related to many collections,
+              // Set relationTo based on value
+              if (hasManyRelations && value && value.relationTo) {
+                relation = value.relationTo;
+              }
 
-            if (relation) {
-              const relatedCollection = findRelatedCollection(relation);
+              if (relation) {
+                const relatedCollection = this.collections[relation].config;
 
-              if (relatedCollection) {
-                let relatedDocumentData = data[field.name][i];
-                let dataToHook = resultingData[field.name][i];
+                if (relatedCollection) {
+                  let relatedDocumentData = data[field.name][i];
+                  let dataToHook = resultingData[field.name][i];
 
-                if (hasManyRelations) {
-                  relatedDocumentData = data[field.name][i].value;
-                  dataToHook = resultingData[field.name][i].value;
-                }
+                  if (hasManyRelations) {
+                    relatedDocumentData = data[field.name][i].value;
+                    dataToHook = resultingData[field.name][i].value;
+                  }
 
-                // Only run hooks for populated sub documents - NOT IDs
-                if (relatedDocumentData && typeof relatedDocumentData !== 'string') {
-                  // Perform field hooks on related collection
-                  dataToHook = await performFieldOperations(config, relatedCollection, {
-                    req,
-                    data: relatedDocumentData,
-                    hook: 'afterRead',
-                    operationName: 'read',
-                  });
-
-                  await relatedCollection.hooks.afterRead.reduce(async (priorHook, currentHook) => {
-                    await priorHook;
-
-                    dataToHook = await currentHook({
+                  // Only run hooks for populated sub documents - NOT IDs
+                  if (relatedDocumentData && typeof relatedDocumentData !== 'string') {
+                    // Perform field hooks on related collection
+                    dataToHook = await recursivePerformFieldOperations(relatedCollection, {
                       req,
-                      doc: relatedDocumentData,
-                    }) || dataToHook;
-                  }, Promise.resolve());
+                      data: relatedDocumentData,
+                      hook: 'afterRead',
+                      operationName: 'read',
+                    });
+
+                    await relatedCollection.hooks.afterRead.reduce(async (priorHook, currentHook) => {
+                      await priorHook;
+
+                      dataToHook = await currentHook({
+                        req,
+                        doc: relatedDocumentData,
+                      }) || dataToHook;
+                    }, Promise.resolve());
+                  }
                 }
               }
-            }
+            };
+
+            relationshipDocPromises.push(generateRelationshipDocPromise());
           });
+
+          await Promise.all(relationshipDocPromises);
 
           // Otherwise, there is only one related document
         } else {
@@ -143,7 +188,7 @@ const performFieldOperations = async (config, entityConfig, operation) => {
             relation = data[field.name].relationTo;
           }
 
-          const relatedCollection = findRelatedCollection(relation);
+          const relatedCollection = this.collections[relation].config;
 
           if (relatedCollection) {
             let relatedDocumentData = data[field.name];
@@ -157,7 +202,7 @@ const performFieldOperations = async (config, entityConfig, operation) => {
             // Only run hooks for populated sub documents - NOT IDs
             if (relatedDocumentData && typeof relatedDocumentData !== 'string') {
               // Perform field hooks on related collection
-              dataToHook = await performFieldOperations(config, relatedCollection, {
+              dataToHook = await recursivePerformFieldOperations(relatedCollection, {
                 req,
                 data: relatedDocumentData,
                 hook: 'afterRead',
@@ -255,10 +300,11 @@ const performFieldOperations = async (config, entityConfig, operation) => {
   }
 
   await Promise.all(accessPromises);
+  await Promise.all(relationshipPopulationPromises);
   await Promise.all(hookPromises);
 
   return fullData;
-};
+}
 
 
 module.exports = performFieldOperations;

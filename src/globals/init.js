@@ -1,5 +1,5 @@
+const express = require('express');
 const buildModel = require('./buildModel');
-const routes = require('./routes');
 
 function initGlobals() {
   if (this.config.globals) {
@@ -8,7 +8,16 @@ function initGlobals() {
       config: this.config.globals,
     };
 
-    this.router.use(routes(this.config, this.globals.Model));
+    const router = express.Router();
+
+    this.config.globals.forEach((global) => {
+      router
+        .route(`/globals/${global.slug}`)
+        .get(this.requestHandlers.globals.findOne(global))
+        .post(this.requestHandlers.globals.update(global));
+    });
+
+    this.router.use(router);
   }
 }
 

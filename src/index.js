@@ -2,7 +2,9 @@ require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
 const express = require('express');
-const graphQLPlayground = require('graphql-playground-middleware-express').default;
+// const graphQLPlayground = require('graphql-playground-middleware-express').default;
+const bindOperations = require('./init/bindOperations');
+const bindRequestHandlers = require('./init/bindRequestHandlers');
 const getConfig = require('./utilities/getConfig');
 const authenticate = require('./express/middleware/authenticate');
 const connectMongoose = require('./mongoose/connect');
@@ -12,12 +14,12 @@ const initAuth = require('./auth/init');
 const initCollections = require('./collections/init');
 const initGlobals = require('./globals/init');
 const initStatic = require('./express/static');
-const GraphQL = require('./graphql');
+// const GraphQL = require('./graphql');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
 const buildEmail = require('./email/build');
-const identifyAPI = require('./express/middleware/identifyAPI');
+// const identifyAPI = require('./express/middleware/identifyAPI');
 const errorHandler = require('./express/middleware/errorHandler');
-const { access } = require('./auth/requestHandlers');
+const performFieldOperations = require('./fields/performFieldOperations');
 
 class Payload {
   constructor(options) {
@@ -31,6 +33,9 @@ class Payload {
     this.router = express.Router();
     this.collections = {};
 
+    bindOperations(this);
+    bindRequestHandlers(this);
+
     this.initAuth = initAuth.bind(this);
     this.initCollections = initCollections.bind(this);
     this.initGlobals = initGlobals.bind(this);
@@ -39,6 +44,7 @@ class Payload {
     this.getMockEmailCredentials = this.getMockEmailCredentials.bind(this);
     this.initStatic = initStatic.bind(this);
     this.initAdmin = initAdmin.bind(this);
+    this.performFieldOperations = performFieldOperations.bind(this);
 
     // Configure email service
     this.email = this.buildEmail();
@@ -53,22 +59,22 @@ class Payload {
     this.initGlobals();
     this.initAdmin();
 
-    this.router.get('/access', access(this.config));
+    this.router.get('/access', this.requestHandlers.collections.auth.access);
 
-    const graphQLHandler = new GraphQL(this);
+    // const graphQLHandler = new GraphQL(this);
 
-    this.router.use(
-      this.config.routes.graphQL,
-      identifyAPI('GraphQL'),
-      (req, res) => graphQLHandler.init(req, res)(req, res),
-    );
+    // this.router.use(
+    //   this.config.routes.graphQL,
+    //   identifyAPI('GraphQL'),
+    //   (req, res) => graphQLHandler.init(req, res)(req, res),
+    // );
 
-    this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
-      endpoint: `${this.config.routes.api}${this.config.routes.graphQL}`,
-      settings: {
-        'request.credentials': 'include',
-      },
-    }));
+    // this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
+    //   endpoint: `${this.config.routes.api}${this.config.routes.graphQL}`,
+    //   settings: {
+    //     'request.credentials': 'include',
+    //   },
+    // }));
 
     // Bind router to API
     this.express.use(this.config.routes.api, this.router);

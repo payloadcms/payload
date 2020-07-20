@@ -1,9 +1,10 @@
 const jwt = require('jsonwebtoken');
 const { Forbidden } = require('../../errors');
 
-const refresh = async (args) => {
+async function refresh(args) {
   // Await validation here
 
+  const { secret, cookiePrefix } = this.config;
   let options = { ...args };
 
   // /////////////////////////////////////
@@ -20,7 +21,6 @@ const refresh = async (args) => {
   // 2. Perform refresh
   // /////////////////////////////////////
 
-  const { secret, cookiePrefix } = options.config;
   const opts = {};
   opts.expiresIn = options.collection.config.auth.tokenExpiration;
 
@@ -71,6 +71,6 @@ const refresh = async (args) => {
     refreshedToken,
     user: payload,
   };
-};
+}
 
 module.exports = refresh;

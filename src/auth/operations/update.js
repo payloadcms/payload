@@ -2,12 +2,12 @@ const deepmerge = require('deepmerge');
 const overwriteMerge = require('../../utilities/overwriteMerge');
 const { NotFound, Forbidden } = require('../../errors');
 const executeAccess = require('../executeAccess');
-const performFieldOperations = require('../../fields/performFieldOperations');
 
-const update = async (args) => {
+async function update(args) {
+  const { config } = this;
+
   const {
     depth,
-    config,
     collection: {
       Model,
       config: collectionConfig,
@@ -77,7 +77,7 @@ const update = async (args) => {
   // 4. Execute field-level hooks, access, and validation
   // /////////////////////////////////////
 
-  data = await performFieldOperations(config, collectionConfig, {
+  data = await this.performFieldOperations(collectionConfig, {
     data,
     req,
     hook: 'beforeUpdate',
@@ -111,7 +111,7 @@ const update = async (args) => {
   // 7. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  user = performFieldOperations(config, collectionConfig, {
+  user = this.performFieldOperations(collectionConfig, {
     data: user,
     hook: 'afterRead',
     operationName: 'read',
@@ -137,6 +137,6 @@ const update = async (args) => {
   // /////////////////////////////////////
 
   return user;
-};
+}
 
 module.exports = update;

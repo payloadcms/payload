@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 const getExtractJWT = require('../getExtractJWT');
 
-const me = async ({ req, config }) => {
-  const extractJWT = getExtractJWT(config);
+async function me({ req }) {
+  const extractJWT = getExtractJWT(this.config);
 
   if (req.user) {
     const response = {
@@ -26,6 +26,6 @@ const me = async ({ req, config }) => {
   return {
     user: null,
   };
-};
+}
 
 module.exports = me;

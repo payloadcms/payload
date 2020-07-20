@@ -5,7 +5,7 @@ const executeAccess = async (operation, access) => {
     const result = await access(operation);
 
     if (!result) {
-      throw new Forbidden();
+      if (!operation.disableErrors) throw new Forbidden();
     }
 
     return result;
@@ -15,7 +15,8 @@ const executeAccess = async (operation, access) => {
     return true;
   }
 
-  throw new Forbidden();
+  if (!operation.disableErrors) throw new Forbidden();
+  return false;
 };
 
 module.exports = executeAccess;

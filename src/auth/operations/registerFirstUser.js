@@ -2,7 +2,7 @@ const register = require('./register');
 const login = require('./login');
 const { Forbidden } = require('../../errors');
 
-const registerFirstUser = async (args) => {
+async function registerFirstUser(args) {
   const {
     collection: {
       Model,
@@ -40,6 +40,6 @@ const registerFirstUser = async (args) => {
     message: 'Registered successfully. Welcome to Payload!',
     user: result,
   };
-};
+}
 
 module.exports = registerFirstUser;

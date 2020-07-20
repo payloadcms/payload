@@ -1,12 +1,10 @@
-const { me } = require('../operations');
-
-const meHandler = config => async (req, res, next) => {
+async function me(req, res, next) {
   try {
-    const response = await me({ req, config });
+    const response = await this.operations.collections.auth.me({ req });
     return res.status(200).json(response);
   } catch (err) {
     return next(err);
   }
-};
+}
 
-module.exports = meHandler;
+module.exports = me;

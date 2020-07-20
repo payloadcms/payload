@@ -1,12 +1,10 @@
 const executeAccess = require('../../auth/executeAccess');
-const performFieldOperations = require('../../fields/performFieldOperations');
 
-const find = async (args) => {
+async function find(args) {
   const {
     where,
     page,
     limit,
-    config,
     depth,
     collection: {
       Model,
@@ -90,13 +88,17 @@ const find = async (args) => {
 
       const data = doc.toJSON({ virtuals: true });
 
-      return performFieldOperations(config, collectionConfig, {
-        depth,
-        data,
-        req,
-        hook: 'afterRead',
-        operationName: 'read',
-      });
+      return this.performFieldOperations(
+        collectionConfig,
+        {
+          depth,
+          data,
+          req,
+          hook: 'afterRead',
+          operationName: 'read',
+        },
+        find,
+      );
     })),
   };
 
@@ -128,6 +130,6 @@ const find = async (args) => {
   // /////////////////////////////////////
 
   return afterReadResult;
-};
+}
 
 module.exports = find;

@@ -16,7 +16,6 @@ const { GraphQLJSON } = require('graphql-type-json');
 const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
 const withNullableType = require('./withNullableType');
-const { find } = require('../../collections/operations');
 
 function buildObjectType(name, fields, parentName, baseFields = {}) {
   const recursiveBuildObjectType = buildObjectType.bind(this);
@@ -122,7 +121,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
                   id = relatedDoc.value;
                 }
 
-                const result = await find({
+                const result = await this.operations.collections.find({
                   Model: this.collections[relatedCollectionSlug].Model,
                   query: {
                     where: {
@@ -169,7 +168,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
             if (args.page) relatedDocumentQuery.paginate.page = args.page;
             if (args.limit) relatedDocumentQuery.paginate.limit = args.limit;
 
-            const relatedDocument = await find();
+            const relatedDocument = await this.operations.collections.find();
 
             if (relatedDocument.docs[0]) return relatedDocument.docs[0];
 

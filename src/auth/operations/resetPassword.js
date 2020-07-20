@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
 const { APIError } = require('../../errors');
 
-const resetPassword = async (args) => {
+async function resetPassword(args) {
+  const { config } = this;
+
   if (!Object.prototype.hasOwnProperty.call(args.data, 'token')
     || !Object.prototype.hasOwnProperty.call(args.data, 'password')) {
     throw new APIError('Missing required data.');
@@ -28,7 +30,6 @@ const resetPassword = async (args) => {
       Model,
       config: collectionConfig,
     },
-    config,
     data,
   } = options;
 
@@ -85,6 +86,6 @@ const resetPassword = async (args) => {
   // /////////////////////////////////////
 
   return token;
-};
+}
 
 module.exports = resetPassword;
