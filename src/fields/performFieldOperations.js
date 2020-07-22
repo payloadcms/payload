@@ -11,6 +11,7 @@ async function performFieldOperations(entityConfig, operation) {
     req: {
       payloadAPI,
     },
+    overrideAccess,
   } = operation;
 
   const recursivePerformFieldOperations = performFieldOperations.bind(this);
@@ -29,7 +30,7 @@ async function performFieldOperations(entityConfig, operation) {
     const relation = Array.isArray(field.relationTo) ? data.relationTo : field.relationTo;
     const relatedCollection = this.collections[relation];
 
-    const accessResult = await executeAccess({ req, disableErrors: true }, relatedCollection.config.access.read);
+    const accessResult = !overrideAccess ? await executeAccess({ req, disableErrors: true }, relatedCollection.config.access.read) : true;
 
     let populatedRelationship = null;
 

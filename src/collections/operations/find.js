@@ -100,6 +100,7 @@ async function find(args) {
           req,
           hook: 'afterRead',
           operationName: 'read',
+          overrideAccess,
         },
         find,
       );
