@@ -3,9 +3,10 @@ const getExtractJWT = require('../getExtractJWT');
 
 const JwtStrategy = passportJwt.Strategy;
 
-module.exports = (config, collections) => {
+module.exports = ({ config, collections, operations }) => {
   const opts = {
     session: false,
+    passReqToCallback: true,
   };
 
   const extractJWT = getExtractJWT(config);
@@ -13,16 +14,29 @@ module.exports = (config, collections) => {
   opts.jwtFromRequest = extractJWT;
   opts.secretOrKey = config.secret;
 
-  return new JwtStrategy(opts, async (token, done) => {
+  return new JwtStrategy(opts, async (req, token, done) => {
     try {
       const collection = collections[token.collection];
 
-      const user = await collection.Model.findByUsername(token.email);
+      const userQuery = await operations.collections.find({
+        where: {
+          email: {
+            equals: token.email,
+          },
+        },
+        collection,
+        req,
+        overrideAccess: true,
+      });
 
-      const json = user.toJSON({ virtuals: true });
-      json.collection = collection.config.slug;
+      if (userQuery.docs && userQuery.docs.length > 0) {
+        const user = userQuery.docs[0];
+        user.collection = collection.config.slug;
 
-      done(null, json);
+        done(null, user);
+      } else {
+        done(null, false);
+      }
     } catch (err) {
       done(null, false);
     }

@@ -1,20 +1,36 @@
 const PassportAPIKey = require('passport-headerapikey').HeaderAPIKeyStrategy;
 
-module.exports = ({ Model, config }) => {
+module.exports = ({ operations }, { Model, config }) => {
   const opts = {
     header: 'Authorization',
     prefix: `${config.labels.singular} API-Key `,
   };
 
-  return new PassportAPIKey(opts, false, (apiKey, done) => {
-    Model.findOne({ apiKey, enableAPIKey: true }, (err, user) => {
-      if (err) return done(err);
-      if (!user) return done(null, false);
+  return new PassportAPIKey(opts, true, async (req, apiKey, done) => {
+    try {
+      const userQuery = await operations.collections.find({
+        where: {
+          apiKey: {
+            equals: apiKey,
+          },
+        },
+        collection: {
+          Model,
+          config,
+        },
+        req,
+        overrideAccess: true,
+      });
 
-      const json = user.toJSON({ virtuals: true });
-      json.collection = config.slug;
-
-      return done(null, json);
-    });
+      if (userQuery.docs && userQuery.docs.length > 0) {
+        const user = userQuery.docs[0];
+        user.collection = config.slug;
+        done(null, user);
+      } else {
+        done(null, false);
+      }
+    } catch (err) {
+      done(null, false);
+    }
   });
 };

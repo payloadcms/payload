@@ -15,14 +15,12 @@ async function find(args) {
       locale,
       fallbackLocale,
     },
+    overrideAccess,
   } = args;
 
   // /////////////////////////////////////
   // 1. Retrieve and execute access
   // /////////////////////////////////////
-
-  const accessResults = await executeAccess({ req }, collectionConfig.access.read);
-  const hasWhereAccess = typeof accessResults === 'object';
 
   const queryToBuild = {};
 
@@ -32,15 +30,21 @@ async function find(args) {
     };
   }
 
-  if (hasWhereAccess) {
-    if (!where) {
-      queryToBuild.where = {
-        and: [
-          accessResults,
-        ],
-      };
-    } else {
-      queryToBuild.where.and.push(accessResults);
+  if (!overrideAccess) {
+    const accessResults = await executeAccess({ req }, collectionConfig.access.read);
+    const hasWhereAccess = typeof accessResults === 'object';
+
+
+    if (hasWhereAccess) {
+      if (!where) {
+        queryToBuild.where = {
+          and: [
+            accessResults,
+          ],
+        };
+      } else {
+        queryToBuild.where.and.push(accessResults);
+      }
     }
   }
 

@@ -2,8 +2,6 @@ const passport = require('passport');
 const executeAccess = require('../executeAccess');
 
 async function register(args) {
-  const { config } = this;
-
   const {
     depth,
     overrideAccess,

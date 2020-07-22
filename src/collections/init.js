@@ -48,7 +48,7 @@ function registerCollections() {
       passport.use(new LocalStrategy(AuthCollection.Model.authenticate()));
 
       if (collection.auth.useAPIKey) {
-        passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(AuthCollection));
+        passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(this, AuthCollection));
       }
 
       const {
