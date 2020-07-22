@@ -113,22 +113,20 @@ async function find(args) {
 
   let afterReadResult = result;
 
-  if (typeof afterRead === 'function') {
-    afterReadResult = {
-      ...result,
-      docs: await Promise.all(result.docs.map(async (doc) => {
-        let docRef = doc;
+  afterReadResult = {
+    ...result,
+    docs: await Promise.all(result.docs.map(async (doc) => {
+      let docRef = doc;
 
-        await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-          await priorHook;
+      await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+        await priorHook;
 
-          docRef = await hook({ req, query, doc }) || doc;
-        }, Promise.resolve());
+        docRef = await hook({ req, query, doc }) || doc;
+      }, Promise.resolve());
 
-        return docRef;
-      })),
-    };
-  }
+      return docRef;
+    })),
+  };
 
   // /////////////////////////////////////
   // 7. Return results
