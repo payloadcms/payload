@@ -235,6 +235,8 @@ async function performFieldOperations(entityConfig, operation) {
       field.hooks[hook].forEach(async (fieldHook) => {
         resultingData[field.name] = await fieldHook({
           value: data[field.name],
+          originalDoc: fullOriginalDoc,
+          data: fullData,
           req,
         });
       });

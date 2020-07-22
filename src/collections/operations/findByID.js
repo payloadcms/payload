@@ -53,6 +53,8 @@ async function findByID(args) {
   // 3. Perform database operation
   // /////////////////////////////////////
 
+  if (!query.$and[0]._id) throw new NotFound();
+
   let result = await Model.findOne(query, {});
 
   if (!result) {
