@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Route, Switch, withRouter, Redirect,
+  Route, Switch, withRouter, Redirect, useHistory,
 } from 'react-router-dom';
 import config from 'payload/config';
 import List from './views/collections/List';
@@ -25,6 +25,7 @@ const {
 } = config;
 
 const Routes = () => {
+  const history = useHistory();
   const [initialized, setInitialized] = useState(null);
   const { user, permissions, permissions: { canAccessAdmin } } = useUser();
 
@@ -35,6 +36,10 @@ const Routes = () => {
       }
     }));
   }, []);
+
+  useEffect(() => {
+    history.replace();
+  }, [history]);
 
   return (
     <Route
