@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const { AuthenticationError } = require('../../errors');
 
 async function login(args) {
-  const { config } = this;
+  const { config, operations } = this;
 
   const options = { ...args };
 
@@ -22,19 +22,37 @@ async function login(args) {
       config: collectionConfig,
     },
     data,
+    req,
   } = options;
 
   const { email, password } = data;
 
-  const user = await Model.findByUsername(email);
+  const userDoc = await Model.findByUsername(email);
 
-  if (!user) throw new AuthenticationError();
 
-  const authResult = await user.authenticate(password);
+  if (!userDoc) throw new AuthenticationError();
+
+  const authResult = await userDoc.authenticate(password);
 
   if (!authResult.user) {
     throw new AuthenticationError();
   }
+
+  const userQuery = await operations.collections.find({
+    where: {
+      email: {
+        equals: email,
+      },
+    },
+    collection: {
+      Model,
+      config: collectionConfig,
+    },
+    req,
+    overrideAccess: true,
+  });
+
+  const user = userQuery.docs[0];
 
   const fieldsToSign = collectionConfig.fields.reduce((signedFields, field) => {
     if (field.saveToJWT) {
