@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useRouteMatch, useHistory, useLocation } from 'react-router-dom';
 import config from 'payload/config';
@@ -6,7 +6,7 @@ import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import { useUser } from '../../../data/User';
 import formatFields from './formatFields';
-
+import Loading from '../../../elements/Loading';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import DefaultEdit from './Default';
 
@@ -18,6 +18,7 @@ const EditView = (props) => {
   const history = useHistory();
   const { setStepNav } = useStepNav();
   const [fields, setFields] = useState([]);
+  const [componentProps, setComponentProps] = useState(null);
   const { permissions } = useUser();
 
   const { collection, isEditing } = props;
@@ -32,7 +33,7 @@ const EditView = (props) => {
     },
   } = collection;
 
-  const onSave = (json) => {
+  const onSave = useCallback((json) => {
     history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`, {
       status: {
         message: json.message,
@@ -40,7 +41,7 @@ const EditView = (props) => {
       },
       data: json.doc,
     });
-  };
+  }, [collection, history]);
 
   const [{ data, isLoading }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
@@ -74,20 +75,31 @@ const EditView = (props) => {
 
   const collectionPermissions = permissions?.[slug];
 
-  return (
-    <RenderCustomComponent
-      DefaultComponent={DefaultEdit}
-      path={`${slug}.views.Edit`}
-      componentProps={{
-        isLoading,
-        data: dataToRender,
-        collection: { ...collection, fields },
-        permissions: collectionPermissions,
-        isEditing,
-        onSave,
-      }}
-    />
-  );
+  useEffect(() => {
+    setComponentProps({
+      data: dataToRender,
+      collection: { ...collection, fields },
+      permissions: collectionPermissions,
+      isEditing,
+      onSave,
+    });
+  }, [dataToRender, collection, fields, collectionPermissions, isEditing, onSave]);
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (componentProps) {
+    return (
+      <RenderCustomComponent
+        DefaultComponent={DefaultEdit}
+        path={`${slug}.views.Edit`}
+        componentProps={componentProps}
+      />
+    );
+  }
+
+  return null;
 };
 
 EditView.defaultProps = {

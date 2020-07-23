@@ -18,6 +18,9 @@ import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving';
 
 import './index.scss';
 
+const mainFieldFilter = (field) => (!field?.admin?.position || (field?.admin?.position !== 'sidebar'));
+const sidebarFieldFilter = (field) => field?.admin?.position === 'sidebar';
+
 const { serverURL, routes: { api, admin } } = config;
 
 const baseClass = 'collection-edit';
@@ -26,7 +29,7 @@ const DefaultEditView = (props) => {
   const { params: { id } = {} } = useRouteMatch();
 
   const {
-    collection, isEditing, data, onSave, permissions, isLoading,
+    collection, isEditing, data, onSave, permissions,
   } = props;
 
   const {
@@ -66,28 +69,23 @@ const DefaultEditView = (props) => {
           <Eyebrow />
           <LeaveWithoutSaving />
           <div className={`${baseClass}__edit`}>
-            {isLoading && (
-              <Loading />
-            )}
-            {!isLoading && (
-              <React.Fragment>
-                <header className={`${baseClass}__header`}>
-                  <h1>
-                    <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
-                  </h1>
-                </header>
-                <RenderFields
-                  operation={isEditing ? 'update' : 'create'}
-                  readOnly={!hasSavePermission}
-                  permissions={permissions.fields}
-                  filter={(field) => (!field?.admin?.position || (field?.admin?.position !== 'sidebar'))}
-                  fieldTypes={fieldTypes}
-                  fieldSchema={fields}
-                  initialData={data}
-                  customComponentsPath={`${slug}.fields.`}
-                />
-              </React.Fragment>
-            )}
+            <React.Fragment>
+              <header className={`${baseClass}__header`}>
+                <h1>
+                  <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
+                </h1>
+              </header>
+              <RenderFields
+                operation={isEditing ? 'update' : 'create'}
+                readOnly={!hasSavePermission}
+                permissions={permissions.fields}
+                filter={mainFieldFilter}
+                fieldTypes={fieldTypes}
+                fieldSchema={fields}
+                initialData={data}
+                customComponentsPath={`${slug}.fields.`}
+              />
+            </React.Fragment>
           </div>
         </div>
         <div className={`${baseClass}__sidebar`}>
@@ -134,48 +132,46 @@ const DefaultEditView = (props) => {
                 </a>
               </div>
             )}
-            {!isLoading && (
-              <React.Fragment>
-                <div className={`${baseClass}__sidebar-fields`}>
-                  <RenderFields
-                    operation={isEditing ? 'update' : 'create'}
-                    readOnly={!hasSavePermission}
-                    permissions={permissions.fields}
-                    filter={(field) => field?.admin?.position === 'sidebar'}
-                    position="sidebar"
-                    fieldTypes={fieldTypes}
-                    fieldSchema={fields}
-                    initialData={data}
-                    customComponentsPath={`${slug}.fields.`}
-                  />
-                </div>
-                {isEditing && (
-                  <ul className={`${baseClass}__meta`}>
-                    <li>
-                      <div className={`${baseClass}__label`}>ID</div>
-                      <div>{id}</div>
-                    </li>
-                    {timestamps && (
-                      <React.Fragment>
-                        {data.updatedAt && (
-                          <li>
-                            <div className={`${baseClass}__label`}>Last Modified</div>
-                            <div>{format(new Date(data.updatedAt), 'MMMM do yyyy, h:mma')}</div>
-                          </li>
-                        )}
-                        {data.createdAt && (
-                          <li>
-                            <div className={`${baseClass}__label`}>Created</div>
-                            <div>{format(new Date(data.createdAt), 'MMMM do yyyy, h:mma')}</div>
-                          </li>
-                        )}
-                      </React.Fragment>
-                    )}
+            <React.Fragment>
+              <div className={`${baseClass}__sidebar-fields`}>
+                <RenderFields
+                  operation={isEditing ? 'update' : 'create'}
+                  readOnly={!hasSavePermission}
+                  permissions={permissions.fields}
+                  filter={sidebarFieldFilter}
+                  position="sidebar"
+                  fieldTypes={fieldTypes}
+                  fieldSchema={fields}
+                  initialData={data}
+                  customComponentsPath={`${slug}.fields.`}
+                />
+              </div>
+              {isEditing && (
+                <ul className={`${baseClass}__meta`}>
+                  <li>
+                    <div className={`${baseClass}__label`}>ID</div>
+                    <div>{id}</div>
+                  </li>
+                  {timestamps && (
+                    <React.Fragment>
+                      {data.updatedAt && (
+                        <li>
+                          <div className={`${baseClass}__label`}>Last Modified</div>
+                          <div>{format(new Date(data.updatedAt), 'MMMM do yyyy, h:mma')}</div>
+                        </li>
+                      )}
+                      {data.createdAt && (
+                        <li>
+                          <div className={`${baseClass}__label`}>Created</div>
+                          <div>{format(new Date(data.createdAt), 'MMMM do yyyy, h:mma')}</div>
+                        </li>
+                      )}
+                    </React.Fragment>
+                  )}
 
-                  </ul>
-                )}
-              </React.Fragment>
-            )}
+                </ul>
+              )}
+            </React.Fragment>
           </div>
         </div>
       </Form>
@@ -185,12 +181,10 @@ const DefaultEditView = (props) => {
 
 DefaultEditView.defaultProps = {
   isEditing: false,
-  isLoading: true,
   data: undefined,
 };
 
 DefaultEditView.propTypes = {
-  isLoading: PropTypes.bool,
   collection: PropTypes.shape({
     labels: PropTypes.shape({
       plural: PropTypes.string,

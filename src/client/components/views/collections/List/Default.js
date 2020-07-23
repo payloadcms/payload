@@ -16,6 +16,8 @@ import Cell from './Cell';
 
 import './index.scss';
 
+const apiOptions = { initialParams: { depth: 0 } };
+
 const { serverURL, routes: { api, admin } } = config;
 
 const baseClass = 'collection-list';
@@ -44,7 +46,7 @@ const DefaultList = (props) => {
 
   const apiURL = `${serverURL}${api}/${slug}`;
 
-  const [{ data }, { setParams }] = usePayloadAPI(apiURL, { initialParams: { depth: 0 } });
+  const [{ data }, { setParams }] = usePayloadAPI(apiURL, apiOptions);
 
   useEffect(() => {
     const params = {};

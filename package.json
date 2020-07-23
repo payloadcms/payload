@@ -96,6 +96,7 @@
     "react-router-dom": "^5.1.2",
     "react-router-navigation-prompt": "^1.8.11",
     "react-select": "^3.0.8",
+    "react-window": "^1.6.0-alpha.1",
     "sanitize-filename": "^1.6.3",
     "sass-loader": "7.1.0",
     "sharp": "^0.25.2",

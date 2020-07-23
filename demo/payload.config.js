@@ -9,6 +9,7 @@ const Blocks = require('./collections/Blocks');
 const HiddenFields = require('./collections/HiddenFields');
 const Hooks = require('./collections/Hooks');
 const Localized = require('./collections/Localized');
+const LotsOfFields = require('./collections/LotsOfFields');
 const LocalizedArray = require('./collections/LocalizedArray');
 const Media = require('./collections/Media');
 const NestedArrays = require('./collections/NestedArrays');
@@ -46,6 +47,7 @@ module.exports = {
     Hooks,
     Localized,
     LocalizedArray,
+    LotsOfFields,
     Media,
     NestedArrays,
     Preview,
