@@ -15,7 +15,8 @@ import Error from '../../Error';
 import useFieldType from '../../useFieldType';
 import Popup from '../../../elements/Popup';
 import BlockSelector from './BlockSelector';
-import { blocks } from '../../../../../fields/validations';
+import { blocks as blockValidator } from '../../../../../fields/validations';
+import SubForm from '../../SubForm';
 
 import './index.scss';
 
@@ -242,7 +243,7 @@ Blocks.defaultProps = {
   defaultValue: [],
   initialData: [],
   singularLabel: 'Block',
-  validate: blocks,
+  validate: blockValidator,
   required: false,
   maxRows: undefined,
   minRows: undefined,
@@ -276,4 +277,23 @@ Blocks.propTypes = {
   }),
 };
 
-export default withCondition(Blocks);
+const BlocksForm = (props) => {
+  const { name, path } = props;
+
+  return (
+    <SubForm {...{ name, path }}>
+      <Blocks {...props} />
+    </SubForm>
+  );
+};
+
+BlocksForm.defaultProps = {
+  path: '',
+};
+
+BlocksForm.propTypes = {
+  path: PropTypes.string,
+  name: PropTypes.string.isRequired,
+};
+
+export default withCondition(BlocksForm);

@@ -12,6 +12,7 @@ import { useForm } from '../../FormProvider/context';
 import useFieldType from '../../useFieldType';
 import Error from '../../Error';
 import { array } from '../../../../../fields/validations';
+import SubForm from '../../SubForm';
 
 import './index.scss';
 
@@ -191,6 +192,7 @@ ArrayFieldType.defaultProps = {
   minRows: undefined,
   singularLabel: 'Row',
   permissions: {},
+  path: '',
 };
 
 ArrayFieldType.propTypes = {
@@ -206,7 +208,7 @@ ArrayFieldType.propTypes = {
   label: PropTypes.string,
   singularLabel: PropTypes.string,
   name: PropTypes.string.isRequired,
-  path: PropTypes.string.isRequired,
+  path: PropTypes.string,
   fieldTypes: PropTypes.shape({}).isRequired,
   validate: PropTypes.func,
   required: PropTypes.bool,
@@ -217,4 +219,23 @@ ArrayFieldType.propTypes = {
   }),
 };
 
-export default withCondition(ArrayFieldType);
+const ArrayForm = (props) => {
+  const { name, path } = props;
+
+  return (
+    <SubForm {...{ name, path }}>
+      <ArrayFieldType {...props} />
+    </SubForm>
+  );
+};
+
+ArrayForm.defaultProps = {
+  path: '',
+};
+
+ArrayForm.propTypes = {
+  path: PropTypes.string,
+  name: PropTypes.string.isRequired,
+};
+
+export default withCondition(ArrayForm);

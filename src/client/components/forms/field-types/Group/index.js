@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import RenderFields, { useRenderedFields } from '../../RenderFields';
 import withCondition from '../../withCondition';
+import SubForm from '../../SubForm';
 
 import './index.scss';
 
@@ -47,4 +48,23 @@ Group.propTypes = {
   fieldTypes: PropTypes.shape({}).isRequired,
 };
 
-export default withCondition(Group);
+const GroupForm = (props) => {
+  const { name, path } = props;
+
+  return (
+    <SubForm {...{ name, path }}>
+      <Group {...props} />
+    </SubForm>
+  );
+};
+
+GroupForm.defaultProps = {
+  path: '',
+};
+
+GroupForm.propTypes = {
+  path: PropTypes.string,
+  name: PropTypes.string.isRequired,
+};
+
+export default withCondition(GroupForm);
