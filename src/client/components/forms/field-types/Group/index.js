@@ -21,12 +21,10 @@ const Group = (props) => {
         initialData={initialData}
         fieldTypes={fieldTypes}
         customComponentsPath={`${customComponentsPath}${name}.fields.`}
-        fieldSchema={fields.map((subField) => {
-          return {
-            ...subField,
-            path: `${path}${subField.name ? `.${subField.name}` : ''}`,
-          };
-        })}
+        fieldSchema={fields.map((subField) => ({
+          ...subField,
+          path: `${path}${subField.name ? `.${subField.name}` : ''}`,
+        }))}
       />
     </div>
   );

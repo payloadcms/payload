@@ -44,7 +44,7 @@ const EditView = (props) => {
 
   const [{ data, isLoading }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
-    { initialParams: { 'fallback-locale': 'null' } },
+    { initialParams: { 'fallback-locale': 'null', depth: 0 } },
   );
 
   const dataToRender = locationState?.data || data;

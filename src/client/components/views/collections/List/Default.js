@@ -44,7 +44,7 @@ const DefaultList = (props) => {
 
   const apiURL = `${serverURL}${api}/${slug}`;
 
-  const [{ data }, { setParams }] = usePayloadAPI(apiURL, {});
+  const [{ data }, { setParams }] = usePayloadAPI(apiURL, { initialParams: { depth: 0 } });
 
   useEffect(() => {
     const params = {};

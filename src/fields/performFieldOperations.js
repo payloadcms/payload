@@ -30,34 +30,36 @@ async function performFieldOperations(entityConfig, operation) {
     const relation = Array.isArray(field.relationTo) ? data.relationTo : field.relationTo;
     const relatedCollection = this.collections[relation];
 
-    const accessResult = !overrideAccess ? await executeAccess({ req, disableErrors: true }, relatedCollection.config.access.read) : true;
+    if (relatedCollection) {
+      const accessResult = !overrideAccess ? await executeAccess({ req, disableErrors: true }, relatedCollection.config.access.read) : true;
 
-    let populatedRelationship = null;
+      let populatedRelationship = null;
 
-    if (accessResult && (depth && currentDepth <= depth)) {
-      populatedRelationship = await this.operations.collections.findByID({
-        req,
-        collection: relatedCollection,
-        id: Array.isArray(field.relationTo) ? data.value : data,
-        currentDepth: currentDepth + 1,
-        disableErrors: true,
-        depth,
-      });
-    }
+      if (accessResult && (depth && currentDepth <= depth)) {
+        populatedRelationship = await this.operations.collections.findByID({
+          req,
+          collection: relatedCollection,
+          id: Array.isArray(field.relationTo) ? data.value : data,
+          currentDepth: currentDepth + 1,
+          disableErrors: true,
+          depth,
+        });
+      }
 
-    // If access control fails, update value to null
-    // If populatedRelationship comes back, update value
-    if (!accessResult || populatedRelationship) {
-      if (typeof i === 'number') {
-        if (Array.isArray(field.relationTo)) {
-          dataToUpdate[field.name][i].value = populatedRelationship;
+      // If access control fails, update value to null
+      // If populatedRelationship comes back, update value
+      if (!accessResult || populatedRelationship) {
+        if (typeof i === 'number') {
+          if (Array.isArray(field.relationTo)) {
+            dataToUpdate[field.name][i].value = populatedRelationship;
+          } else {
+            dataToUpdate[field.name][i] = populatedRelationship;
+          }
+        } else if (Array.isArray(field.relationTo)) {
+          dataToUpdate[field.name].value = populatedRelationship;
         } else {
-          dataToUpdate[field.name][i] = populatedRelationship;
+          dataToUpdate[field.name] = populatedRelationship;
         }
-      } else if (Array.isArray(field.relationTo)) {
-        dataToUpdate[field.name].value = populatedRelationship;
-      } else {
-        dataToUpdate[field.name] = populatedRelationship;
       }
     }
   };
