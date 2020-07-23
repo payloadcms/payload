@@ -62,7 +62,7 @@ const ArrayFieldType = (props) => {
     required,
   });
 
-  const addRow = (rowIndex) => {
+  const addRow = useCallback((rowIndex) => {
     const data = getDataByPath(path);
 
     dispatchRows({
@@ -70,9 +70,9 @@ const ArrayFieldType = (props) => {
     });
 
     setValue(value + 1);
-  };
+  }, [dispatchRows, getDataByPath, path, setValue, value]);
 
-  const removeRow = (rowIndex) => {
+  const removeRow = useCallback((rowIndex) => {
     const data = getDataByPath(path);
 
     dispatchRows({
@@ -82,22 +82,22 @@ const ArrayFieldType = (props) => {
     });
 
     setValue(value - 1);
-  };
+  }, [dispatchRows, path, getDataByPath, setValue, value]);
 
-  const moveRow = (moveFromIndex, moveToIndex) => {
+  const moveRow = useCallback((moveFromIndex, moveToIndex) => {
     const data = getDataByPath(path);
 
     dispatchRows({
       type: 'MOVE', index: moveFromIndex, moveToIndex, data,
     });
-  };
+  }, [dispatchRows, getDataByPath, path]);
 
-  const onDragEnd = (result) => {
+  const onDragEnd = useCallback((result) => {
     if (!result.destination) return;
     const sourceIndex = result.source.index;
     const destinationIndex = result.destination.index;
     moveRow(sourceIndex, destinationIndex);
-  };
+  }, [moveRow]);
 
   useEffect(() => {
     dispatchRows({
@@ -122,6 +122,84 @@ const ArrayFieldType = (props) => {
       setValue(value);
     }
   }, [value, setValue, disableFormData, dataToInitialize]);
+
+  return (
+    <RenderArray
+      onDragEnd={onDragEnd}
+      label={label}
+      showError={showError}
+      errorMessage={errorMessage}
+      rows={rows}
+      singularLabel={singularLabel}
+      addRow={addRow}
+      removeRow={removeRow}
+      moveRow={moveRow}
+      path={path}
+      customComponentsPath={customComponentsPath}
+      name={name}
+      fieldTypes={fieldTypes}
+      fields={fields}
+      permissions={permissions}
+      value={value}
+    />
+  );
+};
+
+ArrayFieldType.defaultProps = {
+  label: '',
+  defaultValue: [],
+  initialData: [],
+  validate: array,
+  required: false,
+  maxRows: undefined,
+  minRows: undefined,
+  singularLabel: 'Row',
+  permissions: {},
+};
+
+ArrayFieldType.propTypes = {
+  defaultValue: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ),
+  initialData: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ),
+  fields: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ).isRequired,
+  label: PropTypes.string,
+  singularLabel: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
+  fieldTypes: PropTypes.shape({}).isRequired,
+  validate: PropTypes.func,
+  required: PropTypes.bool,
+  maxRows: PropTypes.number,
+  minRows: PropTypes.number,
+  permissions: PropTypes.shape({
+    fields: PropTypes.shape({}),
+  }),
+};
+
+const RenderArray = React.memo((props) => {
+  const {
+    onDragEnd,
+    label,
+    showError,
+    errorMessage,
+    rows,
+    singularLabel,
+    addRow,
+    removeRow,
+    moveRow,
+    path,
+    customComponentsPath,
+    name,
+    fieldTypes,
+    fields,
+    permissions,
+    value,
+  } = props;
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -179,42 +257,6 @@ const ArrayFieldType = (props) => {
       </div>
     </DragDropContext>
   );
-};
-
-ArrayFieldType.defaultProps = {
-  label: '',
-  defaultValue: [],
-  initialData: [],
-  validate: array,
-  required: false,
-  maxRows: undefined,
-  minRows: undefined,
-  singularLabel: 'Row',
-  permissions: {},
-};
-
-ArrayFieldType.propTypes = {
-  defaultValue: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ),
-  initialData: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ),
-  fields: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
-  label: PropTypes.string,
-  singularLabel: PropTypes.string,
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string.isRequired,
-  fieldTypes: PropTypes.shape({}).isRequired,
-  validate: PropTypes.func,
-  required: PropTypes.bool,
-  maxRows: PropTypes.number,
-  minRows: PropTypes.number,
-  permissions: PropTypes.shape({
-    fields: PropTypes.shape({}),
-  }),
-};
+});
 
 export default withCondition(ArrayFieldType);

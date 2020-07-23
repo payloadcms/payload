@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useEffect, useContext, useState } from 'react';
 import PropTypes from 'prop-types';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
@@ -22,12 +22,24 @@ const RenderFields = (props) => {
 
   const { customComponentsPath: customComponentsPathFromContext, operation: operationFromContext } = useRenderedFields();
 
-  const customComponentsPath = customComponentsPathFromProps || customComponentsPathFromContext;
   const operation = operationFromProps || operationFromContext;
+  const customComponentsPath = customComponentsPathFromProps || customComponentsPathFromContext;
+
+  const [contextValue, setContextValue] = useState({
+    operation,
+    customComponentsPath,
+  });
+
+  useEffect(() => {
+    setContextValue({
+      operation,
+      customComponentsPath,
+    });
+  }, [operation, customComponentsPath]);
 
   if (fieldSchema) {
     return (
-      <RenderedFieldContext.Provider value={{ customComponentsPath, operation }}>
+      <RenderedFieldContext.Provider value={contextValue}>
         {fieldSchema.map((field, i) => {
           if (!field?.hidden && field?.admin?.disabled !== true) {
             if ((filter && typeof filter === 'function' && filter(field)) || !filter) {

@@ -15,7 +15,7 @@ import Error from '../../Error';
 import useFieldType from '../../useFieldType';
 import Popup from '../../../elements/Popup';
 import BlockSelector from './BlockSelector';
-import { blocks } from '../../../../../fields/validations';
+import { blocks as blocksValidator } from '../../../../../fields/validations';
 
 import './index.scss';
 
@@ -71,7 +71,7 @@ const Blocks = (props) => {
   const { customComponentsPath } = useRenderedFields();
   const { getDataByPath } = useForm();
 
-  const addRow = (index, blockType) => {
+  const addRow = useCallback((index, blockType) => {
     const data = getDataByPath(path);
 
     dispatchRows({
@@ -79,9 +79,9 @@ const Blocks = (props) => {
     });
 
     setValue(value + 1);
-  };
+  }, [getDataByPath, path, setValue, value]);
 
-  const removeRow = (index) => {
+  const removeRow = useCallback((index) => {
     const data = getDataByPath(path);
 
     dispatchRows({
@@ -91,28 +91,28 @@ const Blocks = (props) => {
     });
 
     setValue(value - 1);
-  };
+  }, [getDataByPath, path, setValue, value]);
 
-  const moveRow = (moveFromIndex, moveToIndex) => {
+  const moveRow = useCallback((moveFromIndex, moveToIndex) => {
     const data = getDataByPath(path);
 
     dispatchRows({
       type: 'MOVE', index: moveFromIndex, moveToIndex, data,
     });
-  };
+  }, [getDataByPath, path]);
 
-  const toggleCollapse = (index) => {
+  const toggleCollapse = useCallback((index) => {
     dispatchRows({
       type: 'TOGGLE_COLLAPSE', index, rows,
     });
-  };
+  }, [rows]);
 
-  const onDragEnd = (result) => {
+  const onDragEnd = useCallback((result) => {
     if (!result.destination) return;
     const sourceIndex = result.source.index;
     const destinationIndex = result.destination.index;
     moveRow(sourceIndex, destinationIndex);
-  };
+  }, [moveRow]);
 
   useEffect(() => {
     dispatchRows({
@@ -138,6 +138,87 @@ const Blocks = (props) => {
     }
   }, [value, setValue, disableFormData, dataToInitialize]);
 
+  return (
+    <RenderBlock
+      onDragEnd={onDragEnd}
+      label={label}
+      showError={showError}
+      errorMessage={errorMessage}
+      rows={rows}
+      singularLabel={singularLabel}
+      addRow={addRow}
+      removeRow={removeRow}
+      moveRow={moveRow}
+      path={path}
+      customComponentsPath={customComponentsPath}
+      name={name}
+      fieldTypes={fieldTypes}
+      toggleCollapse={toggleCollapse}
+      permissions={permissions}
+      value={value}
+      dataToInitialize={dataToInitialize}
+      blocks={blocks}
+    />
+  );
+};
+
+Blocks.defaultProps = {
+  label: '',
+  defaultValue: [],
+  initialData: [],
+  singularLabel: 'Block',
+  validate: blocksValidator,
+  required: false,
+  maxRows: undefined,
+  minRows: undefined,
+  permissions: {},
+};
+
+Blocks.propTypes = {
+  blocks: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ).isRequired,
+  defaultValue: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ),
+  initialData: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ),
+  label: PropTypes.string,
+  singularLabel: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
+  fieldTypes: PropTypes.shape({}).isRequired,
+  validate: PropTypes.func,
+  required: PropTypes.bool,
+  maxRows: PropTypes.number,
+  minRows: PropTypes.number,
+  permissions: PropTypes.shape({
+    fields: PropTypes.shape({}),
+  }),
+};
+
+const RenderBlock = React.memo((props) => {
+  const {
+    onDragEnd,
+    label,
+    showError,
+    errorMessage,
+    rows,
+    singularLabel,
+    addRow,
+    removeRow,
+    moveRow,
+    path,
+    customComponentsPath,
+    name,
+    fieldTypes,
+    permissions,
+    value,
+    toggleCollapse,
+    dataToInitialize,
+    blocks,
+  } = props;
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -235,45 +316,6 @@ const Blocks = (props) => {
       </div>
     </DragDropContext>
   );
-};
-
-Blocks.defaultProps = {
-  label: '',
-  defaultValue: [],
-  initialData: [],
-  singularLabel: 'Block',
-  validate: blocks,
-  required: false,
-  maxRows: undefined,
-  minRows: undefined,
-  permissions: {},
-};
-
-Blocks.propTypes = {
-  blocks: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
-  defaultValue: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ),
-  initialData: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ),
-  blocks: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
-  label: PropTypes.string,
-  singularLabel: PropTypes.string,
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string.isRequired,
-  fieldTypes: PropTypes.shape({}).isRequired,
-  validate: PropTypes.func,
-  required: PropTypes.bool,
-  maxRows: PropTypes.number,
-  minRows: PropTypes.number,
-  permissions: PropTypes.shape({
-    fields: PropTypes.shape({}),
-  }),
-};
+});
 
 export default withCondition(Blocks);
