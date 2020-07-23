@@ -1,8 +1,13 @@
 import React, { createContext, useEffect, useContext, useState } from 'react';
 import PropTypes from 'prop-types';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import useIntersect from '../../../hooks/useIntersect';
 
 import './index.scss';
+
+const intersectionObserverOptions = {
+  rootMargin: '1000px',
+};
 
 const RenderedFieldContext = createContext({});
 
@@ -19,6 +24,10 @@ const RenderFields = (props) => {
     readOnly: readOnlyOverride,
     operation: operationFromProps,
   } = props;
+
+  const [hasIntersected, setHasIntersected] = useState(false);
+  const [intersectionRef, entry] = useIntersect(intersectionObserverOptions);
+  const isIntersecting = Boolean(entry?.isIntersecting);
 
   const { customComponentsPath: customComponentsPathFromContext, operation: operationFromContext } = useRenderedFields();
 
@@ -37,75 +46,85 @@ const RenderFields = (props) => {
     });
   }, [operation, customComponentsPath]);
 
+  useEffect(() => {
+    if (isIntersecting && !hasIntersected) {
+      setHasIntersected(true);
+    }
+  }, [isIntersecting, hasIntersected]);
+
   if (fieldSchema) {
     return (
-      <RenderedFieldContext.Provider value={contextValue}>
-        {fieldSchema.map((field, i) => {
-          if (!field?.hidden && field?.admin?.disabled !== true) {
-            if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
-              const FieldComponent = field?.admin?.hidden ? fieldTypes.hidden : fieldTypes[field.type];
+      <div ref={intersectionRef}>
+        {hasIntersected && (
+          <RenderedFieldContext.Provider value={contextValue}>
+            {fieldSchema.map((field, i) => {
+              if (!field?.hidden && field?.admin?.disabled !== true) {
+                if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
+                  const FieldComponent = field?.admin?.hidden ? fieldTypes.hidden : fieldTypes[field.type];
 
-              let initialFieldData;
-              let fieldPermissions = permissions[field.name];
+                  let initialFieldData;
+                  let fieldPermissions = permissions[field.name];
 
-              if (!field.name) {
-                initialFieldData = initialData;
-                fieldPermissions = permissions;
-              } else if (initialData?.[field.name] !== undefined) {
-                initialFieldData = initialData[field.name];
-              }
+                  if (!field.name) {
+                    initialFieldData = initialData;
+                    fieldPermissions = permissions;
+                  } else if (initialData?.[field.name] !== undefined) {
+                    initialFieldData = initialData[field.name];
+                  }
 
-              let { admin: { readOnly } = {} } = field;
+                  let { admin: { readOnly } = {} } = field;
 
-              if (readOnlyOverride) readOnly = true;
+                  if (readOnlyOverride) readOnly = true;
 
-              if (permissions?.[field?.name]?.read?.permission !== false) {
-                if (permissions?.[field?.name]?.[operation]?.permission === false) {
-                  readOnly = true;
+                  if (permissions?.[field?.name]?.read?.permission !== false) {
+                    if (permissions?.[field?.name]?.[operation]?.permission === false) {
+                      readOnly = true;
+                    }
+
+                    if (FieldComponent) {
+                      return (
+                        <RenderCustomComponent
+                          key={field.name || `field-${i}`}
+                          path={`${customComponentsPath}${field.name ? `${field.name}.field` : ''}`}
+                          DefaultComponent={FieldComponent}
+                          componentProps={{
+                            ...field,
+                            path: field.path || field.name,
+                            fieldTypes,
+                            initialData: initialFieldData,
+                            admin: {
+                              ...(field.admin || {}),
+                              readOnly,
+                            },
+                            permissions: fieldPermissions,
+                          }}
+                        />
+                      );
+                    }
+
+                    return (
+                      <div
+                        className="missing-field"
+                        key={i}
+                      >
+                        No matched field found for
+                        {' '}
+                        &quot;
+                        {field.label}
+                        &quot;
+                      </div>
+                    );
+                  }
                 }
 
-                if (FieldComponent) {
-                  return (
-                    <RenderCustomComponent
-                      key={field.name || `field-${i}`}
-                      path={`${customComponentsPath}${field.name ? `${field.name}.field` : ''}`}
-                      DefaultComponent={FieldComponent}
-                      componentProps={{
-                        ...field,
-                        path: field.path || field.name,
-                        fieldTypes,
-                        initialData: initialFieldData,
-                        admin: {
-                          ...(field.admin || {}),
-                          readOnly,
-                        },
-                        permissions: fieldPermissions,
-                      }}
-                    />
-                  );
-                }
-
-                return (
-                  <div
-                    className="missing-field"
-                    key={i}
-                  >
-                    No matched field found for
-                    {' '}
-                    &quot;
-                    {field.label}
-                    &quot;
-                  </div>
-                );
+                return null;
               }
-            }
 
-            return null;
-          }
-
-          return null;
-        })}
-      </RenderedFieldContext.Provider>
+              return null;
+            })}
+          </RenderedFieldContext.Provider>
+        )}
+      </div>
     );
   }
 
