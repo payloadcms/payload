@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useFormProcessing } from '../Form/context';
+import { useFormProcessing } from '../FormProvider/context';
 import Button from '../../elements/Button';
 
 import './index.scss';

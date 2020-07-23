@@ -8,7 +8,7 @@ import Button from '../../../elements/Button';
 import DraggableSection from '../../DraggableSection';
 import reducer from '../rowReducer';
 import { useRenderedFields } from '../../RenderFields';
-import { useForm } from '../../Form/context';
+import { useForm } from '../../FormProvider/context';
 import useFieldType from '../../useFieldType';
 import Error from '../../Error';
 import { array } from '../../../../../fields/validations';

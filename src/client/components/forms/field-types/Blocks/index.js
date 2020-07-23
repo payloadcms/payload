@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import reducer from '../rowReducer';
-import { useForm } from '../../Form/context';
+import { useForm } from '../../FormProvider/context';
 import DraggableSection from '../../DraggableSection';
 import { useRenderedFields } from '../../RenderFields';
 import Error from '../../Error';

@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import { useFormFields } from '../../Form/context';
+import { useFormFields } from '../../FormProvider/context';
 
 import './index.scss';
 

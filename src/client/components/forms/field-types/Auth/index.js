@@ -5,7 +5,7 @@ import Password from '../Password';
 import Checkbox from '../Checkbox';
 import Button from '../../../elements/Button';
 import ConfirmPassword from '../ConfirmPassword';
-import { useFormFields } from '../../Form/context';
+import { useFormFields } from '../../FormProvider/context';
 import APIKey from './APIKey';
 
 import './index.scss';

@@ -1,6 +1,6 @@
 import React from 'react';
 import NavigationPrompt from 'react-router-navigation-prompt';
-import { useForm } from '../../forms/Form/context';
+import { useForm } from '../../forms/FormProvider/context';
 import MinimalTemplate from '../../templates/Minimal';
 import Button from '../../elements/Button';
 

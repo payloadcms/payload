@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import config from 'payload/config';
 import Button from '../Button';
-import { useForm } from '../../forms/Form/context';
+import { useForm } from '../../forms/FormProvider/context';
 
 import './index.scss';
 

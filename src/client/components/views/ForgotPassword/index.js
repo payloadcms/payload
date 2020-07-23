@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import config from 'payload/config';
 import MinimalTemplate from '../../templates/Minimal';
 import StatusList, { useStatusList } from '../../elements/Status';
+import FormProvider from '../../forms/FormProvider';
 import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import FormSubmit from '../../forms/Submit';
@@ -84,21 +85,22 @@ const ForgotPassword = () => {
   return (
     <MinimalTemplate className={baseClass}>
       <StatusList />
-      <Form
-        novalidate
+      <FormProvider
         handleResponse={handleResponse}
         method="POST"
         action={`${serverURL}${api}/${userSlug}/forgot-password`}
       >
-        <h1>Forgot Password</h1>
-        <p>Please enter your email below. You will receive an email message with instructions on how to reset your password.</p>
-        <Email
-          label="Email Address"
-          name="email"
-          required
-        />
-        <FormSubmit>Submit</FormSubmit>
-      </Form>
+        <Form>
+          <h1>Forgot Password</h1>
+          <p>Please enter your email below. You will receive an email message with instructions on how to reset your password.</p>
+          <Email
+            label="Email Address"
+            name="email"
+            required
+          />
+          <FormSubmit>Submit</FormSubmit>
+        </Form>
+      </FormProvider>
       <Link to={`${admin}/login`}>Back to login</Link>
     </MinimalTemplate>
   );

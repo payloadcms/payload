@@ -3,6 +3,7 @@ import { Link, useHistory } from 'react-router-dom';
 import config from 'payload/config';
 import Logo from '../../graphics/Logo';
 import MinimalTemplate from '../../templates/Minimal';
+import FormProvider from '../../forms/FormProvider';
 import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import Password from '../../forms/field-types/Password';
@@ -57,29 +58,31 @@ const Login = () => {
       <div className={`${baseClass}__brand`}>
         <Logo />
       </div>
-      <Form
+      <FormProvider
         disableSuccessStatus
         onSuccess={onSuccess}
         method="POST"
         action={`${serverURL}${api}/${userSlug}/login`}
       >
-        <Email
-          label="Email Address"
-          name="email"
-          autoComplete="email"
-          required
-        />
-        <Password
-          error="password"
-          label="Password"
-          name="password"
-          required
-        />
-        <Link to={`${admin}/forgot`}>
-          Forgot password?
-        </Link>
-        <FormSubmit>Login</FormSubmit>
-      </Form>
+        <Form>
+          <Email
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            required
+          />
+          <Password
+            error="password"
+            label="Password"
+            name="password"
+            required
+          />
+          <Link to={`${admin}/forgot`}>
+            Forgot password?
+          </Link>
+          <FormSubmit>Login</FormSubmit>
+        </Form>
+      </FormProvider>
     </MinimalTemplate>
   );
 };

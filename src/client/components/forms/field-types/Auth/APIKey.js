@@ -6,7 +6,7 @@ import Label from '../../Label';
 import Button from '../../../elements/Button';
 import CopyToClipboard from '../../../elements/CopyToClipboard';
 import { text } from '../../../../../fields/validations';
-import { useFormFields } from '../../Form/context';
+import { useFormFields } from '../../FormProvider/context';
 
 import './index.scss';
 

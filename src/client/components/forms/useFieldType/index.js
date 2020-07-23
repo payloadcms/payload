@@ -1,7 +1,7 @@
 import {
   useCallback, useEffect, useState,
 } from 'react';
-import { useFormProcessing, useFormSubmitted, useFormModified, useForm } from '../Form/context';
+import { useFormProcessing, useFormSubmitted, useFormModified, useForm } from '../FormProvider/context';
 import useDebounce from '../../../hooks/useDebounce';
 import useUnmountEffect from '../../../hooks/useUnmountEffect';
 

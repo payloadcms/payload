@@ -4,6 +4,7 @@ import { Modal, useModal } from '@faceless-ui/modal';
 import config from '../../../../../config';
 import MinimalTemplate from '../../../../templates/Minimal';
 import Form from '../../../Form';
+import FormProvider from '../../../FormProvider';
 import Button from '../../../../elements/Button';
 import formatFields from '../../../../views/collections/Edit/formatFields';
 import RenderFields from '../../../RenderFields';
@@ -45,34 +46,36 @@ const AddUploadModal = (props) => {
       slug={slug}
     >
       <MinimalTemplate width="wide">
-        <Form
+        <FormProvider
           method="post"
           action={`${serverURL}${api}/${collection.slug}`}
           onSuccess={onSuccess}
           disableSuccessStatus
         >
-          <header className={`${baseClass}__header`}>
-            <h1>
-              New
-              {' '}
-              {collection.labels.singular}
-            </h1>
-            <FormSubmit>Save</FormSubmit>
-            <Button
-              icon="x"
-              round
-              buttonStyle="icon-label"
-              iconStyle="with-border"
-              onClick={closeAll}
+          <Form>
+            <header className={`${baseClass}__header`}>
+              <h1>
+                New
+                {' '}
+                {collection.labels.singular}
+              </h1>
+              <FormSubmit>Save</FormSubmit>
+              <Button
+                icon="x"
+                round
+                buttonStyle="icon-label"
+                iconStyle="with-border"
+                onClick={closeAll}
+              />
+            </header>
+            <RenderFields
+              filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
+              fieldTypes={fieldTypes}
+              fieldSchema={fields}
+              customComponentsPath={`${collection.slug}.fields.`}
             />
-          </header>
-          <RenderFields
-            filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
-            fieldTypes={fieldTypes}
-            fieldSchema={fields}
-            customComponentsPath={`${collection.slug}.fields.`}
-          />
-        </Form>
+          </Form>
+        </FormProvider>
       </MinimalTemplate>
     </Modal>
   );

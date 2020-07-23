@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import config from 'payload/config';
 import StatusList from '../../elements/Status';
+import FormProvider from '../../forms/FormProvider';
 import Form from '../../forms/Form';
 import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
@@ -59,24 +60,26 @@ const ResetPassword = () => {
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <StatusList />
-        <Form
+        <FormProvider
           handleResponse={handleResponse}
           method="POST"
           action={`${serverURL}${api}/${userSlug}/reset-password`}
           redirect={admin}
         >
-          <Password
-            error="password"
-            label="Password"
-            name="password"
-            required
-          />
-          <HiddenInput
-            name="token"
-            defaultValue={token}
-          />
-          <FormSubmit>Reset Password</FormSubmit>
-        </Form>
+          <Form>
+            <Password
+              error="password"
+              label="Password"
+              name="password"
+              required
+            />
+            <HiddenInput
+              name="token"
+              defaultValue={token}
+            />
+            <FormSubmit>Reset Password</FormSubmit>
+          </Form>
+        </FormProvider>
       </div>
     </div>
   );
