@@ -3,6 +3,7 @@ require('isomorphic-fetch');
 
 const express = require('express');
 const graphQLPlayground = require('graphql-playground-middleware-express').default;
+const logger = require('./utilities/logger')('payload');
 const bindOperations = require('./init/bindOperations');
 const bindRequestHandlers = require('./init/bindRequestHandlers');
 const bindResolvers = require('./init/bindResolvers');
@@ -24,6 +25,7 @@ const performFieldOperations = require('./fields/performFieldOperations');
 
 class Payload {
   constructor(options) {
+    logger.info('Starting Payload...');
     const config = getConfig(options);
 
     this.config = sanitizeConfig(config);
