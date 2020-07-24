@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 const mongoose = require('mongoose');
-const logger = require('../utilities/logger')('payload');
+const logger = require('../utilities/logger')();
 
 const connectMongoose = async (url) => {
   let urlToConnect = url;

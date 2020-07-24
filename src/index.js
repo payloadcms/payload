@@ -3,7 +3,7 @@ require('isomorphic-fetch');
 
 const express = require('express');
 const graphQLPlayground = require('graphql-playground-middleware-express').default;
-const logger = require('./utilities/logger')('payload');
+const logger = require('./utilities/logger')();
 const bindOperations = require('./init/bindOperations');
 const bindRequestHandlers = require('./init/bindRequestHandlers');
 const bindResolvers = require('./init/bindResolvers');

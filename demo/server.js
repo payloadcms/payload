@@ -2,7 +2,7 @@
 const express = require('express');
 const path = require('path');
 const Payload = require('../src');
-const logger = require('../src/utilities/logger')('payload');
+const logger = require('../src/utilities/logger')();
 
 const expressApp = express();
 
