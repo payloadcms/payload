@@ -30,7 +30,7 @@
     "@faceless-ui/modal": "^1.0.4",
     "@faceless-ui/scroll-info": "^1.1.1",
     "@faceless-ui/window-info": "^1.2.2",
-    "@udecode/slate-plugins": "^0.60.0",
+    "@udecode/slate-plugins": "^0.64.3",
     "async-some": "^1.0.2",
     "autoprefixer": "^9.7.4",
     "babel-core": "^7.0.0-bridge.0",

@@ -19,7 +19,6 @@ import {
   SoftBreakPlugin,
   StrikethroughPlugin,
   UnderlinePlugin,
-  withList,
   withToggleType,
 } from '@udecode/slate-plugins';
 
@@ -64,7 +63,6 @@ const plugins = [
 const withPlugins = [
   withReact,
   withHistory,
-  withList(nodeTypes),
   withToggleType({ defaultType: nodeTypes.typeP }),
 ];
 
