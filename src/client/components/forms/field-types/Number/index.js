@@ -13,8 +13,6 @@ const NumberField = (props) => {
     name,
     path: pathFromProps,
     required,
-    defaultValue,
-    initialData,
     validate,
     label,
     placeholder,
@@ -41,9 +39,6 @@ const NumberField = (props) => {
     errorMessage,
   } = useFieldType({
     path,
-    required,
-    initialData,
-    defaultValue,
     validate: memoizedValidate,
     enableDebouncedValue: true,
   });
@@ -95,8 +90,6 @@ NumberField.defaultProps = {
   label: null,
   path: undefined,
   required: false,
-  defaultValue: undefined,
-  initialData: undefined,
   placeholder: undefined,
   max: undefined,
   min: undefined,
@@ -109,8 +102,6 @@ NumberField.propTypes = {
   path: PropTypes.string,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
-  defaultValue: PropTypes.number,
-  initialData: PropTypes.number,
   validate: PropTypes.func,
   admin: PropTypes.shape({
     readOnly: PropTypes.bool,

@@ -16,7 +16,7 @@ module.exports = {
     read: () => true,
   },
   preview: (doc, token) => {
-    if (doc.title) {
+    if (doc && doc.title) {
       return `http://localhost:3000/posts/${doc.title.value}?preview=true&token=${token}`;
     }
 

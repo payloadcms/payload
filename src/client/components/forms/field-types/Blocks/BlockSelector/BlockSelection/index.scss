@@ -8,6 +8,10 @@
   padding: base(.75) base(.5);
   cursor: pointer;
   align-items: center;
+  background: none;
+  border-radius: 0;
+  box-shadow: 0;
+  border: 0;
 
   &:hover {
     background-color: $color-background-gray;

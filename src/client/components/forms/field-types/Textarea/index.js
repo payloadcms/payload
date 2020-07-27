@@ -13,14 +13,14 @@ const Textarea = (props) => {
     path: pathFromProps,
     name,
     required,
-    defaultValue,
-    initialData,
     validate,
-    style,
-    width,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
     label,
     placeholder,
-    readOnly,
     minLength,
     maxLength,
     rows,
@@ -40,9 +40,6 @@ const Textarea = (props) => {
     errorMessage,
   } = useFieldType({
     path,
-    required,
-    initialData,
-    defaultValue,
     validate: memoizedValidate,
     enableDebouncedValue: true,
   });
@@ -87,8 +84,6 @@ const Textarea = (props) => {
 Textarea.defaultProps = {
   required: false,
   label: null,
-  defaultValue: undefined,
-  initialData: undefined,
   validate: textarea,
   placeholder: null,
   path: '',
@@ -102,8 +97,6 @@ Textarea.propTypes = {
   name: PropTypes.string.isRequired,
   path: PropTypes.string,
   required: PropTypes.bool,
-  defaultValue: PropTypes.string,
-  initialData: PropTypes.string,
   validate: PropTypes.func,
   admin: PropTypes.shape({
     readOnly: PropTypes.bool,

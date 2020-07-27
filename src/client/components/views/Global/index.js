@@ -5,6 +5,7 @@ import config from 'payload/config';
 import { useStepNav } from '../../elements/StepNav';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import { useUser } from '../../data/User';
+import { useLocale } from '../../utilities/Locale';
 
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultGlobal from './Default';
@@ -14,6 +15,7 @@ const { serverURL, routes: { admin, api } } = config;
 const GlobalView = (props) => {
   const { state: locationState } = useLocation();
   const history = useHistory();
+  const locale = useLocale();
   const { setStepNav } = useStepNav();
   const { permissions } = useUser();
 
@@ -60,6 +62,8 @@ const GlobalView = (props) => {
         permissions: globalPermissions,
         global,
         onSave,
+        apiURL: `${serverURL}${api}/globals/${slug}?depth=0`,
+        action: `${serverURL}${api}/globals/${slug}?locale=${locale}`,
       }}
     />
   );

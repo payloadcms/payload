@@ -22,10 +22,10 @@ const BlockSelection = (props) => {
   };
 
   return (
-    <div
+    <button
       className={baseClass}
-      role="button"
       tabIndex={0}
+      type="button"
       onClick={handleBlockSelection}
     >
       <div className={`${baseClass}__image`}>
@@ -36,11 +36,10 @@ const BlockSelection = (props) => {
               alt={blockImageAltText}
             />
           )
-          : <DefaultBlockImage />
-        }
+          : <DefaultBlockImage />}
       </div>
       <div className={`${baseClass}__label`}>{labels.singular}</div>
-    </div>
+    </button>
   );
 };
 

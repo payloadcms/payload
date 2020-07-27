@@ -1,12 +1,11 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
-import useFieldType from '../../useFieldType';
-import Label from '../../Label';
-import Button from '../../../elements/Button';
-import CopyToClipboard from '../../../elements/CopyToClipboard';
-import { text } from '../../../../../fields/validations';
-import { useFormFields } from '../../Form/context';
+import useFieldType from '../../../../forms/useFieldType';
+import Label from '../../../../forms/Label';
+import Button from '../../../../elements/Button';
+import CopyToClipboard from '../../../../elements/CopyToClipboard';
+import { text } from '../../../../../../fields/validations';
+import { useFormFields } from '../../../../forms/Form/context';
 
 import './index.scss';
 
@@ -14,11 +13,7 @@ const path = 'apiKey';
 const baseClass = 'api-key';
 const validate = (val) => text(val, { minLength: 24, maxLength: 48 });
 
-const APIKey = (props) => {
-  const {
-    initialData,
-  } = props;
-
+const APIKey = () => {
   const [initialAPIKey, setInitialAPIKey] = useState(null);
 
   const { getField } = useFormFields();
@@ -38,7 +33,6 @@ const APIKey = (props) => {
 
   const fieldType = useFieldType({
     path: 'apiKey',
-    initialData: initialData || initialAPIKey,
     validate,
   });
 
@@ -50,6 +44,12 @@ const APIKey = (props) => {
   useEffect(() => {
     setInitialAPIKey(uuidv4());
   }, []);
+
+  useEffect(() => {
+    if (!apiKeyValue) {
+      setValue(initialAPIKey);
+    }
+  }, [apiKeyValue, setValue, initialAPIKey]);
 
   const classes = [
     'field-type',
@@ -81,14 +81,6 @@ const APIKey = (props) => {
       </Button>
     </React.Fragment>
   );
-};
-
-APIKey.defaultProps = {
-  initialData: undefined,
-};
-
-APIKey.propTypes = {
-  initialData: PropTypes.string,
 };
 
 export default APIKey;

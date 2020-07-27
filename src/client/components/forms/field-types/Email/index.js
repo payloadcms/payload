@@ -13,8 +13,6 @@ const Email = (props) => {
     name,
     path: pathFromProps,
     required,
-    defaultValue,
-    initialData,
     validate,
     admin: {
       readOnly,
@@ -35,9 +33,6 @@ const Email = (props) => {
 
   const fieldType = useFieldType({
     path,
-    required,
-    initialData,
-    defaultValue,
     validate: memoizedValidate,
     enableDebouncedValue: true,
   });

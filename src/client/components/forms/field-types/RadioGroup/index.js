@@ -15,8 +15,6 @@ const RadioGroup = (props) => {
     name,
     path: pathFromProps,
     required,
-    defaultValue,
-    initialData,
     validate,
     label,
     admin: {
@@ -42,8 +40,6 @@ const RadioGroup = (props) => {
   } = useFieldType({
     path,
     required,
-    initialData,
-    defaultValue,
     validate: memoizedValidate,
   });
 
@@ -72,7 +68,7 @@ const RadioGroup = (props) => {
         required={required}
       />
       {options?.map((option) => {
-        const isSelected = !value ? (option.value === defaultValue) : (option.value === value);
+        const isSelected = option.value === value;
 
         return (
           <RadioInput
@@ -90,8 +86,6 @@ const RadioGroup = (props) => {
 RadioGroup.defaultProps = {
   label: null,
   required: false,
-  defaultValue: null,
-  initialData: undefined,
   validate: radio,
   admin: {},
   path: '',
@@ -101,8 +95,6 @@ RadioGroup.propTypes = {
   path: PropTypes.string,
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
-  defaultValue: PropTypes.string,
-  initialData: PropTypes.string,
   validate: PropTypes.func,
   admin: PropTypes.shape({
     readOnly: PropTypes.bool,

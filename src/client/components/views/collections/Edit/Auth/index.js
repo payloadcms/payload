@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import Email from '../Email';
-import Password from '../Password';
-import Checkbox from '../Checkbox';
-import Button from '../../../elements/Button';
-import ConfirmPassword from '../ConfirmPassword';
-import { useFormFields } from '../../Form/context';
+import Email from '../../../../forms/field-types/Email';
+import Password from '../../../../forms/field-types/Password';
+import Checkbox from '../../../../forms/field-types/Checkbox';
+import Button from '../../../../elements/Button';
+import ConfirmPassword from '../../../../forms/field-types/ConfirmPassword';
+import { useFormFields, useFormModified } from '../../../../forms/Form/context';
 import APIKey from './APIKey';
 
 import './index.scss';
@@ -13,11 +13,18 @@ import './index.scss';
 const baseClass = 'auth-fields';
 
 const Auth = (props) => {
-  const { initialData, useAPIKey, requirePassword } = props;
+  const { useAPIKey, requirePassword } = props;
   const [changingPassword, setChangingPassword] = useState(requirePassword);
   const { getField } = useFormFields();
+  const modified = useFormModified();
 
   const enableAPIKey = getField('enableAPIKey');
+
+  useEffect(() => {
+    if (!modified) {
+      setChangingPassword(false);
+    }
+  }, [modified]);
 
   return (
     <div className={baseClass}>
@@ -25,7 +32,6 @@ const Auth = (props) => {
         required
         name="email"
         label="Email"
-        initialData={initialData?.email}
         autoComplete="email"
       />
       {changingPassword && (
@@ -60,12 +66,11 @@ const Auth = (props) => {
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <Checkbox
-            initialData={initialData?.enableAPIKey}
             label="Enable API Key"
             name="enableAPIKey"
           />
           {enableAPIKey?.value && (
-            <APIKey initialData={initialData?.apiKey} />
+            <APIKey />
           )}
         </div>
       )}
@@ -74,18 +79,11 @@ const Auth = (props) => {
 };
 
 Auth.defaultProps = {
-  initialData: undefined,
   useAPIKey: false,
   requirePassword: false,
 };
 
 Auth.propTypes = {
-  fieldTypes: PropTypes.shape({}).isRequired,
-  initialData: PropTypes.shape({
-    enableAPIKey: PropTypes.bool,
-    apiKey: PropTypes.string,
-    email: PropTypes.string,
-  }),
   useAPIKey: PropTypes.bool,
   requirePassword: PropTypes.bool,
 };

@@ -3,25 +3,17 @@ import {
 } from 'react';
 import { useFormProcessing, useFormSubmitted, useFormModified, useForm } from '../Form/context';
 import useDebounce from '../../../hooks/useDebounce';
-import useUnmountEffect from '../../../hooks/useUnmountEffect';
 
 import './index.scss';
 
 const useFieldType = (options) => {
   const {
     path,
-    initialData: data,
-    defaultValue,
     validate,
-    disableFormData,
     enableDebouncedValue,
+    disableFormData,
+    ignoreWhileFlattening,
   } = options;
-
-  // Determine what the initial data is to be used
-  // If initialData is defined, that means that data has been provided
-  // via the API and should override any default values present.
-  // If no initialData, use default value
-  const initialData = data !== undefined ? data : defaultValue;
 
   const formContext = useForm();
   const submitted = useFormSubmitted();
@@ -29,17 +21,18 @@ const useFieldType = (options) => {
   const modified = useFormModified();
 
   const {
-    dispatchFields, getField, setModified,
+    dispatchFields, getField, setModified, reset,
   } = formContext;
 
-  const [internalValue, setInternalValue] = useState(initialData);
+  const [internalValue, setInternalValue] = useState(undefined);
 
   // Debounce internal values to update form state only every 60ms
   const debouncedValue = useDebounce(internalValue, 120);
 
   // Get field by path
   const field = getField(path);
-  const fieldExists = Boolean(field);
+
+  const initialValue = field?.initialValue;
 
   // Valid could be a string equal to an error message
   const valid = (field && typeof field.valid === 'boolean') ? field.valid : true;
@@ -57,48 +50,39 @@ const useFieldType = (options) => {
       fieldToDispatch.valid = false;
     }
 
-    if (disableFormData) {
-      fieldToDispatch.disableFormData = true;
-    }
+    fieldToDispatch.disableFormData = disableFormData;
+    fieldToDispatch.ignoreWhileFlattening = ignoreWhileFlattening;
+    fieldToDispatch.initialValue = initialValue;
 
     dispatchFields(fieldToDispatch);
-  }, [path, dispatchFields, validate, disableFormData]);
-
+  }, [path, dispatchFields, validate, disableFormData, ignoreWhileFlattening, initialValue]);
 
   // Method to return from `useFieldType`, used to
   // update internal field values from field component(s)
   // as fast as they arrive. NOTE - this method is NOT debounced
   const setValue = useCallback((e) => {
-    const value = (e && e.target) ? e.target.value : e;
+    const val = (e && e.target) ? e.target.value : e;
 
     if (!modified) setModified(true);
 
-    setInternalValue(value);
+    setInternalValue(val);
   }, [setModified, modified]);
 
-  // Remove field from state on "unmount"
-  // This is mostly used for array / flex content row modifications
-  useUnmountEffect(() => {
-    formContext.dispatchFields({ path, type: 'REMOVE' });
-  });
+  useEffect(() => {
+    setInternalValue(initialValue);
+  }, [initialValue]);
 
   // The only time that the FORM value should be updated
   // is when the debounced value updates. So, when the debounced value updates,
   // send it up to the form
 
-  const formValue = enableDebouncedValue ? debouncedValue : internalValue;
+  const valueToSend = enableDebouncedValue ? debouncedValue : internalValue;
 
   useEffect(() => {
-    if (!fieldExists || formValue !== undefined) {
-      sendField(formValue);
+    if (valueToSend !== undefined) {
+      sendField(valueToSend);
     }
-  }, [formValue, sendField, fieldExists]);
-
-  useEffect(() => {
-    if (initialData !== undefined) {
-      setInternalValue(initialData);
-    }
-  }, [initialData]);
+  }, [valueToSend, sendField]);
 
   return {
     ...options,

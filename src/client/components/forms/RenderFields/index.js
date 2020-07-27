@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import useIntersect from '../../../hooks/useIntersect';
 
-import './index.scss';
+const baseClass = 'render-fields';
 
 const intersectionObserverOptions = {
   rootMargin: '1000px',
@@ -16,13 +16,13 @@ export const useRenderedFields = () => useContext(RenderedFieldContext);
 const RenderFields = (props) => {
   const {
     fieldSchema,
-    initialData,
     customComponentsPath: customComponentsPathFromProps,
     fieldTypes,
     filter,
     permissions,
     readOnly: readOnlyOverride,
     operation: operationFromProps,
+    className,
   } = props;
 
   const [hasIntersected, setHasIntersected] = useState(false);
@@ -52,9 +52,17 @@ const RenderFields = (props) => {
     }
   }, [isIntersecting, hasIntersected]);
 
+  const classes = [
+    baseClass,
+    className,
+  ].filter(Boolean).join(' ');
+
   if (fieldSchema) {
     return (
-      <div ref={intersectionRef}>
+      <div
+        ref={intersectionRef}
+        className={classes}
+      >
         {hasIntersected && (
           <RenderedFieldContext.Provider value={contextValue}>
             {fieldSchema.map((field, i) => {
@@ -62,14 +70,10 @@ const RenderFields = (props) => {
                 if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
                   const FieldComponent = field?.admin?.hidden ? fieldTypes.hidden : fieldTypes[field.type];
 
-                  let initialFieldData;
                   let fieldPermissions = permissions[field.name];
 
                   if (!field.name) {
-                    initialFieldData = initialData;
                     fieldPermissions = permissions;
-                  } else if (initialData?.[field.name] !== undefined) {
-                    initialFieldData = initialData[field.name];
                   }
 
                   let { admin: { readOnly } = {} } = field;
@@ -84,14 +88,13 @@ const RenderFields = (props) => {
                     if (FieldComponent) {
                       return (
                         <RenderCustomComponent
-                          key={field.name || `field-${i}`}
+                          key={i}
                           path={`${customComponentsPath}${field.name ? `${field.name}.field` : ''}`}
                           DefaultComponent={FieldComponent}
                           componentProps={{
                             ...field,
                             path: field.path || field.name,
                             fieldTypes,
-                            initialData: initialFieldData,
                             admin: {
                               ...(field.admin || {}),
                               readOnly,
@@ -132,19 +135,18 @@ const RenderFields = (props) => {
 };
 
 RenderFields.defaultProps = {
-  initialData: {},
   customComponentsPath: '',
   filter: null,
   readOnly: false,
   permissions: {},
   operation: undefined,
+  className: undefined,
 };
 
 RenderFields.propTypes = {
   fieldSchema: PropTypes.arrayOf(
     PropTypes.shape({}),
   ).isRequired,
-  initialData: PropTypes.shape({}),
   customComponentsPath: PropTypes.string,
   fieldTypes: PropTypes.shape({
     hidden: PropTypes.function,
@@ -153,6 +155,7 @@ RenderFields.propTypes = {
   permissions: PropTypes.shape({}),
   readOnly: PropTypes.bool,
   operation: PropTypes.string,
+  className: PropTypes.string,
 };
 
 export default RenderFields;

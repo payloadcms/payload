@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import format from 'date-fns/format';
-import config from 'payload/config';
 import Eyebrow from '../../elements/Eyebrow';
 import Form from '../../forms/Form';
 import PreviewButton from '../../elements/PreviewButton';
@@ -13,13 +12,11 @@ import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
 
 import './index.scss';
 
-const { serverURL, routes: { api } } = config;
-
 const baseClass = 'global-edit';
 
 const DefaultGlobalView = (props) => {
   const {
-    global, data, onSave, permissions,
+    global, data, onSave, permissions, action, apiURL,
   } = props;
 
   const {
@@ -29,8 +26,6 @@ const DefaultGlobalView = (props) => {
     label,
   } = global;
 
-  const apiURL = `${serverURL}${api}/globals/${slug}`;
-  const action = `${serverURL}${api}/globals/${slug}`;
   const hasSavePermission = permissions?.update?.permission;
 
   return (
@@ -57,7 +52,7 @@ const DefaultGlobalView = (props) => {
               operation="update"
               readOnly={!hasSavePermission}
               permissions={permissions.fields}
-              filter={field => (!field.position || (field.position && field.position !== 'sidebar'))}
+              filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
               fieldTypes={fieldTypes}
               fieldSchema={fields}
               initialData={data}
@@ -93,7 +88,7 @@ const DefaultGlobalView = (props) => {
               operation="update"
               readOnly={!hasSavePermission}
               permissions={permissions.fields}
-              filter={field => field.position === 'sidebar'}
+              filter={(field) => field.position === 'sidebar'}
               position="sidebar"
               fieldTypes={fieldTypes}
               fieldSchema={fields}
@@ -138,6 +133,8 @@ DefaultGlobalView.propTypes = {
     }),
     fields: PropTypes.shape({}),
   }).isRequired,
+  action: PropTypes.string.isRequired,
+  apiURL: PropTypes.string.isRequired,
 };
 
 export default DefaultGlobalView;

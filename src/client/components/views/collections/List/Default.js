@@ -47,7 +47,9 @@ const DefaultList = (props) => {
   const [{ data }, { setParams }] = usePayloadAPI(apiURL, { initialParams: { depth: 0 } });
 
   useEffect(() => {
-    const params = {};
+    const params = {
+      depth: 0,
+    };
 
     if (page) params.page = page;
     if (sort) params.sort = sort;

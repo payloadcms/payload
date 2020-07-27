@@ -2,10 +2,10 @@ import React, {
   useState, useRef, useEffect, useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
-import useFieldType from '../../useFieldType';
-import Button from '../../../elements/Button';
-import FileDetails from '../../../elements/FileDetails';
-import Error from '../../Error';
+import useFieldType from '../../../../forms/useFieldType';
+import Button from '../../../../elements/Button';
+import FileDetails from '../../../../elements/FileDetails';
+import Error from '../../../../forms/Error';
 
 import './index.scss';
 
@@ -34,10 +34,10 @@ const File = (props) => {
   const [replacingFile, setReplacingFile] = useState(false);
 
   const {
-    initialData = {}, adminThumbnail, staticURL,
+    data = {}, adminThumbnail, staticURL,
   } = props;
 
-  const { filename } = initialData;
+  const { filename } = data;
 
   const {
     value,
@@ -122,7 +122,7 @@ const File = (props) => {
 
   useEffect(() => {
     setReplacingFile(false);
-  }, [initialData]);
+  }, [data]);
 
   const classes = [
     baseClass,
@@ -138,7 +138,7 @@ const File = (props) => {
       />
       {(filename && !replacingFile) && (
         <FileDetails
-          {...initialData}
+          {...data}
           staticURL={staticURL}
           adminThumbnail={adminThumbnail}
           handleRemove={() => {
@@ -167,7 +167,7 @@ const File = (props) => {
             </div>
           )}
           {!value && (
-            <>
+            <React.Fragment>
               <div
                 className={`${baseClass}__drop-zone`}
                 ref={dropRef}
@@ -181,7 +181,7 @@ const File = (props) => {
                 </Button>
                 <span className={`${baseClass}__drag-label`}>or drag and drop a file here</span>
               </div>
-            </>
+            </React.Fragment>
           )}
           <input
             ref={inputRef}
@@ -195,13 +195,13 @@ const File = (props) => {
 };
 
 File.defaultProps = {
-  initialData: undefined,
+  data: undefined,
   adminThumbnail: undefined,
 };
 
 File.propTypes = {
   fieldTypes: PropTypes.shape({}).isRequired,
-  initialData: PropTypes.shape({
+  data: PropTypes.shape({
     filename: PropTypes.string,
     mimeType: PropTypes.string,
     filesize: PropTypes.number,

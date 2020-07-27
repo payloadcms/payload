@@ -10,4 +10,6 @@ export default {
   submit: () => { },
   dispatchFields: () => { },
   setModified: () => { },
+  initialState: {},
+  reset: 0,
 };

@@ -26,8 +26,6 @@ const Upload = (props) => {
     path: pathFromProps,
     name,
     required,
-    defaultValue,
-    initialData,
     admin: {
       readOnly,
       style,
@@ -45,8 +43,6 @@ const Upload = (props) => {
   const addModalSlug = `${path}-add`;
   const selectExistingModalSlug = `${path}-select-existing`;
 
-  const dataToInitialize = (typeof initialData === 'object' && initialData.id) ? initialData.id : initialData;
-
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required });
     return validationResult;
@@ -55,8 +51,6 @@ const Upload = (props) => {
   const fieldType = useFieldType({
     path,
     required,
-    initialData: dataToInitialize,
-    defaultValue,
     validate: memoizedValidate,
   });
 
@@ -75,13 +69,9 @@ const Upload = (props) => {
   ].filter(Boolean).join(' ');
 
   useEffect(() => {
-    if (typeof initialData === 'object' && initialData?.id) {
-      setInternalValue(initialData);
-    }
-
-    if (typeof initialData === 'string') {
+    if (typeof value === 'string') {
       const fetchFile = async () => {
-        const response = await fetch(`${serverURL}${api}/${relationTo}/${initialData}`);
+        const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`);
 
         if (response.ok) {
           const json = await response.json();
@@ -91,7 +81,7 @@ const Upload = (props) => {
 
       fetchFile();
     }
-  }, [initialData, setInternalValue, relationTo]);
+  }, [value, setInternalValue, relationTo]);
 
   return (
     <div
@@ -173,8 +163,6 @@ const Upload = (props) => {
 Upload.defaultProps = {
   label: null,
   required: false,
-  defaultValue: undefined,
-  initialData: undefined,
   admin: {},
   validate: upload,
   path: '',
@@ -184,13 +172,6 @@ Upload.propTypes = {
   name: PropTypes.string.isRequired,
   path: PropTypes.string,
   required: PropTypes.bool,
-  defaultValue: PropTypes.string,
-  initialData: PropTypes.oneOfType([
-    PropTypes.shape({
-      id: PropTypes.string,
-    }),
-    PropTypes.string,
-  ]),
   validate: PropTypes.func,
   admin: PropTypes.shape({
     readOnly: PropTypes.bool,

@@ -74,8 +74,6 @@ const RichText = (props) => {
     path: pathFromProps,
     name,
     required,
-    defaultValue,
-    initialData,
     validate,
     label,
     placeholder,
@@ -93,8 +91,6 @@ const RichText = (props) => {
   const fieldType = useFieldType({
     path,
     required,
-    initialData,
-    defaultValue,
     validate,
   });
 
@@ -164,8 +160,6 @@ const RichText = (props) => {
 RichText.defaultProps = {
   label: null,
   required: false,
-  defaultValue: undefined,
-  initialData: undefined,
   placeholder: undefined,
   admin: {},
   validate: richText,
@@ -177,8 +171,6 @@ RichText.propTypes = {
   path: PropTypes.string,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
-  defaultValue: PropTypes.string,
-  initialData: PropTypes.arrayOf(PropTypes.shape({})),
   validate: PropTypes.func,
   admin: PropTypes.shape({
     readOnly: PropTypes.bool,

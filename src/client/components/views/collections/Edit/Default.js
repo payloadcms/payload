@@ -15,10 +15,12 @@ import DeleteDocument from '../../../elements/DeleteDocument';
 import * as fieldTypes from '../../../forms/field-types';
 import RenderTitle from '../../../elements/RenderTitle';
 import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving';
+import Auth from './Auth';
+import Upload from './Upload';
 
 import './index.scss';
 
-const { serverURL, routes: { api, admin } } = config;
+const { routes: { admin } } = config;
 
 const baseClass = 'collection-edit';
 
@@ -26,7 +28,16 @@ const DefaultEditView = (props) => {
   const { params: { id } = {} } = useRouteMatch();
 
   const {
-    collection, isEditing, data, onSave, permissions, isLoading,
+    collection,
+    isEditing,
+    data,
+    onSave,
+    permissions,
+    isLoading,
+    initialState,
+    apiURL,
+    action,
+    hasSavePermission,
   } = props;
 
   const {
@@ -38,15 +49,8 @@ const DefaultEditView = (props) => {
     timestamps,
     preview,
     auth,
+    upload,
   } = collection;
-
-  const apiURL = `${serverURL}${api}/${slug}/${id}`;
-  let action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}`;
-  const hasSavePermission = (isEditing && permissions?.update?.permission) || (!isEditing && permissions?.create?.permission);
-
-  if (auth && !isEditing) {
-    action = `${action}/register`;
-  }
 
   const classes = [
     baseClass,
@@ -61,6 +65,7 @@ const DefaultEditView = (props) => {
         action={action}
         onSuccess={onSave}
         disabled={!hasSavePermission}
+        initialState={initialState}
       >
         <div className={`${baseClass}__main`}>
           <Eyebrow />
@@ -76,6 +81,19 @@ const DefaultEditView = (props) => {
                     <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
                   </h1>
                 </header>
+                {auth && (
+                  <Auth
+                    useAPIKey={auth.useAPIKey}
+                    requirePassword={!isEditing}
+                  />
+                )}
+                {upload && (
+                  <Upload
+                    data={data}
+                    {...upload}
+                    fieldTypes={fieldTypes}
+                  />
+                )}
                 <RenderFields
                   operation={isEditing ? 'update' : 'create'}
                   readOnly={!hasSavePermission}
@@ -83,7 +101,6 @@ const DefaultEditView = (props) => {
                   filter={(field) => (!field?.admin?.position || (field?.admin?.position !== 'sidebar'))}
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
-                  initialData={data}
                   customComponentsPath={`${slug}.fields.`}
                 />
               </React.Fragment>
@@ -145,7 +162,6 @@ const DefaultEditView = (props) => {
                     position="sidebar"
                     fieldTypes={fieldTypes}
                     fieldSchema={fields}
-                    initialData={data}
                     customComponentsPath={`${slug}.fields.`}
                   />
                 </div>
@@ -187,9 +203,14 @@ DefaultEditView.defaultProps = {
   isEditing: false,
   isLoading: true,
   data: undefined,
+  initialState: undefined,
+  apiURL: undefined,
 };
 
 DefaultEditView.propTypes = {
+  hasSavePermission: PropTypes.bool.isRequired,
+  action: PropTypes.string.isRequired,
+  apiURL: PropTypes.string,
   isLoading: PropTypes.bool,
   collection: PropTypes.shape({
     labels: PropTypes.shape({
@@ -203,7 +224,10 @@ DefaultEditView.propTypes = {
     fields: PropTypes.arrayOf(PropTypes.shape({})),
     preview: PropTypes.func,
     timestamps: PropTypes.bool,
-    auth: PropTypes.shape({}),
+    auth: PropTypes.shape({
+      useAPIKey: PropTypes.bool,
+    }),
+    upload: PropTypes.shape({}),
   }).isRequired,
   isEditing: PropTypes.bool,
   data: PropTypes.shape({
@@ -223,6 +247,7 @@ DefaultEditView.propTypes = {
     }),
     fields: PropTypes.shape({}),
   }).isRequired,
+  initialState: PropTypes.shape({}),
 };
 
 export default DefaultEditView;

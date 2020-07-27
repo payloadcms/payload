@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
@@ -22,17 +22,16 @@ const DraggableSection = (props) => {
     rowCount,
     parentPath,
     fieldSchema,
-    initialData,
     singularLabel,
     blockType,
     fieldTypes,
     customComponentsPath,
-    isOpen,
+    toggleRowCollapse,
     id,
     positionPanelVerticalAlignment,
     actionPanelVerticalAlignment,
-    toggleRowCollapse,
     permissions,
+    isOpen,
   } = props;
 
   const [isHovered, setIsHovered] = useState(false);
@@ -73,7 +72,6 @@ const DraggableSection = (props) => {
                 <div className={`${baseClass}__section-header`}>
                   <SectionTitle
                     label={singularLabel}
-                    initialData={initialData?.blockName}
                     path={`${parentPath}.${rowIndex}.blockName`}
                   />
 
@@ -92,7 +90,6 @@ const DraggableSection = (props) => {
                 duration={0}
               >
                 <RenderFields
-                  initialData={initialData}
                   customComponentsPath={customComponentsPath}
                   fieldTypes={fieldTypes}
                   key={rowIndex}

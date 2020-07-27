@@ -1,7 +1,6 @@
 import React, { useEffect, useReducer, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-import { v4 as uuidv4 } from 'uuid';
 
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
@@ -23,8 +22,6 @@ const ArrayFieldType = (props) => {
     name,
     path: pathFromProps,
     fields,
-    defaultValue,
-    initialData,
     fieldTypes,
     validate,
     required,
@@ -34,10 +31,9 @@ const ArrayFieldType = (props) => {
     permissions,
   } = props;
 
-  const dataToInitialize = initialData || defaultValue;
   const [rows, dispatchRows] = useReducer(reducer, []);
   const { customComponentsPath } = useRenderedFields();
-  const { getDataByPath } = useForm();
+  const { getDataByPath, initialState, dispatchFields } = useForm();
 
   const path = pathFromProps || name;
 
@@ -57,40 +53,25 @@ const ArrayFieldType = (props) => {
     path,
     validate: memoizedValidate,
     disableFormData,
-    initialData: initialData?.length,
-    defaultValue: defaultValue?.length,
+    ignoreWhileFlattening: true,
     required,
   });
 
   const addRow = useCallback((rowIndex) => {
-    const data = getDataByPath(path);
-
-    dispatchRows({
-      type: 'ADD', index: rowIndex, data,
-    });
-
+    dispatchRows({ type: 'ADD', rowIndex });
+    dispatchFields({ type: 'ADD_ROW', rowIndex, fieldSchema: fields, path });
     setValue(value + 1);
-  }, [dispatchRows, getDataByPath, path, setValue, value]);
+  }, [dispatchRows, dispatchFields, fields, path, setValue, value]);
 
   const removeRow = useCallback((rowIndex) => {
-    const data = getDataByPath(path);
-
-    dispatchRows({
-      type: 'REMOVE',
-      index: rowIndex,
-      data,
-    });
-
-    setValue(value - 1);
-  }, [dispatchRows, path, getDataByPath, setValue, value]);
+    dispatchRows({ type: 'REMOVE', rowIndex });
+    dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
+  }, [dispatchRows, dispatchFields, path]);
 
   const moveRow = useCallback((moveFromIndex, moveToIndex) => {
-    const data = getDataByPath(path);
-
-    dispatchRows({
-      type: 'MOVE', index: moveFromIndex, moveToIndex, data,
-    });
-  }, [dispatchRows, getDataByPath, path]);
+    dispatchRows({ type: 'MOVE', moveFromIndex, moveToIndex });
+    dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
+  }, [dispatchRows, dispatchFields, path]);
 
   const onDragEnd = useCallback((result) => {
     if (!result.destination) return;
@@ -100,28 +81,19 @@ const ArrayFieldType = (props) => {
   }, [moveRow]);
 
   useEffect(() => {
-    dispatchRows({
-      type: 'SET_ALL',
-      rows: dataToInitialize.reduce((acc, data) => ([
-        ...acc,
-        {
-          key: uuidv4(),
-          open: true,
-          data,
-        },
-      ]), []),
-    });
-  }, [dataToInitialize]);
+    const data = getDataByPath(path);
+    dispatchRows({ type: 'SET_ALL', data });
+  }, [initialState, getDataByPath, path]);
 
   useEffect(() => {
-    if (value === 0 && dataToInitialize.length > 0 && disableFormData) {
+    setValue(rows?.length || 0);
+
+    if (rows?.length === 0) {
       setDisableFormData(false);
-      setValue(value);
-    } else if (value > 0 && !disableFormData) {
+    } else {
       setDisableFormData(true);
-      setValue(value);
     }
-  }, [value, setValue, disableFormData, dataToInitialize]);
+  }, [rows, setValue]);
 
   return (
     <RenderArray
@@ -147,8 +119,6 @@ const ArrayFieldType = (props) => {
 
 ArrayFieldType.defaultProps = {
   label: '',
-  defaultValue: [],
-  initialData: [],
   validate: array,
   required: false,
   maxRows: undefined,
@@ -158,12 +128,6 @@ ArrayFieldType.defaultProps = {
 };
 
 ArrayFieldType.propTypes = {
-  defaultValue: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ),
-  initialData: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ),
   fields: PropTypes.arrayOf(
     PropTypes.shape({}),
   ).isRequired,
@@ -230,7 +194,6 @@ const RenderArray = React.memo((props) => {
                   removeRow={() => removeRow(i)}
                   moveRow={moveRow}
                   parentPath={path}
-                  initialData={row.data}
                   initNull={row.initNull}
                   customComponentsPath={`${customComponentsPath}${name}.fields.`}
                   fieldTypes={fieldTypes}
@@ -258,5 +221,41 @@ const RenderArray = React.memo((props) => {
     </DragDropContext>
   );
 });
+
+RenderArray.defaultProps = {
+  label: undefined,
+  showError: false,
+  errorMessage: undefined,
+  rows: [],
+  singularLabel: 'Row',
+  path: '',
+  customComponentsPath: undefined,
+  value: undefined,
+};
+
+RenderArray.propTypes = {
+  label: PropTypes.string,
+  showError: PropTypes.bool,
+  errorMessage: PropTypes.string,
+  rows: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ),
+  singularLabel: PropTypes.string,
+  path: PropTypes.string,
+  customComponentsPath: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  value: PropTypes.number,
+  onDragEnd: PropTypes.func.isRequired,
+  addRow: PropTypes.func.isRequired,
+  removeRow: PropTypes.func.isRequired,
+  moveRow: PropTypes.func.isRequired,
+  fieldTypes: PropTypes.shape({}).isRequired,
+  fields: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ).isRequired,
+  permissions: PropTypes.shape({
+    fields: PropTypes.shape({}),
+  }).isRequired,
+};
 
 export default withCondition(ArrayFieldType);

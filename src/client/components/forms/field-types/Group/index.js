@@ -7,7 +7,7 @@ import './index.scss';
 
 const Group = (props) => {
   const {
-    label, fields, name, path: pathFromProps, fieldTypes, initialData,
+    label, fields, name, path: pathFromProps, fieldTypes,
   } = props;
 
   const path = pathFromProps || name;
@@ -18,7 +18,6 @@ const Group = (props) => {
     <div className="field-type group">
       <h3>{label}</h3>
       <RenderFields
-        initialData={initialData}
         fieldTypes={fieldTypes}
         customComponentsPath={`${customComponentsPath}${name}.fields.`}
         fieldSchema={fields.map((subField) => ({
@@ -32,12 +31,10 @@ const Group = (props) => {
 
 Group.defaultProps = {
   label: '',
-  initialData: {},
   path: '',
 };
 
 Group.propTypes = {
-  initialData: PropTypes.shape({}),
   fields: PropTypes.arrayOf(
     PropTypes.shape({}),
   ).isRequired,

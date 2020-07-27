@@ -19,8 +19,6 @@ const DateTime = (props) => {
     path: pathFromProps,
     name,
     required,
-    defaultValue,
-    initialData,
     validate,
     errorMessage,
     label,
@@ -45,8 +43,6 @@ const DateTime = (props) => {
   } = useFieldType({
     path,
     required,
-    initialData,
-    defaultValue,
     validate: memoizedValidate,
   });
 
@@ -88,8 +84,6 @@ const DateTime = (props) => {
 DateTime.defaultProps = {
   label: null,
   required: false,
-  defaultValue: undefined,
-  initialData: undefined,
   validate: date,
   errorMessage: defaultError,
   admin: {},
@@ -101,8 +95,6 @@ DateTime.propTypes = {
   path: PropTypes.string,
   label: PropTypes.string,
   required: PropTypes.bool,
-  defaultValue: PropTypes.string,
-  initialData: PropTypes.string,
   validate: PropTypes.func,
   errorMessage: PropTypes.string,
   admin: PropTypes.shape({

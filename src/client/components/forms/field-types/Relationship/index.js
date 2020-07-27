@@ -1,5 +1,5 @@
 import React, {
-  Component, useState, useEffect, useCallback,
+  Component, useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
 import some from 'async-some';
@@ -90,7 +90,7 @@ class Relationship extends Component {
             error = 'You do not have permission to load options for this field.';
           }
 
-          this.setState({
+          return this.setState({
             errorLoading: error,
           });
         }, (lastPage, nextPage) => {
@@ -245,10 +245,6 @@ class Relationship extends Component {
 
     const valueToRender = this.findValueInOptions(options, value);
 
-    // ///////////////////////////////////////////
-    // TODO: simplify formatValue pattern seen below with react select
-    // ///////////////////////////////////////////
-
     return (
       <div
         className={classes}
@@ -330,14 +326,11 @@ Relationship.propTypes = {
 };
 
 const RelationshipFieldType = (props) => {
-  const [formattedInitialData, setFormattedInitialData] = useState(undefined);
-
   const {
-    defaultValue, relationTo, hasMany, validate, path, name, initialData, required,
+    relationTo, validate, path, name, required,
   } = props;
 
   const hasMultipleRelations = Array.isArray(relationTo);
-  const dataToInitialize = initialData || defaultValue;
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required });
@@ -348,40 +341,9 @@ const RelationshipFieldType = (props) => {
   const fieldType = useFieldType({
     ...props,
     path: path || name,
-    initialData: formattedInitialData,
-    defaultValue,
     validate: memoizedValidate,
     required,
   });
-
-  useEffect(() => {
-    const formatInitialData = (valueToFormat) => {
-      if (hasMultipleRelations) {
-        const id = valueToFormat?.value?.id || valueToFormat?.value;
-
-        return {
-          ...valueToFormat,
-          value: id,
-        };
-      }
-
-      return valueToFormat?.id || valueToFormat;
-    };
-
-    if (dataToInitialize) {
-      if (hasMany && Array.isArray(dataToInitialize)) {
-        const newFormattedInitialData = [];
-
-        dataToInitialize.forEach((individualValue) => {
-          newFormattedInitialData.push(formatInitialData(individualValue));
-        });
-
-        setFormattedInitialData(newFormattedInitialData);
-      } else {
-        setFormattedInitialData(formatInitialData(dataToInitialize));
-      }
-    }
-  }, [dataToInitialize, hasMany, hasMultipleRelations]);
 
   return (
     <Relationship

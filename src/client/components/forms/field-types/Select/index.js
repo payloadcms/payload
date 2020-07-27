@@ -65,8 +65,6 @@ const Select = (props) => {
     path: pathFromProps,
     name,
     required,
-    defaultValue,
-    initialData,
     validate,
     label,
     options,
@@ -94,8 +92,6 @@ const Select = (props) => {
     path,
     label,
     required,
-    initialData,
-    defaultValue,
     validate: memoizedValidate,
   });
 
@@ -142,8 +138,6 @@ Select.defaultProps = {
   admin: {},
   required: false,
   validate: select,
-  defaultValue: undefined,
-  initialData: undefined,
   hasMany: false,
   path: '',
 };
@@ -156,14 +150,6 @@ Select.propTypes = {
     width: PropTypes.string,
   }),
   label: PropTypes.string.isRequired,
-  defaultValue: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.array,
-  ]),
-  initialData: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.array,
-  ]),
   validate: PropTypes.func,
   name: PropTypes.string.isRequired,
   path: PropTypes.string,

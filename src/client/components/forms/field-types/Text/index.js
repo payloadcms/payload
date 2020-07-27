@@ -13,8 +13,6 @@ const Text = (props) => {
     path: pathFromProps,
     name,
     required,
-    defaultValue,
-    initialData,
     validate,
     label,
     placeholder,
@@ -36,9 +34,6 @@ const Text = (props) => {
 
   const fieldType = useFieldType({
     path,
-    required,
-    initialData,
-    defaultValue,
     validate: memoizedValidate,
     enableDebouncedValue: true,
   });
@@ -91,8 +86,6 @@ Text.defaultProps = {
   label: null,
   required: false,
   admin: {},
-  defaultValue: undefined,
-  initialData: undefined,
   placeholder: undefined,
   validate: text,
   path: '',
@@ -105,8 +98,6 @@ Text.propTypes = {
   path: PropTypes.string,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
-  defaultValue: PropTypes.string,
-  initialData: PropTypes.string,
   validate: PropTypes.func,
   admin: PropTypes.shape({
     readOnly: PropTypes.bool,
