@@ -106,7 +106,6 @@
     "slate-hyperscript": "^0.58.3",
     "slate-react": "^0.58.3",
     "style-loader": "^0.21.0",
-    "styled-components": "^5.1.1",
     "uglifyjs-webpack-plugin": "^2.2.0",
     "url-loader": "^1.0.1",
     "uuid": "^8.1.0",
