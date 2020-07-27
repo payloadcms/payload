@@ -15,10 +15,10 @@ import {
   ListPlugin,
   ParagraphPlugin,
   pipe,
+  ExitBreakPlugin,
   SoftBreakPlugin,
   StrikethroughPlugin,
   UnderlinePlugin,
-  withList,
   withToggleType,
 } from '@udecode/slate-plugins';
 
@@ -63,7 +63,6 @@ const plugins = [
 const withPlugins = [
   withReact,
   withHistory,
-  withList(nodeTypes),
   withToggleType({ defaultType: nodeTypes.typeP }),
 ];
 
@@ -101,19 +100,6 @@ const RichText = (props) => {
     errorMessage,
   } = fieldType;
 
-  const [internalState, setInternalState] = useState(value);
-  const [valueHasLoaded, setValueHasLoaded] = useState(false);
-
-  useEffect(() => { setValue(internalState); }, [setValue, internalState]);
-
-  useEffect(() => {
-    // ! could use review
-    if (value !== undefined && !valueHasLoaded) {
-      setInternalState(value);
-      setValueHasLoaded(true);
-    }
-  }, [value, valueHasLoaded]);
-
   const classes = [
     baseClass,
     'field-type',
@@ -141,8 +127,8 @@ const RichText = (props) => {
       <div className={`${baseClass}__wrapper`}>
         <Slate
           editor={editor}
-          value={internalState ?? emptyRichTextNode}
-          onChange={(val) => setInternalState(val)}
+          value={value ?? emptyRichTextNode}
+          onChange={val => setValue(val)}
         >
           <CommandToolbar enabledPluginList={plugins} />
 
