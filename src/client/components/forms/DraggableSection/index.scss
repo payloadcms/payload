@@ -53,6 +53,10 @@
 
   &__section-header {
     display: flex;
+    position: sticky;
+    top: $top-header-offset;
+    z-index: 1;
+    margin-bottom: base(.75);
 
     .toggle-collapse {
       margin: 0 0 0 auto;

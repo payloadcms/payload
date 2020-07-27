@@ -29,7 +29,7 @@ $controls-top-adjustment: base(.1);
   &--vertical-alignment-sticky {
     .position-panel__controls {
       position: sticky;
-      top: 120px;
+      top: $top-header-offset;
       height: unset;
     }
   }
