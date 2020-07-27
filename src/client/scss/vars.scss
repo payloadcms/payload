@@ -57,7 +57,8 @@ $style-stroke-width-m : 2px;
 //////////////////////////////
 // MISC
 //////////////////////////////
-$top-header-offset: 120px;
+$top-header-offset: base(4);
+$top-header-offset-m: base(3);
 
 //////////////////////////////
 // SHADOWS
@@ -101,8 +102,8 @@ $top-header-offset: 120px;
   }
 }
 
-@mixin blur-bg {
-  background: rgba($color-background-gray, .7);
+@mixin blur-bg($color: $color-background-gray) {
+  background: rgba($color, .7);
   backdrop-filter: saturate(180%) blur(5px);
 }
 

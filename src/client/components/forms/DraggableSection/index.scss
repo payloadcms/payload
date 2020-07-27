@@ -42,7 +42,6 @@
   &__content-wrapper {
     display: flex;
     position: relative;
-    padding-top: base(.75);
   }
 
   &.is-closed {
@@ -52,11 +51,15 @@
   }
 
   &__section-header {
+    @include blur-bg(white);
     display: flex;
     position: sticky;
     top: $top-header-offset;
     z-index: 1;
-    margin-bottom: base(.75);
+    padding: base(.75) base(.75);
+    margin-left: - base(.75);
+    margin-right: - base(.75);
+    width: calc(100% + #{base(1.5)});
 
     .toggle-collapse {
       margin: 0 0 0 auto;
@@ -126,6 +129,10 @@
     .position-panel__move-forward,
     .position-panel__move-backward {
       opacity: 1;
+    }
+
+    &__section-header {
+      top: $top-header-offset-m;
     }
   }
 }
