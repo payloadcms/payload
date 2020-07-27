@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const mongoose = require('mongoose');
+const logger = require('../utilities/logger')();
 
 const connectMongoose = async (url) => {
   let urlToConnect = url;
@@ -19,9 +20,9 @@ const connectMongoose = async (url) => {
       useUnifiedTopology: true,
       useCreateIndex: true,
     });
-    console.log(successfulConnectionMessage);
+    logger.info(successfulConnectionMessage);
   } catch (err) {
-    console.error('Error: cannot connect to MongoDB. Details: ', err);
+    logger.error('Error: cannot connect to MongoDB. Details: ', err);
     process.exit(1);
   }
 };
