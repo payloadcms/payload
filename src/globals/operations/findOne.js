@@ -1,95 +1,78 @@
-const executePolicy = require('../../auth/executePolicy');
-const { NotFound } = require('../../errors');
-const performFieldOperations = require('../../fields/performFieldOperations');
+const executeAccess = require('../../auth/executeAccess');
 
-const findOne = async (args) => {
-  try {
-    // /////////////////////////////////////
-    // 1. Retrieve and execute policy
-    // /////////////////////////////////////
+async function findOne(args) {
+  const { globals: { Model } } = this;
 
-    await executePolicy(args, args.config.policies.read);
+  const {
+    globalConfig,
+    req,
+    req: {
+      locale,
+      fallbackLocale,
+    },
+    slug,
+    depth,
+  } = args;
 
-    let options = { ...args };
+  // /////////////////////////////////////
+  // 1. Retrieve and execute access
+  // /////////////////////////////////////
 
-    // /////////////////////////////////////
-    // 2. Execute before collection hook
-    // /////////////////////////////////////
+  await executeAccess({ req }, globalConfig.access.read);
 
-    const { beforeRead } = args.config.hooks;
+  // /////////////////////////////////////
+  // 2. Execute before collection hook
+  // /////////////////////////////////////
 
-    if (typeof beforeRead === 'function') {
-      options = await beforeRead(options);
+  globalConfig.hooks.beforeRead.forEach((hook) => hook({ req }));
+
+  // /////////////////////////////////////
+  // 3. Perform database operation
+  // /////////////////////////////////////
+
+  let doc = await Model.findOne({ globalType: slug });
+
+  if (!doc) {
+    doc = {};
+  } else {
+    if (locale && doc.setLocale) {
+      doc.setLocale(locale, fallbackLocale);
     }
 
-    // /////////////////////////////////////
-    // 3. Perform database operation
-    // /////////////////////////////////////
-
-    const {
-      depth,
-      Model,
-      slug,
-      req: {
-        payloadAPI,
-        locale,
-        fallbackLocale,
-      },
-    } = options;
-
-    const queryOptionsToExecute = {
-      options: {},
-    };
-
-    // Only allow depth override within REST.
-    // If allowed in GraphQL, it would break resolvers
-    // as a full object will be returned instead of an ID string
-    if (payloadAPI === 'REST') {
-      if (depth && depth !== '0') {
-        queryOptionsToExecute.options.autopopulate = {
-          maxDepth: parseInt(depth, 10),
-        };
-      } else {
-        queryOptionsToExecute.options.autopopulate = false;
-      }
-    }
-
-    let result = await Model.findOne({ globalType: slug });
-
-    if (!result) throw new NotFound();
-
-    if (locale && result.setLocale) {
-      result.setLocale(locale, fallbackLocale);
-    }
-
-    let data = result.toJSON({ virtuals: true });
-
-    // /////////////////////////////////////
-    // 4. Execute field-level hooks and policies
-    // /////////////////////////////////////
-
-    result = performFieldOperations(args.config, {
-      ...options, data, hook: 'afterRead', operationName: 'read',
-    });
-
-    // /////////////////////////////////////
-    // 5. Execute after collection hook
-    // /////////////////////////////////////
-
-    const { afterRead } = args.config.hooks;
-
-    if (typeof afterRead === 'function') {
-      data = await afterRead(options, result, data) || data;
-    }
-
-    // /////////////////////////////////////
-    // 6. Return results
-    // /////////////////////////////////////
-
-    return data;
-  } catch (error) {
-    throw error;
+    doc = doc.toJSON({ virtuals: true });
   }
-};
+
+
+  // /////////////////////////////////////
+  // 4. Execute field-level hooks and access
+  // /////////////////////////////////////
+
+  doc = this.performFieldOperations(globalConfig, {
+    data: doc,
+    hook: 'afterRead',
+    operationName: 'read',
+    req,
+    depth,
+  });
+
+  // /////////////////////////////////////
+  // 5. Execute after collection hook
+  // /////////////////////////////////////
+
+  await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    doc = await hook({
+      req,
+      doc,
+    }) || doc;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // 6. Return results
+  // /////////////////////////////////////
+
+  return doc;
+}
 
 module.exports = findOne;

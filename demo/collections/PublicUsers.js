@@ -1,6 +1,6 @@
-const checkRole = require('../policies/checkRole');
+const checkRole = require('../access/checkRole');
 
-const policy = ({ req: { user } }) => checkRole(['admin'], user);
+const access = ({ req: { user } }) => checkRole(['admin'], user);
 
 module.exports = {
   slug: 'public-users',
@@ -8,8 +8,10 @@ module.exports = {
     singular: 'Public User',
     plural: 'Public Users',
   },
-  useAsTitle: 'email',
-  policies: {
+  admin: {
+    useAsTitle: 'email',
+  },
+  access: {
     admin: () => false,
     create: () => true,
     read: () => true,
@@ -30,6 +32,7 @@ module.exports = {
   },
   auth: {
     tokenExpiration: 300,
+    secureCookie: process.env.NODE_ENV === 'production',
   },
   fields: [
     {
@@ -37,10 +40,10 @@ module.exports = {
       label: 'This field should only be readable and editable by Admins with "admin" role',
       type: 'text',
       defaultValue: 'test',
-      policies: {
-        create: policy,
-        read: policy,
-        update: policy,
+      access: {
+        create: access,
+        read: access,
+        update: access,
       },
     },
   ],

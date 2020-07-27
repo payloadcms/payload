@@ -1,23 +1,26 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
-const { findOne } = require('../operations');
 
-const findOneHandler = (Model, config) => async (req, res) => {
-  try {
-    const { slug } = config;
+function findOne(globalConfig) {
+  async function handler(req, res, next) {
+    try {
+      const { slug } = globalConfig;
 
-    const result = await findOne({
-      req,
-      Model,
-      config,
-      slug,
-      depth: req.query.depth,
-    });
+      const result = await this.operations.globals.findOne({
+        req,
+        globalConfig,
+        slug,
+        depth: req.query.depth,
+      });
 
-    return res.status(httpStatus.OK).json(result);
-  } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
+      return res.status(httpStatus.OK).json(result);
+    } catch (error) {
+      return next(error);
+    }
   }
-};
 
-module.exports = findOneHandler;
+  const findOneHandler = handler.bind(this);
+
+  return findOneHandler;
+}
+
+module.exports = findOne;

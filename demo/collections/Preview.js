@@ -4,7 +4,9 @@ module.exports = {
     singular: 'Previewable Post',
     plural: 'Previewable Posts',
   },
-  useAsTitle: 'title',
+  admin: {
+    useAsTitle: 'title',
+  },
   preview: (doc, token) => {
     if (doc.title) {
       return `http://localhost:3000/previewable-posts/${doc.title.value}?preview=true&token=${token}`;

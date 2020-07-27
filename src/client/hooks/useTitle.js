@@ -1,4 +1,4 @@
-import useFormFields from '../components/forms/Form/useFormFields';
+import { useFormFields } from '../components/forms/Form/context';
 
 const useTitle = (useAsTitle) => {
   const { getField } = useFormFields();

@@ -15,9 +15,20 @@
     }
   }
 
+  &__buttons {
+    margin-left: $baseline;
+  }
+
+  &__buttons-wrap {
+    display: flex;
+    margin-left: - base(.5);
+    margin-right: - base(.5);
+    width: calc(100% + #{$baseline});
+  }
+
   &__toggle-columns,
   &__toggle-where {
-    margin: 0 0 0 $baseline;
+    margin: 0 base(.5);
     min-width: 140px;
 
     &.btn--style-primary {
@@ -33,9 +44,8 @@
   }
 
   @include mid-break {
-    &__toggle-columns,
-    &__toggle-where {
-      margin: 0 0 0 base(.5);
+    &__buttons {
+      margin-left: base(.5);
     }
   }
 
@@ -49,17 +59,17 @@
       width: 100%;
     }
 
+    &__buttons {
+      margin: 0;
+    }
+
+    &__buttons {
+      width: 100%;
+    }
+
     &__toggle-columns,
     &__toggle-where {
-      width: calc(50% - #{base(.25)});
-    }
-
-    &__toggle-columns {
-      margin: 0 base(.25) 0 0;
-    }
-
-    &__toggle-where {
-      margin: 0 0 0 base(.25);
+      flex-grow: 1;
     }
   }
 }

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { useModal } from '@trbl/react-modal';
+import { useModal } from '@faceless-ui/modal';
 import config from '../../../../config';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
@@ -14,7 +14,7 @@ import SelectExistingModal from './SelectExisting';
 
 import './index.scss';
 
-const { collections } = config;
+const { collections, serverURL, routes: { api } } = config;
 
 const baseClass = 'upload';
 
@@ -26,29 +26,32 @@ const Upload = (props) => {
     path: pathFromProps,
     name,
     required,
-    defaultValue,
-    initialData,
-    style,
-    width,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
     label,
-    readOnly,
     validate,
     relationTo,
     fieldTypes,
   } = props;
 
-  const collection = collections.find(coll => coll.slug === relationTo);
+  const collection = collections.find((coll) => coll.slug === relationTo);
 
   const path = pathFromProps || name;
   const addModalSlug = `${path}-add`;
   const selectExistingModalSlug = `${path}-select-existing`;
 
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { required });
+    return validationResult;
+  }, [validate, required]);
+
   const fieldType = useFieldType({
     path,
     required,
-    initialData: initialData?.id,
-    defaultValue,
-    validate,
+    validate: memoizedValidate,
   });
 
   const {
@@ -66,10 +69,19 @@ const Upload = (props) => {
   ].filter(Boolean).join(' ');
 
   useEffect(() => {
-    if (initialData) {
-      setInternalValue(initialData);
+    if (typeof value === 'string') {
+      const fetchFile = async () => {
+        const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`);
+
+        if (response.ok) {
+          const json = await response.json();
+          setInternalValue(json);
+        }
+      };
+
+      fetchFile();
     }
-  }, [initialData]);
+  }, [value, setInternalValue, relationTo]);
 
   return (
     <div
@@ -89,7 +101,7 @@ const Upload = (props) => {
         required={required}
       />
       {collection?.upload && (
-        <>
+        <React.Fragment>
           {internalValue && (
             <FileDetails
               {...collection.upload}
@@ -142,7 +154,7 @@ const Upload = (props) => {
             addModalSlug,
           }}
           />
-        </>
+        </React.Fragment>
       )}
     </div>
   );
@@ -151,11 +163,7 @@ const Upload = (props) => {
 Upload.defaultProps = {
   label: null,
   required: false,
-  readOnly: false,
-  defaultValue: undefined,
-  initialData: undefined,
-  width: undefined,
-  style: {},
+  admin: {},
   validate: upload,
   path: '',
 };
@@ -164,14 +172,12 @@ Upload.propTypes = {
   name: PropTypes.string.isRequired,
   path: PropTypes.string,
   required: PropTypes.bool,
-  readOnly: PropTypes.bool,
-  defaultValue: PropTypes.string,
-  initialData: PropTypes.shape({
-    id: PropTypes.string,
-  }),
   validate: PropTypes.func,
-  width: PropTypes.string,
-  style: PropTypes.shape({}),
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
   relationTo: PropTypes.string.isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
   label: PropTypes.oneOfType([

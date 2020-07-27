@@ -20,7 +20,13 @@ const sanitizeGlobals = (globals) => {
     // /////////////////////////////////
 
     if (!sanitizedGlobal.hooks) sanitizedGlobal.hooks = {};
-    if (!sanitizedGlobal.policies) sanitizedGlobal.policies = {};
+    if (!sanitizedGlobal.access) sanitizedGlobal.access = {};
+    if (!sanitizedGlobal.admin) sanitizedGlobal.admin = {};
+
+    if (!sanitizedGlobal.hooks.beforeUpdate) sanitizedGlobal.hooks.beforeUpdate = [];
+    if (!sanitizedGlobal.hooks.afterUpdate) sanitizedGlobal.hooks.afterUpdate = [];
+    if (!sanitizedGlobal.hooks.beforeRead) sanitizedGlobal.hooks.beforeRead = [];
+    if (!sanitizedGlobal.hooks.afterRead) sanitizedGlobal.hooks.afterRead = [];
 
     // /////////////////////////////////
     // Sanitize fields

@@ -1,14 +1,13 @@
 const httpStatus = require('http-status');
 const formatSuccessResponse = require('../../express/responses/formatSuccess');
-const { create } = require('../operations');
 
-const createHandler = async (req, res, next) => {
+async function create(req, res, next) {
   try {
-    const doc = await create({
+    const doc = await this.operations.collections.create({
       req,
-      Model: req.collection.Model,
-      config: req.collection.config,
+      collection: req.collection,
       data: req.body,
+      depth: req.query.depth,
     });
 
     return res.status(httpStatus.CREATED).json({
@@ -18,6 +17,6 @@ const createHandler = async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
-};
+}
 
-module.exports = createHandler;
+module.exports = create;

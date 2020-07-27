@@ -1,120 +1,110 @@
 const { Forbidden, NotFound } = require('../../errors');
-const executePolicy = require('../../auth/executePolicy');
-const performFieldOperations = require('../../fields/performFieldOperations');
+const executeAccess = require('../../auth/executeAccess');
 
-const findByID = async (args) => {
-  try {
-    // /////////////////////////////////////
-    // 1. Retrieve and execute policy
-    // /////////////////////////////////////
-
-    const policyResults = await executePolicy(args, args.config.policies.read);
-    const hasWherePolicy = typeof policyResults === 'object';
-
-    const queryToBuild = {
-      where: {
-        and: [
-          {
-            _id: {
-              equals: args.id,
-            },
-          },
-        ],
-      },
-    };
-
-    if (hasWherePolicy) {
-      queryToBuild.where.and.push(policyResults);
-    }
-
-    let options = {
-      ...args,
-      query: await args.Model.buildQuery(queryToBuild, args.req.locale),
-    };
-
-    // /////////////////////////////////////
-    // 2. Execute before collection hook
-    // /////////////////////////////////////
-
-    const { beforeRead } = args.config.hooks;
-
-    if (typeof beforeRead === 'function') {
-      options = await beforeRead(options);
-    }
-
-    // /////////////////////////////////////
-    // 3. Perform database operation
-    // /////////////////////////////////////
-
-    const {
-      depth,
+async function findByID(args) {
+  const {
+    depth,
+    collection: {
       Model,
-      query,
-      req: {
-        locale,
-        fallbackLocale,
-        payloadAPI,
-      },
-    } = options;
+      config: collectionConfig,
+    },
+    id,
+    req,
+    req: {
+      locale,
+      fallbackLocale,
+    },
+    disableErrors,
+    currentDepth,
+  } = args;
 
-    const queryOptionsToExecute = {
-      options: {},
-    };
+  // /////////////////////////////////////
+  // 1. Retrieve and execute access
+  // /////////////////////////////////////
 
-    // Only allow depth override within REST.
-    // If allowed in GraphQL, it would break resolvers
-    // as a full object will be returned instead of an ID string
-    if (payloadAPI === 'REST') {
-      if (depth && depth !== '0') {
-        queryOptionsToExecute.options.autopopulate = {
-          maxDepth: parseInt(depth, 10),
-        };
-      } else {
-        queryOptionsToExecute.options.autopopulate = false;
-      }
-    }
+  const accessResults = await executeAccess({ req, disableErrors }, collectionConfig.access.read);
+  const hasWhereAccess = typeof accessResults === 'object';
 
-    let result = await Model.findOne(query, {}, queryOptionsToExecute);
+  const queryToBuild = {
+    where: {
+      and: [
+        {
+          _id: {
+            equals: id,
+          },
+        },
+      ],
+    },
+  };
 
-    if (!result && !hasWherePolicy) throw new NotFound();
-    if (!result && hasWherePolicy) throw new Forbidden();
-
-    if (locale && result.setLocale) {
-      result.setLocale(locale, fallbackLocale);
-    }
-
-    result = result.toJSON({ virtuals: true });
-
-    // /////////////////////////////////////
-    // 4. Execute field-level hooks and policies
-    // /////////////////////////////////////
-
-    result = await performFieldOperations(args.config, {
-      ...options, data: result, hook: 'afterRead', operationName: 'read',
-    });
-
-
-    // /////////////////////////////////////
-    // 5. Execute after collection hook
-    // /////////////////////////////////////
-
-    const { afterRead } = args.config.hooks;
-
-    if (typeof afterRead === 'function') {
-      result = await afterRead({
-        ...options,
-        doc: result,
-      }) || result;
-    }
-
-    // /////////////////////////////////////
-    // 6. Return results
-    // /////////////////////////////////////
-
-    return result;
-  } catch (err) {
-    throw err;
+  if (hasWhereAccess) {
+    queryToBuild.where.and.push(accessResults);
   }
-};
+
+  const query = await Model.buildQuery(queryToBuild, locale);
+
+  // /////////////////////////////////////
+  // 2. Execute before collection hook
+  // /////////////////////////////////////
+
+  collectionConfig.hooks.beforeRead.forEach((hook) => hook({ req, query }));
+
+  // /////////////////////////////////////
+  // 3. Perform database operation
+  // /////////////////////////////////////
+
+  if (!query.$and[0]._id) throw new NotFound();
+
+  let result = await Model.findOne(query, {});
+
+  if (!result) {
+    if (!disableErrors) {
+      if (!hasWhereAccess) throw new NotFound();
+      if (hasWhereAccess) throw new Forbidden();
+    }
+
+    return null;
+  }
+
+  if (locale && result.setLocale) {
+    result.setLocale(locale, fallbackLocale);
+  }
+
+  result = result.toJSON({ virtuals: true });
+
+  // /////////////////////////////////////
+  // 4. Execute field-level hooks and access
+  // /////////////////////////////////////
+
+  result = await this.performFieldOperations(collectionConfig, {
+    depth,
+    req,
+    data: result,
+    hook: 'afterRead',
+    operationName: 'read',
+    currentDepth,
+  });
+
+
+  // /////////////////////////////////////
+  // 5. Execute after collection hook
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    result = await hook({
+      req,
+      query,
+      doc: result,
+    }) || result;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // 6. Return results
+  // /////////////////////////////////////
+
+  return result;
+}
 
 module.exports = findByID;

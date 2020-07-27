@@ -3,13 +3,15 @@ const { Schema } = require('mongoose');
 const { MissingSelectOptions } = require('../errors');
 
 const formatBaseSchema = (field) => {
-  const createPolicy = field.policies && field.policies.create;
+  const createAccess = field.access && field.access.create;
+
+  const condition = field.admin && field.admin.condition;
 
   return {
-    hide: field.hidden === 'api' || field.hidden === true,
+    hide: field.hidden,
     localized: field.localized || false,
     unique: field.unique || false,
-    required: (field.required && !field.localized && !field.hidden && !field.condition && !createPolicy) || false,
+    required: (field.required && !field.localized && !condition && !createAccess) || false,
     default: field.defaultValue || undefined,
   };
 };
@@ -28,7 +30,7 @@ const buildSchema = (configFields, options = {}) => {
   const schema = new Schema(fields, options);
 
   configFields.forEach((field) => {
-    if (field.type === 'flexible' && field.blocks && field.blocks.length > 0) {
+    if (field.type === 'blocks' && field.blocks && field.blocks.length > 0) {
       field.blocks.forEach((block) => {
         let blockSchemaFields = {};
 
@@ -49,71 +51,51 @@ const buildSchema = (configFields, options = {}) => {
 };
 
 const fieldToSchemaMap = {
-  number: (field, fields) => {
-    return {
-      ...fields,
-      [field.name]: { ...formatBaseSchema(field), type: Number },
-    };
-  },
-  text: (field, fields) => {
-    return {
-      ...fields,
-      [field.name]: { ...formatBaseSchema(field), type: String },
-    };
-  },
-  email: (field, fields) => {
-    return {
-      ...fields,
-      [field.name]: { ...formatBaseSchema(field), type: String },
-    };
-  },
-  textarea: (field, fields) => {
-    return {
-      ...fields,
-      [field.name]: { ...formatBaseSchema(field), type: String },
-    };
-  },
-  richText: (field, fields) => {
-    return {
-      ...fields,
-      [field.name]: { ...formatBaseSchema(field), type: Schema.Types.Mixed },
-    };
-  },
-  code: (field, fields) => {
-    return {
-      ...fields,
-      [field.name]: { ...formatBaseSchema(field), type: String },
-    };
-  },
-  radio: (field, fields) => {
-    return {
-      ...fields,
-      [field.name]: { ...formatBaseSchema(field), type: String },
-    };
-  },
-  checkbox: (field, fields) => {
-    return {
-      ...fields,
-      [field.name]: { ...formatBaseSchema(field), type: Boolean },
-    };
-  },
-  date: (field, fields) => {
-    return {
-      ...fields,
-      [field.name]: { ...formatBaseSchema(field), type: Date },
-    };
-  },
-  upload: (field, fields) => {
-    return {
-      ...fields,
-      [field.name]: {
-        ...formatBaseSchema(field),
-        type: Schema.Types.ObjectId,
-        autopopulate: true,
-        ref: field.relationTo,
-      },
-    };
-  },
+  number: (field, fields) => ({
+    ...fields,
+    [field.name]: { ...formatBaseSchema(field), type: Number },
+  }),
+  text: (field, fields) => ({
+    ...fields,
+    [field.name]: { ...formatBaseSchema(field), type: String },
+  }),
+  email: (field, fields) => ({
+    ...fields,
+    [field.name]: { ...formatBaseSchema(field), type: String },
+  }),
+  textarea: (field, fields) => ({
+    ...fields,
+    [field.name]: { ...formatBaseSchema(field), type: String },
+  }),
+  richText: (field, fields) => ({
+    ...fields,
+    [field.name]: { ...formatBaseSchema(field), type: Schema.Types.Mixed },
+  }),
+  code: (field, fields) => ({
+    ...fields,
+    [field.name]: { ...formatBaseSchema(field), type: String },
+  }),
+  radio: (field, fields) => ({
+    ...fields,
+    [field.name]: { ...formatBaseSchema(field), type: String },
+  }),
+  checkbox: (field, fields) => ({
+    ...fields,
+    [field.name]: { ...formatBaseSchema(field), type: Boolean },
+  }),
+  date: (field, fields) => ({
+    ...fields,
+    [field.name]: { ...formatBaseSchema(field), type: Date },
+  }),
+  upload: (field, fields) => ({
+    ...fields,
+    [field.name]: {
+      ...formatBaseSchema(field),
+      type: Schema.Types.ObjectId,
+      autopopulate: true,
+      ref: field.relationTo,
+    },
+  }),
   relationship: (field, fields) => {
     let schema = {};
 
@@ -160,7 +142,7 @@ const fieldToSchemaMap = {
 
     return newFields;
   },
-  repeater: (field, fields) => {
+  array: (field, fields) => {
     const schema = buildSchema(field.fields, { _id: false, id: false });
 
     return {
@@ -178,7 +160,7 @@ const fieldToSchemaMap = {
       ...fields,
       [field.name]: {
         ...formatBaseSchema(field),
-        required: field.fields.some(subField => subField.required === true),
+        required: field.fields.some((subField) => subField.required === true),
         type: schema,
       },
     };
@@ -202,7 +184,7 @@ const fieldToSchemaMap = {
       [field.name]: field.hasMany ? [schema] : schema,
     };
   },
-  flexible: (field, fields) => {
+  blocks: (field, fields) => {
     const flexibleSchema = new Schema({ blockName: String }, { discriminatorKey: 'blockType', _id: false, id: false });
 
     return {

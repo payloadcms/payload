@@ -1,0 +1,74 @@
+@import '../../../../../scss/styles.scss';
+
+.file-field {
+  position: relative;
+  margin: base(1.5) 0 base(2);
+  background: $color-background-gray;
+
+  .tooltip.error-message {
+    z-index: 3;
+    bottom: calc(100% - #{base(.5)});
+  }
+
+  &__upload {
+    position: relative;
+
+    input[type=file] {
+      position: absolute;
+      top: 0;
+      z-index: -1;
+    }
+  }
+
+  &__file-selected,
+  &__drop-zone {
+    background: $color-background-gray;
+    position: relative;
+    z-index: 2;
+    padding: base(2);
+    display: flex;
+    align-items: center;
+  }
+
+  &__drop-zone {
+    border: 1px dotted $color-gray;
+
+    .btn {
+      margin: 0 $baseline 0 0;
+    }
+  }
+
+  &__file-selected {
+    .btn {
+      margin: 0 0 0 $baseline;
+    }
+  }
+
+  &__filename {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &--dragging {
+    .file-field__drop-zone {
+      border-color: $color-green;
+      background: rgba($color-green, .15);
+    }
+  }
+
+  @include mid-break {
+    &__drop-zone {
+      display: block;
+      text-align: center;
+
+      .btn {
+        margin: 0 auto;
+      }
+
+      .file-field__drag-label {
+        display: none;
+      }
+    }
+  }
+}

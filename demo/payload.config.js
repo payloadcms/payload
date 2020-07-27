@@ -5,13 +5,13 @@ const Code = require('./collections/Code');
 const Conditions = require('./collections/Conditions');
 const CustomComponents = require('./collections/CustomComponents');
 const File = require('./collections/File');
-const FlexibleContent = require('./collections/FlexibleContent');
+const Blocks = require('./collections/Blocks');
 const HiddenFields = require('./collections/HiddenFields');
 const Hooks = require('./collections/Hooks');
 const Localized = require('./collections/Localized');
-const LocalizedRepeaters = require('./collections/LocalizedRepeater');
+const LocalizedArray = require('./collections/LocalizedArray');
 const Media = require('./collections/Media');
-const NestedRepeaters = require('./collections/NestedRepeater');
+const NestedArrays = require('./collections/NestedArrays');
 const Preview = require('./collections/Preview');
 const PublicUsers = require('./collections/PublicUsers');
 const RelationshipA = require('./collections/RelationshipA');
@@ -20,14 +20,19 @@ const RichText = require('./collections/RichText');
 const StrictPolicies = require('./collections/StrictPolicies');
 const Validations = require('./collections/Validations');
 
-const FlexibleGlobal = require('./globals/FlexibleGlobal');
-const NavigationRepeater = require('./globals/NavigationRepeater');
-const GlobalWithPolicies = require('./globals/GlobalWithPolicies');
+const BlocksGlobal = require('./globals/BlocksGlobal');
+const NavigationArray = require('./globals/NavigationArray');
+const GlobalWithStrictAccess = require('./globals/GlobalWithStrictAccess');
 
 module.exports = {
   admin: {
     user: 'admins',
     disable: false,
+    components: {
+      layout: {
+        // Sidebar: path.resolve(__dirname, 'client/components/layout/Sidebar/index.js'),
+      },
+    },
   },
   collections: [
     Admin,
@@ -36,13 +41,13 @@ module.exports = {
     Conditions,
     CustomComponents,
     File,
-    FlexibleContent,
+    Blocks,
     HiddenFields,
     Hooks,
     Localized,
-    LocalizedRepeaters,
+    LocalizedArray,
     Media,
-    NestedRepeaters,
+    NestedArrays,
     Preview,
     PublicUsers,
     RelationshipA,
@@ -51,7 +56,11 @@ module.exports = {
     StrictPolicies,
     Validations,
   ],
-  globals: [NavigationRepeater, GlobalWithPolicies, FlexibleGlobal],
+  globals: [
+    NavigationArray,
+    GlobalWithStrictAccess,
+    BlocksGlobal,
+  ],
   cookiePrefix: 'payload',
   serverURL: 'http://localhost:3000',
   cors: ['http://localhost', 'http://localhost:8080', 'http://localhost:8081'],
@@ -61,11 +70,11 @@ module.exports = {
     graphQL: '/graphql',
     graphQLPlayground: '/graphql-playground',
   },
+  defaultDepth: 2,
   compression: {},
   paths: {
     scss: path.resolve(__dirname, 'client/scss/overrides.scss'),
   },
-  mongoURL: 'mongodb://localhost/payload',
   graphQL: {
     mutations: {},
     queries: {},
@@ -79,17 +88,10 @@ module.exports = {
     fallback: true,
   },
   productionGraphQLPlayground: false,
-  components: {
-    layout: {
-      // Sidebar: path.resolve(__dirname, 'client/components/layout/Sidebar/index.js'),
-    },
-  },
   hooks: {
-    afterError: (err, response) => {
+    afterError: () => {
       console.error('global error config handler');
     },
   },
-  webpack: (config) => {
-    return config;
-  },
+  webpack: (config) => config,
 };

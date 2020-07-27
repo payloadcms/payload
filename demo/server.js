@@ -1,6 +1,8 @@
+/* eslint-disable no-console */
 const express = require('express');
 const path = require('path');
 const Payload = require('../src');
+const logger = require('../src/utilities/logger')();
 
 const expressApp = express();
 
@@ -13,19 +15,37 @@ const payload = new Payload({
   secret: 'SECRET_KEY',
   mongoURL: 'mongodb://localhost/payload',
   express: expressApp,
+  onInit: () => {
+    logger.info('Payload is initialized');
+    // console.log('Payload is initialized');
+  },
 });
+
+const externalRouter = express.Router();
+
+externalRouter.use(payload.authenticate());
+
+externalRouter.get('/', (req, res) => {
+  if (req.user) {
+    return res.send(`Authenticated successfully as ${req.user.email}.`);
+  }
+
+  return res.send('Not authenticated');
+});
+
+expressApp.use('/external-route', externalRouter);
 
 exports.payload = payload;
 
 exports.start = (cb) => {
   const server = expressApp.listen(3000, async () => {
-    console.log(`listening on ${3000}...`);
+    logger.info(`listening on ${3000}...`);
     if (cb) cb();
 
     const creds = await payload.getMockEmailCredentials();
-    console.log(`Mock email account username: ${creds.user}`);
-    console.log(`Mock email account password: ${creds.pass}`);
-    console.log(`Log in to mock email provider at ${creds.web}`);
+    logger.info(`Mock email account username: ${creds.user}`);
+    logger.info(`Mock email account password: ${creds.pass}`);
+    logger.info(`Log in to mock email provider at ${creds.web}`);
   });
 
   return server;

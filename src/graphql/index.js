@@ -11,7 +11,7 @@ const initCollections = require('../collections/graphql/init');
 const initGlobals = require('../globals/graphql/init');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 const errorHandler = require('./errorHandler');
-const { policies } = require('../auth/graphql/resolvers');
+const access = require('../auth/graphql/resolvers/access');
 
 class GraphQL {
   constructor(init) {
@@ -44,15 +44,13 @@ class GraphQL {
     this.buildPoliciesType = buildPoliciesType.bind(this);
     this.initCollections = initCollections.bind(this);
     this.initGlobals = initGlobals.bind(this);
-  }
 
-  init() {
     this.initCollections();
     this.initGlobals();
 
-    this.Query.fields.Policies = {
+    this.Query.fields.Access = {
       type: this.buildPoliciesType(),
-      resolve: policies(this.config),
+      resolve: access,
     };
 
     this.Query = {
@@ -67,33 +65,37 @@ class GraphQL {
 
     const query = new GraphQLObjectType(this.Query);
     const mutation = new GraphQLObjectType(this.Mutation);
-    const schema = new GraphQLSchema({
+
+    this.schema = new GraphQLSchema({
       query,
       mutation,
     });
 
-    let errorExtensions = [];
-    let errorExtensionIteration = 0;
+    this.errorExtensions = [];
+    this.errorExtensionIteration = 0;
 
-    const extensions = async (info) => {
+    this.extensions = async (info) => {
       const { result } = info;
       if (result.errors) {
         const afterErrorHook = typeof this.config.hooks.afterError === 'function' ? this.config.hooks.afterError : null;
-        errorExtensions = await errorHandler(info, this.config.debug, afterErrorHook);
+        this.errorExtensions = await errorHandler(info, this.config.debug, afterErrorHook);
       }
       return null;
     };
+  }
 
+  init(req, res) {
     return graphQLHTTP({
-      schema,
+      schema: this.schema,
       customFormatErrorFn: () => {
         const response = {
-          ...errorExtensions[errorExtensionIteration],
+          ...this.errorExtensions[this.errorExtensionIteration],
         };
-        errorExtensionIteration += 1;
+        this.errorExtensionIteration += 1;
         return response;
       },
-      extensions,
+      extensions: this.extensions,
+      context: { req, res },
     });
   }
 }

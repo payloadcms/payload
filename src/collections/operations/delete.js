@@ -1,113 +1,122 @@
 const fs = require('fs');
-const { NotFound, Forbidden } = require('../../errors');
-const executePolicy = require('../../auth/executePolicy');
+const { NotFound, Forbidden, ErrorDeletingFile } = require('../../errors');
+const executeAccess = require('../../auth/executeAccess');
 
-const deleteQuery = async (args) => {
-  try {
-    // /////////////////////////////////////
-    // 1. Retrieve and execute policy
-    // /////////////////////////////////////
-
-    const policyResults = await executePolicy(args, args.config.policies.delete);
-    const hasWherePolicy = typeof policyResults === 'object';
-
-    let options = {
-      ...args,
-    };
-
-    // /////////////////////////////////////
-    // 2. Execute before collection hook
-    // /////////////////////////////////////
-
-    const { beforeDelete } = args.config.hooks;
-
-    if (typeof beforeDelete === 'function') {
-      options = await beforeDelete(options);
-    }
-
-    // /////////////////////////////////////
-    // 3. Get existing document
-    // /////////////////////////////////////
-
-    const {
+async function deleteQuery(args) {
+  const {
+    depth,
+    collection: {
       Model,
-      id,
-      req: {
-        locale,
-        fallbackLocale,
-      },
-    } = options;
+      config: collectionConfig,
+    },
+    id,
+    req,
+    req: {
+      locale,
+      fallbackLocale,
+    },
+  } = args;
 
-    let query = { _id: id };
+  // /////////////////////////////////////
+  // 1. Retrieve and execute access
+  // /////////////////////////////////////
 
-    if (hasWherePolicy) {
-      query = {
-        ...query,
-        ...policyResults,
-      };
-    }
+  const accessResults = await executeAccess({ req, id }, collectionConfig.access.delete);
+  const hasWhereAccess = typeof accessResults === 'object';
 
-    let resultToDelete = await Model.findOne(query);
+  // /////////////////////////////////////
+  // 2. Execute before collection hook
+  // /////////////////////////////////////
 
-    if (!resultToDelete && !hasWherePolicy) throw new NotFound();
-    if (!resultToDelete && hasWherePolicy) throw new Forbidden();
+  collectionConfig.hooks.beforeDelete.forEach((hook) => hook({ req, id }));
 
-    resultToDelete = resultToDelete.toJSON({ virtuals: true });
+  // /////////////////////////////////////
+  // 3. Get existing document
+  // /////////////////////////////////////
 
-    if (locale && resultToDelete.setLocale) {
-      resultToDelete.setLocale(locale, fallbackLocale);
-    }
+  let query = { _id: id };
 
-    // /////////////////////////////////////
-    // 4. Delete any associated files
-    // /////////////////////////////////////
-
-    if (options.req.collection.config.upload) {
-      const { staticDir } = options.req.collection.config.upload;
-
-      fs.unlink(`${staticDir}/${resultToDelete.filename}`, (err) => {
-        console.log('Error deleting file:', err);
-      });
-
-      if (resultToDelete.sizes) {
-        Object.values(resultToDelete.sizes).forEach((size) => {
-          fs.unlink(`${staticDir}/${size.filename}`, (err) => {
-            console.log('Error deleting file:', err);
-          });
-        });
-      }
-    }
-
-    // /////////////////////////////////////
-    // 5. Delete database document
-    // /////////////////////////////////////
-
-    let result = await Model.findOneAndDelete({ _id: id });
-
-    result = result.toJSON({ virtuals: true });
-
-    if (locale && result.setLocale) {
-      result.setLocale(locale, fallbackLocale);
-    }
-
-    // /////////////////////////////////////
-    // 4. Execute after collection hook
-    // /////////////////////////////////////
-
-    const { afterDelete } = args.config.hooks;
-
-    if (typeof afterDelete === 'function') {
-      result = await afterDelete(options, result) || result;
-    }
-
-    // /////////////////////////////////////
-    // 5. Return results
-    // /////////////////////////////////////
-
-    return result;
-  } catch (err) {
-    throw err;
+  if (hasWhereAccess) {
+    query = {
+      ...query,
+      ...accessResults,
+    };
   }
-};
+
+  let resultToDelete = await Model.findOne(query);
+
+  if (!resultToDelete && !hasWhereAccess) throw new NotFound();
+  if (!resultToDelete && hasWhereAccess) throw new Forbidden();
+
+  resultToDelete = resultToDelete.toJSON({ virtuals: true });
+
+  if (locale && resultToDelete.setLocale) {
+    resultToDelete.setLocale(locale, fallbackLocale);
+  }
+
+  // /////////////////////////////////////
+  // 4. Delete any associated files
+  // /////////////////////////////////////
+
+  if (collectionConfig.upload) {
+    const { staticDir } = collectionConfig.upload;
+
+    fs.unlink(`${staticDir}/${resultToDelete.filename}`, (err) => {
+      if (err) {
+        throw new ErrorDeletingFile();
+      }
+    });
+
+    if (resultToDelete.sizes) {
+      Object.values(resultToDelete.sizes).forEach((size) => {
+        fs.unlink(`${staticDir}/${size.filename}`, (err) => {
+          if (err) {
+            throw new ErrorDeletingFile();
+          }
+        });
+      });
+    }
+  }
+
+  // /////////////////////////////////////
+  // 5. Delete database document
+  // /////////////////////////////////////
+
+  let result = await Model.findOneAndDelete({ _id: id });
+
+  result = result.toJSON({ virtuals: true });
+
+  if (locale && result.setLocale) {
+    result.setLocale(locale, fallbackLocale);
+  }
+
+  // /////////////////////////////////////
+  // 6. Execute field-level hooks and access
+  // /////////////////////////////////////
+
+  result = await this.performFieldOperations(collectionConfig, {
+    data: result,
+    hook: 'afterRead',
+    operationName: 'read',
+    req,
+    depth,
+  });
+
+  // /////////////////////////////////////
+  // 7. Execute after collection hook
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    result = await hook({ req, id, doc: result }) || result;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // 8. Return results
+  // /////////////////////////////////////
+
+  return result;
+}
 
 module.exports = deleteQuery;

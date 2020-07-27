@@ -13,24 +13,24 @@ const NumberField = (props) => {
     name,
     path: pathFromProps,
     required,
-    defaultValue,
-    initialData,
     validate,
-    style,
-    width,
     label,
     placeholder,
     max,
     min,
-    readOnly,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
   } = props;
 
   const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { min, max });
+    const validationResult = validate(value, { min, max, required });
     return validationResult;
-  }, [validate, max, min]);
+  }, [validate, max, min, required]);
 
   const {
     value,
@@ -39,12 +39,15 @@ const NumberField = (props) => {
     errorMessage,
   } = useFieldType({
     path,
-    required,
-    initialData,
-    defaultValue,
     validate: memoizedValidate,
     enableDebouncedValue: true,
   });
+
+  const handleChange = useCallback((e) => {
+    let val = parseInt(e.target.value, 10);
+    if (Number.isNaN(val)) val = '';
+    setValue(val);
+  }, [setValue]);
 
   const classes = [
     'field-type',
@@ -72,7 +75,7 @@ const NumberField = (props) => {
       />
       <input
         value={value || ''}
-        onChange={e => setValue(parseInt(e.target.value, 10))}
+        onChange={handleChange}
         disabled={readOnly ? 'disabled' : undefined}
         placeholder={placeholder}
         type="number"
@@ -85,17 +88,13 @@ const NumberField = (props) => {
 
 NumberField.defaultProps = {
   label: null,
+  path: undefined,
   required: false,
-  defaultValue: undefined,
-  initialData: undefined,
   placeholder: undefined,
-  width: undefined,
-  style: {},
   max: undefined,
   min: undefined,
-  path: '',
-  readOnly: false,
   validate: number,
+  admin: {},
 };
 
 NumberField.propTypes = {
@@ -103,15 +102,15 @@ NumberField.propTypes = {
   path: PropTypes.string,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
-  defaultValue: PropTypes.number,
-  initialData: PropTypes.number,
   validate: PropTypes.func,
-  width: PropTypes.string,
-  style: PropTypes.shape({}),
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
   label: PropTypes.string,
   max: PropTypes.number,
   min: PropTypes.number,
-  readOnly: PropTypes.bool,
 };
 
 export default withCondition(NumberField);

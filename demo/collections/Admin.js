@@ -1,7 +1,7 @@
-const roles = require('../policies/roles');
-const checkRole = require('../policies/checkRole');
+const roles = require('../access/roles');
+const checkRole = require('../access/checkRole');
 
-const policy = ({ req: { user } }) => {
+const access = ({ req: { user } }) => {
   const result = checkRole(['admin'], user);
   return result;
 };
@@ -12,17 +12,17 @@ module.exports = {
     singular: 'Admin',
     plural: 'Admins',
   },
-  useAsTitle: 'email',
-  policies: {
-    create: policy,
-    read: policy,
-    update: policy,
-    delete: policy,
+  access: {
+    create: access,
+    read: access,
+    update: access,
+    delete: access,
     admin: () => true,
   },
   auth: {
-    tokenExpiration: 300,
+    tokenExpiration: 7200,
     useAPIKey: true,
+    secureCookie: process.env.NODE_ENV === 'production',
   },
   fields: [
     {
@@ -35,6 +35,27 @@ module.exports = {
       saveToJWT: true,
       hasMany: true,
     },
+    {
+      name: 'apiKey',
+      access: {
+        read: ({ req: { user } }) => {
+          if (checkRole(['admin'], user)) {
+            return true;
+          }
+
+          if (user) {
+            return {
+              email: user.email,
+            };
+          }
+
+          return false;
+        },
+      },
+    },
   ],
   timestamps: true,
+  admin: {
+    useAsTitle: 'email',
+  },
 };

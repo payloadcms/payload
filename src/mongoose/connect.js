@@ -1,4 +1,6 @@
+/* eslint-disable no-console */
 const mongoose = require('mongoose');
+const logger = require('../utilities/logger')();
 
 const connectMongoose = async (url) => {
   let urlToConnect = url;
@@ -12,16 +14,17 @@ const connectMongoose = async (url) => {
     successfulConnectionMessage = 'Connected to in-memory Mongo server successfully!';
   }
 
-  mongoose.connect(urlToConnect, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }, (err) => {
-    if (err) {
-      console.log('Unable to connect to the Mongo server. Please start the server. Error:', err);
-    } else {
-      console.log(successfulConnectionMessage);
-    }
-  });
+  try {
+    await mongoose.connect(urlToConnect, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+    });
+    logger.info(successfulConnectionMessage);
+  } catch (err) {
+    logger.error('Error: cannot connect to MongoDB. Details: ', err);
+    process.exit(1);
+  }
 };
 
 module.exports = connectMongoose;

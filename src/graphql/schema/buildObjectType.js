@@ -16,22 +16,21 @@ const { GraphQLJSON } = require('graphql-type-json');
 const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
 const withNullableType = require('./withNullableType');
-const { find } = require('../../collections/operations');
 
 function buildObjectType(name, fields, parentName, baseFields = {}) {
   const recursiveBuildObjectType = buildObjectType.bind(this);
 
   const fieldToSchemaMap = {
-    number: field => ({ type: withNullableType(field, GraphQLFloat) }),
-    text: field => ({ type: withNullableType(field, GraphQLString) }),
-    email: field => ({ type: withNullableType(field, GraphQLString) }),
-    textarea: field => ({ type: withNullableType(field, GraphQLString) }),
-    richText: field => ({ type: withNullableType(field, GraphQLJSON) }),
-    code: field => ({ type: withNullableType(field, GraphQLString) }),
-    date: field => ({ type: withNullableType(field, GraphQLString) }),
-    upload: field => ({ type: withNullableType(field, GraphQLString) }),
-    radio: field => ({ type: withNullableType(field, GraphQLString) }),
-    checkbox: field => ({ type: withNullableType(field, GraphQLBoolean) }),
+    number: (field) => ({ type: withNullableType(field, GraphQLFloat) }),
+    text: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    email: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    textarea: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    richText: (field) => ({ type: withNullableType(field, GraphQLJSON) }),
+    code: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    date: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    upload: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    radio: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    checkbox: (field) => ({ type: withNullableType(field, GraphQLBoolean) }),
     select: (field) => {
       const fullName = combineParentName(parentName, field.name);
 
@@ -74,9 +73,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
       let type;
 
       if (isRelatedToManyCollections) {
-        const types = relationTo.map((relation) => {
-          return this.collections[relation].graphQL.type;
-        });
+        const types = relationTo.map((relation) => this.collections[relation].graphQL.type);
 
         type = new GraphQLUnionType({
           name: relationshipName,
@@ -124,7 +121,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
                   id = relatedDoc.value;
                 }
 
-                const result = await find({
+                const result = await this.operations.collections.find({
                   Model: this.collections[relatedCollectionSlug].Model,
                   query: {
                     where: {
@@ -171,7 +168,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
             if (args.page) relatedDocumentQuery.paginate.page = args.page;
             if (args.limit) relatedDocumentQuery.paginate.limit = args.limit;
 
-            const relatedDocument = await find();
+            const relatedDocument = await this.operations.collections.find();
 
             if (relatedDocument.docs[0]) return relatedDocument.docs[0];
 
@@ -188,12 +185,10 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
       }
 
       if (isRelatedToManyCollections) {
-        const relatedCollectionFields = relationTo.reduce((allFields, relation) => {
-          return [
-            ...allFields,
-            ...this.collections[relation].config.fields,
-          ];
-        }, []);
+        const relatedCollectionFields = relationTo.reduce((allFields, relation) => [
+          ...allFields,
+          ...this.collections[relation].config.fields,
+        ], []);
 
         relationship.args.where = {
           type: this.buildWhereInputType(
@@ -216,7 +211,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
 
       return relationship;
     },
-    repeater: (field) => {
+    array: (field) => {
       const fullName = combineParentName(parentName, field.label);
       let type = recursiveBuildObjectType(fullName, field.fields, fullName);
       type = new GraphQLList(withNullableType(field, type));
@@ -229,7 +224,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
 
       return { type };
     },
-    flexible: (field) => {
+    blocks: (field) => {
       const blockTypes = field.blocks.map((block) => {
         this.buildBlockType(block);
         return this.types.blockTypes[block.slug];
@@ -238,27 +233,23 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
       const type = new GraphQLList(new GraphQLUnionType({
         name: combineParentName(parentName, field.label),
         types: blockTypes,
-        resolveType: (data) => {
-          return this.types.blockTypes[data.blockType];
-        },
+        resolveType: (data) => this.types.blockTypes[data.blockType],
       }));
 
       return { type };
     },
-    row: (field) => {
-      return field.fields.reduce((subFieldSchema, subField) => {
-        const buildSchemaType = fieldToSchemaMap[subField.type];
+    row: (field) => field.fields.reduce((subFieldSchema, subField) => {
+      const buildSchemaType = fieldToSchemaMap[subField.type];
 
-        if (buildSchemaType) {
-          return {
-            ...subFieldSchema,
-            [formatName(subField.name)]: buildSchemaType(subField),
-          };
-        }
+      if (buildSchemaType) {
+        return {
+          ...subFieldSchema,
+          [formatName(subField.name)]: buildSchemaType(subField),
+        };
+      }
 
-        return subFieldSchema;
-      }, {});
-    },
+      return subFieldSchema;
+    }, {}),
   };
 
   const objectSchema = {

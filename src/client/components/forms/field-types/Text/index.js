@@ -13,14 +13,14 @@ const Text = (props) => {
     path: pathFromProps,
     name,
     required,
-    defaultValue,
-    initialData,
     validate,
-    style,
-    width,
     label,
     placeholder,
-    readOnly,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
     minLength,
     maxLength,
   } = props;
@@ -34,9 +34,6 @@ const Text = (props) => {
 
   const fieldType = useFieldType({
     path,
-    required,
-    initialData,
-    defaultValue,
     validate: memoizedValidate,
     enableDebouncedValue: true,
   });
@@ -88,12 +85,8 @@ const Text = (props) => {
 Text.defaultProps = {
   label: null,
   required: false,
-  readOnly: false,
-  defaultValue: undefined,
-  initialData: undefined,
+  admin: {},
   placeholder: undefined,
-  width: undefined,
-  style: {},
   validate: text,
   path: '',
   minLength: undefined,
@@ -104,13 +97,13 @@ Text.propTypes = {
   name: PropTypes.string.isRequired,
   path: PropTypes.string,
   required: PropTypes.bool,
-  readOnly: PropTypes.bool,
   placeholder: PropTypes.string,
-  defaultValue: PropTypes.string,
-  initialData: PropTypes.string,
   validate: PropTypes.func,
-  width: PropTypes.string,
-  style: PropTypes.shape({}),
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
   label: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.node,

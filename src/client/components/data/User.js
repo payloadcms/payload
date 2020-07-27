@@ -1,18 +1,16 @@
 import React, {
   useState, createContext, useContext, useEffect, useCallback,
 } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
 import jwt from 'jsonwebtoken';
+import { useLocation, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import Cookies from 'universal-cookie';
 import config from 'payload/config';
-import { useModal } from '@trbl/react-modal';
+import { useModal } from '@faceless-ui/modal';
 import { requests } from '../../api';
 import StayLoggedInModal from '../modals/StayLoggedIn';
 import useDebounce from '../../hooks/useDebounce';
 
 const {
-  cookiePrefix,
   admin: {
     user: userSlug,
   },
@@ -23,16 +21,12 @@ const {
   },
 } = config;
 
-const cookieTokenName = `${cookiePrefix}-token`;
-
-const cookies = new Cookies();
 const Context = createContext({});
 
-const isNotExpired = decodedJWT => (decodedJWT?.exp || 0) > Date.now() / 1000;
-
 const UserProvider = ({ children }) => {
-  const [token, setToken] = useState('');
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(undefined);
+  const [tokenInMemory, setTokenInMemory] = useState(null);
+  const exp = user?.exp;
 
   const [permissions, setPermissions] = useState({ canAccessAdmin: null });
 
@@ -42,64 +36,72 @@ const UserProvider = ({ children }) => {
   const [lastLocationChange, setLastLocationChange] = useState(0);
   const debouncedLocationChange = useDebounce(lastLocationChange, 10000);
 
-  const exp = user?.exp || 0;
   const email = user?.email;
 
-  const refreshToken = useCallback(() => {
-    // Need to retrieve token straight from cookie so as to keep this function
-    // with no dependencies and to make sure we have the exact token that will be used
-    // in the request to the /refresh route
-    const tokenFromCookie = cookies.get(cookieTokenName);
-    const decodedToken = jwt.decode(tokenFromCookie);
+  const refreshCookie = useCallback(() => {
+    const now = Math.round((new Date()).getTime() / 1000);
+    const remainingTime = (exp || 0) - now;
 
-    if (decodedToken?.exp > (Date.now() / 1000)) {
+    if (exp && remainingTime < 120) {
       setTimeout(async () => {
         const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`);
 
         if (request.status === 200) {
           const json = await request.json();
-          setToken(json.refreshedToken);
+          setUser(json.user);
+        } else {
+          history.push(`${admin}/logout-inactivity`);
         }
       }, 1000);
     }
-  }, [setToken]);
+  }, [setUser, history, exp]);
+
+  const setToken = useCallback((token) => {
+    const decoded = jwt.decode(token);
+    setUser(decoded);
+    setTokenInMemory(token);
+  }, []);
 
   const logOut = () => {
     setUser(null);
-    setToken(null);
-    cookies.remove(cookieTokenName, { path: '/' });
+    setTokenInMemory(null);
+    requests.get(`${serverURL}${api}/${userSlug}/logout`);
   };
 
-  // On mount, get cookie and set as token
+  // On mount, get user and set
   useEffect(() => {
-    const cookieToken = cookies.get(cookieTokenName);
-    if (cookieToken) setToken(cookieToken);
-  }, []);
+    const fetchMe = async () => {
+      const request = await requests.get(`${serverURL}${api}/${userSlug}/me`);
 
-  // When location changes, refresh token
+      if (request.status === 200) {
+        const json = await request.json();
+
+        setUser(json?.user || null);
+
+        if (json?.token) {
+          setToken(json.token);
+        }
+      }
+    };
+
+    fetchMe();
+  }, [setToken]);
+
+  // When location changes, refresh cookie
   useEffect(() => {
-    refreshToken();
-  }, [debouncedLocationChange, refreshToken]);
+    if (email) {
+      refreshCookie();
+    }
+  }, [debouncedLocationChange, refreshCookie, email]);
 
   useEffect(() => {
     setLastLocationChange(Date.now());
   }, [pathname]);
 
-  // When token changes, set cookie, decode and set user
-  useEffect(() => {
-    if (token) {
-      const decoded = jwt.decode(token);
-      if (isNotExpired(decoded)) {
-        setUser(decoded);
-        cookies.set(cookieTokenName, token, { path: '/' });
-      }
-    }
-  }, [token]);
-
-  // When user changes, get new policies
+  // When user changes, get new access
   useEffect(() => {
     async function getPermissions() {
-      const request = await requests.get(`${serverURL}${api}/policies`);
+      const request = await requests.get(`${serverURL}${api}/access`);
 
       if (request.status === 200) {
         const json = await request.json();
@@ -135,7 +137,6 @@ const UserProvider = ({ children }) => {
 
     if (remainingTime > 0) {
       forceLogOut = setTimeout(() => {
-        logOut();
         history.push(`${admin}/logout`);
         closeAllModals();
       }, remainingTime * 1000);
@@ -149,15 +150,15 @@ const UserProvider = ({ children }) => {
   return (
     <Context.Provider value={{
       user,
-      setToken,
       logOut,
-      refreshToken,
-      token,
+      refreshCookie,
       permissions,
+      setToken,
+      token: tokenInMemory,
     }}
     >
       {children}
-      <StayLoggedInModal refreshToken={refreshToken} />
+      <StayLoggedInModal refreshCookie={refreshCookie} />
     </Context.Provider>
   );
 };

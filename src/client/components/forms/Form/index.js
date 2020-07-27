@@ -1,13 +1,10 @@
 import React, {
-  useReducer, useEffect, useRef,
+  useReducer, useEffect, useRef, useState, useCallback,
 } from 'react';
 import { objectToFormData } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { unflatten } from 'flatley';
-import HiddenInput from '../field-types/HiddenInput';
-import FormContext from './FormContext';
-import FieldContext from './FieldContext';
 import { useLocale } from '../../utilities/Locale';
 import { useStatusList } from '../../elements/Status';
 import { requests } from '../../../api';
@@ -15,6 +12,8 @@ import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import { useUser } from '../../data/User';
 import fieldReducer from './fieldReducer';
 import initContextState from './initContextState';
+
+import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FieldContext } from './context';
 
 import './index.scss';
 
@@ -40,36 +39,41 @@ const Form = (props) => {
   const {
     disabled,
     onSubmit,
-    ajax,
     method,
     action,
-    handleAjaxResponse,
+    handleResponse,
     onSuccess,
     children,
     className,
     redirect,
     disableSuccessStatus,
+    initialState,
   } = props;
 
   const history = useHistory();
   const locale = useLocale();
   const { replaceStatus, addStatus, clearStatus } = useStatusList();
-  const { refreshToken } = useUser();
+  const { refreshCookie } = useUser();
+
+  const [modified, setModified] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const contextRef = useRef({ ...initContextState });
 
+  contextRef.current.initialState = initialState;
+
   const [fields, dispatchFields] = useReducer(fieldReducer, {});
   contextRef.current.fields = fields;
-  contextRef.current.dispatchFields = dispatchFields;
 
-  contextRef.current.submit = (e) => {
+  const submit = useCallback((e) => {
     if (disabled) {
       e.preventDefault();
       return false;
     }
 
     e.stopPropagation();
-    contextRef.current.setSubmitted(true);
+    setSubmitted(true);
 
     const isValid = contextRef.current.validateForm();
 
@@ -96,116 +100,129 @@ const Form = (props) => {
       return onSubmit(fields);
     }
 
-    // If form is AJAX, fetch data
-    if (ajax !== false) {
-      e.preventDefault();
+    e.preventDefault();
 
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
 
-      const formData = contextRef.current.createFormData();
-      contextRef.current.setProcessing(true);
+    const formData = contextRef.current.createFormData();
+    setProcessing(true);
 
-      // Make the API call from the action
-      return requests[method.toLowerCase()](action, {
-        body: formData,
-      }).then((res) => {
-        contextRef.current.setModified(false);
-        if (typeof handleAjaxResponse === 'function') return handleAjaxResponse(res);
+    // Make the API call from the action
+    return requests[method.toLowerCase()](action, {
+      body: formData,
+    }).then((res) => {
+      setModified(false);
+      if (typeof handleResponse === 'function') return handleResponse(res);
 
-        return res.json().then((json) => {
-          contextRef.current.setProcessing(false);
-          clearStatus();
+      return res.json().then((json) => {
+        setProcessing(false);
+        clearStatus();
 
-          if (res.status < 400) {
-            if (typeof onSuccess === 'function') onSuccess(json);
+        if (res.status < 400) {
+          if (typeof onSuccess === 'function') onSuccess(json);
 
-            if (redirect) {
-              return history.push(redirect, json);
+          if (redirect) {
+            const destination = {
+              pathname: redirect,
+            };
+
+            if (json.message && !disableSuccessStatus) {
+              destination.state = {
+                status: [
+                  {
+                    message: json.message,
+                    type: 'success',
+                  },
+                ],
+              };
             }
 
-            if (!disableSuccessStatus) {
-              replaceStatus([{
-                message: json.message,
-                type: 'success',
-                disappear: 3000,
-              }]);
-            }
-          } else {
-            if (json.message) {
-              addStatus({
-                message: json.message,
-                type: 'error',
-              });
-
-              return json;
-            }
-
-            if (Array.isArray(json.errors)) {
-              const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => {
-                return err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]];
-              }, [[], []]);
-
-              fieldErrors.forEach((err) => {
-                dispatchFields({
-                  valid: false,
-                  errorMessage: err.message,
-                  path: err.field,
-                  value: contextRef.current.fields?.[err.field]?.value,
-                });
-              });
-
-              nonFieldErrors.forEach((err) => {
-                addStatus({
-                  message: err.message || 'An unknown error occurred.',
-                  type: 'error',
-                });
-              });
-
-              if (fieldErrors.length > 0 && nonFieldErrors.length === 0) {
-                addStatus({
-                  message: 'Please correct the fields below.',
-                  type: 'error',
-                });
-              }
-
-              return json;
-            }
-
+            history.push(destination);
+          } else if (!disableSuccessStatus) {
+            replaceStatus([{
+              message: json.message,
+              type: 'success',
+              disappear: 3000,
+            }]);
+          }
+        } else {
+          if (json.message) {
             addStatus({
-              message: 'An unknown error occurred.',
+              message: json.message,
               type: 'error',
             });
+
+            return json;
           }
 
-          return json;
-        });
-      }).catch((err) => {
-        addStatus({
-          message: err,
-          type: 'error',
-        });
+          if (Array.isArray(json.errors)) {
+            const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => (err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]]), [[], []]);
+
+            fieldErrors.forEach((err) => {
+              dispatchFields({
+                ...(contextRef.current?.fields?.[err.field] || {}),
+                valid: false,
+                errorMessage: err.message,
+                path: err.field,
+              });
+            });
+
+            nonFieldErrors.forEach((err) => {
+              addStatus({
+                message: err.message || 'An unknown error occurred.',
+                type: 'error',
+              });
+            });
+
+            if (fieldErrors.length > 0 && nonFieldErrors.length === 0) {
+              addStatus({
+                message: 'Please correct the fields below.',
+                type: 'error',
+              });
+            }
+
+            return json;
+          }
+
+          addStatus({
+            message: 'An unknown error occurred.',
+            type: 'error',
+          });
+        }
+
+        return json;
       });
-    }
+    }).catch((err) => {
+      addStatus({
+        message: err,
+        type: 'error',
+      });
+    });
+  }, [
+    action,
+    addStatus,
+    clearStatus,
+    disableSuccessStatus,
+    disabled,
+    fields,
+    handleResponse,
+    history,
+    method,
+    onSubmit,
+    onSuccess,
+    redirect,
+    replaceStatus,
+  ]);
 
-    return true;
-  };
 
-  contextRef.current.getFields = () => {
-    return contextRef.current.fields;
-  };
+  const getFields = useCallback(() => contextRef.current.fields, [contextRef]);
+  const getField = useCallback((path) => contextRef.current.fields[path], [contextRef]);
+  const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [contextRef]);
 
-  contextRef.current.getField = (path) => {
-    return contextRef.current.fields[path];
-  };
-
-  contextRef.current.getData = () => {
-    return reduceFieldsToValues(contextRef.current.fields, true);
-  };
-
-  contextRef.current.getSiblingData = (path) => {
+  const getSiblingData = useCallback((path) => {
     let siblingFields = contextRef.current.fields;
 
     // If this field is nested
@@ -225,9 +242,9 @@ const Form = (props) => {
     }
 
     return reduceFieldsToValues(siblingFields, true);
-  };
+  }, [contextRef]);
 
-  contextRef.current.getDataByPath = (path) => {
+  const getDataByPath = useCallback((path) => {
     const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1);
     const name = path.split('.').pop();
 
@@ -245,42 +262,42 @@ const Form = (props) => {
     const values = reduceFieldsToValues(data, true);
     const unflattenedData = unflatten(values);
     return unflattenedData?.[name];
-  };
+  }, [contextRef]);
 
-  contextRef.current.getUnflattenedValues = () => {
-    return reduceFieldsToValues(contextRef.current.fields);
-  };
+  const getUnflattenedValues = useCallback(() => reduceFieldsToValues(contextRef.current.fields), [contextRef]);
 
-  contextRef.current.validateForm = () => {
-    return !Object.values(contextRef.current.fields).some((field) => {
-      return field.valid === false;
-    });
-  };
+  const validateForm = useCallback(() => !Object.values(contextRef.current.fields).some((field) => field.valid === false), [contextRef]);
 
-  contextRef.current.createFormData = () => {
+  const createFormData = useCallback(() => {
     const data = reduceFieldsToValues(contextRef.current.fields);
     return objectToFormData(data, { indices: true });
-  };
+  }, [contextRef]);
 
-  contextRef.current.setModified = (modified) => {
-    contextRef.current.modified = modified;
-  };
+  contextRef.current.dispatchFields = dispatchFields;
+  contextRef.current.submit = submit;
+  contextRef.current.getFields = getFields;
+  contextRef.current.getField = getField;
+  contextRef.current.getData = getData;
+  contextRef.current.getSiblingData = getSiblingData;
+  contextRef.current.getDataByPath = getDataByPath;
+  contextRef.current.getUnflattenedValues = getUnflattenedValues;
+  contextRef.current.validateForm = validateForm;
+  contextRef.current.createFormData = createFormData;
+  contextRef.current.setModified = setModified;
+  contextRef.current.setProcessing = setProcessing;
+  contextRef.current.setSubmitted = setSubmitted;
 
-  contextRef.current.setSubmitted = (submitted) => {
-    contextRef.current.submitted = submitted;
-  };
-
-  contextRef.current.setProcessing = (processing) => {
-    contextRef.current.processing = processing;
-  };
+  useEffect(() => {
+    dispatchFields({ type: 'REPLACE_STATE', state: initialState });
+  }, [initialState]);
 
   useThrottledEffect(() => {
-    refreshToken();
+    refreshCookie();
   }, 15000, [fields]);
 
   useEffect(() => {
-    contextRef.current.modified = false;
-  }, [locale, contextRef.current.modified]);
+    setModified(false);
+  }, [locale]);
 
   const classes = [
     className,
@@ -301,13 +318,16 @@ const Form = (props) => {
           ...contextRef.current,
         }}
         >
-          <HiddenInput
-            path="locale"
-            defaultValue={locale}
-          />
-          {children}
+          <SubmittedContext.Provider value={submitted}>
+            <ProcessingContext.Provider value={processing}>
+              <ModifiedContext.Provider value={modified}>
+                {children}
+              </ModifiedContext.Provider>
+            </ProcessingContext.Provider>
+          </SubmittedContext.Provider>
         </FieldContext.Provider>
       </FormContext.Provider>
+
     </form>
   );
 };
@@ -315,23 +335,22 @@ const Form = (props) => {
 Form.defaultProps = {
   redirect: '',
   onSubmit: null,
-  ajax: true,
   method: 'POST',
   action: '',
-  handleAjaxResponse: null,
+  handleResponse: null,
   onSuccess: null,
   className: '',
   disableSuccessStatus: false,
   disabled: false,
+  initialState: {},
 };
 
 Form.propTypes = {
   disableSuccessStatus: PropTypes.bool,
   onSubmit: PropTypes.func,
-  ajax: PropTypes.bool,
   method: PropTypes.oneOf(['post', 'POST', 'get', 'GET', 'put', 'PUT', 'delete', 'DELETE']),
   action: PropTypes.string,
-  handleAjaxResponse: PropTypes.func,
+  handleResponse: PropTypes.func,
   onSuccess: PropTypes.func,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
@@ -340,6 +359,7 @@ Form.propTypes = {
   className: PropTypes.string,
   redirect: PropTypes.string,
   disabled: PropTypes.bool,
+  initialState: PropTypes.shape({}),
 };
 
 export default Form;

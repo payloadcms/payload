@@ -1,93 +1,106 @@
 const passport = require('passport');
-const executePolicy = require('../executePolicy');
-const performFieldOperations = require('../../fields/performFieldOperations');
+const executeAccess = require('../executeAccess');
 
-const register = async (args) => {
-  try {
-    // /////////////////////////////////////
-    // 1. Retrieve and execute policy
-    // /////////////////////////////////////
+async function register(args) {
+  const {
+    depth,
+    overrideAccess,
+    collection: {
+      Model,
+      config: collectionConfig,
+    },
+    req,
+    req: {
+      locale,
+      fallbackLocale,
+    },
+  } = args;
 
-    if (!args.overridePolicy) {
-      await executePolicy(args, args.collection.config.policies.create);
-    }
+  let { data } = args;
 
-    let options = { ...args };
+  // /////////////////////////////////////
+  // 1. Retrieve and execute access
+  // /////////////////////////////////////
 
-    // /////////////////////////////////////
-    // 2. Execute before register hook
-    // /////////////////////////////////////
-
-    const { beforeRegister } = args.collection.config.hooks;
-
-    if (typeof beforeRegister === 'function') {
-      options = await beforeRegister(options);
-    }
-
-    // /////////////////////////////////////
-    // 3. Execute field-level hooks, policies, and validation
-    // /////////////////////////////////////
-
-    options.data = await performFieldOperations(args.collection.config, { ...options, hook: 'beforeCreate', operationName: 'create' });
-
-    // /////////////////////////////////////
-    // 6. Perform register
-    // /////////////////////////////////////
-
-    const {
-      collection: {
-        Model,
-      },
-      data,
-      req: {
-        locale,
-        fallbackLocale,
-      },
-    } = options;
-
-    const modelData = { ...data };
-    delete modelData.password;
-
-    const user = new Model();
-
-    if (locale && user.setLocale) {
-      user.setLocale(locale, fallbackLocale);
-    }
-
-    Object.assign(user, modelData);
-
-    let result = await Model.register(user, data.password);
-
-    await passport.authenticate('local');
-
-    result = result.toJSON({ virtuals: true });
-
-    // /////////////////////////////////////
-    // 7. Execute field-level hooks and policies
-    // /////////////////////////////////////
-
-    result = await performFieldOperations(args.collection.config, {
-      ...options, data: result, hook: 'afterRead', operationName: 'read',
-    });
-
-    // /////////////////////////////////////
-    // 8. Execute after register hook
-    // /////////////////////////////////////
-
-    const afterRegister = args.collection.config.hooks;
-
-    if (typeof afterRegister === 'function') {
-      result = await afterRegister(options, result);
-    }
-
-    // /////////////////////////////////////
-    // 9. Return user
-    // /////////////////////////////////////
-
-    return result;
-  } catch (error) {
-    throw error;
+  if (!overrideAccess) {
+    await executeAccess({ req }, collectionConfig.access.create);
   }
-};
+
+  // /////////////////////////////////////
+  // 2. Execute before create hook
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.beforeCreate.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    data = (await hook({
+      data,
+      req,
+    })) || data;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // 3. Execute field-level hooks, access, and validation
+  // /////////////////////////////////////
+
+  data = await this.performFieldOperations(collectionConfig, {
+    data,
+    hook: 'beforeCreate',
+    operationName: 'create',
+    req,
+  });
+
+  // /////////////////////////////////////
+  // 6. Perform register
+  // /////////////////////////////////////
+
+  const modelData = { ...data };
+  delete modelData.password;
+
+  const user = new Model();
+
+  if (locale && user.setLocale) {
+    user.setLocale(locale, fallbackLocale);
+  }
+
+  Object.assign(user, modelData);
+
+  let result = await Model.register(user, data.password);
+
+  await passport.authenticate('local');
+
+  result = result.toJSON({ virtuals: true });
+
+  // /////////////////////////////////////
+  // 7. Execute field-level hooks and access
+  // /////////////////////////////////////
+
+  result = await this.performFieldOperations(collectionConfig, {
+    data: result,
+    hook: 'afterRead',
+    operationName: 'read',
+    req,
+    depth,
+  });
+
+  // /////////////////////////////////////
+  // 8. Execute after create hook
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.afterCreate.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    result = await hook({
+      doc: result,
+      req: args.req,
+    }) || result;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // 9. Return user
+  // /////////////////////////////////////
+
+  return result;
+}
 
 module.exports = register;

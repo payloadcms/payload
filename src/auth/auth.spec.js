@@ -72,7 +72,7 @@ describe('Users REST API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.token).not.toBeNull();
+    expect(data.refreshedToken).toBeDefined();
 
     token = data.refreshedToken;
   });

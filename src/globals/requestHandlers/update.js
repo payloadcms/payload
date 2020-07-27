@@ -1,23 +1,26 @@
 const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
-const { update } = require('../operations');
 
-const updateHandler = (Model, config) => async (req, res) => {
-  try {
-    const { slug } = config;
+function update(globalConfig) {
+  async function handler(req, res, next) {
+    try {
+      const { slug } = globalConfig;
 
-    const result = await update({
-      req,
-      Model,
-      config,
-      slug,
-      depth: req.query.depth,
-    });
+      const result = await this.operations.globals.update({
+        req,
+        globalConfig,
+        slug,
+        depth: req.query.depth,
+        data: req.body,
+      });
 
-    return res.status(httpStatus.OK).json({ message: 'Global saved successfully.', result });
-  } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
+      return res.status(httpStatus.OK).json({ message: 'Global saved successfully.', result });
+    } catch (error) {
+      return next(error);
+    }
   }
-};
 
-module.exports = updateHandler;
+  const updateHandler = handler.bind(this);
+  return updateHandler;
+}
+
+module.exports = update;

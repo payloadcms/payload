@@ -10,7 +10,7 @@ import { select } from '../../../../../fields/validations';
 import './index.scss';
 
 const findFullOption = (value, options) => {
-  const matchedOption = options.find(option => option?.value === value);
+  const matchedOption = options.find((option) => option?.value === value);
 
   if (matchedOption) {
     if (typeof matchedOption === 'object' && matchedOption.label && matchedOption.value) {
@@ -65,15 +65,15 @@ const Select = (props) => {
     path: pathFromProps,
     name,
     required,
-    defaultValue,
-    initialData,
     validate,
-    style,
-    width,
     label,
     options,
     hasMany,
-    readOnly,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
   } = props;
 
   const path = pathFromProps || name;
@@ -92,8 +92,6 @@ const Select = (props) => {
     path,
     label,
     required,
-    initialData,
-    defaultValue,
     validate: memoizedValidate,
   });
 
@@ -137,34 +135,24 @@ const Select = (props) => {
 };
 
 Select.defaultProps = {
-  style: {},
+  admin: {},
   required: false,
   validate: select,
-  defaultValue: undefined,
-  initialData: undefined,
   hasMany: false,
-  width: undefined,
   path: '',
-  readOnly: false,
 };
 
 Select.propTypes = {
   required: PropTypes.bool,
-  readOnly: PropTypes.bool,
-  style: PropTypes.shape({}),
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
   label: PropTypes.string.isRequired,
-  defaultValue: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.array,
-  ]),
-  initialData: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.array,
-  ]),
   validate: PropTypes.func,
   name: PropTypes.string.isRequired,
   path: PropTypes.string,
-  width: PropTypes.string,
   options: PropTypes.oneOfType([
     PropTypes.arrayOf(
       PropTypes.string,

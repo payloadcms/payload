@@ -1,6 +1,6 @@
 const formatFields = (config) => {
   let fields = config.fields.reduce((formatted, field) => {
-    if (field.hidden === true || field?.hidden?.admin === true) {
+    if (field.hidden === true || field?.admin?.disabled === true) {
       return formatted;
     }
 

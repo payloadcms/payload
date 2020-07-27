@@ -1,6 +1,5 @@
-/* eslint-disable no-param-reassign */
-const meResolver = async (_, args, context) => {
-  return context.user;
-};
+async function me(_, __, context) {
+  return this.operations.collections.auth.me({ req: context.req });
+}
 
-module.exports = meResolver;
+module.exports = me;

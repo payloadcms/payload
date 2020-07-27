@@ -1,64 +1,43 @@
-const register = require('./register');
-const login = require('./login');
 const { Forbidden } = require('../../errors');
 
-const registerFirstUser = async (args) => {
-  try {
-    const count = await args.collection.Model.countDocuments({});
+async function registerFirstUser(args) {
+  const {
+    collection: {
+      Model,
+    },
+  } = args;
 
-    if (count >= 1) throw new Forbidden();
+  const count = await Model.countDocuments({});
 
-    // Await validation here
+  if (count >= 1) throw new Forbidden();
 
-    let options = { ...args };
+  // /////////////////////////////////////
+  // 2. Perform register first user
+  // /////////////////////////////////////
 
-    // /////////////////////////////////////
-    // 1. Execute before register first user hook
-    // /////////////////////////////////////
-
-    const { beforeRegister } = args.collection.config.hooks;
-
-    if (typeof beforeRegister === 'function') {
-      options = await beforeRegister(options);
-    }
-
-    // /////////////////////////////////////
-    // 2. Perform register first user
-    // /////////////////////////////////////
-
-    let result = await register({
-      ...options,
-      overridePolicy: true,
-    });
+  let result = await this.operations.collections.auth.register({
+    ...args,
+    overrideAccess: true,
+  });
 
 
-    // /////////////////////////////////////
-    // 3. Log in new user
-    // /////////////////////////////////////
+  // /////////////////////////////////////
+  // 3. Log in new user
+  // /////////////////////////////////////
 
-    const token = await login({
-      ...options,
-    });
+  const token = await this.operations.collections.auth.login({
+    ...args,
+  });
 
-    result = {
-      ...result,
-      token,
-    };
+  result = {
+    ...result,
+    token,
+  };
 
-    // /////////////////////////////////////
-    // 4. Execute after register first user hook
-    // /////////////////////////////////////
-
-    const afterRegister = args.config.hooks;
-
-    if (typeof afterRegister === 'function') {
-      result = await afterRegister(options, result);
-    }
-
-    return result;
-  } catch (error) {
-    throw error;
-  }
-};
+  return {
+    message: 'Registered successfully. Welcome to Payload!',
+    user: result,
+  };
+}
 
 module.exports = registerFirstUser;

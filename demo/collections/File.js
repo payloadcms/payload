@@ -1,7 +1,7 @@
 const path = require('path');
-const checkRole = require('../policies/checkRole');
+const checkRole = require('../access/checkRole');
 
-const policy = ({ req: { user } }) => {
+const access = ({ req: { user } }) => {
   const isAdmin = checkRole(['admin'], user);
 
   if (isAdmin) {
@@ -27,13 +27,12 @@ module.exports = {
     staticURL: '/files',
     staticDir: path.resolve(__dirname, '../files'),
   },
-  policies: {
+  access: {
     create: () => true,
-    read: policy,
-    update: policy,
-    delete: policy,
+    read: access,
+    update: access,
+    delete: access,
   },
-  useAsTitle: 'filename',
   fields: [
     {
       name: 'type',
@@ -61,4 +60,7 @@ module.exports = {
     },
   ],
   timestamps: true,
+  admin: {
+    useAsTitle: 'filename',
+  },
 };

@@ -1,20 +1,22 @@
-/* eslint-disable no-param-reassign */
-const { login } = require('../../operations');
+function login(collection) {
+  async function resolver(_, args, context) {
+    const options = {
+      collection,
+      data: {
+        email: args.email,
+        password: args.password,
+      },
+      req: context.req,
+      res: context.res,
+    };
 
-const loginResolver = (config, collection) => async (_, args, context) => {
-  const options = {
-    collection,
-    config,
-    data: {
-      email: args.email,
-      password: args.password,
-    },
-    req: context,
-  };
+    const token = await this.operations.collections.auth.login(options);
 
-  const token = await login(options);
+    return token;
+  }
 
-  return token;
-};
+  const loginResolver = resolver.bind(this);
+  return loginResolver;
+}
 
-module.exports = loginResolver;
+module.exports = login;

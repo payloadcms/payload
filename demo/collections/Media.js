@@ -1,4 +1,5 @@
 const path = require('path');
+const checkRole = require('../access/checkRole');
 
 module.exports = {
   slug: 'media',
@@ -6,7 +7,7 @@ module.exports = {
     singular: 'Media',
     plural: 'Media',
   },
-  policies: {
+  access: {
     read: () => true,
   },
   upload: {
@@ -40,6 +41,25 @@ module.exports = {
       type: 'text',
       required: true,
       localized: true,
+      hooks: {
+        afterRead: [
+          ({ value }) => `${value} alt`,
+        ],
+      },
+    },
+    {
+      name: 'sizes',
+      fields: [
+        {
+          name: 'icon',
+          access: {
+            read: ({ req: { user } }) => {
+              const result = checkRole(['admin'], user);
+              return result;
+            },
+          },
+        },
+      ],
     },
   ],
   timestamps: true,

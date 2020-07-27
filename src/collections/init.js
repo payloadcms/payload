@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const express = require('express');
 const mongooseHidden = require('mongoose-hidden')({
   hidden: {
     salt: true, hash: true, _id: true, __v: true,
@@ -8,113 +9,13 @@ const mongooseHidden = require('mongoose-hidden')({
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
 const LocalStrategy = require('passport-local').Strategy;
-const jwtStrategy = require('../auth/strategies/jwt');
 const apiKeyStrategy = require('../auth/strategies/apiKey');
-const collectionRoutes = require('./routes');
 const buildSchema = require('./buildSchema');
-const baseAuthFields = require('../auth/baseFields');
-const baseAPIKeyFields = require('../auth/baseAPIKeyFields');
-const authRoutes = require('../auth/routes');
+const bindCollectionMiddleware = require('./bindCollection');
 
 function registerCollections() {
   this.config.collections = this.config.collections.map((collection) => {
     const formattedCollection = collection;
-
-    if (collection.upload) {
-      let uploadFields = [
-        {
-          name: 'filename',
-          label: 'Filename',
-          type: 'text',
-          required: true,
-          unique: true,
-          readOnly: true,
-        }, {
-          name: 'mimeType',
-          label: 'MIME Type',
-          type: 'text',
-          readOnly: true,
-        }, {
-          name: 'filesize',
-          label: 'File Size',
-          type: 'number',
-          readOnly: true,
-        },
-      ];
-
-      if (collection.upload.imageSizes && Array.isArray(collection.upload.imageSizes)) {
-        uploadFields = uploadFields.concat([
-          {
-            name: 'width',
-            label: 'Width',
-            type: 'number',
-            readOnly: true,
-          }, {
-            name: 'height',
-            label: 'Height',
-            type: 'number',
-            readOnly: true,
-          },
-          {
-            name: 'sizes',
-            label: 'Sizes',
-            type: 'group',
-            fields: collection.upload.imageSizes.map(size => ({
-              label: size.name,
-              name: size.name,
-              type: 'group',
-              fields: [
-                {
-                  name: 'width',
-                  label: 'Width',
-                  type: 'number',
-                  readOnly: true,
-                }, {
-                  name: 'height',
-                  label: 'Height',
-                  type: 'number',
-                  readOnly: true,
-                }, {
-                  name: 'mimeType',
-                  label: 'MIME Type',
-                  type: 'text',
-                  readOnly: true,
-                }, {
-                  name: 'filesize',
-                  label: 'File Size',
-                  type: 'number',
-                  readOnly: true,
-                }, {
-                  name: 'filename',
-                  label: 'File Name',
-                  type: 'text',
-                  readOnly: true,
-                },
-              ],
-            })),
-          },
-        ]);
-      }
-
-      formattedCollection.fields = [
-        ...formattedCollection.fields,
-        ...uploadFields,
-      ];
-    }
-
-    if (collection.auth) {
-      formattedCollection.fields = [
-        ...baseAuthFields,
-        ...formattedCollection.fields,
-      ];
-
-      if (collection.auth.useAPIKey) {
-        formattedCollection.fields = [
-          ...formattedCollection.fields,
-          ...baseAPIKeyFields,
-        ];
-      }
-    }
 
     const schema = buildSchema(formattedCollection, this.config);
 
@@ -129,22 +30,95 @@ function registerCollections() {
       config: formattedCollection,
     };
 
+    const router = express.Router();
+    const { slug } = collection;
+
+    router.all(`/${slug}*`, bindCollectionMiddleware(this.collections[formattedCollection.slug]));
+
+    const {
+      create,
+      find,
+      update,
+      findByID,
+      delete: deleteHandler,
+    } = this.requestHandlers.collections;
+
     if (collection.auth) {
       const AuthCollection = this.collections[formattedCollection.slug];
       passport.use(new LocalStrategy(AuthCollection.Model.authenticate()));
 
       if (collection.auth.useAPIKey) {
-        passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(AuthCollection));
+        passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(this, AuthCollection));
       }
 
-      passport.use(`${AuthCollection.config.slug}-jwt`, jwtStrategy(this.config, this.collections));
-      passport.serializeUser(AuthCollection.Model.serializeUser());
-      passport.deserializeUser(AuthCollection.Model.deserializeUser());
+      const {
+        init,
+        login,
+        logout,
+        refresh,
+        me,
+        register,
+        registerFirstUser,
+        forgotPassword,
+        resetPassword,
+        update: authUpdate,
+      } = this.requestHandlers.collections.auth;
 
-      this.router.use(authRoutes(AuthCollection, this.config, this.sendEmail));
+      router
+        .route(`/${slug}/init`)
+        .get(init);
+
+      router
+        .route(`/${slug}/login`)
+        .post(login);
+
+      router
+        .route(`/${slug}/logout`)
+        .get(logout);
+
+      router
+        .route(`/${slug}/refresh-token`)
+        .post(refresh);
+
+      router
+        .route(`/${slug}/me`)
+        .get(me);
+
+      router
+        .route(`/${slug}/first-register`)
+        .post(registerFirstUser);
+
+      router
+        .route(`/${slug}/forgot-password`)
+        .post(forgotPassword);
+
+      router
+        .route(`${slug}/reset-password`)
+        .post(resetPassword);
+
+      router
+        .route(`/${slug}/register`)
+        .post(register);
+
+      router.route(`/${slug}`)
+        .get(find);
+
+      router.route(`/${slug}/:id`)
+        .get(findByID)
+        .put(authUpdate)
+        .delete(deleteHandler);
     } else {
-      this.router.use(collectionRoutes(this.collections[formattedCollection.slug]));
+      router.route(`/${slug}`)
+        .get(find)
+        .post(create);
+
+      router.route(`/${slug}/:id`)
+        .put(update)
+        .get(findByID)
+        .delete(deleteHandler);
     }
+
+    this.router.use(router);
 
     return formattedCollection;
   });

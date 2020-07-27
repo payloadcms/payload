@@ -1,0 +1,37 @@
+@import '../../../../scss/styles.scss';
+
+.field-type.array {
+  background: white;
+
+  &__add-button-wrap {
+    margin-left: base(0);
+
+    .btn {
+      color: $color-gray;
+      margin: 0;
+
+      &:hover {
+        color: $color-dark-gray;
+      }
+    }
+  }
+
+  .section .section {
+    margin-top: 0;
+  }
+
+  .section__content {
+    > div > div {
+      width: 100%;
+    }
+  }
+}
+
+.field-type.array,
+.field-type.blocks {
+  .field-type.array {
+    .field-type.array__add-button-wrap {
+      margin-left: base(2.65);
+    }
+  }
+}

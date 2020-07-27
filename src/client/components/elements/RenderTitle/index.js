@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import useTitle from '../../../hooks/useTitle';
+
+import './index.scss';
+
+const baseClass = 'render-title';
 
 const RenderTitle = (props) => {
   const {
@@ -12,11 +16,27 @@ const RenderTitle = (props) => {
 
   let title = titleFromData;
   if (!title) title = titleFromForm;
-  if (!title) title = data.id;
+  if (!title) title = data?.id;
   if (!title) title = fallback;
   title = titleFromProps || title;
 
-  return <>{title}</>;
+  const idAsTitle = title === data?.id;
+
+  const classes = [
+    baseClass,
+    idAsTitle && `${baseClass}--id-as-title`,
+  ].filter(Boolean).join(' ');
+
+  return (
+    <span className={classes}>
+      {idAsTitle && (
+        <Fragment>
+          ID:&nbsp;&nbsp;
+        </Fragment>
+      )}
+      {title}
+    </span>
+  );
 };
 
 RenderTitle.defaultProps = {

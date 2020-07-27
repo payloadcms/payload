@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, useModal } from '@trbl/react-modal';
+import { Modal, useModal } from '@faceless-ui/modal';
 import config from '../../../../../config';
 import MinimalTemplate from '../../../../templates/Minimal';
 import Button from '../../../../elements/Button';
@@ -74,6 +74,7 @@ const SelectExistingUploadModal = (props) => {
           />
         </header>
         <ListControls
+          enableColumns={false}
           handleChange={setListControls}
           collection={{
             ...collection,

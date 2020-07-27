@@ -1,6 +1,3 @@
-export { default as auth } from './Auth';
-export { default as file } from './File';
-
 export { default as email } from './Email';
 export { default as hidden } from './HiddenInput';
 export { default as text } from './Text';
@@ -15,8 +12,8 @@ export { default as checkbox } from './Checkbox';
 export { default as richText } from './RichText';
 export { default as radio } from './RadioGroup';
 
-export { default as flexible } from './Flexible';
+export { default as blocks } from './Blocks';
 export { default as group } from './Group';
-export { default as repeater } from './Repeater';
+export { default as array } from './Array';
 export { default as row } from './Row';
 export { default as upload } from './Upload';

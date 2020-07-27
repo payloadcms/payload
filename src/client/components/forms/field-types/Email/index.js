@@ -13,15 +13,15 @@ const Email = (props) => {
     name,
     path: pathFromProps,
     required,
-    defaultValue,
-    initialData,
     validate,
-    style,
-    width,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
     label,
     placeholder,
     autoComplete,
-    readOnly,
   } = props;
 
   const path = pathFromProps || name;
@@ -33,9 +33,6 @@ const Email = (props) => {
 
   const fieldType = useFieldType({
     path,
-    required,
-    initialData,
-    defaultValue,
     validate: memoizedValidate,
     enableDebouncedValue: true,
   });
@@ -91,12 +88,10 @@ Email.defaultProps = {
   defaultValue: undefined,
   initialData: undefined,
   placeholder: undefined,
-  width: undefined,
-  style: {},
+  admin: {},
   autoComplete: undefined,
   validate: email,
   path: '',
-  readOnly: false,
 };
 
 Email.propTypes = {
@@ -107,11 +102,13 @@ Email.propTypes = {
   defaultValue: PropTypes.string,
   initialData: PropTypes.string,
   validate: PropTypes.func,
-  width: PropTypes.string,
-  style: PropTypes.shape({}),
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
   label: PropTypes.string,
   autoComplete: PropTypes.string,
-  readOnly: PropTypes.bool,
 };
 
 export default withCondition(Email);

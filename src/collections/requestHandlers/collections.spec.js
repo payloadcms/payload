@@ -15,26 +15,26 @@ let localizedPostID;
 const englishPostDesc = faker.lorem.lines(2);
 const spanishPostDesc = faker.lorem.lines(2);
 
-beforeAll(async (done) => {
-  const response = await fetch(`${url}/api/admins/login`, {
-    body: JSON.stringify({
-      email,
-      password,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    method: 'post',
+describe('Collections - REST', () => {
+  beforeAll(async (done) => {
+    const response = await fetch(`${url}/api/admins/login`, {
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'post',
+    });
+
+    const data = await response.json();
+
+    ({ token } = data);
+
+    done();
   });
 
-  const data = await response.json();
-
-  ({ token } = data);
-
-  done();
-});
-
-describe('Collections - REST', () => {
   describe('Create', () => {
     it('should allow a localized post to be created', async () => {
       const response = await fetch(`${url}/api/localized-posts`, {
@@ -56,8 +56,8 @@ describe('Collections - REST', () => {
       expect(data.doc.title).not.toBeNull();
       expect(data.doc.id).not.toBeNull();
       const timestampRegex = /^(\d{4})(?:-?W(\d+)(?:-?(\d+)D?)?|(?:-(\d+))?-(\d+))(?:[T ](\d+):(\d+)(?::(\d+)(?:\.(\d+))?)?)?(?:Z(-?\d*))?$/;
-      expect(data.doc.createdAt).toEqual(expect.stringMatching(timestampRegex));
-      expect(data.doc.updatedAt).toEqual(expect.stringMatching(timestampRegex));
+      expect(data.doc.createdAt).toStrictEqual(expect.stringMatching(timestampRegex));
+      expect(data.doc.updatedAt).toStrictEqual(expect.stringMatching(timestampRegex));
 
       localizedPostID = data.doc.id;
     });
@@ -206,7 +206,88 @@ describe('Collections - REST', () => {
 
       expect(getResponse.status).toBe(200);
       expect(data.docs[0].description).toBe(desc);
-      expect(data.docs.length).toBe(1);
+      expect(data.docs).toHaveLength(1);
+    });
+
+    it('should allow querying with OR', async () => {
+      const title1 = 'Or1';
+      const title2 = 'Or2';
+      const response = await fetch(`${url}/api/localized-posts`, {
+        body: JSON.stringify({
+          title: title1,
+          description: 'desc',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+
+      const response2 = await fetch(`${url}/api/localized-posts`, {
+        body: JSON.stringify({
+          title: title2,
+          description: 'desc',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+
+      expect(response.status).toBe(201);
+      expect(response2.status).toBe(201);
+
+      const queryResponse = await fetch(`${url}/api/localized-posts?where[or][0][title][equals]=${title1}&where[or][1][title][equals]=${title2}`);
+      const data = await queryResponse.json();
+
+      expect(queryResponse.status).toBe(200);
+      expect(data.docs).toHaveLength(2);
+      expect(data.docs).toContainEqual(expect.objectContaining({ title: title1 }));
+      expect(data.docs).toContainEqual(expect.objectContaining({ title: title2 }));
+    });
+
+    it('should allow querying with OR, 1 result', async () => {
+      const title1 = 'OrNegative1';
+      const title2 = 'OrNegative2';
+      const response = await fetch(`${url}/api/localized-posts`, {
+        body: JSON.stringify({
+          title: title1,
+          description: 'desc',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+
+      const response2 = await fetch(`${url}/api/localized-posts`, {
+        body: JSON.stringify({
+          title: title2,
+          description: 'desc',
+          priority: 1,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
+
+      expect(response.status).toBe(201);
+      expect(response2.status).toBe(201);
+
+      const queryResponse = await fetch(`${url}/api/localized-posts?where[or][0][title][equals]=${title1}&where[or][1][title][equals]=nonexistent`);
+      const data = await queryResponse.json();
+
+      expect(queryResponse.status).toBe(200);
+      expect(data.docs).toHaveLength(1);
+      expect(data.docs[0].title).toBe(title1);
     });
   });
 
@@ -324,7 +405,7 @@ describe('Collections - REST', () => {
       const data = await getResponse.json();
 
       expect(getResponse.status).toBe(200);
-      expect(data.docs.length).toEqual(2);
+      expect(data.docs).toHaveLength(2);
       expect(data.docs[0].id).toEqual(id1);
       expect(data.docs[1].id).toEqual(id2);
 
@@ -333,7 +414,7 @@ describe('Collections - REST', () => {
       const sortedData = await getResponseSorted.json();
 
       expect(getResponse.status).toBe(200);
-      expect(sortedData.docs.length).toEqual(2);
+      expect(sortedData.docs).toHaveLength(2);
       // Opposite order from first request
       expect(sortedData.docs[0].id).toEqual(id2);
       expect(sortedData.docs[1].id).toEqual(id1);
@@ -359,20 +440,6 @@ describe('Collections - REST', () => {
         const data = await response.json();
         expect(response.status).toBe(201);
         expect(data.doc.description).toEqual('Original-beforeCreateSuffix');
-      });
-
-      it('beforeRead', async () => {
-        const response = await fetch(`${url}/api/hooks`, {
-          headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
-            hook: 'beforeRead', // Used by hook
-          },
-          method: 'get',
-        });
-        const data = await response.json();
-        expect(response.status).toBe(200);
-        expect(data.limit).toEqual(1); // Set in our beforeRead hook
       });
 
       it('beforeUpdate', async () => {

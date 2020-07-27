@@ -1,0 +1,35 @@
+@import '../../../../scss/styles.scss';
+
+.field-type.blocks {
+
+  &__add-button-wrap {
+
+    .btn {
+      color: $color-gray;
+      margin: 0;
+
+      &:hover {
+        color: $color-dark-gray;
+      }
+    }
+  }
+
+  .section .section {
+    margin-top: 0;
+  }
+
+  .section__content {
+    > div > div {
+      width: 100%;
+    }
+  }
+}
+
+.field-type.array,
+.field-type.blocks {
+  .field-type.blocks {
+    .field-type.blocks__add-button-wrap {
+      margin-left: base(2.65);
+    }
+  }
+}

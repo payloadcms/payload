@@ -10,9 +10,11 @@ const ValidationError = require('./ValidationError');
 const errorHandler = require('../express/middleware/errorHandler');
 const MissingFile = require('./MissingFile');
 const MissingSelectOptions = require('./MissingSelectOptions');
+const ErrorDeletingFile = require('./ErrorDeletingFile');
 
 module.exports = {
   errorHandler,
+  ErrorDeletingFile,
   APIError,
   AuthenticationError,
   DuplicateCollection,

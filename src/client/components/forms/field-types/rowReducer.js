@@ -2,59 +2,57 @@ import { v4 as uuidv4 } from 'uuid';
 
 const reducer = (currentState, action) => {
   const {
-    type, index, moveToIndex, rows, data = [], initialRowData = {},
+    type, rowIndex, moveFromIndex, moveToIndex, data, blockType,
   } = action;
 
   const stateCopy = [...currentState];
 
   switch (type) {
-    case 'SET_ALL':
-      return rows;
+    case 'SET_ALL': {
+      if (Array.isArray(data)) {
+        return data.map((dataRow) => {
+          const row = {
+            key: uuidv4(),
+            open: true,
+          };
+
+          if (dataRow.blockType) {
+            row.blockType = dataRow.blockType;
+          }
+
+          return row;
+        });
+      }
+
+      return [];
+    }
 
     case 'TOGGLE_COLLAPSE':
-      stateCopy[index].open = !stateCopy[index].open;
+      stateCopy[rowIndex].open = !stateCopy[rowIndex].open;
       return stateCopy;
 
     case 'ADD': {
-      stateCopy.splice(index + 1, 0, {
+      const newRow = {
         open: true,
         key: uuidv4(),
-        data,
-      });
+      };
 
-      data.splice(index + 1, 0, initialRowData);
+      if (blockType) newRow.blockType = blockType;
 
-      const result = stateCopy.map((row, i) => {
-        return {
-          ...row,
-          data: {
-            ...(data[i] || {}),
-          },
-        };
-      });
+      stateCopy.splice(rowIndex + 1, 0, newRow);
 
-      return result;
+      return stateCopy;
     }
 
-
     case 'REMOVE':
-      stateCopy.splice(index, 1);
+      stateCopy.splice(rowIndex, 1);
       return stateCopy;
 
     case 'MOVE': {
-      const stateCopyWithNewData = stateCopy.map((row, i) => {
-        return {
-          ...row,
-          data: {
-            ...(data[i] || {}),
-          },
-        };
-      });
-
-      const movingRowState = { ...stateCopyWithNewData[index] };
-      stateCopyWithNewData.splice(index, 1);
-      stateCopyWithNewData.splice(moveToIndex, 0, movingRowState);
-      return stateCopyWithNewData;
+      const movingRowState = { ...stateCopy[moveFromIndex] };
+      stateCopy.splice(moveFromIndex, 1);
+      stateCopy.splice(moveToIndex, 0, movingRowState);
+      return stateCopy;
     }
 
     default:

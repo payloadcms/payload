@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import config from 'payload/config';
 import { useHistory } from 'react-router-dom';
-import { Modal, useModal } from '@trbl/react-modal';
+import { Modal, useModal } from '@faceless-ui/modal';
 import Button from '../Button';
 import MinimalTemplate from '../../templates/Minimal';
 import useTitle from '../../../hooks/useTitle';
@@ -20,7 +20,9 @@ const DeleteDocument = (props) => {
     title: titleFromProps,
     id,
     collection: {
-      useAsTitle,
+      admin: {
+        useAsTitle,
+      },
       slug,
       labels: {
         singular,
@@ -80,7 +82,7 @@ const DeleteDocument = (props) => {
 
   if (id) {
     return (
-      <>
+      <React.Fragment>
         <button
           type="button"
           slug={modalSlug}
@@ -127,7 +129,7 @@ const DeleteDocument = (props) => {
             </Button>
           </MinimalTemplate>
         </Modal>
-      </>
+      </React.Fragment>
     );
   }
 
@@ -141,7 +143,9 @@ DeleteDocument.defaultProps = {
 
 DeleteDocument.propTypes = {
   collection: PropTypes.shape({
-    useAsTitle: PropTypes.string,
+    admin: PropTypes.shape({
+      useAsTitle: PropTypes.string,
+    }),
     slug: PropTypes.string,
     labels: PropTypes.shape({
       singular: PropTypes.string,

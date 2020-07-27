@@ -5,21 +5,14 @@ import config from 'payload/config';
 import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import { useUser } from '../../../data/User';
-import formatFields from './formatFields';
 
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import DefaultEdit from './Default';
+import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema';
 
 const { serverURL, routes: { admin, api } } = config;
 
 const EditView = (props) => {
-  const { params: { id } = {} } = useRouteMatch();
-  const { state: locationState } = useLocation();
-  const history = useHistory();
-  const { setStepNav } = useStepNav();
-  const [fields, setFields] = useState([]);
-  const { permissions } = useUser();
-
   const { collection, isEditing } = props;
 
   const {
@@ -27,8 +20,19 @@ const EditView = (props) => {
     labels: {
       plural: pluralLabel,
     },
-    useAsTitle,
+    admin: {
+      useAsTitle,
+    },
+    fields,
+    auth,
   } = collection;
+
+  const { params: { id } = {} } = useRouteMatch();
+  const { state: locationState } = useLocation();
+  const history = useHistory();
+  const { setStepNav } = useStepNav();
+  const [initialState, setInitialState] = useState({});
+  const { permissions } = useUser();
 
   const onSave = (json) => {
     history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`, {
@@ -40,9 +44,9 @@ const EditView = (props) => {
     });
   };
 
-  const [{ data }] = usePayloadAPI(
+  const [{ data, isLoading }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
-    { initialParams: { 'fallback-locale': 'null' } },
+    { initialParams: { 'fallback-locale': 'null', depth: 0 } },
   );
 
   const dataToRender = locationState?.data || data;
@@ -67,21 +71,39 @@ const EditView = (props) => {
   }, [setStepNav, isEditing, pluralLabel, dataToRender, slug, useAsTitle]);
 
   useEffect(() => {
-    setFields(formatFields(collection, isEditing));
-  }, [collection, isEditing]);
+    const awaitInitialState = async () => {
+      const state = await buildStateFromSchema(fields, dataToRender);
+      setInitialState(state);
+    };
+
+    awaitInitialState();
+  }, [dataToRender, fields]);
 
   const collectionPermissions = permissions?.[slug];
+
+  const apiURL = `${serverURL}${api}/${slug}/${id}`;
+  let action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?depth=0`;
+  const hasSavePermission = (isEditing && collectionPermissions?.update?.permission) || (!isEditing && collectionPermissions?.create?.permission);
+
+  if (auth && !isEditing) {
+    action = `${action}/register`;
+  }
 
   return (
     <RenderCustomComponent
       DefaultComponent={DefaultEdit}
       path={`${slug}.views.Edit`}
       componentProps={{
+        isLoading,
         data: dataToRender,
-        collection: { ...collection, fields },
+        collection,
         permissions: collectionPermissions,
         isEditing,
         onSave,
+        initialState,
+        hasSavePermission,
+        apiURL,
+        action,
       }}
     />
   );
@@ -98,9 +120,12 @@ EditView.propTypes = {
       singular: PropTypes.string,
     }),
     slug: PropTypes.string,
-    useAsTitle: PropTypes.string,
+    admin: PropTypes.shape({
+      useAsTitle: PropTypes.string,
+    }),
     fields: PropTypes.arrayOf(PropTypes.shape({})),
     preview: PropTypes.func,
+    auth: PropTypes.shape({}),
   }).isRequired,
   isEditing: PropTypes.bool,
 };

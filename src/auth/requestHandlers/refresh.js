@@ -1,23 +1,24 @@
-const httpStatus = require('http-status');
-const formatErrorResponse = require('../../express/responses/formatError');
-const { refresh } = require('../operations');
+const getExtractJWT = require('../getExtractJWT');
 
-const refreshHandler = config => async (req, res) => {
+async function refreshHandler(req, res, next) {
   try {
-    const refreshedToken = await refresh({
+    const extractJWT = getExtractJWT(this.config);
+    const token = extractJWT(req);
+
+    const result = await this.operations.collections.auth.refresh({
       req,
+      res,
       collection: req.collection,
-      config,
-      authorization: req.headers.authorization,
+      token,
     });
 
     return res.status(200).json({
       message: 'Token refresh successful',
-      refreshedToken,
+      ...result,
     });
   } catch (error) {
-    return res.status(error.status || httpStatus.INTERNAL_SERVER_ERROR).json(formatErrorResponse(error));
+    return next(error);
   }
-};
+}
 
 module.exports = refreshHandler;

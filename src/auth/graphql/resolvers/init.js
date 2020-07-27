@@ -1,15 +1,17 @@
-/* eslint-disable no-param-reassign */
-const { init } = require('../../operations');
+function init({ Model }) {
+  async function resolver(_, __, context) {
+    const options = {
+      Model,
+      req: context.req,
+    };
 
-const initResolver = ({ Model }) => async (_, __, context) => {
-  const options = {
-    Model,
-    req: context,
-  };
+    const result = await this.operations.collections.auth.init(options);
 
-  const result = await init(options);
+    return result;
+  }
 
-  return result;
-};
+  const initResolver = resolver.bind(this);
+  return initResolver;
+}
 
-module.exports = initResolver;
+module.exports = init;

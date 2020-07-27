@@ -1,8 +1,7 @@
 import React, {
-  Component, useState, useEffect, useCallback,
+  Component, useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
-import Cookies from 'universal-cookie';
 import some from 'async-some';
 import config from 'payload/config';
 import withCondition from '../../withCondition';
@@ -14,15 +13,13 @@ import { relationship } from '../../../../../fields/validations';
 
 import './index.scss';
 
-const cookies = new Cookies();
-
 const {
-  cookiePrefix, serverURL, routes: { api }, collections,
+  serverURL, routes: { api }, collections,
 } = config;
 
-const cookieTokenName = `${cookiePrefix}-token`;
-
 const maxResultsPerRequest = 10;
+
+const baseClass = 'relationship';
 
 class Relationship extends Component {
   constructor(props) {
@@ -36,6 +33,7 @@ class Relationship extends Component {
       lastFullyLoadedRelation: -1,
       lastLoadedPage: 1,
       options: [],
+      errorLoading: false,
     };
   }
 
@@ -51,6 +49,7 @@ class Relationship extends Component {
   }
 
   getNextOptions = (params = {}) => {
+    const { errorLoading } = this.state;
     const { clear } = params;
 
     if (clear) {
@@ -59,47 +58,55 @@ class Relationship extends Component {
       });
     }
 
-    const {
-      relations, lastFullyLoadedRelation, lastLoadedPage, search,
-    } = this.state;
-    const token = cookies.get(cookieTokenName);
+    if (!errorLoading) {
+      const {
+        relations, lastFullyLoadedRelation, lastLoadedPage, search,
+      } = this.state;
 
-    const relationsToSearch = relations.slice(lastFullyLoadedRelation + 1);
+      const relationsToSearch = relations.slice(lastFullyLoadedRelation + 1);
 
-    if (relationsToSearch.length > 0) {
-      some(relationsToSearch, async (relation, callback) => {
-        const collection = collections.find(coll => coll.slug === relation);
-        const fieldToSearch = collection.useAsTitle || 'id';
-        const searchParam = search ? `&where[${fieldToSearch}][like]=${search}` : '';
-        const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}${searchParam}`, {
-          headers: {
-            Authorization: `JWT ${token}`,
-          },
+      if (relationsToSearch.length > 0) {
+        some(relationsToSearch, async (relation, callback) => {
+          const collection = collections.find((coll) => coll.slug === relation);
+          const fieldToSearch = collection?.admin?.useAsTitle || 'id';
+          const searchParam = search ? `&where[${fieldToSearch}][like]=${search}` : '';
+          const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}${searchParam}`);
+          const data = await response.json();
+
+          if (response.ok) {
+            if (data.hasNextPage) {
+              return callback(false, {
+                data,
+                relation,
+              });
+            }
+
+            return callback({ relation, data });
+          }
+
+          let error = 'There was a problem loading options for this field.';
+
+          if (response.status === 403) {
+            error = 'You do not have permission to load options for this field.';
+          }
+
+          return this.setState({
+            errorLoading: error,
+          });
+        }, (lastPage, nextPage) => {
+          if (nextPage) {
+            const { data, relation } = nextPage;
+            this.addOptions(data, relation);
+          } else {
+            const { data, relation } = lastPage;
+            this.addOptions(data, relation);
+            this.setState({
+              lastFullyLoadedRelation: relations.indexOf(relation),
+              lastLoadedPage: 1,
+            });
+          }
         });
-
-        const data = await response.json();
-
-        if (data.hasNextPage) {
-          return callback(false, {
-            data,
-            relation,
-          });
-        }
-
-        return callback({ relation, data });
-      }, (lastPage, nextPage) => {
-        if (nextPage) {
-          const { data, relation } = nextPage;
-          this.addOptions(data, relation);
-        } else {
-          const { data, relation } = lastPage;
-          this.addOptions(data, relation);
-          this.setState({
-            lastFullyLoadedRelation: relations.indexOf(relation),
-            lastLoadedPage: 1,
-          });
-        }
-      });
+      }
     }
   }
 
@@ -109,7 +116,7 @@ class Relationship extends Component {
     const { hasMany } = this.props;
 
     if (hasMany && Array.isArray(selectedValue)) {
-      return selectedValue.map(val => val.value);
+      return selectedValue.map((val) => val.value);
     }
 
     return selectedValue ? selectedValue.value : selectedValue;
@@ -136,9 +143,9 @@ class Relationship extends Component {
       });
     } else if (value) {
       if (hasMany) {
-        foundValue = value.map(val => options.find(option => option.value === val));
+        foundValue = value.map((val) => options.find((option) => option.value === val));
       } else {
-        foundValue = options.find(option => option.value === value);
+        foundValue = options.find((option) => option.value === value);
       }
     }
 
@@ -148,31 +155,29 @@ class Relationship extends Component {
   addOptions = (data, relation) => {
     const { hasMultipleRelations } = this.props;
     const { lastLoadedPage, options } = this.state;
-    const collection = collections.find(coll => coll.slug === relation);
+    const collection = collections.find((coll) => coll.slug === relation);
 
     if (!hasMultipleRelations) {
       this.setState({
         options: [
           ...options,
-          ...data.docs.map(doc => ({
-            label: doc[collection.useAsTitle || 'id'],
+          ...data.docs.map((doc) => ({
+            label: doc[collection?.admin?.useAsTitle || 'id'],
             value: doc.id,
           })),
         ],
       });
     } else {
       const allOptionGroups = [...options];
-      const optionsToAddTo = allOptionGroups.find(optionGroup => optionGroup.label === collection.labels.plural);
+      const optionsToAddTo = allOptionGroups.find((optionGroup) => optionGroup.label === collection.labels.plural);
 
-      const newOptions = data.docs.map((doc) => {
-        return {
-          label: doc[collection.useAsTitle || 'id'],
-          value: {
-            relationTo: collection.slug,
-            value: doc.id,
-          },
-        };
-      });
+      const newOptions = data.docs.map((doc) => ({
+        label: doc[collection?.admin?.useAsTitle || 'id'],
+        value: {
+          relationTo: collection.slug,
+          value: doc.id,
+        },
+      }));
 
       if (optionsToAddTo) {
         optionsToAddTo.options = [
@@ -211,13 +216,11 @@ class Relationship extends Component {
   }
 
   render() {
-    const { options } = this.state;
+    const { options, errorLoading } = this.state;
 
     const {
       path,
       required,
-      style,
-      width,
       errorMessage,
       label,
       hasMany,
@@ -225,21 +228,22 @@ class Relationship extends Component {
       showError,
       formProcessing,
       setValue,
-      readOnly,
+      admin: {
+        readOnly,
+        style,
+        width,
+      } = {},
     } = this.props;
 
     const classes = [
       'field-type',
-      'relationship',
+      baseClass,
       showError && 'error',
+      errorLoading && 'error-loading',
       readOnly && 'read-only',
     ].filter(Boolean).join(' ');
 
     const valueToRender = this.findValueInOptions(options, value);
-
-    // ///////////////////////////////////////////
-    // TODO: simplify formatValue pattern seen below with react select
-    // ///////////////////////////////////////////
 
     return (
       <div
@@ -258,56 +262,59 @@ class Relationship extends Component {
           label={label}
           required={required}
         />
-        <ReactSelect
-          onInputChange={this.handleInputChange}
-          onChange={!readOnly ? setValue : undefined}
-          formatValue={this.formatSelectedValue}
-          onMenuScrollToBottom={this.handleMenuScrollToBottom}
-          findValueInOptions={this.findValueInOptions}
-          value={valueToRender}
-          showError={showError}
-          disabled={formProcessing}
-          options={options}
-          isMulti={hasMany}
-        />
+        {!errorLoading && (
+          <ReactSelect
+            onInputChange={this.handleInputChange}
+            onChange={!readOnly ? setValue : undefined}
+            formatValue={this.formatSelectedValue}
+            onMenuScrollToBottom={this.handleMenuScrollToBottom}
+            findValueInOptions={this.findValueInOptions}
+            value={valueToRender}
+            showError={showError}
+            disabled={formProcessing}
+            options={options}
+            isMulti={hasMany}
+          />
+        )}
+        {errorLoading && (
+          <div className={`${baseClass}__error-loading`}>
+            {errorLoading}
+          </div>
+        )}
       </div>
     );
   }
 }
 
 Relationship.defaultProps = {
-  style: {},
   required: false,
   errorMessage: '',
   hasMany: false,
-  width: undefined,
   showError: false,
   value: undefined,
   path: '',
   formProcessing: false,
-  readOnly: false,
+  admin: {},
 };
 
 Relationship.propTypes = {
-  readOnly: PropTypes.bool,
   relationTo: PropTypes.oneOfType([
-    PropTypes.oneOf(Object.keys(collections).map((key) => {
-      return collections[key].slug;
-    })),
+    PropTypes.oneOf(Object.keys(collections).map((key) => collections[key].slug)),
     PropTypes.arrayOf(
-      PropTypes.oneOf(Object.keys(collections).map((key) => {
-        return collections[key].slug;
-      })),
+      PropTypes.oneOf(Object.keys(collections).map((key) => collections[key].slug)),
     ),
   ]).isRequired,
   required: PropTypes.bool,
-  style: PropTypes.shape({}),
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
   errorMessage: PropTypes.string,
   showError: PropTypes.bool,
   label: PropTypes.string.isRequired,
   path: PropTypes.string,
   formProcessing: PropTypes.bool,
-  width: PropTypes.string,
   hasMany: PropTypes.bool,
   setValue: PropTypes.func.isRequired,
   hasMultipleRelations: PropTypes.bool.isRequired,
@@ -319,14 +326,11 @@ Relationship.propTypes = {
 };
 
 const RelationshipFieldType = (props) => {
-  const [formattedInitialData, setFormattedInitialData] = useState(undefined);
-
   const {
-    defaultValue, relationTo, hasMany, validate, path, name, initialData, required,
+    relationTo, validate, path, name, required,
   } = props;
 
   const hasMultipleRelations = Array.isArray(relationTo);
-  const dataToInitialize = initialData || defaultValue;
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required });
@@ -337,38 +341,9 @@ const RelationshipFieldType = (props) => {
   const fieldType = useFieldType({
     ...props,
     path: path || name,
-    initialData: formattedInitialData,
-    defaultValue,
     validate: memoizedValidate,
     required,
   });
-
-  useEffect(() => {
-    const formatInitialData = (valueToFormat) => {
-      if (hasMultipleRelations) {
-        return {
-          ...valueToFormat,
-          value: valueToFormat.value.id,
-        };
-      }
-
-      return valueToFormat.id;
-    };
-
-    if (dataToInitialize) {
-      if (hasMany && Array.isArray(dataToInitialize)) {
-        const newFormattedInitialData = [];
-
-        dataToInitialize.forEach((individualValue) => {
-          newFormattedInitialData.push(formatInitialData(individualValue));
-        });
-
-        setFormattedInitialData(newFormattedInitialData);
-      } else {
-        setFormattedInitialData(formatInitialData(dataToInitialize));
-      }
-    }
-  }, [dataToInitialize, hasMany, hasMultipleRelations]);
 
   return (
     <Relationship

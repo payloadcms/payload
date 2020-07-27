@@ -6,7 +6,6 @@ module.exports = {
     singular: 'Custom Component',
     plural: 'Custom Components',
   },
-  useAsTitle: 'title',
   fields: [
     {
       name: 'title',
@@ -16,11 +15,6 @@ module.exports = {
       required: true,
       unique: true,
       localized: true,
-      hooks: {
-        beforeCreate: operation => operation.value,
-        beforeUpdate: operation => operation.value,
-        afterRead: operation => operation.value,
-      },
     },
     {
       name: 'description',
@@ -29,23 +23,27 @@ module.exports = {
       height: 100,
       required: true,
       localized: true,
-      components: {
-        field: path.resolve(__dirname, 'components/fields/Description/Field/index.js'),
-        cell: path.resolve(__dirname, 'components/fields/Description/Cell/index.js'),
-        filter: path.resolve(__dirname, 'components/fields/Description/Filter/index.js'),
+      admin: {
+        components: {
+          field: path.resolve(__dirname, 'components/fields/Description/Field/index.js'),
+          cell: path.resolve(__dirname, 'components/fields/Description/Cell/index.js'),
+          filter: path.resolve(__dirname, 'components/fields/Description/Filter/index.js'),
+        },
       },
     },
     {
-      name: 'repeater',
-      label: 'Repeater',
-      type: 'repeater',
+      name: 'array',
+      label: 'Array',
+      type: 'array',
       fields: [
         {
           type: 'text',
-          name: 'nestedRepeaterCustomField',
-          label: 'Nested Repeater Custom Field',
-          components: {
-            field: path.resolve(__dirname, 'components/fields/NestedRepeaterCustomField/Field/index.js'),
+          name: 'nestedArrayCustomField',
+          label: 'Nested Array Custom Field',
+          admin: {
+            components: {
+              field: path.resolve(__dirname, 'components/fields/NestedArrayCustomField/Field/index.js'),
+            },
           },
         },
       ],
@@ -54,16 +52,20 @@ module.exports = {
       name: 'group',
       label: 'Group',
       type: 'group',
-      components: {
-        field: path.resolve(__dirname, 'components/fields/Group/Field/index.js'),
+      admin: {
+        components: {
+          field: path.resolve(__dirname, 'components/fields/Group/Field/index.js'),
+        },
       },
       fields: [
         {
           type: 'text',
           name: 'nestedGroupCustomField',
           label: 'Nested Group Custom Field',
-          components: {
-            field: path.resolve(__dirname, 'components/fields/NestedGroupCustomField/Field/index.js'),
+          admin: {
+            components: {
+              field: path.resolve(__dirname, 'components/fields/NestedGroupCustomField/Field/index.js'),
+            },
           },
         },
       ],
@@ -75,8 +77,10 @@ module.exports = {
           name: 'nestedText1',
           label: 'Nested Text 1',
           type: 'text',
-          components: {
-            field: path.resolve(__dirname, 'components/fields/NestedText1/Field/index.js'),
+          admin: {
+            components: {
+              field: path.resolve(__dirname, 'components/fields/NestedText1/Field/index.js'),
+            },
           },
         }, {
           name: 'nestedText2',
@@ -87,9 +91,12 @@ module.exports = {
     },
   ],
   timestamps: true,
-  components: {
-    views: {
-      List: path.resolve(__dirname, 'components/views/List/index.js'),
+  admin: {
+    useAsTitle: 'title',
+    components: {
+      views: {
+        List: path.resolve(__dirname, 'components/views/List/index.js'),
+      },
     },
   },
 };

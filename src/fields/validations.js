@@ -4,7 +4,7 @@ const optionsToValidatorMap = {
   number: (value, options = {}) => {
     const parsedValue = parseInt(value, 10);
 
-    if (value && (typeof parsedValue !== 'number' || Number.isNaN(parsedValue))) {
+    if ((value && typeof parsedValue !== 'number') || (options.required && Number.isNaN(parsedValue))) {
       return 'Please enter a valid number.';
     }
 
@@ -114,11 +114,15 @@ const optionsToValidatorMap = {
       return true;
     }
 
+    if (value) {
+      return `"${value}" is not a valid date.`;
+    }
+
     if (options.required) {
       return defaultMessage;
     }
 
-    return `"${value}" is not a valid date.`;
+    return true;
   },
   upload: (value, options = {}) => {
     if (value || !options.required) return true;
@@ -128,7 +132,7 @@ const optionsToValidatorMap = {
     if (value || !options.required) return true;
     return defaultMessage;
   },
-  repeater: (value, options = {}) => {
+  array: (value, options = {}) => {
     if (options.minRows && value < options.minRows) {
       return `This field requires at least ${options.minRows} row(s).`;
     }
@@ -151,7 +155,7 @@ const optionsToValidatorMap = {
     if (value || !options.required) return true;
     return defaultMessage;
   },
-  flexible: (value, options) => {
+  blocks: (value, options) => {
     if (options.minRows && value < options.minRows) {
       return `This field requires at least ${options.minRows} row(s).`;
     }

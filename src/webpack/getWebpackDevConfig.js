@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { IgnorePlugin } = require('webpack');
 const path = require('path');
 const webpack = require('webpack');
 const Dotenv = require('dotenv-webpack');
@@ -8,7 +9,7 @@ module.exports = (config) => {
   let webpackConfig = {
     entry: {
       main: [
-        path.resolve(__dirname, '../../node_modules/webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000'),
+        'webpack-hot-middleware/client',
         path.resolve(__dirname, '../client/components/index.js'),
       ],
     },
@@ -19,7 +20,7 @@ module.exports = (config) => {
     },
     devtool: 'source-map',
     mode: 'development',
-    resolveLoader: { modules: [path.join(__dirname, '../../node_modules')] },
+    resolveLoader: { modules: ['node_modules', path.join(__dirname, '../../node_modules')] },
     module: {
       rules: [
         {
@@ -33,14 +34,20 @@ module.exports = (config) => {
         },
         {
           test: /\.js$/,
-          exclude: /node_modules/,
-          use: {
+          exclude: /node_modules\/(?!(@payloadcms\/payload)\/).*/,
+          use: [{
             loader: 'babel-loader',
             options: {
               presets: [
                 [
                   require.resolve('@babel/preset-env'),
                   {
+                    targets: [
+                      'defaults',
+                      'not IE 11',
+                      'not IE_Mob 11',
+                      'maintained node versions',
+                    ],
                     modules: 'commonjs',
                   },
                 ],
@@ -58,6 +65,14 @@ module.exports = (config) => {
               ],
             },
           },
+            // {
+            //   loader: 'eslint-loader',
+            //   options: {
+            //     fix: true,
+            //     emitWarning: true,
+            //   },
+            // }
+          ],
         },
         {
           // "oneOf" will traverse all following loaders until one will
@@ -102,16 +117,6 @@ module.exports = (config) => {
         },
       ],
     },
-    plugins: [
-      new HtmlWebpackPlugin({
-        template: path.resolve(__dirname, '../client/index.html'),
-        filename: './index.html',
-      }),
-      new webpack.HotModuleReplacementPlugin(),
-      new Dotenv({
-        silent: true,
-      }),
-    ],
     resolve: {
       modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
       alias: {
@@ -120,6 +125,35 @@ module.exports = (config) => {
       },
     },
   };
+
+  const plugins = [
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, '../client/index.html'),
+      filename: './index.html',
+    }),
+    new webpack.HotModuleReplacementPlugin(),
+    new Dotenv({
+      silent: true,
+    }),
+  ];
+
+  if (config.webpackIgnorePlugin instanceof RegExp) {
+    plugins.push(new IgnorePlugin(config.webpackIgnorePlugin));
+  } else if (typeof config.webpackIgnorePlugin === 'string') {
+    plugins.push(new IgnorePlugin(new RegExp(`^${config.webpackIgnorePlugin}$`, 'is')));
+  }
+
+  if (Array.isArray(config.webpackIgnorePlugin)) {
+    config.webpackIgnorePlugin.forEach((ignorePath) => {
+      if (ignorePath instanceof RegExp) {
+        plugins.push(new IgnorePlugin(ignorePath));
+      } else if (typeof ignorePath === 'string') {
+        plugins.push(new IgnorePlugin(new RegExp(`^${ignorePath}$`, 'is')));
+      }
+    });
+  }
+
+  webpackConfig.plugins = plugins;
 
   if (config.paths.scss) {
     webpackConfig.resolve.alias['payload-scss-overrides'] = config.paths.scss;

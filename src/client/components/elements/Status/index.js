@@ -17,10 +17,10 @@ const StatusListProvider = ({ children }) => {
   const [statusList, dispatchStatus] = useReducer(reducer, []);
   const { pathname, state } = useLocation();
 
-  const removeStatus = useCallback(i => dispatchStatus({ type: 'REMOVE', payload: i }), []);
-  const addStatus = useCallback(status => dispatchStatus({ type: 'ADD', payload: status }), []);
+  const removeStatus = useCallback((i) => dispatchStatus({ type: 'REMOVE', payload: i }), []);
+  const addStatus = useCallback((status) => dispatchStatus({ type: 'ADD', payload: status }), []);
   const clearStatus = useCallback(() => dispatchStatus({ type: 'CLEAR' }), []);
-  const replaceStatus = useCallback(status => dispatchStatus({ type: 'REPLACE', payload: status }), []);
+  const replaceStatus = useCallback((status) => dispatchStatus({ type: 'REPLACE', payload: status }), []);
 
   useEffect(() => {
     if (state && state.status) {

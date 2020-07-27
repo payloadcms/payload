@@ -1,14 +1,13 @@
 const httpStatus = require('http-status');
 const { NotFound } = require('../../errors');
-const { deleteQuery } = require('../operations');
 
-const deleteHandler = async (req, res, next) => {
+async function deleteHandler(req, res, next) {
   try {
-    const doc = await deleteQuery({
+    const doc = await this.operations.collections.delete({
       req,
-      Model: req.collection.Model,
-      config: req.collection.config,
+      collection: req.collection,
       id: req.params.id,
+      depth: req.query.depth,
     });
 
     if (!doc) {
@@ -19,6 +18,6 @@ const deleteHandler = async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
-};
+}
 
 module.exports = deleteHandler;

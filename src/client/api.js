@@ -1,24 +1,9 @@
-import Cookies from 'universal-cookie';
 import qs from 'qs';
-import config from 'payload/config';
-
-const { cookiePrefix } = config;
-const cookieTokenName = `${cookiePrefix}-token`;
-
-export const getJWTHeader = () => {
-  const cookies = new Cookies();
-  const jwt = cookies.get(cookieTokenName);
-  return jwt ? { Authorization: `JWT ${jwt}` } : {};
-};
 
 export const requests = {
   get: (url, params) => {
     const query = qs.stringify(params, { addQueryPrefix: true, depth: 10 });
-    return fetch(`${url}${query}`, {
-      headers: {
-        ...getJWTHeader(),
-      },
-    });
+    return fetch(`${url}${query}`);
   },
 
   post: (url, options = {}) => {
@@ -29,7 +14,6 @@ export const requests = {
       method: 'post',
       headers: {
         ...headers,
-        ...getJWTHeader(),
       },
     };
 
@@ -44,7 +28,6 @@ export const requests = {
       method: 'put',
       headers: {
         ...headers,
-        ...getJWTHeader(),
       },
     };
 
@@ -58,7 +41,6 @@ export const requests = {
       method: 'delete',
       headers: {
         ...headers,
-        ...getJWTHeader(),
       },
     });
   },

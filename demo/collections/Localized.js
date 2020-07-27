@@ -4,22 +4,24 @@ module.exports = {
     singular: 'Localized Post',
     plural: 'Localized Posts',
   },
-  useAsTitle: 'title',
-  policies: {
+  admin: {
+    useAsTitle: 'title',
+    defaultColumns: [
+      'title',
+      'priority',
+      'createdAt',
+    ],
+  },
+  access: {
     read: () => true,
   },
   preview: (doc, token) => {
-    if (doc.title) {
+    if (doc && doc.title) {
       return `http://localhost:3000/posts/${doc.title.value}?preview=true&token=${token}`;
     }
 
     return null;
   },
-  defaultColumns: [
-    'title',
-    'priority',
-    'createdAt',
-  ],
   fields: [
     {
       name: 'title',

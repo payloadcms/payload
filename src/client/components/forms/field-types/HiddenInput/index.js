@@ -8,8 +8,6 @@ const HiddenInput = (props) => {
     name,
     path: pathFromProps,
     required,
-    defaultValue,
-    initialData,
   } = props;
 
   const path = pathFromProps || name;
@@ -17,8 +15,6 @@ const HiddenInput = (props) => {
   const { value, setValue } = useFieldType({
     path,
     required,
-    initialData,
-    defaultValue,
   });
 
   return (
@@ -33,8 +29,6 @@ const HiddenInput = (props) => {
 
 HiddenInput.defaultProps = {
   required: false,
-  defaultValue: undefined,
-  initialData: undefined,
   path: '',
 };
 
@@ -42,8 +36,6 @@ HiddenInput.propTypes = {
   name: PropTypes.string.isRequired,
   path: PropTypes.string,
   required: PropTypes.bool,
-  defaultValue: PropTypes.string,
-  initialData: PropTypes.string,
 };
 
 export default withCondition(HiddenInput);

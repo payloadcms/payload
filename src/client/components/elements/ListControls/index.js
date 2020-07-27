@@ -14,10 +14,13 @@ const ListControls = (props) => {
   const {
     handleChange,
     collection,
+    enableColumns,
     collection: {
       fields,
-      useAsTitle,
-      defaultColumns,
+      admin: {
+        useAsTitle,
+        defaultColumns,
+      },
     },
   } = props;
 
@@ -29,7 +32,7 @@ const ListControls = (props) => {
 
   useEffect(() => {
     if (useAsTitle) {
-      const foundTitleField = fields.find(field => field.name === useAsTitle);
+      const foundTitleField = fields.find((field) => field.name === useAsTitle);
 
       if (foundTitleField) {
         setTitleField(foundTitleField);
@@ -71,35 +74,43 @@ const ListControls = (props) => {
           fieldName={titleField ? titleField.name : undefined}
           fieldLabel={titleField ? titleField.label : undefined}
         />
-        <Button
-          className={`${baseClass}__toggle-columns`}
-          buttonStyle={visibleDrawer === 'columns' ? undefined : 'secondary'}
-          onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : false)}
-          icon="chevron"
-          iconStyle="none"
-        >
-          Columns
-        </Button>
-        <Button
-          className={`${baseClass}__toggle-where`}
-          buttonStyle={visibleDrawer === 'where' ? undefined : 'secondary'}
-          onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : false)}
-          icon="chevron"
-          iconStyle="none"
-        >
-          Filters
-        </Button>
+        <div className={`${baseClass}__buttons`}>
+          <div className={`${baseClass}__buttons-wrap`}>
+            {enableColumns && (
+              <Button
+                className={`${baseClass}__toggle-columns`}
+                buttonStyle={visibleDrawer === 'columns' ? undefined : 'secondary'}
+                onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : false)}
+                icon="chevron"
+                iconStyle="none"
+              >
+                Columns
+              </Button>
+            )}
+            <Button
+              className={`${baseClass}__toggle-where`}
+              buttonStyle={visibleDrawer === 'where' ? undefined : 'secondary'}
+              onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : false)}
+              icon="chevron"
+              iconStyle="none"
+            >
+              Filters
+            </Button>
+          </div>
+        </div>
       </div>
-      <AnimateHeight
-        className={`${baseClass}__columns`}
-        height={visibleDrawer === 'columns' ? 'auto' : 0}
-      >
-        <ColumnSelector
-          collection={collection}
-          defaultColumns={defaultColumns}
-          handleChange={setColumns}
-        />
-      </AnimateHeight>
+      {enableColumns && (
+        <AnimateHeight
+          className={`${baseClass}__columns`}
+          height={visibleDrawer === 'columns' ? 'auto' : 0}
+        >
+          <ColumnSelector
+            collection={collection}
+            defaultColumns={defaultColumns}
+            handleChange={setColumns}
+          />
+        </AnimateHeight>
+      )}
       <AnimateHeight
         className={`${baseClass}__where`}
         height={visibleDrawer === 'where' ? 'auto' : 0}
@@ -113,13 +124,20 @@ const ListControls = (props) => {
   );
 };
 
+ListControls.defaultProps = {
+  enableColumns: true,
+};
+
 ListControls.propTypes = {
+  enableColumns: PropTypes.bool,
   collection: PropTypes.shape({
-    useAsTitle: PropTypes.string,
+    admin: PropTypes.shape({
+      useAsTitle: PropTypes.string,
+      defaultColumns: PropTypes.arrayOf(
+        PropTypes.string,
+      ),
+    }),
     fields: PropTypes.arrayOf(PropTypes.shape),
-    defaultColumns: PropTypes.arrayOf(
-      PropTypes.string,
-    ),
   }).isRequired,
   handleChange: PropTypes.func.isRequired,
 };

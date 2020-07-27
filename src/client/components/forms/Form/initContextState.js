@@ -1,7 +1,4 @@
 export default {
-  processing: false,
-  modified: false,
-  submitted: false,
   getFields: () => { },
   getField: () => { },
   getData: () => { },
@@ -13,4 +10,6 @@ export default {
   submit: () => { },
   dispatchFields: () => { },
   setModified: () => { },
+  initialState: {},
+  reset: 0,
 };

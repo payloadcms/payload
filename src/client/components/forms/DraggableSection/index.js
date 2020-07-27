@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
@@ -22,17 +22,16 @@ const DraggableSection = (props) => {
     rowCount,
     parentPath,
     fieldSchema,
-    initialData,
     singularLabel,
     blockType,
     fieldTypes,
     customComponentsPath,
-    isOpen,
+    toggleRowCollapse,
     id,
     positionPanelVerticalAlignment,
     actionPanelVerticalAlignment,
-    toggleRowCollapse,
     permissions,
+    isOpen,
   } = props;
 
   const [isHovered, setIsHovered] = useState(false);
@@ -48,79 +47,73 @@ const DraggableSection = (props) => {
       draggableId={id}
       index={rowIndex}
     >
-      {(providedDrag) => {
-        return (
-          <div
-            ref={providedDrag.innerRef}
-            className={classes}
-            onMouseLeave={() => setIsHovered(false)}
-            onMouseOver={() => setIsHovered(true)}
-            onFocus={() => setIsHovered(true)}
-            {...providedDrag.draggableProps}
-          >
+      {(providedDrag) => (
+        <div
+          ref={providedDrag.innerRef}
+          className={classes}
+          onMouseLeave={() => setIsHovered(false)}
+          onMouseOver={() => setIsHovered(true)}
+          onFocus={() => setIsHovered(true)}
+          {...providedDrag.draggableProps}
+        >
 
-            <div className={`${baseClass}__content-wrapper`}>
-              <PositionPanel
-                dragHandleProps={providedDrag.dragHandleProps}
-                moveRow={moveRow}
-                rowCount={rowCount}
-                positionIndex={rowIndex}
-                verticalAlignment={positionPanelVerticalAlignment}
-              />
+          <div className={`${baseClass}__content-wrapper`}>
+            <PositionPanel
+              dragHandleProps={providedDrag.dragHandleProps}
+              moveRow={moveRow}
+              rowCount={rowCount}
+              positionIndex={rowIndex}
+              verticalAlignment={positionPanelVerticalAlignment}
+            />
 
-              <div className={`${baseClass}__render-fields-wrapper`}>
+            <div className={`${baseClass}__render-fields-wrapper`}>
 
-                {blockType === 'flexible' && (
-                  <div className={`${baseClass}__section-header`}>
-                    <SectionTitle
-                      label={singularLabel}
-                      initialData={initialData?.blockName}
-                      path={`${parentPath}.${rowIndex}.blockName`}
-                    />
-
-                    <Button
-                      icon="chevron"
-                      onClick={toggleRowCollapse}
-                      buttonStyle="icon-label"
-                      className={`toggle-collapse toggle-collapse--is-${isOpen ? 'open' : 'closed'}`}
-                      round
-                    />
-                  </div>
-                )}
-
-                <AnimateHeight
-                  height={isOpen ? 'auto' : 0}
-                  duration={0}
-                >
-                  <RenderFields
-                    initialData={initialData}
-                    customComponentsPath={customComponentsPath}
-                    fieldTypes={fieldTypes}
-                    key={rowIndex}
-                    permissions={permissions}
-                    fieldSchema={fieldSchema.map((field) => {
-                      return ({
-                        ...field,
-                        path: `${parentPath}.${rowIndex}${field.name ? `.${field.name}` : ''}`,
-                      });
-                    })}
+              {blockType === 'blocks' && (
+                <div className={`${baseClass}__section-header`}>
+                  <SectionTitle
+                    label={singularLabel}
+                    path={`${parentPath}.${rowIndex}.blockName`}
                   />
-                </AnimateHeight>
-              </div>
 
-              <ActionPanel
-                rowIndex={rowIndex}
-                addRow={addRow}
-                removeRow={removeRow}
-                singularLabel={singularLabel}
-                verticalAlignment={actionPanelVerticalAlignment}
-                isHovered={isHovered}
-                {...props}
-              />
+                  <Button
+                    icon="chevron"
+                    onClick={toggleRowCollapse}
+                    buttonStyle="icon-label"
+                    className={`toggle-collapse toggle-collapse--is-${isOpen ? 'open' : 'closed'}`}
+                    round
+                  />
+                </div>
+              )}
+
+              <AnimateHeight
+                height={isOpen ? 'auto' : 0}
+                duration={0}
+              >
+                <RenderFields
+                  customComponentsPath={customComponentsPath}
+                  fieldTypes={fieldTypes}
+                  key={rowIndex}
+                  permissions={permissions}
+                  fieldSchema={fieldSchema.map((field) => ({
+                    ...field,
+                    path: `${parentPath}.${rowIndex}${field.name ? `.${field.name}` : ''}`,
+                  }))}
+                />
+              </AnimateHeight>
             </div>
+
+            <ActionPanel
+              rowIndex={rowIndex}
+              addRow={addRow}
+              removeRow={removeRow}
+              singularLabel={singularLabel}
+              verticalAlignment={actionPanelVerticalAlignment}
+              isHovered={isHovered}
+              {...props}
+            />
           </div>
-        );
-      }}
+        </div>
+      )}
     </Draggable>
   );
 };

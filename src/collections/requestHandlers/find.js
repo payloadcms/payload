@@ -1,12 +1,10 @@
 const httpStatus = require('http-status');
-const { find } = require('../operations');
 
-const findHandler = async (req, res, next) => {
+async function find(req, res, next) {
   try {
     const options = {
       req,
-      Model: req.collection.Model,
-      config: req.collection.config,
+      collection: req.collection,
       where: req.query.where,
       page: req.query.page,
       limit: req.query.limit,
@@ -14,12 +12,12 @@ const findHandler = async (req, res, next) => {
       depth: req.query.depth,
     };
 
-    const result = await find(options);
+    const result = await this.operations.collections.find(options);
 
     return res.status(httpStatus.OK).json(result);
   } catch (error) {
     return next(error);
   }
-};
+}
 
-module.exports = findHandler;
+module.exports = find;

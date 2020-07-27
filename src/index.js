@@ -3,12 +3,16 @@ require('isomorphic-fetch');
 
 const express = require('express');
 const graphQLPlayground = require('graphql-playground-middleware-express').default;
+const logger = require('./utilities/logger')();
+const bindOperations = require('./init/bindOperations');
+const bindRequestHandlers = require('./init/bindRequestHandlers');
+const bindResolvers = require('./init/bindResolvers');
 const getConfig = require('./utilities/getConfig');
 const authenticate = require('./express/middleware/authenticate');
 const connectMongoose = require('./mongoose/connect');
 const expressMiddleware = require('./express/middleware');
-const createAuthHeaderFromCookie = require('./express/middleware/createAuthHeaderFromCookie');
 const initAdmin = require('./express/admin');
+const initAuth = require('./auth/init');
 const initCollections = require('./collections/init');
 const initGlobals = require('./globals/init');
 const initStatic = require('./express/static');
@@ -17,10 +21,11 @@ const sanitizeConfig = require('./utilities/sanitizeConfig');
 const buildEmail = require('./email/build');
 const identifyAPI = require('./express/middleware/identifyAPI');
 const errorHandler = require('./express/middleware/errorHandler');
-const { policies } = require('./auth/requestHandlers');
+const performFieldOperations = require('./fields/performFieldOperations');
 
 class Payload {
   constructor(options) {
+    logger.info('Starting Payload...');
     const config = getConfig(options);
 
     this.config = sanitizeConfig(config);
@@ -31,6 +36,11 @@ class Payload {
     this.router = express.Router();
     this.collections = {};
 
+    bindOperations(this);
+    bindRequestHandlers(this);
+    bindResolvers(this);
+
+    this.initAuth = initAuth.bind(this);
     this.initCollections = initCollections.bind(this);
     this.initGlobals = initGlobals.bind(this);
     this.buildEmail = buildEmail.bind(this);
@@ -38,26 +48,29 @@ class Payload {
     this.getMockEmailCredentials = this.getMockEmailCredentials.bind(this);
     this.initStatic = initStatic.bind(this);
     this.initAdmin = initAdmin.bind(this);
+    this.performFieldOperations = performFieldOperations.bind(this);
 
     // Configure email service
     this.email = this.buildEmail();
 
     // Setup & initialization
     connectMongoose(this.config.mongoURL);
-    this.router.use(...expressMiddleware(this.config));
 
+    this.router.use(...expressMiddleware(this.config, this.collections));
+
+    this.initAuth();
     this.initCollections();
     this.initGlobals();
     this.initAdmin();
 
-    this.router.get('/policies', policies(this.config));
+    this.router.get('/access', this.requestHandlers.collections.auth.access);
+
+    const graphQLHandler = new GraphQL(this);
 
     this.router.use(
       this.config.routes.graphQL,
       identifyAPI('GraphQL'),
-      createAuthHeaderFromCookie(this.config),
-      authenticate(this.config),
-      new GraphQL(this).init(),
+      (req, res) => graphQLHandler.init(req, res)(req, res),
     );
 
     this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
@@ -74,21 +87,23 @@ class Payload {
     this.initStatic();
 
     this.router.use(errorHandler(this.config));
+
+    if (typeof options.onInit === 'function') options.onInit();
   }
 
   async sendEmail(message) {
-    try {
-      const email = await this.email;
-      const result = email.transport.sendMail(message);
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    const email = await this.email;
+    const result = email.transport.sendMail(message);
+    return result;
   }
 
   async getMockEmailCredentials() {
     const email = await this.email;
     return email.account;
+  }
+
+  authenticate() {
+    return authenticate(this.config);
   }
 }
 

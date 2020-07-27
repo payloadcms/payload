@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, Link, useHistory } from 'react-router-dom';
 import config from 'payload/config';
 import { useUser } from '../../data/User';
 import Chevron from '../../icons/Chevron';
@@ -25,11 +25,16 @@ const {
 const Nav = () => {
   const { permissions } = useUser();
   const [menuActive, setMenuActive] = useState(false);
+  const history = useHistory();
 
   const classes = [
     baseClass,
     menuActive && `${baseClass}--menu-active`,
   ].filter(Boolean).join(' ');
+
+  useEffect(() => history.listen(() => {
+    setMenuActive(false);
+  }), []);
 
   return (
     <aside className={classes}>
@@ -76,27 +81,31 @@ const Nav = () => {
               return null;
             })}
           </nav>
-          <span className={`${baseClass}__label`}>Globals</span>
-          <nav>
-            {globals && globals.map((global, i) => {
-              const href = `${admin}/globals/${global.slug}`;
+          {(globals && globals.length > 0) && (
+            <React.Fragment>
+              <span className={`${baseClass}__label`}>Globals</span>
+              <nav>
+                {globals.map((global, i) => {
+                  const href = `${admin}/globals/${global.slug}`;
 
-              if (permissions?.[global.slug].read.permission) {
-                return (
-                  <NavLink
-                    activeClassName="active"
-                    key={i}
-                    to={href}
-                  >
-                    <Chevron />
-                    {global.label}
-                  </NavLink>
-                );
-              }
+                  if (permissions?.[global.slug].read.permission) {
+                    return (
+                      <NavLink
+                        activeClassName="active"
+                        key={i}
+                        to={href}
+                      >
+                        <Chevron />
+                        {global.label}
+                      </NavLink>
+                    );
+                  }
 
-              return null;
-            })}
-          </nav>
+                  return null;
+                })}
+              </nav>
+            </React.Fragment>
+          )}
           <div className={`${baseClass}__controls`}>
             <Localizer />
             <Link

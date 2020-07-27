@@ -19,14 +19,14 @@ const DateTime = (props) => {
     path: pathFromProps,
     name,
     required,
-    defaultValue,
-    initialData,
     validate,
-    style,
-    width,
     errorMessage,
     label,
-    readOnly,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
   } = props;
 
   const path = pathFromProps || name;
@@ -43,8 +43,6 @@ const DateTime = (props) => {
   } = useFieldType({
     path,
     required,
-    initialData,
-    defaultValue,
     validate: memoizedValidate,
   });
 
@@ -86,14 +84,10 @@ const DateTime = (props) => {
 DateTime.defaultProps = {
   label: null,
   required: false,
-  defaultValue: undefined,
-  initialData: undefined,
   validate: date,
   errorMessage: defaultError,
-  width: undefined,
-  style: {},
+  admin: {},
   path: '',
-  readOnly: false,
 };
 
 DateTime.propTypes = {
@@ -101,13 +95,13 @@ DateTime.propTypes = {
   path: PropTypes.string,
   label: PropTypes.string,
   required: PropTypes.bool,
-  defaultValue: PropTypes.string,
-  initialData: PropTypes.string,
   validate: PropTypes.func,
   errorMessage: PropTypes.string,
-  width: PropTypes.string,
-  style: PropTypes.shape({}),
-  readOnly: PropTypes.bool,
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
+  }),
 };
 
 export default withCondition(DateTime);

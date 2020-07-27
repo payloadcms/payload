@@ -34,9 +34,7 @@ module.exports = function localizationPlugin(schema, options) {
 
     // schema.remove removes path from paths object only, but doesn't update tree
     // sounds like a bug, removing item from the tree manually
-    const tree = pathArray.reduce((mem, part) => {
-      return mem[part];
-    }, schema.tree);
+    const tree = pathArray.reduce((mem, part) => mem[part], schema.tree);
     delete tree[key];
 
     schema.virtual(path)
@@ -46,7 +44,7 @@ module.exports = function localizationPlugin(schema, options) {
         const locale = owner.getLocale();
         const localeSubDoc = this.$__getValue(path);
 
-        if (localeSubDoc === null || localeSubDoc === void 0) {
+        if (localeSubDoc === null || localeSubDoc === undefined) {
           return localeSubDoc;
         }
 
@@ -103,7 +101,7 @@ module.exports = function localizationPlugin(schema, options) {
     };
 
     options.locales.forEach(function (locale) {
-      const localeOptions = Object.assign({}, schemaType.options);
+      const localeOptions = { ...schemaType.options };
       if (locale !== options.defaultLocale) {
         delete localeOptions.default;
         delete localeOptions.required;
@@ -150,7 +148,7 @@ module.exports = function localizationPlugin(schema, options) {
       this.fallbackLocale = sanitizeFallbackLocale(fallbackLocale);
       this.schema.eachPath((path, schemaType) => {
         if (schemaType.options.type instanceof Array) {
-          if (this[path]) this[path].forEach(doc => doc.setLocale && doc.setLocale(locale, this.fallbackLocale));
+          if (this[path]) this[path].forEach((doc) => doc.setLocale && doc.setLocale(locale, this.fallbackLocale));
         }
 
         if (schemaType.options.ref && this[path]) {
