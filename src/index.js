@@ -23,6 +23,8 @@ const identifyAPI = require('./express/middleware/identifyAPI');
 const errorHandler = require('./express/middleware/errorHandler');
 const performFieldOperations = require('./fields/performFieldOperations');
 
+const localOperations = require('./collections/operations/local');
+
 class Payload {
   constructor(options) {
     logger.info('Starting Payload...');
@@ -56,7 +58,7 @@ class Payload {
     // Setup & initialization
     connectMongoose(this.config.mongoURL);
 
-    this.router.use(...expressMiddleware(this.config, this.collections));
+    this.router.use(...expressMiddleware(this));
 
     this.initAuth();
     this.initCollections();
@@ -104,6 +106,12 @@ class Payload {
 
   authenticate() {
     return authenticate(this.config);
+  }
+
+  async find(options) {
+    let { find } = localOperations;
+    find = find.bind(this);
+    return find(options);
   }
 }
 

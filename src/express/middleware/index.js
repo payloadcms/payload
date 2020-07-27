@@ -9,22 +9,26 @@ const localizationMiddleware = require('../../localization/middleware');
 const authenticate = require('./authenticate');
 const identifyAPI = require('./identifyAPI');
 
-const middleware = (config) => [
+const middleware = (payload) => [
   passport.initialize(),
   identifyAPI('REST'),
-  authenticate(config),
+  authenticate(payload.config),
   express.json(),
   methodOverride('X-HTTP-Method-Override'),
   qsMiddleware({ depth: 10 }),
   bodyParser.urlencoded({ extended: true }),
-  compression(config.compression),
-  localizationMiddleware(config.localization),
+  compression(payload.config.compression),
+  localizationMiddleware(payload.config.localization),
   fileUpload({
     parseNested: true,
   }),
+  (req, _, next) => {
+    req.payload = payload;
+    return next();
+  },
   (req, res, next) => {
-    if (config.cors) {
-      if (config.cors.indexOf(req.headers.origin) > -1) {
+    if (payload.config.cors) {
+      if (payload.config.cors.indexOf(req.headers.origin) > -1) {
         res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
         res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
       }
