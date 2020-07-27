@@ -33,7 +33,7 @@
   &--vertical-alignment-sticky {
     .action-panel__controls {
       position: sticky;
-      top: 120px;
+      top: $top-header-offset;
       height: unset;
     }
   }
