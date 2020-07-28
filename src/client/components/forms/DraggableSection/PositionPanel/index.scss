@@ -1,39 +1,6 @@
 @import '../../../../scss/styles';
 
-$controls-top-adjustment: base(.1);
-
 .position-panel {
-  padding-right: base(1);
-  margin-bottom: base(1);
-
-  &__controls-container {
-    position: relative;
-    min-height: 100%;
-    box-shadow: #{$style-stroke-width-s} 0px 0px 0px $color-light-gray;
-  }
-
-  &__controls {
-    padding-right: base(.65);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100%;
-  }
-
-  &--vertical-alignment-top {
-    .position-panel__controls {
-      justify-content: flex-start;
-    }
-  }
-
-  &--vertical-alignment-sticky {
-    .position-panel__controls {
-      position: sticky;
-      top: $top-header-offset;
-      height: unset;
-    }
-  }
-
   &__move-backward {
     transform: rotate(.5turn);
     margin: 0;
@@ -51,24 +18,14 @@ $controls-top-adjustment: base(.1);
   }
 
   @include large-break {
-    padding-right: base(1);
+    padding-right: 0;
 
     &__controls {
       padding-right: base(.75);
     }
   }
-}
 
-
-// External scopes
-.field-type.blocks {
-  .position-panel {
-    &__controls-container {
-      min-height: calc(100% + #{$controls-top-adjustment});
-    }
-
-    &__controls {
-      margin-top: - $controls-top-adjustment;
-    }
+  @include mid-break {
+    padding-right: 0;
   }
 }

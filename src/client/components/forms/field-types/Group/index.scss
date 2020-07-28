@@ -1,3 +1,28 @@
-.field-group {
+@import '../../../../scss/styles.scss';
 
+.group {
+  &:hover {
+    .render-field-gutter__content-container {
+      box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
+    }
+  }
+
+  &__fields-wrapper {
+    position: relative;
+  }
+
+  .render-fields {
+    width: 100%;
+  }
+
+  @include mid-break {
+    &__fields-wrapper {
+      display: flex;
+    }
+
+    .render-field-gutter__content-container {
+      padding-right: 0;
+      padding-left: 2px;
+    }
+  }
 }

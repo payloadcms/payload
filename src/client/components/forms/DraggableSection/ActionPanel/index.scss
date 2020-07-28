@@ -1,41 +1,8 @@
 @import '../../../../scss/styles';
 
 .action-panel {
-  padding: 0 base(.5);
-  padding-left: base(.75);
-  margin-bottom: base(1);
-
   &:hover {
     z-index: $z-nav;
-  }
-
-  &__controls-container {
-    position: relative;
-    height: 100%;
-  }
-
-  &__controls {
-    display: flex;
-    justify-content: center;
-    height: 100%;
-    flex-direction: column;
-    color: $color-gray;
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  &--vertical-alignment-top {
-    .action-panel__controls {
-      justify-content: flex-start;
-    }
-  }
-
-  &--vertical-alignment-sticky {
-    .action-panel__controls {
-      position: sticky;
-      top: $top-header-offset;
-      height: unset;
-    }
   }
 
   &__remove-row {
@@ -44,18 +11,5 @@
 
   &__add-row {
     margin: base(.3) 0 0;
-  }
-
-  @include mid-break {
-    &__controls {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    &--vertical-alignment-sticky {
-      .action-panel__controls {
-        top: 100px;
-      }
-    }
   }
 }
