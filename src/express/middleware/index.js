@@ -24,7 +24,7 @@ const middleware = (payload) => [
   }),
   (req, _, next) => {
     req.payload = payload;
-    return next();
+    next();
   },
   (req, res, next) => {
     if (payload.config.cors) {
