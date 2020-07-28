@@ -45,6 +45,7 @@ const DefaultEditView = (props) => {
     fields,
     admin: {
       useAsTitle,
+      disableDuplicate,
     },
     timestamps,
     preview,
@@ -110,10 +111,12 @@ const DefaultEditView = (props) => {
         <div className={`${baseClass}__sidebar`}>
           {isEditing ? (
             <ul className={`${baseClass}__collection-actions`}>
-              {permissions?.create?.permission && (
+              {(permissions?.create?.permission) && (
                 <React.Fragment>
                   <li><Link to={`${admin}/collections/${slug}/create`}>Create New</Link></li>
-                  <li><DuplicateDocument slug={slug} /></li>
+                  {!disableDuplicate && (
+                    <li><DuplicateDocument slug={slug} /></li>
+                  )}
                 </React.Fragment>
               )}
               {permissions?.delete?.permission && (
@@ -220,6 +223,7 @@ DefaultEditView.propTypes = {
     slug: PropTypes.string,
     admin: PropTypes.shape({
       useAsTitle: PropTypes.string,
+      disableDuplicate: PropTypes.bool,
     }),
     fields: PropTypes.arrayOf(PropTypes.shape({})),
     preview: PropTypes.func,
