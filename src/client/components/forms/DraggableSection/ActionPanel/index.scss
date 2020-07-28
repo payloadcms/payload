@@ -5,38 +5,6 @@
     z-index: $z-nav;
   }
 
-<<<<<<< Updated upstream
-  &__controls-container {
-    position: relative;
-    height: 100%;
-  }
-
-  &__controls {
-    display: flex;
-    justify-content: center;
-    height: 100%;
-    flex-direction: column;
-    color: $color-gray;
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  &--vertical-alignment-top {
-    .action-panel__controls {
-      justify-content: flex-start;
-    }
-  }
-
-  &--vertical-alignment-sticky {
-    .action-panel__controls {
-      position: sticky;
-      top: 120px;
-      height: unset;
-    }
-  }
-
-=======
->>>>>>> Stashed changes
   &__remove-row {
     margin: 0 0 base(.3);
   }
