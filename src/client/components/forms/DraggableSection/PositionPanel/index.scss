@@ -1,8 +1,7 @@
 @import '../../../../scss/styles';
 
-$controls-top-adjustment: base(.1);
-
 .position-panel {
+<<<<<<< Updated upstream
   padding-right: base(1);
   margin-bottom: base(1);
 
@@ -34,6 +33,8 @@ $controls-top-adjustment: base(.1);
     }
   }
 
+=======
+>>>>>>> Stashed changes
   &__move-backward {
     transform: rotate(.5turn);
     margin: 0;
@@ -51,24 +52,14 @@ $controls-top-adjustment: base(.1);
   }
 
   @include large-break {
-    padding-right: base(1);
+    padding-right: 0;
 
     &__controls {
       padding-right: base(.75);
     }
   }
-}
 
-
-// External scopes
-.field-type.blocks {
-  .position-panel {
-    &__controls-container {
-      min-height: calc(100% + #{$controls-top-adjustment});
-    }
-
-    &__controls {
-      margin-top: - $controls-top-adjustment;
-    }
+  @include mid-break {
+    padding-right: 0;
   }
 }

@@ -1,0 +1,72 @@
+@import '../../../scss/styles.scss';
+
+$controls-top-adjustment: base(.1);
+
+.render-field-gutter {
+  padding-right: base(1.25);
+  margin-bottom: base(1);
+
+  &--right {
+    padding-right: 0;
+    padding-left: base(1.25);
+
+    .render-field-gutter__content {
+      margin-bottom: base(1);
+    }
+
+    .render-field-gutter__content-container {
+      padding-right: 0;
+      box-shadow: none;
+    }
+  }
+
+  &--v-align-top {
+    .render-field-gutter__content {
+      justify-content: flex-start;
+    }
+  }
+
+  &--v-align-sticky {
+    .render-field-gutter__content {
+      position: sticky;
+      top: $top-header-offset;
+      height: unset;
+    }
+  }
+
+  &__content-container {
+    padding-right: base(.75);
+    position: relative;
+    min-height: 100%;
+    box-shadow: #{$style-stroke-width-s} 0px 0px 0px $color-light-gray;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+  }
+
+  @include mid-break {
+    padding-right: base(1);
+
+    &--right {
+      padding-right: 0;
+    }
+  }
+}
+
+
+// External scopes
+.field-type.blocks {
+  .render-field-gutter {
+    &__content-container {
+      min-height: calc(100% + #{$controls-top-adjustment});
+    }
+
+    &__content {
+      margin-top: - $controls-top-adjustment;
+    }
+  }
+}

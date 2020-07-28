@@ -6,10 +6,12 @@ import { Draggable } from 'react-beautiful-dnd';
 import ActionPanel from './ActionPanel';
 import SectionTitle from './SectionTitle';
 import PositionPanel from './PositionPanel';
+import Button from '../../elements/Button';
+import RenderFieldGutter from '../RenderFieldGutter';
 import RenderFields from '../RenderFields';
 
+
 import './index.scss';
-import Button from '../../elements/Button';
 
 const baseClass = 'draggable-section';
 
@@ -58,13 +60,17 @@ const DraggableSection = (props) => {
         >
 
           <div className={`${baseClass}__content-wrapper`}>
-            <PositionPanel
+            <RenderFieldGutter
+              variant="left"
               dragHandleProps={providedDrag.dragHandleProps}
-              moveRow={moveRow}
-              rowCount={rowCount}
-              positionIndex={rowIndex}
-              verticalAlignment={positionPanelVerticalAlignment}
-            />
+            >
+              <PositionPanel
+                moveRow={moveRow}
+                rowCount={rowCount}
+                positionIndex={rowIndex}
+                verticalAlignment={positionPanelVerticalAlignment}
+              />
+            </RenderFieldGutter>
 
             <div className={`${baseClass}__render-fields-wrapper`}>
 
@@ -102,15 +108,17 @@ const DraggableSection = (props) => {
               </AnimateHeight>
             </div>
 
-            <ActionPanel
-              rowIndex={rowIndex}
-              addRow={addRow}
-              removeRow={removeRow}
-              singularLabel={singularLabel}
-              verticalAlignment={actionPanelVerticalAlignment}
-              isHovered={isHovered}
-              {...props}
-            />
+            <RenderFieldGutter variant="right" className="actions" dragHandleProps={providedDrag.dragHandleProps}>
+              <ActionPanel
+                rowIndex={rowIndex}
+                addRow={addRow}
+                removeRow={removeRow}
+                singularLabel={singularLabel}
+                verticalAlignment={actionPanelVerticalAlignment}
+                isHovered={isHovered}
+                {...props}
+              />
+            </RenderFieldGutter>
           </div>
         </div>
       )}

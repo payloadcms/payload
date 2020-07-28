@@ -5,26 +5,26 @@
 //////////////////////
 
 @mixin relatively-position-panels {
-  .position-panel {
+  .render-field-gutter {
     position: relative;
     right: 0;
   }
 
-  .action-panel {
+  .render-field-gutter.actions {
     position: relative;
     left: 0;
   }
 }
 
 @mixin absolutely-position-panels {
-  .position-panel {
+  .render-field-gutter {
     position: absolute;
     top: 0; right: 100%; bottom: 0;
   }
 
-  .action-panel {
+  .render-field-gutter.actions {
     position: absolute;
-    top: 0; bottom: 0; left: 100%;
+    top: 0; bottom: 0; left: 100%; right: unset;
   }
 }
 
@@ -58,6 +58,10 @@
       margin: 0 0 0 auto;
       transform: rotate(.5turn);
 
+      .btn__icon {
+        background-color: white;
+      }
+
       &--is-closed {
         transform: rotate(0turn);
       }
@@ -69,8 +73,8 @@
   }
 
   &.is-hovered > div {
-    > .position-panel {
-      .position-panel__controls-container {
+    > .render-field-gutter {
+      .render-field-gutter__content-container:not(&.actions) {
         box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
       }
 
@@ -144,6 +148,14 @@
 .field-type.array .field-type.blocks,
 .field-type.blocks .field-type.blocks {
   @include relatively-position-panels();
+}
+
+.field-type.group {
+  @include absolutely-position-panels();
+
+  @include mid-break {
+    @include relatively-position-panels();
+  }
 }
 
 // remove padding above array rows to level
