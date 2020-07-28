@@ -55,4 +55,10 @@
       }
     }
   }
+
+  &--read-only {
+    &__input {
+      background-color: lighten($color-gray, 5%);
+    }
+  }
 }

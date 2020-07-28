@@ -3,3 +3,11 @@
 .field-type.select {
   position: relative;
 }
+
+.select--read-only {
+  div.react-select {
+    div.rs__control {
+      background: lighten($color-light-gray, 5%);
+    }
+  }
+}

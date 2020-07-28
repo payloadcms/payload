@@ -61,15 +61,25 @@
 }
 
 .radio-group--read-only {
-  .radio-input__label {
-    color: $color-gray;
-  }
+  .radio-input {
+    &__label {
+      color: $color-gray;
+    }
 
-  .radio-input--is-selected {
-    .radio-input {
-      &__styled-radio {
+    &--is-selected {
+      .radio-input__styled-radio {
         &:before {
           background-color: $color-gray;
+        }
+      }
+    }
+
+    &:not(&--is-selected) {
+      &:hover {
+        .radio-input__styled-radio {
+          &:before {
+            opacity: 0;
+          }
         }
       }
     }

@@ -50,7 +50,7 @@ const Checkbox = (props) => {
     baseClass,
     showError && 'error',
     value && `${baseClass}--checked`,
-    readOnly && 'read-only',
+    readOnly && `${baseClass}--read-only`,
   ].filter(Boolean).join(' ');
 
   return (
@@ -74,7 +74,7 @@ const Checkbox = (props) => {
       />
       <button
         type="button"
-        onClick={() => {
+        onClick={readOnly ? undefined : () => {
           setValue(!value);
           if (typeof onChange === 'function') onChange(!value);
         }}

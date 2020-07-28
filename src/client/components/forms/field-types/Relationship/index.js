@@ -34,6 +34,7 @@ class Relationship extends Component {
       lastLoadedPage: 1,
       options: [],
       errorLoading: false,
+      loadedIDs: [],
     };
   }
 
@@ -41,10 +42,14 @@ class Relationship extends Component {
     this.getNextOptions();
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    const { search } = this.state;
+  componentDidUpdate(_, prevState) {
+    const { search, options } = this.state;
     if (search !== prevState.search) {
       this.getNextOptions({ clear: true });
+    }
+
+    if (options !== prevState.options) {
+      this.ensureValueHasOption();
     }
   }
 
@@ -55,6 +60,8 @@ class Relationship extends Component {
     if (clear) {
       this.setState({
         options: [],
+        loadedIDs: [],
+        lastFullyLoadedRelation: -1,
       });
     }
 
@@ -63,7 +70,7 @@ class Relationship extends Component {
         relations, lastFullyLoadedRelation, lastLoadedPage, search,
       } = this.state;
 
-      const relationsToSearch = relations.slice(lastFullyLoadedRelation + 1);
+      const relationsToSearch = lastFullyLoadedRelation === -1 ? relations : relations.slice(lastFullyLoadedRelation + 1);
 
       if (relationsToSearch.length > 0) {
         some(relationsToSearch, async (relation, callback) => {
@@ -97,6 +104,9 @@ class Relationship extends Component {
           if (nextPage) {
             const { data, relation } = nextPage;
             this.addOptions(data, relation);
+            this.setState({
+              lastLoadedPage: lastLoadedPage + 1,
+            });
           } else {
             const { data, relation } = lastPage;
             this.addOptions(data, relation);
@@ -154,61 +164,116 @@ class Relationship extends Component {
 
   addOptions = (data, relation) => {
     const { hasMultipleRelations } = this.props;
-    const { lastLoadedPage, options } = this.state;
+    const { options, loadedIDs } = this.state;
     const collection = collections.find((coll) => coll.slug === relation);
 
-    if (!hasMultipleRelations) {
-      this.setState({
-        options: [
-          ...options,
-          ...data.docs.map((doc) => ({
-            label: doc[collection?.admin?.useAsTitle || 'id'],
-            value: doc.id,
-          })),
-        ],
-      });
-    } else {
-      const allOptionGroups = [...options];
-      const optionsToAddTo = allOptionGroups.find((optionGroup) => optionGroup.label === collection.labels.plural);
+    const newlyLoadedIDs = [];
 
-      const newOptions = data.docs.map((doc) => ({
-        label: doc[collection?.admin?.useAsTitle || 'id'],
-        value: {
-          relationTo: collection.slug,
-          value: doc.id,
-        },
-      }));
+    let newOptions = [];
+
+    if (!hasMultipleRelations) {
+      newOptions = [
+        ...options,
+        ...data.docs.reduce((docs, doc) => {
+          if (loadedIDs.indexOf(doc.id) === -1) {
+            newlyLoadedIDs.push(doc.id);
+
+            return [
+              ...docs,
+              {
+                label: doc[collection?.admin?.useAsTitle || 'id'],
+                value: doc.id,
+              },
+            ];
+          }
+          return docs;
+        }, []),
+      ];
+    } else {
+      newOptions = [...options];
+      const optionsToAddTo = newOptions.find((optionGroup) => optionGroup.label === collection.labels.plural);
+
+      const newSubOptions = data.docs.reduce((docs, doc) => {
+        if (loadedIDs.indexOf(doc.id) === -1) {
+          newlyLoadedIDs.push(doc.id);
+
+          return [
+            ...docs,
+            {
+              label: doc[collection?.admin?.useAsTitle || 'id'],
+              value: {
+                relationTo: collection.slug,
+                value: doc.id,
+              },
+            },
+          ];
+        }
+
+        return docs;
+      }, []);
 
       if (optionsToAddTo) {
         optionsToAddTo.options = [
           ...optionsToAddTo.options,
-          ...newOptions,
+          ...newSubOptions,
         ];
       } else {
-        allOptionGroups.push({
+        newOptions.push({
           label: collection.labels.plural,
-          options: newOptions,
+          options: newSubOptions,
         });
       }
-
-      this.setState({
-        options: [
-          ...allOptionGroups,
-        ],
-      });
     }
 
     this.setState({
-      lastLoadedPage: lastLoadedPage + 1,
+      options: newOptions,
+      loadedIDs: [
+        ...loadedIDs,
+        ...newlyLoadedIDs,
+      ],
     });
   }
 
+  ensureValueHasOption = async () => {
+    const { relationTo, hasMany, value } = this.props;
+    const { options } = this.state;
+    const locatedValue = this.findValueInOptions(options, value);
+
+    const hasMultipleRelations = Array.isArray(relationTo);
+
+    if (!locatedValue && value) {
+      if (hasMany) {
+        value.forEach((val) => {
+          if (hasMultipleRelations) {
+            this.addOptionByID(val.value, val.relationTo);
+          } else {
+            this.addOptionByID(val, relationTo);
+          }
+        });
+      } else if (hasMultipleRelations) {
+        this.addOptionByID(value.value, value.relationTo);
+      } else {
+        this.addOptionByID(value, relationTo);
+      }
+    }
+  }
+
+  addOptionByID = async (id, relation) => {
+    const response = await fetch(`${serverURL}${api}/${relation}/${id}`);
+    const data = await response.json();
+    this.addOptions({ docs: [data] }, relation);
+  }
+
   handleInputChange = (search) => {
-    this.setState({
-      search,
-      lastFullyLoadedRelation: -1,
-      lastLoadedPage: 1,
-    });
+    const { search: existingSearch } = this.state;
+
+    if (search !== existingSearch) {
+      this.setState({
+        search,
+        lastFullyLoadedRelation: -1,
+        lastLoadedPage: 1,
+      });
+    }
   }
 
   handleMenuScrollToBottom = () => {
@@ -240,10 +305,10 @@ class Relationship extends Component {
       baseClass,
       showError && 'error',
       errorLoading && 'error-loading',
-      readOnly && 'read-only',
+      readOnly && `${baseClass}--read-only`,
     ].filter(Boolean).join(' ');
 
-    const valueToRender = this.findValueInOptions(options, value);
+    const valueToRender = this.findValueInOptions(options, value) || value;
 
     return (
       <div
@@ -264,6 +329,7 @@ class Relationship extends Component {
         />
         {!errorLoading && (
           <ReactSelect
+            isDisabled={readOnly}
             onInputChange={this.handleInputChange}
             onChange={!readOnly ? setValue : undefined}
             formatValue={this.formatSelectedValue}
