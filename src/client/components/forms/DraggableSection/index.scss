@@ -81,7 +81,12 @@
 
   &.is-hovered > div {
     > .render-field-gutter {
-      .render-field-gutter__content-container:not(&.actions) {
+      &.actions {
+        .render-field-gutter__content-container {
+          box-shadow: none;
+        }
+      }
+      .render-field-gutter__content-container {
         box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
       }
 
