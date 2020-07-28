@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import { useSlate, useFocused } from 'slate-react';
 import { ToolbarElement, ToolbarMark, ToolbarList } from '@udecode/slate-plugins';
 

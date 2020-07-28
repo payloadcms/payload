@@ -25,18 +25,19 @@
   }
 
   input {
-    background: none;
+    background: transparent;
     border: none;
+    border-radius: $style-radius-s;
     width: 100%;
     margin-left: base(.5);
+
+    &:hover {
+      box-shadow: inset 0px -2px 0px -1px $color-light-gray;
+    }
 
     &:hover,
     &:focus {
       outline: 0;
-    }
-
-    &:hover {
-      box-shadow: inset 0px -2px 0px -1px $color-light-gray;
     }
 
     &:focus {

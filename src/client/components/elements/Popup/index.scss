@@ -26,7 +26,8 @@
 
   &__scroll {
     padding: base(1);
-    overflow-y: scroll;
+    overflow-y: auto;
+    width: calc(100% + var(--scrollbar-width));
     white-space: nowrap;
   }
 
