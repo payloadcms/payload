@@ -51,6 +51,7 @@ div.react-select {
   }
 
   .rs__menu {
+    z-index: 2;
     border-radius: 0;
     @include inputShadowActive;
   }
