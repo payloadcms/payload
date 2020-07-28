@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const formatErrorResponse = require('../responses/formatError');
 const logger = require('../../utilities/logger')();
 
-const errorHandler = (config) => async (err, req, res) => {
+const errorHandler = (config) => async (err, req, res, next) => {
   const data = formatErrorResponse(err);
   let response;
   let status = err.status || httpStatus.INTERNAL_SERVER_ERROR;
