@@ -29,6 +29,9 @@ const ArrayFieldType = (props) => {
     minRows,
     singularLabel,
     permissions,
+    admin: {
+      readOnly,
+    },
   } = props;
 
   const [rows, dispatchRows] = useReducer(reducer, []);
@@ -113,6 +116,7 @@ const ArrayFieldType = (props) => {
       fields={fields}
       permissions={permissions}
       value={value}
+      readOnly={readOnly}
     />
   );
 };
@@ -125,6 +129,7 @@ ArrayFieldType.defaultProps = {
   minRows: undefined,
   singularLabel: 'Row',
   permissions: {},
+  admin: {},
 };
 
 ArrayFieldType.propTypes = {
@@ -142,6 +147,9 @@ ArrayFieldType.propTypes = {
   minRows: PropTypes.number,
   permissions: PropTypes.shape({
     fields: PropTypes.shape({}),
+  }),
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
   }),
 };
 
@@ -163,6 +171,7 @@ const RenderArray = React.memo((props) => {
     fields,
     permissions,
     value,
+    readOnly,
   } = props;
 
   return (
@@ -183,6 +192,7 @@ const RenderArray = React.memo((props) => {
             >
               {rows.length > 0 && rows.map((row, i) => (
                 <DraggableSection
+                  readOnly={readOnly}
                   key={row.key}
                   id={row.key}
                   blockType="array"
@@ -205,18 +215,19 @@ const RenderArray = React.memo((props) => {
             </div>
           )}
         </Droppable>
-
-        <div className={`${baseClass}__add-button-wrap`}>
-          <Button
-            onClick={() => addRow(value)}
-            buttonStyle="icon-label"
-            icon="plus"
-            iconStyle="with-border"
-            iconPosition="left"
-          >
-            {`Add ${singularLabel}`}
-          </Button>
-        </div>
+        {!readOnly && (
+          <div className={`${baseClass}__add-button-wrap`}>
+            <Button
+              onClick={() => addRow(value)}
+              buttonStyle="icon-label"
+              icon="plus"
+              iconStyle="with-border"
+              iconPosition="left"
+            >
+              {`Add ${singularLabel}`}
+            </Button>
+          </div>
+        )}
       </div>
     </DragDropContext>
   );
@@ -231,6 +242,7 @@ RenderArray.defaultProps = {
   path: '',
   customComponentsPath: undefined,
   value: undefined,
+  readOnly: false,
 };
 
 RenderArray.propTypes = {
@@ -256,6 +268,7 @@ RenderArray.propTypes = {
   permissions: PropTypes.shape({
     fields: PropTypes.shape({}),
   }).isRequired,
+  readOnly: PropTypes.bool,
 };
 
 export default withCondition(ArrayFieldType);

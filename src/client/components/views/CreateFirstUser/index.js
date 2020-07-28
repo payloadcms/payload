@@ -46,7 +46,7 @@ const CreateFirstUser = (props) => {
 
   return (
     <MinimalTemplate className={baseClass}>
-      <h1>Welcome to Payload</h1>
+      <h1>Welcome</h1>
       <p>To begin, create your first user.</p>
       <Form
         onSuccess={onSuccess}

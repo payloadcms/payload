@@ -7,7 +7,14 @@ import './index.scss';
 
 const Group = (props) => {
   const {
-    label, fields, name, path: pathFromProps, fieldTypes,
+    label,
+    fields,
+    name,
+    path: pathFromProps,
+    fieldTypes,
+    admin: {
+      readOnly,
+    },
   } = props;
 
   const path = pathFromProps || name;
@@ -18,6 +25,7 @@ const Group = (props) => {
     <div className="field-type group">
       <h3>{label}</h3>
       <RenderFields
+        readOnly={readOnly}
         fieldTypes={fieldTypes}
         customComponentsPath={`${customComponentsPath}${name}.fields.`}
         fieldSchema={fields.map((subField) => ({
@@ -32,6 +40,7 @@ const Group = (props) => {
 Group.defaultProps = {
   label: '',
   path: '',
+  admin: {},
 };
 
 Group.propTypes = {
@@ -42,6 +51,9 @@ Group.propTypes = {
   name: PropTypes.string.isRequired,
   path: PropTypes.string,
   fieldTypes: PropTypes.shape({}).isRequired,
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+  }),
 };
 
 export default withCondition(Group);
