@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
@@ -45,17 +45,21 @@ const Checkbox = (props) => {
     disableFormData,
   });
 
-  const classes = [
-    'field-type',
-    baseClass,
-    showError && 'error',
-    value && `${baseClass}--checked`,
-    readOnly && `${baseClass}--read-only`,
-  ].filter(Boolean).join(' ');
+  useEffect(() => {
+    if (value === null || value === undefined) {
+      setValue(false);
+    }
+  }, [value, setValue]);
 
   return (
     <div
-      className={classes}
+      className={[
+        'field-type',
+        baseClass,
+        showError && 'error',
+        value && `${baseClass}--checked`,
+        readOnly && `${baseClass}--read-only`,
+      ].filter(Boolean).join(' ')}
       style={{
         ...style,
         width,
