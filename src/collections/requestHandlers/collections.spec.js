@@ -2,8 +2,11 @@
  * @jest-environment node
  */
 
+const fs = require('fs');
+const path = require('path');
 require('isomorphic-fetch');
 const faker = require('faker');
+const FormData = require('form-data');
 const config = require('../../../demo/payload.config');
 const { email, password } = require('../../tests/credentials');
 
@@ -630,6 +633,56 @@ describe('Collections - REST', () => {
       [nested] = nested.post;
       expect(nested).not.toHaveProperty('post');
       expect(nested).toBe(documentA.id);
+    });
+  });
+
+  describe('Media', () => {
+    beforeEach(() => {
+      // Clear demo/media directory
+      const mediaDir = path.join(__dirname, '../../../demo', 'media');
+      fs.readdir(mediaDir, (err, files) => {
+        if (err) throw err;
+
+        // eslint-disable-next-line no-restricted-syntax
+        for (const file of files) {
+          fs.unlink(path.join(mediaDir, file), (unlinkErr) => {
+            if (unlinkErr) throw unlinkErr;
+          });
+        }
+      });
+    });
+
+    it('create', async () => {
+      const formData = new FormData();
+      formData.append('file', fs.createReadStream(path.join(__dirname, '../..', 'tests/assets/image.png')));
+      formData.append('alt', 'test media');
+      formData.append('locale', 'en');
+
+      const response = await fetch(`${url}/api/media`, {
+        body: formData,
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+        method: 'post',
+      });
+
+      const data = await response.json();
+
+      expect(response.status).toBe(201);
+
+      expect(data.doc.alt).not.toBeNull();
+      expect(data.doc.filename).toBe('image.png');
+      expect(data.doc.mimeType).not.toBeNull();
+      expect(data.doc.sizes.icon.filesize).not.toBeLessThan(1);
+      expect(data.doc.sizes.icon.filename).toBe('image-16x16.png');
+      expect(data.doc.sizes.icon.width).toBe(16);
+      expect(data.doc.sizes.icon.height).toBe(16);
+      expect(data.doc.sizes.mobile.filename).toBe('image-320x240.png');
+      expect(data.doc.sizes.mobile.width).toBe(320);
+      expect(data.doc.sizes.mobile.height).toBe(240);
+      expect(data.doc.sizes.tablet.filename).toBe('image-640x480.png');
+      expect(data.doc.sizes.tablet.width).toBe(640);
+      expect(data.doc.sizes.tablet.height).toBe(480);
     });
   });
 });
