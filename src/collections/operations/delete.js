@@ -97,7 +97,7 @@ async function deleteQuery(args) {
   result = await this.performFieldOperations(collectionConfig, {
     data: result,
     hook: 'afterRead',
-    operationName: 'read',
+    operation: 'read',
     req,
     depth,
   });

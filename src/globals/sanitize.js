@@ -23,8 +23,9 @@ const sanitizeGlobals = (globals) => {
     if (!sanitizedGlobal.access) sanitizedGlobal.access = {};
     if (!sanitizedGlobal.admin) sanitizedGlobal.admin = {};
 
-    if (!sanitizedGlobal.hooks.beforeUpdate) sanitizedGlobal.hooks.beforeUpdate = [];
-    if (!sanitizedGlobal.hooks.afterUpdate) sanitizedGlobal.hooks.afterUpdate = [];
+    if (!sanitizedGlobal.hooks.beforeValidate) sanitizedGlobal.hooks.beforeValidate = [];
+    if (!sanitizedGlobal.hooks.beforeChange) sanitizedGlobal.hooks.beforeChange = [];
+    if (!sanitizedGlobal.hooks.afterChange) sanitizedGlobal.hooks.afterChange = [];
     if (!sanitizedGlobal.hooks.beforeRead) sanitizedGlobal.hooks.beforeRead = [];
     if (!sanitizedGlobal.hooks.afterRead) sanitizedGlobal.hooks.afterRead = [];
 

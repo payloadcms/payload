@@ -50,7 +50,7 @@ async function findOne(args) {
   doc = this.performFieldOperations(globalConfig, {
     data: doc,
     hook: 'afterRead',
-    operationName: 'read',
+    operation: 'read',
     req,
     depth,
   });

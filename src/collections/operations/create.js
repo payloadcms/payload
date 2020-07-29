@@ -33,31 +33,46 @@ async function create(args) {
   await executeAccess({ req }, collectionConfig.access.create);
 
   // /////////////////////////////////////
-  // 2. Execute field-level access, hooks, and validation
+  // 2. Execute before validate collection hooks
   // /////////////////////////////////////
 
-  data = await performFieldOperations(collectionConfig, {
-    data,
-    hook: 'beforeCreate',
-    operationName: 'create',
-    req,
-  });
-
-  // /////////////////////////////////////
-  // 3. Execute before collection hook
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.beforeCreate.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
     await priorHook;
 
     data = (await hook({
       data,
       req,
+      operation: 'create',
     })) || data;
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 4. Upload and resize any files that may be present
+  // 3. Execute field-level access, beforeChange hooks, and validation
+  // /////////////////////////////////////
+
+  data = await performFieldOperations(collectionConfig, {
+    data,
+    hook: 'beforeChange',
+    operation: 'create',
+    req,
+  });
+
+  // /////////////////////////////////////
+  // 4. Execute before change hooks
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    data = (await hook({
+      data,
+      req,
+      operation: 'create',
+    })) || data;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // 5. Upload and resize any files that may be present
   // /////////////////////////////////////
 
   if (collectionConfig.upload) {
@@ -98,7 +113,7 @@ async function create(args) {
   }
 
   // /////////////////////////////////////
-  // 5. Perform database operation
+  // 6. Perform database operation
   // /////////////////////////////////////
 
   let result = new Model();
@@ -113,32 +128,33 @@ async function create(args) {
   result = result.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 6. Execute field-level hooks and access
+  // 7. Execute field-level hooks and access
   // /////////////////////////////////////
 
   result = await performFieldOperations(collectionConfig, {
     data: result,
     hook: 'afterRead',
-    operationName: 'read',
+    operation: 'read',
     req,
     depth,
   });
 
   // /////////////////////////////////////
-  // 7. Execute after collection hook
+  // 8. Execute after collection hook
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterCreate.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
     result = await hook({
       doc: result,
       req: args.req,
+      operation: 'create',
     }) || result;
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 8. Return results
+  // 9. Return results
   // /////////////////////////////////////
 
   return result;

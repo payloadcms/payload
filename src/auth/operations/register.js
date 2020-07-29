@@ -27,31 +27,47 @@ async function register(args) {
   }
 
   // /////////////////////////////////////
-  // 2. Execute field-level hooks, access, and validation
+  // 2. Execute before validate collection hooks
   // /////////////////////////////////////
 
-  data = await this.performFieldOperations(collectionConfig, {
-    data,
-    hook: 'beforeCreate',
-    operationName: 'create',
-    req,
-  });
-
-  // /////////////////////////////////////
-  // 3. Execute before create hook
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.beforeCreate.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
     await priorHook;
 
     data = (await hook({
       data,
       req,
+      operation: 'create',
+    })) || data;
+  }, Promise.resolve());
+
+
+  // /////////////////////////////////////
+  // 3. Execute field-level hooks, access, and validation
+  // /////////////////////////////////////
+
+  data = await this.performFieldOperations(collectionConfig, {
+    data,
+    hook: 'beforeChange',
+    operation: 'create',
+    req,
+  });
+
+  // /////////////////////////////////////
+  // 4. Execute before create hook
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    data = (await hook({
+      data,
+      req,
+      operation: 'create',
     })) || data;
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 6. Perform register
+  // 5. Perform register
   // /////////////////////////////////////
 
   const modelData = { ...data };
@@ -72,32 +88,33 @@ async function register(args) {
   result = result.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 7. Execute field-level hooks and access
+  // 6. Execute field-level hooks and access
   // /////////////////////////////////////
 
   result = await this.performFieldOperations(collectionConfig, {
     data: result,
     hook: 'afterRead',
-    operationName: 'read',
+    operation: 'read',
     req,
     depth,
   });
 
   // /////////////////////////////////////
-  // 8. Execute after create hook
+  // 7. Execute after create hook
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterCreate.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
     result = await hook({
       doc: result,
       req: args.req,
+      operation: 'create',
     }) || result;
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 9. Return user
+  // 8. Return user
   // /////////////////////////////////////
 
   return result;

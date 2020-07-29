@@ -81,7 +81,7 @@ async function findByID(args) {
     req,
     data: result,
     hook: 'afterRead',
-    operationName: 'read',
+    operation: 'read',
     currentDepth,
   });
 

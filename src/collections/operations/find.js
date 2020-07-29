@@ -99,7 +99,7 @@ async function find(args) {
           data,
           req,
           hook: 'afterRead',
-          operationName: 'read',
+          operation: 'read',
           overrideAccess,
         },
         find,

@@ -406,8 +406,8 @@ describe('Collections - REST', () => {
 
       expect(getResponse.status).toBe(200);
       expect(data.docs).toHaveLength(2);
-      expect(data.docs[0].id).toEqual(id1);
-      expect(data.docs[1].id).toEqual(id2);
+      expect(data.docs[0].id).toStrictEqual(id1);
+      expect(data.docs[1].id).toStrictEqual(id2);
 
       // Query on shared desc and sort descending
       const getResponseSorted = await fetch(`${url}/api/localized-posts?where[description][equals]=${desc}&sort=-title`);
@@ -416,14 +416,14 @@ describe('Collections - REST', () => {
       expect(getResponse.status).toBe(200);
       expect(sortedData.docs).toHaveLength(2);
       // Opposite order from first request
-      expect(sortedData.docs[0].id).toEqual(id2);
-      expect(sortedData.docs[1].id).toEqual(id1);
+      expect(sortedData.docs[0].id).toStrictEqual(id2);
+      expect(sortedData.docs[1].id).toStrictEqual(id1);
     });
   });
 
   describe('Hooks', () => {
     describe('Before', () => {
-      it('beforeCreate', async () => {
+      it('beforeChange', async () => {
         const response = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
             title: faker.name.firstName(),
@@ -433,48 +433,13 @@ describe('Collections - REST', () => {
           headers: {
             Authorization: `JWT ${token}`,
             'Content-Type': 'application/json',
-            hook: 'beforeCreate', // Used by hook
+            hook: 'beforeChange', // Used by hook
           },
           method: 'post',
         });
         const data = await response.json();
         expect(response.status).toBe(201);
-        expect(data.doc.description).toEqual('Original-beforeCreateSuffix');
-      });
-
-      it('beforeUpdate', async () => {
-        const createResponse = await fetch(`${url}/api/hooks`, {
-          body: JSON.stringify({
-            title: faker.name.firstName(),
-            description: 'Original',
-            priority: 1,
-          }),
-          headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
-          },
-          method: 'post',
-        });
-        const createData = await createResponse.json();
-        expect(createResponse.status).toBe(201);
-        const { id } = createData.doc;
-
-        const response = await fetch(`${url}/api/hooks/${id}`, {
-          body: JSON.stringify({
-            description: 'Updated',
-          }),
-          headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
-            hook: 'beforeUpdate', // Used by hook
-
-          },
-          method: 'put',
-        });
-
-        const data = await response.json();
-        expect(response.status).toBe(200);
-        expect(data.doc.description).toEqual('Updated-beforeUpdateSuffix');
+        expect(data.doc.description).toStrictEqual('Original-beforeChangeSuffix');
       });
 
       it('beforeDelete', async () => {
@@ -505,30 +470,11 @@ describe('Collections - REST', () => {
         const data = await response.json();
         expect(response.status).toBe(200);
         // Intentionally afterDeleteHook - beforeDelete hook is setting header in order to trigger afterDelete hook
-        expect(data.afterDeleteHook).toEqual(true);
+        expect(data.afterDeleteHook).toStrictEqual(true);
       });
     });
 
     describe('After', () => {
-      it('afterCreate', async () => {
-        const response = await fetch(`${url}/api/hooks`, {
-          body: JSON.stringify({
-            title: faker.name.firstName(),
-            description: 'Original',
-            priority: 1,
-          }),
-          headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
-            hook: 'afterCreate', // Used by hook
-          },
-          method: 'post',
-        });
-        const data = await response.json();
-        expect(response.status).toBe(201);
-        expect(data.doc.afterCreateHook).toEqual(true);
-      });
-
       it('afterRead', async () => {
         const response = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
@@ -547,10 +493,10 @@ describe('Collections - REST', () => {
         const getResponse = await fetch(`${url}/api/hooks/${data.doc.id}`);
         const getResponseData = await getResponse.json();
         expect(getResponse.status).toBe(200);
-        expect(getResponseData.afterReadHook).toEqual(true);
+        expect(getResponseData.afterReadHook).toStrictEqual(true);
       });
 
-      it('afterUpdate', async () => {
+      it('afterChange', async () => {
         const createResponse = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
             title: faker.name.firstName(),
@@ -568,19 +514,19 @@ describe('Collections - REST', () => {
 
         const response = await fetch(`${url}/api/hooks/${id}`, {
           body: JSON.stringify({
-            description: 'afterUpdate',
+            description: 'afterChange',
           }),
           headers: {
             Authorization: `JWT ${token}`,
             'Content-Type': 'application/json',
-            hook: 'afterUpdate', // Used by hook
+            hook: 'afterChange', // Used by hook
           },
           method: 'put',
         });
 
         const data = await response.json();
         expect(response.status).toBe(200);
-        expect(data.doc.afterUpdateHook).toEqual(true);
+        expect(data.doc.afterChangeHook).toStrictEqual(true);
       });
 
       it('afterDelete', async () => {
@@ -610,7 +556,7 @@ describe('Collections - REST', () => {
 
         const data = await response.json();
         expect(response.status).toBe(200);
-        expect(data.afterDeleteHook).toEqual(true);
+        expect(data.afterDeleteHook).toStrictEqual(true);
       });
     });
   });

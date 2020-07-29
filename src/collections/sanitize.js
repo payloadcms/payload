@@ -77,10 +77,9 @@ const sanitizeCollection = (collections, collection) => {
   if (!sanitized.access) sanitized.access = {};
   if (!sanitized.admin) sanitized.admin = {};
 
-  if (!sanitized.hooks.beforeCreate) sanitized.hooks.beforeCreate = [];
-  if (!sanitized.hooks.afterCreate) sanitized.hooks.afterCreate = [];
-  if (!sanitized.hooks.beforeUpdate) sanitized.hooks.beforeUpdate = [];
-  if (!sanitized.hooks.afterUpdate) sanitized.hooks.afterUpdate = [];
+  if (!sanitized.hooks.beforeValidate) sanitized.hooks.beforeValidate = [];
+  if (!sanitized.hooks.beforeChange) sanitized.hooks.beforeChange = [];
+  if (!sanitized.hooks.afterChange) sanitized.hooks.afterChange = [];
   if (!sanitized.hooks.beforeRead) sanitized.hooks.beforeRead = [];
   if (!sanitized.hooks.afterRead) sanitized.hooks.afterRead = [];
   if (!sanitized.hooks.beforeDelete) sanitized.hooks.beforeDelete = [];
@@ -103,10 +102,14 @@ const sanitizeCollection = (collections, collection) => {
         name: 'filename',
         label: 'Filename',
         hooks: {
-          beforeCreate: [
-            ({ req }) => {
-              const file = (req.files && req.files.file) ? req.files.file : req.file;
-              return file.name;
+          beforeChange: [
+            ({ req, operation, value }) => {
+              if (operation === 'create') {
+                const file = (req.files && req.files.file) ? req.files.file : req.file;
+                return file.name;
+              }
+
+              return value;
             },
           ],
         },

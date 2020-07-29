@@ -4,8 +4,6 @@ const { NotFound, Forbidden } = require('../../errors');
 const executeAccess = require('../executeAccess');
 
 async function update(args) {
-  const { config } = this;
-
   const {
     depth,
     collection: {
@@ -54,39 +52,55 @@ async function update(args) {
   let { data } = args;
 
   // /////////////////////////////////////
-  // 2. Execute field-level hooks, access, and validation
+  // 3. Execute before validate collection hooks
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    data = (await hook({
+      data,
+      req,
+      operation: 'update',
+      originalDoc,
+    })) || data;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // 4. Execute field-level hooks, access, and validation
   // /////////////////////////////////////
 
   data = await this.performFieldOperations(collectionConfig, {
     data,
     req,
-    hook: 'beforeUpdate',
-    operationName: 'update',
+    hook: 'beforeChange',
+    operation: 'update',
     originalDoc,
   });
 
   // /////////////////////////////////////
-  // 3. Execute before update hook
+  // 5. Execute before update hook
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeUpdate.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
     data = (await hook({
       data,
       req,
       originalDoc,
+      operation: 'update',
     })) || data;
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 4. Merge updates into existing data
+  // 6. Merge updates into existing data
   // /////////////////////////////////////
 
   data = deepmerge(originalDoc, data, { arrayMerge: overwriteMerge });
 
   // /////////////////////////////////////
-  // 5. Handle password update
+  // 7. Handle password update
   // /////////////////////////////////////
 
   const dataToUpdate = { ...data };
@@ -98,7 +112,7 @@ async function update(args) {
   }
 
   // /////////////////////////////////////
-  // 6. Perform database operation
+  // 8. Perform database operation
   // /////////////////////////////////////
 
   Object.assign(user, dataToUpdate);
@@ -108,32 +122,33 @@ async function update(args) {
   user = user.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 7. Execute field-level hooks and access
+  // 9. Execute field-level hooks and access
   // /////////////////////////////////////
 
   user = this.performFieldOperations(collectionConfig, {
     data: user,
     hook: 'afterRead',
-    operationName: 'read',
+    operation: 'read',
     req,
     depth,
   });
 
   // /////////////////////////////////////
-  // 8. Execute after update hook
+  // 10. Execute after update hook
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterUpdate.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
     user = await hook({
       doc: user,
       req,
+      operation: 'update',
     }) || user;
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 9. Return user
+  // 11. Return user
   // /////////////////////////////////////
 
   return user;

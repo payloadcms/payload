@@ -1,28 +1,28 @@
 const { ValidationError } = require('../errors');
 const executeAccess = require('../auth/executeAccess');
 
-async function performFieldOperations(entityConfig, operation) {
+async function performFieldOperations(entityConfig, args) {
   const {
     data: fullData,
     originalDoc: fullOriginalDoc,
-    operationName,
+    operation,
     hook,
     req,
     req: {
       payloadAPI,
     },
     overrideAccess,
-  } = operation;
+  } = args;
 
   const recursivePerformFieldOperations = performFieldOperations.bind(this);
 
   let depth = 0;
 
   if (payloadAPI === 'REST') {
-    depth = (operation.depth || operation.depth === 0) ? parseInt(operation.depth, 10) : this.config.defaultDepth;
+    depth = (args.depth || args.depth === 0) ? parseInt(args.depth, 10) : this.config.defaultDepth;
   }
 
-  const currentDepth = operation.currentDepth || 1;
+  const currentDepth = args.currentDepth || 1;
 
   const populateRelationship = async (dataReference, data, field, i) => {
     const dataToUpdate = dataReference;
@@ -116,10 +116,10 @@ async function performFieldOperations(entityConfig, operation) {
   const createAccessPromise = async (data, originalDoc, field) => {
     const resultingData = data;
 
-    if (field.access && field.access[operationName]) {
-      const result = await field.access[operationName]({ req });
+    if (field.access && field.access[operation]) {
+      const result = await field.access[operation]({ req });
 
-      if (!result && operationName === 'update' && originalDoc[field.name] !== undefined) {
+      if (!result && operation === 'update' && originalDoc[field.name] !== undefined) {
         resultingData[field.name] = originalDoc[field.name];
       } else if (!result) {
         delete resultingData[field.name];
@@ -175,7 +175,7 @@ async function performFieldOperations(entityConfig, operation) {
                       req,
                       data: relatedDocumentData,
                       hook: 'afterRead',
-                      operationName: 'read',
+                      operation: 'read',
                     });
 
                     await relatedCollection.hooks.afterRead.reduce(async (priorHook, currentHook) => {
@@ -221,7 +221,7 @@ async function performFieldOperations(entityConfig, operation) {
                 req,
                 data: relatedDocumentData,
                 hook: 'afterRead',
-                operationName: 'read',
+                operation: 'read',
               });
 
               await relatedCollection.hooks.afterRead.reduce(async (priorHook, currentHook) => {
@@ -285,7 +285,7 @@ async function performFieldOperations(entityConfig, operation) {
         }
       }
 
-      if (operationName === 'create' || operationName === 'update') {
+      if (operation === 'create' || operation === 'update') {
         if (field.type === 'array' || field.type === 'blocks') {
           const hasRowsOfNewData = Array.isArray(data[field.name]);
           const newRowCount = hasRowsOfNewData ? data[field.name].length : 0;

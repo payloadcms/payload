@@ -3,7 +3,7 @@ const overwriteMerge = require('../../utilities/overwriteMerge');
 const executeAccess = require('../../auth/executeAccess');
 
 async function update(args) {
-  const { config, globals: { Model } } = this;
+  const { globals: { Model } } = this;
 
   const {
     globalConfig,
@@ -38,42 +38,57 @@ async function update(args) {
 
   const globalJSON = global.toJSON({ virtuals: true });
 
-  // /////////////////////////////////////
-  // 3. Execute before global hook
-  // /////////////////////////////////////
-
   let { data } = args;
 
-  await globalConfig.hooks.beforeUpdate.reduce(async (priorHook, hook) => {
+  // /////////////////////////////////////
+  // 3. Execute before validate collection hooks
+  // /////////////////////////////////////
+
+  await globalConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    data = (await hook({
+      data,
+      req,
+      operation: 'update',
+    })) || data;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // 4. Execute field-level hooks, access, and validation
+  // /////////////////////////////////////
+
+  data = await this.performFieldOperations(globalConfig, {
+    data,
+    req,
+    hook: 'beforeChange',
+    operation: 'update',
+    originalDoc: global,
+  });
+
+  // /////////////////////////////////////
+  // 5. Execute before global hook
+  // /////////////////////////////////////
+
+  await globalConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
     data = (await hook({
       data,
       req,
       originalDoc: global,
+      operation: 'update',
     })) || data;
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 4. Merge updates into existing data
+  // 6. Merge updates into existing data
   // /////////////////////////////////////
 
   data = deepmerge(globalJSON, data, { arrayMerge: overwriteMerge });
 
   // /////////////////////////////////////
-  // 5. Execute field-level hooks, access, and validation
-  // /////////////////////////////////////
-
-  data = await this.performFieldOperations(globalConfig, {
-    data,
-    req,
-    hook: 'beforeUpdate',
-    operationName: 'update',
-    originalDoc: globalJSON,
-  });
-
-  // /////////////////////////////////////
-  // 6. Perform database operation
+  // 7. Perform database operation
   // /////////////////////////////////////
 
   Object.assign(global, data);
@@ -83,32 +98,33 @@ async function update(args) {
   global = global.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 7. Execute field-level hooks and access
+  // 8. Execute field-level hooks and access
   // /////////////////////////////////////
 
   global = await this.performFieldOperations(globalConfig, {
     data: global,
     hook: 'afterRead',
-    operationName: 'read',
+    operation: 'read',
     req,
     depth,
   });
 
   // /////////////////////////////////////
-  // 8. Execute after global hook
+  // 9. Execute after global hook
   // /////////////////////////////////////
 
-  await globalConfig.hooks.afterUpdate.reduce(async (priorHook, hook) => {
+  await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
     global = await hook({
       doc: global,
       req,
+      operation: 'update',
     }) || global;
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 9. Return global
+  // 10. Return global
   // /////////////////////////////////////
 
   return global;

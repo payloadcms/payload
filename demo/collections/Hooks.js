@@ -15,14 +15,6 @@ module.exports = {
     delete: () => true,
   },
   hooks: {
-    beforeCreate: [
-      (operation) => {
-        if (operation.req.headers.hook === 'beforeCreate') {
-          operation.req.body.description += '-beforeCreateSuffix';
-        }
-        return operation.data;
-      },
-    ],
     beforeRead: [
       (operation) => {
         if (operation.req.headers.hook === 'beforeRead') {
@@ -30,10 +22,10 @@ module.exports = {
         }
       },
     ],
-    beforeUpdate: [
+    beforeChange: [
       (operation) => {
-        if (operation.req.headers.hook === 'beforeUpdate') {
-          operation.req.body.description += '-beforeUpdateSuffix';
+        if (operation.req.headers.hook === 'beforeChange') {
+          operation.req.body.description += '-beforeChangeSuffix';
         }
         return operation.data;
       },
@@ -46,14 +38,6 @@ module.exports = {
         }
       },
     ],
-    afterCreate: [
-      (operation) => {
-        if (operation.req.headers.hook === 'afterCreate') {
-          operation.doc.afterCreateHook = true;
-        }
-        return operation.doc;
-      },
-    ],
     afterRead: [
       (operation) => {
         const { doc } = operation;
@@ -62,10 +46,10 @@ module.exports = {
         return doc;
       },
     ],
-    afterUpdate: [
+    afterChange: [
       (operation) => {
-        if (operation.req.headers.hook === 'afterUpdate') {
-          operation.doc.afterUpdateHook = true;
+        if (operation.req.headers.hook === 'afterChange') {
+          operation.doc.afterChangeHook = true;
         }
         return operation.doc;
       },
