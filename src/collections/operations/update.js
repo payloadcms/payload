@@ -64,10 +64,22 @@ async function update(args) {
   const originalDoc = doc.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 2. Execute before update hook
+  // 2. Execute field-level hooks, access, and validation
   // /////////////////////////////////////
 
   let { data } = args;
+
+  data = await this.performFieldOperations(collectionConfig, {
+    data,
+    req,
+    originalDoc,
+    hook: 'beforeUpdate',
+    operationName: 'update',
+  });
+
+  // /////////////////////////////////////
+  // 3. Execute before update hook
+  // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeUpdate.reduce(async (priorHook, hook) => {
     await priorHook;
@@ -80,22 +92,10 @@ async function update(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 3. Merge updates into existing data
+  // 4. Merge updates into existing data
   // /////////////////////////////////////
 
   data = deepmerge(originalDoc, data, { arrayMerge: overwriteMerge });
-
-  // /////////////////////////////////////
-  // 4. Execute field-level hooks, access, and validation
-  // /////////////////////////////////////
-
-  data = await this.performFieldOperations(collectionConfig, {
-    data,
-    req,
-    originalDoc,
-    hook: 'beforeUpdate',
-    operationName: 'update',
-  });
 
   // /////////////////////////////////////
   // 5. Upload and resize any files that may be present
@@ -106,21 +106,23 @@ async function update(args) {
 
     const { staticDir, imageSizes } = collectionConfig.upload;
 
-    if (req.files && req.files.file) {
-      const fsSafeName = await getSafeFilename(staticDir, req.files.file.name);
+    const file = (req.files && req.files.file) ? req.files.file : req.fileData;
 
-      await req.files.file.mv(`${staticDir}/${fsSafeName}`);
+    if (file) {
+      const fsSafeName = await getSafeFilename(staticDir, file.name);
+
+      await file.mv(`${staticDir}/${fsSafeName}`);
 
       fileData.filename = fsSafeName;
-      fileData.filesize = req.files.file.size;
-      fileData.mimeType = req.files.file.mimetype;
+      fileData.filesize = file.size;
+      fileData.mimeType = file.mimetype;
 
-      if (imageMIMETypes.indexOf(req.files.file.mimetype) > -1) {
+      if (imageMIMETypes.indexOf(file.mimetype) > -1) {
         const dimensions = await getImageSize(`${staticDir}/${fsSafeName}`);
         fileData.width = dimensions.width;
         fileData.height = dimensions.height;
 
-        if (Array.isArray(imageSizes) && req.files.file.mimetype !== 'image/svg+xml') {
+        if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
           fileData.sizes = await resizeAndSave(collectionConfig, fsSafeName, fileData.mimeType);
         }
       }

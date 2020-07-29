@@ -54,7 +54,19 @@ async function update(args) {
   let { data } = args;
 
   // /////////////////////////////////////
-  // 2. Execute before update hook
+  // 2. Execute field-level hooks, access, and validation
+  // /////////////////////////////////////
+
+  data = await this.performFieldOperations(collectionConfig, {
+    data,
+    req,
+    hook: 'beforeUpdate',
+    operationName: 'update',
+    originalDoc,
+  });
+
+  // /////////////////////////////////////
+  // 3. Execute before update hook
   // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeUpdate.reduce(async (priorHook, hook) => {
@@ -68,22 +80,10 @@ async function update(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 3. Merge updates into existing data
+  // 4. Merge updates into existing data
   // /////////////////////////////////////
 
   data = deepmerge(originalDoc, data, { arrayMerge: overwriteMerge });
-
-  // /////////////////////////////////////
-  // 4. Execute field-level hooks, access, and validation
-  // /////////////////////////////////////
-
-  data = await this.performFieldOperations(collectionConfig, {
-    data,
-    req,
-    hook: 'beforeUpdate',
-    operationName: 'update',
-    originalDoc,
-  });
 
   // /////////////////////////////////////
   // 5. Handle password update

@@ -10,6 +10,8 @@ const RelationshipCell = (props) => {
 
   const [data, setData] = useState();
 
+  console.log(cellData);
+
   useEffect(() => {
     const hasManyRelations = Array.isArray(relationTo);
 
@@ -24,7 +26,7 @@ const RelationshipCell = (props) => {
           if (collection) {
             const useAsTitle = collection.admin.useAsTitle ? collection.admin.useAsTitle : 'id';
 
-            return `${newData}, ${doc[useAsTitle]}`;
+            return newData ? `${newData}, ${doc[useAsTitle]}` : doc[useAsTitle];
           }
 
           return newData;
@@ -58,6 +60,7 @@ RelationshipCell.propTypes = {
   cellData: PropTypes.oneOfType([
     PropTypes.shape({}),
     PropTypes.array,
+    PropTypes.string,
   ]),
   field: PropTypes.shape({
     relationTo: PropTypes.oneOfType([

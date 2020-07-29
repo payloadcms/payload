@@ -73,12 +73,12 @@ async function performFieldOperations(entityConfig, operation) {
   const hookPromises = [];
   const errors = [];
 
-  const createValidationPromise = async (newValue, existingValue, field, path) => {
+  const createValidationPromise = async (newData, existingData, field, path) => {
     const hasCondition = field.admin && field.admin.condition;
     const shouldValidate = field.validate && !hasCondition;
 
-    let valueToValidate = newValue;
-    if (valueToValidate === undefined) valueToValidate = existingValue;
+    let valueToValidate = newData[field.name];
+    if (valueToValidate === undefined) valueToValidate = existingData[field.name];
     if (valueToValidate === undefined) valueToValidate = field.defaultValue;
 
     const result = shouldValidate ? await field.validate(valueToValidate, field) : true;
@@ -135,7 +135,7 @@ async function performFieldOperations(entityConfig, operation) {
     const resultingData = data;
 
     if ((field.type === 'relationship' || field.type === 'upload') && (data[field.name] === 'null' || data[field.name] === null)) {
-      data[field.name] = null;
+      resultingData[field.name] = null;
     }
 
     if (hook === 'afterRead') {
@@ -239,14 +239,16 @@ async function performFieldOperations(entityConfig, operation) {
     }
 
     if (field.hooks && field.hooks[hook]) {
-      field.hooks[hook].forEach(async (fieldHook) => {
-        resultingData[field.name] = await fieldHook({
+      await field.hooks[hook].reduce(async (priorHook, currentHook) => {
+        await priorHook;
+
+        resultingData[field.name] = await currentHook({
           value: data[field.name],
           originalDoc: fullOriginalDoc,
           data: fullData,
           req,
-        });
-      });
+        }) || resultingData[field.name];
+      }, Promise.resolve());
     }
   };
 
@@ -297,9 +299,9 @@ async function performFieldOperations(entityConfig, operation) {
           const hasRowsOfExistingData = Array.isArray(originalDoc[field.name]);
           const existingRowCount = hasRowsOfExistingData ? originalDoc[field.name].length : 0;
 
-          validationPromises.push(createValidationPromise(newRowCount, existingRowCount, field, path));
+          validationPromises.push(() => createValidationPromise({ [field.name]: newRowCount }, { [field.name]: existingRowCount }, field, path));
         } else if (field.name) {
-          validationPromises.push(createValidationPromise(data[field.name], originalDoc[field.name], field, path));
+          validationPromises.push(() => createValidationPromise(data, originalDoc, field, path, true));
         }
       }
     });
@@ -310,6 +312,11 @@ async function performFieldOperations(entityConfig, operation) {
   // //////////////////////////////////////////
 
   traverseFields(entityConfig.fields, fullData, fullOriginalDoc, '');
+
+  await Promise.all(hookPromises);
+
+  validationPromises.forEach((promise) => promise());
+
   await Promise.all(validationPromises);
 
   if (errors.length > 0) {
@@ -318,7 +325,6 @@ async function performFieldOperations(entityConfig, operation) {
 
   await Promise.all(accessPromises);
   await Promise.all(relationshipPopulationPromises);
-  await Promise.all(hookPromises);
 
   return fullData;
 }
