@@ -1,6 +1,8 @@
 @import '../../../../scss/styles.scss';
 
 .group {
+  margin-bottom: base(2);
+
   &:hover {
     .render-field-gutter__content-container {
       box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;

@@ -10,8 +10,6 @@ const RelationshipCell = (props) => {
 
   const [data, setData] = useState();
 
-  console.log(cellData);
-
   useEffect(() => {
     const hasManyRelations = Array.isArray(relationTo);
 

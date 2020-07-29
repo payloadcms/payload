@@ -22,6 +22,7 @@ const NumberField = (props) => {
       readOnly,
       style,
       width,
+      step,
     } = {},
   } = props;
 
@@ -44,7 +45,7 @@ const NumberField = (props) => {
   });
 
   const handleChange = useCallback((e) => {
-    let val = parseInt(e.target.value, 10);
+    let val = parseFloat(e.target.value);
     if (Number.isNaN(val)) val = '';
     setValue(val);
   }, [setValue]);
@@ -81,6 +82,7 @@ const NumberField = (props) => {
         type="number"
         id={path}
         name={path}
+        step={step}
       />
     </div>
   );
@@ -107,6 +109,7 @@ NumberField.propTypes = {
     readOnly: PropTypes.bool,
     style: PropTypes.shape({}),
     width: PropTypes.string,
+    step: PropTypes.number,
   }),
   label: PropTypes.string,
   max: PropTypes.number,
