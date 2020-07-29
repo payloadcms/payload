@@ -25,16 +25,18 @@ class Relationship extends Component {
   constructor(props) {
     super(props);
 
-    const { relationTo, hasMultipleRelations } = this.props;
+    const { relationTo, hasMultipleRelations, required } = this.props;
     const relations = hasMultipleRelations ? relationTo : [relationTo];
+
+    this.initialOptions = required ? [] : [{ value: 'null', label: 'None' }];
 
     this.state = {
       relations,
       lastFullyLoadedRelation: -1,
       lastLoadedPage: 1,
-      options: [],
       errorLoading: false,
       loadedIDs: [],
+      options: this.initialOptions,
     };
   }
 
@@ -59,7 +61,7 @@ class Relationship extends Component {
 
     if (clear) {
       this.setState({
-        options: [],
+        options: this.initialOptions,
         loadedIDs: [],
         lastFullyLoadedRelation: -1,
       });
@@ -141,7 +143,7 @@ class Relationship extends Component {
 
     if (hasMultipleRelations) {
       options.forEach((option) => {
-        const potentialValue = option.options.find((subOption) => {
+        const potentialValue = option.options && option.options.find((subOption) => {
           if (subOption?.value?.value && value?.value) {
             return subOption.value.value === value.value;
           }
@@ -259,9 +261,17 @@ class Relationship extends Component {
   }
 
   addOptionByID = async (id, relation) => {
-    const response = await fetch(`${serverURL}${api}/${relation}/${id}`);
-    const data = await response.json();
-    this.addOptions({ docs: [data] }, relation);
+    const { errorLoading } = this.state;
+    if (!errorLoading) {
+      const response = await fetch(`${serverURL}${api}/${relation}/${id}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        this.addOptions({ docs: [data] }, relation);
+      } else {
+        console.log(`There was a problem loading the document with ID of ${id}.`);
+      }
+    }
   }
 
   handleInputChange = (search) => {

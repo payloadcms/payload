@@ -131,8 +131,12 @@ async function performFieldOperations(entityConfig, operation) {
     }
   };
 
-  const createHookPromise = async (data, field) => {
+  const createHookPromise = async (data, originalDoc, field) => {
     const resultingData = data;
+
+    if ((field.type === 'relationship' || field.type === 'upload') && (data[field.name] === 'null' || data[field.name] === null)) {
+      data[field.name] = null;
+    }
 
     if (hook === 'afterRead') {
       if ((field.type === 'relationship' || field.type === 'upload')) {
@@ -262,7 +266,7 @@ async function performFieldOperations(entityConfig, operation) {
       }
 
       accessPromises.push(createAccessPromise(data, originalDoc, field));
-      hookPromises.push(createHookPromise(data, field));
+      hookPromises.push(createHookPromise(data, originalDoc, field));
 
       if (field.fields) {
         if (field.name === undefined) {
