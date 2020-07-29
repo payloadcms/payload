@@ -1,10 +1,21 @@
 @import '../../../../scss/styles.scss';
 
+@mixin reduce-gutter {
+  padding-right: 0;
+  padding-left: 2px;
+}
+
 .group {
+  display: flex;
+
   &:hover {
-    .render-field-gutter__content-container {
+    .field-type-gutter__content-container {
       box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
     }
+  }
+
+  &__content-wrapper {
+    width: 100%;
   }
 
   &__fields-wrapper {
@@ -13,6 +24,12 @@
 
   .render-fields {
     width: 100%;
+
+    .row {
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
   }
 
   @include mid-break {
@@ -20,9 +37,17 @@
       display: flex;
     }
 
-    .render-field-gutter__content-container {
-      padding-right: 0;
-      padding-left: 2px;
+    .field-type-gutter__content-container {
+      @include reduce-gutter;
     }
+  }
+}
+
+.field-type.group .field-type.group,
+.field-type.blocks .field-type.group,
+.field-type.array .field-type.group {
+
+  .field-type-gutter__content-container {
+    @include reduce-gutter;
   }
 }

@@ -5,24 +5,24 @@
 //////////////////////
 
 @mixin relatively-position-panels {
-  .render-field-gutter {
+  .field-type-gutter {
     position: relative;
     right: 0;
   }
 
-  .render-field-gutter.actions {
+  .field-type-gutter.actions {
     position: relative;
     left: 0;
   }
 }
 
 @mixin absolutely-position-panels {
-  .render-field-gutter {
+  .field-type-gutter {
     position: absolute;
     top: 0; right: 100%; bottom: 0;
   }
 
-  .render-field-gutter.actions {
+  .field-type-gutter.actions {
     position: absolute;
     top: 0; bottom: 0; left: 100%; right: unset;
   }
@@ -80,13 +80,15 @@
   }
 
   &.is-hovered > div {
-    > .render-field-gutter {
+    > .field-type-gutter {
       &.actions {
-        .render-field-gutter__content-container {
+        z-index: $z-nav;
+
+        .field-type-gutter__content-container {
           box-shadow: none;
         }
       }
-      .render-field-gutter__content-container {
+      .field-type-gutter__content-container {
         box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
       }
 
@@ -103,14 +105,6 @@
 
       .position-panel__current-position {
         color: $color-dark-gray;
-      }
-    }
-
-    > .action-panel {
-      .action-panel__controls {
-        opacity: 1;
-        visibility: visible;
-        z-index: $z-nav;
       }
     }
 
@@ -159,10 +153,12 @@
   }
 }
 
+.field-type.blocks .field-type.blocks
+.field-type.blocks .field-type.group
 .field-type.blocks .field-type.array,
 .field-type.array .field-type.array,
 .field-type.array .field-type.blocks,
-.field-type.blocks .field-type.blocks {
+.field-type.array .field-type.group {
   @include relatively-position-panels();
 }
 

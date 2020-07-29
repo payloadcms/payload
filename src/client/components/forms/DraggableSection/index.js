@@ -7,7 +7,7 @@ import ActionPanel from './ActionPanel';
 import SectionTitle from './SectionTitle';
 import PositionPanel from './PositionPanel';
 import Button from '../../elements/Button';
-import RenderFieldGutter from '../RenderFieldGutter';
+import FieldTypeGutter from '../FieldTypeGutter';
 import RenderFields from '../RenderFields';
 
 
@@ -60,7 +60,7 @@ const DraggableSection = (props) => {
         >
 
           <div className={`${baseClass}__content-wrapper`}>
-            <RenderFieldGutter
+            <FieldTypeGutter
               variant="left"
               dragHandleProps={providedDrag.dragHandleProps}
             >
@@ -70,7 +70,7 @@ const DraggableSection = (props) => {
                 positionIndex={rowIndex}
                 verticalAlignment={positionPanelVerticalAlignment}
               />
-            </RenderFieldGutter>
+            </FieldTypeGutter>
 
             <div className={`${baseClass}__render-fields-wrapper`}>
 
@@ -108,7 +108,11 @@ const DraggableSection = (props) => {
               </AnimateHeight>
             </div>
 
-            <RenderFieldGutter variant="right" className="actions" dragHandleProps={providedDrag.dragHandleProps}>
+            <FieldTypeGutter
+              variant="right"
+              className="actions"
+              dragHandleProps={providedDrag.dragHandleProps}
+            >
               <ActionPanel
                 rowIndex={rowIndex}
                 addRow={addRow}
@@ -118,7 +122,7 @@ const DraggableSection = (props) => {
                 isHovered={isHovered}
                 {...props}
               />
-            </RenderFieldGutter>
+            </FieldTypeGutter>
           </div>
         </div>
       )}

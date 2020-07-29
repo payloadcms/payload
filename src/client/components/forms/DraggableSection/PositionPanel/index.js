@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import Button from '../../../elements/Button';
-import RenderFieldGutter from '../../RenderFieldGutter';
 
 import './index.scss';
 
@@ -27,9 +26,8 @@ const PositionPanel = (props) => {
         onClick={() => moveRow(positionIndex, positionIndex - 1)}
       />
 
-      {(adjustedIndex && typeof positionIndex === 'number') &&
-        <div className={`${baseClass}__current-position`}>{adjustedIndex >= 10 ? adjustedIndex : `0${adjustedIndex}`}</div>
-      }
+      {(adjustedIndex && typeof positionIndex === 'number')
+        && <div className={`${baseClass}__current-position`}>{adjustedIndex >= 10 ? adjustedIndex : `0${adjustedIndex}`}</div>}
 
       <Button
         className={`${baseClass}__move-forward ${(positionIndex === rowCount - 1) ? 'last-row' : ''}`}
