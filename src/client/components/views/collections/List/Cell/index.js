@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import format from 'date-fns/format';
 import config from 'payload/config';
-import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
-import Thumbnail from '../../../elements/Thumbnail';
+import RenderCustomComponent from '../../../../utilities/RenderCustomComponent';
+import Thumbnail from '../../../../elements/Thumbnail';
+import Relationship from './Relationship';
 
 const { routes: { admin } } = config;
 
@@ -50,6 +51,17 @@ const DefaultCell = (props) => {
     );
   }
 
+  if (field.type === 'relationship') {
+    return (
+      <WrapElement {...wrapElementProps}>
+        <Relationship
+          field={field}
+          cellData={cellData}
+        />
+      </WrapElement>
+    );
+  }
+
   if (field.type === 'date' && cellData) {
     return (
       <WrapElement {...wrapElementProps}>
@@ -65,6 +77,7 @@ const DefaultCell = (props) => {
       {field.type !== 'date' && (
         <React.Fragment>
           {typeof cellData === 'string' && cellData}
+          {typeof cellData === 'number' && cellData}
           {typeof cellData === 'object' && JSON.stringify(cellData)}
         </React.Fragment>
       )}

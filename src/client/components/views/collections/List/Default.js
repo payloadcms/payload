@@ -48,7 +48,7 @@ const DefaultList = (props) => {
 
   useEffect(() => {
     const params = {
-      depth: 0,
+      depth: 2,
     };
 
     if (page) params.page = page;
