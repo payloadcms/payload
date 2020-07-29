@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import RenderFields, { useRenderedFields } from '../../RenderFields';
 import withCondition from '../../withCondition';
-import RenderFieldGutter from '../../RenderFieldGutter';
+import FieldTypeGutter from '../../FieldTypeGutter';
 
 import './index.scss';
 
@@ -26,18 +26,22 @@ const Group = (props) => {
 
   return (
     <div className="field-type group">
-      <h3 className={`${baseClass}__title`}>{label}</h3>
-      <div className={`${baseClass}__fields-wrapper`}>
-        <RenderFieldGutter />
-        <RenderFields
-          readOnly={readOnly}
-          fieldTypes={fieldTypes}
-          customComponentsPath={`${customComponentsPath}${name}.fields.`}
-          fieldSchema={fields.map((subField) => ({
-            ...subField,
-            path: `${path}${subField.name ? `.${subField.name}` : ''}`,
-          }))}
-        />
+      <FieldTypeGutter />
+
+      <div className={`${baseClass}__content-wrapper`}>
+        <h3 className={`${baseClass}__title`}>{label}</h3>
+
+        <div className={`${baseClass}__fields-wrapper`}>
+          <RenderFields
+            readOnly={readOnly}
+            fieldTypes={fieldTypes}
+            customComponentsPath={`${customComponentsPath}${name}.fields.`}
+            fieldSchema={fields.map((subField) => ({
+              ...subField,
+              path: `${path}${subField.name ? `.${subField.name}` : ''}`,
+            }))}
+          />
+        </div>
       </div>
     </div>
   );

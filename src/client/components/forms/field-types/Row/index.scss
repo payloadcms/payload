@@ -2,6 +2,7 @@
 
 .field-type.row {
   display: flex;
+  flex-wrap: wrap;
   margin-left: - base(.5);
   margin-right: - base(.5);
   width: calc(100% + #{$baseline});

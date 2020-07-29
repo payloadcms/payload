@@ -3,20 +3,23 @@ import PropTypes from 'prop-types';
 
 import './index.scss';
 
-const baseClass = 'render-field-gutter';
+const baseClass = 'field-type-gutter';
 
-const RenderFieldGutter = (props) => {
+const FieldTypeGutter = (props) => {
   const { children, variant, verticalAlignment, className, dragHandleProps } = props;
 
   const classes = [
     baseClass,
     `${baseClass}--${variant}`,
     `${baseClass}--v-align-${verticalAlignment}`,
-    className && className
+    className && className,
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={classes} {...dragHandleProps}>
+    <div
+      className={classes}
+      {...dragHandleProps}
+    >
       <div className={`${baseClass}__content-container`}>
         <div className={`${baseClass}__content`}>
           {children}
@@ -24,19 +27,24 @@ const RenderFieldGutter = (props) => {
       </div>
     </div>
   );
-}
+};
 
-const { oneOf } = PropTypes;
+const { oneOf, shape, string, node } = PropTypes;
 
-RenderFieldGutter.defaultProps = {
+FieldTypeGutter.defaultProps = {
   variant: 'left',
   verticalAlignment: 'sticky',
   dragHandleProps: {},
-}
+  className: null,
+  children: null,
+};
 
-RenderFieldGutter.propTypes = {
+FieldTypeGutter.propTypes = {
   variant: oneOf(['left', 'right']),
   verticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
-}
+  dragHandleProps: shape({}),
+  className: string,
+  children: node,
+};
 
-export default RenderFieldGutter;
+export default FieldTypeGutter;
