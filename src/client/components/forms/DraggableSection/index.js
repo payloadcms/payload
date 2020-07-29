@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
@@ -34,6 +34,7 @@ const DraggableSection = (props) => {
     actionPanelVerticalAlignment,
     permissions,
     isOpen,
+    readOnly,
   } = props;
 
   const [isHovered, setIsHovered] = useState(false);
@@ -48,6 +49,7 @@ const DraggableSection = (props) => {
     <Draggable
       draggableId={id}
       index={rowIndex}
+      isDropDisabled={readOnly}
     >
       {(providedDrag) => (
         <div
@@ -79,6 +81,7 @@ const DraggableSection = (props) => {
                   <SectionTitle
                     label={singularLabel}
                     path={`${parentPath}.${rowIndex}.blockName`}
+                    readOnly={readOnly}
                   />
 
                   <Button
@@ -96,6 +99,7 @@ const DraggableSection = (props) => {
                 duration={0}
               >
                 <RenderFields
+                  readOnly={readOnly}
                   customComponentsPath={customComponentsPath}
                   fieldTypes={fieldTypes}
                   key={rowIndex}
@@ -113,15 +117,17 @@ const DraggableSection = (props) => {
               className="actions"
               dragHandleProps={providedDrag.dragHandleProps}
             >
-              <ActionPanel
-                rowIndex={rowIndex}
-                addRow={addRow}
-                removeRow={removeRow}
-                singularLabel={singularLabel}
-                verticalAlignment={actionPanelVerticalAlignment}
-                isHovered={isHovered}
-                {...props}
-              />
+              {!readOnly && (
+                <ActionPanel
+                  rowIndex={rowIndex}
+                  addRow={addRow}
+                  removeRow={removeRow}
+                  singularLabel={singularLabel}
+                  verticalAlignment={actionPanelVerticalAlignment}
+                  isHovered={isHovered}
+                  {...props}
+                />
+              )}
             </FieldTypeGutter>
           </div>
         </div>
@@ -141,6 +147,7 @@ DraggableSection.defaultProps = {
   positionPanelVerticalAlignment: 'sticky',
   actionPanelVerticalAlignment: 'sticky',
   permissions: {},
+  readOnly: false,
 };
 
 DraggableSection.propTypes = {
@@ -162,6 +169,7 @@ DraggableSection.propTypes = {
   positionPanelVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
   actionPanelVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
   permissions: PropTypes.shape({}),
+  readOnly: PropTypes.bool,
 };
 
 export default DraggableSection;

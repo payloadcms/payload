@@ -33,7 +33,18 @@ async function create(args) {
   await executeAccess({ req }, collectionConfig.access.create);
 
   // /////////////////////////////////////
-  // 2. Execute before collection hook
+  // 2. Execute field-level access, hooks, and validation
+  // /////////////////////////////////////
+
+  data = await performFieldOperations(collectionConfig, {
+    data,
+    hook: 'beforeCreate',
+    operationName: 'create',
+    req,
+  });
+
+  // /////////////////////////////////////
+  // 3. Execute before collection hook
   // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeCreate.reduce(async (priorHook, hook) => {
@@ -46,54 +57,45 @@ async function create(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 3. Upload and resize any files that may be present
+  // 4. Upload and resize any files that may be present
   // /////////////////////////////////////
 
   if (collectionConfig.upload) {
-    const { staticDir, imageSizes } = collectionConfig.upload;
-
     const fileData = {};
 
-    if (!req.files || Object.keys(req.files).length === 0) {
+    const { staticDir, imageSizes } = collectionConfig.upload;
+
+    const file = (req.files && req.files.file) ? req.files.file : req.file;
+
+    if (!file) {
       throw new MissingFile();
     }
 
     mkdirp.sync(staticDir);
 
-    const fsSafeName = await getSafeFilename(staticDir, req.files.file.name);
+    const fsSafeName = await getSafeFilename(staticDir, file.name);
 
-    await req.files.file.mv(`${staticDir}/${fsSafeName}`);
+    await file.mv(`${staticDir}/${fsSafeName}`);
 
-    if (imageMIMETypes.indexOf(req.files.file.mimetype) > -1) {
+    if (imageMIMETypes.indexOf(file.mimetype) > -1) {
       const dimensions = await getImageSize(`${staticDir}/${fsSafeName}`);
       fileData.width = dimensions.width;
       fileData.height = dimensions.height;
 
-      if (Array.isArray(imageSizes) && req.files.file.mimetype !== 'image/svg+xml') {
+      if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
         fileData.sizes = await resizeAndSave(collectionConfig, fsSafeName, fileData.mimeType);
       }
     }
 
     fileData.filename = fsSafeName;
-    fileData.filesize = req.files.file.size;
-    fileData.mimeType = req.files.file.mimetype;
+    fileData.filesize = file.size;
+    fileData.mimeType = file.mimetype;
 
     data = {
       ...data,
       ...fileData,
     };
   }
-
-  // /////////////////////////////////////
-  // 4. Execute field-level access, hooks, and validation
-  // /////////////////////////////////////
-
-  data = await performFieldOperations(collectionConfig, {
-    data,
-    hook: 'beforeCreate',
-    operationName: 'create',
-    req,
-  });
 
   // /////////////////////////////////////
   // 5. Perform database operation

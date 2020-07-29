@@ -24,17 +24,18 @@ const middleware = (payload) => [
   }),
   (req, _, next) => {
     req.payload = payload;
-    return next();
+    next();
   },
   (req, res, next) => {
     if (payload.config.cors) {
-      if (payload.config.cors.indexOf(req.headers.origin) > -1) {
-        res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-        res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
-      }
+      res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Origin X-Requested-With, Content-Type, Accept, Authorization');
 
-      res.header('Access-Control-Allow-Headers',
-        'Origin X-Requested-With, Content-Type, Accept, Authorization');
+      if (payload.config.cors === '*') {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+      } else if (Array.isArray(payload.config.cors) && payload.config.cors.indexOf(req.headers.origin) > -1) {
+        res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+      }
     }
 
     next();

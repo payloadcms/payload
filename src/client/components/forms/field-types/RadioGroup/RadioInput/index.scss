@@ -59,3 +59,29 @@
     }
   }
 }
+
+.radio-group--read-only {
+  .radio-input {
+    &__label {
+      color: $color-gray;
+    }
+
+    &--is-selected {
+      .radio-input__styled-radio {
+        &:before {
+          background-color: $color-gray;
+        }
+      }
+    }
+
+    &:not(&--is-selected) {
+      &:hover {
+        .radio-input__styled-radio {
+          &:before {
+            opacity: 0;
+          }
+        }
+      }
+    }
+  }
+}

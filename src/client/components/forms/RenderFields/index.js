@@ -80,6 +80,8 @@ const RenderFields = (props) => {
 
                   if (readOnlyOverride) readOnly = true;
 
+                  if (operation === 'create') readOnly = false;
+
                   if (permissions?.[field?.name]?.read?.permission !== false) {
                     if (permissions?.[field?.name]?.[operation]?.permission === false) {
                       readOnly = true;

@@ -33,6 +33,9 @@ const Blocks = (props) => {
     required,
     validate,
     permissions,
+    admin: {
+      readOnly,
+    },
   } = props;
 
   const path = pathFromProps || name;
@@ -130,6 +133,7 @@ const Blocks = (props) => {
       permissions={permissions}
       value={value}
       blocks={blocks}
+      readOnly={readOnly}
     />
   );
 };
@@ -142,6 +146,7 @@ Blocks.defaultProps = {
   maxRows: undefined,
   minRows: undefined,
   permissions: {},
+  admin: {},
 };
 
 Blocks.propTypes = {
@@ -159,6 +164,9 @@ Blocks.propTypes = {
   minRows: PropTypes.number,
   permissions: PropTypes.shape({
     fields: PropTypes.shape({}),
+  }),
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
   }),
 };
 
@@ -181,6 +189,7 @@ const RenderBlocks = React.memo((props) => {
     value,
     toggleCollapse,
     blocks,
+    readOnly,
   } = props;
 
   return (
@@ -195,7 +204,10 @@ const RenderBlocks = React.memo((props) => {
           />
         </header>
 
-        <Droppable droppableId="blocks-drop">
+        <Droppable
+          droppableId="blocks-drop"
+          isDropDisabled={readOnly}
+        >
           {(provided) => (
             <div
               ref={provided.innerRef}
@@ -208,6 +220,7 @@ const RenderBlocks = React.memo((props) => {
                 if (blockToRender) {
                   return (
                     <DraggableSection
+                      readOnly={readOnly}
                       key={row.key}
                       id={row.key}
                       blockType="blocks"

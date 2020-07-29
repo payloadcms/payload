@@ -10,6 +10,8 @@ import { radio } from '../../../../../fields/validations';
 
 import './index.scss';
 
+const baseClass = 'radio-group';
+
 const RadioGroup = (props) => {
   const {
     name,
@@ -19,6 +21,7 @@ const RadioGroup = (props) => {
     label,
     admin: {
       readOnly,
+      layout = 'horizontal',
       style,
       width,
     } = {},
@@ -45,9 +48,10 @@ const RadioGroup = (props) => {
 
   const classes = [
     'field-type',
-    'radio-group',
+    baseClass,
+    `${baseClass}--layout-${layout}`,
     showError && 'error',
-    readOnly && 'read-only',
+    readOnly && `${baseClass}--read-only`,
   ].filter(Boolean).join(' ');
 
   return (
@@ -67,18 +71,22 @@ const RadioGroup = (props) => {
         label={label}
         required={required}
       />
-      {options?.map((option) => {
-        const isSelected = option.value === value;
+      <ul className={`${baseClass}--group`}>
+        {options?.map((option) => {
+          const isSelected = option.value === value;
 
-        return (
-          <RadioInput
-            key={option.value}
-            isSelected={isSelected}
-            option={option}
-            onChange={readOnly ? undefined : setValue}
-          />
-        );
-      })}
+          return (
+            <li key={option.value}>
+              <RadioInput
+                key={option.value}
+                isSelected={isSelected}
+                option={option}
+                onChange={readOnly ? undefined : setValue}
+              />
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 };

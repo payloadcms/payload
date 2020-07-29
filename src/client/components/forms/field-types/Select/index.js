@@ -9,6 +9,8 @@ import { select } from '../../../../../fields/validations';
 
 import './index.scss';
 
+const baseClass = 'select';
+
 const findFullOption = (value, options) => {
   const matchedOption = options.find((option) => option?.value === value);
 
@@ -97,9 +99,9 @@ const Select = (props) => {
 
   const classes = [
     'field-type',
-    'select',
+    baseClass,
     showError && 'error',
-    readOnly && 'read-only',
+    readOnly && `${baseClass}--read-only`,
   ].filter(Boolean).join(' ');
 
   const valueToRender = formatRenderValue(value, options);
@@ -126,7 +128,7 @@ const Select = (props) => {
         value={valueToRender}
         formatValue={formatFormValue}
         showError={showError}
-        disabled={readOnly}
+        isDisabled={readOnly}
         options={options}
         isMulti={hasMany}
       />

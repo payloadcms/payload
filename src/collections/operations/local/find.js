@@ -22,6 +22,7 @@ async function find(options) {
       payloadAPI: 'local',
       locale,
       fallbackLocale,
+      payload: this,
     },
   });
 }

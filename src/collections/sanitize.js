@@ -102,6 +102,14 @@ const sanitizeCollection = (collections, collection) => {
       {
         name: 'filename',
         label: 'Filename',
+        hooks: {
+          beforeCreate: [
+            ({ req }) => {
+              const file = (req.files && req.files.file) ? req.files.file : req.file;
+              return file.name;
+            },
+          ],
+        },
         type: 'text',
         required: true,
         unique: true,

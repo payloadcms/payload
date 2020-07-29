@@ -27,7 +27,18 @@ async function register(args) {
   }
 
   // /////////////////////////////////////
-  // 2. Execute before create hook
+  // 2. Execute field-level hooks, access, and validation
+  // /////////////////////////////////////
+
+  data = await this.performFieldOperations(collectionConfig, {
+    data,
+    hook: 'beforeCreate',
+    operationName: 'create',
+    req,
+  });
+
+  // /////////////////////////////////////
+  // 3. Execute before create hook
   // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeCreate.reduce(async (priorHook, hook) => {
@@ -38,17 +49,6 @@ async function register(args) {
       req,
     })) || data;
   }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // 3. Execute field-level hooks, access, and validation
-  // /////////////////////////////////////
-
-  data = await this.performFieldOperations(collectionConfig, {
-    data,
-    hook: 'beforeCreate',
-    operationName: 'create',
-    req,
-  });
 
   // /////////////////////////////////////
   // 6. Perform register

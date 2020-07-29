@@ -37,8 +37,8 @@
     }
 
     &:disabled {
-      background: $color-light-gray;
-      color: $color-gray;
+      background: lighten($color-light-gray, 5%);
+      color: darken($color-gray, 5%);
 
       &:hover {
         border-color: $color-light-gray;
