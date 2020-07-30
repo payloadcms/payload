@@ -242,13 +242,17 @@ async function performFieldOperations(entityConfig, args) {
       await field.hooks[hook].reduce(async (priorHook, currentHook) => {
         await priorHook;
 
-        resultingData[field.name] = await currentHook({
+        const hookedValue = await currentHook({
           value: data[field.name],
           originalDoc: fullOriginalDoc,
           data: fullData,
           operation,
           req,
-        }) || resultingData[field.name];
+        });
+
+        if (hookedValue !== undefined) {
+          resultingData[field.name] = hookedValue;
+        }
       }, Promise.resolve());
     }
   };
