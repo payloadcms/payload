@@ -57,8 +57,13 @@
   }
 
   &--read-only {
-    &__input {
-      background-color: lighten($color-gray, 5%);
+
+    .checkbox__label {
+      color: $color-gray;
+    }
+
+    .checkbox__input {
+      background-color: lighten($color-light-gray, 5%);
     }
   }
 }

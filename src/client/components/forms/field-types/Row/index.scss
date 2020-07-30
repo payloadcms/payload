@@ -6,10 +6,11 @@
   margin-left: - base(.5);
   margin-right: - base(.5);
   width: calc(100% + #{$baseline});
+  margin-bottom: 0;
 
   > * {
-    margin-left: base(.5);
-    margin-right: base(.5);
+    padding-left: base(.5);
+    padding-right: base(.5);
   }
 
   @include mid-break {
