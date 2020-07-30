@@ -1,9 +1,6 @@
 @import '../../../../scss/styles';
 
 .action-panel {
-  &:hover {
-    z-index: $z-nav;
-  }
 
   &__remove-row {
     margin: 0 0 base(.3);
