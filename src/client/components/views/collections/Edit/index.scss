@@ -45,6 +45,10 @@
     min-width: 0;
   }
 
+  &__sidebar-sticky {
+    min-height: 100%;
+  }
+
   &__collection-actions,
   &__document-actions,
   &__meta,
