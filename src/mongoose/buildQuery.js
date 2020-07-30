@@ -171,6 +171,11 @@ class ParamParser {
 
     let formattedValue = val;
 
+    if (schemaObject && schemaObject.type === Boolean && typeof val === 'string') {
+      if (val.toLowerCase() === 'true') formattedValue = true;
+      if (val.toLowerCase() === 'false') formattedValue = false;
+    }
+
     if (operator && validOperators.includes(operator)) {
       switch (operator) {
         case 'greater_than_equal':
