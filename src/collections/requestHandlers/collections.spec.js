@@ -637,7 +637,7 @@ describe('Collections - REST', () => {
   });
 
   describe('Media', () => {
-    beforeEach(() => {
+    beforeAll(() => {
       // Clear demo/media directory
       const mediaDir = path.join(__dirname, '../../../demo', 'media');
       fs.readdir(mediaDir, (err, files) => {
@@ -683,6 +683,36 @@ describe('Collections - REST', () => {
       expect(data.doc.sizes.tablet.filename).toBe('image-640x480.png');
       expect(data.doc.sizes.tablet.width).toBe(640);
       expect(data.doc.sizes.tablet.height).toBe(480);
+    });
+
+    it('delete', async () => {
+      const formData = new FormData();
+      formData.append('file', fs.createReadStream(path.join(__dirname, '../..', 'tests/assets/delete.png')));
+      formData.append('alt', 'test media');
+      formData.append('locale', 'en');
+
+      const createResponse = await fetch(`${url}/api/media`, {
+        body: formData,
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+        method: 'post',
+      });
+
+      const createData = await createResponse.json();
+      expect(createResponse.status).toBe(201);
+      const docId = createData.doc.id;
+
+      const response = await fetch(`${url}/api/media/${docId}`, {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+        method: 'delete',
+      });
+
+      const data = await response.json();
+      expect(response.status).toBe(200);
+      expect(data.id).toBe(docId);
     });
   });
 });
