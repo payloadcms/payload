@@ -9,6 +9,7 @@ const faker = require('faker');
 const FormData = require('form-data');
 const config = require('../../../demo/payload.config');
 const { email, password } = require('../../tests/credentials');
+const fileExists = require('../../tests/utils/fileExists');
 
 const url = config.serverURL;
 
@@ -637,9 +638,9 @@ describe('Collections - REST', () => {
   });
 
   describe('Media', () => {
+    const mediaDir = path.join(__dirname, '../../../demo', 'media');
     beforeAll(() => {
       // Clear demo/media directory
-      const mediaDir = path.join(__dirname, '../../../demo', 'media');
       fs.readdir(mediaDir, (err, files) => {
         if (err) throw err;
 
@@ -713,6 +714,9 @@ describe('Collections - REST', () => {
       const data = await response.json();
       expect(response.status).toBe(200);
       expect(data.id).toBe(docId);
+
+      const imageExists = await fileExists(path.join(mediaDir, 'delete.png'));
+      expect(imageExists).toBe(false);
     });
   });
 });
