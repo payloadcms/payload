@@ -61,10 +61,12 @@ class ParamParser {
     for (const relationOrPath of Object.keys(object)) {
       if (relationOrPath.toLowerCase() === 'and') {
         const andConditions = object[relationOrPath];
-        result.$and = await this.buildAndOrConditions(andConditions);
+        const builtAndConditions = await this.buildAndOrConditions(andConditions);
+        if (builtAndConditions.length > 0) result.$and = builtAndConditions;
       } else if (relationOrPath.toLowerCase() === 'or' && Array.isArray(object[relationOrPath])) {
         const orConditions = object[relationOrPath];
-        result.$or = await this.buildAndOrConditions(orConditions);
+        const builtOrConditions = await this.buildAndOrConditions(orConditions);
+        if (builtOrConditions.length > 0) result.$or = builtOrConditions;
       } else {
         // It's a path - and there can be multiple comparisons on a single path.
         // For example - title like 'test' and title not equal to 'tester'
@@ -201,7 +203,12 @@ class ParamParser {
           break;
 
         case 'like':
-          formattedValue = { $regex: val, $options: '-i' };
+          if (localizedKey === '_id') {
+            formattedValue = val;
+          } else {
+            formattedValue = { $regex: val, $options: '-i' };
+          }
+
           break;
 
         default:

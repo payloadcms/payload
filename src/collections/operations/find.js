@@ -26,7 +26,10 @@ async function find(args) {
 
   if (where) {
     queryToBuild.where = {
-      and: [where],
+      ...where,
+      and: [
+        ...(Array.isArray(where.and) ? where.and : []),
+      ],
     };
   }
 
