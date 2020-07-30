@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef } from 'react';
 
 const useThrottledEffect = (callback, delay, deps = []) => {
@@ -16,8 +17,7 @@ const useThrottledEffect = (callback, delay, deps = []) => {
         clearTimeout(handler);
       };
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [delay, ...deps, callback],
+    [delay, ...deps],
   );
 };
 
