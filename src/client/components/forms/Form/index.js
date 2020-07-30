@@ -288,6 +288,7 @@ const Form = (props) => {
   contextRef.current.setSubmitted = setSubmitted;
 
   useEffect(() => {
+    contextRef.current = { ...initContextState };
     dispatchFields({ type: 'REPLACE_STATE', state: initialState });
   }, [initialState]);
 

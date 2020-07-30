@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory, useLocation } from 'react-router-dom';
 import config from 'payload/config';
@@ -9,6 +9,7 @@ import { useLocale } from '../../utilities/Locale';
 
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultGlobal from './Default';
+import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 
 const { serverURL, routes: { admin, api } } = config;
 
@@ -18,12 +19,14 @@ const GlobalView = (props) => {
   const locale = useLocale();
   const { setStepNav } = useStepNav();
   const { permissions } = useUser();
+  const [initialState, setInitialState] = useState({});
 
   const { global } = props;
 
   const {
     slug,
     label,
+    fields,
   } = global;
 
   const onSave = (json) => {
@@ -38,7 +41,7 @@ const GlobalView = (props) => {
 
   const [{ data }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
-    { initialParams: { 'fallback-locale': 'null' } },
+    { initialParams: { 'fallback-locale': 'null', depth: 0 } },
   );
 
   const dataToRender = locationState?.data || data;
@@ -51,6 +54,15 @@ const GlobalView = (props) => {
     setStepNav(nav);
   }, [setStepNav, label]);
 
+  useEffect(() => {
+    const awaitInitialState = async () => {
+      const state = await buildStateFromSchema(fields, dataToRender);
+      setInitialState(state);
+    };
+
+    awaitInitialState();
+  }, [dataToRender, fields]);
+
   const globalPermissions = permissions?.[slug];
 
   return (
@@ -60,6 +72,7 @@ const GlobalView = (props) => {
       componentProps={{
         data: dataToRender,
         permissions: globalPermissions,
+        initialState,
         global,
         onSave,
         apiURL: `${serverURL}${api}/globals/${slug}?depth=0`,

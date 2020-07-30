@@ -16,7 +16,7 @@ const baseClass = 'global-edit';
 
 const DefaultGlobalView = (props) => {
   const {
-    global, data, onSave, permissions, action, apiURL,
+    global, data, onSave, permissions, action, apiURL, initialState,
   } = props;
 
   const {
@@ -36,6 +36,7 @@ const DefaultGlobalView = (props) => {
         action={action}
         onSuccess={onSave}
         disabled={!hasSavePermission}
+        initialState={initialState}
       >
         <div className={`${baseClass}__main`}>
           <Eyebrow />
@@ -55,7 +56,6 @@ const DefaultGlobalView = (props) => {
               filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
               fieldTypes={fieldTypes}
               fieldSchema={fields}
-              initialData={data}
               customComponentsPath={`${slug}.fields.`}
             />
           </div>
@@ -92,7 +92,6 @@ const DefaultGlobalView = (props) => {
               position="sidebar"
               fieldTypes={fieldTypes}
               fieldSchema={fields}
-              initialData={data}
               customComponentsPath={`${slug}.fields.`}
             />
           </div>
@@ -135,6 +134,7 @@ DefaultGlobalView.propTypes = {
   }).isRequired,
   action: PropTypes.string.isRequired,
   apiURL: PropTypes.string.isRequired,
+  initialState: PropTypes.shape({}).isRequired,
 };
 
 export default DefaultGlobalView;

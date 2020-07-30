@@ -269,7 +269,7 @@ class Relationship extends Component {
         const data = await response.json();
         this.addOptions({ docs: [data] }, relation);
       } else {
-        console.log(`There was a problem loading the document with ID of ${id}.`);
+        console.error(`There was a problem loading the document with ID of ${id}.`);
       }
     }
   }
@@ -413,9 +413,7 @@ const RelationshipFieldType = (props) => {
     return validationResult;
   }, [validate, required]);
 
-
   const fieldType = useFieldType({
-    ...props,
     path: path || name,
     validate: memoizedValidate,
     required,

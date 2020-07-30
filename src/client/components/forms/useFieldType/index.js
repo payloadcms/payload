@@ -21,7 +21,7 @@ const useFieldType = (options) => {
   const modified = useFormModified();
 
   const {
-    dispatchFields, getField, setModified, reset,
+    dispatchFields, getField, setModified,
   } = formContext;
 
   const [internalValue, setInternalValue] = useState(undefined);
