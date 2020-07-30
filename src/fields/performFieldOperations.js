@@ -246,6 +246,7 @@ async function performFieldOperations(entityConfig, args) {
           value: data[field.name],
           originalDoc: fullOriginalDoc,
           data: fullData,
+          operation,
           req,
         }) || resultingData[field.name];
       }, Promise.resolve());
