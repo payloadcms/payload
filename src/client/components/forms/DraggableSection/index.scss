@@ -82,7 +82,12 @@
   &.is-hovered > div {
     > .field-type-gutter {
       &.actions {
-        z-index: $z-nav;
+
+        .field-type-gutter__content {
+          &:hover {
+            z-index: $z-nav;
+          }
+        }
 
         .field-type-gutter__content-container {
           box-shadow: none;

@@ -2,9 +2,24 @@
 
 $controls-top-adjustment: base(.1);
 
+@mixin nestedStickyOffsets ($loopCount, $currentCount: 0) {
+  .field-type {
+    @if $loopCount > $currentCount {
+      .field-type-gutter--v-align-sticky .field-type-gutter__content {
+        top: calc(#{$top-header-offset} + (#{base(2.75)} * #{$currentCount}));
+      }
+
+      @include nestedStickyOffsets($loopCount, $currentCount + 1);
+    }
+  }
+}
+
+@include nestedStickyOffsets(4);
+
 .field-type-gutter {
   padding-right: base(1.25);
   margin-bottom: base(1);
+
 
   &--right {
     padding-right: 0;
