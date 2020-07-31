@@ -639,8 +639,10 @@ describe('Collections - REST', () => {
 
   describe('Media', () => {
     const mediaDir = path.join(__dirname, '../../../demo', 'media');
-    beforeAll(() => {
+    beforeAll(async () => {
       // Clear demo/media directory
+      const mediaDirExists = await fileExists(mediaDir);
+      if (!mediaDirExists) return;
       fs.readdir(mediaDir, (err, files) => {
         if (err) throw err;
 
