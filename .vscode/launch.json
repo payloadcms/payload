@@ -18,7 +18,30 @@
       },
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "port": 9229
+      "port": 9229,
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "Debug Jest Test - Current File",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "${workspaceRoot}/node_modules/.bin/jest",
+        "${fileBasename}",
+        "--runInBand"
+      ],
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "demo/payload.config.js"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "port": 9229,
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
     },
     {
       "type": "node",
