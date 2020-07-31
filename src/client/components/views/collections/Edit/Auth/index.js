@@ -34,7 +34,7 @@ const Auth = (props) => {
         label="Email"
         autoComplete="email"
       />
-      {changingPassword && (
+      {(changingPassword || requirePassword) && (
         <div className={`${baseClass}__changing-password`}>
           <Password
             autoComplete="off"

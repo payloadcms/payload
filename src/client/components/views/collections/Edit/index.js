@@ -82,12 +82,14 @@ const EditView = (props) => {
   const collectionPermissions = permissions?.[slug];
 
   const apiURL = `${serverURL}${api}/${slug}/${id}`;
-  let action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?depth=0`;
+  let action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}`;
   const hasSavePermission = (isEditing && collectionPermissions?.update?.permission) || (!isEditing && collectionPermissions?.create?.permission);
 
   if (auth && !isEditing) {
     action = `${action}/register`;
   }
+
+  action += '?depth=0';
 
   return (
     <RenderCustomComponent
