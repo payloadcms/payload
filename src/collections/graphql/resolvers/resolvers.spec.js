@@ -40,6 +40,7 @@ describe('GrahpQL Resolvers', () => {
       // language=graphQL
       const query = `mutation {
           createLocalizedPost(data: {title: "${title}", description: "${description}", priority: 10}) {
+          id
           title
           description
           priority
@@ -53,10 +54,43 @@ describe('GrahpQL Resolvers', () => {
       const data = response.createLocalizedPost;
 
       expect(data.title).toBe(title);
-      expect(data.id).not.toBeNull();
+      expect(data.id).toStrictEqual(expect.any(String));
       const timestampRegex = /^(\d{4})(?:-?W(\d+)(?:-?(\d+)D?)?|(?:-(\d+))?-(\d+))(?:[T ](\d+):(\d+)(?::(\d+)(?:\.(\d+))?)?)?(?:Z(-?\d*))?$/;
       expect(data.createdAt).toStrictEqual(expect.stringMatching(timestampRegex));
       expect(data.updatedAt).toStrictEqual(expect.stringMatching(timestampRegex));
+    });
+  });
+
+  describe('Read', () => {
+    it('should be able to read localized post', async () => {
+      const title = faker.lorem.words(1);
+      const description = faker.lorem.words(1);
+
+      // language=graphQL
+      const query = `mutation {
+            createLocalizedPost(data: {title: "${title}", description: "${description}", priority: 10}) {
+            id
+            title
+            description
+            priority
+            createdAt
+            updatedAt
+          }
+        }`;
+
+      const response = await client.request(query);
+
+      const { id } = response.createLocalizedPost;
+      // language=graphQL
+      const readQuery = `query {
+        LocalizedPost(id: "${id}") {
+          id
+        }
+      }`;
+      const readResponse = await client.request(readQuery);
+      const retrievedId = readResponse.LocalizedPost.id;
+
+      expect(retrievedId).toStrictEqual(id);
     });
   });
 
@@ -95,4 +129,38 @@ describe('GrahpQL Resolvers', () => {
       expect(data.description).toBe(updatedDesc);
     });
   });
+
+  describe('Delete', () => {
+    it('should be able to delete a localized post', async () => {
+      const title = faker.lorem.words(1);
+      const description = faker.lorem.words(1);
+
+      // language=graphQL
+      const query = `mutation {
+            createLocalizedPost(data: {title: "${title}", description: "${description}", priority: 10}) {
+            id
+            title
+            description
+            priority
+            createdAt
+            updatedAt
+          }
+        }`;
+
+      const response = await client.request(query);
+
+      const { id } = response.createLocalizedPost;
+      // language=graphQL
+      const deleteMutation = `mutation {
+        deleteLocalizedPost(id: "${id}") {
+          id
+        }
+      }`;
+      const deleteResponse = await client.request(deleteMutation);
+      const deletedId = deleteResponse.deleteLocalizedPost.id;
+
+      expect(deletedId).toStrictEqual(id);
+    });
+  });
+
 });
