@@ -129,4 +129,38 @@ describe('GrahpQL Resolvers', () => {
       expect(data.description).toBe(updatedDesc);
     });
   });
+
+  describe('Delete', () => {
+    it('should be able to delete a localized post', async () => {
+      const title = faker.lorem.words(1);
+      const description = faker.lorem.words(1);
+
+      // language=graphQL
+      const query = `mutation {
+            createLocalizedPost(data: {title: "${title}", description: "${description}", priority: 10}) {
+            id
+            title
+            description
+            priority
+            createdAt
+            updatedAt
+          }
+        }`;
+
+      const response = await client.request(query);
+
+      const { id } = response.createLocalizedPost;
+      // language=graphQL
+      const deleteMutation = `mutation {
+        deleteLocalizedPost(id: "${id}") {
+          id
+        }
+      }`;
+      const deleteResponse = await client.request(deleteMutation);
+      const deletedId = deleteResponse.deleteLocalizedPost.id;
+
+      expect(deletedId).toStrictEqual(id);
+    });
+  });
+
 });
