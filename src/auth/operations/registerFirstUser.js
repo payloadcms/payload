@@ -35,7 +35,7 @@ async function registerFirstUser(args) {
   };
 
   return {
-    message: 'Registered successfully. Welcome to Payload!',
+    message: 'Registered and logged in successfully. Welcome!',
     user: result,
   };
 }

@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
-import queryString from 'qs';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import config from 'payload/config';
-import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import UploadGallery from '../../../elements/UploadGallery';
 import Eyebrow from '../../../elements/Eyebrow';
 import Paginator from '../../../elements/Paginator';
@@ -16,7 +14,7 @@ import Cell from './Cell';
 
 import './index.scss';
 
-const { serverURL, routes: { api, admin } } = config;
+const { routes: { admin } } = config;
 
 const baseClass = 'collection-list';
 
@@ -32,31 +30,15 @@ const DefaultList = (props) => {
         plural: pluralLabel,
       },
     },
+    data,
+    newDocumentURL,
+    setListControls,
+    listControls,
+    setSort,
+    hasCreatePermission,
   } = props;
 
   const history = useHistory();
-  const location = useLocation();
-  const [listControls, setListControls] = useState({});
-  const [sort, setSort] = useState(null);
-  const newDocumentURL = `${admin}/collections/${slug}/create`;
-
-  const { page } = queryString.parse(location.search, { ignoreQueryPrefix: true });
-
-  const apiURL = `${serverURL}${api}/${slug}`;
-
-  const [{ data }, { setParams }] = usePayloadAPI(apiURL, { initialParams: { depth: 0 } });
-
-  useEffect(() => {
-    const params = {
-      depth: 2,
-    };
-
-    if (page) params.page = page;
-    if (sort) params.sort = sort;
-    if (listControls?.where) params.where = listControls.where;
-
-    setParams(params);
-  }, [setParams, page, sort, listControls]);
 
   return (
     <div className={baseClass}>
@@ -64,9 +46,11 @@ const DefaultList = (props) => {
       <div className={`${baseClass}__wrap`}>
         <header className={`${baseClass}__header`}>
           <h1>{pluralLabel}</h1>
-          <Pill to={newDocumentURL}>
-            Create New
-          </Pill>
+          {hasCreatePermission && (
+            <Pill to={newDocumentURL}>
+              Create New
+            </Pill>
+          )}
         </header>
         <ListControls
           handleChange={setListControls}
@@ -135,14 +119,16 @@ const DefaultList = (props) => {
               {' '}
               exist yet or none match the filters you&apos;ve specified above.
             </p>
-            <Button
-              el="link"
-              to={newDocumentURL}
-            >
-              Create new
-              {' '}
-              {singularLabel}
-            </Button>
+            {hasCreatePermission && (
+              <Button
+                el="link"
+                to={newDocumentURL}
+              >
+                Create new
+                {' '}
+                {singularLabel}
+              </Button>
+            )}
           </div>
         )}
         <div className={`${baseClass}__page-controls`}>
@@ -173,6 +159,10 @@ const DefaultList = (props) => {
   );
 };
 
+DefaultList.defaultProps = {
+  data: null,
+};
+
 DefaultList.propTypes = {
   collection: PropTypes.shape({
     upload: PropTypes.shape({}),
@@ -187,6 +177,28 @@ DefaultList.propTypes = {
     fields: PropTypes.arrayOf(PropTypes.shape),
     timestamps: PropTypes.bool,
   }).isRequired,
+  newDocumentURL: PropTypes.string.isRequired,
+  data: PropTypes.shape({
+    docs: PropTypes.arrayOf(
+      PropTypes.shape({}),
+    ),
+    limit: PropTypes.number,
+    nextPage: PropTypes.number,
+    prevPage: PropTypes.number,
+    totalDocs: PropTypes.number,
+    hasNextPage: PropTypes.bool,
+    hasPrevPage: PropTypes.bool,
+    page: PropTypes.number,
+    totalPages: PropTypes.number,
+  }),
+  setListControls: PropTypes.func.isRequired,
+  setSort: PropTypes.func.isRequired,
+  listControls: PropTypes.shape({
+    columns: PropTypes.arrayOf(
+      PropTypes.string,
+    ),
+  }).isRequired,
+  hasCreatePermission: PropTypes.bool.isRequired,
 };
 
 export default DefaultList;

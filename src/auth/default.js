@@ -10,6 +10,7 @@ const defaultUser = {
   auth: {
     tokenExpiration: 7200,
   },
+  fields: [],
   timestamps: true,
 };
 

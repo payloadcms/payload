@@ -20,7 +20,7 @@ const sanitizeConfig = (config) => {
   sanitizedConfig.admin = config.admin || {};
 
   if (!sanitizedConfig.admin.user) {
-    sanitizedConfig.admin.user = config.admin.user || 'users';
+    sanitizedConfig.admin.user = 'users';
     sanitizedConfig.collections.push(defaultUser);
   }
 
