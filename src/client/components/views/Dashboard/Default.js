@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import config from 'payload/config';
-import { useUser } from '../../data/User';
-import { useStepNav } from '../../elements/StepNav';
+
 import Eyebrow from '../../elements/Eyebrow';
 import Card from '../../elements/Card';
 import Button from '../../elements/Button';
@@ -10,8 +10,6 @@ import Button from '../../elements/Button';
 import './index.scss';
 
 const {
-  collections,
-  globals,
   routes: {
     admin,
   },
@@ -19,21 +17,14 @@ const {
 
 const baseClass = 'dashboard';
 
-const Dashboard = () => {
-  const [filteredGlobals, setFilteredGlobals] = useState([]);
-  const { setStepNav } = useStepNav();
+const Dashboard = (props) => {
+  const {
+    collections,
+    globals,
+    permissions,
+  } = props;
+
   const { push } = useHistory();
-  const { permissions } = useUser();
-
-  useEffect(() => {
-    setFilteredGlobals(
-      globals.filter((global) => permissions?.[global.slug]?.read?.permission),
-    );
-  }, [permissions]);
-
-  useEffect(() => {
-    setStepNav([]);
-  }, [setStepNav]);
 
   return (
     <div className={baseClass}>
@@ -42,35 +33,33 @@ const Dashboard = () => {
         <h3 className={`${baseClass}__label`}>Collections</h3>
         <ul className={`${baseClass}__card-list`}>
           {collections.map((collection) => {
-            if (permissions?.[collection.slug]?.read?.permission) {
-              return (
-                <li key={collection.slug}>
-                  <Card
-                    title={collection.labels.plural}
-                    onClick={() => push({ pathname: `${admin}/collections/${collection.slug}` })}
-                    actions={(
-                      <Button
-                        el="link"
-                        to={`${admin}/collections/${collection.slug}/create`}
-                        icon="plus"
-                        round
-                        buttonStyle="icon-label"
-                        iconStyle="with-border"
-                      />
-                    )}
-                  />
-                </li>
-              );
-            }
+            const hasCreatePermission = permissions?.[collection.slug]?.create?.permission;
 
-            return null;
+            return (
+              <li key={collection.slug}>
+                <Card
+                  title={collection.labels.plural}
+                  onClick={() => push({ pathname: `${admin}/collections/${collection.slug}` })}
+                  actions={hasCreatePermission ? (
+                    <Button
+                      el="link"
+                      to={`${admin}/collections/${collection.slug}/create`}
+                      icon="plus"
+                      round
+                      buttonStyle="icon-label"
+                      iconStyle="with-border"
+                    />
+                  ) : undefined}
+                />
+              </li>
+            );
           })}
         </ul>
-        {(filteredGlobals.length > 0) && (
+        {(globals.length > 0) && (
           <React.Fragment>
             <h3 className={`${baseClass}__label`}>Globals</h3>
             <ul className={`${baseClass}__card-list`}>
-              {filteredGlobals.map((global) => (
+              {globals.map((global) => (
                 <li key={global.slug}>
                   <Card
                     title={global.label}
@@ -84,6 +73,16 @@ const Dashboard = () => {
       </div>
     </div>
   );
+};
+
+Dashboard.propTypes = {
+  collections: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ).isRequired,
+  globals: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ).isRequired,
+  permissions: PropTypes.shape({}).isRequired,
 };
 
 export default Dashboard;

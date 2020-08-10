@@ -24,10 +24,12 @@
 
     li {
       width: 20%;
+      margin-bottom: $baseline;
     }
 
     .card {
-      margin: 0 base(.5) $baseline;
+      height: 100%;
+      margin: 0 base(.5);
     }
   }
 
