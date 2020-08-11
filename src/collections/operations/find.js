@@ -37,7 +37,6 @@ async function find(args) {
     const accessResults = await executeAccess({ req }, collectionConfig.access.read);
     const hasWhereAccess = typeof accessResults === 'object';
 
-
     if (hasWhereAccess) {
       if (!where) {
         queryToBuild.where = {

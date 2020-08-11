@@ -117,7 +117,7 @@ async function performFieldOperations(entityConfig, args) {
     const resultingData = data;
 
     if (field.access && field.access[operation]) {
-      const result = await field.access[operation]({ req });
+      const result = overrideAccess ? true : await field.access[operation]({ req });
 
       if (!result && operation === 'update' && originalDoc[field.name] !== undefined) {
         resultingData[field.name] = originalDoc[field.name];
