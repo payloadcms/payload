@@ -22,7 +22,7 @@ async function logout(args) {
 
   if (req.headers.origin && req.headers.origin.indexOf('localhost') === -1) {
     let domain = req.headers.origin.replace('https://', '');
-    domain = req.headers.origin.replace('http://', '');
+    domain = domain.replace('http://', '');
     cookieOptions.domain = domain;
   }
 

@@ -89,7 +89,7 @@ async function login(args) {
 
     if (args.req.headers.origin && args.req.headers.origin.indexOf('localhost') === -1) {
       let domain = args.req.headers.origin.replace('https://', '');
-      domain = args.req.headers.origin.replace('http://', '');
+      domain = domain.replace('http://', '');
       cookieOptions.domain = domain;
     }
 
