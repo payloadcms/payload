@@ -65,7 +65,7 @@ const UserProvider = ({ children }) => {
   const logOut = () => {
     setUser(null);
     setTokenInMemory(null);
-    requests.get(`${serverURL}${api}/${userSlug}/logout`);
+    requests.post(`${serverURL}${api}/${userSlug}/logout`);
   };
 
   // On mount, get user and set

@@ -74,7 +74,7 @@ function registerCollections() {
 
       router
         .route(`/${slug}/logout`)
-        .get(logout);
+        .post(logout);
 
       router
         .route(`/${slug}/refresh-token`)
