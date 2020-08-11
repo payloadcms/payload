@@ -18,7 +18,6 @@ $controls-top-adjustment: base(.1);
 
 .field-type-gutter {
   padding-right: base(1.25);
-  margin-bottom: base(1);
 
 
   &--right {
@@ -76,10 +75,6 @@ $controls-top-adjustment: base(.1);
 // External scopes
 .field-type.blocks {
   .field-type-gutter {
-    &__content-container {
-      min-height: calc(100% + #{$controls-top-adjustment});
-    }
-
     &__content {
       margin-top: - $controls-top-adjustment;
     }

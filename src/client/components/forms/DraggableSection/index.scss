@@ -42,12 +42,7 @@
   &__content-wrapper {
     display: flex;
     position: relative;
-  }
-
-  &.is-closed {
-    .draggable-section__content-wrapper {
-      margin-bottom: base(1.75);
-    }
+    margin-bottom: $baseline;
   }
 
   &__section-header {
@@ -158,12 +153,12 @@
   }
 }
 
+.field-type.group .field-type.array,
+.field-type.group .field-type.blocks,
 .field-type.blocks .field-type.blocks,
-.field-type.blocks .field-type.group,
 .field-type.blocks .field-type.array,
 .field-type.array .field-type.array,
-.field-type.array .field-type.blocks,
-.field-type.array .field-type.group {
+.field-type.array .field-type.blocks {
   @include relatively-position-panels();
 }
 

@@ -73,7 +73,7 @@ const DateTime = (props) => {
       <div className={`${baseClass}__input-wrapper`}>
         <DatePicker
           {...props}
-          onChange={readOnly ? setValue : undefined}
+          onChange={readOnly ? undefined : setValue}
           value={value}
         />
       </div>

@@ -23,6 +23,9 @@ const DateTime = (props) => {
     placeholder: placeholderText,
     value,
     onChange,
+    admin: {
+      readOnly,
+    } = {},
   } = props;
 
   let dateTimeFormat = inputDateTimeFormat;
@@ -44,6 +47,7 @@ const DateTime = (props) => {
     timeIntervals,
     timeFormat,
     placeholderText,
+    disabled: readOnly,
     onChange,
     showPopperArrow: false,
     selected: value && new Date(value),
@@ -80,6 +84,8 @@ DateTime.defaultProps = {
   timeIntervals: 30,
   timeFormat: 'h:mm aa',
   value: undefined,
+  onChange: undefined,
+  admin: {},
 };
 
 DateTime.propTypes = {
@@ -97,7 +103,10 @@ DateTime.propTypes = {
   timeIntervals: PropTypes.number,
   timeFormat: PropTypes.string,
   value: PropTypes.instanceOf(Date),
-  onChange: PropTypes.func.isRequired,
+  onChange: PropTypes.func,
+  admin: PropTypes.shape({
+    readOnly: PropTypes.bool,
+  }),
 };
 
 export default DateTime;
