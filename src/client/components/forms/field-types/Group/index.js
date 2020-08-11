@@ -29,7 +29,7 @@ const Group = (props) => {
       <FieldTypeGutter />
 
       <div className={`${baseClass}__content-wrapper`}>
-        <h3 className={`${baseClass}__title`}>{label}</h3>
+        <h2 className={`${baseClass}__title`}>{label}</h2>
 
         <div className={`${baseClass}__fields-wrapper`}>
           <RenderFields
