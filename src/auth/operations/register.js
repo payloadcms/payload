@@ -50,6 +50,7 @@ async function register(args) {
     hook: 'beforeChange',
     operation: 'create',
     req,
+    overrideAccess,
   });
 
   // /////////////////////////////////////
@@ -97,6 +98,7 @@ async function register(args) {
     operation: 'read',
     req,
     depth,
+    overrideAccess,
   });
 
   // /////////////////////////////////////
