@@ -123,6 +123,7 @@ module.exports = (config) => {
     }),
     new Dotenv({
       silent: true,
+      systemvars: true,
     }),
   ];
 

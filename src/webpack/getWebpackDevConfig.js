@@ -134,6 +134,7 @@ module.exports = (config) => {
     new webpack.HotModuleReplacementPlugin(),
     new Dotenv({
       silent: true,
+      systemvars: true,
     }),
   ];
 
