@@ -14,6 +14,7 @@ const ConfirmPassword = () => {
     if (value === password?.value) {
       return true;
     }
+
     return 'Passwords do not match.';
   }, [password]);
 

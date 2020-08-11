@@ -33,15 +33,12 @@ async function resetPassword(args) {
     data,
   } = options;
 
-  const { email } = data;
-
   const user = await Model.findOne({
     resetPasswordToken: data.token,
     resetPasswordExpiration: { $gt: Date.now() },
   });
 
   if (!user) throw new APIError('Token is either invalid or has expired.');
-
 
   await user.setPassword(data.password);
 
@@ -60,7 +57,9 @@ async function resetPassword(args) {
     }
     return signedFields;
   }, {
-    email,
+    email: user.email,
+    id: user.id,
+    collection: collectionConfig.slug,
   });
 
   const token = jwt.sign(
@@ -70,6 +69,25 @@ async function resetPassword(args) {
       expiresIn: collectionConfig.auth.tokenExpiration,
     },
   );
+
+  if (args.res) {
+    const cookieOptions = {
+      path: '/',
+      httpOnly: true,
+    };
+
+    if (collectionConfig.auth.secureCookie) {
+      cookieOptions.secure = true;
+    }
+
+    if (args.req.headers.origin && args.req.headers.origin.indexOf('localhost') === -1) {
+      let domain = args.req.headers.origin.replace('https://', '');
+      domain = domain.replace('http://', '');
+      cookieOptions.domain = domain;
+    }
+
+    args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
+  }
 
   // /////////////////////////////////////
   // 3. Execute after reset password hook

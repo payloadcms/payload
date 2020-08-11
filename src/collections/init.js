@@ -93,7 +93,7 @@ function registerCollections() {
         .post(forgotPassword);
 
       router
-        .route(`${slug}/reset-password`)
+        .route(`/${slug}/reset-password`)
         .post(resetPassword);
 
       router

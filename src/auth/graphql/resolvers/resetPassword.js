@@ -8,6 +8,7 @@ function resetPassword(collection) {
       collection,
       data: args,
       req: context.req,
+      res: context.res,
       api: 'GraphQL',
     };
 

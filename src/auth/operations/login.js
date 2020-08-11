@@ -65,9 +65,8 @@ async function login(args) {
   }, {
     email,
     id: user.id,
+    collection: collectionConfig.slug,
   });
-
-  fieldsToSign.collection = collectionConfig.slug;
 
   const token = jwt.sign(
     fieldsToSign,

@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import config from 'payload/config';
-import StatusList from '../../elements/Status';
+import MinimalTemplate from '../../templates/Minimal';
 import Form from '../../forms/Form';
 import Password from '../../forms/field-types/Password';
+import ConfirmPassword from '../../forms/field-types/ConfirmPassword';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import { useUser } from '../../data/User';
@@ -20,19 +21,16 @@ const ResetPassword = () => {
   const history = useHistory();
   const { user, setToken } = useUser();
 
-  const handleResponse = (res) => {
-    res.json()
-      .then((data) => {
-        if (data.token) {
-          setToken(data.token);
-          history.push(`${admin}`);
-        }
-      });
+  const onSuccess = (data) => {
+    if (data.token) {
+      setToken(data.token);
+      history.push(`${admin}`);
+    }
   };
 
   if (user) {
     return (
-      <div className={baseClass}>
+      <MinimalTemplate className={baseClass}>
         <div className={`${baseClass}__wrap`}>
           <h1>Already logged in</h1>
           <p>
@@ -51,34 +49,35 @@ const ResetPassword = () => {
             Back to Dashboard
           </Button>
         </div>
-      </div>
+      </MinimalTemplate>
     );
   }
 
   return (
-    <div className={baseClass}>
+    <MinimalTemplate className={baseClass}>
       <div className={`${baseClass}__wrap`}>
-        <StatusList />
+        <h1>Reset Password</h1>
         <Form
-          handleResponse={handleResponse}
+          onSuccess={onSuccess}
           method="POST"
           action={`${serverURL}${api}/${userSlug}/reset-password`}
           redirect={admin}
         >
           <Password
             error="password"
-            label="Password"
+            label="New Password"
             name="password"
             required
           />
+          <ConfirmPassword />
           <HiddenInput
             name="token"
-            defaultValue={token}
+            value={token}
           />
           <FormSubmit>Reset Password</FormSubmit>
         </Form>
       </div>
-    </div>
+    </MinimalTemplate>
   );
 };
 

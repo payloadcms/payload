@@ -69,14 +69,6 @@ const ForgotPassword = () => {
         <p>
           Check your email for a link that will allow you to securely reset your password.
         </p>
-        <br />
-        <Button
-          el="link"
-          buttonStyle="secondary"
-          to={`${admin}/login`}
-        >
-          Go to login
-        </Button>
       </MinimalTemplate>
     );
   }
