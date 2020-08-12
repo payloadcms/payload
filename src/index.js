@@ -91,6 +91,10 @@ class Payload {
     this.router.use(errorHandler(this.config));
 
     if (typeof options.onInit === 'function') options.onInit();
+
+    this.find = this.find.bind(this);
+    this.register = this.register.bind(this);
+    this.login = this.login.bind(this);
   }
 
   async sendEmail(message) {
@@ -112,6 +116,18 @@ class Payload {
     let { find } = localOperations;
     find = find.bind(this);
     return find(options);
+  }
+
+  async register(options) {
+    let { register } = localOperations.auth;
+    register = register.bind(this);
+    return register(options);
+  }
+
+  async login(options) {
+    let { login } = localOperations.auth;
+    login = login.bind(this);
+    return login(options);
   }
 }
 

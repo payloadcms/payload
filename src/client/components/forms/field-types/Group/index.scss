@@ -6,8 +6,12 @@
 }
 
 .group {
-  margin: base(2) 0;
+  margin-bottom: base(2);
   display: flex;
+
+  &__title {
+    margin-top: base(2);
+  }
 
   &:hover {
     .field-type-gutter__content-container {

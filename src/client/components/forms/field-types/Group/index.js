@@ -29,8 +29,9 @@ const Group = (props) => {
       <FieldTypeGutter />
 
       <div className={`${baseClass}__content-wrapper`}>
-        <h2 className={`${baseClass}__title`}>{label}</h2>
-
+        {label && (
+          <h2 className={`${baseClass}__title`}>{label}</h2>
+        )}
         <div className={`${baseClass}__fields-wrapper`}>
           <RenderFields
             readOnly={readOnly}

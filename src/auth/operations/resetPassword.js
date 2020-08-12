@@ -80,7 +80,7 @@ async function resetPassword(args) {
       cookieOptions.secure = true;
     }
 
-    if (args.req.headers.origin && args.req.headers.origin.indexOf('localhost') === -1) {
+    if (args.req.headers && args.req.headers.origin && args.req.headers.origin.indexOf('localhost') === -1) {
       let domain = args.req.headers.origin.replace('https://', '');
       domain = domain.replace('http://', '');
       cookieOptions.domain = domain;
