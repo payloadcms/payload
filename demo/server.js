@@ -23,7 +23,7 @@ payload.init({
 
 const externalRouter = express.Router();
 
-externalRouter.use(payload.authenticate());
+externalRouter.use(payload.authenticate);
 
 externalRouter.get('/', (req, res) => {
   if (req.user) {

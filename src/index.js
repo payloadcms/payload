@@ -88,14 +88,17 @@ class Payload {
     // Enable static routes for all collections permitting upload
     this.initStatic();
 
-    this.router.use(errorHandler(this.config));
+    this.errorHandler = errorHandler(this.config);
+    this.router.use(this.errorHandler);
 
-    if (typeof options.onInit === 'function') options.onInit();
+    this.authenticate = authenticate(this.config);
 
     this.create = this.create.bind(this);
     this.find = this.find.bind(this);
     this.register = this.register.bind(this);
     this.login = this.login.bind(this);
+
+    if (typeof options.onInit === 'function') options.onInit();
   }
 
   async sendEmail(message) {
@@ -107,10 +110,6 @@ class Payload {
   async getMockEmailCredentials() {
     const email = await this.email;
     return email.account;
-  }
-
-  authenticate() {
-    return authenticate(this.config);
   }
 
   async create(options) {
