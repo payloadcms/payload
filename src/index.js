@@ -26,7 +26,7 @@ const performFieldOperations = require('./fields/performFieldOperations');
 const localOperations = require('./collections/operations/local');
 
 class Payload {
-  constructor(options) {
+  init(options) {
     logger.info('Starting Payload...');
     const config = getConfig(options);
 
@@ -92,6 +92,7 @@ class Payload {
 
     if (typeof options.onInit === 'function') options.onInit();
 
+    this.create = this.create.bind(this);
     this.find = this.find.bind(this);
     this.register = this.register.bind(this);
     this.login = this.login.bind(this);
@@ -110,6 +111,12 @@ class Payload {
 
   authenticate() {
     return authenticate(this.config);
+  }
+
+  async create(options) {
+    let { create } = localOperations;
+    create = create.bind(this);
+    return create(options);
   }
 
   async find(options) {
@@ -131,4 +138,4 @@ class Payload {
   }
 }
 
-module.exports = Payload;
+module.exports = new Payload();

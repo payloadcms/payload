@@ -1,14 +1,14 @@
 /* eslint-disable no-console */
 const express = require('express');
 const path = require('path');
-const Payload = require('../src');
+const payload = require('../src');
 const logger = require('../src/utilities/logger')();
 
 const expressApp = express();
 
 expressApp.use('/static', express.static(path.resolve(__dirname, 'client/static')));
 
-const payload = new Payload({
+payload.init({
   email: {
     provider: 'mock',
   },
@@ -34,8 +34,6 @@ externalRouter.get('/', (req, res) => {
 });
 
 expressApp.use('/external-route', externalRouter);
-
-exports.payload = payload;
 
 exports.start = (cb) => {
   const server = expressApp.listen(3000, async () => {
