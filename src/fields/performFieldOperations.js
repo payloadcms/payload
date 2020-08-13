@@ -290,14 +290,19 @@ async function performFieldOperations(entityConfig, args) {
         }
       }
 
-      if (operation === 'create' || operation === 'update') {
+      if ((operation === 'create' || operation === 'update') && field.name) {
+        const updatedData = data;
+
+        if (data[field.name] === undefined && originalDoc[field.name] === undefined && field.defaultValue) {
+          updatedData[field.name] = field.defaultValue;
+        }
+
         if (field.type === 'array' || field.type === 'blocks') {
           const hasRowsOfNewData = Array.isArray(data[field.name]);
           const newRowCount = hasRowsOfNewData ? data[field.name].length : 0;
 
           // Handle cases of arrays being intentionally set to 0
           if (data[field.name] === '0' || data[field.name] === 0 || data[field.name] === null) {
-            const updatedData = data;
             updatedData[field.name] = [];
           }
 
@@ -305,7 +310,7 @@ async function performFieldOperations(entityConfig, args) {
           const existingRowCount = hasRowsOfExistingData ? originalDoc[field.name].length : 0;
 
           validationPromises.push(() => createValidationPromise({ [field.name]: newRowCount }, { [field.name]: existingRowCount }, field, path));
-        } else if (field.name) {
+        } else {
           validationPromises.push(() => createValidationPromise(data, originalDoc, field, path, true));
         }
       }
