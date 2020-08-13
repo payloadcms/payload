@@ -95,8 +95,11 @@ class Payload {
 
     this.create = this.create.bind(this);
     this.find = this.find.bind(this);
+    this.findByID = this.findByID.bind(this);
     this.register = this.register.bind(this);
     this.login = this.login.bind(this);
+    this.forgotPassword = this.forgotPassword.bind(this);
+    this.resetPassword = this.resetPassword.bind(this);
 
     if (typeof options.onInit === 'function') options.onInit();
   }
@@ -124,6 +127,12 @@ class Payload {
     return find(options);
   }
 
+  async findByID(options) {
+    let { findByID } = localOperations;
+    findByID = findByID.bind(this);
+    return findByID(options);
+  }
+
   async register(options) {
     let { register } = localOperations.auth;
     register = register.bind(this);
@@ -134,6 +143,18 @@ class Payload {
     let { login } = localOperations.auth;
     login = login.bind(this);
     return login(options);
+  }
+
+  async forgotPassword(options) {
+    let { forgotPassword } = localOperations.auth;
+    forgotPassword = forgotPassword.bind(this);
+    return forgotPassword(options);
+  }
+
+  async resetPassword(options) {
+    let { resetPassword } = localOperations.auth;
+    resetPassword = resetPassword.bind(this);
+    return resetPassword(options);
   }
 }
 

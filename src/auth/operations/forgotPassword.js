@@ -36,7 +36,7 @@ async function forgotPassword(args) {
 
   const user = await Model.findOne({ email: data.email });
 
-  if (!user) return;
+  if (!user) return null;
 
   user.resetPasswordToken = token;
   user.resetPasswordExpiration = Date.now() + 3600000; // 1 hour
@@ -61,11 +61,13 @@ async function forgotPassword(args) {
   // 3. Execute after forgot password hook
   // /////////////////////////////////////
 
-  const { afterForgotPassword } = args.req.collection.config.hooks;
+  const { afterForgotPassword } = args.collection.config.hooks;
 
   if (typeof afterForgotPassword === 'function') {
     await afterForgotPassword(options);
   }
+
+  return token;
 }
 
 module.exports = forgotPassword;

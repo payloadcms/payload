@@ -21,14 +21,15 @@ async function update(args) {
       locale,
       fallbackLocale,
     },
+    overrideAccess,
   } = args;
 
   // /////////////////////////////////////
   // 1. Execute access
   // /////////////////////////////////////
 
-  const policyResults = await executeAccess({ req }, collectionConfig.access.update);
-  const hasWherePolicy = typeof policyResults === 'object';
+  const accessResults = !overrideAccess ? await executeAccess({ req }, collectionConfig.access.update) : true;
+  const hasWherePolicy = typeof accessResults === 'object';
 
   // /////////////////////////////////////
   // 2. Retrieve document
@@ -90,6 +91,7 @@ async function update(args) {
     originalDoc,
     hook: 'beforeChange',
     operation: 'update',
+    overrideAccess,
   });
 
   // /////////////////////////////////////
@@ -176,6 +178,7 @@ async function update(args) {
     operation: 'read',
     req,
     depth,
+    overrideAccess,
   });
 
   // /////////////////////////////////////

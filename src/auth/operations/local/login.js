@@ -1,28 +1,33 @@
-async function login(options) {
+async function login(args) {
   const {
     collection: collectionSlug,
+    req = {},
     res,
     depth,
     locale,
     fallbackLocale,
     data,
-  } = options;
+  } = args;
 
   const collection = this.collections[collectionSlug];
 
-  return this.operations.collections.auth.login({
+  const options = {
     depth,
     collection,
     overrideAccess: true,
     data,
     req: {
+      ...req,
       payloadAPI: 'local',
-      locale,
-      fallbackLocale,
       payload: this,
     },
     res,
-  });
+  };
+
+  if (locale) options.req.locale = locale;
+  if (fallbackLocale) options.req.fallbackLocale = fallbackLocale;
+
+  return this.operations.collections.auth.login(options);
 }
 
 module.exports = login;

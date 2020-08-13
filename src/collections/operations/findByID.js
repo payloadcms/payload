@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const { Forbidden, NotFound } = require('../../errors');
 const executeAccess = require('../../auth/executeAccess');
 
@@ -16,13 +17,14 @@ async function findByID(args) {
     },
     disableErrors,
     currentDepth,
+    overrideAccess,
   } = args;
 
   // /////////////////////////////////////
   // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  const accessResults = await executeAccess({ req, disableErrors }, collectionConfig.access.read);
+  const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors }, collectionConfig.access.read) : true;
   const hasWhereAccess = typeof accessResults === 'object';
 
   const queryToBuild = {
@@ -83,6 +85,7 @@ async function findByID(args) {
     hook: 'afterRead',
     operation: 'read',
     currentDepth,
+    overrideAccess,
   });
 
 

@@ -22,6 +22,7 @@ async function create(args) {
       fallbackLocale,
     },
     depth,
+    overrideAccess,
   } = args;
 
   let { data } = args;
@@ -30,7 +31,9 @@ async function create(args) {
   // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  await executeAccess({ req }, collectionConfig.access.create);
+  if (!overrideAccess) {
+    await executeAccess({ req }, collectionConfig.access.create);
+  }
 
   // /////////////////////////////////////
   // 2. Execute before validate collection hooks
@@ -55,6 +58,7 @@ async function create(args) {
     hook: 'beforeChange',
     operation: 'create',
     req,
+    overrideAccess,
   });
 
   // /////////////////////////////////////
@@ -137,6 +141,7 @@ async function create(args) {
     operation: 'read',
     req,
     depth,
+    overrideAccess,
   });
 
   // /////////////////////////////////////

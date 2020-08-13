@@ -15,13 +15,14 @@ async function deleteQuery(args) {
       locale,
       fallbackLocale,
     },
+    overrideAccess,
   } = args;
 
   // /////////////////////////////////////
   // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  const accessResults = await executeAccess({ req, id }, collectionConfig.access.delete);
+  const accessResults = !overrideAccess ? await executeAccess({ req, id }, collectionConfig.access.delete) : true;
   const hasWhereAccess = typeof accessResults === 'object';
 
   // /////////////////////////////////////
@@ -100,6 +101,7 @@ async function deleteQuery(args) {
     operation: 'read',
     req,
     depth,
+    overrideAccess,
   });
 
   // /////////////////////////////////////
