@@ -7,6 +7,7 @@ async function forgotPasswordHandler(req, res, next) {
       collection: req.collection,
       data: { email: req.body.email },
       disableEmail: req.body.disableEmail,
+      expiration: req.body.expiration,
     });
 
     return res.status(httpStatus.OK)

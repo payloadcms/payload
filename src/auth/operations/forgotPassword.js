@@ -30,6 +30,7 @@ async function forgotPassword(args) {
     },
     data,
     disableEmail,
+    expiration,
   } = options;
 
   let token = await crypto.randomBytes(20);
@@ -40,7 +41,7 @@ async function forgotPassword(args) {
   if (!user) return null;
 
   user.resetPasswordToken = token;
-  user.resetPasswordExpiration = Date.now() + 3600000; // 1 hour
+  user.resetPasswordExpiration = expiration || Date.now() + 3600000; // 1 hour
 
   await user.save();
 

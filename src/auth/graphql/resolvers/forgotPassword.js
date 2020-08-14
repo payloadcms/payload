@@ -5,6 +5,7 @@ function forgotPassword(collection) {
       data: { email: args.email },
       req: context.req,
       disableEmail: args.disableEmail,
+      expiration: args.expiration,
     };
 
     await this.operations.collections.auth.forgotPassword(options);

@@ -2,6 +2,8 @@ async function forgotPassword(options) {
   const {
     collection: collectionSlug,
     data,
+    expiration,
+    disableEmail,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -10,6 +12,8 @@ async function forgotPassword(options) {
     data,
     collection,
     overrideAccess: true,
+    disableEmail,
+    expiration,
   });
 }
 

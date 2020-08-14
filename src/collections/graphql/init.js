@@ -215,6 +215,7 @@ function registerCollections() {
         args: {
           email: { type: new GraphQLNonNull(GraphQLString) },
           disableEmail: { type: GraphQLBoolean },
+          expiration: { type: GraphQLInt },
         },
         resolve: forgotPassword(collection),
       };
