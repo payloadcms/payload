@@ -2,6 +2,28 @@
 const { Schema } = require('mongoose');
 const { MissingSelectOptions } = require('../errors');
 
+const setBlockDiscriminators = (fields, schema) => {
+  fields.forEach((field) => {
+    if (field.type === 'blocks' && field.blocks && field.blocks.length > 0) {
+      field.blocks.forEach((block) => {
+        let blockSchemaFields = {};
+
+        block.fields.forEach((blockField) => {
+          const fieldSchema = fieldToSchemaMap[blockField.type];
+          if (fieldSchema) {
+            blockSchemaFields = fieldSchema(blockField, blockSchemaFields);
+          }
+        });
+
+        const blockSchema = new Schema(blockSchemaFields, { _id: false });
+        schema.path(field.name).discriminator(block.slug, blockSchema);
+
+        setBlockDiscriminators(block.fields, blockSchema);
+      });
+    }
+  });
+};
+
 const formatBaseSchema = (field) => {
   const createAccess = field.access && field.access.create;
 
@@ -29,23 +51,7 @@ const buildSchema = (configFields, options = {}) => {
 
   const schema = new Schema(fields, options);
 
-  configFields.forEach((field) => {
-    if (field.type === 'blocks' && field.blocks && field.blocks.length > 0) {
-      field.blocks.forEach((block) => {
-        let blockSchemaFields = {};
-
-        block.fields.forEach((blockField) => {
-          const fieldSchema = fieldToSchemaMap[blockField.type];
-          if (fieldSchema) {
-            blockSchemaFields = fieldSchema(blockField, blockSchemaFields);
-          }
-        });
-
-        const blockSchema = new Schema(blockSchemaFields, { _id: false });
-        schema.path(field.name).discriminator(block.slug, blockSchema);
-      });
-    }
-  });
+  setBlockDiscriminators(configFields, schema);
 
   return schema;
 };
