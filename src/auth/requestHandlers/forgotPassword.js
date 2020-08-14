@@ -5,7 +5,8 @@ async function forgotPasswordHandler(req, res, next) {
     await this.operations.collections.auth.forgotPassword({
       req,
       collection: req.collection,
-      data: req.body,
+      data: { email: req.body.email },
+      disableEmail: req.body.disableEmail,
     });
 
     return res.status(httpStatus.OK)

@@ -2,8 +2,9 @@ function forgotPassword(collection) {
   async function resolver(_, args, context) {
     const options = {
       collection,
-      data: args,
+      data: { email: args.email },
       req: context.req,
+      disableEmail: args.disableEmail,
     };
 
     await this.operations.collections.auth.forgotPassword(options);

@@ -96,6 +96,7 @@ class Payload {
     this.create = this.create.bind(this);
     this.find = this.find.bind(this);
     this.findByID = this.findByID.bind(this);
+    this.update = this.update.bind(this);
     this.register = this.register.bind(this);
     this.login = this.login.bind(this);
     this.forgotPassword = this.forgotPassword.bind(this);
@@ -131,6 +132,12 @@ class Payload {
     let { findByID } = localOperations;
     findByID = findByID.bind(this);
     return findByID(options);
+  }
+
+  async update(options) {
+    let { update } = localOperations;
+    update = update.bind(this);
+    return update(options);
   }
 
   async register(options) {

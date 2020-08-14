@@ -107,6 +107,9 @@ async function findByID(args) {
   // 6. Return results
   // /////////////////////////////////////
 
+  result = JSON.stringify(result);
+  result = JSON.parse(result);
+
   return result;
 }
 

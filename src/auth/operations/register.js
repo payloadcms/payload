@@ -118,6 +118,8 @@ async function register(args) {
   // /////////////////////////////////////
   // 8. Return user
   // /////////////////////////////////////
+  result = JSON.stringify(result);
+  result = JSON.parse(result);
 
   return result;
 }

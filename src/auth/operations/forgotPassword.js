@@ -29,6 +29,7 @@ async function forgotPassword(args) {
       Model,
     },
     data,
+    disableEmail,
   } = options;
 
   let token = await crypto.randomBytes(20);
@@ -43,19 +44,21 @@ async function forgotPassword(args) {
 
   await user.save();
 
-  const html = `You are receiving this because you (or someone else) have requested the reset of the password for your account.
-                       Please click on the following link, or paste this into your browser to complete the process:
-                       <a href="${config.serverURL}${config.routes.admin}/reset/${token}">
-                        ${config.serverURL}${config.routes.admin}/reset/${token}
-                       </a>
-                       If you did not request this, please ignore this email and your password will remain unchanged.`;
+  if (!disableEmail) {
+    const html = `You are receiving this because you (or someone else) have requested the reset of the password for your account.
+    Please click on the following link, or paste this into your browser to complete the process:
+    <a href="${config.serverURL}${config.routes.admin}/reset/${token}">
+     ${config.serverURL}${config.routes.admin}/reset/${token}
+    </a>
+    If you did not request this, please ignore this email and your password will remain unchanged.`;
 
-  email({
-    from: `"${config.email.fromName}" <${config.email.fromAddress}>`,
-    to: data.email,
-    subject: 'Password Reset',
-    html,
-  });
+    email({
+      from: `"${config.email.fromName}" <${config.email.fromAddress}>`,
+      to: data.email,
+      subject: 'Password Reset',
+      html,
+    });
+  }
 
   // /////////////////////////////////////
   // 3. Execute after forgot password hook

@@ -62,7 +62,10 @@ async function update(args) {
     doc.setLocale(locale, fallbackLocale);
   }
 
-  const originalDoc = doc.toJSON({ virtuals: true });
+  let originalDoc = doc.toJSON({ virtuals: true });
+
+  originalDoc = JSON.stringify(originalDoc);
+  originalDoc = JSON.parse(originalDoc);
 
   let { data } = args;
 
@@ -198,6 +201,9 @@ async function update(args) {
   // /////////////////////////////////////
   // 11. Return updated document
   // /////////////////////////////////////
+
+  doc = JSON.stringify(doc);
+  doc = JSON.parse(doc);
 
   return doc;
 }

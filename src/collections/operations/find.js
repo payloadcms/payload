@@ -134,6 +134,9 @@ async function find(args) {
   // 7. Return results
   // /////////////////////////////////////
 
+  afterReadResult = JSON.stringify(afterReadResult);
+  afterReadResult = JSON.parse(afterReadResult);
+
   return afterReadResult;
 }
 
