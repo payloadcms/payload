@@ -6,7 +6,7 @@ module.exports = ({ operations }, { Model, config }) => {
     prefix: `${config.labels.singular} API-Key `,
   };
 
-  return new PassportAPIKey(opts, true, async (req, apiKey, done) => {
+  return new PassportAPIKey(opts, true, async (apiKey, done, req) => {
     try {
       const userQuery = await operations.collections.find({
         where: {
