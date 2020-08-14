@@ -45,12 +45,6 @@ const Checkbox = (props) => {
     disableFormData,
   });
 
-  useEffect(() => {
-    if (value === null || value === undefined) {
-      setValue(false);
-    }
-  }, [value, setValue]);
-
   return (
     <div
       className={[
