@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { createEditor } from 'slate';
 import { withHistory } from 'slate-history';
@@ -15,7 +15,6 @@ import {
   ListPlugin,
   ParagraphPlugin,
   pipe,
-  ExitBreakPlugin,
   SoftBreakPlugin,
   StrikethroughPlugin,
   UnderlinePlugin,
@@ -87,10 +86,15 @@ const RichText = (props) => {
 
   const path = pathFromProps || name;
 
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { required });
+    return validationResult;
+  }, [validate, required]);
+
   const fieldType = useFieldType({
     path,
     required,
-    validate,
+    validate: memoizedValidate,
   });
 
   const {
@@ -128,7 +132,7 @@ const RichText = (props) => {
         <Slate
           editor={editor}
           value={value ?? emptyRichTextNode}
-          onChange={val => setValue(val)}
+          onChange={(val) => setValue(val)}
         >
           <CommandToolbar enabledPluginList={plugins} />
 

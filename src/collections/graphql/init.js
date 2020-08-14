@@ -5,7 +5,6 @@ const {
   GraphQLNonNull,
   GraphQLInt,
 } = require('graphql');
-const GraphQLDate = require('graphql-date');
 
 const formatName = require('../../graphql/utilities/formatName');
 
@@ -62,11 +61,11 @@ function registerCollections() {
 
     if (timestamps) {
       baseFields.createdAt = {
-        type: new GraphQLNonNull(GraphQLDate),
+        type: new GraphQLNonNull(GraphQLString),
       };
 
       baseFields.updatedAt = {
-        type: new GraphQLNonNull(GraphQLDate),
+        type: new GraphQLNonNull(GraphQLString),
       };
 
       whereInputFields.push({

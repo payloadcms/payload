@@ -55,9 +55,11 @@ describe('GrahpQL Resolvers', () => {
 
       expect(data.title).toBe(title);
       expect(data.id).toStrictEqual(expect.any(String));
-      const timestampRegex = /^(\d{4})(?:-?W(\d+)(?:-?(\d+)D?)?|(?:-(\d+))?-(\d+))(?:[T ](\d+):(\d+)(?::(\d+)(?:\.(\d+))?)?)?(?:Z(-?\d*))?$/;
-      expect(data.createdAt).toStrictEqual(expect.stringMatching(timestampRegex));
-      expect(data.updatedAt).toStrictEqual(expect.stringMatching(timestampRegex));
+      // const timestampRegex = /^(\d{4})(?:-?W(\d+)(?:-?(\d+)D?)?|(?:-(\d+))?-(\d+))(?:[T ](\d+):(\d+)(?::(\d+)(?:\.(\d+))?)?)?(?:Z(-?\d*))?$/;
+      // expect(data.createdAt).toStrictEqual(expect.stringMatching(timestampRegex));
+      // expect(data.updatedAt).toStrictEqual(expect.stringMatching(timestampRegex));
+      expect(data.createdAt).toStrictEqual(expect.any(String));
+      expect(data.updatedAt).toStrictEqual(expect.any(String));
     });
   });
 
@@ -162,5 +164,4 @@ describe('GrahpQL Resolvers', () => {
       expect(deletedId).toStrictEqual(id);
     });
   });
-
 });
