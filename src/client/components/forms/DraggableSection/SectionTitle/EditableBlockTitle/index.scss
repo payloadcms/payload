@@ -28,6 +28,7 @@
     border: none;
     width: 100%;
     margin-left: base(.5);
+    background-color: transparent;
 
     &:hover {
       box-shadow: inset 0px -2px 0px -1px $color-light-gray;
