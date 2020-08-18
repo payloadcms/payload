@@ -55,21 +55,20 @@ async function login(args) {
   const user = userQuery.docs[0];
 
   const fieldsToSign = collectionConfig.fields.reduce((signedFields, field) => {
-
     const result = {
       ...signedFields,
-    }
+    };
 
     if (!field.name && field.fields) {
       field.fields.forEach((subField) => {
         if (subField.saveToJWT) {
-          result[subField.name]: user[subField.name];
-        };
-      })
+          result[subField.name] = user[subField.name];
+        }
+      });
     }
 
     if (field.saveToJWT) {
-      result[field.name]: user[field.name];
+      result[field.name] = user[field.name];
     }
 
     return result;
