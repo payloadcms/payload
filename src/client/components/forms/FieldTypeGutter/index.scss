@@ -19,7 +19,6 @@ $controls-top-adjustment: base(.1);
 .field-type-gutter {
   padding-right: base(1.25);
 
-
   &--right {
     padding-right: 0;
     padding-left: base(1.25);
@@ -30,7 +29,7 @@ $controls-top-adjustment: base(.1);
 
     .field-type-gutter__content-container {
       padding-right: 0;
-      box-shadow: none;
+      box-shadow: none !important;
     }
   }
 
