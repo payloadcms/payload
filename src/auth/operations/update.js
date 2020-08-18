@@ -30,14 +30,23 @@ async function update(args) {
   // 2. Retrieve document
   // /////////////////////////////////////
 
-  let query = { _id: id };
+  const queryToBuild = {
+    where: {
+      and: [
+        {
+          id: {
+            equals: id,
+          },
+        },
+      ],
+    },
+  };
 
   if (hasWhereAccess) {
-    query = {
-      ...query,
-      ...accessResults,
-    };
+    queryToBuild.where.and.push(hasWhereAccess);
   }
+
+  const query = await Model.buildQuery(queryToBuild, locale);
 
   let user = await Model.findOne(query);
 
@@ -112,8 +121,8 @@ async function update(args) {
   const { password } = dataToUpdate;
 
   if (password) {
-    delete dataToUpdate.password;
     await user.setPassword(password);
+    delete dataToUpdate.password;
   }
 
   // /////////////////////////////////////
@@ -130,7 +139,7 @@ async function update(args) {
   // 9. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  user = this.performFieldOperations(collectionConfig, {
+  user = await this.performFieldOperations(collectionConfig, {
     data: user,
     hook: 'afterRead',
     operation: 'read',
