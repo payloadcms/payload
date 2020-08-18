@@ -41,7 +41,7 @@ async function forgotPassword(args) {
   if (!user) return null;
 
   user.resetPasswordToken = token;
-  user.resetPasswordExpiration = expiration || Date.now() + 3600000; // 1 hour
+  user.resetPasswordExpiration = expiration ? Date.now() + expiration : Date.now() + 3600000; // 1 hour
 
   await user.save();
 

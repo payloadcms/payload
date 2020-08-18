@@ -8,7 +8,7 @@ async function buildEmail() {
   }
 
   return {
-    transport: nodemailer.createTransport(this.config.email),
+    transport: nodemailer.createTransport(this.config.email.transport),
     account: this.config.email,
   };
 }
