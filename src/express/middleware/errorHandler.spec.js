@@ -5,9 +5,9 @@ const testError = new APIError('test error', 503);
 
 const mockResponse = () => {
   const res = {};
-  res.status = jest.fn()
+  jest.spyOn(res, 'status').mockImplementation()
     .mockReturnValue(res);
-  res.send = jest.fn()
+  jest.spyOn(res, 'send').mockImplementation()
     .mockReturnValue(res);
   return res;
 };
@@ -33,7 +33,7 @@ describe('errorHandler', () => {
   });
 
   it('should send the response with the error', async () => {
-    const handler = errorHandler({ debug: true, hooks: {}});
+    const handler = errorHandler({ debug: true, hooks: {} });
     await handler(testError, req, res);
     expect(res.send)
       .toHaveBeenCalledWith(
@@ -51,7 +51,7 @@ describe('errorHandler', () => {
   });
 
   it('should not include stack trace when config debug is not set', async () => {
-    const handler = errorHandler({hooks: {}});
+    const handler = errorHandler({ hooks: {} });
     await handler(testError, req, res);
     expect(res.send)
       .toHaveBeenCalledWith(
