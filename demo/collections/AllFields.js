@@ -151,11 +151,18 @@ const AllFields = {
               label: 'Array Text 1',
               type: 'text',
               required: true,
-            }, {
+              admin: {
+                width: '50%',
+              },
+            },
+            {
               name: 'arrayText2',
               label: 'Array Text 2',
               type: 'text',
               required: true,
+              admin: {
+                width: '50%',
+              },
               access: {
                 read: ({ req: { user } }) => Boolean(user),
                 update: ({ req: { user } }) => checkRole(['admin'], user),
@@ -170,6 +177,11 @@ const AllFields = {
           admin: {
             readOnly: true,
           },
+        },
+        {
+          name: 'checkbox',
+          label: 'Checkbox',
+          type: 'checkbox',
         },
       ],
     },

@@ -149,6 +149,8 @@ const Form = (props) => {
             }]);
           }
         } else {
+          contextRef.current = { ...contextRef.current }; // triggers rerender of all components that subscribe to form
+
           if (json.message) {
             addStatus({
               message: json.message,
@@ -270,7 +272,7 @@ const Form = (props) => {
 
   const createFormData = useCallback(() => {
     const data = reduceFieldsToValues(contextRef.current.fields);
-    return objectToFormData(data, { indices: true });
+    return objectToFormData(data, { indices: true, nullsAsUndefineds: true });
   }, [contextRef]);
 
   contextRef.current.dispatchFields = dispatchFields;

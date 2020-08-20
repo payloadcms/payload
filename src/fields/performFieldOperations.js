@@ -278,7 +278,7 @@ async function performFieldOperations(entityConfig, args) {
       if (field.fields) {
         if (field.name === undefined) {
           traverseFields(field.fields, data, originalDoc, path);
-        } else if (field.type === 'array' || field.type === 'blocks') {
+        } else if (field.type === 'array') {
           if (Array.isArray(data[field.name])) {
             data[field.name].forEach((rowData, i) => {
               const originalDocRow = originalDoc && originalDoc[field.name] && originalDoc[field.name][i];
@@ -287,6 +287,16 @@ async function performFieldOperations(entityConfig, args) {
           }
         } else {
           traverseFields(field.fields, data[field.name], originalDoc[field.name], `${path}${field.name}.`);
+        }
+      }
+
+      if (field.type === 'blocks') {
+        if (Array.isArray(data[field.name])) {
+          data[field.name].forEach((rowData, i) => {
+            const block = field.blocks.find((blockType) => blockType.slug === rowData.blockType);
+            const originalDocRow = originalDoc && originalDoc[field.name] && originalDoc[field.name][i];
+            traverseFields(block.fields, rowData, originalDocRow || undefined, `${path}${field.name}.${i}.`);
+          });
         }
       }
 
