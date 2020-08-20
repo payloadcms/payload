@@ -4,9 +4,14 @@ const APIError = require('../../errors/APIError');
 const testError = new APIError('test error', 503);
 
 const mockResponse = () => {
-  const res = {};
+  const res = {
+    status: jest.fn(),
+    send: jest.fn(),
+  };
+
   jest.spyOn(res, 'status').mockImplementation()
     .mockReturnValue(res);
+
   jest.spyOn(res, 'send').mockImplementation()
     .mockReturnValue(res);
   return res;
