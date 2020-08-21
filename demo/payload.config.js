@@ -28,6 +28,11 @@ const GlobalWithStrictAccess = require('./globals/GlobalWithStrictAccess');
 module.exports = {
   admin: {
     user: 'admins',
+    meta: {
+      titleSuffix: '- Payload',
+      ogImage: '/static/find-image-here.jpg',
+      favicon: '/img/whatever.png',
+    },
     disable: false,
     components: {
       layout: {
@@ -35,6 +40,10 @@ module.exports = {
       },
     },
   },
+  csrf: [
+    'http://localhost:3000',
+    'https://other-app-here.com',
+  ],
   collections: [
     Admin,
     AllFields,

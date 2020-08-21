@@ -10,9 +10,13 @@ const getExtractJWT = (config) => (req) => {
   const cookies = parseCookies(req);
   const tokenCookieName = `${config.cookiePrefix}-token`;
 
-  if (cookies && cookies[tokenCookieName]) {
-    const token = cookies[tokenCookieName];
-    return token;
+  if (cookies && cookies[tokenCookieName] && Array.isArray(config.csrf)) {
+    const { headers: { origin } = {} } = req;
+
+    if (config.csrf.indexOf(origin) > -1) {
+      const token = cookies[tokenCookieName];
+      return token;
+    }
   }
 
   return null;
