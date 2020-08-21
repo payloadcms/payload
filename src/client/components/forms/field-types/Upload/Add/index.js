@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, useModal } from '@faceless-ui/modal';
 import config from '../../../../../config';
 import MinimalTemplate from '../../../../templates/Minimal';
 import Form from '../../../Form';
 import Button from '../../../../elements/Button';
-import formatFields from '../../../../views/collections/Edit/formatFields';
 import RenderFields from '../../../RenderFields';
 import FormSubmit from '../../../Submit';
+import Upload from '../../../../views/collections/Edit/Upload';
 
 import './index.scss';
 
@@ -24,7 +24,6 @@ const AddUploadModal = (props) => {
   } = props;
 
   const { closeAll } = useModal();
-  const [fields, setFields] = useState([]);
 
   const onSuccess = useCallback((json) => {
     closeAll();
@@ -34,10 +33,6 @@ const AddUploadModal = (props) => {
   const classes = [
     baseClass,
   ].filter(Boolean).join(' ');
-
-  useEffect(() => {
-    setFields(formatFields(collection, false));
-  }, [collection]);
 
   return (
     <Modal
@@ -66,10 +61,14 @@ const AddUploadModal = (props) => {
               onClick={closeAll}
             />
           </header>
+          <Upload
+            {...collection.upload}
+            fieldTypes={fieldTypes}
+          />
           <RenderFields
             filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
             fieldTypes={fieldTypes}
-            fieldSchema={fields}
+            fieldSchema={collection.fields}
             customComponentsPath={`${collection.slug}.fields.`}
           />
         </Form>
@@ -85,6 +84,10 @@ AddUploadModal.propTypes = {
       singular: PropTypes.string,
     }),
     slug: PropTypes.string,
+    fields: PropTypes.arrayOf(
+      PropTypes.shape({}),
+    ),
+    upload: PropTypes.shape({}),
   }).isRequired,
   slug: PropTypes.string.isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
