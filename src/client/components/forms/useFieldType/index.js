@@ -63,10 +63,12 @@ const useFieldType = (options) => {
   const setValue = useCallback((e) => {
     const val = (e && e.target) ? e.target.value : e;
 
-    if (!modified) setModified(true);
+    if (!ignoreWhileFlattening && !modified) {
+      setModified(true);
+    }
 
     setInternalValue(val);
-  }, [setModified, modified]);
+  }, [setModified, modified, ignoreWhileFlattening]);
 
   useEffect(() => {
     setInternalValue(initialValue);

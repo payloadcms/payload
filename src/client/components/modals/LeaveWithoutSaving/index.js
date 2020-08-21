@@ -1,6 +1,6 @@
 import React from 'react';
 import NavigationPrompt from 'react-router-navigation-prompt';
-import { useForm } from '../../forms/Form/context';
+import { useFormModified } from '../../forms/Form/context';
 import MinimalTemplate from '../../templates/Minimal';
 import Button from '../../elements/Button';
 
@@ -9,7 +9,7 @@ import './index.scss';
 const modalSlug = 'leave-without-saving';
 
 const LeaveWithoutSaving = () => {
-  const { modified } = useForm();
+  const modified = useFormModified();
 
   return (
     <NavigationPrompt when={modified}>
