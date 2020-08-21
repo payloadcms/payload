@@ -74,7 +74,7 @@ module.exports = {
   ],
   cookiePrefix: 'payload',
   serverURL: 'http://localhost:3000',
-  cors: ['http://localhost', 'http://localhost:8080', 'http://localhost:8081'],
+  cors: ['http://localhost', 'http://localhost:3000', 'http://localhost:8080', 'http://localhost:8081'],
   routes: {
     api: '/api',
     admin: '/admin',
