@@ -162,8 +162,8 @@ async function create(args) {
   // 9. Return results
   // /////////////////////////////////////
 
-  // result = JSON.stringify(result);
-  // result = JSON.parse(result);
+  result = JSON.stringify(result);
+  result = JSON.parse(result);
 
   return result;
 }

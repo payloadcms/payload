@@ -1,6 +1,7 @@
+const httpStatus = require('http-status');
 const deepmerge = require('deepmerge');
 const overwriteMerge = require('../../utilities/overwriteMerge');
-const { NotFound, Forbidden } = require('../../errors');
+const { NotFound, Forbidden, APIError } = require('../../errors');
 const executeAccess = require('../executeAccess');
 
 async function update(args) {
@@ -18,6 +19,10 @@ async function update(args) {
     },
     overrideAccess,
   } = args;
+
+  if (!id) {
+    throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST);
+  }
 
   // /////////////////////////////////////
   // 1. Execute access
