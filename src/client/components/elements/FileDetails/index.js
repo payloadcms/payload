@@ -41,16 +41,16 @@ const FileDetails = (props) => {
               onClick={() => setMoreInfoOpen(!moreInfoOpen)}
             >
               {!moreInfoOpen && (
-                <>
+                <React.Fragment>
                   More info
                   <Chevron />
-                </>
+                </React.Fragment>
               )}
               {moreInfoOpen && (
-                <>
+                <React.Fragment>
                   Less info
                   <Chevron />
-                </>
+                </React.Fragment>
               )}
             </Button>
           )}
@@ -72,20 +72,18 @@ const FileDetails = (props) => {
           height={moreInfoOpen ? 'auto' : 0}
         >
           <ul className={`${baseClass}__sizes`}>
-            {Object.entries(sizes).map(([key, val]) => {
-              return (
-                <li key={key}>
-                  <div className={`${baseClass}__size-label`}>
-                    {key}
-                  </div>
-                  <Meta
-                    {...val}
-                    mimeType={mimeType}
-                    staticURL={staticURL}
-                  />
-                </li>
-              );
-            })}
+            {Object.entries(sizes).map(([key, val]) => (
+              <li key={key}>
+                <div className={`${baseClass}__size-label`}>
+                  {key}
+                </div>
+                <Meta
+                  {...val}
+                  mimeType={mimeType}
+                  staticURL={staticURL}
+                />
+              </li>
+            ))}
           </ul>
         </AnimateHeight>
       )}

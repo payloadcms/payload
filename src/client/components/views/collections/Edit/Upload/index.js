@@ -162,7 +162,10 @@ const File = (props) => {
                 round
                 buttonStyle="icon-label"
                 iconStyle="with-border"
-                onClick={() => setFileList(null)}
+                onClick={() => {
+                  setFileList(null);
+                  setValue(null);
+                }}
               />
             </div>
           )}
