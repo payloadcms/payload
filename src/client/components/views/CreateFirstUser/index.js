@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import config from 'payload/config';
 import MinimalTemplate from '../../templates/Minimal';
+import Meta from '../../utilities/Meta';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import * as fieldTypes from '../../forms/field-types';
@@ -48,6 +49,11 @@ const CreateFirstUser = (props) => {
     <MinimalTemplate className={baseClass}>
       <h1>Welcome</h1>
       <p>To begin, create your first user.</p>
+      <Meta
+        title="Create First User"
+        description="Create first user"
+        keywords="Create, Payload, CMS"
+      />
       <Form
         onSuccess={onSuccess}
         method="POST"

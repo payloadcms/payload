@@ -29,7 +29,7 @@ module.exports = {
   admin: {
     user: 'admins',
     meta: {
-      titleSuffix: '- Payload',
+      titleSuffix: '- Payload Demo',
       ogImage: '/static/find-image-here.jpg',
       favicon: '/img/whatever.png',
     },
