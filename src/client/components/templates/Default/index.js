@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import DefaultNav from '../../elements/Nav';
 import { StepNavProvider } from '../../elements/StepNav';
 import customComponents from '../../customComponents';
+import Meta from '../../utilities/Meta';
 
 import './index.scss';
 
@@ -19,6 +20,11 @@ const Default = ({ children, className }) => {
   return (
     <div className={classes}>
       <StepNavProvider>
+        <Meta
+          title="Dashboard"
+          description="Dashboard for Payload CMS"
+          keywords="Dashboard, Payload, CMS"
+        />
         <Nav />
         <div className={`${baseClass}__wrap`}>
           {children}

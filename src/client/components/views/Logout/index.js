@@ -4,6 +4,7 @@ import config from 'payload/config';
 import { useUser } from '../../data/User';
 import Minimal from '../../templates/Minimal';
 import Button from '../../elements/Button';
+import Meta from '../../utilities/Meta';
 
 import './index.scss';
 
@@ -22,6 +23,11 @@ const Logout = (props) => {
 
   return (
     <Minimal className={baseClass}>
+      <Meta
+        title="Logout"
+        description="Logout user"
+        keywords="Logout, Payload, CMS"
+      />
       <div className={`${baseClass}__wrap`}>
         {inactivity && (
           <h2>You have been logged out due to inactivity.</h2>

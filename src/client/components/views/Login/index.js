@@ -8,6 +8,7 @@ import Email from '../../forms/field-types/Email';
 import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
+import Meta from '../../utilities/Meta';
 import { useUser } from '../../data/User';
 
 import './index.scss';
@@ -30,6 +31,11 @@ const Login = () => {
   if (user) {
     return (
       <MinimalTemplate className={baseClass}>
+        <Meta
+          title="Login"
+          description="Login user"
+          keywords="Login, Payload, CMS"
+        />
         <div className={`${baseClass}__wrap`}>
           <h1>Already logged in</h1>
           <p>
@@ -54,6 +60,11 @@ const Login = () => {
 
   return (
     <MinimalTemplate className={baseClass}>
+      <Meta
+        title="Login"
+        description="Login user"
+        keywords="Login, Payload, CMS"
+      />
       <div className={`${baseClass}__brand`}>
         <Logo />
       </div>

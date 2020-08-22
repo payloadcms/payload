@@ -12,6 +12,7 @@ import CopyToClipboard from '../../elements/CopyToClipboard';
 import * as fieldTypes from '../../forms/field-types';
 import RenderTitle from '../../elements/RenderTitle';
 import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
+import Meta from '../../utilities/Meta';
 import Auth from '../collections/Edit/Auth';
 import Loading from '../../elements/Loading';
 
@@ -57,6 +58,11 @@ const DefaultAccount = (props) => {
         disabled={!hasSavePermission}
       >
         <div className={`${baseClass}__main`}>
+          <Meta
+            title="Account"
+            description="Account of current user"
+            keywords="Account, Dashboard, Payload, CMS"
+          />
           <Eyebrow />
           <LeaveWithoutSaving />
           <div className={`${baseClass}__edit`}>

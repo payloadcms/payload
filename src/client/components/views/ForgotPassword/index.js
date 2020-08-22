@@ -7,6 +7,7 @@ import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
+import Meta from '../../utilities/Meta';
 import { useUser } from '../../data/User';
 
 import './index.scss';
@@ -42,6 +43,12 @@ const ForgotPassword = () => {
   if (user) {
     return (
       <MinimalTemplate className={baseClass}>
+        <Meta
+          title="Forgot Password"
+          description="Forgot password"
+          keywords="Forgot, Password, Payload, CMS"
+        />
+
         <h1>You&apos;re already logged in</h1>
         <p>
           To change your password, go to your

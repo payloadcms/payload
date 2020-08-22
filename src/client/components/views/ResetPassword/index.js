@@ -7,6 +7,7 @@ import Password from '../../forms/field-types/Password';
 import ConfirmPassword from '../../forms/field-types/ConfirmPassword';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
+import Meta from '../../utilities/Meta';
 import { useUser } from '../../data/User';
 
 import './index.scss';
@@ -31,6 +32,12 @@ const ResetPassword = () => {
   if (user) {
     return (
       <MinimalTemplate className={baseClass}>
+        <Meta
+          title="Reset Password"
+          description="Reset password"
+          keywords="Reset Password, Payload, CMS"
+        />
+
         <div className={`${baseClass}__wrap`}>
           <h1>Already logged in</h1>
           <p>

@@ -10,6 +10,7 @@ import Pill from '../../../elements/Pill';
 import Button from '../../../elements/Button';
 import SortColumn from '../../../elements/SortColumn';
 import Table from '../../../elements/Table';
+import Meta from '../../../utilities/Meta';
 import Cell from './Cell';
 
 import './index.scss';
@@ -42,6 +43,9 @@ const DefaultList = (props) => {
 
   return (
     <div className={baseClass}>
+      <Meta
+        title={collection.labels.plural}
+      />
       <Eyebrow />
       <div className={`${baseClass}__wrap`}>
         <header className={`${baseClass}__header`}>
