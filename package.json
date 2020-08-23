@@ -106,14 +106,14 @@
     "slate-hyperscript": "^0.58.3",
     "slate-react": "^0.58.3",
     "style-loader": "^0.21.0",
-    "uglifyjs-webpack-plugin": "^2.2.0",
     "url-loader": "^1.0.1",
     "uuid": "^8.1.0",
     "val-loader": "^2.1.0",
     "webpack": "^4.43.0",
     "webpack-bundle-analyzer": "^3.8.0",
     "webpack-dev-middleware": "^3.7.2",
-    "webpack-hot-middleware": "^2.25.0"
+    "webpack-hot-middleware": "^2.25.0",
+    "webpack-node-externals": "^2.5.1"
   },
   "devDependencies": {
     "@trbl/eslint-config": "^1.2.4",
