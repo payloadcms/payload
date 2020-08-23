@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const mongooseHidden = require('mongoose-hidden')({
   hidden: {
-    salt: true, hash: true, _id: true, __v: true,
+    _id: true, __v: true,
   },
   applyRecursively: true,
 });
@@ -21,6 +21,8 @@ function registerCollections() {
 
     if (collection.auth) {
       schema.plugin(passportLocalMongoose, { usernameField: 'email' });
+      schema.path('hash').options.hide = true;
+      schema.path('salt').options.hide = true;
     }
 
     schema.plugin(mongooseHidden);
