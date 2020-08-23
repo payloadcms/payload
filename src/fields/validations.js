@@ -157,7 +157,7 @@ const optionsToValidatorMap = {
     return defaultMessage;
   },
   radio: (value, options = {}) => {
-    if (value || !options.required) return true;
+    if ((value || !options.required) && (options.options.find((option) => option.value === value))) return true;
     return defaultMessage;
   },
   blocks: (value, options) => {
