@@ -7,6 +7,7 @@ import PreviewButton from '../../elements/PreviewButton';
 import FormSubmit from '../../forms/Submit';
 import RenderFields from '../../forms/RenderFields';
 import CopyToClipboard from '../../elements/CopyToClipboard';
+import Meta from '../../utilities/Meta';
 import * as fieldTypes from '../../forms/field-types';
 import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
 
@@ -39,6 +40,11 @@ const DefaultGlobalView = (props) => {
         initialState={initialState}
       >
         <div className={`${baseClass}__main`}>
+          <Meta
+            title={label}
+            description={label}
+            keywords={`${label}, Payload, CMS`}
+          />
           <Eyebrow />
           <LeaveWithoutSaving />
           <div className={`${baseClass}__edit`}>

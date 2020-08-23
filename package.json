@@ -94,6 +94,7 @@
     "react-datepicker": "^2.13.0",
     "react-document-meta": "^3.0.0-beta.2",
     "react-dom": "^16.13.1",
+    "react-helmet": "^6.1.0",
     "react-hook-form": "^5.7.2",
     "react-router-dom": "^5.1.2",
     "react-router-navigation-prompt": "^1.8.11",

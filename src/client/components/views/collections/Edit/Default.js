@@ -12,6 +12,7 @@ import RenderFields from '../../../forms/RenderFields';
 import CopyToClipboard from '../../../elements/CopyToClipboard';
 import DuplicateDocument from '../../../elements/DuplicateDocument';
 import DeleteDocument from '../../../elements/DeleteDocument';
+import Meta from '../../../utilities/Meta';
 import * as fieldTypes from '../../../forms/field-types';
 import RenderTitle from '../../../elements/RenderTitle';
 import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving';
@@ -69,6 +70,11 @@ const DefaultEditView = (props) => {
         initialState={initialState}
       >
         <div className={`${baseClass}__main`}>
+          <Meta
+            title={`${isEditing ? 'Editing' : 'Creating'} - ${collection.labels.singular}`}
+            description={`${isEditing ? 'Editing' : 'Creating'} - ${collection.labels.singular}`}
+            keywords={`${collection.labels.singular}, Payload, CMS`}
+          />
           <Eyebrow />
           <LeaveWithoutSaving />
           <div className={`${baseClass}__edit`}>

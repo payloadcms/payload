@@ -28,8 +28,9 @@ const GlobalWithStrictAccess = require('./globals/GlobalWithStrictAccess');
 module.exports = {
   admin: {
     user: 'admins',
+    // indexHTML: path.resolve(__dirname, 'custom-index.html'),
     meta: {
-      titleSuffix: '- Payload',
+      titleSuffix: '- Payload Demo',
       ogImage: '/static/find-image-here.jpg',
       favicon: '/img/whatever.png',
     },
@@ -40,10 +41,6 @@ module.exports = {
       },
     },
   },
-  csrf: [
-    'http://localhost:3000',
-    'https://other-app-here.com',
-  ],
   collections: [
     Admin,
     AllFields,
@@ -75,6 +72,10 @@ module.exports = {
   cookiePrefix: 'payload',
   serverURL: 'http://localhost:3000',
   cors: ['http://localhost', 'http://localhost:3000', 'http://localhost:8080', 'http://localhost:8081'],
+  csrf: [
+    'http://localhost:3000',
+    'https://other-app-here.com',
+  ],
   routes: {
     api: '/api',
     admin: '/admin',

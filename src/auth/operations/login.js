@@ -96,6 +96,10 @@ async function login(args) {
       cookieOptions.secure = true;
     }
 
+    if (collectionConfig.auth.sameSite) {
+      cookieOptions.sameSite = collectionConfig.auth.sameSite;
+    }
+
     if (args.req.headers && args.req.headers.origin && args.req.headers.origin.indexOf('localhost') === -1) {
       let domain = args.req.headers.origin.replace('https://', '');
       domain = domain.replace('http://', '');
