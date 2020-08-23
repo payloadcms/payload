@@ -128,7 +128,7 @@ module.exports = (config) => {
 
   const plugins = [
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, '../client/index.html'),
+      template: config.admin && config.admin.indexHTML ? config.admin.indexHTML : path.resolve(__dirname, '../client/index.html'),
       filename: './index.html',
     }),
     new webpack.HotModuleReplacementPlugin(),

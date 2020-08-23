@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Helmet from 'react-helmet';
-import config from '../../../config';
-
+import config from 'payload/config';
 
 function Meta({ description, lang, meta, title, image, keywords }) {
   const titleSuffix = config?.admin?.meta?.titleSuffix ?? '- Payload';
