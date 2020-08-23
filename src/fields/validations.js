@@ -153,11 +153,22 @@ const optionsToValidatorMap = {
     return true;
   },
   select: (value, options = {}) => {
-    if (value || !options.required) return true;
-    return defaultMessage;
+    if (Array.isArray(value) && value.find((input) => !options.options.find((option) => (option === input || option.value === input)))) {
+      return 'This field has an invalid selection';
+    }
+
+    if (typeof value === 'string' && !options.options.find((option) => (option === value || option.value === value))) {
+      return 'This field has an invalid selection';
+    }
+
+    if (options.required && !value) {
+      return defaultMessage;
+    }
+
+    return true;
   },
   radio: (value, options = {}) => {
-    if (value || !options.required) return true;
+    if ((value || !options.required) && (options.options.find((option) => option.value === value))) return true;
     return defaultMessage;
   },
   blocks: (value, options) => {
