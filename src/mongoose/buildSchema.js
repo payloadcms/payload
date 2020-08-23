@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 const { Schema } = require('mongoose');
-const { MissingSelectOptions } = require('../errors');
+const { MissingFieldInputOptions } = require('../errors');
 
 const setBlockDiscriminators = (fields, schema) => {
   fields.forEach((field) => {
@@ -81,10 +81,25 @@ const fieldToSchemaMap = {
     ...fields,
     [field.name]: { ...formatBaseSchema(field), type: String },
   }),
-  radio: (field, fields) => ({
-    ...fields,
-    [field.name]: { ...formatBaseSchema(field), type: String },
-  }),
+  radio: (field, fields) => {
+    if (!field.options || field.options.length === 0) {
+      throw new MissingFieldInputOptions(field);
+    }
+
+    const schema = {
+      ...formatBaseSchema(field),
+      type: String,
+      enum: field.options.map((option) => {
+        if (typeof option === 'object') return option.value;
+        return option;
+      }),
+    };
+
+    return {
+      ...fields,
+      [field.name]: field.hasMany ? [schema] : schema,
+    };
+  },
   checkbox: (field, fields) => ({
     ...fields,
     [field.name]: { ...formatBaseSchema(field), type: Boolean },
@@ -173,7 +188,7 @@ const fieldToSchemaMap = {
   },
   select: (field, fields) => {
     if (!field.options || field.options.length === 0) {
-      throw new MissingSelectOptions(field);
+      throw new MissingFieldInputOptions(field);
     }
 
     const schema = {
