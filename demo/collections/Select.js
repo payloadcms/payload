@@ -2,7 +2,7 @@ const Select = {
   slug: 'select',
   labels: {
     singular: 'Select',
-    plural: 'selects',
+    plural: 'Selects',
   },
   fields: [
     {
