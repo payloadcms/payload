@@ -81,9 +81,9 @@ const Select = (props) => {
   const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { required });
+    const validationResult = validate(value, { required, options });
     return validationResult;
-  }, [validate, required]);
+  }, [validate, required, options]);
 
   const {
     value,

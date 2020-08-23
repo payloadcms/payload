@@ -18,6 +18,7 @@ const PublicUsers = require('./collections/PublicUsers');
 const RelationshipA = require('./collections/RelationshipA');
 const RelationshipB = require('./collections/RelationshipB');
 const RichText = require('./collections/RichText');
+const Select = require('./collections/Select');
 const StrictPolicies = require('./collections/StrictPolicies');
 const Validations = require('./collections/Validations');
 
@@ -61,6 +62,7 @@ module.exports = {
     RelationshipA,
     RelationshipB,
     RichText,
+    Select,
     StrictPolicies,
     Validations,
   ],
