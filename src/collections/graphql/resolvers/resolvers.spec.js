@@ -34,8 +34,8 @@ describe('GrahpQL Resolvers', () => {
 
   describe('Create', () => {
     it('should allow a localized post to be created', async () => {
-      const title = faker.lorem.words(1);
-      const description = faker.lorem.words(1);
+      const title = 'gql create';
+      const description = 'description';
 
       // language=graphQL
       const query = `mutation {
@@ -65,8 +65,8 @@ describe('GrahpQL Resolvers', () => {
 
   describe('Read', () => {
     it('should be able to read localized post', async () => {
-      const title = faker.lorem.words(1);
-      const description = faker.lorem.words(1);
+      const title = 'gql read';
+      const description = 'description';
 
       // language=graphQL
       const query = `mutation {
@@ -98,8 +98,8 @@ describe('GrahpQL Resolvers', () => {
 
   describe('Update', () => {
     it('should allow updating an existing post', async () => {
-      const title = faker.lorem.words(1);
-      const description = 'original description';
+      const title = 'gql update';
+      const description = 'description';
 
       // language=graphQL
       const query = `mutation {
@@ -134,8 +134,8 @@ describe('GrahpQL Resolvers', () => {
 
   describe('Delete', () => {
     it('should be able to delete a localized post', async () => {
-      const title = faker.lorem.words(1);
-      const description = faker.lorem.words(1);
+      const title = 'gql delete';
+      const description = 'description';
 
       // language=graphQL
       const query = `mutation {
