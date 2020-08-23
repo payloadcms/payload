@@ -28,6 +28,7 @@ const GlobalWithStrictAccess = require('./globals/GlobalWithStrictAccess');
 module.exports = {
   admin: {
     user: 'admins',
+    // indexHTML: path.resolve(__dirname, 'custom-index.html'),
     meta: {
       titleSuffix: '- Payload Demo',
       ogImage: '/static/find-image-here.jpg',
