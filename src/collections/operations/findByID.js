@@ -24,7 +24,7 @@ async function findByID(args) {
   // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors }, collectionConfig.access.read) : true;
+  const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors, id }, collectionConfig.access.read) : true;
   const hasWhereAccess = typeof accessResults === 'object';
 
   const queryToBuild = {
@@ -81,6 +81,7 @@ async function findByID(args) {
   result = await this.performFieldOperations(collectionConfig, {
     depth,
     req,
+    id,
     data: result,
     hook: 'afterRead',
     operation: 'read',

@@ -33,7 +33,7 @@ async function update(args) {
   // 1. Execute access
   // /////////////////////////////////////
 
-  const accessResults = !overrideAccess ? await executeAccess({ req }, collectionConfig.access.update) : true;
+  const accessResults = !overrideAccess ? await executeAccess({ req, id }, collectionConfig.access.update) : true;
   const hasWherePolicy = typeof accessResults === 'object';
 
   // /////////////////////////////////////
@@ -96,6 +96,7 @@ async function update(args) {
   data = await this.performFieldOperations(collectionConfig, {
     data,
     req,
+    id,
     originalDoc,
     hook: 'beforeChange',
     operation: 'update',
@@ -185,6 +186,7 @@ async function update(args) {
     hook: 'afterRead',
     operation: 'read',
     req,
+    id,
     depth,
     overrideAccess,
   });

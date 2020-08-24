@@ -100,6 +100,7 @@ async function find(args) {
           depth,
           data,
           req,
+          id: doc.id,
           hook: 'afterRead',
           operation: 'read',
           overrideAccess,

@@ -8,6 +8,7 @@ async function performFieldOperations(entityConfig, args) {
     operation,
     hook,
     req,
+    id,
     req: {
       payloadAPI,
     },
@@ -31,7 +32,7 @@ async function performFieldOperations(entityConfig, args) {
     const relatedCollection = this.collections[relation];
 
     if (relatedCollection) {
-      const accessResult = !overrideAccess ? await executeAccess({ req, disableErrors: true }, relatedCollection.config.access.read) : true;
+      const accessResult = !overrideAccess ? await executeAccess({ req, disableErrors: true, id }, relatedCollection.config.access.read) : true;
 
       let populatedRelationship = null;
 
@@ -117,7 +118,7 @@ async function performFieldOperations(entityConfig, args) {
     const resultingData = data;
 
     if (field.access && field.access[operation]) {
-      const result = overrideAccess ? true : await field.access[operation]({ req });
+      const result = overrideAccess ? true : await field.access[operation]({ req, id });
 
       if (!result && operation === 'update' && originalDoc[field.name] !== undefined) {
         resultingData[field.name] = originalDoc[field.name];
