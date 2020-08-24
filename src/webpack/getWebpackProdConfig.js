@@ -2,7 +2,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 // const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const webpack = require('webpack');
-const nodeExternals = require('webpack-node-externals');
 const path = require('path');
 const getStyleLoaders = require('./getStyleLoaders');
 
@@ -17,7 +16,6 @@ module.exports = (config) => {
       filename: '[name].[chunkhash].js',
     },
     mode: 'production',
-    externals: [nodeExternals()],
     resolveLoader: { modules: ['node_modules', path.join(__dirname, '../../node_modules')] },
     module: {
       rules: [
@@ -127,6 +125,9 @@ module.exports = (config) => {
       silent: true,
       systemvars: true,
     }),
+    new webpack.IgnorePlugin(
+      new RegExp('^@payloadcms/payload$', 'is'),
+    ),
   ];
 
   if (config.webpackIgnorePlugin instanceof RegExp) {
