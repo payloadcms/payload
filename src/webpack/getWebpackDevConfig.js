@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { IgnorePlugin } = require('webpack');
+const nodeExternals = require('webpack-node-externals');
 const path = require('path');
 const webpack = require('webpack');
 const Dotenv = require('dotenv-webpack');
@@ -20,6 +21,7 @@ module.exports = (config) => {
     },
     devtool: 'source-map',
     mode: 'development',
+    externals: [nodeExternals()],
     resolveLoader: { modules: ['node_modules', path.join(__dirname, '../../node_modules')] },
     module: {
       rules: [

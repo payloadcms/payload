@@ -71,7 +71,11 @@ async function register(args) {
   // 5. Perform register
   // /////////////////////////////////////
 
-  const modelData = { ...data };
+  const modelData = {
+    ...data,
+    email: data.email ? data.email.toLowerCase() : null,
+  };
+
   delete modelData.password;
 
   const user = new Model();
