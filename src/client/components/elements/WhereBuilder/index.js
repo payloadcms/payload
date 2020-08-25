@@ -5,6 +5,7 @@ import Button from '../Button';
 import reducer from './reducer';
 import Condition from './Condition';
 import fieldTypes from './field-types';
+import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
 
 import './index.scss';
 
@@ -18,10 +19,30 @@ const validateWhereQuery = (query) => {
   return null;
 };
 
+const reduceFields = (fields) => flattenTopLevelFields(fields).reduce((reduced, field) => {
+  if (typeof fieldTypes[field.type] === 'object') {
+    const formattedField = {
+      label: field.label,
+      value: field.name,
+      ...fieldTypes[field.type],
+      props: {
+        ...field,
+      },
+    };
+
+    return [
+      ...reduced,
+      formattedField,
+    ];
+  }
+
+  return reduced;
+}, []);
+
 const WhereBuilder = (props) => {
   const {
+    collection,
     collection: {
-      fields,
       slug,
       labels: {
         plural,
@@ -31,29 +52,7 @@ const WhereBuilder = (props) => {
   } = props;
 
   const [where, dispatchWhere] = useReducer(reducer, []);
-  const [reducedFields, setReducedFields] = useState([]);
-
-  useEffect(() => {
-    setReducedFields(fields.reduce((reduced, field) => {
-      if (typeof fieldTypes[field.type] === 'object') {
-        const formattedField = {
-          label: field.label,
-          value: field.name,
-          ...fieldTypes[field.type],
-          props: {
-            ...field,
-          },
-        };
-
-        return [
-          ...reduced,
-          formattedField,
-        ];
-      }
-
-      return reduced;
-    }, []));
-  }, [fields]);
+  const [reducedFields] = useState(() => reduceFields(collection.fields));
 
   useThrottledEffect(() => {
     let whereQuery = {
@@ -61,27 +60,25 @@ const WhereBuilder = (props) => {
     };
 
     if (where) {
-      whereQuery.or = where.map((or) => {
-        return or.reduce((conditions, condition) => {
-          const { field, operator, value } = condition;
-          if (field && operator && value) {
-            return {
-              and: [
-                ...conditions.and,
-                {
-                  [field]: {
-                    [operator]: value,
-                  },
+      whereQuery.or = where.map((or) => or.reduce((conditions, condition) => {
+        const { field, operator, value } = condition;
+        if (field && operator && value) {
+          return {
+            and: [
+              ...conditions.and,
+              {
+                [field]: {
+                  [operator]: value,
                 },
-              ],
-            };
-          }
+              },
+            ],
+          };
+        }
 
-          return conditions;
-        }, {
-          and: [],
-        });
-      });
+        return conditions;
+      }, {
+        and: [],
+      }));
     }
 
     whereQuery = validateWhereQuery(whereQuery);
@@ -92,7 +89,7 @@ const WhereBuilder = (props) => {
   return (
     <div className={baseClass}>
       {where.length > 0 && (
-        <>
+        <React.Fragment>
           <div className={`${baseClass}__label`}>
             Filter
             {' '}
@@ -101,39 +98,35 @@ const WhereBuilder = (props) => {
             where
           </div>
           <ul className={`${baseClass}__or-filters`}>
-            {where.map((or, orIndex) => {
-              return (
-                <li key={orIndex}>
-                  {orIndex !== 0 && (
-                    <div className={`${baseClass}__label`}>
-                      Or
-                    </div>
-                  )}
-                  <ul className={`${baseClass}__and-filters`}>
-                    {or && or.map((_, andIndex) => {
-                      return (
-                        <li key={andIndex}>
-                          {andIndex !== 0 && (
-                            <div className={`${baseClass}__label`}>
-                              And
-                            </div>
-                          )}
-                          <Condition
-                            collectionSlug={slug}
-                            value={where[orIndex][andIndex]}
-                            orIndex={orIndex}
-                            andIndex={andIndex}
-                            key={andIndex}
-                            fields={reducedFields}
-                            dispatch={dispatchWhere}
-                          />
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </li>
-              );
-            })}
+            {where.map((or, orIndex) => (
+              <li key={orIndex}>
+                {orIndex !== 0 && (
+                  <div className={`${baseClass}__label`}>
+                    Or
+                  </div>
+                )}
+                <ul className={`${baseClass}__and-filters`}>
+                  {or && or.map((_, andIndex) => (
+                    <li key={andIndex}>
+                      {andIndex !== 0 && (
+                        <div className={`${baseClass}__label`}>
+                          And
+                        </div>
+                      )}
+                      <Condition
+                        collectionSlug={slug}
+                        value={where[orIndex][andIndex]}
+                        orIndex={orIndex}
+                        andIndex={andIndex}
+                        key={andIndex}
+                        fields={reducedFields}
+                        dispatch={dispatchWhere}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
           </ul>
           <Button
             className={`${baseClass}__add-or`}
@@ -145,7 +138,7 @@ const WhereBuilder = (props) => {
           >
             Or
           </Button>
-        </>
+        </React.Fragment>
       )}
       {where.length === 0 && (
         <div className={`${baseClass}__no-filters`}>

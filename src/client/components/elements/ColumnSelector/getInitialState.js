@@ -1,26 +1,37 @@
 const getInitialColumnState = (fields, useAsTitle, defaultColumns) => {
   let initialColumns = [];
 
-  const hasThumbnail = fields.find((field) => field.type === 'thumbnail');
-
   if (Array.isArray(defaultColumns) && defaultColumns.length >= 1) {
     return {
       columns: defaultColumns,
     };
   }
 
-  if (hasThumbnail) {
-    initialColumns.push('thumbnail');
-  }
 
   if (useAsTitle) {
     initialColumns.push(useAsTitle);
   }
 
-  const remainingColumns = fields.filter((field) => field.name !== useAsTitle && field.type !== 'thumbnail')
-    .slice(0, 3 - initialColumns.length).map((field) => field.name);
+  const remainingColumns = fields.reduce((remaining, field) => {
+    if (field.name === useAsTitle) {
+      return remaining;
+    }
+
+    if (!field.name && Array.isArray(field.fields)) {
+      return [
+        ...remaining,
+        ...field.fields.map((subField) => subField.name),
+      ];
+    }
+
+    return [
+      ...remaining,
+      field.name,
+    ];
+  }, []);
 
   initialColumns = initialColumns.concat(remainingColumns);
+  initialColumns = initialColumns.slice(0, 4);
 
   return {
     columns: initialColumns,

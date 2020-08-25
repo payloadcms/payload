@@ -16,29 +16,23 @@ const Table = ({ columns, data }) => {
         >
           <thead>
             <tr>
-              {columns.map((col, i) => {
-                return (
-                  <th key={i}>
-                    {col.components.Heading}
-                  </th>
-                );
-              })}
+              {columns.map((col, i) => (
+                <th key={i}>
+                  {col.components.Heading}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {data && data.map((row, rowIndex) => {
-              return (
-                <tr key={rowIndex}>
-                  {columns.map((col, colIndex) => {
-                    return (
-                      <td key={colIndex}>
-                        {col.components.renderCell(row, row[col.accessor])}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
+            {data && data.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {columns.map((col, colIndex) => (
+                  <td key={colIndex}>
+                    {col.components.renderCell(row, row[col.accessor])}
+                  </td>
+                ))}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

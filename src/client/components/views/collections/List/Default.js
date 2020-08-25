@@ -8,10 +8,8 @@ import Paginator from '../../../elements/Paginator';
 import ListControls from '../../../elements/ListControls';
 import Pill from '../../../elements/Pill';
 import Button from '../../../elements/Button';
-import SortColumn from '../../../elements/SortColumn';
 import Table from '../../../elements/Table';
 import Meta from '../../../utilities/Meta';
-import Cell from './Cell';
 
 import './index.scss';
 
@@ -24,7 +22,6 @@ const DefaultList = (props) => {
     collection,
     collection: {
       upload,
-      fields,
       slug,
       labels: {
         singular: singularLabel,
@@ -34,8 +31,7 @@ const DefaultList = (props) => {
     data,
     newDocumentURL,
     setListControls,
-    listControls,
-    setSort,
+    columns,
     hasCreatePermission,
   } = props;
 
@@ -66,39 +62,7 @@ const DefaultList = (props) => {
             {!upload && (
               <Table
                 data={data.docs}
-                columns={listControls.columns.reduce((cols, col, colIndex) => {
-                  const field = fields.find((fieldToCheck) => fieldToCheck.name === col);
-
-                  if (field) {
-                    return [
-                      ...cols,
-                      {
-                        accessor: field.name,
-                        components: {
-                          Heading: (
-                            <SortColumn
-                              label={field.label}
-                              name={field.name}
-                              handleChange={setSort}
-                              disable={field.disableSort || undefined}
-                            />
-                          ),
-                          renderCell: (rowData, cellData) => (
-                            <Cell
-                              field={field}
-                              colIndex={colIndex}
-                              collection={collection}
-                              rowData={rowData}
-                              cellData={cellData}
-                            />
-                          ),
-                        },
-                      },
-                    ];
-                  }
-
-                  return cols;
-                }, [])}
+                columns={columns}
               />
             )}
             {upload && (
@@ -196,13 +160,15 @@ DefaultList.propTypes = {
     totalPages: PropTypes.number,
   }),
   setListControls: PropTypes.func.isRequired,
-  setSort: PropTypes.func.isRequired,
   listControls: PropTypes.shape({
     columns: PropTypes.arrayOf(
       PropTypes.string,
     ),
   }).isRequired,
   hasCreatePermission: PropTypes.bool.isRequired,
+  columns: PropTypes.arrayOf(
+    PropTypes.shape({}),
+  ).isRequired,
 };
 
 export default DefaultList;

@@ -9,6 +9,7 @@ import DefaultList from './Default';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import { useStepNav } from '../../../elements/StepNav';
 import formatFields from './formatFields';
+import buildColumns from './buildColumns';
 
 const { serverURL, routes: { api, admin } } = config;
 
@@ -29,6 +30,7 @@ const ListView = (props) => {
 
   const [fields] = useState(() => formatFields(collection));
   const [listControls, setListControls] = useState({});
+  const [columns, setColumns] = useState([]);
   const [sort, setSort] = useState(null);
 
   const collectionPermissions = permissions?.[slug];
@@ -39,6 +41,8 @@ const ListView = (props) => {
   const apiURL = `${serverURL}${api}/${slug}`;
 
   const [{ data }, { setParams }] = usePayloadAPI(apiURL, { initialParams: { depth: 0 } });
+
+  const { columns: listControlsColumns } = listControls;
 
   useEffect(() => {
     const params = {
@@ -60,6 +64,10 @@ const ListView = (props) => {
     ]);
   }, [setStepNav, plural]);
 
+  useEffect(() => {
+    setColumns(buildColumns(collection, listControlsColumns, setSort));
+  }, [collection, listControlsColumns, setSort]);
+
   return (
     <RenderCustomComponent
       DefaultComponent={DefaultList}
@@ -72,6 +80,7 @@ const ListView = (props) => {
         setListControls,
         listControls,
         data,
+        columns,
       }}
     />
   );

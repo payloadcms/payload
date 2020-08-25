@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import getInitialState from './getInitialState';
+import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
 import Pill from '../Pill';
 import Plus from '../../icons/Plus';
 import X from '../../icons/X';
@@ -28,8 +29,8 @@ const reducer = (state, { type, payload }) => {
 
 const ColumnSelector = (props) => {
   const {
+    collection,
     collection: {
-      fields,
       admin: {
         useAsTitle,
         defaultColumns,
@@ -39,6 +40,7 @@ const ColumnSelector = (props) => {
   } = props;
 
   const [initialColumns, setInitialColumns] = useState([]);
+  const [fields] = useState(() => flattenTopLevelFields(collection.fields));
   const [columns, dispatchColumns] = useReducer(reducer, initialColumns);
 
   useEffect(() => {
