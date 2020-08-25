@@ -35,6 +35,7 @@
     "autoprefixer": "^9.7.4",
     "babel-core": "^7.0.0-bridge.0",
     "babel-loader": "^8.0.6",
+    "babel-plugin-remove-object-properties": "^1.0.2",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "connect-history-api-fallback": "^1.6.0",

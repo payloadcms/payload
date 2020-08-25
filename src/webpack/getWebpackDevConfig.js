@@ -5,6 +5,19 @@ const webpack = require('webpack');
 const Dotenv = require('dotenv-webpack');
 const getStyleLoaders = require('./getStyleLoaders');
 
+function removeServerCode() {
+  return {
+    visitor: {
+      ObjectProperty: function ObjectProperty(path, state) {
+        if (state.opts.values.indexOf(path.node.key.name) > -1) {
+          // Oh sheet, found a match, remove dis beech
+          path.remove();
+        }
+      },
+    },
+  };
+}
+
 module.exports = (config) => {
   let webpackConfig = {
     entry: {
@@ -30,6 +43,48 @@ module.exports = (config) => {
               loader: 'val-loader',
               options: config,
             },
+          ],
+        },
+        {
+          test: /config.js$/,
+          use: [{
+            loader: 'babel-loader',
+            options: {
+              presets: [
+                [
+                  require.resolve('@babel/preset-env'),
+                  {
+                    targets: [
+                      'defaults',
+                      'not IE 11',
+                      'not IE_Mob 11',
+                      'maintained node versions',
+                    ],
+                    modules: 'commonjs',
+                  },
+                ],
+                require.resolve('@babel/preset-react'),
+              ],
+              plugins: [
+                require.resolve('@babel/plugin-proposal-class-properties'),
+                require.resolve('@babel/plugin-proposal-optional-chaining'),
+                [
+                  require.resolve('@babel/plugin-transform-runtime'),
+                  {
+                    regenerator: true,
+                  },
+                ],
+                [removeServerCode, { values: ['access', 'hooks'] }],
+              ],
+            },
+          },
+            // {
+            //   loader: 'eslint-loader',
+            //   options: {
+            //     fix: true,
+            //     emitWarning: true,
+            //   },
+            // }
           ],
         },
         {
