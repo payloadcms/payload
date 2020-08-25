@@ -1,4 +1,4 @@
-function removeServerCode() {
+function removeObjectProperties() {
   return {
     visitor: {
       ObjectProperty: function ObjectProperty(path, state) {
@@ -11,4 +11,4 @@ function removeServerCode() {
   };
 }
 
-module.exports = removeServerCode;
+module.exports = removeObjectProperties;
