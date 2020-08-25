@@ -1,6 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+// const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const webpack = require('webpack');
 const path = require('path');
 const getStyleLoaders = require('./getStyleLoaders');
@@ -115,7 +115,7 @@ module.exports = (config) => {
   };
 
   const plugins = [
-    new BundleAnalyzerPlugin(),
+    // new BundleAnalyzerPlugin(),
     new HtmlWebpackPlugin({
       template: config.admin && config.admin.indexHTML ? config.admin.indexHTML : path.resolve(__dirname, '../client/index.html'),
       filename: './index.html',
