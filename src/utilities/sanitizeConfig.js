@@ -17,6 +17,11 @@ const sanitizeConfig = (config) => {
 
   if (!sanitizedConfig.cookiePrefix) sanitizedConfig.cookiePrefix = 'payload';
 
+  sanitizedConfig.csrf = [
+    ...(Array.isArray(config.csrf) ? config.csrf : []),
+    config.serverURL,
+  ];
+
   sanitizedConfig.admin = config.admin || {};
 
   if (!sanitizedConfig.admin.user) {
