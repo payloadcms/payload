@@ -1,9 +1,9 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 // const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-const webpack = require('webpack');
 const path = require('path');
 const getStyleLoaders = require('./getStyleLoaders');
+const removeObjectProperties = require('./removeObjectProperties');
 
 module.exports = (config) => {
   let webpackConfig = {
@@ -25,6 +25,32 @@ module.exports = (config) => {
             {
               loader: 'val-loader',
               options: config,
+            },
+          ],
+        },
+        {
+          test: config.paths.config,
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                plugins: [
+                  [removeObjectProperties, { values: ['graphQL', 'hooks', 'webpack'] }],
+                ],
+              },
+            },
+          ],
+        },
+        {
+          issuer: config.paths.config,
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                plugins: [
+                  [removeObjectProperties, { values: ['access', 'hooks'] }],
+                ],
+              },
             },
           ],
         },
@@ -112,41 +138,19 @@ module.exports = (config) => {
         'payload/config': path.resolve(__dirname, '../client/config.js'),
       },
     },
+    plugins: [
+      // new BundleAnalyzerPlugin(),
+      new HtmlWebpackPlugin({
+        template: config.admin && config.admin.indexHTML ? config.admin.indexHTML : path.resolve(__dirname, '../client/index.html'),
+        filename: './index.html',
+        minify: true,
+      }),
+      new Dotenv({
+        silent: true,
+        systemvars: true,
+      }),
+    ],
   };
-
-  const plugins = [
-    // new BundleAnalyzerPlugin(),
-    new HtmlWebpackPlugin({
-      template: config.admin && config.admin.indexHTML ? config.admin.indexHTML : path.resolve(__dirname, '../client/index.html'),
-      filename: './index.html',
-      minify: true,
-    }),
-    new Dotenv({
-      silent: true,
-      systemvars: true,
-    }),
-    new webpack.IgnorePlugin(
-      new RegExp('^@payloadcms/payload$', 'is'),
-    ),
-  ];
-
-  if (config.webpackIgnorePlugin instanceof RegExp) {
-    plugins.push(new webpack.IgnorePlugin(config.webpackIgnorePlugin));
-  } else if (typeof config.webpackIgnorePlugin === 'string') {
-    plugins.push(new webpack.IgnorePlugin(new RegExp(`^${config.webpackIgnorePlugin}$`, 'is')));
-  }
-
-  if (Array.isArray(config.webpackIgnorePlugin)) {
-    config.webpackIgnorePlugin.forEach((ignorePath) => {
-      if (ignorePath instanceof RegExp) {
-        plugins.push(new webpack.IgnorePlugin(ignorePath));
-      } else if (typeof ignorePath === 'string') {
-        plugins.push(new webpack.IgnorePlugin(new RegExp(`^${ignorePath}$`, 'is')));
-      }
-    });
-  }
-
-  webpackConfig.plugins = plugins;
 
   if (config.paths.scss) {
     webpackConfig.resolve.alias['payload-scss-overrides'] = config.paths.scss;

@@ -1,22 +1,9 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { IgnorePlugin } = require('webpack');
 const path = require('path');
 const webpack = require('webpack');
 const Dotenv = require('dotenv-webpack');
 const getStyleLoaders = require('./getStyleLoaders');
-
-function removeServerCode() {
-  return {
-    visitor: {
-      ObjectProperty: function ObjectProperty(path, state) {
-        if (state.opts.values.indexOf(path.node.key.name) > -1) {
-          // Oh sheet, found a match, remove dis beech
-          path.remove();
-        }
-      },
-    },
-  };
-}
+const removeObjectProperties = require('./removeObjectProperties');
 
 module.exports = (config) => {
   let webpackConfig = {
@@ -46,45 +33,29 @@ module.exports = (config) => {
           ],
         },
         {
-          test: /config.js$/,
-          use: [{
-            loader: 'babel-loader',
-            options: {
-              presets: [
-                [
-                  require.resolve('@babel/preset-env'),
-                  {
-                    targets: [
-                      'defaults',
-                      'not IE 11',
-                      'not IE_Mob 11',
-                      'maintained node versions',
-                    ],
-                    modules: 'commonjs',
-                  },
+          test: config.paths.config,
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                plugins: [
+                  [removeObjectProperties, { values: ['graphQL', 'hooks', 'webpack'] }],
                 ],
-                require.resolve('@babel/preset-react'),
-              ],
-              plugins: [
-                require.resolve('@babel/plugin-proposal-class-properties'),
-                require.resolve('@babel/plugin-proposal-optional-chaining'),
-                [
-                  require.resolve('@babel/plugin-transform-runtime'),
-                  {
-                    regenerator: true,
-                  },
-                ],
-                [removeServerCode, { values: ['access', 'hooks'] }],
-              ],
+              },
             },
-          },
-            // {
-            //   loader: 'eslint-loader',
-            //   options: {
-            //     fix: true,
-            //     emitWarning: true,
-            //   },
-            // }
+          ],
+        },
+        {
+          issuer: config.paths.config,
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                plugins: [
+                  [removeObjectProperties, { values: ['access', 'hooks'] }],
+                ],
+              },
+            },
           ],
         },
         {
@@ -179,40 +150,18 @@ module.exports = (config) => {
         'payload/config': path.resolve(__dirname, '../client/config.js'),
       },
     },
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: config.admin && config.admin.indexHTML ? config.admin.indexHTML : path.resolve(__dirname, '../client/index.html'),
+        filename: './index.html',
+      }),
+      new webpack.HotModuleReplacementPlugin(),
+      new Dotenv({
+        silent: true,
+        systemvars: true,
+      }),
+    ],
   };
-
-  const plugins = [
-    new HtmlWebpackPlugin({
-      template: config.admin && config.admin.indexHTML ? config.admin.indexHTML : path.resolve(__dirname, '../client/index.html'),
-      filename: './index.html',
-    }),
-    new webpack.HotModuleReplacementPlugin(),
-    new Dotenv({
-      silent: true,
-      systemvars: true,
-    }),
-    new IgnorePlugin(
-      new RegExp('^@payloadcms/payload$', 'is'),
-    ),
-  ];
-
-  if (config.webpackIgnorePlugin instanceof RegExp) {
-    plugins.push(new IgnorePlugin(config.webpackIgnorePlugin));
-  } else if (typeof config.webpackIgnorePlugin === 'string') {
-    plugins.push(new IgnorePlugin(new RegExp(`^${config.webpackIgnorePlugin}$`, 'is')));
-  }
-
-  if (Array.isArray(config.webpackIgnorePlugin)) {
-    config.webpackIgnorePlugin.forEach((ignorePath) => {
-      if (ignorePath instanceof RegExp) {
-        plugins.push(new IgnorePlugin(ignorePath));
-      } else if (typeof ignorePath === 'string') {
-        plugins.push(new IgnorePlugin(new RegExp(`^${ignorePath}$`, 'is')));
-      }
-    });
-  }
-
-  webpackConfig.plugins = plugins;
 
   if (config.paths.scss) {
     webpackConfig.resolve.alias['payload-scss-overrides'] = config.paths.scss;
