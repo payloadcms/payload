@@ -5,7 +5,7 @@ import MinimalTemplate from '../../templates/Minimal';
 import Meta from '../../utilities/Meta';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
-import * as fieldTypes from '../../forms/field-types';
+import fieldTypes from '../../forms/field-types';
 import FormSubmit from '../../forms/Submit';
 import { useUser } from '../../data/User';
 

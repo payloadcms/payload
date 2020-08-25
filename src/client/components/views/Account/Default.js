@@ -9,7 +9,7 @@ import PreviewButton from '../../elements/PreviewButton';
 import FormSubmit from '../../forms/Submit';
 import RenderFields from '../../forms/RenderFields';
 import CopyToClipboard from '../../elements/CopyToClipboard';
-import * as fieldTypes from '../../forms/field-types';
+import fieldTypes from '../../forms/field-types';
 import RenderTitle from '../../elements/RenderTitle';
 import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
 import Meta from '../../utilities/Meta';

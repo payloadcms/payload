@@ -74,7 +74,6 @@ module.exports = (config) => {
                       'not IE_Mob 11',
                       'maintained node versions',
                     ],
-                    modules: 'commonjs',
                   },
                 ],
                 require.resolve('@babel/preset-react'),
@@ -82,12 +81,6 @@ module.exports = (config) => {
               plugins: [
                 require.resolve('@babel/plugin-proposal-class-properties'),
                 require.resolve('@babel/plugin-proposal-optional-chaining'),
-                [
-                  require.resolve('@babel/plugin-transform-runtime'),
-                  {
-                    regenerator: true,
-                  },
-                ],
               ],
             },
           },

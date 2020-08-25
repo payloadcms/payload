@@ -8,7 +8,7 @@ import FormSubmit from '../../forms/Submit';
 import RenderFields from '../../forms/RenderFields';
 import CopyToClipboard from '../../elements/CopyToClipboard';
 import Meta from '../../utilities/Meta';
-import * as fieldTypes from '../../forms/field-types';
+import fieldTypes from '../../forms/field-types';
 import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
 
 import './index.scss';

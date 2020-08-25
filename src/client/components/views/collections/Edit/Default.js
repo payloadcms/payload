@@ -13,7 +13,7 @@ import CopyToClipboard from '../../../elements/CopyToClipboard';
 import DuplicateDocument from '../../../elements/DuplicateDocument';
 import DeleteDocument from '../../../elements/DeleteDocument';
 import Meta from '../../../utilities/Meta';
-import * as fieldTypes from '../../../forms/field-types';
+import fieldTypes from '../../../forms/field-types';
 import RenderTitle from '../../../elements/RenderTitle';
 import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving';
 import Auth from './Auth';

@@ -82,7 +82,7 @@ function customComponents(config) {
   return {
     code: `
       const React = require('react');
-      module.exports = ${string};
+      export default ${string};
   `,
   };
 }

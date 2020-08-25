@@ -14,6 +14,7 @@ module.exports = (config) => {
       path: path.resolve(process.cwd(), 'build'),
       publicPath: `${config.routes.admin}/`,
       filename: '[name].[chunkhash].js',
+      chunkFilename: '[name].[chunkhash].js',
     },
     mode: 'production',
     resolveLoader: { modules: ['node_modules', path.join(__dirname, '../../node_modules')] },
@@ -68,9 +69,7 @@ module.exports = (config) => {
                       'defaults',
                       'not IE 11',
                       'not IE_Mob 11',
-                      'maintained node versions',
                     ],
-                    modules: 'commonjs',
                   },
                 ],
                 require.resolve('@babel/preset-react'),
@@ -78,12 +77,6 @@ module.exports = (config) => {
               plugins: [
                 require.resolve('@babel/plugin-proposal-optional-chaining'),
                 require.resolve('@babel/plugin-proposal-class-properties'),
-                [
-                  require.resolve('@babel/plugin-transform-runtime'),
-                  {
-                    regenerator: true,
-                  },
-                ],
               ],
             },
           },

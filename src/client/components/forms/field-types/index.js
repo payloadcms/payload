@@ -1,19 +1,39 @@
-export { default as email } from './Email';
-export { default as hidden } from './HiddenInput';
-export { default as text } from './Text';
-export { default as date } from './DateTime';
+import email from './Email';
+import hidden from './HiddenInput';
+import text from './Text';
+import date from './DateTime';
 
-export { default as password } from './Password';
-export { default as relationship } from './Relationship';
-export { default as textarea } from './Textarea';
-export { default as select } from './Select';
-export { default as number } from './Number';
-export { default as checkbox } from './Checkbox';
-export { default as richText } from './RichText';
-export { default as radio } from './RadioGroup';
+import password from './Password';
+import relationship from './Relationship';
+import textarea from './Textarea';
+import select from './Select';
+import number from './Number';
+import checkbox from './Checkbox';
+import richText from './RichText';
+import radio from './RadioGroup';
 
-export { default as blocks } from './Blocks';
-export { default as group } from './Group';
-export { default as array } from './Array';
-export { default as row } from './Row';
-export { default as upload } from './Upload';
+import blocks from './Blocks';
+import group from './Group';
+import array from './Array';
+import row from './Row';
+import upload from './Upload';
+
+export default {
+  email,
+  hidden,
+  text,
+  date,
+  password,
+  relationship,
+  textarea,
+  select,
+  number,
+  checkbox,
+  richText,
+  radio,
+  blocks,
+  group,
+  array,
+  row,
+  upload,
+};

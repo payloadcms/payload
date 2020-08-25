@@ -98,4 +98,4 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
 };
 
 
-module.exports = buildStateFromSchema;
+export default buildStateFromSchema;
