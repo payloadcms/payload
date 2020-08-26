@@ -36,7 +36,7 @@ async function forgotPassword(args) {
   let token = await crypto.randomBytes(20);
   token = token.toString('hex');
 
-  const user = await Model.findOne({ email: data.email });
+  const user = await Model.findOne({ email: data.email.toLowerCase() });
 
   if (!user) return null;
 
