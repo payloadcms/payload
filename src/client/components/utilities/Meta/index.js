@@ -2,9 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Helmet from 'react-helmet';
 import config from 'payload/config';
+import payloadFavicon from '../../../assets/images/favicon.svg';
+import payloadOgImage from '../../../assets/images/og-image.png';
 
-function Meta({ description, lang, meta, title, image, keywords }) {
+function Meta({ description, lang, meta, title, keywords }) {
   const titleSuffix = config?.admin?.meta?.titleSuffix ?? '- Payload';
+  const favicon = config?.admin?.meta?.favicon ?? payloadFavicon;
+  const ogImage = config?.admin?.meta?.ogImage ?? payloadOgImage;
   return (
     <Helmet
       htmlAttributes={{
@@ -26,7 +30,7 @@ function Meta({ description, lang, meta, title, image, keywords }) {
         },
         {
           property: 'og:image',
-          content: image,
+          content: ogImage,
         },
         {
           property: 'og:description',
@@ -49,6 +53,13 @@ function Meta({ description, lang, meta, title, image, keywords }) {
           content: description,
         },
       ].concat(meta)}
+      link={[
+        {
+          rel: 'icon',
+          type: 'image/svg+xml',
+          href: favicon,
+        },
+      ]}
     />
   );
 }
