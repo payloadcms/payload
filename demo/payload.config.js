@@ -32,8 +32,8 @@ module.exports = {
     // indexHTML: path.resolve(__dirname, 'custom-index.html'),
     meta: {
       titleSuffix: '- Payload Demo',
-      ogImage: '/static/find-image-here.jpg',
-      favicon: '/img/whatever.png',
+      // ogImage: '/static/find-image-here.jpg',
+      // favicon: '/img/whatever.png',
     },
     disable: false,
     components: {
