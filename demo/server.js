@@ -10,7 +10,7 @@ expressApp.use('/static', express.static(path.resolve(__dirname, 'client/static'
 
 payload.init({
   email: {
-    provider: 'mock',
+    transport: 'mock',
   },
   secret: 'SECRET_KEY',
   mongoURL: 'mongodb://localhost/payload',

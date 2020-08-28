@@ -5,7 +5,26 @@ import SortColumn from '../../../elements/SortColumn';
 const buildColumns = (collection, columns, setSort) => (columns || []).reduce((cols, col, colIndex) => {
   let field = null;
 
-  collection.fields.forEach((fieldToCheck) => {
+  const fields = [
+    ...collection.fields,
+    {
+      name: 'id',
+      type: 'text',
+      label: 'ID',
+    },
+    {
+      name: 'updatedAt',
+      type: 'date',
+      label: 'Updated At',
+    },
+    {
+      name: 'createdAt',
+      type: 'date',
+      label: 'Created At',
+    },
+  ];
+
+  fields.forEach((fieldToCheck) => {
     if (fieldToCheck.name === col) {
       field = fieldToCheck;
     }

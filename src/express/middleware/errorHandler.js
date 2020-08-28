@@ -12,6 +12,7 @@ const errorHandler = (config) => async (err, req, res, next) => {
   if (config.debug && config.debug === true) {
     data.stack = err.stack;
   }
+
   response = {
     ...data,
   };

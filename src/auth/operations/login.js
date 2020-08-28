@@ -27,7 +27,7 @@ async function login(args) {
 
   const { email: unsanitizedEmail, password } = data;
 
-  const email = unsanitizedEmail.toLowerCase();
+  const email = unsanitizedEmail ? unsanitizedEmail.toLowerCase() : null;
 
   const userDoc = await Model.findByUsername(email);
 

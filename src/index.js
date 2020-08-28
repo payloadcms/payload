@@ -140,6 +140,12 @@ class Payload {
     return update(options);
   }
 
+  async delete(options) {
+    let { delete: deleteOperation } = localOperations;
+    deleteOperation = deleteOperation.bind(this);
+    return deleteOperation(options);
+  }
+
   async register(options) {
     let { register } = localOperations.auth;
     register = register.bind(this);
