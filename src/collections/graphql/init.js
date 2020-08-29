@@ -121,8 +121,10 @@ function registerCollections() {
       type: collection.graphQL.type,
       args: {
         id: { type: GraphQLString },
-        locale: { type: this.types.localeInputType },
-        fallbackLocale: { type: this.types.fallbackLocaleInputType },
+        ...(this.config.localization ? {
+          locale: { type: this.types.localeInputType },
+          fallbackLocale: { type: this.types.fallbackLocaleInputType },
+        } : {}),
       },
       resolve: findByID(collection),
     };
@@ -131,8 +133,10 @@ function registerCollections() {
       type: buildPaginatedListType(pluralLabel, collection.graphQL.type),
       args: {
         where: { type: collection.graphQL.whereInputType },
-        locale: { type: this.types.localeInputType },
-        fallbackLocale: { type: this.types.fallbackLocaleInputType },
+        ...(this.config.localization ? {
+          locale: { type: this.types.localeInputType },
+          fallbackLocale: { type: this.types.fallbackLocaleInputType },
+        } : {}),
         page: { type: GraphQLInt },
         limit: { type: GraphQLInt },
         sort: { type: GraphQLString },
@@ -149,6 +153,26 @@ function registerCollections() {
     };
 
     if (collection.config.auth) {
+      collection.graphQL.JWT = this.buildObjectType(
+        formatName(`${slug}JWT`),
+        collection.config.fields.filter((field) => field.saveToJWT).concat([
+          {
+            name: 'email',
+            type: 'email',
+            required: true,
+          },
+          {
+            name: 'collection',
+            type: 'text',
+            required: true,
+          },
+          {
+            name: 'exp',
+            type: 'number',
+          },
+        ]),
+      );
+
       this.Query.fields[`me${singularLabel}`] = {
         type: new GraphQLObjectType({
           name: formatName(`${slug}Me`),
@@ -158,7 +182,7 @@ function registerCollections() {
             },
             user: {
               type: this.buildObjectType(
-                formatName(`${slug}MeUser`),
+                formatName(`${slug}Me${singularLabel}`),
                 collection.config.fields.concat([
                   {
                     name: 'email',
@@ -230,7 +254,17 @@ function registerCollections() {
       };
 
       this.Mutation.fields[`refreshToken${singularLabel}`] = {
-        type: GraphQLString,
+        type: new GraphQLObjectType({
+          name: formatName(`${slug}Refreshed${singularLabel}`),
+          fields: {
+            user: {
+              type: collection.graphQL.JWT,
+            },
+            refreshedToken: {
+              type: GraphQLString,
+            },
+          },
+        }),
         resolve: refresh(collection),
       };
 

@@ -93,16 +93,21 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
 
       type = type || newlyCreatedBlockType;
 
+      const relationshipArgs = {};
+
+      if (this.config.localization) {
+        relationshipArgs.locale = {
+          type: this.types.localeInputType,
+        };
+
+        relationshipArgs.fallbackLocale = {
+          type: this.types.fallbackLocaleInputType,
+        };
+      }
+
       const relationship = {
+        args: relationshipArgs,
         type: hasManyValues ? new GraphQLList(type) : type,
-        args: {
-          locale: {
-            type: this.types.localeInputType,
-          },
-          fallbackLocale: {
-            type: this.types.fallbackLocaleInputType,
-          },
-        },
         async resolve(parent, args, context) {
           const value = parent[field.name];
           const locale = args.locale || context.locale;

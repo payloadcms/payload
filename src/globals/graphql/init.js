@@ -33,8 +33,10 @@ function registerGlobals() {
       this.Query.fields[formattedLabel] = {
         type: global.graphQL.type,
         args: {
-          locale: { type: this.types.localeInputType },
-          fallbackLocale: { type: this.types.fallbackLocaleInputType },
+          ...(this.config.localization ? {
+            locale: { type: this.types.localeInputType },
+            fallbackLocale: { type: this.types.fallbackLocaleInputType },
+          } : {}),
         },
         resolve: findOne(global),
       };
