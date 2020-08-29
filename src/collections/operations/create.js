@@ -36,7 +36,19 @@ async function create(args) {
   }
 
   // /////////////////////////////////////
-  // 2. Execute before validate collection hooks
+  // 2. Execute beforeValidate field-level hooks, access, and validation
+  // /////////////////////////////////////
+
+  data = await this.performFieldOperations(collectionConfig, {
+    data,
+    req,
+    hook: 'beforeValidate',
+    operation: 'create',
+    overrideAccess,
+  });
+
+  // /////////////////////////////////////
+  // 3. Execute beforeValidate collection hooks
   // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
@@ -50,7 +62,7 @@ async function create(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 3. Execute field-level access, beforeChange hooks, and validation
+  // 4. Execute field-level access, beforeChange hooks, and validation
   // /////////////////////////////////////
 
   data = await performFieldOperations(collectionConfig, {
@@ -62,7 +74,7 @@ async function create(args) {
   });
 
   // /////////////////////////////////////
-  // 4. Execute before change hooks
+  // 5. Execute beforeChange collection hooks
   // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
@@ -76,7 +88,7 @@ async function create(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 5. Upload and resize any files that may be present
+  // 6. Upload and resize any files that may be present
   // /////////////////////////////////////
 
   if (collectionConfig.upload) {
@@ -117,7 +129,7 @@ async function create(args) {
   }
 
   // /////////////////////////////////////
-  // 6. Perform database operation
+  // 7. Perform database operation
   // /////////////////////////////////////
 
   let result = new Model();
@@ -132,7 +144,7 @@ async function create(args) {
   result = result.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 7. Execute field-level hooks and access
+  // 8. Execute field-level hooks and access
   // /////////////////////////////////////
 
   result = await performFieldOperations(collectionConfig, {
@@ -145,7 +157,7 @@ async function create(args) {
   });
 
   // /////////////////////////////////////
-  // 8. Execute after collection hook
+  // 9. Execute after collection hook
   // /////////////////////////////////////
 
   await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
@@ -159,7 +171,7 @@ async function create(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 9. Return results
+  // 10. Return results
   // /////////////////////////////////////
 
   result = JSON.stringify(result);

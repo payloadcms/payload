@@ -11,7 +11,7 @@ import { useForm } from '../../Form/context';
 import useFieldType from '../../useFieldType';
 import Error from '../../Error';
 import { array } from '../../../../../fields/validations';
-import reduceFieldsToValues from '../../Form/reduceFieldsToValues';
+import getDataByPath from '../../Form/getDataByPath';
 
 import './index.scss';
 
@@ -85,12 +85,9 @@ const ArrayFieldType = (props) => {
   }, [moveRow]);
 
   useEffect(() => {
-    const data = reduceFieldsToValues(initialState, true);
-
-    if (data?.[name]) {
-      dispatchRows({ type: 'SET_ALL', data: data[name] });
-    }
-  }, [initialState, name]);
+    const data = getDataByPath(initialState, path);
+    dispatchRows({ type: 'SET_ALL', data: data || [] });
+  }, [initialState, path]);
 
   useEffect(() => {
     setValue(rows?.length || 0);

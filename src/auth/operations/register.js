@@ -27,7 +27,20 @@ async function register(args) {
   }
 
   // /////////////////////////////////////
-  // 2. Execute before validate collection hooks
+  // 2. Execute beforeValidate field-level hooks, access, and validation
+  // /////////////////////////////////////
+
+  data = await this.performFieldOperations(collectionConfig, {
+    data,
+    req,
+    hook: 'beforeValidate',
+    operation: 'create',
+    overrideAccess,
+  });
+
+
+  // /////////////////////////////////////
+  // 3. Execute beforeValidate collection hooks
   // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
@@ -42,7 +55,7 @@ async function register(args) {
 
 
   // /////////////////////////////////////
-  // 3. Execute field-level hooks, access, and validation
+  // 4. Execute field-level access, beforeChange hooks, and validation
   // /////////////////////////////////////
 
   data = await this.performFieldOperations(collectionConfig, {
@@ -54,7 +67,7 @@ async function register(args) {
   });
 
   // /////////////////////////////////////
-  // 4. Execute before create hook
+  // 5. Execute beforeChange collection hooks
   // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
@@ -68,7 +81,7 @@ async function register(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 5. Perform register
+  // 6. Perform register
   // /////////////////////////////////////
 
   const modelData = {
@@ -93,7 +106,7 @@ async function register(args) {
   result = result.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 6. Execute field-level hooks and access
+  // 7. Execute field-level hooks and access
   // /////////////////////////////////////
 
   result = await this.performFieldOperations(collectionConfig, {
@@ -106,7 +119,7 @@ async function register(args) {
   });
 
   // /////////////////////////////////////
-  // 7. Execute after create hook
+  // 8. Execute afterChange collcetion hooks
   // /////////////////////////////////////
 
   await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
@@ -120,7 +133,7 @@ async function register(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 8. Return user
+  // 9. Return user
   // /////////////////////////////////////
   result = JSON.stringify(result);
   result = JSON.parse(result);

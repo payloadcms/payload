@@ -75,6 +75,8 @@ async function performFieldOperations(entityConfig, args) {
   const errors = [];
 
   const createValidationPromise = async (newData, existingData, field, path) => {
+    if (hook === 'beforeValidate') return true;
+
     const hasCondition = field.admin && field.admin.condition;
     const shouldValidate = field.validate && !hasCondition;
 

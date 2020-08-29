@@ -70,7 +70,21 @@ async function update(args) {
   let { data } = args;
 
   // /////////////////////////////////////
-  // 3. Execute before validate collection hooks
+  // 3. Execute beforeValidate field-level hooks, access, and validation
+  // /////////////////////////////////////
+
+  data = await this.performFieldOperations(collectionConfig, {
+    data,
+    req,
+    id,
+    originalDoc,
+    hook: 'beforeValidate',
+    operation: 'update',
+    overrideAccess,
+  });
+
+  // /////////////////////////////////////
+  // 4. Execute beforeValidate collection hooks
   // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
@@ -85,7 +99,7 @@ async function update(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 4. Execute field-level hooks, access, and validation
+  // 5. Execute field-level hooks, access, and validation
   // /////////////////////////////////////
 
   data = await this.performFieldOperations(collectionConfig, {
@@ -99,7 +113,7 @@ async function update(args) {
   });
 
   // /////////////////////////////////////
-  // 5. Execute before update hook
+  // 6. Execute beforeChange collection hooks
   // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
@@ -114,13 +128,13 @@ async function update(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 6. Merge updates into existing data
+  // 7. Merge updates into existing data
   // /////////////////////////////////////
 
   data = deepmerge(originalDoc, data, { arrayMerge: overwriteMerge });
 
   // /////////////////////////////////////
-  // 7. Handle password update
+  // 8. Handle password update
   // /////////////////////////////////////
 
   const dataToUpdate = { ...data };
@@ -132,7 +146,7 @@ async function update(args) {
   }
 
   // /////////////////////////////////////
-  // 8. Perform database operation
+  // 9. Perform database operation
   // /////////////////////////////////////
 
   Object.assign(user, dataToUpdate);
@@ -142,7 +156,7 @@ async function update(args) {
   user = user.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 9. Execute field-level hooks and access
+  // 10. Execute field-level hooks and access
   // /////////////////////////////////////
 
   user = await this.performFieldOperations(collectionConfig, {
@@ -156,7 +170,7 @@ async function update(args) {
   });
 
   // /////////////////////////////////////
-  // 10. Execute after update hook
+  // 11. Execute afterChange collection hooks
   // /////////////////////////////////////
 
   await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
@@ -170,7 +184,7 @@ async function update(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 11. Return user
+  // 12. Return updated user
   // /////////////////////////////////////
   user = JSON.stringify(user);
   user = JSON.parse(user);

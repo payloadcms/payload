@@ -13,6 +13,8 @@ import { useUser } from '../../data/User';
 import fieldReducer from './fieldReducer';
 import initContextState from './initContextState';
 import reduceFieldsToValues from './reduceFieldsToValues';
+import getSiblingDataFunc from './getSiblingData';
+import getDataByPathFunc from './getDataByPath';
 
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FieldContext } from './context';
 
@@ -211,47 +213,9 @@ const Form = (props) => {
   const getField = useCallback((path) => contextRef.current.fields[path], [contextRef]);
   const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [contextRef]);
 
-  const getSiblingData = useCallback((path) => {
-    let siblingFields = contextRef.current.fields;
+  const getSiblingData = useCallback((path) => getSiblingDataFunc(contextRef.current.fields, path), [contextRef]);
 
-    // If this field is nested
-    // We can provide a list of sibling fields
-    if (path.indexOf('.') > 0) {
-      const parentFieldPath = path.substring(0, path.lastIndexOf('.') + 1);
-      siblingFields = Object.keys(contextRef.current.fields).reduce((siblings, fieldKey) => {
-        if (fieldKey.indexOf(parentFieldPath) === 0) {
-          return {
-            ...siblings,
-            [fieldKey.replace(parentFieldPath, '')]: contextRef.current.fields[fieldKey],
-          };
-        }
-
-        return siblings;
-      }, {});
-    }
-
-    return reduceFieldsToValues(siblingFields, true);
-  }, [contextRef]);
-
-  const getDataByPath = useCallback((path) => {
-    const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1);
-    const name = path.split('.').pop();
-
-    const data = Object.keys(contextRef.current.fields).reduce((matchedData, key) => {
-      if (key.indexOf(`${path}.`) === 0) {
-        return {
-          ...matchedData,
-          [key.replace(pathPrefixToRemove, '')]: contextRef.current.fields[key],
-        };
-      }
-
-      return matchedData;
-    }, {});
-
-    const values = reduceFieldsToValues(data, true);
-    const unflattenedData = unflatten(values);
-    return unflattenedData?.[name];
-  }, [contextRef]);
+  const getDataByPath = useCallback((path) => getDataByPathFunc(contextRef.current.fields, path), [contextRef]);
 
   const getUnflattenedValues = useCallback(() => reduceFieldsToValues(contextRef.current.fields), [contextRef]);
 
