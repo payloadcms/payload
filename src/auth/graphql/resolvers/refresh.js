@@ -3,7 +3,7 @@ const getExtractJWT = require('../../getExtractJWT');
 function refresh(collection) {
   async function resolver(_, __, context) {
     const extractJWT = getExtractJWT(this.config);
-    const token = extractJWT(context);
+    const token = extractJWT(context.req);
 
     const options = {
       collection,
