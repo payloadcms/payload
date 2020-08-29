@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import { useFormFields } from '../Form/context';
@@ -35,17 +35,27 @@ const withCondition = (Field) => {
   const WithCondition = (props) => {
     const {
       name,
-      path,
+      path: pathFromProps,
       admin: {
         condition,
       } = {},
     } = props;
 
-    const { getData, getSiblingData } = useFormFields();
+    const path = pathFromProps || name;
+
+    const { getData, getSiblingData, getField, dispatchFields } = useFormFields();
 
     const data = getData();
-    const siblingData = getSiblingData(path || name);
+    const field = getField(path);
+    const siblingData = getSiblingData(path);
     const passesCondition = condition ? condition(data, siblingData) : true;
+    const fieldExists = Boolean(field);
+
+    useEffect(() => {
+      if (!passesCondition && fieldExists) {
+        dispatchFields({ type: 'REMOVE', path });
+      }
+    }, [dispatchFields, passesCondition, path, fieldExists]);
 
     if (passesCondition) {
       return <Field {...props} />;
