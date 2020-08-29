@@ -76,9 +76,9 @@ const RadioGroup = (props) => {
           const isSelected = option.value === value;
 
           return (
-            <li key={option.value}>
+            <li key={`${path} - ${option.value}`}>
               <RadioInput
-                key={option.value}
+                path={path}
                 isSelected={isSelected}
                 option={option}
                 onChange={readOnly ? undefined : setValue}
