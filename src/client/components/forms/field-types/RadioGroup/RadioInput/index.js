@@ -6,21 +6,22 @@ import './index.scss';
 const baseClass = 'radio-input';
 
 const RadioInput = (props) => {
-  const { isSelected, option, onChange } = props;
+  const { isSelected, option, onChange, path } = props;
 
   const classes = [
     baseClass,
     isSelected && `${baseClass}--is-selected`,
   ].filter(Boolean).join(' ');
 
+  const id = `${path}-${option.value}`;
+
   return (
     <label
-
-      htmlFor={option.label}
+      htmlFor={id}
     >
       <div className={classes}>
         <input
-          id={option.label}
+          id={id}
           type="radio"
           checked={isSelected}
           onChange={() => (typeof onChange === 'function' ? onChange(option.value) : null)}
@@ -44,6 +45,7 @@ RadioInput.propTypes = {
     value: PropTypes.string,
   }).isRequired,
   onChange: PropTypes.func,
+  path: PropTypes.string.isRequired,
 };
 
 export default RadioInput;

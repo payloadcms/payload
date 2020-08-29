@@ -15,6 +15,7 @@ import useFieldType from '../../useFieldType';
 import Popup from '../../../elements/Popup';
 import BlockSelector from './BlockSelector';
 import { blocks as blocksValidator } from '../../../../../fields/validations';
+import reduceFieldsToValues from '../../Form/reduceFieldsToValues';
 
 import './index.scss';
 
@@ -42,7 +43,7 @@ const Blocks = (props) => {
 
   const [rows, dispatchRows] = useReducer(reducer, []);
   const { customComponentsPath } = useRenderedFields();
-  const { getDataByPath, initialState, dispatchFields } = useForm();
+  const { initialState, dispatchFields } = useForm();
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(
@@ -100,9 +101,12 @@ const Blocks = (props) => {
   }, [moveRow]);
 
   useEffect(() => {
-    const data = getDataByPath(path);
-    dispatchRows({ type: 'SET_ALL', data });
-  }, [initialState, getDataByPath, path]);
+    const data = reduceFieldsToValues(initialState, true);
+
+    if (data?.[name]) {
+      dispatchRows({ type: 'SET_ALL', data: data[name] });
+    }
+  }, [initialState, name]);
 
   useEffect(() => {
     setValue(rows?.length || 0);
@@ -297,6 +301,7 @@ RenderBlocks.defaultProps = {
   path: '',
   customComponentsPath: undefined,
   value: undefined,
+  readOnly: false,
 };
 
 RenderBlocks.propTypes = {
@@ -323,6 +328,7 @@ RenderBlocks.propTypes = {
     PropTypes.shape({}),
   ).isRequired,
   toggleCollapse: PropTypes.func.isRequired,
+  readOnly: PropTypes.bool,
 };
 
 export default withCondition(Blocks);

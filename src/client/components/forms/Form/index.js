@@ -12,28 +12,13 @@ import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import { useUser } from '../../data/User';
 import fieldReducer from './fieldReducer';
 import initContextState from './initContextState';
+import reduceFieldsToValues from './reduceFieldsToValues';
 
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FieldContext } from './context';
 
 import './index.scss';
 
 const baseClass = 'form';
-
-const reduceFieldsToValues = (fields, flatten) => {
-  const data = {};
-
-  Object.keys(fields).forEach((key) => {
-    if (!fields[key].disableFormData && fields[key].value !== undefined) {
-      data[key] = fields[key].value;
-    }
-  });
-
-  if (flatten) {
-    return unflatten(data, { safe: true });
-  }
-
-  return data;
-};
 
 const Form = (props) => {
   const {
@@ -122,6 +107,8 @@ const Form = (props) => {
         clearStatus();
 
         if (res.status < 400) {
+          setSubmitted(false);
+
           if (typeof onSuccess === 'function') onSuccess(json);
 
           if (redirect) {

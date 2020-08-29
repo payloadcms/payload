@@ -11,6 +11,7 @@ import { useForm } from '../../Form/context';
 import useFieldType from '../../useFieldType';
 import Error from '../../Error';
 import { array } from '../../../../../fields/validations';
+import reduceFieldsToValues from '../../Form/reduceFieldsToValues';
 
 import './index.scss';
 
@@ -36,7 +37,7 @@ const ArrayFieldType = (props) => {
 
   const [rows, dispatchRows] = useReducer(reducer, []);
   const { customComponentsPath } = useRenderedFields();
-  const { getDataByPath, initialState, dispatchFields } = useForm();
+  const { initialState, dispatchFields } = useForm();
 
   const path = pathFromProps || name;
 
@@ -84,9 +85,12 @@ const ArrayFieldType = (props) => {
   }, [moveRow]);
 
   useEffect(() => {
-    const data = getDataByPath(path);
-    dispatchRows({ type: 'SET_ALL', data });
-  }, [initialState, getDataByPath, path]);
+    const data = reduceFieldsToValues(initialState, true);
+
+    if (data?.[name]) {
+      dispatchRows({ type: 'SET_ALL', data: data[name] });
+    }
+  }, [initialState, name]);
 
   useEffect(() => {
     setValue(rows?.length || 0);
