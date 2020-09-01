@@ -34,6 +34,7 @@ const middleware = (payload) => [
       if (payload.config.cors === '*') {
         res.setHeader('Access-Control-Allow-Origin', '*');
       } else if (Array.isArray(payload.config.cors) && payload.config.cors.indexOf(req.headers.origin) > -1) {
+        res.header('Access-Control-Allow-Credentials', true);
         res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
       }
     }

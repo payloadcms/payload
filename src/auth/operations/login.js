@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { AuthenticationError } = require('../../errors');
+const getCookieExpiration = require('../../utilities/getCookieExpiration');
 
 async function login(args) {
   const { config, operations } = this;
@@ -92,15 +93,13 @@ async function login(args) {
     const cookieOptions = {
       path: '/',
       httpOnly: true,
+      expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
+      secure: collectionConfig.auth.cookies.secure,
+      sameSite: collectionConfig.auth.cookies.sameSite,
     };
 
-    if (collectionConfig.auth.secureCookie) {
-      cookieOptions.secure = true;
-    }
 
-    if (collectionConfig.auth.sameSite) {
-      cookieOptions.sameSite = collectionConfig.auth.sameSite;
-    }
+    if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
 
     args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
   }

@@ -238,6 +238,13 @@ const sanitizeCollection = (collections, collection) => {
       authFields = authFields.concat(baseAPIKeyFields);
     }
 
+    if (!sanitized.auth.tokenExpiration) sanitized.auth.tokenExpiration = 7200;
+
+    if (!sanitized.auth.cookies) sanitized.auth.cookies = {};
+
+    if (!sanitized.auth.cookies.secure) sanitized.auth.cookies.secure = false;
+    if (!sanitized.auth.cookies.sameSite) sanitized.auth.cookies.sameSite = 'Lax';
+
     authFields = mergeBaseFields(sanitized.fields, authFields);
 
     sanitized.fields = [

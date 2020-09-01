@@ -32,7 +32,11 @@ module.exports = {
   },
   auth: {
     tokenExpiration: 300,
-    secureCookie: process.env.NODE_ENV === 'production',
+    cookies: {
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Lax',
+      domain: undefined,
+    },
   },
   fields: [
     {

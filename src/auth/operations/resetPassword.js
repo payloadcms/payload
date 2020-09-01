@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { APIError } = require('../../errors');
+const getCookieExpiration = require('../../utilities/getCookieExpiration');
 
 async function resetPassword(args) {
   const { config } = this;
@@ -74,17 +75,13 @@ async function resetPassword(args) {
     const cookieOptions = {
       path: '/',
       httpOnly: true,
+      expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
+      secure: collectionConfig.auth.cookies.secure,
+      sameSite: collectionConfig.auth.cookies.sameSite,
     };
 
-    if (collectionConfig.auth.secureCookie) {
-      cookieOptions.secure = true;
-    }
 
-    if (args.req.headers && args.req.headers.origin && args.req.headers.origin.indexOf('localhost') === -1) {
-      let domain = args.req.headers.origin.replace('https://', '');
-      domain = domain.replace('http://', '');
-      cookieOptions.domain = domain;
-    }
+    if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
 
     args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
   }
