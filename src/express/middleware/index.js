@@ -41,6 +41,7 @@ const middleware = (payload) => [
 
     next();
   },
+  ...(payload.config.middleware || []),
 ];
 
 module.exports = middleware;
