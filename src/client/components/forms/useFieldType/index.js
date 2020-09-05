@@ -31,6 +31,7 @@ const useFieldType = (options) => {
 
   // Get field by path
   const field = getField(path);
+  const fieldExists = Boolean(field);
 
   const initialValue = field?.initialValue;
 
@@ -81,10 +82,10 @@ const useFieldType = (options) => {
   const valueToSend = enableDebouncedValue ? debouncedValue : internalValue;
 
   useEffect(() => {
-    if (valueToSend !== undefined) {
+    if (valueToSend !== undefined || !fieldExists) {
       sendField(valueToSend);
     }
-  }, [valueToSend, sendField]);
+  }, [valueToSend, sendField, fieldExists]);
 
   return {
     ...options,
