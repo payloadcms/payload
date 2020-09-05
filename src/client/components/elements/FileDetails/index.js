@@ -18,6 +18,8 @@ const FileDetails = (props) => {
 
   const [moreInfoOpen, setMoreInfoOpen] = useState(false);
 
+  const hasSizes = Object.keys(sizes)?.length > 0;
+
   return (
     <div className={baseClass}>
       <header>
@@ -34,7 +36,7 @@ const FileDetails = (props) => {
             height={height}
             mimeType={mimeType}
           />
-          {sizes && (
+          {hasSizes && (
             <Button
               className={`${baseClass}__toggle-more-info${moreInfoOpen ? ' open' : ''}`}
               buttonStyle="none"
@@ -66,7 +68,7 @@ const FileDetails = (props) => {
           />
         )}
       </header>
-      {sizes && (
+      {hasSizes && (
         <AnimateHeight
           className={`${baseClass}__more-info`}
           height={moreInfoOpen ? 'auto' : 0}

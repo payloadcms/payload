@@ -28,7 +28,85 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
     richText: (field) => ({ type: withNullableType(field, GraphQLJSON) }),
     code: (field) => ({ type: withNullableType(field, GraphQLString) }),
     date: (field) => ({ type: withNullableType(field, GraphQLString) }),
-    upload: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    upload: (field) => {
+      const { relationTo, label } = field;
+      const uploadName = combineParentName(parentName, label);
+
+      // If the relationshipType is undefined at this point,
+      // it can be assumed that this blockType can have a relationship
+      // to itself. Therefore, we set the relationshipType equal to the blockType
+      // that is currently being created.
+
+      const type = this.collections[relationTo].graphQL.type || newlyCreatedBlockType;
+
+      const uploadArgs = {};
+
+      if (this.config.localization) {
+        uploadArgs.locale = {
+          type: this.types.localeInputType,
+        };
+
+        uploadArgs.fallbackLocale = {
+          type: this.types.fallbackLocaleInputType,
+        };
+      }
+
+      const relatedCollectionSlug = field.relationTo;
+      const relatedCollection = this.collections[relatedCollectionSlug];
+
+      const { find } = this.operations.collections;
+
+      const upload = {
+        args: uploadArgs,
+        type,
+        async resolve(parent, args, context) {
+          const value = parent[field.name];
+          const locale = args.locale || context.locale;
+          const fallbackLocale = args.fallbackLocale || context.fallbackLocale;
+
+          let id = value;
+
+          if (id) {
+            id = id.toString();
+
+            const relatedDocumentQuery = {
+              collection: relatedCollection,
+              where: {
+                ...(args.where || {}),
+                _id: {
+                  equals: id,
+                },
+              },
+              req: {
+                ...context,
+                locale,
+                fallbackLocale,
+              },
+            };
+
+            const relatedDocument = await find(relatedDocumentQuery);
+
+            if (relatedDocument.docs[0]) return relatedDocument.docs[0];
+
+            return null;
+          }
+
+          return null;
+        },
+      };
+
+      const whereFields = this.collections[relationTo].config.fields;
+
+      upload.args.where = {
+        type: this.buildWhereInputType(
+          uploadName,
+          whereFields,
+          uploadName,
+        ),
+      };
+
+      return upload;
+    },
     radio: (field) => ({ type: withNullableType(field, GraphQLString) }),
     checkbox: (field) => ({ type: withNullableType(field, GraphQLBoolean) }),
     select: (field) => {
@@ -105,6 +183,15 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
         };
       }
 
+      const {
+        collections,
+        operations: {
+          collections: {
+            find,
+          },
+        },
+      } = this;
+
       const relationship = {
         args: relationshipArgs,
         type: hasManyValues ? new GraphQLList(type) : type,
@@ -116,36 +203,43 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
 
           if (hasManyValues) {
             const results = [];
+            const resultPromises = [];
 
-            if (value) {
-              for (const relatedDoc of value) {
-                let id = relatedDoc;
+            const createPopulationPromise = async (relatedDoc) => {
+              let id = relatedDoc;
 
-                if (isRelatedToManyCollections) {
-                  relatedCollectionSlug = relatedDoc.relationTo;
-                  id = relatedDoc.value;
-                }
+              if (isRelatedToManyCollections) {
+                relatedCollectionSlug = relatedDoc.relationTo;
+                id = relatedDoc.value;
+              }
 
-                const result = await this.operations.collections.find({
-                  Model: this.collections[relatedCollectionSlug].Model,
-                  query: {
-                    where: {
-                      ...(args.where || {}),
-                      _id: {
-                        equals: id,
-                      },
-                    },
+              const result = await find({
+                collection: collections[relatedCollectionSlug],
+                where: {
+                  ...(args.where || {}),
+                  _id: {
+                    equals: id,
                   },
+                },
+                req: {
+                  ...context,
                   locale,
                   fallbackLocale,
-                });
+                },
+              });
 
-                if (result.docs.length === 1) {
-                  results.push(result.docs[0]);
-                }
+              if (result.docs.length === 1) {
+                results.push(result.docs[0]);
               }
+            };
+
+            if (value) {
+              value.forEach((relatedDoc) => {
+                resultPromises.push(createPopulationPromise(relatedDoc));
+              });
             }
 
+            await Promise.all(resultPromises);
             return results;
           }
 
@@ -156,24 +250,20 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
             id = id.toString();
 
             const relatedDocumentQuery = {
-              Model: this.collections[relatedCollectionSlug].Model,
-              query: {
-                where: {
-                  ...(args.where || {}),
-                  _id: {
-                    equals: id,
-                  },
+              collection: collections[relatedCollectionSlug],
+              where: {
+                ...(args.where || {}),
+                id: {
+                  equals: id,
                 },
               },
-              paginate: {},
-              locale,
-              fallbackLocale,
+              req: context,
             };
 
             if (args.page) relatedDocumentQuery.paginate.page = args.page;
             if (args.limit) relatedDocumentQuery.paginate.limit = args.limit;
 
-            const relatedDocument = await this.operations.collections.find();
+            const relatedDocument = await find(relatedDocumentQuery);
 
             if (relatedDocument.docs[0]) return relatedDocument.docs[0];
 
@@ -192,7 +282,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
       if (isRelatedToManyCollections) {
         const relatedCollectionFields = relationTo.reduce((allFields, relation) => [
           ...allFields,
-          ...this.collections[relation].config.fields,
+          ...collections[relation].config.fields,
         ], []);
 
         relationship.args.where = {
