@@ -94,9 +94,10 @@ function registerCollections() {
       singularLabel,
     );
 
-    if (collection.auth) {
+    if (collection.config.auth) {
       fields.push({
         name: 'password',
+        label: 'Password',
         type: 'text',
         required: true,
       });
