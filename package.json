@@ -99,7 +99,7 @@
     "sanitize-filename": "^1.6.3",
     "sass-loader": "7.1.0",
     "sharp": "^0.25.2",
-    "slate": "^0.58.3",
+    "slate": "^0.58.4",
     "slate-history": "^0.58.3",
     "slate-hyperscript": "^0.58.3",
     "slate-react": "^0.58.3",
