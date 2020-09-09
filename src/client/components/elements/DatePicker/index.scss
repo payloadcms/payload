@@ -220,6 +220,8 @@ $cal-icon-width: 18px;
 
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item {
     line-height: 20px;
+    font-size: base(.5);
+    font-weight: 500;
   }
 
   @include small-break {
