@@ -35,6 +35,7 @@ const formatBaseSchema = (field) => {
     unique: field.unique || false,
     required: (field.required && !field.localized && !condition && !createAccess) || false,
     default: field.defaultValue || undefined,
+    index: field.index || field.unique || false,
   };
 };
 

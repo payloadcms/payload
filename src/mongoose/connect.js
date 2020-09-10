@@ -19,6 +19,7 @@ const connectMongoose = async (url) => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useCreateIndex: true,
+      autoIndex: false,
     });
     logger.info(successfulConnectionMessage);
   } catch (err) {
