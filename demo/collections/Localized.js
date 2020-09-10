@@ -33,6 +33,12 @@ module.exports = {
       localized: true,
     },
     {
+      name: 'summary',
+      label: 'Summary',
+      type: 'text',
+      index: true,
+    },
+    {
       name: 'description',
       label: 'Description',
       type: 'textarea',
