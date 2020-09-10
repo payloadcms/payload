@@ -1,7 +1,7 @@
 const { MissingGlobalLabel } = require('../errors');
 const sanitizeFields = require('../fields/sanitize');
 
-const sanitizeGlobals = (globals) => {
+const sanitizeGlobals = (collections, globals) => {
   // /////////////////////////////////
   // Ensure globals are valid
   // /////////////////////////////////
@@ -33,7 +33,8 @@ const sanitizeGlobals = (globals) => {
     // Sanitize fields
     // /////////////////////////////////
 
-    sanitizedGlobal.fields = sanitizeFields(global.fields);
+    const validRelationships = collections.map((c) => c.slug);
+    sanitizedGlobal.fields = sanitizeFields(validRelationships, global.fields);
 
     return sanitizedGlobal;
   });

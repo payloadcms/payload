@@ -10,7 +10,7 @@ const sanitizeConfig = (config) => {
   sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig.collections, collection));
 
   if (sanitizedConfig.globals) {
-    sanitizedConfig.globals = sanitizeGlobals(sanitizedConfig.globals);
+    sanitizedConfig.globals = sanitizeGlobals(sanitizedConfig.collections, sanitizedConfig.globals);
   } else {
     sanitizedConfig.globals = [];
   }
