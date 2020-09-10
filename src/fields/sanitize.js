@@ -11,6 +11,12 @@ const sanitizeFields = (collections, fields) => {
 
     if (!field.type) throw new MissingFieldType(field);
 
+    if (field.type === 'blocks') {
+      field.blocks.forEach((blockCollection) => {
+        sanitizeFields(collections, blockCollection.fields);
+      });
+    }
+
     if (field.type === 'relationship') {
       const relationships = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo];
       relationships.forEach((relationship) => {
