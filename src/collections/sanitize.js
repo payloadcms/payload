@@ -257,7 +257,7 @@ const sanitizeCollection = (collections, collection) => {
   // Sanitize fields
   // /////////////////////////////////
 
-  sanitized.fields = sanitizeFields(sanitized.fields);
+  sanitized.fields = sanitizeFields(collections, sanitized.fields);
 
   return sanitized;
 };
