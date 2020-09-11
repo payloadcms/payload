@@ -8,6 +8,7 @@ const Forbidden = require('./Forbidden');
 const InvalidFieldRelationship = require('./InvalidFieldRelationship');
 const MissingCollectionLabel = require('./MissingCollectionLabel');
 const MissingFieldInputOptions = require('./MissingFieldInputOptions');
+const MissingFieldType = require('./MissingFieldType');
 const MissingFile = require('./MissingFile');
 const MissingGlobalLabel = require('./MissingGlobalLabel');
 const NotFound = require('./NotFound');
@@ -24,6 +25,7 @@ module.exports = {
   InvalidFieldRelationship,
   MissingCollectionLabel,
   MissingFieldInputOptions,
+  MissingFieldType,
   MissingFile,
   MissingGlobalLabel,
   NotFound,
