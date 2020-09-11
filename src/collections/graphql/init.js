@@ -172,6 +172,7 @@ function registerCollections() {
             type: 'number',
           },
         ]),
+        formatName(`${slug}JWT`),
       );
 
       this.Query.fields[`me${singularLabel}`] = {

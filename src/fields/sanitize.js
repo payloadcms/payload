@@ -28,7 +28,7 @@ const sanitizeFields = (fields, validRelationships) => {
     if (!field.access) field.access = {};
     if (!field.admin) field.admin = {};
 
-    if (field.fields) field.fields = sanitizeFields(field.fields);
+    if (field.fields) field.fields = sanitizeFields(field.fields, validRelationships);
 
     if (field.blocks) {
       field.blocks = field.blocks.map((block) => {
