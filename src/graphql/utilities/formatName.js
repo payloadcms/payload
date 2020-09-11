@@ -3,6 +3,10 @@ const formatName = (string) => {
     .replace(/\./g, '_')
     .replace(/-|\//g, '_')
     .replace(/\+/g, '_')
+    .replace(/,/g, '_')
+    .replace(/\(/g, '_')
+    .replace(/\)/g, '_')
+    .replace(/'/g, '_')
     .replace(/ /g, '');
 
   return formatted;
