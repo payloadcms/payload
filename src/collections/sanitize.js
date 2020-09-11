@@ -258,7 +258,7 @@ const sanitizeCollection = (collections, collection) => {
   // /////////////////////////////////
 
   const validRelationships = collections.map((c) => c.slug);
-  sanitized.fields = sanitizeFields(validRelationships, sanitized.fields);
+  sanitized.fields = sanitizeFields(sanitized.fields, validRelationships);
 
   return sanitized;
 };

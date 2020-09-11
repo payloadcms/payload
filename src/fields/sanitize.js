@@ -1,7 +1,7 @@
 const { MissingFieldType, InvalidFieldRelationship } = require('../errors');
 const validations = require('./validations');
 
-const sanitizeFields = (validRelationships, fields) => {
+const sanitizeFields = (fields, validRelationships) => {
   if (!fields) return [];
 
   return fields.map((unsanitizedField) => {
@@ -11,7 +11,7 @@ const sanitizeFields = (validRelationships, fields) => {
 
     if (field.type === 'blocks') {
       field.blocks.forEach((blockCollection) => {
-        sanitizeFields(validRelationships, blockCollection.fields);
+        sanitizeFields(blockCollection.fields, validRelationships);
       });
     }
 
@@ -39,7 +39,7 @@ const sanitizeFields = (validRelationships, fields) => {
     if (field.blocks) {
       field.blocks = field.blocks.map((block) => {
         const unsanitizedBlock = { ...block };
-        unsanitizedBlock.fields = sanitizeFields(block.fields);
+        unsanitizedBlock.fields = sanitizeFields(block.fields, validRelationships);
         return unsanitizedBlock;
       });
     }

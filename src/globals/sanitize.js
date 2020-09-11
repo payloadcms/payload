@@ -34,7 +34,7 @@ const sanitizeGlobals = (collections, globals) => {
     // /////////////////////////////////
 
     const validRelationships = collections.map((c) => c.slug);
-    sanitizedGlobal.fields = sanitizeFields(validRelationships, global.fields);
+    sanitizedGlobal.fields = sanitizeFields(global.fields, validRelationships);
 
     return sanitizedGlobal;
   });
