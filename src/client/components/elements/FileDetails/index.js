@@ -18,7 +18,7 @@ const FileDetails = (props) => {
 
   const [moreInfoOpen, setMoreInfoOpen] = useState(false);
 
-  const hasSizes = Object.keys(sizes)?.length > 0;
+  const hasSizes = sizes && Object.keys(sizes)?.length > 0;
 
   return (
     <div className={baseClass}>
