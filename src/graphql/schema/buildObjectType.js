@@ -127,7 +127,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
           if (typeof option === 'string') {
             return {
               ...values,
-              [option]: {
+              [formatName(option)]: {
                 value: option,
               },
             };
@@ -149,15 +149,40 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
       const relationshipName = combineParentName(parentName, label);
 
       let type;
+      let relationToType = null;
 
       if (isRelatedToManyCollections) {
+        relationToType = new GraphQLEnumType({
+          name: `${relationshipName}_RelationTo`,
+          values: field.relationTo.reduce((relations, relation) => ({
+            ...relations,
+            [formatName(relation)]: {
+              value: relation,
+            },
+          }), {}),
+        });
+
         const types = relationTo.map((relation) => this.collections[relation].graphQL.type);
 
-        type = new GraphQLUnionType({
-          name: relationshipName,
-          types,
-          resolveType(data) {
-            return this.types.blockTypes[data.blockType];
+        let resolveType = function resolveType(data) {
+          return this.collections[data.collection].graphQL.type;
+        };
+
+        resolveType = resolveType.bind(this);
+
+        type = new GraphQLObjectType({
+          name: `${relationshipName}_Relationship`,
+          fields: {
+            relationTo: {
+              type: relationToType,
+            },
+            value: {
+              type: new GraphQLUnionType({
+                name: relationshipName,
+                types,
+                resolveType,
+              }),
+            },
           },
         });
       } else {
@@ -229,7 +254,17 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
               });
 
               if (result.docs.length === 1) {
-                results.push(result.docs[0]);
+                if (isRelatedToManyCollections) {
+                  results.push({
+                    relationTo: relatedCollectionSlug,
+                    value: {
+                      ...result.docs[0],
+                      collection: relatedCollectionSlug,
+                    },
+                  });
+                } else {
+                  results.push(result.docs[0]);
+                }
               }
             };
 
@@ -244,7 +279,10 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
           }
 
           let id = value;
-          if (isRelatedToManyCollections && value) id = value.value;
+          if (isRelatedToManyCollections && value) {
+            id = value.value;
+            relatedCollectionSlug = value.relationTo;
+          }
 
           if (id) {
             id = id.toString();
@@ -265,7 +303,19 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
 
             const relatedDocument = await find(relatedDocumentQuery);
 
-            if (relatedDocument.docs[0]) return relatedDocument.docs[0];
+            if (relatedDocument.docs[0]) {
+              if (isRelatedToManyCollections) {
+                return {
+                  relationTo: relatedCollectionSlug,
+                  value: {
+                    ...relatedDocument.docs[0],
+                    collection: relatedCollectionSlug,
+                  },
+                };
+              }
+
+              return relatedDocument.docs[0];
+            }
 
             return null;
           }
