@@ -2,28 +2,32 @@ const APIError = require('./APIError');
 const AuthenticationError = require('./AuthenticationError');
 const DuplicateCollection = require('./DuplicateCollection');
 const DuplicateGlobal = require('./DuplicateGlobal');
+const ErrorDeletingFile = require('./ErrorDeletingFile');
+const errorHandler = require('../express/middleware/errorHandler');
+const Forbidden = require('./Forbidden');
+const InvalidFieldRelationship = require('./InvalidFieldRelationship');
 const MissingCollectionLabel = require('./MissingCollectionLabel');
+const MissingFieldInputOptions = require('./MissingFieldInputOptions');
+const MissingFieldType = require('./MissingFieldType');
+const MissingFile = require('./MissingFile');
 const MissingGlobalLabel = require('./MissingGlobalLabel');
 const NotFound = require('./NotFound');
-const Forbidden = require('./Forbidden');
 const ValidationError = require('./ValidationError');
-const errorHandler = require('../express/middleware/errorHandler');
-const MissingFile = require('./MissingFile');
-const MissingFieldInputOptions = require('./MissingFieldInputOptions');
-const ErrorDeletingFile = require('./ErrorDeletingFile');
 
 module.exports = {
-  errorHandler,
-  ErrorDeletingFile,
   APIError,
   AuthenticationError,
   DuplicateCollection,
   DuplicateGlobal,
+  ErrorDeletingFile,
+  errorHandler,
+  Forbidden,
+  InvalidFieldRelationship,
   MissingCollectionLabel,
+  MissingFieldInputOptions,
+  MissingFieldType,
+  MissingFile,
   MissingGlobalLabel,
   NotFound,
-  Forbidden,
   ValidationError,
-  MissingFile,
-  MissingFieldInputOptions,
 };

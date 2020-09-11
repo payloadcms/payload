@@ -39,7 +39,7 @@ module.exports = (config) => {
               loader: 'babel-loader',
               options: {
                 plugins: [
-                  [removeObjectProperties, { values: ['graphQL', 'hooks', 'webpack', 'access', 'hooks'] }],
+                  [removeObjectProperties, { values: ['graphQL', 'hooks', 'webpack', 'access'] }],
                 ],
               },
             },

@@ -115,7 +115,7 @@ const optionsToValidatorMap = {
     return true;
   },
   date: (value, options = {}) => {
-    if (value && value instanceof Date) {
+    if (value && !isNaN(Date.parse(value.toString()))) { /* eslint-disable-line */
       return true;
     }
 

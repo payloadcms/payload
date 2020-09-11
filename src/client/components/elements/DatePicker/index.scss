@@ -3,12 +3,34 @@
 $cal-icon-width: 18px;
 
 .date-time-picker {
+  .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box,
+  .react-datepicker__time-container {
+    width: 120px;
+  }
 
   &--hide-dates {
     .react-datepicker {
-      &__month-container {
+      width: 100%;
+
+      &__month-container,
+      &__navigation--previous,
+      &__navigation--next {
         display: none;
         visibility: hidden;
+      }
+
+      &-popper,
+      &__time-container,
+      &__time-box {
+        width: 100%;
+      }
+
+      &__time-container {
+        .react-datepicker__time {
+          .react-datepicker__time-box {
+            width: 100%;
+          }
+        }
       }
     }
   }
@@ -69,7 +91,7 @@ $cal-icon-width: 18px;
       &--time {
         padding: 10px 0;
         border-bottom: 1px solid $color-light-gray;
-        font-weight: bold;
+        font-weight: 600;
       }
     }
 
@@ -111,10 +133,15 @@ $cal-icon-width: 18px;
 
     &__current-month {
       padding: 10px 0;
+      font-weight: 600;
+    }
+
+    &__month-container {
+      border-right: 1px solid $color-light-gray;
     }
 
     &__time-container {
-      border-left: 1px solid $color-light-gray;
+      border-left: none;
     }
 
     &__day-names {
@@ -131,38 +158,54 @@ $cal-icon-width: 18px;
       }
 
       &--selected {
+        font-weight: 600;
+
         &:focus {
-          background-color: $color-dark-gray;
+          background-color: $color-light-gray;
         }
       }
 
       &--keyboard-selected {
         color: white;
+        font-weight: 600;
 
         &:focus {
           background-color: $color-light-gray;
           box-shadow: inset 0px 0px 0px 1px $color-dark-gray, 0px 0px 0px 1px $color-dark-gray;
         }
       }
+
+      &--today {
+        font-weight: 600;
+      }
+    }
+
+    &__day,
+    &__day-name {
+      width: base(1.5);
+      margin: base(.15);
+      line-height: base(1.25);
     }
   }
 
   .react-datepicker-popper {
     z-index: 10;
+    border: 1px solid $color-light-gray;
   }
 
   .react-datepicker__day--keyboard-selected,
   .react-datepicker__month-text--keyboard-selected,
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
-    background: $color-dark-gray;
+    box-shadow: inset 0px 0px 0px 1px $color-dark-gray, 0px 0px 0px 1px $color-dark-gray;
+    background-color: $color-light-gray;
     color: $color-dark-gray;
-    font-weight: normal;
     border-radius: 0;
   }
 
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected,
   .react-datepicker__day--selected, .react-datepicker__day--in-selecting-range, .react-datepicker__day--in-range, .react-datepicker__month-text--selected, .react-datepicker__month-text--in-selecting-range, .react-datepicker__month-text--in-range {
-    background: $color-dark-gray;
+    box-shadow: inset 0px 0px 0px 1px $color-dark-gray, 0px 0px 0px 1px $color-dark-gray;
+    background-color: $color-light-gray;
     color: $color-dark-gray;
     border-radius: 0;
   }
@@ -171,17 +214,14 @@ $cal-icon-width: 18px;
     border-radius: 0;
   }
 
-  .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box,
-  .react-datepicker__time-container {
-    width: 120px;
-  }
-
   .react-datepicker__navigation--next--with-time:not(.react-datepicker__navigation--next--with-today-button) {
     right: 130px;
   }
 
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item {
     line-height: 20px;
+    font-size: base(.5);
+    font-weight: 500;
   }
 
   @include small-break {
