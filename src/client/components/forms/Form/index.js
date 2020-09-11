@@ -4,7 +4,6 @@ import React, {
 import { objectToFormData } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { unflatten } from 'flatley';
 import { useLocale } from '../../utilities/Locale';
 import { useStatusList } from '../../elements/Status';
 import { requests } from '../../../api';
@@ -95,6 +94,7 @@ const Form = (props) => {
     });
 
     const formData = contextRef.current.createFormData();
+
     setProcessing(true);
 
     // Make the API call from the action
@@ -223,7 +223,7 @@ const Form = (props) => {
 
   const createFormData = useCallback(() => {
     const data = reduceFieldsToValues(contextRef.current.fields);
-    return objectToFormData(data, { indices: true, nullsAsUndefineds: true });
+    return objectToFormData(data, { indices: true });
   }, [contextRef]);
 
   contextRef.current.dispatchFields = dispatchFields;

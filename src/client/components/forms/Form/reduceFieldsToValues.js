@@ -10,7 +10,8 @@ const reduceFieldsToValues = (fields, flatten) => {
   });
 
   if (flatten) {
-    return unflatten(data, { safe: true });
+    const unflattened = unflatten(data, { safe: true });
+    return unflattened;
   }
 
   return data;

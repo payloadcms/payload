@@ -73,7 +73,7 @@ const RadioGroup = (props) => {
       />
       <ul className={`${baseClass}--group`}>
         {options?.map((option) => {
-          const isSelected = option.value === value;
+          const isSelected = String(option.value) === String(value);
 
           return (
             <li key={`${path} - ${option.value}`}>
@@ -113,7 +113,10 @@ RadioGroup.propTypes = {
   options: PropTypes.arrayOf(
     PropTypes.shape({
       label: PropTypes.string,
-      value: PropTypes.string,
+      value: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number,
+      ]),
     }),
   ).isRequired,
 };

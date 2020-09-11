@@ -168,7 +168,8 @@ const optionsToValidatorMap = {
     return true;
   },
   radio: (value, options = {}) => {
-    if ((value || !options.required) && (options.options.find((option) => option.value === value))) return true;
+    const stringValue = String(value);
+    if ((value || !options.required) && (options.options.find((option) => String(option.value) === stringValue))) return true;
     return defaultMessage;
   },
   blocks: (value, options) => {

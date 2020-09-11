@@ -42,7 +42,10 @@ RadioInput.propTypes = {
   isSelected: PropTypes.bool,
   option: PropTypes.shape({
     label: PropTypes.string,
-    value: PropTypes.string,
+    value: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number,
+    ]),
   }).isRequired,
   onChange: PropTypes.func,
   path: PropTypes.string.isRequired,
