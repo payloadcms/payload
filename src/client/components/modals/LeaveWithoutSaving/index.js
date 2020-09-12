@@ -3,6 +3,7 @@ import NavigationPrompt from 'react-router-navigation-prompt';
 import { useFormModified } from '../../forms/Form/context';
 import MinimalTemplate from '../../templates/Minimal';
 import Button from '../../elements/Button';
+import { useUser } from '../../data/User';
 
 import './index.scss';
 
@@ -10,9 +11,10 @@ const modalSlug = 'leave-without-saving';
 
 const LeaveWithoutSaving = () => {
   const modified = useFormModified();
+  const { user } = useUser();
 
   return (
-    <NavigationPrompt when={modified}>
+    <NavigationPrompt when={modified && user}>
       {({ onConfirm, onCancel }) => (
         <div className={modalSlug}>
           <MinimalTemplate>
