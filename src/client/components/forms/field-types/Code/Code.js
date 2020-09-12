@@ -34,7 +34,7 @@ const Code = (props) => {
       return (content) => highlight(content, languages[language]);
     }
 
-    return undefined;
+    return (content) => content;
   });
 
   const path = pathFromProps || name;

@@ -14,7 +14,7 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
     const validationPromises = [];
 
     const structureFieldState = (field, data = {}) => {
-      const value = data[field.name] || field.defaultValue;
+      const value = typeof data[field.name] !== 'undefined' ? data[field.name] : field.defaultValue;
 
       const fieldState = {
         value,
@@ -27,7 +27,7 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
     };
 
     const iterateFields = (fields, data, path = '') => fields.reduce((state, field) => {
-      if (field.name && data[field.name]) {
+      if (field.name && typeof data[field.name] !== 'undefined') {
         if (Array.isArray(data[field.name])) {
           if (field.type === 'array') {
             return {
