@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useRouteMatch, useHistory, useLocation } from 'react-router-dom';
+import { Redirect, useRouteMatch, useHistory, useLocation } from 'react-router-dom';
 import config from 'payload/config';
 import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
@@ -44,7 +44,7 @@ const EditView = (props) => {
     });
   };
 
-  const [{ data, isLoading }] = usePayloadAPI(
+  const [{ data, isLoading, isError }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
     { initialParams: { 'fallback-locale': 'null', depth: 0 } },
   );
@@ -78,6 +78,12 @@ const EditView = (props) => {
 
     awaitInitialState();
   }, [dataToRender, fields]);
+
+  if (isError) {
+    return (
+      <Redirect to={`${admin}/not-found`} />
+    );
+  }
 
   const collectionPermissions = permissions?.[slug];
 

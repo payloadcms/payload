@@ -28,6 +28,11 @@ const usePayloadAPI = (url, options = {}) => {
 
       try {
         const response = await requests.get(`${url}?${search}`);
+
+        if (response.status > 201) {
+          setIsError(true);
+        }
+
         const json = await response.json();
         setData(json);
         setIsLoading(false);
