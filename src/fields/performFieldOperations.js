@@ -19,7 +19,7 @@ async function performFieldOperations(entityConfig, args) {
 
   let depth = 0;
 
-  if (payloadAPI === 'REST') {
+  if (payloadAPI === 'REST' || payloadAPI === 'local') {
     depth = (args.depth || args.depth === 0) ? parseInt(args.depth, 10) : this.config.defaultDepth;
   }
 
@@ -37,10 +37,16 @@ async function performFieldOperations(entityConfig, args) {
       let populatedRelationship = null;
 
       if (accessResult && (depth && currentDepth <= depth)) {
+        let idString = Array.isArray(field.relationTo) ? data.value : data;
+
+        if (typeof idString !== 'string') {
+          idString = idString.toString();
+        }
+
         populatedRelationship = await this.operations.collections.findByID({
           req,
           collection: relatedCollection,
-          id: Array.isArray(field.relationTo) ? data.value : data,
+          id: idString,
           currentDepth: currentDepth + 1,
           disableErrors: true,
           depth,
@@ -336,6 +342,10 @@ async function performFieldOperations(entityConfig, args) {
   // //////////////////////////////////////////
   // Entry point for field validation
   // //////////////////////////////////////////
+
+  if (entityConfig.slug === 'assessments') {
+    console.log('found it');
+  }
 
   traverseFields(entityConfig.fields, fullData, fullOriginalDoc, '');
 
