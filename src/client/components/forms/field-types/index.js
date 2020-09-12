@@ -1,3 +1,4 @@
+import code from './Code';
 import email from './Email';
 import hidden from './HiddenInput';
 import text from './Text';
@@ -19,6 +20,7 @@ import row from './Row';
 import upload from './Upload';
 
 export default {
+  code,
   email,
   hidden,
   text,

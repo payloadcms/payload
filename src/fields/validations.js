@@ -85,7 +85,7 @@ const optionsToValidatorMap = {
     return true;
   },
   code: (value, options = {}) => {
-    if (options.required && !value) {
+    if (options.required && value === undefined) {
       return defaultMessage;
     }
 

@@ -298,7 +298,10 @@ async function performFieldOperations(entityConfig, args) {
           data[field.name].forEach((rowData, i) => {
             const block = field.blocks.find((blockType) => blockType.slug === rowData.blockType);
             const originalDocRow = originalDoc && originalDoc[field.name] && originalDoc[field.name][i];
-            traverseFields(block.fields, rowData, originalDocRow || undefined, `${path}${field.name}.${i}.`);
+
+            if (block) {
+              traverseFields(block.fields, rowData, originalDocRow || undefined, `${path}${field.name}.${i}.`);
+            }
           });
         }
       }

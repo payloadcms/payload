@@ -1,0 +1,11 @@
+@import '../shared';
+
+.field-type.code {
+  position: relative;
+
+  &.error {
+    textarea {
+      border: 1px solid $color-red !important;
+    }
+  }
+}
