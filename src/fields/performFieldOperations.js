@@ -343,10 +343,6 @@ async function performFieldOperations(entityConfig, args) {
   // Entry point for field validation
   // //////////////////////////////////////////
 
-  if (entityConfig.slug === 'assessments') {
-    console.log('found it');
-  }
-
   traverseFields(entityConfig.fields, fullData, fullOriginalDoc, '');
 
   await Promise.all(hookPromises);
