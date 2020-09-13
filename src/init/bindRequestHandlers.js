@@ -5,10 +5,8 @@ const login = require('../auth/requestHandlers/login');
 const logout = require('../auth/requestHandlers/logout');
 const me = require('../auth/requestHandlers/me');
 const refresh = require('../auth/requestHandlers/refresh');
-const register = require('../auth/requestHandlers/register');
 const registerFirstUser = require('../auth/requestHandlers/registerFirstUser');
 const resetPassword = require('../auth/requestHandlers/resetPassword');
-const authUpdate = require('../auth/requestHandlers/update');
 
 const create = require('../collections/requestHandlers/create');
 const find = require('../collections/requestHandlers/find');
@@ -37,10 +35,8 @@ function bindRequestHandlers(ctx) {
         logout: logout.bind(ctx),
         me: me.bind(ctx),
         refresh: refresh.bind(ctx),
-        register: register.bind(ctx),
         registerFirstUser: registerFirstUser.bind(ctx),
         resetPassword: resetPassword.bind(ctx),
-        update: authUpdate.bind(ctx),
       },
     },
     globals: {

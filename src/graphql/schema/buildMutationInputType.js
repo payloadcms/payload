@@ -14,19 +14,19 @@ const withNullableType = require('./withNullableType');
 const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
 
-function buildMutationInputType(name, fields, parentName) {
+function buildMutationInputType(name, fields, parentName, forceNullable = false) {
   const fieldToSchemaMap = {
-    number: (field) => ({ type: withNullableType(field, GraphQLFloat) }),
-    text: (field) => ({ type: withNullableType(field, GraphQLString) }),
-    email: (field) => ({ type: withNullableType(field, GraphQLString) }),
-    textarea: (field) => ({ type: withNullableType(field, GraphQLString) }),
-    richText: (field) => ({ type: withNullableType(field, GraphQLJSON) }),
-    code: (field) => ({ type: withNullableType(field, GraphQLString) }),
-    date: (field) => ({ type: withNullableType(field, GraphQLString) }),
-    upload: (field) => ({ type: withNullableType(field, GraphQLString) }),
-    'rich-text': (field) => ({ type: withNullableType(field, GraphQLString) }),
-    html: (field) => ({ type: withNullableType(field, GraphQLString) }),
-    radio: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    number: (field) => ({ type: withNullableType(field, GraphQLFloat, forceNullable) }),
+    text: (field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
+    email: (field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
+    textarea: (field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
+    richText: (field) => ({ type: withNullableType(field, GraphQLJSON, forceNullable) }),
+    code: (field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
+    date: (field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
+    upload: (field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
+    'rich-text': (field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
+    html: (field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
+    radio: (field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
     checkbox: () => ({ type: GraphQLBoolean }),
     select: (field) => {
       const formattedName = `${combineParentName(parentName, field.name)}_MutationInput`;
@@ -56,7 +56,7 @@ function buildMutationInputType(name, fields, parentName) {
       });
 
       type = field.hasMany ? new GraphQLList(type) : type;
-      type = withNullableType(field, type);
+      type = withNullableType(field, type, forceNullable);
 
       return { type };
     },
@@ -90,7 +90,7 @@ function buildMutationInputType(name, fields, parentName) {
     array: (field) => {
       const fullName = combineParentName(parentName, field.label);
       let type = buildMutationInputType(fullName, field.fields, fullName);
-      type = new GraphQLList(withNullableType(field, type));
+      type = new GraphQLList(withNullableType(field, type, forceNullable));
       return { type };
     },
     group: (field) => {

@@ -16,7 +16,7 @@ function registerCollections() {
   } = this.graphQL.resolvers.collections;
 
   const {
-    login, logout, me, init, refresh, register, forgotPassword, resetPassword, update: authUpdate,
+    login, logout, me, init, refresh, forgotPassword, resetPassword,
   } = this.graphQL.resolvers.collections.auth;
 
   Object.keys(this.collections).forEach((slug) => {
@@ -36,7 +36,6 @@ function registerCollections() {
 
     const singularLabel = formatName(singular);
     let pluralLabel = formatName(plural);
-
 
     // For collections named 'Media' or similar,
     // there is a possibility that the singular name
@@ -111,11 +110,9 @@ function registerCollections() {
 
     collection.graphQL.updateMutationInputType = new GraphQLNonNull(this.buildMutationInputType(
       `${singularLabel}Update`,
-      fields.map((field) => ({
-        ...field,
-        required: false,
-      })),
+      fields,
       `${singularLabel}Update`,
+      true,
     ));
 
     this.Query.fields[singularLabel] = {
@@ -143,6 +140,23 @@ function registerCollections() {
         sort: { type: GraphQLString },
       },
       resolve: find(collection),
+    };
+
+    this.Mutation.fields[`create${singularLabel}`] = {
+      type: collection.graphQL.type,
+      args: {
+        data: { type: collection.graphQL.mutationInputType },
+      },
+      resolve: create(collection),
+    };
+
+    this.Mutation.fields[`update${singularLabel}`] = {
+      type: collection.graphQL.type,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLString) },
+        data: { type: collection.graphQL.updateMutationInputType },
+      },
+      resolve: update(collection),
     };
 
     this.Mutation.fields[`delete${singularLabel}`] = {
@@ -228,14 +242,6 @@ function registerCollections() {
         resolve: logout(collection),
       };
 
-      this.Mutation.fields[`register${singularLabel}`] = {
-        type: collection.graphQL.type,
-        args: {
-          data: { type: collection.graphQL.mutationInputType },
-        },
-        resolve: register(collection),
-      };
-
       this.Mutation.fields[`forgotPassword${singularLabel}`] = {
         type: new GraphQLNonNull(GraphQLBoolean),
         args: {
@@ -268,32 +274,6 @@ function registerCollections() {
           },
         }),
         resolve: refresh(collection),
-      };
-
-      this.Mutation.fields[`update${singularLabel}`] = {
-        type: collection.graphQL.type,
-        args: {
-          id: { type: new GraphQLNonNull(GraphQLString) },
-          data: { type: collection.graphQL.updateMutationInputType },
-        },
-        resolve: authUpdate(collection),
-      };
-    } else {
-      this.Mutation.fields[`create${singularLabel}`] = {
-        type: collection.graphQL.type,
-        args: {
-          data: { type: collection.graphQL.mutationInputType },
-        },
-        resolve: create(collection),
-      };
-
-      this.Mutation.fields[`update${singularLabel}`] = {
-        type: collection.graphQL.type,
-        args: {
-          id: { type: new GraphQLNonNull(GraphQLString) },
-          data: { type: collection.graphQL.updateMutationInputType },
-        },
-        resolve: update(collection),
       };
     }
   });

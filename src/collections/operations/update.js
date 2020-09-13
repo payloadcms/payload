@@ -182,7 +182,18 @@ async function update(args) {
   }
 
   // /////////////////////////////////////
-  // 9. Perform database operation
+  // 9. Handle password update
+  // /////////////////////////////////////
+
+  const { password } = data;
+
+  if (password) {
+    await doc.setPassword(password);
+    delete data.password;
+  }
+
+  // /////////////////////////////////////
+  // 10. Perform database operation
   // /////////////////////////////////////
 
   Object.assign(doc, data);
@@ -192,7 +203,7 @@ async function update(args) {
   doc = doc.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 10. Execute field-level hooks and access
+  // 11. Execute field-level hooks and access
   // /////////////////////////////////////
 
   doc = await this.performFieldOperations(collectionConfig, {
@@ -206,7 +217,7 @@ async function update(args) {
   });
 
   // /////////////////////////////////////
-  // 11. Execute afterChange collection hooks
+  // 12. Execute afterChange collection hooks
   // /////////////////////////////////////
 
   await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
@@ -220,7 +231,7 @@ async function update(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 12. Return updated document
+  // 13. Return updated document
   // /////////////////////////////////////
 
   doc = JSON.stringify(doc);

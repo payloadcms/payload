@@ -15,7 +15,7 @@ async function registerFirstUser(args) {
   // 2. Perform register first user
   // /////////////////////////////////////
 
-  let result = await this.operations.collections.auth.register({
+  let result = await this.operations.collections.create({
     ...args,
     overrideAccess: true,
   });

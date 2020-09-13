@@ -138,8 +138,17 @@ async function create(args) {
     result.setLocale(locale, fallbackLocale);
   }
 
+  if (collectionConfig.auth && data.email) {
+    data.email = data.email.toLowerCase();
+  }
+
   Object.assign(result, data);
-  await result.save();
+
+  if (collectionConfig.auth) {
+    result = await Model.register(result, data.password);
+  } else {
+    await result.save();
+  }
 
   result = result.toJSON({ virtuals: true });
 

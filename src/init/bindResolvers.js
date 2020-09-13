@@ -5,9 +5,7 @@ const login = require('../auth/graphql/resolvers/login');
 const logout = require('../auth/graphql/resolvers/logout');
 const me = require('../auth/graphql/resolvers/me');
 const refresh = require('../auth/graphql/resolvers/refresh');
-const register = require('../auth/graphql/resolvers/register');
 const resetPassword = require('../auth/graphql/resolvers/resetPassword');
-const authUpdate = require('../auth/graphql/resolvers/update');
 
 const create = require('../collections/graphql/resolvers/create');
 const find = require('../collections/graphql/resolvers/find');
@@ -37,9 +35,7 @@ function bindResolvers(ctx) {
           logout: logout.bind(ctx),
           me: me.bind(ctx),
           refresh: refresh.bind(ctx),
-          register: register.bind(ctx),
           resetPassword: resetPassword.bind(ctx),
-          update: authUpdate.bind(ctx),
         },
       },
       globals: {

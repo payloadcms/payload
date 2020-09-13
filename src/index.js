@@ -97,7 +97,6 @@ class Payload {
     this.find = this.find.bind(this);
     this.findByID = this.findByID.bind(this);
     this.update = this.update.bind(this);
-    this.register = this.register.bind(this);
     this.login = this.login.bind(this);
     this.forgotPassword = this.forgotPassword.bind(this);
     this.resetPassword = this.resetPassword.bind(this);
@@ -144,12 +143,6 @@ class Payload {
     let { delete: deleteOperation } = localOperations;
     deleteOperation = deleteOperation.bind(this);
     return deleteOperation(options);
-  }
-
-  async register(options) {
-    let { register } = localOperations.auth;
-    register = register.bind(this);
-    return register(options);
   }
 
   async login(options) {

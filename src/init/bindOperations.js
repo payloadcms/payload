@@ -5,10 +5,8 @@ const login = require('../auth/operations/login');
 const logout = require('../auth/operations/logout');
 const me = require('../auth/operations/me');
 const refresh = require('../auth/operations/refresh');
-const register = require('../auth/operations/register');
 const registerFirstUser = require('../auth/operations/registerFirstUser');
 const resetPassword = require('../auth/operations/resetPassword');
-const authUpdate = require('../auth/operations/update');
 
 const create = require('../collections/operations/create');
 const find = require('../collections/operations/find');
@@ -37,10 +35,8 @@ function bindOperations(ctx) {
         logout: logout.bind(ctx),
         me: me.bind(ctx),
         refresh: refresh.bind(ctx),
-        register: register.bind(ctx),
         registerFirstUser: registerFirstUser.bind(ctx),
         resetPassword: resetPassword.bind(ctx),
-        update: authUpdate.bind(ctx),
       },
     },
     globals: {

@@ -59,11 +59,9 @@ function registerCollections() {
         logout,
         refresh,
         me,
-        register,
         registerFirstUser,
         forgotPassword,
         resetPassword,
-        update: authUpdate,
       } = this.requestHandlers.collections.auth;
 
       router
@@ -97,28 +95,16 @@ function registerCollections() {
       router
         .route(`/${slug}/reset-password`)
         .post(resetPassword);
-
-      router
-        .route(`/${slug}/register`)
-        .post(register);
-
-      router.route(`/${slug}`)
-        .get(find);
-
-      router.route(`/${slug}/:id`)
-        .get(findByID)
-        .put(authUpdate)
-        .delete(deleteHandler);
-    } else {
-      router.route(`/${slug}`)
-        .get(find)
-        .post(create);
-
-      router.route(`/${slug}/:id`)
-        .put(update)
-        .get(findByID)
-        .delete(deleteHandler);
     }
+
+    router.route(`/${slug}`)
+      .get(find)
+      .post(create);
+
+    router.route(`/${slug}/:id`)
+      .put(update)
+      .get(findByID)
+      .delete(deleteHandler);
 
     this.router.use(router);
 

@@ -97,7 +97,7 @@ describe('Users REST API', () => {
   });
 
   it('should allow a user to be created', async () => {
-    const response = await fetch(`${url}/api/admins/register`, {
+    const response = await fetch(`${url}/api/admins`, {
       body: JSON.stringify({
         email: `${faker.name.firstName()}@test.com`,
         password,
