@@ -1,3 +1,4 @@
+const { isValidObjectId } = require('mongoose');
 const { ValidationError } = require('../errors');
 const executeAccess = require('../auth/executeAccess');
 
@@ -76,7 +77,7 @@ async function performFieldOperations(entityConfig, args) {
   // can run in parallel
   const validationPromises = [];
   const accessPromises = [];
-  const relationshipPopulationPromises = [];
+  const relationshipPopulations = [];
   const hookPromises = [];
   const errors = [];
 
@@ -98,9 +99,11 @@ async function performFieldOperations(entityConfig, args) {
         field: `${path}${field.name}`,
       });
     }
+
+    return result;
   };
 
-  const createRelationshipPopulationPromise = async (data, field) => {
+  const createRelationshipPopulationPromise = (data, field) => async () => {
     const resultingData = data;
 
     if (field.hasMany && Array.isArray(data[field.name])) {
@@ -136,7 +139,7 @@ async function performFieldOperations(entityConfig, args) {
     }
 
     if ((field.type === 'relationship' || field.type === 'upload') && hook === 'afterRead') {
-      relationshipPopulationPromises.push(createRelationshipPopulationPromise(data, field));
+      relationshipPopulations.push(createRelationshipPopulationPromise(data, field));
     }
   };
 
@@ -178,7 +181,7 @@ async function performFieldOperations(entityConfig, args) {
                   }
 
                   // Only run hooks for populated sub documents - NOT IDs
-                  if (relatedDocumentData && typeof relatedDocumentData !== 'string') {
+                  if (relatedDocumentData && !isValidObjectId(relatedDocumentData)) {
                     // Perform field hooks on related collection
                     dataToHook = await recursivePerformFieldOperations(relatedCollection, {
                       req,
@@ -224,7 +227,7 @@ async function performFieldOperations(entityConfig, args) {
             }
 
             // Only run hooks for populated sub documents - NOT IDs
-            if (relatedDocumentData && typeof relatedDocumentData !== 'string') {
+            if (relatedDocumentData && !isValidObjectId(relatedDocumentData)) {
               // Perform field hooks on related collection
               dataToHook = await recursivePerformFieldOperations(relatedCollection, {
                 req,
@@ -356,6 +359,9 @@ async function performFieldOperations(entityConfig, args) {
   }
 
   await Promise.all(accessPromises);
+
+  const relationshipPopulationPromises = relationshipPopulations.map((population) => population());
+
   await Promise.all(relationshipPopulationPromises);
 
   return fullData;
