@@ -97,6 +97,7 @@ class Payload {
     this.create = this.create.bind(this);
     this.find = this.find.bind(this);
     this.findGlobal = this.findGlobal.bind(this);
+    this.updateGlobal = this.updateGlobal.bind(this);
     this.findByID = this.findByID.bind(this);
     this.update = this.update.bind(this);
     this.register = this.register.bind(this);
@@ -134,6 +135,12 @@ class Payload {
     let { findOne } = localGlobalOperations;
     findOne = findOne.bind(this);
     return findOne(options);
+  }
+
+  async updateGlobal(options) {
+    let { update } = localGlobalOperations;
+    update = update.bind(this);
+    return update(options);
   }
 
   async findByID(options) {
