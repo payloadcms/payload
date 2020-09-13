@@ -4,7 +4,7 @@ const localizationPlugin = require('../localization/plugin');
 const buildSchema = require('../mongoose/buildSchema');
 
 const buildCollectionSchema = (collection, config, schemaOptions = {}) => {
-  const schema = buildSchema(collection.fields, { timestamps: collection.timestamps, ...schemaOptions });
+  const schema = buildSchema(collection.fields, { timestamps: collection.timestamps !== false, ...schemaOptions });
 
   schema.plugin(paginate)
     .plugin(buildQueryPlugin);
