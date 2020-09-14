@@ -24,6 +24,7 @@ const errorHandler = require('./express/middleware/errorHandler');
 const performFieldOperations = require('./fields/performFieldOperations');
 
 const localOperations = require('./collections/operations/local');
+const localGlobalOperations = require('./globals/operations/local');
 
 class Payload {
   init(options) {
@@ -95,6 +96,8 @@ class Payload {
 
     this.create = this.create.bind(this);
     this.find = this.find.bind(this);
+    this.findGlobal = this.findGlobal.bind(this);
+    this.updateGlobal = this.updateGlobal.bind(this);
     this.findByID = this.findByID.bind(this);
     this.update = this.update.bind(this);
     this.login = this.login.bind(this);
@@ -125,6 +128,18 @@ class Payload {
     let { find } = localOperations;
     find = find.bind(this);
     return find(options);
+  }
+
+  async findGlobal(options) {
+    let { findOne } = localGlobalOperations;
+    findOne = findOne.bind(this);
+    return findOne(options);
+  }
+
+  async updateGlobal(options) {
+    let { update } = localGlobalOperations;
+    update = update.bind(this);
+    return update(options);
   }
 
   async findByID(options) {
