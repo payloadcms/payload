@@ -47,7 +47,7 @@ async function findOne(args) {
   // 4. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  doc = this.performFieldOperations(globalConfig, {
+  doc = await this.performFieldOperations(globalConfig, {
     data: doc,
     hook: 'afterRead',
     operation: 'read',
@@ -71,6 +71,9 @@ async function findOne(args) {
   // /////////////////////////////////////
   // 6. Return results
   // /////////////////////////////////////
+
+  doc = JSON.stringify(doc);
+  doc = JSON.parse(doc);
 
   return doc;
 }
