@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 import CalendarIcon from '../../icons/Calendar';
 
-import './react-datepicker.css';
+// eslint-disable-next-line import/no-unresolved
+import '~react-datepicker/dist/react-datepicker.css';
 import './index.scss';
 
 const baseClass = 'date-time-picker';
