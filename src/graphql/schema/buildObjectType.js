@@ -246,8 +246,9 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
                     equals: id,
                   },
                 },
+                res: context.res,
                 req: {
-                  ...context,
+                  ...context.req,
                   locale,
                   fallbackLocale,
                 },
@@ -295,7 +296,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
                   equals: id,
                 },
               },
-              req: context,
+              ...context,
             };
 
             if (args.page) relatedDocumentQuery.paginate.page = args.page;
