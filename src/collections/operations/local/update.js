@@ -27,10 +27,6 @@ async function update(options) {
     },
   };
 
-  if (collection.config.auth) {
-    return this.operations.collections.auth.update(args);
-  }
-
   return this.operations.collections.update(args);
 }
 
