@@ -138,8 +138,15 @@ async function create(args) {
     result.setLocale(locale, fallbackLocale);
   }
 
-  if (collectionConfig.auth && data.email) {
-    data.email = data.email.toLowerCase();
+  if (collectionConfig.auth) {
+    if (data.email) {
+      data.email = data.email.toLowerCase();
+    }
+    if (collectionConfig.auth.emailVerification) {
+      data.verified = false;
+      data.verificationToken = 'asdf'; // TODO: Use bcrypt
+      // TODO: Generate and send email
+    }
   }
 
   Object.assign(result, data);

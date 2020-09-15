@@ -23,6 +23,10 @@ function registerCollections() {
       schema.plugin(passportLocalMongoose, { usernameField: 'email' });
       schema.path('hash').options.hide = true;
       schema.path('salt').options.hide = true;
+      if (collection.auth.emailVerification) {
+        schema.add({ verified: { type: Boolean, hide: true } });
+        schema.add({ verificationToken: { type: String, hide: true } });
+      }
     }
 
     schema.plugin(mongooseHidden);
