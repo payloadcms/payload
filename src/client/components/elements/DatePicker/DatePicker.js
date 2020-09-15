@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 import CalendarIcon from '../../icons/Calendar';
 
-import 'react-datepicker/dist/react-datepicker.css';
+import './react-datepicker.css';
 import './index.scss';
 
 const baseClass = 'date-time-picker';
