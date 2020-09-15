@@ -46,13 +46,7 @@ async function findByID(args) {
   const query = await Model.buildQuery(queryToBuild, locale);
 
   // /////////////////////////////////////
-  // 2. Execute before collection hook
-  // /////////////////////////////////////
-
-  collectionConfig.hooks.beforeRead.forEach((hook) => hook({ req, query }));
-
-  // /////////////////////////////////////
-  // 3. Perform database operation
+  // 2. Perform database operation
   // /////////////////////////////////////
 
   if (!query.$and[0]._id) throw new NotFound();
@@ -75,6 +69,20 @@ async function findByID(args) {
   result = result.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
+  // 3. Execute beforeRead collection hook
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    result = await hook({
+      req,
+      query,
+      doc: result,
+    }) || result;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
   // 4. Execute field-level hooks and access
   // /////////////////////////////////////
 
@@ -91,7 +99,7 @@ async function findByID(args) {
 
 
   // /////////////////////////////////////
-  // 5. Execute after collection hook
+  // 5. Execute afterRead collection hook
   // /////////////////////////////////////
 
   await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {

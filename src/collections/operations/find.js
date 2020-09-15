@@ -53,13 +53,7 @@ async function find(args) {
   const query = await Model.buildQuery(queryToBuild, locale);
 
   // /////////////////////////////////////
-  // 2. Execute before collection hook
-  // /////////////////////////////////////
-
-  collectionConfig.hooks.beforeRead.forEach((hook) => hook({ req, query }));
-
-  // /////////////////////////////////////
-  // 3. Perform database operation
+  // 2. Perform database operation
   // /////////////////////////////////////
 
   let { sort } = args;
@@ -82,41 +76,56 @@ async function find(args) {
   let result = await Model.paginate(query, optionsToExecute);
 
   // /////////////////////////////////////
-  // 4. Execute field-level access
+  // 3. Execute beforeRead collection hook
   // /////////////////////////////////////
 
   result = {
     ...result,
     docs: await Promise.all(result.docs.map(async (doc) => {
+      let docRef = doc;
+
       if (locale && doc.setLocale) {
         doc.setLocale(locale, fallbackLocale);
       }
 
-      const data = doc.toJSON({ virtuals: true });
+      docRef = doc.toJSON({ virtuals: true });
 
-      return this.performFieldOperations(
-        collectionConfig,
-        {
-          depth,
-          data,
-          req,
-          id: doc.id,
-          hook: 'afterRead',
-          operation: 'read',
-          overrideAccess,
-        },
-        find,
-      );
+      await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
+        await priorHook;
+
+        docRef = await hook({ req, query, doc: docRef }) || docRef;
+      }, Promise.resolve());
+
+      return docRef;
     })),
   };
 
   // /////////////////////////////////////
-  // 6. Execute afterRead collection hook
+  // 4. Execute field-level hooks and access
   // /////////////////////////////////////
 
-  let afterReadResult = result;
+  result = {
+    ...result,
+    docs: await Promise.all(result.docs.map(async (data) => this.performFieldOperations(
+      collectionConfig,
+      {
+        depth,
+        data,
+        req,
+        id: data.id,
+        hook: 'afterRead',
+        operation: 'read',
+        overrideAccess,
+      },
+      find,
+    ))),
+  };
 
-  afterReadResult = {
+  // /////////////////////////////////////
+  // 5. Execute afterRead collection hook
+  // /////////////////////////////////////
+
+  result = {
     ...result,
     docs: await Promise.all(result.docs.map(async (doc) => {
       let docRef = doc;
@@ -132,13 +141,13 @@ async function find(args) {
   };
 
   // /////////////////////////////////////
-  // 7. Return results
+  // 6. Return results
   // /////////////////////////////////////
 
-  afterReadResult = JSON.stringify(afterReadResult);
-  afterReadResult = JSON.parse(afterReadResult);
+  result = JSON.stringify(result);
+  result = JSON.parse(result);
 
-  return afterReadResult;
+  return result;
 }
 
 module.exports = find;
