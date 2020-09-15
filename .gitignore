@@ -218,11 +218,6 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/node,macos,windows,webstorm,sublimetext,visualstudiocode
 
-# Ignores compiled CSS
-src/**/*.css
-demo**/*.css
-dist
-
 # Ignore all uploads
 demo/upload
 demo/media
