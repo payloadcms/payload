@@ -12,7 +12,12 @@ const LocalOperations = {
           collection: 'localized-posts',
         });
 
+        const blocksGlobal = await req.payload.findGlobal({
+          global: 'blocks-global',
+        });
+
         formattedData.localizedPosts = localizedPosts;
+        formattedData.blocksGlobal = blocksGlobal;
 
         return formattedData;
       },

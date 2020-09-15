@@ -14,13 +14,16 @@ async function update(args) {
       fallbackLocale,
     },
     depth,
+    overrideAccess,
   } = args;
 
   // /////////////////////////////////////
   // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  await executeAccess(args, globalConfig.access.update);
+  if (!overrideAccess) {
+    await executeAccess({ req }, globalConfig.access.update);
+  }
 
   // /////////////////////////////////////
   // 2. Retrieve document
