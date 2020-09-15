@@ -5,6 +5,8 @@ async function create(options) {
     locale,
     fallbackLocale,
     data,
+    user,
+    overrideAccess = true,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -13,8 +15,9 @@ async function create(options) {
     depth,
     data,
     collection,
-    overrideAccess: true,
+    overrideAccess,
     req: {
+      user,
       payloadAPI: 'local',
       locale,
       fallbackLocale,

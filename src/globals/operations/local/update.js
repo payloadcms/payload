@@ -5,6 +5,8 @@ async function update(options) {
     locale,
     fallbackLocale,
     data,
+    user,
+    overrideAccess = true,
   } = options;
 
   const globalConfig = this.globals.config.find((config) => config.slug === globalSlug);
@@ -14,8 +16,9 @@ async function update(options) {
     data,
     depth,
     globalConfig,
-    overrideAccess: true,
+    overrideAccess,
     req: {
+      user,
       payloadAPI: 'local',
       locale,
       fallbackLocale,

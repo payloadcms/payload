@@ -7,6 +7,8 @@ async function find(options) {
     where,
     locale,
     fallbackLocale,
+    user,
+    overrideAccess = true,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -17,8 +19,9 @@ async function find(options) {
     limit,
     where,
     collection,
-    overrideAccess: true,
+    overrideAccess,
     req: {
+      user,
       payloadAPI: 'local',
       locale,
       fallbackLocale,

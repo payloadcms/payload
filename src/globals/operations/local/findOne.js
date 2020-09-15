@@ -4,6 +4,8 @@ async function findOne(options) {
     depth,
     locale,
     fallbackLocale,
+    user,
+    overrideAccess = true,
   } = options;
 
   const globalConfig = this.globals.config.find((config) => config.slug === globalSlug);
@@ -12,8 +14,9 @@ async function findOne(options) {
     slug: globalSlug,
     depth,
     globalConfig,
-    overrideAccess: true,
+    overrideAccess,
     req: {
+      user,
       payloadAPI: 'local',
       locale,
       fallbackLocale,

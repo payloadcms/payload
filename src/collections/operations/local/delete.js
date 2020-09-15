@@ -5,6 +5,8 @@ async function localDelete(options) {
     id,
     locale,
     fallbackLocale,
+    user,
+    overrideAccess = true,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -13,8 +15,9 @@ async function localDelete(options) {
     depth,
     id,
     collection,
-    overrideAccess: true,
+    overrideAccess,
     req: {
+      user,
       payloadAPI: 'local',
       locale,
       fallbackLocale,

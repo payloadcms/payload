@@ -6,6 +6,8 @@ async function update(options) {
     fallbackLocale,
     data,
     id,
+    user,
+    overrideAccess = true,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -14,9 +16,10 @@ async function update(options) {
     depth,
     data,
     collection,
-    overrideAccess: true,
+    overrideAccess,
     id,
     req: {
+      user,
       payloadAPI: 'local',
       locale,
       fallbackLocale,
