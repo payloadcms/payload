@@ -71,30 +71,30 @@ class GraphQL {
       mutation,
     });
 
-    this.errorExtensions = [];
-    this.errorExtensionIteration = 0;
+    // this.errorExtensions = [];
+    // this.errorExtensionIteration = 0;
 
-    this.extensions = async (info) => {
-      const { result } = info;
-      if (result.errors) {
-        const afterErrorHook = typeof this.config.hooks.afterError === 'function' ? this.config.hooks.afterError : null;
-        this.errorExtensions = await errorHandler(info, this.config.debug, afterErrorHook);
-      }
-      return null;
-    };
+    // this.extensions = async (info) => {
+    //   const { result } = info;
+    //   if (result.errors) {
+    //     const afterErrorHook = typeof this.config.hooks.afterError === 'function' ? this.config.hooks.afterError : null;
+    //     this.errorExtensions = await errorHandler(info, this.config.debug, afterErrorHook);
+    //   }
+    //   return null;
+    // };
   }
 
   init(req, res) {
     return graphQLHTTP({
       schema: this.schema,
-      customFormatErrorFn: () => {
-        const response = {
-          ...this.errorExtensions[this.errorExtensionIteration],
-        };
-        this.errorExtensionIteration += 1;
-        return response;
-      },
-      extensions: this.extensions,
+      // customFormatErrorFn: () => {
+      //   const response = {
+      //     ...this.errorExtensions[this.errorExtensionIteration],
+      //   };
+      //   this.errorExtensionIteration += 1;
+      //   return response;
+      // },
+      // extensions: this.extensions,
       context: { req, res },
     });
   }
