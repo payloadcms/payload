@@ -1,4 +1,5 @@
 const mkdirp = require('mkdirp');
+const crypto = require('crypto');
 
 const executeAccess = require('../../auth/executeAccess');
 
@@ -144,7 +145,7 @@ async function create(args) {
     }
     if (collectionConfig.auth.emailVerification) {
       data.verified = false;
-      data.verificationToken = 'asdf'; // TODO: Use bcrypt
+      data.verificationToken = await crypto.randomBytes(20).toString('hex');
       // TODO: Generate and send email
     }
   }
