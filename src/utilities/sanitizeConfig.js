@@ -33,9 +33,6 @@ const sanitizeConfig = (config) => {
     sanitizedConfig.graphQL = {};
   }
 
-  if (sanitizedConfig.graphQL.mutations) sanitizedConfig.graphQL.mutations = {};
-  if (sanitizedConfig.graphQL.queries) sanitizedConfig.graphQL.queries = {};
-
   sanitizedConfig.routes = {
     admin: (config.routes && config.routes.admin) ? config.routes.admin : '/admin',
     api: (config.routes && config.routes.api) ? config.routes.api : '/api',
