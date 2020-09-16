@@ -243,7 +243,7 @@ class Relationship extends Component {
 
     const hasMultipleRelations = Array.isArray(relationTo);
 
-    if (hasMany) {
+    if (hasMany && value?.length > 0) {
       locatedValue.forEach((val, i) => {
         if (!val && value[i]) {
           if (hasMultipleRelations) {
@@ -253,22 +253,8 @@ class Relationship extends Component {
           }
         }
       });
-    } else if (hasMultipleRelations) {
-      this.addOptionByID(value.value, value.relationTo);
-    } else {
-      this.addOptionByID(value, relationTo);
-    }
-
-    if (!locatedValue && value) {
-      if (hasMany) {
-        value.forEach((val) => {
-          if (hasMultipleRelations) {
-            this.addOptionByID(val.value, val.relationTo);
-          } else {
-            this.addOptionByID(val, relationTo);
-          }
-        });
-      } else if (hasMultipleRelations) {
+    } else if (!locatedValue && value) {
+      if (hasMultipleRelations) {
         this.addOptionByID(value.value, value.relationTo);
       } else {
         this.addOptionByID(value, relationTo);
