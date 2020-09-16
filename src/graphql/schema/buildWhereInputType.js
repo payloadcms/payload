@@ -146,6 +146,42 @@ const buildWhereInputType = (name, fields, parentName) => {
         ),
       };
     },
+    relationship: (field) => {
+      let type = withOperators(
+        field.name,
+        GraphQLString,
+        parentName,
+        ['in', 'not_in', 'all', 'equals', 'not_equals'],
+      );
+
+      if (Array.isArray(field.relationTo)) {
+        type = new GraphQLInputObjectType({
+          name: `${combineParentName(parentName, field.name)}_Relation`,
+          fields: {
+            relationTo: {
+              type: new GraphQLEnumType({
+                name: `${combineParentName(parentName, field.name)}_Relation_RelationTo`,
+                values: field.relationTo.reduce((values, relation) => ({
+                  ...values,
+                  [formatName(relation)]: {
+                    value: relation,
+                  },
+                }), {}),
+              }),
+            },
+            value: { type: GraphQLString },
+          },
+        });
+      }
+
+      if (field.hasMany) {
+        return {
+          type: new GraphQLList(type),
+        };
+      }
+
+      return { type };
+    },
     upload: () => {
       const type = GraphQLString;
       return {
