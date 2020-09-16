@@ -9,6 +9,8 @@ const getSafeFilename = require('../../uploads/getSafeFilename');
 const getImageSize = require('../../uploads/getImageSize');
 const imageMIMETypes = require('../../uploads/imageMIMETypes');
 
+const sendVerificationEmail = require('../../auth/sendVerificationEmail');
+
 async function create(args) {
   const { performFieldOperations } = this;
 
@@ -145,8 +147,7 @@ async function create(args) {
     }
     if (collectionConfig.auth.emailVerification) {
       data.verified = false;
-      data.verificationToken = await crypto.randomBytes(20).toString('hex');
-      // TODO: Generate and send email
+      data.verificationToken = crypto.randomBytes(20).toString('hex');
     }
   }
 
@@ -188,7 +189,19 @@ async function create(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 10. Return results
+  // 10. Send verification email if applicable
+  // /////////////////////////////////////
+
+  if (collectionConfig.auth.emailVerification) {
+    await sendVerificationEmail({
+      collection: { config: collectionConfig, Model },
+      user: result,
+      req,
+    });
+  }
+
+  // /////////////////////////////////////
+  // 11. Return results
   // /////////////////////////////////////
 
   result = JSON.stringify(result);
