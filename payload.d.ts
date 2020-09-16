@@ -86,3 +86,53 @@ declare module "@payloadcms/payload" {
   var payload: PayloadInstance;
   export = payload;
 }
+declare module "@payloadcms/payload/types" {
+
+  interface PayloadField {
+    name: string;
+    label: string;
+    type: 'number' | 'text' | 'email' | 'textarea' | 'richText' | 'code' | 'radio' | 'checkbox' | 'date' | 'upload' | 'relationship' | 'row' | 'array' | 'group' | 'select' | 'blocks';
+    localized?: boolean;
+    fields?: PayloadField[];
+  }
+  interface PayloadCollection {
+    slug: string;
+    labels: {
+      singular: string;
+      plural: string;
+    },
+    access?: {
+      create?: (args?: any) => boolean;
+      read?: (args?: any) => boolean;
+      update?: (args?: any) => boolean;
+      delete?: (args?: any) => boolean;
+      admin?: (args?: any) => boolean;
+    },
+    fields: PayloadField[];
+  }
+
+  interface PayloadGlobal {
+    slug: string;
+    label: string;
+    access?: {
+      create?: (args?: any) => boolean;
+      read?: (args?: any) => boolean;
+      update?: (args?: any) => boolean;
+      delete?: (args?: any) => boolean;
+      admin?: (args?: any) => boolean;
+    },
+    fields: PayloadField[];
+
+  }
+  interface PayloadConfig {
+    admin: {
+      user: string;
+      meta?: {
+        titleSuffix?: string;
+      },
+      disable?: boolean;
+    },
+    collections: PayloadCollection[],
+    globals: PayloadGlobal[]
+  }
+}
