@@ -13,6 +13,10 @@ declare module "@payloadcms/payload" {
     onInit?: () => void,
   }
 
+  interface Document {
+    id: string;
+  }
+
   interface CreateOptions {
     collection: string;
     data: any;
@@ -22,10 +26,22 @@ declare module "@payloadcms/payload" {
     collection: string;
   }
 
+  export interface FindResponse {
+    docs: Document[];
+    totalDocs: number;
+    limit: number;
+    totalPages: number;
+    page: number;
+    pagingCounter: number;
+    hasPrevPage: boolean;
+    hasNextPage: boolean;
+    prevPage: number | null;
+    nextPage: number | null;
+  }
+
   interface FindGlobalOptions {
     global: string;
   }
-
   interface UpdateGlobalOptions {
     global: string;
     data: any;
@@ -35,7 +51,6 @@ declare module "@payloadcms/payload" {
     collection: string;
     id: string;
   }
-
   interface UpdateOptions {
     collection: string;
     id: string;
@@ -71,13 +86,13 @@ declare module "@payloadcms/payload" {
     init(options: PayloadInitOptions): void;
     sendEmail(message: SendEmailOptions): void;
     getMockEmailCredentials(): MockEmailCredentials;
-    create(options: CreateOptions): Promise<any>;
-    find(options: FindOptions): Promise<any>;
-    findGlobal(options: FindGlobalOptions): Promise<any>;
-    updateGlobal(options: UpdateGlobalOptions): Promise<any>;
-    findByID(options: FindByIDOptions): Promise<any>;
-    update(options: UpdateOptions): Promise<any>;
-    delete(options: DeleteOptions): Promise<any>;
+    create(options: CreateOptions): Promise<Document>;
+    find(options: FindOptions): Promise<FindResponse>;
+    findGlobal(options: FindGlobalOptions): Promise<Document>;
+    updateGlobal(options: UpdateGlobalOptions): Promise<Document>;
+    findByID(options: FindByIDOptions): Promise<Document>;
+    update(options: UpdateOptions): Promise<Document>;
+    delete(options: DeleteOptions): Promise<Document>;
     login(options: any): Promise<any>; // TODO: find example of this to type
     forgotPassword(options: ForgotPasswordOptions): Promise<any>;
     resetPassword(options: any): Promise<any>;
