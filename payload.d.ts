@@ -1,11 +1,11 @@
 declare module "@payloadcms/payload" {
-  interface PayloadEmailOptions {
+  export interface PayloadEmailOptions {
     transport: 'mock'; // TODO: import nodemailer Mail type
     fromName?: string;
     fromAddress?: string;
   }
 
-  interface PayloadInitOptions {
+  export interface PayloadInitOptions {
     express: any,
     mongoURL: string,
     secret: string,
@@ -13,16 +13,16 @@ declare module "@payloadcms/payload" {
     onInit?: () => void,
   }
 
-  interface Document {
+  export interface Document {
     id: string;
   }
 
-  interface CreateOptions {
+  export interface CreateOptions {
     collection: string;
     data: any;
   }
 
-  interface FindOptions {
+  export interface FindOptions {
     collection: string;
   }
 
@@ -39,44 +39,44 @@ declare module "@payloadcms/payload" {
     nextPage: number | null;
   }
 
-  interface FindGlobalOptions {
+  export interface FindGlobalOptions {
     global: string;
   }
-  interface UpdateGlobalOptions {
+  export interface UpdateGlobalOptions {
     global: string;
     data: any;
   }
 
-  interface FindByIDOptions {
+  export interface FindByIDOptions {
     collection: string;
     id: string;
   }
-  interface UpdateOptions {
+  export interface UpdateOptions {
     collection: string;
     id: string;
     data: any;
   }
 
-  interface DeleteOptions {
+  export interface DeleteOptions {
     collection: string;
     id: string;
   }
 
-  interface ForgotPasswordOptions {
+  export interface ForgotPasswordOptions {
     collection: string;
     generateEmailHTML?: (token: string) => string;
     expiration: Date;
     data: any;
   }
 
-  interface SendEmailOptions {
+  export interface SendEmailOptions {
     from: string;
     to: string;
     subject: string;
     html: string;
   }
 
-  interface MockEmailCredentials {
+  export interface MockEmailCredentials {
     user: string;
     pass: string;
     web: string;
@@ -99,19 +99,19 @@ declare module "@payloadcms/payload" {
   }
 
   var payload: PayloadInstance;
-  export = payload;
+  export default payload;
 }
 
 declare module "@payloadcms/payload/types" {
 
-  interface PayloadField {
+  export interface PayloadField {
     name: string;
     label: string;
     type: 'number' | 'text' | 'email' | 'textarea' | 'richText' | 'code' | 'radio' | 'checkbox' | 'date' | 'upload' | 'relationship' | 'row' | 'array' | 'group' | 'select' | 'blocks';
     localized?: boolean;
     fields?: PayloadField[];
   }
-  interface PayloadCollection {
+  export interface PayloadCollection {
     slug: string;
     labels: {
       singular: string;
@@ -127,7 +127,7 @@ declare module "@payloadcms/payload/types" {
     fields: PayloadField[];
   }
 
-  interface PayloadGlobal {
+  export interface PayloadGlobal {
     slug: string;
     label: string;
     access?: {
@@ -139,7 +139,7 @@ declare module "@payloadcms/payload/types" {
     };
     fields: PayloadField[];
   }
-  interface PayloadConfig {
+  export interface PayloadConfig {
     admin?: {
       user?: string;
       meta?: {
