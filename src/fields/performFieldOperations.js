@@ -282,6 +282,7 @@ async function performFieldOperations(entityConfig, args) {
       if (field.type === 'checkbox') {
         if (data[field.name] === 'true') dataCopy[field.name] = true;
         if (data[field.name] === 'false') dataCopy[field.name] = false;
+        if (data[field.name] === '') dataCopy[field.name] = false;
       }
 
       accessPromises.push(createAccessPromise(data, originalDoc, field));

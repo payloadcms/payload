@@ -27,7 +27,13 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
     };
 
     const iterateFields = (fields, data, path = '') => fields.reduce((state, field) => {
+      const newData = data;
+
       if (field.name && typeof data[field.name] !== 'undefined') {
+        if (field.type === 'relationship' && data[field.name] === null) {
+          newData[field.name] = 'null';
+        }
+
         if (Array.isArray(data[field.name])) {
           if (field.type === 'array') {
             return {
@@ -68,7 +74,7 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
         if (field.fields) {
           return {
             ...state,
-            ...iterateFields(field.fields, data[field.name], `${path}${field.name}.`),
+            ...iterateFields(field.fields, newData[field.name], `${path}${field.name}.`),
           };
         }
 

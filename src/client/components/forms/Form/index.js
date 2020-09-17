@@ -94,7 +94,6 @@ const Form = (props) => {
     });
 
     const formData = contextRef.current.createFormData();
-
     setProcessing(true);
 
     // Make the API call from the action
@@ -223,7 +222,7 @@ const Form = (props) => {
 
   const createFormData = useCallback(() => {
     const data = reduceFieldsToValues(contextRef.current.fields);
-    return objectToFormData(data, { indices: true });
+    return objectToFormData(data, { indices: true, nullsAsUndefineds: true });
   }, [contextRef]);
 
   contextRef.current.dispatchFields = dispatchFields;

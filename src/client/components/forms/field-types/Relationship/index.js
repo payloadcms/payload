@@ -161,7 +161,7 @@ class Relationship extends Component {
       }
     }
 
-    return foundValue || undefined;
+    return foundValue || { value: 'null', label: 'None' };
   }
 
   addOptions = (data, relation) => {
