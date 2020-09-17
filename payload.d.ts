@@ -86,6 +86,7 @@ declare module "@payloadcms/payload" {
   var payload: PayloadInstance;
   export = payload;
 }
+
 declare module "@payloadcms/payload/types" {
 
   interface PayloadField {
@@ -120,19 +121,35 @@ declare module "@payloadcms/payload/types" {
       update?: (args?: any) => boolean;
       delete?: (args?: any) => boolean;
       admin?: (args?: any) => boolean;
-    },
+    };
     fields: PayloadField[];
-
   }
   interface PayloadConfig {
-    admin: {
-      user: string;
+    admin?: {
+      user?: string;
       meta?: {
         titleSuffix?: string;
       },
       disable?: boolean;
-    },
-    collections: PayloadCollection[],
-    globals: PayloadGlobal[]
+    };
+    collections?: PayloadCollection[];
+    globals?: PayloadGlobal[];
+    routes?: {
+      api?: string;
+      admin?: string;
+      graphQL?: string;
+      graphQLPlayground?: string;
+    };
+    defaultDepth?: number,
+    localization?: {
+      locales: string[]
+    };
+    defaultLocale?: string;
+    fallback?: boolean;
+    productionGraphQLPlayground?: boolean;
+    hooks?: {
+      afterError?: () => void;
+    };
+    webpack?: (config: any) => any;
   }
 }
