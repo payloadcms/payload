@@ -5,6 +5,7 @@
   "license": "ISC",
   "author": "Payload CMS LLC",
   "main": "index.js",
+  "typings": "payload.d.ts",
   "bin": {
     "payload": "./src/bin/index.js"
   },
