@@ -146,8 +146,8 @@ async function create(args) {
       data.email = data.email.toLowerCase();
     }
     if (collectionConfig.auth.emailVerification) {
-      data.verified = false;
-      data.verificationToken = crypto.randomBytes(20).toString('hex');
+      data._verified = false;
+      data._verificationToken = crypto.randomBytes(20).toString('hex');
     }
   }
 

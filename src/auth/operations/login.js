@@ -32,7 +32,7 @@ async function login(args) {
 
   const userDoc = await Model.findByUsername(email);
 
-  if (!userDoc || (args.collection.config.auth.emailVerification && !userDoc.verified)) {
+  if (!userDoc || (args.collection.config.auth.emailVerification && !userDoc._verified)) {
     throw new AuthenticationError();
   }
   const authResult = await userDoc.authenticate(password);

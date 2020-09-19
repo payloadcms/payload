@@ -239,8 +239,7 @@ const sanitizeCollection = (collections, collection) => {
     }
     if (collection.auth.emailVerification) {
       authFields.push({
-        name: 'verified',
-        label: 'Verified',
+        name: '_verified',
         type: 'checkbox',
         hidden: true,
         admin: {

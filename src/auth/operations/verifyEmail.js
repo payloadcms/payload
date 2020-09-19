@@ -12,13 +12,13 @@ async function verifyEmail(args) {
 
   // TODO: How do we know which collection this is?
   const user = await args.collection.Model.findOne({
-    verificationToken: args.token,
+    _verificationToken: args.token,
   });
 
   if (!user) throw new APIError('User not found.', httpStatus.BAD_REQUEST);
 
-  user.verified = true;
-  user.verificationToken = null;
+  user._verified = true;
+  user._verificationToken = null;
 
   await user.save();
 }

@@ -13,7 +13,7 @@ function sendVerificationEmail(args) {
 
   if (!disableEmail) {
     const url = collectionConfig.auth.generateVerificationUrl
-      ? `${config.serverURL}${collectionConfig.auth.generateVerificationUrl(req, user.verificationToken)}`
+      ? `${config.serverURL}${collectionConfig.auth.generateVerificationUrl(req, user._verificationToken)}`
       : 'asdfasdf'; // TODO: point to payload view that verifies
     const html = `Thank you for created an account.
     Please click on the following link, or paste this into your browser to complete the process:
