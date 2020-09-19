@@ -3,7 +3,8 @@ const path = require('path');
 const webpack = require('webpack');
 const Dotenv = require('dotenv-webpack');
 const getStyleLoaders = require('./getStyleLoaders');
-const removeObjectProperties = require('./removeObjectProperties');
+
+const mockModulePath = path.resolve(__dirname, './mockModule.js');
 
 module.exports = (config) => {
   let webpackConfig = {
@@ -29,32 +30,6 @@ module.exports = (config) => {
             {
               loader: 'val-loader',
               options: config,
-            },
-          ],
-        },
-        {
-          test: config.paths.config,
-          use: [
-            {
-              loader: 'babel-loader',
-              options: {
-                plugins: [
-                  [removeObjectProperties, { values: ['graphQL', 'hooks', 'webpack', 'access'] }],
-                ],
-              },
-            },
-          ],
-        },
-        {
-          issuer: config.paths.config,
-          use: [
-            {
-              loader: 'babel-loader',
-              options: {
-                plugins: [
-                  [removeObjectProperties, { values: ['access', 'hooks'] }],
-                ],
-              },
             },
           ],
         },
@@ -141,6 +116,7 @@ module.exports = (config) => {
       alias: {
         'payload/unsanitizedConfig': config.paths.config,
         'payload/config': path.resolve(__dirname, '../client/config.js'),
+        '@payloadcms/payload$': mockModulePath,
       },
     },
     plugins: [
@@ -155,6 +131,12 @@ module.exports = (config) => {
       }),
     ],
   };
+
+  if (Array.isArray(config.serverModules)) {
+    config.serverModules.forEach((module) => {
+      webpackConfig.resolve.alias[module] = mockModulePath;
+    });
+  }
 
   if (config.paths.scss) {
     webpackConfig.resolve.alias['payload-scss-overrides'] = config.paths.scss;

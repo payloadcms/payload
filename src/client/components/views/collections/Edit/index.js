@@ -24,7 +24,6 @@ const EditView = (props) => {
       useAsTitle,
     },
     fields,
-    auth,
   } = collection;
 
   const { params: { id } = {} } = useRouteMatch();
