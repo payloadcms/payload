@@ -24,7 +24,6 @@ function registerCollections() {
       schema.path('hash').options.hide = true;
       schema.path('salt').options.hide = true;
       if (collection.auth.emailVerification) {
-        schema.add({ verified: { type: Boolean, hide: true } });
         schema.add({ verificationToken: { type: String, hide: true } });
       }
     }
@@ -66,7 +65,14 @@ function registerCollections() {
         registerFirstUser,
         forgotPassword,
         resetPassword,
+        verifyEmail,
       } = this.requestHandlers.collections.auth;
+
+      if (collection.auth.emailVerification) {
+        router
+          .route(`/${slug}/verify/:token`)
+          .post(verifyEmail);
+      }
 
       router
         .route(`/${slug}/init`)

@@ -1,18 +1,15 @@
-async function sendVerificationEmail(args) {
-  const { config, sendEmail: email } = this;
-
-  const options = { ...args };
-
+function sendVerificationEmail(args) {
   // Verify token from e-mail
   const {
+    config,
+    sendEmail,
     collection: {
       config: collectionConfig,
     },
     user,
-    data,
     disableEmail,
     req,
-  } = options;
+  } = args;
 
   if (!disableEmail) {
     const url = collectionConfig.auth.generateVerificationUrl
@@ -25,9 +22,9 @@ async function sendVerificationEmail(args) {
     </a>
     If you did not request this, please ignore this email and your password will remain unchanged.`;
 
-    email({
+    sendEmail({
       from: `"${config.email.fromName}" <${config.email.fromAddress}>`,
-      to: data.email,
+      to: user.email,
       subject: 'Verify Email',
       html,
     });

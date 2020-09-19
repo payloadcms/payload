@@ -192,8 +192,10 @@ async function create(args) {
   // 10. Send verification email if applicable
   // /////////////////////////////////////
 
-  if (collectionConfig.auth.emailVerification) {
-    await sendVerificationEmail({
+  if (collectionConfig.auth && collectionConfig.auth.emailVerification) {
+    sendVerificationEmail({
+      config: this.config,
+      sendEmail: this.sendEmail,
       collection: { config: collectionConfig, Model },
       user: result,
       req,
