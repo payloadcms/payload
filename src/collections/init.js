@@ -23,6 +23,9 @@ function registerCollections() {
       schema.plugin(passportLocalMongoose, { usernameField: 'email' });
       schema.path('hash').options.hide = true;
       schema.path('salt').options.hide = true;
+      if (collection.auth.emailVerification) {
+        schema.add({ verificationToken: { type: String, hide: true } });
+      }
     }
 
     schema.plugin(mongooseHidden);
@@ -62,7 +65,14 @@ function registerCollections() {
         registerFirstUser,
         forgotPassword,
         resetPassword,
+        verifyEmail,
       } = this.requestHandlers.collections.auth;
+
+      if (collection.auth.emailVerification) {
+        router
+          .route(`/${slug}/verify/:token`)
+          .post(verifyEmail);
+      }
 
       router
         .route(`/${slug}/init`)

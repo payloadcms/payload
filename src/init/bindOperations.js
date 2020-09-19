@@ -7,6 +7,7 @@ const me = require('../auth/operations/me');
 const refresh = require('../auth/operations/refresh');
 const registerFirstUser = require('../auth/operations/registerFirstUser');
 const resetPassword = require('../auth/operations/resetPassword');
+const verifyEmail = require('../auth/operations/verifyEmail');
 
 const create = require('../collections/operations/create');
 const find = require('../collections/operations/find');
@@ -37,6 +38,7 @@ function bindOperations(ctx) {
         refresh: refresh.bind(ctx),
         registerFirstUser: registerFirstUser.bind(ctx),
         resetPassword: resetPassword.bind(ctx),
+        verifyEmail: verifyEmail.bind(ctx),
       },
     },
     globals: {

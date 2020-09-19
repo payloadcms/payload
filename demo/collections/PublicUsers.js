@@ -32,6 +32,8 @@ module.exports = {
   },
   auth: {
     tokenExpiration: 300,
+    emailVerification: true,
+    generateVerificationUrl: (req, token) => `http://localhost:3000/api/verify?token=${token}`,
     cookies: {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Lax',

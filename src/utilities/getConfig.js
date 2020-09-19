@@ -14,12 +14,13 @@ const getConfig = (options = {}) => {
 
   const configPath = findConfig();
   const publicConfig = require(configPath);
+  const email = { ...(publicConfig.email || {}), ...(options.email || {}) };
 
   return {
     ...publicConfig,
     secret: options.secret,
     mongoURL: options.mongoURL,
-    email: options.email,
+    email,
     paths: {
       ...(publicConfig.paths || {}),
       config: configPath,

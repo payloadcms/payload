@@ -33,7 +33,7 @@ async function forgotPassword(args) {
     expiration,
   } = options;
 
-  let token = await crypto.randomBytes(20);
+  let token = crypto.randomBytes(20);
   token = token.toString('hex');
 
   const user = await Model.findOne({ email: data.email.toLowerCase() });

@@ -1,4 +1,5 @@
 const mkdirp = require('mkdirp');
+const crypto = require('crypto');
 
 const executeAccess = require('../../auth/executeAccess');
 
@@ -7,6 +8,8 @@ const resizeAndSave = require('../../uploads/imageResizer');
 const getSafeFilename = require('../../uploads/getSafeFilename');
 const getImageSize = require('../../uploads/getImageSize');
 const imageMIMETypes = require('../../uploads/imageMIMETypes');
+
+const sendVerificationEmail = require('../../auth/sendVerificationEmail');
 
 async function create(args) {
   const { performFieldOperations } = this;
@@ -138,8 +141,14 @@ async function create(args) {
     result.setLocale(locale, fallbackLocale);
   }
 
-  if (collectionConfig.auth && data.email) {
-    data.email = data.email.toLowerCase();
+  if (collectionConfig.auth) {
+    if (data.email) {
+      data.email = data.email.toLowerCase();
+    }
+    if (collectionConfig.auth.emailVerification) {
+      data.verified = false;
+      data.verificationToken = crypto.randomBytes(20).toString('hex');
+    }
   }
 
   Object.assign(result, data);
@@ -180,7 +189,21 @@ async function create(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 10. Return results
+  // 10. Send verification email if applicable
+  // /////////////////////////////////////
+
+  if (collectionConfig.auth && collectionConfig.auth.emailVerification) {
+    sendVerificationEmail({
+      config: this.config,
+      sendEmail: this.sendEmail,
+      collection: { config: collectionConfig, Model },
+      user: result,
+      req,
+    });
+  }
+
+  // /////////////////////////////////////
+  // 11. Return results
   // /////////////////////////////////////
 
   result = JSON.stringify(result);

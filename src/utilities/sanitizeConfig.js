@@ -29,6 +29,10 @@ const sanitizeConfig = (config) => {
     sanitizedConfig.collections.push(defaultUser);
   }
 
+  sanitizedConfig.email = config.email || {};
+  sanitizedConfig.email.fromName = sanitizedConfig.email.fromName || 'Payload';
+  sanitizedConfig.email.fromAddress = sanitizedConfig.email.fromName || 'hello@payloadcms.com';
+
   if (!sanitizedConfig.graphQL) {
     sanitizedConfig.graphQL = {};
   }

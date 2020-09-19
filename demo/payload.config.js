@@ -42,6 +42,10 @@ module.exports = {
       },
     },
   },
+  email: {
+    fromName: 'Payload',
+    fromAddress: 'hello@payloadcms.com',
+  },
   collections: [
     Admin,
     AllFields,
