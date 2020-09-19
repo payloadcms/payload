@@ -1,4 +1,3 @@
-const path = require('path');
 const Admin = require('./collections/Admin');
 const AllFields = require('./collections/AllFields');
 const Code = require('./collections/Code');
@@ -29,7 +28,7 @@ const GlobalWithStrictAccess = require('./globals/GlobalWithStrictAccess');
 module.exports = {
   admin: {
     user: 'admins',
-    // indexHTML: path.resolve(__dirname, 'custom-index.html'),
+    // indexHTML: 'custom-index.html',
     meta: {
       titleSuffix: '- Payload Demo',
       // ogImage: '/static/find-image-here.jpg',
@@ -38,7 +37,7 @@ module.exports = {
     disable: false,
     components: {
       layout: {
-        // Sidebar: path.resolve(__dirname, 'client/components/layout/Sidebar/index.js'),
+        // Sidebar: 'client/components/layout/Sidebar/index.js',
       },
     },
   },
@@ -92,7 +91,7 @@ module.exports = {
   defaultDepth: 2,
   compression: {},
   paths: {
-    scss: path.resolve(__dirname, 'client/scss/overrides.scss'),
+    scss: 'client/scss/overrides.scss',
   },
   graphQL: {
     mutations: {},

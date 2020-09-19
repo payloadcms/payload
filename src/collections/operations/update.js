@@ -1,5 +1,7 @@
 const httpStatus = require('http-status');
 const deepmerge = require('deepmerge');
+const path = require('path');
+
 const overwriteMerge = require('../../utilities/overwriteMerge');
 const executeAccess = require('../../auth/executeAccess');
 const { NotFound, Forbidden, APIError } = require('../../errors');
@@ -147,24 +149,26 @@ async function update(args) {
 
     const { staticDir, imageSizes } = collectionConfig.upload;
 
+    const staticPath = path.resolve(this.config.paths.configDir, staticDir);
+
     const file = (req.files && req.files.file) ? req.files.file : req.fileData;
 
     if (file) {
-      const fsSafeName = await getSafeFilename(staticDir, file.name);
+      const fsSafeName = await getSafeFilename(staticPath, file.name);
 
-      await file.mv(`${staticDir}/${fsSafeName}`);
+      await file.mv(`${staticPath}/${fsSafeName}`);
 
       fileData.filename = fsSafeName;
       fileData.filesize = file.size;
       fileData.mimeType = file.mimetype;
 
       if (imageMIMETypes.indexOf(file.mimetype) > -1) {
-        const dimensions = await getImageSize(`${staticDir}/${fsSafeName}`);
+        const dimensions = await getImageSize(`${staticPath}/${fsSafeName}`);
         fileData.width = dimensions.width;
         fileData.height = dimensions.height;
 
         if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
-          fileData.sizes = await resizeAndSave(collectionConfig, fsSafeName, fileData.mimeType);
+          fileData.sizes = await resizeAndSave(staticPath, collectionConfig, fsSafeName, fileData.mimeType);
         }
       }
 

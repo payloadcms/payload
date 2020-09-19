@@ -1,5 +1,3 @@
-const path = require('path');
-
 module.exports = {
   slug: 'custom-components',
   labels: {
@@ -25,9 +23,9 @@ module.exports = {
       localized: true,
       admin: {
         components: {
-          field: path.resolve(__dirname, 'components/fields/Description/Field/index.js'),
-          cell: path.resolve(__dirname, 'components/fields/Description/Cell/index.js'),
-          filter: path.resolve(__dirname, 'components/fields/Description/Filter/index.js'),
+          field: 'collections/CustomComponents/components/fields/Description/Field/index.js',
+          cell: 'collections/CustomComponents/components/fields/Description/Cell/index.js',
+          filter: 'collections/CustomComponents/components/fields/Description/Filter/index.js',
         },
       },
     },
@@ -42,7 +40,7 @@ module.exports = {
           label: 'Nested Array Custom Field',
           admin: {
             components: {
-              field: path.resolve(__dirname, 'components/fields/NestedArrayCustomField/Field/index.js'),
+              field: 'collections/CustomComponents/components/fields/NestedArrayCustomField/Field/index.js',
             },
           },
         },
@@ -54,7 +52,7 @@ module.exports = {
       type: 'group',
       admin: {
         components: {
-          field: path.resolve(__dirname, 'components/fields/Group/Field/index.js'),
+          field: 'collections/CustomComponents/components/fields/Group/Field/index.js',
         },
       },
       fields: [
@@ -64,7 +62,7 @@ module.exports = {
           label: 'Nested Group Custom Field',
           admin: {
             components: {
-              field: path.resolve(__dirname, 'components/fields/NestedGroupCustomField/Field/index.js'),
+              field: 'collections/CustomComponents/components/fields/NestedGroupCustomField/Field/index.js',
             },
           },
         },
@@ -79,7 +77,7 @@ module.exports = {
           type: 'text',
           admin: {
             components: {
-              field: path.resolve(__dirname, 'components/fields/NestedText1/Field/index.js'),
+              field: 'collections/CustomComponents/components/fields/NestedText1/Field/index.js',
             },
           },
         }, {
@@ -95,7 +93,7 @@ module.exports = {
     useAsTitle: 'title',
     components: {
       views: {
-        List: path.resolve(__dirname, 'components/views/List/index.js'),
+        List: 'collections/CustomComponents/components/views/List/index.js',
       },
     },
   },

@@ -12,7 +12,7 @@ module.exports = {
   },
   upload: {
     staticURL: '/media',
-    staticDir: path.resolve(__dirname, '../media'),
+    staticDir: './media',
     adminThumbnail: 'mobile',
     imageSizes: [
       {

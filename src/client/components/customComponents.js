@@ -1,21 +1,23 @@
-function stringify(obj) {
+const path = require('path');
+
+function stringify(obj, config) {
   if (typeof obj === 'object') {
     const result = [];
     Object.keys(obj).forEach((key) => {
-      const val = stringify(obj[key]);
+      const val = stringify(obj[key], config);
       if (val !== null) {
         result.push(`"${key}": ${val}`);
       }
     });
     return `{${result.join(',')}}`;
   }
-  return `React.lazy(() => import('${obj}'))`;
+  return `React.lazy(() => import('${path.join(config.paths.configDir, obj)}'))`;
 }
 
-function recursivelyAddFieldComponents(fields) {
+function recursivelyAddFieldComponents(fields, config) {
   if (fields) {
     return fields.reduce((allFields, field) => {
-      const subFields = recursivelyAddFieldComponents(field.fields);
+      const subFields = recursivelyAddFieldComponents(field.fields, config);
 
       if (!field.name && field.fields) {
         return {
@@ -55,7 +57,7 @@ function customComponents(config) {
     const newComponents = { ...components };
 
     newComponents[collection.slug] = {
-      fields: recursivelyAddFieldComponents(collection.fields),
+      fields: recursivelyAddFieldComponents(collection.fields, config),
       ...(collection.admin.components || {}),
     };
 
@@ -66,7 +68,7 @@ function customComponents(config) {
     const newComponents = { ...globals };
 
     newComponents[global.slug] = {
-      fields: recursivelyAddFieldComponents(global.fields),
+      fields: recursivelyAddFieldComponents(global.fields, config),
       ...(global.admin.components || {}),
     };
 
@@ -77,7 +79,7 @@ function customComponents(config) {
     ...(allCollectionComponents || {}),
     ...(allGlobalComponents || {}),
     ...(config.admin.components || {}),
-  }).replace(/\\/g, '\\\\');
+  }, config).replace(/\\/g, '\\\\');
 
   return {
     code: `

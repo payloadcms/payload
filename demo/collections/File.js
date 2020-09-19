@@ -1,4 +1,3 @@
-const path = require('path');
 const checkRole = require('../access/checkRole');
 
 const access = ({ req: { user } }) => {
@@ -15,6 +14,8 @@ const access = ({ req: { user } }) => {
       },
     };
   }
+
+  return false;
 };
 
 module.exports = {
@@ -25,7 +26,7 @@ module.exports = {
   },
   upload: {
     staticURL: '/files',
-    staticDir: path.resolve(__dirname, '../files'),
+    staticDir: './files',
   },
   access: {
     create: () => true,

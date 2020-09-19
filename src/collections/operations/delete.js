@@ -1,4 +1,6 @@
 const fs = require('fs');
+const path = require('path');
+
 const { NotFound, Forbidden, ErrorDeletingFile } = require('../../errors');
 const executeAccess = require('../../auth/executeAccess');
 
@@ -62,7 +64,9 @@ async function deleteQuery(args) {
   if (collectionConfig.upload) {
     const { staticDir } = collectionConfig.upload;
 
-    fs.unlink(`${staticDir}/${resultToDelete.filename}`, (err) => {
+    const staticPath = path.resolve(this.config.paths.configDir, staticDir);
+
+    fs.unlink(`${staticPath}/${resultToDelete.filename}`, (err) => {
       if (err) {
         throw new ErrorDeletingFile();
       }
@@ -70,7 +74,7 @@ async function deleteQuery(args) {
 
     if (resultToDelete.sizes) {
       Object.values(resultToDelete.sizes).forEach((size) => {
-        fs.unlink(`${staticDir}/${size.filename}`, (err) => {
+        fs.unlink(`${staticPath}/${size.filename}`, (err) => {
           if (err) {
             throw new ErrorDeletingFile();
           }

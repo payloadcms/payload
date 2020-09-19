@@ -21,6 +21,7 @@ const getConfig = (options = {}) => {
     mongoURL: options.mongoURL,
     email: options.email,
     paths: {
+      configDir: configPath.substring(0, configPath.lastIndexOf('/')),
       ...(publicConfig.paths || {}),
       config: configPath,
     },

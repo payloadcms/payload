@@ -1,5 +1,6 @@
 const express = require('express');
 const passport = require('passport');
+const path = require('path');
 const getExecuteStaticAccess = require('../auth/getExecuteStaticAccess');
 const authenticate = require('./middleware/authenticate');
 
@@ -14,7 +15,10 @@ function initStatic() {
       router.use(authenticate(this.config));
 
       router.use(getExecuteStaticAccess(collection));
-      router.use(express.static(config.upload.staticDir));
+
+      const staticPath = path.resolve(this.config.paths.configDir, config.upload.staticDir);
+
+      router.use(express.static(staticPath));
 
       this.express.use(`${config.upload.staticURL}`, router);
     }

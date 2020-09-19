@@ -124,7 +124,6 @@ const propTypes = {
   collection: PropTypes.shape({
     slug: PropTypes.string,
     upload: PropTypes.shape({
-      staticDir: PropTypes.string,
       adminThumbnail: PropTypes.string,
     }),
   }).isRequired,

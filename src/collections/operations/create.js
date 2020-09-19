@@ -1,4 +1,5 @@
 const mkdirp = require('mkdirp');
+const path = require('path');
 
 const executeAccess = require('../../auth/executeAccess');
 
@@ -9,7 +10,7 @@ const getImageSize = require('../../uploads/getImageSize');
 const imageMIMETypes = require('../../uploads/imageMIMETypes');
 
 async function create(args) {
-  const { performFieldOperations } = this;
+  const { performFieldOperations, config } = this;
 
   const {
     collection: {
@@ -102,19 +103,21 @@ async function create(args) {
       throw new MissingFile();
     }
 
-    mkdirp.sync(staticDir);
+    const staticPath = path.join(config.paths.configDir, staticDir);
 
-    const fsSafeName = await getSafeFilename(staticDir, file.name);
+    mkdirp.sync(staticPath);
 
-    await file.mv(`${staticDir}/${fsSafeName}`);
+    const fsSafeName = await getSafeFilename(staticPath, file.name);
+
+    await file.mv(`${staticPath}/${fsSafeName}`);
 
     if (imageMIMETypes.indexOf(file.mimetype) > -1) {
-      const dimensions = await getImageSize(`${staticDir}/${fsSafeName}`);
+      const dimensions = await getImageSize(`${staticPath}/${fsSafeName}`);
       fileData.width = dimensions.width;
       fileData.height = dimensions.height;
 
       if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
-        fileData.sizes = await resizeAndSave(collectionConfig, fsSafeName, fileData.mimeType);
+        fileData.sizes = await resizeAndSave(staticPath, collectionConfig, fsSafeName, fileData.mimeType);
       }
     }
 

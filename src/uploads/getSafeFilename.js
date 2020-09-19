@@ -19,11 +19,11 @@ const incrementName = (name) => {
   return `${incrementedName}.${extension}`;
 };
 
-async function getSafeFileName(staticDir, desiredFilename) {
+async function getSafeFileName(staticPath, desiredFilename) {
   let modifiedFilename = desiredFilename;
 
   // eslint-disable-next-line no-await-in-loop
-  while (await fileExists(`${staticDir}/${modifiedFilename}`)) {
+  while (await fileExists(`${staticPath}/${modifiedFilename}`)) {
     modifiedFilename = incrementName(modifiedFilename);
   }
   return modifiedFilename;

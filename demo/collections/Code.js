@@ -10,6 +10,9 @@ const Code = {
       type: 'code',
       label: 'Code',
       required: true,
+      admin: {
+        language: 'js',
+      },
     },
   ],
 };

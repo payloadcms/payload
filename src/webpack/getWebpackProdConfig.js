@@ -110,7 +110,9 @@ module.exports = (config) => {
     plugins: [
       // new BundleAnalyzerPlugin(),
       new HtmlWebpackPlugin({
-        template: config.admin && config.admin.indexHTML ? config.admin.indexHTML : path.resolve(__dirname, '../client/index.html'),
+        template: config.admin && config.admin.indexHTML
+          ? path.join(config.paths.configDir, config.admin.indexHTML)
+          : path.resolve(__dirname, '../client/index.html'),
         filename: './index.html',
         minify: true,
       }),
@@ -128,7 +130,7 @@ module.exports = (config) => {
   }
 
   if (config.paths.scss) {
-    webpackConfig.resolve.alias['payload-scss-overrides'] = config.paths.scss;
+    webpackConfig.resolve.alias['payload-scss-overrides'] = path.join(config.paths.configDir, config.paths.scss);
   } else {
     webpackConfig.resolve.alias['payload-scss-overrides'] = path.resolve(__dirname, '../client/scss/overrides.scss');
   }
