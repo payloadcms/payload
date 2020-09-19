@@ -124,17 +124,22 @@ const buildWhereInputType = (name, fields, parentName) => {
         ),
       };
     },
-    radio: (field) => {
-      const type = GraphQLString;
-      return {
-        type: withOperators(
-          field.name,
-          type,
-          parentName,
-          ['equals', 'like', 'not_equals'],
-        ),
-      };
-    },
+    radio: (field) => ({
+      type: withOperators(
+        field.name,
+        new GraphQLEnumType({
+          name: `${combineParentName(parentName, field.name)}_Input`,
+          values: field.options.reduce((values, option) => ({
+            ...values,
+            [formatName(option.value)]: {
+              value: option.value,
+            },
+          }), {}),
+        }),
+        parentName,
+        ['like', 'equals', 'not_equals'],
+      ),
+    }),
     date: (field) => {
       const type = GraphQLString;
       return {
@@ -182,12 +187,14 @@ const buildWhereInputType = (name, fields, parentName) => {
 
       return { type };
     },
-    upload: () => {
-      const type = GraphQLString;
-      return {
-        type,
-      };
-    },
+    upload: (field) => ({
+      type: withOperators(
+        field.name,
+        GraphQLString,
+        parentName,
+        ['equals', 'not_equals'],
+      ),
+    }),
     checkbox: (field) => ({
       type: withOperators(
         field.name,
