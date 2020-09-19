@@ -21,6 +21,7 @@ module.exports = {
   },
   auth: {
     tokenExpiration: 7200,
+    emailVerification: false,
     useAPIKey: true,
     cookies: {
       secure: process.env.NODE_ENV === 'production',
