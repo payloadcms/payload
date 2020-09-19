@@ -242,6 +242,7 @@ const sanitizeCollection = (collections, collection) => {
         name: 'verified',
         label: 'Verified',
         type: 'checkbox',
+        hidden: true,
         admin: {
           disabled: true,
         },
