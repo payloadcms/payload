@@ -8,12 +8,27 @@ module.exports = ({ operations }, { Model, config }) => {
 
   return new PassportAPIKey(opts, true, async (apiKey, done, req) => {
     try {
-      const userQuery = await operations.collections.find({
-        where: {
-          apiKey: {
-            equals: apiKey,
+      const where = {};
+      if (config.auth.emailVerification) {
+        where.and = [
+          {
+            apiKey: {
+              equals: apiKey,
+            },
           },
-        },
+          {
+            _verified: {
+              equals: true,
+            },
+          },
+        ];
+      } else {
+        where.apiKey = {
+          equals: apiKey,
+        };
+      }
+      const userQuery = await operations.collections.find({
+        where,
         collection: {
           Model,
           config,

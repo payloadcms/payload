@@ -237,6 +237,16 @@ const sanitizeCollection = (collections, collection) => {
     if (collection.auth.useAPIKey) {
       authFields = authFields.concat(baseAPIKeyFields);
     }
+    if (collection.auth.emailVerification) {
+      authFields.push({
+        name: '_verified',
+        type: 'checkbox',
+        hidden: true,
+        admin: {
+          disabled: true,
+        },
+      });
+    }
 
     if (!sanitized.auth.tokenExpiration) sanitized.auth.tokenExpiration = 7200;
 

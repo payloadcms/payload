@@ -18,12 +18,27 @@ module.exports = ({ config, collections, operations }) => {
     try {
       const collection = collections[token.collection];
 
-      const userQuery = await operations.collections.find({
-        where: {
-          email: {
-            equals: token.email,
+      const where = {};
+      if (collection.config.auth.emailVerification) {
+        where.and = [
+          {
+            email: {
+              equals: token.email,
+            },
           },
-        },
+          {
+            _verified: {
+              equals: true,
+            },
+          },
+        ];
+      } else {
+        where.email = {
+          equals: token.email,
+        };
+      }
+      const userQuery = await operations.collections.find({
+        where,
         collection,
         req,
         overrideAccess: true,
