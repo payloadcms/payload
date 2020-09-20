@@ -1,70 +1,22 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import isHotkey from 'is-hotkey';
+import { Editable, withReact, Slate } from 'slate-react';
 import { createEditor } from 'slate';
 import { withHistory } from 'slate-history';
-import { Slate, withReact } from 'slate-react';
-import {
-  BlockquotePlugin,
-  BoldPlugin,
-  CodePlugin,
-  CodeBlockPlugin,
-  EditablePlugins,
-  HeadingPlugin,
-  ImagePlugin,
-  ItalicPlugin,
-  ListPlugin,
-  ParagraphPlugin,
-  pipe,
-  SoftBreakPlugin,
-  StrikethroughPlugin,
-  UnderlinePlugin,
-  withToggleType,
-} from '@udecode/slate-plugins';
-
-import { nodeTypes } from './types';
 import { richText } from '../../../../../fields/validations';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
-import CommandToolbar from './CommandToolbar';
+import leafTypes from './leafTypes';
+import elementTypes from './elementTypes';
+import toggleLeaf from './toggleLeaf';
+import hotkeys from './hotkeys';
+
+import mergeCustomFunctions from './mergeCustomFunctions';
 
 import './index.scss';
-
-const emptyRichTextNode = [{
-  children: [{ text: '' }],
-}];
-
-const plugins = [
-  BlockquotePlugin(),
-  BoldPlugin(),
-  CodePlugin({ hotkey: 'mod+shift+c' }),
-  CodeBlockPlugin(),
-  HeadingPlugin(),
-  ImagePlugin(),
-  ItalicPlugin(),
-  ListPlugin(),
-  ParagraphPlugin(),
-  StrikethroughPlugin(),
-  UnderlinePlugin(),
-  SoftBreakPlugin({
-    rules: [
-      { hotkey: 'shift+enter' },
-      {
-        hotkey: 'enter',
-        query: {
-          allow: [nodeTypes.typeCodeBlock, nodeTypes.typeBlockquote],
-        },
-      },
-    ],
-  }),
-];
-
-const withPlugins = [
-  withReact,
-  withHistory,
-  withToggleType({ defaultType: nodeTypes.typeP }),
-];
 
 const baseClass = 'rich-text';
 
@@ -80,12 +32,45 @@ const RichText = (props) => {
       readOnly,
       style,
       width,
+      elements = [],
+      leaves = [],
     } = {},
+    customComponentPath,
   } = props;
 
-  const editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
-
   const path = pathFromProps || name;
+
+  const [preloaded, setPreloaded] = useState(false);
+
+  const [enabledElements, setEnabledElements] = useState({});
+  const [enabledLeaves, setEnabledLeaves] = useState({});
+
+  const renderElement = useCallback(({ attributes, children, element }) => {
+    const matchedElement = enabledElements[element?.type];
+    const Element = matchedElement?.element;
+
+    if (Element) {
+      return (
+        <Element attributes={attributes}>{children}</Element>
+      );
+    }
+
+    return <p {...attributes}>{children}</p>;
+  }, [enabledElements]);
+
+  const renderLeaf = useCallback(({ attributes, children, leaf }) => {
+    const matchedLeafName = Object.keys(enabledLeaves).find((leafName) => leaf[leafName]);
+
+    if (enabledLeaves[matchedLeafName]?.leaf) {
+      const Leaf = enabledLeaves[matchedLeafName]?.leaf;
+
+      return <Leaf attributes={attributes}>{children}</Leaf>;
+    }
+
+    return (
+      <span {...attributes}>{children}</span>
+    );
+  }, [enabledLeaves]);
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required });
@@ -112,6 +97,53 @@ const RichText = (props) => {
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
+  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+
+  useEffect(() => {
+    if (!preloaded) {
+      const preload = async () => {
+        const elementPromises = Object.values(enabledElements).reduce((promises, element) => {
+          const componentPromises = [];
+
+          if (element?.button?.preload) componentPromises.push(element.button.preload());
+          if (element?.element?.preload) componentPromises.push(element.element.preload());
+
+          return [
+            ...promises,
+            ...componentPromises,
+          ];
+        }, []);
+
+        const leafPromises = Object.values(enabledLeaves).reduce((promises, leaf) => {
+          const componentPromises = [];
+
+          if (leaf?.button?.preload) componentPromises.push(leaf.button.preload());
+          if (leaf?.leaf?.preload) {
+            componentPromises.push(leaf.leaf.preload());
+          }
+
+          return [
+            ...promises,
+            ...componentPromises,
+          ];
+        }, []);
+
+        await Promise.all([...elementPromises, ...leafPromises]);
+
+        setEnabledElements(mergeCustomFunctions(`${customComponentPath}.elements`, elements, elementTypes));
+        setEnabledLeaves(mergeCustomFunctions(`${customComponentPath}.leaves`, leaves, leafTypes));
+
+        setPreloaded(true);
+      };
+
+      preload();
+    }
+  }, [preloaded, enabledElements, enabledLeaves, customComponentPath, elements, leaves]);
+
+  if (!preloaded) {
+    return null;
+  }
+
   return (
     <div
       className={classes}
@@ -129,20 +161,70 @@ const RichText = (props) => {
         label={label}
         required={required}
       />
-      <div className={`${baseClass}__wrapper`}>
-        <Slate
-          editor={editor}
-          value={value ?? emptyRichTextNode}
-          onChange={(val) => setValue(val)}
-        >
-          <CommandToolbar enabledPluginList={plugins} />
+      <Slate
+        editor={editor}
+        value={value || [{
+          children: [{ text: '' }],
+        }]}
+        onChange={setValue}
+      >
+        <div className={`${baseClass}__toolbar`}>
+          {elements.map((element, i) => {
+            const elementName = element?.name || element;
 
-          <EditablePlugins
-            plugins={plugins}
-            placeholder={placeholder}
-            className={`${baseClass}__editor`}
-          />
-        </Slate>
+            const elementType = enabledElements[elementName];
+            const Button = elementType?.button;
+
+            if (Button) {
+              return <Button key={i} />;
+            }
+
+            return null;
+          })}
+          {leaves.map((leaf, i) => {
+            const leafName = leaf?.name || leaf;
+            const leafType = enabledLeaves[leafName];
+            const Button = leafType?.button;
+
+            if (Button) {
+              return <Button key={i} />;
+            }
+
+            return null;
+          })}
+        </div>
+        <Editable
+          renderElement={renderElement}
+          renderLeaf={renderLeaf}
+          placeholder={placeholder}
+          spellCheck
+          autoFocus
+          onKeyDown={(event) => {
+            Object.keys(hotkeys).forEach((hotkey) => {
+              if (isHotkey(hotkey, event)) {
+                event.preventDefault();
+                const mark = hotkeys[hotkey];
+                toggleLeaf(editor, mark);
+              }
+            });
+          }}
+        />
+      </Slate>
+      <div className={`${baseClass}__preload`}>
+        {Object.values(enabledElements).map(({ element: Element }, i) => (
+          <Element
+            key={i}
+          >
+            {i}
+          </Element>
+        ))}
+        {Object.values(enabledLeaves).map(({ leaf: Leaf }, i) => (
+          <Leaf
+            key={i}
+          >
+            {i}
+          </Leaf>
+        ))}
       </div>
     </div>
   );
@@ -151,24 +233,41 @@ const RichText = (props) => {
 RichText.defaultProps = {
   label: null,
   required: false,
-  placeholder: undefined,
   admin: {},
   validate: richText,
   path: '',
+  placeholder: undefined,
 };
 
 RichText.propTypes = {
   name: PropTypes.string.isRequired,
   path: PropTypes.string,
   required: PropTypes.bool,
-  placeholder: PropTypes.string,
   validate: PropTypes.func,
   admin: PropTypes.shape({
     readOnly: PropTypes.bool,
     style: PropTypes.shape({}),
     width: PropTypes.string,
+    elements: PropTypes.arrayOf(
+      PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.shape({
+          name: PropTypes.string,
+        }),
+      ]),
+    ),
+    leaves: PropTypes.arrayOf(
+      PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.shape({
+          name: PropTypes.string,
+        }),
+      ]),
+    ),
   }),
   label: PropTypes.string,
+  placeholder: PropTypes.string,
+  customComponentPath: PropTypes.string.isRequired,
 };
 
 export default withCondition(RichText);

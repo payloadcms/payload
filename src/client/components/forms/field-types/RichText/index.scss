@@ -1,7 +1,6 @@
 @import '../../../../scss/styles.scss';
 
 .rich-text {
-
   &__wrapper {
     border: 1px solid $color-light-gray;
   }
@@ -16,5 +15,24 @@
     h3 {
       margin-bottom: base(.25);
     }
+  }
+
+  &__button {
+    @extend %btn-reset;
+    padding: base(.25);
+
+    svg {
+      @include color-svg($color-dark-gray);
+      width: base(.75);
+      height: base(.75);
+    }
+
+    &:hover {
+      background-color: $color-background-gray;
+    }
+  }
+
+  &__preload {
+    display: none;
   }
 }

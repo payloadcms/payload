@@ -11,7 +11,7 @@ function stringify(obj, config) {
     });
     return `{${result.join(',')}}`;
   }
-  return `React.lazy(() => import('${path.join(config.paths.configDir, obj)}'))`;
+  return `ReactLazyPreload(() => import('${path.join(config.paths.configDir, obj)}'))`;
 }
 
 function recursivelyAddFieldComponents(fields, config) {
@@ -26,10 +26,36 @@ function recursivelyAddFieldComponents(fields, config) {
         };
       }
 
-      if (field.admin.components || field.fields) {
+      if (field.admin.components || field.fields || field.admin.elements || field.admin.leaves) {
         const fieldComponents = {
           ...(field.admin.components || {}),
         };
+
+        if (field.admin.elements) {
+          fieldComponents.elements = {};
+
+          field.admin.elements.forEach((element) => {
+            if (typeof element === 'object') {
+              fieldComponents.elements[element.name] = {
+                element: element.element,
+                button: element.button,
+              };
+            }
+          });
+        }
+
+        if (field.admin.leaves) {
+          fieldComponents.leaves = {};
+
+          field.admin.leaves.forEach((leaf) => {
+            if (typeof leaf === 'object') {
+              fieldComponents.leaves[leaf.name] = {
+                leaf: leaf.leaf,
+                button: leaf.button,
+              };
+            }
+          });
+        }
 
         if (field.fields) {
           fieldComponents.fields = subFields;
@@ -84,6 +110,13 @@ function customComponents(config) {
   return {
     code: `
       const React = require('react');
+
+      const ReactLazyPreload = importStatement => {
+        const Component = React.lazy(importStatement);
+        Component.preload = importStatement;
+        return Component;
+      };
+
       export default ${string};
   `,
   };

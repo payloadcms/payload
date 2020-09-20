@@ -87,13 +87,16 @@ const RenderFields = (props) => {
                       readOnly = true;
                     }
 
+                    const customComponentPath = `${customComponentsPath}${field.name ? `${field.name}` : ''}`;
+
                     if (FieldComponent) {
                       return (
                         <RenderCustomComponent
                           key={i}
-                          path={`${customComponentsPath}${field.name ? `${field.name}.field` : ''}`}
+                          path={`${customComponentPath}.field`}
                           DefaultComponent={FieldComponent}
                           componentProps={{
+                            customComponentPath,
                             ...field,
                             path: field.path || field.name,
                             fieldTypes,

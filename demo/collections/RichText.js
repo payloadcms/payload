@@ -10,8 +10,30 @@ const RichText = {
       type: 'richText',
       label: 'Rich Text',
       required: true,
-      disabledElements: [],
-      disabledMarks: [],
+      admin: {
+        elements: [
+          // 'h1',
+          // 'h2',
+          // 'h3',
+          {
+            name: 'button',
+            button: 'client/components/richText/elements/Button/Button',
+            element: 'client/components/richText/elements/Button/Element',
+          },
+          // 'blockquote',
+          'ul',
+          'ol',
+        ],
+        leaves: [
+          'bold',
+          'italic',
+          {
+            name: 'strikethrough',
+            button: 'client/components/richText/leaves/Strikethrough/Button',
+            leaf: 'client/components/richText/leaves/Strikethrough/Leaf',
+          },
+        ],
+      },
     },
   ],
 };
