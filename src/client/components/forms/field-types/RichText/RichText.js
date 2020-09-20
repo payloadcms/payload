@@ -41,7 +41,6 @@ const RichText = (props) => {
   const path = pathFromProps || name;
 
   const [preloaded, setPreloaded] = useState(false);
-
   const [enabledElements, setEnabledElements] = useState({});
   const [enabledLeaves, setEnabledLeaves] = useState({});
 
@@ -102,43 +101,18 @@ const RichText = (props) => {
   useEffect(() => {
     if (!preloaded) {
       const preload = async () => {
-        const elementPromises = Object.values(enabledElements).reduce((promises, element) => {
-          const componentPromises = [];
+        const mergedElements = await mergeCustomFunctions(`${customComponentPath}.elements`, elements, elementTypes);
+        const mergedLeaves = await mergeCustomFunctions(`${customComponentPath}.leaves`, leaves, leafTypes);
 
-          if (element?.button?.preload) componentPromises.push(element.button.preload());
-          if (element?.element?.preload) componentPromises.push(element.element.preload());
-
-          return [
-            ...promises,
-            ...componentPromises,
-          ];
-        }, []);
-
-        const leafPromises = Object.values(enabledLeaves).reduce((promises, leaf) => {
-          const componentPromises = [];
-
-          if (leaf?.button?.preload) componentPromises.push(leaf.button.preload());
-          if (leaf?.leaf?.preload) {
-            componentPromises.push(leaf.leaf.preload());
-          }
-
-          return [
-            ...promises,
-            ...componentPromises,
-          ];
-        }, []);
-
-        await Promise.all([...elementPromises, ...leafPromises]);
-
-        setEnabledElements(mergeCustomFunctions(`${customComponentPath}.elements`, elements, elementTypes));
-        setEnabledLeaves(mergeCustomFunctions(`${customComponentPath}.leaves`, leaves, leafTypes));
+        setEnabledElements(mergedElements);
+        setEnabledLeaves(mergedLeaves);
 
         setPreloaded(true);
       };
 
       preload();
     }
-  }, [preloaded, enabledElements, enabledLeaves, customComponentPath, elements, leaves]);
+  }, [preloaded, customComponentPath, elements, leaves]);
 
   if (!preloaded) {
     return null;
@@ -210,22 +184,6 @@ const RichText = (props) => {
           }}
         />
       </Slate>
-      <div className={`${baseClass}__preload`}>
-        {Object.values(enabledElements).map(({ element: Element }, i) => (
-          <Element
-            key={i}
-          >
-            {i}
-          </Element>
-        ))}
-        {Object.values(enabledLeaves).map(({ leaf: Leaf }, i) => (
-          <Leaf
-            key={i}
-          >
-            {i}
-          </Leaf>
-        ))}
-      </div>
     </div>
   );
 };

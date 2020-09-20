@@ -7,7 +7,7 @@ const RenderCustomComponent = (props) => {
   const { path, DefaultComponent, componentProps } = props;
 
   if (path) {
-    const CustomComponent = path.split('.').reduce((res, prop) => {
+    const customComponentImport = path.split('.').reduce((res, prop) => {
       const potentialRowIndex = parseInt(prop, 10);
 
       if (!Number.isNaN(potentialRowIndex) && res.fields) {
@@ -21,7 +21,9 @@ const RenderCustomComponent = (props) => {
       return false;
     }, customComponents);
 
-    if (CustomComponent) {
+    if (customComponentImport) {
+      const CustomComponent = React.lazy(customComponentImport);
+
       return (
         <Suspense fallback={<Loading />}>
           <CustomComponent {...componentProps} />

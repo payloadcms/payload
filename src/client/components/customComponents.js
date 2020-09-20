@@ -11,7 +11,7 @@ function stringify(obj, config) {
     });
     return `{${result.join(',')}}`;
   }
-  return `ReactLazyPreload(() => import('${path.join(config.paths.configDir, obj)}'))`;
+  return `() => import('${path.join(config.paths.configDir, obj)}')`;
 }
 
 function recursivelyAddFieldComponents(fields, config) {
@@ -109,14 +109,6 @@ function customComponents(config) {
 
   return {
     code: `
-      const React = require('react');
-
-      const ReactLazyPreload = importStatement => {
-        const Component = React.lazy(importStatement);
-        Component.preload = importStatement;
-        return Component;
-      };
-
       export default ${string};
   `,
   };

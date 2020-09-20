@@ -1,6 +1,23 @@
 import customComponents from '../../../customComponents';
 
-export default (path, enabledFunctions, builtInFunctions) => {
+const setComponent = async (obj, key, loadComponent) => {
+  const newObj = obj;
+  const Component = await loadComponent();
+  newObj[key] = Component.default;
+};
+
+const loadComponents = (promises, obj) => Object.entries(obj).forEach(([key, val]) => {
+  if (typeof val === 'object') {
+    loadComponents(promises, val);
+  }
+  if (typeof val === 'function') {
+    promises.push(setComponent(obj, key, val));
+  }
+});
+
+export default async (path, enabledFunctions, builtInFunctions) => {
+  const promises = [];
+
   const CustomFunctions = path.split('.').reduce((res, prop) => {
     const potentialRowIndex = parseInt(prop, 10);
 
@@ -14,6 +31,10 @@ export default (path, enabledFunctions, builtInFunctions) => {
 
     return {};
   }, customComponents);
+
+  loadComponents(promises, CustomFunctions);
+
+  await Promise.all(promises);
 
   const formattedEnabledFunctions = [...enabledFunctions];
 
