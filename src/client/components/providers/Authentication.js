@@ -4,28 +4,29 @@ import React, {
 import jwt from 'jsonwebtoken';
 import { useLocation, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import config from 'payload/config';
 import { useModal } from '@faceless-ui/modal';
+import { useConfig } from './Config';
 import { requests } from '../../api';
 import StayLoggedInModal from '../modals/StayLoggedIn';
 import useDebounce from '../../hooks/useDebounce';
 
-const {
-  admin: {
-    user: userSlug,
-  },
-  serverURL,
-  routes: {
-    admin,
-    api,
-  },
-} = config;
-
 const Context = createContext({});
 
-const UserProvider = ({ children }) => {
+const AuthenticationProvider = ({ children }) => {
   const [user, setUser] = useState(undefined);
   const [tokenInMemory, setTokenInMemory] = useState(null);
+
+  const {
+    admin: {
+      user: userSlug,
+    },
+    serverURL,
+    routes: {
+      admin,
+      api,
+    },
+  } = useConfig();
+
   const exp = user?.exp;
 
   const [permissions, setPermissions] = useState({ canAccessAdmin: null });
@@ -54,7 +55,7 @@ const UserProvider = ({ children }) => {
         }
       }, 1000);
     }
-  }, [setUser, history, exp]);
+  }, [setUser, history, exp, admin, api, serverURL, userSlug]);
 
   const setToken = useCallback((token) => {
     const decoded = jwt.decode(token);
@@ -112,7 +113,7 @@ const UserProvider = ({ children }) => {
     if (email) {
       getPermissions();
     }
-  }, [email]);
+  }, [email, api, serverURL]);
 
   useEffect(() => {
     let reminder = false;
@@ -145,7 +146,7 @@ const UserProvider = ({ children }) => {
     return () => {
       if (forceLogOut) clearTimeout(forceLogOut);
     };
-  }, [exp, history, closeAllModals]);
+  }, [exp, history, closeAllModals, admin]);
 
   return (
     <Context.Provider value={{
@@ -163,16 +164,16 @@ const UserProvider = ({ children }) => {
   );
 };
 
-UserProvider.propTypes = {
+AuthenticationProvider.propTypes = {
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,
   ]).isRequired,
 };
 
-const useUser = () => useContext(Context);
+const useAuthentication = () => useContext(Context);
 
 export {
-  UserProvider,
-  useUser,
+  AuthenticationProvider,
+  useAuthentication,
 };

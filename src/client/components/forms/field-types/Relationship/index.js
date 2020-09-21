@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import some from 'async-some';
-import config from 'payload/config';
+import { useConfig } from '../../../providers/Config';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
@@ -12,10 +12,6 @@ import Error from '../../Error';
 import { relationship } from '../../../../../fields/validations';
 
 import './index.scss';
-
-const {
-  serverURL, routes: { api }, collections,
-} = config;
 
 const maxResultsPerRequest = 10;
 
@@ -56,6 +52,7 @@ class Relationship extends Component {
   }
 
   getNextOptions = (params = {}) => {
+    const { config: { serverURL, routes: { api }, collections } } = this.props;
     const { errorLoading } = this.state;
     const { clear } = params;
 
@@ -165,7 +162,7 @@ class Relationship extends Component {
   }
 
   addOptions = (data, relation) => {
-    const { hasMultipleRelations } = this.props;
+    const { hasMultipleRelations, config: { collections } } = this.props;
     const { options, loadedIDs } = this.state;
     const collection = collections.find((coll) => coll.slug === relation);
 
@@ -263,6 +260,7 @@ class Relationship extends Component {
   }
 
   addOptionByID = async (id, relation) => {
+    const { config: { serverURL, routes: { api } } } = this.props;
     const { errorLoading } = this.state;
     if (!errorLoading) {
       const response = await fetch(`${serverURL}${api}/${relation}/${id}`);
@@ -377,9 +375,9 @@ Relationship.defaultProps = {
 
 Relationship.propTypes = {
   relationTo: PropTypes.oneOfType([
-    PropTypes.oneOf(Object.keys(collections).map((key) => collections[key].slug)),
+    PropTypes.string,
     PropTypes.arrayOf(
-      PropTypes.oneOf(Object.keys(collections).map((key) => collections[key].slug)),
+      PropTypes.string,
     ),
   ]).isRequired,
   required: PropTypes.bool,
@@ -401,12 +399,30 @@ Relationship.propTypes = {
     PropTypes.array,
     PropTypes.shape({}),
   ]),
+  config: PropTypes.shape({
+    serverURL: PropTypes.string,
+    routes: PropTypes.shape({
+      admin: PropTypes.string,
+      api: PropTypes.string,
+    }),
+    collections: PropTypes.arrayOf(
+      PropTypes.shape({
+        slug: PropTypes.string,
+        labels: PropTypes.shape({
+          singular: PropTypes.string,
+          plural: PropTypes.string,
+        }),
+      }),
+    ),
+  }).isRequired,
 };
 
 const RelationshipFieldType = (props) => {
   const {
     relationTo, validate, path, name, required,
   } = props;
+
+  const config = useConfig;
 
   const hasMultipleRelations = Array.isArray(relationTo);
 
@@ -423,6 +439,7 @@ const RelationshipFieldType = (props) => {
 
   return (
     <Relationship
+      config={config}
       {...props}
       {...fieldType}
       hasMultipleRelations={hasMultipleRelations}

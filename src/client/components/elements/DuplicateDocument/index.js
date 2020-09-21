@@ -1,19 +1,18 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import config from 'payload/config';
+import { useConfig } from '../../providers/Config';
 import Button from '../Button';
 import { useForm } from '../../forms/Form/context';
 
 import './index.scss';
-
-const { routes: { admin } } = config;
 
 const baseClass = 'duplicate';
 
 const Duplicate = ({ slug }) => {
   const { push } = useHistory();
   const { getData } = useForm();
+  const { routes: { admin } } = useConfig();
 
   const handleClick = useCallback(() => {
     const data = getData();
@@ -24,7 +23,7 @@ const Duplicate = ({ slug }) => {
         data,
       },
     });
-  }, [push, getData, slug]);
+  }, [push, getData, slug, admin]);
 
   return (
     <Button

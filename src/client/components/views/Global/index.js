@@ -1,25 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory, useLocation } from 'react-router-dom';
-import config from 'payload/config';
+import { useConfig } from '../../providers/Config';
 import { useStepNav } from '../../elements/StepNav';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
-import { useUser } from '../../data/User';
+import { useAuthentication } from '../../providers/Authentication';
 import { useLocale } from '../../utilities/Locale';
 
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultGlobal from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 
-const { serverURL, routes: { admin, api } } = config;
-
 const GlobalView = (props) => {
   const { state: locationState } = useLocation();
   const history = useHistory();
   const locale = useLocale();
   const { setStepNav } = useStepNav();
-  const { permissions } = useUser();
+  const { permissions } = useAuthentication();
   const [initialState, setInitialState] = useState({});
+
+  const {
+    serverURL,
+    routes: {
+      admin,
+      api,
+    },
+  } = useConfig();
 
   const { global } = props;
 
@@ -27,6 +33,13 @@ const GlobalView = (props) => {
     slug,
     label,
     fields,
+    admin: {
+      components: {
+        views: {
+          edit: CustomEdit,
+        } = {},
+      } = {},
+    } = {},
   } = global;
 
   const onSave = (json) => {
@@ -68,7 +81,7 @@ const GlobalView = (props) => {
   return (
     <RenderCustomComponent
       DefaultComponent={DefaultGlobal}
-      path={`${slug}.views.Edit`}
+      CustomComponent={CustomEdit}
       componentProps={{
         data: dataToRender,
         permissions: globalPermissions,

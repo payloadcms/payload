@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import Button from '../Button';
@@ -43,7 +43,6 @@ const WhereBuilder = (props) => {
   const {
     collection,
     collection: {
-      slug,
       labels: {
         plural,
       } = {},
@@ -114,7 +113,6 @@ const WhereBuilder = (props) => {
                         </div>
                       )}
                       <Condition
-                        collectionSlug={slug}
                         value={where[orIndex][andIndex]}
                         orIndex={orIndex}
                         andIndex={andIndex}
@@ -162,7 +160,6 @@ const WhereBuilder = (props) => {
 WhereBuilder.propTypes = {
   handleChange: PropTypes.func.isRequired,
   collection: PropTypes.shape({
-    slug: PropTypes.string,
     fields: PropTypes.arrayOf(
       PropTypes.shape({}),
     ),

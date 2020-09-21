@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect, useRouteMatch, useHistory, useLocation } from 'react-router-dom';
-import config from 'payload/config';
+import { useConfig } from '../../../providers/Config';
 import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
-import { useUser } from '../../../data/User';
+import { useAuthentication } from '../../../providers/Authentication';
 
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import DefaultEdit from './Default';
 import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema';
-
-const { serverURL, routes: { admin, api } } = config;
 
 const EditView = (props) => {
   const { collection, isEditing } = props;
@@ -22,16 +20,22 @@ const EditView = (props) => {
     },
     admin: {
       useAsTitle,
+      components: {
+        views: {
+          edit: CustomEdit,
+        } = {},
+      } = {},
     },
     fields,
   } = collection;
 
+  const { serverURL, routes: { admin, api } } = useConfig();
   const { params: { id } = {} } = useRouteMatch();
   const { state: locationState } = useLocation();
   const history = useHistory();
   const { setStepNav } = useStepNav();
   const [initialState, setInitialState] = useState({});
-  const { permissions } = useUser();
+  const { permissions } = useAuthentication();
 
   const onSave = (json) => {
     history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`, {
@@ -95,7 +99,7 @@ const EditView = (props) => {
   return (
     <RenderCustomComponent
       DefaultComponent={DefaultEdit}
-      path={`${slug}.views.Edit`}
+      CustomComponent={CustomEdit}
       componentProps={{
         isLoading,
         data: dataToRender,

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import format from 'date-fns/format';
-import config from 'payload/config';
+import { useConfig } from '../../providers/Config';
 import Eyebrow from '../../elements/Eyebrow';
 import Form from '../../forms/Form';
 import PreviewButton from '../../elements/PreviewButton';
@@ -17,8 +17,6 @@ import Auth from '../collections/Edit/Auth';
 import Loading from '../../elements/Loading';
 
 import './index.scss';
-
-const { serverURL, routes: { api, admin } } = config;
 
 const baseClass = 'account';
 
@@ -43,6 +41,8 @@ const DefaultAccount = (props) => {
     preview,
     auth,
   } = collection;
+
+  const { serverURL, routes: { api, admin } } = useConfig();
 
   const classes = [
     baseClass,
@@ -84,7 +84,6 @@ const DefaultAccount = (props) => {
                   filter={(field) => (!field.position || field?.admin?.position !== 'sidebar')}
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
-                  customComponentsPath={`${slug}.fields.`}
                 />
               </React.Fragment>
             )}
@@ -127,7 +126,6 @@ const DefaultAccount = (props) => {
               position="sidebar"
               fieldTypes={fieldTypes}
               fieldSchema={fields}
-              customComponentsPath={`${slug}.fields.`}
             />
           </div>
           <ul className={`${baseClass}__meta`}>

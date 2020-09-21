@@ -1,12 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import config from '../../../../config';
+import { useConfig } from '../../../providers/Config';
 import CopyToClipboard from '../../CopyToClipboard';
 import formatFilesize from '../../../../../uploads/formatFilesize';
 
 import './index.scss';
-
-const { serverURL } = config;
 
 const baseClass = 'file-meta';
 
@@ -14,6 +12,8 @@ const Meta = (props) => {
   const {
     filename, filesize, width, height, mimeType, staticURL,
   } = props;
+
+  const { serverURL } = useConfig();
 
   const fileURL = `${serverURL}${staticURL}/${filename}`;
 
@@ -35,18 +35,18 @@ const Meta = (props) => {
       <div className={`${baseClass}__size-type`}>
         {formatFilesize(filesize)}
         {(width && height) && (
-          <>
+          <React.Fragment>
             &nbsp;-&nbsp;
             {width}
             x
             {height}
-          </>
+          </React.Fragment>
         )}
         {mimeType && (
-          <>
+          <React.Fragment>
             &nbsp;-&nbsp;
             {mimeType}
-          </>
+          </React.Fragment>
         )}
       </div>
     </div>

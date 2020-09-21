@@ -16,7 +16,6 @@ export const useRenderedFields = () => useContext(RenderedFieldContext);
 const RenderFields = (props) => {
   const {
     fieldSchema,
-    customComponentsPath: customComponentsPathFromProps,
     fieldTypes,
     filter,
     permissions,
@@ -29,22 +28,19 @@ const RenderFields = (props) => {
   const [intersectionRef, entry] = useIntersect(intersectionObserverOptions);
   const isIntersecting = Boolean(entry?.isIntersecting);
 
-  const { customComponentsPath: customComponentsPathFromContext, operation: operationFromContext } = useRenderedFields();
+  const { operation: operationFromContext } = useRenderedFields();
 
   const operation = operationFromProps || operationFromContext;
-  const customComponentsPath = customComponentsPathFromProps || customComponentsPathFromContext;
 
   const [contextValue, setContextValue] = useState({
     operation,
-    customComponentsPath,
   });
 
   useEffect(() => {
     setContextValue({
       operation,
-      customComponentsPath,
     });
-  }, [operation, customComponentsPath]);
+  }, [operation]);
 
   useEffect(() => {
     if (isIntersecting && !hasIntersected) {
@@ -87,16 +83,13 @@ const RenderFields = (props) => {
                       readOnly = true;
                     }
 
-                    const customComponentPath = `${customComponentsPath}${field.name ? `${field.name}` : ''}`;
-
                     if (FieldComponent) {
                       return (
                         <RenderCustomComponent
                           key={i}
-                          path={`${customComponentPath}.field`}
+                          CustomComponent={field?.admin?.components?.field}
                           DefaultComponent={FieldComponent}
                           componentProps={{
-                            customComponentPath,
                             ...field,
                             path: field.path || field.name,
                             fieldTypes,
@@ -140,7 +133,6 @@ const RenderFields = (props) => {
 };
 
 RenderFields.defaultProps = {
-  customComponentsPath: '',
   filter: null,
   readOnly: false,
   permissions: {},
@@ -152,7 +144,6 @@ RenderFields.propTypes = {
   fieldSchema: PropTypes.arrayOf(
     PropTypes.shape({}),
   ).isRequired,
-  customComponentsPath: PropTypes.string,
   fieldTypes: PropTypes.shape({
     hidden: PropTypes.function,
   }).isRequired,

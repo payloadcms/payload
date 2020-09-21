@@ -1,7 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import config from 'payload/config';
+import { useConfig } from '../../../providers/Config';
 import UploadGallery from '../../../elements/UploadGallery';
 import Eyebrow from '../../../elements/Eyebrow';
 import Paginator from '../../../elements/Paginator';
@@ -12,8 +12,6 @@ import Table from '../../../elements/Table';
 import Meta from '../../../utilities/Meta';
 
 import './index.scss';
-
-const { routes: { admin } } = config;
 
 const baseClass = 'collection-list';
 
@@ -35,6 +33,7 @@ const DefaultList = (props) => {
     hasCreatePermission,
   } = props;
 
+  const { routes: { admin } } = useConfig();
   const history = useHistory();
 
   return (

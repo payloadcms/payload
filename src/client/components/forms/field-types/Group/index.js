@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import RenderFields, { useRenderedFields } from '../../RenderFields';
+import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import FieldTypeGutter from '../../FieldTypeGutter';
 
@@ -22,8 +22,6 @@ const Group = (props) => {
 
   const path = pathFromProps || name;
 
-  const { customComponentsPath } = useRenderedFields();
-
   return (
     <div className="field-type group">
       <FieldTypeGutter />
@@ -36,7 +34,6 @@ const Group = (props) => {
           <RenderFields
             readOnly={readOnly}
             fieldTypes={fieldTypes}
-            customComponentsPath={`${customComponentsPath}${name}.fields.`}
             fieldSchema={fields.map((subField) => ({
               ...subField,
               path: `${path}${subField.name ? `.${subField.name}` : ''}`,

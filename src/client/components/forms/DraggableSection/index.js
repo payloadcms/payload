@@ -27,7 +27,6 @@ const DraggableSection = (props) => {
     singularLabel,
     blockType,
     fieldTypes,
-    customComponentsPath,
     toggleRowCollapse,
     id,
     positionPanelVerticalAlignment,
@@ -100,7 +99,6 @@ const DraggableSection = (props) => {
               >
                 <RenderFields
                   readOnly={readOnly}
-                  customComponentsPath={customComponentsPath}
                   fieldTypes={fieldTypes}
                   key={rowIndex}
                   permissions={permissions}
@@ -142,7 +140,6 @@ DraggableSection.defaultProps = {
   initialData: undefined,
   singularLabel: '',
   blockType: '',
-  customComponentsPath: '',
   isOpen: true,
   positionPanelVerticalAlignment: 'sticky',
   actionPanelVerticalAlignment: 'sticky',
@@ -164,7 +161,6 @@ DraggableSection.propTypes = {
   isOpen: PropTypes.bool,
   blockType: PropTypes.string,
   fieldTypes: PropTypes.shape({}).isRequired,
-  customComponentsPath: PropTypes.string,
   id: PropTypes.string.isRequired,
   positionPanelVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
   actionPanelVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),

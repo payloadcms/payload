@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import config from 'payload/config';
+import { useConfig } from '../../providers/Config';
 import MinimalTemplate from '../../templates/Minimal';
 import StatusList, { useStatusList } from '../../elements/Status';
 import Form from '../../forms/Form';
@@ -8,25 +8,24 @@ import Email from '../../forms/field-types/Email';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
-import { useUser } from '../../data/User';
+import { useAuthentication } from '../../providers/Authentication';
 
 import './index.scss';
 
 const baseClass = 'forgot-password';
 
-const {
-  admin: { user: userSlug },
-  serverURL,
-  routes: {
-    admin,
-    api,
-  },
-} = config;
-
 const ForgotPassword = () => {
   const { addStatus } = useStatusList();
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const { user } = useUser();
+  const { user } = useAuthentication();
+  const {
+    admin: { user: userSlug },
+    serverURL,
+    routes: {
+      admin,
+      api,
+    },
+  } = useConfig();
 
   const handleResponse = (res) => {
     res.json()

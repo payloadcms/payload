@@ -1,27 +1,26 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import config from 'payload/config';
+import { useConfig } from '../../providers/Config';
 import MinimalTemplate from '../../templates/Minimal';
 import Meta from '../../utilities/Meta';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import fieldTypes from '../../forms/field-types';
 import FormSubmit from '../../forms/Submit';
-import { useUser } from '../../data/User';
+import { useAuthentication } from '../../providers/Authentication';
 
 import './index.scss';
-
-const {
-  admin: { user: userSlug }, collections, serverURL, routes: { admin, api },
-} = config;
-
-const userConfig = collections.find((collection) => collection.slug === userSlug);
 
 const baseClass = 'create-first-user';
 
 const CreateFirstUser = (props) => {
   const { setInitialized } = props;
-  const { setToken } = useUser();
+  const { setToken } = useAuthentication();
+  const {
+    admin: { user: userSlug }, collections, serverURL, routes: { admin, api },
+  } = useConfig();
+
+  const userConfig = collections.find((collection) => collection.slug === userSlug);
 
   const onSuccess = (json) => {
     if (json?.user?.token) {

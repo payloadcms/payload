@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useModal } from '@faceless-ui/modal';
-import config from '../../../../config';
+import { useConfig } from '../../../providers/Config';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
@@ -14,13 +14,12 @@ import SelectExistingModal from './SelectExisting';
 
 import './index.scss';
 
-const { collections, serverURL, routes: { api } } = config;
-
 const baseClass = 'upload';
 
 const Upload = (props) => {
   const { toggle } = useModal();
   const [internalValue, setInternalValue] = useState(undefined);
+  const { collections, serverURL, routes: { api } } = useConfig();
 
   const {
     path: pathFromProps,

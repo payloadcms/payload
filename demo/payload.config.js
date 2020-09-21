@@ -37,7 +37,9 @@ module.exports = {
     disable: false,
     components: {
       layout: {
-        // Sidebar: 'client/components/layout/Sidebar/index.js',
+        // Sidebar: () => (
+        //   <div>Hello</div>
+        // ),
       },
     },
   },

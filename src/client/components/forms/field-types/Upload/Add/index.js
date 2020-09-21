@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, useModal } from '@faceless-ui/modal';
-import config from '../../../../../config';
+import { useConfig } from '../../../../providers/Config';
 import MinimalTemplate from '../../../../templates/Minimal';
 import Form from '../../../Form';
 import Button from '../../../../elements/Button';
@@ -10,8 +10,6 @@ import FormSubmit from '../../../Submit';
 import Upload from '../../../../views/collections/Edit/Upload';
 
 import './index.scss';
-
-const { serverURL, routes: { api } } = config;
 
 const baseClass = 'add-upload-modal';
 
@@ -23,6 +21,7 @@ const AddUploadModal = (props) => {
     setValue,
   } = props;
 
+  const { serverURL, routes: { api } } = useConfig();
   const { closeAll } = useModal();
 
   const onSuccess = useCallback((json) => {
@@ -69,7 +68,6 @@ const AddUploadModal = (props) => {
             filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
             fieldTypes={fieldTypes}
             fieldSchema={collection.fields}
-            customComponentsPath={`${collection.slug}.fields.`}
           />
         </Form>
       </MinimalTemplate>

@@ -8,7 +8,7 @@ import { useLocale } from '../../utilities/Locale';
 import { useStatusList } from '../../elements/Status';
 import { requests } from '../../../api';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
-import { useUser } from '../../data/User';
+import { useAuthentication } from '../../providers/Authentication';
 import fieldReducer from './fieldReducer';
 import initContextState from './initContextState';
 import reduceFieldsToValues from './reduceFieldsToValues';
@@ -39,7 +39,7 @@ const Form = (props) => {
   const history = useHistory();
   const locale = useLocale();
   const { replaceStatus, addStatus, clearStatus } = useStatusList();
-  const { refreshCookie } = useUser();
+  const { refreshCookie } = useAuthentication();
 
   const [modified, setModified] = useState(false);
   const [processing, setProcessing] = useState(false);

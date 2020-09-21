@@ -3,16 +3,14 @@ import PropTypes from 'prop-types';
 
 import './index.scss';
 
-const Filter = ({ onChange, value }) => {
-  return (
-    <input
-      className="custom-description-filter"
-      type="text"
-      onChange={e => onChange(e.target.value)}
-      value={value}
-    />
-  );
-};
+const Filter = ({ onChange, value }) => (
+  <input
+    className="custom-description-filter"
+    type="text"
+    onChange={(e) => onChange(e.target.value)}
+    value={value}
+  />
+);
 
 Filter.defaultProps = {
   value: '',

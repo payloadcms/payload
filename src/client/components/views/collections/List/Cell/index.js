@@ -2,12 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import format from 'date-fns/format';
-import config from 'payload/config';
+import { useConfig } from '../../../../providers/Config';
 import RenderCustomComponent from '../../../../utilities/RenderCustomComponent';
 import Thumbnail from '../../../../elements/Thumbnail';
 import Relationship from './Relationship';
-
-const { routes: { admin } } = config;
 
 const DefaultCell = (props) => {
   const {
@@ -28,6 +26,8 @@ const DefaultCell = (props) => {
       sizes,
     } = {},
   } = props;
+
+  const { routes: { admin } } = useConfig();
 
   let WrapElement = 'span';
 
@@ -89,14 +89,15 @@ const Cell = (props) => {
   const {
     colIndex,
     collection,
-    collection: {
-      slug,
-    },
     cellData,
     rowData,
     field,
     field: {
-      name,
+      admin: {
+        components: {
+          cell: CustomCell,
+        } = {},
+      } = {},
     },
   } = props;
 
@@ -109,7 +110,7 @@ const Cell = (props) => {
         collection,
         field,
       }}
-      path={`${slug}.fields.${name}.cell`}
+      CustomComponent={CustomCell}
       DefaultComponent={DefaultCell}
     />
   );
@@ -141,6 +142,11 @@ const propTypes = {
   field: PropTypes.shape({
     name: PropTypes.string,
     type: PropTypes.string,
+    admin: PropTypes.shape({
+      components: PropTypes.shape({
+        cell: PropTypes.func,
+      }),
+    }),
   }).isRequired,
 };
 

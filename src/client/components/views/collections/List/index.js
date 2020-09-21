@@ -2,16 +2,14 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import queryString from 'qs';
 import { useLocation } from 'react-router-dom';
-import config from 'payload/config';
-import { useUser } from '../../../data/User';
+import { useConfig } from '../../../providers/Config';
+import { useAuthentication } from '../../../providers/Authentication';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import DefaultList from './Default';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import { useStepNav } from '../../../elements/StepNav';
 import formatFields from './formatFields';
 import buildColumns from './buildColumns';
-
-const { serverURL, routes: { api, admin } } = config;
 
 const ListView = (props) => {
   const {
@@ -24,7 +22,8 @@ const ListView = (props) => {
     },
   } = props;
 
-  const { permissions } = useUser();
+  const { serverURL, routes: { api, admin } } = useConfig();
+  const { permissions } = useAuthentication();
   const location = useLocation();
   const { setStepNav } = useStepNav();
 

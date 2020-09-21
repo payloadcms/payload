@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useHistory } from 'react-router-dom';
-import config from 'payload/config';
-import { useUser } from '../../data/User';
+import { useConfig } from '../../providers/Config';
+import { useAuthentication } from '../../providers/Authentication';
 import Chevron from '../../icons/Chevron';
 import LogOut from '../../icons/LogOut';
 import Menu from '../../icons/Menu';
@@ -14,18 +14,17 @@ import './index.scss';
 
 const baseClass = 'nav';
 
-const {
-  collections,
-  globals,
-  routes: {
-    admin,
-  },
-} = config;
-
 const Nav = () => {
-  const { permissions } = useUser();
+  const { permissions } = useAuthentication();
   const [menuActive, setMenuActive] = useState(false);
   const history = useHistory();
+  const {
+    collections,
+    globals,
+    routes: {
+      admin,
+    },
+  } = useConfig();
 
   const classes = [
     baseClass,
@@ -34,7 +33,7 @@ const Nav = () => {
 
   useEffect(() => history.listen(() => {
     setMenuActive(false);
-  }), []);
+  }), [history]);
 
   return (
     <aside className={classes}>

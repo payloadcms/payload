@@ -25,15 +25,6 @@ module.exports = (config) => {
     module: {
       rules: [
         {
-          test: require.resolve('../client/components/customComponents'),
-          use: [
-            {
-              loader: 'val-loader',
-              options: config,
-            },
-          ],
-        },
-        {
           test: /\.js$/,
           exclude: /node_modules\/(?!(@payloadcms\/payload)\/).*/,
           use: [{
@@ -47,15 +38,15 @@ module.exports = (config) => {
                       'defaults',
                       'not IE 11',
                       'not IE_Mob 11',
-                      'maintained node versions',
                     ],
                   },
                 ],
                 require.resolve('@babel/preset-react'),
               ],
               plugins: [
-                require.resolve('@babel/plugin-proposal-class-properties'),
-                require.resolve('@babel/plugin-proposal-optional-chaining'),
+                'add-module-exports',
+                '@babel/plugin-proposal-class-properties',
+                '@babel/plugin-proposal-optional-chaining',
               ],
             },
           },
@@ -115,7 +106,6 @@ module.exports = (config) => {
       modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
       alias: {
         'payload/unsanitizedConfig': config.paths.config,
-        'payload/config': path.resolve(__dirname, '../client/config.js'),
         '@payloadcms/payload$': mockModulePath,
       },
     },

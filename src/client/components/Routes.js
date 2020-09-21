@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import {
   Route, Switch, withRouter, Redirect, useHistory,
 } from 'react-router-dom';
-import config from 'payload/config';
+import { useConfig } from './providers/Config';
 import List from './views/collections/List';
-import { useUser } from './data/User';
+import { useAuthentication } from './providers/Authentication';
 import DefaultTemplate from './templates/Default';
 import Dashboard from './views/Dashboard';
 import ForgotPassword from './views/ForgotPassword';
@@ -20,14 +20,14 @@ import Unauthorized from './views/Unauthorized';
 import Account from './views/Account';
 import Loading from './elements/Loading';
 
-const {
-  admin: { user: userSlug }, routes, collections, globals,
-} = config;
-
 const Routes = () => {
   const history = useHistory();
   const [initialized, setInitialized] = useState(null);
-  const { user, permissions, permissions: { canAccessAdmin } } = useUser();
+  const { user, permissions, permissions: { canAccessAdmin } } = useAuthentication();
+
+  const {
+    admin: { user: userSlug }, routes, collections, globals,
+  } = useConfig();
 
   useEffect(() => {
     requests.get(`${routes.api}/${userSlug}/init`).then((res) => res.json().then((data) => {
@@ -35,7 +35,7 @@ const Routes = () => {
         setInitialized(data.initialized);
       }
     }));
-  }, []);
+  }, [routes, userSlug]);
 
   useEffect(() => {
     history.replace();

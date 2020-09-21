@@ -1,14 +1,13 @@
 import React, { useEffect } from 'react';
-import config from 'payload/config';
+import { useConfig } from '../../providers/Config';
 import Eyebrow from '../../elements/Eyebrow';
 import { useStepNav } from '../../elements/StepNav';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
 
-const { routes: { admin } } = config;
-
 const NotFound = () => {
   const { setStepNav } = useStepNav();
+  const { routes: { admin } } = useConfig;
 
   useEffect(() => {
     setStepNav([{

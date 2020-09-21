@@ -4,15 +4,13 @@ import DefaultList from '../../../../../../src/client/components/views/collectio
 
 import './index.scss';
 
-const CustomListView = (props) => {
-  return (
-    <div className="custom-list">
-      <p>This is a custom Pages list view</p>
-      <p>Sup</p>
-      <DefaultList {...props} />
-    </div>
-  );
-};
+const CustomListView = (props) => (
+  <div className="custom-list">
+    <p>This is a custom Pages list view</p>
+    <p>Sup</p>
+    <DefaultList {...props} />
+  </div>
+);
 
 CustomListView.propTypes = {
   collection: PropTypes.shape({

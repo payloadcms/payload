@@ -62,7 +62,6 @@ const DefaultGlobalView = (props) => {
               filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
               fieldTypes={fieldTypes}
               fieldSchema={fields}
-              customComponentsPath={`${slug}.fields.`}
             />
           </div>
         </div>
@@ -98,7 +97,6 @@ const DefaultGlobalView = (props) => {
               position="sidebar"
               fieldTypes={fieldTypes}
               fieldSchema={fields}
-              customComponentsPath={`${slug}.fields.`}
             />
           </div>
           {data && (

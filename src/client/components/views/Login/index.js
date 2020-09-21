@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import config from 'payload/config';
+import { useConfig } from '../../providers/Config';
 import Logo from '../../graphics/Logo';
 import MinimalTemplate from '../../templates/Minimal';
 import Form from '../../forms/Form';
@@ -9,17 +9,16 @@ import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
-import { useUser } from '../../data/User';
+import { useAuthentication } from '../../providers/Authentication';
 
 import './index.scss';
 
 const baseClass = 'login';
 
-const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = config;
-
 const Login = () => {
   const history = useHistory();
-  const { user, setToken } = useUser();
+  const { user, setToken } = useAuthentication();
+  const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = useConfig();
 
   const onSuccess = (data) => {
     if (data.token) {

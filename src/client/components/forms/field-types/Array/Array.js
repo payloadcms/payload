@@ -6,7 +6,6 @@ import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import DraggableSection from '../../DraggableSection';
 import reducer from '../rowReducer';
-import { useRenderedFields } from '../../RenderFields';
 import { useForm } from '../../Form/context';
 import useFieldType from '../../useFieldType';
 import Error from '../../Error';
@@ -36,7 +35,6 @@ const ArrayFieldType = (props) => {
   } = props;
 
   const [rows, dispatchRows] = useReducer(reducer, []);
-  const { customComponentsPath } = useRenderedFields();
   const { initialState, dispatchFields } = useForm();
 
   const path = pathFromProps || name;
@@ -111,7 +109,6 @@ const ArrayFieldType = (props) => {
       removeRow={removeRow}
       moveRow={moveRow}
       path={path}
-      customComponentsPath={customComponentsPath}
       name={name}
       fieldTypes={fieldTypes}
       fields={fields}
@@ -166,8 +163,6 @@ const RenderArray = React.memo((props) => {
     removeRow,
     moveRow,
     path,
-    customComponentsPath,
-    name,
     fieldTypes,
     fields,
     permissions,
@@ -206,7 +201,6 @@ const RenderArray = React.memo((props) => {
                   moveRow={moveRow}
                   parentPath={path}
                   initNull={row.initNull}
-                  customComponentsPath={`${customComponentsPath}${name}.fields.`}
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
                   permissions={permissions.fields}
@@ -241,7 +235,6 @@ RenderArray.defaultProps = {
   rows: [],
   singularLabel: 'Row',
   path: '',
-  customComponentsPath: undefined,
   value: undefined,
   readOnly: false,
 };
@@ -255,7 +248,6 @@ RenderArray.propTypes = {
   ),
   singularLabel: PropTypes.string,
   path: PropTypes.string,
-  customComponentsPath: PropTypes.string,
   name: PropTypes.string.isRequired,
   value: PropTypes.number,
   onDragEnd: PropTypes.func.isRequired,

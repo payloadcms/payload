@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import qs from 'qs';
-import config from 'payload/config';
+import { useConfig } from '../../providers/Config';
 import { useLocale } from '../../utilities/Locale';
 import { useSearchParams } from '../../utilities/SearchParams';
 import Popup from '../Popup';
@@ -10,9 +10,8 @@ import './index.scss';
 
 const baseClass = 'localizer';
 
-const { localization } = config;
-
 const Localizer = () => {
+  const { localization } = useConfig();
   const locale = useLocale();
   const searchParams = useSearchParams();
 
@@ -24,48 +23,46 @@ const Localizer = () => {
         <Popup
           align="left"
           button={locale}
-          render={({ close }) => {
-            return (
-              <div>
-                <span>Locales</span>
-                <ul>
-                  {locales.map((localeOption) => {
-                    const baseLocaleClass = `${baseClass}__locale`;
+          render={({ close }) => (
+            <div>
+              <span>Locales</span>
+              <ul>
+                {locales.map((localeOption) => {
+                  const baseLocaleClass = `${baseClass}__locale`;
 
-                    const localeClasses = [
-                      baseLocaleClass,
-                      locale === localeOption && `${baseLocaleClass}--active`,
-                    ];
+                  const localeClasses = [
+                    baseLocaleClass,
+                    locale === localeOption && `${baseLocaleClass}--active`,
+                  ];
 
-                    const newParams = {
-                      ...searchParams,
-                      locale: localeOption,
-                    };
+                  const newParams = {
+                    ...searchParams,
+                    locale: localeOption,
+                  };
 
-                    const search = qs.stringify(newParams);
+                  const search = qs.stringify(newParams);
 
-                    if (localeOption !== locale) {
-                      return (
-                        <li
-                          key={localeOption}
-                          className={localeClasses}
+                  if (localeOption !== locale) {
+                    return (
+                      <li
+                        key={localeOption}
+                        className={localeClasses}
+                      >
+                        <Link
+                          to={{ search }}
+                          onClick={close}
                         >
-                          <Link
-                            to={{ search }}
-                            onClick={close}
-                          >
-                            {localeOption}
-                          </Link>
-                        </li>
-                      );
-                    }
+                          {localeOption}
+                        </Link>
+                      </li>
+                    );
+                  }
 
-                    return null;
-                  })}
-                </ul>
-              </div>
-            );
-          }}
+                  return null;
+                })}
+              </ul>
+            </div>
+          )}
         />
       </div>
     );

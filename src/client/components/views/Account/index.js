@@ -1,21 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import config from 'payload/config';
 import { useLocation } from 'react-router-dom';
+import { useConfig } from '../../providers/Config';
 import { useStepNav } from '../../elements/StepNav';
-import { useUser } from '../../data/User';
+import { useAuthentication } from '../../providers/Authentication';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import DefaultAccount from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
-const { serverURL, routes: { api }, collections } = config;
-
 const AccountView = () => {
   const { state: locationState } = useLocation();
   const { setStepNav } = useStepNav();
-  const { user, permissions } = useUser();
+  const { user, permissions } = useAuthentication();
   const [initialState, setInitialState] = useState({});
+  const {
+    serverURL,
+    routes: { api },
+    collections,
+    admin: {
+      components: {
+        account: CustomAccount,
+      } = {},
+    } = {},
+  } = useConfig();
 
   const collection = collections.find((coll) => coll.slug === user.collection);
 
@@ -52,7 +60,7 @@ const AccountView = () => {
   return (
     <RenderCustomComponent
       DefaultComponent={DefaultAccount}
-      path="account"
+      CustomComponent={CustomAccount}
       componentProps={{
         data,
         collection,

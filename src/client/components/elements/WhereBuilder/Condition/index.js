@@ -25,7 +25,6 @@ const Condition = (props) => {
     value,
     orIndex,
     andIndex,
-    collectionSlug,
   } = props;
 
   const [activeField, setActiveField] = useState({ operators: [] });
@@ -33,7 +32,7 @@ const Condition = (props) => {
   const debouncedValue = useDebounce(internalValue, 300);
 
   useEffect(() => {
-    const newActiveField = fields.find(field => value.field === field.value);
+    const newActiveField = fields.find((field) => value.field === field.value);
 
     if (newActiveField) {
       setActiveField(newActiveField);
@@ -57,9 +56,9 @@ const Condition = (props) => {
         <div className={`${baseClass}__inputs`}>
           <div className={`${baseClass}__field`}>
             <ReactSelect
-              value={fields.find(field => value.field === field.value)}
+              value={fields.find((field) => value.field === field.value)}
               options={fields}
-              onChange={field => dispatch({
+              onChange={(field) => dispatch({
                 type: 'update',
                 orIndex,
                 andIndex,
@@ -69,9 +68,9 @@ const Condition = (props) => {
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              value={activeField.operators.find(operator => value.operator === operator.value)}
+              value={activeField.operators.find((operator) => value.operator === operator.value)}
               options={activeField.operators}
-              onChange={operator => dispatch({
+              onChange={(operator) => dispatch({
                 type: 'update',
                 orIndex,
                 andIndex,
@@ -81,7 +80,7 @@ const Condition = (props) => {
           </div>
           <div className={`${baseClass}__value`}>
             <RenderCustomComponent
-              path={`${collectionSlug}.fields.${activeField.value}.filter`}
+              CustomComponent={activeField?.props?.admin?.components?.filter}
               DefaultComponent={ValueComponent}
               componentProps={{
                 ...activeField.props,
@@ -144,7 +143,6 @@ Condition.propTypes = {
   dispatch: PropTypes.func.isRequired,
   orIndex: PropTypes.number.isRequired,
   andIndex: PropTypes.number.isRequired,
-  collectionSlug: PropTypes.string.isRequired,
 };
 
 export default Condition;

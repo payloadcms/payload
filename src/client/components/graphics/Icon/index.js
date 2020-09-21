@@ -1,5 +1,6 @@
 import React from 'react';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import { useConfig } from '../../providers/Config';
 
 const PayloadIcon = () => (
   <svg
@@ -19,11 +20,24 @@ const PayloadIcon = () => (
   </svg>
 );
 
-const Icon = () => (
-  <RenderCustomComponent
-    path="graphics.Icon"
-    DefaultComponent={PayloadIcon}
-  />
-);
+const Icon = () => {
+  const {
+    admin: {
+      components: {
+        graphics: {
+          icon: CustomIcon,
+        } = {},
+      } = {},
+    } = {},
+  } = useConfig();
+
+  return (
+    <RenderCustomComponent
+      CustomComponent={CustomIcon}
+      path="graphics.Icon"
+      DefaultComponent={PayloadIcon}
+    />
+  );
+};
 
 export default Icon;

@@ -1,3 +1,8 @@
+const ButtonToolbarButton = require('../client/components/richText/elements/Button/Button');
+const ButtonElement = require('../client/components/richText/elements/Button/Element');
+const StrikethroughButton = require('../client/components/richText/leaves/Strikethrough/Button');
+const StrikethroughLeaf = require('../client/components/richText/leaves/Strikethrough/Leaf');
+
 const RichText = {
   slug: 'rich-text',
   labels: {
@@ -17,8 +22,8 @@ const RichText = {
           // 'h3',
           {
             name: 'button',
-            button: 'client/components/richText/elements/Button/Button',
-            element: 'client/components/richText/elements/Button/Element',
+            button: ButtonToolbarButton,
+            element: ButtonElement,
           },
           // 'blockquote',
           'ul',
@@ -29,8 +34,8 @@ const RichText = {
           'italic',
           {
             name: 'strikethrough',
-            button: 'client/components/richText/leaves/Strikethrough/Button',
-            leaf: 'client/components/richText/leaves/Strikethrough/Leaf',
+            button: StrikethroughButton,
+            leaf: StrikethroughLeaf,
           },
         ],
       },

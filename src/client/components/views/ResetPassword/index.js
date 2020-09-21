@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import config from 'payload/config';
+import { useConfig } from '../../providers/Config';
 import MinimalTemplate from '../../templates/Minimal';
 import Form from '../../forms/Form';
 import Password from '../../forms/field-types/Password';
@@ -8,19 +8,18 @@ import ConfirmPassword from '../../forms/field-types/ConfirmPassword';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
-import { useUser } from '../../data/User';
+import { useAuthentication } from '../../providers/Authentication';
 
 import './index.scss';
 import HiddenInput from '../../forms/field-types/HiddenInput';
 
 const baseClass = 'reset-password';
 
-const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = config;
-
 const ResetPassword = () => {
+  const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = useConfig();
   const { token } = useParams();
   const history = useHistory();
-  const { user, setToken } = useUser();
+  const { user, setToken } = useAuthentication();
 
   const onSuccess = (data) => {
     if (data.token) {

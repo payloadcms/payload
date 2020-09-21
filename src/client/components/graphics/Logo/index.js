@@ -1,5 +1,6 @@
 import React from 'react';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import { useConfig } from '../../providers/Config';
 
 const PayloadLogo = () => (
   <svg
@@ -49,11 +50,23 @@ const PayloadLogo = () => (
   </svg>
 );
 
-const Logo = () => (
-  <RenderCustomComponent
-    path="graphics.Logo"
-    DefaultComponent={PayloadLogo}
-  />
-);
+const Logo = () => {
+  const {
+    admin: {
+      components: {
+        graphics: {
+          Logo: CustomLogo,
+        } = {},
+      } = {},
+    } = {},
+  } = useConfig();
+
+  return (
+    <RenderCustomComponent
+      CustomComponent={CustomLogo}
+      DefaultComponent={PayloadLogo}
+    />
+  );
+};
 
 export default Logo;

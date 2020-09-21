@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import config from 'payload/config';
-
-const { collections } = config;
+import { useConfig } from '../../../../../providers/Config';
 
 const RelationshipCell = (props) => {
   const { field, cellData } = props;
   const { relationTo } = field;
-
+  const { collections } = useConfig();
   const [data, setData] = useState();
 
   useEffect(() => {

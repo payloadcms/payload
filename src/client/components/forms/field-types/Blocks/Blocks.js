@@ -9,7 +9,6 @@ import Button from '../../../elements/Button';
 import reducer from '../rowReducer';
 import { useForm } from '../../Form/context';
 import DraggableSection from '../../DraggableSection';
-import { useRenderedFields } from '../../RenderFields';
 import Error from '../../Error';
 import useFieldType from '../../useFieldType';
 import Popup from '../../../elements/Popup';
@@ -42,7 +41,6 @@ const Blocks = (props) => {
   const path = pathFromProps || name;
 
   const [rows, dispatchRows] = useReducer(reducer, []);
-  const { customComponentsPath } = useRenderedFields();
   const { initialState, dispatchFields } = useForm();
 
   const memoizedValidate = useCallback((value) => {
@@ -127,7 +125,6 @@ const Blocks = (props) => {
       removeRow={removeRow}
       moveRow={moveRow}
       path={path}
-      customComponentsPath={customComponentsPath}
       name={name}
       fieldTypes={fieldTypes}
       toggleCollapse={toggleCollapse}
@@ -183,8 +180,6 @@ const RenderBlocks = React.memo((props) => {
     removeRow,
     moveRow,
     path,
-    customComponentsPath,
-    name,
     fieldTypes,
     permissions,
     value,
@@ -235,7 +230,6 @@ const RenderBlocks = React.memo((props) => {
                       moveRow={moveRow}
                       toggleRowCollapse={() => toggleCollapse(i)}
                       parentPath={path}
-                      customComponentsPath={`${customComponentsPath}${name}.fields.`}
                       fieldTypes={fieldTypes}
                       permissions={permissions.fields}
                       fieldSchema={[
@@ -296,7 +290,6 @@ RenderBlocks.defaultProps = {
   rows: [],
   singularLabel: 'Row',
   path: '',
-  customComponentsPath: undefined,
   value: undefined,
   readOnly: false,
 };
@@ -310,7 +303,6 @@ RenderBlocks.propTypes = {
   ),
   singularLabel: PropTypes.string,
   path: PropTypes.string,
-  customComponentsPath: PropTypes.string,
   name: PropTypes.string.isRequired,
   value: PropTypes.number,
   onDragEnd: PropTypes.func.isRequired,

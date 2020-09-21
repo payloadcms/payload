@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { useModal, Modal } from '@faceless-ui/modal';
-import config from 'payload/config';
+import { useConfig } from '../../providers/Config';
 import MinimalTemplate from '../../templates/Minimal';
 import Button from '../../elements/Button';
 
@@ -10,11 +10,10 @@ import './index.scss';
 
 const baseClass = 'stay-logged-in';
 
-const { routes: { admin } } = config;
-
 const StayLoggedInModal = (props) => {
   const { refreshCookie } = props;
   const history = useHistory();
+  const { routes: { admin } } = useConfig();
   const { closeAll: closeAllModals } = useModal();
 
   return (

@@ -1,14 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Helmet from 'react-helmet';
-import config from 'payload/config';
+import { useConfig } from '../../providers/Config';
 import payloadFavicon from '../../../assets/images/favicon.svg';
 import payloadOgImage from '../../../assets/images/og-image.png';
 
 function Meta({ description, lang, meta, title, keywords }) {
+  const config = useConfig();
   const titleSuffix = config?.admin?.meta?.titleSuffix ?? '- Payload';
   const favicon = config?.admin?.meta?.favicon ?? payloadFavicon;
   const ogImage = config?.admin?.meta?.ogImage ?? payloadOgImage;
+
   return (
     <Helmet
       htmlAttributes={{

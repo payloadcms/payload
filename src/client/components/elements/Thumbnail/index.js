@@ -1,12 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import config from '../../../config';
+import { useConfig } from '../../providers/Config';
 import FileGraphic from '../../graphics/File';
 import getThumbnail from '../../../../uploads/getThumbnail';
 
 import './index.scss';
-
-const { serverURL } = config;
 
 const baseClass = 'thumbnail';
 
@@ -14,6 +12,8 @@ const Thumbnail = (props) => {
   const {
     filename, mimeType, staticURL, sizes, adminThumbnail, size,
   } = props;
+
+  const { serverURL } = useConfig();
 
   const thumbnail = getThumbnail(mimeType, staticURL, filename, sizes, adminThumbnail);
 

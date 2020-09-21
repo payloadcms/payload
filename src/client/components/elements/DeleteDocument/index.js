@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import config from 'payload/config';
 import { useHistory } from 'react-router-dom';
 import { Modal, useModal } from '@faceless-ui/modal';
+import { useConfig } from '../../providers/Config';
 import Button from '../Button';
 import MinimalTemplate from '../../templates/Minimal';
 import useTitle from '../../../hooks/useTitle';
@@ -10,8 +10,6 @@ import { requests } from '../../../api';
 import { useStatusList } from '../Status';
 
 import './index.scss';
-
-const { serverURL, routes: { api, admin } } = config;
 
 const baseClass = 'delete-document';
 
@@ -30,6 +28,7 @@ const DeleteDocument = (props) => {
     } = {},
   } = props;
 
+  const { serverURL, routes: { api, admin } } = useConfig();
   const { replaceStatus } = useStatusList();
   const [deleting, setDeleting] = useState(false);
   const { closeAll, toggle } = useModal();
@@ -78,7 +77,7 @@ const DeleteDocument = (props) => {
         return addDefaultError();
       }
     });
-  }, [addDefaultError, closeAll, history, id, replaceStatus, singular, slug, title]);
+  }, [addDefaultError, closeAll, history, id, replaceStatus, singular, slug, title, admin, api, serverURL]);
 
   if (id) {
     return (

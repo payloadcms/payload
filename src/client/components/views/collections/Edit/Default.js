@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link, useRouteMatch } from 'react-router-dom';
 import format from 'date-fns/format';
-import config from 'payload/config';
+import { useConfig } from '../../../providers/Config';
 import Eyebrow from '../../../elements/Eyebrow';
 import Form from '../../../forms/Form';
 import Loading from '../../../elements/Loading';
@@ -21,12 +21,11 @@ import Upload from './Upload';
 
 import './index.scss';
 
-const { routes: { admin } } = config;
-
 const baseClass = 'collection-edit';
 
 const DefaultEditView = (props) => {
   const { params: { id } = {} } = useRouteMatch();
+  const { routes: { admin } } = useConfig();
 
   const {
     collection,
@@ -108,7 +107,6 @@ const DefaultEditView = (props) => {
                   filter={(field) => (!field?.admin?.position || (field?.admin?.position !== 'sidebar'))}
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
-                  customComponentsPath={`${slug}.fields.`}
                 />
               </React.Fragment>
             )}
@@ -171,7 +169,6 @@ const DefaultEditView = (props) => {
                     position="sidebar"
                     fieldTypes={fieldTypes}
                     fieldSchema={fields}
-                    customComponentsPath={`${slug}.fields.`}
                   />
                 </div>
                 {isEditing && (

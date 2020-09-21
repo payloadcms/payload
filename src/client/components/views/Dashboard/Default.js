@@ -1,19 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import config from 'payload/config';
+import { useConfig } from '../../providers/Config';
 
 import Eyebrow from '../../elements/Eyebrow';
 import Card from '../../elements/Card';
 import Button from '../../elements/Button';
 
 import './index.scss';
-
-const {
-  routes: {
-    admin,
-  },
-} = config;
 
 const baseClass = 'dashboard';
 
@@ -25,6 +19,12 @@ const Dashboard = (props) => {
   } = props;
 
   const { push } = useHistory();
+
+  const {
+    routes: {
+      admin,
+    },
+  } = useConfig();
 
   return (
     <div className={baseClass}>

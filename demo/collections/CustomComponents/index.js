@@ -1,3 +1,12 @@
+const DescriptionField = require('./components/fields/Description/Field');
+const DescriptionCell = require('./components/fields/Description/Cell');
+const DescriptionFilter = require('./components/fields/Description/Filter');
+const NestedArrayField = require('./components/fields/NestedArrayCustomField/Field');
+const GroupField = require('./components/fields/Group/Field');
+const NestedGroupField = require('./components/fields/NestedGroupCustomField/Field');
+const NestedText1Field = require('./components/fields/NestedText1/Field');
+const ListView = require('./components/views/List');
+
 module.exports = {
   slug: 'custom-components',
   labels: {
@@ -23,9 +32,9 @@ module.exports = {
       localized: true,
       admin: {
         components: {
-          field: 'collections/CustomComponents/components/fields/Description/Field/index.js',
-          cell: 'collections/CustomComponents/components/fields/Description/Cell/index.js',
-          filter: 'collections/CustomComponents/components/fields/Description/Filter/index.js',
+          field: DescriptionField,
+          cell: DescriptionCell,
+          filter: DescriptionFilter,
         },
       },
     },
@@ -40,7 +49,7 @@ module.exports = {
           label: 'Nested Array Custom Field',
           admin: {
             components: {
-              field: 'collections/CustomComponents/components/fields/NestedArrayCustomField/Field/index.js',
+              field: NestedArrayField,
             },
           },
         },
@@ -52,7 +61,7 @@ module.exports = {
       type: 'group',
       admin: {
         components: {
-          field: 'collections/CustomComponents/components/fields/Group/Field/index.js',
+          field: GroupField,
         },
       },
       fields: [
@@ -62,7 +71,7 @@ module.exports = {
           label: 'Nested Group Custom Field',
           admin: {
             components: {
-              field: 'collections/CustomComponents/components/fields/NestedGroupCustomField/Field/index.js',
+              field: NestedGroupField,
             },
           },
         },
@@ -77,7 +86,7 @@ module.exports = {
           type: 'text',
           admin: {
             components: {
-              field: 'collections/CustomComponents/components/fields/NestedText1/Field/index.js',
+              field: NestedText1Field,
             },
           },
         }, {
@@ -93,7 +102,7 @@ module.exports = {
     useAsTitle: 'title',
     components: {
       views: {
-        List: 'collections/CustomComponents/components/views/List/index.js',
+        List: ListView,
       },
     },
   },

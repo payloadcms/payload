@@ -1,21 +1,20 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import config from 'payload/config';
-import { useUser } from '../../data/User';
+import { useConfig } from '../../providers/Config';
+import { useAuthentication } from '../../providers/Authentication';
 import Minimal from '../../templates/Minimal';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
 
 import './index.scss';
 
-const { routes: { admin } } = config;
-
 const baseClass = 'logout';
 
 const Logout = (props) => {
   const { inactivity } = props;
 
-  const { logOut } = useUser();
+  const { logOut } = useAuthentication();
+  const { routes: { admin } } = useConfig();
 
   useEffect(() => {
     logOut();

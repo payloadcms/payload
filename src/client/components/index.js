@@ -7,9 +7,10 @@ import { ModalProvider, ModalContainer } from '@faceless-ui/modal';
 import { SearchParamsProvider } from './utilities/SearchParams';
 import { LocaleProvider } from './utilities/Locale';
 import StatusList, { StatusListProvider } from './elements/Status';
-import { UserProvider } from './data/User';
+import { AuthenticationProvider } from './providers/Authentication';
 import Routes from './Routes';
 import getCSSVariable from '../../utilities/getCSSVariable';
+import ConfigProvider from './providers/Config/Provider';
 
 import '../scss/app.scss';
 
@@ -24,28 +25,30 @@ const Index = () => {
   };
 
   return (
-    <WindowInfoProvider {...windowInfoProps}>
-      <ScrollInfoProvider>
-        <Router>
-          <ModalProvider
-            classPrefix="payload"
-            zIndex={parseInt(getCSSVariable('z-modal'), 10)}
-          >
-            <UserProvider>
-              <StatusListProvider>
-                <SearchParamsProvider>
-                  <LocaleProvider>
-                    <StatusList />
-                    <Routes />
-                  </LocaleProvider>
-                </SearchParamsProvider>
-              </StatusListProvider>
-              <ModalContainer />
-            </UserProvider>
-          </ModalProvider>
-        </Router>
-      </ScrollInfoProvider>
-    </WindowInfoProvider>
+    <ConfigProvider>
+      <WindowInfoProvider {...windowInfoProps}>
+        <ScrollInfoProvider>
+          <Router>
+            <ModalProvider
+              classPrefix="payload"
+              zIndex={parseInt(getCSSVariable('z-modal'), 10)}
+            >
+              <AuthenticationProvider>
+                <StatusListProvider>
+                  <SearchParamsProvider>
+                    <LocaleProvider>
+                      <StatusList />
+                      <Routes />
+                    </LocaleProvider>
+                  </SearchParamsProvider>
+                </StatusListProvider>
+                <ModalContainer />
+              </AuthenticationProvider>
+            </ModalProvider>
+          </Router>
+        </ScrollInfoProvider>
+      </WindowInfoProvider>
+    </ConfigProvider>
   );
 };
 

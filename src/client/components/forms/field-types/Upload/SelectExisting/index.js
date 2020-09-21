@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, useModal } from '@faceless-ui/modal';
-import config from '../../../../../config';
+import { useConfig } from '../../../../providers/Config';
 import MinimalTemplate from '../../../../templates/Minimal';
 import Button from '../../../../elements/Button';
 import formatFields from '../../../../views/collections/List/formatFields';
@@ -11,8 +11,6 @@ import Paginator from '../../../../elements/Paginator';
 import UploadGallery from '../../../../elements/UploadGallery';
 
 import './index.scss';
-
-const { serverURL, routes: { api } } = config;
 
 const baseClass = 'select-existing-upload-modal';
 
@@ -26,6 +24,7 @@ const SelectExistingUploadModal = (props) => {
     slug: modalSlug,
   } = props;
 
+  const { serverURL, routes: { api } } = useConfig();
   const { closeAll } = useModal();
   const [fields, setFields] = useState(collection.fields);
   const [listControls, setListControls] = useState({});
