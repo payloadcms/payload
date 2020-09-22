@@ -1,17 +1,15 @@
 require('isomorphic-fetch');
+
 const server = require('../../demo/server');
-const config = require('../../demo/payload.config');
-// const payload = require('..');
+const getConfig = require('../utilities/getConfig');
 const { email, password } = require('./credentials');
 
-const url = config.serverURL;
+const { serverURL } = getConfig();
 
 const globalSetup = async () => {
   global.PAYLOAD_SERVER = server.start();
 
-  // ensureIndexes payload.collections....... etc loop through and await promise.all ensure indexes
-
-  const response = await fetch(`${url}/api/admins/first-register`, {
+  const response = await fetch(`${serverURL}/api/admins/first-register`, {
     body: JSON.stringify({
       email,
       password,

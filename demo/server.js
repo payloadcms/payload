@@ -38,12 +38,13 @@ expressApp.use('/external-route', externalRouter);
 exports.start = (cb) => {
   const server = expressApp.listen(3000, async () => {
     logger.info(`listening on ${3000}...`);
-    if (cb) cb();
 
     const creds = await payload.getMockEmailCredentials();
     logger.info(`Mock email account username: ${creds.user}`);
     logger.info(`Mock email account password: ${creds.pass}`);
     logger.info(`Log in to mock email provider at ${creds.web}`);
+
+    if (cb) cb();
   });
 
   return server;

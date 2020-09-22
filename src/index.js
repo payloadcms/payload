@@ -29,9 +29,24 @@ const localGlobalOperations = require('./globals/operations/local');
 class Payload {
   init(options) {
     logger.info('Starting Payload...');
-    const config = getConfig(options);
 
-    this.config = sanitizeConfig(config);
+    if (!options.secret) {
+      throw new Error('Error: missing secret key. A secret key is needed to secure Payload.');
+    }
+
+    if (!options.mongoURL) {
+      throw new Error('Error: missing MongoDB connection URL.');
+    }
+
+    const config = getConfig(options);
+    const email = { ...(config.email || {}), ...(options.email || {}) };
+
+    this.config = sanitizeConfig({
+      ...config,
+      email,
+      secret: options.secret,
+      mongoURL: options.mongoURL,
+    });
 
     if (typeof this.config.paths === 'undefined') this.config.paths = {};
 

@@ -4,9 +4,10 @@
 // eslint-disable-next-line no-unused-vars
 const fetch = require('isomorphic-fetch');
 const { request, GraphQLClient } = require('graphql-request');
-const faker = require('faker');
-const config = require('../../../../demo/payload.config');
+const getConfig = require('../../../utilities/getConfig');
 const { email, password } = require('../../../tests/credentials');
+
+const config = getConfig();
 
 const url = `${config.serverURL}${config.routes.api}${config.routes.graphQL}`;
 

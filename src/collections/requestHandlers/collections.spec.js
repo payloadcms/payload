@@ -7,11 +7,11 @@ const path = require('path');
 require('isomorphic-fetch');
 const faker = require('faker');
 const FormData = require('form-data');
-const config = require('../../../demo/payload.config');
+const getConfig = require('../../utilities/getConfig');
 const { email, password } = require('../../tests/credentials');
 const fileExists = require('../../tests/utils/fileExists');
 
-const url = config.serverURL;
+const { serverURL: url } = getConfig();
 
 let token = null;
 

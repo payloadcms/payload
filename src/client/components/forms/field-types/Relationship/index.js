@@ -422,7 +422,7 @@ const RelationshipFieldType = (props) => {
     relationTo, validate, path, name, required,
   } = props;
 
-  const config = useConfig;
+  const config = useConfig();
 
   const hasMultipleRelations = Array.isArray(relationTo);
 

@@ -3,8 +3,9 @@ const path = require('path');
 const webpack = require('webpack');
 const Dotenv = require('dotenv-webpack');
 const getStyleLoaders = require('./getStyleLoaders');
+const babelConfig = require('../../babel.config');
 
-const mockModulePath = path.resolve(__dirname, './mockModule.js');
+const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js');
 
 module.exports = (config) => {
   let webpackConfig = {
@@ -29,26 +30,7 @@ module.exports = (config) => {
           exclude: /node_modules\/(?!(@payloadcms\/payload)\/).*/,
           use: [{
             loader: 'babel-loader',
-            options: {
-              presets: [
-                [
-                  require.resolve('@babel/preset-env'),
-                  {
-                    targets: [
-                      'defaults',
-                      'not IE 11',
-                      'not IE_Mob 11',
-                    ],
-                  },
-                ],
-                require.resolve('@babel/preset-react'),
-              ],
-              plugins: [
-                'add-module-exports',
-                '@babel/plugin-proposal-class-properties',
-                '@babel/plugin-proposal-optional-chaining',
-              ],
-            },
+            options: babelConfig,
           },
             // {
             //   loader: 'eslint-loader',

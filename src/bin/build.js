@@ -4,13 +4,14 @@
 const webpack = require('webpack');
 const getWebpackProdConfig = require('../webpack/getWebpackProdConfig');
 const findConfig = require('../utilities/findConfig');
+const getConfig = require('../utilities/getConfig');
 const sanitizeConfig = require('../utilities/sanitizeConfig');
 
-module.exports = () => {
-  const configPath = findConfig();
+const configPath = findConfig();
 
+module.exports = () => {
   try {
-    const unsanitizedConfig = require(configPath);
+    const unsanitizedConfig = getConfig();
     const config = sanitizeConfig(unsanitizedConfig);
 
     const webpackProdConfig = getWebpackProdConfig({

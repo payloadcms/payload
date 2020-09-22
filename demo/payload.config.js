@@ -36,11 +36,9 @@ module.exports = {
     },
     disable: false,
     components: {
-      layout: {
-        // Sidebar: () => (
-        //   <div>Hello</div>
-        // ),
-      },
+      // nav: () => (
+      //   <div>Hello</div>
+      // ),
     },
   },
   email: {

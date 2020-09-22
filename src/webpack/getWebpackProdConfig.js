@@ -3,8 +3,9 @@ const Dotenv = require('dotenv-webpack');
 // const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const path = require('path');
 const getStyleLoaders = require('./getStyleLoaders');
+const babelConfig = require('../../babel.config');
 
-const mockModulePath = path.resolve(__dirname, './mockModule.js');
+const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js');
 
 module.exports = (config) => {
   let webpackConfig = {
@@ -22,39 +23,11 @@ module.exports = (config) => {
     module: {
       rules: [
         {
-          test: require.resolve('../client/components/customComponents'),
-          use: [
-            {
-              loader: 'val-loader',
-              options: config,
-            },
-          ],
-        },
-        {
           test: /\.js$/,
           exclude: /node_modules\/(?!(@payloadcms\/payload)\/).*/,
           use: {
             loader: 'babel-loader',
-            options: {
-              presets: [
-                [
-                  require.resolve('@babel/preset-env'),
-                  {
-                    targets: [
-                      'defaults',
-                      'not IE 11',
-                      'not IE_Mob 11',
-                    ],
-                  },
-                ],
-                require.resolve('@babel/preset-react'),
-              ],
-              plugins: [
-                'add-module-exports',
-                require.resolve('@babel/plugin-proposal-optional-chaining'),
-                require.resolve('@babel/plugin-proposal-class-properties'),
-              ],
-            },
+            options: babelConfig,
           },
         },
         {
@@ -104,7 +77,6 @@ module.exports = (config) => {
       modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
       alias: {
         'payload/unsanitizedConfig': config.paths.config,
-        'payload/config': path.resolve(__dirname, '../client/config.js'),
         '@payloadcms/payload$': mockModulePath,
       },
     },

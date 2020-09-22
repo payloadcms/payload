@@ -3,10 +3,10 @@
  */
 
 require('isomorphic-fetch');
-const config = require('../../../demo/payload.config');
+const getConfig = require('../../utilities/getConfig');
 const { email, password } = require('../../tests/credentials');
 
-const url = config.serverURL;
+const { serverURL: url } = getConfig();
 
 let token = null;
 
