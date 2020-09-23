@@ -5,8 +5,15 @@
     border: 1px solid $color-light-gray;
   }
 
+  &__toolbar {
+    border-bottom: 1px solid $color-light-gray;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
   &__editor {
-    min-height: 200px;
+    min-height: 150px;
     padding: base(.5);
 
     p,
@@ -27,8 +34,13 @@
       height: base(.75);
     }
 
-    &:hover {
+    &:hover{
       background-color: $color-background-gray;
+    }
+
+    &__button--active,
+    &__button--active:hover {
+      background-color: $color-light-gray ;
     }
   }
 

@@ -157,47 +157,50 @@ const RichText = (props) => {
         }]}
         onChange={setValue}
       >
-        <div className={`${baseClass}__toolbar`}>
-          {elements.map((element, i) => {
-            const elementName = element?.name || element;
+        <div className={`${baseClass}__wrapper`}>
+          <div className={`${baseClass}__toolbar`}>
+            {elements.map((element, i) => {
+              const elementName = element?.name || element;
 
-            const elementType = enabledElements[elementName];
-            const Button = elementType?.button;
+              const elementType = enabledElements[elementName];
+              const Button = elementType?.button;
 
-            if (Button) {
-              return <Button key={i} />;
-            }
-
-            return null;
-          })}
-          {leaves.map((leaf, i) => {
-            const leafName = leaf?.name || leaf;
-            const leafType = enabledLeaves[leafName];
-            const Button = leafType?.button;
-
-            if (Button) {
-              return <Button key={i} />;
-            }
-
-            return null;
-          })}
-        </div>
-        <Editable
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
-          placeholder={placeholder}
-          spellCheck
-          autoFocus
-          onKeyDown={(event) => {
-            Object.keys(hotkeys).forEach((hotkey) => {
-              if (isHotkey(hotkey, event)) {
-                event.preventDefault();
-                const mark = hotkeys[hotkey];
-                toggleLeaf(editor, mark);
+              if (Button) {
+                return <Button key={i} />;
               }
-            });
-          }}
-        />
+
+              return null;
+            })}
+            {leaves.map((leaf, i) => {
+              const leafName = leaf?.name || leaf;
+              const leafType = enabledLeaves[leafName];
+              const Button = leafType?.button;
+
+              if (Button) {
+                return <Button key={i} />;
+              }
+
+              return null;
+            })}
+          </div>
+          <Editable
+            className={`${baseClass}__editor`}
+            renderElement={renderElement}
+            renderLeaf={renderLeaf}
+            placeholder={placeholder}
+            spellCheck
+            autoFocus
+            onKeyDown={(event) => {
+              Object.keys(hotkeys).forEach((hotkey) => {
+                if (isHotkey(hotkey, event)) {
+                  event.preventDefault();
+                  const mark = hotkeys[hotkey];
+                  toggleLeaf(editor, mark);
+                }
+              });
+            }}
+          />
+        </div>
       </Slate>
     </div>
   );

@@ -21,6 +21,26 @@ const H1 = ({ attributes, children }) => (
   <h1 {...attributes}>{children}</h1>
 );
 
+const H2 = ({ attributes, children }) => (
+  <h2 {...attributes}>{children}</h2>
+);
+
+const H3 = ({ attributes, children }) => (
+  <h3 {...attributes}>{children}</h3>
+);
+
+const H4 = ({ attributes, children }) => (
+  <h4 {...attributes}>{children}</h4>
+);
+
+const H5 = ({ attributes, children }) => (
+  <h5 {...attributes}>{children}</h5>
+);
+
+const H6 = ({ attributes, children }) => (
+  <h6 {...attributes}>{children}</h6>
+);
+
 const UL = ({ attributes, children }) => (
   <ul {...attributes}>{children}</ul>
 );
@@ -44,6 +64,21 @@ const Link = ({ attributes, children, element }) => (
 
 H1.defaultProps = elementDefaultProps;
 H1.propTypes = elementPropTypes;
+
+H2.defaultProps = elementDefaultProps;
+H2.propTypes = elementPropTypes;
+
+H3.defaultProps = elementDefaultProps;
+H3.propTypes = elementPropTypes;
+
+H4.defaultProps = elementDefaultProps;
+H4.propTypes = elementPropTypes;
+
+H5.defaultProps = elementDefaultProps;
+H5.propTypes = elementPropTypes;
+
+H6.defaultProps = elementDefaultProps;
+H6.propTypes = elementPropTypes;
 
 UL.defaultProps = elementDefaultProps;
 UL.propTypes = elementPropTypes;
@@ -71,6 +106,51 @@ const elementTypes = {
       />
     ),
     element: H1,
+  },
+  h2: {
+    button: () => (
+      <ElementButton
+        format="h2"
+        icon="h2"
+      />
+    ),
+    element: H2,
+  },
+  h3: {
+    button: () => (
+      <ElementButton
+        format="h3"
+        icon="h3"
+      />
+    ),
+    element: H3,
+  },
+  h4: {
+    button: () => (
+      <ElementButton
+        format="h4"
+        icon="h4"
+      />
+    ),
+    element: H4,
+  },
+  h5: {
+    button: () => (
+      <ElementButton
+        format="h5"
+        icon="h5"
+      />
+    ),
+    element: H5,
+  },
+  h6: {
+    button: () => (
+      <ElementButton
+        format="h6"
+        icon="h6"
+      />
+    ),
+    element: H6,
   },
   ul: {
     button: () => (

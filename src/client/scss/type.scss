@@ -5,7 +5,7 @@
 // HEADINGS
 /////////////////////////////
 
-%h1, %h2, %h3, %h4, %h5 {
+%h1, %h2, %h3, %h4, %h5, %h6 {
   font-family: $font-body;
   font-weight: 600;
   color: $color-dark-gray;
@@ -64,6 +64,13 @@
 %h5 {
   margin: 0;
   font-size: base(.5625);
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+%h6 {
+  margin: 0;
+  font-size: base(.5);
   line-height: 1.5;
   font-weight: 600;
 }

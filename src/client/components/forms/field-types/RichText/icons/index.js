@@ -10,10 +10,13 @@ import underline from './Underline';
 import ul from './UnorderedList';
 import link from './Link';
 
-import h1 from './Headings/H1';
-
 const Icons = {
-  h1,
+  h1: Headings.H1,
+  h2: Headings.H2,
+  h3: Headings.H3,
+  h4: Headings.H4,
+  h5: Headings.H5,
+  h6: Headings.H6,
   ul,
   ol,
   bold,
