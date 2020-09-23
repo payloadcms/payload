@@ -11,7 +11,7 @@ if (process.env.NODE_ENV !== 'test') {
   require('@babel/register')({
     ...babelConfig,
     ignore: [
-      /node_modules\/(?!@payloadcms\/payload\/admin).*/,
+      /node_modules\/(?!@payloadcms\/payload\/src\/client|@payloadcms\/payload\/admin).*/,
     ],
   });
 }
