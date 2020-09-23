@@ -1,23 +1,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Strikethrough = ({ attributes, children }) => (
+const PurpleBackground = ({ attributes, children }) => (
   <span
     {...attributes}
-    style={{ textDecoration: 'line-through' }}
+    style={{ backgroundColor: 'purple' }}
   >
     {children}
   </span>
 );
 
-Strikethrough.defaultProps = {
+PurpleBackground.defaultProps = {
   attributes: {},
   children: null,
 };
 
-Strikethrough.propTypes = {
+PurpleBackground.propTypes = {
   attributes: PropTypes.shape({}),
   children: PropTypes.node,
 };
 
-export default Strikethrough;
+export default PurpleBackground;

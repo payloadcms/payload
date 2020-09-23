@@ -13,6 +13,7 @@ import leafTypes from './leafTypes';
 import elementTypes from './elementTypes';
 import toggleLeaf from './toggleLeaf';
 import hotkeys from './hotkeys';
+import enablePlugins from './enablePlugins';
 
 import mergeCustomFunctions from './mergeCustomFunctions';
 
@@ -35,12 +36,11 @@ const RichText = (props) => {
       elements = [],
       leaves = [],
     } = {},
-    customComponentPath,
   } = props;
 
   const path = pathFromProps || name;
 
-  const [preloaded, setPreloaded] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [enabledElements, setEnabledElements] = useState({});
   const [enabledLeaves, setEnabledLeaves] = useState({});
 
@@ -50,7 +50,12 @@ const RichText = (props) => {
 
     if (Element) {
       return (
-        <Element attributes={attributes}>{children}</Element>
+        <Element
+          attributes={attributes}
+          element={element}
+        >
+          {children}
+        </Element>
       );
     }
 
@@ -63,7 +68,14 @@ const RichText = (props) => {
     if (enabledLeaves[matchedLeafName]?.leaf) {
       const Leaf = enabledLeaves[matchedLeafName]?.leaf;
 
-      return <Leaf attributes={attributes}>{children}</Leaf>;
+      return (
+        <Leaf
+          attributes={attributes}
+          leaf={leaf}
+        >
+          {children}
+        </Leaf>
+      );
     }
 
     return (
@@ -96,25 +108,28 @@ const RichText = (props) => {
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
-  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+  const editor = useMemo(() => {
+    let CreatedEditor = withHistory(withReact(createEditor()));
+
+    CreatedEditor = enablePlugins(CreatedEditor, elements);
+    CreatedEditor = enablePlugins(CreatedEditor, leaves);
+
+    return CreatedEditor;
+  }, [elements, leaves]);
 
   useEffect(() => {
-    if (!preloaded) {
-      const preload = async () => {
-        const mergedElements = await mergeCustomFunctions(`${customComponentPath}.elements`, elements, elementTypes);
-        const mergedLeaves = await mergeCustomFunctions(`${customComponentPath}.leaves`, leaves, leafTypes);
+    if (!loaded) {
+      const mergedElements = mergeCustomFunctions(elements, elementTypes);
+      const mergedLeaves = mergeCustomFunctions(leaves, leafTypes);
 
-        setEnabledElements(mergedElements);
-        setEnabledLeaves(mergedLeaves);
+      setEnabledElements(mergedElements);
+      setEnabledLeaves(mergedLeaves);
 
-        setPreloaded(true);
-      };
-
-      preload();
+      setLoaded(true);
     }
-  }, [preloaded, customComponentPath, elements, leaves]);
+  }, [loaded, elements, leaves]);
 
-  if (!preloaded) {
+  if (!loaded) {
     return null;
   }
 
@@ -225,7 +240,6 @@ RichText.propTypes = {
   }),
   label: PropTypes.string,
   placeholder: PropTypes.string,
-  customComponentPath: PropTypes.string.isRequired,
 };
 
 export default withCondition(RichText);

@@ -1,0 +1,29 @@
+@import '../../../../../../../admin/styles';
+
+.button-rich-text-button {
+  .btn {
+    margin-right: base(1);
+  }
+
+  &__modal {
+    @include blur-bg;
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+
+  &__header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+
+    h4 {
+      margin: 0;
+    }
+
+    svg {
+      width: base(1.5);
+      height: base(1.5);
+    }
+  }
+}
