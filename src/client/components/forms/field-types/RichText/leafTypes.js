@@ -24,6 +24,19 @@ const Underline = ({ attributes, children }) => (
   <u {...attributes}>{children}</u>
 );
 
+const Code = ({ attributes, children }) => (
+  <code {...attributes}>{children}</code>
+);
+
+const Strikethrough = ({ attributes, children }) => (
+  <span
+    style={{ textDecoration: 'line-through' }}
+    {...attributes}
+  >
+    {children}
+  </span>
+);
+
 Bold.defaultProps = leafDefaultProps;
 Bold.propTypes = leafPropTypes;
 
@@ -32,6 +45,12 @@ Italic.propTypes = leafPropTypes;
 
 Underline.defaultProps = leafDefaultProps;
 Underline.propTypes = leafPropTypes;
+
+Code.defaultProps = leafDefaultProps;
+Code.propTypes = leafPropTypes;
+
+Strikethrough.defaultProps = leafDefaultProps;
+Strikethrough.propTypes = leafPropTypes;
 
 const leafTypes = {
   bold: {
@@ -60,6 +79,24 @@ const leafTypes = {
       />
     ),
     leaf: Underline,
+  },
+  strikethrough: {
+    button: () => (
+      <LeafButton
+        format="strikethrough"
+        icon="strikethrough"
+      />
+    ),
+    leaf: Strikethrough,
+  },
+  code: {
+    button: () => (
+      <LeafButton
+        format="code"
+        icon="code"
+      />
+    ),
+    leaf: Code,
   },
 };
 

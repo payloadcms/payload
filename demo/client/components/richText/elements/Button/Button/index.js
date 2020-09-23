@@ -2,7 +2,7 @@ import React, { Fragment, useCallback } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
 import { useSlate } from 'slate-react';
-import { MinimalTemplate } from '../../../../../../../components';
+import { MinimalTemplate } from '../../../../../../../admin/components';
 import { ElementButton } from '../../../../../../../admin/rich-text';
 import { X } from '../../../../../../../admin/icons';
 import { Button } from '../../../../../../../admin/elements';

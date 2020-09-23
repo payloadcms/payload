@@ -8,7 +8,12 @@ const babelConfig = require('../../babel.config');
 require('ignore-styles');
 
 if (process.env.NODE_ENV !== 'test') {
-  require('@babel/register')(babelConfig);
+  require('@babel/register')({
+    ...babelConfig,
+    ignore: [
+      /node_modules\/(?!@payloadcms\/payload\/admin).*/,
+    ],
+  });
 }
 
 const getConfig = () => {

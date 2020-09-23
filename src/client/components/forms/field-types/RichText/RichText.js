@@ -33,8 +33,8 @@ const RichText = (props) => {
       readOnly,
       style,
       width,
-      elements = [],
-      leaves = [],
+      elements = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link'],
+      leaves = ['bold', 'italic', 'underline', 'strikethrough', 'code'],
     } = {},
   } = props;
 
