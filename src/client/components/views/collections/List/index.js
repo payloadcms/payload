@@ -45,7 +45,7 @@ const ListView = (props) => {
 
   useEffect(() => {
     const params = {
-      depth: 2,
+      depth: 1,
     };
 
     if (page) params.page = page;

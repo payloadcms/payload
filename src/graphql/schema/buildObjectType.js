@@ -82,6 +82,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
                 locale,
                 fallbackLocale,
               },
+              depth: 0,
             };
 
             const relatedDocument = await find(relatedDocumentQuery);
@@ -265,6 +266,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
                   locale,
                   fallbackLocale,
                 },
+                depth: 0,
               });
 
               if (result.docs.length === 1) {
@@ -310,6 +312,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
                 },
               },
               ...context,
+              depth: 0,
             };
 
             if (args.page) relatedDocumentQuery.paginate.page = args.page;

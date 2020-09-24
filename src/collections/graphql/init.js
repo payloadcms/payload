@@ -201,6 +201,11 @@ function registerCollections() {
                 formatName(`${slug}Me${singularLabel}`),
                 collection.config.fields.concat([
                   {
+                    name: 'id',
+                    label: 'ID',
+                    type: 'text',
+                  },
+                  {
                     name: 'email',
                     type: 'email',
                     required: true,
