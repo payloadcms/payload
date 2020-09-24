@@ -20,6 +20,7 @@ async function verifyEmail(args) {
   user._verified = true;
 
   await user.save();
+  return true;
 }
 
 module.exports = verifyEmail;
