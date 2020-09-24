@@ -111,6 +111,9 @@ declare module "@payloadcms/payload/types" {
     localized?: boolean;
     fields?: PayloadField[];
   }
+
+  export type PayloadCollectionHook = (...args: any[]) => any | void;
+
   export interface PayloadCollection {
     slug: string;
     labels: {
@@ -121,6 +124,15 @@ declare module "@payloadcms/payload/types" {
       useAsTitle?: string;
       components?: any;
     },
+    hooks?: {
+      beforeValidate?: Array<PayloadCollectionHook>;
+      beforeChange?: Array<PayloadCollectionHook>;
+      afterChange?: Array<PayloadCollectionHook>;
+      beforeRead?: Array<PayloadCollectionHook>;
+      afterRead?: Array<PayloadCollectionHook>;
+      beforeDelete?: Array<PayloadCollectionHook>;
+      afterDelete?: Array<PayloadCollectionHook>;
+    }
     access?: {
       create?: (args?: any) => boolean;
       read?: (args?: any) => boolean;
@@ -153,6 +165,7 @@ declare module "@payloadcms/payload/types" {
     };
     fields: PayloadField[];
   }
+
   export interface PayloadConfig {
     admin?: {
       user?: string;
