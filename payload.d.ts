@@ -117,6 +117,10 @@ declare module "@payloadcms/payload/types" {
       singular: string;
       plural: string;
     },
+    admin?: {
+      useAsTitle?: string;
+      components?: any;
+    },
     access?: {
       create?: (args?: any) => boolean;
       read?: (args?: any) => boolean;
@@ -124,6 +128,16 @@ declare module "@payloadcms/payload/types" {
       delete?: (args?: any) => boolean;
       admin?: (args?: any) => boolean;
     },
+    auth?: {
+      tokenExpiration?: number;
+      emailVerification?: boolean;
+      useAPIKey?: boolean;
+      cookies?: {
+        secure?: boolean;
+        sameSite?: string;
+        domain?: string | undefined;
+      }
+    }
     fields: PayloadField[];
   }
 
