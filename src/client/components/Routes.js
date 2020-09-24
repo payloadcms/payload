@@ -11,6 +11,7 @@ import ForgotPassword from './views/ForgotPassword';
 import Login from './views/Login';
 import Logout from './views/Logout';
 import NotFound from './views/NotFound';
+import Verify from './views/Verify';
 import CreateFirstUser from './views/CreateFirstUser';
 import Edit from './views/collections/Edit';
 import EditGlobal from './views/Global';
@@ -76,6 +77,21 @@ const Routes = () => {
               <Route path={`${match.url}/reset/:token`}>
                 <ResetPassword />
               </Route>
+
+              {collections.map((collection) => {
+                if (collection?.auth?.emailVerification) {
+                  return (
+                    <Route
+                      key={`${collection.slug}-verify`}
+                      path={`${match.url}/${collection.slug}/verify/:token`}
+                      exact
+                    >
+                      <Verify />
+                    </Route>
+                  );
+                }
+                return null;
+              })}
 
               <Route
                 render={() => {
