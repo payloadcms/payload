@@ -25,10 +25,15 @@ async function find(args) {
   const queryToBuild = {};
 
   if (where) {
+    let and = [];
+
+    if (Array.isArray(where.and)) and = where.and;
+    if (Array.isArray(where.AND)) and = where.AND;
+
     queryToBuild.where = {
       ...where,
       and: [
-        ...(Array.isArray(where.and) ? where.and : []),
+        ...and,
       ],
     };
   }

@@ -292,7 +292,7 @@ const buildWhereInputType = (name, fields, parentName) => {
       'id',
       GraphQLString,
       parentName,
-      ['equals', 'not_equals'],
+      ['equals', 'not_equals', 'in', 'not_in'],
     ),
   };
 
