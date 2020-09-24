@@ -7,7 +7,7 @@ import Meta from '../../utilities/Meta';
 
 const NotFound = () => {
   const { setStepNav } = useStepNav();
-  const { routes: { admin } } = useConfig;
+  const { routes: { admin } } = useConfig();
 
   useEffect(() => {
     setStepNav([{
