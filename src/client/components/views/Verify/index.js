@@ -34,6 +34,12 @@ const Verify = () => {
     return <Login />;
   }
 
+  const getText = () => {
+    if (verifyResult?.status === 200) return 'Verified Successfully';
+    if (verifyResult?.status === 202) return 'Already Activated';
+    return 'Unable To Verify';
+  };
+
   return (
     <MinimalTemplate className={baseClass}>
       <Meta
@@ -45,7 +51,7 @@ const Verify = () => {
         <Logo />
       </div>
       <h2>
-        {verifyResult?.status === 200 ? 'Verified Successfully' : 'Unable To Verify'}
+        {getText()}
       </h2>
       {isAdminUser && verifyResult?.status === 200 && (
         <Button
