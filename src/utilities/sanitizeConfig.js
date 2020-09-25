@@ -29,6 +29,9 @@ const sanitizeConfig = (config) => {
     sanitizedConfig.collections.push(defaultUser);
   }
 
+  sanitizedConfig.maxLoginAttempts = sanitizedConfig.maxLoginAttempts || 3;
+  sanitizedConfig.lockTime = sanitizedConfig.lockTime || 600000; // 10 minutes
+
   sanitizedConfig.email = config.email || {};
   sanitizedConfig.email.fromName = sanitizedConfig.email.fromName || 'Payload';
   sanitizedConfig.email.fromAddress = sanitizedConfig.email.fromName || 'hello@payloadcms.com';
@@ -43,6 +46,10 @@ const sanitizeConfig = (config) => {
     graphQL: (config.routes && config.routes.graphQL) ? config.routes.graphQL : '/graphql',
     graphQLPlayground: (config.routes && config.routes.graphQLPlayground) ? config.routes.graphQLPlayground : '/graphql-playground',
   };
+
+  sanitizedConfig.rateLimit = config.rateLimit || {};
+  sanitizedConfig.rateLimit.window = sanitizedConfig.rateLimit.window || 15 * 60 * 100; // 15min default
+  sanitizedConfig.rateLimit.max = sanitizedConfig.rateLimit.max || 100;
 
   sanitizedConfig.components = { ...(config.components || {}) };
   sanitizedConfig.hooks = { ...(config.hooks || {}) };

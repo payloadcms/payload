@@ -3,6 +3,7 @@ require('isomorphic-fetch');
 
 const express = require('express');
 const graphQLPlayground = require('graphql-playground-middleware-express').default;
+const rateLimit = require('express-rate-limit');
 const logger = require('./utilities/logger')();
 const bindOperations = require('./init/bindOperations');
 const bindRequestHandlers = require('./init/bindRequestHandlers');
@@ -98,8 +99,12 @@ class Payload {
       },
     }));
 
-    // Bind router to API
-    this.express.use(this.config.routes.api, this.router);
+    const apiLimiter = rateLimit({
+      windowMs: this.config.rateLimit.window,
+      max: this.config.rateLimit.max,
+    });
+    // Bind router to API and add rate limiter
+    this.express.use(this.config.routes.api, apiLimiter, this.router);
 
     // Enable static routes for all collections permitting upload
     this.initStatic();

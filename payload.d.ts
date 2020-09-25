@@ -169,6 +169,8 @@ declare module "@payloadcms/payload/types" {
   export interface PayloadConfig {
     admin?: {
       user?: string;
+      maxLoginAttempts?: number;
+      lockTime?: number;
       meta?: {
         titleSuffix?: string;
       },
@@ -183,6 +185,10 @@ declare module "@payloadcms/payload/types" {
       graphQLPlayground?: string;
     };
     defaultDepth?: number,
+    rateLimit?: {
+      window?: number;
+      max?: number;
+    },
     localization?: {
       locales: string[]
     };
