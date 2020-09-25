@@ -101,6 +101,10 @@ module.exports = {
     mutations: {},
     queries: {},
   },
+  rateLimit: {
+    window: 15 * 60 * 100,
+    max: 100,
+  },
   localization: {
     locales: [
       'en',

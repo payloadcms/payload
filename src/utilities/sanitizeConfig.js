@@ -44,6 +44,10 @@ const sanitizeConfig = (config) => {
     graphQLPlayground: (config.routes && config.routes.graphQLPlayground) ? config.routes.graphQLPlayground : '/graphql-playground',
   };
 
+  sanitizedConfig.rateLimit = config.rateLimit || {};
+  sanitizedConfig.rateLimit.window = sanitizedConfig.rateLimit.window || 15 * 60 * 100; // 15min default
+  sanitizedConfig.rateLimit.max = sanitizedConfig.rateLimit.max || 100;
+
   sanitizedConfig.components = { ...(config.components || {}) };
   sanitizedConfig.hooks = { ...(config.hooks || {}) };
   sanitizedConfig.admin = { ...(config.admin || {}) };

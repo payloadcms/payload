@@ -183,6 +183,10 @@ declare module "@payloadcms/payload/types" {
       graphQLPlayground?: string;
     };
     defaultDepth?: number,
+    rateLimit?: {
+      window?: number;
+      max?: number;
+    },
     localization?: {
       locales: string[]
     };
