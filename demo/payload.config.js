@@ -29,6 +29,8 @@ module.exports = {
   admin: {
     user: 'admins',
     // indexHTML: 'custom-index.html',
+    maxLoginAttempts: 3,
+    lockTime: 600 * 1000, // lock time in ms
     meta: {
       titleSuffix: '- Payload Demo',
       // ogImage: '/static/find-image-here.jpg',
@@ -101,6 +103,10 @@ module.exports = {
     mutations: {},
     queries: {},
   },
+  rateLimit: {
+    window: 15 * 60 * 100,
+    max: 100,
+  },
   localization: {
     locales: [
       'en',
@@ -111,8 +117,8 @@ module.exports = {
   },
   productionGraphQLPlayground: false,
   hooks: {
-    afterError: () => {
-      console.error('global error config handler');
+    afterError: (err) => {
+      console.error('global error config handler', err);
     },
   },
   webpack: (config) => config,

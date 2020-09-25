@@ -111,12 +111,28 @@ declare module "@payloadcms/payload/types" {
     localized?: boolean;
     fields?: PayloadField[];
   }
+
+  export type PayloadCollectionHook = (...args: any[]) => any | void;
+
   export interface PayloadCollection {
     slug: string;
     labels: {
       singular: string;
       plural: string;
     },
+    admin?: {
+      useAsTitle?: string;
+      components?: any;
+    },
+    hooks?: {
+      beforeValidate?: Array<PayloadCollectionHook>;
+      beforeChange?: Array<PayloadCollectionHook>;
+      afterChange?: Array<PayloadCollectionHook>;
+      beforeRead?: Array<PayloadCollectionHook>;
+      afterRead?: Array<PayloadCollectionHook>;
+      beforeDelete?: Array<PayloadCollectionHook>;
+      afterDelete?: Array<PayloadCollectionHook>;
+    }
     access?: {
       create?: (args?: any) => boolean;
       read?: (args?: any) => boolean;
@@ -124,6 +140,16 @@ declare module "@payloadcms/payload/types" {
       delete?: (args?: any) => boolean;
       admin?: (args?: any) => boolean;
     },
+    auth?: {
+      tokenExpiration?: number;
+      emailVerification?: boolean;
+      useAPIKey?: boolean;
+      cookies?: {
+        secure?: boolean;
+        sameSite?: string;
+        domain?: string | undefined;
+      }
+    }
     fields: PayloadField[];
   }
 
@@ -139,9 +165,12 @@ declare module "@payloadcms/payload/types" {
     };
     fields: PayloadField[];
   }
+
   export interface PayloadConfig {
     admin?: {
       user?: string;
+      maxLoginAttempts?: number;
+      lockTime?: number;
       meta?: {
         titleSuffix?: string;
       },
@@ -156,6 +185,10 @@ declare module "@payloadcms/payload/types" {
       graphQLPlayground?: string;
     };
     defaultDepth?: number,
+    rateLimit?: {
+      window?: number;
+      max?: number;
+    },
     localization?: {
       locales: string[]
     };

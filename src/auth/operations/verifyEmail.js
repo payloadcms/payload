@@ -10,17 +10,17 @@ async function verifyEmail(args) {
   // 2. Perform password reset
   // /////////////////////////////////////
 
-  // TODO: How do we know which collection this is?
   const user = await args.collection.Model.findOne({
     _verificationToken: args.token,
   });
 
   if (!user) throw new APIError('User not found.', httpStatus.BAD_REQUEST);
+  if (user && user._verified === true) throw new APIError('Already activated', httpStatus.ACCEPTED);
 
   user._verified = true;
-  user._verificationToken = null;
 
   await user.save();
+  return true;
 }
 
 module.exports = verifyEmail;

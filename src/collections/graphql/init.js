@@ -16,7 +16,7 @@ function registerCollections() {
   } = this.graphQL.resolvers.collections;
 
   const {
-    login, logout, me, init, refresh, forgotPassword, resetPassword,
+    login, logout, me, init, refresh, forgotPassword, resetPassword, verifyEmail,
   } = this.graphQL.resolvers.collections.auth;
 
   Object.keys(this.collections).forEach((slug) => {
@@ -264,6 +264,14 @@ function registerCollections() {
           password: { type: GraphQLString },
         },
         resolve: resetPassword(collection),
+      };
+
+      this.Mutation.fields[`verifyEmail${singularLabel}`] = {
+        type: GraphQLBoolean,
+        args: {
+          token: { type: GraphQLString },
+        },
+        resolve: verifyEmail(collection),
       };
 
       this.Mutation.fields[`refreshToken${singularLabel}`] = {
