@@ -24,14 +24,13 @@ function registerCollections() {
         usernameField: 'email',
       });
 
-      // Check if collection is the admin user set in config
-      if (collection.slug === this.config.admin.user) {
+
+      const { maxLoginAttempts, lockTime } = collection.auth;
+
+      if (maxLoginAttempts > 0) {
         schema.add({ loginAttempts: { type: Number, hide: true, default: 0 } });
         schema.add({ lockUntil: { type: Date, hide: true } });
-
         schema.virtual('isLocked').get(() => !!(this.lockUntil && this.lockUntil > Date.now()));
-
-        const { maxLoginAttempts, lockTime } = this.config.admin;
 
         // eslint-disable-next-line func-names
         schema.methods.incLoginAttempts = function (cb) {

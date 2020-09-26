@@ -241,12 +241,18 @@ const sanitizeCollection = (collections, collection) => {
       authFields.push({
         name: '_verified',
         type: 'checkbox',
-        hidden: true,
+        access: {
+          create: () => false,
+          update: () => false,
+        },
         admin: {
           disabled: true,
         },
       });
     }
+
+    sanitized.auth.maxLoginAttempts = typeof sanitized.auth.maxLoginAttempts === 'undefined' ? 5 : sanitized.auth.maxLoginAttempts;
+    sanitized.auth.lockTime = sanitized.auth.lockTime || 600000; // 10 minutes
 
     if (!sanitized.auth.tokenExpiration) sanitized.auth.tokenExpiration = 7200;
 

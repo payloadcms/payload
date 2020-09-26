@@ -91,6 +91,7 @@ const DefaultEditView = (props) => {
                   <Auth
                     useAPIKey={auth.useAPIKey}
                     requirePassword={!isEditing}
+                    emailVerification={auth.emailVerification}
                   />
                 )}
                 {upload && (
@@ -233,6 +234,7 @@ DefaultEditView.propTypes = {
     timestamps: PropTypes.bool,
     auth: PropTypes.shape({
       useAPIKey: PropTypes.bool,
+      emailVerification: PropTypes.bool,
     }),
     upload: PropTypes.shape({}),
   }).isRequired,

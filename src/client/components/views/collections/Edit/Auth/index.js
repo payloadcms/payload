@@ -13,7 +13,7 @@ import './index.scss';
 const baseClass = 'auth-fields';
 
 const Auth = (props) => {
-  const { useAPIKey, requirePassword } = props;
+  const { useAPIKey, requirePassword, emailVerification } = props;
   const [changingPassword, setChangingPassword] = useState(requirePassword);
   const { getField } = useFormFields();
   const modified = useFormModified();
@@ -74,6 +74,13 @@ const Auth = (props) => {
           )}
         </div>
       )}
+      {emailVerification && (
+        <Checkbox
+          label="Verified"
+          name="_verified"
+          readOnly
+        />
+      )}
     </div>
   );
 };
@@ -81,11 +88,13 @@ const Auth = (props) => {
 Auth.defaultProps = {
   useAPIKey: false,
   requirePassword: false,
+  emailVerification: false,
 };
 
 Auth.propTypes = {
   useAPIKey: PropTypes.bool,
   requirePassword: PropTypes.bool,
+  emailVerification: PropTypes.bool,
 };
 
 export default Auth;
