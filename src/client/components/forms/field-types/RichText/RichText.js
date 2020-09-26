@@ -166,7 +166,12 @@ const RichText = (props) => {
               const Button = elementType?.button;
 
               if (Button) {
-                return <Button key={i} />;
+                return (
+                  <Button
+                    key={i}
+                    path={path}
+                  />
+                );
               }
 
               return null;
@@ -177,7 +182,12 @@ const RichText = (props) => {
               const Button = leafType?.button;
 
               if (Button) {
-                return <Button key={i} />;
+                return (
+                  <Button
+                    key={i}
+                    path={path}
+                  />
+                );
               }
 
               return null;

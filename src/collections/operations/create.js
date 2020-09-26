@@ -106,7 +106,11 @@ async function create(args) {
       throw new MissingFile();
     }
 
-    const staticPath = path.join(config.paths.configDir, staticDir);
+    let staticPath = staticDir;
+
+    if (staticDir.indexOf('/') !== 0) {
+      staticPath = path.join(config.paths.configDir, staticDir);
+    }
 
     mkdirp.sync(staticPath);
 

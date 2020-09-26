@@ -149,7 +149,11 @@ async function update(args) {
 
     const { staticDir, imageSizes } = collectionConfig.upload;
 
-    const staticPath = path.resolve(this.config.paths.configDir, staticDir);
+    let staticPath = staticDir;
+
+    if (staticDir.indexOf('/') !== 0) {
+      staticPath = path.join(this.config.paths.configDir, staticDir);
+    }
 
     const file = (req.files && req.files.file) ? req.files.file : req.fileData;
 
