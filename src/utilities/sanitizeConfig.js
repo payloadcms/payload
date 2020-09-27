@@ -29,16 +29,12 @@ const sanitizeConfig = (config) => {
     sanitizedConfig.collections.push(defaultUser);
   }
 
-  sanitizedConfig.maxLoginAttempts = sanitizedConfig.maxLoginAttempts || 3;
-  sanitizedConfig.lockTime = sanitizedConfig.lockTime || 600000; // 10 minutes
-
   sanitizedConfig.email = config.email || {};
   sanitizedConfig.email.fromName = sanitizedConfig.email.fromName || 'Payload';
   sanitizedConfig.email.fromAddress = sanitizedConfig.email.fromName || 'hello@payloadcms.com';
 
-  if (!sanitizedConfig.graphQL) {
-    sanitizedConfig.graphQL = {};
-  }
+  sanitizedConfig.graphQL = config.graphQL || {};
+  sanitizedConfig.maxComplexity = sanitizedConfig.maxComplexity || 1000;
 
   sanitizedConfig.routes = {
     admin: (config.routes && config.routes.admin) ? config.routes.admin : '/admin',

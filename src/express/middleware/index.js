@@ -5,11 +5,16 @@ const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const qsMiddleware = require('qs-middleware');
 const fileUpload = require('express-fileupload');
+const rateLimit = require('express-rate-limit');
 const localizationMiddleware = require('../../localization/middleware');
 const authenticate = require('./authenticate');
 const identifyAPI = require('./identifyAPI');
 
 const middleware = (payload) => [
+  rateLimit({
+    windowMs: payload.config.rateLimit.window,
+    max: payload.config.rateLimit.max,
+  }),
   passport.initialize(),
   identifyAPI('REST'),
   authenticate(payload.config),

@@ -40,12 +40,13 @@ async function login(args) {
   }
   const authResult = await userDoc.authenticate(password);
 
-  if (authResult.user) {
-    await authResult.user.resetLoginAttempts();
-  } else {
-    await userDoc.incLoginAttempts();
+  const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0;
+  if (!authResult.user) {
+    if (maxLoginAttemptsEnabled) await userDoc.incLoginAttempts();
     throw new AuthenticationError();
   }
+
+  if (maxLoginAttemptsEnabled) await authResult.user.resetLoginAttempts();
 
   const userQuery = await operations.collections.find({
     where: {

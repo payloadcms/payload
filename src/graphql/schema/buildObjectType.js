@@ -59,6 +59,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
       const upload = {
         args: uploadArgs,
         type,
+        extensions: { complexity: 20 },
         async resolve(parent, args, context) {
           const value = parent[field.name];
           const locale = args.locale || context.locale;
@@ -234,6 +235,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
       const relationship = {
         args: relationshipArgs,
         type: hasManyValues ? new GraphQLList(type) : type,
+        extensions: { complexity: 10 },
         async resolve(parent, args, context) {
           const value = parent[field.name];
           const locale = args.locale || context.locale;

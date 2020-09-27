@@ -22,6 +22,8 @@ module.exports = {
   auth: {
     tokenExpiration: 7200,
     emailVerification: false,
+    maxLoginAttempts: 5,
+    lockTime: 600 * 1000, // lock time in ms
     useAPIKey: true,
     cookies: {
       secure: process.env.NODE_ENV === 'production',
