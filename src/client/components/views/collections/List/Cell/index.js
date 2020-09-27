@@ -1,11 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import format from 'date-fns/format';
 import { useConfig } from '../../../../providers/Config';
 import RenderCustomComponent from '../../../../utilities/RenderCustomComponent';
-import Thumbnail from '../../../../elements/Thumbnail';
-import Relationship from './Relationship';
+import cellComponents from './types';
 
 const DefaultCell = (props) => {
   const {
@@ -13,17 +11,10 @@ const DefaultCell = (props) => {
     colIndex,
     collection: {
       slug,
-      upload: {
-        staticURL,
-        adminThumbnail,
-      } = {},
     },
     cellData,
     rowData: {
       id,
-      filename,
-      mimeType,
-      sizes,
     } = {},
   } = props;
 
@@ -38,49 +29,24 @@ const DefaultCell = (props) => {
     wrapElementProps.to = `${admin}/collections/${slug}/${id}`;
   }
 
-  if (field.type === 'thumbnail') {
-    return (
-      <WrapElement {...wrapElementProps}>
-        <Thumbnail
-          size="small"
-          {...{
-            mimeType, adminThumbnail, sizes, staticURL, filename,
-          }}
-        />
-      </WrapElement>
-    );
-  }
+  const CellComponent = cellComponents[field.type];
 
-  if (field.type === 'relationship') {
+  if (!CellComponent) {
     return (
       <WrapElement {...wrapElementProps}>
-        <Relationship
-          field={field}
-          cellData={cellData}
-        />
-      </WrapElement>
-    );
-  }
-
-  if (field.type === 'date' && cellData) {
-    return (
-      <WrapElement {...wrapElementProps}>
-        <span>
-          {format(new Date(cellData), 'MMMM do yyyy, h:mma')}
-        </span>
+        {typeof cellData === 'string' && cellData}
+        {typeof cellData === 'number' && cellData}
+        {typeof cellData === 'object' && JSON.stringify(cellData)}
       </WrapElement>
     );
   }
 
   return (
     <WrapElement {...wrapElementProps}>
-      {field.type !== 'date' && (
-        <React.Fragment>
-          {typeof cellData === 'string' && cellData}
-          {typeof cellData === 'number' && cellData}
-          {typeof cellData === 'object' && JSON.stringify(cellData)}
-        </React.Fragment>
-      )}
+      <CellComponent
+        field={field}
+        data={cellData}
+      />
     </WrapElement>
   );
 };

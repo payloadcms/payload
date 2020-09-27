@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useConfig } from '../../../../../providers/Config';
+import { useConfig } from '../../../../../../providers/Config';
 
 const RelationshipCell = (props) => {
-  const { field, cellData } = props;
+  const { field, data: cellData } = props;
   const { relationTo } = field;
   const { collections } = useConfig();
   const [data, setData] = useState();
@@ -39,7 +39,7 @@ const RelationshipCell = (props) => {
         }
       }
     }
-  }, [cellData, relationTo, field]);
+  }, [cellData, relationTo, field, collections]);
 
   return (
     <React.Fragment>
@@ -49,11 +49,11 @@ const RelationshipCell = (props) => {
 };
 
 RelationshipCell.defaultProps = {
-  cellData: undefined,
+  data: undefined,
 };
 
 RelationshipCell.propTypes = {
-  cellData: PropTypes.oneOfType([
+  data: PropTypes.oneOfType([
     PropTypes.shape({}),
     PropTypes.array,
     PropTypes.string,
