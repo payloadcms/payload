@@ -29,8 +29,6 @@ module.exports = {
   admin: {
     user: 'admins',
     // indexHTML: 'custom-index.html',
-    maxLoginAttempts: 3,
-    lockTime: 600 * 1000, // lock time in ms
     meta: {
       titleSuffix: '- Payload Demo',
       // ogImage: '/static/find-image-here.jpg',

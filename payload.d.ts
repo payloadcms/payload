@@ -143,6 +143,8 @@ declare module "@payloadcms/payload/types" {
     auth?: {
       tokenExpiration?: number;
       emailVerification?: boolean;
+      maxLoginAttempts?: number;
+      lockTime?: number;
       useAPIKey?: boolean;
       cookies?: {
         secure?: boolean;
@@ -169,8 +171,6 @@ declare module "@payloadcms/payload/types" {
   export interface PayloadConfig {
     admin?: {
       user?: string;
-      maxLoginAttempts?: number;
-      lockTime?: number;
       meta?: {
         titleSuffix?: string;
       },
