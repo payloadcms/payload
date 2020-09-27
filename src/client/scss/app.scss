@@ -22,15 +22,10 @@ html {
   @extend %body;
   background: $color-background-gray;
   -webkit-font-smoothing: antialiased;
-  overflow-y: scroll;
 
   @include mid-break {
     font-size: 12px;
   }
-}
-
-html, body, #app {
-  height: 100%;
 }
 
 #app {
