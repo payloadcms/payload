@@ -98,6 +98,7 @@ module.exports = {
     scss: 'client/scss/overrides.scss',
   },
   graphQL: {
+    maxComplexity: 1000,
     mutations: {},
     queries: {},
   },

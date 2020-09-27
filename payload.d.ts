@@ -195,6 +195,11 @@ declare module "@payloadcms/payload/types" {
     defaultLocale?: string;
     fallback?: boolean;
     productionGraphQLPlayground?: boolean;
+    graphQL?: {
+      mutations?: Object;
+      queries?: Object;
+      maxComplexity?: number;
+    };
     hooks?: {
       afterError?: () => void;
     };
