@@ -1,6 +1,13 @@
 const GraphQL = require('graphql');
 
 const { GraphQLObjectType, GraphQLSchema } = GraphQL;
+const queryComplexityImport = require('graphql-query-complexity');
+
+const queryComplexity = queryComplexityImport.default;
+const {
+  fieldExtensionsEstimator,
+  simpleEstimator,
+} = queryComplexityImport;
 
 const graphQLHTTP = require('express-graphql');
 const buildObjectType = require('./schema/buildObjectType');
@@ -12,7 +19,6 @@ const buildFallbackLocaleInputType = require('./schema/buildFallbackLocaleInputT
 const initCollections = require('../collections/graphql/init');
 const initGlobals = require('../globals/graphql/init');
 const buildWhereInputType = require('./schema/buildWhereInputType');
-const errorHandler = require('./errorHandler');
 const access = require('../auth/graphql/resolvers/access');
 
 class InitializeGraphQL {
@@ -101,18 +107,31 @@ class InitializeGraphQL {
   }
 
   init(req, res) {
-    return graphQLHTTP({
-      schema: this.schema,
-      // customFormatErrorFn: () => {
-      //   const response = {
-      //     ...this.errorExtensions[this.errorExtensionIteration],
-      //   };
-      //   this.errorExtensionIteration += 1;
-      //   return response;
-      // },
-      // extensions: this.extensions,
-      context: { req, res },
-    });
+    return graphQLHTTP(
+      async (request, response, { variables }) => ({
+        schema: this.schema,
+        // customFormatErrorFn: () => {
+        //   const response = {
+        //     ...this.errorExtensions[this.errorExtensionIteration],
+        //   };
+        //   this.errorExtensionIteration += 1;
+        //   return response;
+        // },
+        // extensions: this.extensions,
+        context: { req, res },
+        validationRules: [
+          queryComplexity({
+            estimators: [
+              fieldExtensionsEstimator(),
+              simpleEstimator({ defaultComplexity: 1 }), // Fallback if complexity not set
+            ],
+            maximumComplexity: this.config.graphQL.maxComplexity,
+            variables,
+            // onComplete: (complexity) => { console.log('Query Complexity:', complexity); },
+          }),
+        ],
+      }),
+    );
   }
 }
 
