@@ -6,8 +6,14 @@ const BlocksCell = ({ data, field }) => {
 
   let label = `0 ${field.label}.`;
 
-  if (selectedBlocks.length > 0) {
-    label = `${selectedBlocks.length} ${field.label}`;
+  const formatBlocks = (blocks) => blocks.map((b) => b.charAt(0).toUpperCase() + b.slice(1)).join(', ');
+
+  const itemsToShow = 5;
+  if (selectedBlocks.length > itemsToShow) {
+    const more = selectedBlocks.length - itemsToShow;
+    label = `${selectedBlocks.length} ${field.label} - ${formatBlocks(selectedBlocks.slice(0, itemsToShow))} and ${more} more`;
+  } else if (selectedBlocks.length > 0) {
+    label = `${selectedBlocks.length} ${field.label} - ${formatBlocks(selectedBlocks)}`;
   }
 
   return (
