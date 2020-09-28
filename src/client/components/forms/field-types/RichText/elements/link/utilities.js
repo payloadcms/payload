@@ -1,5 +1,4 @@
 import { Editor, Transforms, Range } from 'slate';
-import isURL from 'is-url';
 
 export const isLinkActive = (editor) => {
   const [link] = Editor.nodes(editor, { match: (n) => n.type === 'link' });
@@ -10,7 +9,7 @@ export const unwrapLink = (editor) => {
   Transforms.unwrapNodes(editor, { match: (n) => n.type === 'link' });
 };
 
-export const wrapLink = (editor, url) => {
+export const wrapLink = (editor, url, newTab) => {
   if (isLinkActive(editor)) {
     unwrapLink(editor);
   }
@@ -20,6 +19,7 @@ export const wrapLink = (editor, url) => {
   const link = {
     type: 'link',
     url,
+    newTab,
     children: isCollapsed ? [{ text: url }] : [],
   };
 
@@ -33,33 +33,15 @@ export const wrapLink = (editor, url) => {
 
 export const withLinks = (incomingEditor) => {
   const editor = incomingEditor;
-  const { insertData, insertText, isInline } = editor;
+  const { isInline } = editor;
 
-  editor.isInline = (element) => (element.type === 'link' ? true : isInline(element));
-
-  editor.insertText = (text) => {
-    if (text && isURL(text)) {
-      wrapLink(editor, text);
-    } else {
-      insertText(text);
+  editor.isInline = (element) => {
+    if (element.type === 'link') {
+      return true;
     }
-  };
 
-  editor.insertData = (data) => {
-    const text = data.getData('text/plain');
-
-    if (text && isURL(text)) {
-      wrapLink(editor, text);
-    } else {
-      insertData(data);
-    }
+    return isInline(element);
   };
 
   return editor;
-};
-
-export const insertLink = (editor, url) => {
-  if (editor.selection) {
-    wrapLink(editor, url);
-  }
 };

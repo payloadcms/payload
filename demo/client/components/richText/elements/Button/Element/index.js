@@ -6,19 +6,24 @@ import './index.scss';
 const baseClass = 'rich-text-button';
 
 const ButtonElement = ({ attributes, children, element }) => {
-  const { label, style = 'primary' } = element;
+  const { style = 'primary', label } = element;
 
   return (
-    <span
-      {...attributes}
-      className={[
-        baseClass,
-        `${baseClass}--${style}`,
-      ].join(' ')}
+    <div
+      className={baseClass}
+      contentEditable={false}
     >
-      {label}
-      {children}
-    </span>
+      <span
+        {...attributes}
+        className={[
+          `${baseClass}__button`,
+          `${baseClass}__button--${style}`,
+        ].join(' ')}
+      >
+        {label}
+        {children}
+      </span>
+    </div>
   );
 };
 

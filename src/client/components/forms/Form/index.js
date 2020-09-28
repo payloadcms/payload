@@ -222,7 +222,10 @@ const Form = (props) => {
 
   const createFormData = useCallback(() => {
     const data = reduceFieldsToValues(contextRef.current.fields);
-    return objectToFormData(data, { indices: true, nullsAsUndefineds: true });
+    console.log(data);
+    const formData = objectToFormData(data, { indices: true, nullsAsUndefineds: true });
+    console.log(formData);
+    return formData;
   }, [contextRef]);
 
   contextRef.current.dispatchFields = dispatchFields;

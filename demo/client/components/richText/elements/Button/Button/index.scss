@@ -1,4 +1,4 @@
-@import '../../../../../../../admin/styles';
+@import '../../../../../../../admin/styles.scss';
 
 .button-rich-text-button {
   .btn {
@@ -6,10 +6,13 @@
   }
 
   &__modal {
-    @include blur-bg;
     display: flex;
     align-items: center;
     height: 100%;
+
+    &.payload__modal-item--enterDone {
+      @include blur-bg;
+    }
   }
 
   &__header {

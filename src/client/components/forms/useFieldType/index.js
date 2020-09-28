@@ -13,6 +13,7 @@ const useFieldType = (options) => {
     enableDebouncedValue,
     disableFormData,
     ignoreWhileFlattening,
+    stringify,
   } = options;
 
   const formContext = useForm();
@@ -51,12 +52,13 @@ const useFieldType = (options) => {
       fieldToDispatch.valid = false;
     }
 
+    fieldToDispatch.stringify = stringify;
     fieldToDispatch.disableFormData = disableFormData;
     fieldToDispatch.ignoreWhileFlattening = ignoreWhileFlattening;
     fieldToDispatch.initialValue = initialValue;
 
     dispatchFields(fieldToDispatch);
-  }, [path, dispatchFields, validate, disableFormData, ignoreWhileFlattening, initialValue]);
+  }, [path, dispatchFields, validate, disableFormData, ignoreWhileFlattening, initialValue, stringify]);
 
   // Method to return from `useFieldType`, used to
   // update internal field values from field component(s)

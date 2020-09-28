@@ -1,5 +1,5 @@
 import { Editor } from 'slate';
-import isLeafActive from './isLeafActive';
+import isLeafActive from './isActive';
 
 const toggleLeaf = (editor, format) => {
   const isActive = isLeafActive(editor, format);

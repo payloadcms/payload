@@ -9,30 +9,25 @@ const RichText = {
   },
   fields: [
     {
-      name: 'richText',
+      name: 'defaultRichText',
       type: 'richText',
-      label: 'Rich Text',
+      label: 'Default Rich Text',
+      required: true,
+    },
+    {
+      name: 'customRichText',
+      type: 'richText',
+      label: 'Customized Rich Text',
       required: true,
       admin: {
         elements: [
-          'h1',
           'h2',
           'h3',
-          'h4',
-          'h5',
-          'h6',
-          // 'blockquote',
           Button,
-          'ul',
-          'ol',
-          'link',
         ],
         leaves: [
           'bold',
-          'italic',
           PurpleBackground,
-          // 'underline',
-          // 'strikethrough',
         ],
       },
     },

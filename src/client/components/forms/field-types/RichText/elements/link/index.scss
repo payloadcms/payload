@@ -1,0 +1,25 @@
+@import '../../../../../../scss/styles.scss';
+
+.rich-text-link {
+  position: relative;
+  text-decoration: underline;
+}
+
+.rich-text-link__popup-wrap {
+  position: absolute;
+  z-index: $z-modal;
+  cursor: pointer;
+}
+
+.rich-text-link__button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.rich-text-link__url {
+  @include formInput;
+  width: base(12);
+}

@@ -149,6 +149,7 @@ function fieldReducer(state, action) {
         disableFormData: action.disableFormData,
         ignoreWhileFlattening: action.ignoreWhileFlattening,
         initialValue: action.initialValue,
+        stringify: action.stringify,
       };
 
       return {

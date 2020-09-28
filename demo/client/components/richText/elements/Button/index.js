@@ -6,5 +6,7 @@ module.exports = {
   name: 'button',
   button,
   element,
-  plugin,
+  plugins: [
+    plugin,
+  ],
 };

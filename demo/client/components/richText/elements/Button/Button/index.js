@@ -1,4 +1,5 @@
 import React, { Fragment, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
 import { useSlate } from 'slate-react';
@@ -10,26 +11,31 @@ import { Form, Text, Checkbox, Select, Submit, reduceFieldsToValues } from '../.
 
 import './index.scss';
 
-const modalSlug = 'add-button';
-
 const baseClass = 'button-rich-text-button';
 
-const insertButton = (editor, { url, label, style, newTab = false }) => {
-  const text = { text: label };
+const initialFormState = {
+  style: 'primary',
+};
+
+const insertButton = (editor, { href, label, style, newTab = false }) => {
+  const text = { text: ' ' };
   const button = {
     type: 'button',
-    url,
+    href,
     style,
     newTab,
+    label,
     children: [
       text,
     ],
   };
 
-  Transforms.insertNodes(editor, button);
+  const nodes = [button, { children: [{ text: '' }] }];
+
+  Transforms.insertNodes(editor, nodes);
 };
 
-const ButtonButton = () => {
+const ToolbarButton = ({ path }) => {
   const { open, closeAll } = useModal();
   const editor = useSlate();
 
@@ -38,6 +44,8 @@ const ButtonButton = () => {
     insertButton(editor, data);
     closeAll();
   }, [editor, closeAll]);
+
+  const modalSlug = `${path}-add-button`;
 
   return (
     <Fragment>
@@ -62,7 +70,10 @@ const ButtonButton = () => {
               <X />
             </Button>
           </header>
-          <Form onSubmit={handleAddButton}>
+          <Form
+            onSubmit={handleAddButton}
+            initialState={initialFormState}
+          >
             <Text
               label="Label"
               name="label"
@@ -70,7 +81,7 @@ const ButtonButton = () => {
             />
             <Text
               label="URL"
-              name="URL"
+              name="href"
               required
             />
             <Select
@@ -101,4 +112,8 @@ const ButtonButton = () => {
   );
 };
 
-export default ButtonButton;
+ToolbarButton.propTypes = {
+  path: PropTypes.string.isRequired,
+};
+
+export default ToolbarButton;

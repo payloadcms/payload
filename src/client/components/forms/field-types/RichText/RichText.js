@@ -9,15 +9,22 @@ import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
-import leafTypes from './leafTypes';
-import elementTypes from './elementTypes';
-import toggleLeaf from './toggleLeaf';
+import leafTypes from './leaves';
+import elementTypes from './elements';
+import toggleLeaf from './leaves/toggle';
 import hotkeys from './hotkeys';
 import enablePlugins from './enablePlugins';
 
 import mergeCustomFunctions from './mergeCustomFunctions';
 
 import './index.scss';
+
+const defaultValue = [{
+  children: [{ text: '' }],
+}];
+
+const defaultElements = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link'];
+const defaultLeaves = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
 
 const baseClass = 'rich-text';
 
@@ -29,14 +36,16 @@ const RichText = (props) => {
     validate,
     label,
     placeholder,
+    admin,
     admin: {
       readOnly,
       style,
       width,
-      elements = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link'],
-      leaves = ['bold', 'italic', 'underline', 'strikethrough', 'code'],
     } = {},
   } = props;
+
+  const elements = admin?.elements || defaultElements;
+  const leaves = admin?.leaves || defaultLeaves;
 
   const path = pathFromProps || name;
 
@@ -92,6 +101,7 @@ const RichText = (props) => {
     path,
     required,
     validate: memoizedValidate,
+    stringify: true,
   });
 
   const {
@@ -152,10 +162,12 @@ const RichText = (props) => {
       />
       <Slate
         editor={editor}
-        value={value || [{
-          children: [{ text: '' }],
-        }]}
-        onChange={setValue}
+        value={value || defaultValue}
+        onChange={(val) => {
+          if (val !== defaultValue && val !== value) {
+            setValue(val);
+          }
+        }}
       >
         <div className={`${baseClass}__wrapper`}>
           <div className={`${baseClass}__toolbar`}>

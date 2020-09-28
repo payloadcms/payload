@@ -1,4 +1,3 @@
-const path = require('path');
 const checkRole = require('../access/checkRole');
 
 module.exports = {

@@ -15,9 +15,7 @@ const Label = (props) => {
         className="field-label"
       >
         {label}
-        {required
-          && <span className="required">*</span>
-        }
+        {required && <span className="required">*</span>}
       </label>
     );
   }

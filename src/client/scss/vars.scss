@@ -102,9 +102,63 @@ $top-header-offset-m: base(3);
   }
 }
 
+//////////////////////////////
+// STYLE MIXINS
+//////////////////////////////
+
 @mixin blur-bg($color: $color-background-gray) {
   background: rgba($color, .7);
   backdrop-filter: saturate(180%) blur(5px);
+}
+
+@mixin formInput () {
+  @include inputShadow;
+  font-family: $font-body;
+  width: 100%;
+  border: 1px solid $color-light-gray;
+  background: white;
+  color: $color-dark-gray;
+  border-radius: 0;
+  font-size: 1rem;
+  height: base(2);
+  line-height: base(1);
+  padding: base(.5) base(.75);
+  -webkit-appearance: none;
+
+  &::-webkit-input-placeholder {
+    color: $color-gray;
+    font-weight: normal;
+    font-size: 1rem;
+  }
+
+  &::-moz-placeholder {
+    color: $color-gray;
+    font-weight: normal;
+    font-size: 1rem;
+  }
+
+  &:hover {
+    border-color: darken($color-light-gray, 10%);
+  }
+
+  &:focus,
+  &:active {
+    border-color: $color-gray;
+    outline: 0;
+  }
+
+  &:disabled {
+    background: lighten($color-light-gray, 5%);
+    color: darken($color-gray, 5%);
+
+    &:hover {
+      border-color: $color-light-gray;
+    }
+  }
+
+  @include small-break {
+      margin-bottom: base(.5);
+  }
 }
 
 //////////////////////////////

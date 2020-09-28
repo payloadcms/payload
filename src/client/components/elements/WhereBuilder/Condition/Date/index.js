@@ -2,20 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import DatePicker from '../../../DatePicker';
 
-import './index.scss';
-
 const baseClass = 'condition-value-date';
 
-const DateField = ({ onChange, value }) => {
-  return (
-    <div className={baseClass}>
-      <DatePicker
-        onChange={onChange}
-        value={value}
-      />
-    </div>
-  );
-};
+const DateField = ({ onChange, value }) => (
+  <div className={baseClass}>
+    <DatePicker
+      onChange={onChange}
+      value={value}
+    />
+  </div>
+);
 
 DateField.defaultProps = {
   value: undefined,

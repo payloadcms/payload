@@ -1,5 +1,5 @@
 import { Transforms } from 'slate';
-import isElementActive from './isElementActive';
+import isElementActive from './isActive';
 import listTypes from './listTypes';
 
 const toggleElement = (editor, format) => {
