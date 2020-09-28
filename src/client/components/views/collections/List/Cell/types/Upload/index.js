@@ -21,10 +21,13 @@ UploadCell.defaultProps = {
 };
 
 UploadCell.propTypes = {
-  data: PropTypes.shape({
-    filename: PropTypes.string,
-    mimeType: PropTypes.string,
-  }),
+  data: PropTypes.oneOfType([
+    PropTypes.shape({
+      filename: PropTypes.string,
+      mimeType: PropTypes.string,
+    }),
+    PropTypes.string,
+  ]),
 };
 
 export default UploadCell;
