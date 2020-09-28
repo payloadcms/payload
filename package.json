@@ -137,5 +137,11 @@
     "form-data": "^3.0.0",
     "graphql-request": "^2.0.0",
     "nodemon": "^1.19.4"
-  }
+  },
+  "files": [
+    "*.js",
+    "!jest.config.js",
+    "payload.d.ts",
+    "src"
+  ]
 }
