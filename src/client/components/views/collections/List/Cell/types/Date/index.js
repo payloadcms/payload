@@ -4,7 +4,7 @@ import format from 'date-fns/format';
 
 const DateCell = ({ data }) => (
   <span>
-    {format(new Date(data), 'MMMM do yyyy, h:mma')}
+    {format(new Date(data), 'MMMM do yyyy, h:mm a')}
   </span>
 );
 
