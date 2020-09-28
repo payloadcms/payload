@@ -34,7 +34,6 @@ const Icon = () => {
   return (
     <RenderCustomComponent
       CustomComponent={CustomIcon}
-      path="graphics.Icon"
       DefaultComponent={PayloadIcon}
     />
   );
