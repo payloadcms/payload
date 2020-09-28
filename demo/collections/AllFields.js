@@ -37,12 +37,12 @@ const AllFields = {
         read: ({ req: { user } }) => Boolean(user),
       },
     },
-    {
-      name: 'image',
-      type: 'upload',
-      label: 'Image',
-      relationTo: 'media',
-    },
+    // {
+    //   name: 'image',
+    //   type: 'upload',
+    //   label: 'Image',
+    //   relationTo: 'media',
+    // },
     {
       name: 'select',
       label: 'Select',
