@@ -1,0 +1,8 @@
+@import '../../../../../../../scss/styles';
+
+.upload-cell {
+  &--mime-type {
+    color: $color-gray;
+    float: right;
+  }
+}

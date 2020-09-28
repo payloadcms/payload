@@ -4,6 +4,7 @@ import blocks from './Blocks';
 import array from './Array';
 import textarea from './Textarea';
 import richText from './Richtext';
+import upload from './Upload';
 
 export default {
   relationship,
@@ -12,4 +13,5 @@ export default {
   array,
   textarea,
   richText,
+  upload,
 };
