@@ -285,6 +285,10 @@ async function performFieldOperations(entityConfig, args) {
         if (data[field.name] === '') dataCopy[field.name] = false;
       }
 
+      if (field.type === 'richText' && typeof data[field.name] === 'string') {
+        dataCopy[field.name] = JSON.parse(data[field.name]);
+      }
+
       // If richText content comes through as a string, parse it into JSON
 
       if (field.type === 'richText' && typeof data[field.name] === 'string') {

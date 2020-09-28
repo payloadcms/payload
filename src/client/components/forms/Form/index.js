@@ -222,7 +222,9 @@ const Form = (props) => {
 
   const createFormData = useCallback(() => {
     const data = reduceFieldsToValues(contextRef.current.fields);
-    const formData = objectToFormData(data, { indices: true, nullsAsUndefineds: true });
+
+    // nullAsUndefineds is important to allow uploads and relationship fields to clear themselves
+    const formData = objectToFormData(data, { indices: true, nullsAsUndefineds: false });
     return formData;
   }, [contextRef]);
 

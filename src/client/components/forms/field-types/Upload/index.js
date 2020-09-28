@@ -80,7 +80,7 @@ const Upload = (props) => {
 
       fetchFile();
     }
-  }, [value, setInternalValue, relationTo]);
+  }, [value, setInternalValue, relationTo, api, serverURL]);
 
   return (
     <div

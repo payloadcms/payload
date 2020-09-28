@@ -8,10 +8,10 @@ const baseClass = 'upload-cell';
 const UploadCell = ({ data }) => (
   <React.Fragment>
     <span>
-      {data.filename}
+      {data?.filename}
     </span>
     <span className={`${baseClass}--mime-type`}>
-      {data.mimeType}
+      {data?.mimeType}
     </span>
   </React.Fragment>
 );
