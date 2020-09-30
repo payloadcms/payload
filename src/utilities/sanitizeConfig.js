@@ -34,7 +34,7 @@ const sanitizeConfig = (config) => {
   sanitizedConfig.email.fromAddress = sanitizedConfig.email.fromName || 'hello@payloadcms.com';
 
   sanitizedConfig.graphQL = config.graphQL || {};
-  sanitizedConfig.maxComplexity = sanitizedConfig.maxComplexity || 1000;
+  sanitizedConfig.graphQL.maxComplexity = (sanitizedConfig.graphQL && sanitizedConfig.graphQL.maxComplexity) ? sanitizedConfig.graphQL.maxComplexity : 1000;
 
   sanitizedConfig.routes = {
     admin: (config.routes && config.routes.admin) ? config.routes.admin : '/admin',
