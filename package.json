@@ -143,11 +143,6 @@
     "!jest.config.js",
     "payload.d.ts",
     "src",
-    "./admin",
-    "./field-types.js",
-    "./hooks.js",
-    "./errors.js",
-    "./views.js",
-    "./utilities.js"
+    "admin"
   ]
 }
