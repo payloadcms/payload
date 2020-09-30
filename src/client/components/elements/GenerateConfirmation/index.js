@@ -12,6 +12,7 @@ const baseClass = 'generate-confirmation';
 const GenerateConfirmation = (props) => {
   const {
     setKey,
+    highlightField,
   } = props;
 
   const { toggle } = useModal();
@@ -26,6 +27,7 @@ const GenerateConfirmation = (props) => {
       message: 'New API Key Generated.',
       type: 'success',
     }]);
+    highlightField(true);
   };
 
   return (
@@ -76,13 +78,9 @@ const GenerateConfirmation = (props) => {
   );
 };
 
-// GenerateConfirmation.defaultProps = {
-//   title: undefined,
-//   id: undefined,
-// };
-
 GenerateConfirmation.propTypes = {
   setKey: PropTypes.func.isRequired,
+  highlightField: PropTypes.func.isRequired,
 };
 
 export default GenerateConfirmation;

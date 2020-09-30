@@ -19,3 +19,16 @@
     @include formInput;
   }
 }
+
+@keyframes highlight {
+  0% {
+    background: $color-green;
+  }
+  100% {
+    background: none;
+  }
+}
+
+.highlight {
+  animation: highlight 10s;
+}
