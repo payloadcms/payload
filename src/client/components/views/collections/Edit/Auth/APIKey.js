@@ -7,7 +7,7 @@ import { text } from '../../../../../../fields/validations';
 import { useFormFields } from '../../../../forms/Form/context';
 
 import './index.scss';
-import RegenConfirmation from '../../../../elements/GenerateConfirmation';
+import GenerateConfirmation from '../../../../elements/GenerateConfirmation';
 
 const path = 'apiKey';
 const baseClass = 'api-key';
@@ -15,6 +15,7 @@ const validate = (val) => text(val, { minLength: 24, maxLength: 48 });
 
 const APIKey = () => {
   const [initialAPIKey, setInitialAPIKey] = useState(null);
+  const [highlightedField, setHighlightedField] = useState(false);
 
   const { getField } = useFormFields();
 
@@ -36,6 +37,15 @@ const APIKey = () => {
     validate,
   });
 
+  const highlightField = () => {
+    if (highlightedField) {
+      setHighlightedField(false);
+    }
+    setTimeout(() => {
+      setHighlightedField(true);
+    }, 1);
+  };
+
   const {
     value,
     setValue,
@@ -50,6 +60,14 @@ const APIKey = () => {
       setValue(initialAPIKey);
     }
   }, [apiKeyValue, setValue, initialAPIKey]);
+
+  useEffect(() => {
+    if (highlightedField) {
+      setTimeout(() => {
+        setHighlightedField(false);
+      }, 10000);
+    }
+  }, [highlightedField]);
 
   const classes = [
     'field-type',
@@ -66,14 +84,16 @@ const APIKey = () => {
         />
         <input
           value={value || ''}
+          className={highlightedField ? 'highlight' : undefined}
           disabled="disabled"
           type="text"
           id="apiKey"
           name="apiKey"
         />
       </div>
-      <RegenConfirmation
+      <GenerateConfirmation
         setKey={() => setValue(uuidv4())}
+        highlightField={highlightField}
       />
     </React.Fragment>
   );
