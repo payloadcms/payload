@@ -14,6 +14,9 @@ const middleware = (payload) => [
   rateLimit({
     windowMs: payload.config.rateLimit.window,
     max: payload.config.rateLimit.max,
+    skip(req) {
+      return payload.config.rateLimit.whitelist.includes(req.ip);
+    },
   }),
   passport.initialize(),
   identifyAPI('REST'),
