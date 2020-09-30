@@ -2,12 +2,12 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import useFieldType from '../../../../forms/useFieldType';
 import Label from '../../../../forms/Label';
-import Button from '../../../../elements/Button';
 import CopyToClipboard from '../../../../elements/CopyToClipboard';
 import { text } from '../../../../../../fields/validations';
 import { useFormFields } from '../../../../forms/Form/context';
 
 import './index.scss';
+import RegenConfirmation from '../../../../elements/GenerateConfirmation';
 
 const path = 'apiKey';
 const baseClass = 'api-key';
@@ -72,13 +72,9 @@ const APIKey = () => {
           name="apiKey"
         />
       </div>
-      <Button
-        onClick={() => setValue(uuidv4())}
-        size="small"
-        buttonStyle="secondary"
-      >
-        Generate new API Key
-      </Button>
+      <RegenConfirmation
+        setKey={() => setValue(uuidv4())}
+      />
     </React.Fragment>
   );
 };
