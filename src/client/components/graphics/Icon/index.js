@@ -25,7 +25,7 @@ const Icon = () => {
     admin: {
       components: {
         graphics: {
-          icon: CustomIcon,
+          Icon: CustomIcon,
         } = {},
       } = {},
     } = {},

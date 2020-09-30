@@ -22,7 +22,7 @@ const EditView = (props) => {
       useAsTitle,
       components: {
         views: {
-          edit: CustomEdit,
+          Edit: CustomEdit,
         } = {},
       } = {},
     },
@@ -71,7 +71,7 @@ const EditView = (props) => {
     }
 
     setStepNav(nav);
-  }, [setStepNav, isEditing, pluralLabel, dataToRender, slug, useAsTitle]);
+  }, [setStepNav, isEditing, pluralLabel, dataToRender, slug, useAsTitle, admin]);
 
   useEffect(() => {
     const awaitInitialState = async () => {
@@ -129,6 +129,9 @@ EditView.propTypes = {
     slug: PropTypes.string,
     admin: PropTypes.shape({
       useAsTitle: PropTypes.string,
+      components: PropTypes.shape({
+        Edit: PropTypes.node,
+      }),
     }),
     fields: PropTypes.arrayOf(PropTypes.shape({})),
     preview: PropTypes.func,

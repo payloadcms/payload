@@ -15,7 +15,7 @@ const Dashboard = () => {
     globals,
     admin: {
       components: {
-        dashboard: CustomDashboard,
+        Dashboard: CustomDashboard,
       } = {},
     } = {},
   } = useConfig();

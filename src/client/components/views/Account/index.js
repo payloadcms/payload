@@ -20,7 +20,7 @@ const AccountView = () => {
     collections,
     admin: {
       components: {
-        account: CustomAccount,
+        Account: CustomAccount,
       } = {},
     } = {},
   } = useConfig();

@@ -36,7 +36,7 @@ const GlobalView = (props) => {
     admin: {
       components: {
         views: {
-          edit: CustomEdit,
+          Edit: CustomEdit,
         } = {},
       } = {},
     } = {},
@@ -100,6 +100,11 @@ GlobalView.propTypes = {
     label: PropTypes.string.isRequired,
     slug: PropTypes.string.isRequired,
     fields: PropTypes.arrayOf(PropTypes.shape({})),
+    admin: PropTypes.shape({
+      components: PropTypes.shape({
+        Edit: PropTypes.node,
+      }),
+    }),
   }).isRequired,
 };
 

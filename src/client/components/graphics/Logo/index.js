@@ -55,7 +55,7 @@ const Logo = () => {
     admin: {
       components: {
         graphics: {
-          logo: CustomLogo,
+          Logo: CustomLogo,
         } = {},
       } = {},
     } = {},

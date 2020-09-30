@@ -131,8 +131,8 @@ const Nav = () => {
   const {
     admin: {
       components: {
-        nav: CustomNav,
-      } = {}
+        Nav: CustomNav,
+      } = {},
     } = {},
   } = useConfig();
 
@@ -142,6 +142,6 @@ const Nav = () => {
       DefaultComponent={DefaultNav}
     />
   );
-}
+};
 
 export default Nav;

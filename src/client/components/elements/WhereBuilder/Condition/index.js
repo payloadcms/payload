@@ -80,7 +80,7 @@ const Condition = (props) => {
           </div>
           <div className={`${baseClass}__value`}>
             <RenderCustomComponent
-              CustomComponent={activeField?.props?.admin?.components?.filter}
+              CustomComponent={activeField?.props?.admin?.components?.Filter}
               DefaultComponent={ValueComponent}
               componentProps={{
                 ...activeField.props,

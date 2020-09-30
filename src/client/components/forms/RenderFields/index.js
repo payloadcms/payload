@@ -87,7 +87,7 @@ const RenderFields = (props) => {
                       return (
                         <RenderCustomComponent
                           key={i}
-                          CustomComponent={field?.admin?.components?.field}
+                          CustomComponent={field?.admin?.components?.Field}
                           DefaultComponent={FieldComponent}
                           componentProps={{
                             ...field,

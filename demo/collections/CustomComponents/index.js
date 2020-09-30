@@ -32,9 +32,9 @@ module.exports = {
       localized: true,
       admin: {
         components: {
-          field: DescriptionField,
-          cell: DescriptionCell,
-          filter: DescriptionFilter,
+          Field: DescriptionField,
+          Cell: DescriptionCell,
+          Filter: DescriptionFilter,
         },
       },
     },
@@ -49,7 +49,7 @@ module.exports = {
           label: 'Nested Array Custom Field',
           admin: {
             components: {
-              field: NestedArrayField,
+              Field: NestedArrayField,
             },
           },
         },
@@ -61,7 +61,7 @@ module.exports = {
       type: 'group',
       admin: {
         components: {
-          field: GroupField,
+          Field: GroupField,
         },
       },
       fields: [
@@ -71,7 +71,7 @@ module.exports = {
           label: 'Nested Group Custom Field',
           admin: {
             components: {
-              field: NestedGroupField,
+              Field: NestedGroupField,
             },
           },
         },
@@ -86,7 +86,7 @@ module.exports = {
           type: 'text',
           admin: {
             components: {
-              field: NestedText1Field,
+              Field: NestedText1Field,
             },
           },
         }, {

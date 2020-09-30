@@ -36,7 +36,7 @@ module.exports = {
     },
     disable: false,
     components: {
-      // nav: () => (
+      // Nav: () => (
       //   <div>Hello</div>
       // ),
     },

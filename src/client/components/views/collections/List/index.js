@@ -19,6 +19,11 @@ const ListView = (props) => {
       labels: {
         plural,
       },
+      admin: {
+        components: {
+          List: CustomList,
+        } = {},
+      },
     },
   } = props;
 
@@ -70,7 +75,7 @@ const ListView = (props) => {
   return (
     <RenderCustomComponent
       DefaultComponent={DefaultList}
-      path={`${slug}.views.List`}
+      CustomComponent={CustomList}
       componentProps={{
         collection: { ...collection, fields },
         newDocumentURL,
@@ -90,6 +95,11 @@ ListView.propTypes = {
     labels: PropTypes.shape({
       singular: PropTypes.string,
       plural: PropTypes.string,
+    }),
+    admin: PropTypes.shape({
+      components: PropTypes.shape({
+        List: PropTypes.node,
+      }),
     }),
     slug: PropTypes.string,
     fields: PropTypes.arrayOf(PropTypes.shape),

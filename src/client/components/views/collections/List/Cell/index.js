@@ -61,7 +61,7 @@ const Cell = (props) => {
     field: {
       admin: {
         components: {
-          cell: CustomCell,
+          Cell: CustomCell,
         } = {},
       } = {},
     },
@@ -110,7 +110,7 @@ const propTypes = {
     type: PropTypes.string,
     admin: PropTypes.shape({
       components: PropTypes.shape({
-        cell: PropTypes.func,
+        Cell: PropTypes.func,
       }),
     }),
   }).isRequired,
