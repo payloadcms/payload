@@ -89,6 +89,7 @@ const Code = (props) => {
           color: 'white',
           fontFamily: '"Consolas", "Monaco", monospace',
           fontSize: 12,
+          pointerEvents: readOnly ? 'none' : 'auto',
         }}
       />
     </div>
