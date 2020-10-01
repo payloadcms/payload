@@ -250,7 +250,13 @@ function registerCollections() {
       };
 
       this.Mutation.fields[`resetPassword${singularLabel}`] = {
-        type: GraphQLString,
+        type: new GraphQLObjectType({
+          name: formatName(`${slug}ResetPassword`),
+          fields: {
+            token: { type: GraphQLString },
+            user: { type: collection.graphQL.type },
+          },
+        }),
         args: {
           token: { type: GraphQLString },
           password: { type: GraphQLString },

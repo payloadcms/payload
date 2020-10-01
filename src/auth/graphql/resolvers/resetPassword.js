@@ -12,9 +12,9 @@ function resetPassword(collection) {
       api: 'GraphQL',
     };
 
-    const token = await this.operations.collections.auth.resetPassword(options);
+    const result = await this.operations.collections.auth.resetPassword(options);
 
-    return token;
+    return result;
   }
 
   const resetPasswordResolver = resolver.bind(this);

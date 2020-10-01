@@ -73,7 +73,7 @@ class InitializeGraphQL {
     }
 
     if (typeof this.config.graphQL.mutations === 'function') {
-      const customMutations = this.config.graphQL.mutations(this);
+      const customMutations = this.config.graphQL.mutations(GraphQL, this);
       this.Mutation = {
         ...this.Mutation,
         fields: {

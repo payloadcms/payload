@@ -100,7 +100,8 @@ async function resetPassword(args) {
   // 4. Return updated user
   // /////////////////////////////////////
 
-  return token;
+  const fullUser = await this.findByID({ collection: collectionConfig.slug, id: user.id });
+  return { token, user: fullUser };
 }
 
 module.exports = resetPassword;
