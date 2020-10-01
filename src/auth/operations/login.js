@@ -121,7 +121,10 @@ async function login(args) {
   // 4. Return token
   // /////////////////////////////////////
 
-  return token;
+  return {
+    token,
+    user,
+  };
 }
 
 module.exports = login;

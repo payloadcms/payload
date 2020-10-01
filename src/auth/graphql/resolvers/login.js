@@ -10,9 +10,8 @@ function login(collection) {
       res: context.res,
     };
 
-    const token = await this.operations.collections.auth.login(options);
-
-    return token;
+    const result = await this.operations.collections.auth.login(options);
+    return result;
   }
 
   const loginResolver = resolver.bind(this);
