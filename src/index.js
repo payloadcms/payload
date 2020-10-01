@@ -46,7 +46,6 @@ class Payload {
       email,
       secret: options.secret,
       mongoURL: options.mongoURL,
-      publicENV: options.publicENV,
     });
 
     if (typeof this.config.paths === 'undefined') this.config.paths = {};
