@@ -197,31 +197,13 @@ function registerCollections() {
               type: GraphQLString,
             },
             user: {
-              type: this.buildObjectType(
-                formatName(`${slug}Me${singularLabel}`),
-                collection.config.fields.concat([
-                  {
-                    name: 'id',
-                    label: 'ID',
-                    type: 'text',
-                  },
-                  {
-                    name: 'email',
-                    type: 'email',
-                    required: true,
-                  },
-                  {
-                    name: 'collection',
-                    type: 'text',
-                    required: true,
-                  },
-                  {
-                    name: 'exp',
-                    type: 'number',
-                  },
-                ]),
-                formatName(`${slug}MeUser`),
-              ),
+              type: collection.graphQL.type,
+            },
+            exp: {
+              type: GraphQLInt,
+            },
+            collection: {
+              type: GraphQLString,
             },
           },
         }),
@@ -234,7 +216,17 @@ function registerCollections() {
       };
 
       this.Mutation.fields[`login${singularLabel}`] = {
-        type: GraphQLString,
+        type: new GraphQLObjectType({
+          name: formatName(`${slug}LoginResult`),
+          fields: {
+            token: {
+              type: GraphQLString,
+            },
+            user: {
+              type: collection.graphQL.type,
+            },
+          },
+        }),
         args: {
           email: { type: GraphQLString },
           password: { type: GraphQLString },
