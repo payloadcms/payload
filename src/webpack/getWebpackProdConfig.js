@@ -1,7 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const Dotenv = require('dotenv-webpack');
 // const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const path = require('path');
+const webpack = require('webpack');
 const getStyleLoaders = require('./getStyleLoaders');
 const babelConfig = require('../../babel.config');
 
@@ -89,16 +89,18 @@ module.exports = (config) => {
         filename: './index.html',
         minify: true,
       }),
-      new Dotenv({
-        silent: true,
-        systemvars: true,
-      }),
+      new webpack.DefinePlugin(Object.entries(config.publicENV).reduce((values, [key, val]) => ({
+        ...values,
+        [`process.env.${key}`]: val,
+      }), {
+        'process.env.NODE_ENV': process.env.NODE_ENV,
+      })),
     ],
   };
 
   if (Array.isArray(config.serverModules)) {
-    config.serverModules.forEach((module) => {
-      webpackConfig.resolve.alias[module] = mockModulePath;
+    config.serverModules.forEach((mod) => {
+      webpackConfig.resolve.alias[mod] = mockModulePath;
     });
   }
 

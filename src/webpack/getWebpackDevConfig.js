@@ -1,7 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
-const Dotenv = require('dotenv-webpack');
 const getStyleLoaders = require('./getStyleLoaders');
 const babelConfig = require('../../babel.config');
 
@@ -92,6 +91,12 @@ module.exports = (config) => {
       },
     },
     plugins: [
+      new webpack.DefinePlugin(Object.entries(config.publicENV).reduce((values, [key, val]) => ({
+        ...values,
+        [`process.env.${key}`]: `'${val}'`,
+      }), {
+        'process.env.NODE_ENV': `'${process.env.NODE_ENV}'`,
+      })),
       new HtmlWebpackPlugin({
         template: config.admin && config.admin.indexHTML
           ? path.join(config.paths.configDir, config.admin.indexHTML)
@@ -99,16 +104,12 @@ module.exports = (config) => {
         filename: './index.html',
       }),
       new webpack.HotModuleReplacementPlugin(),
-      new Dotenv({
-        silent: true,
-        systemvars: true,
-      }),
     ],
   };
 
   if (Array.isArray(config.serverModules)) {
-    config.serverModules.forEach((module) => {
-      webpackConfig.resolve.alias[module] = mockModulePath;
+    config.serverModules.forEach((mod) => {
+      webpackConfig.resolve.alias[mod] = mockModulePath;
     });
   }
 
