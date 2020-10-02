@@ -9,7 +9,7 @@ const sanitizeConfig = require('../utilities/sanitizeConfig');
 
 const configPath = findConfig();
 
-module.exports = () => {
+const build = () => {
   try {
     const unsanitizedConfig = getConfig();
     const config = sanitizeConfig(unsanitizedConfig);
@@ -38,8 +38,12 @@ module.exports = () => {
     console.log(err);
     console.error(`Error: can't find the configuration file located at ${configPath}.`);
   }
-
-  // Need to get the path to the config file if it's been passed as an arg to the build command
-  // If it hasn't been passed, just check the root of the project
-  // If not in either place, return an error
 };
+
+// when build.js is launched directly
+if (module.id === require.main.id) {
+  build();
+}
+
+
+module.exports = build;

@@ -1,14 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Group } from '../../../../../../../field-types';
+import { Group } from '../../../../../../../admin/forms';
 
-const CustomGroup = (props) => {
-  return (
-    <div className="custom-group">
-      <Group {...props} />
-    </div>
-  );
-};
+const CustomGroup = (props) => (
+  <div className="custom-group">
+    <Group {...props} />
+  </div>
+);
 
 CustomGroup.defaultProps = {
   value: '',

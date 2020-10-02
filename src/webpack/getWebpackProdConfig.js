@@ -1,5 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-// const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const path = require('path');
 const webpack = require('webpack');
 const getStyleLoaders = require('./getStyleLoaders');
@@ -81,7 +81,7 @@ module.exports = (config) => {
       },
     },
     plugins: [
-      // new BundleAnalyzerPlugin(),
+      new BundleAnalyzerPlugin(),
       new HtmlWebpackPlugin({
         template: config.admin && config.admin.indexHTML
           ? path.join(config.paths.configDir, config.admin.indexHTML)
