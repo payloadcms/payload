@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const baseClass = 'bool-cell';
+import './index.scss';
 
 // Handles boolean values
 const Checkbox = ({ data }) => (
-  <code className={`${baseClass}--style`}>
+  <code className="bool-cell">
     <span>{JSON.stringify(data)}</span>
   </code>
 );
