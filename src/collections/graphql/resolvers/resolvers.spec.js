@@ -21,12 +21,14 @@ describe('GrahpQL Resolvers', () => {
         loginAdmin(
           email: "${email}",
           password: "${password}"
-        )
+        ) {
+          token
+        }
       }`;
 
     const response = await request(url, query);
 
-    token = response.loginAdmin;
+    token = response.loginAdmin.token;
 
     client = new GraphQLClient(url, { headers: { Authorization: `JWT ${token}` } });
 
