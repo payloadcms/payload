@@ -24,9 +24,12 @@ const RenderFields = (props) => {
     className,
   } = props;
 
-  const [hasIntersected, setHasIntersected] = useState(false);
+  const [hasRendered, setHasRendered] = useState(false);
   const [intersectionRef, entry] = useIntersect(intersectionObserverOptions);
   const isIntersecting = Boolean(entry?.isIntersecting);
+  const isAboveViewport = entry?.boundingClientRect?.top < 0;
+
+  const shouldRender = isIntersecting || isAboveViewport;
 
   const { operation: operationFromContext } = useRenderedFields();
 
@@ -43,10 +46,10 @@ const RenderFields = (props) => {
   }, [operation]);
 
   useEffect(() => {
-    if (isIntersecting && !hasIntersected) {
-      setHasIntersected(true);
+    if (shouldRender && !hasRendered) {
+      setHasRendered(true);
     }
-  }, [isIntersecting, hasIntersected]);
+  }, [shouldRender, hasRendered]);
 
   const classes = [
     baseClass,
@@ -59,7 +62,7 @@ const RenderFields = (props) => {
         ref={intersectionRef}
         className={classes}
       >
-        {hasIntersected && (
+        {hasRendered && (
           <RenderedFieldContext.Provider value={contextValue}>
             {fieldSchema.map((field, i) => {
               if (!field?.hidden && field?.admin?.disabled !== true) {

@@ -64,7 +64,7 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
                     initialValue: row.blockName,
                     valid: true,
                   },
-                  ...iterateFields(block.fields, row, rowPath),
+                  ...(block?.fields ? iterateFields(block.fields, row, rowPath) : {}),
                 };
               }, {}),
             };
