@@ -110,17 +110,13 @@ const DeleteDocument = (props) => {
               </strong>
               &quot;. Are you sure?
             </p>
-            {!deleting && (
-              <Button
-                buttonStyle="secondary"
-                type="button"
-                onClick={() => {
-                  toggle(modalSlug);
-                }}
-              >
-                Cancel
-              </Button>
-            )}
+            <Button
+              buttonStyle="secondary"
+              type="button"
+              onClick={deleting ? undefined : () => toggle(modalSlug)}
+            >
+              Cancel
+            </Button>
             <Button
               onClick={deleting ? undefined : handleDelete}
             >

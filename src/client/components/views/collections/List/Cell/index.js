@@ -34,6 +34,7 @@ const DefaultCell = (props) => {
   if (!CellComponent) {
     return (
       <WrapElement {...wrapElementProps}>
+        {(cellData === '' || typeof cellData === 'undefined') && `<No ${field.label ?? 'data'}>`}
         {typeof cellData === 'string' && cellData}
         {typeof cellData === 'number' && cellData}
         {typeof cellData === 'object' && JSON.stringify(cellData)}
@@ -108,6 +109,7 @@ const propTypes = {
   field: PropTypes.shape({
     name: PropTypes.string,
     type: PropTypes.string,
+    label: PropTypes.string,
     admin: PropTypes.shape({
       components: PropTypes.shape({
         Cell: PropTypes.func,

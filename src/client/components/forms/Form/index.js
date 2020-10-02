@@ -34,6 +34,7 @@ const Form = (props) => {
     redirect,
     disableSuccessStatus,
     initialState,
+    disableScrollOnSuccess,
   } = props;
 
   const history = useHistory();
@@ -72,10 +73,12 @@ const Form = (props) => {
         type: 'error',
       });
 
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
+      if (!disableScrollOnSuccess) {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth',
+        });
+      }
 
       return false;
     }
@@ -88,10 +91,12 @@ const Form = (props) => {
 
     e.preventDefault();
 
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
+    if (!disableScrollOnSuccess) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    }
 
     const formData = contextRef.current.createFormData();
     setProcessing(true);
@@ -205,6 +210,7 @@ const Form = (props) => {
     onSuccess,
     redirect,
     replaceStatus,
+    disableScrollOnSuccess,
   ]);
 
 
@@ -299,6 +305,7 @@ Form.defaultProps = {
   disableSuccessStatus: false,
   disabled: false,
   initialState: {},
+  disableScrollOnSuccess: false,
 };
 
 Form.propTypes = {
@@ -316,6 +323,7 @@ Form.propTypes = {
   redirect: PropTypes.string,
   disabled: PropTypes.bool,
   initialState: PropTypes.shape({}),
+  disableScrollOnSuccess: PropTypes.bool,
 };
 
 export default Form;

@@ -85,8 +85,6 @@ const Email = (props) => {
 Email.defaultProps = {
   label: null,
   required: false,
-  defaultValue: undefined,
-  initialData: undefined,
   placeholder: undefined,
   admin: {},
   autoComplete: undefined,
@@ -99,8 +97,6 @@ Email.propTypes = {
   path: PropTypes.string,
   required: PropTypes.bool,
   placeholder: PropTypes.string,
-  defaultValue: PropTypes.string,
-  initialData: PropTypes.string,
   validate: PropTypes.func,
   admin: PropTypes.shape({
     readOnly: PropTypes.bool,

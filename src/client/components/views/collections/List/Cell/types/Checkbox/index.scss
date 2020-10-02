@@ -1,0 +1,17 @@
+@import '../../../../../../../scss/styles.scss';
+
+.bool-cell {
+  font-size: 1rem;
+  line-height: base(1);
+  border: 0;
+  display: inline-flex;
+  vertical-align: middle;
+  background: $color-light-gray;
+  color: $color-dark-gray;
+  border-radius: $style-radius-s;
+  padding: 0 base(0.25);
+  padding-left: base(0.0875 + 0.25);
+
+  background: $color-background-gray;
+  color: $color-dark-gray;
+}
