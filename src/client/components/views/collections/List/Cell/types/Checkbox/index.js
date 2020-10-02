@@ -11,7 +11,7 @@ const Checkbox = ({ data }) => (
 );
 
 Checkbox.defaultProps = {
-  data: '',
+  data: undefined,
 };
 
 Checkbox.propTypes = {
