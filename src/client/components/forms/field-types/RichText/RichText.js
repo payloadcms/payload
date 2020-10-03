@@ -15,6 +15,8 @@ import toggleLeaf from './leaves/toggle';
 import hotkeys from './hotkeys';
 import enablePlugins from './enablePlugins';
 import defaultValue from '../../../../../fields/richText/defaultValue';
+import FieldTypeGutter from '../../FieldTypeGutter';
+import withHTML from './plugins/withHTML';
 
 import mergeCustomFunctions from './mergeCustomFunctions';
 
@@ -65,7 +67,7 @@ const RichText = (props) => {
       );
     }
 
-    return <p {...attributes}>{children}</p>;
+    return <div {...attributes}>{children}</div>;
   }, [enabledElements]);
 
   const renderLeaf = useCallback(({ attributes, children, leaf }) => {
@@ -116,7 +118,7 @@ const RichText = (props) => {
   ].filter(Boolean).join(' ');
 
   const editor = useMemo(() => {
-    let CreatedEditor = withHistory(withReact(createEditor()));
+    let CreatedEditor = withHTML(withHistory(withReact(createEditor())));
 
     CreatedEditor = enablePlugins(CreatedEditor, elements);
     CreatedEditor = enablePlugins(CreatedEditor, leaves);
@@ -148,6 +150,7 @@ const RichText = (props) => {
         width,
       }}
     >
+      <FieldTypeGutter />
       <Error
         showError={showError}
         message={errorMessage}
@@ -208,7 +211,6 @@ const RichText = (props) => {
             renderLeaf={renderLeaf}
             placeholder={placeholder}
             spellCheck
-            autoFocus
             onKeyDown={(event) => {
               Object.keys(hotkeys).forEach((hotkey) => {
                 if (isHotkey(hotkey, event)) {

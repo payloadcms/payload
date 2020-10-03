@@ -1,22 +1,17 @@
 @import '../../../../scss/styles.scss';
 
 .rich-text {
-  &__wrapper {
-    border: 1px solid $color-light-gray;
-  }
+  margin-bottom: base(2);
 
   &__toolbar {
-    border-bottom: 1px solid $color-light-gray;
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
+    margin-bottom: $baseline;
   }
 
   &__editor {
     min-height: base(10);
-    padding: base(.5);
-    max-height: base(20);
-    overflow-y: scroll;
 
     p,
     h1,
@@ -46,7 +41,9 @@
     }
   }
 
-  &__preload {
-    display: none;
+  &:hover {
+    .field-type-gutter__content-container {
+      box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
+    }
   }
 }

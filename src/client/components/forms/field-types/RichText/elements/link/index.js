@@ -1,6 +1,7 @@
-import React, { Fragment, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { ReactEditor, useSlate } from 'slate-react';
+import { useWindowInfo } from '@faceless-ui/window-info';
 import { Transforms } from 'slate';
 import ElementButton from '../Button';
 import { withLinks, wrapLink } from './utilities';
@@ -10,6 +11,7 @@ import Popup from '../../../../../elements/Popup';
 import Button from '../../../../../elements/Button';
 import Check from '../../../../../icons/Check';
 import Error from '../../../../Error';
+import getOffsetTop from '../../../../../../utilities/getOffsetTop';
 
 import './index.scss';
 
@@ -18,6 +20,7 @@ const baseClass = 'rich-text-link';
 const Link = ({ attributes, children, element }) => {
   const editor = useSlate();
   const linkRef = useRef();
+  const { height: windowHeight, width: windowWidth } = useWindowInfo();
   const [left, setLeft] = useState(0);
   const [top, setTop] = useState(0);
   const [error, setError] = useState(false);
@@ -26,15 +29,21 @@ const Link = ({ attributes, children, element }) => {
   const [url, setURL] = useState(element.url);
   const [newTab, setNewTab] = useState(Boolean(element.newTab));
 
-  useEffect(() => {
+  const calculatePosition = useCallback(() => {
     if (linkRef?.current) {
       const rect = linkRef.current.getBoundingClientRect();
-      setTop(rect.top);
+
+      const offsetTop = getOffsetTop(linkRef.current);
+      setTop(offsetTop);
       setLeft(rect.left);
       setWidth(rect.width);
       setHeight(rect.height);
     }
-  }, [children]);
+  }, []);
+
+  useEffect(() => {
+    calculatePosition();
+  }, [children, calculatePosition, windowHeight, windowWidth]);
 
   useEffect(() => {
     const path = ReactEditor.findPath(editor, element);
@@ -70,6 +79,7 @@ const Link = ({ attributes, children, element }) => {
               size="small"
               color="dark"
               horizontalAlign="center"
+              onToggleOpen={calculatePosition}
               render={({ close }) => (
                 <Fragment>
                   <div className={`${baseClass}__url-wrap`}>
@@ -96,6 +106,7 @@ const Link = ({ attributes, children, element }) => {
                       className={`${baseClass}__confirm`}
                       buttonStyle="none"
                       icon="chevron"
+                      onToggleOpen={calculatePosition}
                       onClick={(e) => {
                         e.preventDefault();
 

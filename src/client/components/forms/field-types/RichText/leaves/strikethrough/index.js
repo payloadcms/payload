@@ -4,12 +4,9 @@ import LeafButton from '../Button';
 import StrikethroughIcon from '../../../../../icons/Strikethrough';
 
 const Strikethrough = ({ attributes, children }) => (
-  <span
-    style={{ textDecoration: 'line-through' }}
-    {...attributes}
-  >
+  <del {...attributes}>
     {children}
-  </span>
+  </del>
 );
 
 Strikethrough.defaultProps = {

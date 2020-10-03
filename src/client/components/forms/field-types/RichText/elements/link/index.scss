@@ -3,6 +3,14 @@
 .rich-text-link {
   position: relative;
   text-decoration: underline;
+
+  .popup {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
 }
 
 .rich-text-link__popup-wrap {
