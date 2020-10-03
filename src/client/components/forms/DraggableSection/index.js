@@ -7,9 +7,9 @@ import ActionPanel from './ActionPanel';
 import SectionTitle from './SectionTitle';
 import PositionPanel from './PositionPanel';
 import Button from '../../elements/Button';
+import { NegativeFieldGutterProvider } from '../FieldTypeGutter/context';
 import FieldTypeGutter from '../FieldTypeGutter';
 import RenderFields from '../RenderFields';
-
 
 import './index.scss';
 
@@ -97,16 +97,18 @@ const DraggableSection = (props) => {
                 height={isOpen ? 'auto' : 0}
                 duration={0}
               >
-                <RenderFields
-                  readOnly={readOnly}
-                  fieldTypes={fieldTypes}
-                  key={rowIndex}
-                  permissions={permissions}
-                  fieldSchema={fieldSchema.map((field) => ({
-                    ...field,
-                    path: `${parentPath}.${rowIndex}${field.name ? `.${field.name}` : ''}`,
-                  }))}
-                />
+                <NegativeFieldGutterProvider allow={false}>
+                  <RenderFields
+                    readOnly={readOnly}
+                    fieldTypes={fieldTypes}
+                    key={rowIndex}
+                    permissions={permissions}
+                    fieldSchema={fieldSchema.map((field) => ({
+                      ...field,
+                      path: `${parentPath}.${rowIndex}${field.name ? `.${field.name}` : ''}`,
+                    }))}
+                  />
+                </NegativeFieldGutterProvider>
               </AnimateHeight>
             </div>
 

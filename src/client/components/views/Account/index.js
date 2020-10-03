@@ -6,8 +6,8 @@ import { useAuthentication } from '../../providers/Authentication';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import DefaultAccount from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
-
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
 
 const AccountView = () => {
   const { state: locationState } = useLocation();
@@ -58,19 +58,21 @@ const AccountView = () => {
   }, [dataToRender, fields]);
 
   return (
-    <RenderCustomComponent
-      DefaultComponent={DefaultAccount}
-      CustomComponent={CustomAccount}
-      componentProps={{
-        data,
-        collection,
-        permissions: collectionPermissions,
-        hasSavePermission,
-        initialState,
-        apiURL,
-        isLoading,
-      }}
-    />
+    <NegativeFieldGutterProvider allow>
+      <RenderCustomComponent
+        DefaultComponent={DefaultAccount}
+        CustomComponent={CustomAccount}
+        componentProps={{
+          data,
+          collection,
+          permissions: collectionPermissions,
+          hasSavePermission,
+          initialState,
+          apiURL,
+          isLoading,
+        }}
+      />
+    </NegativeFieldGutterProvider>
   );
 };
 

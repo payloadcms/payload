@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useNegativeFieldGutter } from './context';
 
 import './index.scss';
 
@@ -7,11 +8,13 @@ const baseClass = 'field-type-gutter';
 
 const FieldTypeGutter = (props) => {
   const { children, variant, verticalAlignment, className, dragHandleProps } = props;
+  const allowNegativeGutter = useNegativeFieldGutter();
 
   const classes = [
     baseClass,
     `${baseClass}--${variant}`,
     `${baseClass}--v-align-${verticalAlignment}`,
+    allowNegativeGutter && `${baseClass}--negative-gutter`,
     className && className,
   ].filter(Boolean).join(' ');
 

@@ -21,7 +21,7 @@ const EditableBlockTitle = (props) => {
   });
 
   useEffect(() => {
-    setInputWidth(inputCloneRef.current.offsetWidth);
+    setInputWidth(inputCloneRef.current.offsetWidth + 5);
   }, [value]);
 
   const onKeyDown = (e) => {

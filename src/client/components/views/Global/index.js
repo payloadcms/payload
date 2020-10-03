@@ -10,6 +10,7 @@ import { useLocale } from '../../utilities/Locale';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultGlobal from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
+import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
 
 const GlobalView = (props) => {
   const { state: locationState } = useLocation();
@@ -79,19 +80,21 @@ const GlobalView = (props) => {
   const globalPermissions = permissions?.[slug];
 
   return (
-    <RenderCustomComponent
-      DefaultComponent={DefaultGlobal}
-      CustomComponent={CustomEdit}
-      componentProps={{
-        data: dataToRender,
-        permissions: globalPermissions,
-        initialState,
-        global,
-        onSave,
-        apiURL: `${serverURL}${api}/globals/${slug}?depth=0`,
-        action: `${serverURL}${api}/globals/${slug}?locale=${locale}`,
-      }}
-    />
+    <NegativeFieldGutterProvider allow>
+      <RenderCustomComponent
+        DefaultComponent={DefaultGlobal}
+        CustomComponent={CustomEdit}
+        componentProps={{
+          data: dataToRender,
+          permissions: globalPermissions,
+          initialState,
+          global,
+          onSave,
+          apiURL: `${serverURL}${api}/globals/${slug}?depth=0`,
+          action: `${serverURL}${api}/globals/${slug}?locale=${locale}`,
+        }}
+      />
+    </NegativeFieldGutterProvider>
   );
 };
 

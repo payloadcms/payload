@@ -8,6 +8,7 @@ import Button from '../../../../elements/Button';
 import RenderFields from '../../../RenderFields';
 import FormSubmit from '../../../Submit';
 import Upload from '../../../../views/collections/Edit/Upload';
+import { NegativeFieldGutterProvider } from '../../../FieldTypeGutter/context';
 
 import './index.scss';
 
@@ -65,11 +66,13 @@ const AddUploadModal = (props) => {
             {...collection.upload}
             fieldTypes={fieldTypes}
           />
-          <RenderFields
-            filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
-            fieldTypes={fieldTypes}
-            fieldSchema={collection.fields}
-          />
+          <NegativeFieldGutterProvider allow>
+            <RenderFields
+              filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
+              fieldTypes={fieldTypes}
+              fieldSchema={collection.fields}
+            />
+          </NegativeFieldGutterProvider>
         </Form>
       </MinimalTemplate>
     </Modal>

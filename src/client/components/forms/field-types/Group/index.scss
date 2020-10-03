@@ -6,12 +6,9 @@
 }
 
 .group {
+  margin-top: base(2);
   margin-bottom: base(2);
   display: flex;
-
-  &__title {
-    margin-top: base(2);
-  }
 
   &:hover {
     .field-type-gutter__content-container {
@@ -51,7 +48,6 @@
 .field-type.group .field-type.group,
 .field-type.blocks .field-type.group,
 .field-type.array .field-type.group {
-
   .field-type-gutter__content-container {
     @include reduce-gutter;
   }

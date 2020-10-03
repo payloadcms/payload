@@ -61,6 +61,13 @@ $controls-top-adjustment: base(.1);
     height: 100%;
   }
 
+  &--negative-gutter {
+    &.field-type-gutter--left {
+      position: absolute;
+      top: 0; right: 100%; bottom: 0;
+    }
+  }
+
   @include mid-break {
     padding-right: base(1);
 

@@ -9,6 +9,7 @@ import { useAuthentication } from '../../../providers/Authentication';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import DefaultEdit from './Default';
 import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema';
+import { NegativeFieldGutterProvider } from '../../../forms/FieldTypeGutter/context';
 
 const EditView = (props) => {
   const { collection, isEditing } = props;
@@ -97,22 +98,24 @@ const EditView = (props) => {
   action += '?depth=0';
 
   return (
-    <RenderCustomComponent
-      DefaultComponent={DefaultEdit}
-      CustomComponent={CustomEdit}
-      componentProps={{
-        isLoading,
-        data: dataToRender,
-        collection,
-        permissions: collectionPermissions,
-        isEditing,
-        onSave,
-        initialState,
-        hasSavePermission,
-        apiURL,
-        action,
-      }}
-    />
+    <NegativeFieldGutterProvider allow>
+      <RenderCustomComponent
+        DefaultComponent={DefaultEdit}
+        CustomComponent={CustomEdit}
+        componentProps={{
+          isLoading,
+          data: dataToRender,
+          collection,
+          permissions: collectionPermissions,
+          isEditing,
+          onSave,
+          initialState,
+          hasSavePermission,
+          apiURL,
+          action,
+        }}
+      />
+    </NegativeFieldGutterProvider>
   );
 };
 

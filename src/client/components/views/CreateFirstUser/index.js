@@ -8,6 +8,7 @@ import RenderFields from '../../forms/RenderFields';
 import fieldTypes from '../../forms/field-types';
 import FormSubmit from '../../forms/Submit';
 import { useAuthentication } from '../../providers/Authentication';
+import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
 
 import './index.scss';
 
@@ -59,13 +60,15 @@ const CreateFirstUser = (props) => {
         redirect={admin}
         action={`${serverURL}${api}/${userSlug}/first-register`}
       >
-        <RenderFields
-          fieldSchema={[
-            ...fields,
-            ...userConfig.fields,
-          ]}
-          fieldTypes={fieldTypes}
-        />
+        <NegativeFieldGutterProvider allow>
+          <RenderFields
+            fieldSchema={[
+              ...fields,
+              ...userConfig.fields,
+            ]}
+            fieldTypes={fieldTypes}
+          />
+        </NegativeFieldGutterProvider>
         <FormSubmit>Create</FormSubmit>
       </Form>
     </MinimalTemplate>

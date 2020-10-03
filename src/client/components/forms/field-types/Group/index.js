@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import FieldTypeGutter from '../../FieldTypeGutter';
+import { NegativeFieldGutterProvider } from '../../FieldTypeGutter/context';
 
 import './index.scss';
 
@@ -31,14 +32,16 @@ const Group = (props) => {
           <h2 className={`${baseClass}__title`}>{label}</h2>
         )}
         <div className={`${baseClass}__fields-wrapper`}>
-          <RenderFields
-            readOnly={readOnly}
-            fieldTypes={fieldTypes}
-            fieldSchema={fields.map((subField) => ({
-              ...subField,
-              path: `${path}${subField.name ? `.${subField.name}` : ''}`,
-            }))}
-          />
+          <NegativeFieldGutterProvider allow={false}>
+            <RenderFields
+              readOnly={readOnly}
+              fieldTypes={fieldTypes}
+              fieldSchema={fields.map((subField) => ({
+                ...subField,
+                path: `${path}${subField.name ? `.${subField.name}` : ''}`,
+              }))}
+            />
+          </NegativeFieldGutterProvider>
         </div>
       </div>
     </div>
