@@ -5,6 +5,7 @@ import { Modal, useModal } from '@faceless-ui/modal';
 import { useConfig } from '../../providers/Config';
 import Button from '../Button';
 import MinimalTemplate from '../../templates/Minimal';
+import { useForm } from '../../forms/Form/context';
 import useTitle from '../../../hooks/useTitle';
 import { requests } from '../../../api';
 import { useStatusList } from '../Status';
@@ -30,6 +31,7 @@ const DeleteDocument = (props) => {
 
   const { serverURL, routes: { api, admin } } = useConfig();
   const { replaceStatus } = useStatusList();
+  const { setModified } = useForm();
   const [deleting, setDeleting] = useState(false);
   const { closeAll, toggle } = useModal();
   const history = useHistory();
@@ -47,6 +49,7 @@ const DeleteDocument = (props) => {
 
   const handleDelete = useCallback(() => {
     setDeleting(true);
+    setModified(false);
     requests.delete(`${serverURL}${api}/${slug}/${id}`, {
       headers: {
         'Content-Type': 'application/json',
@@ -77,7 +80,7 @@ const DeleteDocument = (props) => {
         return addDefaultError();
       }
     });
-  }, [addDefaultError, closeAll, history, id, replaceStatus, singular, slug, title, admin, api, serverURL]);
+  }, [addDefaultError, closeAll, history, id, replaceStatus, singular, slug, title, admin, api, serverURL, setModified]);
 
   if (id) {
     return (
