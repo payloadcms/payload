@@ -20,7 +20,7 @@ module.exports = {
     admin: () => true,
   },
   auth: {
-    tokenExpiration: 7200,
+    tokenExpiration: 7200, // 2 hours
     emailVerification: false,
     maxLoginAttempts: 5,
     lockTime: 600 * 1000, // lock time in ms

@@ -27,10 +27,11 @@ module.exports = (config) => {
         {
           test: /\.js$/,
           exclude: /node_modules\/(?!(@payloadcms\/payload)\/).*/,
-          use: [{
-            loader: 'babel-loader',
-            options: babelConfig,
-          },
+          use: [
+            {
+              loader: 'babel-loader',
+              options: babelConfig,
+            },
             // {
             //   loader: 'eslint-loader',
             //   options: {

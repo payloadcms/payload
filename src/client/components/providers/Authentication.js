@@ -51,6 +51,7 @@ const AuthenticationProvider = ({ children }) => {
           const json = await request.json();
           setUser(json.user);
         } else {
+          setUser(null);
           history.push(`${admin}/logout-inactivity`);
         }
       }, 1000);
@@ -138,6 +139,7 @@ const AuthenticationProvider = ({ children }) => {
 
     if (remainingTime > 0) {
       forceLogOut = setTimeout(() => {
+        setUser(null);
         history.push(`${admin}/logout`);
         closeAllModals();
       }, remainingTime * 1000);
