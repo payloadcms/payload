@@ -1,5 +1,5 @@
-const Button = require('../client/components/richText/elements/Button');
-const PurpleBackground = require('../client/components/richText/leaves/PurpleBackground');
+const Button = require('../client/components/richText/elements/Button').default;
+const PurpleBackground = require('../client/components/richText/leaves/PurpleBackground').default;
 
 const RichText = {
   slug: 'rich-text',

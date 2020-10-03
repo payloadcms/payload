@@ -1,8 +1,8 @@
-const button = require('./Button');
-const element = require('./Element');
-const plugin = require('./plugin');
+import button from './Button';
+import element from './Element';
+import plugin from './plugin';
 
-module.exports = {
+export default {
   name: 'button',
   button,
   element,

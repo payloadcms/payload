@@ -6,16 +6,10 @@ export default (enabledFunctions, builtInFunctions) => {
   }
 
   return formattedEnabledFunctions.reduce((resultingFunctions, func) => {
-    if (typeof func === 'object') {
-      let customFunction = func;
-
-      if (customFunction?.default?.name) {
-        customFunction = customFunction.default;
-      }
-
+    if (typeof func === 'object' && func.name) {
       return {
         ...resultingFunctions,
-        [customFunction.name]: customFunction,
+        [func.name]: func,
       };
     }
 

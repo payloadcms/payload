@@ -1,11 +1,11 @@
-const DescriptionField = require('./components/fields/Description/Field');
-const DescriptionCell = require('./components/fields/Description/Cell');
-const DescriptionFilter = require('./components/fields/Description/Filter');
-const NestedArrayField = require('./components/fields/NestedArrayCustomField/Field');
-const GroupField = require('./components/fields/Group/Field');
-const NestedGroupField = require('./components/fields/NestedGroupCustomField/Field');
-const NestedText1Field = require('./components/fields/NestedText1/Field');
-const ListView = require('./components/views/List');
+const DescriptionField = require('./components/fields/Description/Field').default;
+const DescriptionCell = require('./components/fields/Description/Cell').default;
+const DescriptionFilter = require('./components/fields/Description/Filter').default;
+const NestedArrayField = require('./components/fields/NestedArrayCustomField/Field').default;
+const GroupField = require('./components/fields/Group/Field').default;
+const NestedGroupField = require('./components/fields/NestedGroupCustomField/Field').default;
+const NestedText1Field = require('./components/fields/NestedText1/Field').default;
+const ListView = require('./components/views/List').default;
 
 module.exports = {
   slug: 'custom-components',

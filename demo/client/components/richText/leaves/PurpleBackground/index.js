@@ -1,7 +1,7 @@
-const button = require('./Button');
-const leaf = require('./Leaf');
+import button from './Button';
+import leaf from './Leaf';
 
-module.exports = {
+export default {
   name: 'purple-background',
   button,
   leaf,
