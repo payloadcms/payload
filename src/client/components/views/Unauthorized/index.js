@@ -14,6 +14,7 @@ const Unauthorized = () => {
         description="Unauthorized"
         keywords="Unauthorized, Payload, CMS"
       />
+      <h2>Unauthorized</h2>
       <p>You are not allowed to access this page.</p>
       <br />
       <Button

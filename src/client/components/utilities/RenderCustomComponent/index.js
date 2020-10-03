@@ -5,8 +5,12 @@ const RenderCustomComponent = (props) => {
   const { CustomComponent, DefaultComponent, componentProps } = props;
 
   if (CustomComponent) {
+    let Component = CustomComponent;
+
+    if (typeof Component === 'object' && Component.default) Component = Component.default;
+
     return (
-      <CustomComponent {...componentProps} />
+      <Component {...componentProps} />
     );
   }
 
@@ -29,7 +33,12 @@ RenderCustomComponent.propTypes = {
     PropTypes.node,
     PropTypes.element,
   ]).isRequired,
-  CustomComponent: PropTypes.func,
+  CustomComponent: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({
+      default: PropTypes.func,
+    }),
+  ]),
   componentProps: PropTypes.shape({}),
 };
 

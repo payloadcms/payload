@@ -35,12 +35,14 @@ async function login(args) {
   if (!userDoc || (args.collection.config.auth.emailVerification && !userDoc._verified)) {
     throw new AuthenticationError();
   }
+
   if (userDoc && userDoc.isLocked) {
     throw new AuthenticationError();
   }
   const authResult = await userDoc.authenticate(password);
 
   const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0;
+
   if (!authResult.user) {
     if (maxLoginAttemptsEnabled) await userDoc.incLoginAttempts();
     throw new AuthenticationError();

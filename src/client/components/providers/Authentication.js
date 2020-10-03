@@ -1,7 +1,7 @@
 import React, {
   useState, createContext, useContext, useEffect, useCallback,
 } from 'react';
-import jwt from 'jsonwebtoken';
+import jwtDecode from 'jwt-decode';
 import { useLocation, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useModal } from '@faceless-ui/modal';
@@ -58,7 +58,7 @@ const AuthenticationProvider = ({ children }) => {
   }, [setUser, history, exp, admin, api, serverURL, userSlug]);
 
   const setToken = useCallback((token) => {
-    const decoded = jwt.decode(token);
+    const decoded = jwtDecode(token);
     setUser(decoded);
     setTokenInMemory(token);
   }, []);
@@ -86,7 +86,7 @@ const AuthenticationProvider = ({ children }) => {
     };
 
     fetchMe();
-  }, [setToken]);
+  }, [setToken, api, serverURL, userSlug]);
 
   // When location changes, refresh cookie
   useEffect(() => {

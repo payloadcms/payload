@@ -26,7 +26,7 @@ module.exports = {
     lockTime: 600 * 1000, // lock time in ms
     useAPIKey: true,
     cookies: {
-      secure: process.env.NODE_ENV === 'production',
+      secure: false,
       sameSite: 'Lax',
       domain: undefined,
     },

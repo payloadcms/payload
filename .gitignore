@@ -222,3 +222,6 @@ $RECYCLE.BIN/
 demo/upload
 demo/media
 demo/files
+
+# Ignore build folder
+build
