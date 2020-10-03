@@ -165,13 +165,20 @@
   &--v-align-bottom {
     .popup__content {
       @include shadow-lg-top;
-      top: calc(100% + #{$baseline});
+      top: calc(100% + #{base(.5)});
 
       &:after {
         top: unset;
         bottom: calc(100% - 1px);
-        border-bottom-color: white;
-        border-top-color: transparent;
+        border-top-color: transparent !important;
+      }
+    }
+
+    &.popup--color-dark {
+      .popup__content {
+        &:after {
+          border-bottom-color: $color-dark-gray;
+        }
       }
     }
   }
@@ -206,6 +213,7 @@
     &__scroll,
     &--size-large .popup__scroll{
       padding: base(.75);
+      padding-right: calc(var(--scrollbar-width) + #{base(.75)});
     }
 
     &--h-align-left {

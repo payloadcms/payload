@@ -12,7 +12,7 @@ const baseClass = 'popup';
 
 const Popup = (props) => {
   const {
-    render, align, size, color, button, buttonType, children, showOnHover, horizontalAlign, initActive,
+    render, align, size, color, button, buttonType, children, showOnHover, horizontalAlign, initActive, onToggleOpen,
   } = props;
 
   const buttonRef = useRef(null);
@@ -101,6 +101,7 @@ const Popup = (props) => {
               onMouseLeave={() => setActive(false)}
             >
               <PopupButton
+                onToggleOpen={onToggleOpen}
                 buttonType={buttonType}
                 button={button}
                 setActive={setActive}
@@ -110,6 +111,7 @@ const Popup = (props) => {
           )
           : (
             <PopupButton
+              onToggleOpen={onToggleOpen}
               buttonType={buttonType}
               button={button}
               setActive={setActive}
@@ -144,6 +146,7 @@ Popup.defaultProps = {
   showOnHover: false,
   horizontalAlign: 'left',
   initActive: false,
+  onToggleOpen: undefined,
 };
 
 Popup.propTypes = {
@@ -157,6 +160,7 @@ Popup.propTypes = {
   button: PropTypes.node,
   showOnHover: PropTypes.bool,
   initActive: PropTypes.bool,
+  onToggleOpen: PropTypes.func,
 };
 
 export default Popup;
