@@ -82,6 +82,15 @@
     padding: base(.125) 0;
     display: flex;
     text-decoration: none;
+
+    &:focus {
+      box-shadow: none;
+      font-weight: 600;
+    }
+
+    &:active {
+      font-weight: normal;
+    }
   }
 
   nav {

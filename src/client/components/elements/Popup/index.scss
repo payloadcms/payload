@@ -25,7 +25,8 @@
   }
 
   &__scroll {
-    padding: base(1);
+    padding: $baseline;
+    padding-right: calc(var(--scrollbar-width) + #{$baseline});
     overflow-y: auto;
     width: calc(100% + var(--scrollbar-width));
     white-space: nowrap;

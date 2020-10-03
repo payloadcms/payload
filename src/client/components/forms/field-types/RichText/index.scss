@@ -13,8 +13,10 @@
   }
 
   &__editor {
-    min-height: 150px;
+    min-height: base(10);
     padding: base(.5);
+    max-height: base(20);
+    overflow-y: scroll;
 
     p,
     h1,

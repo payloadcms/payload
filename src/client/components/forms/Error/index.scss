@@ -1,14 +1,13 @@
 @import '../../../scss/styles';
 
-.field-error {
-  .tooltip {
-    left: auto;
-    right: base(.5);
-    transform: none;
-    background-color: $error;
+.error-message {
+  left: auto;
+  right: base(.5);
+  transform: none;
+  background-color: $color-red;
 
-    span {
-      border-top-color: $error;
-    }
+  span {
+    border-top-color: $color-red;
   }
 }
+

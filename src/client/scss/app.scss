@@ -93,6 +93,16 @@ ul, ol {
 
 a {
   color: $color-dark-gray;
+
+  &:focus {
+    opacity: .8;
+    outline: none;
+  }
+
+  &:active {
+    opacity: .7;
+    outline: none;
+  }
 }
 
 svg {

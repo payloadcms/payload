@@ -17,10 +17,11 @@
 
   &__header {
     width: 100%;
+    margin-bottom: $baseline;
     display: flex;
     justify-content: space-between;
 
-    h4 {
+    h3 {
       margin: 0;
     }
 

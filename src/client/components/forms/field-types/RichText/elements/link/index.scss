@@ -9,6 +9,10 @@
   position: absolute;
   z-index: $z-modal;
   cursor: pointer;
+
+  .tooltip {
+    bottom: 80%;
+  }
 }
 
 .rich-text-link__button {
@@ -19,7 +23,59 @@
   left: 0;
 }
 
+.rich-text-link__url-wrap {
+  position: relative;
+  width: 100%;
+  margin-bottom: base(.5);
+}
+
+.rich-text-link__confirm {
+  position: absolute;
+  right: base(.5);
+  top: 50%;
+  transform: translateY(-50%);
+
+  svg {
+    @include color-svg(white);
+    transform: rotate(-90deg);
+  }
+}
+
 .rich-text-link__url {
   @include formInput;
-  width: base(12);
+  min-width: base(12);
+  width: 100%;
+  background: rgba($color-background-gray, .1);
+  border: 0;
+  color: white;
+}
+
+.rich-text-link__new-tab {
+  svg {
+    @include color-svg(white);
+    background-color: rgba(white, .1);
+    margin-right: base(.5);
+  }
+
+  path {
+    opacity: 0;
+  }
+
+  &:hover {
+    path {
+      opacity: .2;
+    }
+  }
+
+  &--checked {
+    path {
+      opacity: 1;
+    }
+
+    &:hover {
+      path {
+        opacity: .8;
+      }
+    }
+  }
 }

@@ -92,6 +92,15 @@
   &--style-none {
     padding: 0;
     margin: 0;
+    border-radius: 0;
+
+    &:focus {
+      opacity: .8;
+    }
+
+    &:active {
+      opacity: .7;
+    }
   }
 
   &--round {
@@ -155,6 +164,8 @@
       @include color-svg($color-dark-gray);
       background: $color-light-gray;
     }
+
+    outline: none;
   }
 
   &:active {

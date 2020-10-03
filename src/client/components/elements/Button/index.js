@@ -79,7 +79,7 @@ const Button = (props) => {
 
   function handleClick(event) {
     if (type !== 'submit' && onClick) event.preventDefault();
-    if (onClick) onClick();
+    if (onClick) onClick(event);
   }
 
   const buttonProps = {

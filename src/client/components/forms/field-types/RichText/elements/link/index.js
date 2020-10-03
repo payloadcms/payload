@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { ReactEditor, useSlate } from 'slate-react';
 import { Transforms } from 'slate';
@@ -8,8 +8,8 @@ import LinkIcon from '../../../../../icons/Link';
 import Portal from '../../../../../utilities/Portal';
 import Popup from '../../../../../elements/Popup';
 import Button from '../../../../../elements/Button';
-import Chevron from '../../../../../icons/Chevron';
 import Check from '../../../../../icons/Check';
+import Error from '../../../../Error';
 
 import './index.scss';
 
@@ -20,6 +20,7 @@ const Link = ({ attributes, children, element }) => {
   const linkRef = useRef();
   const [left, setLeft] = useState(0);
   const [top, setTop] = useState(0);
+  const [error, setError] = useState(false);
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
   const [url, setURL] = useState(element.url);
@@ -62,32 +63,67 @@ const Link = ({ attributes, children, element }) => {
             }}
           >
             <Popup
-              initOpen
+              initActive={url === undefined}
               className={`${baseClass}__popup`}
               buttonType="custom"
               button={<span className={`${baseClass}__button`} />}
               size="small"
               color="dark"
               horizontalAlign="center"
-            >
-              <div className={`${baseClass}__url-wrap`}>
-                <input
-                  value={url}
-                  className={`${baseClass}__url`}
-                  placeholder="Enter a URL"
-                  onChange={(e) => setURL(e.target.value)}
-                />
-                <Chevron />
-              </div>
-              <Button
-                className={`${baseClass}__new-tab`}
-                buttonStyle="none"
-                onClick={() => setNewTab(!newTab)}
-              >
-                <Check />
-                Open link in new tab
-              </Button>
-            </Popup>
+              render={({ close }) => (
+                <Fragment>
+                  <div className={`${baseClass}__url-wrap`}>
+                    <input
+                      value={url || ''}
+                      className={`${baseClass}__url`}
+                      placeholder="Enter a URL"
+                      onChange={(e) => {
+                        const { value } = e.target;
+
+                        if (value && error) {
+                          setError(false);
+                        }
+
+                        setURL(value);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          close();
+                        }
+                      }}
+                    />
+                    <Button
+                      className={`${baseClass}__confirm`}
+                      buttonStyle="none"
+                      icon="chevron"
+                      onClick={(e) => {
+                        e.preventDefault();
+
+                        if (url) {
+                          close();
+                        } else {
+                          setError(true);
+                        }
+                      }}
+                    />
+                    {error && (
+                      <Error
+                        showError={error}
+                        message="Please enter a valid URL."
+                      />
+                    )}
+                  </div>
+                  <Button
+                    className={[`${baseClass}__new-tab`, newTab && `${baseClass}__new-tab--checked`].filter(Boolean).join(' ')}
+                    buttonStyle="none"
+                    onClick={() => setNewTab(!newTab)}
+                  >
+                    <Check />
+                    Open link in new tab
+                  </Button>
+                </Fragment>
+              )}
+            />
           </div>
         </Portal>
         {children}

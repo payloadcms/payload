@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Tooltip from '../../elements/Tooltip';
 
+import './index.scss';
+
 const Error = (props) => {
   const { showError, message } = props;
 

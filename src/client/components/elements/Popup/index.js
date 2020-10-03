@@ -12,12 +12,12 @@ const baseClass = 'popup';
 
 const Popup = (props) => {
   const {
-    render, align, size, color, button, buttonType, children, showOnHover, horizontalAlign,
+    render, align, size, color, button, buttonType, children, showOnHover, horizontalAlign, initActive,
   } = props;
 
   const buttonRef = useRef(null);
   const contentRef = useRef(null);
-  const [active, setActive] = useState(false);
+  const [active, setActive] = useState(initActive);
   const [verticalAlign, setVerticalAlign] = useState('top');
   const [forceHorizontalAlign, setForceHorizontalAlign] = useState(null);
 
@@ -143,6 +143,7 @@ Popup.defaultProps = {
   button: undefined,
   showOnHover: false,
   horizontalAlign: 'left',
+  initActive: false,
 };
 
 Popup.propTypes = {
@@ -155,6 +156,7 @@ Popup.propTypes = {
   buttonType: PropTypes.oneOf(['default', 'custom']),
   button: PropTypes.node,
   showOnHover: PropTypes.bool,
+  initActive: PropTypes.bool,
 };
 
 export default Popup;
