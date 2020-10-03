@@ -57,8 +57,10 @@ $style-stroke-width-m : 2px;
 //////////////////////////////
 // MISC
 //////////////////////////////
+
 $top-header-offset: base(4);
 $top-header-offset-m: base(3);
+$focus-box-shadow: 0 0 0 $style-stroke-width-m $color-green;
 
 //////////////////////////////
 // SHADOWS
