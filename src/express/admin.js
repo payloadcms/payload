@@ -1,4 +1,5 @@
 const express = require('express');
+const compression = require('compression');
 const history = require('connect-history-api-fallback');
 const path = require('path');
 const initWebpack = require('../webpack/init');
@@ -21,6 +22,7 @@ function initAdmin() {
         }
       });
 
+      router.use(compression(this.config.compression));
       router.use(express.static(path.resolve(process.cwd(), 'build'), { redirect: false }));
 
       this.express.use(this.config.routes.admin, router);
