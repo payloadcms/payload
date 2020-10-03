@@ -20,7 +20,7 @@ const Index = () => {
   windowInfoProps.breakpoints = {
     xs: parseInt(getCSSVariable('breakpoint-xs-width').replace('px', ''), 10),
     s: parseInt(getCSSVariable('breakpoint-s-width').replace('px', ''), 10),
-    m: parseInt(getCSSVariable('breakpoint-s-width').replace('px', ''), 10),
+    m: parseInt(getCSSVariable('breakpoint-m-width').replace('px', ''), 10),
     l: parseInt(getCSSVariable('breakpoint-l-width').replace('px', ''), 10),
   };
 
