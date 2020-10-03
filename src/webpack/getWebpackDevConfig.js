@@ -94,9 +94,7 @@ module.exports = (config) => {
       new webpack.DefinePlugin(Object.entries(config.publicENV).reduce((values, [key, val]) => ({
         ...values,
         [`process.env.${key}`]: `'${val}'`,
-      }), {
-        'process.env.NODE_ENV': `'${process.env.NODE_ENV}'`,
-      })),
+      }), {})),
       new HtmlWebpackPlugin({
         template: config.admin && config.admin.indexHTML
           ? path.join(config.paths.configDir, config.admin.indexHTML)

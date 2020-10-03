@@ -39,7 +39,7 @@ const middleware = (payload) => {
     (req, res, next) => {
       if (payload.config.cors) {
         res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Content-Encoding');
 
         if (payload.config.cors === '*') {
           res.setHeader('Access-Control-Allow-Origin', '*');
