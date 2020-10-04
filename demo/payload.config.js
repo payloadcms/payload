@@ -107,6 +107,7 @@ module.exports = {
     max: 100,
     skip: (req) => req.ip === '127.0.0.1',
   },
+  maxDepth: 10,
   localization: {
     locales: [
       'en',

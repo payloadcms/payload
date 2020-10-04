@@ -22,6 +22,8 @@ async function performFieldOperations(entityConfig, args) {
 
   if (payloadAPI === 'REST' || payloadAPI === 'local') {
     depth = (args.depth || args.depth === 0) ? parseInt(args.depth, 10) : this.config.defaultDepth;
+
+    if (depth > this.config.maxDepth) depth = this.config.maxDepth;
   }
 
   const currentDepth = args.currentDepth || 1;

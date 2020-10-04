@@ -8,6 +8,7 @@ const sanitizeConfig = (config) => {
   if (sanitizedConfig.publicENV === undefined) sanitizedConfig.publicENV = {};
 
   if (sanitizedConfig.defaultDepth === undefined) sanitizedConfig.defaultDepth = 2;
+  if (sanitizedConfig.maxDepth === undefined) sanitizedConfig.maxDepth = 10;
 
   sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig.collections, collection));
 
