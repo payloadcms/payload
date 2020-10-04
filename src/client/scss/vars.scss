@@ -114,6 +114,16 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m $color-green;
   backdrop-filter: saturate(180%) blur(5px);
 }
 
+@keyframes onAutoFillStart {
+  from {/**/}
+  to {/**/}
+}
+
+@keyframes onAutoFillCancel {
+  from {/**/}
+  to {/**/}
+}
+
 @mixin formInput () {
   @include inputShadow;
   font-family: $font-body;
@@ -157,6 +167,17 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m $color-green;
     &:hover {
       border-color: $color-light-gray;
     }
+  }
+
+  // Thanks, Klarna:
+
+  &:-webkit-autofill {
+    animation-name: onAutoFillStart;
+    transition: background-color 50000s ease-in-out 0s;
+  }
+
+  &:not(:-webkit-autofill) {
+    animation-name: onAutoFillCancel;
   }
 
   @include small-break {

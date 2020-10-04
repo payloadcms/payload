@@ -56,6 +56,7 @@ const useFieldType = (options) => {
     fieldToDispatch.disableFormData = disableFormData;
     fieldToDispatch.ignoreWhileFlattening = ignoreWhileFlattening;
     fieldToDispatch.initialValue = initialValue;
+    fieldToDispatch.validate = validate;
 
     dispatchFields(fieldToDispatch);
   }, [path, dispatchFields, validate, disableFormData, ignoreWhileFlattening, initialValue, stringify]);

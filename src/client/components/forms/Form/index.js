@@ -14,6 +14,7 @@ import initContextState from './initContextState';
 import reduceFieldsToValues from './reduceFieldsToValues';
 import getSiblingDataFunc from './getSiblingData';
 import getDataByPathFunc from './getDataByPath';
+import wait from '../../../../utilities/wait';
 
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FieldContext } from './context';
 
@@ -35,6 +36,7 @@ const Form = (props) => {
     disableSuccessStatus,
     initialState,
     disableScrollOnSuccess,
+    waitForAutocomplete,
   } = props;
 
   const history = useHistory();
@@ -53,21 +55,50 @@ const Form = (props) => {
   const [fields, dispatchFields] = useReducer(fieldReducer, {});
   contextRef.current.fields = fields;
 
-  const submit = useCallback((e) => {
+  const validateForm = useCallback(async () => {
+    const validatedFieldState = {};
+    let isValid = true;
+
+    const validationPromises = Object.entries(contextRef.current.fields).map(async ([path, field]) => {
+      const validatedField = { ...field };
+
+      validatedField.valid = typeof field.validate === 'function' ? await field.validate(field.value) : true;
+
+      if (typeof validatedField.valid === 'string') {
+        validatedField.errorMessage = validatedField.valid;
+        validatedField.valid = false;
+        isValid = false;
+      }
+
+      validatedFieldState[path] = validatedField;
+    });
+
+    await Promise.all(validationPromises);
+
+    dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState });
+
+    return isValid;
+  }, [contextRef]);
+
+  const submit = useCallback(async (e) => {
     if (disabled) {
       e.preventDefault();
       return false;
     }
 
     e.stopPropagation();
-    setSubmitted(true);
+    e.preventDefault();
 
-    const isValid = contextRef.current.validateForm();
+    setProcessing(true);
+
+    if (waitForAutocomplete) await wait(100);
+
+    const isValid = await contextRef.current.validateForm();
+
+    setSubmitted(true);
 
     // If not valid, prevent submission
     if (!isValid) {
-      e.preventDefault();
-
       addStatus({
         message: 'Please correct the fields below.',
         type: 'error',
@@ -85,11 +116,8 @@ const Form = (props) => {
 
     // If submit handler comes through via props, run that
     if (onSubmit) {
-      e.preventDefault();
       return onSubmit(fields);
     }
-
-    e.preventDefault();
 
     if (!disableScrollOnSuccess) {
       window.scrollTo({
@@ -99,103 +127,104 @@ const Form = (props) => {
     }
 
     const formData = contextRef.current.createFormData();
-    setProcessing(true);
 
-    // Make the API call from the action
-    return requests[method.toLowerCase()](action, {
-      body: formData,
-    }).then((res) => {
-      setModified(false);
+    try {
+      const res = await requests[method.toLowerCase()](action, {
+        body: formData,
+      });
+
       if (typeof handleResponse === 'function') return handleResponse(res);
 
-      return res.json().then((json) => {
-        setProcessing(false);
-        clearStatus();
+      const json = await res.json();
 
-        if (res.status < 400) {
-          setSubmitted(false);
+      setProcessing(false);
+      clearStatus();
 
-          if (typeof onSuccess === 'function') onSuccess(json);
+      if (res.status < 400) {
+        setSubmitted(false);
 
-          if (redirect) {
-            const destination = {
-              pathname: redirect,
+        if (typeof onSuccess === 'function') onSuccess(json);
+
+        if (redirect) {
+          const destination = {
+            pathname: redirect,
+          };
+
+          if (json.message && !disableSuccessStatus) {
+            destination.state = {
+              status: [
+                {
+                  message: json.message,
+                  type: 'success',
+                },
+              ],
             };
-
-            if (json.message && !disableSuccessStatus) {
-              destination.state = {
-                status: [
-                  {
-                    message: json.message,
-                    type: 'success',
-                  },
-                ],
-              };
-            }
-
-            history.push(destination);
-          } else if (!disableSuccessStatus) {
-            replaceStatus([{
-              message: json.message,
-              type: 'success',
-              disappear: 3000,
-            }]);
-          }
-        } else {
-          contextRef.current = { ...contextRef.current }; // triggers rerender of all components that subscribe to form
-
-          if (json.message) {
-            addStatus({
-              message: json.message,
-              type: 'error',
-            });
-
-            return json;
           }
 
-          if (Array.isArray(json.errors)) {
-            const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => (err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]]), [[], []]);
+          history.push(destination);
+        } else if (!disableSuccessStatus) {
+          replaceStatus([{
+            message: json.message,
+            type: 'success',
+            disappear: 3000,
+          }]);
+        }
+      } else {
+        contextRef.current = { ...contextRef.current }; // triggers rerender of all components that subscribe to form
 
-            fieldErrors.forEach((err) => {
-              dispatchFields({
-                ...(contextRef.current?.fields?.[err.field] || {}),
-                valid: false,
-                errorMessage: err.message,
-                path: err.field,
-              });
-            });
-
-            nonFieldErrors.forEach((err) => {
-              addStatus({
-                message: err.message || 'An unknown error occurred.',
-                type: 'error',
-              });
-            });
-
-            if (fieldErrors.length > 0 && nonFieldErrors.length === 0) {
-              addStatus({
-                message: 'Please correct the fields below.',
-                type: 'error',
-              });
-            }
-
-            return json;
-          }
-
+        if (json.message) {
           addStatus({
-            message: 'An unknown error occurred.',
+            message: json.message,
             type: 'error',
           });
+
+          return json;
         }
 
-        return json;
-      });
-    }).catch((err) => {
-      addStatus({
+        if (Array.isArray(json.errors)) {
+          const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => (err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]]), [[], []]);
+
+          fieldErrors.forEach((err) => {
+            dispatchFields({
+              ...(contextRef.current?.fields?.[err.field] || {}),
+              valid: false,
+              errorMessage: err.message,
+              path: err.field,
+            });
+          });
+
+          nonFieldErrors.forEach((err) => {
+            addStatus({
+              message: err.message || 'An unknown error occurred.',
+              type: 'error',
+            });
+          });
+
+          if (fieldErrors.length > 0 && nonFieldErrors.length === 0) {
+            addStatus({
+              message: 'Please correct the fields below.',
+              type: 'error',
+            });
+          }
+
+          return json;
+        }
+
+        addStatus({
+          message: 'An unknown error occurred.',
+          type: 'error',
+        });
+      }
+
+      return json;
+    } catch (err) {
+      setProcessing(false);
+
+      return addStatus({
         message: err,
         type: 'error',
       });
-    });
+    }
   }, [
     action,
     addStatus,
@@ -211,6 +240,7 @@ const Form = (props) => {
     redirect,
     replaceStatus,
     disableScrollOnSuccess,
+    waitForAutocomplete,
   ]);
 
 
@@ -223,8 +253,6 @@ const Form = (props) => {
   const getDataByPath = useCallback((path) => getDataByPathFunc(contextRef.current.fields, path), [contextRef]);
 
   const getUnflattenedValues = useCallback(() => reduceFieldsToValues(contextRef.current.fields), [contextRef]);
-
-  const validateForm = useCallback(() => !Object.values(contextRef.current.fields).some((field) => field.valid === false), [contextRef]);
 
   const createFormData = useCallback(() => {
     const data = reduceFieldsToValues(contextRef.current.fields);
@@ -306,6 +334,7 @@ Form.defaultProps = {
   disabled: false,
   initialState: {},
   disableScrollOnSuccess: false,
+  waitForAutocomplete: false,
 };
 
 Form.propTypes = {
@@ -324,6 +353,7 @@ Form.propTypes = {
   disabled: PropTypes.bool,
   initialState: PropTypes.shape({}),
   disableScrollOnSuccess: PropTypes.bool,
+  waitForAutocomplete: PropTypes.bool,
 };
 
 export default Form;

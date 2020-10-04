@@ -140,7 +140,7 @@ const AuthenticationProvider = ({ children }) => {
     if (remainingTime > 0) {
       forceLogOut = setTimeout(() => {
         setUser(null);
-        history.push(`${admin}/logout`);
+        history.push(`${admin}/logout-inactivity`);
         closeAllModals();
       }, remainingTime * 1000);
     }

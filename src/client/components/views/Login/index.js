@@ -69,6 +69,7 @@ const Login = () => {
       </div>
       <Form
         disableSuccessStatus
+        waitForAutocomplete
         onSuccess={onSuccess}
         method="POST"
         action={`${serverURL}${api}/${userSlug}/login`}
