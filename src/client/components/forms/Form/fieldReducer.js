@@ -1,7 +1,6 @@
 import { unflatten, flatten } from 'flatley';
 import flattenFilters from './flattenFilters';
 
-//
 const unflattenRowsFromState = (state, path) => {
   // Take a copy of state
   const remainingFlattenedState = { ...state };

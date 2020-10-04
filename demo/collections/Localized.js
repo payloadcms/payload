@@ -11,6 +11,7 @@ module.exports = {
       'priority',
       'createdAt',
     ],
+    enableRichTextRelationship: true,
   },
   access: {
     read: () => true,

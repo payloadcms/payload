@@ -15,7 +15,7 @@
 
 .rich-text-link__popup-wrap {
   position: absolute;
-  z-index: $z-modal;
+  z-index: $z-page-content;
   cursor: pointer;
 
   .tooltip {

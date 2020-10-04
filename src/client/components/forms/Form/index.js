@@ -15,6 +15,7 @@ import reduceFieldsToValues from './reduceFieldsToValues';
 import getSiblingDataFunc from './getSiblingData';
 import getDataByPathFunc from './getDataByPath';
 import wait from '../../../../utilities/wait';
+import buildInitialState from './buildInitialState';
 
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FieldContext } from './context';
 
@@ -34,9 +35,11 @@ const Form = (props) => {
     className,
     redirect,
     disableSuccessStatus,
-    initialState,
+    initialState, // fully formed field state
+    initialData, // values only
     disableScrollOnSuccess,
     waitForAutocomplete,
+    log,
   } = props;
 
   const history = useHistory();
@@ -50,9 +53,15 @@ const Form = (props) => {
 
   const contextRef = useRef({ ...initContextState });
 
-  contextRef.current.initialState = initialState;
+  const [fields, dispatchFields] = useReducer(fieldReducer, {}, () => {
+    let initialFields = {};
 
-  const [fields, dispatchFields] = useReducer(fieldReducer, {});
+    if (initialData) initialFields = buildInitialState(initialData);
+    if (initialState) initialFields = initialState;
+
+    return initialFields;
+  });
+
   contextRef.current.fields = fields;
 
   const validateForm = useCallback(async () => {
@@ -116,7 +125,7 @@ const Form = (props) => {
 
     // If submit handler comes through via props, run that
     if (onSubmit) {
-      return onSubmit(fields);
+      return onSubmit(fields, reduceFieldsToValues(fields));
     }
 
     if (!disableScrollOnSuccess) {
@@ -132,6 +141,8 @@ const Form = (props) => {
       const res = await requests[method.toLowerCase()](action, {
         body: formData,
       });
+
+      setModified(false);
 
       if (typeof handleResponse === 'function') return handleResponse(res);
 
@@ -247,11 +258,8 @@ const Form = (props) => {
   const getFields = useCallback(() => contextRef.current.fields, [contextRef]);
   const getField = useCallback((path) => contextRef.current.fields[path], [contextRef]);
   const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [contextRef]);
-
   const getSiblingData = useCallback((path) => getSiblingDataFunc(contextRef.current.fields, path), [contextRef]);
-
   const getDataByPath = useCallback((path) => getDataByPathFunc(contextRef.current.fields, path), [contextRef]);
-
   const getUnflattenedValues = useCallback(() => reduceFieldsToValues(contextRef.current.fields), [contextRef]);
 
   const createFormData = useCallback(() => {
@@ -275,11 +283,22 @@ const Form = (props) => {
   contextRef.current.setModified = setModified;
   contextRef.current.setProcessing = setProcessing;
   contextRef.current.setSubmitted = setSubmitted;
+  contextRef.current.disabled = disabled;
 
   useEffect(() => {
-    contextRef.current = { ...initContextState };
-    dispatchFields({ type: 'REPLACE_STATE', state: initialState });
+    if (initialState) {
+      contextRef.current = { ...initContextState };
+      dispatchFields({ type: 'REPLACE_STATE', state: initialState });
+    }
   }, [initialState]);
+
+  useEffect(() => {
+    if (initialData) {
+      contextRef.current = { ...initContextState };
+      const builtState = buildInitialState(initialData);
+      dispatchFields({ type: 'REPLACE_STATE', state: builtState });
+    }
+  }, [initialData]);
 
   useThrottledEffect(() => {
     refreshCookie();
@@ -293,6 +312,11 @@ const Form = (props) => {
     className,
     baseClass,
   ].filter(Boolean).join(' ');
+
+  if (log) {
+    // eslint-disable-next-line no-console
+    console.log(fields);
+  }
 
   return (
     <form
@@ -317,7 +341,6 @@ const Form = (props) => {
           </SubmittedContext.Provider>
         </FieldContext.Provider>
       </FormContext.Provider>
-
     </form>
   );
 };
@@ -332,9 +355,11 @@ Form.defaultProps = {
   className: '',
   disableSuccessStatus: false,
   disabled: false,
-  initialState: {},
+  initialState: undefined,
   disableScrollOnSuccess: false,
   waitForAutocomplete: false,
+  initialData: undefined,
+  log: false,
 };
 
 Form.propTypes = {
@@ -354,6 +379,8 @@ Form.propTypes = {
   initialState: PropTypes.shape({}),
   disableScrollOnSuccess: PropTypes.bool,
   waitForAutocomplete: PropTypes.bool,
+  initialData: PropTypes.shape({}),
+  log: PropTypes.bool,
 };
 
 export default Form;

@@ -1,0 +1,22 @@
+@import '../../../../../../../scss/styles.scss';
+
+.rich-text-relationship {
+  padding: base(.5);
+  display: flex;
+  align-items: flex-start;
+  background: $color-background-gray;
+  max-width: base(15);
+  margin-bottom: $baseline;
+
+  svg {
+    width: base(1.25);
+    height: base(1.25);
+    margin-right: base(.5);
+  }
+
+  h5 {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+}

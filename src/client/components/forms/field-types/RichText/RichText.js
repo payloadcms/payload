@@ -22,7 +22,7 @@ import mergeCustomFunctions from './mergeCustomFunctions';
 
 import './index.scss';
 
-const defaultElements = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link'];
+const defaultElements = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link', 'relationship'];
 const defaultLeaves = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
 
 const baseClass = 'rich-text';

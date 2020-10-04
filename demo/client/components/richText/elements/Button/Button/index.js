@@ -13,7 +13,7 @@ import './index.scss';
 
 const baseClass = 'button-rich-text-button';
 
-const initialFormState = {
+const initialFormData = {
   style: 'primary',
 };
 
@@ -72,7 +72,7 @@ const ToolbarButton = ({ path }) => {
           </header>
           <Form
             onSubmit={handleAddButton}
-            initialState={initialFormState}
+            initialData={initialFormData}
           >
             <Text
               label="Label"

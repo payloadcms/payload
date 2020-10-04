@@ -1,0 +1,33 @@
+@import '../../../../../../../scss/styles.scss';
+
+.relationship-rich-text-button {
+  .btn {
+    margin-right: base(1);
+  }
+
+  &__modal {
+    display: flex;
+    align-items: center;
+    height: 100%;
+
+    &.payload__modal-item--enterDone {
+      @include blur-bg;
+    }
+  }
+
+  &__header {
+    width: 100%;
+    margin-bottom: $baseline;
+    display: flex;
+    justify-content: space-between;
+
+    h3 {
+      margin: 0;
+    }
+
+    svg {
+      width: base(1.5);
+      height: base(1.5);
+    }
+  }
+}

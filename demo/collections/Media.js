@@ -9,6 +9,9 @@ module.exports = {
   access: {
     read: () => true,
   },
+  admin: {
+    enableRichTextRelationship: true,
+  },
   upload: {
     staticURL: '/media',
     staticDir: './media',

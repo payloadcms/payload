@@ -8,6 +8,7 @@ import link from './link';
 import ol from './ol';
 import ul from './ul';
 import li from './li';
+import relationship from './relationship';
 
 export default {
   h1,
@@ -20,4 +21,5 @@ export default {
   ol,
   ul,
   li,
+  relationship,
 };
