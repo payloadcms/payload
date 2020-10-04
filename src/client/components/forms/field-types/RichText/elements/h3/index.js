@@ -18,12 +18,12 @@ H3.propTypes = {
 };
 
 const h3 = {
-  button: () => (
+  Button: () => (
     <ElementButton format="h3">
       <H3Icon />
     </ElementButton>
   ),
-  element: H3,
+  Element: H3,
 };
 
 export default h3;

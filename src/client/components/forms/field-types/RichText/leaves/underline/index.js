@@ -18,12 +18,12 @@ Underline.propTypes = {
 };
 
 const underline = {
-  button: () => (
+  Button: () => (
     <LeafButton format="underline">
       <UnderlineIcon />
     </LeafButton>
   ),
-  leaf: Underline,
+  Leaf: Underline,
 };
 
 export default underline;

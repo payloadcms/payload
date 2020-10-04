@@ -18,14 +18,14 @@ H1.propTypes = {
 };
 
 const h1 = {
-  button: () => (
+  Button: () => (
     <ElementButton
       format="h1"
     >
       <H1Icon />
     </ElementButton>
   ),
-  element: H1,
+  Element: H1,
 };
 
 export default h1;

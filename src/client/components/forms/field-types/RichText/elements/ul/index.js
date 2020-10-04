@@ -18,12 +18,12 @@ UL.propTypes = {
 };
 
 const ul = {
-  button: () => (
+  Button: () => (
     <ElementButton format="ul">
       <ULIcon />
     </ElementButton>
   ),
-  element: UL,
+  Element: UL,
 };
 
 export default ul;

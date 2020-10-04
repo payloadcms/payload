@@ -18,12 +18,12 @@ Code.propTypes = {
 };
 
 const code = {
-  button: () => (
+  Button: () => (
     <LeafButton format="code">
       <CodeIcon />
     </LeafButton>
   ),
-  leaf: Code,
+  Leaf: Code,
 };
 
 export default code;

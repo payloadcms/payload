@@ -18,12 +18,12 @@ H2.propTypes = {
 };
 
 const h2 = {
-  button: () => (
+  Button: () => (
     <ElementButton format="h2">
       <H2Icon />
     </ElementButton>
   ),
-  element: H2,
+  Element: H2,
 };
 
 export default h2;

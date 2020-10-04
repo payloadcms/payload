@@ -18,12 +18,12 @@ Italic.propTypes = {
 };
 
 const italic = {
-  button: () => (
+  Button: () => (
     <LeafButton format="italic">
       <ItalicIcon />
     </LeafButton>
   ),
-  leaf: Italic,
+  Leaf: Italic,
 };
 
 export default italic;

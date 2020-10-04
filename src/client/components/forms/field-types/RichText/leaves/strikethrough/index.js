@@ -20,12 +20,12 @@ Strikethrough.propTypes = {
 };
 
 const strikethrough = {
-  button: () => (
+  Button: () => (
     <LeafButton format="strikethrough">
       <StrikethroughIcon />
     </LeafButton>
   ),
-  leaf: Strikethrough,
+  Leaf: Strikethrough,
 };
 
 export default strikethrough;

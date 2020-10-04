@@ -16,5 +16,5 @@ LI.propTypes = {
 };
 
 export default {
-  element: LI,
+  Element: LI,
 };

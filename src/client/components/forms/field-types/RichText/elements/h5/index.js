@@ -18,12 +18,12 @@ H5.propTypes = {
 };
 
 const h5 = {
-  button: () => (
+  Button: () => (
     <ElementButton format="h5">
       <H5Icon />
     </ElementButton>
   ),
-  element: H5,
+  Element: H5,
 };
 
 export default h5;

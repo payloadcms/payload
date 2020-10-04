@@ -171,8 +171,8 @@ const LinkButton = () => {
 };
 
 const link = {
-  button: LinkButton,
-  element: Link,
+  Button: LinkButton,
+  Element: Link,
   plugins: [
     withLinks,
   ],

@@ -1,11 +1,11 @@
-import button from './Button';
-import element from './Element';
+import Button from './Button';
+import Element from './Element';
 import plugin from './plugin';
 
 export default {
   name: 'button',
-  button,
-  element,
+  Button,
+  Element,
   plugins: [
     plugin,
   ],

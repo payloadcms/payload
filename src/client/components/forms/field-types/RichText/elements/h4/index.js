@@ -18,12 +18,12 @@ H4.propTypes = {
 };
 
 const h4 = {
-  button: () => (
+  Button: () => (
     <ElementButton format="h4">
       <H4Icon />
     </ElementButton>
   ),
-  element: H4,
+  Element: H4,
 };
 
 export default h4;

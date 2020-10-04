@@ -54,7 +54,7 @@ const RichText = (props) => {
 
   const renderElement = useCallback(({ attributes, children, element }) => {
     const matchedElement = enabledElements[element?.type];
-    const Element = matchedElement?.element;
+    const Element = matchedElement?.Element;
 
     if (Element) {
       return (
@@ -73,8 +73,8 @@ const RichText = (props) => {
   const renderLeaf = useCallback(({ attributes, children, leaf }) => {
     const matchedLeafName = Object.keys(enabledLeaves).find((leafName) => leaf[leafName]);
 
-    if (enabledLeaves[matchedLeafName]?.leaf) {
-      const Leaf = enabledLeaves[matchedLeafName]?.leaf;
+    if (enabledLeaves[matchedLeafName]?.Leaf) {
+      const { Leaf } = enabledLeaves[matchedLeafName];
 
       return (
         <Leaf
@@ -175,7 +175,7 @@ const RichText = (props) => {
               const elementName = element?.name || element;
 
               const elementType = enabledElements[elementName];
-              const Button = elementType?.button;
+              const Button = elementType?.Button;
 
               if (Button) {
                 return (
@@ -191,7 +191,7 @@ const RichText = (props) => {
             {leaves.map((leaf, i) => {
               const leafName = leaf?.name || leaf;
               const leafType = enabledLeaves[leafName];
-              const Button = leafType?.button;
+              const Button = leafType?.Button;
 
               if (Button) {
                 return (

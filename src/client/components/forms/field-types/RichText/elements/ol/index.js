@@ -18,12 +18,12 @@ OL.propTypes = {
 };
 
 const ol = {
-  button: () => (
+  Button: () => (
     <ElementButton format="ol">
       <OLIcon />
     </ElementButton>
   ),
-  element: OL,
+  Element: OL,
 };
 
 export default ol;

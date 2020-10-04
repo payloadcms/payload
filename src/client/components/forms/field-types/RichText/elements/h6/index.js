@@ -18,12 +18,12 @@ H6.propTypes = {
 };
 
 const h6 = {
-  button: () => (
+  Button: () => (
     <ElementButton format="h6">
       <H6Icon />
     </ElementButton>
   ),
-  element: H6,
+  Element: H6,
 };
 
 export default h6;

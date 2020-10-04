@@ -18,12 +18,12 @@ Bold.propTypes = {
 };
 
 const bold = {
-  button: () => (
+  Button: () => (
     <LeafButton format="bold">
       <BoldIcon />
     </LeafButton>
   ),
-  leaf: Bold,
+  Leaf: Bold,
 };
 
 export default bold;
