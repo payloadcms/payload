@@ -73,88 +73,91 @@ function registerCollections() {
       config: formattedCollection,
     };
 
-    const router = express.Router();
-    const { slug } = collection;
+    // If not local, open routes
+    if (!this.config.local) {
+      const router = express.Router();
+      const { slug } = collection;
 
-    router.all(`/${slug}*`, bindCollectionMiddleware(this.collections[formattedCollection.slug]));
-
-    const {
-      create,
-      find,
-      update,
-      findByID,
-      delete: deleteHandler,
-    } = this.requestHandlers.collections;
-
-    if (collection.auth) {
-      const AuthCollection = this.collections[formattedCollection.slug];
-      passport.use(new LocalStrategy(AuthCollection.Model.authenticate()));
-
-      if (collection.auth.useAPIKey) {
-        passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(this, AuthCollection));
-      }
+      router.all(`/${slug}*`, bindCollectionMiddleware(this.collections[formattedCollection.slug]));
 
       const {
-        init,
-        login,
-        logout,
-        refresh,
-        me,
-        registerFirstUser,
-        forgotPassword,
-        resetPassword,
-        verifyEmail,
-      } = this.requestHandlers.collections.auth;
+        create,
+        find,
+        update,
+        findByID,
+        delete: deleteHandler,
+      } = this.requestHandlers.collections;
 
-      if (collection.auth.emailVerification) {
+      if (collection.auth) {
+        const AuthCollection = this.collections[formattedCollection.slug];
+        passport.use(new LocalStrategy(AuthCollection.Model.authenticate()));
+
+        if (collection.auth.useAPIKey) {
+          passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(this, AuthCollection));
+        }
+
+        const {
+          init,
+          login,
+          logout,
+          refresh,
+          me,
+          registerFirstUser,
+          forgotPassword,
+          resetPassword,
+          verifyEmail,
+        } = this.requestHandlers.collections.auth;
+
+        if (collection.auth.emailVerification) {
+          router
+            .route(`/${slug}/verify/:token`)
+            .post(verifyEmail);
+        }
+
         router
-          .route(`/${slug}/verify/:token`)
-          .post(verifyEmail);
+          .route(`/${slug}/init`)
+          .get(init);
+
+        router
+          .route(`/${slug}/login`)
+          .post(login);
+
+        router
+          .route(`/${slug}/logout`)
+          .post(logout);
+
+        router
+          .route(`/${slug}/refresh-token`)
+          .post(refresh);
+
+        router
+          .route(`/${slug}/me`)
+          .get(me);
+
+        router
+          .route(`/${slug}/first-register`)
+          .post(registerFirstUser);
+
+        router
+          .route(`/${slug}/forgot-password`)
+          .post(forgotPassword);
+
+        router
+          .route(`/${slug}/reset-password`)
+          .post(resetPassword);
       }
 
-      router
-        .route(`/${slug}/init`)
-        .get(init);
+      router.route(`/${slug}`)
+        .get(find)
+        .post(create);
 
-      router
-        .route(`/${slug}/login`)
-        .post(login);
+      router.route(`/${slug}/:id`)
+        .put(update)
+        .get(findByID)
+        .delete(deleteHandler);
 
-      router
-        .route(`/${slug}/logout`)
-        .post(logout);
-
-      router
-        .route(`/${slug}/refresh-token`)
-        .post(refresh);
-
-      router
-        .route(`/${slug}/me`)
-        .get(me);
-
-      router
-        .route(`/${slug}/first-register`)
-        .post(registerFirstUser);
-
-      router
-        .route(`/${slug}/forgot-password`)
-        .post(forgotPassword);
-
-      router
-        .route(`/${slug}/reset-password`)
-        .post(resetPassword);
+      this.router.use(router);
     }
-
-    router.route(`/${slug}`)
-      .get(find)
-      .post(create);
-
-    router.route(`/${slug}/:id`)
-      .put(update)
-      .get(findByID)
-      .delete(deleteHandler);
-
-    this.router.use(router);
 
     return formattedCollection;
   });

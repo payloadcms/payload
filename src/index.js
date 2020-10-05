@@ -46,12 +46,11 @@ class Payload {
       email,
       secret: options.secret,
       mongoURL: options.mongoURL,
+      local: options.local,
     });
 
     if (typeof this.config.paths === 'undefined') this.config.paths = {};
 
-    this.express = options.express;
-    this.router = express.Router();
     this.collections = {};
 
     bindOperations(this);
@@ -68,47 +67,6 @@ class Payload {
     this.initAdmin = initAdmin.bind(this);
     this.performFieldOperations = performFieldOperations.bind(this);
 
-    // Configure email service
-    this.email = this.buildEmail();
-
-    // Setup & initialization
-    connectMongoose(this.config.mongoURL);
-
-    this.router.use(...expressMiddleware(this));
-
-    this.initAuth();
-    this.initCollections();
-    this.initGlobals();
-    this.initAdmin();
-
-    this.router.get('/access', this.requestHandlers.collections.auth.access);
-
-    const graphQLHandler = new GraphQL(this);
-
-    this.router.use(
-      this.config.routes.graphQL,
-      identifyAPI('GraphQL'),
-      (req, res) => graphQLHandler.init(req, res)(req, res),
-    );
-
-    this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
-      endpoint: `${this.config.routes.api}${this.config.routes.graphQL}`,
-      settings: {
-        'request.credentials': 'include',
-      },
-    }));
-
-    // Bind router to API
-    this.express.use(this.config.routes.api, this.router);
-
-    // Enable static routes for all collections permitting upload
-    this.initStatic();
-
-    this.errorHandler = errorHandler(this.config);
-    this.router.use(this.errorHandler);
-
-    this.authenticate = authenticate(this.config);
-
     this.create = this.create.bind(this);
     this.find = this.find.bind(this);
     this.findGlobal = this.findGlobal.bind(this);
@@ -118,6 +76,59 @@ class Payload {
     this.login = this.login.bind(this);
     this.forgotPassword = this.forgotPassword.bind(this);
     this.resetPassword = this.resetPassword.bind(this);
+
+    // If not initializing locally, scaffold router
+    if (!this.config.local) {
+      this.router = express.Router();
+      this.router.use(...expressMiddleware(this));
+      this.initAuth();
+    }
+
+    // Configure email service
+    this.email = this.buildEmail();
+
+    // Initialize collections & globals
+    this.initCollections();
+    this.initGlobals();
+
+    // Connect to database
+    connectMongoose(this.config.mongoURL);
+
+
+    // If not initializing locally, set up HTTP routing
+    if (!this.config.local) {
+      this.express = options.express;
+
+      this.initAdmin();
+
+      this.router.get('/access', this.requestHandlers.collections.auth.access);
+
+      const graphQLHandler = new GraphQL(this);
+
+      this.router.use(
+        this.config.routes.graphQL,
+        identifyAPI('GraphQL'),
+        (req, res) => graphQLHandler.init(req, res)(req, res),
+      );
+
+      this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
+        endpoint: `${this.config.routes.api}${this.config.routes.graphQL}`,
+        settings: {
+          'request.credentials': 'include',
+        },
+      }));
+
+      // Bind router to API
+      this.express.use(this.config.routes.api, this.router);
+
+      // Enable static routes for all collections permitting upload
+      this.initStatic();
+
+      this.errorHandler = errorHandler(this.config);
+      this.router.use(this.errorHandler);
+
+      this.authenticate = authenticate(this.config);
+    }
 
     if (typeof options.onInit === 'function') options.onInit();
   }

@@ -8,16 +8,19 @@ function initGlobals() {
       config: this.config.globals,
     };
 
-    const router = express.Router();
+    // If not local, open routes
+    if (!this.config.local) {
+      const router = express.Router();
 
-    this.config.globals.forEach((global) => {
-      router
-        .route(`/globals/${global.slug}`)
-        .get(this.requestHandlers.globals.findOne(global))
-        .post(this.requestHandlers.globals.update(global));
-    });
+      this.config.globals.forEach((global) => {
+        router
+          .route(`/globals/${global.slug}`)
+          .get(this.requestHandlers.globals.findOne(global))
+          .post(this.requestHandlers.globals.update(global));
+      });
 
-    this.router.use(router);
+      this.router.use(router);
+    }
   }
 }
 
