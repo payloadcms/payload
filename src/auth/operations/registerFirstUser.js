@@ -25,7 +25,7 @@ async function registerFirstUser(args) {
   // 3. Log in new user
   // /////////////////////////////////////
 
-  const token = await this.operations.collections.auth.login({
+  const { token } = await this.operations.collections.auth.login({
     ...args,
   });
 
