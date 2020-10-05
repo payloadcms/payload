@@ -35,8 +35,8 @@ const Form = (props) => {
     className,
     redirect,
     disableSuccessStatus,
-    initialState, // fully formed field state
-    initialData, // values only
+    initialState, // fully formed initial field state
+    initialData, // values only, paths are required as key - form should build initial state as convenience
     disableScrollOnSuccess,
     waitForAutocomplete,
     log,
@@ -50,17 +50,19 @@ const Form = (props) => {
   const [modified, setModified] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [formattedInitialData, setFormattedInitialData] = useState(buildInitialState(initialData));
 
   const contextRef = useRef({ ...initContextState });
 
-  const [fields, dispatchFields] = useReducer(fieldReducer, {}, () => {
-    let initialFields = {};
+  let initialFieldState = {};
 
-    if (initialData) initialFields = buildInitialState(initialData);
-    if (initialState) initialFields = initialState;
+  if (formattedInitialData) initialFieldState = formattedInitialData;
+  if (initialState) initialFieldState = initialState;
 
-    return initialFields;
-  });
+  // Allow access to initialState for field types such as Blocks and Array
+  contextRef.current.initialState = initialState;
+
+  const [fields, dispatchFields] = useReducer(fieldReducer, {}, () => initialFieldState);
 
   contextRef.current.fields = fields;
 
@@ -296,6 +298,7 @@ const Form = (props) => {
     if (initialData) {
       contextRef.current = { ...initContextState };
       const builtState = buildInitialState(initialData);
+      setFormattedInitialData(builtState);
       dispatchFields({ type: 'REPLACE_STATE', state: builtState });
     }
   }, [initialData]);
