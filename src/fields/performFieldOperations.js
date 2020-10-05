@@ -1,6 +1,7 @@
 const { isValidObjectId } = require('mongoose');
 const { ValidationError } = require('../errors');
 const executeAccess = require('../auth/executeAccess');
+const sanitizeFallbackLocale = require('../localization/sanitizeFallbackLocale');
 
 async function performFieldOperations(entityConfig, args) {
   const {
@@ -12,9 +13,13 @@ async function performFieldOperations(entityConfig, args) {
     id,
     req: {
       payloadAPI,
+      locale,
     },
     overrideAccess,
+    reduceLocales,
   } = args;
+
+  const fallbackLocale = sanitizeFallbackLocale(req.fallbackLocale);
 
   const recursivePerformFieldOperations = performFieldOperations.bind(this);
 
@@ -274,6 +279,13 @@ async function performFieldOperations(entityConfig, args) {
   const traverseFields = (fields, data = {}, originalDoc = {}, path) => {
     fields.forEach((field) => {
       const dataCopy = data;
+
+      if (reduceLocales && field.name && field.localized && locale !== 'all' && typeof data[field.name] === 'object') {
+        let localizedValue = data[field.name][locale];
+        if (typeof localizedValue === 'undefined' && fallbackLocale) localizedValue = data[field.name][fallbackLocale];
+        if (typeof localizedValue === 'undefined') localizedValue = null;
+        dataCopy[field.name] = localizedValue;
+      }
 
       if (field.type === 'upload') {
         if (data[field.name] === '') dataCopy[field.name] = null;

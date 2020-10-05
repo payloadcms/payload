@@ -13,7 +13,6 @@ async function find(args) {
     req,
     req: {
       locale,
-      fallbackLocale,
     },
     overrideAccess,
   } = args;
@@ -75,7 +74,8 @@ async function find(args) {
     page: page || 1,
     limit: limit || 10,
     sort,
-    collation: sort ? { locale: 'en' } : {}, // case-insensitive sort in MongoDB
+    lean: true,
+    leanWithId: true,
   };
 
   let result = await Model.paginate(query, optionsToExecute);
@@ -89,11 +89,8 @@ async function find(args) {
     docs: await Promise.all(result.docs.map(async (doc) => {
       let docRef = doc;
 
-      if (locale && doc.setLocale) {
-        doc.setLocale(locale, fallbackLocale);
-      }
-
-      docRef = doc.toJSON({ virtuals: true });
+      if (docRef._id) delete docRef._id;
+      if (docRef.__v) delete docRef.__v;
 
       await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
         await priorHook;
@@ -121,6 +118,7 @@ async function find(args) {
         hook: 'afterRead',
         operation: 'read',
         overrideAccess,
+        reduceLocales: true,
       },
       find,
     ))),
@@ -148,9 +146,6 @@ async function find(args) {
   // /////////////////////////////////////
   // 6. Return results
   // /////////////////////////////////////
-
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
 
   return result;
 }

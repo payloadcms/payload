@@ -13,7 +13,6 @@ async function findByID(args) {
     req,
     req: {
       locale,
-      fallbackLocale,
     },
     disableErrors,
     currentDepth,
@@ -51,7 +50,7 @@ async function findByID(args) {
 
   if (!query.$and[0]._id) throw new NotFound();
 
-  let result = await Model.findOne(query, {});
+  let result = await Model.findOne(query, {}).lean();
 
   if (!result) {
     if (!disableErrors) {
@@ -62,11 +61,12 @@ async function findByID(args) {
     return null;
   }
 
-  if (locale && result.setLocale) {
-    result.setLocale(locale, fallbackLocale);
+  if (result._id) {
+    result.id = result._id;
+    delete result._id;
   }
 
-  result = result.toJSON({ virtuals: true });
+  if (result.__v) delete result.__v;
 
   // /////////////////////////////////////
   // 3. Execute beforeRead collection hook
@@ -95,6 +95,7 @@ async function findByID(args) {
     operation: 'read',
     currentDepth,
     overrideAccess,
+    reduceLocales: true,
   });
 
 
@@ -115,9 +116,6 @@ async function findByID(args) {
   // /////////////////////////////////////
   // 6. Return results
   // /////////////////////////////////////
-
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
 
   return result;
 }

@@ -222,6 +222,7 @@ async function update(args) {
     id,
     depth,
     overrideAccess,
+    reduceLocales: true,
   });
 
   // /////////////////////////////////////

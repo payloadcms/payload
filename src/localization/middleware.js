@@ -21,11 +21,11 @@ module.exports = function localizationMiddleware(localization) {
       if (requestedFallbackLocale === 'none') requestedFallbackLocale = 'null';
       if (requestedLocale === '*' || requestedLocale === 'all') requestedLocale = 'all';
 
-      if (validLocales.find(locale => locale === requestedLocale)) {
+      if (validLocales.find((locale) => locale === requestedLocale)) {
         req.locale = requestedLocale;
       }
 
-      if (validFallbackLocales.find(locale => locale === requestedFallbackLocale)) {
+      if (validFallbackLocales.find((locale) => locale === requestedFallbackLocale)) {
         req.fallbackLocale = requestedFallbackLocale;
       }
     }

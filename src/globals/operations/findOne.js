@@ -6,10 +6,6 @@ async function findOne(args) {
   const {
     globalConfig,
     req,
-    req: {
-      locale,
-      fallbackLocale,
-    },
     slug,
     depth,
   } = args;
@@ -30,18 +26,11 @@ async function findOne(args) {
   // 3. Perform database operation
   // /////////////////////////////////////
 
-  let doc = await Model.findOne({ globalType: slug });
+  let doc = await Model.findOne({ globalType: slug }).lean();
 
   if (!doc) {
     doc = {};
-  } else {
-    if (locale && doc.setLocale) {
-      doc.setLocale(locale, fallbackLocale);
-    }
-
-    doc = doc.toJSON({ virtuals: true });
   }
-
 
   // /////////////////////////////////////
   // 4. Execute field-level hooks and access
@@ -53,6 +42,7 @@ async function findOne(args) {
     operation: 'read',
     req,
     depth,
+    reduceLocales: true,
   });
 
   // /////////////////////////////////////
@@ -71,9 +61,6 @@ async function findOne(args) {
   // /////////////////////////////////////
   // 6. Return results
   // /////////////////////////////////////
-
-  doc = JSON.stringify(doc);
-  doc = JSON.parse(doc);
 
   return doc;
 }
