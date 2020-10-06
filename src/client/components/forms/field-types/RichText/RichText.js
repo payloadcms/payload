@@ -142,6 +142,10 @@ const RichText = (props) => {
     return null;
   }
 
+  let valueToRender = value;
+  if (typeof valueToRender === 'string') valueToRender = JSON.parse(valueToRender);
+  if (!valueToRender) valueToRender = defaultValue;
+
   return (
     <div
       className={classes}
@@ -163,7 +167,7 @@ const RichText = (props) => {
         />
         <Slate
           editor={editor}
-          value={value || defaultValue}
+          value={valueToRender}
           onChange={(val) => {
             if (val !== defaultValue && val !== value) {
               setValue(val);
