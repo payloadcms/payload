@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */
+const memoize = require('micro-memoize');
 const { Forbidden, NotFound } = require('../../errors');
 const executeAccess = require('../../auth/executeAccess');
 
@@ -50,7 +51,18 @@ async function findByID(args) {
 
   if (!query.$and[0]._id) throw new NotFound();
 
-  let result = await Model.findOne(query, {}).lean();
+  if (!req.findByID) req.findByID = {};
+
+  if (!req.findByID[collectionConfig.slug]) {
+    const nonMemoizedFindByID = async (_, q) => Model.findOne(q, {}).lean();
+    req.findByID[collectionConfig.slug] = memoize(nonMemoizedFindByID, {
+      isPromise: true,
+      maxSize: 100,
+      transformKey: JSON.stringify,
+    });
+  }
+
+  let result = await req.findByID[collectionConfig.slug](id.toString(), query);
 
   if (!result) {
     if (!disableErrors) {
@@ -100,7 +112,6 @@ async function findByID(args) {
     reduceLocales: true,
   });
 
-
   // /////////////////////////////////////
   // 5. Execute afterRead collection hook
   // /////////////////////////////////////
@@ -118,6 +129,9 @@ async function findByID(args) {
   // /////////////////////////////////////
   // 6. Return results
   // /////////////////////////////////////
+
+  result = JSON.stringify(result);
+  result = JSON.parse(result);
 
   return result;
 }
