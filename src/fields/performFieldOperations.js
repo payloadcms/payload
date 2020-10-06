@@ -1,4 +1,4 @@
-const memoize = require('micro-memoize');
+const memoize = require('fast-memoize');
 const { ValidationError } = require('../errors');
 const sanitizeFallbackLocale = require('../localization/sanitizeFallbackLocale');
 const traverseFields = require('./traverseFields');
@@ -102,7 +102,7 @@ async function performFieldOperations(entityConfig, args) {
   };
 
   const populate = memoize(nonMemoizedPopulate, {
-    isPromise: true,
+    serializer: (populateArgs) => JSON.stringify(populateArgs[0]),
   });
 
   // //////////////////////////////////////////
