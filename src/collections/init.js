@@ -55,8 +55,6 @@ function registerCollections() {
         };
       }
 
-      schema.path('hash').options.hide = true;
-      schema.path('salt').options.hide = true;
       if (collection.auth.emailVerification) {
         schema.add({ _verificationToken: { type: String, hide: true } });
       }
