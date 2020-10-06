@@ -54,7 +54,7 @@ async function findByID(args) {
   if (!req.findByID) req.findByID = {};
 
   if (!req.findByID[collectionConfig.slug]) {
-    const nonMemoizedFindByID = async (_, q) => Model.findOne(q, {}).lean();
+    const nonMemoizedFindByID = async (q) => Model.findOne(q, {}).lean();
     req.findByID[collectionConfig.slug] = memoize(nonMemoizedFindByID, {
       isPromise: true,
       maxSize: 100,
@@ -62,7 +62,7 @@ async function findByID(args) {
     });
   }
 
-  let result = await req.findByID[collectionConfig.slug](id.toString(), query);
+  let result = await req.findByID[collectionConfig.slug](query);
 
   if (!result) {
     if (!disableErrors) {
