@@ -22,5 +22,13 @@ module.exports = {
       localized: true,
       required: true,
     },
+    {
+      name: 'nonLocalizedLayout',
+      label: 'Non Localized Layout',
+      singularLabel: 'Block',
+      type: 'blocks',
+      blocks: [Email, NumberBlock, Quote, CallToAction],
+      required: true,
+    },
   ],
 };

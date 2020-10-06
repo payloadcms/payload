@@ -179,7 +179,6 @@ async function create(args) {
     req,
     depth,
     overrideAccess,
-    reduceLocales: true,
   });
 
   // /////////////////////////////////////
