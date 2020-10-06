@@ -50,7 +50,7 @@ async function performFieldOperations(entityConfig, args) {
   // Note - this function is recreated each time a request comes in
   // ////////////////////////////////////////////////////////////////
 
-  const nonMemoizedPopulate = async (
+  const populate = memoize(async (
     data,
     dataReference,
     field,
@@ -99,9 +99,7 @@ async function performFieldOperations(entityConfig, args) {
         }
       }
     }
-  };
-
-  const populate = memoize(nonMemoizedPopulate, {
+  }, {
     serializer: (populateArgs) => JSON.stringify(populateArgs[0]),
   });
 
