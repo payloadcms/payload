@@ -9,10 +9,8 @@ const accessPromise = async ({
   req,
   id,
   relationshipPopulations,
-  depth,
-  currentDepth,
   hook,
-  payload,
+  populate,
 }) => {
   const resultingData = data;
 
@@ -30,11 +28,7 @@ const accessPromise = async ({
     relationshipPopulations.push(relationshipPopulationPromise({
       data,
       field,
-      depth,
-      currentDepth,
-      req,
-      overrideAccess,
-      payload,
+      populate,
     }));
   }
 };

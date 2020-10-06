@@ -27,6 +27,7 @@ const traverseFields = (args) => {
     validationPromises,
     errors,
     payload,
+    populate,
   } = args;
 
   fields.forEach((field) => {
@@ -60,6 +61,7 @@ const traverseFields = (args) => {
     }
 
     accessPromises.push(accessPromise({
+      populate,
       data,
       originalDoc,
       field,
@@ -68,10 +70,7 @@ const traverseFields = (args) => {
       req,
       id,
       relationshipPopulations,
-      depth,
-      currentDepth,
       hook,
-      payload,
     }));
 
     hookPromises.push(hookPromise({
