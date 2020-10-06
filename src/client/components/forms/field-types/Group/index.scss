@@ -1,10 +1,5 @@
 @import '../../../../scss/styles.scss';
 
-@mixin reduce-gutter {
-  padding-right: 0;
-  padding-left: 2px;
-}
-
 .group {
   margin-top: base(2);
   margin-bottom: base(2);
@@ -38,17 +33,5 @@
     &__fields-wrapper {
       display: flex;
     }
-
-    .field-type-gutter__content-container {
-      @include reduce-gutter;
-    }
-  }
-}
-
-.field-type.group .field-type.group,
-.field-type.blocks .field-type.group,
-.field-type.array .field-type.group {
-  .field-type-gutter__content-container {
-    @include reduce-gutter;
   }
 }

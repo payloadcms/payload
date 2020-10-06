@@ -151,78 +151,80 @@ const RichText = (props) => {
       }}
     >
       <FieldTypeGutter />
-      <Error
-        showError={showError}
-        message={errorMessage}
-      />
-      <Label
-        htmlFor={path}
-        label={label}
-        required={required}
-      />
-      <Slate
-        editor={editor}
-        value={value || defaultValue}
-        onChange={(val) => {
-          if (val !== defaultValue && val !== value) {
-            setValue(val);
-          }
-        }}
-      >
-        <div className={`${baseClass}__wrapper`}>
-          <div className={`${baseClass}__toolbar`}>
-            {elements.map((element, i) => {
-              const elementName = element?.name || element;
+      <div className={`${baseClass}__wrap`}>
+        <Error
+          showError={showError}
+          message={errorMessage}
+        />
+        <Label
+          htmlFor={path}
+          label={label}
+          required={required}
+        />
+        <Slate
+          editor={editor}
+          value={value || defaultValue}
+          onChange={(val) => {
+            if (val !== defaultValue && val !== value) {
+              setValue(val);
+            }
+          }}
+        >
+          <div className={`${baseClass}__wrapper`}>
+            <div className={`${baseClass}__toolbar`}>
+              {elements.map((element, i) => {
+                const elementName = element?.name || element;
 
-              const elementType = enabledElements[elementName];
-              const Button = elementType?.Button;
+                const elementType = enabledElements[elementName];
+                const Button = elementType?.Button;
 
-              if (Button) {
-                return (
-                  <Button
-                    key={i}
-                    path={path}
-                  />
-                );
-              }
-
-              return null;
-            })}
-            {leaves.map((leaf, i) => {
-              const leafName = leaf?.name || leaf;
-              const leafType = enabledLeaves[leafName];
-              const Button = leafType?.Button;
-
-              if (Button) {
-                return (
-                  <Button
-                    key={i}
-                    path={path}
-                  />
-                );
-              }
-
-              return null;
-            })}
-          </div>
-          <Editable
-            className={`${baseClass}__editor`}
-            renderElement={renderElement}
-            renderLeaf={renderLeaf}
-            placeholder={placeholder}
-            spellCheck
-            onKeyDown={(event) => {
-              Object.keys(hotkeys).forEach((hotkey) => {
-                if (isHotkey(hotkey, event)) {
-                  event.preventDefault();
-                  const mark = hotkeys[hotkey];
-                  toggleLeaf(editor, mark);
+                if (Button) {
+                  return (
+                    <Button
+                      key={i}
+                      path={path}
+                    />
+                  );
                 }
-              });
-            }}
-          />
-        </div>
-      </Slate>
+
+                return null;
+              })}
+              {leaves.map((leaf, i) => {
+                const leafName = leaf?.name || leaf;
+                const leafType = enabledLeaves[leafName];
+                const Button = leafType?.Button;
+
+                if (Button) {
+                  return (
+                    <Button
+                      key={i}
+                      path={path}
+                    />
+                  );
+                }
+
+                return null;
+              })}
+            </div>
+            <Editable
+              className={`${baseClass}__editor`}
+              renderElement={renderElement}
+              renderLeaf={renderLeaf}
+              placeholder={placeholder}
+              spellCheck
+              onKeyDown={(event) => {
+                Object.keys(hotkeys).forEach((hotkey) => {
+                  if (isHotkey(hotkey, event)) {
+                    event.preventDefault();
+                    const mark = hotkeys[hotkey];
+                    toggleLeaf(editor, mark);
+                  }
+                });
+              }}
+            />
+          </div>
+        </Slate>
+      </div>
     </div>
   );
 };

@@ -17,7 +17,9 @@ $controls-top-adjustment: base(.1);
 @include nestedStickyOffsets(4);
 
 .field-type-gutter {
-  padding-right: base(1.25);
+  &--left {
+    margin-right: base(1.25);
+  }
 
   &--right {
     padding-right: 0;
@@ -69,20 +71,15 @@ $controls-top-adjustment: base(.1);
   }
 
   @include mid-break {
-    padding-right: base(1);
+    &--left {
+      .field-type-gutter__content-container {
+        padding-right: $style-stroke-width-m;
+        padding-left: 0;
+      }
+    }
 
     &--right {
       padding-right: 0;
-    }
-  }
-}
-
-
-// External scopes
-.field-type.blocks {
-  .field-type-gutter {
-    &__content {
-      margin-top: - $controls-top-adjustment;
     }
   }
 }
