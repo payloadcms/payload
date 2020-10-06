@@ -90,7 +90,7 @@ async function find(args) {
       let docRef = doc;
 
       if (docRef._id) delete docRef._id;
-      if (docRef.__v) delete docRef.__v;
+      if (typeof docRef.__v !== 'undefined') delete docRef.__v;
 
       await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
         await priorHook;

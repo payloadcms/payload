@@ -39,6 +39,10 @@ const traverseFields = (args) => {
       dataCopy[field.name] = localizedValue;
     }
 
+    if (operation === 'read' && field.hidden && typeof data[field.name] !== 'undefined') {
+      delete data[field.name];
+    }
+
     if (field.type === 'upload') {
       if (data[field.name] === '') dataCopy[field.name] = null;
     }

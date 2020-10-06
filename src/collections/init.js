@@ -28,10 +28,6 @@ function registerCollections() {
       const { maxLoginAttempts, lockTime } = collection.auth;
 
       if (maxLoginAttempts > 0) {
-        schema.add({ loginAttempts: { type: Number, hide: true, default: 0 } });
-        schema.add({ lockUntil: { type: Date, hide: true } });
-        schema.virtual('isLocked').get(() => !!(this.lockUntil && this.lockUntil > Date.now()));
-
         // eslint-disable-next-line func-names
         schema.methods.incLoginAttempts = function (cb) {
           // Expired lock, restart count at 1

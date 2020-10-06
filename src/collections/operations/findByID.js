@@ -66,7 +66,9 @@ async function findByID(args) {
     delete result._id;
   }
 
-  if (result.__v) delete result.__v;
+  if (typeof result.__v !== 'undefined') {
+    delete result.__v;
+  }
 
   // /////////////////////////////////////
   // 3. Execute beforeRead collection hook

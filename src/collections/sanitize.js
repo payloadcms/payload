@@ -237,6 +237,7 @@ const sanitizeCollection = (collections, collection) => {
     if (collection.auth.useAPIKey) {
       authFields = authFields.concat(baseAPIKeyFields);
     }
+
     if (collection.auth.emailVerification) {
       authFields.push({
         name: '_verified',
@@ -253,6 +254,34 @@ const sanitizeCollection = (collections, collection) => {
 
     sanitized.auth.maxLoginAttempts = typeof sanitized.auth.maxLoginAttempts === 'undefined' ? 5 : sanitized.auth.maxLoginAttempts;
     sanitized.auth.lockTime = sanitized.auth.lockTime || 600000; // 10 minutes
+
+    if (sanitized.auth.maxLoginAttempts > 0) {
+      authFields.push({
+        name: 'loginAttempts',
+        type: 'number',
+        hidden: true,
+        defaultValue: 0,
+      });
+
+      authFields.push({
+        name: 'lockUntil',
+        type: 'date',
+        hidden: true,
+      });
+
+      authFields.push({
+        name: 'isLocked',
+        type: 'checkbox',
+        admin: {
+          disabled: true,
+        },
+        hooks: {
+          afterRead: [
+            ({ data }) => !!(data.lockUntil && data.lockUntil > Date.now()),
+          ],
+        },
+      });
+    }
 
     if (!sanitized.auth.tokenExpiration) sanitized.auth.tokenExpiration = 7200;
 
