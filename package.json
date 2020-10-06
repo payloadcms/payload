@@ -52,7 +52,6 @@
     "express-rate-limit": "^5.1.3",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "falsey": "^1.0.0",
-    "fast-memoize": "^2.5.2",
     "file-loader": "^1.1.11",
     "flatley": "^5.2.0",
     "graphql": "^15.0.0",
