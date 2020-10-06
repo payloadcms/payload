@@ -1,8 +1,6 @@
-const memoize = require('fast-memoize');
 const { ValidationError } = require('../errors');
 const sanitizeFallbackLocale = require('../localization/sanitizeFallbackLocale');
 const traverseFields = require('./traverseFields');
-const executeAccess = require('../auth/executeAccess');
 
 async function performFieldOperations(entityConfig, args) {
   const {
@@ -37,71 +35,11 @@ async function performFieldOperations(entityConfig, args) {
   // Maintain a top-level list of promises
   // so that all async field access / validations / hooks
   // can run in parallel
-
   const validationPromises = [];
   const accessPromises = [];
   const relationshipPopulations = [];
   const hookPromises = [];
   const errors = [];
-
-  // ////////////////////////////////////////////////////////////////
-  // Create memoized Populate function — with the same input (ID),
-  // it will return the same result without re-querying.
-  // Note - this function is recreated each time a request comes in
-  // ////////////////////////////////////////////////////////////////
-
-  const populate = memoize(async (
-    data,
-    dataReference,
-    field,
-    index,
-  ) => {
-    const dataToUpdate = dataReference;
-
-    const relation = Array.isArray(field.relationTo) ? data.relationTo : field.relationTo;
-    const relatedCollection = this.collections[relation];
-
-    if (relatedCollection) {
-      const accessResult = !overrideAccess ? await executeAccess({ req, disableErrors: true, id }, relatedCollection.config.access.read) : true;
-
-      let populatedRelationship = null;
-
-      if (accessResult && (depth && currentDepth <= depth)) {
-        let idString = Array.isArray(field.relationTo) ? data.value : data;
-
-        if (typeof idString !== 'string') {
-          idString = idString.toString();
-        }
-
-        populatedRelationship = await this.operations.collections.findByID({
-          req,
-          collection: relatedCollection,
-          id: idString,
-          currentDepth: currentDepth + 1,
-          disableErrors: true,
-          depth,
-        });
-      }
-
-      // If access control fails, update value to null
-      // If populatedRelationship comes back, update value
-      if (!accessResult || populatedRelationship) {
-        if (typeof index === 'number') {
-          if (Array.isArray(field.relationTo)) {
-            dataToUpdate[field.name][index].value = populatedRelationship;
-          } else {
-            dataToUpdate[field.name][index] = populatedRelationship;
-          }
-        } else if (Array.isArray(field.relationTo)) {
-          dataToUpdate[field.name].value = populatedRelationship;
-        } else {
-          dataToUpdate[field.name] = populatedRelationship;
-        }
-      }
-    }
-  }, {
-    serializer: (populateArgs) => JSON.stringify(populateArgs[0]),
-  });
 
   // //////////////////////////////////////////
   // Entry point for field validation
@@ -131,7 +69,6 @@ async function performFieldOperations(entityConfig, args) {
     validationPromises,
     errors,
     payload: this,
-    populate,
   });
 
   await Promise.all(hookPromises);
