@@ -18,14 +18,10 @@
   }
 
   @include large-break {
-    padding-right: $baseline;
+    padding-right: base(.5);
 
     &__controls {
       padding-right: base(.75);
     }
-  }
-
-  @include mid-break {
-    padding-right: base(.5);
   }
 }
