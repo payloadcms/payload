@@ -122,5 +122,10 @@ module.exports = {
       console.error('global error config handler', err);
     },
   },
+  upload: {
+    limits: {
+      fileSize: 10000000, // 10MB
+    },
+  },
   webpack: (config) => config,
 };

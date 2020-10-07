@@ -4,7 +4,7 @@ const path = require('path');
 
 const overwriteMerge = require('../../utilities/overwriteMerge');
 const executeAccess = require('../../auth/executeAccess');
-const { NotFound, Forbidden, APIError } = require('../../errors');
+const { NotFound, Forbidden, APIError, FileUploadError } = require('../../errors');
 const imageMIMETypes = require('../../uploads/imageMIMETypes');
 const getImageSize = require('../../uploads/getImageSize');
 const getSafeFilename = require('../../uploads/getSafeFilename');
@@ -160,21 +160,26 @@ async function update(args) {
     if (file) {
       const fsSafeName = await getSafeFilename(staticPath, file.name);
 
-      await file.mv(`${staticPath}/${fsSafeName}`);
+      try {
+        await file.mv(`${staticPath}/${fsSafeName}`);
 
-      fileData.filename = fsSafeName;
-      fileData.filesize = file.size;
-      fileData.mimeType = file.mimetype;
+        fileData.filename = fsSafeName;
+        fileData.filesize = file.size;
+        fileData.mimeType = file.mimetype;
 
-      if (imageMIMETypes.indexOf(file.mimetype) > -1) {
-        const dimensions = await getImageSize(`${staticPath}/${fsSafeName}`);
-        fileData.width = dimensions.width;
-        fileData.height = dimensions.height;
+        if (imageMIMETypes.indexOf(file.mimetype) > -1) {
+          const dimensions = await getImageSize(`${staticPath}/${fsSafeName}`);
+          fileData.width = dimensions.width;
+          fileData.height = dimensions.height;
 
-        if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
-          fileData.sizes = await resizeAndSave(staticPath, collectionConfig, fsSafeName, fileData.mimeType);
+          if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
+            fileData.sizes = await resizeAndSave(staticPath, collectionConfig, fsSafeName, fileData.mimeType);
+          }
         }
+      } catch (err) {
+        throw new FileUploadError(err);
       }
+
 
       data = {
         ...data,

@@ -16,6 +16,7 @@ import getSiblingDataFunc from './getSiblingData';
 import getDataByPathFunc from './getDataByPath';
 import wait from '../../../../utilities/wait';
 import buildInitialState from './buildInitialState';
+import errorMessages from './errorMessages';
 
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FieldContext } from './context';
 
@@ -148,10 +149,15 @@ const Form = (props) => {
 
       if (typeof handleResponse === 'function') return handleResponse(res);
 
-      const json = await res.json();
 
       setProcessing(false);
       clearStatus();
+
+      const contentType = res.headers.get('content-type');
+      const isJSON = contentType && contentType.indexOf('application/json') !== -1;
+
+      let json = {};
+      if (isJSON) json = await res.json();
 
       if (res.status < 400) {
         setSubmitted(false);
@@ -177,7 +183,7 @@ const Form = (props) => {
           history.push(destination);
         } else if (!disableSuccessStatus) {
           replaceStatus([{
-            message: json.message,
+            message: json.message || 'Submission successful.',
             type: 'success',
             disappear: 3000,
           }]);
@@ -223,8 +229,10 @@ const Form = (props) => {
           return json;
         }
 
+        const message = errorMessages[res.status] || 'An unknown error occurrred.';
+
         addStatus({
-          message: 'An unknown error occurred.',
+          message,
           type: 'error',
         });
       }

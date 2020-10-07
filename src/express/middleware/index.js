@@ -31,6 +31,7 @@ const middleware = (payload) => {
     localizationMiddleware(payload.config.localization),
     fileUpload({
       parseNested: true,
+      ...payload.config.upload,
     }),
     (req, _, next) => {
       req.payload = payload;

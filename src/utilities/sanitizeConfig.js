@@ -27,6 +27,8 @@ const sanitizeConfig = (config) => {
 
   sanitizedConfig.admin = config.admin || {};
 
+  sanitizedConfig.upload = config.upload || {};
+
   if (!sanitizedConfig.admin.user) {
     sanitizedConfig.admin.user = 'users';
     sanitizedConfig.collections.push(defaultUser);

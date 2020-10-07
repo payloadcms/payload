@@ -4,7 +4,7 @@ const crypto = require('crypto');
 
 const executeAccess = require('../../auth/executeAccess');
 
-const { MissingFile } = require('../../errors');
+const { MissingFile, FileUploadError } = require('../../errors');
 const resizeAndSave = require('../../uploads/imageResizer');
 const getSafeFilename = require('../../uploads/getSafeFilename');
 const getImageSize = require('../../uploads/getImageSize');
@@ -116,17 +116,22 @@ async function create(args) {
 
     const fsSafeName = await getSafeFilename(staticPath, file.name);
 
-    await file.mv(`${staticPath}/${fsSafeName}`);
+    try {
+      await file.mv(`${staticPath}/${fsSafeName}`);
 
-    if (imageMIMETypes.indexOf(file.mimetype) > -1) {
-      const dimensions = await getImageSize(`${staticPath}/${fsSafeName}`);
-      fileData.width = dimensions.width;
-      fileData.height = dimensions.height;
+      if (imageMIMETypes.indexOf(file.mimetype) > -1) {
+        const dimensions = await getImageSize(`${staticPath}/${fsSafeName}`);
+        fileData.width = dimensions.width;
+        fileData.height = dimensions.height;
 
-      if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
-        fileData.sizes = await resizeAndSave(staticPath, collectionConfig, fsSafeName, fileData.mimeType);
+        if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
+          fileData.sizes = await resizeAndSave(staticPath, collectionConfig, fsSafeName, fileData.mimeType);
+        }
       }
+    } catch (err) {
+      throw new FileUploadError(err);
     }
+
 
     fileData.filename = fsSafeName;
     fileData.filesize = file.size;
