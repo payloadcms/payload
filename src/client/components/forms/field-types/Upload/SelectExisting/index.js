@@ -25,7 +25,7 @@ const SelectExistingUploadModal = (props) => {
   } = props;
 
   const { serverURL, routes: { api } } = useConfig();
-  const { closeAll } = useModal();
+  const { closeAll, currentModal } = useModal();
   const [fields, setFields] = useState(collection.fields);
   const [listControls, setListControls] = useState({});
   const [page, setPage] = useState(null);
@@ -34,7 +34,9 @@ const SelectExistingUploadModal = (props) => {
     baseClass,
   ].filter(Boolean).join(' ');
 
-  const apiURL = `${serverURL}${api}/${collectionSlug}`;
+  const isOpen = currentModal === modalSlug;
+
+  const apiURL = isOpen ? `${serverURL}${api}/${collectionSlug}` : null;
 
   const [{ data }, { setParams }] = usePayloadAPI(apiURL, {});
 
@@ -51,69 +53,72 @@ const SelectExistingUploadModal = (props) => {
     setParams(params);
   }, [setParams, page, listControls]);
 
+
   return (
     <Modal
       className={classes}
       slug={modalSlug}
     >
-      <MinimalTemplate width="wide">
-        <header className={`${baseClass}__header`}>
-          <h1>
-            {' '}
-            Select existing
-            {' '}
-            {collection.labels.singular}
-          </h1>
-          <Button
-            icon="x"
-            round
-            buttonStyle="icon-label"
-            iconStyle="with-border"
-            onClick={closeAll}
-          />
-        </header>
-        <ListControls
-          enableColumns={false}
-          handleChange={setListControls}
-          collection={{
-            ...collection,
-            fields,
-          }}
-        />
-        <UploadGallery
-          docs={data?.docs}
-          collection={collection}
-          onCardClick={(doc) => {
-            setValue(doc);
-            closeAll();
-          }}
-        />
-        <div className={`${baseClass}__page-controls`}>
-          <Paginator
-            limit={data.limit}
-            totalPages={data.totalPages}
-            page={data.page}
-            hasPrevPage={data.hasPrevPage}
-            hasNextPage={data.hasNextPage}
-            prevPage={data.prevPage}
-            nextPage={data.nextPage}
-            numberOfNeighbors={1}
-            onChange={setPage}
-            disableHistoryChange
-          />
-          {data?.totalDocs > 0 && (
-            <div className={`${baseClass}__page-info`}>
-              {data.page}
-              -
-              {data.totalPages > 1 ? data.limit : data.totalDocs}
+      {isOpen && (
+        <MinimalTemplate width="wide">
+          <header className={`${baseClass}__header`}>
+            <h1>
               {' '}
-              of
+              Select existing
               {' '}
-              {data.totalDocs}
-            </div>
-          )}
-        </div>
-      </MinimalTemplate>
+              {collection.labels.singular}
+            </h1>
+            <Button
+              icon="x"
+              round
+              buttonStyle="icon-label"
+              iconStyle="with-border"
+              onClick={closeAll}
+            />
+          </header>
+          <ListControls
+            enableColumns={false}
+            handleChange={setListControls}
+            collection={{
+              ...collection,
+              fields,
+            }}
+          />
+          <UploadGallery
+            docs={data?.docs}
+            collection={collection}
+            onCardClick={(doc) => {
+              setValue(doc);
+              closeAll();
+            }}
+          />
+          <div className={`${baseClass}__page-controls`}>
+            <Paginator
+              limit={data.limit}
+              totalPages={data.totalPages}
+              page={data.page}
+              hasPrevPage={data.hasPrevPage}
+              hasNextPage={data.hasNextPage}
+              prevPage={data.prevPage}
+              nextPage={data.nextPage}
+              numberOfNeighbors={1}
+              onChange={setPage}
+              disableHistoryChange
+            />
+            {data?.totalDocs > 0 && (
+              <div className={`${baseClass}__page-info`}>
+                {data.page}
+                -
+                {data.totalPages > 1 ? data.limit : data.totalDocs}
+                {' '}
+                of
+                {' '}
+                {data.totalDocs}
+              </div>
+            )}
+          </div>
+        </MinimalTemplate>
+      )}
     </Modal>
   );
 };
