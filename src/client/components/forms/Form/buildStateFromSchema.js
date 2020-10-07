@@ -14,7 +14,8 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
     const validationPromises = [];
 
     const structureFieldState = (field, data = {}) => {
-      const value = typeof data[field.name] !== 'undefined' ? data[field.name] : field.defaultValue;
+      const value = typeof data?.[field.name] !== 'undefined' ? data[field.name] : field.defaultValue;
+
       const fieldState = {
         value,
         initialValue: value,
@@ -28,16 +29,16 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
     const iterateFields = (fields, data, path = '') => fields.reduce((state, field) => {
       let initialData = data;
 
-      if (field.name && field.defaultValue && typeof initialData[field.name] === 'undefined') {
+      if (field.name && field.defaultValue && typeof initialData?.[field.name] === 'undefined') {
         initialData = { [field.name]: field.defaultValue };
       }
 
-      if (field.name && typeof initialData[field.name] !== 'undefined') {
-        if (field.type === 'relationship' && initialData[field.name] === null) {
+      if (field.name) {
+        if (field.type === 'relationship' && initialData?.[field.name] === null) {
           initialData[field.name] = 'null';
         }
 
-        if (Array.isArray(initialData[field.name])) {
+        if (Array.isArray(initialData?.[field.name])) {
           if (field.type === 'array') {
             return {
               ...state,
@@ -78,7 +79,7 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
         if (field.fields) {
           return {
             ...state,
-            ...iterateFields(field.fields, initialData[field.name], `${path}${field.name}.`),
+            ...iterateFields(field.fields, initialData?.[field.name], `${path}${field.name}.`),
           };
         }
 
