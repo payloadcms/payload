@@ -116,6 +116,9 @@ const DefaultValues = {
       type: 'group',
       label: 'Group',
       name: 'group',
+      // defaultValue: {
+      //   nestedText1: 'neat',
+      // },
       fields: [
         {
           type: 'row',

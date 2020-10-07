@@ -10,7 +10,7 @@ const buildValidationPromise = async (fieldState, field) => {
 };
 
 const buildStateFromSchema = async (fieldSchema, fullData) => {
-  if (fieldSchema && fullData) {
+  if (fieldSchema) {
     const validationPromises = [];
 
     const structureFieldState = (field, data = {}) => {
@@ -26,18 +26,22 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
     };
 
     const iterateFields = (fields, data, path = '') => fields.reduce((state, field) => {
-      const newData = data;
+      let initialData = data;
 
-      if (field.name && typeof data[field.name] !== 'undefined') {
-        if (field.type === 'relationship' && data[field.name] === null) {
-          newData[field.name] = 'null';
+      if (field.name && field.defaultValue && typeof initialData[field.name] === 'undefined') {
+        initialData = { [field.name]: field.defaultValue };
+      }
+
+      if (field.name && typeof initialData[field.name] !== 'undefined') {
+        if (field.type === 'relationship' && initialData[field.name] === null) {
+          initialData[field.name] = 'null';
         }
 
-        if (Array.isArray(data[field.name])) {
+        if (Array.isArray(initialData[field.name])) {
           if (field.type === 'array') {
             return {
               ...state,
-              ...data[field.name].reduce((rowState, row, i) => ({
+              ...initialData[field.name].reduce((rowState, row, i) => ({
                 ...rowState,
                 ...iterateFields(field.fields, row, `${path}${field.name}.${i}.`),
               }), {}),
@@ -47,7 +51,7 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
           if (field.type === 'blocks') {
             return {
               ...state,
-              ...data[field.name].reduce((rowState, row, i) => {
+              ...initialData[field.name].reduce((rowState, row, i) => {
                 const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
                 const rowPath = `${path}${field.name}.${i}.`;
 
@@ -70,10 +74,11 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
           }
         }
 
+        // Handle non-array-based nested fields (group, etc)
         if (field.fields) {
           return {
             ...state,
-            ...iterateFields(field.fields, newData[field.name], `${path}${field.name}.`),
+            ...iterateFields(field.fields, initialData[field.name], `${path}${field.name}.`),
           };
         }
 
@@ -83,6 +88,7 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
         };
       }
 
+      // Handle field types that do not use names (row, etc)
       if (field.fields) {
         return {
           ...state,
@@ -90,6 +96,7 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
         };
       }
 
+      // Handle normal fields
       return {
         ...state,
         [`${path}${field.name}`]: structureFieldState(field, data),
