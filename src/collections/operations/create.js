@@ -129,6 +129,7 @@ async function create(args) {
         }
       }
     } catch (err) {
+      console.error(err);
       throw new FileUploadError(err);
     }
 

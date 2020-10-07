@@ -1,6 +1,9 @@
-const imageSize = require('image-size');
-const { promisify } = require('util');
+const fs = require('fs');
+const probeImageSize = require('probe-image-size');
 
-const getImageSize = promisify(imageSize);
+const getImageSize = async (path) => {
+  const image = fs.createReadStream(path);
+  return probeImageSize(image);
+};
 
 module.exports = getImageSize;
