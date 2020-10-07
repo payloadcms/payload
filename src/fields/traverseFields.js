@@ -32,7 +32,13 @@ const traverseFields = (args) => {
   fields.forEach((field) => {
     const dataCopy = data;
 
-    if (reduceLocales && field.name && field.localized && locale !== 'all' && typeof data[field.name] === 'object') {
+    const hasLocalizedValue = (typeof data[field.name] === 'object' && data[field.name] !== null)
+      && field.name
+      && field.localized
+      && locale !== 'all'
+      && reduceLocales;
+
+    if (hasLocalizedValue) {
       let localizedValue = data[field.name][locale];
       if (typeof localizedValue === 'undefined' && fallbackLocale) localizedValue = data[field.name][fallbackLocale];
       if (typeof localizedValue === 'undefined') localizedValue = null;
