@@ -15,7 +15,6 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
 
     const structureFieldState = (field, data = {}) => {
       const value = typeof data[field.name] !== 'undefined' ? data[field.name] : field.defaultValue;
-
       const fieldState = {
         value,
         initialValue: value,
@@ -78,7 +77,6 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
           };
         }
 
-
         return {
           ...state,
           [`${path}${field.name}`]: structureFieldState(field, data),
@@ -92,7 +90,10 @@ const buildStateFromSchema = async (fieldSchema, fullData) => {
         };
       }
 
-      return state;
+      return {
+        ...state,
+        [`${path}${field.name}`]: structureFieldState(field, data),
+      };
     }, {});
 
     const resultingState = iterateFields(fieldSchema, fullData);
