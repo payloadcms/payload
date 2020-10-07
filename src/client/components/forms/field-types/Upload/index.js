@@ -19,6 +19,7 @@ const baseClass = 'upload';
 const Upload = (props) => {
   const { toggle } = useModal();
   const [internalValue, setInternalValue] = useState(undefined);
+  const [missingFile, setMissingFile] = useState(false);
   const { collections, serverURL, routes: { api } } = useConfig();
 
   const {
@@ -75,12 +76,16 @@ const Upload = (props) => {
         if (response.ok) {
           const json = await response.json();
           setInternalValue(json);
+        } else {
+          setInternalValue(undefined);
+          setValue(null);
+          setMissingFile(true);
         }
       };
 
       fetchFile();
     }
-  }, [value, setInternalValue, relationTo, api, serverURL]);
+  }, [value, setInternalValue, relationTo, api, serverURL, setValue]);
 
   return (
     <div
@@ -101,7 +106,7 @@ const Upload = (props) => {
       />
       {collection?.upload && (
         <React.Fragment>
-          {internalValue && (
+          {(internalValue && !missingFile) && (
             <FileDetails
               {...collection.upload}
               {...internalValue}
@@ -111,7 +116,7 @@ const Upload = (props) => {
               }}
             />
           )}
-          {!value && (
+          {(!value || missingFile) && (
             <div className={`${baseClass}__wrap`}>
               <Button
                 buttonStyle="secondary"
@@ -138,6 +143,7 @@ const Upload = (props) => {
             slug: addModalSlug,
             fieldTypes,
             setValue: (val) => {
+              setMissingFile(false);
               setValue(val.id);
               setInternalValue(val);
             },
@@ -147,6 +153,7 @@ const Upload = (props) => {
             collection,
             slug: selectExistingModalSlug,
             setValue: (val) => {
+              setMissingFile(false);
               setValue(val.id);
               setInternalValue(val);
             },
