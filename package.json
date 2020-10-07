@@ -18,7 +18,8 @@
     "dev": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js nodemon demo/server.js",
     "lint": "eslint .",
     "test:int": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js NODE_ENV=test jest --forceExit --runInBand",
-    "test:unit": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js NODE_ENV=test jest"
+    "test:unit": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js NODE_ENV=test jest",
+    "test:react": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js NODE_ENV=test jest --config=jest.react.config.js  src/client/client.spec.js"
   },
   "dependencies": {
     "@babel/core": "^7.11.6",
@@ -126,6 +127,8 @@
     "webpack-hot-middleware": "^2.25.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.0.4",
     "@trbl/eslint-config": "^1.2.4",
     "babel-eslint": "^10.0.1",
     "cross-env": "^7.0.2",
