@@ -1,5 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-// const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const path = require('path');
 const webpack = require('webpack');
 const getStyleLoaders = require('./getStyleLoaders');
@@ -81,7 +81,6 @@ module.exports = (config) => {
       },
     },
     plugins: [
-      // new BundleAnalyzerPlugin(),
       new HtmlWebpackPlugin({
         template: config.admin && config.admin.indexHTML
           ? path.join(config.paths.configDir, config.admin.indexHTML)
@@ -100,6 +99,10 @@ module.exports = (config) => {
     config.serverModules.forEach((mod) => {
       webpackConfig.resolve.alias[mod] = mockModulePath;
     });
+  }
+
+  if (process.env.PAYLOAD_ANALYZE_BUNDLE) {
+    webpackConfig.plugins.push(new BundleAnalyzerPlugin());
   }
 
   if (config.paths.scss) {
