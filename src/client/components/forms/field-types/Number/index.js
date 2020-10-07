@@ -75,7 +75,7 @@ const NumberField = (props) => {
         required={required}
       />
       <input
-        value={typeof value !== 'undefined' ? value : ''}
+        value={typeof value === 'number' ? value : ''}
         onChange={handleChange}
         disabled={readOnly ? 'disabled' : undefined}
         placeholder={placeholder}
