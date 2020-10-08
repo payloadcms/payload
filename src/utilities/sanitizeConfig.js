@@ -36,7 +36,7 @@ const sanitizeConfig = (config) => {
 
   sanitizedConfig.email = config.email || {};
   sanitizedConfig.email.fromName = sanitizedConfig.email.fromName || 'Payload';
-  sanitizedConfig.email.fromAddress = sanitizedConfig.email.fromName || 'hello@payloadcms.com';
+  sanitizedConfig.email.fromAddress = sanitizedConfig.email.fromAddress || 'hello@payloadcms.com';
 
   sanitizedConfig.graphQL = config.graphQL || {};
   sanitizedConfig.graphQL.maxComplexity = (sanitizedConfig.graphQL && sanitizedConfig.graphQL.maxComplexity) ? sanitizedConfig.graphQL.maxComplexity : 1000;
