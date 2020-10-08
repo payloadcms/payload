@@ -255,31 +255,33 @@ const RenderBlocks = React.memo((props) => {
           )}
         </Droppable>
 
-        <div className={`${baseClass}__add-button-wrap`}>
-          <Popup
-            buttonType="custom"
-            size="large"
-            horizontalAlign="left"
-            button={(
-              <Button
-                buttonStyle="icon-label"
-                icon="plus"
-                iconPosition="left"
-                iconStyle="with-border"
-              >
-                {`Add ${singularLabel}`}
-              </Button>
-            )}
-            render={({ close }) => (
-              <BlockSelector
-                blocks={blocks}
-                addRow={addRow}
-                addRowIndex={value}
-                close={close}
-              />
-            )}
-          />
-        </div>
+        {!readOnly && (
+          <div className={`${baseClass}__add-button-wrap`}>
+            <Popup
+              buttonType="custom"
+              size="large"
+              horizontalAlign="left"
+              button={(
+                <Button
+                  buttonStyle="icon-label"
+                  icon="plus"
+                  iconPosition="left"
+                  iconStyle="with-border"
+                >
+                  {`Add ${singularLabel}`}
+                </Button>
+              )}
+              render={({ close }) => (
+                <BlockSelector
+                  blocks={blocks}
+                  addRow={addRow}
+                  addRowIndex={value}
+                  close={close}
+                />
+              )}
+            />
+          </div>
+        )}
       </div>
     </DragDropContext>
   );
