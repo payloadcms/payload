@@ -59,10 +59,12 @@ const traverseFields = (args) => {
       if (data[field.name] === '') dataCopy[field.name] = false;
     }
 
-    // If richText content comes through as a string, parse it into JSON
-
     if (field.type === 'richText' && typeof data[field.name] === 'string') {
       dataCopy[field.name] = JSON.parse(data[field.name]);
+    }
+
+    if (field.type === 'relationship' && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null')) {
+      dataCopy[field.name] = null;
     }
 
     accessPromises.push(accessPromise({
