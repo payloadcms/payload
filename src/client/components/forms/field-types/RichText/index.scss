@@ -5,10 +5,15 @@
   display: flex;
 
   &__toolbar {
+    @include blur-bg(white);
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
     margin-bottom: $baseline;
+    border: $style-stroke-width-s solid $color-light-gray;
+    padding: base(.25);
+    position: sticky;
+    top: base(5);
   }
 
   &__editor {
@@ -27,16 +32,13 @@
   }
 
   &__wrapper {
-    @include inputShadow();
     width: 100%;
-    border: 1px solid $color-light-gray;
-    line-height: base(1);
-    padding: base(0.5) base(0.75);
   }
 
   &--read-only {
-    .rich-text__wrapper {
+    .rich-text__editor {
       background-color: $color-light-gray;
+      padding: base(.5);
     }
   }
 
@@ -57,12 +59,6 @@
     &__button--active,
     &__button--active:hover {
       background-color: $color-light-gray;
-    }
-  }
-
-  &:hover {
-    .field-type-gutter__content-container {
-      box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
     }
   }
 }
