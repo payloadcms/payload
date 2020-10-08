@@ -114,7 +114,7 @@ const RichText = (props) => {
     baseClass,
     'field-type',
     showError && 'error',
-    readOnly && 'read-only',
+    readOnly && `${baseClass}--read-only`,
   ].filter(Boolean).join(' ');
 
   const editor = useMemo(() => {
@@ -216,6 +216,7 @@ const RichText = (props) => {
               renderLeaf={renderLeaf}
               placeholder={placeholder}
               spellCheck
+              readOnly={readOnly}
               onKeyDown={(event) => {
                 Object.keys(hotkeys).forEach((hotkey) => {
                   if (isHotkey(hotkey, event)) {
