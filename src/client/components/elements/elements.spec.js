@@ -1,9 +1,8 @@
-import '@testing-library/jest-dom/extend-expect';
 import React from 'react';
 import { render } from '@testing-library/react';
-import Separator from './components/elements/Paginator/Separator';
+import Separator from './Paginator/Separator';
 
-describe('Components', () => {
+describe('Elements', () => {
   describe('Paginator', () => {
     it('separator - renders dash', () => {
       const { getByText } = render(<Separator />);

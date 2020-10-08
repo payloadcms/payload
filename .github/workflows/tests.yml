@@ -25,6 +25,7 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
     - run: yarn
+    - run: yarn test:client
     - run: yarn test:int # In-memory db + api tests
       env:
         CI: true

@@ -5,7 +5,7 @@
 const fetch = require('isomorphic-fetch');
 const { request, GraphQLClient } = require('graphql-request');
 const getConfig = require('../../../utilities/getConfig');
-const { email, password } = require('../../../tests/credentials');
+const { email, password } = require('../../../../tests/api/credentials');
 
 const config = getConfig();
 
