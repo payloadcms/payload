@@ -8,8 +8,8 @@ require('isomorphic-fetch');
 const faker = require('faker');
 const FormData = require('form-data');
 const getConfig = require('../../utilities/getConfig');
-const { email, password } = require('../../tests/credentials');
-const fileExists = require('../../tests/utils/fileExists');
+const { email, password } = require('../../tests/api/credentials');
+const fileExists = require('../../tests/api/utils/fileExists');
 
 const { serverURL: url } = getConfig();
 
@@ -657,7 +657,7 @@ describe('Collections - REST', () => {
 
     it('create', async () => {
       const formData = new FormData();
-      formData.append('file', fs.createReadStream(path.join(__dirname, '../..', 'tests/assets/image.png')));
+      formData.append('file', fs.createReadStream(path.join(__dirname, '../..', 'tests/api/assets/image.png')));
       formData.append('alt', 'test media');
       formData.append('locale', 'en');
 
@@ -690,7 +690,7 @@ describe('Collections - REST', () => {
 
     it('delete', async () => {
       const formData = new FormData();
-      formData.append('file', fs.createReadStream(path.join(__dirname, '../..', 'tests/assets/delete.png')));
+      formData.append('file', fs.createReadStream(path.join(__dirname, '../..', 'tests/api/assets/delete.png')));
       formData.append('alt', 'test media');
       formData.append('locale', 'en');
 
