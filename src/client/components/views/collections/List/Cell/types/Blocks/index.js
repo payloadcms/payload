@@ -5,7 +5,7 @@ const BlocksCell = ({ data, field }) => {
   const selectedBlocks = data ? data.map(({ blockType }) => blockType) : [];
   const blockLabels = field.blocks.map((s) => ({ slug: s.slug, label: s.labels.singular }));
 
-  let label = `0 ${field.label}.`;
+  let label = `0 ${field.label}`;
 
   const formatBlockList = (blocks) => blocks.map((b) => {
     const filtered = blockLabels.filter((f) => f.slug === b)?.[0];
