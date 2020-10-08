@@ -8,9 +8,10 @@ describe('Cell Types', () => {
   describe('Date', () => {
     it('renders date', () => {
       const timeStamp = '2020-10-06T14:07:39.033Z';
-      const { getByText } = render(<DateCell data={timeStamp} />);
-      const linkElement = getByText(/October 6th 2020, 10:07 AM/i);
-      expect(linkElement).toBeInTheDocument();
+      const { container } = render(<DateCell data={timeStamp} />);
+      const dateMatch = /October\s6th\s2020,\s[\d]{1,2}:07\s[A|P]M/; // Had to account for timezones in CI
+      const sp = container.querySelector('span');
+      expect(sp.textContent).toMatch(dateMatch);
     });
   });
 
