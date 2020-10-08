@@ -8,6 +8,7 @@ import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import reducer from '../rowReducer';
 import { useForm } from '../../Form/context';
+import buildStateFromSchema from '../../Form/buildStateFromSchema';
 import DraggableSection from '../../DraggableSection';
 import Error from '../../Error';
 import useFieldType from '../../useFieldType';
@@ -68,11 +69,12 @@ const Blocks = (props) => {
     required,
   });
 
-  const addRow = useCallback((rowIndex, blockType) => {
+  const addRow = useCallback(async (rowIndex, blockType) => {
     const block = blocks.find((potentialBlock) => potentialBlock.slug === blockType);
 
     dispatchRows({ type: 'ADD', rowIndex, blockType });
-    dispatchFields({ type: 'ADD_ROW', rowIndex, fieldSchema: block.fields, path, blockType });
+    const subFieldState = await buildStateFromSchema(block.fields);
+    dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
     setValue(value + 1);
   }, [path, setValue, value, blocks, dispatchFields]);
 

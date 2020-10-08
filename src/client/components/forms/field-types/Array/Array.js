@@ -7,6 +7,7 @@ import Button from '../../../elements/Button';
 import DraggableSection from '../../DraggableSection';
 import reducer from '../rowReducer';
 import { useForm } from '../../Form/context';
+import buildStateFromSchema from '../../Form/buildStateFromSchema';
 import useFieldType from '../../useFieldType';
 import Error from '../../Error';
 import { array } from '../../../../../fields/validations';
@@ -59,9 +60,10 @@ const ArrayFieldType = (props) => {
     required,
   });
 
-  const addRow = useCallback((rowIndex) => {
+  const addRow = useCallback(async (rowIndex) => {
     dispatchRows({ type: 'ADD', rowIndex });
-    dispatchFields({ type: 'ADD_ROW', rowIndex, fieldSchema: fields, path });
+    const subFieldState = await buildStateFromSchema(fields);
+    dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
     setValue(value + 1);
   }, [dispatchRows, dispatchFields, fields, path, setValue, value]);
 

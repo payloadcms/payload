@@ -60,50 +60,18 @@ function fieldReducer(state, action) {
 
     case 'ADD_ROW': {
       const {
-        rowIndex, path, fieldSchema, blockType,
+        rowIndex, path, subFieldState, blockType,
       } = action;
       const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, path);
 
-      // Get paths of sub fields
-      const subFields = fieldSchema.reduce((acc, field) => {
-        if (field.type === 'flexible' || field.type === 'repeater') {
-          return acc;
-        }
-
-        if (field.name) {
-          return {
-            ...acc,
-            [field.name]: {
-              value: null,
-              valid: !field.required,
-            },
-          };
-        }
-
-        if (field.fields) {
-          return {
-            ...acc,
-            ...(field.fields.reduce((fields, subField) => ({
-              ...fields,
-              [subField.name]: {
-                value: null,
-                valid: !field.required,
-              },
-            }), {})),
-          };
-        }
-
-        return acc;
-      }, {});
-
       if (blockType) {
-        subFields.blockType = {
+        subFieldState.blockType = {
           value: blockType,
           initialValue: blockType,
           valid: true,
         };
 
-        subFields.blockName = {
+        subFieldState.blockName = {
           value: null,
           initialValue: null,
           valid: true,
@@ -111,7 +79,7 @@ function fieldReducer(state, action) {
       }
 
       // Add new object containing subfield names to unflattenedRows array
-      unflattenedRows.splice(rowIndex + 1, 0, subFields);
+      unflattenedRows.splice(rowIndex + 1, 0, subFieldState);
 
       const newState = {
         ...remainingFlattenedState,
