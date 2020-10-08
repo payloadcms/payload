@@ -1,6 +1,6 @@
 require('isomorphic-fetch');
 const faker = require('faker');
-const { email, password } = require('../tests/api/credentials');
+const { email, password } = require('../../tests/api/credentials');
 
 /**
  * @jest-environment node

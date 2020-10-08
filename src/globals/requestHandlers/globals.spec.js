@@ -4,7 +4,7 @@
 
 require('isomorphic-fetch');
 const getConfig = require('../../utilities/getConfig');
-const { email, password } = require('../../tests/api/credentials');
+const { email, password } = require('../../../tests/api/credentials');
 
 const { serverURL: url } = getConfig();
 
