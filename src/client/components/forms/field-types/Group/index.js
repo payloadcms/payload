@@ -18,13 +18,21 @@ const Group = (props) => {
     fieldTypes,
     admin: {
       readOnly,
+      style,
+      width,
     },
   } = props;
 
   const path = pathFromProps || name;
 
   return (
-    <div className="field-type group">
+    <div
+      className="field-type group"
+      style={{
+        ...style,
+        width,
+      }}
+    >
       <FieldTypeGutter />
 
       <div className={`${baseClass}__content-wrapper`}>
@@ -64,6 +72,8 @@ Group.propTypes = {
   fieldTypes: PropTypes.shape({}).isRequired,
   admin: PropTypes.shape({
     readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
   }),
 };
 
