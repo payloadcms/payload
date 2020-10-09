@@ -16,6 +16,7 @@ import Popup from '../../../elements/Popup';
 import BlockSelector from './BlockSelector';
 import { blocks as blocksValidator } from '../../../../../fields/validations';
 import getDataByPath from '../../Form/getDataByPath';
+import Banner from '../../../elements/Banner';
 
 import './index.scss';
 
@@ -134,6 +135,7 @@ const Blocks = (props) => {
       value={value}
       blocks={blocks}
       readOnly={readOnly}
+      minRows={minRows}
     />
   );
 };
@@ -194,6 +196,7 @@ const RenderBlocks = React.memo((props) => {
     toggleCollapse,
     blocks,
     readOnly,
+    minRows,
   } = props;
 
   return (
@@ -256,6 +259,23 @@ const RenderBlocks = React.memo((props) => {
 
                 return null;
               })}
+              {rows.length < minRows && (
+                <Banner type="error">
+                  This field requires at least
+                  {' '}
+                  {minRows}
+                  {' '}
+                  {labels.plural}
+                </Banner>
+              )}
+              {(rows.length === 0 && readOnly) && (
+                <Banner>
+                  This field has no
+                  {' '}
+                  {labels.plural}
+                  .
+                </Banner>
+              )}
               {provided.placeholder}
             </div>
           )}
@@ -299,12 +319,14 @@ RenderBlocks.defaultProps = {
   errorMessage: undefined,
   rows: [],
   labels: {
-    singular: 'Row',
-    plural: 'Rows',
+    singular: 'Block',
+    plural: 'Blocks',
   },
   path: '',
   value: undefined,
   readOnly: false,
+  maxRows: undefined,
+  minRows: undefined,
 };
 
 RenderBlocks.propTypes = {
@@ -334,6 +356,8 @@ RenderBlocks.propTypes = {
   ).isRequired,
   toggleCollapse: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
+  maxRows: PropTypes.number,
+  minRows: PropTypes.number,
 };
 
 export default withCondition(Blocks);

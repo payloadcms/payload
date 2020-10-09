@@ -142,6 +142,9 @@ const DefaultValues = {
       type: 'array',
       label: 'Array',
       name: 'array',
+      admin: {
+        readOnly: true,
+      },
       defaultValue: [
         {
           arrayText1: 'Get out',

@@ -225,6 +225,15 @@ const RenderArray = React.memo((props) => {
                   {minRows}
                   {' '}
                   {labels.plural}
+                  .
+                </Banner>
+              )}
+              {(rows.length === 0 && readOnly) && (
+                <Banner>
+                  This field has no
+                  {' '}
+                  {labels.plural}
+                  .
                 </Banner>
               )}
               {provided.placeholder}
