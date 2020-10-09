@@ -1,11 +1,5 @@
 const mongoose = require('mongoose');
 const express = require('express');
-const mongooseHidden = require('mongoose-hidden')({
-  hidden: {
-    _id: true, __v: true,
-  },
-  applyRecursively: true,
-});
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
 const LocalStrategy = require('passport-local').Strategy;
@@ -54,13 +48,7 @@ function registerCollections() {
           }, cb);
         };
       }
-
-      if (collection.auth.emailVerification) {
-        schema.add({ _verificationToken: { type: String, hide: true } });
-      }
     }
-
-    schema.plugin(mongooseHidden);
 
     this.collections[formattedCollection.slug] = {
       Model: mongoose.model(formattedCollection.slug, schema),

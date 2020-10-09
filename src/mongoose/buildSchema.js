@@ -30,7 +30,6 @@ const formatBaseSchema = (field) => {
   const condition = field.admin && field.admin.condition;
 
   return {
-    hide: field.hidden,
     localized: field.localized || false,
     unique: field.unique || false,
     required: (field.required && !field.localized && !condition && !createAccess) || false,

@@ -245,10 +245,17 @@ const sanitizeCollection = (collections, collection) => {
         access: {
           create: () => false,
           update: ({ req: { user } }) => Boolean(user),
+          read: ({ req: { user } }) => Boolean(user),
         },
         admin: {
           disabled: true,
         },
+      });
+
+      authFields.push({
+        name: '_verificationToken',
+        type: 'text',
+        hidden: true,
       });
     }
 
