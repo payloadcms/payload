@@ -110,6 +110,12 @@ declare module "@payloadcms/payload/types" {
     type: 'number' | 'text' | 'email' | 'textarea' | 'richText' | 'code' | 'radio' | 'checkbox' | 'date' | 'upload' | 'relationship' | 'row' | 'array' | 'group' | 'select' | 'blocks';
     localized?: boolean;
     fields?: PayloadField[];
+    admin?:
+    {
+      position?: string;
+      width?: string;
+      style?: Object;
+    }
   }
 
   export type PayloadCollectionHook = (...args: any[]) => any | void;
@@ -122,6 +128,8 @@ declare module "@payloadcms/payload/types" {
     },
     admin?: {
       useAsTitle?: string;
+      defaultColumns?: string[];
+      disableScrollOnSuccess?: boolean;
       components?: any;
     },
     hooks?: {
