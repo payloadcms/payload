@@ -37,6 +37,8 @@ const Blocks = (props) => {
     permissions,
     admin: {
       readOnly,
+      style,
+      width,
     },
   } = props;
 
@@ -136,6 +138,8 @@ const Blocks = (props) => {
       value={value}
       blocks={blocks}
       readOnly={readOnly}
+      style={style}
+      width={width}
       minRows={minRows}
     />
   );
@@ -176,6 +180,8 @@ Blocks.propTypes = {
   }),
   admin: PropTypes.shape({
     readOnly: PropTypes.bool,
+    style: PropTypes.shape({}),
+    width: PropTypes.string,
   }),
 };
 
@@ -197,13 +203,21 @@ const RenderBlocks = React.memo((props) => {
     toggleCollapse,
     blocks,
     readOnly,
+    style,
+    width,
     minRows,
     maxRows,
   } = props;
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className={baseClass}>
+      <div
+        className={baseClass}
+        style={{
+          ...style,
+          width,
+        }}
+      >
         <header className={`${baseClass}__header`}>
           <h3>{label}</h3>
 
@@ -327,6 +341,8 @@ RenderBlocks.defaultProps = {
   path: '',
   value: undefined,
   readOnly: false,
+  style: {},
+  width: undefined,
   maxRows: undefined,
   minRows: undefined,
 };
@@ -358,6 +374,8 @@ RenderBlocks.propTypes = {
   ).isRequired,
   toggleCollapse: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
+  style: PropTypes.shape({}),
+  width: PropTypes.string,
   maxRows: PropTypes.number,
   minRows: PropTypes.number,
 };
