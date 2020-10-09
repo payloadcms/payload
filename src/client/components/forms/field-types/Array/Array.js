@@ -180,6 +180,7 @@ const RenderArray = React.memo((props) => {
     value,
     readOnly,
     minRows,
+    maxRows,
   } = props;
 
   return (
@@ -240,7 +241,7 @@ const RenderArray = React.memo((props) => {
             </div>
           )}
         </Droppable>
-        {!readOnly && (
+        {(!readOnly && (rows.length < maxRows || maxRows === undefined)) && (
           <div className={`${baseClass}__add-button-wrap`}>
             <Button
               onClick={() => addRow(value)}

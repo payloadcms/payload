@@ -198,6 +198,7 @@ const RenderBlocks = React.memo((props) => {
     blocks,
     readOnly,
     minRows,
+    maxRows,
   } = props;
 
   return (
@@ -282,7 +283,7 @@ const RenderBlocks = React.memo((props) => {
           )}
         </Droppable>
 
-        {!readOnly && (
+        {(!readOnly && (rows.length < maxRows || maxRows === undefined)) && (
           <div className={`${baseClass}__add-button-wrap`}>
             <Popup
               buttonType="custom"
