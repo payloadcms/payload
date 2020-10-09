@@ -115,6 +115,10 @@ dialog {
   padding: 0;
 }
 
+.payload__modal-container {
+  overflow: scroll;
+}
+
 .payload__modal-item--enter,
 .payload__modal-item--enterDone {
   z-index: $z-modal;
