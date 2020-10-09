@@ -93,6 +93,7 @@ const ForgotPassword = () => {
         <Email
           label="Email Address"
           name="email"
+          autoComplete="email"
           required
         />
         <FormSubmit>Submit</FormSubmit>

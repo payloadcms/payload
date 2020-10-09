@@ -33,8 +33,6 @@ const ArrayFieldType = (props) => {
     permissions,
     admin: {
       readOnly,
-      style,
-      width,
     },
   } = props;
 

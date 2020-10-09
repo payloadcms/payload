@@ -73,6 +73,7 @@ const ResetPassword = () => {
             error="password"
             label="New Password"
             name="password"
+            autoComplete="off"
             required
           />
           <ConfirmPassword />
