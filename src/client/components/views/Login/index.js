@@ -84,6 +84,7 @@ const Login = () => {
           error="password"
           label="Password"
           name="password"
+          autoComplete="off"
           required
         />
         <Link to={`${admin}/forgot`}>

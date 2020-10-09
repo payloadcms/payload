@@ -46,6 +46,7 @@ const DefaultEditView = (props) => {
     admin: {
       useAsTitle,
       disableDuplicate,
+      disableScrollOnSuccess,
     },
     timestamps,
     preview,
@@ -67,6 +68,7 @@ const DefaultEditView = (props) => {
         onSuccess={onSave}
         disabled={!hasSavePermission}
         initialState={initialState}
+        disableScrollOnSuccess={disableScrollOnSuccess}
       >
         <div className={`${baseClass}__main`}>
           <Meta
@@ -229,6 +231,7 @@ DefaultEditView.propTypes = {
     admin: PropTypes.shape({
       useAsTitle: PropTypes.string,
       disableDuplicate: PropTypes.bool,
+      disableScrollOnSuccess: PropTypes.bool,
     }),
     fields: PropTypes.arrayOf(PropTypes.shape({})),
     preview: PropTypes.func,

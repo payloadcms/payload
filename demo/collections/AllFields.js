@@ -12,6 +12,7 @@ const AllFields = {
   },
   admin: {
     useAsTitle: 'text',
+    disableScrollOnSuccess: true,
   },
   preview: (doc, token) => {
     if (doc && doc.text) {

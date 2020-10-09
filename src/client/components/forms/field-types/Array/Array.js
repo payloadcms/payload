@@ -179,12 +179,21 @@ const RenderArray = React.memo((props) => {
     permissions,
     value,
     readOnly,
+    style,
+    width,
     minRows,
+    maxRows,
   } = props;
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className={baseClass}>
+      <div
+        className={baseClass}
+        style={{
+          ...style,
+          width,
+        }}
+      >
         <header className={`${baseClass}__header`}>
           <h3>{label}</h3>
           <Error
@@ -240,7 +249,7 @@ const RenderArray = React.memo((props) => {
             </div>
           )}
         </Droppable>
-        {!readOnly && (
+        {(!readOnly && (rows.length < maxRows || maxRows === undefined)) && (
           <div className={`${baseClass}__add-button-wrap`}>
             <Button
               onClick={() => addRow(value)}
@@ -270,6 +279,8 @@ RenderArray.defaultProps = {
   path: '',
   value: undefined,
   readOnly: false,
+  style: {},
+  width: undefined,
   maxRows: undefined,
   minRows: undefined,
 };
@@ -300,6 +311,8 @@ RenderArray.propTypes = {
     fields: PropTypes.shape({}),
   }).isRequired,
   readOnly: PropTypes.bool,
+  style: PropTypes.shape({}),
+  width: PropTypes.string,
   maxRows: PropTypes.number,
   minRows: PropTypes.number,
 };
