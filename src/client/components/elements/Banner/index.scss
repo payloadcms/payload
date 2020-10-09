@@ -1,0 +1,74 @@
+@import '../../../scss/styles.scss';
+
+.banner {
+  font-size: 1rem;
+  line-height: base(1);
+  border: 0;
+  vertical-align: middle;
+  background: rgba($color-dark-gray, .1);
+  color: $color-dark-gray;
+  border-radius: $style-radius-s;
+  padding: base(.5);
+  margin-bottom: $baseline;
+
+  &--has-action {
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  &--has-icon {
+    svg {
+      display: block;
+    }
+  }
+
+  &--align-icon-left {
+    padding-left: base(.125);
+  }
+
+  &--align-icon-right {
+    padding-right: base(.125);
+  }
+
+  &--type-default {
+    &.button--has-action {
+      &:hover {
+        background: darken($color-dark-gray, .15);
+      }
+
+      &:active {
+        background: darken($color-dark-gray, .2);
+      }
+    }
+  }
+
+  &--type-error {
+    background: rgba($color-red, .1);
+    color: $color-red;
+
+    &.button--has-action {
+      &:hover {
+        background: rgba($color-red, .15);
+      }
+
+      &:active {
+        background: rgba($color-red, .2);
+      }
+    }
+  }
+
+  &--type-success {
+    background: rgba($color-green, .1);
+    color: darken($color-green, 20%);
+
+    &.button--has-action {
+      &:hover {
+        background: rgba($color-green, .15);
+      }
+
+      &:active {
+        background: rgba($color-green, .2);
+      }
+    }
+  }
+}

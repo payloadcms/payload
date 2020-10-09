@@ -45,7 +45,9 @@ describe('sanitizeFields', () => {
       const fields = [{
         name: 'layout',
         label: 'Layout Blocks',
-        singularLabel: 'Block',
+        labels: {
+          singular: 'Block',
+        },
         type: 'blocks',
         blocks: [{
           fields: [{
@@ -92,7 +94,9 @@ describe('sanitizeFields', () => {
       const fields = [{
         name: 'layout',
         label: 'Layout Blocks',
-        singularLabel: 'Block',
+        labels: {
+          singular: 'Block',
+        },
         type: 'blocks',
         blocks: [{
           fields: [{

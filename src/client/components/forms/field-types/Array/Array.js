@@ -12,6 +12,7 @@ import useFieldType from '../../useFieldType';
 import Error from '../../Error';
 import { array } from '../../../../../fields/validations';
 import getDataByPath from '../../Form/getDataByPath';
+import Banner from '../../../elements/Banner';
 
 import './index.scss';
 
@@ -28,7 +29,7 @@ const ArrayFieldType = (props) => {
     required,
     maxRows,
     minRows,
-    singularLabel,
+    labels,
     permissions,
     admin: {
       readOnly,
@@ -106,7 +107,7 @@ const ArrayFieldType = (props) => {
       showError={showError}
       errorMessage={errorMessage}
       rows={rows}
-      singularLabel={singularLabel}
+      labels={labels}
       addRow={addRow}
       removeRow={removeRow}
       moveRow={moveRow}
@@ -117,17 +118,22 @@ const ArrayFieldType = (props) => {
       permissions={permissions}
       value={value}
       readOnly={readOnly}
+      minRows={minRows}
+      maxRows={maxRows}
     />
   );
 };
 
 ArrayFieldType.defaultProps = {
-  label: '',
+  label: undefined,
   validate: array,
   required: false,
   maxRows: undefined,
   minRows: undefined,
-  singularLabel: 'Row',
+  labels: {
+    singular: 'Row',
+    plural: 'Rows',
+  },
   permissions: {},
   admin: {},
 };
@@ -137,7 +143,10 @@ ArrayFieldType.propTypes = {
     PropTypes.shape({}),
   ).isRequired,
   label: PropTypes.string,
-  singularLabel: PropTypes.string,
+  labels: PropTypes.shape({
+    singular: PropTypes.string,
+    plural: PropTypes.string,
+  }),
   name: PropTypes.string.isRequired,
   path: PropTypes.string.isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
@@ -160,7 +169,7 @@ const RenderArray = React.memo((props) => {
     showError,
     errorMessage,
     rows,
-    singularLabel,
+    labels,
     addRow,
     removeRow,
     moveRow,
@@ -170,6 +179,7 @@ const RenderArray = React.memo((props) => {
     permissions,
     value,
     readOnly,
+    minRows,
   } = props;
 
   return (
@@ -194,7 +204,7 @@ const RenderArray = React.memo((props) => {
                   key={row.key}
                   id={row.key}
                   blockType="array"
-                  singularLabel={singularLabel}
+                  label={label}
                   isOpen={row.open}
                   rowCount={rows.length}
                   rowIndex={i}
@@ -208,6 +218,15 @@ const RenderArray = React.memo((props) => {
                   permissions={permissions.fields}
                 />
               ))}
+              {rows.length < minRows && (
+                <Banner type="error">
+                  This field requires at least
+                  {' '}
+                  {minRows}
+                  {' '}
+                  {labels.plural}
+                </Banner>
+              )}
               {provided.placeholder}
             </div>
           )}
@@ -221,7 +240,7 @@ const RenderArray = React.memo((props) => {
               iconStyle="with-border"
               iconPosition="left"
             >
-              {`Add ${singularLabel}`}
+              {`Add ${label}`}
             </Button>
           </div>
         )}
@@ -235,10 +254,15 @@ RenderArray.defaultProps = {
   showError: false,
   errorMessage: undefined,
   rows: [],
-  singularLabel: 'Row',
+  labels: {
+    singular: 'Row',
+    plural: 'Rows',
+  },
   path: '',
   value: undefined,
   readOnly: false,
+  maxRows: undefined,
+  minRows: undefined,
 };
 
 RenderArray.propTypes = {
@@ -248,7 +272,10 @@ RenderArray.propTypes = {
   rows: PropTypes.arrayOf(
     PropTypes.shape({}),
   ),
-  singularLabel: PropTypes.string,
+  labels: PropTypes.shape({
+    singular: PropTypes.string,
+    plural: PropTypes.string,
+  }),
   path: PropTypes.string,
   name: PropTypes.string.isRequired,
   value: PropTypes.number,
@@ -264,6 +291,8 @@ RenderArray.propTypes = {
     fields: PropTypes.shape({}),
   }).isRequired,
   readOnly: PropTypes.bool,
+  maxRows: PropTypes.number,
+  minRows: PropTypes.number,
 };
 
 export default withCondition(ArrayFieldType);

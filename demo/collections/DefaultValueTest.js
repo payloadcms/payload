@@ -187,7 +187,10 @@ const DefaultValueTest = {
       type: 'blocks',
       label: 'Blocks Content',
       name: 'blocks',
-      singularLabel: 'Block',
+      labels: {
+        singular: 'Block',
+        plural: 'Blocks',
+      },
       blocks: [Email, NumberBlock, Quote, CallToAction],
       localized: true,
     },

@@ -13,8 +13,7 @@ const ActionPanel = (props) => {
   const {
     addRow,
     removeRow,
-    singularLabel,
-    verticalAlignment,
+    label,
     blockType,
     blocks,
     rowIndex,
@@ -46,7 +45,7 @@ const ActionPanel = (props) => {
         )}
       >
         Remove&nbsp;
-            {singularLabel}
+        {label}
       </Popup>
 
       {blockType === 'blocks'
@@ -54,7 +53,7 @@ const ActionPanel = (props) => {
           <Popup
             buttonType="custom"
             size="large"
-            horizontalAlign="right"
+            horizontalAlign="center"
             button={(
               <Button
                 className={`${baseClass}__add-row`}
@@ -82,7 +81,7 @@ const ActionPanel = (props) => {
             showOnHover
             size="wide"
             color="dark"
-            horizontalAlign="right"
+            horizontalAlign="center"
             buttonType="custom"
             button={(
               <Button
@@ -97,7 +96,7 @@ const ActionPanel = (props) => {
             )}
           >
             Add&nbsp;
-            {singularLabel}
+            {label}
           </Popup>
         )}
     </div>
@@ -105,14 +104,14 @@ const ActionPanel = (props) => {
 };
 
 ActionPanel.defaultProps = {
-  singularLabel: 'Row',
+  label: 'Row',
   blockType: null,
   isHovered: false,
   blocks: [],
 };
 
 ActionPanel.propTypes = {
-  singularLabel: PropTypes.string,
+  label: PropTypes.string,
   addRow: PropTypes.func.isRequired,
   removeRow: PropTypes.func.isRequired,
   blockType: PropTypes.oneOf(['blocks', 'array']),

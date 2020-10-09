@@ -34,7 +34,6 @@ BlocksCell.propTypes = {
     PropTypes.shape({}),
   ),
   field: PropTypes.shape({
-    singularLabel: PropTypes.string,
     label: PropTypes.string,
     blocks: PropTypes.arrayOf(
       PropTypes.shape({}),

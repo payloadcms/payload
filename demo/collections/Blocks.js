@@ -16,7 +16,10 @@ module.exports = {
     {
       name: 'layout',
       label: 'Layout Blocks',
-      singularLabel: 'Block',
+      labels: {
+        singular: 'Block',
+        plural: 'Blocks',
+      },
       type: 'blocks',
       blocks: [Email, NumberBlock, Quote, CallToAction],
       localized: true,
@@ -25,7 +28,10 @@ module.exports = {
     {
       name: 'nonLocalizedLayout',
       label: 'Non Localized Layout',
-      singularLabel: 'Block',
+      labels: {
+        singular: 'Layout',
+        plural: 'Layouts',
+      },
       type: 'blocks',
       blocks: [Email, NumberBlock, Quote, CallToAction],
       required: true,

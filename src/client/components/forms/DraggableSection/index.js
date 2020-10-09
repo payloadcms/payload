@@ -24,7 +24,7 @@ const DraggableSection = (props) => {
     rowCount,
     parentPath,
     fieldSchema,
-    singularLabel,
+    label,
     blockType,
     fieldTypes,
     toggleRowCollapse,
@@ -78,7 +78,7 @@ const DraggableSection = (props) => {
               {blockType === 'blocks' && (
                 <div className={`${baseClass}__section-header`}>
                   <SectionTitle
-                    label={singularLabel}
+                    label={label}
                     path={`${parentPath}.${rowIndex}.blockName`}
                     readOnly={readOnly}
                   />
@@ -122,7 +122,7 @@ const DraggableSection = (props) => {
                   rowIndex={rowIndex}
                   addRow={addRow}
                   removeRow={removeRow}
-                  singularLabel={singularLabel}
+                  label={label}
                   verticalAlignment={actionPanelVerticalAlignment}
                   isHovered={isHovered}
                   {...props}
@@ -140,7 +140,7 @@ DraggableSection.defaultProps = {
   toggleRowCollapse: undefined,
   rowCount: null,
   initialData: undefined,
-  singularLabel: '',
+  label: '',
   blockType: '',
   isOpen: true,
   positionPanelVerticalAlignment: 'sticky',
@@ -156,7 +156,7 @@ DraggableSection.propTypes = {
   toggleRowCollapse: PropTypes.func,
   rowIndex: PropTypes.number.isRequired,
   parentPath: PropTypes.string.isRequired,
-  singularLabel: PropTypes.string,
+  label: PropTypes.string,
   fieldSchema: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   rowCount: PropTypes.number,
   initialData: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),

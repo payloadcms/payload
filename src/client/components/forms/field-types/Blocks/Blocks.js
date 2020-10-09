@@ -27,7 +27,7 @@ const Blocks = (props) => {
     name,
     path: pathFromProps,
     blocks,
-    singularLabel,
+    labels,
     fieldTypes,
     maxRows,
     minRows,
@@ -48,11 +48,11 @@ const Blocks = (props) => {
     const validationResult = validate(
       value,
       {
-        minRows, maxRows, singularLabel, blocks, required,
+        minRows, maxRows, labels, blocks, required,
       },
     );
     return validationResult;
-  }, [validate, maxRows, minRows, singularLabel, blocks, required]);
+  }, [validate, maxRows, minRows, labels, blocks, required]);
 
   const [disableFormData, setDisableFormData] = useState(false);
 
@@ -122,7 +122,7 @@ const Blocks = (props) => {
       showError={showError}
       errorMessage={errorMessage}
       rows={rows}
-      singularLabel={singularLabel}
+      labels={labels}
       addRow={addRow}
       removeRow={removeRow}
       moveRow={moveRow}
@@ -140,7 +140,10 @@ const Blocks = (props) => {
 
 Blocks.defaultProps = {
   label: '',
-  singularLabel: 'Block',
+  labels: {
+    singular: 'Block',
+    plural: 'Blocks',
+  },
   validate: blocksValidator,
   required: false,
   maxRows: undefined,
@@ -154,7 +157,10 @@ Blocks.propTypes = {
     PropTypes.shape({}),
   ).isRequired,
   label: PropTypes.string,
-  singularLabel: PropTypes.string,
+  labels: PropTypes.shape({
+    singular: PropTypes.string,
+    plural: PropTypes.string,
+  }),
   name: PropTypes.string.isRequired,
   path: PropTypes.string.isRequired,
   fieldTypes: PropTypes.shape({}).isRequired,
@@ -177,7 +183,7 @@ const RenderBlocks = React.memo((props) => {
     showError,
     errorMessage,
     rows,
-    singularLabel,
+    labels,
     addRow,
     removeRow,
     moveRow,
@@ -223,7 +229,7 @@ const RenderBlocks = React.memo((props) => {
                       id={row.key}
                       blockType="blocks"
                       blocks={blocks}
-                      singularLabel={blockToRender?.labels?.singular}
+                      label={blockToRender?.labels?.singular}
                       isOpen={row.open}
                       rowCount={rows.length}
                       rowIndex={i}
@@ -268,7 +274,7 @@ const RenderBlocks = React.memo((props) => {
                   iconPosition="left"
                   iconStyle="with-border"
                 >
-                  {`Add ${singularLabel}`}
+                  {`Add ${labels.singular}`}
                 </Button>
               )}
               render={({ close }) => (
@@ -292,7 +298,10 @@ RenderBlocks.defaultProps = {
   showError: false,
   errorMessage: undefined,
   rows: [],
-  singularLabel: 'Row',
+  labels: {
+    singular: 'Row',
+    plural: 'Rows',
+  },
   path: '',
   value: undefined,
   readOnly: false,
@@ -305,7 +314,10 @@ RenderBlocks.propTypes = {
   rows: PropTypes.arrayOf(
     PropTypes.shape({}),
   ),
-  singularLabel: PropTypes.string,
+  labels: PropTypes.shape({
+    singular: PropTypes.string,
+    plural: PropTypes.string,
+  }),
   path: PropTypes.string,
   name: PropTypes.string.isRequired,
   value: PropTypes.number,

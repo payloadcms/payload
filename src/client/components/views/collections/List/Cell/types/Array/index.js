@@ -19,7 +19,6 @@ ArrayCell.propTypes = {
     PropTypes.shape({}),
   ),
   field: PropTypes.shape({
-    singularLabel: PropTypes.string,
     label: PropTypes.string,
   }).isRequired,
 };

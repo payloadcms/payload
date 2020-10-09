@@ -15,7 +15,6 @@ TextareaCell.defaultProps = {
 TextareaCell.propTypes = {
   data: PropTypes.string,
   field: PropTypes.shape({
-    singularLabel: PropTypes.string,
     label: PropTypes.string,
   }).isRequired,
 };

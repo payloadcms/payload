@@ -27,7 +27,6 @@ RichTextCell.propTypes = {
 
 
   field: PropTypes.shape({
-    singularLabel: PropTypes.string,
     label: PropTypes.string,
   }).isRequired,
 };

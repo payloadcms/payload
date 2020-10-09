@@ -38,7 +38,6 @@ SelectCell.propTypes = {
     ],
   ),
   field: PropTypes.shape({
-    singularLabel: PropTypes.string,
     label: PropTypes.string,
     options: PropTypes.arrayOf(
       PropTypes.oneOfType([
