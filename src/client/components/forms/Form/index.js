@@ -316,6 +316,7 @@ const Form = (props) => {
   }, 15000, [fields]);
 
   useEffect(() => {
+    contextRef.current = { ...contextRef.current }; // triggers rerender of all components that subscribe to form
     setModified(false);
   }, [locale]);
 

@@ -73,9 +73,10 @@ const Blocks = (props) => {
   const addRow = useCallback(async (rowIndex, blockType) => {
     const block = blocks.find((potentialBlock) => potentialBlock.slug === blockType);
 
-    dispatchRows({ type: 'ADD', rowIndex, blockType });
     const subFieldState = await buildStateFromSchema(block.fields);
+
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
+    dispatchRows({ type: 'ADD', rowIndex, blockType });
     setValue(value + 1);
   }, [path, setValue, value, blocks, dispatchFields]);
 

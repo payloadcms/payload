@@ -62,9 +62,9 @@ const ArrayFieldType = (props) => {
   });
 
   const addRow = useCallback(async (rowIndex) => {
-    dispatchRows({ type: 'ADD', rowIndex });
     const subFieldState = await buildStateFromSchema(fields);
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
+    dispatchRows({ type: 'ADD', rowIndex });
     setValue(value + 1);
   }, [dispatchRows, dispatchFields, fields, path, setValue, value]);
 
