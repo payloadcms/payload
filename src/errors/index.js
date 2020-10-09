@@ -6,6 +6,7 @@ const ErrorDeletingFile = require('./ErrorDeletingFile');
 const errorHandler = require('../express/middleware/errorHandler');
 const FileUploadError = require('./FileUploadError');
 const Forbidden = require('./Forbidden');
+const LockedAuth = require('./LockedAuth');
 const InvalidFieldRelationship = require('./InvalidFieldRelationship');
 const MissingCollectionLabel = require('./MissingCollectionLabel');
 const MissingFieldInputOptions = require('./MissingFieldInputOptions');
@@ -24,6 +25,7 @@ module.exports = {
   errorHandler,
   FileUploadError,
   Forbidden,
+  LockedAuth,
   InvalidFieldRelationship,
   MissingCollectionLabel,
   MissingFieldInputOptions,

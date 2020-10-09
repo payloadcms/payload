@@ -11,7 +11,7 @@ async function forgotPassword(args) {
   let options = { ...args };
 
   // /////////////////////////////////////
-  // 1. Execute before login hook
+  // 1. Execute before forgotPassword hook
   // /////////////////////////////////////
 
   const { beforeForgotPassword } = args.collection.config.hooks;
@@ -64,7 +64,7 @@ async function forgotPassword(args) {
   }
 
   // /////////////////////////////////////
-  // 3. Execute after forgot password hook
+  // 3. Execute after forgotPassword hook
   // /////////////////////////////////////
 
   const { afterForgotPassword } = args.collection.config.hooks;

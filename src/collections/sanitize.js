@@ -244,7 +244,7 @@ const sanitizeCollection = (collections, collection) => {
         type: 'checkbox',
         access: {
           create: () => false,
-          update: () => false,
+          update: ({ req: { user } }) => Boolean(user),
         },
         admin: {
           disabled: true,
@@ -269,18 +269,7 @@ const sanitizeCollection = (collections, collection) => {
         hidden: true,
       });
 
-      authFields.push({
-        name: 'isLocked',
-        type: 'checkbox',
-        admin: {
-          disabled: true,
-        },
-        hooks: {
-          afterRead: [
-            ({ data }) => !!(data.lockUntil && data.lockUntil > Date.now()),
-          ],
-        },
-      });
+      if (!sanitized.access.unlock) sanitized.access.unlock = ({ req: { user } }) => Boolean(user);
     }
 
     if (!sanitized.auth.tokenExpiration) sanitized.auth.tokenExpiration = 7200;

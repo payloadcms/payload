@@ -8,6 +8,7 @@ const refresh = require('../auth/operations/refresh');
 const registerFirstUser = require('../auth/operations/registerFirstUser');
 const resetPassword = require('../auth/operations/resetPassword');
 const verifyEmail = require('../auth/operations/verifyEmail');
+const unlock = require('../auth/operations/unlock');
 
 const create = require('../collections/operations/create');
 const find = require('../collections/operations/find');
@@ -39,6 +40,7 @@ function bindOperations(ctx) {
         registerFirstUser: registerFirstUser.bind(ctx),
         resetPassword: resetPassword.bind(ctx),
         verifyEmail: verifyEmail.bind(ctx),
+        unlock: unlock.bind(ctx),
       },
     },
     globals: {

@@ -100,12 +100,19 @@ function registerCollections() {
           forgotPassword,
           resetPassword,
           verifyEmail,
+          unlock,
         } = this.requestHandlers.collections.auth;
 
         if (collection.auth.emailVerification) {
           router
             .route(`/${slug}/verify/:token`)
             .post(verifyEmail);
+        }
+
+        if (collection.auth.maxLoginAttempts > 0) {
+          router
+            .route(`/${slug}/unlock`)
+            .post(unlock);
         }
 
         router

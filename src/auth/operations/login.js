@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
-const { AuthenticationError } = require('../../errors');
+const { AuthenticationError, LockedAuth } = require('../../errors');
 const getCookieExpiration = require('../../utilities/getCookieExpiration');
+const isLocked = require('../isLocked');
 
 async function login(args) {
   const { config, operations } = this;
@@ -36,9 +37,10 @@ async function login(args) {
     throw new AuthenticationError();
   }
 
-  if (userDoc && userDoc.isLocked) {
-    throw new AuthenticationError();
+  if (userDoc && isLocked(userDoc.lockUntil)) {
+    throw new LockedAuth();
   }
+
   const authResult = await userDoc.authenticate(password);
 
   const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0;
@@ -48,7 +50,17 @@ async function login(args) {
     throw new AuthenticationError();
   }
 
-  if (maxLoginAttemptsEnabled) await authResult.user.resetLoginAttempts();
+  if (maxLoginAttemptsEnabled) {
+    await operations.collections.auth.unlock({
+      collection: {
+        Model,
+        config: collectionConfig,
+      },
+      req,
+      data,
+      overrideAccess: true,
+    });
+  }
 
   const userQuery = await operations.collections.find({
     where: {

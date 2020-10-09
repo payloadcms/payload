@@ -16,7 +16,7 @@ function registerCollections() {
   } = this.graphQL.resolvers.collections;
 
   const {
-    login, logout, me, init, refresh, forgotPassword, resetPassword, verifyEmail,
+    login, logout, me, init, refresh, forgotPassword, resetPassword, verifyEmail, unlock,
   } = this.graphQL.resolvers.collections.auth;
 
   Object.keys(this.collections).forEach((slug) => {
@@ -209,6 +209,16 @@ function registerCollections() {
         }),
         resolve: me,
       };
+
+      if (collection.config.auth.maxLoginAttempts > 0) {
+        this.Mutation.fields[`unlock${singularLabel}`] = {
+          type: new GraphQLNonNull(GraphQLBoolean),
+          args: {
+            email: { type: new GraphQLNonNull(GraphQLString) },
+          },
+          resolve: unlock(collection),
+        };
+      }
 
       this.Query.fields[`initialized${singularLabel}`] = {
         type: GraphQLBoolean,

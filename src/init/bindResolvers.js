@@ -7,6 +7,7 @@ const me = require('../auth/graphql/resolvers/me');
 const refresh = require('../auth/graphql/resolvers/refresh');
 const resetPassword = require('../auth/graphql/resolvers/resetPassword');
 const verifyEmail = require('../auth/graphql/resolvers/verifyEmail');
+const unlock = require('../auth/graphql/resolvers/unlock');
 
 const create = require('../collections/graphql/resolvers/create');
 const find = require('../collections/graphql/resolvers/find');
@@ -38,6 +39,7 @@ function bindResolvers(ctx) {
           refresh: refresh.bind(ctx),
           resetPassword: resetPassword.bind(ctx),
           verifyEmail: verifyEmail.bind(ctx),
+          unlock: unlock.bind(ctx),
         },
       },
       globals: {
