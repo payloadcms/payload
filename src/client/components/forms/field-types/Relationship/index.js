@@ -151,7 +151,7 @@ class Relationship extends Component {
         if (potentialValue) foundValue = potentialValue;
       });
     } else if (value) {
-      if (hasMany) {
+      if (hasMany && Array.isArray(value)) {
         foundValue = value.map((val) => options.find((option) => option.value === val));
       } else {
         foundValue = options.find((option) => option.value === value);
