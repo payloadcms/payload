@@ -114,16 +114,6 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m $color-green;
   backdrop-filter: saturate(180%) blur(5px);
 }
 
-@keyframes onAutoFillStart {
-  from {/**/}
-  to {/**/}
-}
-
-@keyframes onAutoFillCancel {
-  from {/**/}
-  to {/**/}
-}
-
 @mixin formInput () {
   @include inputShadow;
   font-family: $font-body;
@@ -184,9 +174,3 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m $color-green;
       margin-bottom: base(.5);
   }
 }
-
-//////////////////////////////
-// IMPORT OVERRIDES
-//////////////////////////////
-
-@import '~payload-scss-overrides';

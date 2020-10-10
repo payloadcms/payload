@@ -6,10 +6,12 @@
   "author": "Payload CMS LLC",
   "main": "index.js",
   "typings": "payload.d.ts",
+  "sideEffects": false,
   "bin": {
     "payload": "./src/bin/index.js"
   },
   "scripts": {
+    "build:components": "webpack --config src/webpack/components.config.js",
     "build": "PAYLOAD_CONFIG_PATH=demo/payload.config.js node src/bin/build",
     "build:analyze": "PAYLOAD_CONFIG_PATH=demo/payload.config.js PAYLOAD_ANALYZE_BUNDLE=true node src/bin/build",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
@@ -68,11 +70,13 @@
     "is-hotkey": "^0.1.6",
     "is-url": "^1.2.4",
     "isomorphic-fetch": "^2.2.1",
+    "isomorphic-style-loader": "^5.1.0",
     "jest": "^25.3.0",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^3.0.0",
     "method-override": "^3.0.0",
     "micro-memoize": "^4.0.9",
+    "mini-css-extract-plugin": "^1.0.0",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "mongodb-memory-server": "^6.5.2",
@@ -83,7 +87,7 @@
     "node-sass-chokidar": "^1.4.0",
     "nodemailer": "^6.4.2",
     "object-to-formdata": "^3.0.9",
-    "optimize-css-assets-webpack-plugin": "^5.0.3",
+    "optimize-css-assets-webpack-plugin": "^5.0.4",
     "passport": "^0.4.1",
     "passport-anonymous": "^1.0.1",
     "passport-headerapikey": "^1.2.1",
@@ -92,9 +96,8 @@
     "passport-local-mongoose": "^6.0.1",
     "pino": "^6.4.1",
     "pino-pretty": "^4.1.0",
-    "postcss-flexbugs-fixes": "^3.3.1",
-    "postcss-loader": "^2.1.6",
-    "postcss-preset-env": "6.0.6",
+    "postcss-loader": "^4.0.4",
+    "postcss-preset-env": "^6.7.0",
     "prismjs": "^1.21.0",
     "probe-image-size": "^5.0.0",
     "prop-types": "^15.7.2",
@@ -119,6 +122,7 @@
     "slate-hyperscript": "^0.58.3",
     "slate-react": "^0.58.3",
     "style-loader": "^0.21.0",
+    "terser-webpack-plugin": "^4.2.3",
     "url-loader": "^1.0.1",
     "uuid": "^8.1.0",
     "webpack": "^4.43.0",
@@ -133,7 +137,6 @@
     "babel-eslint": "^10.0.1",
     "cross-env": "^7.0.2",
     "eslint": "^6.8.0",
-    "eslint-loader": "^4.0.2",
     "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-jest": "^23.16.0",
     "eslint-plugin-jest-dom": "^3.0.1",
@@ -143,13 +146,15 @@
     "faker": "^4.1.0",
     "form-data": "^3.0.0",
     "graphql-request": "^2.0.0",
-    "nodemon": "^1.19.4"
+    "nodemon": "^1.19.4",
+    "webpack-cli": "^4.0.0"
   },
   "files": [
     "*.js",
     "!jest.config.js",
     "payload.d.ts",
     "src",
-    "admin"
+    "components",
+    "scss"
   ]
 }

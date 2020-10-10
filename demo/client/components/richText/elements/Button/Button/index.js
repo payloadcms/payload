@@ -3,11 +3,11 @@ import PropTypes from 'prop-types';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
 import { useSlate } from 'slate-react';
-import { MinimalTemplate } from '../../../../../../../admin/components';
-import { ElementButton } from '../../../../../../../admin/rich-text';
-import { X } from '../../../../../../../admin/icons';
-import { Button } from '../../../../../../../admin/elements';
-import { Form, Text, Checkbox, Select, Submit, reduceFieldsToValues } from '../../../../../../../admin/forms';
+import MinimalTemplate from '../../../../../../../src/admin/components/templates/Minimal';
+import { ElementButton } from '../../../../../../../components/rich-text';
+import X from '../../../../../../../src/admin/components/icons/X';
+import Button from '../../../../../../../src/admin/components/elements/Button';
+import { Form, Text, Checkbox, Select, Submit, reduceFieldsToValues } from '../../../../../../../components/forms';
 
 import './index.scss';
 

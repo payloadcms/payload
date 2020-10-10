@@ -25,17 +25,13 @@ const build = () => {
     webpack(webpackProdConfig, (err, stats) => { // Stats Object
       if (err || stats.hasErrors()) {
         // Handle errors here
-        console.log(err);
+        console.error(stats.toString({
+          stats: 'errors-only',
+        }));
       }
-
-      console.log(stats.toString({
-        chunks: false, // Makes the build much quieter
-        colors: true, // Shows colors in the console
-      }));
-      // Done processing
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     console.error(`Error: can't find the configuration file located at ${configPath}.`);
   }
 };

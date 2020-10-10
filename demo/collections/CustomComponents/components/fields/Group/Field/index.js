@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Group } from '../../../../../../../admin/forms';
+import { Group } from '../../../../../../../components/forms';
 
 const CustomGroup = (props) => (
   <div className="custom-group">

@@ -215,7 +215,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-
 # End of https://www.gitignore.io/api/node,macos,windows,webstorm,sublimetext,visualstudiocode
 
 # Ignore all uploads
@@ -225,3 +224,7 @@ demo/files
 
 # Ignore build folder
 build
+
+# Ignore built components
+components/index.js
+components/styles.css

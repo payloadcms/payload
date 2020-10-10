@@ -1,6 +1,6 @@
 module.exports = (cssOptions, preProcessor) => {
   const loaders = [
-    require.resolve('style-loader'),
+    'isomorphic-style-loader',
     {
       loader: require.resolve('css-loader'),
       options: cssOptions,
@@ -16,12 +16,7 @@ module.exports = (cssOptions, preProcessor) => {
         ident: 'postcss',
         plugins: () => [
           require('postcss-flexbugs-fixes'),
-          require('postcss-preset-env')({
-            autoprefixer: {
-              flexbox: 'no-2009',
-            },
-            stage: 3,
-          }),
+          require('postcss-preset-env'),
         ],
       },
     },

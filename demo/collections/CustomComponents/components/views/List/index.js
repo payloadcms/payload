@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import DefaultList from '../../../../../../src/client/components/views/collections/List/Default';
+import DefaultList from '../../../../../../src/admin/components/views/collections/List/Default';
 
 import './index.scss';
 

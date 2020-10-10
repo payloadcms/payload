@@ -4,15 +4,15 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info';
 import { WindowInfoProvider } from '@faceless-ui/window-info';
 import { ModalProvider, ModalContainer } from '@faceless-ui/modal';
-import { SearchParamsProvider } from './utilities/SearchParams';
-import { LocaleProvider } from './utilities/Locale';
-import StatusList, { StatusListProvider } from './elements/Status';
-import { AuthenticationProvider } from './providers/Authentication';
-import Routes from './Routes';
-import getCSSVariable from '../../utilities/getCSSVariable';
-import ConfigProvider from './providers/Config/Provider';
+import { SearchParamsProvider } from './components/utilities/SearchParams';
+import { LocaleProvider } from './components/utilities/Locale';
+import StatusList, { StatusListProvider } from './components/elements/Status';
+import { AuthenticationProvider } from './components/providers/Authentication';
+import Routes from './components/Routes';
+import getCSSVariable from '../utilities/getCSSVariable';
+import ConfigProvider from './components/providers/Config/Provider';
 
-import '../scss/app.scss';
+import './scss/app.scss';
 
 const Index = () => {
   const windowInfoProps = {};

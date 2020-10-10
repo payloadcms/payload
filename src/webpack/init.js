@@ -12,6 +12,7 @@ function initWebpack() {
 
   router.use(webpackDevMiddleware(compiler, {
     publicPath: webpackDevConfig.output.publicPath,
+    stats: 'errors-only',
   }));
 
   router.use(webpackHotMiddleware(compiler));

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LeafButton } from '../../../../../../../admin/rich-text';
+import { LeafButton } from '../../../../../../../components/rich-text';
 
 const Button = () => (
   <LeafButton format="purple-background">
