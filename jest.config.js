@@ -5,7 +5,7 @@ module.exports = {
   globalTeardown: '<rootDir>/tests/api/globalTeardown.js',
   testPathIgnorePatterns: [
     'node_modules',
-    'src/client/*',
+    'src/admin/*',
   ],
   testTimeout: 15000,
   moduleNameMapper: {
