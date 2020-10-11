@@ -59,6 +59,7 @@ module.exports = (config) => {
             },
             {
               test: /\.(sa|sc|c)ss$/,
+              sideEffects: true,
               use: [
                 MiniCSSExtractPlugin.loader,
                 'css-loader',
