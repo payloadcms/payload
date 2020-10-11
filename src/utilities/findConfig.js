@@ -22,7 +22,6 @@ const findConfig = () => {
 
   // Check for config in current working directory
   const cwdPath = path.resolve(process.cwd(), 'payload.config.js');
-
   if (fs.existsSync(cwdPath)) {
     return cwdPath;
   }
