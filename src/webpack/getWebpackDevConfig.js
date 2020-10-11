@@ -26,7 +26,7 @@ module.exports = (config) => {
       rules: [
         {
           test: /\.js$/,
-          exclude: /node_modules\\(?!(@payloadcms\/payload)\/).*/,
+          exclude: /node_modules[\\/](?!(@payloadcms[\\/]payload)[\\/]).*/,
           use: [
             {
               loader: 'babel-loader',

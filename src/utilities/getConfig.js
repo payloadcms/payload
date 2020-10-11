@@ -12,7 +12,7 @@ if (process.env.NODE_ENV !== 'test') {
   require('@babel/register')({
     ...babelConfig,
     ignore: [
-      /node_modules\\(?!@payloadcms\\payload\\src\\admin|@payloadcms\\payload\\components|@payloadcms\\payload\\hooks).*/,
+      /node_modules[\\/](?!@payloadcms[\\/]payload[\\/]src[\\/]admin|@payloadcms[\\/]payload[\\/]components|@payloadcms[\\/]payload[\\/]hooks).*/,
     ],
   });
 }
