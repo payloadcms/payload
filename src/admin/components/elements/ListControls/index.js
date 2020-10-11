@@ -4,6 +4,7 @@ import AnimateHeight from 'react-animate-height';
 import SearchFilter from '../SearchFilter';
 import ColumnSelector from '../ColumnSelector';
 import WhereBuilder from '../WhereBuilder';
+import SortComplex from '../SortComplex';
 import Button from '../Button';
 
 import './index.scss';
@@ -15,6 +16,8 @@ const ListControls = (props) => {
     handleChange,
     collection,
     enableColumns,
+    enableSort,
+    setSort,
     collection: {
       fields,
       admin: {
@@ -96,6 +99,17 @@ const ListControls = (props) => {
             >
               Filters
             </Button>
+            {enableSort && (
+              <Button
+                className={`${baseClass}__toggle-sort`}
+                buttonStyle={visibleDrawer === 'sort' ? undefined : 'secondary'}
+                onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : false)}
+                icon="chevron"
+                iconStyle="none"
+              >
+                Sort
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -120,16 +134,31 @@ const ListControls = (props) => {
           collection={collection}
         />
       </AnimateHeight>
+      {enableSort && (
+        <AnimateHeight
+          className={`${baseClass}__sort`}
+          height={visibleDrawer === 'sort' ? 'auto' : 0}
+        >
+          <SortComplex
+            handleChange={setSort}
+            collection={collection}
+            enableSort
+          />
+        </AnimateHeight>
+      )}
     </div>
   );
 };
 
 ListControls.defaultProps = {
   enableColumns: true,
+  enableSort: false,
 };
 
 ListControls.propTypes = {
   enableColumns: PropTypes.bool,
+  enableSort: PropTypes.bool,
+  setSort: PropTypes.func.isRequired,
   collection: PropTypes.shape({
     admin: PropTypes.shape({
       useAsTitle: PropTypes.string,

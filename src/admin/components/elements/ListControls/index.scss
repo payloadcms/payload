@@ -27,7 +27,8 @@
   }
 
   &__toggle-columns,
-  &__toggle-where {
+  &__toggle-where,
+  &__toggle-sort {
     margin: 0 base(.5);
     min-width: 140px;
 
@@ -39,7 +40,8 @@
   }
 
   .column-selector,
-  .where-builder {
+  .where-builder,
+  .sort-complex {
     margin-top: base(1);
   }
 
@@ -68,7 +70,8 @@
     }
 
     &__toggle-columns,
-    &__toggle-where {
+    &__toggle-where,
+    &__toggle-sort {
       flex-grow: 1;
     }
   }

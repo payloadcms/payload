@@ -1,0 +1,35 @@
+@import '../../../scss/styles.scss';
+
+.sort-complex {
+  background: $color-background-gray;
+  padding: base(0.5);
+  display: flex;
+
+  &__wrap {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  &__select {
+    width: 50%;
+    margin-bottom: base(0.5);
+    padding: 0 base(0.5);
+    flex-grow: 1;
+  }
+  &__label {
+    color: $color-gray;
+    margin: base(0.5) 0;
+  }
+
+  @include mid-break {
+    &__wrap {
+      display: block;
+    }
+
+    &__select {
+      margin: 0 0 base(0.5);
+      width: 100%;
+    }
+  }
+}

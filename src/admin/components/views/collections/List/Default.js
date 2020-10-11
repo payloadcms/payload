@@ -29,6 +29,7 @@ const DefaultList = (props) => {
     data,
     newDocumentURL,
     setListControls,
+    setSort,
     columns,
     hasCreatePermission,
   } = props;
@@ -53,8 +54,10 @@ const DefaultList = (props) => {
         </header>
         <ListControls
           handleChange={setListControls}
+          setSort={setSort}
           collection={collection}
-          enableColumns={!upload}
+          enableColumns={Boolean(!upload)}
+          enableSort={Boolean(upload)}
         />
         {(data.docs && data.docs.length > 0) && (
           <React.Fragment>
@@ -159,6 +162,7 @@ DefaultList.propTypes = {
     totalPages: PropTypes.number,
   }),
   setListControls: PropTypes.func.isRequired,
+  setSort: PropTypes.func.isRequired,
   listControls: PropTypes.shape({
     columns: PropTypes.arrayOf(
       PropTypes.string,
