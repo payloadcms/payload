@@ -107,7 +107,6 @@ module.exports = (config) => {
   if (config.paths.scss) {
     const overridePath = path.join(config.paths.configDir, config.paths.scss);
     webpackConfig.resolve.alias['payload-scss-overrides'] = overridePath;
-    console.log(overridePath);
   } else {
     webpackConfig.resolve.alias['payload-scss-overrides'] = path.resolve(__dirname, '../admin/scss/overrides.scss');
   }

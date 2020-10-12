@@ -30,6 +30,9 @@ async function findOne(args) {
 
   if (!doc) {
     doc = {};
+  } else if (doc._id) {
+    doc.id = doc._id;
+    delete doc._id;
   }
 
   // /////////////////////////////////////

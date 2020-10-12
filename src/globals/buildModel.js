@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const mongooseHidden = require('mongoose-hidden')();
 const buildSchema = require('../mongoose/buildSchema');
 const localizationPlugin = require('../localization/plugin');
 
@@ -11,8 +10,6 @@ const buildModel = (config) => {
       globalsSchema.plugin(localizationPlugin, config.localization);
     }
 
-    globalsSchema.plugin(mongooseHidden);
-
     const Globals = mongoose.model('globals', globalsSchema);
 
     Object.values(config.globals).forEach((globalConfig) => {
@@ -21,8 +18,6 @@ const buildModel = (config) => {
       if (config.localization) {
         globalSchema.plugin(localizationPlugin, config.localization);
       }
-
-      globalSchema.plugin(mongooseHidden);
 
       Globals.discriminator(globalConfig.slug, globalSchema);
     });

@@ -41,6 +41,10 @@ async function update(args) {
 
   const globalJSON = global.toJSON({ virtuals: true });
 
+  if (globalJSON._id) {
+    delete globalJSON._id;
+  }
+
   let { data } = args;
 
   // /////////////////////////////////////
