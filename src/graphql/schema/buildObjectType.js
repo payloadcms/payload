@@ -13,6 +13,11 @@ const {
 } = require('graphql');
 const { GraphQLJSON } = require('graphql-type-json');
 
+const {
+  DateTimeResolver,
+  EmailAddressResolver,
+} = require('graphql-scalars');
+
 const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
 const withNullableType = require('./withNullableType');
@@ -23,11 +28,11 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
   const fieldToSchemaMap = {
     number: (field) => ({ type: withNullableType(field, GraphQLFloat) }),
     text: (field) => ({ type: withNullableType(field, GraphQLString) }),
-    email: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    email: (field) => ({ type: withNullableType(field, EmailAddressResolver) }),
     textarea: (field) => ({ type: withNullableType(field, GraphQLString) }),
     richText: (field) => ({ type: withNullableType(field, GraphQLJSON) }),
     code: (field) => ({ type: withNullableType(field, GraphQLString) }),
-    date: (field) => ({ type: withNullableType(field, GraphQLString) }),
+    date: (field) => ({ type: withNullableType(field, DateTimeResolver) }),
     upload: (field) => {
       const { relationTo, label } = field;
       const uploadName = combineParentName(parentName, label);

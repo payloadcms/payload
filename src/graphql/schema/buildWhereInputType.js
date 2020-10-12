@@ -10,6 +10,11 @@ const {
 } = require('graphql');
 const { GraphQLJSON } = require('graphql-type-json');
 
+const {
+  DateTimeResolver,
+  EmailAddressResolver,
+} = require('graphql-scalars');
+
 const formatName = require('../utilities/formatName');
 const combineParentName = require('../utilities/combineParentName');
 const withOperators = require('./withOperators');
@@ -81,7 +86,7 @@ const buildWhereInputType = (name, fields, parentName) => {
       };
     },
     email: (field) => {
-      const type = GraphQLString;
+      const type = EmailAddressResolver;
       return {
         type: withOperators(
           field.name,
@@ -141,7 +146,7 @@ const buildWhereInputType = (name, fields, parentName) => {
       ),
     }),
     date: (field) => {
-      const type = GraphQLString;
+      const type = DateTimeResolver;
       return {
         type: withOperators(
           field.name,
