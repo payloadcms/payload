@@ -634,6 +634,62 @@ describe('Collections - REST', () => {
       expect(data.doc.sizes.tablet.height).toBe(480);
     });
 
+    it('update', async () => {
+      const formData = new FormData();
+      formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/image.png')));
+      formData.append('alt', 'test media');
+      formData.append('locale', 'en');
+
+      const response = await fetch(`${url}/api/media`, {
+        body: formData,
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+        method: 'post',
+      });
+
+      const data = await response.json();
+
+      expect(response.status).toBe(201);
+
+      const updateData = { ...data };
+      const newAlt = 'my new alt';
+      updateData.alt = newAlt;
+      const updateResponse = await fetch(`${url}/api/media/${data.doc._id}?depth=0`, {
+        body: updateData,
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+        method: 'put',
+      });
+
+      expect(updateResponse.status).toBe(200);
+
+      const updateResponseData = await updateResponse.json();
+
+      // Check that files weren't affected
+      expect(await fileExists(path.join(mediaDir, 'image.png'))).toBe(true);
+      expect(await fileExists(path.join(mediaDir, 'image-16x16.png'))).toBe(true);
+      expect(await fileExists(path.join(mediaDir, 'image-320x240.png'))).toBe(true);
+      expect(await fileExists(path.join(mediaDir, 'image-640x480.png'))).toBe(true);
+
+      // Check api response
+      expect(updateResponseData.doc.alt).toStrictEqual(newAlt);
+      expect(updateResponseData.doc.filename).toBe('image.png');
+      expect(updateResponseData.doc.mimeType).not.toBeNull();
+      expect(updateResponseData.doc.sizes.icon.filesize).not.toBeLessThan(1);
+
+      expect(updateResponseData.doc.sizes.icon.filename).toBe('image-16x16.png');
+      expect(updateResponseData.doc.sizes.icon.width).toBe(16);
+      expect(updateResponseData.doc.sizes.icon.height).toBe(16);
+      expect(updateResponseData.doc.sizes.mobile.filename).toBe('image-320x240.png');
+      expect(updateResponseData.doc.sizes.mobile.width).toBe(320);
+      expect(updateResponseData.doc.sizes.mobile.height).toBe(240);
+      expect(updateResponseData.doc.sizes.tablet.filename).toBe('image-640x480.png');
+      expect(updateResponseData.doc.sizes.tablet.width).toBe(640);
+      expect(updateResponseData.doc.sizes.tablet.height).toBe(480);
+    });
+
     it('delete', async () => {
       const formData = new FormData();
       formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/delete.png')));
