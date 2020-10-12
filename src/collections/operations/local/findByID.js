@@ -7,6 +7,7 @@ async function findByID(options) {
     fallbackLocale,
     user,
     overrideAccess = true,
+    disableErrors = false,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -16,6 +17,7 @@ async function findByID(options) {
     id,
     collection,
     overrideAccess,
+    disableErrors,
     req: {
       user,
       payloadAPI: 'local',
