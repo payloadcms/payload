@@ -14,6 +14,7 @@ const fileExists = require('../../../tests/api/utils/fileExists');
 const { serverURL: url } = getConfig();
 
 let token = null;
+let headers = null;
 
 let localizedPostID;
 const englishPostDesc = faker.lorem.lines(2);
@@ -35,6 +36,10 @@ describe('Collections - REST', () => {
     const data = await response.json();
 
     ({ token } = data);
+    headers = {
+      Authorization: `JWT ${token}`,
+      'Content-Type': 'application/json',
+    };
 
     done();
   });
@@ -47,10 +52,7 @@ describe('Collections - REST', () => {
           description: englishPostDesc,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -75,10 +77,7 @@ describe('Collections - REST', () => {
           description: 'original description',
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -93,10 +92,7 @@ describe('Collections - REST', () => {
           description: updatedDesc,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'put',
       });
 
@@ -113,10 +109,7 @@ describe('Collections - REST', () => {
           description: spanishPostDesc,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'put',
       });
 
@@ -170,10 +163,7 @@ describe('Collections - REST', () => {
           description: faker.lorem.lines(2),
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -197,10 +187,7 @@ describe('Collections - REST', () => {
           description: desc,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -222,10 +209,7 @@ describe('Collections - REST', () => {
           description: 'desc',
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -235,10 +219,7 @@ describe('Collections - REST', () => {
           description: 'desc',
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -263,10 +244,7 @@ describe('Collections - REST', () => {
           description: 'desc',
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -276,10 +254,7 @@ describe('Collections - REST', () => {
           description: 'desc',
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -303,10 +278,7 @@ describe('Collections - REST', () => {
           description: englishPostDesc,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -316,10 +288,7 @@ describe('Collections - REST', () => {
       expect(docId).not.toBeNull();
 
       const deleteResponse = await fetch(`${url}/api/localized-posts/${docId}`, {
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'delete',
       });
       expect(deleteResponse.status).toBe(200);
@@ -336,10 +305,7 @@ describe('Collections - REST', () => {
           description,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
     }
@@ -379,10 +345,7 @@ describe('Collections - REST', () => {
           description: desc,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -392,10 +355,7 @@ describe('Collections - REST', () => {
           description: desc,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -435,8 +395,7 @@ describe('Collections - REST', () => {
             priority: 1,
           }),
           headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
+            ...headers,
             hook: 'beforeChange', // Used by hook
           },
           method: 'post',
@@ -453,10 +412,7 @@ describe('Collections - REST', () => {
             description: 'Original',
             priority: 1,
           }),
-          headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
-          },
+          headers,
           method: 'post',
         });
         const createData = await createResponse.json();
@@ -464,8 +420,7 @@ describe('Collections - REST', () => {
 
         const response = await fetch(`${url}/api/hooks/${id}`, {
           headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
+            ...headers,
             hook: 'beforeDelete', // Used by hook
           },
           method: 'delete',
@@ -487,8 +442,7 @@ describe('Collections - REST', () => {
             priority: 1,
           }),
           headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
+            ...headers,
             hook: 'afterRead', // Used by hook
           },
           method: 'post',
@@ -507,10 +461,7 @@ describe('Collections - REST', () => {
             description: 'Original',
             priority: 1,
           }),
-          headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
-          },
+          headers,
           method: 'post',
         });
         const createData = await createResponse.json();
@@ -521,8 +472,7 @@ describe('Collections - REST', () => {
             description: 'afterChange',
           }),
           headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
+            ...headers,
             hook: 'afterChange', // Used by hook
           },
           method: 'put',
@@ -573,10 +523,7 @@ describe('Collections - REST', () => {
       // create document a
       const createA = await fetch(`${url}/api/relationship-a`, {
         body: JSON.stringify({}),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
       const createAData = await createA.json();
@@ -585,10 +532,7 @@ describe('Collections - REST', () => {
         body: JSON.stringify({
           post: [createAData.doc.id],
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
       // update a to relate to b
@@ -598,10 +542,7 @@ describe('Collections - REST', () => {
         body: JSON.stringify({
           post: documentB.id,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'put',
       });
       const updateAData = await updateA.json();
@@ -616,10 +557,7 @@ describe('Collections - REST', () => {
 
     it('should use depth to limit the number of relationships returned', async () => {
       const response = await fetch(`${url}/api/relationship-a?depth=3`, {
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'get',
       });
       const data = await response.json();
@@ -655,9 +593,126 @@ describe('Collections - REST', () => {
       });
     });
 
-    it('create', async () => {
+    describe('create', () => {
+      it('creates', async () => {
+        const formData = new FormData();
+        formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/image.png')));
+        formData.append('alt', 'test media');
+        formData.append('locale', 'en');
+
+        const response = await fetch(`${url}/api/media`, {
+          body: formData,
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+          method: 'post',
+        });
+
+        const data = await response.json();
+
+        expect(response.status).toBe(201);
+
+        // Check for files
+        expect(await fileExists(path.join(mediaDir, 'image.png'))).toBe(true);
+        expect(await fileExists(path.join(mediaDir, 'image-16x16.png'))).toBe(true);
+        expect(await fileExists(path.join(mediaDir, 'image-320x240.png'))).toBe(true);
+        expect(await fileExists(path.join(mediaDir, 'image-640x480.png'))).toBe(true);
+
+        // Check api response
+        expect(data).toMatchObject({
+          doc: {
+            alt: 'test media',
+            filename: 'image.png',
+            mimeType: 'image/png',
+            sizes: {
+              icon: {
+                filename: 'image-16x16.png',
+                width: 16,
+                height: 16,
+              },
+              mobile: {
+                filename: 'image-320x240.png',
+                width: 320,
+                height: 240,
+              },
+              tablet: {
+                filename: 'image-640x480.png',
+                width: 640,
+                height: 480,
+              },
+            },
+          },
+        });
+      });
+
+      it('creates with same name', async () => {
+        const formData = new FormData();
+        formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/samename.png')));
+        formData.append('alt', 'test media');
+        formData.append('locale', 'en');
+
+        const firstResponse = await fetch(`${url}/api/media`, {
+          body: formData,
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+          method: 'post',
+        });
+
+        expect(firstResponse.status).toBe(201);
+
+        const sameForm = new FormData();
+        sameForm.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/samename.png')));
+        sameForm.append('alt', 'test media');
+        sameForm.append('locale', 'en');
+
+        const response = await fetch(`${url}/api/media`, {
+          body: sameForm,
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+          method: 'post',
+        });
+
+        expect(response.status).toBe(201);
+        const data = await response.json();
+
+        // Check for files
+        expect(await fileExists(path.join(mediaDir, 'samename-1.png'))).toBe(true);
+        expect(await fileExists(path.join(mediaDir, 'samename-1-16x16.png'))).toBe(true);
+        expect(await fileExists(path.join(mediaDir, 'samename-1-320x240.png'))).toBe(true);
+        expect(await fileExists(path.join(mediaDir, 'samename-1-640x480.png'))).toBe(true);
+
+        expect(data).toMatchObject({
+          doc: {
+            alt: 'test media',
+            filename: 'samename-1.png',
+            mimeType: 'image/png',
+            sizes: {
+              icon: {
+                filename: 'samename-1-16x16.png',
+                width: 16,
+                height: 16,
+              },
+              mobile: {
+                filename: 'samename-1-320x240.png',
+                width: 320,
+                height: 240,
+              },
+              tablet: {
+                filename: 'samename-1-640x480.png',
+                width: 640,
+                height: 480,
+              },
+            },
+          },
+        });
+      });
+    });
+
+    it('update', async () => {
       const formData = new FormData();
-      formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/image.png')));
+      formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/update.png')));
       formData.append('alt', 'test media');
       formData.append('locale', 'en');
 
@@ -673,19 +728,54 @@ describe('Collections - REST', () => {
 
       expect(response.status).toBe(201);
 
-      expect(data.doc.alt).not.toBeNull();
-      expect(data.doc.filename).toBe('image.png');
-      expect(data.doc.mimeType).not.toBeNull();
-      expect(data.doc.sizes.icon.filesize).not.toBeLessThan(1);
-      expect(data.doc.sizes.icon.filename).toBe('image-16x16.png');
-      expect(data.doc.sizes.icon.width).toBe(16);
-      expect(data.doc.sizes.icon.height).toBe(16);
-      expect(data.doc.sizes.mobile.filename).toBe('image-320x240.png');
-      expect(data.doc.sizes.mobile.width).toBe(320);
-      expect(data.doc.sizes.mobile.height).toBe(240);
-      expect(data.doc.sizes.tablet.filename).toBe('image-640x480.png');
-      expect(data.doc.sizes.tablet.width).toBe(640);
-      expect(data.doc.sizes.tablet.height).toBe(480);
+      const updateFormData = new FormData();
+      const newAlt = 'my new alt';
+
+      updateFormData.append('filename', data.doc.filename);
+      updateFormData.append('alt', newAlt);
+      const updateResponse = await fetch(`${url}/api/media/${data.doc.id}`, {
+        body: updateFormData,
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+        method: 'put',
+      });
+
+      expect(updateResponse.status).toBe(200);
+
+      const updateResponseData = await updateResponse.json();
+
+      // Check that files weren't affected
+      expect(await fileExists(path.join(mediaDir, 'update.png'))).toBe(true);
+      expect(await fileExists(path.join(mediaDir, 'update-16x16.png'))).toBe(true);
+      expect(await fileExists(path.join(mediaDir, 'update-320x240.png'))).toBe(true);
+      expect(await fileExists(path.join(mediaDir, 'update-640x480.png'))).toBe(true);
+
+      // Check api response
+      expect(updateResponseData).toMatchObject({
+        doc: {
+          alt: newAlt,
+          filename: 'update.png',
+          mimeType: 'image/png',
+          sizes: {
+            icon: {
+              filename: 'update-16x16.png',
+              width: 16,
+              height: 16,
+            },
+            mobile: {
+              filename: 'update-320x240.png',
+              width: 320,
+              height: 240,
+            },
+            tablet: {
+              filename: 'update-640x480.png',
+              width: 640,
+              height: 480,
+            },
+          },
+        },
+      });
     });
 
     it('delete', async () => {
