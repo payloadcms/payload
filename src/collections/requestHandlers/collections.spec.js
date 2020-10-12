@@ -14,6 +14,7 @@ const fileExists = require('../../../tests/api/utils/fileExists');
 const { serverURL: url } = getConfig();
 
 let token = null;
+let headers = null;
 
 let localizedPostID;
 const englishPostDesc = faker.lorem.lines(2);
@@ -35,6 +36,10 @@ describe('Collections - REST', () => {
     const data = await response.json();
 
     ({ token } = data);
+    headers = {
+      Authorization: `JWT ${token}`,
+      'Content-Type': 'application/json',
+    };
 
     done();
   });
@@ -47,10 +52,7 @@ describe('Collections - REST', () => {
           description: englishPostDesc,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -75,10 +77,7 @@ describe('Collections - REST', () => {
           description: 'original description',
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -93,10 +92,7 @@ describe('Collections - REST', () => {
           description: updatedDesc,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'put',
       });
 
@@ -113,10 +109,7 @@ describe('Collections - REST', () => {
           description: spanishPostDesc,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'put',
       });
 
@@ -170,10 +163,7 @@ describe('Collections - REST', () => {
           description: faker.lorem.lines(2),
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -197,10 +187,7 @@ describe('Collections - REST', () => {
           description: desc,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -222,10 +209,7 @@ describe('Collections - REST', () => {
           description: 'desc',
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -235,10 +219,7 @@ describe('Collections - REST', () => {
           description: 'desc',
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -263,10 +244,7 @@ describe('Collections - REST', () => {
           description: 'desc',
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -276,10 +254,7 @@ describe('Collections - REST', () => {
           description: 'desc',
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -303,10 +278,7 @@ describe('Collections - REST', () => {
           description: englishPostDesc,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -316,10 +288,7 @@ describe('Collections - REST', () => {
       expect(docId).not.toBeNull();
 
       const deleteResponse = await fetch(`${url}/api/localized-posts/${docId}`, {
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'delete',
       });
       expect(deleteResponse.status).toBe(200);
@@ -336,10 +305,7 @@ describe('Collections - REST', () => {
           description,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
     }
@@ -379,10 +345,7 @@ describe('Collections - REST', () => {
           description: desc,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -392,10 +355,7 @@ describe('Collections - REST', () => {
           description: desc,
           priority: 1,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
 
@@ -435,8 +395,7 @@ describe('Collections - REST', () => {
             priority: 1,
           }),
           headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
+            ...headers,
             hook: 'beforeChange', // Used by hook
           },
           method: 'post',
@@ -453,10 +412,7 @@ describe('Collections - REST', () => {
             description: 'Original',
             priority: 1,
           }),
-          headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
-          },
+          headers,
           method: 'post',
         });
         const createData = await createResponse.json();
@@ -464,8 +420,7 @@ describe('Collections - REST', () => {
 
         const response = await fetch(`${url}/api/hooks/${id}`, {
           headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
+            ...headers,
             hook: 'beforeDelete', // Used by hook
           },
           method: 'delete',
@@ -487,8 +442,7 @@ describe('Collections - REST', () => {
             priority: 1,
           }),
           headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
+            ...headers,
             hook: 'afterRead', // Used by hook
           },
           method: 'post',
@@ -507,10 +461,7 @@ describe('Collections - REST', () => {
             description: 'Original',
             priority: 1,
           }),
-          headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
-          },
+          headers,
           method: 'post',
         });
         const createData = await createResponse.json();
@@ -521,8 +472,7 @@ describe('Collections - REST', () => {
             description: 'afterChange',
           }),
           headers: {
-            Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
+            ...headers,
             hook: 'afterChange', // Used by hook
           },
           method: 'put',
@@ -573,10 +523,7 @@ describe('Collections - REST', () => {
       // create document a
       const createA = await fetch(`${url}/api/relationship-a`, {
         body: JSON.stringify({}),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
       const createAData = await createA.json();
@@ -585,10 +532,7 @@ describe('Collections - REST', () => {
         body: JSON.stringify({
           post: [createAData.doc.id],
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'post',
       });
       // update a to relate to b
@@ -598,10 +542,7 @@ describe('Collections - REST', () => {
         body: JSON.stringify({
           post: documentB.id,
         }),
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'put',
       });
       const updateAData = await updateA.json();
@@ -616,10 +557,7 @@ describe('Collections - REST', () => {
 
     it('should use depth to limit the number of relationships returned', async () => {
       const response = await fetch(`${url}/api/relationship-a?depth=3`, {
-        headers: {
-          Authorization: `JWT ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         method: 'get',
       });
       const data = await response.json();
