@@ -87,7 +87,8 @@ async function find(args) {
   result = {
     ...result,
     docs: await Promise.all(result.docs.map(async (doc) => {
-      let docRef = doc;
+      let docRef = JSON.stringify(doc);
+      docRef = JSON.parse(docRef);
 
       if (docRef._id) delete docRef._id;
       if (typeof docRef.__v !== 'undefined') delete docRef.__v;

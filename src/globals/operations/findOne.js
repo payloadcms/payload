@@ -65,6 +65,9 @@ async function findOne(args) {
   // 6. Return results
   // /////////////////////////////////////
 
+  doc = JSON.stringify(doc);
+  doc = JSON.parse(doc);
+
   return doc;
 }
 
