@@ -611,10 +611,18 @@ describe('Collections - REST', () => {
 
       expect(response.status).toBe(201);
 
+      // Check for files
+      expect(await fileExists(path.join(mediaDir, 'image.png'))).toBe(true);
+      expect(await fileExists(path.join(mediaDir, 'image-16x16.png'))).toBe(true);
+      expect(await fileExists(path.join(mediaDir, 'image-320x240.png'))).toBe(true);
+      expect(await fileExists(path.join(mediaDir, 'image-640x480.png'))).toBe(true);
+
+      // Check api response
       expect(data.doc.alt).not.toBeNull();
       expect(data.doc.filename).toBe('image.png');
       expect(data.doc.mimeType).not.toBeNull();
       expect(data.doc.sizes.icon.filesize).not.toBeLessThan(1);
+
       expect(data.doc.sizes.icon.filename).toBe('image-16x16.png');
       expect(data.doc.sizes.icon.width).toBe(16);
       expect(data.doc.sizes.icon.height).toBe(16);
