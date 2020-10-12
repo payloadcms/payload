@@ -3,6 +3,7 @@ const path = require('path');
 
 const { NotFound, Forbidden, ErrorDeletingFile } = require('../../errors');
 const executeAccess = require('../../auth/executeAccess');
+const fileExists = require('../../uploads/fileExists');
 
 async function deleteQuery(args) {
   const {
@@ -66,19 +67,24 @@ async function deleteQuery(args) {
 
     const staticPath = path.resolve(this.config.paths.configDir, staticDir);
 
-    fs.unlink(`${staticPath}/${resultToDelete.filename}`, (err) => {
-      if (err) {
-        throw new ErrorDeletingFile();
-      }
-    });
+    const fileToDelete = `${staticPath}/${resultToDelete.filename}`;
+    if (await fileExists(fileToDelete)) {
+      fs.unlink(fileToDelete, (err) => {
+        if (err) {
+          throw new ErrorDeletingFile();
+        }
+      });
+    }
 
     if (resultToDelete.sizes) {
-      Object.values(resultToDelete.sizes).forEach((size) => {
-        fs.unlink(`${staticPath}/${size.filename}`, (err) => {
-          if (err) {
-            throw new ErrorDeletingFile();
-          }
-        });
+      Object.values(resultToDelete.sizes).forEach(async (size) => {
+        if (await fileExists(`${staticPath}/${size.filename}`)) {
+          fs.unlink(`${staticPath}/${size.filename}`, (err) => {
+            if (err) {
+              throw new ErrorDeletingFile();
+            }
+          });
+        }
       });
     }
   }
