@@ -618,20 +618,30 @@ describe('Collections - REST', () => {
       expect(await fileExists(path.join(mediaDir, 'image-640x480.png'))).toBe(true);
 
       // Check api response
-      expect(data.doc.alt).not.toBeNull();
-      expect(data.doc.filename).toBe('image.png');
-      expect(data.doc.mimeType).not.toBeNull();
-      expect(data.doc.sizes.icon.filesize).not.toBeLessThan(1);
-
-      expect(data.doc.sizes.icon.filename).toBe('image-16x16.png');
-      expect(data.doc.sizes.icon.width).toBe(16);
-      expect(data.doc.sizes.icon.height).toBe(16);
-      expect(data.doc.sizes.mobile.filename).toBe('image-320x240.png');
-      expect(data.doc.sizes.mobile.width).toBe(320);
-      expect(data.doc.sizes.mobile.height).toBe(240);
-      expect(data.doc.sizes.tablet.filename).toBe('image-640x480.png');
-      expect(data.doc.sizes.tablet.width).toBe(640);
-      expect(data.doc.sizes.tablet.height).toBe(480);
+      expect(data).toMatchObject({
+        doc: {
+          alt: 'test media',
+          filename: 'image.png',
+          mimeType: 'image/png',
+          sizes: {
+            icon: {
+              filename: 'image-16x16.png',
+              width: 16,
+              height: 16,
+            },
+            mobile: {
+              filename: 'image-320x240.png',
+              width: 320,
+              height: 240,
+            },
+            tablet: {
+              filename: 'image-640x480.png',
+              width: 640,
+              height: 480,
+            },
+          },
+        },
+      });
     });
 
     it('update', async () => {

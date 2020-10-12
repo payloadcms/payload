@@ -43,11 +43,6 @@ module.exports = {
       type: 'text',
       required: true,
       localized: true,
-      hooks: {
-        afterRead: [
-          ({ value }) => `${value} alt`,
-        ],
-      },
     },
     {
       name: 'sizes',
