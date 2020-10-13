@@ -33,7 +33,7 @@ const numeric = [
   },
   {
     label: 'is less than or equal to',
-    value: 'less_than_equals',
+    value: 'less_than_equal',
   },
   {
     label: 'is greater than or equal to',
