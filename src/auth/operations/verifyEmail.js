@@ -18,6 +18,7 @@ async function verifyEmail(args) {
   if (user && user._verified === true) throw new APIError('Already activated', httpStatus.ACCEPTED);
 
   user._verified = true;
+  user._verificationToken = undefined;
 
   await user.save();
   return true;
