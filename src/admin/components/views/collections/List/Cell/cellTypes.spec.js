@@ -66,6 +66,13 @@ describe('Cell Types', () => {
       const el = container.querySelector('span');
       expect(el.textContent).toMatch(dateMatch);
     });
+
+    it('handles undefined', () => {
+      const timeStamp = undefined;
+      const { container } = render(<DateCell data={timeStamp} />);
+      const el = container.querySelector('span');
+      expect(el.textContent).toBe('');
+    });
   });
 
   describe('Checkbox', () => {

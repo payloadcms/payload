@@ -31,8 +31,8 @@ const DateTime = (props) => {
   let dateTimeFormat = inputDateTimeFormat;
 
   if (!dateTimeFormat) {
-    if (useTime && useDate) dateTimeFormat = 'MMM d, yyy h:mma';
-    else if (useTime) dateTimeFormat = 'h:mma';
+    if (useTime && useDate) dateTimeFormat = 'MMM d, yyy h:mm a';
+    else if (useTime) dateTimeFormat = 'h:mm a';
     else dateTimeFormat = 'MMM d, yyy';
   }
 
@@ -102,7 +102,10 @@ DateTime.propTypes = {
   maxTime: PropTypes.instanceOf(Date),
   timeIntervals: PropTypes.number,
   timeFormat: PropTypes.string,
-  value: PropTypes.instanceOf(Date),
+  value: PropTypes.oneOfType([
+    PropTypes.instanceOf(Date),
+    PropTypes.string,
+  ]),
   onChange: PropTypes.func,
   admin: PropTypes.shape({
     readOnly: PropTypes.bool,

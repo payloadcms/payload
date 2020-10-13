@@ -4,12 +4,16 @@ import format from 'date-fns/format';
 
 const DateCell = ({ data }) => (
   <span>
-    {format(new Date(data), 'MMMM do yyyy, h:mm a')}
+    {data && format(new Date(data), 'MMMM do yyyy, h:mm a')}
   </span>
 );
 
+DateCell.defaultProps = {
+  data: undefined,
+};
+
 DateCell.propTypes = {
-  data: PropTypes.string.isRequired,
+  data: PropTypes.string,
 };
 
 export default DateCell;

@@ -186,13 +186,13 @@ const DefaultEditView = (props) => {
                         {data.updatedAt && (
                           <li>
                             <div className={`${baseClass}__label`}>Last Modified</div>
-                            <div>{format(new Date(data.updatedAt), 'MMMM do yyyy, h:mma')}</div>
+                            <div>{format(new Date(data.updatedAt), 'MMMM do yyyy, h:mm a')}</div>
                           </li>
                         )}
                         {data.createdAt && (
                           <li>
                             <div className={`${baseClass}__label`}>Created</div>
-                            <div>{format(new Date(data.createdAt), 'MMMM do yyyy, h:mma')}</div>
+                            <div>{format(new Date(data.createdAt), 'MMMM do yyyy, h:mm a')}</div>
                           </li>
                         )}
                       </React.Fragment>
