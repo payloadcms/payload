@@ -1,5 +1,4 @@
 require('isomorphic-fetch');
-const faker = require('faker');
 const { email, password } = require('../../tests/api/credentials');
 
 /**
@@ -99,7 +98,7 @@ describe('Users REST API', () => {
   it('should allow a user to be created', async () => {
     const response = await fetch(`${url}/api/admins`, {
       body: JSON.stringify({
-        email: `${faker.name.firstName()}@test.com`,
+        email: 'name@test.com',
         password,
         roles: ['editor'],
       }),

@@ -1,5 +1,5 @@
 require('isomorphic-fetch');
-const faker = require('faker');
+const uuid = require('uuid').v4;
 const getConfig = require('../../utilities/getConfig');
 const { email, password } = require('../../../tests/api/credentials');
 
@@ -9,8 +9,8 @@ let token = null;
 let headers = null;
 
 let localizedPostID;
-const englishPostDesc = faker.lorem.lines(2);
-const spanishPostDesc = faker.lorem.lines(2);
+const englishPostDesc = 'english description';
+const spanishPostDesc = 'spanish description';
 
 describe('Collections - REST', () => {
   beforeAll(async (done) => {
@@ -40,7 +40,7 @@ describe('Collections - REST', () => {
     it('should allow a localized post to be created', async () => {
       const response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: faker.name.firstName(),
+          title: 'title',
           description: englishPostDesc,
           priority: 1,
         }),
@@ -65,7 +65,7 @@ describe('Collections - REST', () => {
     it('should allow updating an existing post', async () => {
       const createResponse = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: faker.name.firstName(),
+          title: 'title',
           description: 'original description',
           priority: 1,
         }),
@@ -80,7 +80,7 @@ describe('Collections - REST', () => {
       const updatedDesc = 'updated description';
       const response = await fetch(`${url}/api/localized-posts/${id}`, {
         body: JSON.stringify({
-          title: 'asdf',
+          title: 'title',
           description: updatedDesc,
           priority: 1,
         }),
@@ -97,7 +97,7 @@ describe('Collections - REST', () => {
     it('should allow a Spanish locale to be added to an existing post', async () => {
       const response = await fetch(`${url}/api/localized-posts/${localizedPostID}?locale=es`, {
         body: JSON.stringify({
-          title: `Spanish-${faker.name.firstName()}`,
+          title: 'title',
           description: spanishPostDesc,
           priority: 1,
         }),
@@ -151,8 +151,8 @@ describe('Collections - REST', () => {
     it('should allow querying by id', async () => {
       const response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: faker.name.firstName(),
-          description: faker.lorem.lines(2),
+          title: 'title',
+          description: 'description',
           priority: 1,
         }),
         headers,
@@ -175,7 +175,7 @@ describe('Collections - REST', () => {
       const desc = 'query test';
       const response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: faker.name.firstName(),
+          title: 'title',
           description: desc,
           priority: 1,
         }),
@@ -266,7 +266,7 @@ describe('Collections - REST', () => {
     it('should allow a post to be deleted', async () => {
       const response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: faker.name.firstName(),
+          title: 'title',
           description: englishPostDesc,
           priority: 1,
         }),
@@ -293,7 +293,7 @@ describe('Collections - REST', () => {
     async function createPost(title, description) {
       await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: title || faker.name.firstName(),
+          title: title || uuid(),
           description,
           priority: 1,
         }),

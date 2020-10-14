@@ -141,7 +141,6 @@
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-react": "^7.18.0",
     "eslint-plugin-react-hooks": "^2.3.0",
-    "faker": "^4.1.0",
     "form-data": "^3.0.0",
     "graphql-request": "^2.0.0",
     "nodemon": "^1.19.4",
