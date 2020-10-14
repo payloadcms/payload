@@ -1,10 +1,6 @@
 require('isomorphic-fetch');
-const faker = require('faker');
-const { email, password } = require('../../tests/api/credentials');
-
-/**
- * @jest-environment node
- */
+const { MongoClient } = require('mongodb');
+const { email, password, mongo: { url: mongoURL, port: mongoPort, name: mongoDBName } } = require('../../tests/api/credentials');
 
 const getConfig = require('../utilities/getConfig');
 
@@ -99,7 +95,7 @@ describe('Users REST API', () => {
   it('should allow a user to be created', async () => {
     const response = await fetch(`${url}/api/admins`, {
       body: JSON.stringify({
-        email: `${faker.name.firstName()}@test.com`,
+        email: 'name@test.com',
         password,
         roles: ['editor'],
       }),
@@ -121,5 +117,44 @@ describe('Users REST API', () => {
     expect(doc).toHaveProperty('email');
     expect(doc).toHaveProperty('createdAt');
     expect(doc).toHaveProperty('roles');
+  });
+
+  it('should allow verification of a user', async () => {
+    const emailToVerify = 'verify@me.com';
+    const response = await fetch(`${url}/api/public-users`, {
+      body: JSON.stringify({
+        email: emailToVerify,
+        password,
+        roles: ['editor'],
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'post',
+    });
+
+    expect(response.status).toBe(201);
+    const client = await MongoClient.connect(`${mongoURL}:${mongoPort}`);
+    const db = client.db(mongoDBName);
+    const userResult = await db.collection('public-users').findOne({ email: emailToVerify });
+    const { _verified, _verificationToken } = userResult;
+
+    expect(_verified).toBe(false);
+    expect(_verificationToken).not.toBeUndefined();
+
+    const verificationResponse = await fetch(`${url}/api/public-users/verify/${_verificationToken}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'post',
+    });
+
+    expect(verificationResponse.status).toBe(200);
+
+    const afterVerifyResult = await db.collection('public-users').findOne({ email: emailToVerify });
+    const { _verified: afterVerified, _verificationToken: afterToken } = afterVerifyResult;
+    expect(afterVerified).toBe(true);
+    expect(afterToken).toBeUndefined();
   });
 });

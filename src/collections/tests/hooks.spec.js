@@ -1,5 +1,4 @@
 require('isomorphic-fetch');
-const faker = require('faker');
 const getConfig = require('../../utilities/getConfig');
 const { email, password } = require('../../../tests/api/credentials');
 
@@ -37,7 +36,7 @@ describe('Collections - REST', () => {
       it('beforeChange', async () => {
         const response = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
-            title: faker.name.firstName(),
+            title: 'title',
             description: 'Original',
             priority: 1,
           }),
@@ -55,7 +54,7 @@ describe('Collections - REST', () => {
       it('beforeDelete', async () => {
         const createResponse = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
-            title: faker.name.firstName(),
+            title: 'title',
             description: 'Original',
             priority: 1,
           }),
@@ -84,7 +83,7 @@ describe('Collections - REST', () => {
       it('afterRead', async () => {
         const response = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
-            title: faker.name.firstName(),
+            title: 'title',
             description: 'afterRead',
             priority: 1,
           }),
@@ -104,7 +103,7 @@ describe('Collections - REST', () => {
       it('afterChange', async () => {
         const createResponse = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
-            title: faker.name.firstName(),
+            title: 'title',
             description: 'Original',
             priority: 1,
           }),
@@ -133,7 +132,7 @@ describe('Collections - REST', () => {
       it('afterDelete', async () => {
         const createResponse = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
-            title: faker.name.firstName(),
+            title: 'title',
             description: 'Original',
             priority: 1,
           }),
