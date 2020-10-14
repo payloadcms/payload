@@ -143,6 +143,7 @@
     "eslint-plugin-react-hooks": "^2.3.0",
     "form-data": "^3.0.0",
     "graphql-request": "^2.0.0",
+    "mongodb": "^3.6.2",
     "nodemon": "^1.19.4",
     "webpack-cli": "^4.0.0"
   },
