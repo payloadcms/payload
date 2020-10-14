@@ -141,6 +141,7 @@ const Blocks = (props) => {
       style={style}
       width={width}
       minRows={minRows}
+      required={required}
     />
   );
 };
@@ -207,6 +208,7 @@ const RenderBlocks = React.memo((props) => {
     width,
     minRows,
     maxRows,
+    required,
   } = props;
 
   return (
@@ -275,13 +277,13 @@ const RenderBlocks = React.memo((props) => {
 
                 return null;
               })}
-              {rows.length < minRows && (
+              {(rows.length < minRows || (required && rows.length === 0)) && (
                 <Banner type="error">
                   This field requires at least
                   {' '}
-                  {minRows}
-                  {' '}
-                  {labels.plural}
+                  {minRows
+                    ? `${minRows} ${labels.plural}`
+                    : `1 ${labels.singular}`}
                 </Banner>
               )}
               {(rows.length === 0 && readOnly) && (
@@ -345,6 +347,7 @@ RenderBlocks.defaultProps = {
   width: undefined,
   maxRows: undefined,
   minRows: undefined,
+  required: false,
 };
 
 RenderBlocks.propTypes = {
@@ -378,6 +381,7 @@ RenderBlocks.propTypes = {
   width: PropTypes.string,
   maxRows: PropTypes.number,
   minRows: PropTypes.number,
+  required: PropTypes.bool,
 };
 
 export default withCondition(Blocks);

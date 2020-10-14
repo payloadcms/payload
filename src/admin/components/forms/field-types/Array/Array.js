@@ -120,6 +120,7 @@ const ArrayFieldType = (props) => {
       readOnly={readOnly}
       minRows={minRows}
       maxRows={maxRows}
+      required={required}
     />
   );
 };
@@ -183,6 +184,7 @@ const RenderArray = React.memo((props) => {
     width,
     minRows,
     maxRows,
+    required,
   } = props;
 
   return (
@@ -227,14 +229,13 @@ const RenderArray = React.memo((props) => {
                   permissions={permissions.fields}
                 />
               ))}
-              {rows.length < minRows && (
+              {(rows.length < minRows || (required && rows.length === 0)) && (
                 <Banner type="error">
                   This field requires at least
                   {' '}
-                  {minRows}
-                  {' '}
-                  {labels.plural}
-                  .
+                  {minRows
+                    ? `${minRows} ${labels.plural}`
+                    : `1 ${labels.singular}`}
                 </Banner>
               )}
               {(rows.length === 0 && readOnly) && (
@@ -283,6 +284,7 @@ RenderArray.defaultProps = {
   width: undefined,
   maxRows: undefined,
   minRows: undefined,
+  required: false,
 };
 
 RenderArray.propTypes = {
@@ -315,6 +317,7 @@ RenderArray.propTypes = {
   width: PropTypes.string,
   maxRows: PropTypes.number,
   minRows: PropTypes.number,
+  required: PropTypes.bool,
 };
 
 export default withCondition(ArrayFieldType);
