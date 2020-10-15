@@ -88,7 +88,7 @@ const Routes = () => {
                         path={`${match.url}/${collection.slug}/verify/:token`}
                         exact
                       >
-                        <Verify />
+                        <Verify collection={collection} />
                       </Route>
                     );
                   }

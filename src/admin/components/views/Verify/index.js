@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { useParams } from 'react-router-dom';
 import Logo from '../../graphics/Logo';
 import MinimalTemplate from '../../templates/Minimal';
 import Button from '../../elements/Button';
@@ -12,23 +13,23 @@ import './index.scss';
 
 const baseClass = 'verify';
 
-const Verify = () => {
+const Verify = ({ collection }) => {
+  const { slug: collectionSlug } = collection;
+
   const { user } = useAuthentication();
   const { token } = useParams();
-  const { pathname } = useLocation();
   const { serverURL, routes: { admin: adminRoute }, admin: { user: adminUser } } = useConfig();
 
-  const collectionToVerify = pathname.split('/')?.[2];
-  const isAdminUser = collectionToVerify === adminUser;
+  const isAdminUser = collectionSlug === adminUser;
   const [verifyResult, setVerifyResult] = useState(null);
 
   useEffect(() => {
     async function verifyToken() {
-      const result = await fetch(`${serverURL}/api/${collectionToVerify}/verify/${token}`, { method: 'POST' });
+      const result = await fetch(`${serverURL}/api/${collectionSlug}/verify/${token}`, { method: 'POST' });
       setVerifyResult(result);
     }
     verifyToken();
-  }, [setVerifyResult, collectionToVerify, pathname, serverURL, token]);
+  }, [setVerifyResult, collectionSlug, serverURL, token]);
 
   if (user) {
     return <Login />;
@@ -64,5 +65,11 @@ const Verify = () => {
       )}
     </MinimalTemplate>
   );
+};
+
+Verify.propTypes = {
+  collection: PropTypes.shape({
+    slug: PropTypes.string,
+  }).isRequired,
 };
 export default Verify;
