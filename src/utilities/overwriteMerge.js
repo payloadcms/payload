@@ -1,3 +1,3 @@
-const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
+const overwriteMerge = (_, sourceArray) => sourceArray;
 
 module.exports = overwriteMerge;

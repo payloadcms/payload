@@ -3,56 +3,57 @@ const { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } = require('graphql')
 const formatName = require('../utilities/formatName');
 
 const buildFields = (label, fieldsToBuild) => fieldsToBuild.reduce((builtFields, field) => {
-  if (field.name) {
-    const fieldName = formatName(field.name);
+  if (!field.hidden) {
+    if (field.name) {
+      const fieldName = formatName(field.name);
 
-    const objectTypeFields = ['create', 'read', 'update', 'delete'].reduce((operations, operation) => {
-      const capitalizedOperation = operation.charAt(0).toUpperCase() + operation.slice(1);
+      const objectTypeFields = ['create', 'read', 'update', 'delete'].reduce((operations, operation) => {
+        const capitalizedOperation = operation.charAt(0).toUpperCase() + operation.slice(1);
+
+        return {
+          ...operations,
+          [operation]: {
+            type: new GraphQLObjectType({
+              name: `${label}_${fieldName}_${capitalizedOperation}`,
+              fields: {
+                permission: {
+                  type: new GraphQLNonNull(GraphQLBoolean),
+                },
+              },
+            }),
+          },
+        };
+      }, {});
+
+      if (field.fields) {
+        objectTypeFields.fields = {
+          type: new GraphQLObjectType({
+            name: `${label}_${fieldName}_Fields`,
+            fields: buildFields(`${label}_${fieldName}`, field.fields),
+          }),
+        };
+      }
 
       return {
-        ...operations,
-        [operation]: {
+        ...builtFields,
+        [field.name]: {
           type: new GraphQLObjectType({
-            name: `${label}_${fieldName}_${capitalizedOperation}`,
-            fields: {
-              permission: {
-                type: new GraphQLNonNull(GraphQLBoolean),
-              },
-            },
+            name: `${label}_${fieldName}`,
+            fields: objectTypeFields,
           }),
         },
       };
-    }, {});
-
-    if (field.fields) {
-      objectTypeFields.fields = {
-        type: new GraphQLObjectType({
-          name: `${label}_${fieldName}_Fields`,
-          fields: buildFields(`${label}_${fieldName}`, field.fields),
-        }),
-      };
     }
 
-    return {
-      ...builtFields,
-      [field.name]: {
-        type: new GraphQLObjectType({
-          name: `${label}_${fieldName}`,
-          fields: objectTypeFields,
-        }),
-      },
-    };
+    if (!field.name && field.fields) {
+      const subFields = buildFields(label, field.fields);
+
+      return {
+        ...builtFields,
+        ...subFields,
+      };
+    }
   }
-
-  if (!field.name && field.fields) {
-    const subFields = buildFields(label, field.fields);
-
-    return {
-      ...builtFields,
-      ...subFields,
-    };
-  }
-
   return builtFields;
 }, {});
 

@@ -268,25 +268,27 @@ const buildWhereInputType = (name, fields, parentName) => {
   };
 
   const fieldTypes = fields.reduce((schema, field) => {
-    const getFieldSchema = fieldToSchemaMap[field.type];
+    if (!field.hidden) {
+      const getFieldSchema = fieldToSchemaMap[field.type];
 
-    if (getFieldSchema) {
-      const fieldSchema = getFieldSchema(field);
+      if (getFieldSchema) {
+        const fieldSchema = getFieldSchema(field);
 
-      if (Array.isArray(fieldSchema)) {
+        if (Array.isArray(fieldSchema)) {
+          return {
+            ...schema,
+            ...(fieldSchema.reduce((subFields, subField) => ({
+              ...subFields,
+              [formatName(subField.key)]: subField.type,
+            }), {})),
+          };
+        }
+
         return {
           ...schema,
-          ...(fieldSchema.reduce((subFields, subField) => ({
-            ...subFields,
-            [formatName(subField.key)]: subField.type,
-          }), {})),
+          [formatName(field.name)]: fieldSchema,
         };
       }
-
-      return {
-        ...schema,
-        [formatName(field.name)]: fieldSchema,
-      };
     }
 
     return schema;

@@ -424,19 +424,21 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
   const objectSchema = {
     name,
     fields: () => fields.reduce((schema, field) => {
-      const fieldSchema = fieldToSchemaMap[field.type];
-      if (fieldSchema) {
-        if (field.name) {
+      if (!field.hidden) {
+        const fieldSchema = fieldToSchemaMap[field.type];
+        if (fieldSchema) {
+          if (field.name) {
+            return {
+              ...schema,
+              [formatName(field.name)]: fieldSchema(field),
+            };
+          }
+
           return {
             ...schema,
-            [formatName(field.name)]: fieldSchema(field),
+            ...fieldSchema(field),
           };
         }
-
-        return {
-          ...schema,
-          ...fieldSchema(field),
-        };
       }
 
       return schema;

@@ -118,22 +118,24 @@ function buildMutationInputType(name, fields, parentName, forceNullable = false)
   };
 
   const fieldTypes = fields.reduce((schema, field) => {
-    const getFieldSchema = fieldToSchemaMap[field.type];
+    if (!field.hidden) {
+      const getFieldSchema = fieldToSchemaMap[field.type];
 
-    if (getFieldSchema) {
-      const fieldSchema = getFieldSchema(field);
+      if (getFieldSchema) {
+        const fieldSchema = getFieldSchema(field);
 
-      if (Array.isArray(fieldSchema)) {
-        return fieldSchema.reduce((acc, subField, i) => ({
-          ...acc,
-          [field.fields[i].name]: subField,
-        }), schema);
+        if (Array.isArray(fieldSchema)) {
+          return fieldSchema.reduce((acc, subField, i) => ({
+            ...acc,
+            [field.fields[i].name]: subField,
+          }), schema);
+        }
+
+        return {
+          ...schema,
+          [field.name]: fieldSchema,
+        };
       }
-
-      return {
-        ...schema,
-        [field.name]: fieldSchema,
-      };
     }
 
     return schema;
