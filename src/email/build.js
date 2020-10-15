@@ -7,10 +7,15 @@ async function buildEmail() {
     return mockAccount;
   }
 
-  const email = {
-    transport: nodemailer.createTransport(this.config.email.transport),
-    account: this.config.email,
-  };
+  const email = { ...this.config.email };
+
+  if (this.config.email.transport) {
+    email.transport = this.config.email.transport;
+  }
+
+  if (this.config.email.transportOptions) {
+    email.transport = nodemailer.createTransport(this.config.email.transportOptions);
+  }
 
   try {
     await email.transport.verify();

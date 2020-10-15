@@ -8,8 +8,8 @@ const mockEmailHandler = async (emailConfig) => {
     host: 'smtp.ethereal.email',
     port: 587,
     secure: false,
-    fromName: 'John Doe',
-    fromAddress: 'john.doe@payloadcms.com',
+    fromName: emailConfig.fromName || 'Payload CMS',
+    fromAddress: emailConfig.fromAddress || 'info@payloadcms.com',
     auth: {
       user: testAccount.user,
       pass: testAccount.pass,
