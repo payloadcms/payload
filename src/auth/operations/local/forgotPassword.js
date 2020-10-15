@@ -4,7 +4,7 @@ async function forgotPassword(options) {
     data,
     expiration,
     disableEmail,
-    generateEmailHTML,
+    req,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -15,7 +15,11 @@ async function forgotPassword(options) {
     overrideAccess: true,
     disableEmail,
     expiration,
-    generateEmailHTML,
+    req: {
+      ...req,
+      payloadAPI: 'local',
+      payload: this,
+    },
   });
 }
 

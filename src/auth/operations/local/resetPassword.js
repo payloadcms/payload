@@ -2,7 +2,7 @@ async function resetPassword(options) {
   const {
     collection: collectionSlug,
     data,
-    req,
+    req = {},
     res,
   } = options;
 

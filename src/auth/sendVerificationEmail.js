@@ -12,20 +12,37 @@ function sendVerificationEmail(args) {
   } = args;
 
   if (!disableEmail) {
-    const url = collectionConfig.auth.generateVerificationUrl
-      ? `${config.serverURL}${collectionConfig.auth.generateVerificationUrl(req, user._verificationToken)}`
-      : 'asdfasdf'; // TODO: point to payload view that verifies
-    const html = `Thank you for created an account.
-    Please click on the following link, or paste this into your browser to complete the process:
-    <a href="${url}">
-    ${url}
-    </a>
-    If you did not request this, please ignore this email and your password will remain unchanged.`;
+    const defaultVerificationURL = `${config.serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${user._verificationToken}`;
+
+    let html = `A new account has just been created for you to access <a href="${config.serverURL}">${config.serverURL}</a>.
+    Please click on the following link or paste the URL below into your browser to verify your email:
+    <a href="${defaultVerificationURL}">${defaultVerificationURL}</a><br>
+    After verifying your email, you will be able to log in successfully.`;
+
+    // Allow config to override email content
+    if (typeof collectionConfig.auth.verify.generateEmailHTML === 'function') {
+      html = collectionConfig.auth.verify.generateEmailHTML({
+        req,
+        token: user._verificationToken,
+        user,
+      });
+    }
+
+    let subject = 'Verify your email';
+
+    // Allow config to override email subject
+    if (typeof collectionConfig.auth.verify.generateEmailSubject === 'function') {
+      subject = collectionConfig.auth.verify.generateEmailSubject({
+        req,
+        token: user._verificationToken,
+        email: user.email,
+      });
+    }
 
     sendEmail({
       from: `"${config.email.fromName}" <${config.email.fromAddress}>`,
       to: user.email,
-      subject: 'Verify Email',
+      subject,
       html,
     });
   }

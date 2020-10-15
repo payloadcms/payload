@@ -7,6 +7,7 @@ async function create(options) {
     data,
     user,
     overrideAccess = true,
+    disableVerificationEmail,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -16,6 +17,7 @@ async function create(options) {
     data,
     collection,
     overrideAccess,
+    disableVerificationEmail,
     req: {
       user,
       payloadAPI: 'local',

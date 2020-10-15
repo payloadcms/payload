@@ -25,6 +25,7 @@ async function create(args) {
       locale,
       fallbackLocale,
     },
+    disableVerificationEmail,
     depth,
     overrideAccess,
   } = args;
@@ -205,7 +206,7 @@ async function create(args) {
   // 10. Send verification email if applicable
   // /////////////////////////////////////
 
-  if (collectionConfig.auth && collectionConfig.auth.emailVerification) {
+  if (collectionConfig.auth && collectionConfig.auth.emailVerification && !disableVerificationEmail) {
     sendVerificationEmail({
       config: this.config,
       sendEmail: this.sendEmail,

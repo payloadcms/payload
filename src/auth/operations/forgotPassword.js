@@ -27,10 +27,12 @@ async function forgotPassword(args) {
   const {
     collection: {
       Model,
+      config: collectionConfig,
     },
     data,
     disableEmail,
     expiration,
+    req,
   } = options;
 
   let token = crypto.randomBytes(20);
@@ -45,6 +47,8 @@ async function forgotPassword(args) {
 
   await user.save();
 
+  const userJSON = user.toJSON({ virtuals: true });
+
   if (!disableEmail) {
     let html = `You are receiving this because you (or someone else) have requested the reset of the password for your account.
     Please click on the following link, or paste this into your browser to complete the process:
@@ -53,12 +57,28 @@ async function forgotPassword(args) {
     </a>
     If you did not request this, please ignore this email and your password will remain unchanged.`;
 
-    if (args.generateEmailHTML) html = args.generateEmailHTML(token);
+    if (typeof collectionConfig.auth.forgotPassword.generateEmailHTML === 'function') {
+      html = collectionConfig.auth.forgotPassword.generateEmailHTML({
+        req,
+        token,
+        user: userJSON,
+      });
+    }
+
+    let subject = 'Reset your password';
+
+    if (typeof collectionConfig.auth.forgotPassword.generateEmailSubject === 'function') {
+      subject = collectionConfig.auth.forgotPassword.generateEmailSubject({
+        req,
+        token,
+        user: userJSON,
+      });
+    }
 
     email({
       from: `"${config.email.fromName}" <${config.email.fromAddress}>`,
       to: data.email,
-      subject: 'Password Reset',
+      subject,
       html,
     });
   }
