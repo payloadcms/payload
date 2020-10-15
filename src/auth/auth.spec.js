@@ -141,7 +141,7 @@ describe('Users REST API', () => {
     const { _verified, _verificationToken } = userResult;
 
     expect(_verified).toBe(false);
-    expect(_verificationToken).not.toBeUndefined();
+    expect(_verificationToken).toBeDefined();
 
     const verificationResponse = await fetch(`${url}/api/public-users/verify/${_verificationToken}`, {
       headers: {
@@ -158,49 +158,75 @@ describe('Users REST API', () => {
     expect(afterToken).toBeUndefined();
   });
 
-  it('should lock the user after too many attempts', async () => {
+  describe('Account Locking', () => {
     const userEmail = 'lock@me.com';
-
-    const createResponse = await fetch(`${url}/api/admins`, {
-      body: JSON.stringify({
-        email: userEmail,
-        password,
-      }),
-      headers: {
-        Authorization: `JWT ${token}`,
-        'Content-Type': 'application/json',
-      },
-      method: 'post',
+    let db;
+    beforeAll(async () => {
+      const client = await MongoClient.connect(`${mongoURL}:${mongoPort}`);
+      db = client.db(mongoDBName);
     });
 
-    expect(createResponse.status).toBe(201);
+    it('should lock the user after too many attempts', async () => {
+      await fetch(`${url}/api/admins`, {
+        body: JSON.stringify({
+          email: userEmail,
+          password,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
 
-    console.log('token', token);
+      const tryLogin = () => fetch(`${url}/api/admins/login`, {
+        body: JSON.stringify({
+          email: userEmail,
+          password: 'bad',
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
 
-    const tryLogin = () => fetch(`${url}/api/admins/login`, {
-      body: JSON.stringify({
-        email: userEmail,
-        password: 'bad',
-      }),
-      headers: {
-        Authorization: `JWT ${token}`,
-        'Content-Type': 'application/json',
-      },
-      method: 'post',
+      await tryLogin();
+      await tryLogin();
+      await tryLogin();
+      await tryLogin();
+      await tryLogin();
+
+      const userResult = await db.collection('admins').findOne({ email: userEmail });
+      const { loginAttempts, lockUntil } = userResult;
+
+      expect(loginAttempts).toBe(5);
+      expect(lockUntil).toBeDefined();
     });
 
-    await tryLogin();
-    await tryLogin();
-    await tryLogin();
-    await tryLogin();
-    await tryLogin();
-    await tryLogin();
+    it('should unlock account once lockUntil period is over', async () => {
+      await db.collection('admins').findOneAndUpdate(
+        { email: userEmail },
+        { $set: { lockUntil: Date.now() - (605 * 1000) } },
+      );
 
-    const client = await MongoClient.connect(`${mongoURL}:${mongoPort}`);
-    const db = client.db(mongoDBName);
-    const userResult = await db.collection('admins').findOne({ email: userEmail });
-    const { lockUntil } = userResult;
+      await fetch(`${url}/api/admins/login`, {
+        body: JSON.stringify({
+          email: userEmail,
+          password,
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      });
 
-    expect(lockUntil).not.toBeUndefined();
+      const userResult = await db.collection('admins').findOne({ email: userEmail });
+      const { loginAttempts, lockUntil } = userResult;
+
+      expect(loginAttempts).toBe(0);
+      expect(lockUntil).toBeUndefined();
+    });
   });
 });
