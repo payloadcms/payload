@@ -29,6 +29,7 @@ const SelectExistingUploadModal = (props) => {
   const [fields, setFields] = useState(collection.fields);
   const [listControls, setListControls] = useState({});
   const [page, setPage] = useState(null);
+  const [sort, setSort] = useState(null);
 
   const classes = [
     baseClass,
@@ -49,9 +50,10 @@ const SelectExistingUploadModal = (props) => {
 
     if (page) params.page = page;
     if (listControls?.where) params.where = listControls.where;
+    if (sort) params.sort = sort;
 
     setParams(params);
-  }, [setParams, page, listControls]);
+  }, [setParams, page, listControls, sort]);
 
 
   return (
@@ -77,12 +79,14 @@ const SelectExistingUploadModal = (props) => {
             />
           </header>
           <ListControls
-            enableColumns={false}
             handleChange={setListControls}
             collection={{
               ...collection,
               fields,
             }}
+            enableColumns={false}
+            setSort={setSort}
+            enableSort
           />
           <UploadGallery
             docs={data?.docs}
