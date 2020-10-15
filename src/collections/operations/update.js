@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const deepmerge = require('deepmerge');
 const path = require('path');
 
+const removeInternalFields = require('../../utilities/removeInternalFields');
 const overwriteMerge = require('../../utilities/overwriteMerge');
 const executeAccess = require('../../auth/executeAccess');
 const { NotFound, Forbidden, APIError, FileUploadError } = require('../../errors');
@@ -25,6 +26,7 @@ async function update(args) {
       fallbackLocale,
     },
     overrideAccess,
+    showHiddenFields,
   } = args;
 
   if (!id) {
@@ -227,6 +229,7 @@ async function update(args) {
     id,
     depth,
     overrideAccess,
+    showHiddenFields,
   });
 
   // /////////////////////////////////////
@@ -247,6 +250,7 @@ async function update(args) {
   // 13. Return updated document
   // /////////////////////////////////////
 
+  doc = removeInternalFields(doc);
   doc = JSON.stringify(doc);
   doc = JSON.parse(doc);
 

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
+const removeInternalFields = require('../../utilities/removeInternalFields');
 const { NotFound, Forbidden, ErrorDeletingFile } = require('../../errors');
 const executeAccess = require('../../auth/executeAccess');
 const fileExists = require('../../uploads/fileExists');
@@ -19,6 +20,7 @@ async function deleteQuery(args) {
       fallbackLocale,
     },
     overrideAccess,
+    showHiddenFields,
   } = args;
 
   // /////////////////////////////////////
@@ -112,6 +114,7 @@ async function deleteQuery(args) {
     req,
     depth,
     overrideAccess,
+    showHiddenFields,
   });
 
   // /////////////////////////////////////
@@ -127,6 +130,10 @@ async function deleteQuery(args) {
   // /////////////////////////////////////
   // 8. Return results
   // /////////////////////////////////////
+
+  result = removeInternalFields(result);
+  result = JSON.stringify(result);
+  result = JSON.parse(result);
 
   return result;
 }

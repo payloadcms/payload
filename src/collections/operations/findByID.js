@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 const memoize = require('micro-memoize');
+const removeInternalFields = require('../../utilities/removeInternalFields');
 const { Forbidden, NotFound } = require('../../errors');
 const executeAccess = require('../../auth/executeAccess');
 
@@ -18,6 +19,7 @@ async function findByID(args) {
     disableErrors,
     currentDepth,
     overrideAccess,
+    showHiddenFields,
   } = args;
 
   // /////////////////////////////////////
@@ -73,14 +75,7 @@ async function findByID(args) {
     return null;
   }
 
-  if (result._id) {
-    result.id = result._id;
-    delete result._id;
-  }
-
-  if (typeof result.__v !== 'undefined') {
-    delete result.__v;
-  }
+  result.id = result._id;
 
   // /////////////////////////////////////
   // 3. Execute beforeRead collection hook
@@ -110,6 +105,7 @@ async function findByID(args) {
     currentDepth,
     overrideAccess,
     reduceLocales: true,
+    showHiddenFields,
   });
 
   // /////////////////////////////////////
@@ -130,6 +126,7 @@ async function findByID(args) {
   // 6. Return results
   // /////////////////////////////////////
 
+  result = removeInternalFields(result);
   result = JSON.stringify(result);
   result = JSON.parse(result);
 

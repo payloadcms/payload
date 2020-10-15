@@ -3,6 +3,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const executeAccess = require('../../auth/executeAccess');
+const removeInternalFields = require('../../utilities/removeInternalFields');
 
 const { MissingFile, FileUploadError } = require('../../errors');
 const resizeAndSave = require('../../uploads/imageResizer');
@@ -28,6 +29,7 @@ async function create(args) {
     disableVerificationEmail,
     depth,
     overrideAccess,
+    showHiddenFields,
   } = args;
 
   let { data } = args;
@@ -186,6 +188,7 @@ async function create(args) {
     req,
     depth,
     overrideAccess,
+    showHiddenFields,
   });
 
   // /////////////////////////////////////
@@ -220,6 +223,7 @@ async function create(args) {
   // 11. Return results
   // /////////////////////////////////////
 
+  result = removeInternalFields(result);
   result = JSON.stringify(result);
   result = JSON.parse(result);
 

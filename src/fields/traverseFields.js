@@ -27,6 +27,7 @@ const traverseFields = (args) => {
     validationPromises,
     errors,
     payload,
+    showHiddenFields.
   } = args;
 
   fields.forEach((field) => {
@@ -45,7 +46,7 @@ const traverseFields = (args) => {
       dataCopy[field.name] = localizedValue;
     }
 
-    if (operation === 'read' && field.hidden && typeof data[field.name] !== 'undefined') {
+    if (operation === 'read' && field.hidden && typeof data[field.name] !== 'undefined' && !showHiddenFields) {
       delete data[field.name];
     }
 

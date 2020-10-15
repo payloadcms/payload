@@ -16,6 +16,7 @@ async function performFieldOperations(entityConfig, args) {
     },
     overrideAccess,
     reduceLocales,
+    showHiddenFields,
   } = args;
 
   const recursivePerformFieldOperations = performFieldOperations.bind(this);
@@ -69,6 +70,7 @@ async function performFieldOperations(entityConfig, args) {
     validationPromises,
     errors,
     payload: this,
+    showHiddenFields,
   });
 
   await Promise.all(hookPromises);

@@ -9,6 +9,7 @@ async function find(options) {
     fallbackLocale,
     user,
     overrideAccess = true,
+    showHiddenFields,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -20,6 +21,7 @@ async function find(options) {
     where,
     collection,
     overrideAccess,
+    showHiddenFields,
     req: {
       user,
       payloadAPI: 'local',

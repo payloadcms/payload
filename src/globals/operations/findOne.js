@@ -1,4 +1,5 @@
 const executeAccess = require('../../auth/executeAccess');
+const removeInternalFields = require('../../utilities/removeInternalFields');
 
 async function findOne(args) {
   const { globals: { Model } } = this;
@@ -8,6 +9,7 @@ async function findOne(args) {
     req,
     slug,
     depth,
+    showHiddenFields,
   } = args;
 
   // /////////////////////////////////////
@@ -46,6 +48,7 @@ async function findOne(args) {
     req,
     depth,
     reduceLocales: true,
+    showHiddenFields,
   });
 
   // /////////////////////////////////////
@@ -65,6 +68,7 @@ async function findOne(args) {
   // 6. Return results
   // /////////////////////////////////////
 
+  doc = removeInternalFields(doc);
   doc = JSON.stringify(doc);
   doc = JSON.parse(doc);
 

@@ -8,6 +8,7 @@ async function update(options) {
     id,
     user,
     overrideAccess = true,
+    showHiddenFields,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -18,6 +19,7 @@ async function update(options) {
     collection,
     overrideAccess,
     id,
+    showHiddenFields,
     req: {
       user,
       payloadAPI: 'local',

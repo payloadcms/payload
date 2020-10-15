@@ -8,6 +8,7 @@ async function findByID(options) {
     user,
     overrideAccess = true,
     disableErrors = false,
+    showHiddenFields,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -18,6 +19,7 @@ async function findByID(options) {
     collection,
     overrideAccess,
     disableErrors,
+    showHiddenFields,
     req: {
       user,
       payloadAPI: 'local',

@@ -8,6 +8,7 @@ async function create(options) {
     user,
     overrideAccess = true,
     disableVerificationEmail,
+    showHiddenFields,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -18,6 +19,7 @@ async function create(options) {
     collection,
     overrideAccess,
     disableVerificationEmail,
+    showHiddenFields,
     req: {
       user,
       payloadAPI: 'local',

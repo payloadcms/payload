@@ -1,6 +1,7 @@
 const deepmerge = require('deepmerge');
 const overwriteMerge = require('../../utilities/overwriteMerge');
 const executeAccess = require('../../auth/executeAccess');
+const removeInternalFields = require('../../utilities/removeInternalFields');
 
 async function update(args) {
   const { globals: { Model } } = this;
@@ -15,6 +16,7 @@ async function update(args) {
     },
     depth,
     overrideAccess,
+    showHiddenFields,
   } = args;
 
   // /////////////////////////////////////
@@ -114,6 +116,7 @@ async function update(args) {
     operation: 'read',
     req,
     depth,
+    showHiddenFields,
   });
 
   // /////////////////////////////////////
@@ -133,6 +136,8 @@ async function update(args) {
   // /////////////////////////////////////
   // 10. Return global
   // /////////////////////////////////////
+
+  global = removeInternalFields(global);
 
   return global;
 }

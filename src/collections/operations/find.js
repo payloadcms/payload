@@ -1,4 +1,5 @@
 const executeAccess = require('../../auth/executeAccess');
+const removeInternalFields = require('../../utilities/removeInternalFields');
 
 async function find(args) {
   const {
@@ -15,6 +16,7 @@ async function find(args) {
       locale,
     },
     overrideAccess,
+    showHiddenFields,
   } = args;
 
   // /////////////////////////////////////
@@ -90,9 +92,6 @@ async function find(args) {
       let docRef = JSON.stringify(doc);
       docRef = JSON.parse(docRef);
 
-      if (docRef._id) delete docRef._id;
-      if (typeof docRef.__v !== 'undefined') delete docRef.__v;
-
       await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
@@ -120,6 +119,7 @@ async function find(args) {
         operation: 'read',
         overrideAccess,
         reduceLocales: true,
+        showHiddenFields,
       },
       find,
     ))),
@@ -147,6 +147,11 @@ async function find(args) {
   // /////////////////////////////////////
   // 6. Return results
   // /////////////////////////////////////
+
+  result = {
+    ...result,
+    docs: result.docs.map((doc) => removeInternalFields(doc)),
+  };
 
   return result;
 }
