@@ -157,4 +157,50 @@ describe('Users REST API', () => {
     expect(afterVerified).toBe(true);
     expect(afterToken).toBeUndefined();
   });
+
+  it('should lock the user after too many attempts', async () => {
+    const userEmail = 'lock@me.com';
+
+    const createResponse = await fetch(`${url}/api/admins`, {
+      body: JSON.stringify({
+        email: userEmail,
+        password,
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'post',
+    });
+
+    expect(createResponse.status).toBe(201);
+
+    console.log('token', token);
+
+    const tryLogin = () => fetch(`${url}/api/admins/login`, {
+      body: JSON.stringify({
+        email: userEmail,
+        password: 'bad',
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'post',
+    });
+
+    await tryLogin();
+    await tryLogin();
+    await tryLogin();
+    await tryLogin();
+    await tryLogin();
+    await tryLogin();
+
+    const client = await MongoClient.connect(`${mongoURL}:${mongoPort}`);
+    const db = client.db(mongoDBName);
+    const userResult = await db.collection('admins').findOne({ email: userEmail });
+    const { lockUntil } = userResult;
+
+    expect(lockUntil).not.toBeUndefined();
+  });
 });
