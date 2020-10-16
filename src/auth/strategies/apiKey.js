@@ -18,7 +18,7 @@ module.exports = ({ operations }, { Model, config }) => {
           },
           {
             _verified: {
-              equals: true,
+              not_equals: false,
             },
           },
         ];

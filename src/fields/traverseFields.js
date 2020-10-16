@@ -27,7 +27,7 @@ const traverseFields = (args) => {
     validationPromises,
     errors,
     payload,
-    showHiddenFields.
+    showHiddenFields,
   } = args;
 
   fields.forEach((field) => {

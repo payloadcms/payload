@@ -28,7 +28,7 @@ module.exports = ({ config, collections, operations }) => {
           },
           {
             _verified: {
-              equals: true,
+              not_equals: false,
             },
           },
         ];
