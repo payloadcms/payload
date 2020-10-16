@@ -77,6 +77,7 @@ class Payload {
     this.forgotPassword = this.forgotPassword.bind(this);
     this.resetPassword = this.resetPassword.bind(this);
     this.unlock = this.unlock.bind(this);
+    this.verifyEmail = this.verifyEmail.bind(this);
 
     // If not initializing locally, scaffold router
     if (!this.config.local) {
@@ -209,6 +210,12 @@ class Payload {
     let { unlock } = localOperations.auth;
     unlock = unlock.bind(this);
     return unlock(options);
+  }
+
+  async verifyEmail(options) {
+    let { verifyEmail } = localOperations.auth;
+    verifyEmail = verifyEmail.bind(this);
+    return verifyEmail(options);
   }
 }
 
