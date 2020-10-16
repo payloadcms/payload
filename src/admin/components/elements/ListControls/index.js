@@ -142,7 +142,6 @@ const ListControls = (props) => {
           <SortComplex
             handleChange={setSort}
             collection={collection}
-            enableSort
           />
         </AnimateHeight>
       )}

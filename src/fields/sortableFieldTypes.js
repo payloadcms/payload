@@ -6,4 +6,5 @@ module.exports = [
   'email',
   'radio',
   'select',
+  'date',
 ];
