@@ -14,8 +14,8 @@ async function verifyEmail(args) {
     _verificationToken: args.token,
   });
 
-  if (!user) throw new APIError('User not found.', httpStatus.BAD_REQUEST);
-  if (user && user._verified === true) throw new APIError('Already activated', httpStatus.ACCEPTED);
+  if (!user) throw new APIError('Verification token is invalid.', httpStatus.BAD_REQUEST);
+  if (user && user._verified === true) throw new APIError('This account has already been activated.', httpStatus.ACCEPTED);
 
   user._verified = true;
   user._verificationToken = undefined;
