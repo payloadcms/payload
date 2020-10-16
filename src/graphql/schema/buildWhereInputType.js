@@ -62,15 +62,21 @@ const buildWhereInputType = (name, fields, parentName) => {
     return nestedPaths;
   };
 
+  const operators = {
+    equality: ['equals', 'not_equals'],
+    contains: ['in', 'not_in', 'all'],
+    comparison: ['greater_than_equal', 'greater_than', 'less_than_equal', 'less_than'],
+  };
+
   const fieldToSchemaMap = {
     number: (field) => {
       const type = GraphQLFloat;
       return {
         type: withOperators(
-          field.name,
+          field,
           type,
           parentName,
-          ['equals', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals'],
+          [...operators.equality, ...operators.comparison],
         ),
       };
     },
@@ -78,10 +84,11 @@ const buildWhereInputType = (name, fields, parentName) => {
       const type = GraphQLString;
       return {
         type: withOperators(
-          field.name,
+          field,
           type,
           parentName,
           ['equals', 'like', 'not_equals'],
+          [...operators.equality, 'like'],
         ),
       };
     },
@@ -89,10 +96,10 @@ const buildWhereInputType = (name, fields, parentName) => {
       const type = EmailAddressResolver;
       return {
         type: withOperators(
-          field.name,
+          field,
           type,
           parentName,
-          ['equals', 'like', 'not_equals'],
+          [...operators.equality, 'like'],
         ),
       };
     },
@@ -100,10 +107,10 @@ const buildWhereInputType = (name, fields, parentName) => {
       const type = GraphQLString;
       return {
         type: withOperators(
-          field.name,
+          field,
           type,
           parentName,
-          ['equals', 'like', 'not_equals'],
+          [...operators.equality, 'like'],
         ),
       };
     },
@@ -111,10 +118,10 @@ const buildWhereInputType = (name, fields, parentName) => {
       const type = GraphQLJSON;
       return {
         type: withOperators(
-          field.name,
+          field,
           type,
           parentName,
-          ['equals', 'like', 'not_equals'],
+          [...operators.equality, 'like'],
         ),
       };
     },
@@ -122,16 +129,16 @@ const buildWhereInputType = (name, fields, parentName) => {
       const type = GraphQLString;
       return {
         type: withOperators(
-          field.name,
+          field,
           type,
           parentName,
-          ['equals', 'like', 'not_equals'],
+          [...operators.equality, 'like'],
         ),
       };
     },
     radio: (field) => ({
       type: withOperators(
-        field.name,
+        field,
         new GraphQLEnumType({
           name: `${combineParentName(parentName, field.name)}_Input`,
           values: field.options.reduce((values, option) => ({
@@ -142,26 +149,26 @@ const buildWhereInputType = (name, fields, parentName) => {
           }), {}),
         }),
         parentName,
-        ['like', 'equals', 'not_equals'],
+        [...operators.equality, 'like'],
       ),
     }),
     date: (field) => {
       const type = DateTimeResolver;
       return {
         type: withOperators(
-          field.name,
+          field,
           type,
           parentName,
-          ['equals', 'like', 'not_equals', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than'],
+          [...operators.equality, ...operators.comparison, 'like'],
         ),
       };
     },
     relationship: (field) => {
       let type = withOperators(
-        field.name,
+        field,
         GraphQLString,
         parentName,
-        ['in', 'not_in', 'all', 'equals', 'not_equals'],
+        [...operators.equality, ...operators.contains],
       );
 
       if (Array.isArray(field.relationTo)) {
@@ -194,23 +201,23 @@ const buildWhereInputType = (name, fields, parentName) => {
     },
     upload: (field) => ({
       type: withOperators(
-        field.name,
+        field,
         GraphQLString,
         parentName,
-        ['equals', 'not_equals'],
+        [...operators.equality],
       ),
     }),
     checkbox: (field) => ({
       type: withOperators(
-        field.name,
+        field,
         GraphQLBoolean,
         parentName,
-        ['equals', 'not_equals'],
+        [...operators.equality],
       ),
     }),
     select: (field) => ({
       type: withOperators(
-        field.name,
+        field,
         new GraphQLEnumType({
           name: `${combineParentName(parentName, field.name)}_Input`,
           values: field.options.reduce((values, option) => {
@@ -236,7 +243,7 @@ const buildWhereInputType = (name, fields, parentName) => {
           }, {}),
         }),
         parentName,
-        ['in', 'not_in', 'all', 'equals', 'not_equals'],
+        [...operators.equality, ...operators.contains],
       ),
     }),
     array: (field) => recursivelyBuildNestedPaths(field),
@@ -294,10 +301,10 @@ const buildWhereInputType = (name, fields, parentName) => {
 
   fieldTypes.id = {
     type: withOperators(
-      'id',
+      { name: 'id' },
       GraphQLString,
       parentName,
-      ['equals', 'not_equals', 'in', 'not_in'],
+      [...operators.equality, ...operators.contains],
     ),
   };
 

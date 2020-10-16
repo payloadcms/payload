@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 const mongoose = require('mongoose');
 
-const validOperators = ['like', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals'];
+const validOperators = ['like', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists'];
 
 function addSearchParam(key, value, searchParams) {
   return {
@@ -214,6 +214,10 @@ class ParamParser {
             formattedValue = { $regex: val, $options: '-i' };
           }
 
+          break;
+
+        case 'exists':
+          formattedValue = { $exists: (val === 'true' || val === true) };
           break;
 
         default:
