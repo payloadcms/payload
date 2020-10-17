@@ -229,6 +229,7 @@ const sanitizeCollection = (collections, collection) => {
   }
 
   if (collection.auth) {
+    if (collection.auth === true) sanitized.auth = {};
     if (!sanitized.hooks.beforeLogin) sanitized.hooks.beforeLogin = [];
     if (!sanitized.hooks.afterLogin) sanitized.hooks.afterLogin = [];
     if (!collection.auth.forgotPassword) sanitized.auth.forgotPassword = {};
