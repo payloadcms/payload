@@ -15,7 +15,7 @@
     "build": "PAYLOAD_CONFIG_PATH=demo/payload.config.js node src/bin/build",
     "build:analyze": "PAYLOAD_CONFIG_PATH=demo/payload.config.js PAYLOAD_ANALYZE_BUNDLE=true node src/bin/build",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
-    "debug": "nodemon --inspect demo/server.js",
+    "debug": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js nodemon --inspect demo/server.js",
     "debug:test:int": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "dev": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js nodemon demo/server.js",
     "lint": "eslint .",
