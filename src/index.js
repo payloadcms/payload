@@ -2,7 +2,6 @@ require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
 const express = require('express');
-const graphQLPlayground = require('graphql-playground-middleware-express').default;
 const logger = require('./utilities/logger')();
 const bindOperations = require('./init/bindOperations');
 const bindRequestHandlers = require('./init/bindRequestHandlers');
@@ -15,6 +14,7 @@ const initAdmin = require('./express/admin');
 const initAuth = require('./auth/init');
 const initCollections = require('./collections/init');
 const initGlobals = require('./globals/init');
+const initGraphQLPlayground = require('./graphql/initPlayground');
 const initStatic = require('./express/static');
 const GraphQL = require('./graphql');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
@@ -60,6 +60,7 @@ class Payload {
     this.initAuth = initAuth.bind(this);
     this.initCollections = initCollections.bind(this);
     this.initGlobals = initGlobals.bind(this);
+    this.initGraphQLPlayground = initGraphQLPlayground.bind(this);
     this.buildEmail = buildEmail.bind(this);
     this.sendEmail = this.sendEmail.bind(this);
     this.getMockEmailCredentials = this.getMockEmailCredentials.bind(this);
@@ -113,12 +114,7 @@ class Payload {
         (req, res) => graphQLHandler.init(req, res)(req, res),
       );
 
-      this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
-        endpoint: `${this.config.routes.api}${this.config.routes.graphQL}`,
-        settings: {
-          'request.credentials': 'include',
-        },
-      }));
+      this.initGraphQLPlayground();
 
       // Bind router to API
       this.express.use(this.config.routes.api, this.router);
