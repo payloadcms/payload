@@ -3,7 +3,7 @@ const APIError = require('./APIError');
 
 class ValidationError extends APIError {
   constructor(results) {
-    super(results, httpStatus.BAD_REQUEST);
+    super(`Bad request with ${results.length} errors`, httpStatus.BAD_REQUEST, results);
   }
 }
 

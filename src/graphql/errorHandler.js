@@ -1,22 +1,28 @@
-const errorHandler = async (info, debug, afterErrorHook) => {
-  return Promise.all(info.result.errors.map(async (err) => {
-    // TODO: use payload logging
-    console.error(err.stack);
+/**
+ *
+ * @param info
+ * @param debug
+ * @param afterErrorHook
+ * @returns {Promise<unknown[]>}
+ */
+const errorHandler = async (info, debug, afterErrorHook) => Promise.all(info.result.errors.map(async (err) => {
+  // TODO: use payload logging
+  console.error(err.stack);
 
-    let response = {
-      ...err,
-    };
+  let response = {
+    message: err.message,
+    data: err?.originalError?.data,
+  };
 
-    if (afterErrorHook) {
-      ({ response } = await afterErrorHook(err, response) || { response });
-    }
+  if (afterErrorHook) {
+    ({ response } = await afterErrorHook(err, response) || { response });
+  }
 
-    if (debug && debug === true) {
-      response.stack = err.stack;
-    }
+  if (debug && debug === true) {
+    response.stack = err.stack;
+  }
 
-    return response;
-  }));
-};
+  return response;
+}));
 
 module.exports = errorHandler;
