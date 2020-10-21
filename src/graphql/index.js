@@ -20,6 +20,7 @@ const initCollections = require('../collections/graphql/init');
 const initGlobals = require('../globals/graphql/init');
 const buildWhereInputType = require('./schema/buildWhereInputType');
 const access = require('../auth/graphql/resolvers/access');
+const errorHandler = require('./errorHandler');
 
 class InitializeGraphQL {
   constructor(init) {
@@ -93,31 +94,23 @@ class InitializeGraphQL {
 
     this.schema = new GraphQLSchema(schema);
 
-    // this.errorExtensions = [];
-    // this.errorExtensionIteration = 0;
-
-    // this.extensions = async (info) => {
-    //   const { result } = info;
-    //   if (result.errors) {
-    //     const afterErrorHook = typeof this.config.hooks.afterError === 'function' ? this.config.hooks.afterError : null;
-    //     this.errorExtensions = await errorHandler(info, this.config.debug, afterErrorHook);
-    //   }
-    //   return null;
-    // };
+    this.extensions = async (info) => {
+      const { result } = info;
+      if (result.errors) {
+        const afterErrorHook = typeof this.config.hooks.afterError === 'function' ? this.config.hooks.afterError : null;
+        this.errorResponse = await errorHandler(info, this.config.debug, afterErrorHook);
+      }
+      return null;
+    };
   }
 
   init(req, res) {
+    this.errorResponse = null;
     return graphQLHTTP(
       async (request, response, { variables }) => ({
         schema: this.schema,
-        // customFormatErrorFn: () => {
-        //   const response = {
-        //     ...this.errorExtensions[this.errorExtensionIteration],
-        //   };
-        //   this.errorExtensionIteration += 1;
-        //   return response;
-        // },
-        // extensions: this.extensions,
+        customFormatErrorFn: () => (this.errorResponse),
+        extensions: this.extensions,
         context: { req, res },
         validationRules: [
           queryComplexity({

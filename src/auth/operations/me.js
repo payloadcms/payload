@@ -9,7 +9,7 @@ async function me({ req }) {
     delete user.collection;
 
     const response = {
-      user: req.user,
+      user,
       collection: req.user.collection,
     };
 

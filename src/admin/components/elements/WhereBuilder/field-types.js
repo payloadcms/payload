@@ -19,6 +19,10 @@ const base = [
     label: 'is not in',
     value: 'not_in',
   },
+  {
+    label: 'exists',
+    value: 'exists',
+  },
 ];
 
 const numeric = [

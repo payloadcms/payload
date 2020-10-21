@@ -40,6 +40,7 @@ const sanitizeConfig = (config) => {
 
   sanitizedConfig.graphQL = config.graphQL || {};
   sanitizedConfig.graphQL.maxComplexity = (sanitizedConfig.graphQL && sanitizedConfig.graphQL.maxComplexity) ? sanitizedConfig.graphQL.maxComplexity : 1000;
+  sanitizedConfig.graphQL.disablePlaygroundInProduction = (sanitizedConfig.graphQL && sanitizedConfig.graphQL.disablePlaygroundInProduction !== undefined) ? sanitizedConfig.graphQL.disablePlaygroundInProduction : true;
 
   sanitizedConfig.routes = {
     admin: (config.routes && config.routes.admin) ? config.routes.admin : '/admin',
