@@ -11,7 +11,7 @@ const errorHandler = async (info, debug, afterErrorHook) => Promise.all(info.res
 
   let response = {
     message: err.message,
-    data: err?.originalError?.data,
+    data: (err && err.originalError && err.originalError.data) || undefined,
   };
 
   if (afterErrorHook) {
