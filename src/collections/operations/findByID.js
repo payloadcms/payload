@@ -75,6 +75,9 @@ async function findByID(args) {
     return null;
   }
 
+  // Clone the result - it may have come back memoized
+  result = JSON.parse(JSON.stringify(result));
+
   result.id = result._id;
 
   // /////////////////////////////////////
