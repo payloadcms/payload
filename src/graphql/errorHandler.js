@@ -1,3 +1,5 @@
+const logger = require('../utilities/logger')();
+
 /**
  *
  * @param info
@@ -6,8 +8,7 @@
  * @returns {Promise<unknown[]>}
  */
 const errorHandler = async (info, debug, afterErrorHook) => Promise.all(info.result.errors.map(async (err) => {
-  // TODO: use payload logging
-  console.error(err.stack);
+  logger.error(err.stack);
 
   let response = {
     message: err.message,
