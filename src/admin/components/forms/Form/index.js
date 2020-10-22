@@ -201,7 +201,12 @@ const Form = (props) => {
         }
 
         if (Array.isArray(json.errors)) {
-          const [fieldErrors, nonFieldErrors] = json.errors.reduce(([fieldErrs, nonFieldErrs], err) => (err.field && err.message ? [[...fieldErrs, err], nonFieldErrs] : [fieldErrs, [...nonFieldErrs, err]]), [[], []]);
+          const [fieldErrors, nonFieldErrors] = (errors) => errors.reduce(([fieldErrs, nonFieldErrs], err) => {
+            if (err.data) {
+              return [[...fieldErrs, ...err.data], [...nonFieldErrs, err]];
+            }
+            return [fieldErrs, [...nonFieldErrs, err]];
+          }, [[], []]);
 
           fieldErrors.forEach((err) => {
             dispatchFields({
@@ -218,13 +223,6 @@ const Form = (props) => {
               type: 'error',
             });
           });
-
-          if (fieldErrors.length > 0 && nonFieldErrors.length === 0) {
-            addStatus({
-              message: 'Please correct the fields below.',
-              type: 'error',
-            });
-          }
 
           return json;
         }
