@@ -1,15 +1,26 @@
 const formatErrorResponse = (incoming) => {
   if (incoming) {
+    if (incoming?.data?.length > 0) {
+      return {
+        errors: [{
+          name: incoming.name,
+          message: incoming.message,
+          data: incoming.data,
+        }],
+      };
+    }
+
     // mongoose
     if (incoming.errors) {
       return {
-        errors: Object.keys(incoming.errors).reduce((acc, key) => {
-          acc.push({
-            field: incoming.errors[key].path,
-            message: incoming.errors[key].message,
-          });
-          return acc;
-        }, []),
+        errors: Object.keys(incoming.errors)
+          .reduce((acc, key) => {
+            acc.push({
+              field: incoming.errors[key].path,
+              message: incoming.errors[key].message,
+            });
+            return acc;
+          }, []),
       };
     }
 
