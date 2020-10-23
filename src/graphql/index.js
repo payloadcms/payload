@@ -98,10 +98,22 @@ class InitializeGraphQL {
       const { result } = info;
       if (result.errors) {
         const afterErrorHook = typeof this.config.hooks.afterError === 'function' ? this.config.hooks.afterError : null;
-        this.errorResponse = await errorHandler(info, this.config.debug, afterErrorHook);
+        [this.errorResponse] = await errorHandler(info, this.config.debug, afterErrorHook);
       }
       return null;
     };
+    this.customFormatErrorFn = () => (this.errorResponse);
+    this.validationRules = (variables) => ([
+      queryComplexity({
+        estimators: [
+          fieldExtensionsEstimator(),
+          simpleEstimator({ defaultComplexity: 1 }), // Fallback if complexity not set
+        ],
+        maximumComplexity: this.config.graphQL.maxComplexity,
+        variables,
+        // onComplete: (complexity) => { console.log('Query Complexity:', complexity); },
+      }),
+    ]);
   }
 
   init(req, res) {
@@ -109,20 +121,10 @@ class InitializeGraphQL {
     return graphQLHTTP(
       async (request, response, { variables }) => ({
         schema: this.schema,
-        customFormatErrorFn: () => (this.errorResponse),
+        customFormatErrorFn: this.customFormatErrorFn,
         extensions: this.extensions,
         context: { req, res },
-        validationRules: [
-          queryComplexity({
-            estimators: [
-              fieldExtensionsEstimator(),
-              simpleEstimator({ defaultComplexity: 1 }), // Fallback if complexity not set
-            ],
-            maximumComplexity: this.config.graphQL.maxComplexity,
-            variables,
-            // onComplete: (complexity) => { console.log('Query Complexity:', complexity); },
-          }),
-        ],
+        validationRules: this.validationRules(variables),
       }),
     );
   }
