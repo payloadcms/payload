@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "/Collection",
+  "title": "Payload Collection Configuration",
+  "type": "object",
+  "required": [
+    "slug",
+    "labels",
+    "fields",
+    "admin"
+  ],
+  "properties": {
+    "slug": {
+      "type": "string"
+    },
+    "labels": {
+      "type": "object",
+      "properties": {
+        "singular": {
+          "type": "string",
+          "description": "Name used when referring to an instance of the collection"
+        },
+        "plural": {
+          "type": "string",
+          "description": "Name used when referring to set of instances for the collection"
+        }
+      }
+    },
+    "access": {
+      "type": "object",
+      "description": "Callable functions to determine permission access"
+    }
+  }
+}

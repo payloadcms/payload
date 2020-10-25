@@ -22,7 +22,7 @@ const buildEmail = require('./email/build');
 const identifyAPI = require('./express/middleware/identifyAPI');
 const errorHandler = require('./express/middleware/errorHandler');
 const performFieldOperations = require('./fields/performFieldOperations');
-
+const validateSchema = require('./schema/validateSchema');
 const localOperations = require('./collections/operations/local');
 const localGlobalOperations = require('./globals/operations/local');
 
@@ -39,6 +39,8 @@ class Payload {
     }
 
     const config = getConfig(options);
+
+    validateSchema(config);
     const email = { ...(config.email || {}), ...(options.email || {}) };
 
     this.config = sanitizeConfig({
