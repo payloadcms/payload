@@ -4,7 +4,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { useConfig } from '../../providers/Config';
 import { useStepNav } from '../../elements/StepNav';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
-import { useAuthentication } from '../../providers/Authentication';
+import { useAuth } from '../../providers/Authentication';
 import { useLocale } from '../../utilities/Locale';
 
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
@@ -17,7 +17,7 @@ const GlobalView = (props) => {
   const history = useHistory();
   const locale = useLocale();
   const { setStepNav } = useStepNav();
-  const { permissions } = useAuthentication();
+  const { permissions } = useAuth();
   const [initialState, setInitialState] = useState({});
 
   const {

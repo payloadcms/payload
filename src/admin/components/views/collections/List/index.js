@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import queryString from 'qs';
 import { useLocation } from 'react-router-dom';
 import { useConfig } from '../../../providers/Config';
-import { useAuthentication } from '../../../providers/Authentication';
+import { useAuth } from '../../../providers/Authentication';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import DefaultList from './Default';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
@@ -28,7 +28,7 @@ const ListView = (props) => {
   } = props;
 
   const { serverURL, routes: { api, admin } } = useConfig();
-  const { permissions } = useAuthentication();
+  const { permissions } = useAuth();
   const location = useLocation();
   const { setStepNav } = useStepNav();
 

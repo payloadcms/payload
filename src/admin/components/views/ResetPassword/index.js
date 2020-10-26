@@ -8,7 +8,7 @@ import ConfirmPassword from '../../forms/field-types/ConfirmPassword';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
-import { useAuthentication } from '../../providers/Authentication';
+import { useAuth } from '../../providers/Authentication';
 
 import './index.scss';
 import HiddenInput from '../../forms/field-types/HiddenInput';
@@ -19,7 +19,7 @@ const ResetPassword = () => {
   const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = useConfig();
   const { token } = useParams();
   const history = useHistory();
-  const { user, setToken } = useAuthentication();
+  const { user, setToken } = useAuth();
 
   const onSuccess = (data) => {
     if (data.token) {

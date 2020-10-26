@@ -7,7 +7,7 @@ import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import fieldTypes from '../../forms/field-types';
 import FormSubmit from '../../forms/Submit';
-import { useAuthentication } from '../../providers/Authentication';
+import { useAuth } from '../../providers/Authentication';
 import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
 
 import './index.scss';
@@ -16,7 +16,7 @@ const baseClass = 'create-first-user';
 
 const CreateFirstUser = (props) => {
   const { setInitialized } = props;
-  const { setToken } = useAuthentication();
+  const { setToken } = useAuth();
   const {
     admin: { user: userSlug }, collections, serverURL, routes: { admin, api },
   } = useConfig();

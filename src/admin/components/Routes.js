@@ -4,7 +4,7 @@ import {
 } from 'react-router-dom';
 import { useConfig } from './providers/Config';
 import List from './views/collections/List';
-import { useAuthentication } from './providers/Authentication';
+import { useAuth } from './providers/Authentication';
 import DefaultTemplate from './templates/Default';
 import { requests } from '../api';
 import Loading from './elements/Loading';
@@ -25,7 +25,7 @@ const Account = lazy(() => import('./views/Account'));
 const Routes = () => {
   const history = useHistory();
   const [initialized, setInitialized] = useState(null);
-  const { user, permissions, permissions: { canAccessAdmin } } = useAuthentication();
+  const { user, permissions, permissions: { canAccessAdmin } } = useAuth();
 
   const {
     admin: { user: userSlug }, routes, collections, globals,

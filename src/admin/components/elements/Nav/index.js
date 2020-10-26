@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useHistory } from 'react-router-dom';
 import { useConfig } from '../../providers/Config';
-import { useAuthentication } from '../../providers/Authentication';
+import { useAuth } from '../../providers/Authentication';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import Chevron from '../../icons/Chevron';
 import LogOut from '../../icons/LogOut';
@@ -16,7 +16,7 @@ import './index.scss';
 const baseClass = 'nav';
 
 const DefaultNav = () => {
-  const { permissions } = useAuthentication();
+  const { permissions } = useAuth();
   const [menuActive, setMenuActive] = useState(false);
   const history = useHistory();
   const {

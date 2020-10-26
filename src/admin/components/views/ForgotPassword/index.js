@@ -8,7 +8,7 @@ import Email from '../../forms/field-types/Email';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
-import { useAuthentication } from '../../providers/Authentication';
+import { useAuth } from '../../providers/Authentication';
 
 import './index.scss';
 
@@ -17,7 +17,7 @@ const baseClass = 'forgot-password';
 const ForgotPassword = () => {
   const { addStatus } = useStatusList();
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const { user } = useAuthentication();
+  const { user } = useAuth();
   const {
     admin: { user: userSlug },
     serverURL,
