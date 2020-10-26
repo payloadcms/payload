@@ -1,4 +1,4 @@
-const Ajv = require('Ajv');
+const Ajv = require('ajv');
 const payloadSchema = require('./payload.schema.json');
 const collectionSchema = require('./collection.schema.json');
 const InvalidSchema = require('../errors/InvalidSchema');
