@@ -25,6 +25,7 @@ module.exports = {
     maxLoginAttempts: 5,
     lockTime: 600 * 1000, // lock time in ms
     useAPIKey: true,
+    depth: 0,
     cookies: {
       secure: false,
       sameSite: 'Lax',
