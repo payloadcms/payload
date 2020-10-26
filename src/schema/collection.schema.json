@@ -1,13 +1,12 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "/Collection",
+  "$id": "collection.schema.json",
   "title": "Payload Collection Configuration",
   "type": "object",
   "required": [
     "slug",
     "labels",
-    "fields",
-    "admin"
+    "fields"
   ],
   "properties": {
     "slug": {

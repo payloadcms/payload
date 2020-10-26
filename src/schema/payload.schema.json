@@ -1,9 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "/Config",
+  "$id": "payload.schema.json",
   "title": "Payload Configuration",
   "type": "object",
-  "required": ["collections"],
+  "required": [
+    "collections"
+  ],
   "properties": {
     "admin": {
       "type": "object",
@@ -16,7 +18,9 @@
         "meta": {
           "type": "object",
           "description": "Admin web interface configuration",
-          "required": ["titleSuffix"],
+          "required": [
+            "titleSuffix"
+          ],
           "properties": {
             "titleSuffix": {
               "type": "string",
@@ -24,7 +28,7 @@
             },
             "ogImage": {
               "type": "string",
-              "default": ""
+              "default": "/ok.jpg"
             },
             "favicon": {
               "type": "string",
@@ -32,12 +36,12 @@
             }
           }
         }
-      },
-      "collections": {
-        "type": "array",
-        "items": {
-          "type": "object"
-        }
+      }
+    },
+    "collections": {
+      "type": "array",
+      "items": {
+        "$ref": "./collection.schema.json"
       }
     }
   }

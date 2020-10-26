@@ -40,7 +40,6 @@ class Payload {
 
     const config = getConfig(options);
 
-    validateSchema(config);
     const email = { ...(config.email || {}), ...(options.email || {}) };
 
     this.config = sanitizeConfig({
