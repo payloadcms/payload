@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useConfig } from '../../providers/Config';
 import { useStepNav } from '../../elements/StepNav';
-import { useAuthentication } from '../../providers/Authentication';
+import { useAuth } from '../../providers/Authentication';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import DefaultAccount from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
@@ -12,7 +12,7 @@ import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context
 const AccountView = () => {
   const { state: locationState } = useLocation();
   const { setStepNav } = useStepNav();
-  const { user, permissions } = useAuthentication();
+  const { user, permissions } = useAuth();
   const [initialState, setInitialState] = useState({});
   const {
     serverURL,

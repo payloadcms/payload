@@ -4,7 +4,7 @@ import { Redirect, useRouteMatch, useHistory, useLocation } from 'react-router-d
 import { useConfig } from '../../../providers/Config';
 import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
-import { useAuthentication } from '../../../providers/Authentication';
+import { useAuth } from '../../../providers/Authentication';
 
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import DefaultEdit from './Default';
@@ -36,7 +36,7 @@ const EditView = (props) => {
   const history = useHistory();
   const { setStepNav } = useStepNav();
   const [initialState, setInitialState] = useState({});
-  const { permissions } = useAuthentication();
+  const { permissions } = useAuth();
 
   const onSave = (json) => {
     history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`, {

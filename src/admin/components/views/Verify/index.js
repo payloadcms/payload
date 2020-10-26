@@ -7,7 +7,7 @@ import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
 
 import { useConfig } from '../../providers/Config';
-import { useAuthentication } from '../../providers/Authentication';
+import { useAuth } from '../../providers/Authentication';
 import Login from '../Login';
 import './index.scss';
 
@@ -16,7 +16,7 @@ const baseClass = 'verify';
 const Verify = ({ collection }) => {
   const { slug: collectionSlug } = collection;
 
-  const { user } = useAuthentication();
+  const { user } = useAuth();
   const { token } = useParams();
   const { serverURL, routes: { admin: adminRoute }, admin: { user: adminUser } } = useConfig();
 

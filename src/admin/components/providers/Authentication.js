@@ -173,9 +173,9 @@ AuthenticationProvider.propTypes = {
   ]).isRequired,
 };
 
-const useAuthentication = () => useContext(Context);
+const useAuth = () => useContext(Context);
 
 export {
   AuthenticationProvider,
-  useAuthentication,
+  useAuth,
 };

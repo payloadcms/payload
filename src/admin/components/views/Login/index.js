@@ -9,7 +9,7 @@ import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
-import { useAuthentication } from '../../providers/Authentication';
+import { useAuth } from '../../providers/Authentication';
 
 import './index.scss';
 
@@ -17,7 +17,7 @@ const baseClass = 'login';
 
 const Login = () => {
   const history = useHistory();
-  const { user, setToken } = useAuthentication();
+  const { user, setToken } = useAuth();
   const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = useConfig();
 
   const onSuccess = (data) => {

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useConfig } from '../../providers/Config';
-import { useAuthentication } from '../../providers/Authentication';
+import { useAuth } from '../../providers/Authentication';
 import Minimal from '../../templates/Minimal';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
@@ -13,7 +13,7 @@ const baseClass = 'logout';
 const Logout = (props) => {
   const { inactivity } = props;
 
-  const { logOut } = useAuthentication();
+  const { logOut } = useAuth();
   const { routes: { admin } } = useConfig();
 
   useEffect(() => {
