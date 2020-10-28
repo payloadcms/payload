@@ -138,6 +138,7 @@ async function login(args) {
   return {
     token,
     user,
+    exp: jwt.decode(token).exp,
   };
 }
 

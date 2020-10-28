@@ -186,10 +186,6 @@ function registerCollections() {
             type: 'text',
             required: true,
           },
-          {
-            name: 'exp',
-            type: 'number',
-          },
         ]),
         formatName(`${slug}JWT`),
       );
@@ -239,6 +235,9 @@ function registerCollections() {
             },
             user: {
               type: collection.graphQL.type,
+            },
+            exp: {
+              type: GraphQLInt,
             },
           },
         }),
@@ -296,6 +295,9 @@ function registerCollections() {
             },
             refreshedToken: {
               type: GraphQLString,
+            },
+            exp: {
+              type: GraphQLInt,
             },
           },
         }),
