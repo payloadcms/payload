@@ -14,6 +14,7 @@ async function loginHandler(req, res, next) {
         message: 'Auth Passed',
         user: result.user,
         token: result.token,
+        exp: result.exp,
       });
   } catch (error) {
     return next(error);
