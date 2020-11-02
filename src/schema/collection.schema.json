@@ -105,6 +105,10 @@
           }
         }
       }
+    },
+    "timestamps": {
+      "type": "boolean",
+      "description": "Adds createdAt and updatedAt fields for the collection"
     }
   }
 }
