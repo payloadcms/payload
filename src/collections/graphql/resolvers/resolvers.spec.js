@@ -97,6 +97,79 @@ describe('GrahpQL Resolvers', () => {
 
       expect(retrievedId).toStrictEqual(id);
     });
+
+    it('should query exists - true', async () => {
+      const title = 'gql read';
+      const description = 'description';
+      const summary = 'summary';
+
+      // language=graphQL
+      const query = `mutation {
+            createLocalizedPost(data: {title: "${title}", description: "${description}", summary: "${summary}", priority: 10}) {
+            id
+            title
+            description
+            priority
+            createdAt
+            updatedAt
+          }
+        }`;
+
+      const response = await client.request(query);
+
+      const { id } = response.createLocalizedPost;
+      // language=graphQL
+      const readQuery = `query {
+  LocalizedPosts(where: { summary: { exists: true }}) {
+    docs {
+      id
+      description
+      summary
+    }
+  }
+}`;
+      const readResponse = await client.request(readQuery);
+      const retrievedId = readResponse.LocalizedPosts.docs[0].id;
+
+      expect(readResponse.LocalizedPosts.docs).toHaveLength(1);
+      expect(retrievedId).toStrictEqual(id);
+    });
+
+    it('should query exists - false', async () => {
+      const title = 'gql read';
+      const description = 'description';
+
+      // language=graphQL
+      const query = `mutation {
+            createLocalizedPost(data: {title: "${title}", description: "${description}", priority: 10}) {
+            id
+            title
+            description
+            priority
+            createdAt
+            updatedAt
+          }
+        }`;
+
+      const response = await client.request(query);
+
+      const { id } = response.createLocalizedPost;
+      // language=graphQL
+      const readQuery = `query {
+  LocalizedPosts(where: { summary: { exists: false }}) {
+    docs {
+      id
+      summary
+    }
+  }
+}`;
+      const readResponse = await client.request(readQuery);
+      const retrievedDoc = readResponse.LocalizedPosts.docs[0];
+
+      expect(readResponse.LocalizedPosts.docs.length).toBeGreaterThan(0);
+      expect(retrievedDoc.id).toStrictEqual(id);
+      expect(retrievedDoc.summary).toBeNull();
+    });
   });
 
   describe('Update', () => {

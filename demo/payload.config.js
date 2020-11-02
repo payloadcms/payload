@@ -103,6 +103,7 @@ module.exports = {
     maxComplexity: 1000,
     mutations: {},
     queries: {},
+    disablePlaygroundInProduction: true,
   },
   rateLimit: {
     window: 15 * 60 * 100,
@@ -119,7 +120,6 @@ module.exports = {
     defaultLocale: 'en',
     fallback: true,
   },
-  productionGraphQLPlayground: false,
   hooks: {
     afterError: (err) => {
       console.error('global error config handler', err);

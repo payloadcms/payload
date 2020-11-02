@@ -76,7 +76,11 @@ const DefaultAccount = (props) => {
                     <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
                   </h1>
                 </header>
-                <Auth useAPIKey={auth.useAPIKey} />
+                <Auth
+                  useAPIKey={auth.useAPIKey}
+                  collection={collection}
+                  email={data?.email}
+                />
                 <RenderFields
                   operation="update"
                   permissions={permissions.fields}
@@ -187,6 +191,7 @@ DefaultAccount.propTypes = {
     updatedAt: PropTypes.string,
     createdAt: PropTypes.string,
     id: PropTypes.string,
+    email: PropTypes.string,
   }),
   permissions: PropTypes.shape({
     create: PropTypes.shape({

@@ -2,7 +2,6 @@ require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
 const express = require('express');
-const graphQLPlayground = require('graphql-playground-middleware-express').default;
 const logger = require('./utilities/logger')();
 const bindOperations = require('./init/bindOperations');
 const bindRequestHandlers = require('./init/bindRequestHandlers');
@@ -15,6 +14,7 @@ const initAdmin = require('./express/admin');
 const initAuth = require('./auth/init');
 const initCollections = require('./collections/init');
 const initGlobals = require('./globals/init');
+const initGraphQLPlayground = require('./graphql/initPlayground');
 const initStatic = require('./express/static');
 const GraphQL = require('./graphql');
 const sanitizeConfig = require('./utilities/sanitizeConfig');
@@ -39,7 +39,6 @@ class Payload {
     }
 
     const config = getConfig(options);
-
     const email = { ...(config.email || {}), ...(options.email || {}) };
 
     this.config = sanitizeConfig({
@@ -61,6 +60,7 @@ class Payload {
     this.initAuth = initAuth.bind(this);
     this.initCollections = initCollections.bind(this);
     this.initGlobals = initGlobals.bind(this);
+    this.initGraphQLPlayground = initGraphQLPlayground.bind(this);
     this.buildEmail = buildEmail.bind(this);
     this.sendEmail = this.sendEmail.bind(this);
     this.getMockEmailCredentials = this.getMockEmailCredentials.bind(this);
@@ -78,6 +78,7 @@ class Payload {
     this.forgotPassword = this.forgotPassword.bind(this);
     this.resetPassword = this.resetPassword.bind(this);
     this.unlock = this.unlock.bind(this);
+    this.verifyEmail = this.verifyEmail.bind(this);
 
     // If not initializing locally, scaffold router
     if (!this.config.local) {
@@ -100,7 +101,7 @@ class Payload {
     // If not initializing locally, set up HTTP routing
     if (!this.config.local) {
       this.express = options.express;
-      if (this.config.rateLimit?.trustProxy) this.express.set('trust proxy', 1);
+      if (this.config.rateLimit && this.config.rateLimit.trustProxy) this.express.set('trust proxy', 1);
 
       this.initAdmin();
 
@@ -114,12 +115,7 @@ class Payload {
         (req, res) => graphQLHandler.init(req, res)(req, res),
       );
 
-      this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
-        endpoint: `${this.config.routes.api}${this.config.routes.graphQL}`,
-        settings: {
-          'request.credentials': 'include',
-        },
-      }));
+      this.initGraphQLPlayground();
 
       // Bind router to API
       this.express.use(this.config.routes.api, this.router);
@@ -211,6 +207,12 @@ class Payload {
     let { unlock } = localOperations.auth;
     unlock = unlock.bind(this);
     return unlock(options);
+  }
+
+  async verifyEmail(options) {
+    let { verifyEmail } = localOperations.auth;
+    verifyEmail = verifyEmail.bind(this);
+    return verifyEmail(options);
   }
 }
 

@@ -4,7 +4,7 @@ import Relationship from '../../../../../Relationship';
 import Number from '../../../../../Number';
 import Select from '../../../../../Select';
 import { useConfig } from '../../../../../../../providers/Config';
-import { useAuthentication } from '../../../../../../../providers/Authentication';
+import { useAuth } from '../../../../../../../providers/Authentication';
 
 const createOptions = (collections, permissions) => collections.reduce((options, collection) => {
   if (permissions[collection.slug]?.read?.permission && collection?.admin?.enableRichTextRelationship) {
@@ -22,7 +22,7 @@ const createOptions = (collections, permissions) => collections.reduce((options,
 
 const RelationshipFields = () => {
   const { collections, maxDepth } = useConfig();
-  const { permissions } = useAuthentication();
+  const { permissions } = useAuth();
 
   const [options, setOptions] = useState(() => createOptions(collections, permissions));
 

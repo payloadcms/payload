@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 const mockHandler = require('./mockHandler');
 
 async function buildEmail() {
-  if (this.config.email.transport === 'mock') {
+  if (!this.config.email || this.config.email.transport === 'mock') {
     const mockAccount = await mockHandler(this.config.email);
     return mockAccount;
   }

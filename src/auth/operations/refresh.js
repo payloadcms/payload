@@ -67,10 +67,9 @@ async function refresh(args) {
   // 4. Return refreshed token
   // /////////////////////////////////////
 
-  payload.exp = jwt.decode(refreshedToken).exp;
-
   return {
     refreshedToken,
+    exp: jwt.decode(refreshedToken).exp,
     user: payload,
   };
 }

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/payload",
-  "version": "0.0.123",
+  "version": "0.0.127",
   "description": "CMS and Application Framework",
   "license": "ISC",
   "author": "Payload CMS LLC",
@@ -146,7 +146,7 @@
     "graphql-request": "^2.0.0",
     "mongodb": "^3.6.2",
     "nodemon": "^1.19.4",
-    "webpack-cli": "^4.0.0"
+    "webpack-cli": "^4.1.0"
   },
   "files": [
     "*.js",

@@ -94,7 +94,8 @@ const DefaultEditView = (props) => {
                     useAPIKey={auth.useAPIKey}
                     requirePassword={!isEditing}
                     emailVerification={auth.emailVerification}
-                    maxLoginAttempts={auth.maxLoginAttempts}
+                    collection={collection}
+                    email={data?.email}
                   />
                 )}
                 {upload && (
@@ -247,6 +248,7 @@ DefaultEditView.propTypes = {
   data: PropTypes.shape({
     updatedAt: PropTypes.string,
     createdAt: PropTypes.string,
+    email: PropTypes.string,
   }),
   onSave: PropTypes.func.isRequired,
   permissions: PropTypes.shape({

@@ -37,11 +37,13 @@ module.exports = ({ config, collections, operations }) => {
           equals: token.email,
         };
       }
+
       const userQuery = await operations.collections.find({
         where,
         collection,
         req,
         overrideAccess: true,
+        depth: collection.config.auth.depth,
       });
 
       if (userQuery.docs && userQuery.docs.length > 0) {

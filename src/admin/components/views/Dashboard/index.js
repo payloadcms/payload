@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useConfig } from '../../providers/Config';
-import { useAuthentication } from '../../providers/Authentication';
+import { useAuth } from '../../providers/Authentication';
 import { useStepNav } from '../../elements/StepNav';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultDashboard from './Default';
 
 const Dashboard = () => {
-  const { permissions } = useAuthentication();
+  const { permissions } = useAuth();
   const { setStepNav } = useStepNav();
   const [filteredGlobals, setFilteredGlobals] = useState([]);
 

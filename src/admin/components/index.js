@@ -1,5 +1,6 @@
 export { default as Button } from './elements/Button';
 export { default as Popup } from './elements/Popup';
+export { default as Banner } from './elements/Banner';
 
 export { default as MinimalTemplate } from './templates/Minimal';
 

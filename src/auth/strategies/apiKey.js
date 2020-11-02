@@ -35,6 +35,7 @@ module.exports = ({ operations }, { Model, config }) => {
         },
         req,
         overrideAccess: true,
+        depth: config.auth.depth,
       });
 
       if (userQuery.docs && userQuery.docs.length > 0) {

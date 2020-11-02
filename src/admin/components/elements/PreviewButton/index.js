@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useForm } from '../../forms/Form/context';
-import { useAuthentication } from '../../providers/Authentication';
+import { useAuth } from '../../providers/Authentication';
 import Button from '../Button';
 
 const baseClass = 'preview-btn';
 
 const PreviewButton = ({ generatePreviewURL }) => {
-  const { token } = useAuthentication();
+  const { token } = useAuth();
   const { getFields } = useForm();
   const fields = getFields();
 

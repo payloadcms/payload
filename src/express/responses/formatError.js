@@ -1,6 +1,6 @@
 const formatErrorResponse = (incoming) => {
   if (incoming) {
-    if (incoming?.data?.length > 0) {
+    if (incoming && incoming.data && incoming.data.length > 0) {
       return {
         errors: [{
           name: incoming.name,
