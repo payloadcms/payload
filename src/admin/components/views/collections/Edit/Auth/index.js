@@ -49,7 +49,6 @@ const Auth = (props) => {
       method: 'post',
     });
 
-    console.log('response.status', response.status);
     if (response.status === 200) {
       replaceStatus([{
         message: 'Successfully unlocked',
