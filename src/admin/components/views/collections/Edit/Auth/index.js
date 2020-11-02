@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import Email from '../../../../forms/field-types/Email';
 import Password from '../../../../forms/field-types/Password';
@@ -6,6 +6,9 @@ import Checkbox from '../../../../forms/field-types/Checkbox';
 import Button from '../../../../elements/Button';
 import ConfirmPassword from '../../../../forms/field-types/ConfirmPassword';
 import { useFormFields, useFormModified } from '../../../../forms/Form/context';
+import { useConfig } from '../../../../providers/Config';
+import { useStatusList } from '../../../../elements/Status';
+
 import APIKey from './APIKey';
 
 import './index.scss';
@@ -13,10 +16,11 @@ import './index.scss';
 const baseClass = 'auth-fields';
 
 const Auth = (props) => {
-  const { useAPIKey, requirePassword, emailVerification, maxLoginAttempts } = props;
+  const { useAPIKey, requirePassword, emailVerification, collection: { slug }, email } = props;
   const [changingPassword, setChangingPassword] = useState(requirePassword);
   const { getField } = useFormFields();
   const modified = useFormModified();
+  const { replaceStatus } = useStatusList();
 
   const enableAPIKey = getField('enableAPIKey');
 
@@ -25,6 +29,39 @@ const Auth = (props) => {
       setChangingPassword(false);
     }
   }, [modified]);
+
+  const {
+    serverURL,
+    routes: {
+      api,
+    },
+  } = useConfig();
+
+  const unlock = useCallback(async () => {
+    const url = `${serverURL}${api}/${slug}/unlock`;
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+      }),
+      method: 'post',
+    });
+
+    console.log('response.status', response.status);
+    if (response.status === 200) {
+      replaceStatus([{
+        message: 'Successfully unlocked',
+        type: 'success',
+      }]);
+    } else {
+      replaceStatus([{
+        message: 'Unable to unlock',
+        type: 'error',
+      }]);
+    }
+  }, [replaceStatus, serverURL, api, slug, email]);
 
   return (
     <div className={baseClass}>
@@ -63,6 +100,13 @@ const Auth = (props) => {
           Change Password
         </Button>
       )}
+      <Button
+        size="small"
+        buttonStyle="secondary"
+        onClick={() => unlock()}
+      >
+        Force Unlock
+      </Button>
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <Checkbox
@@ -81,13 +125,6 @@ const Auth = (props) => {
           readOnly
         />
       )}
-      {/* {maxLoginAttempts > 0 && (
-        <Checkbox
-          label="Verified"
-          name="_verified"
-          readOnly
-        />
-      )} */}
     </div>
   );
 };
@@ -96,14 +133,18 @@ Auth.defaultProps = {
   useAPIKey: false,
   requirePassword: false,
   emailVerification: false,
-  maxLoginAttempts: undefined,
+  collection: undefined,
+  email: '',
 };
 
 Auth.propTypes = {
   useAPIKey: PropTypes.bool,
   requirePassword: PropTypes.bool,
   emailVerification: PropTypes.bool,
-  maxLoginAttempts: PropTypes.number,
+  collection: PropTypes.shape({
+    slug: PropTypes.string,
+  }),
+  email: PropTypes.string,
 };
 
 export default Auth;
