@@ -113,7 +113,6 @@ const fieldToSchemaMap = {
     [field.name]: {
       ...formatBaseSchema(field),
       type: Schema.Types.ObjectId,
-      autopopulate: true,
       ref: field.relationTo,
     },
   }),
@@ -123,7 +122,6 @@ const fieldToSchemaMap = {
     if (Array.isArray(field.relationTo)) {
       schema.value = {
         type: Schema.Types.ObjectId,
-        autopopulate: true,
         refPath: `${field.name}${field.localized ? '.{{LOCALE}}' : ''}.relationTo`,
       };
       schema.relationTo = { type: String, enum: field.relationTo };
@@ -133,7 +131,6 @@ const fieldToSchemaMap = {
       };
 
       schema.type = Schema.Types.ObjectId;
-      schema.autopopulate = true;
       schema.ref = field.relationTo;
     }
 
