@@ -176,6 +176,10 @@ class ParamParser {
       if (val.toLowerCase() === 'false') formattedValue = false;
     }
 
+    if (schemaObject && schemaObject.ref && val === 'null') {
+      val = null;
+    }
+
     if (operator && validOperators.includes(operator)) {
       switch (operator) {
         case 'greater_than_equal':
