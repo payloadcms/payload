@@ -177,7 +177,7 @@ class ParamParser {
     }
 
     if (schemaObject && schemaObject.ref && val === 'null') {
-      val = null;
+      formattedValue = null;
     }
 
     if (operator && validOperators.includes(operator)) {
