@@ -32,15 +32,15 @@ const Pill = ({
       to={to || undefined}
     >
       {(icon && alignIcon === 'left') && (
-        <>
+        <React.Fragment>
           {icon}
-        </>
+        </React.Fragment>
       )}
       {children}
       {(icon && alignIcon === 'right') && (
-        <>
+        <React.Fragment>
           {icon}
-        </>
+        </React.Fragment>
       )}
     </RenderedType>
   );
