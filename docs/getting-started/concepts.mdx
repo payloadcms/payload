@@ -1,6 +1,39 @@
 ---
-title: Concepts
+title: Payload Concepts
+label: Concepts
 order: 20
 ---
 
-# Concepts
+Payload is based around a small and intuitive set of concepts. Before starting to work with Payload, it's a good idea to familiarize yourself with the following:
+
+### Config
+
+<Banner type="info">
+	The Payload config is where you configure everything that Payload does.
+</Banner>
+
+By default, the Payload config lives in the root folder of your code and is named `payload.config.js`, but you can customize where you store it. The `config` is plain old JavaScript, meaning you can write full JavaScript functions and even full React components right into your config.
+
+### Collections
+
+<Banner type="info">
+	A Collection represents a type of content that Payload will store and can contain many documents.
+</Banner>
+
+Payload Collections are defined through Each Collection will map one-to-one with a MongoDB collection automatically based on fields that you define. You can have as many Collections as you need. It's often best practice to write your Collections in separate files,
+
+### Globals
+
+<Banner type="info">
+	A Global is a "one-off" piece of content that is perfect for storing navigational structures, themes, top-level meta data, and more.
+</Banner>
+
+You can define as many Collections as you need. On each Collection, you can specify the shape of your data through Fields.
+
+### Fields
+
+<Banner type="info">
+	Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data that they store.
+</Banner>
+
+Payload comes with many different types of Fields that give you a ton of flexibility while designing your API. Each Field type has its own potential properties that allow you to customize how they work.
