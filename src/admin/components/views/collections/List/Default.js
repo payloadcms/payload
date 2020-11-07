@@ -1,5 +1,5 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useConfig } from '../../../providers/Config';
 import UploadGallery from '../../../elements/UploadGallery';
@@ -36,6 +36,7 @@ const DefaultList = (props) => {
 
   const { routes: { admin } } = useConfig();
   const history = useHistory();
+  const { pathname, search } = useLocation();
 
   return (
     <div className={baseClass}>
@@ -60,7 +61,9 @@ const DefaultList = (props) => {
           enableSort={Boolean(upload)}
         />
         {(data.docs && data.docs.length > 0) && (
-          <React.Fragment>
+          <React.Fragment
+            key={`${pathname}${search}`}
+          >
             {!upload && (
               <Table
                 data={data.docs}
