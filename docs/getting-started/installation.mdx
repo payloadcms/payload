@@ -1,0 +1,94 @@
+---
+title: Installation
+label: Installation
+order: 30
+---
+
+### Requirements
+
+Payload requires the following software:
+
+- Yarn or NPM
+- NodeJS version 10+
+- A Mongo Database
+- Express
+
+Once you are sure that you have all of these dependencies, you can `yarn add payload` or `npm install --save payload` at the root of your project folder.
+
+The first step is writing a baseline config. The simplest config contains the following:
+
+```
+export default {
+  serverURL: 'http://localhost:3000',
+};
+```
+
+Create a new `payload.config.js` file in the root of your project and write the above code into it. This file fully supports ES6.
+
+Although this is just the bare minimum config, there are *many* more options that you can control here. To reference the full config and all of its options, [click here](/docs/configuration/main).
+
+### Server
+
+Now that you've got a baseline Payload config, it's time to initialize Payload. It requires an Express server that you provide, so if you're not familiar with how to set up a baseline Express server, please read up on exactly what Express is and why to use it. Express' own [Documentation](https://expressjs.com/en/starter/hello-world.html) is a good place to start. Otherwise, follow along below for how to build your own Express server to use with Payload.
+
+1. Run `yarn add express`
+1. Create a new `server.js` file in the root folder of your app
+1. Add the following code to `server.js`:
+
+```
+const express = require('express');
+
+const app = express();
+
+app.listen(3000, async () => {
+	console.log('Express is now listening for incoming connections on port 3000.')
+});
+
+```
+
+This server doesn't do anything just yet. But, after you have this in place, it's time to initialize Payload. Payload is initialized via its `init()` method, which accepts a small set of arguments to tell it how to operate. For a full list of `init` arguments, please consult the [main configuration](/docs/configuration/main#init) docs.
+
+To initialize Payload, update your `server.js` file with the following code:
+
+```
+const express = require('express');
+const payload = require('payload');
+
+const app = express();
+
+payload.init({
+  secret: 'SECRET_KEY',
+  mongoURL: 'mongodb://localhost/payload',
+  express: app,
+})
+
+app.listen(3000, async () => {
+	console.log('Express is now listening for incoming connections on port 3000.')
+});
+
+```
+
+As you can see above, the required arguments to the `init` function are as follows:
+
+##### `secret`
+
+This is a secure string that will be used to authenticate with Payload. It can be random but should be at least 14 characters and be very difficult to guess. Often, it's smart to store this value in an `env` and set different values for each of your environments (ocal, stage, prod, etc).
+
+##### `mongoURL`
+
+This is a fully qualified MongoDB connection string that points to your Mongo database. If you don't have Mongo installed locally, you can [follow these steps for Mac OSX](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/) and [these steps](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/) for Windows 10. If you want to use a local database and you know you have MongoDB installed locally, a typical connection string will look like this:
+
+`mongodb://localhost/payload`
+
+In contrast to running Mongo locally, a popular option is to sign up for a free [MongoDB Atlas account](https://www.mongodb.com/cloud/atlas), which is a fully hosted and cloud-based installation of Mongo that you don't need to ever worry about.
+
+##### `express`
+
+This is your Express app as shown above. Payload will tie into your existing `app` and scope all of its functionalities to sub-routers. By default, Payload will add an `/admin` router and an `/api` router, but you can customize these paths.
+
+### Test it out
+
+After you've gotten this far, it's time to boot up Payload. At the command line, run `yarn` or `npm install` and then `node server.js` in your application's folder to start up your app and initialize Payload.
+
+After it starts, you can go to `http://localhost:3000/admin` to create your first Payload user!
+
