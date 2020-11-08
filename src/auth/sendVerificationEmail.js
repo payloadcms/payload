@@ -1,4 +1,4 @@
-function sendVerificationEmail(args) {
+async function sendVerificationEmail(args) {
   // Verify token from e-mail
   const {
     config,
@@ -9,10 +9,11 @@ function sendVerificationEmail(args) {
     user,
     disableEmail,
     req,
+    token,
   } = args;
 
   if (!disableEmail) {
-    const defaultVerificationURL = `${config.serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${user._verificationToken}`;
+    const defaultVerificationURL = `${config.serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`;
 
     let html = `A new account has just been created for you to access <a href="${config.serverURL}">${config.serverURL}</a>.
     Please click on the following link or paste the URL below into your browser to verify your email:
@@ -21,9 +22,9 @@ function sendVerificationEmail(args) {
 
     // Allow config to override email content
     if (typeof collectionConfig.auth.verify.generateEmailHTML === 'function') {
-      html = collectionConfig.auth.verify.generateEmailHTML({
+      html = await collectionConfig.auth.verify.generateEmailHTML({
         req,
-        token: user._verificationToken,
+        token,
         user,
       });
     }
@@ -32,9 +33,9 @@ function sendVerificationEmail(args) {
 
     // Allow config to override email subject
     if (typeof collectionConfig.auth.verify.generateEmailSubject === 'function') {
-      subject = collectionConfig.auth.verify.generateEmailSubject({
+      subject = await collectionConfig.auth.verify.generateEmailSubject({
         req,
-        token: user._verificationToken,
+        token,
         email: user.email,
       });
     }

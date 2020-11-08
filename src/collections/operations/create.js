@@ -215,6 +215,7 @@ async function create(args) {
       sendEmail: this.sendEmail,
       collection: { config: collectionConfig, Model },
       user: result,
+      token: data._verificationToken,
       req,
     });
   }
