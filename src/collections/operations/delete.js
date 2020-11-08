@@ -40,14 +40,23 @@ async function deleteQuery(args) {
   // 3. Get existing document
   // /////////////////////////////////////
 
-  let query = { _id: id };
+  const queryToBuild = {
+    where: {
+      and: [
+        {
+          id: {
+            equals: id,
+          },
+        },
+      ],
+    },
+  };
 
   if (hasWhereAccess) {
-    query = {
-      ...query,
-      ...accessResults,
-    };
+    queryToBuild.where.and.push(accessResults);
   }
+
+  const query = await Model.buildQuery(queryToBuild, locale);
 
   let resultToDelete = await Model.findOne(query);
 
