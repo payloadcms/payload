@@ -58,7 +58,7 @@ async function forgotPassword(args) {
     If you did not request this, please ignore this email and your password will remain unchanged.`;
 
     if (typeof collectionConfig.auth.forgotPassword.generateEmailHTML === 'function') {
-      html = collectionConfig.auth.forgotPassword.generateEmailHTML({
+      html = await collectionConfig.auth.forgotPassword.generateEmailHTML({
         req,
         token,
         user: userJSON,
@@ -68,7 +68,7 @@ async function forgotPassword(args) {
     let subject = 'Reset your password';
 
     if (typeof collectionConfig.auth.forgotPassword.generateEmailSubject === 'function') {
-      subject = collectionConfig.auth.forgotPassword.generateEmailSubject({
+      subject = await collectionConfig.auth.forgotPassword.generateEmailSubject({
         req,
         token,
         user: userJSON,
