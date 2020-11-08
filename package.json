@@ -152,6 +152,7 @@
     "!jest.config.js",
     "payload.d.ts",
     "src",
+    "docs",
     "components",
     "scss"
   ]
