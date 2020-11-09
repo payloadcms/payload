@@ -32,12 +32,12 @@
     "auth": {
       "type": "object",
       "description": "Authentication properties",
-      "default": false,
       "properties": {
         "verify": {
           "anyOf": [
             {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Enable email verification of user accounts, set to true to enable the feature using Payload default settings"
             },
             {
               "type": "object",
