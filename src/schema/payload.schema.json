@@ -28,7 +28,7 @@
             },
             "ogImage": {
               "type": "string",
-              "default": "/ok.jpg"
+              "description": "src url for the admin image"
             },
             "favicon": {
               "type": "string",

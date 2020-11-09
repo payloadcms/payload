@@ -93,7 +93,7 @@ const DefaultEditView = (props) => {
                   <Auth
                     useAPIKey={auth.useAPIKey}
                     requirePassword={!isEditing}
-                    emailVerification={auth.emailVerification}
+                    verify={auth.verify}
                     collection={collection}
                     email={data?.email}
                   />
@@ -239,7 +239,10 @@ DefaultEditView.propTypes = {
     timestamps: PropTypes.bool,
     auth: PropTypes.shape({
       useAPIKey: PropTypes.bool,
-      emailVerification: PropTypes.bool,
+      verify: PropTypes.oneOfType([
+        PropTypes.bool,
+        PropTypes.object,
+      ]),
       maxLoginAttempts: PropTypes.number,
     }),
     upload: PropTypes.shape({}),

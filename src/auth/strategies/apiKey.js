@@ -9,7 +9,7 @@ module.exports = ({ operations }, { Model, config }) => {
   return new PassportAPIKey(opts, true, async (apiKey, done, req) => {
     try {
       const where = {};
-      if (config.auth.emailVerification) {
+      if (config.auth.verify) {
         where.and = [
           {
             apiKey: {

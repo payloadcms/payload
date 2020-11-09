@@ -33,7 +33,7 @@ async function login(args) {
 
   const userDoc = await Model.findByUsername(email);
 
-  if (!userDoc || (args.collection.config.auth.emailVerification && userDoc._verified === false)) {
+  if (!userDoc || (args.collection.config.auth.verify && userDoc._verified === false)) {
     throw new AuthenticationError();
   }
 

@@ -161,7 +161,7 @@ async function create(args) {
     if (data.email) {
       data.email = data.email.toLowerCase();
     }
-    if (collectionConfig.auth.emailVerification) {
+    if (collectionConfig.auth.verify) {
       data._verified = false;
       data._verificationToken = crypto.randomBytes(20).toString('hex');
     }
@@ -209,7 +209,7 @@ async function create(args) {
   // 10. Send verification email if applicable
   // /////////////////////////////////////
 
-  if (collectionConfig.auth && collectionConfig.auth.emailVerification && !disableVerificationEmail) {
+  if (collectionConfig.auth && collectionConfig.auth.verify && !disableVerificationEmail) {
     sendVerificationEmail({
       config: this.config,
       sendEmail: this.sendEmail,
