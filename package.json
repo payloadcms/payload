@@ -38,6 +38,7 @@
     "@faceless-ui/scroll-info": "^1.1.1",
     "@faceless-ui/window-info": "^1.2.2",
     "@udecode/slate-plugins": "^0.64.3",
+    "ajv": "^6.12.6",
     "async-some": "^1.0.2",
     "autoprefixer": "^9.7.4",
     "babel-jest": "^26.3.0",

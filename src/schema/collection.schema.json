@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "collection.schema.json",
+  "title": "Payload Collection Configuration",
+  "type": "object",
+  "required": [
+    "slug",
+    "labels",
+    "fields"
+  ],
+  "properties": {
+    "slug": {
+      "type": "string"
+    },
+    "labels": {
+      "type": "object",
+      "properties": {
+        "singular": {
+          "type": "string",
+          "description": "Name used when referring to an instance of the collection"
+        },
+        "plural": {
+          "type": "string",
+          "description": "Name used when referring to set of instances for the collection"
+        }
+      }
+    },
+    "access": {
+      "type": "object",
+      "description": "Callable functions to determine permission access"
+    },
+    "fields": {
+      "type": "array",
+      "description": "The attributes of the collection",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The attribute key of the field used on model instances"
+          },
+          "type": {
+            "type": "string",
+            "description": ""
+          },
+          "label": {
+            "type": "string",
+            "description": "Field label for the admin panel"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Enforce attribute has a value when saving"
+          },
+          "defaultValue": {
+            "description": "When not present, will be saved with when not given"
+          },
+          "unique": {
+            "description": "Enforce instances in the collection to not repeat the value",
+            "type": "boolean"
+          },
+          "access": {
+            "description": "Field level permissions",
+            "type": "object",
+            "properties": {
+              "create": {},
+              "update": {},
+              "read": {}
+            }
+          },
+          "relationTo": {
+            "description": "The name of the collection being referenced",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "options": {
+            "description": "Choices",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {"type":  "string"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "description": "The data stored and returned for the selection",
+                      "type": "string"
+                    },
+                    "label": {
+                      "description": "The name that identifies the value to be selected",
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "timestamps": {
+      "type": "boolean",
+      "description": "Adds createdAt and updatedAt fields for the collection"
+    }
+  }
+}
