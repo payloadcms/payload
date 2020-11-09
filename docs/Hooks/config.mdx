@@ -4,7 +4,233 @@ label: Config
 order: 10
 ---
 
-Talk about how to write hooks.
+Hooks allow intervention before or after any internal operation.
 
-List all possible hoooks.
+Payload has extensive support for hooks, at both the document-level and field-level:
 
+## Hook Lifecycle
+
+_TODO: Document Hook lifecycle_
+
+## Hook Types
+
+- [Collection Hooks](#collection-hooks)
+- [Field Hooks](#field-hooks)
+- Operation Hooks
+
+## Collection Hooks
+
+Collection can be executed at any point in the modification or retrieval of a collection.
+
+Collection Hooks available:
+
+- `beforeValidate`
+- `beforeChange`
+- `afterChange`
+- `beforeRead`
+- `afterRead`
+- `beforeDelete`
+- `afterDelete`
+
+### Usage
+
+Configuration of collection hooks is done under a collection config in `payload.config.js`. They can either be created in-line or required from a separate file.  Each hook is an array of functions to be run.
+
+_TODO: Talk about async vs synchronous and concurrency_
+
+```js
+// Collection config
+module.exports = {
+  slug: 'public-user',
+  fields: [
+    { name: 'name', label: 'Name', type: 'text'},
+  ]
+  hooks: {
+    // Create and Update Operations
+    beforeValidate: [(args) => {...}],
+    beforeChange: [(args) => {...}],
+    afterChange: [(args) => {...}],
+
+    // Read Operations
+    beforeRead: [(args) => {...}],
+    afterRead: [(args) => {...}],
+
+    // Delete Operations
+    beforeDelete: [(args) => {...}],
+    afterDelete: [(args) => {...}],
+
+    // Login Operations
+    beforeLogin: [(args) => {...}],
+    afterLogin: [(args) => {...}],
+
+    // After error
+    afterError: [(args) => {...}],
+  }
+}
+```
+
+Each hook is an array of functions allowing for multiple to be combined as desired.
+
+Configuration of hooks should be done in your `payload.config.js`
+
+#### beforeValidate
+
+Runs before the `create` and `update` operations.
+
+```js
+const beforeValidateHook = ({
+  data, // incoming document data
+  req, // full express request
+  operation, // name of the operation ie. 'create', 'update'
+  originalDoc, // original document
+}) => {...}
+```
+
+#### beforeChange
+
+Runs before `create` and `update` operations, after validation.
+
+```js
+const beforeChangeHook = ({
+  data, // incoming document data
+  req, // full express request
+  operation, // name of the operation ie. 'create', 'update'
+  originalDoc, // original document
+}) => {...}
+```
+
+#### afterChange
+
+Runs after `create` and `update` operations.
+
+```js
+const afterChangeHook = ({
+  doc, // full document data
+  req, // full express request
+  operation, // name of the operation ie. 'create', 'update'
+}) => {...}
+```
+
+#### beforeRead
+
+Runs before `find` and `findByID` operations.
+
+```js
+const beforeReadHook = ({
+  req, // full express request
+  query, // JSON formatted query
+  doc, // full document data
+}) => {...}
+```
+
+#### afterRead
+
+Runs after `find` and `findByID` operations.
+
+```js
+const afterReadHook = ({
+  req, // full express request
+  query, // JSON formatted query
+  doc, // full document data
+}) => {...}
+```
+
+#### beforeDelete
+
+_TODO: Document_
+
+#### afterDelete
+
+_TODO: Document_
+
+## Field Hooks
+
+Field can be executed at any point in the modification or retrieval of a collection field.
+
+Field Hooks available:
+
+- `beforeValidate`
+- `beforeChange`
+- `afterChange`
+- `afterRead`
+
+### Usage
+
+```js
+// Collection config
+module.exports = {
+  slug: 'public-user',
+  fields: [
+    {
+      name: 'name',
+      label: 'Name',
+      type: 'text',
+      hooks: {
+        // Create and Update Operations
+        beforeValidate: [(args) => {...}],
+        beforeChange: [(args) => {...}],
+        afterChange: [(args) => {...}],
+
+        // Read Operations
+        afterRead: [(args) => {...}],
+      }
+    },
+  ],
+}
+```
+
+#### beforeValidate
+
+Runs before the `create` and `update` operations.
+
+```js
+const beforeValidateHook = ({
+  value, // field value
+  originalDoc, // original document
+  data, // incoming document data
+  operation, // name of the operation ie. 'create', 'update'
+  req, // full express request
+}) => {...}
+```
+
+#### beforeChange
+
+Runs before the `create` and `update` operations, after validation.
+
+```js
+const beforeChangeHook = ({
+  value, // field value
+  originalDoc, // original document
+  data, // incoming document data
+  operation, // name of the operation ie. 'create', 'update'
+  req, // full express request
+}) => {...}
+```
+
+#### afterChange
+
+Runs after `create` and `update` operations
+
+```js
+const afterChangeHook = ({
+  value, // field value
+  originalDoc, // original document
+  data, // incoming document data
+  operation, // name of the operation ie. 'create', 'update'
+  req, // full express request
+}) => {...}
+```
+
+#### afterRead
+
+Runs after result as been retrieved from database
+
+```js
+const beforeChangeHook = ({
+  value, // field value
+  originalDoc, // original document
+  data, // incoming document data
+  operation, // name of the operation ie. 'create', 'update'
+  req, // full express request
+}) => {...}
+```
