@@ -19,7 +19,7 @@ module.exports = ({ config, collections, operations }) => {
       const collection = collections[token.collection];
 
       const where = {};
-      if (collection.config.auth.emailVerification) {
+      if (collection.config.auth.verify) {
         where.and = [
           {
             email: {

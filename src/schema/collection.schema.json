@@ -29,6 +29,33 @@
       "type": "object",
       "description": "Callable functions to determine permission access"
     },
+    "auth": {
+      "type": "object",
+      "description": "Authentication properties",
+      "properties": {
+        "verify": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Enable email verification of user accounts, set to true to enable the feature using Payload default settings"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "generateEmailSubject": {
+                  "type": "string",
+                  "description": "Subject field used when sending verify email for new user accounts"
+                },
+                "generateEmailHTML": {
+                  "type": "object",
+                  "description": "Function that returns HTML for the body of the email sent to verify user accounts"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
     "fields": {
       "type": "array",
       "description": "The attributes of the collection",
