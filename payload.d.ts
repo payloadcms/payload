@@ -150,7 +150,7 @@ declare module "@payloadcms/payload/types" {
     },
     auth?: {
       tokenExpiration?: number;
-      emailVerification?: boolean;
+      verify?: boolean | { generateEmailHTML: string, generateEmailSubject: string };
       maxLoginAttempts?: number;
       lockTime?: number;
       useAPIKey?: boolean;

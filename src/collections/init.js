@@ -91,7 +91,7 @@ function registerCollections() {
           unlock,
         } = this.requestHandlers.collections.auth;
 
-        if (collection.auth.emailVerification) {
+        if (collection.auth.verify) {
           router
             .route(`/${slug}/verify/:token`)
             .post(verifyEmail);

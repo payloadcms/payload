@@ -32,7 +32,7 @@ module.exports = {
   },
   auth: {
     tokenExpiration: 300,
-    emailVerification: true,
+    verify: true,
     maxLoginAttempts: 5,
     lockTime: 600 * 1000, // lock time in ms
     generateVerificationUrl: (req, token) => `http://localhost:3000/api/verify?token=${token}`,

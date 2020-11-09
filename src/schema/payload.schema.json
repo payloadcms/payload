@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "payload.schema.json",
+  "title": "Payload Configuration",
+  "type": "object",
+  "required": [
+    "collections"
+  ],
+  "properties": {
+    "admin": {
+      "type": "object",
+      "description": "Admin panel configuration",
+      "properties": {
+        "user": {
+          "type": "string",
+          "description": "Collection name users designated to access the panel"
+        },
+        "meta": {
+          "type": "object",
+          "description": "Admin web interface configuration",
+          "required": [
+            "titleSuffix"
+          ],
+          "properties": {
+            "titleSuffix": {
+              "type": "string",
+              "description": "Text to add at the end of the page title of the admin html head"
+            },
+            "ogImage": {
+              "type": "string",
+              "description": "src url for the admin image"
+            },
+            "favicon": {
+              "type": "string",
+              "description": "Admin panel favicon file to use"
+            }
+          }
+        }
+      }
+    },
+    "collections": {
+      "type": "array",
+      "items": {
+        "$ref": "./collection.schema.json"
+      }
+    }
+  }
+}

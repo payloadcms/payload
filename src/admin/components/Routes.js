@@ -81,7 +81,7 @@ const Routes = () => {
                 </Route>
 
                 {collections.map((collection) => {
-                  if (collection?.auth?.emailVerification) {
+                  if (collection?.auth?.verify) {
                     return (
                       <Route
                         key={`${collection.slug}-verify`}
