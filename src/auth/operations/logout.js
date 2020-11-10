@@ -10,10 +10,16 @@ async function logout(args) {
 
   const {
     res,
+    collection: {
+      config: collectionConfig,
+    },
   } = args;
 
   const cookieOptions = {
     path: '/',
+    httpOnly: true,
+    secure: collectionConfig.auth.cookies.secure,
+    sameSite: collectionConfig.auth.cookies.sameSite,
   };
 
   res.clearCookie(`${config.cookiePrefix}-token`, cookieOptions);
