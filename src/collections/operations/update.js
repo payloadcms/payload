@@ -223,8 +223,8 @@ async function update(args) {
 
   doc = await this.performFieldOperations(collectionConfig, {
     data: doc,
-    hook: 'afterRead',
-    operation: 'read',
+    hook: 'afterChange',
+    operation: 'update',
     req,
     id,
     depth,
