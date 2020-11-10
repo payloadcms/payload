@@ -34,6 +34,7 @@
       "description": "Authentication properties",
       "properties": {
         "verify": {
+          "description": "Require users to verify their email before being able to login for this collection",
           "anyOf": [
             {
               "type": "boolean",
@@ -41,16 +42,28 @@
             },
             {
               "type": "object",
-              "properties": {
-                "generateEmailSubject": {
-                  "type": "string",
-                  "description": "Subject field used when sending verify email for new user accounts"
+              "anyOf": [
+                {
+                  "required": [
+                    "generateEmailSubject"
+                  ],
+                  "properties": {
+                    "generateEmailSubject": {
+                      "type": "string",
+                      "description": "Subject field used when sending verify email for new user accounts"
+                    }
+                  }
                 },
-                "generateEmailHTML": {
-                  "type": "object",
-                  "description": "Function that returns HTML for the body of the email sent to verify user accounts"
+                {
+                  "required": [
+                    "generateEmailHTML"
+                  ],
+                  "generateEmailHTML": {
+                    "type": "string",
+                    "description": "Function that returns HTML for the body of the email sent to verify user accounts"
+                  }
                 }
-              }
+              ]
             }
           ]
         }
