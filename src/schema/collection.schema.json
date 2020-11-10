@@ -34,7 +34,7 @@
       "description": "Authentication properties",
       "properties": {
         "verify": {
-          "description": "Require users authentication of the collection to verify their email before being able to login",
+          "description": "Require users to verify their email before being able to login for this collection",
           "anyOf": [
             {
               "type": "boolean",
