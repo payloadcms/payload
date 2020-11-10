@@ -183,8 +183,8 @@ async function create(args) {
 
   result = await performFieldOperations(collectionConfig, {
     data: result,
-    hook: 'afterRead',
-    operation: 'read',
+    hook: 'afterChange',
+    operation: 'create',
     req,
     depth,
     overrideAccess,

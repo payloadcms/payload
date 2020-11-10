@@ -4,4 +4,61 @@ label: Examples
 order: 20
 ---
 
-Show common examples of how to write hook functions.
+### Collection Hooks
+
+#### Set createdBy and lastModifiedBy
+
+```js
+beforeChange: [
+  ({ req, operation }) => {
+    if (req.user && req.body) {
+      if (operation === 'create') {
+        req.body.createdBy = req.user.id;
+      }
+      req.body.lastModifiedBy = req.user.id;
+    }
+  }
+]
+```
+_NOTE: createdBy and lastModifiedBy must be fields on the collection_
+
+#### Use Local Payload API
+
+Queries a separate collection and appends to returned result
+
+```js
+afterRead: [
+  async ({ req, doc }) => {
+    const formattedData = { ...doc };
+    const posts = await req.payload.find({
+      collection: 'posts',
+    });
+
+    formattedData.posts = posts;
+
+    return formattedData;
+  },
+],
+```
+
+#### Read Request Header
+
+```js
+beforeRead: [
+  ({ req }) => {
+    if (req.headers.specialheader === 'special') {
+      // Do something...
+    }
+  },
+],
+```
+
+### Field Hooks
+
+#### Kebab-case Formatter
+
+```js
+beforeValidate: [
+  ({ value }) => val.replace(/ /g, '-').toLowerCase();
+]
+```
