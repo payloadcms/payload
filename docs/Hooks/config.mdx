@@ -4,31 +4,11 @@ label: Config
 order: 10
 ---
 
-Hooks allow intervention before or after any internal operation.
+<Banner type="info">
+	Hooks allow intervention before or after any internal operation.
 
-Payload has extensive support for hooks, at both the document-level and field-level:
-
-## Hook Lifecycle
-
-Hooks execute in the following order in relation to operations:
-
-### Create/Update Lifecycle
-
-1. `beforeValidate` Field Hooks
-2. `beforeValidate` Collection Hooks
-3. Validate operation
-4. `beforeChange` Field Hooks
-5. `beforeChange` Collection Hooks
-6. Create/Update against database
-7. `afterChange` Field Hooks
-8. `afterChange` Collection Hooks
-
-### Find Lifecycle
-
-1. `beforeRead` Collection Hooks
-2. Find against database
-3. `afterRead` Field Hooks
-4. `afterRead` Collection Hooks
+  Payload has extensive support for hooks, at both the document-level and field-level.
+</Banner>
 
 ## Hook Types
 
@@ -295,3 +275,25 @@ const beforeChangeHook = ({
   req, // full express request
 }) => {...}
 ```
+
+## Hook Lifecycle
+
+Hooks execute in the following order in relation to operations
+
+### Create/Update Lifecycle
+
+1. `beforeValidate` Field Hooks
+2. `beforeValidate` Collection Hooks
+3. Validate operation
+4. `beforeChange` Field Hooks
+5. `beforeChange` Collection Hooks
+6. Create/Update against database
+7. `afterChange` Field Hooks
+8. `afterChange` Collection Hooks
+
+### Find Lifecycle
+
+1. `beforeRead` Collection Hooks
+2. Find against database
+3. `afterRead` Field Hooks
+4. `afterRead` Collection Hooks
