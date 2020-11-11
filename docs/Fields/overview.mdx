@@ -4,11 +4,59 @@ label: Overview
 order: 10
 ---
 
-Collections are composed of any number of fields. Payload offers a wide-array of field-types - both simple and complex.
+<Banner type="info">
+	Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data that they store. Payload offers a wide-array of field-types - both simple and complex.
+</Banner>
+
+## Common Options
+
+Most fields have the ability to use the following options
+
+#### `defaultValue`
+
+Initial value for the field
+
+#### `required`
+
+`true/false` value if the field is required to be populated
+
+#### `localized`
+
+`true/false` value to enable localization on the field
+
+#### `admin`
+
+The `admin` is an optional object with properties that specify how the field should be represented in the admin interface.
+
+Properties:
+
+- `position` - If specified as `sidebar`, the field will show in the admin interface's sidebar
+- `width` - A percentage value ie. `50%` that will control the max-width of the field
+- `readOnly` - `true/false` to set the field to read-only after it is saved
+
+### Common Options Example
+
+```js
+// Collection config
+{
+  fields: [
+    {
+      name: 'my-field',
+      type: 'text',
+      label: 'Text',
+      admin: {
+        position: 'sidebar',
+        width: '50%',
+        readOnly: true,
+      }
+    }
+  ]
+}
+```
 
 ## Field types
 
-When configuring a field in a collection, there are multiple values to set for the `type`. This type determines how the input will be rendered in the admin interface, what values it can accept, and how it is presented in the API.
+The `type` property on a field determines how the input will be rendered in the admin interface, what values it can accept, and how it is presented in the API.
 
 ```js
 // Collection config
@@ -22,13 +70,6 @@ When configuring a field in a collection, there are multiple values to set for t
   ]
 }
 ```
-
-### Common Options
-
-- `defaultValue`
-- `required` - boolean
-- `localized` - boolean
-- `admin` - _TODO: Document all options_
 
 ### Simple Types
 
