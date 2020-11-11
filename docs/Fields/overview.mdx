@@ -4,4 +4,252 @@ label: Overview
 order: 10
 ---
 
-List all field types here and link to each field type which should have its own documentation page.
+Collections are composed of any number of fields. Payload offers a wide-array of field-types - both simple and complex.
+
+## Field types
+
+When configuring a field in a collection, there are multiple values to set for the `type`. This type determines how the input will be rendered in the admin interface, what values it can accept, and how it is presented in the API.
+
+```js
+// Collection config
+{
+  fields: [
+    {
+      name: 'my-field',
+      type: 'text',
+      label: 'Text',
+    }
+  ]
+}
+```
+
+### Common Options
+
+- `defaultValue`
+- `required` - boolean
+- `localized` - boolean
+- `admin` - _TODO: Document all options_
+
+### Simple Types
+
+#### `text`
+
+Plain text
+
+#### `textarea`
+
+Large blocks of text. No formatting.
+
+#### `number`
+
+Simple number input
+
+#### `checkbox`
+
+Boolean value that renders a checkbox
+
+#### `date`
+
+Renders date-picker
+
+#### `email`
+
+Email. Includes validation.
+
+#### `code`
+
+Monospaced code block
+
+#### `richText`
+
+Large formatted text. Includes rich text editor in the admin interface.
+
+#### `select`
+
+Renders a select box with any number of options
+
+Options:
+
+- `hasMany` - Allows for multiple options to be selected
+
+```js
+{
+  name: 'select',
+  label: 'Select',
+  type: 'select',
+  hasMany: true // Optional
+  options: [
+    {
+      value: 'option-1',
+      label: 'Option 1 Label',
+    }, {
+      value: 'option-2',
+      label: 'Option 2 Label',
+    },
+  ],
+},
+```
+
+#### `radio`
+
+```js
+{
+  name: 'radioGroup',
+  label: 'Radio Group Example',
+  type: 'radio',
+  options: [
+    {
+      value: 'option-1',
+      label: 'Options 1 Label',
+    },
+    {
+      value: 'option-2',
+      label: 'Option 2 Label',
+    },
+  ],
+},
+```
+
+### Complex Types
+
+More powerful types but require more complex configuration
+
+#### `upload`
+
+Allows file and image upload. Useful for uploaded assets that can be referenced and re-used.
+
+_TODO: Link to Upload configuration docs_
+
+```js
+{
+  name: 'image',
+  type: 'upload',
+  label: 'Image',
+  relationTo: 'media', // A collection with the `upload` properties configured
+}
+```
+
+#### `row`
+
+Rows allow for deeper nesting of values. They have their own set of fields.
+
+```js
+{
+  type: 'row',
+  fields: [
+    {
+      name: 'text',
+      label: 'Text',
+      type: 'text',
+    },
+    {
+      name: 'number',
+      label: 'Number',
+      type: 'number',
+    },
+  ],
+}
+```
+
+#### `array`
+
+An array of the specified fields
+
+Options:
+
+- `minRows` - Minimum number of items required
+- `maxRows` - Maximum number of items allowed
+
+```js
+{
+  name: 'array',
+  label: 'Array',
+  type: 'array',
+  minRows: 2, // Optional
+  maxRows: 4, // Optional
+  fields: [
+    {
+      name: 'textField',
+      label: 'Text Field',
+      type: 'text'
+    },
+    {
+      name: 'checkbox',
+      label: 'Checkbox',
+      type: 'checkbox'
+    }
+  ]
+}
+```
+
+#### `group`
+
+A way to group related fields together. They will be rendered as a group in the admin interface.
+
+```js
+{
+  type: 'group',
+  label: 'Group',
+  name: 'group',
+  fields: [
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'nestedText1',
+          label: 'Nested Text 1',
+          type: 'text',
+        }, {
+          name: 'nestedText2',
+          label: 'Nested Text 2',
+          type: 'text',
+        },
+      ],
+    },
+  ],
+},
+```
+
+#### `blocks`
+
+Repeat any type of content any number of times
+
+The `blocks` property takes an array of the allowed fields
+
+_TODO: Link to more powerful and complex examples_
+
+Options:
+
+- `minRows` - Minimum number of items required
+- `maxRows` - Maximum number of items allowed
+
+```js
+{
+  name: 'page',
+  type: 'blocks',
+  label: 'Page',
+  labels: {
+    singular: 'Page',
+    plural: 'Pages',
+  },
+  minRows: 2, // Optional
+  maxRows: 4, // Optional
+  blocks: [
+    {
+      slug: 'quote'
+      label: 'Quote',
+      type: 'text'
+    },
+    {
+      slug: 'testimonial',
+      label: 'Testimonial',
+      type: 'textarea'
+    },
+    {
+      slug: 'cta',
+      label: 'Call To Action',
+      type: 'text'
+    }
+  ],
+}
+```
