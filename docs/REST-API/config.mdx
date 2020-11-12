@@ -4,9 +4,116 @@ label: Overview
 order: 10
 ---
 
-Go over REST configuration options.
+_TODO: Middleware_
 
-- Middleware
-- Routes
-- Depth
-- Query parameters
+<Banner type="info">
+  The Payload REST API is created using properties in each collection's config
+</Banner>
+
+Access to each collection is mounted on the API route using the collection's `slug` value. For example if a collection's slug is `users`, access to that collection will be mounted on `/api/users`.
+
+Basic CRUD operations are automatically made available:
+
+## Endpoints
+
+### Collections
+
+| Method   | Path                    | Description                          |
+| :------- | :---------------------- | :----------------------------------- |
+| `GET`    | `/api/{collection}`     | Get all {collection} documents       |
+| `GET`    | `/api/{collection}/:id` | Get a specific {collection} document |
+| `POST`   | `/api/{collection}`     | Create a {collection} document       |
+| `DELETE` | `/api/{collection}/:id` | Delete a {collection} document       |
+| `PUT`    | `/api/{collection}/:id` | Update a {collection} document       |
+
+### Globals
+
+| Method   | Path                    | Description            |
+| :------- | :---------------------- | :--------------------- |
+| `GET`    | `/api/globals/{global}` | Get {global}           |
+| `POST`   | `/api/globals/{global}` | Create/Update {global} |
+| `DELETE` | `/api/globals/{global}` | Delete a {global}      |
+
+NOTE: The `/api` prefix can be customized in the [main Payload configuration](../Configuration/main)
+
+## Responses
+
+### Collections
+
+All collection queries return metadata
+
+#### Example Response
+
+Collection Query
+
+```js
+{
+  // Document Array // highlight-line
+  "docs": [
+    {
+      "title": "Page Title",
+      "description": "Some description text",
+      "priority": 1,
+      "createdAt": "2020-10-17T01:19:29.858Z",
+      "updatedAt": "2020-10-17T01:19:29.858Z",
+      "id": "5f8a46a1dd05db75c3c64760"
+    }
+  ],
+  // Metadata // highlight-line
+  "totalDocs": 6,
+  "limit": 1,
+  "totalPages": 6,
+  "page": 1,
+  "pagingCounter": 1,
+  "hasPrevPage": false,
+  "hasNextPage": true,
+  "prevPage": null,
+  "nextPage": 2
+}
+```
+
+Documents queried by id and globals will return a single JSON document, no metadata
+
+| Property      | Description                                                |
+| :------------ | :--------------------------------------------------------- |
+| docs          | Array of documents in the {collection}                     |
+| totalDocs     | Total available documents of {collection}                  |
+| limit         | Limit query parameter. Defaults to `10`, can be configured |
+| totalPages    | Total pages available, based upon the `limit` queried for  |
+| page          | Current page                                               |
+| pagingCounter | `number` for the first doc on the current page             |
+| hasPrevPage   | `true/false` if previous page exists                       |
+| hasNextPage   | `true/false` if next page exists                           |
+| prevPage      | `number` of previous page. `null` if doesn't exist.        |
+| nextPage      | `number` of next page. `null` if doesn't exist.            |
+
+## Query Parameters
+
+| param   | description                                                                               | example                          |
+| :------ | :---------------------------------------------------------------------------------------- | :------------------------------- |
+| `limit` | Limits the number of documents returned                                                   | `?limit=3`                       |
+| `page`  | Get specific page number                                                                  | `?page=2`                        |
+| `sort`  | Sort on a specific field. Use field name for ascending. Prefix with `-` for descending    | `?sort=age`, `?sort=-age`        |
+| `depth` | Controls how deep in JSON structure to return in the query. _Follows relationship fields_ | `?depth=3`                       |
+| `where` | Exposes many logical operators. _In-depth documentation below_                            | `?where[property][equals]=value` |
+
+### Where
+
+Query on specific collection field values
+
+| operator             | description                                         | example                                      |
+| :------------------- | :-------------------------------------------------- | :------------------------------------------- |
+| `equals`             |                                                     | `?where[property][equals]=value`             |
+| `not_equals`         |                                                     | `?where[property][not_equals]=value`         |
+| `greater_than`       |                                                     | `?where[property][greater_than]=value`       |
+| `greater_than_equal` |                                                     | `?where[property][greater_than_equal]=value` |
+| `less_than`          |                                                     | `?where[property][less_than]=value`          |
+| `less_than_equal`    |                                                     | `?where[property][less_than_equal]=value`    |
+| `like`               | Partial match against property                      | `?where[property][like]=value`               |
+| `in`                 | Query for values in a comma-delimited list          | `?where[property][in]=value1,value2`         |
+| `not_in`             | Query for values _not in_ in a comma-delimited list | `?where[property][not_in]=value1,value2`     |
+| `exists`             | Query for existence of a property                   | `?where[property][exists]=true`              |
+
+#### Complex Examples
+
+_TODO: Complex Examples_
