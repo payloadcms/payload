@@ -55,6 +55,12 @@ const sanitizeConfig = (config) => {
   sanitizedConfig.rateLimit.window = sanitizedConfig.rateLimit.window || 15 * 60 * 100; // 15min default
   sanitizedConfig.rateLimit.max = sanitizedConfig.rateLimit.max || 500;
 
+  if (!sanitizedConfig.express) {
+    sanitizedConfig.express = {
+      json: {},
+    };
+  }
+
   sanitizedConfig.components = { ...(config.components || {}) };
   sanitizedConfig.hooks = { ...(config.hooks || {}) };
   sanitizedConfig.admin = { ...(config.admin || {}) };

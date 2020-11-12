@@ -23,7 +23,7 @@ const middleware = (payload) => {
     passport.initialize(),
     identifyAPI('REST'),
     authenticate(payload.config),
-    express.json(),
+    express.json(payload.config.express.json),
     methodOverride('X-HTTP-Method-Override'),
     qsMiddleware({ depth: 10 }),
     bodyParser.urlencoded({ extended: true }),
