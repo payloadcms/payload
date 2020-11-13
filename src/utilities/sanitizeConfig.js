@@ -1,5 +1,6 @@
 const defaultUser = require('../auth/default');
 const sanitizeCollection = require('../collections/sanitize');
+const { InvalidConfiguration } = require('../errors');
 const sanitizeGlobals = require('../globals/sanitize');
 const validateSchema = require('../schema/validateSchema');
 
@@ -37,8 +38,12 @@ const sanitizeConfig = (config) => {
   }
 
   sanitizedConfig.email = config.email || {};
-  sanitizedConfig.email.fromName = sanitizedConfig.email.fromName || 'Payload';
-  sanitizedConfig.email.fromAddress = sanitizedConfig.email.fromAddress || 'hello@payloadcms.com';
+  // TODO: This should likely be moved to the payload.schema.json
+  if (sanitizedConfig.email.transports) {
+    if (!sanitizedConfig.email.email.fromName || !sanitizedConfig.email.email.fromAddress) {
+      throw new InvalidConfiguration('Email fromName and fromAddress must be configured when transport is configured');
+    }
+  }
 
   sanitizedConfig.graphQL = config.graphQL || {};
   sanitizedConfig.graphQL.maxComplexity = (sanitizedConfig.graphQL && sanitizedConfig.graphQL.maxComplexity) ? sanitizedConfig.graphQL.maxComplexity : 1000;
