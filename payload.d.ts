@@ -1,15 +1,15 @@
 declare module "@payloadcms/payload" {
   export interface PayloadEmailOptions {
     transport: 'mock'; // TODO: import nodemailer Mail type
-    fromName?: string;
-    fromAddress?: string;
+    fromName: string;
+    fromAddress: string;
   }
 
   export interface PayloadInitOptions {
-    express: any,
+    express?: any,
     mongoURL: string,
     secret: string,
-    email: PayloadEmailOptions,
+    email?: PayloadEmailOptions,
     onInit?: () => void,
   }
 
@@ -24,6 +24,7 @@ declare module "@payloadcms/payload" {
 
   export interface FindOptions {
     collection: string;
+    where?: { [key: string]: any };
   }
 
   export interface FindResponse {
@@ -158,7 +159,7 @@ declare module "@payloadcms/payload/types" {
         secure?: boolean;
         sameSite?: string;
         domain?: string | undefined;
-      }
+      } | boolean,
     }
     fields: PayloadField[];
   }
