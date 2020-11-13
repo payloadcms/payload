@@ -1,28 +1,27 @@
 const crypto = require('crypto');
 const { APIError } = require('../../errors');
 
-async function forgotPassword(args) {
+async function forgotPassword(incomingArgs) {
   const { config, sendEmail: email } = this;
 
-  if (!Object.prototype.hasOwnProperty.call(args.data, 'email')) {
+  if (!Object.prototype.hasOwnProperty.call(incomingArgs.data, 'email')) {
     throw new APIError('Missing email.');
   }
 
-  let options = { ...args };
+  let args = incomingArgs;
 
   // /////////////////////////////////////
-  // 1. Execute before forgotPassword hook
+  // beforeOperation - Collection
   // /////////////////////////////////////
 
-  const { beforeForgotPassword } = args.collection.config.hooks;
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+    await priorHook;
 
-  if (typeof beforeForgotPassword === 'function') {
-    options = await beforeForgotPassword(options);
-  }
-
-  // /////////////////////////////////////
-  // 2. Perform forgot password
-  // /////////////////////////////////////
+    args = (await hook({
+      args,
+      operation: 'forgotPassword',
+    })) || args;
+  }, Promise.resolve());
 
   const {
     collection: {
@@ -33,7 +32,11 @@ async function forgotPassword(args) {
     disableEmail,
     expiration,
     req,
-  } = options;
+  } = args;
+
+  // /////////////////////////////////////
+  // Forget password
+  // /////////////////////////////////////
 
   let token = crypto.randomBytes(20);
   token = token.toString('hex');
@@ -84,14 +87,13 @@ async function forgotPassword(args) {
   }
 
   // /////////////////////////////////////
-  // 3. Execute after forgotPassword hook
+  // afterForgotPassword - Collection
   // /////////////////////////////////////
 
-  const { afterForgotPassword } = args.collection.config.hooks;
-
-  if (typeof afterForgotPassword === 'function') {
-    await afterForgotPassword(options);
-  }
+  await collectionConfig.hooks.afterForgotPassword.reduce(async (priorHook, hook) => {
+    await priorHook;
+    await hook({ args });
+  }, Promise.resolve());
 
   return token;
 }

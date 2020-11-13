@@ -16,29 +16,19 @@ async function unlock(args) {
   } = args;
 
   // /////////////////////////////////////
-  // 1. Retrieve and execute access
+  // Access
   // /////////////////////////////////////
 
   if (!overrideAccess) {
     await executeAccess({ req }, collectionConfig.access.unlock);
   }
 
-  let options = { ...args };
-
-  // /////////////////////////////////////
-  // 2. Execute before unlock hook
-  // /////////////////////////////////////
-
-  const { beforeUnlock } = args.collection.config.hooks;
-
-  if (typeof beforeUnlock === 'function') {
-    options = await beforeUnlock(options);
-  }
+  const options = { ...args };
 
   const { data } = options;
 
   // /////////////////////////////////////
-  // 3. Perform unlock
+  // Unlock
   // /////////////////////////////////////
 
   const user = await Model.findOne({ email: data.email.toLowerCase() });
@@ -46,16 +36,6 @@ async function unlock(args) {
   if (!user) return null;
 
   await user.resetLoginAttempts();
-
-  // /////////////////////////////////////
-  // 4. Execute after unlock hook
-  // /////////////////////////////////////
-
-  const { afterUnlock } = args.collection.config.hooks;
-
-  if (typeof afterUnlock === 'function') {
-    await afterUnlock(options);
-  }
 
   return true;
 }

@@ -6,7 +6,22 @@ const { NotFound, Forbidden, ErrorDeletingFile } = require('../../errors');
 const executeAccess = require('../../auth/executeAccess');
 const fileExists = require('../../uploads/fileExists');
 
-async function deleteQuery(args) {
+async function deleteQuery(incomingArgs) {
+  let args = incomingArgs;
+
+  // /////////////////////////////////////
+  // beforeOperation - Collection
+  // /////////////////////////////////////
+
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    args = (await hook({
+      args,
+      operation: 'delete',
+    })) || args;
+  }, Promise.resolve());
+
   const {
     depth,
     collection: {
@@ -24,20 +39,20 @@ async function deleteQuery(args) {
   } = args;
 
   // /////////////////////////////////////
-  // 1. Retrieve and execute access
+  // Access
   // /////////////////////////////////////
 
   const accessResults = !overrideAccess ? await executeAccess({ req, id }, collectionConfig.access.delete) : true;
   const hasWhereAccess = typeof accessResults === 'object';
 
   // /////////////////////////////////////
-  // 2. Execute before collection hook
+  // beforeDelete - Collection
   // /////////////////////////////////////
 
   collectionConfig.hooks.beforeDelete.forEach((hook) => hook({ req, id }));
 
   // /////////////////////////////////////
-  // 3. Get existing document
+  // Retrieve document
   // /////////////////////////////////////
 
   const queryToBuild = {
@@ -70,7 +85,7 @@ async function deleteQuery(args) {
   }
 
   // /////////////////////////////////////
-  // 4. Delete any associated files
+  // Delete any associated files
   // /////////////////////////////////////
 
   if (collectionConfig.upload) {
@@ -101,7 +116,7 @@ async function deleteQuery(args) {
   }
 
   // /////////////////////////////////////
-  // 5. Delete database document
+  // Delete document
   // /////////////////////////////////////
 
   let result = await Model.findOneAndDelete({ _id: id });
@@ -113,27 +128,42 @@ async function deleteQuery(args) {
   }
 
   // /////////////////////////////////////
-  // 6. Execute field-level hooks and access
-  // /////////////////////////////////////
-
-  result = await this.performFieldOperations(collectionConfig, {
-    data: result,
-    hook: 'afterRead',
-    operation: 'read',
-    req,
-    depth,
-    overrideAccess,
-    showHiddenFields,
-  });
-
-  // /////////////////////////////////////
-  // 7. Execute after collection hook
+  // afterDelete - Collection
   // /////////////////////////////////////
 
   await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
     await priorHook;
 
     result = await hook({ req, id, doc: result }) || result;
+  }, Promise.resolve());
+
+
+  // /////////////////////////////////////
+  // afterRead - Fields
+  // /////////////////////////////////////
+
+  result = await this.performFieldOperations(collectionConfig, {
+    depth,
+    req,
+    data: result,
+    hook: 'afterRead',
+    operation: 'delete',
+    overrideAccess,
+    reduceLocales: true,
+    showHiddenFields,
+  });
+
+  // /////////////////////////////////////
+  // afterRead - Collection
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    result = await hook({
+      req,
+      doc: result,
+    }) || result;
   }, Promise.resolve());
 
   // /////////////////////////////////////

@@ -7,6 +7,7 @@ async function loginHandler(req, res, next) {
       res,
       collection: req.collection,
       data: req.body,
+      depth: req.query.depth,
     });
 
     return res.status(httpStatus.OK)

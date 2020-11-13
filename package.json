@@ -79,7 +79,7 @@
     "micro-memoize": "^4.0.9",
     "mini-css-extract-plugin": "^1.0.0",
     "minimist": "^1.2.0",
-    "mkdirp": "^0.5.1",
+    "mkdirp": "^1.0.4",
     "mongodb-memory-server": "^6.5.2",
     "mongoose": "^5.8.9",
     "mongoose-paginate-v2": "^1.3.6",

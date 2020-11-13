@@ -1,7 +1,22 @@
 const executeAccess = require('../../auth/executeAccess');
 const removeInternalFields = require('../../utilities/removeInternalFields');
 
-async function find(args) {
+async function find(incomingArgs) {
+  let args = incomingArgs;
+
+  // /////////////////////////////////////
+  // beforeOperation - Collection
+  // /////////////////////////////////////
+
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    args = (await hook({
+      args,
+      operation: 'find',
+    })) || args;
+  }, Promise.resolve());
+
   const {
     where,
     page,
@@ -20,7 +35,7 @@ async function find(args) {
   } = args;
 
   // /////////////////////////////////////
-  // 1. Retrieve and execute access
+  // Access
   // /////////////////////////////////////
 
   const queryToBuild = {};
@@ -59,7 +74,7 @@ async function find(args) {
   const query = await Model.buildQuery(queryToBuild, locale);
 
   // /////////////////////////////////////
-  // 2. Perform database operation
+  // Find
   // /////////////////////////////////////
 
   let { sort } = args;
@@ -83,7 +98,7 @@ async function find(args) {
   let result = await Model.paginate(query, optionsToExecute);
 
   // /////////////////////////////////////
-  // 3. Execute beforeRead collection hook
+  // beforeRead - Collection
   // /////////////////////////////////////
 
   result = {
@@ -103,7 +118,7 @@ async function find(args) {
   };
 
   // /////////////////////////////////////
-  // 4. Execute field-level hooks and access
+  // afterRead - Fields
   // /////////////////////////////////////
 
   result = {
@@ -126,7 +141,7 @@ async function find(args) {
   };
 
   // /////////////////////////////////////
-  // 5. Execute afterRead collection hook
+  // afterRead - Collection
   // /////////////////////////////////////
 
   result = {
@@ -145,7 +160,7 @@ async function find(args) {
   };
 
   // /////////////////////////////////////
-  // 6. Return results
+  // Return results
   // /////////////////////////////////////
 
   result = {

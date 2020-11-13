@@ -3,20 +3,23 @@ const { AuthenticationError, LockedAuth } = require('../../errors');
 const getCookieExpiration = require('../../utilities/getCookieExpiration');
 const isLocked = require('../isLocked');
 
-async function login(args) {
+async function login(incomingArgs) {
   const { config, operations } = this;
 
-  const options = { ...args };
+  let args = incomingArgs;
 
   // /////////////////////////////////////
-  // 1. Execute before login hook
+  // beforeOperation - Collection
   // /////////////////////////////////////
 
-  args.collection.config.hooks.beforeLogin.forEach((hook) => hook({ req: args.req }));
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+    await priorHook;
 
-  // /////////////////////////////////////
-  // 2. Perform login
-  // /////////////////////////////////////
+    args = (await hook({
+      args,
+      operation: 'login',
+    })) || args;
+  }, Promise.resolve());
 
   const {
     collection: {
@@ -25,7 +28,14 @@ async function login(args) {
     },
     data,
     req,
-  } = options;
+    depth,
+    overrideAccess,
+    showHiddenFields,
+  } = args;
+
+  // /////////////////////////////////////
+  // Login
+  // /////////////////////////////////////
 
   const { email: unsanitizedEmail, password } = data;
 
@@ -76,7 +86,7 @@ async function login(args) {
     overrideAccess: true,
   });
 
-  const user = userQuery.docs[0];
+  let user = userQuery.docs[0];
 
   const fieldsToSign = collectionConfig.fields.reduce((signedFields, field) => {
     const result = {
@@ -119,20 +129,55 @@ async function login(args) {
       sameSite: collectionConfig.auth.cookies.sameSite,
     };
 
-
     if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
 
     args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
   }
 
   // /////////////////////////////////////
-  // 3. Execute after login hook
+  // afterLogin - Collection
   // /////////////////////////////////////
 
-  args.collection.config.hooks.afterLogin.forEach((hook) => hook({ token, user, req: args.req }));
+  await collectionConfig.hooks.afterLogin.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    user = await hook({
+      doc: user,
+      req: args.req,
+      token,
+    }) || user;
+  }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 4. Return token
+  // afterRead - Fields
+  // /////////////////////////////////////
+
+  user = await this.performFieldOperations(collectionConfig, {
+    depth,
+    req,
+    data: user,
+    hook: 'afterRead',
+    operation: 'login',
+    overrideAccess,
+    reduceLocales: true,
+    showHiddenFields,
+  });
+
+  // /////////////////////////////////////
+  // afterRead - Collection
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    user = await hook({
+      req,
+      doc: user,
+    }) || user;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // Return results
   // /////////////////////////////////////
 
   return {

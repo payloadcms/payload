@@ -13,8 +13,23 @@ const imageMIMETypes = require('../../uploads/imageMIMETypes');
 
 const sendVerificationEmail = require('../../auth/sendVerificationEmail');
 
-async function create(args) {
+async function create(incomingArgs) {
   const { performFieldOperations, config } = this;
+
+  let args = incomingArgs;
+
+  // /////////////////////////////////////
+  // beforeOperation - Collection
+  // /////////////////////////////////////
+
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    args = (await hook({
+      args,
+      operation: 'create',
+    })) || args;
+  }, Promise.resolve());
 
   const {
     collection: {
@@ -35,7 +50,7 @@ async function create(args) {
   let { data } = args;
 
   // /////////////////////////////////////
-  // 1. Retrieve and execute access
+  // Access
   // /////////////////////////////////////
 
   if (!overrideAccess) {
@@ -43,7 +58,7 @@ async function create(args) {
   }
 
   // /////////////////////////////////////
-  // 2. Execute beforeValidate field-level hooks, access, and validation
+  // beforeValidate - Fields
   // /////////////////////////////////////
 
   data = await this.performFieldOperations(collectionConfig, {
@@ -55,7 +70,7 @@ async function create(args) {
   });
 
   // /////////////////////////////////////
-  // 3. Execute beforeValidate collection hooks
+  // beforeValidate - Collections
   // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
@@ -69,7 +84,7 @@ async function create(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 4. Execute field-level access, beforeChange hooks, and validation
+  // beforeChange - Fields
   // /////////////////////////////////////
 
   data = await performFieldOperations(collectionConfig, {
@@ -81,7 +96,7 @@ async function create(args) {
   });
 
   // /////////////////////////////////////
-  // 5. Execute beforeChange collection hooks
+  // beforeChange - Collection
   // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
@@ -95,7 +110,7 @@ async function create(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 6. Upload and resize any files that may be present
+  // Upload and resize potential files
   // /////////////////////////////////////
 
   if (collectionConfig.upload) {
@@ -148,7 +163,7 @@ async function create(args) {
   }
 
   // /////////////////////////////////////
-  // 7. Perform database operation
+  // Create
   // /////////////////////////////////////
 
   let result = new Model();
@@ -178,7 +193,7 @@ async function create(args) {
   result = result.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 8. Execute field-level hooks and access
+  // afterChange - Fields
   // /////////////////////////////////////
 
   result = await performFieldOperations(collectionConfig, {
@@ -192,7 +207,7 @@ async function create(args) {
   });
 
   // /////////////////////////////////////
-  // 9. Execute after collection hook
+  // afterChange - Collection
   // /////////////////////////////////////
 
   await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
@@ -206,7 +221,7 @@ async function create(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 10. Send verification email if applicable
+  // Send verification email if applicable
   // /////////////////////////////////////
 
   if (collectionConfig.auth && collectionConfig.auth.verify && !disableVerificationEmail) {
@@ -221,7 +236,35 @@ async function create(args) {
   }
 
   // /////////////////////////////////////
-  // 11. Return results
+  // afterRead - Fields
+  // /////////////////////////////////////
+
+  result = await this.performFieldOperations(collectionConfig, {
+    depth,
+    req,
+    data: result,
+    hook: 'afterRead',
+    operation: 'create',
+    overrideAccess,
+    reduceLocales: true,
+    showHiddenFields,
+  });
+
+  // /////////////////////////////////////
+  // afterRead - Collection
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    result = await hook({
+      req,
+      doc: result,
+    }) || result;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // Return results
   // /////////////////////////////////////
 
   result = removeInternalFields(result);

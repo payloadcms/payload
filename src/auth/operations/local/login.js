@@ -7,6 +7,8 @@ async function login(args) {
     locale,
     fallbackLocale,
     data,
+    overrideAccess = true,
+    showHiddenFields,
   } = args;
 
   const collection = this.collections[collectionSlug];
@@ -14,7 +16,8 @@ async function login(args) {
   const options = {
     depth,
     collection,
-    overrideAccess: true,
+    overrideAccess,
+    showHiddenFields,
     data,
     req: {
       ...req,

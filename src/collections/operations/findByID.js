@@ -4,7 +4,22 @@ const removeInternalFields = require('../../utilities/removeInternalFields');
 const { Forbidden, NotFound } = require('../../errors');
 const executeAccess = require('../../auth/executeAccess');
 
-async function findByID(args) {
+async function findByID(incomingArgs) {
+  let args = incomingArgs;
+
+  // /////////////////////////////////////
+  // beforeOperation - Collection
+  // /////////////////////////////////////
+
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    args = (await hook({
+      args,
+      operation: 'findByID',
+    })) || args;
+  }, Promise.resolve());
+
   const {
     depth,
     collection: {
@@ -23,7 +38,7 @@ async function findByID(args) {
   } = args;
 
   // /////////////////////////////////////
-  // 1. Retrieve and execute access
+  // Access
   // /////////////////////////////////////
 
   const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors, id }, collectionConfig.access.read) : true;
@@ -48,7 +63,7 @@ async function findByID(args) {
   const query = await Model.buildQuery(queryToBuild, locale);
 
   // /////////////////////////////////////
-  // 2. Perform database operation
+  // Find by ID
   // /////////////////////////////////////
 
   if (!query.$and[0]._id) throw new NotFound();
@@ -81,7 +96,7 @@ async function findByID(args) {
   result.id = result._id;
 
   // /////////////////////////////////////
-  // 3. Execute beforeRead collection hook
+  // beforeRead - Collection
   // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
@@ -95,7 +110,7 @@ async function findByID(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 4. Execute field-level hooks and access
+  // afterRead - Fields
   // /////////////////////////////////////
 
   result = await this.performFieldOperations(collectionConfig, {
@@ -112,7 +127,7 @@ async function findByID(args) {
   });
 
   // /////////////////////////////////////
-  // 5. Execute afterRead collection hook
+  // afterRead - Collection
   // /////////////////////////////////////
 
   await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
@@ -126,7 +141,7 @@ async function findByID(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 6. Return results
+  // Return results
   // /////////////////////////////////////
 
   result = removeInternalFields(result);

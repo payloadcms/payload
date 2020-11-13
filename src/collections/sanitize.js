@@ -77,6 +77,7 @@ const sanitizeCollection = (collections, collection) => {
   if (!sanitized.access) sanitized.access = {};
   if (!sanitized.admin) sanitized.admin = {};
 
+  if (!sanitized.hooks.beforeOperation) sanitized.hooks.beforeOperation = [];
   if (!sanitized.hooks.beforeValidate) sanitized.hooks.beforeValidate = [];
   if (!sanitized.hooks.beforeChange) sanitized.hooks.beforeChange = [];
   if (!sanitized.hooks.afterChange) sanitized.hooks.afterChange = [];
@@ -232,6 +233,7 @@ const sanitizeCollection = (collections, collection) => {
     if (collection.auth === true) sanitized.auth = {};
     if (!sanitized.hooks.beforeLogin) sanitized.hooks.beforeLogin = [];
     if (!sanitized.hooks.afterLogin) sanitized.hooks.afterLogin = [];
+    if (!sanitized.hooks.afterForgotPassword) sanitized.hooks.afterForgotPassword = [];
     if (!collection.auth.forgotPassword) sanitized.auth.forgotPassword = {};
 
     let authFields = baseAuthFields;

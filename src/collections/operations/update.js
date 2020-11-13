@@ -12,7 +12,22 @@ const getSafeFilename = require('../../uploads/getSafeFilename');
 
 const resizeAndSave = require('../../uploads/imageResizer');
 
-async function update(args) {
+async function update(incomingArgs) {
+  let args = incomingArgs;
+
+  // /////////////////////////////////////
+  // beforeOperation - Collection
+  // /////////////////////////////////////
+
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    args = (await hook({
+      args,
+      operation: 'update',
+    })) || args;
+  }, Promise.resolve());
+
   const {
     depth,
     collection: {
@@ -34,14 +49,14 @@ async function update(args) {
   }
 
   // /////////////////////////////////////
-  // 1. Execute access
+  // Access
   // /////////////////////////////////////
 
   const accessResults = !overrideAccess ? await executeAccess({ req, id }, collectionConfig.access.update) : true;
   const hasWherePolicy = typeof accessResults === 'object';
 
   // /////////////////////////////////////
-  // 2. Retrieve document
+  // Retrieve document
   // /////////////////////////////////////
 
   const queryToBuild = {
@@ -79,7 +94,7 @@ async function update(args) {
   let { data } = args;
 
   // /////////////////////////////////////
-  // 3. Execute beforeValidate field-level hooks, access, and validation
+  // beforeValidate - Fields
   // /////////////////////////////////////
 
   data = await this.performFieldOperations(collectionConfig, {
@@ -93,7 +108,7 @@ async function update(args) {
   });
 
   // /////////////////////////////////////
-  // 4. Execute beforeValidate collection hooks
+  // beforeValidate - Collection
   // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
@@ -108,7 +123,7 @@ async function update(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 5. Execute beforeChange field-level hooks, access, and validation
+  // beforeChange - Fields
   // /////////////////////////////////////
 
   data = await this.performFieldOperations(collectionConfig, {
@@ -122,7 +137,7 @@ async function update(args) {
   });
 
   // /////////////////////////////////////
-  // 6. Execute beforeChange collection hooks
+  // beforeChange - Collection
   // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
@@ -137,13 +152,13 @@ async function update(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 7. Merge updates into existing data
+  // Merge updates into existing data
   // /////////////////////////////////////
 
   data = deepmerge(originalDoc, data, { arrayMerge: overwriteMerge });
 
   // /////////////////////////////////////
-  // 8. Upload and resize any files that may be present
+  // Upload and resize potential files
   // /////////////////////////////////////
 
   if (collectionConfig.upload) {
@@ -197,7 +212,7 @@ async function update(args) {
   }
 
   // /////////////////////////////////////
-  // 9. Handle password update
+  // Handle potential password update
   // /////////////////////////////////////
 
   const { password } = data;
@@ -208,7 +223,7 @@ async function update(args) {
   }
 
   // /////////////////////////////////////
-  // 10. Perform database operation
+  // Update
   // /////////////////////////////////////
 
   Object.assign(doc, data);
@@ -218,7 +233,7 @@ async function update(args) {
   doc = doc.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
-  // 11. Execute field-level hooks and access
+  // afterChange - Fields
   // /////////////////////////////////////
 
   doc = await this.performFieldOperations(collectionConfig, {
@@ -233,7 +248,7 @@ async function update(args) {
   });
 
   // /////////////////////////////////////
-  // 12. Execute afterChange collection hooks
+  // afterChange - Collection
   // /////////////////////////////////////
 
   await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
@@ -247,7 +262,35 @@ async function update(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 13. Return updated document
+  // afterRead - Fields
+  // /////////////////////////////////////
+
+  doc = await this.performFieldOperations(collectionConfig, {
+    depth,
+    req,
+    data: doc,
+    hook: 'afterRead',
+    operation: 'update',
+    overrideAccess,
+    reduceLocales: true,
+    showHiddenFields,
+  });
+
+  // /////////////////////////////////////
+  // afterRead - Collection
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    doc = await hook({
+      req,
+      doc,
+    }) || doc;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // Return results
   // /////////////////////////////////////
 
   doc = removeInternalFields(doc);

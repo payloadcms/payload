@@ -10,29 +10,13 @@ async function resetPassword(args) {
     throw new APIError('Missing required data.');
   }
 
-  let options = { ...args };
-
-  // /////////////////////////////////////
-  // 1. Execute before reset password hook
-  // /////////////////////////////////////
-
-  const { beforeResetPassword } = args.collection.config.hooks;
-
-  if (typeof beforeResetPassword === 'function') {
-    options = await beforeResetPassword(options);
-  }
-
-  // /////////////////////////////////////
-  // 2. Perform password reset
-  // /////////////////////////////////////
-
   const {
     collection: {
       Model,
       config: collectionConfig,
     },
     data,
-  } = options;
+  } = args;
 
   const user = await Model.findOne({
     resetPasswordToken: data.token,
@@ -85,20 +69,6 @@ async function resetPassword(args) {
 
     args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
   }
-
-  // /////////////////////////////////////
-  // 3. Execute after reset password hook
-  // /////////////////////////////////////
-
-  const { afterResetPassword } = collectionConfig.hooks;
-
-  if (typeof afterResetPassword === 'function') {
-    await afterResetPassword(options, user);
-  }
-
-  // /////////////////////////////////////
-  // 4. Return updated user
-  // /////////////////////////////////////
 
   const fullUser = await this.findByID({ collection: collectionConfig.slug, id: user.id });
   return { token, user: fullUser };

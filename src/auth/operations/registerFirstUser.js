@@ -12,7 +12,7 @@ async function registerFirstUser(args) {
   if (count >= 1) throw new Forbidden();
 
   // /////////////////////////////////////
-  // 2. Perform register first user
+  // Register first user
   // /////////////////////////////////////
 
   let result = await this.operations.collections.create({
@@ -22,7 +22,7 @@ async function registerFirstUser(args) {
 
 
   // /////////////////////////////////////
-  // 3. Log in new user
+  // Log in new user
   // /////////////////////////////////////
 
   const { token } = await this.operations.collections.auth.login({

@@ -6,10 +6,6 @@ async function verifyEmail(args) {
     throw new APIError('Missing required data.', httpStatus.BAD_REQUEST);
   }
 
-  // /////////////////////////////////////
-  // 2. Perform password reset
-  // /////////////////////////////////////
-
   const user = await args.collection.Model.findOne({
     _verificationToken: args.token,
   });
