@@ -1,8 +1,11 @@
 const nodemailer = require('nodemailer');
+const logger = require('../utilities/logger')();
 const mockHandler = require('./mockHandler');
 
 async function buildEmail() {
-  if (!this.config.email || this.config.email.transport === 'mock') {
+  if (!this.config.email.transport || this.config.email.transport === 'mock') {
+    logger.info('E-mail configured with mock configuration');
+    // TODO: Log mock e-mail credentials here as well?
     const mockAccount = await mockHandler(this.config.email);
     return mockAccount;
   }
@@ -20,7 +23,7 @@ async function buildEmail() {
   try {
     await email.transport.verify();
   } catch (err) {
-    console.error('There is an error with the email configuration you have provided.', err);
+    logger.error('There is an error with the email configuration you have provided.', err);
   }
 
   return email;

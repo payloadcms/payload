@@ -30,7 +30,7 @@
       "description": "Callable functions to determine permission access"
     },
     "auth": {
-      "type": "object",
+      "type": ["object", "boolean"],
       "description": "Authentication properties",
       "properties": {
         "verify": {

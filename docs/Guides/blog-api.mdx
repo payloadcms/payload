@@ -1,0 +1,253 @@
+---
+title: Blog API From Scratch
+label: Blog API
+order: 20
+---
+
+In this guide, we will be creating a Blog API from scratch.
+
+Prerequisites:
+
+- Node
+- npm or yarn
+- MongoDB server
+
+## Initial Setup
+
+Let's get started by creating a project in a blank directory
+
+```sh
+yarn init -y
+```
+
+We then will install Payload and Express
+
+```sh
+yarn add payload express
+```
+
+### Server
+
+Create a file named `server.js` in the root folder with the following contents
+
+```js
+const express = require('express');
+const app = express();
+
+app.listen(3000, async () => {
+	console.log('Express is now listening for incoming connections on port 3000.');
+});
+```
+
+This is a basic Express application. Now let's pull in Payload and fill in the `init` parameters. `secret` and `mongoURL` can be changed as needed.
+
+```js
+const express = require('express');
+const payload = require('payload'); // highlight-line
+
+const app = express();
+
+// highlight-start
+payload.init({
+  secret: 'SECRET_KEY',
+  mongoURL: 'mongodb://localhost/payload-blog',
+  express: app,
+})
+// highlight-end
+
+app.listen(3000, async () => {
+	console.log('Express is now listening for incoming connections on port 3000.');
+});
+```
+
+### Payload Configuration
+
+Next, let's get some basics put into our `payload.config.js` file
+
+```js
+module.exports = {
+  serverURL: 'http://localhost:3000',
+  collections: [],
+}
+```
+
+#### Collections
+
+We'll need a few different collections for our blog:
+
+- Posts
+- Categories
+- Tags
+
+The Posts will have the ability to have a single category and multiple tags
+
+Let's create a `collections` directory and create a `.js` file for each
+
+```js:title=Posts.js
+module.exports = {
+  slug: 'posts',
+  labels: {
+    singular: 'Post',
+    plural: 'Posts',
+  },
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      label: 'Title',
+      type: 'text'
+    },
+    {
+      name: 'content',
+      label: 'Content',
+      type: 'textarea',
+    },
+    {
+      name: 'category',
+      label: 'Category',
+      type: 'relationship',
+      relationTo: 'categories', // Categories Slug // highlight-line
+    },
+    {
+      name: 'tags',
+      label: 'Tags',
+      type: 'relationship',
+      relationTo: 'tags', // Tags Slug // highlight-line
+      hasMany: true, // Allow multiple tags per post
+    },
+  ]
+};
+```
+
+```js:title=Categories.js
+module.exports = {
+  slug: 'categories',
+  labels: {
+    singular: 'Category',
+    plural: 'Categories',
+  },
+  admin: {
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      label: 'Name',
+      type: 'text',
+    },
+  ],
+};
+```
+
+```js:title=Tags.js
+module.exports = {
+  slug: 'tags',
+  labels: {
+    singular: 'Tag',
+    plural: 'Tags',
+  },
+  admin: {
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      label: 'Name',
+      type: 'text',
+    },
+  ],
+};
+```
+
+Once these are created, we can pull them into the `collections` array in our `payload.config.js`
+
+```js:title=payload.config.js
+const Admins = require('./collections/Admins');
+// highlight-start
+const Posts = require('./collections/Posts');
+const Categories = require('./collections/Categories');
+const Tags = require('./collections/Tags');
+// highlight-end
+
+module.exports = {
+  serverURL: 'http://localhost:3000',
+  admin: {
+    user: 'admins',
+  },
+  collections: [
+    Admins,
+    // highlight-start
+    Posts,
+    Categories,
+    Tags
+    // highlight-end
+  ],
+}
+```
+
+### Create Content
+
+**TODO: Should a guide like this use the Admin interface or `curl`?**
+
+Navigate to the admin interface at `http://localhost:3000/admin` and create your first user.
+
+Then create some Categories, Tags, and a Post.
+
+Let's use `curl` to quickly create some data. The following commands will create 2 tags and 1 category.
+
+```sh
+curl -H "Content-Type: application/json" -X POST -d '{"name": "JavaScript"}' http://localhost:3000/api/tags
+curl -H "Content-Type: application/json" -X POST -d '{"name": "TypeScript"}' http://localhost:3000/api/tags
+curl -H "Content-Type: application/json" -X POST -d '{"name": "Code"}' http://localhost:3000/api/categories
+```
+
+We'll then make a request to create a Post, this will inclue a relationship to the category and tags created previously.
+
+TODO: Somehow retrieve tag and category IDs then include them in a request to create a Post
+
+Once complete, navigate to `http://localhost:3000/api/posts`, and you should see something similar to the following:
+
+```js
+{
+  "docs": [
+    {
+      "tags": [
+        {
+          "name": "TypeScript",
+          "createdAt": "2020-11-13T11:48:05.993Z",
+          "updatedAt": "2020-11-13T11:48:05.993Z",
+          "id": "5fae72758315da656fb3a8f0"
+        },
+        {
+          "name": "JavaScript",
+          "createdAt": "2020-11-13T11:48:00.064Z",
+          "updatedAt": "2020-11-13T11:48:00.064Z",
+          "id": "5fae72708315da656fb3a8ef"
+        }
+      ],
+      "title": "My Title",
+      "content": "This is some content",
+      "category": {
+        "name": "Code",
+        "createdAt": "2020-11-13T11:48:10.351Z",
+        "updatedAt": "2020-11-13T11:48:36.358Z",
+        "id": "5fae727a8315da656fb3a8f1"
+      },
+      "createdAt": "2020-11-13T11:50:14.312Z",
+      "updatedAt": "2020-11-13T11:50:14.312Z",
+      "id": "5fae72f68e314b67609e05d1"
+    }
+  ],
+  "totalDocs": 1,
+  "limit": 10,
+  "totalPages": 1,
+  "page": 1,
+  "pagingCounter": 1,
+  "hasPrevPage": false,
+  "hasNextPage": false,
+  "prevPage": null,
+  "nextPage": null
+}
+```
