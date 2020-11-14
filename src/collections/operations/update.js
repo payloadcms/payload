@@ -232,6 +232,10 @@ async function update(incomingArgs) {
 
   doc = doc.toJSON({ virtuals: true });
 
+  doc = removeInternalFields(doc);
+  doc = JSON.stringify(doc);
+  doc = JSON.parse(doc);
+
   // /////////////////////////////////////
   // afterChange - Fields
   // /////////////////////////////////////
@@ -292,10 +296,6 @@ async function update(incomingArgs) {
   // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////
-
-  doc = removeInternalFields(doc);
-  doc = JSON.stringify(doc);
-  doc = JSON.parse(doc);
 
   return doc;
 }

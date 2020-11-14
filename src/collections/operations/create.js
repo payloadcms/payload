@@ -192,6 +192,10 @@ async function create(incomingArgs) {
 
   result = result.toJSON({ virtuals: true });
 
+  result = removeInternalFields(result);
+  result = JSON.stringify(result);
+  result = JSON.parse(result);
+
   // /////////////////////////////////////
   // afterChange - Fields
   // /////////////////////////////////////
@@ -266,10 +270,6 @@ async function create(incomingArgs) {
   // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////
-
-  result = removeInternalFields(result);
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
 
   return result;
 }

@@ -13,7 +13,7 @@ async function find(incomingArgs) {
 
     args = (await hook({
       args,
-      operation: 'find',
+      operation: 'read',
     })) || args;
   }, Promise.resolve());
 

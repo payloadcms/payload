@@ -121,11 +121,15 @@ async function deleteQuery(incomingArgs) {
 
   let result = await Model.findOneAndDelete({ _id: id });
 
-  result = result.toJSON({ virtuals: true });
-
   if (locale && result.setLocale) {
     result.setLocale(locale, fallbackLocale);
   }
+
+  result = result.toJSON({ virtuals: true });
+
+  result = removeInternalFields(result);
+  result = JSON.stringify(result);
+  result = JSON.parse(result);
 
   // /////////////////////////////////////
   // afterDelete - Collection
@@ -169,10 +173,6 @@ async function deleteQuery(incomingArgs) {
   // /////////////////////////////////////
   // 8. Return results
   // /////////////////////////////////////
-
-  result = removeInternalFields(result);
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
 
   return result;
 }

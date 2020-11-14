@@ -16,7 +16,7 @@ async function findByID(incomingArgs) {
 
     args = (await hook({
       args,
-      operation: 'findByID',
+      operation: 'read',
     })) || args;
   }, Promise.resolve());
 
@@ -95,6 +95,8 @@ async function findByID(incomingArgs) {
 
   result.id = result._id;
 
+  result = removeInternalFields(result);
+
   // /////////////////////////////////////
   // beforeRead - Collection
   // /////////////////////////////////////
@@ -143,10 +145,6 @@ async function findByID(incomingArgs) {
   // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////
-
-  result = removeInternalFields(result);
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
 
   return result;
 }
