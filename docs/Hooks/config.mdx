@@ -22,17 +22,20 @@ Collection can be executed at any point in the modification or retrieval of a co
 
 Collection Hooks available:
 
-- `beforeValidate`
-- `beforeChange`
-- `afterChange`
-- `beforeRead`
-- `afterRead`
-- `beforeDelete`
-- `afterDelete`
+_TODO: Fix anchor links_
+
+- [beforeOperation](#beforeOperation)
+- [beforeValidate](#beforeValidate)
+- [beforeChange](#beforeChange)
+- [afterChange](#afterChange)
+- [beforeRead](#beforeRead)
+- [afterRead](#afterRead)
+- [beforeDelete](#beforeDelete)
+- [afterDelete](#afterDelete)
 
 ### Usage
 
-Configuration of collection hooks is done under a collection config in `payload.config.js`. They can either be created in-line or required from a separate file.  Each hook is an array of functions to be run.
+Configuration of collection hooks is done under a collection config in `payload.config.js`. They can either be created in-line or required from a separate file. Each hook is an array of functions to be run.
 
 _TODO: Talk about async vs synchronous and concurrency_
 
@@ -44,6 +47,9 @@ module.exports = {
     { name: 'name', label: 'Name', type: 'text'},
   ]
   hooks: {
+    // Before All Operations
+    beforeOperation: [(args) => {...}],
+
     // Create and Update Operations
     beforeValidate: [(args) => {...}],
     beforeChange: [(args) => {...}],
@@ -71,7 +77,20 @@ Each hook is an array of functions allowing for multiple to be combined as desir
 
 Configuration of hooks should be done in your `payload.config.js`
 
-#### `beforeValidate`
+#### beforeOperation
+
+Runs before any operation
+
+```js
+const beforeOperationHook = ({
+  args, // Original arguments passed into the operation
+  operation, // name of the operation
+}) => {...}
+```
+
+Available Operations: `create`, `read`, `update`, `delete`, `refresh`, `forgotPassword`
+
+#### beforeValidate
 
 Runs before the `create` and `update` operations.
 
@@ -84,7 +103,7 @@ const beforeValidateHook = ({
 }) => {...}
 ```
 
-#### `beforeChange`
+#### beforeChange
 
 Runs before `create` and `update` operations, after validation.
 
@@ -97,7 +116,7 @@ const beforeChangeHook = ({
 }) => {...}
 ```
 
-#### `afterChange`
+#### afterChange
 
 Runs after `create` and `update` operations.
 
@@ -109,7 +128,7 @@ const afterChangeHook = ({
 }) => {...}
 ```
 
-#### `beforeRead`
+#### beforeRead
 
 Runs before `find` and `findByID` operations.
 
@@ -121,7 +140,7 @@ const beforeReadHook = ({
 }) => {...}
 ```
 
-#### `afterRead`
+#### afterRead
 
 Runs after `find` and `findByID` operations.
 
@@ -133,7 +152,7 @@ const afterReadHook = ({
 }) => {...}
 ```
 
-#### `beforeDelete`
+#### beforeDelete
 
 Runs before `delete` operation
 
@@ -144,7 +163,7 @@ const beforeDeleteHook = ({
 }) => {...}
 ```
 
-#### `afterDelete`
+#### afterDelete
 
 Runs after `delete` operation
 
@@ -156,7 +175,7 @@ const afterDeleteHook = ({
 }) => {...}
 ```
 
-#### `beforeLogin`
+#### beforeLogin
 
 Runs before `login` operation
 
@@ -166,7 +185,7 @@ const beforeLoginHook = ({
 }) => {...}
 ```
 
-#### `afterLogin`
+#### afterLogin
 
 Runs after `login` operation
 
@@ -178,7 +197,7 @@ const afterLoginHook = ({
 }) => {...}
 ```
 
-#### `afterError`
+#### afterError
 
 Runs after an error occurs
 
@@ -220,7 +239,7 @@ module.exports = {
 }
 ```
 
-#### `beforeValidate`
+#### beforeValidate
 
 Runs before the `create` and `update` operations.
 
@@ -234,7 +253,7 @@ const beforeValidateHook = ({
 }) => {...}
 ```
 
-#### `beforeChange`
+#### beforeChange
 
 Runs before the `create` and `update` operations, after validation.
 
@@ -248,7 +267,7 @@ const beforeChangeHook = ({
 }) => {...}
 ```
 
-#### `afterChange`
+#### afterChange
 
 Runs after `create` and `update` operations
 
@@ -262,7 +281,7 @@ const afterChangeHook = ({
 }) => {...}
 ```
 
-#### `afterRead`
+#### afterRead
 
 Runs after result as been retrieved from database
 
@@ -279,6 +298,8 @@ const beforeChangeHook = ({
 ## Hook Lifecycle
 
 Hooks execute in the following order in relation to operations
+
+`beforeOperation` is a special hook that runs _before all operations_.
 
 ### Create/Update Lifecycle
 
