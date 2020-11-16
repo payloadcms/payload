@@ -1,8 +1,5 @@
 const jwt = require('jsonwebtoken');
-const httpStatus = require('http-status');
 const getExtractJWT = require('../getExtractJWT');
-
-const { APIError } = require('../../errors');
 
 async function me({ req }) {
   const extractJWT = getExtractJWT(this.config);
@@ -12,7 +9,9 @@ async function me({ req }) {
     const user = { ...req.user };
 
     if (user.collection !== requestedSlug) {
-      throw new APIError('Incorrect collection', httpStatus.FORBIDDEN);
+      return {
+        user: null,
+      };
     }
 
     delete user.collection;
