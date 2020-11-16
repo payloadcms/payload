@@ -4,6 +4,8 @@ const sanitizeFields = require('../fields/sanitize');
 const toKebabCase = require('../utilities/toKebabCase');
 const baseAuthFields = require('../auth/baseFields');
 const baseAPIKeyFields = require('../auth/baseAPIKeyFields');
+const baseVerificationFields = require('../auth/baseVerificationFields');
+const baseAccountLockFields = require('../auth/baseAccountLockFields');
 
 const mergeBaseFields = (fields, baseFields) => {
   const mergedFields = [];
@@ -243,42 +245,14 @@ const sanitizeCollection = (collections, collection) => {
     }
 
     if (collection.auth.verify) {
-      authFields.push({
-        name: '_verified',
-        type: 'checkbox',
-        access: {
-          create: () => false,
-          update: ({ req: { user } }) => Boolean(user),
-          read: ({ req: { user } }) => Boolean(user),
-        },
-        admin: {
-          disabled: true,
-        },
-      });
-
-      authFields.push({
-        name: '_verificationToken',
-        type: 'text',
-        hidden: true,
-      });
+      authFields.concat(baseVerificationFields);
     }
 
     sanitized.auth.maxLoginAttempts = typeof sanitized.auth.maxLoginAttempts === 'undefined' ? 5 : sanitized.auth.maxLoginAttempts;
     sanitized.auth.lockTime = sanitized.auth.lockTime || 600000; // 10 minutes
 
     if (sanitized.auth.maxLoginAttempts > 0) {
-      authFields.push({
-        name: 'loginAttempts',
-        type: 'number',
-        hidden: true,
-        defaultValue: 0,
-      });
-
-      authFields.push({
-        name: 'lockUntil',
-        type: 'date',
-        hidden: true,
-      });
+      authFields.concat(baseAccountLockFields);
 
       if (!sanitized.access.unlock) sanitized.access.unlock = ({ req: { user } }) => Boolean(user);
     }

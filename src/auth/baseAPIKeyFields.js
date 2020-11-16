@@ -1,3 +1,8 @@
+const crypto = require('crypto');
+
+const encryptKey = ({ req, value }) => (value ? req.payload.encrypt(value) : undefined);
+const decryptKey = ({ req, value }) => (value ? req.payload.decrypt(value) : undefined);
+
 module.exports = [
   {
     name: 'enableAPIKey',
@@ -10,10 +15,39 @@ module.exports = [
   {
     name: 'apiKey',
     type: 'text',
-    minLength: 24,
-    maxLength: 48,
     admin: {
       disabled: true,
+    },
+    hooks: {
+      beforeChange: [
+        encryptKey,
+      ],
+      afterRead: [
+        decryptKey,
+      ],
+    },
+  },
+  {
+    name: 'apiKeyIndex',
+    type: 'text',
+    hidden: true,
+    admin: {
+      disabled: true,
+    },
+    hooks: {
+      beforeValidate: [
+        async ({ data, req, value }) => {
+          if (data.apiKey) {
+            return crypto.createHmac('sha1', req.payload.config.secret)
+              .update(data.apiKey)
+              .digest('hex');
+          }
+          if (data.enableAPIKey === false) {
+            return null;
+          }
+          return value;
+        },
+      ],
     },
   },
 ];

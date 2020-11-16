@@ -19,24 +19,23 @@ const middleware = (payload) => {
   if (typeof payload.config.rateLimit.skip === 'function') rateLimitOptions.skip = payload.config.rateLimit.skip;
 
   return [
+    (req, _, next) => {
+      req.payload = payload;
+      next();
+    },
     rateLimit(rateLimitOptions),
     passport.initialize(),
     identifyAPI('REST'),
-    authenticate(payload.config),
-    express.json(payload.config.express.json),
     methodOverride('X-HTTP-Method-Override'),
     qsMiddleware({ depth: 10 }),
     bodyParser.urlencoded({ extended: true }),
     compression(payload.config.compression),
     localizationMiddleware(payload.config.localization),
+    express.json(payload.config.express.json),
     fileUpload({
       parseNested: true,
       ...payload.config.upload,
     }),
-    (req, _, next) => {
-      req.payload = payload;
-      next();
-    },
     (req, res, next) => {
       if (payload.config.cors) {
         res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
@@ -52,6 +51,7 @@ const middleware = (payload) => {
 
       next();
     },
+    authenticate(payload.config),
     ...(payload.config.middleware || []),
   ];
 };

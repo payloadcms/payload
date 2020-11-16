@@ -1,19 +1,25 @@
 const PassportAPIKey = require('passport-headerapikey').HeaderAPIKeyStrategy;
+const crypto = require('crypto');
 
-module.exports = ({ operations }, { Model, config }) => {
+module.exports = ({ operations, config: { secret } }, { Model, config }) => {
   const opts = {
     header: 'Authorization',
     prefix: `${config.labels.singular} API-Key `,
   };
 
   return new PassportAPIKey(opts, true, async (apiKey, done, req) => {
+    const apiKeyIndex = crypto.createHmac('sha1', secret)
+      .update(apiKey)
+      .digest('hex');
+
     try {
       const where = {};
       if (config.auth.verify) {
         where.and = [
           {
-            apiKey: {
-              equals: apiKey,
+            // TODO: Search for index
+            apiKeyIndex: {
+              equals: apiKeyIndex,
             },
           },
           {
@@ -23,8 +29,8 @@ module.exports = ({ operations }, { Model, config }) => {
           },
         ];
       } else {
-        where.apiKey = {
-          equals: apiKey,
+        where.apiKeyIndex = {
+          equals: apiKeyIndex,
         };
       }
       const userQuery = await operations.collections.find({

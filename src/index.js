@@ -2,6 +2,7 @@ require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
 const express = require('express');
+const crypto = require('crypto');
 const logger = require('./utilities/logger')();
 const bindOperations = require('./init/bindOperations');
 const bindRequestHandlers = require('./init/bindRequestHandlers');
@@ -24,11 +25,11 @@ const errorHandler = require('./express/middleware/errorHandler');
 const performFieldOperations = require('./fields/performFieldOperations');
 const localOperations = require('./collections/operations/local');
 const localGlobalOperations = require('./globals/operations/local');
+const { encrypt, decrypt } = require('./auth/crypto');
 
 class Payload {
   init(options) {
     logger.info('Starting Payload...');
-    this.license = options.license;
 
     if (!options.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.');
@@ -44,7 +45,8 @@ class Payload {
     this.config = sanitizeConfig({
       ...config,
       email,
-      secret: options.secret,
+      license: options.license,
+      secret: crypto.createHash('sha256').update(options.secret).digest('hex').slice(0, 32),
       mongoURL: options.mongoURL,
       local: options.local,
     });
@@ -58,6 +60,8 @@ class Payload {
     bindResolvers(this);
 
     this.initAuth = initAuth.bind(this);
+    this.encrypt = encrypt.bind(this);
+    this.decrypt = decrypt.bind(this);
     this.initCollections = initCollections.bind(this);
     this.initGlobals = initGlobals.bind(this);
     this.initGraphQLPlayground = initGraphQLPlayground.bind(this);
