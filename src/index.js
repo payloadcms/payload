@@ -28,6 +28,7 @@ const localGlobalOperations = require('./globals/operations/local');
 class Payload {
   init(options) {
     logger.info('Starting Payload...');
+    this.license = options.license;
 
     if (!options.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.');

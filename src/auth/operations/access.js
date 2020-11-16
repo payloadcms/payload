@@ -1,7 +1,7 @@
 const allOperations = ['create', 'read', 'update', 'delete'];
 
 async function accessOperation(args) {
-  const { config } = this;
+  const { config, license } = this;
 
   const {
     req,
@@ -87,6 +87,7 @@ async function accessOperation(args) {
 
   if (userCollectionConfig) {
     results.canAccessAdmin = userCollectionConfig.access.admin ? userCollectionConfig.access.admin(args) : isLoggedIn;
+    if (results.canAccessAdmin) results.license = license;
   } else {
     results.canAccessAdmin = false;
   }
