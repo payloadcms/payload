@@ -276,7 +276,7 @@ async function update(incomingArgs) {
     hook: 'afterRead',
     operation: 'update',
     overrideAccess,
-    reduceLocales: true,
+    reduceLocales: false,
     showHiddenFields,
   });
 

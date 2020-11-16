@@ -250,7 +250,7 @@ async function create(incomingArgs) {
     hook: 'afterRead',
     operation: 'create',
     overrideAccess,
-    reduceLocales: true,
+    reduceLocales: false,
     showHiddenFields,
   });
 

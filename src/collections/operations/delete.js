@@ -153,7 +153,7 @@ async function deleteQuery(incomingArgs) {
     hook: 'afterRead',
     operation: 'delete',
     overrideAccess,
-    reduceLocales: true,
+    reduceLocales: false,
     showHiddenFields,
   });
 
