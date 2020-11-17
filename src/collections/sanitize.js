@@ -2,10 +2,12 @@ const merge = require('deepmerge');
 const { DuplicateCollection, MissingCollectionLabel } = require('../errors');
 const sanitizeFields = require('../fields/sanitize');
 const toKebabCase = require('../utilities/toKebabCase');
-const baseAuthFields = require('../auth/baseFields');
-const baseAPIKeyFields = require('../auth/baseAPIKeyFields');
-const baseVerificationFields = require('../auth/baseVerificationFields');
-const baseAccountLockFields = require('../auth/baseAccountLockFields');
+const baseAuthFields = require('../fields/baseFields/baseFields');
+const baseAPIKeyFields = require('../fields/baseFields/baseAPIKeyFields');
+const baseVerificationFields = require('../fields/baseFields/baseVerificationFields');
+const baseAccountLockFields = require('../fields/baseFields/baseAccountLockFields');
+const baseUploadFields = require('../fields/baseFields/baseUploadFields');
+const baseImageUploadFields = require('../fields/baseFields/baseImageUploadFields');
 
 const mergeBaseFields = (fields, baseFields) => {
   const mergedFields = [];
@@ -100,127 +102,10 @@ const sanitizeCollection = (collections, collection) => {
   // /////////////////////////////////
 
   if (collection.upload) {
-    let uploadFields = [
-      {
-        name: 'filename',
-        label: 'Filename',
-        hooks: {
-          beforeChange: [
-            ({ req, operation, value }) => {
-              if (operation === 'create') {
-                const file = (req.files && req.files.file) ? req.files.file : req.file;
-                return file.name;
-              }
-
-              return value;
-            },
-          ],
-        },
-        type: 'text',
-        required: true,
-        unique: true,
-        admin: {
-          disabled: true,
-          readOnly: true,
-        },
-      }, {
-        name: 'mimeType',
-        label: 'MIME Type',
-        type: 'text',
-        admin: {
-          readOnly: true,
-          disabled: true,
-        },
-      }, {
-        name: 'filesize',
-        label: 'File Size',
-        type: 'number',
-        admin: {
-          readOnly: true,
-          disabled: true,
-        },
-      },
-    ];
+    let uploadFields = baseUploadFields;
 
     if (collection.upload.imageSizes && Array.isArray(collection.upload.imageSizes)) {
-      uploadFields = uploadFields.concat([
-        {
-          name: 'width',
-          label: 'Width',
-          type: 'number',
-          admin: {
-            readOnly: true,
-            disabled: true,
-          },
-        }, {
-          name: 'height',
-          label: 'Height',
-          type: 'number',
-          admin: {
-            readOnly: true,
-            disabled: true,
-          },
-        },
-        {
-          name: 'sizes',
-          label: 'Sizes',
-          type: 'group',
-          admin: {
-            disabled: true,
-          },
-          fields: collection.upload.imageSizes.map((size) => ({
-            label: size.name,
-            name: size.name,
-            type: 'group',
-            admin: {
-              disabled: true,
-            },
-            fields: [
-              {
-                name: 'width',
-                label: 'Width',
-                type: 'number',
-                admin: {
-                  readOnly: true,
-                  disabled: true,
-                },
-              }, {
-                name: 'height',
-                label: 'Height',
-                type: 'number',
-                admin: {
-                  readOnly: true,
-                  disabled: true,
-                },
-              }, {
-                name: 'mimeType',
-                label: 'MIME Type',
-                type: 'text',
-                admin: {
-                  readOnly: true,
-                  disabled: true,
-                },
-              }, {
-                name: 'filesize',
-                label: 'File Size',
-                type: 'number',
-                admin: {
-                  readOnly: true,
-                  disabled: true,
-                },
-              }, {
-                name: 'filename',
-                label: 'File Name',
-                type: 'text',
-                admin: {
-                  readOnly: true,
-                  disabled: true,
-                },
-              },
-            ],
-          })),
-        },
-      ]);
+      uploadFields = uploadFields.concat(baseImageUploadFields(collection.upload.imageSizes));
     }
 
     uploadFields = mergeBaseFields(sanitized.fields, uploadFields);
