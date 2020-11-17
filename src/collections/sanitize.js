@@ -245,14 +245,14 @@ const sanitizeCollection = (collections, collection) => {
     }
 
     if (collection.auth.verify) {
-      authFields.concat(baseVerificationFields);
+      authFields = authFields.concat(baseVerificationFields);
     }
 
     sanitized.auth.maxLoginAttempts = typeof sanitized.auth.maxLoginAttempts === 'undefined' ? 5 : sanitized.auth.maxLoginAttempts;
     sanitized.auth.lockTime = sanitized.auth.lockTime || 600000; // 10 minutes
 
     if (sanitized.auth.maxLoginAttempts > 0) {
-      authFields.concat(baseAccountLockFields);
+      authFields = authFields.concat(baseAccountLockFields);
 
       if (!sanitized.access.unlock) sanitized.access.unlock = ({ req: { user } }) => Boolean(user);
     }
