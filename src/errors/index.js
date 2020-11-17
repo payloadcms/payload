@@ -7,6 +7,7 @@ const errorHandler = require('../express/middleware/errorHandler');
 const FileUploadError = require('./FileUploadError');
 const Forbidden = require('./Forbidden');
 const LockedAuth = require('./LockedAuth');
+const InvalidConfiguration = require('./InvalidConfiguration');
 const InvalidFieldRelationship = require('./InvalidFieldRelationship');
 const MissingCollectionLabel = require('./MissingCollectionLabel');
 const MissingFieldInputOptions = require('./MissingFieldInputOptions');
@@ -26,6 +27,7 @@ module.exports = {
   FileUploadError,
   Forbidden,
   LockedAuth,
+  InvalidConfiguration,
   InvalidFieldRelationship,
   MissingCollectionLabel,
   MissingFieldInputOptions,
