@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const { AuthenticationError, LockedAuth } = require('../../errors');
 const getCookieExpiration = require('../../utilities/getCookieExpiration');
 const isLocked = require('../isLocked');
+const removeInternalFields = require('../../utilities/removeInternalFields');
 
 async function login(incomingArgs) {
   const { config, operations } = this;
@@ -72,21 +73,9 @@ async function login(incomingArgs) {
     });
   }
 
-  const userQuery = await operations.collections.find({
-    where: {
-      email: {
-        equals: email,
-      },
-    },
-    collection: {
-      Model,
-      config: collectionConfig,
-    },
-    req,
-    overrideAccess: true,
-  });
-
-  let user = userQuery.docs[0];
+  let user = userDoc.toJSON({ virtuals: true });
+  user = removeInternalFields(user);
+  user = JSON.parse(JSON.stringify(user));
 
   const fieldsToSign = collectionConfig.fields.reduce((signedFields, field) => {
     const result = {
@@ -133,6 +122,8 @@ async function login(incomingArgs) {
 
     args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
   }
+
+  req.user = user;
 
   // /////////////////////////////////////
   // afterLogin - Collection
