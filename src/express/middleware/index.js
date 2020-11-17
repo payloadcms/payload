@@ -19,10 +19,6 @@ const middleware = (payload) => {
   if (typeof payload.config.rateLimit.skip === 'function') rateLimitOptions.skip = payload.config.rateLimit.skip;
 
   return [
-    (req, _, next) => {
-      req.payload = payload;
-      next();
-    },
     rateLimit(rateLimitOptions),
     passport.initialize(),
     identifyAPI('REST'),

@@ -101,6 +101,10 @@ class Payload {
     // Connect to database
     connectMongoose(this.config.mongoURL);
 
+    options.express.use((req, res, next) => {
+      req.payload = this;
+      next();
+    });
 
     // If not initializing locally, set up HTTP routing
     if (!this.config.local) {
