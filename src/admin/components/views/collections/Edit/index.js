@@ -10,6 +10,7 @@ import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import DefaultEdit from './Default';
 import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema';
 import { NegativeFieldGutterProvider } from '../../../forms/FieldTypeGutter/context';
+import { useLocale } from '../../../utilities/Locale';
 
 const EditView = (props) => {
   const { collection, isEditing } = props;
@@ -30,6 +31,7 @@ const EditView = (props) => {
     fields,
   } = collection;
 
+  const locale = useLocale();
   const { serverURL, routes: { admin, api } } = useConfig();
   const { params: { id } = {} } = useRouteMatch();
   const { state: locationState } = useLocation();
@@ -92,10 +94,8 @@ const EditView = (props) => {
   const collectionPermissions = permissions?.[slug];
 
   const apiURL = `${serverURL}${api}/${slug}/${id}`;
-  let action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}`;
+  const action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?locale=${locale}&depth=0`;
   const hasSavePermission = (isEditing && collectionPermissions?.update?.permission) || (!isEditing && collectionPermissions?.create?.permission);
-
-  action += '?depth=0';
 
   return (
     <NegativeFieldGutterProvider allow>
