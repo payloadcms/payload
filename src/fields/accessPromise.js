@@ -16,10 +16,19 @@ const accessPromise = async ({
 }) => {
   const resultingData = data;
 
-  if (field.access && field.access[operation]) {
-    const result = overrideAccess ? true : await field.access[operation]({ req, id });
+  let accessOperation;
 
-    if (!result && operation === 'update' && originalDoc[field.name] !== undefined) {
+  if (hook === 'afterRead') {
+    accessOperation = 'read';
+  } else if (hook === 'beforeValidate') {
+    if (operation === 'update') accessOperation = 'update';
+    if (operation === 'create') accessOperation = 'create';
+  }
+
+  if (field.access && field.access[accessOperation]) {
+    const result = overrideAccess ? true : await field.access[accessOperation]({ req, id });
+
+    if (!result && accessOperation === 'update' && originalDoc[field.name] !== undefined) {
       resultingData[field.name] = originalDoc[field.name];
     } else if (!result) {
       delete resultingData[field.name];
