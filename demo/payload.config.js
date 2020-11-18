@@ -43,6 +43,7 @@ module.exports = {
     },
   },
   email: {
+    transport: 'mock',
     fromName: 'Payload',
     fromAddress: 'hello@payloadcms.com',
   },

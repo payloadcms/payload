@@ -9,9 +9,6 @@ const expressApp = express();
 expressApp.use('/static', express.static(path.resolve(__dirname, 'client/static')));
 
 payload.init({
-  email: {
-    transport: 'mock',
-  },
   secret: 'SECRET_KEY',
   mongoURL: 'mongodb://localhost/payload',
   express: expressApp,
@@ -38,11 +35,6 @@ expressApp.use('/external-route', externalRouter);
 exports.start = (cb) => {
   const server = expressApp.listen(3000, async () => {
     logger.info(`listening on ${3000}...`);
-
-    const creds = await payload.getMockEmailCredentials();
-    logger.info(`Mock email account username: ${creds.user}`);
-    logger.info(`Mock email account password: ${creds.pass}`);
-    logger.info(`Log in to mock email provider at ${creds.web}`);
 
     if (cb) cb();
   });
