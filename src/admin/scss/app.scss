@@ -1,5 +1,6 @@
 @import 'fonts';
 @import 'styles';
+@import './toastify.scss';
 
 :root {
   --breakpoint-xs-width : #{$breakpoint-xs-width};

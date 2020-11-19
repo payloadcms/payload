@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { toast } from 'react-toastify';
 import { useHistory } from 'react-router-dom';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useConfig } from '../../providers/Config';
@@ -8,7 +9,6 @@ import MinimalTemplate from '../../templates/Minimal';
 import { useForm } from '../../forms/Form/context';
 import useTitle from '../../../hooks/useTitle';
 import { requests } from '../../../api';
-import { useStatusList } from '../Status';
 
 import './index.scss';
 
@@ -30,7 +30,6 @@ const DeleteDocument = (props) => {
   } = props;
 
   const { serverURL, routes: { api, admin } } = useConfig();
-  const { replaceStatus } = useStatusList();
   const { setModified } = useForm();
   const [deleting, setDeleting] = useState(false);
   const { closeAll, toggle } = useModal();
@@ -41,11 +40,8 @@ const DeleteDocument = (props) => {
   const modalSlug = `delete-${id}`;
 
   const addDefaultError = useCallback(() => {
-    replaceStatus([{
-      message: `There was an error while deleting ${title}. Please check your connection and try again.`,
-      type: 'error',
-    }]);
-  }, [replaceStatus, title]);
+    toast.error(`There was an error while deleting ${title}. Please check your connection and try again.`);
+  }, [title]);
 
   const handleDelete = useCallback(() => {
     setDeleting(true);
@@ -72,7 +68,7 @@ const DeleteDocument = (props) => {
         closeAll();
 
         if (json.errors) {
-          replaceStatus(json.errors);
+          toast.error(json.errors);
         }
         addDefaultError();
         return false;
@@ -80,7 +76,7 @@ const DeleteDocument = (props) => {
         return addDefaultError();
       }
     });
-  }, [addDefaultError, closeAll, history, id, replaceStatus, singular, slug, title, admin, api, serverURL, setModified]);
+  }, [addDefaultError, closeAll, history, id, singular, slug, title, admin, api, serverURL, setModified]);
 
   if (id) {
     return (
