@@ -1,5 +1,6 @@
-const { APIError } = require('./src/errors');
+const { APIError, Forbidden } = require('./src/errors');
 
 module.exports = {
   APIError,
+  Forbidden,
 };

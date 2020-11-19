@@ -5,8 +5,13 @@ const mockHandler = require('./mockHandler');
 async function buildEmail() {
   if (!this.config.email.transport || this.config.email.transport === 'mock') {
     logger.info('E-mail configured with mock configuration');
-    // TODO: Log mock e-mail credentials here as well?
     const mockAccount = await mockHandler(this.config.email);
+    if (this.config.email.transport === 'mock') {
+      const { account: { web, user, pass } } = mockAccount;
+      logger.info(`Log into mock email provider at ${web}`);
+      logger.info(`Mock email account username: ${user}`);
+      logger.info(`Mock email account password: ${pass}`);
+    }
     return mockAccount;
   }
 

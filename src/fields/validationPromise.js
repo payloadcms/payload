@@ -6,7 +6,7 @@ const validationPromise = async ({
   field,
   path,
 }) => {
-  if (hook === 'beforeValidate') return true;
+  if (hook !== 'beforeChange') return true;
 
   const hasCondition = field.admin && field.admin.condition;
   const shouldValidate = field.validate && !hasCondition;

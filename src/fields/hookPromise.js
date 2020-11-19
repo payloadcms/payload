@@ -23,7 +23,7 @@ const hookPromise = async ({
         data: fullData,
         operation,
         req,
-      });
+      }) || data[field.name];
 
       if (hookedValue !== undefined) {
         resultingData[field.name] = hookedValue;

@@ -4,6 +4,7 @@ import { useConfig } from '../../providers/Config';
 import { useStepNav } from '../../elements/StepNav';
 import { useAuth } from '../../providers/Authentication';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
+import { useLocale } from '../../utilities/Locale';
 import DefaultAccount from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
@@ -11,6 +12,7 @@ import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context
 
 const AccountView = () => {
   const { state: locationState } = useLocation();
+  const locale = useLocale();
   const { setStepNav } = useStepNav();
   const { user, permissions } = useAuth();
   const [initialState, setInitialState] = useState({});
@@ -40,6 +42,8 @@ const AccountView = () => {
   const dataToRender = locationState?.data || data;
   const apiURL = `${serverURL}${api}/${user.collection}/${data?.id}`;
 
+  const action = `${serverURL}${api}/${user.collection}/${data?.id}?locale=${locale}&depth=0`;
+
   useEffect(() => {
     const nav = [{
       label: 'Account',
@@ -63,6 +67,7 @@ const AccountView = () => {
         DefaultComponent={DefaultAccount}
         CustomComponent={CustomAccount}
         componentProps={{
+          action,
           data,
           collection,
           permissions: collectionPermissions,

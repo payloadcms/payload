@@ -91,7 +91,7 @@ const GlobalView = (props) => {
           global,
           onSave,
           apiURL: `${serverURL}${api}/globals/${slug}?depth=0`,
-          action: `${serverURL}${api}/globals/${slug}?locale=${locale}`,
+          action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0`,
         }}
       />
     </NegativeFieldGutterProvider>

@@ -21,7 +21,6 @@ const DefaultGlobalView = (props) => {
   } = props;
 
   const {
-    slug,
     fields,
     preview,
     label,
@@ -122,7 +121,6 @@ DefaultGlobalView.defaultProps = {
 DefaultGlobalView.propTypes = {
   global: PropTypes.shape({
     label: PropTypes.string.isRequired,
-    slug: PropTypes.string,
     fields: PropTypes.arrayOf(PropTypes.shape({})),
     preview: PropTypes.func,
   }).isRequired,

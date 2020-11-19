@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useConfig } from '../../providers/Config';
 import MinimalTemplate from '../../templates/Minimal';
-import StatusList, { useStatusList } from '../../elements/Status';
 import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import FormSubmit from '../../forms/Submit';
@@ -15,7 +15,6 @@ import './index.scss';
 const baseClass = 'forgot-password';
 
 const ForgotPassword = () => {
-  const { addStatus } = useStatusList();
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const { user } = useAuth();
   const {
@@ -32,10 +31,7 @@ const ForgotPassword = () => {
       .then(() => {
         setHasSubmitted(true);
       }, () => {
-        addStatus({
-          type: 'error',
-          message: 'The email provided is not valid.',
-        });
+        toast.error('The email provided is not valid.');
       });
   };
 
@@ -81,7 +77,6 @@ const ForgotPassword = () => {
 
   return (
     <MinimalTemplate className={baseClass}>
-      <StatusList />
       <Form
         novalidate
         handleResponse={handleResponse}

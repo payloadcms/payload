@@ -1,15 +1,18 @@
 module.exports = {
-  parser: "babel-eslint",
-  extends: "@trbl",
+  parser: 'babel-eslint',
+  extends: '@trbl',
+  ignorePatterns: [
+    '/**/*.d.ts'
+  ],
   rules: {
-    "import/no-unresolved": [
+    'import/no-unresolved': [
       2,
       {
         ignore: [
           'payload/config',
           'payload/unsanitizedConfig',
-        ]
-      }
+        ],
+      },
     ],
     'no-underscore-dangle': 'off',
   },

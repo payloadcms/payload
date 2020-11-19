@@ -29,6 +29,7 @@ const DefaultAccount = (props) => {
     apiURL,
     initialState,
     isLoading,
+    action,
   } = props;
 
   const {
@@ -42,7 +43,7 @@ const DefaultAccount = (props) => {
     auth,
   } = collection;
 
-  const { serverURL, routes: { api, admin } } = useConfig();
+  const { routes: { admin } } = useConfig();
 
   const classes = [
     baseClass,
@@ -53,7 +54,7 @@ const DefaultAccount = (props) => {
       <Form
         className={`${baseClass}__form`}
         method="put"
-        action={`${serverURL}${api}/${slug}/${data?.id}`}
+        action={action}
         initialState={initialState}
         disabled={!hasSavePermission}
       >
@@ -170,6 +171,7 @@ DefaultAccount.defaultProps = {
 DefaultAccount.propTypes = {
   hasSavePermission: PropTypes.bool.isRequired,
   apiURL: PropTypes.string.isRequired,
+  action: PropTypes.string.isRequired,
   collection: PropTypes.shape({
     labels: PropTypes.shape({
       plural: PropTypes.string,

@@ -130,7 +130,6 @@ declare module "@payloadcms/payload/types" {
     admin?: {
       useAsTitle?: string;
       defaultColumns?: string[];
-      disableScrollOnSuccess?: boolean;
       components?: any;
     },
     hooks?: {
@@ -214,4 +213,14 @@ declare module "@payloadcms/payload/types" {
     };
     webpack?: (config: any) => any;
   }
+}
+
+declare module "@payloadcms/payload/src/utilities/sanitizeConfig" {
+  import { PayloadConfig } from '@payloadcms/payload/types';
+
+  export type SanitizeConfig = (config: PayloadConfig) => PayloadConfig;
+
+  const sanitizeConfig: SanitizeConfig;
+
+  export default sanitizeConfig;
 }

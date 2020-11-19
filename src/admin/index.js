@@ -4,9 +4,9 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info';
 import { WindowInfoProvider } from '@faceless-ui/window-info';
 import { ModalProvider, ModalContainer } from '@faceless-ui/modal';
+import { ToastContainer, Slide } from 'react-toastify';
 import { SearchParamsProvider } from './components/utilities/SearchParams';
 import { LocaleProvider } from './components/utilities/Locale';
-import StatusList, { StatusListProvider } from './components/elements/Status';
 import { AuthenticationProvider } from './components/providers/Authentication';
 import Routes from './components/Routes';
 import getCSSVariable from '../utilities/getCSSVariable';
@@ -25,30 +25,34 @@ const Index = () => {
   };
 
   return (
-    <ConfigProvider>
-      <WindowInfoProvider {...windowInfoProps}>
-        <ScrollInfoProvider>
-          <Router>
-            <ModalProvider
-              classPrefix="payload"
-              zIndex={parseInt(getCSSVariable('z-modal'), 10)}
-            >
-              <AuthenticationProvider>
-                <StatusListProvider>
+    <React.Fragment>
+      <ConfigProvider>
+        <WindowInfoProvider {...windowInfoProps}>
+          <ScrollInfoProvider>
+            <Router>
+              <ModalProvider
+                classPrefix="payload"
+                zIndex={parseInt(getCSSVariable('z-modal'), 10)}
+              >
+                <AuthenticationProvider>
                   <SearchParamsProvider>
                     <LocaleProvider>
-                      <StatusList />
                       <Routes />
                     </LocaleProvider>
                   </SearchParamsProvider>
-                </StatusListProvider>
-                <ModalContainer />
-              </AuthenticationProvider>
-            </ModalProvider>
-          </Router>
-        </ScrollInfoProvider>
-      </WindowInfoProvider>
-    </ConfigProvider>
+                  <ModalContainer />
+                </AuthenticationProvider>
+              </ModalProvider>
+            </Router>
+          </ScrollInfoProvider>
+        </WindowInfoProvider>
+      </ConfigProvider>
+      <ToastContainer
+        position="bottom-center"
+        transition={Slide}
+      />
+    </React.Fragment>
+
   );
 };
 
