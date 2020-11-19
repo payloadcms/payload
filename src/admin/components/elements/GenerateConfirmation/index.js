@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
 import Button from '../Button';
 import MinimalTemplate from '../../templates/Minimal';
-import { useStatusList } from '../Status';
 
 import './index.scss';
 
@@ -16,17 +16,13 @@ const GenerateConfirmation = (props) => {
   } = props;
 
   const { toggle } = useModal();
-  const { replaceStatus } = useStatusList();
 
   const modalSlug = 'generate-confirmation';
 
   const handleGenerate = () => {
     setKey();
     toggle(modalSlug);
-    replaceStatus([{
-      message: 'New API Key Generated.',
-      type: 'success',
-    }]);
+    toast.success('New API Key Generated.', { autoClose: 3000 });
     highlightField(true);
   };
 

@@ -45,7 +45,6 @@ const AddUploadModal = (props) => {
           action={`${serverURL}${api}/${collection.slug}`}
           onSuccess={onSuccess}
           disableSuccessStatus
-          disableScrollOnSuccess
         >
           <header className={`${baseClass}__header`}>
             <h1>

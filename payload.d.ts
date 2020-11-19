@@ -130,7 +130,6 @@ declare module "@payloadcms/payload/types" {
     admin?: {
       useAsTitle?: string;
       defaultColumns?: string[];
-      disableScrollOnSuccess?: boolean;
       components?: any;
     },
     hooks?: {

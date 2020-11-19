@@ -4,8 +4,8 @@ import React, {
 import { objectToFormData } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { toast } from 'react-toastify';
 import { useLocale } from '../../utilities/Locale';
-import { useStatusList } from '../../elements/Status';
 import { requests } from '../../../api';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import { useAuth } from '../../providers/Authentication';
@@ -38,14 +38,12 @@ const Form = (props) => {
     disableSuccessStatus,
     initialState, // fully formed initial field state
     initialData, // values only, paths are required as key - form should build initial state as convenience
-    disableScrollOnSuccess,
     waitForAutocomplete,
     log,
   } = props;
 
   const history = useHistory();
   const locale = useLocale();
-  const { replaceStatus, addStatus, clearStatus } = useStatusList();
   const { refreshCookie } = useAuth();
 
   const [modified, setModified] = useState(false);
@@ -111,17 +109,7 @@ const Form = (props) => {
 
     // If not valid, prevent submission
     if (!isValid) {
-      addStatus({
-        message: 'Please correct the fields below.',
-        type: 'error',
-      });
-
-      if (!disableScrollOnSuccess) {
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth',
-        });
-      }
+      toast.error('Please correct invalid fields.');
 
       return false;
     }
@@ -129,13 +117,6 @@ const Form = (props) => {
     // If submit handler comes through via props, run that
     if (onSubmit) {
       return onSubmit(fields, reduceFieldsToValues(fields));
-    }
-
-    if (!disableScrollOnSuccess) {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
     }
 
     const formData = contextRef.current.createFormData();
@@ -151,7 +132,6 @@ const Form = (props) => {
 
 
       setProcessing(false);
-      clearStatus();
 
       const contentType = res.headers.get('content-type');
       const isJSON = contentType && contentType.indexOf('application/json') !== -1;
@@ -182,20 +162,13 @@ const Form = (props) => {
 
           history.push(destination);
         } else if (!disableSuccessStatus) {
-          replaceStatus([{
-            message: json.message || 'Submission successful.',
-            type: 'success',
-            disappear: 3000,
-          }]);
+          toast.success(json.message || 'Submission successful.', { autoClose: 3000 });
         }
       } else {
         contextRef.current = { ...contextRef.current }; // triggers rerender of all components that subscribe to form
 
         if (json.message) {
-          addStatus({
-            message: json.message,
-            type: 'error',
-          });
+          toast.error(json.message);
 
           return json;
         }
@@ -218,10 +191,7 @@ const Form = (props) => {
           });
 
           nonFieldErrors.forEach((err) => {
-            addStatus({
-              message: err.message || 'An unknown error occurred.',
-              type: 'error',
-            });
+            toast.error(err.message || 'An unknown error occurred.');
           });
 
           return json;
@@ -229,25 +199,17 @@ const Form = (props) => {
 
         const message = errorMessages[res.status] || 'An unknown error occurrred.';
 
-        addStatus({
-          message,
-          type: 'error',
-        });
+        toast.error(message);
       }
 
       return json;
     } catch (err) {
       setProcessing(false);
 
-      return addStatus({
-        message: err,
-        type: 'error',
-      });
+      toast.error(err);
     }
   }, [
     action,
-    addStatus,
-    clearStatus,
     disableSuccessStatus,
     disabled,
     fields,
@@ -257,8 +219,6 @@ const Form = (props) => {
     onSubmit,
     onSuccess,
     redirect,
-    replaceStatus,
-    disableScrollOnSuccess,
     waitForAutocomplete,
   ]);
 
@@ -366,7 +326,6 @@ Form.defaultProps = {
   disableSuccessStatus: false,
   disabled: false,
   initialState: undefined,
-  disableScrollOnSuccess: false,
   waitForAutocomplete: false,
   initialData: undefined,
   log: false,
@@ -387,7 +346,6 @@ Form.propTypes = {
   redirect: PropTypes.string,
   disabled: PropTypes.bool,
   initialState: PropTypes.shape({}),
-  disableScrollOnSuccess: PropTypes.bool,
   waitForAutocomplete: PropTypes.bool,
   initialData: PropTypes.shape({}),
   log: PropTypes.bool,
