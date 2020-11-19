@@ -34,6 +34,7 @@ const populate = async ({
         collection: relatedCollection,
         id: idString,
         currentDepth: currentDepth + 1,
+        overrideAccess,
         disableErrors: true,
         depth,
       });
