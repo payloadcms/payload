@@ -1,4 +1,4 @@
-module.exports = (imageSizes) => [
+export default (imageSizes) => [
   {
     name: 'width',
     label: 'Width',

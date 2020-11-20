@@ -1,4 +1,4 @@
-const executeAccess = require('../auth/executeAccess');
+import executeAccess from '../auth/executeAccess';
 
 const populate = async ({
   depth,
@@ -107,4 +107,4 @@ const relationshipPopulationPromise = ({
   }
 };
 
-module.exports = relationshipPopulationPromise;
+export default relationshipPopulationPromise;

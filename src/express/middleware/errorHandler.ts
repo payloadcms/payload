@@ -1,5 +1,5 @@
-const httpStatus = require('http-status');
-const formatErrorResponse = require('../responses/formatError');
+import httpStatus from 'http-status';
+import formatErrorResponse from '../responses/formatError';
 const logger = require('../../utilities/logger')();
 
 const errorHandler = (config) => async (err, req, res, next) => {
@@ -28,4 +28,4 @@ const errorHandler = (config) => async (err, req, res, next) => {
     .send(response);
 };
 
-module.exports = errorHandler;
+export default errorHandler;

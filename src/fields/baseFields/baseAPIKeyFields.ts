@@ -1,9 +1,9 @@
-const crypto = require('crypto');
+import crypto from 'crypto';
 
 const encryptKey = ({ req, value }) => (value ? req.payload.encrypt(value) : undefined);
 const decryptKey = ({ req, value }) => (value ? req.payload.decrypt(value) : undefined);
 
-module.exports = [
+export default [
   {
     name: 'enableAPIKey',
     type: 'checkbox',

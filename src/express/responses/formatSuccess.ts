@@ -10,4 +10,4 @@ const formatSuccessResponse = (incoming, type) => {
   }
 };
 
-module.exports = formatSuccessResponse;
+export default formatSuccessResponse;

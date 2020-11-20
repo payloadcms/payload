@@ -1,6 +1,6 @@
-const validations = require('../validations');
+import validations from '../validations';
 
-module.exports = [
+export default [
   {
     name: 'email',
     label: 'Email',

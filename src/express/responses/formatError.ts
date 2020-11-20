@@ -50,4 +50,4 @@ const formatErrorResponse = (incoming) => {
   };
 };
 
-module.exports = formatErrorResponse;
+export default formatErrorResponse;

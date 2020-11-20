@@ -27,4 +27,4 @@ const validationPromise = async ({
   return result;
 };
 
-module.exports = validationPromise;
+export default validationPromise;

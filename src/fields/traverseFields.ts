@@ -1,6 +1,6 @@
-const validationPromise = require('./validationPromise');
-const accessPromise = require('./accessPromise');
-const hookPromise = require('./hookPromise');
+import validationPromise from './validationPromise';
+import accessPromise from './accessPromise';
+import hookPromise from './hookPromise';
 
 const traverseFields = (args) => {
   const {
@@ -185,4 +185,4 @@ const traverseFields = (args) => {
   });
 };
 
-module.exports = traverseFields;
+export default traverseFields;

@@ -1,8 +1,8 @@
-const express = require('express');
-const passport = require('passport');
-const path = require('path');
-const getExecuteStaticAccess = require('../auth/getExecuteStaticAccess');
-const authenticate = require('./middleware/authenticate');
+import express from 'express';
+import passport from 'passport';
+import path from 'path';
+import getExecuteStaticAccess from '../auth/getExecuteStaticAccess';
+import authenticate from './middleware/authenticate';
 
 function initStatic() {
   Object.entries(this.collections).forEach(([_, collection]) => {
@@ -25,4 +25,4 @@ function initStatic() {
   });
 }
 
-module.exports = initStatic;
+export default initStatic;

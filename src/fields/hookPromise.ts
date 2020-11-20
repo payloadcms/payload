@@ -32,4 +32,4 @@ const hookPromise = async ({
   }
 };
 
-module.exports = hookPromise;
+export default hookPromise;

@@ -1,7 +1,7 @@
-module.exports = [
+export default [
   {
-    name: '_verified',
-    type: 'checkbox',
+    name: "_verified",
+    type: "checkbox",
     access: {
       create: () => false,
       update: ({ req: { user } }) => Boolean(user),
@@ -12,8 +12,8 @@ module.exports = [
     },
   },
   {
-    name: '_verificationToken',
-    type: 'text',
+    name: "_verificationToken",
+    type: "text",
     hidden: true,
   },
 ];

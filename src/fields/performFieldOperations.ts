@@ -1,8 +1,8 @@
-const { ValidationError } = require('../errors');
-const sanitizeFallbackLocale = require('../localization/sanitizeFallbackLocale');
-const traverseFields = require('./traverseFields');
+import { ValidationError } from '../errors';
+import sanitizeFallbackLocale from '../localization/sanitizeFallbackLocale';
+import traverseFields from './traverseFields';
 
-async function performFieldOperations(entityConfig, args) {
+export default async function performFieldOperations(entityConfig, args) {
   const {
     data: fullData,
     originalDoc: fullOriginalDoc,
@@ -91,6 +91,3 @@ async function performFieldOperations(entityConfig, args) {
 
   return fullData;
 }
-
-
-module.exports = performFieldOperations;

@@ -1,4 +1,4 @@
-const relationshipPopulationPromise = require('./relationshipPopulationPromise');
+import relationshipPopulationPromise from './relationshipPopulationPromise';
 
 const accessPromise = async ({
   data,
@@ -48,4 +48,4 @@ const accessPromise = async ({
   }
 };
 
-module.exports = accessPromise;
+export default accessPromise;
