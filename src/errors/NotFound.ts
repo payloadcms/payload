@@ -7,4 +7,4 @@ class NotFound extends APIError {
   }
 }
 
-module.exports = NotFound;
+export default NotFound;

@@ -1,8 +1,8 @@
-const jwt = require('jsonwebtoken');
-const { AuthenticationError, LockedAuth } = require('../../errors');
-const getCookieExpiration = require('../../utilities/getCookieExpiration');
-const isLocked = require('../isLocked');
-const removeInternalFields = require('../../utilities/removeInternalFields');
+import jwt from 'jsonwebtoken';
+import { AuthenticationError, LockedAuth } from '../../errors';
+import getCookieExpiration from '../../utilities/getCookieExpiration';
+import isLocked from '../isLocked';
+import removeInternalFields from '../../utilities/removeInternalFields';
 
 async function login(incomingArgs) {
   const { config, operations } = this;

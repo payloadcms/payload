@@ -33,7 +33,7 @@ expressApp.use('/external-route', externalRouter);
 
 exports.start = (cb) => {
   const server = expressApp.listen(3000, async () => {
-    logger.info(`listening on ${3000}...`);
+    payload.logger.info(`listening on ${3000}...`);
 
     if (cb) cb();
   });

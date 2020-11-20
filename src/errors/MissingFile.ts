@@ -7,4 +7,4 @@ class MissingFile extends APIError {
   }
 }
 
-module.exports = MissingFile;
+export default MissingFile;

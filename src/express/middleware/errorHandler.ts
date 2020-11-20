@@ -1,15 +1,13 @@
 import httpStatus from 'http-status';
 import formatErrorResponse from '../responses/formatError';
-import logger from '../../utilities/logger';
 
-logger();
-
-const errorHandler = (config) => async (err, req, res, next) => {
+const errorHandler = (payload) => async (err, req, res, next) => {
+  const { config } = payload;
   const data = formatErrorResponse(err);
   let response;
   let status = err.status || httpStatus.INTERNAL_SERVER_ERROR;
 
-  logger.error(err.stack);
+  payload.logger.error(err.stack);
 
   if (config.debug && config.debug === true) {
     data.stack = err.stack;
@@ -26,8 +24,7 @@ const errorHandler = (config) => async (err, req, res, next) => {
     ({ response, status } = await config.hooks.afterError(err, response) || { response, status });
   }
 
-  res.status(status)
-    .send(response);
+  res.status(status).send(response);
 };
 
 export default errorHandler;

@@ -6,4 +6,4 @@ class MissingGlobalLabel extends APIError {
   }
 }
 
-module.exports = MissingGlobalLabel;
+export default MissingGlobalLabel;

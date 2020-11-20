@@ -6,4 +6,4 @@ class MissingCollectionLabel extends APIError {
   }
 }
 
-module.exports = MissingCollectionLabel;
+export default MissingCollectionLabel;

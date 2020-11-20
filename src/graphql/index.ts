@@ -1,9 +1,6 @@
 import GraphQL, { GraphQLObjectType, GraphQLSchema } from 'graphql';
-import queryComplexity, {
-  simpleEstimator,
-  fieldExtensionsEstimator,
-} from 'graphql-query-complexity';
 import graphQLHTTP from 'express-graphql';
+import queryComplexity, { simpleEstimator, fieldExtensionsEstimator } from 'graphql-query-complexity';
 import buildObjectType from './schema/buildObjectType';
 import buildMutationInputType from './schema/buildMutationInputType';
 import errorHandler from './errorHandler';

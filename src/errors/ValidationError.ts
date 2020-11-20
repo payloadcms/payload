@@ -7,4 +7,4 @@ class ValidationError extends APIError {
   }
 }
 
-module.exports = ValidationError;
+export default ValidationError;

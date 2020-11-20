@@ -6,4 +6,4 @@ class MissingFieldType extends APIError {
   }
 }
 
-module.exports = MissingFieldType;
+export default MissingFieldType;

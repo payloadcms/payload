@@ -6,4 +6,4 @@ class MissingFieldInputOptions extends APIError {
   }
 }
 
-module.exports = MissingFieldInputOptions;
+export default MissingFieldInputOptions;

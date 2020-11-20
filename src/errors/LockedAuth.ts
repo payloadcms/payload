@@ -7,4 +7,4 @@ class LockedAuth extends APIError {
   }
 }
 
-module.exports = LockedAuth;
+export default LockedAuth;

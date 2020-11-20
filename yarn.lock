@@ -3048,6 +3048,11 @@ babel-plugin-emotion@^10.0.27:
     find-root "^1.1.0"
     source-map "^0.5.7"
 
+babel-plugin-ignore-html-and-css-imports@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/babel-plugin-ignore-html-and-css-imports/-/babel-plugin-ignore-html-and-css-imports-0.1.0.tgz#a164a607c0424e6f7c2639f79e96782d6b3170a7"
+  integrity sha512-1ayvecgwu98HyLVNe8iAR+cE7B+MBwEsNEJOJoARxzxtq6p0qCBULAQtuDS5/WH+bmxkjRg+uE3w+QSgkElKCw==
+
 babel-plugin-istanbul@^6.0.0:
   version "6.0.0"
   resolved "https://registry.npmjs.org/babel-plugin-istanbul/-/babel-plugin-istanbul-6.0.0.tgz#e159ccdc9af95e0b570c75b4573b7c34d671d765"

@@ -1,11 +1,11 @@
-import validations from '../validations';
+import { email } from '../validations';
 
 export default [
   {
     name: 'email',
     label: 'Email',
     type: 'email',
-    validate: validations.email,
+    validate: email,
     admin: {
       disabled: true,
     },

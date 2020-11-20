@@ -3,7 +3,6 @@
 import path from 'path';
 import findConfig from './findConfig';
 
-
 const configPath = findConfig();
 const getConfig = () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
