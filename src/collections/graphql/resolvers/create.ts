@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 
-function create(collection) {
+export default function create(collection) {
   async function resolver(_, args, context) {
     if (args.locale) {
       context.req.locale = args.locale;
@@ -20,5 +20,3 @@ function create(collection) {
   const createResolver = resolver.bind(this);
   return createResolver;
 }
-
-module.exports = create;

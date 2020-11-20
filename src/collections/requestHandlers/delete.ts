@@ -1,7 +1,7 @@
-const httpStatus = require('http-status');
-const { NotFound } = require('../../errors');
+import httpStatus from 'http-status';
+import { NotFound } from '../../errors';
 
-async function deleteHandler(req, res, next) {
+export default async function deleteHandler(req, res, next) {
   try {
     const doc = await this.operations.collections.delete({
       req,
@@ -19,5 +19,3 @@ async function deleteHandler(req, res, next) {
     return next(error);
   }
 }
-
-module.exports = deleteHandler;

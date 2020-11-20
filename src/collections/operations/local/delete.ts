@@ -1,4 +1,4 @@
-async function localDelete(options) {
+export default async function localDelete(options) {
   const {
     collection: collectionSlug,
     depth,
@@ -27,5 +27,3 @@ async function localDelete(options) {
     },
   });
 }
-
-module.exports = localDelete;

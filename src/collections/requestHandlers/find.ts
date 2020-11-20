@@ -1,6 +1,6 @@
-const httpStatus = require('http-status');
+import httpStatus from 'http-status';
 
-async function find(req, res, next) {
+export default async function find(req, res, next) {
   try {
     const options = {
       req,
@@ -19,5 +19,3 @@ async function find(req, res, next) {
     return next(error);
   }
 }
-
-module.exports = find;

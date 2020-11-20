@@ -1,4 +1,4 @@
-async function find(options) {
+export default async function find(options) {
   const {
     collection: collectionSlug,
     depth,
@@ -31,5 +31,3 @@ async function find(options) {
     },
   });
 }
-
-module.exports = find;

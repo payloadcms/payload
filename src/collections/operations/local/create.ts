@@ -1,4 +1,4 @@
-async function create(options) {
+export default async function create(options) {
   const {
     collection: collectionSlug,
     depth,
@@ -29,5 +29,3 @@ async function create(options) {
     },
   });
 }
-
-module.exports = create;

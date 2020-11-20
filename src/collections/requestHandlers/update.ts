@@ -1,7 +1,7 @@
-const httpStatus = require('http-status');
-const formatSuccessResponse = require('../../express/responses/formatSuccess');
+import httpStatus from 'http-status';
+import formatSuccessResponse from '../../express/responses/formatSuccess';
 
-async function update(req, res, next) {
+export default async function update(req, res, next) {
   try {
     const doc = await this.operations.collections.update({
       req,
@@ -19,5 +19,3 @@ async function update(req, res, next) {
     return next(error);
   }
 }
-
-module.exports = update;

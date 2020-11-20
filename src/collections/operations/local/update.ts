@@ -1,4 +1,4 @@
-async function update(options) {
+export default async function update(options) {
   const {
     collection: collectionSlug,
     depth,
@@ -31,5 +31,3 @@ async function update(options) {
 
   return this.operations.collections.update(args);
 }
-
-module.exports = update;

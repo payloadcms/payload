@@ -5,4 +5,4 @@ const bindCollectionMiddleware = (collection) => {
   };
 };
 
-module.exports = bindCollectionMiddleware;
+export default bindCollectionMiddleware;

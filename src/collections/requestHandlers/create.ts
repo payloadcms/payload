@@ -1,7 +1,7 @@
-const httpStatus = require('http-status');
-const formatSuccessResponse = require('../../express/responses/formatSuccess');
+import httpStatus from 'http-status';
+import formatSuccessResponse from '../../express/responses/formatSuccess';
 
-async function create(req, res, next) {
+export default async function create(req, res, next) {
   try {
     const doc = await this.operations.collections.create({
       req,
@@ -18,5 +18,3 @@ async function create(req, res, next) {
     return next(error);
   }
 }
-
-module.exports = create;

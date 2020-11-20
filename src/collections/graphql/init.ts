@@ -1,19 +1,8 @@
-const {
-  DateTimeResolver,
-} = require('graphql-scalars');
+import { DateTimeResolver } from 'graphql-scalars';
+import { GraphQLString, GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLInt } from 'graphql';
 
-const {
-  GraphQLString,
-  GraphQLObjectType,
-  GraphQLBoolean,
-  GraphQLNonNull,
-  GraphQLInt,
-} = require('graphql');
-
-
-const formatName = require('../../graphql/utilities/formatName');
-
-const buildPaginatedListType = require('../../graphql/schema/buildPaginatedListType');
+import formatName from '../../graphql/utilities/formatName';
+import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
 
 function registerCollections() {
   const {

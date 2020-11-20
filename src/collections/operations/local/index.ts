@@ -1,10 +1,10 @@
-const find = require('./find');
-const findByID = require('./findByID');
-const create = require('./create');
-const update = require('./update');
-const localDelete = require('./delete');
+import find from './find';
+import findByID from './findByID';
+import create from './create';
+import update from './update';
+import localDelete from './delete';
 
-const authOperations = require('../../../auth/operations/local');
+import authOperations from '../../../auth/operations/local';
 
 module.exports = {
   find,

@@ -1,4 +1,4 @@
-async function findByID(req, res, next) {
+export default async function findByID(req, res, next) {
   const options = {
     req,
     collection: req.collection,
@@ -13,5 +13,3 @@ async function findByID(req, res, next) {
     return next(error);
   }
 }
-
-module.exports = findByID;

@@ -6,13 +6,12 @@ const CallToAction = require('../blocks/CallToAction');
 
 const AllFields = {
   slug: 'all-fields',
-  labels: {
-    singular: 'All Fields',
-    plural: 'All Fields',
-  },
+  // labels: {
+  //   singular: 'All Fields',
+  //   plural: 'All Fields',
+  // },
   admin: {
     useAsTitle: 'text',
-    disableScrollOnSuccess: true,
   },
   preview: (doc, token) => {
     if (doc && doc.text) {
@@ -101,6 +100,9 @@ const AllFields = {
       }],
       defaultValue: 'option-2',
       required: true,
+      admin: {
+        readOnly: true,
+      },
     },
     {
       type: 'row',

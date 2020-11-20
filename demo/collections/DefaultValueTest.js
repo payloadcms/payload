@@ -96,6 +96,9 @@ const DefaultValueTest = {
         label: 'Option 3 Label',
       }],
       defaultValue: 'option-2',
+      admin: {
+        readOnly: true,
+      },
     },
     {
       type: 'row',

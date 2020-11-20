@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 
-function update(collection) {
+export default function update(collection) {
   async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
@@ -21,5 +21,3 @@ function update(collection) {
   const updateResolver = resolver.bind(this);
   return updateResolver;
 }
-
-module.exports = update;

@@ -16,4 +16,4 @@ const buildCollectionSchema = (collection, config, schemaOptions = {}) => {
   return schema;
 };
 
-module.exports = buildCollectionSchema;
+export default buildCollectionSchema;
