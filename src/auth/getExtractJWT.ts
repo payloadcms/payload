@@ -1,4 +1,4 @@
-const parseCookies = require('../utilities/parseCookies');
+import parseCookies from '../utilities/parseCookies';
 
 const getExtractJWT = (config) => (req) => {
   if (req && req.get) {

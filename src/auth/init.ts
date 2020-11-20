@@ -1,10 +1,10 @@
-const passport = require('passport');
-const AnonymousStrategy = require('passport-anonymous');
-const jwtStrategy = require('./strategies/jwt');
+import passport from 'passport';
+import AnonymousStrategy from 'passport-anonymous';
+import jwtStrategy from './strategies/jwt';
 
 function initAuth() {
   passport.use(new AnonymousStrategy.Strategy());
   passport.use('jwt', jwtStrategy(this));
 }
 
-module.exports = initAuth;
+export default initAuth;

@@ -1,9 +1,9 @@
-const passportJwt = require('passport-jwt');
-const getExtractJWT = require('../getExtractJWT');
+import passportJwt from 'passport-jwt';
+import getExtractJWT from '../getExtractJWT';
 
 const JwtStrategy = passportJwt.Strategy;
 
-module.exports = ({ config, collections, operations }) => {
+export default ({ config, collections, operations }) => {
   const opts = {
     session: false,
     passReqToCallback: true,

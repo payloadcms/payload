@@ -20,4 +20,4 @@ function initWebpack() {
   return router;
 }
 
-module.exports = initWebpack;
+export default initWebpack;

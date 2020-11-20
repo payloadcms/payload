@@ -1,7 +1,7 @@
 const PassportAPIKey = require('passport-headerapikey').HeaderAPIKeyStrategy;
-const crypto = require('crypto');
+import crypto from 'crypto';
 
-module.exports = ({ operations, config: { secret } }, { Model, config }) => {
+export default ({ operations, config: { secret } }, { Model, config }) => {
   const opts = {
     header: 'Authorization',
     prefix: `${config.labels.singular} API-Key `,

@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
-const express = require('express');
-const passport = require('passport');
-const passportLocalMongoose = require('passport-local-mongoose');
+import mongoose from 'mongoose';
+import express from 'express';
+import passport from 'passport';
+import passportLocalMongoose from 'passport-local-mongoose';
 const LocalStrategy = require('passport-local').Strategy;
-const apiKeyStrategy = require('../auth/strategies/apiKey');
-const buildSchema = require('./buildSchema');
-const bindCollectionMiddleware = require('./bindCollection');
+import apiKeyStrategy from '../auth/strategies/apiKey';
+import buildSchema from './buildSchema';
+import bindCollectionMiddleware from './bindCollection';
 
 function registerCollections() {
   this.config.collections = this.config.collections.map((collection) => {

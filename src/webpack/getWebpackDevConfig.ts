@@ -2,11 +2,11 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import path from 'path';
 import webpack from 'webpack';
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
-import babelConfig from '../../babel.config';
+import babelConfig from '../babel.config';
 
 const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js');
 
-module.exports = (config) => {
+export default (config) => {
   let webpackConfig = {
     entry: {
       main: [

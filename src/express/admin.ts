@@ -33,4 +33,4 @@ function initAdmin() {
   }
 }
 
-module.exports = initAdmin;
+export default initAdmin;
