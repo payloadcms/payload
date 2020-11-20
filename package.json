@@ -95,6 +95,7 @@
     "passport-local-mongoose": "^6.0.1",
     "pino": "^6.4.1",
     "pino-pretty": "^4.1.0",
+    "pluralize": "^8.0.0",
     "postcss-loader": "^4.0.4",
     "postcss-preset-env": "^6.7.0",
     "prismjs": "^1.21.0",

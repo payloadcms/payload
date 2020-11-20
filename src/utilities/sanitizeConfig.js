@@ -3,6 +3,7 @@ const sanitizeCollection = require('../collections/sanitize');
 const { InvalidConfiguration } = require('../errors');
 const sanitizeGlobals = require('../globals/sanitize');
 const validateSchema = require('../schema/validateSchema');
+const checkDuplicateCollections = require('./checkDuplicateCollections');
 
 const sanitizeConfig = (config) => {
   const sanitizedConfig = validateSchema({ ...config });
@@ -14,6 +15,7 @@ const sanitizeConfig = (config) => {
   if (sanitizedConfig.maxDepth === undefined) sanitizedConfig.maxDepth = 10;
 
   sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig.collections, collection));
+  checkDuplicateCollections(sanitizedConfig.collections);
 
   if (sanitizedConfig.globals) {
     sanitizedConfig.globals = sanitizeGlobals(sanitizedConfig.collections, sanitizedConfig.globals);

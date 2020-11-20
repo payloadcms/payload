@@ -5,7 +5,6 @@
   "type": "object",
   "required": [
     "slug",
-    "labels",
     "fields"
   ],
   "properties": {

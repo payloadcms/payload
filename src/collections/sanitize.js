@@ -1,5 +1,4 @@
 const merge = require('deepmerge');
-const { DuplicateCollection, MissingCollectionLabel } = require('../errors');
 const sanitizeFields = require('../fields/sanitize');
 const toKebabCase = require('../utilities/toKebabCase');
 const baseAuthFields = require('../fields/baseFields/baseFields');
@@ -8,6 +7,7 @@ const baseVerificationFields = require('../fields/baseFields/baseVerificationFie
 const baseAccountLockFields = require('../fields/baseFields/baseAccountLockFields');
 const baseUploadFields = require('../fields/baseFields/baseUploadFields');
 const baseImageUploadFields = require('../fields/baseFields/baseImageUploadFields');
+const formatLabels = require('../utilities/formatLabels');
 
 const mergeBaseFields = (fields, baseFields) => {
   const mergedFields = [];
@@ -54,24 +54,12 @@ const mergeBaseFields = (fields, baseFields) => {
 
 const sanitizeCollection = (collections, collection) => {
   // /////////////////////////////////
-  // Ensure collection is valid
-  // /////////////////////////////////
-
-  if (!collection.labels.singular) {
-    throw new MissingCollectionLabel(collection);
-  }
-
-  if (collections && collections[collection.labels.singular]) {
-    throw new DuplicateCollection(collection);
-  }
-
-  // /////////////////////////////////
   // Make copy of collection config
   // /////////////////////////////////
 
   const sanitized = { ...collection };
-
   sanitized.slug = toKebabCase(sanitized.slug);
+  sanitized.labels = !sanitized.labels ? formatLabels(sanitized.slug) : sanitized.labels;
 
   // /////////////////////////////////
   // Ensure that collection has required object structure
