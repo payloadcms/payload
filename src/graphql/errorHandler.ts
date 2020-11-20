@@ -1,4 +1,6 @@
-const logger = require('../utilities/logger')();
+import utilities from '../utilities/logger';
+
+const logger = utilities();
 
 /**
  *
@@ -26,4 +28,4 @@ const errorHandler = async (info, debug, afterErrorHook) => Promise.all(info.res
   return response;
 }));
 
-module.exports = errorHandler;
+export default errorHandler;

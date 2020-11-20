@@ -22,4 +22,4 @@ const formatName = (string) => {
   return formatted;
 };
 
-module.exports = formatName;
+export default formatName;

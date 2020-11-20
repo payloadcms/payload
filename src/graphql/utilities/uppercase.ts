@@ -8,4 +8,4 @@ function uppercase(str) {
   return newarray1.join(' ');
 }
 
-module.exports = uppercase;
+export default uppercase;

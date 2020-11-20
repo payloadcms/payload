@@ -1,4 +1,5 @@
-const { GraphQLNonNull } = require('graphql');
+import { GraphQLNonNull } from 'graphql';
+
 
 const withNullableType = (field, type, forceNullable) => {
   const hasReadAccessControl = field.access && field.access.read;
@@ -11,4 +12,4 @@ const withNullableType = (field, type, forceNullable) => {
   return type;
 };
 
-module.exports = withNullableType;
+export default withNullableType;

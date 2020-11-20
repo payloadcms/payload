@@ -1,14 +1,12 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
-const path = require('path');
-const findConfig = require('./findConfig');
+import path from 'path';
+import findConfig from './findConfig';
+
 
 const configPath = findConfig();
-const babelConfig = require('../../babel.config');
-
-require('ignore-styles');
-
 const getConfig = () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const publicConfig = require(configPath);
   return {
     ...publicConfig,
@@ -20,4 +18,4 @@ const getConfig = () => {
   };
 };
 
-module.exports = getConfig;
+export default getConfig;

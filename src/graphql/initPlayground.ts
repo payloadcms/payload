@@ -1,4 +1,4 @@
-const graphQLPlayground = require('graphql-playground-middleware-express').default;
+import graphQLPlayground from 'graphql-playground-middleware-express';
 
 function initPlayground() {
   if ((!this.config.graphQL.disablePlaygroundInProduction && process.env.NODE_ENV === 'production') || process.env.NODE_ENV !== 'production') {
@@ -11,4 +11,4 @@ function initPlayground() {
   }
 }
 
-module.exports = initPlayground;
+export default initPlayground;

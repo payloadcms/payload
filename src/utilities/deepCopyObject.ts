@@ -16,4 +16,4 @@ const deepCopyObject = (inObject) => {
   return outObject;
 };
 
-module.exports = deepCopyObject;
+export default deepCopyObject;

@@ -1,27 +1,21 @@
-const convertArrayToObject = (arr, key) => {
-  return arr.reduce((obj, item) => {
-    if (key) {
-      obj[item[key]] = item;
-      return obj;
-    }
-
-    obj[item] = {};
+const convertArrayToObject = (arr, key) => arr.reduce((obj, item) => {
+  if (key) {
+    obj[item[key]] = item;
     return obj;
-  }, {});
-};
+  }
 
-const convertObjectToArray = (arr) => {
-  return Object.values(arr);
-};
+  obj[item] = {};
+  return obj;
+}, {});
 
-const convertArrayToHash = (arr, key) => {
-  return arr.reduce((obj, item, i) => {
-    obj[item[key]] = i;
-    return obj;
-  }, {});
-};
+const convertObjectToArray = (arr) => Object.values(arr);
 
-module.exports = {
+const convertArrayToHash = (arr, key) => arr.reduce((obj, item, i) => {
+  obj[item[key]] = i;
+  return obj;
+}, {});
+
+export {
   convertArrayToHash,
   convertObjectToArray,
   convertArrayToObject,

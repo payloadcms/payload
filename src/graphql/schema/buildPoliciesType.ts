@@ -1,6 +1,7 @@
-const { GraphQLJSONObject } = require('graphql-type-json');
-const { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } = require('graphql');
-const formatName = require('../utilities/formatName');
+
+import { GraphQLJSONObject } from 'graphql-type-json';
+import { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } from 'graphql';
+import formatName from '../utilities/formatName';
 
 const buildFields = (label, fieldsToBuild) => fieldsToBuild.reduce((builtFields, field) => {
   if (!field.hidden) {
@@ -117,4 +118,4 @@ function buildPoliciesType() {
   });
 }
 
-module.exports = buildPoliciesType;
+export default buildPoliciesType;

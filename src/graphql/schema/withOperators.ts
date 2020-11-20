@@ -1,5 +1,5 @@
-const { GraphQLList, GraphQLInputObjectType, GraphQLBoolean } = require('graphql');
-const combineParentName = require('../utilities/combineParentName');
+import { GraphQLBoolean, GraphQLInputObjectType, GraphQLList } from 'graphql';
+import combineParentName from '../utilities/combineParentName';
 
 const withOperators = (field, type, parent, operators) => {
   const name = `${combineParentName(parent, field.name)}_operator`;
@@ -28,4 +28,4 @@ const withOperators = (field, type, parent, operators) => {
   });
 };
 
-module.exports = withOperators;
+export default withOperators;
