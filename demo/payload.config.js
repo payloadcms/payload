@@ -1,31 +1,31 @@
 const Admin = require('./collections/Admin');
-// const AllFields = require('./collections/AllFields');
+const AllFields = require('./collections/AllFields');
 const AutoLabel = require('./collections/AutoLabel');
-// const Code = require('./collections/Code');
-// const Conditions = require('./collections/Conditions');
-// const CustomComponents = require('./collections/CustomComponents');
-// const File = require('./collections/File');
-// const Blocks = require('./collections/Blocks');
-// const DefaultValues = require('./collections/DefaultValues');
-// const HiddenFields = require('./collections/HiddenFields');
-// const Hooks = require('./collections/Hooks');
-// const Localized = require('./collections/Localized');
-// const LocalizedArray = require('./collections/LocalizedArray');
-// const LocalOperations = require('./collections/LocalOperations');
-// const Media = require('./collections/Media');
-// const NestedArrays = require('./collections/NestedArrays');
-// const Preview = require('./collections/Preview');
-// const PublicUsers = require('./collections/PublicUsers');
-// const RelationshipA = require('./collections/RelationshipA');
-// const RelationshipB = require('./collections/RelationshipB');
-// const RichText = require('./collections/RichText');
-// const Select = require('./collections/Select');
-// const StrictPolicies = require('./collections/StrictPolicies');
-// const Validations = require('./collections/Validations');
+const Code = require('./collections/Code');
+const Conditions = require('./collections/Conditions');
+const CustomComponents = require('./collections/CustomComponents');
+const File = require('./collections/File');
+const Blocks = require('./collections/Blocks');
+const DefaultValues = require('./collections/DefaultValues');
+const HiddenFields = require('./collections/HiddenFields');
+const Hooks = require('./collections/Hooks');
+const Localized = require('./collections/Localized');
+const LocalizedArray = require('./collections/LocalizedArray');
+const LocalOperations = require('./collections/LocalOperations');
+const Media = require('./collections/Media');
+const NestedArrays = require('./collections/NestedArrays');
+const Preview = require('./collections/Preview');
+const PublicUsers = require('./collections/PublicUsers');
+const RelationshipA = require('./collections/RelationshipA');
+const RelationshipB = require('./collections/RelationshipB');
+const RichText = require('./collections/RichText');
+const Select = require('./collections/Select');
+const StrictPolicies = require('./collections/StrictPolicies');
+const Validations = require('./collections/Validations');
 
-// const BlocksGlobal = require('./globals/BlocksGlobal');
-// const NavigationArray = require('./globals/NavigationArray');
-// const GlobalWithStrictAccess = require('./globals/GlobalWithStrictAccess');
+const BlocksGlobal = require('./globals/BlocksGlobal');
+const NavigationArray = require('./globals/NavigationArray');
+const GlobalWithStrictAccess = require('./globals/GlobalWithStrictAccess');
 
 module.exports = {
   admin: {
@@ -50,35 +50,35 @@ module.exports = {
   },
   collections: [
     Admin,
-    // AllFields,
+    AllFields,
     AutoLabel,
-    // Code,
-    // Conditions,
-    // CustomComponents,
-    // File,
-    // DefaultValues,
-    // Blocks,
-    // HiddenFields,
-    // Hooks,
-    // Localized,
-    // LocalizedArray,
-    // LocalOperations,
-    // Media,
-    // NestedArrays,
-    // Preview,
-    // PublicUsers,
-    // RelationshipA,
-    // RelationshipB,
-    // RichText,
-    // Select,
-    // StrictPolicies,
-    // Validations,
+    Code,
+    Conditions,
+    CustomComponents,
+    File,
+    DefaultValues,
+    Blocks,
+    HiddenFields,
+    Hooks,
+    Localized,
+    LocalizedArray,
+    LocalOperations,
+    Media,
+    NestedArrays,
+    Preview,
+    PublicUsers,
+    RelationshipA,
+    RelationshipB,
+    RichText,
+    Select,
+    StrictPolicies,
+    Validations,
   ],
-  // globals: [
-  //   NavigationArray,
-  //   GlobalWithStrictAccess,
-  //   BlocksGlobal,
-  // ],
+  globals: [
+    NavigationArray,
+    GlobalWithStrictAccess,
+    BlocksGlobal,
+  ],
   cookiePrefix: 'payload',
   serverURL: 'http://localhost:3000',
   cors: [
