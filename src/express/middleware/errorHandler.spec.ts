@@ -1,5 +1,5 @@
-const errorHandler = require('./errorHandler');
-const APIError = require('../../errors/APIError');
+import errorHandler from './errorHandler';
+import { APIError } from '../../errors';
 
 const testError = new APIError('test error', 503);
 
