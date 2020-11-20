@@ -1,3 +1,3 @@
-const logger = require('./src/utilities/logger');
+const logger = require('./dist/utilities/logger');
 
 module.exports = logger;

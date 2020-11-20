@@ -56,6 +56,19 @@
       ]
     },
     {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Program - Production",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "demo/payload.config.js",
+        "NODE_ENV": "production"
+      },
+      "program": "${workspaceFolder}/demo/server.js",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
       "type": "chrome",
       "request": "launch",
       "name": "Launch Chrome against Localhost",

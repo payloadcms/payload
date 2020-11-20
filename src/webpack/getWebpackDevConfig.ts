@@ -10,26 +10,28 @@ module.exports = (config) => {
   let webpackConfig = {
     entry: {
       main: [
-        'webpack-hot-middleware/client',
-        path.resolve(__dirname, '../admin/index.js'),
+        "webpack-hot-middleware/client",
+        path.resolve(__dirname, "../admin/index.tsx"),
       ],
     },
     output: {
-      path: '/',
+      path: "/",
       publicPath: config.routes.admin,
-      filename: '[name].js',
+      filename: "[name].js",
     },
-    devtool: 'inline-cheap-source-map',
-    mode: 'development',
-    resolveLoader: { modules: ['node_modules', path.join(__dirname, '../../node_modules')] },
+    devtool: "inline-cheap-source-map",
+    mode: "development",
+    resolveLoader: {
+      modules: ["node_modules", path.join(__dirname, "../../node_modules")],
+    },
     module: {
       rules: [
         {
-          test: /\.js$/,
+          test: /\.(t|j)sx?$/,
           exclude: /node_modules[\\/](?!(@payloadcms[\\/]payload)[\\/]).*/,
           use: [
             {
-              loader: 'babel-loader',
+              loader: "babel-loader",
               options: babelConfig,
             },
           ],
@@ -38,35 +40,33 @@ module.exports = (config) => {
           oneOf: [
             {
               test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
-              loader: require.resolve('url-loader'),
+              loader: require.resolve("url-loader"),
               options: {
                 limit: 10000,
-                name: 'static/media/[name].[hash:8].[ext]',
+                name: "static/media/[name].[hash:8].[ext]",
               },
             },
             {
               test: /\.(sa|sc|c)ss$/,
               use: [
                 MiniCSSExtractPlugin.loader,
-                'css-loader',
+                "css-loader",
                 {
-                  loader: 'postcss-loader',
+                  loader: "postcss-loader",
                   options: {
                     postcssOptions: {
-                      plugins: [
-                        'postcss-preset-env',
-                      ],
+                      plugins: ["postcss-preset-env"],
                     },
                   },
                 },
-                'sass-loader',
+                "sass-loader",
               ],
             },
             {
-              exclude: [/\.(js|jsx|mjs)$/, /\.html$/, /\.json$/],
-              loader: require.resolve('file-loader'),
+              exclude: [/\.((t|j)s|(t|j)sx|mjs)$/, /\.html$/, /\.json$/],
+              loader: require.resolve("file-loader"),
               options: {
-                name: 'static/media/[name].[hash:8].[ext]',
+                name: "static/media/[name].[hash:8].[ext]",
               },
             },
           ],
@@ -74,22 +74,29 @@ module.exports = (config) => {
       ],
     },
     resolve: {
-      modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
+      modules: ["node_modules", path.resolve(__dirname, "../../node_modules")],
       alias: {
-        'payload/unsanitizedConfig': config.paths.config,
-        '@payloadcms/payload$': mockModulePath,
+        "payload/unsanitizedConfig": config.paths.config,
+        "@payloadcms/payload$": mockModulePath,
       },
+      extensions: [".ts", ".tsx", ".js", ".json"],
     },
     plugins: [
-      new webpack.DefinePlugin(Object.entries(config.publicENV).reduce((values, [key, val]) => ({
-        ...values,
-        [`process.env.${key}`]: `'${val}'`,
-      }), {})),
+      new webpack.DefinePlugin(
+        Object.entries(config.publicENV).reduce(
+          (values, [key, val]) => ({
+            ...values,
+            [`process.env.${key}`]: `'${val}'`,
+          }),
+          {}
+        )
+      ),
       new HtmlWebpackPlugin({
-        template: config.admin && config.admin.indexHTML
-          ? path.join(config.paths.configDir, config.admin.indexHTML)
-          : path.resolve(__dirname, '../admin/index.html'),
-        filename: './index.html',
+        template:
+          config.admin && config.admin.indexHTML
+            ? path.join(config.paths.configDir, config.admin.indexHTML)
+            : path.resolve(__dirname, "../admin/index.html"),
+        filename: "./index.html",
       }),
       new webpack.HotModuleReplacementPlugin(),
       new MiniCSSExtractPlugin({

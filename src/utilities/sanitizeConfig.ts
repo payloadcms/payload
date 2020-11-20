@@ -37,10 +37,7 @@ const sanitizeConfig = (config) => {
   if (!sanitizedConfig.admin.user) {
     sanitizedConfig.admin.user = 'users';
     sanitizedConfig.collections.push(defaultUser);
-  } else if (!sanitizedConfig.collections
-    .filter((c) => c.auth !== undefined)
-    .map((c) => c.slug)
-    .includes(sanitizedConfig.admin.user)) {
+  } else if (!sanitizedConfig.collections.find((c) => c.slug === sanitizedConfig.admin.user)) {
     throw new InvalidConfiguration(`${sanitizedConfig.admin.user} is not a valid admin user collection`);
   }
 
