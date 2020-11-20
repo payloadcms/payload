@@ -154,6 +154,7 @@
     "@types/is-hotkey": "^0.1.2",
     "@types/is-url": "^1.2.28",
     "@types/isomorphic-fetch": "^0.0.35",
+    "@types/jest": "^26.0.15",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/method-override": "^0.0.31",
     "@types/mini-css-extract-plugin": "^1.2.1",

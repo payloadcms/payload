@@ -1,6 +1,8 @@
 import httpStatus from 'http-status';
 import formatErrorResponse from '../responses/formatError';
-const logger = require('../../utilities/logger')();
+import logger from '../../utilities/logger';
+
+logger();
 
 const errorHandler = (config) => async (err, req, res, next) => {
   const data = formatErrorResponse(err);
