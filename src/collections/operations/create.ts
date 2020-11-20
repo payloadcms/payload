@@ -1,17 +1,17 @@
-const mkdirp = require('mkdirp');
-const path = require('path');
-const crypto = require('crypto');
+import mkdirp from 'mkdirp';
+import path from 'path';
+import crypto from 'crypto';
 
-const executeAccess = require('../../auth/executeAccess');
-const removeInternalFields = require('../../utilities/removeInternalFields');
+import executeAccess from '../../auth/executeAccess';
+import removeInternalFields from '../../utilities/removeInternalFields';
 
-const { MissingFile, FileUploadError } = require('../../errors');
-const resizeAndSave = require('../../uploads/imageResizer');
-const getSafeFilename = require('../../uploads/getSafeFilename');
-const getImageSize = require('../../uploads/getImageSize');
-const imageMIMETypes = require('../../uploads/imageMIMETypes');
+import { MissingFile, FileUploadError } from '../../errors';
+import resizeAndSave from '../../uploads/imageResizer';
+import getSafeFilename from '../../uploads/getSafeFilename';
+import getImageSize from '../../uploads/getImageSize';
+import imageMIMETypes from '../../uploads/imageMIMETypes';
 
-const sendVerificationEmail = require('../../auth/sendVerificationEmail');
+import sendVerificationEmail from '../../auth/sendVerificationEmail';
 
 async function create(incomingArgs) {
   const { performFieldOperations, config } = this;
@@ -274,4 +274,4 @@ async function create(incomingArgs) {
   return result;
 }
 
-module.exports = create;
+export default create;

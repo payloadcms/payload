@@ -1,5 +1,5 @@
-const executeAccess = require('../../auth/executeAccess');
-const removeInternalFields = require('../../utilities/removeInternalFields');
+import executeAccess from '../../auth/executeAccess';
+import removeInternalFields from '../../utilities/removeInternalFields';
 
 async function findOne(args) {
   const { globals: { Model } } = this;
@@ -75,4 +75,4 @@ async function findOne(args) {
   return doc;
 }
 
-module.exports = findOne;
+export default findOne;

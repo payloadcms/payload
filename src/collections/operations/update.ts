@@ -1,16 +1,16 @@
-const httpStatus = require('http-status');
-const deepmerge = require('deepmerge');
-const path = require('path');
+import httpStatus from 'http-status';
+import deepmerge from 'deepmerge';
+import path from 'path';
 
-const removeInternalFields = require('../../utilities/removeInternalFields');
-const overwriteMerge = require('../../utilities/overwriteMerge');
-const executeAccess = require('../../auth/executeAccess');
-const { NotFound, Forbidden, APIError, FileUploadError } = require('../../errors');
-const imageMIMETypes = require('../../uploads/imageMIMETypes');
-const getImageSize = require('../../uploads/getImageSize');
-const getSafeFilename = require('../../uploads/getSafeFilename');
+import removeInternalFields from '../../utilities/removeInternalFields';
+import overwriteMerge from '../../utilities/overwriteMerge';
+import executeAccess from '../../auth/executeAccess';
+import { NotFound, Forbidden, APIError, FileUploadError } from '../../errors';
+import imageMIMETypes from '../../uploads/imageMIMETypes';
+import getImageSize from '../../uploads/getImageSize';
+import getSafeFilename from '../../uploads/getSafeFilename';
 
-const resizeAndSave = require('../../uploads/imageResizer');
+import resizeAndSave from '../../uploads/imageResizer';
 
 async function update(incomingArgs) {
   let args = incomingArgs;
@@ -300,4 +300,4 @@ async function update(incomingArgs) {
   return doc;
 }
 
-module.exports = update;
+export default update;

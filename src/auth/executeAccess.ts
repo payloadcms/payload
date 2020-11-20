@@ -1,4 +1,4 @@
-const { Forbidden } = require('../errors');
+import { Forbidden } from '../errors';
 
 const executeAccess = async (operation, access) => {
   if (access) {
@@ -19,4 +19,4 @@ const executeAccess = async (operation, access) => {
   return false;
 };
 
-module.exports = executeAccess;
+export default executeAccess;

@@ -1,5 +1,5 @@
-const { APIError } = require('../../errors');
-const executeAccess = require('../executeAccess');
+import { APIError } from '../../errors';
+import executeAccess from '../executeAccess';
 
 async function unlock(args) {
   if (!Object.prototype.hasOwnProperty.call(args.data, 'email')) {
@@ -40,4 +40,4 @@ async function unlock(args) {
   return true;
 }
 
-module.exports = unlock;
+export default unlock;

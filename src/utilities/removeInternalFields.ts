@@ -11,4 +11,4 @@ const removeInternalFields = (incomingDoc) => Object.entries(incomingDoc).reduce
   };
 }, {});
 
-module.exports = removeInternalFields;
+export default removeInternalFields;

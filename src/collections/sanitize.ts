@@ -1,13 +1,13 @@
-const merge = require('deepmerge');
-const sanitizeFields = require('../fields/sanitize');
-const toKebabCase = require('../utilities/toKebabCase');
-const baseAuthFields = require('../fields/baseFields/baseFields');
-const baseAPIKeyFields = require('../fields/baseFields/baseAPIKeyFields');
-const baseVerificationFields = require('../fields/baseFields/baseVerificationFields');
-const baseAccountLockFields = require('../fields/baseFields/baseAccountLockFields');
-const baseUploadFields = require('../fields/baseFields/baseUploadFields');
-const baseImageUploadFields = require('../fields/baseFields/baseImageUploadFields');
-const formatLabels = require('../utilities/formatLabels');
+import merge from 'deepmerge';
+import sanitizeFields from '../fields/sanitize';
+import toKebabCase from '../utilities/toKebabCase';
+import baseAuthFields from '../fields/baseFields/baseFields';
+import baseAPIKeyFields from '../fields/baseFields/baseAPIKeyFields';
+import baseVerificationFields from '../fields/baseFields/baseVerificationFields';
+import baseAccountLockFields from '../fields/baseFields/baseAccountLockFields';
+import baseUploadFields from '../fields/baseFields/baseUploadFields';
+import baseImageUploadFields from '../fields/baseFields/baseImageUploadFields';
+import formatLabels from '../utilities/formatLabels';
 
 const mergeBaseFields = (fields, baseFields) => {
   const mergedFields = [];
@@ -155,4 +155,4 @@ const sanitizeCollection = (collections, collection) => {
   return sanitized;
 };
 
-module.exports = sanitizeCollection;
+export default sanitizeCollection;

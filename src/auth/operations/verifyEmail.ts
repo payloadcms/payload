@@ -1,5 +1,5 @@
-const httpStatus = require('http-status');
-const { APIError } = require('../../errors');
+import httpStatus from 'http-status';
+import { APIError } from '../../errors';
 
 async function verifyEmail(args) {
   if (!Object.prototype.hasOwnProperty.call(args, 'token')) {
@@ -20,4 +20,4 @@ async function verifyEmail(args) {
   return true;
 }
 
-module.exports = verifyEmail;
+export default verifyEmail;

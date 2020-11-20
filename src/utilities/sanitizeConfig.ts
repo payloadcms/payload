@@ -1,9 +1,9 @@
-const defaultUser = require('../auth/default');
-const sanitizeCollection = require('../collections/sanitize');
-const { InvalidConfiguration } = require('../errors');
-const sanitizeGlobals = require('../globals/sanitize');
-const validateSchema = require('../schema/validateSchema');
-const checkDuplicateCollections = require('./checkDuplicateCollections');
+import defaultUser from '../auth/default';
+import sanitizeCollection from '../collections/sanitize';
+import { InvalidConfiguration } from '../errors';
+import sanitizeGlobals from '../globals/sanitize';
+import validateSchema from '../schema/validateSchema';
+import checkDuplicateCollections from './checkDuplicateCollections';
 
 const sanitizeConfig = (config) => {
   const sanitizedConfig = validateSchema({ ...config });
@@ -36,7 +36,7 @@ const sanitizeConfig = (config) => {
 
   if (!sanitizedConfig.admin.user) {
     sanitizedConfig.admin.user = 'users';
-    sanitizedConfig.collections.push(defaultUser);
+    sanitizedConfig.collections.push(sanitizeCollection(sanitizedConfig.collections, defaultUser));
   } else if (!sanitizedConfig.collections.find((c) => c.slug === sanitizedConfig.admin.user)) {
     throw new InvalidConfiguration(`${sanitizedConfig.admin.user} is not a valid admin user collection`);
   }
@@ -77,4 +77,4 @@ const sanitizeConfig = (config) => {
   return sanitizedConfig;
 };
 
-module.exports = sanitizeConfig;
+export default sanitizeConfig;

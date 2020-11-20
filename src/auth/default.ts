@@ -11,7 +11,6 @@ const defaultUser = {
     tokenExpiration: 7200,
   },
   fields: [],
-  timestamps: true,
 };
 
-module.exports = defaultUser;
+export default defaultUser;

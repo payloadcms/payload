@@ -1,10 +1,10 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const removeInternalFields = require('../../utilities/removeInternalFields');
-const { NotFound, Forbidden, ErrorDeletingFile } = require('../../errors');
-const executeAccess = require('../../auth/executeAccess');
-const fileExists = require('../../uploads/fileExists');
+import removeInternalFields from '../../utilities/removeInternalFields';
+import { NotFound, Forbidden, ErrorDeletingFile } from '../../errors';
+import executeAccess from '../../auth/executeAccess';
+import fileExists from '../../uploads/fileExists';
 
 async function deleteQuery(incomingArgs) {
   let args = incomingArgs;
@@ -177,4 +177,4 @@ async function deleteQuery(incomingArgs) {
   return result;
 }
 
-module.exports = deleteQuery;
+export default deleteQuery;

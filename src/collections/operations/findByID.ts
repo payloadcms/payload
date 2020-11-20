@@ -1,8 +1,8 @@
 /* eslint-disable no-underscore-dangle */
-const memoize = require('micro-memoize');
-const removeInternalFields = require('../../utilities/removeInternalFields');
-const { Forbidden, NotFound } = require('../../errors');
-const executeAccess = require('../../auth/executeAccess');
+import memoize from 'micro-memoize';
+import removeInternalFields from '../../utilities/removeInternalFields';
+import { Forbidden, NotFound } from '../../errors';
+import executeAccess from '../../auth/executeAccess';
 
 async function findByID(incomingArgs) {
   let args = incomingArgs;
@@ -149,4 +149,4 @@ async function findByID(incomingArgs) {
   return result;
 }
 
-module.exports = findByID;
+export default findByID;

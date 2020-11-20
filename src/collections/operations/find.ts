@@ -1,5 +1,5 @@
-const executeAccess = require('../../auth/executeAccess');
-const removeInternalFields = require('../../utilities/removeInternalFields');
+import executeAccess from '../../auth/executeAccess';
+import removeInternalFields from '../../utilities/removeInternalFields';
 
 async function find(incomingArgs) {
   let args = incomingArgs;
@@ -171,4 +171,4 @@ async function find(incomingArgs) {
   return result;
 }
 
-module.exports = find;
+export default find;
