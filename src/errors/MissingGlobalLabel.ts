@@ -1,4 +1,4 @@
-const APIError = require('./APIError');
+import APIError from './APIError';
 
 class MissingGlobalLabel extends APIError {
   constructor(config) {
