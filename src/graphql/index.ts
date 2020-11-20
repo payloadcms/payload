@@ -1,6 +1,6 @@
-import GraphQL from 'graphql';
-import queryComplexityImport from 'graphql-query-complexity';
+import GraphQL, { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import graphQLHTTP from 'express-graphql';
+import queryComplexity, { simpleEstimator, fieldExtensionsEstimator } from 'graphql-query-complexity';
 import buildObjectType from './schema/buildObjectType';
 import buildMutationInputType from './schema/buildMutationInputType';
 import errorHandler from './errorHandler';
@@ -12,13 +12,6 @@ import initCollections from '../collections/graphql/init';
 import initGlobals from '../globals/graphql/init';
 import buildWhereInputType from './schema/buildWhereInputType';
 import access from '../auth/graphql/resolvers/access';
-
-const { GraphQLObjectType, GraphQLSchema } = GraphQL;
-const queryComplexity = queryComplexityImport.default;
-const {
-  fieldExtensionsEstimator,
-  simpleEstimator,
-} = queryComplexityImport;
 
 class InitializeGraphQL {
   constructor(init) {
