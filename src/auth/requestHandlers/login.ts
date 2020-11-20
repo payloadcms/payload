@@ -1,4 +1,4 @@
-const httpStatus = require('http-status');
+import httpStatus from 'http-status';
 
 async function loginHandler(req, res, next) {
   try {
@@ -22,4 +22,4 @@ async function loginHandler(req, res, next) {
   }
 }
 
-module.exports = loginHandler;
+export default loginHandler;

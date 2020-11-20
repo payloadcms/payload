@@ -33,4 +33,4 @@ async function login(args) {
   return this.operations.collections.auth.login(options);
 }
 
-module.exports = login;
+export default login;

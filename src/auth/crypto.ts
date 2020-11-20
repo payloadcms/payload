@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+import crypto from 'crypto';
 
 const algorithm = 'aes-256-ctr';
 
@@ -27,7 +27,7 @@ function decrypt(hash) {
   return result;
 }
 
-module.exports = {
+export default {
   encrypt,
   decrypt,
 };

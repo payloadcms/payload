@@ -16,4 +16,4 @@ async function unlock(options) {
   });
 }
 
-module.exports = unlock;
+export default unlock;

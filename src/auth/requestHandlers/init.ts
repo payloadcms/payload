@@ -7,4 +7,4 @@ async function initHandler(req, res, next) {
   }
 }
 
-module.exports = initHandler;
+export default initHandler;

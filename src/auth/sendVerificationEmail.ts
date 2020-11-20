@@ -49,4 +49,4 @@ async function sendVerificationEmail(args) {
   }
 }
 
-module.exports = sendVerificationEmail;
+export default sendVerificationEmail;

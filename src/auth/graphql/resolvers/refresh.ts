@@ -21,4 +21,4 @@ function refresh(collection) {
   return refreshResolver;
 }
 
-module.exports = refresh;
+export default refresh;

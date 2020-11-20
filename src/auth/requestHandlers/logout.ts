@@ -12,4 +12,4 @@ async function logoutHandler(req, res, next) {
   }
 }
 
-module.exports = logoutHandler;
+export default logoutHandler;

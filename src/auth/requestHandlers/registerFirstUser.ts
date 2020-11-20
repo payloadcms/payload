@@ -13,4 +13,4 @@ async function registerFirstUser(req, res, next) {
   }
 }
 
-module.exports = registerFirstUser;
+export default registerFirstUser;

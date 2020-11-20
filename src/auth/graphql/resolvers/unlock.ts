@@ -15,4 +15,4 @@ function unlock(collection) {
   return unlockResolver;
 }
 
-module.exports = unlock;
+export default unlock;

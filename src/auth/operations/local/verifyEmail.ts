@@ -12,4 +12,4 @@ async function verifyEmail(options) {
   });
 }
 
-module.exports = verifyEmail;
+export default verifyEmail;

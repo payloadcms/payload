@@ -17,4 +17,4 @@ function forgotPassword(collection) {
   return forgotPasswordResolver;
 }
 
-module.exports = forgotPassword;
+export default forgotPassword;

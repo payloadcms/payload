@@ -1,4 +1,4 @@
-const httpStatus = require('http-status');
+import httpStatus from 'http-status';
 
 async function verifyEmail(req, res, next) {
   try {
@@ -16,4 +16,4 @@ async function verifyEmail(req, res, next) {
   }
 }
 
-module.exports = verifyEmail;
+export default verifyEmail;

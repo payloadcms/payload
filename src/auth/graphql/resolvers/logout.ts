@@ -15,4 +15,4 @@ function logout(collection) {
   return logoutResolver;
 }
 
-module.exports = logout;
+export default logout;

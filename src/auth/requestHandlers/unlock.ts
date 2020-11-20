@@ -1,4 +1,4 @@
-const httpStatus = require('http-status');
+import httpStatus from 'http-status';
 
 async function unlockHandler(req, res, next) {
   try {
@@ -17,4 +17,4 @@ async function unlockHandler(req, res, next) {
   }
 }
 
-module.exports = unlockHandler;
+export default unlockHandler;

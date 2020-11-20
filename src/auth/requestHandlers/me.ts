@@ -7,4 +7,4 @@ async function me(req, res, next) {
   }
 }
 
-module.exports = me;
+export default me;

@@ -1,4 +1,4 @@
-const getExtractJWT = require('../getExtractJWT');
+import getExtractJWT from '../getExtractJWT';
 
 async function refreshHandler(req, res, next) {
   try {
@@ -21,4 +21,4 @@ async function refreshHandler(req, res, next) {
   }
 }
 
-module.exports = refreshHandler;
+export default refreshHandler;

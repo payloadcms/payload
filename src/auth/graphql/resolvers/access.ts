@@ -1,4 +1,4 @@
-const formatName = require('../../../graphql/utilities/formatName');
+import formatName from '../../../graphql/utilities/formatName';
 
 const formatConfigNames = (results, configs) => {
   const formattedResults = { ...results };
@@ -25,4 +25,4 @@ async function access(_, __, context) {
   return accessResults;
 }
 
-module.exports = access;
+export default access;

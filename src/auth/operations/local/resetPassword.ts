@@ -21,4 +21,4 @@ async function resetPassword(options) {
   });
 }
 
-module.exports = resetPassword;
+export default resetPassword;

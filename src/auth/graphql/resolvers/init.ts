@@ -14,4 +14,4 @@ function init({ Model }) {
   return initResolver;
 }
 
-module.exports = init;
+export default init;

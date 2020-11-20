@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
 const mockEmailHandler = async (emailConfig) => {
   const testAccount = await nodemailer.createTestAccount();
@@ -22,4 +22,4 @@ const mockEmailHandler = async (emailConfig) => {
   };
 };
 
-module.exports = mockEmailHandler;
+export default mockEmailHandler;

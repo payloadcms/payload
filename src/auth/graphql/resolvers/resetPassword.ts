@@ -21,4 +21,4 @@ function resetPassword(collection) {
   return resetPasswordResolver;
 }
 
-module.exports = resetPassword;
+export default resetPassword;

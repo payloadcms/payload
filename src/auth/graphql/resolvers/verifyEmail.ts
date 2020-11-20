@@ -20,4 +20,4 @@ function verifyEmail(collection) {
   return verifyEmailResolver;
 }
 
-module.exports = verifyEmail;
+export default verifyEmail;

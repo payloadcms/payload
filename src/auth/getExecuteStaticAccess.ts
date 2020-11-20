@@ -1,5 +1,5 @@
-const executeAccess = require('./executeAccess');
-const { Forbidden } = require('../errors');
+import executeAccess from './executeAccess';
+import { Forbidden } from '../errors';
 
 const getExecuteStaticAccess = ({ config, Model }) => async (req, res, next) => {
   try {
@@ -37,4 +37,4 @@ const getExecuteStaticAccess = ({ config, Model }) => async (req, res, next) => 
   }
 };
 
-module.exports = getExecuteStaticAccess;
+export default getExecuteStaticAccess;

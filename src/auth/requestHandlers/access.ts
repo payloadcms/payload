@@ -13,4 +13,4 @@ async function policiesHandler(req, res, next) {
   }
 }
 
-module.exports = policiesHandler;
+export default policiesHandler;

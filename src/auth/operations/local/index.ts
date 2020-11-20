@@ -1,13 +1,5 @@
-const login = require('./login');
-const forgotPassword = require('./forgotPassword');
-const resetPassword = require('./resetPassword');
-const unlock = require('./unlock');
-const verifyEmail = require('./verifyEmail');
-
-module.exports = {
-  login,
-  forgotPassword,
-  resetPassword,
-  unlock,
-  verifyEmail,
-};
+export { default as login } from './login';
+export { default as forgotPassword } from './forgotPassword';
+export { default as resetPassword } from './resetPassword';
+export { default as unlock } from './unlock';
+export { default as verifyEmail } from './verifyEmail';

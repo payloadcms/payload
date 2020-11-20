@@ -1,4 +1,4 @@
-const httpStatus = require('http-status');
+import httpStatus from 'http-status';
 
 async function resetPassword(req, res, next) {
   try {
@@ -20,4 +20,4 @@ async function resetPassword(req, res, next) {
   }
 }
 
-module.exports = resetPassword;
+export default resetPassword;

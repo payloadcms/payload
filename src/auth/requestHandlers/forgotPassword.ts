@@ -19,4 +19,4 @@ async function forgotPasswordHandler(req, res, next) {
   }
 }
 
-module.exports = forgotPasswordHandler;
+export default forgotPasswordHandler;

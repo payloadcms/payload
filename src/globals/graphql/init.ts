@@ -1,5 +1,5 @@
-const { GraphQLNonNull } = require('graphql');
-const formatName = require('../../graphql/utilities/formatName');
+import { GraphQLNonNull } from 'graphql';
+import formatName from '../../graphql/utilities/formatName';
 
 function registerGlobals() {
   if (this.config.globals) {
@@ -52,4 +52,4 @@ function registerGlobals() {
   }
 }
 
-module.exports = registerGlobals;
+export default registerGlobals;

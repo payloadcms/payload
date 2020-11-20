@@ -1,6 +1,8 @@
-const nodemailer = require('nodemailer');
-const logger = require('../utilities/logger')();
-const mockHandler = require('./mockHandler');
+import nodemailer from 'nodemailer';
+import logger from '../utilities/logger';
+import mockHandler from './mockHandler';
+
+logger();
 
 async function buildEmail() {
   if (!this.config.email.transport || this.config.email.transport === 'mock') {
@@ -35,4 +37,4 @@ async function buildEmail() {
 }
 
 
-module.exports = buildEmail;
+export default buildEmail;

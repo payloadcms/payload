@@ -23,4 +23,4 @@ async function forgotPassword(options) {
   });
 }
 
-module.exports = forgotPassword;
+export default forgotPassword;

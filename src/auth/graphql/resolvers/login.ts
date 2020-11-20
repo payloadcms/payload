@@ -18,4 +18,4 @@ function login(collection) {
   return loginResolver;
 }
 
-module.exports = login;
+export default login;
