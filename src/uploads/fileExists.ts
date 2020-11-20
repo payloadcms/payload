@@ -1,9 +1,9 @@
-const fs = require('fs');
-const { promisify } = require('util');
+import fs from 'fs';
+import { promisify } from 'util';
 
 const stat = promisify(fs.stat);
 
-const fileExists = async (fileName) => {
+export default async (fileName) => {
   try {
     await stat(fileName);
     return true;
@@ -11,5 +11,3 @@ const fileExists = async (fileName) => {
     return false;
   }
 };
-
-module.exports = fileExists;
