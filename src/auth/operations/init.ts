@@ -10,4 +10,4 @@ async function init(args) {
   return false;
 }
 
-module.exports = init;
+export default init;

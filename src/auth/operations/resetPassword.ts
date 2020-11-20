@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
-const { APIError } = require('../../errors');
-const getCookieExpiration = require('../../utilities/getCookieExpiration');
+import jwt from 'jsonwebtoken';
+import { APIError } from '../../errors';
+import getCookieExpiration from '../../utilities/getCookieExpiration';
 
 async function resetPassword(args) {
   const { config } = this;
@@ -74,4 +74,4 @@ async function resetPassword(args) {
   return { token, user: fullUser };
 }
 
-module.exports = resetPassword;
+export default resetPassword;

@@ -1,23 +1,23 @@
-const access = require('../auth/operations/access');
-const forgotPassword = require('../auth/operations/forgotPassword');
-const init = require('../auth/operations/init');
-const login = require('../auth/operations/login');
-const logout = require('../auth/operations/logout');
-const me = require('../auth/operations/me');
-const refresh = require('../auth/operations/refresh');
-const registerFirstUser = require('../auth/operations/registerFirstUser');
-const resetPassword = require('../auth/operations/resetPassword');
-const verifyEmail = require('../auth/operations/verifyEmail');
-const unlock = require('../auth/operations/unlock');
+import access from '../auth/operations/access';
+import forgotPassword from '../auth/operations/forgotPassword';
+import init from '../auth/operations/init';
+import login from '../auth/operations/login';
+import logout from '../auth/operations/logout';
+import me from '../auth/operations/me';
+import refresh from '../auth/operations/refresh';
+import registerFirstUser from '../auth/operations/registerFirstUser';
+import resetPassword from '../auth/operations/resetPassword';
+import verifyEmail from '../auth/operations/verifyEmail';
+import unlock from '../auth/operations/unlock';
 
-const create = require('../collections/operations/create');
-const find = require('../collections/operations/find');
-const findByID = require('../collections/operations/findByID');
-const update = require('../collections/operations/update');
-const deleteHandler = require('../collections/operations/delete');
+import create from '../collections/operations/create';
+import find from '../collections/operations/find';
+import findByID from '../collections/operations/findByID';
+import update from '../collections/operations/update';
+import deleteHandler from '../collections/operations/delete';
 
-const findOne = require('../globals/operations/findOne');
-const globalUpdate = require('../globals/operations/update');
+import findOne from '../globals/operations/findOne';
+import globalUpdate from '../globals/operations/update';
 
 function bindOperations(ctx) {
   const payload = ctx;
@@ -50,4 +50,4 @@ function bindOperations(ctx) {
   };
 }
 
-module.exports = bindOperations;
+export default bindOperations;

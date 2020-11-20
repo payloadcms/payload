@@ -1,4 +1,4 @@
-const { Forbidden } = require('../../errors');
+import { Forbidden } from '../../errors';
 
 async function registerFirstUser(args) {
   const {
@@ -40,4 +40,4 @@ async function registerFirstUser(args) {
   };
 }
 
-module.exports = registerFirstUser;
+export default registerFirstUser;

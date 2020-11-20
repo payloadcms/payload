@@ -105,4 +105,4 @@ async function accessOperation(args) {
   return results;
 }
 
-module.exports = accessOperation;
+export default accessOperation;

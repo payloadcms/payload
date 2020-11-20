@@ -1,39 +1,18 @@
-const APIError = require('./APIError');
-const AuthenticationError = require('./AuthenticationError');
-const DuplicateCollection = require('./DuplicateCollection');
-const DuplicateGlobal = require('./DuplicateGlobal');
-const ErrorDeletingFile = require('./ErrorDeletingFile');
-const errorHandler = require('../express/middleware/errorHandler');
-const FileUploadError = require('./FileUploadError');
-const Forbidden = require('./Forbidden');
-const LockedAuth = require('./LockedAuth');
-const InvalidConfiguration = require('./InvalidConfiguration');
-const InvalidFieldRelationship = require('./InvalidFieldRelationship');
-const MissingCollectionLabel = require('./MissingCollectionLabel');
-const MissingFieldInputOptions = require('./MissingFieldInputOptions');
-const MissingFieldType = require('./MissingFieldType');
-const MissingFile = require('./MissingFile');
-const MissingGlobalLabel = require('./MissingGlobalLabel');
-const NotFound = require('./NotFound');
-const ValidationError = require('./ValidationError');
-
-module.exports = {
-  APIError,
-  AuthenticationError,
-  DuplicateCollection,
-  DuplicateGlobal,
-  ErrorDeletingFile,
-  errorHandler,
-  FileUploadError,
-  Forbidden,
-  LockedAuth,
-  InvalidConfiguration,
-  InvalidFieldRelationship,
-  MissingCollectionLabel,
-  MissingFieldInputOptions,
-  MissingFieldType,
-  MissingFile,
-  MissingGlobalLabel,
-  NotFound,
-  ValidationError,
-};
+export { default as APIError } from './APIError';
+export { default as AuthenticationError } from './AuthenticationError';
+export { default as DuplicateCollection } from './DuplicateCollection';
+export { default as DuplicateGlobal } from './DuplicateGlobal';
+export { default as ErrorDeletingFile } from './ErrorDeletingFile';
+export { default as errorHandler } from '../express/middleware/errorHandler';
+export { default as FileUploadError } from './FileUploadError';
+export { default as Forbidden } from './Forbidden';
+export { default as LockedAuth } from './LockedAuth';
+export { default as InvalidConfiguration } from './InvalidConfiguration';
+export { default as InvalidFieldRelationship } from './InvalidFieldRelationship';
+export { default as MissingCollectionLabel } from './MissingCollectionLabel';
+export { default as MissingFieldInputOptions } from './MissingFieldInputOptions';
+export { default as MissingFieldType } from './MissingFieldType';
+export { default as MissingFile } from './MissingFile';
+export { default as MissingGlobalLabel } from './MissingGlobalLabel';
+export { default as NotFound } from './NotFound';
+export { default as ValidationError } from './ValidationError';

@@ -1,5 +1,5 @@
-const crypto = require('crypto');
-const { APIError } = require('../../errors');
+import crypto from 'crypto';
+import { APIError } from '../../errors';
 
 async function forgotPassword(incomingArgs) {
   const { config, sendEmail: email } = this;
@@ -98,4 +98,4 @@ async function forgotPassword(incomingArgs) {
   return token;
 }
 
-module.exports = forgotPassword;
+export default forgotPassword;

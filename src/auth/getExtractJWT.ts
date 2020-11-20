@@ -23,4 +23,4 @@ const getExtractJWT = (config) => (req) => {
   return null;
 };
 
-module.exports = getExtractJWT;
+export default getExtractJWT;

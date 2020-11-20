@@ -4,4 +4,4 @@ const getCookieExpiration = (seconds = 7200) => {
   return currentTime;
 };
 
-module.exports = getCookieExpiration;
+export default getCookieExpiration;

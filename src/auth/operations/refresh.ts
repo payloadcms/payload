@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
-const { Forbidden } = require('../../errors');
-const getCookieExpiration = require('../../utilities/getCookieExpiration');
+import jwt from 'jsonwebtoken';
+import { Forbidden } from '../../errors';
+import getCookieExpiration from '../../utilities/getCookieExpiration';
 
 async function refresh(incomingArgs) {
   let args = incomingArgs;
@@ -64,4 +64,4 @@ async function refresh(incomingArgs) {
   };
 }
 
-module.exports = refresh;
+export default refresh;

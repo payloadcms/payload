@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const getExtractJWT = require('../getExtractJWT');
+import jwt from 'jsonwebtoken';
+import getExtractJWT from '../getExtractJWT';
 
 async function me({ req }) {
   const extractJWT = getExtractJWT(this.config);
@@ -37,4 +37,4 @@ async function me({ req }) {
   };
 }
 
-module.exports = me;
+export default me;

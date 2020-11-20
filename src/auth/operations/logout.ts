@@ -27,4 +27,4 @@ async function logout(args) {
   return 'Logged out successfully.';
 }
 
-module.exports = logout;
+export default logout;

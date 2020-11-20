@@ -1,9 +1,8 @@
-const falsey = require('falsey');
-const pino = require('pino');
-const memoize = require('micro-memoize');
+import falsey from 'falsey';
+import pino from 'pino';
+import memoize from 'micro-memoize';
 
-// eslint-disable-next-line arrow-body-style
-module.exports = memoize((name = 'payload') => {
+export default memoize((name = 'payload') => {
   return pino({
     name,
     enabled: falsey(process.env.DISABLE_LOGGING),

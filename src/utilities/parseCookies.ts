@@ -12,4 +12,4 @@ function parseCookies(req) {
   return list;
 }
 
-module.exports = parseCookies;
+export default parseCookies;
