@@ -2,7 +2,6 @@
 const express = require('express');
 const path = require('path');
 const payload = require('../src/dev');
-const logger = require('../src/utilities/logger')();
 
 const expressApp = express();
 
@@ -13,7 +12,7 @@ payload.init({
   mongoURL: 'mongodb://localhost/payload',
   express: expressApp,
   onInit: () => {
-    logger.info('Payload is initialized');
+    console.log('Payload is initialized');
     // console.log('Payload is initialized');
   },
 });

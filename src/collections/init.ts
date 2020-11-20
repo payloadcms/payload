@@ -152,4 +152,4 @@ function registerCollections() {
   });
 }
 
-module.exports = registerCollections;
+export default registerCollections;

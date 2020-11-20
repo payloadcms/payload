@@ -1,6 +1,6 @@
 import express from 'express';
 import crypto from 'crypto';
-import logger from './utilities/logger';
+import Logger from './utilities/logger';
 import bindOperations from './init/bindOperations';
 import bindRequestHandlers from './init/bindRequestHandlers';
 import bindResolvers from './init/bindResolvers';
@@ -27,11 +27,14 @@ import { encrypt, decrypt } from './auth/crypto';
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
-logger();
+const logger = Logger();
 
 class Payload {
+  logger: any;
+
   init(options) {
-    logger.info('Starting Payload...');
+    this.logger = logger;
+    this.logger.info('Starting Payload...');
 
     if (!options.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.');

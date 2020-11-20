@@ -1,5 +1,13 @@
-export { default as login } from './login';
-export { default as forgotPassword } from './forgotPassword';
-export { default as resetPassword } from './resetPassword';
-export { default as unlock } from './unlock';
-export { default as verifyEmail } from './verifyEmail';
+import login from './login';
+import forgotPassword from './forgotPassword';
+import resetPassword from './resetPassword';
+import unlock from './unlock';
+import verifyEmail from './verifyEmail';
+
+export default {
+  login,
+  forgotPassword,
+  resetPassword,
+  unlock,
+  verifyEmail,
+};

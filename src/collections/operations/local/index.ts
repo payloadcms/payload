@@ -3,14 +3,13 @@ import findByID from './findByID';
 import create from './create';
 import update from './update';
 import localDelete from './delete';
+import auth from '../../../auth/operations/local';
 
-import authOperations from '../../../auth/operations/local';
-
-module.exports = {
+export default {
   find,
   findByID,
   create,
   update,
   localDelete,
-  auth: authOperations,
+  auth,
 };
