@@ -4,4 +4,4 @@ async function wait(ms) {
   });
 }
 
-module.exports = wait;
+export default wait;

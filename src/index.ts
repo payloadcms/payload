@@ -1,6 +1,3 @@
-require('es6-promise').polyfill();
-require('isomorphic-fetch');
-
 import express from 'express';
 import crypto from 'crypto';
 import logger from './utilities/logger';
@@ -26,6 +23,9 @@ import performFieldOperations from './fields/performFieldOperations';
 import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
 import { encrypt, decrypt } from './auth/crypto';
+
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
 
 logger();
 

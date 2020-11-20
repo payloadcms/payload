@@ -1,24 +1,21 @@
 /* eslint-disable no-use-before-define */
-const {
-  GraphQLString,
-  GraphQLFloat,
+import {
   GraphQLBoolean,
+  GraphQLEnumType,
+  GraphQLFloat,
+  GraphQLInputObjectType,
   GraphQLInt,
   GraphQLList,
-  GraphQLEnumType,
-  GraphQLInputObjectType,
-} = require('graphql');
-const { GraphQLJSON } = require('graphql-type-json');
+  GraphQLString,
+} from 'graphql';
 
-const {
-  DateTimeResolver,
-  EmailAddressResolver,
-} = require('graphql-scalars');
+import { GraphQLJSON } from 'graphql-type-json';
 
-const formatName = require('../utilities/formatName');
-const combineParentName = require('../utilities/combineParentName');
-const withOperators = require('./withOperators');
 
+import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
+import formatName from '../utilities/formatName';
+import combineParentName from '../utilities/combineParentName';
+import withOperators from './withOperators';
 // buildWhereInputType is similar to buildObjectType and operates
 // on a field basis with a few distinct differences.
 //
@@ -339,4 +336,4 @@ const buildWhereInputType = (name, fields, parentName) => {
   });
 };
 
-module.exports = buildWhereInputType;
+export default buildWhereInputType;

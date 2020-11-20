@@ -1,26 +1,24 @@
-const GraphQL = require('graphql');
+import GraphQL from 'graphql';
+import queryComplexityImport from 'graphql-query-complexity';
+import graphQLHTTP from 'express-graphql';
+import buildObjectType from './schema/buildObjectType';
+import buildMutationInputType from './schema/buildMutationInputType';
+import errorHandler from './errorHandler';
+import buildBlockType from './schema/buildBlockType';
+import buildPoliciesType from './schema/buildPoliciesType';
+import buildLocaleInputType from './schema/buildLocaleInputType';
+import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType';
+import initCollections from '../collections/graphql/init';
+import initGlobals from '../globals/graphql/init';
+import buildWhereInputType from './schema/buildWhereInputType';
+import access from '../auth/graphql/resolvers/access';
 
 const { GraphQLObjectType, GraphQLSchema } = GraphQL;
-const queryComplexityImport = require('graphql-query-complexity');
-
 const queryComplexity = queryComplexityImport.default;
 const {
   fieldExtensionsEstimator,
   simpleEstimator,
 } = queryComplexityImport;
-
-const graphQLHTTP = require('express-graphql');
-const buildObjectType = require('./schema/buildObjectType');
-const buildMutationInputType = require('./schema/buildMutationInputType');
-const buildBlockType = require('./schema/buildBlockType');
-const buildPoliciesType = require('./schema/buildPoliciesType');
-const buildLocaleInputType = require('./schema/buildLocaleInputType');
-const buildFallbackLocaleInputType = require('./schema/buildFallbackLocaleInputType');
-const initCollections = require('../collections/graphql/init');
-const initGlobals = require('../globals/graphql/init');
-const buildWhereInputType = require('./schema/buildWhereInputType');
-const access = require('../auth/graphql/resolvers/access');
-const errorHandler = require('./errorHandler');
 
 class InitializeGraphQL {
   constructor(init) {
@@ -130,4 +128,4 @@ class InitializeGraphQL {
   }
 }
 
-module.exports = InitializeGraphQL;
+export default InitializeGraphQL;

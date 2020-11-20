@@ -1,5 +1,5 @@
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
 
 const findConfig = () => {
   // If the developer has specified a config path,
@@ -29,4 +29,4 @@ const findConfig = () => {
   throw new Error('Error: cannot find Payload config. Please create a configuration file located at the root of your current working directory called "payload.config.js".');
 };
 
-module.exports = findConfig;
+export default findConfig;

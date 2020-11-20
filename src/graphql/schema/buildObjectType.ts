@@ -1,26 +1,20 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-use-before-define */
-const {
-  GraphQLString,
+import { GraphQLJSON } from 'graphql-type-json';
+import {
+  GraphQLBoolean, GraphQLEnumType,
   GraphQLFloat,
   GraphQLInt,
-  GraphQLBoolean,
   GraphQLList,
   GraphQLObjectType,
+  GraphQLString,
   GraphQLUnionType,
-  GraphQLEnumType,
-} = require('graphql');
-const { GraphQLJSON } = require('graphql-type-json');
-
-const {
-  DateTimeResolver,
-  EmailAddressResolver,
-} = require('graphql-scalars');
-
-const formatName = require('../utilities/formatName');
-const combineParentName = require('../utilities/combineParentName');
-const withNullableType = require('./withNullableType');
+} from 'graphql';
+import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
+import formatName from '../utilities/formatName';
+import combineParentName from '../utilities/combineParentName';
+import withNullableType from './withNullableType';
 
 function buildObjectType(name, fields, parentName, baseFields = {}) {
   const recursiveBuildObjectType = buildObjectType.bind(this);
@@ -450,4 +444,4 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
   return newlyCreatedBlockType;
 }
 
-module.exports = buildObjectType;
+export default buildObjectType;

@@ -1,4 +1,4 @@
-const { GraphQLEnumType } = require('graphql');
+import { GraphQLEnumType } from 'graphql';
 
 const buildFallbackLocaleInputType = (localization) => new GraphQLEnumType({
   name: 'FallbackLocaleInputType',
@@ -10,4 +10,4 @@ const buildFallbackLocaleInputType = (localization) => new GraphQLEnumType({
   }), {}),
 });
 
-module.exports = buildFallbackLocaleInputType;
+export default buildFallbackLocaleInputType;

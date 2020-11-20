@@ -1,18 +1,17 @@
 /* eslint-disable no-use-before-define */
-const {
-  GraphQLString,
-  GraphQLNonNull,
-  GraphQLFloat,
+import {
   GraphQLBoolean,
-  GraphQLList,
   GraphQLEnumType,
+  GraphQLFloat,
   GraphQLInputObjectType,
-} = require('graphql');
-const { GraphQLJSON } = require('graphql-type-json');
-
-const withNullableType = require('./withNullableType');
-const formatName = require('../utilities/formatName');
-const combineParentName = require('../utilities/combineParentName');
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLString,
+} from 'graphql';
+import { GraphQLJSON } from 'graphql-type-json';
+import withNullableType from './withNullableType';
+import formatName from '../utilities/formatName';
+import combineParentName from '../utilities/combineParentName';
 
 function buildMutationInputType(name, fields, parentName, forceNullable = false) {
   const fieldToSchemaMap = {
@@ -151,4 +150,4 @@ function buildMutationInputType(name, fields, parentName, forceNullable = false)
   });
 }
 
-module.exports = buildMutationInputType;
+export default buildMutationInputType;

@@ -1,4 +1,4 @@
-const pluralize = require('pluralize');
+import pluralize from 'pluralize';
 
 const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
 
@@ -26,4 +26,4 @@ const formatLabels = ((input) => {
   };
 });
 
-module.exports = formatLabels;
+export default formatLabels;

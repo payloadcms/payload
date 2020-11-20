@@ -1,4 +1,4 @@
-const formatLabels = require('./formatLabels');
+import formatLabels from './formatLabels';
 
 describe('formatLabels', () => {
   it('should format single word', () => {

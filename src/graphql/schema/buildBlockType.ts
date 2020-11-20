@@ -1,4 +1,4 @@
-const formatName = require('../utilities/formatName');
+import formatName from '../utilities/formatName';
 
 function buildBlockType(block) {
   const {
@@ -28,4 +28,4 @@ function buildBlockType(block) {
   }
 }
 
-module.exports = buildBlockType;
+export default buildBlockType;

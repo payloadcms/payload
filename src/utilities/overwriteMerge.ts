@@ -1,3 +1,3 @@
 const overwriteMerge = (_, sourceArray) => sourceArray;
 
-module.exports = overwriteMerge;
+export default overwriteMerge;
