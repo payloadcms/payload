@@ -1,8 +1,9 @@
 /* eslint-disable no-console */
-const mongoose = require('mongoose');
-const logger = require('../utilities/logger')();
+import mongoose from 'mongoose';
+import Logger from '../utilities/logger';
+const logger = Logger();
 
-const connectMongoose = async (url) => {
+const connectMongoose = async (url: string) => {
   let urlToConnect = url;
   let successfulConnectionMessage = 'Connected to Mongo server successfully!';
 
@@ -33,4 +34,4 @@ const connectMongoose = async (url) => {
   }
 };
 
-module.exports = connectMongoose;
+export default connectMongoose;

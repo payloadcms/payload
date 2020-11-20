@@ -1,8 +1,8 @@
-const express = require('express');
-const compression = require('compression');
-const history = require('connect-history-api-fallback');
-const path = require('path');
-const initWebpack = require('../webpack/init');
+import express from 'express';
+import compression from 'compression';
+import history from 'connect-history-api-fallback';
+import path from 'path';
+import initWebpack from '../webpack/init';
 
 const router = express.Router();
 

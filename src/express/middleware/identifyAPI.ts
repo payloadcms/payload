@@ -5,4 +5,4 @@ const identifyAPI = (api) => {
   };
 };
 
-module.exports = identifyAPI;
+export default identifyAPI;

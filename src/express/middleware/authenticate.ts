@@ -1,6 +1,6 @@
-const passport = require('passport');
+import passport from 'passport';
 
-module.exports = (config) => {
+export default (config) => {
   const methods = config.collections.reduce((enabledMethods, collection) => {
     if (collection.auth && collection.auth.useAPIKey) {
       const collectionMethods = [...enabledMethods];
