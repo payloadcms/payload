@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const validOperators = ['like', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists'];
 function addSearchParam(key, value, searchParams) {
@@ -201,4 +201,4 @@ function buildQueryPlugin(schema) {
   }
   modifiedSchema.statics.buildQuery = buildQuery;
 }
-module.exports = buildQueryPlugin;
+export default buildQueryPlugin;

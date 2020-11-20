@@ -1,14 +1,14 @@
-const express = require('express');
-const passport = require('passport');
-const compression = require('compression');
-const bodyParser = require('body-parser');
-const methodOverride = require('method-override');
-const qsMiddleware = require('qs-middleware');
-const fileUpload = require('express-fileupload');
-const rateLimit = require('express-rate-limit');
-const localizationMiddleware = require('../../localization/middleware');
-const authenticate = require('./authenticate');
-const identifyAPI = require('./identifyAPI');
+import express from 'express';
+import passport from 'passport';
+import compression from 'compression';
+import bodyParser from 'body-parser';
+import methodOverride from 'method-override';
+import qsMiddleware from 'qs-middleware';
+import fileUpload from 'express-fileupload';
+import rateLimit from 'express-rate-limit';
+import localizationMiddleware from '../../localization/middleware';
+import authenticate from './authenticate';
+import identifyAPI from './identifyAPI';
 
 const middleware = (payload) => {
   const rateLimitOptions = {
@@ -52,4 +52,4 @@ const middleware = (payload) => {
   ];
 };
 
-module.exports = middleware;
+export default middleware;
