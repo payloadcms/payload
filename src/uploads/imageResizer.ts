@@ -1,8 +1,8 @@
-const fs = require('fs');
-const sharp = require('sharp');
-const sanitize = require('sanitize-filename');
-const getImageSize = require('./getImageSize');
-const fileExists = require('./fileExists');
+import fs from 'fs';
+import sharp from 'sharp';
+import sanitize from 'sanitize-filename';
+import getImageSize from './getImageSize';
+import fileExists from './fileExists';
 
 function getOutputImage(sourceImage, size) {
   const extension = sourceImage.split('.').pop();
@@ -16,7 +16,7 @@ function getOutputImage(sourceImage, size) {
   };
 }
 
-module.exports = async function resizeAndSave(staticPath, config, savedFilename, mimeType) {
+export default async function resizeAndSave(staticPath, config, savedFilename, mimeType) {
   /**
    * Resize images according to image desired width and height and return sizes
    * @param config Object

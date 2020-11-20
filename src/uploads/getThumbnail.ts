@@ -1,4 +1,4 @@
-const imageMIMETypes = require('./imageMIMETypes');
+import imageMIMETypes from './imageMIMETypes';
 
 const getThumbnail = (mimeType, staticURL, filename, sizes, adminThumbnail) => {
   if (imageMIMETypes.indexOf(mimeType) > -1) {
@@ -12,4 +12,4 @@ const getThumbnail = (mimeType, staticURL, filename, sizes, adminThumbnail) => {
   return false;
 };
 
-module.exports = getThumbnail;
+export default getThumbnail;

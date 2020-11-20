@@ -1,5 +1,5 @@
-const sanitize = require('sanitize-filename');
-const fileExists = require('./fileExists');
+import sanitize from 'sanitize-filename';
+import fileExists from './fileExists';
 
 const incrementName = (name) => {
   const extension = name.split('.').pop();
@@ -29,4 +29,4 @@ async function getSafeFileName(staticPath, desiredFilename) {
   return modifiedFilename;
 }
 
-module.exports = getSafeFileName;
+export default getSafeFileName;
