@@ -4,7 +4,7 @@
   "description": "CMS and Application Framework",
   "license": "ISC",
   "author": "Payload CMS LLC",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "sideEffects": false,
   "bin": {
     "payload": "./src/bin/index.js"
@@ -36,6 +36,7 @@
     "@faceless-ui/modal": "^1.0.4",
     "@faceless-ui/scroll-info": "^1.1.1",
     "@faceless-ui/window-info": "^1.2.2",
+    "@typescript-eslint/parser": "^4.8.1",
     "@udecode/slate-plugins": "^0.64.3",
     "ajv": "^6.12.6",
     "async-some": "^1.0.2",

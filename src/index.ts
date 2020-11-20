@@ -1,31 +1,33 @@
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
-const express = require('express');
-const crypto = require('crypto');
-const logger = require('./utilities/logger')();
-const bindOperations = require('./init/bindOperations');
-const bindRequestHandlers = require('./init/bindRequestHandlers');
-const bindResolvers = require('./init/bindResolvers');
-const getConfig = require('./utilities/getConfig');
-const authenticate = require('./express/middleware/authenticate');
-const connectMongoose = require('./mongoose/connect');
-const expressMiddleware = require('./express/middleware');
-const initAdmin = require('./express/admin');
-const initAuth = require('./auth/init');
-const initCollections = require('./collections/init');
-const initGlobals = require('./globals/init');
-const initGraphQLPlayground = require('./graphql/initPlayground');
-const initStatic = require('./express/static');
-const GraphQL = require('./graphql');
-const sanitizeConfig = require('./utilities/sanitizeConfig');
-const buildEmail = require('./email/build');
-const identifyAPI = require('./express/middleware/identifyAPI');
-const errorHandler = require('./express/middleware/errorHandler');
-const performFieldOperations = require('./fields/performFieldOperations');
-const localOperations = require('./collections/operations/local');
-const localGlobalOperations = require('./globals/operations/local');
-const { encrypt, decrypt } = require('./auth/crypto');
+import express from 'express';
+import crypto from 'crypto';
+import logger from './utilities/logger';
+import bindOperations from './init/bindOperations';
+import bindRequestHandlers from './init/bindRequestHandlers';
+import bindResolvers from './init/bindResolvers';
+import getConfig from './utilities/getConfig';
+import authenticate from './express/middleware/authenticate';
+import connectMongoose from './mongoose/connect';
+import expressMiddleware from './express/middleware';
+import initAdmin from './express/admin';
+import initAuth from './auth/init';
+import initCollections from './collections/init';
+import initGlobals from './globals/init';
+import initGraphQLPlayground from './graphql/initPlayground';
+import initStatic from './express/static';
+import GraphQL from './graphql';
+import sanitizeConfig from './utilities/sanitizeConfig';
+import buildEmail from './email/build';
+import identifyAPI from './express/middleware/identifyAPI';
+import errorHandler from './express/middleware/errorHandler';
+import performFieldOperations from './fields/performFieldOperations';
+import localOperations from './collections/operations/local';
+import localGlobalOperations from './globals/operations/local';
+import { encrypt, decrypt } from './auth/crypto';
+
+logger();
 
 class Payload {
   init(options) {

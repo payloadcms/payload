@@ -8,6 +8,6 @@ require('@babel/register')({
   extensions: ['.js', '.jsx', '.ts', '.tsx'],
 });
 
-const payload = require('./payload.ts');
+const payload = require('./index.ts');
 
 module.exports = payload;

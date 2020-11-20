@@ -1,7 +1,8 @@
-const Ajv = require('ajv');
-const payloadSchema = require('./payload.schema.json');
-const collectionSchema = require('./collection.schema.json');
-const InvalidSchema = require('../errors/InvalidSchema');
+import Ajv from 'ajv';
+import * as payloadSchema from './payload.schema.json';
+import * as collectionSchema from './collection.schema.json';
+
+import InvalidSchema from '../errors/InvalidSchema';
 
 const validateSchema = (config) => {
   const ajv = new Ajv({ useDefaults: true });
@@ -15,4 +16,4 @@ const validateSchema = (config) => {
   return config;
 };
 
-module.exports = validateSchema;
+export default validateSchema;

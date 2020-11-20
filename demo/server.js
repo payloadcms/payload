@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const express = require('express');
 const path = require('path');
-const payload = require('../src');
+const payload = require('../src/dev');
 const logger = require('../src/utilities/logger')();
 
 const expressApp = express();
