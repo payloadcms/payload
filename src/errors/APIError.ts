@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-const httpStatus = require('http-status');
+import httpStatus from 'http-status';
 
 /**
  * @extends Error

@@ -1,1 +1,1 @@
-module.exports = 'file-stub';
+export default 'file-stub';

@@ -1,4 +1,4 @@
-const APIError = require('./APIError');
+import APIError from './APIError';
 
 class DuplicateGlobal extends APIError {
   constructor(config) {
@@ -6,4 +6,4 @@ class DuplicateGlobal extends APIError {
   }
 }
 
-module.exports = DuplicateGlobal;
+export default DuplicateGlobal;

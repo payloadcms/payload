@@ -1,10 +1,10 @@
-const path = require('path');
-const MiniCSSExtractPlugin = require('mini-css-extract-plugin');
-const TerserJSPlugin = require('terser-webpack-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const babelConfig = require('../../babel.config');
+import path from 'path';
+import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
+import TerserJSPlugin from 'terser-webpack-plugin';
+import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
+import babelConfig from '../babel.config';
 
-module.exports = {
+export default {
   entry: {
     main: [path.resolve(__dirname, '../admin/components/index.js')],
   },

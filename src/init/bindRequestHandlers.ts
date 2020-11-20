@@ -1,23 +1,23 @@
-const access = require('../auth/requestHandlers/access');
-const forgotPassword = require('../auth/requestHandlers/forgotPassword');
-const init = require('../auth/requestHandlers/init');
-const login = require('../auth/requestHandlers/login');
-const logout = require('../auth/requestHandlers/logout');
-const me = require('../auth/requestHandlers/me');
-const refresh = require('../auth/requestHandlers/refresh');
-const registerFirstUser = require('../auth/requestHandlers/registerFirstUser');
-const resetPassword = require('../auth/requestHandlers/resetPassword');
-const verifyEmail = require('../auth/requestHandlers/verifyEmail');
-const unlock = require('../auth/requestHandlers/unlock');
+import access from '../auth/requestHandlers/access';
+import forgotPassword from '../auth/requestHandlers/forgotPassword';
+import init from '../auth/requestHandlers/init';
+import login from '../auth/requestHandlers/login';
+import logout from '../auth/requestHandlers/logout';
+import me from '../auth/requestHandlers/me';
+import refresh from '../auth/requestHandlers/refresh';
+import registerFirstUser from '../auth/requestHandlers/registerFirstUser';
+import resetPassword from '../auth/requestHandlers/resetPassword';
+import verifyEmail from '../auth/requestHandlers/verifyEmail';
+import unlock from '../auth/requestHandlers/unlock';
 
-const create = require('../collections/requestHandlers/create');
-const find = require('../collections/requestHandlers/find');
-const findByID = require('../collections/requestHandlers/findByID');
-const update = require('../collections/requestHandlers/update');
-const deleteHandler = require('../collections/requestHandlers/delete');
+import create from '../collections/requestHandlers/create';
+import find from '../collections/requestHandlers/find';
+import findByID from '../collections/requestHandlers/findByID';
+import update from '../collections/requestHandlers/update';
+import deleteHandler from '../collections/requestHandlers/delete';
 
-const findOne = require('../globals/requestHandlers/findOne');
-const globalUpdate = require('../globals/requestHandlers/update');
+import findOne from '../globals/requestHandlers/findOne';
+import globalUpdate from '../globals/requestHandlers/update';
 
 function bindRequestHandlers(ctx) {
   const payload = ctx;
@@ -50,4 +50,4 @@ function bindRequestHandlers(ctx) {
   };
 }
 
-module.exports = bindRequestHandlers;
+export default bindRequestHandlers;

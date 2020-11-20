@@ -1,4 +1,4 @@
-module.exports = (cssOptions, preProcessor) => {
+export default (cssOptions, preProcessor) => {
   const loaders = [
     'isomorphic-style-loader',
     {

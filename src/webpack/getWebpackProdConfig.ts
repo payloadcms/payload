@@ -1,15 +1,15 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const TerserJSPlugin = require('terser-webpack-plugin');
-const MiniCSSExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-const path = require('path');
-const webpack = require('webpack');
-const babelConfig = require('../../babel.config');
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import TerserJSPlugin from 'terser-webpack-plugin';
+import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
+import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+import path from 'path';
+import webpack from 'webpack';
+import babelConfig from '../babel.config';
 
 const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js');
 
-module.exports = (config) => {
+export default (config) => {
   let webpackConfig = {
     entry: {
       main: [path.resolve(__dirname, '../admin/index.js')],
@@ -105,7 +105,6 @@ module.exports = (config) => {
           ? path.join(config.paths.configDir, config.admin.indexHTML)
           : path.resolve(__dirname, '../admin/index.html'),
         filename: './index.html',
-        minify: true,
       }),
       new webpack.DefinePlugin(Object.entries(config.publicENV).reduce((values, [key, val]) => ({
         ...values,

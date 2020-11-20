@@ -1,5 +1,5 @@
-const httpStatus = require('http-status');
-const { APIError } = require('../../errors');
+import httpStatus from 'http-status';
+import { APIError } from '../../errors';
 
 async function logout(args) {
   const { config } = this;

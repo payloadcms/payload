@@ -1,5 +1,5 @@
-const httpStatus = require('http-status');
-const APIError = require('./APIError');
+import httpStatus from 'http-status';
+import APIError from './APIError';
 
 class InvalidConfiguration extends APIError {
   constructor(message, results) {
@@ -7,4 +7,4 @@ class InvalidConfiguration extends APIError {
   }
 }
 
-module.exports = InvalidConfiguration;
+export default InvalidConfiguration;

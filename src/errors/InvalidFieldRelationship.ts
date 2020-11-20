@@ -1,4 +1,4 @@
-const APIError = require('./APIError');
+import APIError from './APIError';
 
 class InvalidFieldRelationship extends APIError {
   constructor(field, relationship) {
@@ -6,4 +6,4 @@ class InvalidFieldRelationship extends APIError {
   }
 }
 
-module.exports = InvalidFieldRelationship;
+export default InvalidFieldRelationship;

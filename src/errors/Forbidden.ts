@@ -1,5 +1,5 @@
-const httpStatus = require('http-status');
-const APIError = require('./APIError');
+import httpStatus from 'http-status';
+import APIError from './APIError';
 
 class Forbidden extends APIError {
   constructor() {
@@ -7,4 +7,4 @@ class Forbidden extends APIError {
   }
 }
 
-module.exports = Forbidden;
+export default Forbidden;

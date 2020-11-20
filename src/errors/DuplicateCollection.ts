@@ -1,4 +1,4 @@
-const APIError = require('./APIError');
+import APIError from './APIError';
 
 class DuplicateCollection extends APIError {
   constructor(propertyName, duplicates) {
@@ -6,4 +6,4 @@ class DuplicateCollection extends APIError {
   }
 }
 
-module.exports = DuplicateCollection;
+export default DuplicateCollection;

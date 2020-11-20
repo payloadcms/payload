@@ -1,5 +1,5 @@
-const httpStatus = require('http-status');
-const APIError = require('./APIError');
+import httpStatus from 'http-status';
+import APIError from './APIError';
 
 class FileUploadError extends APIError {
   constructor() {
@@ -7,4 +7,4 @@ class FileUploadError extends APIError {
   }
 }
 
-module.exports = FileUploadError;
+export default FileUploadError;
