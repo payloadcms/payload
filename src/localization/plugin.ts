@@ -1,11 +1,11 @@
 /* eslint-disable func-names */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-restricted-syntax */
-const mongoose = require('mongoose');
-const sanitizeFallbackLocale = require('./sanitizeFallbackLocale');
-const formatRefPathLocales = require('./formatRefPathLocales');
+import mongoose from 'mongoose';
+import sanitizeFallbackLocale from './sanitizeFallbackLocale';
+import formatRefPathLocales from './formatRefPathLocales';
 
-module.exports = function localizationPlugin(schema, options) {
+export default function localizationPlugin(schema, options) {
   if (!options || !options.locales || !Array.isArray(options.locales) || !options.locales.length) {
     throw new mongoose.Error('Required locales array is missing');
   }

@@ -22,4 +22,4 @@ function findOne(globalConfig) {
   return findOneResolver;
 }
 
-module.exports = findOne;
+export default findOne;

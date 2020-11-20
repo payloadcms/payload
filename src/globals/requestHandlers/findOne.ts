@@ -1,4 +1,4 @@
-const httpStatus = require('http-status');
+import httpStatus from 'http-status';
 
 function findOne(globalConfig) {
   async function handler(req, res, next) {
@@ -23,4 +23,4 @@ function findOne(globalConfig) {
   return findOneHandler;
 }
 
-module.exports = findOne;
+export default findOne;

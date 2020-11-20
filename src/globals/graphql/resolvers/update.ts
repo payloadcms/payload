@@ -23,4 +23,4 @@ function update(globalConfig) {
   return findOneResolver;
 }
 
-module.exports = update;
+export default update;

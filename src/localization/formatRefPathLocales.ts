@@ -49,4 +49,4 @@ function formatRefPathLocales(schema, parentSchema, parentPath) {
   });
 }
 
-module.exports = formatRefPathLocales;
+export default formatRefPathLocales;

@@ -185,4 +185,4 @@ const optionsToValidatorMap = {
   },
 };
 
-module.exports = optionsToValidatorMap;
+export default optionsToValidatorMap;

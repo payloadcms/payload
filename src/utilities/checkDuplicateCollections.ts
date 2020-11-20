@@ -1,4 +1,4 @@
-const { DuplicateCollection } = require('../errors');
+import { DuplicateCollection } from '../errors';
 
 const getDuplicates = (arr) => arr.filter((item, index) => arr.indexOf(item) !== index);
 
@@ -13,4 +13,4 @@ const checkDuplicateCollections = (collections) => {
   }
 };
 
-module.exports = checkDuplicateCollections;
+export default checkDuplicateCollections;

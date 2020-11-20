@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
-const { Schema } = require('mongoose');
-const { MissingFieldInputOptions } = require('../errors');
+import { Schema } from 'mongoose';
+import { MissingFieldInputOptions } from '../errors';
 
 const setBlockDiscriminators = (fields, schema) => {
   fields.forEach((field) => {
@@ -215,4 +215,4 @@ const fieldToSchemaMap = {
   },
 };
 
-module.exports = buildSchema;
+export default buildSchema;

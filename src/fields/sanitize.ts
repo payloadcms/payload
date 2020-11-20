@@ -1,5 +1,5 @@
-const { MissingFieldType, InvalidFieldRelationship } = require('../errors');
-const validations = require('./validations');
+import { MissingFieldType, InvalidFieldRelationship } from '../errors';
+import validations from './validations';
 
 const sanitizeFields = (fields, validRelationships) => {
   if (!fields) return [];
@@ -42,4 +42,4 @@ const sanitizeFields = (fields, validRelationships) => {
   });
 };
 
-module.exports = sanitizeFields;
+export default sanitizeFields;

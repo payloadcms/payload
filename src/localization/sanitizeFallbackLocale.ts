@@ -6,4 +6,4 @@ const sanitizeFallbackLocale = (fallbackLocale) => {
   return fallbackLocale;
 };
 
-module.exports = sanitizeFallbackLocale;
+export default sanitizeFallbackLocale;

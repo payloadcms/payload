@@ -1,7 +1,7 @@
-const deepmerge = require('deepmerge');
-const overwriteMerge = require('../../utilities/overwriteMerge');
-const executeAccess = require('../../auth/executeAccess');
-const removeInternalFields = require('../../utilities/removeInternalFields');
+import deepmerge from 'deepmerge';
+import overwriteMerge from '../../utilities/overwriteMerge';
+import executeAccess from '../../auth/executeAccess';
+import removeInternalFields from '../../utilities/removeInternalFields';
 
 async function update(args) {
   const { globals: { Model } } = this;
@@ -142,4 +142,4 @@ async function update(args) {
   return global;
 }
 
-module.exports = update;
+export default update;

@@ -1,5 +1,5 @@
-const express = require('express');
-const buildModel = require('./buildModel');
+import express from 'express';
+import buildModel from './buildModel';
 
 function initGlobals() {
   if (this.config.globals) {
@@ -24,4 +24,4 @@ function initGlobals() {
   }
 }
 
-module.exports = initGlobals;
+export default initGlobals;

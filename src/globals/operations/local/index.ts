@@ -1,7 +1,7 @@
-const findOne = require('./findOne');
-const update = require('./update');
+import findOne from './findOne';
+import update from './update';
 
-module.exports = {
+export default {
   findOne,
   update,
 };

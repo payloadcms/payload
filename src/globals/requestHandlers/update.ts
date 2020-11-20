@@ -1,4 +1,4 @@
-const httpStatus = require('http-status');
+import httpStatus from 'http-status';
 
 function update(globalConfig) {
   async function handler(req, res, next) {
@@ -23,4 +23,4 @@ function update(globalConfig) {
   return updateHandler;
 }
 
-module.exports = update;
+export default update;

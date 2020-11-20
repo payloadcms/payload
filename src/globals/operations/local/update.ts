@@ -29,4 +29,4 @@ async function update(options) {
   });
 }
 
-module.exports = update;
+export default update;

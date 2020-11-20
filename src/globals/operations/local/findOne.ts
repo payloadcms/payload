@@ -27,4 +27,4 @@ async function findOne(options) {
   });
 }
 
-module.exports = findOne;
+export default findOne;

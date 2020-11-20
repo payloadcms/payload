@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const buildSchema = require('../mongoose/buildSchema');
-const localizationPlugin = require('../localization/plugin');
+import mongoose from 'mongoose';
+import buildSchema from '../mongoose/buildSchema';
+import localizationPlugin from '../localization/plugin';
 
 const buildModel = (config) => {
   if (config.globals && config.globals.length > 0) {
@@ -28,4 +28,4 @@ const buildModel = (config) => {
   return null;
 };
 
-module.exports = buildModel;
+export default buildModel;
