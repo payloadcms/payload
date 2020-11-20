@@ -1,4 +1,4 @@
-const APIError = require('./APIError');
+import APIError from './APIError';
 
 class MissingFieldInputOptions extends APIError {
   constructor(field) {

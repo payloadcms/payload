@@ -1,4 +1,4 @@
-const APIError = require('./APIError');
+import APIError from './APIError';
 
 class MissingCollectionLabel extends APIError {
   constructor() {
