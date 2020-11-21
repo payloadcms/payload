@@ -5,7 +5,7 @@ import { Config } from './types';
 import findConfig from './find';
 
 const configPath = findConfig();
-const getConfig = (): Config => {
+const loadConfig = (): Config => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const publicConfig = require(configPath);
   return {
@@ -18,4 +18,4 @@ const getConfig = (): Config => {
   };
 };
 
-export default getConfig;
+export default loadConfig;

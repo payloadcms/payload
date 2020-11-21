@@ -1,10 +1,10 @@
 require('isomorphic-fetch');
 
 const server = require('../../demo/server');
-const getConfig = require('../../src/utilities/getConfig').default;
+const loadConfig = require('../../src/config/load').default;
 const { email, password } = require('./credentials');
 
-const { serverURL } = getConfig();
+const { serverURL } = loadConfig();
 
 const globalSetup = async () => {
   global.PAYLOAD_SERVER = server.start();

@@ -1,4 +1,5 @@
 import merge from 'deepmerge';
+import { Collection } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
 import toKebabCase from '../../utilities/toKebabCase';
 import baseAuthFields from '../../fields/baseFields/baseFields';
@@ -52,7 +53,7 @@ const mergeBaseFields = (fields, baseFields) => {
   return baseFields;
 };
 
-const sanitizeCollection = (collections, collection) => {
+const sanitizeCollection = (collections: Collection[], collection: Collection): Collection => {
   // /////////////////////////////////
   // Make copy of collection config
   // /////////////////////////////////

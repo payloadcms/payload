@@ -1,1 +1,1 @@
-exports.buildConfig = require('./dist/src/config/build');
+exports.buildConfig = require('./dist/src/config/build').buildConfig;
