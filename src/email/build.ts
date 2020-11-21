@@ -1,11 +1,13 @@
 import nodemailer, { Transporter } from 'nodemailer';
-import { PayloadEmailOptions } from '../types';
+import { EmailOptions } from '../config/types';
 import { InvalidConfiguration } from '../errors';
 import mockHandler from './mockHandler';
 import Logger from '../utilities/logger';
+import { BuildEmailResult } from './types';
+
 const logger = Logger();
 
-export default async function buildEmail(emailConfig: PayloadEmailOptions) {
+export default async function buildEmail(emailConfig: EmailOptions): BuildEmailResult {
   if (!emailConfig.transport || emailConfig.transport === 'mock') {
     const mockAccount = await mockHandler(emailConfig);
     // Only log mock credentials if was explicitly set in config
@@ -38,8 +40,8 @@ export default async function buildEmail(emailConfig: PayloadEmailOptions) {
     email.transport = transport;
   } catch (err) {
     logger.error(
-      "There is an error with the email configuration you have provided.",
-      err
+      'There is an error with the email configuration you have provided.',
+      err,
     );
   }
 

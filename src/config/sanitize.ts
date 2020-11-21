@@ -1,13 +1,12 @@
-import { PayloadConfig } from '../types';
+import { Config } from './types';
 import defaultUser from '../auth/default';
-import sanitizeCollection from '../collections/sanitize';
+import sanitizeCollection from '../collections/config/sanitize';
 import { InvalidConfiguration } from '../errors';
-import sanitizeGlobals from '../globals/sanitize';
-import validateSchema from '../schema/validateSchema';
-import checkDuplicateCollections from './checkDuplicateCollections';
+import sanitizeGlobals from '../globals/config/sanitize';
+import checkDuplicateCollections from '../utilities/checkDuplicateCollections';
 
-const sanitizeConfig = (config: PayloadConfig) => {
-  const sanitizedConfig = validateSchema({ ...config });
+const sanitizeConfig = (config: Config): Config => {
+  const sanitizedConfig = { ...config };
 
   // TODO: remove default values from sanitize in favor of assigning in the schema within validateSchema and use https://www.npmjs.com/package/ajv#coercing-data-types where needed
   if (sanitizedConfig.publicENV === undefined) sanitizedConfig.publicENV = {};

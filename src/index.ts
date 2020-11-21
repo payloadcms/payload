@@ -1,11 +1,15 @@
-import express from 'express';
+import express, { Express, Router } from 'express';
 import crypto from 'crypto';
-import { Router } from 'express';
+
+import { TestAccount } from 'nodemailer';
 import {
-  PayloadConfig,
-  PayloadCollection,
-  PayloadInitOptions,
-  PayloadLogger,
+  Config,
+  InitOptions,
+} from './config/types';
+import {
+  Collection,
+} from './collections/config/types';
+import {
   CreateOptions,
   FindOptions,
   FindGlobalOptions,
@@ -18,7 +22,7 @@ import Logger from './utilities/logger';
 import bindOperations from './init/bindOperations';
 import bindRequestHandlers from './init/bindRequestHandlers';
 import bindResolvers from './init/bindResolvers';
-import getConfig from './utilities/getConfig';
+import loadConfig from './config/load';
 import authenticate from './express/middleware/authenticate';
 import connectMongoose from './mongoose/connect';
 import expressMiddleware from './express/middleware';
@@ -29,7 +33,6 @@ import initGlobals from './globals/init';
 import initGraphQLPlayground from './graphql/initPlayground';
 import initStatic from './express/static';
 import GraphQL from './graphql';
-import sanitizeConfig from './utilities/sanitizeConfig';
 import buildEmail from './email/build';
 import identifyAPI from './express/middleware/identifyAPI';
 import errorHandler from './express/middleware/errorHandler';
@@ -37,26 +40,58 @@ import performFieldOperations from './fields/performFieldOperations';
 import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
 import { encrypt, decrypt } from './auth/crypto';
-import { TestAccount } from 'nodemailer';
-import { MockEmailHandler } from './email/types';
+import { MockEmailHandler, BuildEmailResult } from './email/types';
 
-require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
 class Payload {
-  config: PayloadConfig;
-  collections: PayloadCollection[] = [];
-  logger: PayloadLogger;
-  router: Router;
-  email: any;
+  config: Config;
 
-  init(options: PayloadInitOptions) {
+  collections: Collection[] = [];
+
+  logger: typeof Logger;
+
+  express: Express
+
+  router: Router;
+
+  emailOptions: any;
+
+  email: BuildEmailResult;
+
+  license: string;
+
+  secret: string;
+
+  mongoURL: string;
+
+  local: boolean;
+
+  initAuth: typeof initAuth;
+
+  encrypt: typeof encrypt;
+
+  decrypt: typeof decrypt;
+
+  initCollections: typeof initCollections;
+
+  initGlobals: typeof initGlobals;
+
+  initGraphQLPlayground: typeof initGraphQLPlayground;
+
+  initStatic: typeof initStatic;
+
+  initAdmin: typeof initAdmin;
+
+  performFieldOperations: typeof performFieldOperations;
+
+  init(options: InitOptions) {
     this.logger = Logger();
     this.logger.info('Starting Payload...');
 
     if (!options.secret) {
       throw new Error(
-        'Error: missing secret key. A secret key is needed to secure Payload.'
+        'Error: missing secret key. A secret key is needed to secure Payload.',
       );
     }
 
@@ -64,21 +99,18 @@ class Payload {
       throw new Error('Error: missing MongoDB connection URL.');
     }
 
-    const config = getConfig(options);
-    const email = { ...(config.email || {}), ...(options.email || {}) };
+    this.license = options.license;
+    this.emailOptions = { ...(options.email || {}) };
+    this.secret = crypto
+      .createHash('sha256')
+      .update(options.secret)
+      .digest('hex')
+      .slice(0, 32);
 
-    this.config = sanitizeConfig({
-      ...config,
-      email,
-      license: options.license,
-      secret: crypto
-        .createHash('sha256')
-        .update(options.secret)
-        .digest('hex')
-        .slice(0, 32),
-      mongoURL: options.mongoURL,
-      local: options.local,
-    });
+    this.mongoURL = options.mongoURL;
+    this.local = options.local;
+
+    this.config = loadConfig();
 
     if (typeof this.config.paths === 'undefined') this.config.paths = {};
 
@@ -121,14 +153,14 @@ class Payload {
     }
 
     // Configure email service
-    this.email = buildEmail(this.config.email);
+    this.email = buildEmail(this.emailOptions);
 
     // Initialize collections & globals
     this.initCollections();
     this.initGlobals();
 
     // Connect to database
-    connectMongoose(this.config.mongoURL);
+    connectMongoose(this.mongoURL);
 
     options.express.use((req, res, next) => {
       req.payload = this;
@@ -138,8 +170,7 @@ class Payload {
     // If not initializing locally, set up HTTP routing
     if (!this.config.local) {
       this.express = options.express;
-      if (this.config.rateLimit && this.config.rateLimit.trustProxy)
-        this.express.set('trust proxy', 1);
+      if (this.config.rateLimit && this.config.rateLimit.trustProxy) { this.express.set('trust proxy', 1); }
 
       this.initAdmin();
 
@@ -150,7 +181,7 @@ class Payload {
       this.router.use(
         this.config.routes.graphQL,
         identifyAPI('GraphQL'),
-        (req, res) => graphQLHandler.init(req, res)(req, res)
+        (req, res) => graphQLHandler.init(req, res)(req, res),
       );
 
       this.initGraphQLPlayground();

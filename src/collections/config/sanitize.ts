@@ -1,13 +1,13 @@
 import merge from 'deepmerge';
-import sanitizeFields from '../fields/sanitize';
-import toKebabCase from '../utilities/toKebabCase';
-import baseAuthFields from '../fields/baseFields/baseFields';
-import baseAPIKeyFields from '../fields/baseFields/baseAPIKeyFields';
-import baseVerificationFields from '../fields/baseFields/baseVerificationFields';
-import baseAccountLockFields from '../fields/baseFields/baseAccountLockFields';
-import baseUploadFields from '../fields/baseFields/baseUploadFields';
-import baseImageUploadFields from '../fields/baseFields/baseImageUploadFields';
-import formatLabels from '../utilities/formatLabels';
+import sanitizeFields from '../../fields/config/sanitize';
+import toKebabCase from '../../utilities/toKebabCase';
+import baseAuthFields from '../../fields/baseFields/baseFields';
+import baseAPIKeyFields from '../../fields/baseFields/baseAPIKeyFields';
+import baseVerificationFields from '../../fields/baseFields/baseVerificationFields';
+import baseAccountLockFields from '../../fields/baseFields/baseAccountLockFields';
+import baseUploadFields from '../../fields/baseFields/baseUploadFields';
+import baseImageUploadFields from '../../fields/baseFields/baseImageUploadFields';
+import formatLabels from '../../utilities/formatLabels';
 
 const mergeBaseFields = (fields, baseFields) => {
   const mergedFields = [];

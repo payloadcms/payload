@@ -1,12 +1,11 @@
-const babelConfig = require('./babel.config');
+const babelConfig = require('./babel.config')({
+  env: () => false,
+});
 
 if (process.env.NODE_ENV !== 'test') {
   // eslint-disable-next-line global-require
   require('@babel/register')({
     ...babelConfig,
-    ignore: [
-      /node_modules[\\/](?!@payloadcms[\\/]payload[\\/]src[\\/]admin|@payloadcms[\\/]payload[\\/]components|@payloadcms[\\/]payload[\\/]hooks).*/,
-    ],
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     plugins: [
       [

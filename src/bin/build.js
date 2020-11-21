@@ -3,9 +3,9 @@
 
 const webpack = require('webpack');
 const getWebpackProdConfig = require('../webpack/getWebpackProdConfig');
-const findConfig = require('../utilities/findConfig');
-const getConfig = require('../utilities/getConfig');
-const sanitizeConfig = require('../utilities/sanitizeConfig');
+const findConfig = require('../config/find');
+const getConfig = require('../config/load');
+const sanitizeConfig = require('../config/sanitize');
 
 const configPath = findConfig();
 

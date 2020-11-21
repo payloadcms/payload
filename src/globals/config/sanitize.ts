@@ -1,5 +1,5 @@
-import { MissingGlobalLabel } from '../errors';
-import sanitizeFields from '../fields/sanitize';
+import { MissingGlobalLabel } from '../../errors';
+import sanitizeFields from '../../fields/config/sanitize';
 
 const sanitizeGlobals = (collections, globals) => {
   // /////////////////////////////////

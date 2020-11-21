@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { request, GraphQLClient } from 'graphql-request';
-import getConfig from '../../../utilities/getConfig';
+import getConfig from '../../../config/load';
 import { email, password } from '../../../../tests/api/credentials';
 
 require('isomorphic-fetch');

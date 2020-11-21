@@ -1,5 +1,5 @@
-import { MissingFieldType, InvalidFieldRelationship } from '../errors';
-import validations from './validations';
+import { MissingFieldType, InvalidFieldRelationship } from '../../errors';
+import validations from '../validations';
 
 const sanitizeFields = (fields, validRelationships) => {
   if (!fields) return [];

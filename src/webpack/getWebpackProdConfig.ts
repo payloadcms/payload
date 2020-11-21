@@ -5,7 +5,6 @@ import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import path from 'path';
 import webpack from 'webpack';
-import babelConfig from '../babel.config';
 
 const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js');
 
@@ -44,7 +43,6 @@ export default (config) => {
           exclude: /node_modules[\\/](?!(@payloadcms[\\/]payload)[\\/]).*/,
           use: {
             loader: 'babel-loader',
-            options: babelConfig,
           },
         },
         {

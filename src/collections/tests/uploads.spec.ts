@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import FormData from 'form-data';
-import getConfig from '../../utilities/getConfig';
+import getConfig from '../../config/load';
 import fileExists from '../../../tests/api/utils/fileExists';
 import { email, password } from '../../../tests/api/credentials';
 

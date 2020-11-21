@@ -1,5 +1,5 @@
 import sanitizeFields from './sanitize';
-import { MissingFieldType, InvalidFieldRelationship } from '../errors';
+import { MissingFieldType, InvalidFieldRelationship } from '../../errors';
 
 describe('sanitizeFields', () => {
   it('should throw on missing type field', () => {

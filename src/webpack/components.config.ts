@@ -2,7 +2,6 @@ import path from 'path';
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
 import TerserJSPlugin from 'terser-webpack-plugin';
 import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
-import babelConfig from '../babel.config';
 
 export default {
   entry: {
@@ -31,7 +30,6 @@ export default {
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
-          options: babelConfig,
         },
       },
       {
