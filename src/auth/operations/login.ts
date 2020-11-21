@@ -5,7 +5,7 @@ import isLocked from '../isLocked';
 import removeInternalFields from '../../utilities/removeInternalFields';
 
 async function login(incomingArgs) {
-  const { config, operations } = this;
+  const { config, operations, secret } = this;
 
   let args = incomingArgs;
 
@@ -103,7 +103,7 @@ async function login(incomingArgs) {
 
   const token = jwt.sign(
     fieldsToSign,
-    config.secret,
+    secret,
     {
       expiresIn: collectionConfig.auth.tokenExpiration,
     },

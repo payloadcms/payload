@@ -1,7 +1,7 @@
 import PassportAPIKey from 'passport-headerapikey';
 import crypto from 'crypto';
 
-export default ({ operations, config: { secret } }, { Model, config }) => {
+export default ({ operations, secret }, { Model, config }) => {
   const opts = {
     header: 'Authorization',
     prefix: `${config.labels.singular} API-Key `,

@@ -33,10 +33,10 @@ async function refresh(incomingArgs) {
 
   if (typeof args.token !== 'string') throw new Forbidden();
 
-  const payload = jwt.verify(args.token, this.config.secret, {});
+  const payload = jwt.verify(args.token, this.secret, {});
   delete payload.iat;
   delete payload.exp;
-  const refreshedToken = jwt.sign(payload, this.config.secret, opts);
+  const refreshedToken = jwt.sign(payload, this.secret, opts);
 
   if (args.res) {
     const cookieOptions = {

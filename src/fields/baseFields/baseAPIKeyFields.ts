@@ -38,7 +38,7 @@ export default [
       beforeValidate: [
         async ({ data, req, value }) => {
           if (data.apiKey) {
-            return crypto.createHmac('sha1', req.payload.config.secret)
+            return crypto.createHmac('sha1', req.payload.secret)
               .update(data.apiKey)
               .digest('hex');
           }

@@ -3,7 +3,7 @@ import getExtractJWT from '../getExtractJWT';
 
 const JwtStrategy = passportJwt.Strategy;
 
-export default ({ config, collections, operations }) => {
+export default ({ secret, config, collections, operations }) => {
   const opts = {
     session: false,
     passReqToCallback: true,
@@ -12,7 +12,7 @@ export default ({ config, collections, operations }) => {
   const extractJWT = getExtractJWT(config);
 
   opts.jwtFromRequest = extractJWT;
-  opts.secretOrKey = config.secret;
+  opts.secretOrKey = secret;
 
   return new JwtStrategy(opts, async (req, token, done) => {
     try {

@@ -3,7 +3,7 @@ import { APIError } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 
 async function resetPassword(args) {
-  const { config } = this;
+  const { config, secret } = this;
 
   if (!Object.prototype.hasOwnProperty.call(args.data, 'token')
     || !Object.prototype.hasOwnProperty.call(args.data, 'password')) {
@@ -49,7 +49,7 @@ async function resetPassword(args) {
 
   const token = jwt.sign(
     fieldsToSign,
-    config.secret,
+    secret,
     {
       expiresIn: collectionConfig.auth.tokenExpiration,
     },
