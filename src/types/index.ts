@@ -2,6 +2,7 @@
 
 import { Express, Request } from 'express';
 import { Transporter } from 'nodemailer';
+import { Logger } from 'pino';
 
 export type PayloadEmailOptions = {
   transport: 'mock' | Transporter; // Not positive Transporter is correct type
@@ -237,3 +238,5 @@ export type PayloadConfig = {
   webpack?: (config: any) => any;
   serverModules?: string[];
 };
+
+export type PayloadLogger = Logger;

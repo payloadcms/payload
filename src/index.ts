@@ -1,7 +1,13 @@
-import { PayloadConfig, PayloadCollection, PayloadInitOptions } from './types';
+
 import express from 'express';
 import crypto from 'crypto';
 import { Router } from 'express';
+import {
+  PayloadConfig,
+  PayloadCollection,
+  PayloadInitOptions,
+  PayloadLogger,
+} from "./types";
 import Logger from './utilities/logger';
 import bindOperations from './init/bindOperations';
 import bindRequestHandlers from './init/bindRequestHandlers';
@@ -32,7 +38,7 @@ require('isomorphic-fetch');
 class Payload {
   config: PayloadConfig;
   collections: PayloadCollection[] = [];
-  logger: any;
+  logger: PayloadLogger;
   router: Router;
 
   init(options: PayloadInitOptions) {
@@ -40,7 +46,9 @@ class Payload {
     this.logger.info('Starting Payload...');
 
     if (!options.secret) {
-      throw new Error('Error: missing secret key. A secret key is needed to secure Payload.');
+      throw new Error(
+        'Error: missing secret key. A secret key is needed to secure Payload.'
+      );
     }
 
     if (!options.mongoURL) {
@@ -54,7 +62,11 @@ class Payload {
       ...config,
       email,
       license: options.license,
-      secret: crypto.createHash('sha256').update(options.secret).digest('hex').slice(0, 32),
+      secret: crypto
+        .createHash('sha256')
+        .update(options.secret)
+        .digest('hex')
+        .slice(0, 32),
       mongoURL: options.mongoURL,
       local: options.local,
     });
@@ -117,7 +129,8 @@ class Payload {
     // If not initializing locally, set up HTTP routing
     if (!this.config.local) {
       this.express = options.express;
-      if (this.config.rateLimit && this.config.rateLimit.trustProxy) this.express.set('trust proxy', 1);
+      if (this.config.rateLimit && this.config.rateLimit.trustProxy)
+        this.express.set('trust proxy', 1);
 
       this.initAdmin();
 
@@ -128,7 +141,7 @@ class Payload {
       this.router.use(
         this.config.routes.graphQL,
         identifyAPI('GraphQL'),
-        (req, res) => graphQLHandler.init(req, res)(req, res),
+        (req, res) => graphQLHandler.init(req, res)(req, res)
       );
 
       this.initGraphQLPlayground();
