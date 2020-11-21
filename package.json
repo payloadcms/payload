@@ -4,7 +4,7 @@
   "description": "CMS and Application Framework",
   "license": "ISC",
   "author": "Payload CMS LLC",
-  "main": "./dist/index.js",
+  "main": "./dist/src/index.js",
   "sideEffects": false,
   "bin": {
     "payload": "./src/bin/index.js"
