@@ -3,8 +3,9 @@ import * as payloadSchema from './payload.schema.json';
 import * as collectionSchema from './collection.schema.json';
 
 import InvalidSchema from '../errors/InvalidSchema';
+import { PayloadConfig } from '../types';
 
-const validateSchema = (config) => {
+const validateSchema = (config: PayloadConfig) => {
   const ajv = new Ajv({ useDefaults: true });
   const validate = ajv.addSchema(collectionSchema, '/collection.schema.json')
     .compile(payloadSchema);

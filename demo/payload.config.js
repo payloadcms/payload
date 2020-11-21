@@ -104,8 +104,8 @@ module.exports = {
   },
   graphQL: {
     maxComplexity: 1000,
-    mutations: {},
-    queries: {},
+    mutations: {}, // TODO: needs typing
+    queries: {}, // TODO: needs typing
     disablePlaygroundInProduction: true,
   },
   rateLimit: {

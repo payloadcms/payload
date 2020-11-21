@@ -1,6 +1,7 @@
 import falsey from 'falsey';
 import pino from 'pino';
 import memoize from 'micro-memoize';
+import { PayloadLogger } from '../types';
 
 export default memoize((name = 'payload') => pino({
   name,
@@ -9,4 +10,4 @@ export default memoize((name = 'payload') => pino({
     ignore: 'pid,hostname',
     translateTime: 'HH:MM:ss',
   },
-}));
+}) as PayloadLogger);

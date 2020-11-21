@@ -12,8 +12,7 @@ payload.init({
   mongoURL: 'mongodb://localhost/payload',
   express: expressApp,
   onInit: () => {
-    console.log('Payload is initialized');
-    // console.log('Payload is initialized');
+    console.log('Payload Demo Initialized');
   },
 });
 

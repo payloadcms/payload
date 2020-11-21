@@ -1,3 +1,4 @@
+import { PayloadConfig } from '../types';
 import defaultUser from '../auth/default';
 import sanitizeCollection from '../collections/sanitize';
 import { InvalidConfiguration } from '../errors';
@@ -5,7 +6,7 @@ import sanitizeGlobals from '../globals/sanitize';
 import validateSchema from '../schema/validateSchema';
 import checkDuplicateCollections from './checkDuplicateCollections';
 
-const sanitizeConfig = (config) => {
+const sanitizeConfig = (config: PayloadConfig) => {
   const sanitizedConfig = validateSchema({ ...config });
 
   // TODO: remove default values from sanitize in favor of assigning in the schema within validateSchema and use https://www.npmjs.com/package/ajv#coercing-data-types where needed
@@ -42,12 +43,7 @@ const sanitizeConfig = (config) => {
   }
 
   sanitizedConfig.email = config.email || {};
-  // TODO: This should likely be moved to the payload.schema.json
-  if (sanitizedConfig.email.transports) {
-    if (!sanitizedConfig.email.email.fromName || !sanitizedConfig.email.email.fromAddress) {
-      throw new InvalidConfiguration('Email fromName and fromAddress must be configured when transport is configured');
-    }
-  }
+  // if (!sanitizedConfig.email.transport) sanitizedConfig.email.transport = 'mock';
 
   sanitizedConfig.graphQL = config.graphQL || {};
   sanitizedConfig.graphQL.maxComplexity = (sanitizedConfig.graphQL && sanitizedConfig.graphQL.maxComplexity) ? sanitizedConfig.graphQL.maxComplexity : 1000;
