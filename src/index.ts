@@ -1,5 +1,7 @@
+import { PayloadConfig, PayloadCollection, PayloadInitOptions } from './types';
 import express from 'express';
 import crypto from 'crypto';
+import { Router } from 'express';
 import Logger from './utilities/logger';
 import bindOperations from './init/bindOperations';
 import bindRequestHandlers from './init/bindRequestHandlers';
@@ -30,11 +32,14 @@ require('isomorphic-fetch');
 const logger = Logger();
 
 class Payload {
+  config: PayloadConfig;
+  collections: PayloadCollection[] = [];
   logger: any;
+  router: Router;
 
-  init(options) {
+  init(options: PayloadInitOptions) {
     this.logger = logger;
-    this.logger.info('Starting Payload...');
+    logger.info('Starting Payload...');
 
     if (!options.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.');
@@ -58,7 +63,7 @@ class Payload {
 
     if (typeof this.config.paths === 'undefined') this.config.paths = {};
 
-    this.collections = {};
+    // this.collections = {};
 
     bindOperations(this);
     bindRequestHandlers(this);

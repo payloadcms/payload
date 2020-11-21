@@ -13,7 +13,6 @@ payload.init({
   express: expressApp,
   onInit: () => {
     console.log('Payload is initialized');
-    // console.log('Payload is initialized');
   },
 });
 
