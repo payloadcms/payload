@@ -1,4 +1,4 @@
-export default (element) => {
+export default (element: HTMLElement): number => {
   let el = element;
   // Set our distance placeholder
   let distance = 0;
@@ -7,7 +7,7 @@ export default (element) => {
   if (el.offsetParent) {
     do {
       distance += el.offsetTop;
-      el = el.offsetParent;
+      el = el.offsetParent as HTMLElement;
     } while (el);
   }
 

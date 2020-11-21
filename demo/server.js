@@ -11,8 +11,8 @@ payload.init({
   secret: 'SECRET_KEY',
   mongoURL: 'mongodb://localhost/payload',
   express: expressApp,
-  onInit: () => {
-    console.log('Payload Demo Initialized');
+  onInit: (app) => {
+    app.logger.info('Payload Demo Initialized');
   },
 });
 

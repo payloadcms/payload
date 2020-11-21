@@ -14,47 +14,42 @@ import ConfigProvider from './components/providers/Config/Provider';
 
 import './scss/app.scss';
 
-const Index = () => {
-  const windowInfoProps = {};
+const Index = () => (
+  <React.Fragment>
+    <ConfigProvider>
+      <WindowInfoProvider breakpoints={{
+        xs: parseInt(getCSSVariable('breakpoint-xs-width').replace('px', ''), 10),
+        s: parseInt(getCSSVariable('breakpoint-s-width').replace('px', ''), 10),
+        m: parseInt(getCSSVariable('breakpoint-m-width').replace('px', ''), 10),
+        l: parseInt(getCSSVariable('breakpoint-l-width').replace('px', ''), 10),
+      }}
+      >
+        <ScrollInfoProvider>
+          <Router>
+            <ModalProvider
+              classPrefix="payload"
+              zIndex={parseInt(getCSSVariable('z-modal'), 10)}
+            >
+              <AuthenticationProvider>
+                <SearchParamsProvider>
+                  <LocaleProvider>
+                    <Routes />
+                  </LocaleProvider>
+                </SearchParamsProvider>
+                <ModalContainer />
+              </AuthenticationProvider>
+            </ModalProvider>
+          </Router>
+        </ScrollInfoProvider>
+      </WindowInfoProvider>
+    </ConfigProvider>
+    <ToastContainer
+      position="bottom-center"
+      transition={Slide}
+    />
+  </React.Fragment>
 
-  windowInfoProps.breakpoints = {
-    xs: parseInt(getCSSVariable('breakpoint-xs-width').replace('px', ''), 10),
-    s: parseInt(getCSSVariable('breakpoint-s-width').replace('px', ''), 10),
-    m: parseInt(getCSSVariable('breakpoint-m-width').replace('px', ''), 10),
-    l: parseInt(getCSSVariable('breakpoint-l-width').replace('px', ''), 10),
-  };
-
-  return (
-    <React.Fragment>
-      <ConfigProvider>
-        <WindowInfoProvider {...windowInfoProps}>
-          <ScrollInfoProvider>
-            <Router>
-              <ModalProvider
-                classPrefix="payload"
-                zIndex={parseInt(getCSSVariable('z-modal'), 10)}
-              >
-                <AuthenticationProvider>
-                  <SearchParamsProvider>
-                    <LocaleProvider>
-                      <Routes />
-                    </LocaleProvider>
-                  </SearchParamsProvider>
-                  <ModalContainer />
-                </AuthenticationProvider>
-              </ModalProvider>
-            </Router>
-          </ScrollInfoProvider>
-        </WindowInfoProvider>
-      </ConfigProvider>
-      <ToastContainer
-        position="bottom-center"
-        transition={Slide}
-      />
-    </React.Fragment>
-
-  );
-};
+);
 
 render(<Index />, document.getElementById('app'));
 

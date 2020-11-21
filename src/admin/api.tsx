@@ -1,13 +1,12 @@
-/* eslint-disable import/prefer-default-export */
 import qs from 'qs';
 
 export const requests = {
-  get: (url, params) => {
-    const query = qs.stringify(params, { addQueryPrefix: true, depth: 10 });
+  get: (url: string, params: unknown = {}): Promise<Response> => {
+    const query = qs.stringify(params, { addQueryPrefix: true });
     return fetch(`${url}${query}`);
   },
 
-  post: (url, options = {}) => {
+  post: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {
     const headers = options && options.headers ? { ...options.headers } : {};
 
     const formattedOptions = {
@@ -21,7 +20,7 @@ export const requests = {
     return fetch(`${url}`, formattedOptions);
   },
 
-  put: (url, options = {}) => {
+  put: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {
     const headers = options && options.headers ? { ...options.headers } : {};
 
     const formattedOptions = {
@@ -35,7 +34,7 @@ export const requests = {
     return fetch(url, formattedOptions);
   },
 
-  delete: (url, options = {}) => {
+  delete: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {
     const headers = options && options.headers ? { ...options.headers } : {};
     return fetch(url, {
       ...options,

@@ -198,7 +198,7 @@ class Payload {
       this.authenticate = authenticate(this.config);
     }
 
-    if (typeof options.onInit === 'function') options.onInit();
+    if (typeof options.onInit === 'function') options.onInit(this);
   }
 
   async sendEmail(message: Message) {

@@ -53,7 +53,7 @@ const Auth = (props) => {
     } else {
       toast.error('Successfully unlocked');
     }
-  }, [replaceStatus, serverURL, api, slug, email]);
+  }, [serverURL, api, slug, email]);
 
   return (
     <div className={baseClass}>
@@ -64,33 +64,33 @@ const Auth = (props) => {
         autoComplete="email"
       />
       {(changingPassword || requirePassword) && (
-        <div className={`${baseClass}__changing-password`}>
-          <Password
-            autoComplete="off"
-            required
-            name="password"
-            label="New Password"
-          />
-          <ConfirmPassword />
-          {!requirePassword && (
-            <Button
-              size="small"
-              buttonStyle="secondary"
-              onClick={() => setChangingPassword(false)}
-            >
-              Cancel
-            </Button>
-          )}
-        </div>
-      )}
-      {(!changingPassword && !requirePassword) && (
+      <div className={`${baseClass}__changing-password`}>
+        <Password
+          autoComplete="off"
+          required
+          name="password"
+          label="New Password"
+        />
+        <ConfirmPassword />
+        {!requirePassword && (
         <Button
           size="small"
           buttonStyle="secondary"
-          onClick={() => setChangingPassword(true)}
+          onClick={() => setChangingPassword(false)}
         >
-          Change Password
+          Cancel
         </Button>
+        )}
+      </div>
+      )}
+      {(!changingPassword && !requirePassword) && (
+      <Button
+        size="small"
+        buttonStyle="secondary"
+        onClick={() => setChangingPassword(true)}
+      >
+        Change Password
+      </Button>
       )}
       <Button
         size="small"
@@ -100,22 +100,22 @@ const Auth = (props) => {
         Force Unlock
       </Button>
       {useAPIKey && (
-        <div className={`${baseClass}__api-key`}>
-          <Checkbox
-            label="Enable API Key"
-            name="enableAPIKey"
-          />
-          {enableAPIKey?.value && (
-            <APIKey />
-          )}
-        </div>
+      <div className={`${baseClass}__api-key`}>
+        <Checkbox
+          label="Enable API Key"
+          name="enableAPIKey"
+        />
+        {enableAPIKey?.value && (
+        <APIKey />
+					)}
+      </div>
       )}
       {verify && (
-        <Checkbox
-          label="Verified"
-          name="_verified"
-          readOnly
-        />
+      <Checkbox
+        label="Verified"
+        name="_verified"
+        readOnly
+      />
       )}
     </div>
   );
