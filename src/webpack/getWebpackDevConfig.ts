@@ -10,7 +10,7 @@ export default (config) => {
     entry: {
       main: [
         'webpack-hot-middleware/client',
-        path.resolve(__dirname, '../admin/index.tsx'),
+        path.resolve(__dirname, '../admin'),
       ],
     },
     output: {

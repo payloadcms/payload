@@ -11,7 +11,7 @@ const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js');
 export default (config) => {
   let webpackConfig = {
     entry: {
-      main: [path.resolve(__dirname, '../admin/index.js')],
+      main: [path.resolve(__dirname, '../admin')],
     },
     output: {
       path: path.resolve(process.cwd(), 'build'),
