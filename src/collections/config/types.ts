@@ -1,3 +1,5 @@
+import { Access, Hook } from '../../config/types';
+import { Field } from '../../fields/config/types';
 
 export type Collection = {
   slug: string;

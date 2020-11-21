@@ -1,17 +1,17 @@
-import nodemailer, { TestAccount, Transporter } from 'nodemailer';
-import { PayloadEmailOptions } from '../types';
+import nodemailer from 'nodemailer';
+import { EmailOptions } from '../config/types';
 import { MockEmailHandler } from './types';
 
-const mockEmailHandler = async (emailConfig: PayloadEmailOptions): Promise<MockEmailHandler> => {
+const mockEmailHandler = async (emailConfig: EmailOptions): Promise<MockEmailHandler> => {
   const testAccount = await nodemailer.createTestAccount();
 
   const smtpOptions = {
     ...emailConfig,
-    host: "smtp.ethereal.email",
+    host: 'smtp.ethereal.email',
     port: 587,
     secure: false,
-    fromName: emailConfig.fromName || "Payload CMS",
-    fromAddress: emailConfig.fromAddress || "info@payloadcms.com",
+    fromName: emailConfig.fromName || 'Payload CMS',
+    fromAddress: emailConfig.fromAddress || 'info@payloadcms.com',
     auth: {
       user: testAccount.user,
       pass: testAccount.pass,

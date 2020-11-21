@@ -1,3 +1,5 @@
+const { buildConfig } = require('../config');
+
 const Admin = require('./collections/Admin');
 const AllFields = require('./collections/AllFields');
 const AutoLabel = require('./collections/AutoLabel');
@@ -27,7 +29,7 @@ const BlocksGlobal = require('./globals/BlocksGlobal');
 const NavigationArray = require('./globals/NavigationArray');
 const GlobalWithStrictAccess = require('./globals/GlobalWithStrictAccess');
 
-module.exports = {
+module.exports = buildConfig({
   admin: {
     user: 'admins',
     // indexHTML: 'custom-index.html',
@@ -134,4 +136,4 @@ module.exports = {
     },
   },
   webpack: (config) => config,
-};
+});

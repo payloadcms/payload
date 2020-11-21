@@ -1,8 +1,8 @@
 import { Express } from 'express';
-import { CSSProperties } from 'react';
 import { Transporter } from 'nodemailer';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { Collection } from '../collections/config/types';
+import { Global } from '../globals/config/types';
 
 type MockEmailTransport = {
   transport?: 'mock';
@@ -67,6 +67,11 @@ export type Config = {
     graphQL?: string;
     graphQLPlayground?: string;
   };
+  express: {
+    json: {
+      limit?: number
+    }
+  },
   email?: EmailOptions;
   local?: boolean;
   defaultDepth?: number;

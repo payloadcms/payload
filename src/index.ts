@@ -40,7 +40,7 @@ import performFieldOperations from './fields/performFieldOperations';
 import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
 import { encrypt, decrypt } from './auth/crypto';
-import { MockEmailHandler, BuildEmailResult } from './email/types';
+import { MockEmailHandler, BuildEmailResult, Message } from './email/types';
 
 require('isomorphic-fetch');
 
@@ -201,7 +201,7 @@ class Payload {
     if (typeof options.onInit === 'function') options.onInit();
   }
 
-  async sendEmail(message: string) {
+  async sendEmail(message: Message) {
     const email = await this.email;
     const result = email.transport.sendMail(message);
     return result;

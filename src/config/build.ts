@@ -1,12 +1,10 @@
-import { PayloadConfig } from '../types';
+import { Config } from './types';
 import sanitize from './sanitize';
 import validate from './validate';
 
-const buildConfig = (config: PayloadConfig) => {
+export default function buildConfig(config: Config): Config {
   const validated = validate(config);
   const sanitized = sanitize(validated);
 
   return sanitized;
-};
-
-module.exports = buildConfig;
+}
