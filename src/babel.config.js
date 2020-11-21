@@ -17,5 +17,11 @@ module.exports = {
     require.resolve('@babel/plugin-transform-runtime'),
     require.resolve('@babel/plugin-proposal-class-properties'),
     require.resolve('@babel/plugin-proposal-optional-chaining'),
+    [
+      'babel-plugin-ignore-html-and-css-imports',
+      {
+        removeExtensions: ['.svg', '.css', '.scss', '.png', '.jpg'],
+      },
+    ],
   ],
 };

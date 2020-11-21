@@ -1,8 +1,10 @@
-require('isomorphic-fetch');
-const { MongoClient } = require('mongodb');
-const { email, password, mongo: { url: mongoURL, port: mongoPort, name: mongoDBName } } = require('../../tests/api/credentials');
+import { MongoClient } from 'mongodb';
+import getConfig from '../utilities/getConfig';
+import { email, password, mongo } from '../../tests/api/credentials';
 
-const getConfig = require('../utilities/getConfig');
+require('isomorphic-fetch');
+
+const { url: mongoURL, port: mongoPort, name: mongoDBName } = mongo;
 
 const { serverURL: url } = getConfig();
 

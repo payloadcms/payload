@@ -1,10 +1,11 @@
+import fs from 'fs';
+import path from 'path';
+import FormData from 'form-data';
+import getConfig from '../../utilities/getConfig';
+import fileExists from '../../../tests/api/utils/fileExists';
+import { email, password } from '../../../tests/api/credentials';
+
 require('isomorphic-fetch');
-const fs = require('fs');
-const path = require('path');
-const FormData = require('form-data');
-const getConfig = require('../../utilities/getConfig');
-const fileExists = require('../../../tests/api/utils/fileExists');
-const { email, password } = require('../../../tests/api/credentials');
 
 const { serverURL: url } = getConfig();
 

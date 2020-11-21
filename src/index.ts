@@ -136,7 +136,7 @@ class Payload {
       // Enable static routes for all collections permitting upload
       this.initStatic();
 
-      this.errorHandler = errorHandler(this);
+      this.errorHandler = errorHandler(this.config, this.logger);
       this.router.use(this.errorHandler);
 
       this.authenticate = authenticate(this.config);

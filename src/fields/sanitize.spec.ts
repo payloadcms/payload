@@ -1,6 +1,5 @@
-/* eslint-disable jest/require-to-throw-message */
-const sanitizeFields = require('./sanitize');
-const { MissingFieldType, InvalidFieldRelationship } = require('../errors');
+import sanitizeFields from './sanitize';
+import { MissingFieldType, InvalidFieldRelationship } from '../errors';
 
 describe('sanitizeFields', () => {
   it('should throw on missing type field', () => {

@@ -1,7 +1,8 @@
+import { v4 as uuid } from 'uuid';
+import getConfig from '../../utilities/getConfig';
+import { email, password } from '../../../tests/api/credentials';
+
 require('isomorphic-fetch');
-const uuid = require('uuid').v4;
-const getConfig = require('../../utilities/getConfig');
-const { email, password } = require('../../../tests/api/credentials');
 
 const { serverURL: url } = getConfig();
 

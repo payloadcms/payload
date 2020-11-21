@@ -1,13 +1,12 @@
 import httpStatus from 'http-status';
 import formatErrorResponse from '../responses/formatError';
 
-const errorHandler = (payload) => async (err, req, res, next) => {
-  const { config } = payload;
+const errorHandler = (config, logger) => async (err, req, res, next) => {
   const data = formatErrorResponse(err);
   let response;
   let status = err.status || httpStatus.INTERNAL_SERVER_ERROR;
 
-  payload.logger.error(err.stack);
+  logger.error(err.stack);
 
   if (config.debug && config.debug === true) {
     data.stack = err.stack;

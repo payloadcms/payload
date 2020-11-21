@@ -1,7 +1,7 @@
 require('isomorphic-fetch');
 
 const server = require('../../demo/server');
-const getConfig = require('../../src/utilities/getConfig');
+const getConfig = require('../../src/utilities/getConfig').default;
 const { email, password } = require('./credentials');
 
 const { serverURL } = getConfig();
