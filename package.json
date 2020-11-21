@@ -10,6 +10,7 @@
     "payload": "./src/bin/index.js"
   },
   "scripts": {
+    "copyfiles": "copyfiles src/**/*.{html,css,scss,ttf,woff,eot,svg,jpg,png} dist/",
     "build:components": "webpack --config src/webpack/components.config.js",
     "build": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js node src/bin/build",
     "build:tsc": "tsc",
@@ -191,6 +192,7 @@
     "@typescript-eslint/eslint-plugin": "^4.8.1",
     "babel-eslint": "^10.0.1",
     "babel-plugin-ignore-html-and-css-imports": "^0.1.0",
+    "copyfiles": "^2.4.0",
     "cross-env": "^7.0.2",
     "eslint": "^6.8.0",
     "eslint-plugin-import": "^2.20.0",
