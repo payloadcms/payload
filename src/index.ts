@@ -29,8 +29,6 @@ import { encrypt, decrypt } from './auth/crypto';
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
-const logger = Logger();
-
 class Payload {
   config: PayloadConfig;
   collections: PayloadCollection[] = [];
@@ -38,8 +36,8 @@ class Payload {
   router: Router;
 
   init(options: PayloadInitOptions) {
-    this.logger = logger;
-    logger.info('Starting Payload...');
+    this.logger = Logger();
+    this.logger.info('Starting Payload...');
 
     if (!options.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.');
