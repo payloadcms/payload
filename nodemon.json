@@ -3,11 +3,12 @@
     ".git",
     "node_modules",
     "node_modules/**/node_modules",
-    "src/client"
+    "src/client",
+    "src/**/*.spec.ts"
   ],
   "watch": [
-    "src/",
+    "src/**/*.ts",
     "demo/"
   ],
-  "ext": "js,json"
+  "ext": "ts,js,json"
 }
