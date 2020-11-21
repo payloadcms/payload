@@ -2,13 +2,21 @@
 
 import { Express, Request } from 'express';
 import { Transporter } from 'nodemailer';
+import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { Logger } from 'pino';
 
-export type PayloadEmailOptions = {
-  transport: 'mock' | Transporter; // Not positive Transporter is correct type
+type MockEmailTransport = {
+  transport?: 'mock';
+  fromName?: string;
+  fromAddress?: string;
+};
+type ValidEmailTransport = {
+  transport: Transporter;
+  transportOptions?: SMTPConnection.Options;
   fromName: string;
   fromAddress: string;
 };
+export type PayloadEmailOptions = ValidEmailTransport | MockEmailTransport;
 
 export type PayloadInitOptions = {
   express?: Express;
@@ -208,6 +216,7 @@ export type PayloadConfig = {
   email?: PayloadEmailOptions;
   local?: boolean;
   defaultDepth?: number;
+  maxDepth?: number;
   rateLimit?: {
     window?: number;
     max?: number;
@@ -215,8 +224,8 @@ export type PayloadConfig = {
     skip?: (req: Request) => boolean; // TODO: Type join Request w/ PayloadRequest
   };
   upload?: {
-    limits: {
-      fileSize: number;
+    limits?: {
+      fileSize?: number;
     };
   };
   localization?: {

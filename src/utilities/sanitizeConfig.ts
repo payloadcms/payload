@@ -43,12 +43,7 @@ const sanitizeConfig = (config: PayloadConfig) => {
   }
 
   sanitizedConfig.email = config.email || {};
-  // TODO: This should likely be moved to the payload.schema.json
-  if (sanitizedConfig.email.transports) {
-    if (!sanitizedConfig.email.email.fromName || !sanitizedConfig.email.email.fromAddress) {
-      throw new InvalidConfiguration('Email fromName and fromAddress must be configured when transport is configured');
-    }
-  }
+  // if (!sanitizedConfig.email.transport) sanitizedConfig.email.transport = 'mock';
 
   sanitizedConfig.graphQL = config.graphQL || {};
   sanitizedConfig.graphQL.maxComplexity = (sanitizedConfig.graphQL && sanitizedConfig.graphQL.maxComplexity) ? sanitizedConfig.graphQL.maxComplexity : 1000;

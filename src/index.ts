@@ -1,4 +1,3 @@
-
 import express from 'express';
 import crypto from 'crypto';
 import { Router } from 'express';
@@ -7,7 +6,14 @@ import {
   PayloadCollection,
   PayloadInitOptions,
   PayloadLogger,
-} from "./types";
+  CreateOptions,
+  FindOptions,
+  FindGlobalOptions,
+  UpdateGlobalOptions,
+  FindByIDOptions,
+  UpdateOptions,
+  DeleteOptions,
+} from './types';
 import Logger from './utilities/logger';
 import bindOperations from './init/bindOperations';
 import bindRequestHandlers from './init/bindRequestHandlers';
@@ -31,6 +37,8 @@ import performFieldOperations from './fields/performFieldOperations';
 import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
 import { encrypt, decrypt } from './auth/crypto';
+import { TestAccount } from 'nodemailer';
+import { MockEmailHandler } from './email/types';
 
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
@@ -40,6 +48,7 @@ class Payload {
   collections: PayloadCollection[] = [];
   logger: PayloadLogger;
   router: Router;
+  email: any;
 
   init(options: PayloadInitOptions) {
     this.logger = Logger();
@@ -85,7 +94,7 @@ class Payload {
     this.initCollections = initCollections.bind(this);
     this.initGlobals = initGlobals.bind(this);
     this.initGraphQLPlayground = initGraphQLPlayground.bind(this);
-    this.buildEmail = buildEmail.bind(this);
+    // this.buildEmail = buildEmail.bind(this);
     this.sendEmail = this.sendEmail.bind(this);
     this.getMockEmailCredentials = this.getMockEmailCredentials.bind(this);
     this.initStatic = initStatic.bind(this);
@@ -112,7 +121,7 @@ class Payload {
     }
 
     // Configure email service
-    this.email = this.buildEmail();
+    this.email = buildEmail(this.config.email);
 
     // Initialize collections & globals
     this.initCollections();
@@ -161,54 +170,54 @@ class Payload {
     if (typeof options.onInit === 'function') options.onInit();
   }
 
-  async sendEmail(message) {
+  async sendEmail(message: string) {
     const email = await this.email;
     const result = email.transport.sendMail(message);
     return result;
   }
 
-  async getMockEmailCredentials() {
-    const email = await this.email;
+  async getMockEmailCredentials(): Promise<TestAccount> {
+    const email = await this.email as MockEmailHandler;
     return email.account;
   }
 
-  async create(options) {
+  async create(options: CreateOptions) {
     let { create } = localOperations;
     create = create.bind(this);
     return create(options);
   }
 
-  async find(options) {
+  async find(options: FindOptions) {
     let { find } = localOperations;
     find = find.bind(this);
     return find(options);
   }
 
-  async findGlobal(options) {
+  async findGlobal(options: FindGlobalOptions) {
     let { findOne } = localGlobalOperations;
     findOne = findOne.bind(this);
     return findOne(options);
   }
 
-  async updateGlobal(options) {
+  async updateGlobal(options: UpdateGlobalOptions) {
     let { update } = localGlobalOperations;
     update = update.bind(this);
     return update(options);
   }
 
-  async findByID(options) {
+  async findByID(options: FindByIDOptions) {
     let { findByID } = localOperations;
     findByID = findByID.bind(this);
     return findByID(options);
   }
 
-  async update(options) {
+  async update(options: UpdateOptions) {
     let { update } = localOperations;
     update = update.bind(this);
     return update(options);
   }
 
-  async delete(options) {
+  async delete(options: DeleteOptions) {
     let { delete: deleteOperation } = localOperations;
     deleteOperation = deleteOperation.bind(this);
     return deleteOperation(options);
