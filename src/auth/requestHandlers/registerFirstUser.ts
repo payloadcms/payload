@@ -1,4 +1,7 @@
-async function registerFirstUser(req, res, next) {
+
+import { Request, Response, NextFunction } from 'express';
+
+export default async function registerFirstUser(req: Request, res: Response, next: NextFunction): Promise<any> {
   try {
     const firstUser = await this.operations.collections.auth.registerFirstUser({
       req,
@@ -12,5 +15,3 @@ async function registerFirstUser(req, res, next) {
     return next(error);
   }
 }
-
-export default registerFirstUser;

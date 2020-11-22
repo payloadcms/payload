@@ -1,7 +1,9 @@
+import { Response, NextFunction } from 'express';
 import executeAccess from './executeAccess';
 import { Forbidden } from '../errors';
+import { PayloadRequest } from '../express/types/payloadRequest';
 
-const getExecuteStaticAccess = ({ config, Model }) => async (req, res, next) => {
+const getExecuteStaticAccess = ({ config, Model }) => async (req: PayloadRequest, res: Response, next: NextFunction) => {
   try {
     if (req.path) {
       const accessResult = await executeAccess({ req, isReadingStaticFile: true }, config.access.read);

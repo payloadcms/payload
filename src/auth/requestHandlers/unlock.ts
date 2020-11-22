@@ -1,6 +1,7 @@
+import { Request, Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 
-async function unlockHandler(req, res, next) {
+export default async function unlockHandler(req: Request, res: Response, next: NextFunction): Promise<any> {
   try {
     await this.operations.collections.auth.unlock({
       req,
@@ -16,5 +17,3 @@ async function unlockHandler(req, res, next) {
     return next(error);
   }
 }
-
-export default unlockHandler;
