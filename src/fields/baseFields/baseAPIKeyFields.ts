@@ -1,7 +1,8 @@
 import crypto from 'crypto';
+import { Field, FieldHook } from '../config/types';
 
-const encryptKey = ({ req, value }) => (value ? req.payload.encrypt(value) : undefined);
-const decryptKey = ({ req, value }) => (value ? req.payload.decrypt(value) : undefined);
+const encryptKey: FieldHook = ({ req, value }) => (value ? req.payload.encrypt(value) : undefined);
+const decryptKey: FieldHook = ({ req, value }) => (value ? req.payload.decrypt(value) : undefined);
 
 export default [
   {
@@ -50,4 +51,4 @@ export default [
       ],
     },
   },
-];
+] as Field[];

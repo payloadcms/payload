@@ -1,4 +1,5 @@
 import { email } from '../validations';
+import { Field } from '../config/types';
 
 export default [
   {
@@ -20,4 +21,4 @@ export default [
     type: 'date',
     hidden: true,
   },
-];
+] as Field[];

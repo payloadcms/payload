@@ -58,7 +58,7 @@ const sanitizeCollection = (collections: Collection[], collection: Collection): 
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitized = { ...collection };
+  const sanitized: Collection = { ...collection };
   sanitized.slug = toKebabCase(sanitized.slug);
   sanitized.labels = !sanitized.labels ? formatLabels(sanitized.slug) : sanitized.labels;
 
@@ -135,8 +135,10 @@ const sanitizeCollection = (collections: Collection[], collection: Collection): 
 
     if (!sanitized.auth.cookies) sanitized.auth.cookies = {};
 
-    if (!sanitized.auth.cookies.secure) sanitized.auth.cookies.secure = false;
-    if (!sanitized.auth.cookies.sameSite) sanitized.auth.cookies.sameSite = 'Lax';
+    if (typeof sanitized.auth.cookies !== 'boolean') {
+      if (!sanitized.auth.cookies.secure) sanitized.auth.cookies.secure = false;
+      if (!sanitized.auth.cookies.sameSite) sanitized.auth.cookies.sameSite = 'Lax';
+    }
 
     authFields = mergeBaseFields(sanitized.fields, authFields);
 

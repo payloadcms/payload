@@ -1,5 +1,13 @@
 import { Access, Hook } from '../../config/types';
 import { Field } from '../../fields/config/types';
+import { PayloadRequest } from '../../express/types/payloadRequest';
+
+export type ImageSize = {
+  name: string,
+  width: number,
+  height: number,
+  crop: string, // comes from sharp package
+};
 
 export type Collection = {
   slug: string;
@@ -21,6 +29,10 @@ export type Collection = {
     afterRead?: Hook[];
     beforeDelete?: Hook[];
     afterDelete?: Hook[];
+    beforeLogin?: Hook[];
+    afterLogin?: Hook[];
+    afterForgotPassword?: Hook[];
+    forgotPassword?: Hook[];
   };
   access?: {
     create?: Access;
@@ -28,6 +40,7 @@ export type Collection = {
     update?: Access;
     delete?: Access;
     admin?: Access;
+    unlock?: Access;
   };
   auth?: {
     tokenExpiration?: number;
@@ -44,6 +57,15 @@ export type Collection = {
       domain?: string | undefined;
     }
     | boolean;
+    forgotPassword?: {
+      generateEmailHTML?: (args?: {token?: string, email?: string, req?: PayloadRequest}) => string,
+      generateEmailSubject?: (args?: {req?: PayloadRequest}) => string,
+    }
   };
   fields: Field[];
+  upload: {
+    imageSizes: ImageSize[];
+    staticURL: string;
+    staticDir: string;
+  };
 };

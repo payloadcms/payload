@@ -1,3 +1,5 @@
+import { Field } from '../config/types';
+
 export default [
   {
     name: 'loginAttempts',
@@ -10,4 +12,4 @@ export default [
     type: 'date',
     hidden: true,
   },
-];
+] as Field[];

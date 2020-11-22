@@ -1,3 +1,5 @@
+import { Field } from '../config/types';
+
 export default [
   {
     name: 'filename',
@@ -38,4 +40,4 @@ export default [
       disabled: true,
     },
   },
-];
+] as Field[];

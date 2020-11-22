@@ -1,4 +1,7 @@
-export default (imageSizes) => [
+import { ImageSize } from '../../collections/config/types';
+import { Field } from '../config/types';
+
+export default (imageSizes: ImageSize[]): Field[] => [
   {
     name: 'width',
     label: 'Width',

@@ -1,7 +1,9 @@
+import { Field } from '../config/types';
+
 export default [
   {
-    name: "_verified",
-    type: "checkbox",
+    name: '_verified',
+    type: 'checkbox',
     access: {
       create: () => false,
       update: ({ req: { user } }) => Boolean(user),
@@ -12,8 +14,8 @@ export default [
     },
   },
   {
-    name: "_verificationToken",
-    type: "text",
+    name: '_verificationToken',
+    type: 'text',
     hidden: true,
   },
-];
+] as Field[];
