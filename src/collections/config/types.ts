@@ -15,6 +15,7 @@ export type Collection = {
     singular: string;
     plural: string;
   };
+  fields: Field[];
   admin?: {
     useAsTitle?: string;
     defaultColumns?: string[];
@@ -62,10 +63,10 @@ export type Collection = {
       generateEmailSubject?: (args?: {req?: PayloadRequest}) => string,
     }
   };
-  fields: Field[];
   upload: {
     imageSizes: ImageSize[];
     staticURL: string;
     staticDir: string;
+    adminThumbnail?: string;
   };
 };

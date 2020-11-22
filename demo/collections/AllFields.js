@@ -191,10 +191,6 @@ const AllFields = {
     {
       type: 'blocks',
       label: 'Blocks Content',
-      labels: {
-        singular: 'Block',
-        plural: 'Blocks',
-      },
       name: 'blocks',
       minRows: 2,
       blocks: [Email, NumberBlock, Quote, CallToAction],
