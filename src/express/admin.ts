@@ -6,7 +6,7 @@ import initWebpack from '../webpack/init';
 
 const router = express.Router();
 
-function initAdmin() {
+function initAdmin(): void {
   if (!this.config.admin.disable && process.env.NODE_ENV !== 'test') {
     this.initWebpack = initWebpack.bind(this);
 

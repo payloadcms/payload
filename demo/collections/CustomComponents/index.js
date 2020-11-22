@@ -101,9 +101,7 @@ module.exports = {
   admin: {
     useAsTitle: 'title',
     components: {
-      views: {
-        List: ListView,
-      },
+      List: ListView,
     },
   },
 };
