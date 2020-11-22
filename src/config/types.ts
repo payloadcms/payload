@@ -3,6 +3,7 @@ import { Transporter } from 'nodemailer';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { Collection } from '../collections/config/types';
 import { Global } from '../globals/config/types';
+import { PayloadRequest } from '../express/types/payloadRequest';
 
 type MockEmailTransport = {
   transport?: 'mock';
@@ -80,7 +81,7 @@ export type Config = {
     window?: number;
     max?: number;
     trustProxy?: boolean;
-    skip?: (req: Request) => boolean; // TODO: Type join Request w/ PayloadRequest
+    skip?: (req: PayloadRequest) => boolean;
   };
   upload?: {
     limits?: {

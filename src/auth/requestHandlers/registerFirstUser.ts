@@ -1,7 +1,7 @@
+import { Response, NextFunction } from 'express';
+import { PayloadRequest } from '../../express/types/payloadRequest';
 
-import { Request, Response, NextFunction } from 'express';
-
-export default async function registerFirstUser(req: Request, res: Response, next: NextFunction): Promise<any> {
+export default async function registerFirstUser(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {
     const firstUser = await this.operations.collections.auth.registerFirstUser({
       req,

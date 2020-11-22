@@ -1,7 +1,7 @@
 import PassportAPIKey from 'passport-headerapikey';
 import crypto from 'crypto';
 
-export default ({ operations, secret }, { Model, config }) => {
+export default ({ operations, secret }, { Model, config }): PassportAPIKey => {
   const opts = {
     header: 'Authorization',
     prefix: `${config.labels.singular} API-Key `,
@@ -13,7 +13,7 @@ export default ({ operations, secret }, { Model, config }) => {
       .digest('hex');
 
     try {
-      const where = {};
+      const where: { [key: string]: any } = {};
       if (config.auth.verify) {
         where.and = [
           {

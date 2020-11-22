@@ -1,6 +1,6 @@
-
 export type Document = {
   id: string;
+  [key: string]: any;
 };
 
 export type CreateOptions = {

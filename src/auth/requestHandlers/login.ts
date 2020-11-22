@@ -1,7 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
+import { PayloadRequest } from '../../express/types/payloadRequest';
 
-export default async function loginHandler(req: Request, res: Response, next: NextFunction): Promise<any> {
+export default async function loginHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {
     const result = await this.operations.collections.auth.login({
       req,

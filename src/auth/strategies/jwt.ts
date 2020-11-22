@@ -1,24 +1,21 @@
-import passportJwt from 'passport-jwt';
+import passportJwt, { StrategyOptions } from 'passport-jwt';
+import { Strategy as PassportStrategy } from 'passport-strategy';
 import getExtractJWT from '../getExtractJWT';
 
 const JwtStrategy = passportJwt.Strategy;
 
-export default ({ secret, config, collections, operations }) => {
-  const opts = {
-    session: false,
+export default ({ secret, config, collections, operations }): PassportStrategy => {
+  const opts: StrategyOptions = {
     passReqToCallback: true,
+    jwtFromRequest: getExtractJWT(config),
+    secretOrKey: secret,
   };
-
-  const extractJWT = getExtractJWT(config);
-
-  opts.jwtFromRequest = extractJWT;
-  opts.secretOrKey = secret;
 
   return new JwtStrategy(opts, async (req, token, done) => {
     try {
       const collection = collections[token.collection];
 
-      const where = {};
+      const where: { [key: string]: any } = {};
       if (collection.config.auth.verify) {
         where.and = [
           {

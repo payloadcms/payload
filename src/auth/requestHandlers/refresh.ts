@@ -1,7 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import getExtractJWT from '../getExtractJWT';
+import { PayloadRequest } from '../../express/types/payloadRequest';
 
-export default async function refreshHandler(req: Request, res: Response, next: NextFunction): Promise<any> {
+export default async function refreshHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {
     const extractJWT = getExtractJWT(this.config);
     const token = extractJWT(req);

@@ -1,7 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
+import { PayloadRequest } from '../../express/types/payloadRequest';
 
-async function verifyEmail(req: Request, res: Response, next: NextFunction): Promise<any> {
+async function verifyEmail(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {
     await this.operations.collections.auth.verifyEmail({
       collection: req.collection,

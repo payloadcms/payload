@@ -16,8 +16,7 @@ const getExtractJWT = (config: Config) => (req: Request): string | null => {
 
     if (cookies && cookies[tokenCookieName]) {
       if (!origin || (config.csrf && config.csrf.indexOf(origin) > -1)) {
-        const token = cookies[tokenCookieName];
-        return token;
+        return cookies[tokenCookieName];
       }
     }
   }

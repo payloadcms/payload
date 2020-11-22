@@ -1,6 +1,7 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Response } from 'express';
+import { PayloadRequest } from '../../express/types/payloadRequest';
 
-export default async function me(req: Request, res: Response, next: NextFunction): Promise<any> {
+export default async function me(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {
     const response = await this.operations.collections.auth.me({ req });
     return res.status(200).json(response);

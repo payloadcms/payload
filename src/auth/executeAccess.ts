@@ -1,7 +1,7 @@
-import { Access } from '../config/types';
 import { Forbidden } from '../errors';
+import { Access } from '../config/types';
 
-const executeAccess = async (operation, access) => {
+const executeAccess = async (operation, access: Access): Promise<boolean> => {
   if (access) {
     const result = await access(operation);
 

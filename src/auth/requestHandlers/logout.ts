@@ -1,6 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { PayloadRequest } from '../../express/types/payloadRequest';
 
-export default async function logoutHandler(req: Request, res: Response, next: NextFunction) {
+export default async function logoutHandler(req: PayloadRequest, res: Response, next: NextFunction) {
   try {
     const message = await this.operations.collections.auth.logout({
       collection: req.collection,

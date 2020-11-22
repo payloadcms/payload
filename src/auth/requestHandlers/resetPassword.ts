@@ -1,7 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
+import { PayloadRequest } from '../../express/types/payloadRequest';
 
-async function resetPassword(req: Request, res: Response, next: NextFunction): Promise<any> {
+async function resetPassword(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {
     const result = await this.operations.collections.auth.resetPassword({
       req,
