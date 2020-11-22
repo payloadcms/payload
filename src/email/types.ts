@@ -9,11 +9,10 @@ export type Message = {
   html: string
 }
 
+export type MockEmailHandler = { account: TestAccount; transport: Transporter };
 export type BuildEmailResult = Promise<{
   transport: Mail,
   transportOptions?: SMTPConnection.Options,
   fromName: string,
   fromAddress: string,
-}>
-
-export type MockEmailHandler = { account: TestAccount; transport: Transporter };
+} | MockEmailHandler>

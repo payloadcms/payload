@@ -60,7 +60,7 @@ export type Config = {
   cookiePrefix?: string;
   csrf?: string[];
   cors?: string[];
-  publicENV: { [key: string]: string };
+  publicENV?: { [key: string]: string };
   routes?: {
     api?: string;
     admin?: string;
@@ -102,7 +102,7 @@ export type Config = {
     maxComplexity?: number;
     disablePlaygroundInProduction?: boolean;
   };
-  components: { [key: string]: JSX.Element | (() => JSX.Element) };
+  components?: { [key: string]: JSX.Element | (() => JSX.Element) };
   paths?: { [key: string]: string };
   hooks?: {
     afterError?: () => void;

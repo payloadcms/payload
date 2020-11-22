@@ -1,9 +1,10 @@
-import express, { Express, Router } from 'express';
+import express, { Express, Request, Router } from 'express';
 import crypto from 'crypto';
 
 import { TestAccount } from 'nodemailer';
 import {
   Config,
+  EmailOptions,
   InitOptions,
 } from './config/types';
 import {
@@ -18,7 +19,7 @@ import {
   UpdateOptions,
   DeleteOptions,
 } from './types';
-import Logger from './utilities/logger';
+import Logger, { PayloadLogger } from './utilities/logger';
 import bindOperations from './init/bindOperations';
 import bindRequestHandlers from './init/bindRequestHandlers';
 import bindResolvers from './init/bindResolvers';
@@ -44,18 +45,18 @@ import { MockEmailHandler, BuildEmailResult, Message } from './email/types';
 
 require('isomorphic-fetch');
 
-class Payload {
+export class Payload {
   config: Config;
 
   collections: Collection[] = [];
 
-  logger: typeof Logger;
+  logger: PayloadLogger;
 
   express: Express
 
   router: Router;
 
-  emailOptions: any;
+  emailOptions: EmailOptions;
 
   email: BuildEmailResult;
 
@@ -84,6 +85,7 @@ class Payload {
   initAdmin: typeof initAdmin;
 
   performFieldOperations: typeof performFieldOperations;
+  // requestHandlers: { collections: { create: any; find: any; findByID: any; update: any; delete: any; auth: { access: any; forgotPassword: any; init: any; login: any; logout: any; me: any; refresh: any; registerFirstUser: any; resetPassword: any; verifyEmail: any; unlock: any; }; }; globals: { ...; }; };
 
   init(options: InitOptions) {
     this.logger = Logger();
@@ -153,7 +155,7 @@ class Payload {
     }
 
     // Configure email service
-    this.email = buildEmail(this.emailOptions);
+    this.email = buildEmail(this.config.email);
 
     // Initialize collections & globals
     this.initCollections();
@@ -162,7 +164,8 @@ class Payload {
     // Connect to database
     connectMongoose(this.mongoURL);
 
-    options.express.use((req, res, next) => {
+    type PayloadReq = Request & { payload: Payload }; // TODO: move this out and add more
+    options.express.use((req: PayloadReq, res, next) => {
       req.payload = this;
       next();
     });
