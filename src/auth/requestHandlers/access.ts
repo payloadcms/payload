@@ -1,6 +1,7 @@
-const httpStatus = require('http-status');
+import { Request, Response, NextFunction } from 'express';
+import httpStatus from 'http-status';
 
-async function policiesHandler(req, res, next) {
+export default async function policiesHandler(req: Request, res: Response, next: NextFunction): Promise<any> {
   try {
     const accessResults = await this.operations.collections.auth.access({
       req,
@@ -12,5 +13,3 @@ async function policiesHandler(req, res, next) {
     return next(error);
   }
 }
-
-export default policiesHandler;

@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 
-const findConfig = () => {
+const findConfig = (): string => {
   // If the developer has specified a config path,
   // format it if relative and use it directly if absolute
   if (process.env.PAYLOAD_CONFIG_PATH) {

@@ -19,7 +19,7 @@ import deleteHandler from '../collections/requestHandlers/delete';
 import findOne from '../globals/requestHandlers/findOne';
 import globalUpdate from '../globals/requestHandlers/update';
 
-function bindRequestHandlers(ctx) {
+function bindRequestHandlers(ctx): void {
   const payload = ctx;
 
   payload.requestHandlers = {

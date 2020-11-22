@@ -1,6 +1,8 @@
+import { Request } from 'express';
+import { Config } from '../config/types';
 import parseCookies from '../utilities/parseCookies';
 
-const getExtractJWT = (config) => (req) => {
+const getExtractJWT = (config: Config) => (req: Request): string | null => {
   if (req && req.get) {
     const jwtFromHeader = req.get('Authorization');
     const origin = req.get('Origin');

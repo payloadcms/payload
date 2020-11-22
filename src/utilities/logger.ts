@@ -1,7 +1,8 @@
 import falsey from 'falsey';
 import pino from 'pino';
 import memoize from 'micro-memoize';
-import { PayloadLogger } from '../types';
+
+export type PayloadLogger = pino.Logger;
 
 export default memoize((name = 'payload') => pino({
   name,

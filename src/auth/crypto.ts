@@ -2,7 +2,7 @@ import crypto from 'crypto';
 
 const algorithm = 'aes-256-ctr';
 
-export function encrypt(text) {
+export function encrypt(text: string): string {
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv(algorithm, this.secret, iv);
 
@@ -15,7 +15,7 @@ export function encrypt(text) {
   return result;
 }
 
-export function decrypt(hash) {
+export function decrypt(hash: string): string {
   const iv = hash.slice(0, 32);
   const content = hash.slice(32);
 

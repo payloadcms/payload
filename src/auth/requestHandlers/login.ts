@@ -1,6 +1,7 @@
+import { Request, Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 
-async function loginHandler(req, res, next) {
+export default async function loginHandler(req: Request, res: Response, next: NextFunction): Promise<any> {
   try {
     const result = await this.operations.collections.auth.login({
       req,
@@ -21,5 +22,3 @@ async function loginHandler(req, res, next) {
     return next(error);
   }
 }
-
-export default loginHandler;

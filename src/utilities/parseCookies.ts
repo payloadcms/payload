@@ -1,4 +1,6 @@
-function parseCookies(req) {
+import { Request } from 'express';
+
+export default function parseCookies(req: Request): { [key: string]: string } {
   const list = {};
   const rc = req.headers.cookie;
 
@@ -11,5 +13,3 @@ function parseCookies(req) {
 
   return list;
 }
-
-export default parseCookies;

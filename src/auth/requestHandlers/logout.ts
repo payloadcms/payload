@@ -1,4 +1,6 @@
-async function logoutHandler(req, res, next) {
+import { Request, Response, NextFunction } from 'express';
+
+export default async function logoutHandler(req: Request, res: Response, next: NextFunction) {
   try {
     const message = await this.operations.collections.auth.logout({
       collection: req.collection,
@@ -11,5 +13,3 @@ async function logoutHandler(req, res, next) {
     return next(error);
   }
 }
-
-export default logoutHandler;

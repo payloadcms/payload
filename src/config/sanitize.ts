@@ -1,5 +1,5 @@
 import { Config } from './types';
-import defaultUser from '../auth/default';
+import defaultUser from '../auth/defaultUser';
 import sanitizeCollection from '../collections/config/sanitize';
 import { InvalidConfiguration } from '../errors';
 import sanitizeGlobals from '../globals/config/sanitize';

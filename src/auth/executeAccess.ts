@@ -1,3 +1,4 @@
+import { Access } from '../config/types';
 import { Forbidden } from '../errors';
 
 const executeAccess = async (operation, access) => {

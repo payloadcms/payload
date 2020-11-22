@@ -1,9 +1,10 @@
-import express, { Express, Router } from 'express';
+import express, { Express, Request, Router } from 'express';
 import crypto from 'crypto';
 
 import { TestAccount } from 'nodemailer';
 import {
   Config,
+  EmailOptions,
   InitOptions,
 } from './config/types';
 import {
@@ -18,7 +19,7 @@ import {
   UpdateOptions,
   DeleteOptions,
 } from './types';
-import Logger from './utilities/logger';
+import Logger, { PayloadLogger } from './utilities/logger';
 import bindOperations from './init/bindOperations';
 import bindRequestHandlers from './init/bindRequestHandlers';
 import bindResolvers from './init/bindResolvers';
@@ -41,21 +42,22 @@ import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
 import { encrypt, decrypt } from './auth/crypto';
 import { MockEmailHandler, BuildEmailResult, Message } from './email/types';
+import { PayloadRequest } from './express/types/payloadRequest';
 
 require('isomorphic-fetch');
 
-class Payload {
+export class Payload {
   config: Config;
 
   collections: Collection[] = [];
 
-  logger: typeof Logger;
+  logger: PayloadLogger;
 
   express: Express
 
   router: Router;
 
-  emailOptions: any;
+  emailOptions: EmailOptions;
 
   email: BuildEmailResult;
 
@@ -84,6 +86,7 @@ class Payload {
   initAdmin: typeof initAdmin;
 
   performFieldOperations: typeof performFieldOperations;
+  // requestHandlers: { collections: { create: any; find: any; findByID: any; update: any; delete: any; auth: { access: any; forgotPassword: any; init: any; login: any; logout: any; me: any; refresh: any; registerFirstUser: any; resetPassword: any; verifyEmail: any; unlock: any; }; }; globals: { ...; }; };
 
   init(options: InitOptions) {
     this.logger = Logger();
@@ -153,7 +156,7 @@ class Payload {
     }
 
     // Configure email service
-    this.email = buildEmail(this.emailOptions);
+    this.email = buildEmail(this.config.email);
 
     // Initialize collections & globals
     this.initCollections();
@@ -162,7 +165,7 @@ class Payload {
     // Connect to database
     connectMongoose(this.mongoURL);
 
-    options.express.use((req, res, next) => {
+    options.express.use((req: PayloadRequest, res, next) => {
       req.payload = this;
       next();
     });
@@ -201,7 +204,7 @@ class Payload {
     if (typeof options.onInit === 'function') options.onInit(this);
   }
 
-  async sendEmail(message: Message) {
+  async sendEmail(message: Message): Promise<any> {
     const email = await this.email;
     const result = email.transport.sendMail(message);
     return result;
@@ -212,73 +215,73 @@ class Payload {
     return email.account;
   }
 
-  async create(options: CreateOptions) {
+  async create(options: CreateOptions): Promise<any> {
     let { create } = localOperations;
     create = create.bind(this);
     return create(options);
   }
 
-  async find(options: FindOptions) {
+  async find(options: FindOptions): Promise<any> {
     let { find } = localOperations;
     find = find.bind(this);
     return find(options);
   }
 
-  async findGlobal(options: FindGlobalOptions) {
+  async findGlobal(options: FindGlobalOptions): Promise<any> {
     let { findOne } = localGlobalOperations;
     findOne = findOne.bind(this);
     return findOne(options);
   }
 
-  async updateGlobal(options: UpdateGlobalOptions) {
+  async updateGlobal(options: UpdateGlobalOptions): Promise<any> {
     let { update } = localGlobalOperations;
     update = update.bind(this);
     return update(options);
   }
 
-  async findByID(options: FindByIDOptions) {
+  async findByID(options: FindByIDOptions): Promise<any> {
     let { findByID } = localOperations;
     findByID = findByID.bind(this);
     return findByID(options);
   }
 
-  async update(options: UpdateOptions) {
+  async update(options: UpdateOptions): Promise<any> {
     let { update } = localOperations;
     update = update.bind(this);
     return update(options);
   }
 
-  async delete(options: DeleteOptions) {
+  async delete(options: DeleteOptions): Promise<any> {
     let { delete: deleteOperation } = localOperations;
     deleteOperation = deleteOperation.bind(this);
     return deleteOperation(options);
   }
 
-  async login(options) {
+  async login(options): Promise<any> {
     let { login } = localOperations.auth;
     login = login.bind(this);
     return login(options);
   }
 
-  async forgotPassword(options) {
+  async forgotPassword(options): Promise<any> {
     let { forgotPassword } = localOperations.auth;
     forgotPassword = forgotPassword.bind(this);
     return forgotPassword(options);
   }
 
-  async resetPassword(options) {
+  async resetPassword(options): Promise<any> {
     let { resetPassword } = localOperations.auth;
     resetPassword = resetPassword.bind(this);
     return resetPassword(options);
   }
 
-  async unlock(options) {
+  async unlock(options): Promise<any> {
     let { unlock } = localOperations.auth;
     unlock = unlock.bind(this);
     return unlock(options);
   }
 
-  async verifyEmail(options) {
+  async verifyEmail(options): Promise<any> {
     let { verifyEmail } = localOperations.auth;
     verifyEmail = verifyEmail.bind(this);
     return verifyEmail(options);

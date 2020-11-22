@@ -1,6 +1,7 @@
-const httpStatus = require('http-status');
+import { Request, Response, NextFunction } from 'express';
+import httpStatus from 'http-status';
 
-async function forgotPasswordHandler(req, res, next) {
+export default async function forgotPasswordHandler(req: Request, res: Response, next: NextFunction): Promise<any> {
   try {
     await this.operations.collections.auth.forgotPassword({
       req,
@@ -18,5 +19,3 @@ async function forgotPasswordHandler(req, res, next) {
     return next(error);
   }
 }
-
-export default forgotPasswordHandler;

@@ -1,6 +1,7 @@
+import { Request, Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 
-async function resetPassword(req, res, next) {
+async function resetPassword(req: Request, res: Response, next: NextFunction): Promise<any> {
   try {
     const result = await this.operations.collections.auth.resetPassword({
       req,
