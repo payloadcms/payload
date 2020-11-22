@@ -15,6 +15,8 @@ export type CreateOptions = {
 export type FindOptions = {
   collection: string;
   where?: { [key: string]: any };
+  depth?: number;
+  limit?: number;
 };
 
 export type FindResponse = {

@@ -9,7 +9,8 @@ export type FieldHook = (args: {
   originalDoc?: any,
   data?: any,
   operation?: 'create' | 'update',
-  req?: PayloadRequest}) => Promise<any> | any;
+  req?: PayloadRequest
+}) => Promise<any> | any;
 
 type FieldBase = {
   name: string;
@@ -136,4 +137,20 @@ export type BlockField = FieldBase & {
   blocks?: Block[];
 };
 
-export type Field = NumberField | TextField | EmailField | TextareaField | CodeField | CheckboxField | DateField | BlockField | RadioField | RelationshipField | ArrayField | RichTextField | GroupField | RowField | SelectField | SelectManyField | UploadField;
+export type Field = NumberField
+  | TextField
+  | EmailField
+  | TextareaField
+  | CodeField
+  | CheckboxField
+  | DateField
+  | BlockField
+  | RadioField
+  | RelationshipField
+  | ArrayField
+  | RichTextField
+  | GroupField
+  | RowField
+  | SelectField
+  | SelectManyField
+  | UploadField;

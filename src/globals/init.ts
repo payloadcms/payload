@@ -1,7 +1,7 @@
 import express from 'express';
 import buildModel from './buildModel';
 
-function initGlobals() {
+export default function initGlobals(): void {
   if (this.config.globals) {
     this.globals = {
       Model: buildModel(this.config),
@@ -23,5 +23,3 @@ function initGlobals() {
     }
   }
 }
-
-export default initGlobals;

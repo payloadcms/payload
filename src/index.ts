@@ -18,6 +18,7 @@ import {
   FindByIDOptions,
   UpdateOptions,
   DeleteOptions,
+  FindResponse,
 } from './types';
 import Logger, { PayloadLogger } from './utilities/logger';
 import bindOperations from './init/bindOperations';
@@ -46,6 +47,9 @@ import { PayloadRequest } from './express/types/payloadRequest';
 
 require('isomorphic-fetch');
 
+/**
+ * @description Payload
+ */
 export class Payload {
   config: Config;
 
@@ -90,7 +94,11 @@ export class Payload {
   performFieldOperations: typeof performFieldOperations;
   // requestHandlers: { collections: { create: any; find: any; findByID: any; update: any; delete: any; auth: { access: any; forgotPassword: any; init: any; login: any; logout: any; me: any; refresh: any; registerFirstUser: any; resetPassword: any; verifyEmail: any; unlock: any; }; }; globals: { ...; }; };
 
-  init(options: InitOptions) {
+  /**
+   * @description Initializes Payload
+   * @param options
+   */
+  init(options: InitOptions): void {
     this.logger = Logger();
     this.logger.info('Starting Payload...');
 
@@ -217,13 +225,23 @@ export class Payload {
     return email.account;
   }
 
+  /**
+   * @description Performs create operation
+   * @param options
+   * @returns created document
+   */
   async create(options: CreateOptions): Promise<any> {
     let { create } = localOperations;
     create = create.bind(this);
     return create(options);
   }
 
-  async find(options: FindOptions): Promise<any> {
+  /**
+   * @description Find documents with criteria
+   * @param options
+   * @returns documents satisfying query
+   */
+  async find(options: FindOptions): Promise<FindResponse> {
     let { find } = localOperations;
     find = find.bind(this);
     return find(options);
@@ -241,12 +259,22 @@ export class Payload {
     return update(options);
   }
 
+  /**
+   * @description Find document by ID
+   * @param options
+   * @returns document with specified ID
+   */
   async findByID(options: FindByIDOptions): Promise<any> {
     let { findByID } = localOperations;
     findByID = findByID.bind(this);
     return findByID(options);
   }
 
+  /**
+   * @description Update document
+   * @param options
+   * @returns Updated document
+   */
   async update(options: UpdateOptions): Promise<any> {
     let { update } = localOperations;
     update = update.bind(this);

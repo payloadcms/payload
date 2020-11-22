@@ -25,7 +25,7 @@ export type InitOptions = {
   secret: string;
   license?: string;
   email?: EmailOptions;
-  local?: boolean; // I have no idea what this is
+  local?: boolean; // If true, disables all routes
   onInit?: () => void;
 };
 

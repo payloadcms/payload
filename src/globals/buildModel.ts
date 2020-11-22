@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import buildSchema from '../mongoose/buildSchema';
 import localizationPlugin from '../localization/plugin';
+import { Config } from '../config/types';
 
-const buildModel = (config) => {
+const buildModel = (config: Config): mongoose.PaginateModel<any> | null => {
   if (config.globals && config.globals.length > 0) {
     const globalsSchema = new mongoose.Schema({}, { discriminatorKey: 'globalType', timestamps: true });
 
