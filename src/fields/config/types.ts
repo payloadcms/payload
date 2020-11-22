@@ -1,5 +1,6 @@
 import { CSSProperties } from 'react';
 import { PayloadRequest } from '../../express/types/payloadRequest';
+import { Access } from '../../config/types';
 
 // TODO: add generic type and use mongoose types for originalDoc & data
 export type FieldHook = (args: {
@@ -11,6 +12,7 @@ export type FieldHook = (args: {
 
 export type Field = {
   name: string;
+  slug?: string;
   label?: string;
   type:
   | 'number'
@@ -31,6 +33,17 @@ export type Field = {
   | 'blocks';
   localized?: boolean;
   hidden?: boolean;
+  required?: boolean;
+  defaultValue?: any;
+  validate?: (value: any, field: Field) => any;
+  access?: {
+    create?: Access;
+    read?: Access;
+    update?: Access;
+    delete?: Access;
+  };
+  blocks: Field[];
+  relationTo?: string;
   fields?: Field[];
   hooks?: {
     beforeValidate?: FieldHook[];
@@ -44,5 +57,6 @@ export type Field = {
     style?: CSSProperties;
     readOnly?: boolean;
     disabled?: boolean;
+    condition?: () => any;
   };
 };

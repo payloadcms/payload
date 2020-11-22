@@ -1,4 +1,5 @@
 import executeAccess from '../auth/executeAccess';
+import { OperationArguments } from '../types';
 
 const populate = async ({
   depth,
@@ -11,7 +12,7 @@ const populate = async ({
   index,
   id,
   payload,
-}) => {
+}: OperationArguments) => {
   const dataToUpdate = dataReference;
 
   const relation = Array.isArray(field.relationTo) ? data.relationTo : field.relationTo;

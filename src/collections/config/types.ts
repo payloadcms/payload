@@ -62,6 +62,7 @@ export type Collection = {
       generateEmailSubject?: (args?: {req?: PayloadRequest}) => string,
     }
   };
+  config: {[key: string]: any};
   fields: Field[];
   upload: {
     imageSizes: ImageSize[];

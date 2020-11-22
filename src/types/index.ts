@@ -1,3 +1,7 @@
+import { PayloadRequest } from '../express/types/payloadRequest';
+import { Field } from '../fields/config/types';
+import { Payload } from '../index';
+
 export type Document = {
   id: string;
   [key: string]: any;
@@ -55,3 +59,35 @@ export type ForgotPasswordOptions = {
   expiration: Date;
   data: any;
 };
+
+export interface OperationArguments {
+  data?: {[key: string]: any};
+  originalDoc?: {[key: string]: any};
+  fullOriginalDoc?: {[key: string]: any};
+  fullData?: {[key: string]: any};
+  operation?: unknown;
+  hook?: string;
+  req?: PayloadRequest;
+  id?: string;
+  overrideAccess?: boolean;
+  reduceLocales?: boolean;
+  showHiddenFields?: boolean;
+  currentDepth?: number;
+  depth?: number | string;
+  fields?: Field[];
+  field?: Field;
+  payload?: Payload;
+  path?: string;
+  locale?: string;
+  fallbackLocale?: string;
+  accessPromises?: Promise<void>[];
+  hookPromises?: Promise<void>[];
+  relationshipPopulations?: any[];
+  performFieldOperations?: Promise<Document>;
+  validationPromises?: any[];
+  errors?: { message: any; field: string }[];
+  newData?: {[key: string]: any};
+  existingData?: {[key: string]: any};
+  dataReference?: {[key: string]: any};
+  index?: number | string;
+}

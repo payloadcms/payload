@@ -1,8 +1,11 @@
 import { ValidationError } from '../errors';
 import sanitizeFallbackLocale from '../localization/sanitizeFallbackLocale';
 import traverseFields from './traverseFields';
+import { Collection } from '../collections/config/types';
+import { OperationArguments } from '../types';
 
-export default async function performFieldOperations(entityConfig, args) {
+
+export default async function performFieldOperations(entityConfig: Collection, args: OperationArguments) {
   const {
     data: fullData,
     originalDoc: fullOriginalDoc,

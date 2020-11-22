@@ -20,9 +20,7 @@ import findOne from '../globals/requestHandlers/findOne';
 import globalUpdate from '../globals/requestHandlers/update';
 
 function bindRequestHandlers(ctx): void {
-  const payload = ctx;
-
-  payload.requestHandlers = {
+  ctx.requestHandlers = {
     collections: {
       create: create.bind(ctx),
       find: find.bind(ctx),

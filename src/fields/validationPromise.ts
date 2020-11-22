@@ -1,3 +1,5 @@
+import { OperationArguments } from '../types';
+
 const validationPromise = async ({
   errors,
   hook,
@@ -5,7 +7,7 @@ const validationPromise = async ({
   existingData,
   field,
   path,
-}) => {
+}: OperationArguments) => {
   if (hook !== 'beforeChange') return true;
 
   const hasCondition = field.admin && field.admin.condition;

@@ -19,10 +19,8 @@ import deleteHandler from '../collections/operations/delete';
 import findOne from '../globals/operations/findOne';
 import globalUpdate from '../globals/operations/update';
 
-function bindOperations(ctx) {
-  const payload = ctx;
-
-  payload.operations = {
+function bindOperations(ctx): void {
+  ctx.operations = {
     collections: {
       create: create.bind(ctx),
       find: find.bind(ctx),

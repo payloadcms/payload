@@ -1,8 +1,9 @@
 import validationPromise from './validationPromise';
 import accessPromise from './accessPromise';
 import hookPromise from './hookPromise';
+import { OperationArguments } from '../types';
 
-const traverseFields = (args) => {
+const traverseFields = (args: OperationArguments) => {
   const {
     fields,
     data = {},

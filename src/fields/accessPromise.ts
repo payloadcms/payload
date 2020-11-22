@@ -1,4 +1,5 @@
 import relationshipPopulationPromise from './relationshipPopulationPromise';
+import { OperationArguments } from '../types';
 
 const accessPromise = async ({
   data,
@@ -13,7 +14,7 @@ const accessPromise = async ({
   currentDepth,
   hook,
   payload,
-}) => {
+}: OperationArguments) => {
   const resultingData = data;
 
   let accessOperation;

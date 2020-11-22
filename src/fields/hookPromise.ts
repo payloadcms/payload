@@ -1,3 +1,5 @@
+import { OperationArguments } from '../types';
+
 const hookPromise = async ({
   data,
   field,
@@ -6,7 +8,7 @@ const hookPromise = async ({
   operation,
   fullOriginalDoc,
   fullData,
-}) => {
+}: OperationArguments) => {
   const resultingData = data;
 
   if ((field.type === 'relationship' || field.type === 'upload') && (data[field.name] === 'null' || data[field.name] === null)) {
