@@ -7,7 +7,7 @@
   "main": "./dist/src/index.js",
   "sideEffects": false,
   "bin": {
-    "payload": "./src/bin/index.js"
+    "payload": "./dist/src/bin/index.js"
   },
   "scripts": {
     "copyfiles": "copyfiles \"src/admin/**/*.*\" dist",

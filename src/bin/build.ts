@@ -1,18 +1,18 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
 
-const webpack = require('webpack');
-const getWebpackProdConfig = require('../webpack/getWebpackProdConfig');
-const findConfig = require('../config/find');
-const getConfig = require('../config/load');
-const sanitizeConfig = require('../config/sanitize');
+import webpack from 'webpack';
+import getWebpackProdConfig from '../webpack/getWebpackProdConfig';
+import findConfig from '../config/find';
+import loadConfig from '../config/load';
+import { buildConfig } from '../config/build';
 
 const configPath = findConfig();
 
 const build = () => {
   try {
-    const unsanitizedConfig = getConfig();
-    const config = sanitizeConfig(unsanitizedConfig);
+    const unsanitizedConfig = loadConfig();
+    const config = buildConfig(unsanitizedConfig);
 
     const webpackProdConfig = getWebpackProdConfig({
       ...config,
@@ -26,7 +26,8 @@ const build = () => {
       if (err || stats.hasErrors()) {
         // Handle errors here
         console.error(stats.toString({
-          stats: 'errors-only',
+          chunks: false,
+          colors: true,
         }));
       }
     });
@@ -42,4 +43,4 @@ if (module.id === require.main.id) {
 }
 
 
-module.exports = build;
+export default build;
