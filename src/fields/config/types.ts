@@ -34,6 +34,7 @@ type FieldBase = {
     style?: CSSProperties;
     readOnly?: boolean;
     disabled?: boolean;
+    condition?: (...args: any[]) => any | void;
     components?: { [key: string]: JSX.Element | (() => JSX.Element) };
   };
   access?: {
@@ -56,7 +57,7 @@ export type EmailField = StandardField & { type: 'email'; };
 export type TextareaField = StandardField & { type: 'textarea'; };
 export type CodeField = StandardField & { type: 'code'; };
 export type CheckboxField = StandardField & { type: 'checkbox'; };
-export type DateboxField = StandardField & { type: 'date'; };
+export type DateField = StandardField & { type: 'date'; };
 export type GroupField = StandardField & { type: 'group'; };
 export type RowField = StandardField & { type: 'row'; };
 
@@ -78,10 +79,19 @@ export type SelectManyField = SelectField & {
   hasMany: true;
 }
 
-export type RelationshipField = FieldBase & {
+type RelationShipSingleField = FieldBase & {
   type: 'relationship';
-  relationTo: string | string[];
+  relationTo: string;
+  hasMany?: false;
 }
+
+type RelationShipManyField = FieldBase & {
+  type: 'relationship';
+  relationTo: string[] | string;
+  hasMany: true;
+}
+
+export type RelationshipField = RelationShipSingleField | RelationShipManyField;
 
 type RichTextElements = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link';
 type RichTextLeaves = 'bold' | 'italic' | 'underline' | 'strikethrough';
@@ -124,4 +134,4 @@ export type BlockField = FieldBase & {
   blocks?: Block[];
 };
 
-export type Field = NumberField | TextField | EmailField | TextareaField | CodeField | CheckboxField | DateboxField | BlockField | RadioField | RelationshipField | ArrayField | RichTextField | GroupField | RowField | SelectField | SelectManyField | UploadField;
+export type Field = NumberField | TextField | EmailField | TextareaField | CodeField | CheckboxField | DateField | BlockField | RadioField | RelationshipField | ArrayField | RichTextField | GroupField | RowField | SelectField | SelectManyField | UploadField;
