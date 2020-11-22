@@ -1,12 +1,14 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import path from 'path';
-import webpack from 'webpack';
+import webpack, { Configuration } from 'webpack';
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
+import { Config } from '../config/types';
+import babelConfig from '../babel.config';
 
-const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js');
+const mockModulePath = path.resolve(__dirname, './mocks/emptyModule.js');
 
-export default (config) => {
-  let webpackConfig = {
+export default (config: Config): Configuration => {
+  let webpackConfig: Configuration = {
     entry: {
       main: [
         'webpack-hot-middleware/client',
@@ -31,6 +33,7 @@ export default (config) => {
           use: [
             {
               loader: 'babel-loader',
+              options: babelConfig({ env: () => false }),
             },
           ],
         },

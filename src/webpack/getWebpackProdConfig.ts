@@ -4,12 +4,14 @@ import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
 import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import path from 'path';
-import webpack from 'webpack';
+import webpack, { Configuration } from 'webpack';
+import { Config } from '../config/types';
+import babelConfig from '../babel.config';
 
 const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js');
 
-export default (config) => {
-  let webpackConfig = {
+export default (config: Config): Configuration => {
+  let webpackConfig: Configuration = {
     entry: {
       main: [path.resolve(__dirname, '../admin')],
     },
@@ -43,6 +45,7 @@ export default (config) => {
           exclude: /node_modules[\\/](?!(@payloadcms[\\/]payload)[\\/]).*/,
           use: {
             loader: 'babel-loader',
+            options: babelConfig({ env: () => false }),
           },
         },
         {

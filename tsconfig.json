@@ -63,8 +63,8 @@
   ],
   "exclude": [
     "demo",
-    "dist/",
-    "admin/",
+    "dist",
+    "src/admin",
     "src/tests",
     "src/tests/*",
     //   "**/*.d.ts",

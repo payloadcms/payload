@@ -1,7 +1,7 @@
 module.exports = (api) => {
   const config = {
     presets: [
-      '@babel/typescript',
+      require.resolve('@babel/preset-typescript'),
       [
         require.resolve('@babel/preset-env'),
         {
