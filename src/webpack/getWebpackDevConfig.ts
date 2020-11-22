@@ -20,7 +20,7 @@ export default (config: Config): Configuration => {
       publicPath: config.routes.admin,
       filename: '[name].js',
     },
-    devtool: 'inline-cheap-source-map',
+    devtool: 'inline-source-map',
     mode: 'development',
     resolveLoader: {
       modules: ['node_modules', path.join(__dirname, '../../node_modules')],
