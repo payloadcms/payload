@@ -1,8 +1,8 @@
-import pluralize from 'pluralize';
+import pluralize, { isPlural, singular } from 'pluralize';
 
-const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
+const capitalizeFirstLetter = (string: string) => string.charAt(0).toUpperCase() + string.slice(1);
 
-const toWords = (inputString) => {
+const toWords = (inputString: string): string => {
   const notNullString = inputString || '';
   const trimmedString = notNullString.trim();
   const arrayOfStrings = trimmedString.split(/[\s-]/);
@@ -18,12 +18,17 @@ const toWords = (inputString) => {
   return splitStringsArray.join(' ');
 };
 
-const formatLabels = ((input) => {
-  const words = toWords(input);
-  return {
-    singular: words,
-    plural: pluralize(words),
-  };
+const formatLabels = ((slug: string): { singular: string, plural: string} => {
+  const words = toWords(slug);
+  return (isPlural(slug))
+    ? {
+      singular: singular(words),
+      plural: words,
+    }
+    : {
+      singular: words,
+      plural: pluralize(words),
+    };
 });
 
 export default formatLabels;
