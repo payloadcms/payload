@@ -1,6 +1,7 @@
 import httpStatus from 'http-status';
 import deepmerge from 'deepmerge';
 import path from 'path';
+import { BeforeOperationHook, BeforeChangeHook, BeforeValidateHook } from '../config/types';
 
 import removeInternalFields from '../../utilities/removeInternalFields';
 import overwriteMerge from '../../utilities/overwriteMerge';
@@ -12,6 +13,7 @@ import getSafeFilename from '../../uploads/getSafeFilename';
 
 import resizeAndSave from '../../uploads/imageResizer';
 
+
 async function update(incomingArgs) {
   let args = incomingArgs;
 
@@ -19,7 +21,7 @@ async function update(incomingArgs) {
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
     await priorHook;
 
     args = (await hook({
@@ -111,7 +113,7 @@ async function update(incomingArgs) {
   // beforeValidate - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook: BeforeValidateHook, hook: BeforeValidateHook) => {
     await priorHook;
 
     data = (await hook({
@@ -140,7 +142,7 @@ async function update(incomingArgs) {
   // beforeChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.beforeChange.reduce(async (priorHook: BeforeChangeHook, hook: BeforeChangeHook) => {
     await priorHook;
 
     data = (await hook({

@@ -2,13 +2,17 @@ import mongoose from 'mongoose';
 import express from 'express';
 import passport from 'passport';
 import passportLocalMongoose from 'passport-local-mongoose';
-const LocalStrategy = require('passport-local').Strategy;
+import Passport from 'passport-local';
+import { UpdateQuery } from 'mongodb';
 import apiKeyStrategy from '../auth/strategies/apiKey';
 import buildSchema from './buildSchema';
 import bindCollectionMiddleware from './bindCollection';
+import { Collection } from './config/types';
 
-function registerCollections() {
-  this.config.collections = this.config.collections.map((collection) => {
+const LocalStrategy = Passport.Strategy;
+
+export default function registerCollections(): void {
+  this.config.collections = this.config.collections.map((collection: Collection) => {
     const formattedCollection = collection;
 
     const schema = buildSchema(formattedCollection, this.config);
@@ -32,7 +36,8 @@ function registerCollections() {
             }, cb);
           }
 
-          const updates = { $inc: { loginAttempts: 1 } };
+          type LoginSchema = { loginAttempts: number; };
+          const updates: UpdateQuery<LoginSchema> = { $inc: { loginAttempts: 1 } };
           // Lock the account if at max attempts and not already locked
           if (this.loginAttempts + 1 >= maxLoginAttempts && !this.isLocked) {
             updates.$set = { lockUntil: Date.now() + lockTime };
@@ -151,5 +156,3 @@ function registerCollections() {
     return formattedCollection;
   });
 }
-
-export default registerCollections;

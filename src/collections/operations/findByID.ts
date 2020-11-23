@@ -1,5 +1,6 @@
-/* eslint-disable no-underscore-dangle */
 import memoize from 'micro-memoize';
+import { BeforeOperationHook } from '../config/types';
+/* eslint-disable no-underscore-dangle */
 import removeInternalFields from '../../utilities/removeInternalFields';
 import { Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
@@ -11,7 +12,7 @@ async function findByID(incomingArgs) {
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
     await priorHook;
 
     args = (await hook({

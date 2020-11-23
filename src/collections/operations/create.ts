@@ -12,6 +12,7 @@ import getImageSize from '../../uploads/getImageSize';
 import imageMIMETypes from '../../uploads/imageMIMETypes';
 
 import sendVerificationEmail from '../../auth/sendVerificationEmail';
+import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook } from '../config/types';
 
 async function create(incomingArgs) {
   const { performFieldOperations, config } = this;
@@ -22,7 +23,7 @@ async function create(incomingArgs) {
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
     await priorHook;
 
     args = (await hook({
@@ -73,7 +74,7 @@ async function create(incomingArgs) {
   // beforeValidate - Collections
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook: BeforeValidateHook, hook: BeforeValidateHook) => {
     await priorHook;
 
     data = (await hook({
@@ -214,7 +215,7 @@ async function create(incomingArgs) {
   // afterChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.afterChange.reduce(async (priorHook: AfterChangeHook, hook: AfterChangeHook) => {
     await priorHook;
 
     result = await hook({

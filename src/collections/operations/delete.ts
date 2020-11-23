@@ -5,6 +5,7 @@ import removeInternalFields from '../../utilities/removeInternalFields';
 import { NotFound, Forbidden, ErrorDeletingFile } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import fileExists from '../../uploads/fileExists';
+import { BeforeOperationHook } from '../config/types';
 
 async function deleteQuery(incomingArgs) {
   let args = incomingArgs;
@@ -13,7 +14,7 @@ async function deleteQuery(incomingArgs) {
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
     await priorHook;
 
     args = (await hook({

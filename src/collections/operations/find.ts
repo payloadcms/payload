@@ -1,5 +1,6 @@
 import executeAccess from '../../auth/executeAccess';
 import removeInternalFields from '../../utilities/removeInternalFields';
+import { BeforeOperationHook, BeforeReadHook } from '../config/types';
 
 async function find(incomingArgs) {
   let args = incomingArgs;
@@ -8,7 +9,7 @@ async function find(incomingArgs) {
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
     await priorHook;
 
     args = (await hook({

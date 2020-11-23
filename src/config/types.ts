@@ -47,17 +47,18 @@ export type Access = (args?: any) => boolean;
 
 export type Config = {
   admin?: {
-    user?: string
+    user?: string;
     meta?: {
-      titleSuffix?: string
-      ogImage?: string
-      favicon?: string
+      titleSuffix?: string;
+      ogImage?: string;
+      favicon?: string;
     }
-    disable?: boolean
+    disable?: boolean;
+    indexHTML?: string;
   };
   collections?: Collection[];
   globals?: Global[];
-  serverURL?: string;
+  serverURL: string;
   cookiePrefix?: string;
   csrf?: string[];
   cors?: string[];
@@ -68,7 +69,7 @@ export type Config = {
     graphQL?: string;
     graphQLPlayground?: string;
   };
-  express: {
+  express?: {
     json: {
       limit?: number
     }
