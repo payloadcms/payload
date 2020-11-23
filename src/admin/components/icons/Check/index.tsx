@@ -2,7 +2,7 @@ import React from 'react';
 
 import './index.scss';
 
-const Check = () => (
+const Check: React.FC = () => (
   <svg
     className="icon icon--check"
     xmlns="http://www.w3.org/2000/svg"

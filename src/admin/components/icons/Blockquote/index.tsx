@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BlockquoteIcon = () => (
+const BlockquoteIcon: React.FC = () => (
   <svg
     viewBox="0 0 24 24"
     aria-hidden="true"

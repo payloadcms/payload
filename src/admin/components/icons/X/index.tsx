@@ -2,7 +2,7 @@ import React from 'react';
 
 import './index.scss';
 
-const X = () => (
+const X: React.FC = () => (
   <svg
     width="25"
     height="25"

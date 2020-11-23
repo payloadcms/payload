@@ -1,6 +1,6 @@
 import React from 'react';
 
-const H3Icon = () => (
+const H3Icon: React.FC = () => (
   <svg
     viewBox="0 0 24 24"
     aria-hidden="true"

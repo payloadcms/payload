@@ -1,6 +1,6 @@
 import React from 'react';
 
-const OrderedListIcon = () => (
+const OrderedListIcon: React.FC = () => (
   <svg
     viewBox="0 0 24 24"
     aria-hidden="true"

@@ -1,12 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useForm } from '../../forms/Form/context';
 import { useAuth } from '../../providers/Authentication';
 import Button from '../Button';
+import { Props } from './types';
 
 const baseClass = 'preview-btn';
 
-const PreviewButton = ({ generatePreviewURL }) => {
+const PreviewButton: React.FC<Props> = ({ generatePreviewURL }) => {
   const { token } = useAuth();
   const { getFields } = useForm();
   const fields = getFields();
@@ -27,14 +27,6 @@ const PreviewButton = ({ generatePreviewURL }) => {
   }
 
   return null;
-};
-
-PreviewButton.defaultProps = {
-  generatePreviewURL: null,
-};
-
-PreviewButton.propTypes = {
-  generatePreviewURL: PropTypes.func,
 };
 
 export default PreviewButton;

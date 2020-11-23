@@ -2,7 +2,7 @@ import React from 'react';
 
 import './index.scss';
 
-const Relationship = () => (
+const Relationship: React.FC = () => (
   <svg
     className="icon icon--relationship"
     xmlns="http://www.w3.org/2000/svg"

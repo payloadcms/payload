@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ItalicIcon = () => (
+const ItalicIcon: React.FC = () => (
   <svg
     viewBox="0 0 24 24"
     aria-hidden="true"

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const CodeIcon = () => (
+const CodeIcon: React.FC = () => (
   <svg
     viewBox="0 0 24 24"
     aria-hidden="true"
