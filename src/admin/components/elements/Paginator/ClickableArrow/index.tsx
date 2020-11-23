@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 
 import Chevron from '../../../icons/Chevron';
 
@@ -7,7 +7,7 @@ import './index.scss';
 
 const baseClass = 'clickable-arrow';
 
-const ClickableArrow = (props) => {
+const ClickableArrow: React.FC<Props> = (props) => {
   const {
     updatePage,
     isDisabled,
@@ -29,18 +29,6 @@ const ClickableArrow = (props) => {
       <Chevron />
     </button>
   );
-};
-
-ClickableArrow.defaultProps = {
-  updatePage: null,
-  isDisabled: false,
-  direction: 'right',
-};
-
-ClickableArrow.propTypes = {
-  updatePage: PropTypes.func,
-  isDisabled: PropTypes.bool,
-  direction: PropTypes.oneOf(['right', 'left']),
 };
 
 export default ClickableArrow;

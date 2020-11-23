@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import ReactSelect from '../../ReactSelect';
 import Button from '../../Button';
@@ -18,7 +18,7 @@ const valueFields = {
 
 const baseClass = 'condition';
 
-const Condition = (props) => {
+const Condition: React.FC<Props> = (props) => {
   const {
     fields,
     dispatch,
@@ -118,31 +118,6 @@ const Condition = (props) => {
       </div>
     </div>
   );
-};
-
-Condition.propTypes = {
-  fields: PropTypes.arrayOf(
-    PropTypes.shape({
-      label: PropTypes.string,
-      value: PropTypes.string,
-      operators: PropTypes.arrayOf(
-        PropTypes.shape({}),
-      ),
-    }),
-  ).isRequired,
-  value: PropTypes.shape({
-    field: PropTypes.string,
-    operator: PropTypes.string,
-    value: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number,
-      PropTypes.instanceOf(Date),
-      PropTypes.shape({}),
-    ]),
-  }).isRequired,
-  dispatch: PropTypes.func.isRequired,
-  orIndex: PropTypes.number.isRequired,
-  andIndex: PropTypes.number.isRequired,
 };
 
 export default Condition;

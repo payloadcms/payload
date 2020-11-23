@@ -1,14 +1,14 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useConfig } from '../../../providers/Config';
 import CopyToClipboard from '../../CopyToClipboard';
 import formatFilesize from '../../../../../uploads/formatFilesize';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'file-meta';
 
-const Meta = (props) => {
+const Meta: React.FC<Props> = (props) => {
   const {
     filename, filesize, width, height, mimeType, staticURL,
   } = props;
@@ -51,22 +51,6 @@ const Meta = (props) => {
       </div>
     </div>
   );
-};
-
-Meta.defaultProps = {
-  width: undefined,
-  height: undefined,
-  sizes: undefined,
-};
-
-Meta.propTypes = {
-  filename: PropTypes.string.isRequired,
-  mimeType: PropTypes.string.isRequired,
-  filesize: PropTypes.number.isRequired,
-  staticURL: PropTypes.string.isRequired,
-  width: PropTypes.number,
-  height: PropTypes.number,
-  sizes: PropTypes.shape({}),
 };
 
 export default Meta;

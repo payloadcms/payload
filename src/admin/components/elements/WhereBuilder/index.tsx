@@ -1,5 +1,5 @@
 import React, { useState, useReducer } from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import Button from '../Button';
 import reducer from './reducer';
@@ -39,7 +39,7 @@ const reduceFields = (fields) => flattenTopLevelFields(fields).reduce((reduced, 
   return reduced;
 }, []);
 
-const WhereBuilder = (props) => {
+const WhereBuilder: React.FC<Props> = (props) => {
   const {
     collection,
     collection: {
@@ -155,18 +155,6 @@ const WhereBuilder = (props) => {
       )}
     </div>
   );
-};
-
-WhereBuilder.propTypes = {
-  handleChange: PropTypes.func.isRequired,
-  collection: PropTypes.shape({
-    fields: PropTypes.arrayOf(
-      PropTypes.shape({}),
-    ),
-    labels: PropTypes.shape({
-      plural: PropTypes.string,
-    }),
-  }).isRequired,
 };
 
 export default WhereBuilder;

@@ -1,11 +1,11 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'popup-button';
 
-const PopupButton = (props) => {
+const PopupButton: React.FC<Props> = (props) => {
   const {
     buttonType,
     button,
@@ -47,19 +47,6 @@ const PopupButton = (props) => {
       {button}
     </button>
   );
-};
-
-PopupButton.defaultProps = {
-  buttonType: null,
-  onToggleOpen: undefined,
-};
-
-PopupButton.propTypes = {
-  buttonType: PropTypes.oneOf(['custom', 'default']),
-  button: PropTypes.node.isRequired,
-  setActive: PropTypes.func.isRequired,
-  active: PropTypes.bool.isRequired,
-  onToggleOpen: PropTypes.func,
 };
 
 export default PopupButton;

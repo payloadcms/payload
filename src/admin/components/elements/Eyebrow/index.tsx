@@ -8,7 +8,7 @@ const baseClass = 'eyebrow';
 
 const Eyebrow: React.FC<Props> = ({ actions }) => (
   <div className={baseClass}>
-  <StepNav />
+    <StepNav />
     {actions}
   </div>
 );

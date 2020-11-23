@@ -1,10 +1,10 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 import DatePicker from '../../../DatePicker';
 
 const baseClass = 'condition-value-date';
 
-const DateField = ({ onChange, value }) => (
+const DateField: React.FC<Props> = ({ onChange, value }) => (
   <div className={baseClass}>
     <DatePicker
       onChange={onChange}
@@ -12,14 +12,5 @@ const DateField = ({ onChange, value }) => (
     />
   </div>
 );
-
-DateField.defaultProps = {
-  value: undefined,
-};
-
-DateField.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.instanceOf(Date),
-};
 
 export default DateField;

@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 import { useConfig } from '../../providers/Config';
 import FileGraphic from '../../graphics/File';
 import getThumbnail from '../../../../uploads/getThumbnail';
@@ -8,7 +8,7 @@ import './index.scss';
 
 const baseClass = 'thumbnail';
 
-const Thumbnail = (props) => {
+const Thumbnail: React.FC<Props> = (props) => {
   const {
     filename, mimeType, staticURL, sizes, adminThumbnail, size,
   } = props;
@@ -36,21 +36,4 @@ const Thumbnail = (props) => {
     </div>
   );
 };
-
-Thumbnail.defaultProps = {
-  adminThumbnail: undefined,
-  sizes: undefined,
-  mimeType: undefined,
-  size: 'medium',
-};
-
-Thumbnail.propTypes = {
-  filename: PropTypes.string.isRequired,
-  sizes: PropTypes.shape({}),
-  adminThumbnail: PropTypes.string,
-  mimeType: PropTypes.string,
-  staticURL: PropTypes.string.isRequired,
-  size: PropTypes.oneOf(['small', 'medium', 'large', 'expand']),
-};
-
 export default Thumbnail;

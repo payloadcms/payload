@@ -1,12 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'pill';
 
-const Pill = ({
+const Pill: React.FC<Props> = ({
   children, className, to, icon, alignIcon, onClick, pillStyle,
 }) => {
   const classes = [
@@ -44,26 +44,6 @@ const Pill = ({
       )}
     </RenderedType>
   );
-};
-
-Pill.defaultProps = {
-  children: undefined,
-  className: '',
-  to: undefined,
-  icon: undefined,
-  alignIcon: 'right',
-  onClick: undefined,
-  pillStyle: 'light',
-};
-
-Pill.propTypes = {
-  children: PropTypes.node,
-  className: PropTypes.string,
-  to: PropTypes.string,
-  icon: PropTypes.node,
-  alignIcon: PropTypes.oneOf(['left', 'right']),
-  onClick: PropTypes.func,
-  pillStyle: PropTypes.oneOf(['light', 'dark', 'light-gray']),
 };
 
 export default Pill;

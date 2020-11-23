@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import PropTypes from 'prop-types';
 import { useWindowInfo } from '@faceless-ui/window-info';
 import { useScrollInfo } from '@faceless-ui/scroll-info';
+import { Props } from './types';
 
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import PopupButton from './PopupButton';
@@ -10,7 +10,7 @@ import './index.scss';
 
 const baseClass = 'popup';
 
-const Popup = (props) => {
+const Popup: React.FC<Props> = (props) => {
   const {
     render, align, size, color, button, buttonType, children, showOnHover, horizontalAlign, initActive, onToggleOpen,
   } = props;
@@ -133,34 +133,6 @@ const Popup = (props) => {
       </div>
     </div>
   );
-};
-
-Popup.defaultProps = {
-  align: 'center',
-  size: 'small',
-  color: 'light',
-  children: undefined,
-  render: undefined,
-  buttonType: 'default',
-  button: undefined,
-  showOnHover: false,
-  horizontalAlign: 'left',
-  initActive: false,
-  onToggleOpen: undefined,
-};
-
-Popup.propTypes = {
-  render: PropTypes.func,
-  children: PropTypes.node,
-  align: PropTypes.oneOf(['left', 'center', 'right']),
-  horizontalAlign: PropTypes.oneOf(['left', 'center', 'right']),
-  size: PropTypes.oneOf(['small', 'large', 'wide']),
-  color: PropTypes.oneOf(['light', 'dark']),
-  buttonType: PropTypes.oneOf(['default', 'custom']),
-  button: PropTypes.node,
-  showOnHover: PropTypes.bool,
-  initActive: PropTypes.bool,
-  onToggleOpen: PropTypes.func,
 };
 
 export default Popup;

@@ -1,13 +1,19 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'banner';
 
-const Banner = ({
-  children, className, to, icon, alignIcon, onClick, type,
+const Banner: React.FC<Props> = ({
+  children,
+  className,
+  to,
+  icon,
+  alignIcon,
+  onClick,
+  type,
 }) => {
   const classes = [
     baseClass,
@@ -44,26 +50,6 @@ const Banner = ({
       )}
     </RenderedType>
   );
-};
-
-Banner.defaultProps = {
-  children: undefined,
-  className: '',
-  to: undefined,
-  icon: undefined,
-  alignIcon: 'right',
-  onClick: undefined,
-  type: 'default',
-};
-
-Banner.propTypes = {
-  children: PropTypes.node,
-  className: PropTypes.string,
-  icon: PropTypes.node,
-  alignIcon: PropTypes.oneOf(['left', 'right']),
-  onClick: PropTypes.func,
-  to: PropTypes.string,
-  type: PropTypes.oneOf(['error', 'success', 'info', 'default']),
 };
 
 export default Banner;

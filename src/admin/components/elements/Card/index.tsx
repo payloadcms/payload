@@ -1,12 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import Button from '../Button';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'card';
 
-const Card = (props) => {
+const Card: React.FC<Props> = (props) => {
   const { title, actions, onClick } = props;
 
   const classes = [
@@ -33,17 +33,6 @@ const Card = (props) => {
       )}
     </div>
   );
-};
-
-Card.defaultProps = {
-  actions: null,
-  onClick: undefined,
-};
-
-Card.propTypes = {
-  title: PropTypes.string.isRequired,
-  actions: PropTypes.node,
-  onClick: PropTypes.func,
 };
 
 export default Card;

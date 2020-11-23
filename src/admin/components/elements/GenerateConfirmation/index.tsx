@@ -1,15 +1,15 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
 import Button from '../Button';
 import MinimalTemplate from '../../templates/Minimal';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'generate-confirmation';
 
-const GenerateConfirmation = (props) => {
+const GenerateConfirmation: React.FC<Props> = (props) => {
   const {
     setKey,
     highlightField,
@@ -72,11 +72,6 @@ const GenerateConfirmation = (props) => {
       </Modal>
     </React.Fragment>
   );
-};
-
-GenerateConfirmation.propTypes = {
-  setKey: PropTypes.func.isRequired,
-  highlightField: PropTypes.func.isRequired,
 };
 
 export default GenerateConfirmation;

@@ -1,29 +1,18 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'condition-value-number';
 
-const NumberField = ({ onChange, value }) => {
-  return (
-    <input
-      placeholder="Enter a value"
-      className={baseClass}
-      type="number"
-      onChange={e => onChange(e.target.value)}
-      value={value}
-    />
-  );
-};
-
-NumberField.defaultProps = {
-  value: '',
-};
-
-NumberField.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
-};
+const NumberField: React.FC<Props> = ({ onChange, value }) => (
+  <input
+    placeholder="Enter a value"
+    className={baseClass}
+    type="number"
+    onChange={(e) => onChange(e.target.value)}
+    value={value}
+  />
+);
 
 export default NumberField;

@@ -1,9 +1,9 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 
 import './index.scss';
 
-const Tooltip = (props) => {
+const Tooltip: React.FC<Props> = (props) => {
   const { className, children } = props;
 
   const classes = [
@@ -17,15 +17,6 @@ const Tooltip = (props) => {
       <span />
     </aside>
   );
-};
-
-Tooltip.defaultProps = {
-  className: undefined,
-};
-
-Tooltip.propTypes = {
-  className: PropTypes.string,
-  children: PropTypes.node.isRequired,
 };
 
 export default Tooltip;

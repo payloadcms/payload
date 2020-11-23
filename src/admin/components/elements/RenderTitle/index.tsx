@@ -1,12 +1,12 @@
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 import useTitle from '../../../hooks/useTitle';
 
 import './index.scss';
 
 const baseClass = 'render-title';
 
-const RenderTitle = (props) => {
+const RenderTitle : React.FC<Props> = (props) => {
   const {
     useAsTitle, title: titleFromProps, data, fallback,
   } = props;
@@ -38,22 +38,5 @@ const RenderTitle = (props) => {
     </span>
   );
 };
-
-RenderTitle.defaultProps = {
-  title: undefined,
-  fallback: '[Untitled]',
-  useAsTitle: null,
-  data: null,
-};
-
-RenderTitle.propTypes = {
-  useAsTitle: PropTypes.string,
-  data: PropTypes.shape({
-    id: PropTypes.string,
-  }),
-  title: PropTypes.string,
-  fallback: PropTypes.string,
-};
-
 
 export default RenderTitle;

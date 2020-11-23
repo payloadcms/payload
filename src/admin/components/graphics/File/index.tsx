@@ -1,6 +1,6 @@
 import React from 'react';
 
-const File = () => (
+const File: React.FC = () => (
   <svg
     width="150"
     height="150"

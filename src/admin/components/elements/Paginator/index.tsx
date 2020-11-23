@@ -1,7 +1,7 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useHistory, useLocation } from 'react-router-dom';
 import queryString from 'qs';
+import { Props } from './types';
 
 import Page from './Page';
 import Separator from './Separator';
@@ -17,7 +17,7 @@ const nodeTypes = {
 
 const baseClass = 'paginator';
 
-const Pagination = (props) => {
+const Pagination: React.FC<Props> = (props) => {
   const history = useHistory();
   const location = useLocation();
 
@@ -135,29 +135,3 @@ const Pagination = (props) => {
 };
 
 export default Pagination;
-
-Pagination.defaultProps = {
-  limit: null,
-  totalPages: null,
-  page: 1,
-  hasPrevPage: false,
-  hasNextPage: false,
-  prevPage: null,
-  nextPage: null,
-  numberOfNeighbors: 1,
-  disableHistoryChange: false,
-  onChange: undefined,
-};
-
-Pagination.propTypes = {
-  limit: PropTypes.number,
-  totalPages: PropTypes.number,
-  page: PropTypes.number,
-  hasPrevPage: PropTypes.bool,
-  hasNextPage: PropTypes.bool,
-  prevPage: PropTypes.number,
-  nextPage: PropTypes.number,
-  numberOfNeighbors: PropTypes.number,
-  disableHistoryChange: PropTypes.bool,
-  onChange: PropTypes.func,
-};

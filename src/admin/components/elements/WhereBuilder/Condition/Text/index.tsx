@@ -1,29 +1,18 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'condition-value-text';
 
-const Text = ({ onChange, value }) => {
-  return (
-    <input
-      placeholder="Enter a value"
-      className={baseClass}
-      type="text"
-      onChange={e => onChange(e.target.value)}
-      value={value}
-    />
-  );
-};
-
-Text.defaultProps = {
-  value: '',
-};
-
-Text.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
-};
+const Text: React.FC<Props> = ({ onChange, value }) => (
+  <input
+    placeholder="Enter a value"
+    className={baseClass}
+    type="text"
+    onChange={(e) => onChange(e.target.value)}
+    value={value}
+  />
+);
 
 export default Text;

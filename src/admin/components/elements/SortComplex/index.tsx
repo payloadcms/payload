@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 import ReactSelect from '../ReactSelect';
 import sortableFieldTypes from '../../../../fields/sortableFieldTypes';
 
@@ -9,7 +9,7 @@ const baseClass = 'sort-complex';
 
 const sortOptions = [{ label: 'Ascending', value: '' }, { label: 'Descending', value: '-' }];
 
-const SortComplex = (props) => {
+const SortComplex: React.FC<Props> = (props) => {
   const {
     collection,
     handleChange,
@@ -62,18 +62,6 @@ const SortComplex = (props) => {
       </React.Fragment>
     </div>
   );
-};
-
-SortComplex.propTypes = {
-  handleChange: PropTypes.func.isRequired,
-  collection: PropTypes.shape({
-    fields: PropTypes.arrayOf(
-      PropTypes.shape({}),
-    ),
-    labels: PropTypes.shape({
-      plural: PropTypes.string,
-    }),
-  }).isRequired,
 };
 
 export default SortComplex;
