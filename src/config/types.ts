@@ -42,7 +42,6 @@ export type MockEmailCredentials = {
   web: string;
 };
 
-export type Hook = (...args: any[]) => any | void;
 export type Access = (args?: any) => boolean;
 
 export type Config = {

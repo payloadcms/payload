@@ -4,8 +4,7 @@ import traverseFields from './traverseFields';
 import { Collection } from '../collections/config/types';
 import { OperationArguments } from '../types';
 
-
-export default async function performFieldOperations(entityConfig: Collection, args: OperationArguments) {
+export default async function performFieldOperations(entityConfig: Collection, args: OperationArguments): any {
   const {
     data: fullData,
     originalDoc: fullOriginalDoc,
@@ -29,7 +28,7 @@ export default async function performFieldOperations(entityConfig: Collection, a
   let depth = 0;
 
   if (payloadAPI === 'REST' || payloadAPI === 'local') {
-    depth = (args.depth || args.depth === 0) ? parseInt(args.depth, 10) : this.config.defaultDepth;
+    depth = (args.depth || args.depth === 0) ? parseInt(String(args.depth), 10) : this.config.defaultDepth;
 
     if (depth > this.config.maxDepth) depth = this.config.maxDepth;
   }

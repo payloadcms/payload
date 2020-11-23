@@ -9,7 +9,8 @@ import { MissingFile, FileUploadError } from '../../errors';
 import resizeAndSave from '../../uploads/imageResizer';
 import getSafeFilename from '../../uploads/getSafeFilename';
 import getImageSize from '../../uploads/getImageSize';
-import imageMIMETypes from '../../uploads/imageMIMETypes';
+import isImage from '../../uploads/isImage';
+import { FileData } from '../../uploads/types';
 
 import sendVerificationEmail from '../../auth/sendVerificationEmail';
 import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook } from '../config/types';
@@ -114,8 +115,9 @@ async function create(incomingArgs) {
   // Upload and resize potential files
   // /////////////////////////////////////
 
+
   if (collectionConfig.upload) {
-    const fileData = {};
+    const fileData: Partial<FileData> = {};
 
     const { staticDir, imageSizes } = collectionConfig.upload;
 
@@ -138,7 +140,7 @@ async function create(incomingArgs) {
     try {
       await file.mv(`${staticPath}/${fsSafeName}`);
 
-      if (imageMIMETypes.indexOf(file.mimetype) > -1) {
+      if (isImage(file.mimetype)) {
         const dimensions = await getImageSize(`${staticPath}/${fsSafeName}`);
         fileData.width = dimensions.width;
         fileData.height = dimensions.height;
@@ -149,7 +151,7 @@ async function create(incomingArgs) {
       }
     } catch (err) {
       console.error(err);
-      throw new FileUploadError(err);
+      throw new FileUploadError();
     }
 
 
