@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useConfig } from '../../../providers/Config';
+import { useConfig } from '@payloadcms/config-provider';
 import CopyToClipboard from '../../CopyToClipboard';
 import formatFilesize from '../../../../../uploads/formatFilesize';
 

@@ -85,7 +85,7 @@ export class Payload {
 
   initAdmin: typeof initAdmin;
 
-  operations: {[key: string]: any};
+  operations: { [key: string]: any };
 
   performFieldOperations: typeof performFieldOperations;
   // requestHandlers: { collections: { create: any; find: any; findByID: any; update: any; delete: any; auth: { access: any; forgotPassword: any; init: any; login: any; logout: any; me: any; refresh: any; registerFirstUser: any; resetPassword: any; verifyEmail: any; unlock: any; }; }; globals: { ...; }; };

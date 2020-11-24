@@ -27,6 +27,16 @@ module.exports = {
       extends: [
         'plugin:@typescript-eslint/recommended',
       ],
+      rules: {
+        'import/no-unresolved': [
+          2,
+          {
+            ignore: [
+              'payload/unsanitizedConfig',
+            ],
+          },
+        ],
+      }
     },
   ],
   rules: {

@@ -3,7 +3,7 @@
     ".git",
     "node_modules",
     "node_modules/**/node_modules",
-    "src/client",
+    "src/admin",
     "src/**/*.spec.ts"
   ],
   "watch": [

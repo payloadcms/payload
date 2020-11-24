@@ -94,6 +94,13 @@ export default (config: Config): Configuration => {
       ],
     },
     resolve: {
+      fallback: {
+        path: require.resolve('path-browserify'),
+        crypto: false,
+        https: false,
+        http: false,
+        assert: false,
+      },
       modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
       alias: {
         'payload/unsanitizedConfig': config.paths.config,

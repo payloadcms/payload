@@ -7,7 +7,7 @@ import Checkbox from '../../../../forms/field-types/Checkbox';
 import Button from '../../../../elements/Button';
 import ConfirmPassword from '../../../../forms/field-types/ConfirmPassword';
 import { useFormFields, useFormModified } from '../../../../forms/Form/context';
-import { useConfig } from '../../../../providers/Config';
+import { useConfig } from '@payloadcms/config-provider';
 
 import APIKey from './APIKey';
 
@@ -64,33 +64,33 @@ const Auth = (props) => {
         autoComplete="email"
       />
       {(changingPassword || requirePassword) && (
-      <div className={`${baseClass}__changing-password`}>
-        <Password
-          autoComplete="off"
-          required
-          name="password"
-          label="New Password"
-        />
-        <ConfirmPassword />
-        {!requirePassword && (
+        <div className={`${baseClass}__changing-password`}>
+          <Password
+            autoComplete="off"
+            required
+            name="password"
+            label="New Password"
+          />
+          <ConfirmPassword />
+          {!requirePassword && (
+            <Button
+              size="small"
+              buttonStyle="secondary"
+              onClick={() => setChangingPassword(false)}
+            >
+              Cancel
+            </Button>
+          )}
+        </div>
+      )}
+      {(!changingPassword && !requirePassword) && (
         <Button
           size="small"
           buttonStyle="secondary"
-          onClick={() => setChangingPassword(false)}
+          onClick={() => setChangingPassword(true)}
         >
-          Cancel
+          Change Password
         </Button>
-        )}
-      </div>
-      )}
-      {(!changingPassword && !requirePassword) && (
-      <Button
-        size="small"
-        buttonStyle="secondary"
-        onClick={() => setChangingPassword(true)}
-      >
-        Change Password
-      </Button>
       )}
       <Button
         size="small"
@@ -100,22 +100,22 @@ const Auth = (props) => {
         Force Unlock
       </Button>
       {useAPIKey && (
-      <div className={`${baseClass}__api-key`}>
-        <Checkbox
-          label="Enable API Key"
-          name="enableAPIKey"
-        />
-        {enableAPIKey?.value && (
-        <APIKey />
-					)}
-      </div>
+        <div className={`${baseClass}__api-key`}>
+          <Checkbox
+            label="Enable API Key"
+            name="enableAPIKey"
+          />
+          {enableAPIKey?.value && (
+            <APIKey />
+          )}
+        </div>
       )}
       {verify && (
-      <Checkbox
-        label="Verified"
-        name="_verified"
-        readOnly
-      />
+        <Checkbox
+          label="Verified"
+          name="_verified"
+          readOnly
+        />
       )}
     </div>
   );

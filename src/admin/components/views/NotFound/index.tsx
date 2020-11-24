@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useConfig } from '../../providers/Config';
+import { useConfig } from '@payloadcms/config-provider';
 import Eyebrow from '../../elements/Eyebrow';
 import { useStepNav } from '../../elements/StepNav';
 import Button from '../../elements/Button';

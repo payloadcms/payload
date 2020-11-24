@@ -12,7 +12,6 @@ const sanitizeConfig = (config: Config): Config => {
   if (sanitizedConfig.publicENV === undefined) sanitizedConfig.publicENV = {};
 
   if (sanitizedConfig.defaultDepth === undefined) sanitizedConfig.defaultDepth = 2;
-  if (sanitizedConfig.maxDepth === undefined) sanitizedConfig.maxDepth = 10;
 
   sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig.collections, collection));
   checkDuplicateCollections(sanitizedConfig.collections);
@@ -69,7 +68,7 @@ const sanitizeConfig = (config: Config): Config => {
   sanitizedConfig.hooks = { ...(config.hooks || {}) };
   sanitizedConfig.admin = { ...(config.admin || {}) };
 
-  return sanitizedConfig;
+  return sanitizedConfig as DeepRequired<Config>;
 };
 
 export default sanitizeConfig;

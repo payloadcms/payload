@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useModal } from '@faceless-ui/modal';
-import { useConfig } from '../../../providers/Config';
+import { useConfig } from '@payloadcms/config-provider';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';

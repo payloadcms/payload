@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { useLocale } from '../../utilities/Locale';
 import { requests } from '../../../api';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
-import { useAuth } from '../../providers/Authentication';
+import { useAuth } from '@payloadcms/config-provider';
 import fieldReducer from './fieldReducer';
 import initContextState from './initContextState';
 import reduceFieldsToValues from './reduceFieldsToValues';

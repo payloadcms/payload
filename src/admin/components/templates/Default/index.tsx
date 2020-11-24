@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import DefaultNav from '../../elements/Nav';
-import { useConfig } from '../../providers/Config';
+import { useConfig } from '@payloadcms/config-provider';
 import { StepNavProvider } from '../../elements/StepNav';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import Meta from '../../utilities/Meta';

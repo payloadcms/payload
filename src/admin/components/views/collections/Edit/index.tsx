@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect, useRouteMatch, useHistory, useLocation } from 'react-router-dom';
-import { useConfig } from '../../../providers/Config';
+import { useConfig } from '@payloadcms/config-provider';
 import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
-import { useAuth } from '../../../providers/Authentication';
+import { useAuth } from '@payloadcms/config-provider';
 
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import DefaultEdit from './Default';

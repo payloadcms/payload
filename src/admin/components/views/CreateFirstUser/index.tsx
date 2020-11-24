@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useConfig } from '../../providers/Config';
+import { useConfig } from '@payloadcms/config-provider';
 import MinimalTemplate from '../../templates/Minimal';
 import Meta from '../../utilities/Meta';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import fieldTypes from '../../forms/field-types';
 import FormSubmit from '../../forms/Submit';
-import { useAuth } from '../../providers/Authentication';
+import { useAuth } from '@payloadcms/config-provider';
 import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
 
 import './index.scss';

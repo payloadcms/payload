@@ -2,12 +2,12 @@ import React, { Suspense, lazy, useState, useEffect } from 'react';
 import {
   Route, Switch, withRouter, Redirect, useHistory, useLocation,
 } from 'react-router-dom';
-import { useConfig } from './providers/Config';
+import { useConfig, useAuth } from '@payloadcms/config-provider';
 import List from './views/collections/List';
-import { useAuth } from './providers/Authentication';
 import DefaultTemplate from './templates/Default';
 import { requests } from '../api';
 import Loading from './elements/Loading';
+import StayLoggedIn from './modals/StayLoggedIn';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -26,7 +26,7 @@ const Routes = () => {
   const { pathname } = useLocation();
   const history = useHistory();
   const [initialized, setInitialized] = useState(null);
-  const { user, permissions, permissions: { canAccessAdmin } } = useAuth();
+  const { user, permissions, permissions: { canAccessAdmin }, refreshCookie } = useAuth();
 
   const {
     admin: { user: userSlug }, routes, collections, globals,
@@ -227,6 +227,7 @@ const Routes = () => {
           return null;
         }}
       />
+      <StayLoggedIn refreshCookie={refreshCookie} />
     </Suspense>
   );
 };

@@ -38,6 +38,11 @@
         }
       }
     },
+    "maxDepth": {
+      "type": "number",
+      "description": "The maximum population depth allowed for relationship fields",
+      "default": 10
+    },
     "collections": {
       "type": "array",
       "items": {

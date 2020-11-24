@@ -3,9 +3,9 @@ import * as configSchema from './schema.json';
 import * as collectionSchema from '../collections/config/schema.json';
 
 import InvalidSchema from '../errors/InvalidSchema';
-import { Config } from './types';
+import { PayloadConfig, Config } from './types';
 
-const validateSchema = (config: Config): Config => {
+const validateSchema = (config: PayloadConfig): Config => {
   const ajv = new Ajv({ useDefaults: true });
   const validate = ajv.addSchema(collectionSchema, '../collections/config/schema.json').compile(configSchema);
   const valid = validate(config);
@@ -14,7 +14,7 @@ const validateSchema = (config: Config): Config => {
     throw new InvalidSchema(`Invalid payload config provided. Found ${validate.errors.length} errors`, validate.errors);
   }
 
-  return config;
+  return config as Config;
 };
 
 export default validateSchema;

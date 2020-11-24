@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useForm } from '../../forms/Form/context';
-import { useAuth } from '../../providers/Authentication';
+import { useAuth } from '@payloadcms/config-provider';
 import Button from '../Button';
 
 const baseClass = 'preview-btn';

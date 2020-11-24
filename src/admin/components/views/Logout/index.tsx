@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useConfig } from '../../providers/Config';
-import { useAuth } from '../../providers/Authentication';
+import { useConfig } from '@payloadcms/config-provider';
+import { useAuth } from '@payloadcms/config-provider';
 import Minimal from '../../templates/Minimal';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';

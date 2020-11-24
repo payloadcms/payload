@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { useConfig } from '../../../../../../providers/Config';
+import { useConfig } from '@payloadcms/config-provider';
 import RelationshipIcon from '../../../../../../icons/Relationship';
 
 import './index.scss';

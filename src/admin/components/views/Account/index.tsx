@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useConfig } from '../../providers/Config';
+import { useConfig } from '@payloadcms/config-provider';
 import { useStepNav } from '../../elements/StepNav';
-import { useAuth } from '../../providers/Authentication';
+import { useAuth } from '@payloadcms/config-provider';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import { useLocale } from '../../utilities/Locale';
 import DefaultAccount from './Default';

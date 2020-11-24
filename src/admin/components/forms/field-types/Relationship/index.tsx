@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import some from 'async-some';
-import { useConfig } from '../../../providers/Config';
+import { useConfig } from '@payloadcms/config-provider';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import format from 'date-fns/format';
-import { useConfig } from '../../providers/Config';
+import { useConfig } from '@payloadcms/config-provider';
 import Eyebrow from '../../elements/Eyebrow';
 import Form from '../../forms/Form';
 import PreviewButton from '../../elements/PreviewButton';

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useHistory } from 'react-router-dom';
-import { useConfig } from '../../providers/Config';
-import { useAuth } from '../../providers/Authentication';
+import { useConfig } from '@payloadcms/config-provider';
+import { useAuth } from '@payloadcms/config-provider';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import Chevron from '../../icons/Chevron';
 import LogOut from '../../icons/LogOut';

@@ -11,59 +11,58 @@ export type ImageSize = {
 
 export type Collection = {
   slug: string;
-  labels?: {
+  labels: {
     singular: string;
     plural: string;
   };
   fields: Field[];
-  admin?: {
-    useAsTitle?: string;
-    defaultColumns?: string[];
-    components?: any;
+  admin: {
+    useAsTitle: string;
+    defaultColumns: string[];
+    components: any;
   };
-  hooks?: {
-    beforeOperation?: Hook[];
-    beforeValidate?: Hook[];
-    beforeChange?: Hook[];
-    afterChange?: Hook[];
-    beforeRead?: Hook[];
-    afterRead?: Hook[];
-    beforeDelete?: Hook[];
+  hooks: {
+    beforeOperation: Hook[];
+    beforeValidate: Hook[];
+    beforeChange: Hook[];
+    afterChange: Hook[];
+    beforeRead: Hook[];
+    afterRead: Hook[];
+    beforeDelete: Hook[];
     afterDelete?: Hook[];
     beforeLogin?: Hook[];
     afterLogin?: Hook[];
     afterForgotPassword?: Hook[];
     forgotPassword?: Hook[];
   };
-  access?: {
-    create?: Access;
-    read?: Access;
-    update?: Access;
-    delete?: Access;
-    admin?: Access;
-    unlock?: Access;
+  access: {
+    create: Access;
+    read: Access;
+    update: Access;
+    delete: Access;
+    admin: Access;
+    unlock: Access;
   };
   auth?: {
-    tokenExpiration?: number;
-    verify?:
+    tokenExpiration: number;
+    verify:
     | boolean
     | { generateEmailHTML: string; generateEmailSubject: string };
-    maxLoginAttempts?: number;
-    lockTime?: number;
-    useAPIKey?: boolean;
-    cookies?:
+    maxLoginAttempts: number;
+    lockTime: number;
+    useAPIKey: boolean;
+    cookies:
     | {
-      secure?: boolean;
-      sameSite?: string;
-      domain?: string | undefined;
+      secure: boolean;
+      sameSite: string;
+      domain?: string;
     }
     | boolean;
     forgotPassword?: {
-      generateEmailHTML?: (args?: {token?: string, email?: string, req?: PayloadRequest}) => string,
-      generateEmailSubject?: (args?: {req?: PayloadRequest}) => string,
+      generateEmailHTML?: (args?: { token?: string, email?: string, req?: PayloadRequest }) => string,
+      generateEmailSubject?: (args?: { req?: PayloadRequest }) => string,
     }
   };
-  config: {[key: string]: any};
   upload: {
     imageSizes: ImageSize[];
     staticURL: string;

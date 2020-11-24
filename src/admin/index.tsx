@@ -5,18 +5,18 @@ import { ScrollInfoProvider } from '@faceless-ui/scroll-info';
 import { WindowInfoProvider } from '@faceless-ui/window-info';
 import { ModalProvider, ModalContainer } from '@faceless-ui/modal';
 import { ToastContainer, Slide } from 'react-toastify';
+import { ConfigProvider, AuthProvider } from '@payloadcms/config-provider';
+import unsanitizedConfig from 'payload/unsanitizedConfig';
 import { SearchParamsProvider } from './components/utilities/SearchParams';
 import { LocaleProvider } from './components/utilities/Locale';
-import { AuthenticationProvider } from './components/providers/Authentication';
 import Routes from './components/Routes';
 import getCSSVariable from '../utilities/getCSSVariable';
-import ConfigProvider from './components/providers/Config/Provider';
 
 import './scss/app.scss';
 
 const Index = () => (
   <React.Fragment>
-    <ConfigProvider>
+    <ConfigProvider config={unsanitizedConfig}>
       <WindowInfoProvider breakpoints={{
         xs: parseInt(getCSSVariable('breakpoint-xs-width').replace('px', ''), 10),
         s: parseInt(getCSSVariable('breakpoint-s-width').replace('px', ''), 10),
@@ -30,14 +30,14 @@ const Index = () => (
               classPrefix="payload"
               zIndex={parseInt(getCSSVariable('z-modal'), 10)}
             >
-              <AuthenticationProvider>
+              <AuthProvider>
                 <SearchParamsProvider>
                   <LocaleProvider>
                     <Routes />
                   </LocaleProvider>
                 </SearchParamsProvider>
                 <ModalContainer />
-              </AuthenticationProvider>
+              </AuthProvider>
             </ModalProvider>
           </Router>
         </ScrollInfoProvider>
@@ -48,7 +48,6 @@ const Index = () => (
       transition={Slide}
     />
   </React.Fragment>
-
 );
 
 render(<Index />, document.getElementById('app'));

@@ -1,10 +1,10 @@
 import React, { Fragment, useState, useEffect } from 'react';
+import { useConfig, useAuth } from '@payloadcms/config-provider';
 import { useFormFields } from '../../../../../../Form/context';
 import Relationship from '../../../../../Relationship';
 import Number from '../../../../../Number';
 import Select from '../../../../../Select';
-import { useConfig } from '../../../../../../../providers/Config';
-import { useAuth } from '../../../../../../../providers/Authentication';
+
 
 const createOptions = (collections, permissions) => collections.reduce((options, collection) => {
   if (permissions[collection.slug]?.read?.permission && collection?.admin?.enableRichTextRelationship) {

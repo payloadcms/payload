@@ -1,4 +1,5 @@
 import { Express } from 'express';
+import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { Collection } from '../collections/config/types';
@@ -25,7 +26,7 @@ export type InitOptions = {
   secret: string;
   license?: string;
   email?: EmailOptions;
-  local?: boolean; // I have no idea what this is
+  local?: boolean;
   onInit?: () => void;
 };
 
@@ -45,7 +46,7 @@ export type MockEmailCredentials = {
 export type Hook = (...args: any[]) => any | void;
 export type Access = (args?: any) => boolean;
 
-export type Config = {
+export type PayloadConfig = {
   admin?: {
     user?: string
     meta?: {
@@ -57,7 +58,7 @@ export type Config = {
   };
   collections?: Collection[];
   globals?: Global[];
-  serverURL?: string;
+  serverURL: string;
   cookiePrefix?: string;
   csrf?: string[];
   cors?: string[];
@@ -111,3 +112,5 @@ export type Config = {
   webpack?: (config: any) => any;
   serverModules?: string[];
 };
+
+export type Config = DeepRequired<PayloadConfig>

@@ -2,7 +2,7 @@ import React, {
   createContext, useContext, useState, useEffect,
 } from 'react';
 import PropTypes from 'prop-types';
-import { useConfig } from '../../providers/Config';
+import { useConfig } from '@payloadcms/config-provider';
 import { useSearchParams } from '../SearchParams';
 
 const Context = createContext({});

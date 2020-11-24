@@ -21,7 +21,7 @@ export default (config: Config): Configuration => {
     },
     devtool: 'inline-source-map',
     mode: 'development',
-    stats: 'errors-only',
+    stats: 'errors-warnings',
     resolveLoader: {
       modules: ['node_modules', path.join(__dirname, '../../node_modules')],
     },
@@ -74,6 +74,7 @@ export default (config: Config): Configuration => {
         crypto: false,
         https: false,
         http: false,
+        assert: false,
       },
       modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
       alias: {
