@@ -32,7 +32,7 @@ export default (config: Config): Configuration => {
           exclude: /node_modules[\\/](?!(@payloadcms[\\/]payload)[\\/]).*/,
           use: [
             {
-              loader: 'babel-loader',
+              loader: require.resolve('babel-loader'),
               options: babelConfig({ env: () => false }),
             },
           ],
@@ -41,17 +41,17 @@ export default (config: Config): Configuration => {
           test: /\.(scss|css)$/,
           sideEffects: true,
           use: [
-            'style-loader',
-            'css-loader',
+            require.resolve('style-loader'),
+            require.resolve('css-loader'),
             {
               loader: 'postcss-loader',
               options: {
                 postcssOptions: {
-                  plugins: ['postcss-preset-env'],
+                  plugins: [require.resolve('postcss-preset-env')],
                 },
               },
             },
-            'sass-loader',
+            require.resolve('sass-loader'),
           ],
         },
         {
