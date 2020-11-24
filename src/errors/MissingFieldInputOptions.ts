@@ -1,7 +1,8 @@
+import { Field } from '../fields/config/types';
 import APIError from './APIError';
 
 class MissingFieldInputOptions extends APIError {
-  constructor(field) {
+  constructor(field: Field) {
     super(`Field ${field.label} is missing options.`);
   }
 }
