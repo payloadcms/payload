@@ -9,7 +9,7 @@ const baseClass = 'sort-column';
 
 const SortColumn: React.FC<Props> = (props) => {
   const {
-    label, handleChange, name, disable,
+    label, handleChange, name, disable = false,
   } = props;
   const [sort, setSort] = useState(null);
 

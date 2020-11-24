@@ -8,7 +8,10 @@ const baseClass = 'render-title';
 
 const RenderTitle : React.FC<Props> = (props) => {
   const {
-    useAsTitle, title: titleFromProps, data, fallback,
+    useAsTitle,
+    title: titleFromProps,
+    data,
+    fallback = '[untitled]',
   } = props;
 
   const titleFromForm = useTitle(useAsTitle);

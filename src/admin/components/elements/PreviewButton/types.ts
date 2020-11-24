@@ -1,3 +1,3 @@
 export type Props = {
-  generatePreviewURL: (fields: unknown, token: string) => string
+  generatePreviewURL?: (fields: unknown, token: string) => string
 }

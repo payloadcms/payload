@@ -3,7 +3,7 @@ export type Props = {
   mimeType: string,
   filesize: number,
   staticURL: string,
-  width: number,
-  height: number,
-  sizes: unknown,
+  width?: number,
+  height?: number,
+  sizes?: unknown,
 }

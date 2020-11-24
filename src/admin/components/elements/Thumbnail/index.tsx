@@ -10,7 +10,12 @@ const baseClass = 'thumbnail';
 
 const Thumbnail: React.FC<Props> = (props) => {
   const {
-    filename, mimeType, staticURL, sizes, adminThumbnail, size,
+    filename,
+    mimeType,
+    staticURL,
+    sizes = 'medium',
+    adminThumbnail,
+    size,
   } = props;
 
   const { serverURL } = useConfig();

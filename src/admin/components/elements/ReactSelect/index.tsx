@@ -6,12 +6,12 @@ import './index.scss';
 
 const ReactSelect: React.FC<Props> = (props) => {
   const {
-    showError,
+    showError = false,
     options,
-    isMulti,
+    isMulti = false,
     onChange,
     value,
-    disabled,
+    disabled = false,
     formatValue,
   } = props;
 

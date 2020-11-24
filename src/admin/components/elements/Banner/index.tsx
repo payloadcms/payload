@@ -11,9 +11,9 @@ const Banner: React.FC<Props> = ({
   className,
   to,
   icon,
-  alignIcon,
+  alignIcon = 'right',
   onClick,
-  type,
+  type = 'default',
 }) => {
   const classes = [
     baseClass,

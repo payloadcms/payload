@@ -22,14 +22,14 @@ const Pagination: React.FC<Props> = (props) => {
   const location = useLocation();
 
   const {
-    totalPages,
+    totalPages = null,
     page: currentPage,
-    hasPrevPage,
-    hasNextPage,
-    prevPage,
-    nextPage,
-    numberOfNeighbors,
-    disableHistoryChange,
+    hasPrevPage = false,
+    hasNextPage = false,
+    prevPage = null,
+    nextPage = null,
+    numberOfNeighbors = 1,
+    disableHistoryChange = false,
     onChange,
   } = props;
 

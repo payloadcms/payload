@@ -10,8 +10,8 @@ const baseClass = 'clickable-arrow';
 const ClickableArrow: React.FC<Props> = (props) => {
   const {
     updatePage,
-    isDisabled,
-    direction,
+    isDisabled = false,
+    direction = 'right',
   } = props;
 
   const classes = [

@@ -1,5 +1,5 @@
 export type Props = {
-    docs: [],
+    docs?: [],
     collection: unknown,
-    onCardClick: () => void,
+    onCardClick: (doc) => void,
 }

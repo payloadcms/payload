@@ -12,7 +12,17 @@ const baseClass = 'popup';
 
 const Popup: React.FC<Props> = (props) => {
   const {
-    render, align, size, color, button, buttonType, children, showOnHover, horizontalAlign, initActive, onToggleOpen,
+    render,
+    align = 'center',
+    size = 'small',
+    color = 'light',
+    button,
+    buttonType = 'default',
+    children,
+    showOnHover = false,
+    horizontalAlign = 'left',
+    initActive = false,
+    onToggleOpen,
   } = props;
 
   const buttonRef = useRef(null);

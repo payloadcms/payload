@@ -1,15 +1,10 @@
+import { Collection } from '../../../../collections/config/types';
+
 export type Props = {
-  collection: {
-    labels: {
-      singular: string,
-    },
-    upload: {
-      adminThumbnail: string,
-      staticURL: string,
-    }},
+  collection: Collection,
   id: string,
   filename: string,
   mimeType: string,
-  sizes: unknown,
-  onClick: () => void,
+  sizes?: unknown,
+  onClick?: () => void,
 }

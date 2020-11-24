@@ -1,8 +1,8 @@
 export type Props = {
   filename: string,
-  sizes: unknown,
-  adminThumbnail: string,
-  mimeType: string,
+  sizes?: unknown,
+  adminThumbnail?: string,
+  mimeType?: string,
   staticURL: string,
-  size: 'small' | 'medium' | 'large' | 'expand',
+  size?: 'small' | 'medium' | 'large' | 'expand',
 }

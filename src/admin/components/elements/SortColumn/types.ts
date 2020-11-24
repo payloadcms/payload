@@ -1,6 +1,6 @@
 export type Props = {
   label: string,
-  handleChange: () => void,
+  handleChange: (sort) => void,
   name: string,
-  disable: boolean,
+  disable?: boolean,
 }

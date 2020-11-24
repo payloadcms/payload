@@ -9,8 +9,8 @@ const baseClass = 'search-filter';
 
 const SearchFilter: React.FC<Props> = (props) => {
   const {
-    fieldName,
-    fieldLabel,
+    fieldName = 'id',
+    fieldLabel = 'ID',
     handleChange,
   } = props;
 

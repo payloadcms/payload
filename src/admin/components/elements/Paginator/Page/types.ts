@@ -1,7 +1,7 @@
 export type Props = {
-  page: number,
-  isCurrent: boolean,
-  updatePage: () => void,
-  isFirstPage: boolean,
-  isLastPage: boolean,
+  page?: number,
+  isCurrent?: boolean,
+  updatePage?: (page) => void,
+  isFirstPage?: boolean,
+  isLastPage?: boolean,
 }

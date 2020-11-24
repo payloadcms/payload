@@ -1,13 +1,7 @@
+import { Collection } from '../../../../collections/config/types';
+
 export type Props = {
-  collection: {
-    admin: {
-      useAsTitle: string,
-    },
-    slug: string,
-    labels: {
-      singular: string,
-    },
-  }
-  id: string,
-  title: string,
+  collection?: Collection,
+  id?: string,
+  title?: string,
 }

@@ -15,8 +15,8 @@ const ListControls: React.FC<Props> = (props) => {
   const {
     handleChange,
     collection,
-    enableColumns,
-    enableSort,
+    enableColumns = true,
+    enableSort = false,
     setSort,
     collection: {
       fields,

@@ -7,7 +7,13 @@ import './index.scss';
 const baseClass = 'pill';
 
 const Pill: React.FC<Props> = ({
-  children, className, to, icon, alignIcon, onClick, pillStyle,
+  children,
+  className,
+  to,
+  icon,
+  alignIcon = 'right',
+  onClick,
+  pillStyle = 'light',
 }) => {
   const classes = [
     baseClass,

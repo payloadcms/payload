@@ -39,7 +39,7 @@ const ButtonContents = ({ children, icon }) => {
 const Button: React.FC<Props> = (props) => {
   const {
     className,
-    type,
+    type = 'button',
     el,
     to,
     url,
@@ -47,11 +47,11 @@ const Button: React.FC<Props> = (props) => {
     onClick,
     disabled,
     icon,
-    iconStyle,
-    buttonStyle,
+    iconStyle = 'without-border',
+    buttonStyle = 'primary',
     round,
-    size,
-    iconPosition,
+    size = 'medium',
+    iconPosition = 'right',
   } = props;
 
   const classes = [

@@ -1,8 +1,6 @@
+import { Collection } from '../../../../collections/config/types';
+
 export type Props = {
-  handleChange: () => void,
-  collection: {
-    fields: [],
-    labels: {
-      plural: string,
-  }},
+  handleChange: (any) => void,
+  collection: Collection,
 }

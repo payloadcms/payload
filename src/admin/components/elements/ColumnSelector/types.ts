@@ -1,10 +1,6 @@
+import { Collection } from '../../../../collections/config/types';
+
 export type Props = {
-  collection: {
-    fields: [],
-    admin: {
-      defaultColumns: string[],
-      useAsTitle: string,
-    },
-  },
-  handleChange: () => void,
+  collection: Collection,
+  handleChange: (columns) => void,
 }

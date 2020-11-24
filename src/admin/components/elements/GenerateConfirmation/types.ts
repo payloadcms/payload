@@ -1,4 +1,6 @@
+import { createTrue } from 'typescript';
+
 export type Props = {
   setKey: () => void,
-  highlightField: () => void,
+  highlightField: (Boolean) => void,
 }

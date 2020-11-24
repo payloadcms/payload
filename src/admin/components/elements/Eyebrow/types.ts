@@ -1,3 +1,3 @@
 export type Props = {
-  actions: React.ReactNode
+  actions?: React.ReactNode
 }

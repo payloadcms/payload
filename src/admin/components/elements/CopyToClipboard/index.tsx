@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import PropTypes from 'prop-types';
 import Copy from '../../icons/Copy';
 import Tooltip from '../Tooltip';
 import { Props } from './types';
@@ -8,7 +7,11 @@ import './index.scss';
 
 const baseClass = 'copy-to-clipboard';
 
-const CopyToClipboard: React.FC<Props> = ({ value, defaultMessage, successMessage }) => {
+const CopyToClipboard: React.FC<Props> = ({
+  value,
+  defaultMessage = 'copy',
+  successMessage = 'copied',
+}) => {
   const ref = useRef(null);
   const [copied, setCopied] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -59,18 +62,6 @@ const CopyToClipboard: React.FC<Props> = ({ value, defaultMessage, successMessag
   }
 
   return null;
-};
-
-CopyToClipboard.defaultProps = {
-  value: '',
-  defaultMessage: 'Copy',
-  successMessage: 'Copied',
-};
-
-CopyToClipboard.propTypes = {
-  value: PropTypes.string,
-  defaultMessage: PropTypes.string,
-  successMessage: PropTypes.string,
 };
 
 export default CopyToClipboard;
