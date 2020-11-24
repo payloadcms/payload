@@ -20,13 +20,24 @@ const findConfig = (): string => {
     return defaultPath;
   }
 
-  // Check for config in current working directory
-  const cwdPath = path.resolve(process.cwd(), 'payload.config.js');
-  if (fs.existsSync(cwdPath)) {
-    return cwdPath;
+  const defaultTSPath = path.resolve(__dirname, '../../../payload.config.ts');
+
+  if (fs.existsSync(defaultTSPath)) {
+    return defaultTSPath;
   }
 
-  throw new Error('Error: cannot find Payload config. Please create a configuration file located at the root of your current working directory called "payload.config.js".');
+  // Check for config in current working directory
+  const cwdJSPath = path.resolve(process.cwd(), 'payload.config.js');
+  if (fs.existsSync(cwdJSPath)) {
+    return cwdJSPath;
+  }
+
+  const cwdTSPath = path.resolve(process.cwd(), 'payload.config.ts');
+  if (fs.existsSync(cwdTSPath)) {
+    return cwdTSPath;
+  }
+
+  throw new Error('Error: cannot find Payload config. Please create a configuration file located at the root of your current working directory called "payload.config.js" or "payload.config.ts".');
 };
 
 export default findConfig;

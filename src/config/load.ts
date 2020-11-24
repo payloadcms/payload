@@ -7,12 +7,15 @@ import findConfig from './find';
 const configPath = findConfig();
 const loadConfig = (): Config => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const publicConfig = require(configPath);
+  let publicConfig = require(configPath);
+
+  if (publicConfig.default) publicConfig = publicConfig.default;
+
   return {
     ...publicConfig,
     paths: {
-      configDir: path.dirname(configPath),
       ...(publicConfig.paths || {}),
+      configDir: path.dirname(configPath),
       config: configPath,
     },
   };
