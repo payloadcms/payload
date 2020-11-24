@@ -3,6 +3,7 @@ import { AuthenticationError, LockedAuth } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import isLocked from '../isLocked';
 import removeInternalFields from '../../utilities/removeInternalFields';
+import { BeforeLoginHook, BeforeOperationHook } from '../../collections/config/types';
 
 async function login(incomingArgs) {
   const { config, operations, secret } = this;
@@ -13,7 +14,7 @@ async function login(incomingArgs) {
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
     await priorHook;
 
     args = (await hook({

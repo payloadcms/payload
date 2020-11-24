@@ -1,25 +1,30 @@
 import httpStatus from 'http-status';
 import deepmerge from 'deepmerge';
 import path from 'path';
+import { BeforeOperationHook, BeforeChangeHook, BeforeValidateHook } from '../config/types';
 
 import removeInternalFields from '../../utilities/removeInternalFields';
 import overwriteMerge from '../../utilities/overwriteMerge';
 import executeAccess from '../../auth/executeAccess';
 import { NotFound, Forbidden, APIError, FileUploadError } from '../../errors';
-import imageMIMETypes from '../../uploads/imageMIMETypes';
+import isImage from '../../uploads/isImage';
 import getImageSize from '../../uploads/getImageSize';
 import getSafeFilename from '../../uploads/getSafeFilename';
 
 import resizeAndSave from '../../uploads/imageResizer';
+import { FileData } from '../../uploads/types';
+
 
 async function update(incomingArgs) {
+  const { performFieldOperations, config } = this;
+
   let args = incomingArgs;
 
   // /////////////////////////////////////
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
     await priorHook;
 
     args = (await hook({
@@ -59,7 +64,7 @@ async function update(incomingArgs) {
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild = {
+  const queryToBuild: { [key: string]: any } = {
     where: {
       and: [
         {
@@ -97,7 +102,7 @@ async function update(incomingArgs) {
   // beforeValidate - Fields
   // /////////////////////////////////////
 
-  data = await this.performFieldOperations(collectionConfig, {
+  data = await performFieldOperations(collectionConfig, {
     data,
     req,
     id,
@@ -111,7 +116,7 @@ async function update(incomingArgs) {
   // beforeValidate - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook: BeforeValidateHook, hook: BeforeValidateHook) => {
     await priorHook;
 
     data = (await hook({
@@ -126,7 +131,7 @@ async function update(incomingArgs) {
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  data = await this.performFieldOperations(collectionConfig, {
+  data = await performFieldOperations(collectionConfig, {
     data,
     req,
     id,
@@ -140,7 +145,7 @@ async function update(incomingArgs) {
   // beforeChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.beforeChange.reduce(async (priorHook: BeforeChangeHook, hook: BeforeChangeHook) => {
     await priorHook;
 
     data = (await hook({
@@ -162,14 +167,14 @@ async function update(incomingArgs) {
   // /////////////////////////////////////
 
   if (collectionConfig.upload) {
-    const fileData = {};
+    const fileData: Partial<FileData> = {};
 
     const { staticDir, imageSizes } = collectionConfig.upload;
 
     let staticPath = staticDir;
 
     if (staticDir.indexOf('/') !== 0) {
-      staticPath = path.join(this.config.paths.configDir, staticDir);
+      staticPath = path.join(config.paths.configDir, staticDir);
     }
 
     const file = (req.files && req.files.file) ? req.files.file : req.fileData;
@@ -184,7 +189,7 @@ async function update(incomingArgs) {
         fileData.filesize = file.size;
         fileData.mimeType = file.mimetype;
 
-        if (imageMIMETypes.indexOf(file.mimetype) > -1) {
+        if (isImage(file.mimetype)) {
           const dimensions = await getImageSize(`${staticPath}/${fsSafeName}`);
           fileData.width = dimensions.width;
           fileData.height = dimensions.height;
@@ -194,9 +199,8 @@ async function update(incomingArgs) {
           }
         }
       } catch (err) {
-        throw new FileUploadError(err);
+        throw new FileUploadError();
       }
-
 
       data = {
         ...data,
@@ -240,7 +244,7 @@ async function update(incomingArgs) {
   // afterChange - Fields
   // /////////////////////////////////////
 
-  doc = await this.performFieldOperations(collectionConfig, {
+  doc = await performFieldOperations(collectionConfig, {
     data: doc,
     hook: 'afterChange',
     operation: 'update',
@@ -269,7 +273,7 @@ async function update(incomingArgs) {
   // afterRead - Fields
   // /////////////////////////////////////
 
-  doc = await this.performFieldOperations(collectionConfig, {
+  doc = await performFieldOperations(collectionConfig, {
     depth,
     req,
     data: doc,

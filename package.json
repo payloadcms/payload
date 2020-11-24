@@ -21,6 +21,7 @@
     "dev": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js nodemon demo/server.js",
     "lint": "eslint .",
     "test": "yarn test:int && yarn test:client",
+    "pretest": "tsc-silent --project tsconfig.json --suppress @",
     "test:int": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js NODE_ENV=test DISABLE_LOGGING=true jest --forceExit --runInBand",
     "test:client": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js NODE_ENV=test jest --config=jest.react.config.js"
   },
@@ -91,6 +92,7 @@
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^6.0.1",
+    "path-browserify": "^1.0.1",
     "pino": "^6.4.1",
     "pino-pretty": "^4.1.0",
     "pluralize": "^8.0.0",
@@ -212,6 +214,7 @@
     "mongodb": "^3.6.2",
     "nodemon": "^1.19.4",
     "passport-strategy": "^1.0.0",
+    "tsc-silent": "^1.2.1",
     "typescript": "^4.1.2"
   },
   "files": [

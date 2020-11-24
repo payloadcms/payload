@@ -3,6 +3,8 @@ import sharp from 'sharp';
 import sanitize from 'sanitize-filename';
 import getImageSize from './getImageSize';
 import fileExists from './fileExists';
+import { Collection } from '../collections/config/types';
+import { FileSizes } from './types';
 
 function getOutputImage(sourceImage, size) {
   const extension = sourceImage.split('.').pop();
@@ -16,15 +18,20 @@ function getOutputImage(sourceImage, size) {
   };
 }
 
-export default async function resizeAndSave(staticPath, config, savedFilename, mimeType) {
-  /**
-   * Resize images according to image desired width and height and return sizes
-   * @param config Object
-   * @param uploadConfig Object
-   * @param savedFilename String
-   * @returns String[]
-   */
-
+/**
+ * @description
+ * @param staticPath Path to save images
+ * @param config Payload config
+ * @param savedFilename
+ * @param mimeType
+ * @returns image sizes keyed to strings
+ */
+export default async function resizeAndSave(
+  staticPath: string,
+  config: Collection,
+  savedFilename: string,
+  mimeType: string,
+): Promise<FileSizes> {
   const { imageSizes } = config.upload;
 
   const sourceImage = `${staticPath}/${savedFilename}`;
@@ -69,4 +76,4 @@ export default async function resizeAndSave(staticPath, config, savedFilename, m
       filesize: size.filesize,
     },
   }), {});
-};
+}

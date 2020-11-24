@@ -1811,6 +1811,11 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.9.tgz#04afc9a25c6ff93da14deabd65dc44485b53c8d6"
   integrity sha512-JsoLXFppG62tWTklIoO4knA+oDTYsmqWxHRvd4lpmfQRNhX6osheUOWETP2jMoV/2bEHuMra8Pp3Dmo/stBFcw==
 
+"@types/node@10.12.7":
+  version "10.12.7"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.12.7.tgz#195808b2d4b2e7c33e75e7d9b24aeee88f94660d"
+  integrity sha512-Zh5Z4kACfbeE8aAOYh9mqotRxaZMro8MbBQtR8vEXOMiZo2rGEh2LayJijKdlu48YnS6y2EFU/oo2NCe5P6jGw==
+
 "@types/nodemailer@^6.4.0":
   version "6.4.0"
   resolved "https://registry.yarnpkg.com/@types/nodemailer/-/nodemailer-6.4.0.tgz#d8c039be3ed685c4719a026455555be82c124b74"
@@ -8684,6 +8689,11 @@ passport@^0.4.1:
     passport-strategy "1.x.x"
     pause "0.0.1"
 
+path-browserify@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/path-browserify/-/path-browserify-1.0.1.tgz#d98454a9c3753d5790860f16f68867b9e46be1fd"
+  integrity sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==
+
 path-dirname@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/path-dirname/-/path-dirname-1.0.2.tgz#cc33d24d525e099a5388c0336c6e32b9160609e0"
@@ -11728,10 +11738,20 @@ ts-easing@^0.2.0:
   resolved "https://registry.yarnpkg.com/ts-easing/-/ts-easing-0.2.0.tgz#c8a8a35025105566588d87dbda05dd7fbfa5a4ec"
   integrity sha512-Z86EW+fFFh/IFB1fqQ3/+7Zpf9t2ebOAxNI/V6Wo7r5gqiqtxmgTlQ1qbqQcjLKYeSHPTsEmvlJUDg/EuL0uHQ==
 
+<<<<<<< HEAD
 ts-essentials@^7.0.1:
   version "7.0.1"
   resolved "https://registry.yarnpkg.com/ts-essentials/-/ts-essentials-7.0.1.tgz#d205508cae0cdadfb73c89503140cf2228389e2d"
   integrity sha512-8lwh3QJtIc1UWhkQtr9XuksXu3O0YQdEE5g79guDfhCaU1FWTDIEDZ1ZSx4HTHUmlJZ8L812j3BZQ4a0aOUkSA==
+=======
+tsc-silent@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/tsc-silent/-/tsc-silent-1.2.1.tgz#c219789b7b1ab8e475fe3069d061d5ab49167d3f"
+  integrity sha512-uV/JYkTW/3nFj6wRY89UV77X5W8oWOHHw4HW7437DbkZPUqTqUcn24zcEl0Vh2dz7o9icJnx+QTX04fybhfHJQ==
+  dependencies:
+    "@types/node" "10.12.7"
+    yargs "12 - 15"
+>>>>>>> 062771e0a720fc1684a4754e42b14b95c9cc2c73
 
 tsconfig-paths@^3.9.0:
   version "3.9.0"
@@ -12523,23 +12543,7 @@ yargs-parser@^18.1.2:
     camelcase "^5.0.0"
     decamelize "^1.2.0"
 
-yargs@^13.3.2:
-  version "13.3.2"
-  resolved "https://registry.yarnpkg.com/yargs/-/yargs-13.3.2.tgz#ad7ffefec1aa59565ac915f82dccb38a9c31a2dd"
-  integrity sha512-AX3Zw5iPruN5ie6xGRIDgqkT+ZhnRlZMLMHAs8tg7nRruy2Nb+i5o9bwghAogtM08q1dpr2LVoS8KSTMYpWXUw==
-  dependencies:
-    cliui "^5.0.0"
-    find-up "^3.0.0"
-    get-caller-file "^2.0.1"
-    require-directory "^2.1.1"
-    require-main-filename "^2.0.0"
-    set-blocking "^2.0.0"
-    string-width "^3.0.0"
-    which-module "^2.0.0"
-    y18n "^4.0.0"
-    yargs-parser "^13.1.2"
-
-yargs@^15.3.1, yargs@^15.4.1:
+"yargs@12 - 15", yargs@^15.3.1, yargs@^15.4.1:
   version "15.4.1"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-15.4.1.tgz#0d87a16de01aee9d8bec2bfbf74f67851730f4f8"
   integrity sha512-aePbxDmcYW++PaqBsJ+HYUFwCdv4LVvdnhBy78E57PIor8/OVvhMrADFFEDh8DHDFRv/O9i3lPhsENjO7QX0+A==
@@ -12555,6 +12559,22 @@ yargs@^15.3.1, yargs@^15.4.1:
     which-module "^2.0.0"
     y18n "^4.0.0"
     yargs-parser "^18.1.2"
+
+yargs@^13.3.2:
+  version "13.3.2"
+  resolved "https://registry.yarnpkg.com/yargs/-/yargs-13.3.2.tgz#ad7ffefec1aa59565ac915f82dccb38a9c31a2dd"
+  integrity sha512-AX3Zw5iPruN5ie6xGRIDgqkT+ZhnRlZMLMHAs8tg7nRruy2Nb+i5o9bwghAogtM08q1dpr2LVoS8KSTMYpWXUw==
+  dependencies:
+    cliui "^5.0.0"
+    find-up "^3.0.0"
+    get-caller-file "^2.0.1"
+    require-directory "^2.1.1"
+    require-main-filename "^2.0.0"
+    set-blocking "^2.0.0"
+    string-width "^3.0.0"
+    which-module "^2.0.0"
+    y18n "^4.0.0"
+    yargs-parser "^13.1.2"
 
 yauzl@^2.10.0:
   version "2.10.0"

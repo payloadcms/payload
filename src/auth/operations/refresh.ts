@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { BeforeOperationHook } from '../../collections/config/types';
 import { Forbidden } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 
@@ -9,7 +10,7 @@ async function refresh(incomingArgs) {
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
     await priorHook;
 
     args = (await hook({

@@ -1,11 +1,12 @@
 import crypto from 'crypto';
+import { AfterForgotPasswordHook, BeforeOperationHook } from '../../collections/config/types';
 import { APIError } from '../../errors';
 
 async function forgotPassword(incomingArgs) {
   const { config, sendEmail: email } = this;
 
   if (!Object.prototype.hasOwnProperty.call(incomingArgs.data, 'email')) {
-    throw new APIError('Missing email.');
+    throw new APIError('Missing email.', 400);
   }
 
   let args = incomingArgs;
@@ -14,7 +15,7 @@ async function forgotPassword(incomingArgs) {
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
     await priorHook;
 
     args = (await hook({
@@ -38,7 +39,7 @@ async function forgotPassword(incomingArgs) {
   // Forget password
   // /////////////////////////////////////
 
-  let token = crypto.randomBytes(20);
+  let token: string | Buffer = crypto.randomBytes(20);
   token = token.toString('hex');
 
   const user = await Model.findOne({ email: data.email.toLowerCase() });
@@ -90,7 +91,7 @@ async function forgotPassword(incomingArgs) {
   // afterForgotPassword - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterForgotPassword.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.afterForgotPassword.reduce(async (priorHook: AfterForgotPasswordHook, hook: AfterForgotPasswordHook) => {
     await priorHook;
     await hook({ args });
   }, Promise.resolve());

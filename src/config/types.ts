@@ -43,18 +43,18 @@ export type MockEmailCredentials = {
   web: string;
 };
 
-export type Hook = (...args: any[]) => any | void;
 export type Access = (args?: any) => boolean;
 
 export type PayloadConfig = {
   admin?: {
-    user?: string
+    user?: string;
     meta?: {
-      titleSuffix?: string
-      ogImage?: string
-      favicon?: string
+      titleSuffix?: string;
+      ogImage?: string;
+      favicon?: string;
     }
-    disable?: boolean
+    disable?: boolean;
+    indexHTML?: string;
   };
   collections?: Collection[];
   globals?: Global[];
@@ -69,7 +69,7 @@ export type PayloadConfig = {
     graphQL?: string;
     graphQLPlayground?: string;
   };
-  express: {
+  express?: {
     json: {
       limit?: number
     }

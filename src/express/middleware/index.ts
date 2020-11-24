@@ -9,8 +9,9 @@ import rateLimit from 'express-rate-limit';
 import localizationMiddleware from '../../localization/middleware';
 import authenticate from './authenticate';
 import identifyAPI from './identifyAPI';
+import { Payload } from '../..';
 
-const middleware = (payload) => {
+const middleware = (payload: Payload) => {
   const rateLimitOptions = {
     windowMs: payload.config.rateLimit.window,
     max: payload.config.rateLimit.max,

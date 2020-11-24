@@ -2,6 +2,7 @@ import deepmerge from 'deepmerge';
 import overwriteMerge from '../../utilities/overwriteMerge';
 import executeAccess from '../../auth/executeAccess';
 import removeInternalFields from '../../utilities/removeInternalFields';
+import { AfterChangeHook, BeforeValidateHook } from '../../collections/config/types';
 
 async function update(args) {
   const { globals: { Model } } = this;
@@ -53,7 +54,7 @@ async function update(args) {
   // 3. Execute before validate collection hooks
   // /////////////////////////////////////
 
-  await globalConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+  await globalConfig.hooks.beforeValidate.reduce(async (priorHook: BeforeValidateHook, hook: BeforeValidateHook) => {
     await priorHook;
 
     data = (await hook({
@@ -123,7 +124,7 @@ async function update(args) {
   // 9. Execute after global hook
   // /////////////////////////////////////
 
-  await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+  await globalConfig.hooks.afterChange.reduce(async (priorHook: AfterChangeHook, hook: AfterChangeHook) => {
     await priorHook;
 
     global = await hook({
