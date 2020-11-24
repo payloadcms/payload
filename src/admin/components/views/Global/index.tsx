@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig, useAuth } from '@payloadcms/config-provider';
 import { useStepNav } from '../../elements/StepNav';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
-import { useAuth } from '@payloadcms/config-provider';
+
 import { useLocale } from '../../utilities/Locale';
 
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
@@ -77,7 +77,7 @@ const GlobalView = (props) => {
     awaitInitialState();
   }, [dataToRender, fields]);
 
-  const globalPermissions = permissions?.[slug];
+  const globalPermissions = permissions?.globals?.[slug];
 
   return (
     <NegativeFieldGutterProvider allow>

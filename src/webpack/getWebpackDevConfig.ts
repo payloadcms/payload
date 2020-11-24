@@ -78,7 +78,7 @@ export default (config: Config): Configuration => {
       },
       modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
       alias: {
-        'payload/unsanitizedConfig': config.paths.config,
+        'payload/config': config.paths.config,
         '@payloadcms/payload$': mockModulePath,
       },
       extensions: ['.ts', '.tsx', '.js', '.json'],

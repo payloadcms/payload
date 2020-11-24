@@ -67,18 +67,20 @@ async function accessOperation(args) {
     });
   };
 
-  const executeEntityPolicies = (entity, operations) => {
-    results[entity.slug] = {
+  const executeEntityPolicies = (entity, operations, type) => {
+    if (!results[type]) results[type] = {};
+
+    results[type][entity.slug] = {
       fields: {},
     };
 
     operations.forEach((operation) => {
-      executeFieldPolicies(results[entity.slug].fields, entity.fields, operation);
+      executeFieldPolicies(results[type][entity.slug].fields, entity.fields, operation);
 
       if (typeof entity.access[operation] === 'function') {
-        promises.push(createAccessPromise(results[entity.slug], entity.access[operation], operation));
+        promises.push(createAccessPromise(results[type][entity.slug], entity.access[operation], operation));
       } else {
-        results[entity.slug][operation] = {
+        results[type][entity.slug][operation] = {
           permission: isLoggedIn,
         };
       }
@@ -87,17 +89,17 @@ async function accessOperation(args) {
 
   if (userCollectionConfig) {
     results.canAccessAdmin = userCollectionConfig.access.admin ? userCollectionConfig.access.admin(args) : isLoggedIn;
-    if (results.canAccessAdmin) results.license = config.license;
+    if (results.canAccessAdmin) results.license = this.license;
   } else {
     results.canAccessAdmin = false;
   }
 
   config.collections.forEach((collection) => {
-    executeEntityPolicies(collection, allOperations);
+    executeEntityPolicies(collection, allOperations, 'collection');
   });
 
   config.globals.forEach((global) => {
-    executeEntityPolicies(global, ['read', 'update']);
+    executeEntityPolicies(global, ['read', 'update'], 'global');
   });
 
   await Promise.all(promises);

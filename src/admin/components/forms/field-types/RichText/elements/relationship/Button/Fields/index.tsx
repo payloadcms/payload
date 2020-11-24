@@ -7,7 +7,7 @@ import Select from '../../../../../Select';
 
 
 const createOptions = (collections, permissions) => collections.reduce((options, collection) => {
-  if (permissions[collection.slug]?.read?.permission && collection?.admin?.enableRichTextRelationship) {
+  if (permissions?.collections?.[collection.slug]?.read?.permission && collection?.admin?.enableRichTextRelationship) {
     return [
       ...options,
       {

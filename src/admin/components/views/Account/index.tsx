@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig, useAuth } from '@payloadcms/config-provider';
 import { useStepNav } from '../../elements/StepNav';
-import { useAuth } from '@payloadcms/config-provider';
+
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import { useLocale } from '../../utilities/Locale';
 import DefaultAccount from './Default';
@@ -31,7 +31,7 @@ const AccountView = () => {
 
   const { fields } = collection;
 
-  const collectionPermissions = permissions?.[user?.collection];
+  const collectionPermissions = permissions?.collections?.[user?.collection];
 
   const [{ data, isLoading }] = usePayloadAPI(
     `${serverURL}${api}/${collection?.slug}/${user?.id}?depth=0`,

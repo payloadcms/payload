@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - need to do this because this file doesn't actually exist
+import config from 'payload/config';
 import React from 'react';
 import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -6,7 +9,6 @@ import { WindowInfoProvider } from '@faceless-ui/window-info';
 import { ModalProvider, ModalContainer } from '@faceless-ui/modal';
 import { ToastContainer, Slide } from 'react-toastify';
 import { ConfigProvider, AuthProvider } from '@payloadcms/config-provider';
-import unsanitizedConfig from 'payload/unsanitizedConfig';
 import { SearchParamsProvider } from './components/utilities/SearchParams';
 import { LocaleProvider } from './components/utilities/Locale';
 import Routes from './components/Routes';
@@ -16,7 +18,7 @@ import './scss/app.scss';
 
 const Index = () => (
   <React.Fragment>
-    <ConfigProvider config={unsanitizedConfig}>
+    <ConfigProvider config={config}>
       <WindowInfoProvider breakpoints={{
         xs: parseInt(getCSSVariable('breakpoint-xs-width').replace('px', ''), 10),
         s: parseInt(getCSSVariable('breakpoint-s-width').replace('px', ''), 10),

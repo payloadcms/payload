@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useConfig } from '@payloadcms/config-provider';
-import { useAuth } from '@payloadcms/config-provider';
+import { useConfig, useAuth } from '@payloadcms/config-provider';
+
 import { useStepNav } from '../../elements/StepNav';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultDashboard from './Default';
@@ -22,7 +22,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     setFilteredGlobals(
-      globals.filter((global) => permissions?.[global.slug]?.read?.permission),
+      globals.filter((global) => permissions?.globals?.[global.slug]?.read?.permission),
     );
   }, [permissions, globals]);
 
@@ -36,7 +36,7 @@ const Dashboard = () => {
       CustomComponent={CustomDashboard}
       componentProps={{
         globals: filteredGlobals,
-        collections: collections.filter((collection) => permissions?.[collection.slug]?.read?.permission),
+        collections: collections.filter((collection) => permissions?.collections?.[collection.slug]?.read?.permission),
         permissions,
       }}
     />

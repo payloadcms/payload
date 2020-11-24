@@ -32,7 +32,7 @@ module.exports = {
           2,
           {
             ignore: [
-              'payload/unsanitizedConfig',
+              'payload/config',
             ],
           },
         ],

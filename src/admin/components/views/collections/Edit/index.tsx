@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect, useRouteMatch, useHistory, useLocation } from 'react-router-dom';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig, useAuth } from '@payloadcms/config-provider';
 import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
-import { useAuth } from '@payloadcms/config-provider';
+
 
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import DefaultEdit from './Default';
@@ -91,7 +91,7 @@ const EditView = (props) => {
     );
   }
 
-  const collectionPermissions = permissions?.[slug];
+  const collectionPermissions = permissions?.collections?.[slug];
 
   const apiURL = `${serverURL}${api}/${slug}/${id}`;
   const action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?locale=${locale}&depth=0`;

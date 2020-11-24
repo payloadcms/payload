@@ -121,7 +121,7 @@ const Routes = () => {
                                   path={`${match.url}/collections/${collection.slug}`}
                                   exact
                                   render={(routeProps) => {
-                                    if (permissions?.[collection.slug]?.read?.permission) {
+                                    if (permissions?.collections?.[collection.slug]?.read?.permission) {
                                       return (
                                         <List
                                           {...routeProps}
@@ -141,7 +141,7 @@ const Routes = () => {
                                   path={`${match.url}/collections/${collection.slug}/create`}
                                   exact
                                   render={(routeProps) => {
-                                    if (permissions?.[collection.slug]?.create?.permission) {
+                                    if (permissions?.collections?.[collection.slug]?.create?.permission) {
                                       return (
                                         <Edit
                                           {...routeProps}
@@ -161,7 +161,7 @@ const Routes = () => {
                                   path={`${match.url}/collections/${collection.slug}/:id`}
                                   exact
                                   render={(routeProps) => {
-                                    if (permissions?.[collection.slug]?.read?.permission) {
+                                    if (permissions?.collections?.[collection.slug]?.read?.permission) {
                                       return (
                                         <Edit
                                           isEditing
@@ -182,7 +182,7 @@ const Routes = () => {
                                   path={`${match.url}/globals/${global.slug}`}
                                   exact
                                   render={(routeProps) => {
-                                    if (permissions?.[global.slug]?.read?.permission) {
+                                    if (permissions?.globals?.[global.slug]?.read?.permission) {
                                       return (
                                         <EditGlobal
                                           {...routeProps}

@@ -3,7 +3,8 @@ import { Response, NextFunction } from 'express';
 import formatErrorResponse from '../responses/formatError';
 import { PayloadRequest } from '../types/payloadRequest';
 
-const errorHandler = (config, logger) => async (err, req: PayloadRequest, res: Response): Promise<void> => {
+// NextFunction must be passed for Express to use this middleware as error handler
+const errorHandler = (config, logger) => async (err, req: PayloadRequest, res: Response, next: NextFunction): Promise<void> => {
   const data = formatErrorResponse(err);
   let response;
   let status = err.status || httpStatus.INTERNAL_SERVER_ERROR;

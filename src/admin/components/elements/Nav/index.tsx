@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useHistory } from 'react-router-dom';
-import { useConfig } from '@payloadcms/config-provider';
-import { useAuth } from '@payloadcms/config-provider';
+import { useConfig, useAuth } from '@payloadcms/config-provider';
+
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import Chevron from '../../icons/Chevron';
 import LogOut from '../../icons/LogOut';
@@ -65,7 +65,7 @@ const DefaultNav = () => {
             {collections && collections.map((collection, i) => {
               const href = `${admin}/collections/${collection.slug}`;
 
-              if (permissions?.[collection.slug]?.read.permission) {
+              if (permissions?.collections?.[collection.slug]?.read.permission) {
                 return (
                   <NavLink
                     activeClassName="active"
@@ -88,7 +88,7 @@ const DefaultNav = () => {
                 {globals.map((global, i) => {
                   const href = `${admin}/globals/${global.slug}`;
 
-                  if (permissions?.[global.slug].read.permission) {
+                  if (permissions?.globals?.[global.slug].read.permission) {
                     return (
                       <NavLink
                         activeClassName="active"

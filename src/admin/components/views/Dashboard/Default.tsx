@@ -33,7 +33,7 @@ const Dashboard = (props) => {
         <h3 className={`${baseClass}__label`}>Collections</h3>
         <ul className={`${baseClass}__card-list`}>
           {collections.map((collection) => {
-            const hasCreatePermission = permissions?.[collection.slug]?.create?.permission;
+            const hasCreatePermission = permissions?.collections?.[collection.slug]?.create?.permission;
 
             return (
               <li key={collection.slug}>

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import queryString from 'qs';
 import { useLocation } from 'react-router-dom';
-import { useConfig } from '@payloadcms/config-provider';
-import { useAuth } from '@payloadcms/config-provider';
+import { useConfig, useAuth } from '@payloadcms/config-provider';
+
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import DefaultList from './Default';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
@@ -37,7 +37,7 @@ const ListView = (props) => {
   const [columns, setColumns] = useState([]);
   const [sort, setSort] = useState(null);
 
-  const collectionPermissions = permissions?.[slug];
+  const collectionPermissions = permissions?.collections?.[slug];
   const hasCreatePermission = collectionPermissions?.create?.permission;
 
   const { page } = queryString.parse(location.search, { ignoreQueryPrefix: true });
