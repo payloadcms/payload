@@ -10,7 +10,7 @@ export default (config: Config): Configuration => {
   let webpackConfig: Configuration = {
     entry: {
       main: [
-        'webpack-hot-middleware/client',
+        require.resolve('webpack-hot-middleware/client'),
         path.resolve(__dirname, '../admin'),
       ],
     },
@@ -44,7 +44,7 @@ export default (config: Config): Configuration => {
             require.resolve('style-loader'),
             require.resolve('css-loader'),
             {
-              loader: 'postcss-loader',
+              loader: require.resolve('postcss-loader'),
               options: {
                 postcssOptions: {
                   plugins: [require.resolve('postcss-preset-env')],

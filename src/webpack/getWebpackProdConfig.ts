@@ -65,7 +65,7 @@ export default (config: Config): Configuration => {
                 MiniCSSExtractPlugin.loader,
                 require.resolve('css-loader'),
                 {
-                  loader: 'postcss-loader',
+                  loader: require.resolve('postcss-loader'),
                   options: {
                     postcssOptions: {
                       plugins: [
