@@ -40,7 +40,7 @@
     "@faceless-ui/modal": "^1.0.4",
     "@faceless-ui/scroll-info": "^1.1.1",
     "@faceless-ui/window-info": "^1.2.2",
-    "@payloadcms/config-provider": "0.0.2",
+    "@payloadcms/config-provider": "0.0.3",
     "@typescript-eslint/parser": "4.0.1",
     "@udecode/slate-plugins": "^0.64.3",
     "ajv": "^6.12.6",
@@ -220,11 +220,13 @@
   },
   "files": [
     "dist",
-    "*.js",
-    "!jest.config.js",
-    "payload.d.ts",
     "docs",
     "components",
-    "scss"
+    "scss",
+    "*.js",
+    "*.d.ts",
+    "!jest.config.js",
+    "!jest.react.config.js",
+    "!babel.config.js"
   ]
 }
