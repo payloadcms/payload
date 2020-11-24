@@ -95,11 +95,11 @@ async function accessOperation(args) {
   }
 
   config.collections.forEach((collection) => {
-    executeEntityPolicies(collection, allOperations, 'collection');
+    executeEntityPolicies(collection, allOperations, 'collections');
   });
 
   config.globals.forEach((global) => {
-    executeEntityPolicies(global, ['read', 'update'], 'global');
+    executeEntityPolicies(global, ['read', 'update'], 'globals');
   });
 
   await Promise.all(promises);
