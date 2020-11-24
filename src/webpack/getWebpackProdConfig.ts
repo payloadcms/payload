@@ -44,7 +44,7 @@ export default (config: Config): Configuration => {
           test: /\.js$/,
           exclude: /node_modules[\\/](?!(@payloadcms[\\/]payload)[\\/]).*/,
           use: {
-            loader: 'babel-loader',
+            loader: require.resolve('babel-loader'),
             options: babelConfig({ env: () => false }),
           },
         },
@@ -63,14 +63,14 @@ export default (config: Config): Configuration => {
               sideEffects: true,
               use: [
                 MiniCSSExtractPlugin.loader,
-                'css-loader',
+                require.resolve('css-loader'),
                 {
-                  loader: 'postcss-loader',
+                  loader: require.resolve('postcss-loader'),
                   options: {
                     postcssOptions: {
                       plugins: [
                         [
-                          'postcss-preset-env',
+                          require.resolve('postcss-preset-env'),
                           {
                             // Options
                           },
@@ -79,7 +79,7 @@ export default (config: Config): Configuration => {
                     },
                   },
                 },
-                'sass-loader',
+                require.resolve('sass-loader'),
               ],
             },
             {

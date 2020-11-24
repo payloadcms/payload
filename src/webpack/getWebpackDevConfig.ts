@@ -10,7 +10,7 @@ export default (config: Config): Configuration => {
   let webpackConfig: Configuration = {
     entry: {
       main: [
-        'webpack-hot-middleware/client',
+        require.resolve('webpack-hot-middleware/client'),
         path.resolve(__dirname, '../admin'),
       ],
     },
@@ -32,7 +32,7 @@ export default (config: Config): Configuration => {
           exclude: /node_modules[\\/](?!(@payloadcms[\\/]payload)[\\/]).*/,
           use: [
             {
-              loader: 'babel-loader',
+              loader: require.resolve('babel-loader'),
               options: babelConfig({ env: () => false }),
             },
           ],
@@ -41,17 +41,17 @@ export default (config: Config): Configuration => {
           test: /\.(scss|css)$/,
           sideEffects: true,
           use: [
-            'style-loader',
-            'css-loader',
+            require.resolve('style-loader'),
+            require.resolve('css-loader'),
             {
-              loader: 'postcss-loader',
+              loader: require.resolve('postcss-loader'),
               options: {
                 postcssOptions: {
-                  plugins: ['postcss-preset-env'],
+                  plugins: [require.resolve('postcss-preset-env')],
                 },
               },
             },
-            'sass-loader',
+            require.resolve('sass-loader'),
           ],
         },
         {

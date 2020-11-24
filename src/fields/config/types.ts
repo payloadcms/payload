@@ -18,6 +18,7 @@ type FieldBase = {
   slug?: string;
   required?: boolean;
   unique?: boolean;
+  index?: boolean;
   defaultValue?: any;
   hidden?: boolean;
   localized?: boolean;

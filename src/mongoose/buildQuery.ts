@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
-import mongoose from 'mongoose';
+import mongoose, { FilterQuery } from 'mongoose';
 
 const validOperators = ['like', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists'];
 function addSearchParam(key, value, searchParams) {
@@ -16,8 +16,31 @@ function convertArrayFromCommaDelineated(input) {
   }
   return [input];
 }
+
+
+type ParseType = {
+  searchParams?:
+  {
+    [key: string]: any;
+  };
+  sort?: boolean;
+};
+
 class ParamParser {
-  constructor(model, rawParams, locale) {
+  locale: string;
+
+  rawParams: any;
+
+  model: any;
+
+  query: {
+    searchParams: {
+      [key: string]: any;
+    };
+    sort: boolean;
+  };
+
+  constructor(model, rawParams, locale: string) {
     this.parse = this.parse.bind(this);
     this.model = model;
     this.rawParams = rawParams;
@@ -28,12 +51,13 @@ class ParamParser {
     };
   }
 
-  getLocalizedKey(key, schemaObject) {
+  getLocalizedKey(key: string, schemaObject) {
     return `${key}${(schemaObject && schemaObject.localized) ? `.${this.locale}` : ''}`;
   }
 
   // Entry point to the ParamParser class
-  async parse() {
+
+  async parse(): Promise<ParseType> {
     if (typeof this.rawParams === 'object') {
       for (const key of Object.keys(this.rawParams)) {
         if (key === 'where') {
@@ -48,7 +72,7 @@ class ParamParser {
   }
 
   async parsePathOrRelation(object) {
-    let result = {};
+    let result = {} as FilterQuery<any>;
     // We need to determine if the whereKey is an AND, OR, or a schema path
     for (const relationOrPath of Object.keys(object)) {
       if (relationOrPath.toLowerCase() === 'and') {
@@ -135,7 +159,7 @@ class ParamParser {
           let subQuery = {};
           const localizedSubKey = this.getLocalizedKey(paths[1], subModel.schema.obj[paths[1]]);
           const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val, operator);
-          subQuery = addSearchParam(searchParamKey, searchParamValue, subQuery, subModel.schema);
+          subQuery = addSearchParam(searchParamKey, searchParamValue, subQuery);
           const matchingSubDocuments = await subModel.find(subQuery);
           return [localizedPath, {
             $in: matchingSubDocuments.map((subDoc) => subDoc.id),
