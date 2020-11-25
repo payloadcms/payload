@@ -18,8 +18,9 @@ import deleteHandler from '../collections/requestHandlers/delete';
 
 import findOne from '../globals/requestHandlers/findOne';
 import globalUpdate from '../globals/requestHandlers/update';
+import { Payload } from '../index';
 
-function bindRequestHandlers(ctx): void {
+function bindRequestHandlers(ctx: Payload): void {
   ctx.requestHandlers = {
     collections: {
       create: create.bind(ctx),

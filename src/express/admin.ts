@@ -3,13 +3,12 @@ import compression from 'compression';
 import history from 'connect-history-api-fallback';
 import path from 'path';
 import initWebpack from '../webpack/init';
+import { Payload } from '../index';
 
 const router = express.Router();
 
-function initAdmin(): void {
-  if (!this.config.admin.disable && process.env.NODE_ENV !== 'test') {
-    this.initWebpack = initWebpack.bind(this);
-
+function initAdmin(ctx: Payload): void {
+  if (!ctx.config.admin.disable && process.env.NODE_ENV !== 'test') {
     router.use(history());
 
     if (process.env.NODE_ENV === 'production') {
@@ -22,13 +21,13 @@ function initAdmin(): void {
         }
       });
 
-      router.use(compression(this.config.compression));
+      router.use(compression(ctx.config.compression));
       router.use(express.static(path.resolve(process.cwd(), 'build'), { redirect: false }));
 
-      this.express.use(this.config.routes.admin, router);
+      ctx.express.use(ctx.config.routes.admin, router);
     } else {
-      this.express.use(this.config.routes.admin, history());
-      this.express.use(this.initWebpack());
+      ctx.express.use(ctx.config.routes.admin, history());
+      ctx.express.use(initWebpack(ctx.config));
     }
   }
 }

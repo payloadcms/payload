@@ -3,11 +3,12 @@ import express, { Router } from 'express';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import getWebpackDevConfig from './getWebpackDevConfig';
+import { PayloadConfig } from '../config/types';
 
 const router = express.Router();
 
-function initWebpack(): Router {
-  const webpackDevConfig = getWebpackDevConfig(this.config);
+function initWebpack(config: PayloadConfig): Router {
+  const webpackDevConfig = getWebpackDevConfig(config);
   const compiler = webpack(webpackDevConfig);
 
   router.use(webpackDevMiddleware(compiler, {

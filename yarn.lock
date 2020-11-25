@@ -1872,7 +1872,7 @@
 
 "@types/passport-local-mongoose@^4.0.13":
   version "4.0.13"
-  resolved "https://registry.yarnpkg.com/@types/passport-local-mongoose/-/passport-local-mongoose-4.0.13.tgz#0edc3aedcc82a70b7e461efc2dc85f42ccb80aa3"
+  resolved "https://registry.npmjs.org/@types/passport-local-mongoose/-/passport-local-mongoose-4.0.13.tgz#0edc3aedcc82a70b7e461efc2dc85f42ccb80aa3"
   integrity sha512-tjVfcyFXO+EIzjTg6DHm+Wq9LwftqDv0kQ/IlLqFHBtZ6gKMy5pLKdr4g62VGEJsgPX8F9UGb9inDREQ2tOpEw==
   dependencies:
     "@types/passport-local" "*"

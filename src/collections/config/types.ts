@@ -1,22 +1,33 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { PaginateModel, Document, PassportLocalModel } from 'mongoose';
+import { DeepRequired } from 'ts-essentials';
 import { Access } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types/payloadRequest';
 
+interface PayloadModel extends PaginateModel<Document>, PassportLocalModel<Document>{}
+
 export type Collection = {
+  Model: PayloadModel;
+  config: CollectionConfig;
+};
+
+export type CollectionConfig = DeepRequired<PayloadCollectionConfig>
+
+export type PayloadCollectionConfig = {
   slug: string;
-  labels: {
+  labels?: {
     singular: string;
     plural: string;
   };
   fields: Field[];
-  admin: {
-    useAsTitle: string;
-    defaultColumns: string[];
-    components: any;
+  admin?: {
+    useAsTitle?: string;
+    defaultColumns?: string[];
+    components?: any;
   };
-  hooks: {
+  hooks?: {
     beforeOperation?: BeforeOperationHook[];
     beforeValidate?: BeforeValidateHook[];
     beforeChange?: BeforeChangeHook[];
@@ -28,27 +39,28 @@ export type Collection = {
     beforeLogin?: BeforeLoginHook[];
     afterLogin?: AfterLoginHook[];
     afterForgotPassword?: AfterForgotPasswordHook[];
+    afterError?: AfterErrorHook;
   };
-  access: {
-    create: Access;
-    read: Access;
-    update: Access;
-    delete: Access;
-    admin: Access;
-    unlock: Access;
+  access?: {
+    create?: Access;
+    read?: Access;
+    update?: Access;
+    delete?: Access;
+    admin?: Access;
+    unlock?: Access;
   };
   auth?: {
-    tokenExpiration: number;
-    verify:
+    tokenExpiration?: number;
+    verify?:
     | boolean
     | { generateEmailHTML: string; generateEmailSubject: string };
-    maxLoginAttempts: number;
-    lockTime: number;
-    useAPIKey: boolean;
-    cookies:
+    maxLoginAttempts?: number;
+    lockTime?: number;
+    useAPIKey?: boolean;
+    cookies?:
     | {
-      secure: boolean;
-      sameSite: string;
+      secure?: boolean;
+      sameSite?: string;
       domain?: string;
     }
     | boolean;
@@ -57,10 +69,10 @@ export type Collection = {
       generateEmailSubject?: (args?: { req?: PayloadRequest }) => string,
     }
   };
-  upload: {
-    imageSizes: ImageSize[];
-    staticURL: string;
-    staticDir: string;
+  upload?: {
+    imageSizes?: ImageSize[];
+    staticURL?: string;
+    staticDir?: string;
     adminThumbnail?: string;
   };
 };
@@ -144,3 +156,5 @@ export type AfterLoginHook = (args?: {
 export type AfterForgotPasswordHook = (args?: {
   args?: any;
 }) => any;
+
+export type AfterErrorHook = (args?: { [p: string]: any }, response?: any) => any;
