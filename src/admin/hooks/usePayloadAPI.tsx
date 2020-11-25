@@ -3,11 +3,28 @@ import queryString from 'qs';
 import { useLocale } from '../components/utilities/Locale';
 import { requests } from '../api';
 
-const usePayloadAPI = (url, options = {}) => {
+type Result = [
+  {
+    isLoading: boolean
+    isError: boolean
+    data: unknown
+  },
+  {
+    setParams: React.Dispatch<unknown>
+  }
+]
+
+type Options = {
+  initialParams?: unknown
+  initialData?: unknown
+}
+
+type UsePayloadAPI = (url: string, options?: Options) => Result;
+
+const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   const {
     initialParams = {},
     initialData = {},
-    onLoad,
   } = options;
 
   const [data, setData] = useState(initialData);
@@ -18,8 +35,8 @@ const usePayloadAPI = (url, options = {}) => {
 
   const search = queryString.stringify({
     locale,
-    ...params,
-  }, { depth: 10 });
+    ...(typeof params === 'object' ? params : {}),
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,7 +65,7 @@ const usePayloadAPI = (url, options = {}) => {
       setIsError(false);
       setIsLoading(false);
     }
-  }, [url, locale, search, onLoad]);
+  }, [url, locale, search]);
 
   return [{ data, isLoading, isError }, { setParams }];
 };

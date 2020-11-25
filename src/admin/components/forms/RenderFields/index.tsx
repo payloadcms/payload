@@ -13,7 +13,7 @@ const RenderedFieldContext = createContext({});
 
 export const useRenderedFields = () => useContext(RenderedFieldContext);
 
-const RenderFields = (props) => {
+const RenderFields: React.FC = (props) => {
   const {
     fieldSchema,
     fieldTypes,

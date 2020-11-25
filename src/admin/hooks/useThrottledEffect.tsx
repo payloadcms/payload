@@ -1,7 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef } from 'react';
 
-const useThrottledEffect = (callback, delay, deps = []) => {
+type useThrottledEffect = (callback: React.EffectCallback, delay: number, deps: React.DependencyList) => void;
+
+const useThrottledEffect: useThrottledEffect = (callback, delay, deps = []) => {
   const lastRan = useRef(Date.now());
 
   useEffect(
