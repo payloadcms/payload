@@ -24,17 +24,20 @@
     "inlineSourceMap": true, /* Emit a single file with source maps instead of having a separate file. */
     "skipLibCheck": true, /* Skip type checking of declaration files. */
     "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
+    // "typeRoots": [
+    //   "./src",
+    //   "./node_modules/@types"
+    // ]
   },
   "include": [
-    "src/",
+    "src/"
   ],
   "exclude": [
     "demo",
     "dist",
-    "src/admin",
+    "build",
     "src/tests",
     "src/tests/**/*.spec.ts",
-    //   "**/*.d.ts",
     //   "node_modules/"
   ]
 }

@@ -11,7 +11,7 @@
     "payload": "./dist/src/bin/index.js"
   },
   "scripts": {
-    "copyfiles": "copyfiles \"src/admin/**/*.*\" dist",
+    "copyfiles": "copyfiles src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png} dist/",
     "build:components": "webpack --config src/webpack/components.config.js",
     "build": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js node src/bin/build",
     "build:tsc": "tsc",
@@ -40,7 +40,7 @@
     "@faceless-ui/modal": "^1.0.4",
     "@faceless-ui/scroll-info": "^1.1.1",
     "@faceless-ui/window-info": "^1.2.2",
-    "@payloadcms/config-provider": "0.0.3",
+    "@payloadcms/config-provider": "0.0.7",
     "@typescript-eslint/parser": "4.0.1",
     "@udecode/slate-plugins": "^0.64.3",
     "ajv": "^6.12.6",

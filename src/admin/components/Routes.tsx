@@ -8,6 +8,7 @@ import DefaultTemplate from './templates/Default';
 import { requests } from '../api';
 import Loading from './elements/Loading';
 import StayLoggedIn from './modals/StayLoggedIn';
+import Unlicensed from './views/Unlicensed';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -80,6 +81,9 @@ const Routes = () => {
                 </Route>
                 <Route path={`${match.url}/reset/:token`}>
                   <ResetPassword />
+                </Route>
+                <Route path={`${match.url}/unlicensed`}>
+                  <Unlicensed />
                 </Route>
 
                 {collections.map((collection) => {

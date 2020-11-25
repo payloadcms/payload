@@ -1360,10 +1360,10 @@
   dependencies:
     mkdirp "^1.0.4"
 
-"@payloadcms/config-provider@0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@payloadcms/config-provider/-/config-provider-0.0.3.tgz#0c460583b3b70f396b3f91ad69194ade300683ed"
-  integrity sha512-YSPHssYTvYZYnsd+smtrhMCNsGNL/MWU8YtApa+nZRuHGbBGgO+tuffgNqzSJzUnTnliaVBzUz/RTNdaXnXrRQ==
+"@payloadcms/config-provider@0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@payloadcms/config-provider/-/config-provider-0.0.7.tgz#c225f29cf1737e039c95bd54ba25be5e32550ae1"
+  integrity sha512-qiiz5i/BRPkU6wyBg01Cf5pikfYxudanIjONdpTx7Z4xaUN67OZ0SDCfRno5LGrUupsFgxlEfSIXFGWb9h4gdw==
 
 "@popperjs/core@^2.4.4":
   version "2.5.4"
