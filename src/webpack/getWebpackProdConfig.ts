@@ -8,7 +8,7 @@ import webpack, { Configuration } from 'webpack';
 import { Config } from '../config/types';
 import babelConfig from '../babel.config';
 
-const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js');
+const mockModulePath = path.resolve(__dirname, './mocks/emptyModule.js');
 
 export default (config: Config): Configuration => {
   let webpackConfig: Configuration = {
@@ -41,7 +41,7 @@ export default (config: Config): Configuration => {
     module: {
       rules: [
         {
-          test: /\.js$/,
+          test: /\.(t|j|)sx?$/,
           exclude: /node_modules[\\/](?!(@payloadcms[\\/]payload)[\\/]).*/,
           use: {
             loader: require.resolve('babel-loader'),
@@ -92,8 +92,12 @@ export default (config: Config): Configuration => {
         'payload/config': config.paths.config,
         '@payloadcms/payload$': mockModulePath,
       },
+      extensions: ['.ts', '.tsx', '.js', '.json'],
     },
     plugins: [
+      new webpack.ProvidePlugin(
+        { process: 'process/browser' },
+      ),
       new HtmlWebpackPlugin({
         template: config.admin && config.admin.indexHTML
           ? path.join(config.paths.configDir, config.admin.indexHTML)
