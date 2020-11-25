@@ -1592,6 +1592,13 @@
   dependencies:
     "@types/express" "*"
 
+"@types/express-graphql@^0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@types/express-graphql/-/express-graphql-0.9.0.tgz#6f891c11785204bff3a27cae00180c4228550eb8"
+  integrity sha512-+n13emasFUtIn5kpJUTIUy4tAiJBRnHSChpA8OVmKvdKYbzzK6iI/zsnWEKP8qQJDpiUh48wrRKIXNC+5U/t+w==
+  dependencies:
+    express-graphql "*"
+
 "@types/express-rate-limit@^5.1.0":
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/@types/express-rate-limit/-/express-rate-limit-5.1.0.tgz#c08e9b4957989fbe5ff8d5224f392359a264a597"
@@ -5125,7 +5132,7 @@ express-fileupload@^1.1.6:
   dependencies:
     busboy "^0.3.1"
 
-express-graphql@0.12.0:
+express-graphql@*, express-graphql@0.12.0:
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/express-graphql/-/express-graphql-0.12.0.tgz#58deabc309909ca2c9fe2f83f5fbe94429aa23df"
   integrity sha512-DwYaJQy0amdy3pgNtiTDuGGM2BLdj+YO2SgbKoLliCfuHv3VVTt7vNG/ZqK2hRYjtYHE2t2KB705EU94mE64zg==

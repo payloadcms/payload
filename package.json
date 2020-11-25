@@ -150,6 +150,7 @@
     "@types/eslint": "^6.8.1",
     "@types/express": "^4.17.9",
     "@types/express-fileupload": "^1.1.5",
+    "@types/express-graphql": "^0.9.0",
     "@types/express-rate-limit": "^5.1.0",
     "@types/extract-text-webpack-plugin": "^3.0.4",
     "@types/file-loader": "^4.2.0",

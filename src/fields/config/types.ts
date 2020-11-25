@@ -83,19 +83,19 @@ export type SelectManyField = SelectField & {
   hasMany: true;
 }
 
-type RelationShipSingleField = FieldBase & {
+export type RelationshipSingleField = FieldBase & {
   type: 'relationship';
   relationTo: string;
   hasMany?: false;
 }
 
-type RelationShipManyField = FieldBase & {
+export type RelationshipManyField = FieldBase & {
   type: 'relationship';
-  relationTo: string[] | string;
+  relationTo: string[];
   hasMany: true;
 }
 
-export type RelationshipField = RelationShipSingleField | RelationShipManyField;
+export type RelationshipField = RelationshipSingleField | RelationshipManyField;
 
 type RichTextElements = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link';
 type RichTextLeaves = 'bold' | 'italic' | 'underline' | 'strikethrough';

@@ -84,7 +84,6 @@ const buildWhereInputType = (name, fields, parentName) => {
           field,
           type,
           parentName,
-          ['equals', 'like', 'not_equals'],
           [...operators.equality, 'like'],
         ),
       };

@@ -1,6 +1,7 @@
+import { Block } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 
-function buildBlockType(block) {
+function buildBlockType(block: Block): void {
   const {
     slug,
     labels: {

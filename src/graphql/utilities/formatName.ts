@@ -1,6 +1,6 @@
 const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
 
-const formatName = (string) => {
+const formatName = (string: string): string => {
   let sanitizedString = String(string);
 
   const firstLetter = sanitizedString.substring(0, 1);

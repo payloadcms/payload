@@ -2,9 +2,11 @@ import { Express } from 'express';
 import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
+import { GraphQLType } from 'graphql';
 import { Collection } from '../collections/config/types';
 import { Global } from '../globals/config/types';
 import { PayloadRequest } from '../express/types/payloadRequest';
+import InitializeGraphQL from '../graphql';
 
 type MockEmailTransport = {
   transport?: 'mock';
@@ -97,10 +99,10 @@ export type PayloadConfig = {
   graphQL?: {
     mutations?: {
       [key: string]: unknown
-    },
+    } | ((graphQL: GraphQLType, payload: InitializeGraphQL) => any),
     queries?: {
       [key: string]: unknown
-    },
+    } | ((graphQL: GraphQLType, payload: InitializeGraphQL) => any),
     maxComplexity?: number;
     disablePlaygroundInProduction?: boolean;
   };
