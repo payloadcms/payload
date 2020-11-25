@@ -1,7 +1,7 @@
 import React from 'react';
 
 export type Props = {
-  CustomComponent: React.FC
-  DefaultComponent: React.FC
-  componentProps: unknown
+  CustomComponent: React.ComponentType
+  DefaultComponent: React.ComponentType
+  componentProps?: unknown
 }

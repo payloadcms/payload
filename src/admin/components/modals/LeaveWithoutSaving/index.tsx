@@ -1,20 +1,20 @@
 import React from 'react';
 import NavigationPrompt from 'react-router-navigation-prompt';
+import { useAuth } from '@payloadcms/config-provider';
 import { useFormModified } from '../../forms/Form/context';
 import MinimalTemplate from '../../templates/Minimal';
 import Button from '../../elements/Button';
-import { useAuth } from '@payloadcms/config-provider';
 
 import './index.scss';
 
 const modalSlug = 'leave-without-saving';
 
-const LeaveWithoutSaving = () => {
+const LeaveWithoutSaving: React.FC = () => {
   const modified = useFormModified();
   const { user } = useAuth();
 
   return (
-    <NavigationPrompt when={modified && user}>
+    <NavigationPrompt when={Boolean(modified && user)}>
       {({ onConfirm, onCancel }) => (
         <div className={modalSlug}>
           <MinimalTemplate>

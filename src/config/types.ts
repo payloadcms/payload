@@ -57,6 +57,9 @@ export type PayloadConfig = {
     }
     disable?: boolean;
     indexHTML?: string;
+    components?: {
+      Nav: React.ComponentType
+    }
   };
   collections?: Collection[];
   globals?: Global[];
@@ -92,7 +95,8 @@ export type PayloadConfig = {
     };
   };
   localization?: {
-    locales: string[];
+    locales: string[]
+    defaultLocale: string
   };
   defaultLocale?: string;
   fallback?: boolean;

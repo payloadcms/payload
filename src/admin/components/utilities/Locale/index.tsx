@@ -15,7 +15,7 @@ export const LocaleProvider: React.FC = ({ children }) => {
   const localeFromParams = searchParams.locale;
 
   useEffect(() => {
-    if (localeFromParams && localization.locales.indexOf(localeFromParams) > -1) setLocale(localeFromParams as string);
+    if (localeFromParams && localization.locales.indexOf(localeFromParams as string) > -1) setLocale(localeFromParams as string);
   }, [localeFromParams, localization]);
 
   return (

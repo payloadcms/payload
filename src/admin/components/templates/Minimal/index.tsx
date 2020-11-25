@@ -1,13 +1,16 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'template-minimal';
 
-const Minimal = (props) => {
+const Minimal: React.FC<Props> = (props) => {
   const {
-    className, style, children, width,
+    className,
+    style = {},
+    children,
+    width = 'normal',
   } = props;
 
   const classes = [
@@ -26,19 +29,6 @@ const Minimal = (props) => {
       </div>
     </section>
   );
-};
-
-Minimal.defaultProps = {
-  className: null,
-  style: {},
-  width: 'normal',
-};
-
-Minimal.propTypes = {
-  className: PropTypes.string,
-  style: PropTypes.shape({}),
-  children: PropTypes.node.isRequired,
-  width: PropTypes.oneOf(['normal', 'wide']),
 };
 
 export default Minimal;
