@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useReducer } from 'react';
-import PropTypes from 'prop-types';
 import getInitialState from './getInitialState';
 import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
 import Pill from '../Pill';
 import Plus from '../../icons/Plus';
 import X from '../../icons/X';
+import { Props } from './types';
 
 import './index.scss';
 
@@ -27,7 +27,7 @@ const reducer = (state, { type, payload }) => {
   return state.filter((remainingColumn) => remainingColumn !== payload);
 };
 
-const ColumnSelector = (props) => {
+const ColumnSelector: React.FC<Props> = (props) => {
   const {
     collection,
     collection: {
@@ -75,21 +75,6 @@ const ColumnSelector = (props) => {
       })}
     </div>
   );
-};
-
-ColumnSelector.propTypes = {
-  collection: PropTypes.shape({
-    fields: PropTypes.arrayOf(
-      PropTypes.shape({}),
-    ),
-    admin: PropTypes.shape({
-      defaultColumns: PropTypes.arrayOf(
-        PropTypes.string,
-      ),
-      useAsTitle: PropTypes.string,
-    }),
-  }).isRequired,
-  handleChange: PropTypes.func.isRequired,
 };
 
 export default ColumnSelector;

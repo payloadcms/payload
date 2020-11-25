@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 import { useHistory } from 'react-router-dom';
 import { Modal, useModal } from '@faceless-ui/modal';
@@ -9,12 +8,13 @@ import MinimalTemplate from '../../templates/Minimal';
 import { useForm } from '../../forms/Form/context';
 import useTitle from '../../../hooks/useTitle';
 import { requests } from '../../../api';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'delete-document';
 
-const DeleteDocument = (props) => {
+const DeleteDocument: React.FC<Props> = (props) => {
   const {
     title: titleFromProps,
     id,
@@ -128,25 +128,6 @@ const DeleteDocument = (props) => {
   }
 
   return null;
-};
-
-DeleteDocument.defaultProps = {
-  title: undefined,
-  id: undefined,
-};
-
-DeleteDocument.propTypes = {
-  collection: PropTypes.shape({
-    admin: PropTypes.shape({
-      useAsTitle: PropTypes.string,
-    }),
-    slug: PropTypes.string,
-    labels: PropTypes.shape({
-      singular: PropTypes.string,
-    }),
-  }).isRequired,
-  id: PropTypes.string,
-  title: PropTypes.string,
 };
 
 export default DeleteDocument;

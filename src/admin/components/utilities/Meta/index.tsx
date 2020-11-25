@@ -1,11 +1,17 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import Helmet from 'react-helmet';
 import { useConfig } from '@payloadcms/config-provider';
+import { Props } from './types';
 import payloadFavicon from '../../../assets/images/favicon.svg';
 import payloadOgImage from '../../../assets/images/og-image.png';
 
-function Meta({ description, lang, meta, title, keywords }) {
+const Meta: React.FC<Props> = ({
+  description,
+  lang = 'en',
+  meta = [],
+  title,
+  keywords = 'CMS, Admin, Dashboard',
+}) => {
   const config = useConfig();
   const titleSuffix = config?.admin?.meta?.titleSuffix ?? '- Payload';
   const favicon = config?.admin?.meta?.favicon ?? payloadFavicon;
@@ -64,23 +70,6 @@ function Meta({ description, lang, meta, title, keywords }) {
       ]}
     />
   );
-}
-
-Meta.defaultProps = {
-  lang: 'en',
-  meta: [],
-  description: '',
-  image: '/images/default-og.png',
-  keywords: 'CMS, Admin, Dashboard',
-};
-
-Meta.propTypes = {
-  description: PropTypes.string,
-  lang: PropTypes.string,
-  meta: PropTypes.arrayOf(PropTypes.object),
-  title: PropTypes.string.isRequired,
-  image: PropTypes.string,
-  keywords: PropTypes.string,
 };
 
 export default Meta;

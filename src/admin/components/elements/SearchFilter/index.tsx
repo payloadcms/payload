@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 import Search from '../../icons/Search';
 import useDebounce from '../../../hooks/useDebounce';
 
@@ -7,10 +7,10 @@ import './index.scss';
 
 const baseClass = 'search-filter';
 
-const SearchFilter = (props) => {
+const SearchFilter: React.FC<Props> = (props) => {
   const {
-    fieldName,
-    fieldLabel,
+    fieldName = 'id',
+    fieldLabel = 'ID',
     handleChange,
   } = props;
 
@@ -34,22 +34,11 @@ const SearchFilter = (props) => {
         placeholder={`Search by ${fieldLabel}`}
         type="text"
         value={search}
-        onChange={e => setSearch(e.target.value)}
+        onChange={(e) => setSearch(e.target.value)}
       />
       <Search />
     </div>
   );
-};
-
-SearchFilter.defaultProps = {
-  fieldName: 'id',
-  fieldLabel: 'ID',
-};
-
-SearchFilter.propTypes = {
-  fieldName: PropTypes.string,
-  fieldLabel: PropTypes.string,
-  handleChange: PropTypes.func.isRequired,
 };
 
 export default SearchFilter;

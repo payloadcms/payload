@@ -2,7 +2,7 @@ import React from 'react';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import { useConfig } from '@payloadcms/config-provider';
 
-const PayloadIcon = () => (
+const PayloadIcon: React.FC = () => (
   <svg
     width="25"
     height="25"
@@ -20,7 +20,7 @@ const PayloadIcon = () => (
   </svg>
 );
 
-const Icon = () => {
+const Icon: React.FC = () => {
   const {
     admin: {
       components: {

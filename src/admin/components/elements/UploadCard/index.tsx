@@ -1,12 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 import Thumbnail from '../Thumbnail';
 
 import './index.scss';
 
 const baseClass = 'upload-card';
 
-const UploadCard = (props) => {
+const UploadCard: React.FC<Props> = (props) => {
   const {
     onClick,
     mimeType,
@@ -42,28 +42,5 @@ const UploadCard = (props) => {
     </div>
   );
 };
-
-UploadCard.defaultProps = {
-  sizes: undefined,
-  onClick: undefined,
-};
-
-UploadCard.propTypes = {
-  collection: PropTypes.shape({
-    labels: PropTypes.shape({
-      singular: PropTypes.string,
-    }),
-    upload: PropTypes.shape({
-      adminThumbnail: PropTypes.string,
-      staticURL: PropTypes.string,
-    }),
-  }).isRequired,
-  id: PropTypes.string.isRequired,
-  filename: PropTypes.string.isRequired,
-  mimeType: PropTypes.string.isRequired,
-  sizes: PropTypes.shape({}),
-  onClick: PropTypes.func,
-};
-
 
 export default UploadCard;

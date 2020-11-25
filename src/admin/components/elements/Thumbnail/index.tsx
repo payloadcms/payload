@@ -1,6 +1,6 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useConfig } from '@payloadcms/config-provider';
+import { Props } from './types';
 import FileGraphic from '../../graphics/File';
 import getThumbnail from '../../../../uploads/getThumbnail';
 
@@ -8,9 +8,14 @@ import './index.scss';
 
 const baseClass = 'thumbnail';
 
-const Thumbnail = (props) => {
+const Thumbnail: React.FC<Props> = (props) => {
   const {
-    filename, mimeType, staticURL, sizes, adminThumbnail, size,
+    filename,
+    mimeType,
+    staticURL,
+    sizes = 'medium',
+    adminThumbnail,
+    size,
   } = props;
 
   const { serverURL } = useConfig();
@@ -36,21 +41,4 @@ const Thumbnail = (props) => {
     </div>
   );
 };
-
-Thumbnail.defaultProps = {
-  adminThumbnail: undefined,
-  sizes: undefined,
-  mimeType: undefined,
-  size: 'medium',
-};
-
-Thumbnail.propTypes = {
-  filename: PropTypes.string.isRequired,
-  sizes: PropTypes.shape({}),
-  adminThumbnail: PropTypes.string,
-  mimeType: PropTypes.string,
-  staticURL: PropTypes.string.isRequired,
-  size: PropTypes.oneOf(['small', 'medium', 'large', 'expand']),
-};
-
 export default Thumbnail;

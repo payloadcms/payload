@@ -1,5 +1,5 @@
 import React from 'react';
 
-const Loading = () => <div>Loading</div>;
+const Loading: React.FC = () => <div>Loading</div>;
 
 export default Loading;

@@ -5,12 +5,13 @@ import { useConfig } from '@payloadcms/config-provider';
 import { useLocale } from '../../utilities/Locale';
 import { useSearchParams } from '../../utilities/SearchParams';
 import Popup from '../Popup';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'localizer';
 
-const Localizer = () => {
+const Localizer: React.FC<Props> = () => {
   const { localization } = useConfig();
   const locale = useLocale();
   const searchParams = useSearchParams();

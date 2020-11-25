@@ -1,6 +1,6 @@
 import React, { isValidElement } from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import { Props } from './types';
 
 import plus from '../../icons/Plus';
 import x from '../../icons/X';
@@ -36,20 +36,10 @@ const ButtonContents = ({ children, icon }) => {
   );
 };
 
-ButtonContents.defaultProps = {
-  icon: null,
-  children: null,
-};
-
-ButtonContents.propTypes = {
-  children: PropTypes.node,
-  icon: PropTypes.node,
-};
-
-const Button = (props) => {
+const Button: React.FC<Props> = (props) => {
   const {
     className,
-    type,
+    type = 'button',
     el,
     to,
     url,
@@ -57,11 +47,11 @@ const Button = (props) => {
     onClick,
     disabled,
     icon,
-    iconStyle,
-    buttonStyle,
+    iconStyle = 'without-border',
+    buttonStyle = 'primary',
     round,
-    size,
-    iconPosition,
+    size = 'medium',
+    iconPosition = 'right',
   } = props;
 
   const classes = [
@@ -125,47 +115,6 @@ const Button = (props) => {
         </button>
       );
   }
-};
-
-Button.defaultProps = {
-  className: null,
-  type: 'button',
-  buttonStyle: 'primary',
-  el: null,
-  to: null,
-  url: null,
-  children: null,
-  onClick: null,
-  disabled: undefined,
-  icon: null,
-  size: 'medium',
-  round: false,
-  iconPosition: 'right',
-  iconStyle: 'without-border',
-};
-
-Button.propTypes = {
-  round: PropTypes.bool,
-  className: PropTypes.string,
-  type: PropTypes.oneOf(['submit', 'button']),
-  size: PropTypes.oneOf(['small', 'medium']),
-  buttonStyle: PropTypes.oneOf(['primary', 'secondary', 'transparent', 'error', 'none', 'icon-label']),
-  el: PropTypes.oneOf(['link', 'anchor', undefined]),
-  to: PropTypes.string,
-  url: PropTypes.string,
-  children: PropTypes.node,
-  onClick: PropTypes.func,
-  disabled: PropTypes.bool,
-  iconStyle: PropTypes.oneOf([
-    'with-border',
-    'without-border',
-    'none',
-  ]),
-  icon: PropTypes.oneOfType([
-    PropTypes.node,
-    PropTypes.oneOf(['chevron', 'x', 'plus']),
-  ]),
-  iconPosition: PropTypes.oneOf(['left', 'right']),
 };
 
 export default Button;

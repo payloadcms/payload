@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 import Chevron from '../../icons/Chevron';
 import Button from '../Button';
 
@@ -7,9 +7,9 @@ import './index.scss';
 
 const baseClass = 'sort-column';
 
-const SortColumn = (props) => {
+const SortColumn: React.FC<Props> = (props) => {
   const {
-    label, handleChange, name, disable,
+    label, handleChange, name, disable = false,
   } = props;
   const [sort, setSort] = useState(null);
 
@@ -51,17 +51,6 @@ const SortColumn = (props) => {
       )}
     </div>
   );
-};
-
-SortColumn.defaultProps = {
-  disable: false,
-};
-
-SortColumn.propTypes = {
-  label: PropTypes.string.isRequired,
-  handleChange: PropTypes.func.isRequired,
-  name: PropTypes.string.isRequired,
-  disable: PropTypes.bool,
 };
 
 export default SortColumn;

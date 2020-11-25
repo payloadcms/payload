@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { useConfig } from '@payloadcms/config-provider';
+import { Props } from './types';
 import Button from '../Button';
 import { useForm } from '../../forms/Form/context';
 
@@ -9,7 +9,7 @@ import './index.scss';
 
 const baseClass = 'duplicate';
 
-const Duplicate = ({ slug }) => {
+const Duplicate: React.FC<Props> = ({ slug }) => {
   const { push } = useHistory();
   const { getData } = useForm();
   const { routes: { admin } } = useConfig();
@@ -34,10 +34,6 @@ const Duplicate = ({ slug }) => {
       Duplicate
     </Button>
   );
-};
-
-Duplicate.propTypes = {
-  slug: PropTypes.string.isRequired,
 };
 
 export default Duplicate;

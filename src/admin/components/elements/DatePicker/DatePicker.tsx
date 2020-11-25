@@ -1,25 +1,25 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 import CalendarIcon from '../../icons/Calendar';
+import { Props } from './types';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import './index.scss';
 
 const baseClass = 'date-time-picker';
 
-const DateTime = (props) => {
+const DateTime: React.FC<Props> = (props) => {
   const {
     inputDateTimeFormat,
-    useDate,
+    useDate = true,
     minDate,
     maxDate,
-    monthsShown,
-    useTime,
+    monthsShown = 1,
+    useTime = true,
     minTime,
     maxTime,
-    timeIntervals,
-    timeFormat,
+    timeIntervals = 30,
+    timeFormat = 'h:mm aa',
     placeholder: placeholderText,
     value,
     onChange,
@@ -67,49 +67,6 @@ const DateTime = (props) => {
       </div>
     </div>
   );
-};
-
-DateTime.defaultProps = {
-  placeholder: undefined,
-  // date specific props
-  useDate: true,
-  minDate: undefined,
-  maxDate: undefined,
-  monthsShown: 1,
-  inputDateTimeFormat: '',
-  // time specific props
-  useTime: true,
-  minTime: undefined,
-  maxTime: undefined,
-  timeIntervals: 30,
-  timeFormat: 'h:mm aa',
-  value: undefined,
-  onChange: undefined,
-  admin: {},
-};
-
-DateTime.propTypes = {
-  placeholder: PropTypes.string,
-  // date specific props
-  useDate: PropTypes.bool,
-  minDate: PropTypes.instanceOf(Date),
-  maxDate: PropTypes.instanceOf(Date),
-  monthsShown: PropTypes.number,
-  inputDateTimeFormat: PropTypes.string,
-  // time specific props
-  useTime: PropTypes.bool,
-  minTime: PropTypes.instanceOf(Date),
-  maxTime: PropTypes.instanceOf(Date),
-  timeIntervals: PropTypes.number,
-  timeFormat: PropTypes.string,
-  value: PropTypes.oneOfType([
-    PropTypes.instanceOf(Date),
-    PropTypes.string,
-  ]),
-  onChange: PropTypes.func,
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-  }),
 };
 
 export default DateTime;

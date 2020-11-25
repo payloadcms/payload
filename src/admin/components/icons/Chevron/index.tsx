@@ -2,7 +2,7 @@ import React from 'react';
 
 import './index.scss';
 
-const Chevron = () => (
+const Chevron: React.FC = () => (
   <svg
     className="icon icon--chevron"
     xmlns="http://www.w3.org/2000/svg"

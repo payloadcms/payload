@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import SearchFilter from '../SearchFilter';
 import ColumnSelector from '../ColumnSelector';
 import WhereBuilder from '../WhereBuilder';
 import SortComplex from '../SortComplex';
 import Button from '../Button';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'list-controls';
 
-const ListControls = (props) => {
+const ListControls: React.FC<Props> = (props) => {
   const {
     handleChange,
     collection,
-    enableColumns,
-    enableSort,
+    enableColumns = true,
+    enableSort = false,
     setSort,
     collection: {
       fields,
@@ -147,27 +147,6 @@ const ListControls = (props) => {
       )}
     </div>
   );
-};
-
-ListControls.defaultProps = {
-  enableColumns: true,
-  enableSort: false,
-};
-
-ListControls.propTypes = {
-  enableColumns: PropTypes.bool,
-  enableSort: PropTypes.bool,
-  setSort: PropTypes.func.isRequired,
-  collection: PropTypes.shape({
-    admin: PropTypes.shape({
-      useAsTitle: PropTypes.string,
-      defaultColumns: PropTypes.arrayOf(
-        PropTypes.string,
-      ),
-    }),
-    fields: PropTypes.arrayOf(PropTypes.shape),
-  }).isRequired,
-  handleChange: PropTypes.func.isRequired,
 };
 
 export default ListControls;

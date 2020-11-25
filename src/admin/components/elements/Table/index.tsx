@@ -1,11 +1,11 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'table';
 
-const Table = ({ columns, data }) => {
+const Table: React.FC<Props> = ({ columns, data }) => {
   if (columns && columns.length > 0) {
     return (
       <div className={baseClass}>
@@ -41,20 +41,4 @@ const Table = ({ columns, data }) => {
 
   return null;
 };
-
-Table.propTypes = {
-  columns: PropTypes.arrayOf(
-    PropTypes.shape({
-      accessor: PropTypes.string,
-      components: PropTypes.shape({
-        Heading: PropTypes.node,
-        renderCell: PropTypes.function,
-      }),
-    }),
-  ).isRequired,
-  data: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
-};
-
 export default Table;

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import Thumbnail from '../Thumbnail';
 import Button from '../Button';
 import Meta from './Meta';
+import { Props } from './types';
 
 import Chevron from '../../icons/Chevron';
 
@@ -11,9 +11,17 @@ import './index.scss';
 
 const baseClass = 'file-details';
 
-const FileDetails = (props) => {
+const FileDetails: React.FC<Props> = (props) => {
   const {
-    filename, mimeType, filesize, staticURL, adminThumbnail, sizes, handleRemove, width, height,
+    filename,
+    mimeType,
+    filesize,
+    staticURL,
+    adminThumbnail,
+    sizes,
+    handleRemove,
+    width,
+    height,
   } = props;
 
   const [moreInfoOpen, setMoreInfoOpen] = useState(false);
@@ -92,26 +100,6 @@ const FileDetails = (props) => {
 
     </div>
   );
-};
-
-FileDetails.defaultProps = {
-  adminThumbnail: undefined,
-  handleRemove: undefined,
-  width: undefined,
-  height: undefined,
-  sizes: undefined,
-};
-
-FileDetails.propTypes = {
-  filename: PropTypes.string.isRequired,
-  mimeType: PropTypes.string.isRequired,
-  filesize: PropTypes.number.isRequired,
-  staticURL: PropTypes.string.isRequired,
-  width: PropTypes.number,
-  height: PropTypes.number,
-  sizes: PropTypes.shape({}),
-  adminThumbnail: PropTypes.string,
-  handleRemove: PropTypes.func,
 };
 
 export default FileDetails;

@@ -1,18 +1,17 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import Select from 'react-select';
+import { Props } from './types';
 import Chevron from '../../icons/Chevron';
 
 import './index.scss';
 
-const ReactSelect = (props) => {
+const ReactSelect: React.FC<Props> = (props) => {
   const {
-    showError,
+    showError = false,
     options,
-    isMulti,
+    isMulti = false,
     onChange,
     value,
-    disabled,
+    disabled = false,
     formatValue,
   } = props;
 
@@ -71,40 +70,6 @@ const ReactSelect = (props) => {
       })}
     />
   );
-};
-
-ReactSelect.defaultProps = {
-  isMulti: false,
-  value: undefined,
-  showError: false,
-  disabled: false,
-  formatValue: null,
-  options: [],
-  onChange: () => { },
-};
-
-ReactSelect.propTypes = {
-  value: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.array,
-    PropTypes.shape({}),
-  ]),
-  onChange: PropTypes.func,
-  disabled: PropTypes.bool,
-  showError: PropTypes.bool,
-  formatValue: PropTypes.func,
-  options: PropTypes.oneOfType([
-    PropTypes.arrayOf(
-      PropTypes.string,
-    ),
-    PropTypes.arrayOf(
-      PropTypes.shape({
-        value: PropTypes.string,
-        label: PropTypes.string,
-      }),
-    ),
-  ]),
-  isMulti: PropTypes.bool,
 };
 
 export default ReactSelect;

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const LinkIcon = () => (
+const LinkIcon: React.FC = () => (
   <svg
     viewBox="0 0 24 24"
     aria-hidden="true"

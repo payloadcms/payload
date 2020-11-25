@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { v4 as uuid } from 'uuid';
 
-const DefaultBlockImage = () => {
+const DefaultBlockImage: React.FC = () => {
   const [patternID] = useState(`pattern${uuid()}`);
   const [imageID] = useState(`image${uuid()}`);
 
