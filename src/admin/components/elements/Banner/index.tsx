@@ -36,7 +36,9 @@ const Banner = ({
           {icon}
         </React.Fragment>
       )}
-      {children}
+      <span className={`${baseClass}__content`}>
+        {children}
+      </span>
       {(icon && alignIcon === 'right') && (
         <React.Fragment>
           {icon}
