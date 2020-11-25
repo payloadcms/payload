@@ -2,8 +2,8 @@ import React, {
   Component, useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
-import some from 'async-some';
 import { useConfig } from '@payloadcms/config-provider';
+import some from '../../../../../utilities/asyncSome';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
