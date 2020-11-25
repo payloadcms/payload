@@ -1,5 +1,6 @@
 import executeAccess from '../auth/executeAccess';
 import { OperationArguments } from '../types';
+import { RelationshipField } from './config/types';
 
 const populate = async ({
   depth,
@@ -15,7 +16,8 @@ const populate = async ({
 }: OperationArguments) => {
   const dataToUpdate = dataReference;
 
-  const relation = Array.isArray(field.relationTo) ? data.relationTo : field.relationTo;
+  const fieldAsRelationship = field as RelationshipField;
+  const relation = Array.isArray(fieldAsRelationship.relationTo) ? data.relationTo : fieldAsRelationship.relationTo;
   const relatedCollection = payload.collections[relation];
 
   if (relatedCollection) {
@@ -24,7 +26,7 @@ const populate = async ({
     let populatedRelationship = null;
 
     if (accessResult && (depth && currentDepth <= depth)) {
-      let idString = Array.isArray(field.relationTo) ? data.value : data;
+      let idString = Array.isArray(fieldAsRelationship.relationTo) ? data.value : data;
 
       if (typeof idString !== 'string') {
         idString = idString.toString();
@@ -45,12 +47,12 @@ const populate = async ({
     // If populatedRelationship comes back, update value
     if (!accessResult || populatedRelationship) {
       if (typeof index === 'number') {
-        if (Array.isArray(field.relationTo)) {
+        if (Array.isArray(fieldAsRelationship.relationTo)) {
           dataToUpdate[field.name][index].value = populatedRelationship;
         } else {
           dataToUpdate[field.name][index] = populatedRelationship;
         }
-      } else if (Array.isArray(field.relationTo)) {
+      } else if (Array.isArray(fieldAsRelationship.relationTo)) {
         dataToUpdate[field.name].value = populatedRelationship;
       } else {
         dataToUpdate[field.name] = populatedRelationship;

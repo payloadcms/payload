@@ -9,25 +9,39 @@ import {
   GraphQLList,
   GraphQLObjectType,
   GraphQLString,
+  GraphQLType,
   GraphQLUnionType,
 } from 'graphql';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
+import { Field, RadioField, RelationshipField, RelationshipManyField, SelectField, UploadField } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import withNullableType from './withNullableType';
+
+type LocaleInputType = {
+  locale: {
+    type: GraphQLType;
+  },
+  fallbackLocale: {
+    type: GraphQLType;
+  },
+  where: {
+    type: GraphQLType;
+  }
+}
 
 function buildObjectType(name, fields, parentName, baseFields = {}) {
   const recursiveBuildObjectType = buildObjectType.bind(this);
 
   const fieldToSchemaMap = {
-    number: (field) => ({ type: withNullableType(field, GraphQLFloat) }),
-    text: (field) => ({ type: withNullableType(field, GraphQLString) }),
-    email: (field) => ({ type: withNullableType(field, EmailAddressResolver) }),
-    textarea: (field) => ({ type: withNullableType(field, GraphQLString) }),
-    richText: (field) => ({ type: withNullableType(field, GraphQLJSON) }),
-    code: (field) => ({ type: withNullableType(field, GraphQLString) }),
-    date: (field) => ({ type: withNullableType(field, DateTimeResolver) }),
-    upload: (field) => {
+    number: (field: Field) => ({ type: withNullableType(field, GraphQLFloat) }),
+    text: (field: Field) => ({ type: withNullableType(field, GraphQLString) }),
+    email: (field: Field) => ({ type: withNullableType(field, EmailAddressResolver) }),
+    textarea: (field: Field) => ({ type: withNullableType(field, GraphQLString) }),
+    richText: (field: Field) => ({ type: withNullableType(field, GraphQLJSON) }),
+    code: (field: Field) => ({ type: withNullableType(field, GraphQLString) }),
+    date: (field: Field) => ({ type: withNullableType(field, DateTimeResolver) }),
+    upload: (field: UploadField) => {
       const { relationTo, label } = field;
       const uploadName = combineParentName(parentName, label);
 
@@ -38,7 +52,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
 
       const type = this.collections[relationTo].graphQL.type || newlyCreatedBlockType;
 
-      const uploadArgs = {};
+      const uploadArgs = {} as LocaleInputType;
 
       if (this.config.localization) {
         uploadArgs.locale = {
@@ -108,7 +122,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
 
       return upload;
     },
-    radio: (field) => ({
+    radio: (field: RadioField) => ({
       type: withNullableType(
         field,
         new GraphQLEnumType({
@@ -122,11 +136,11 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
         }),
       ),
     }),
-    checkbox: (field) => ({ type: withNullableType(field, GraphQLBoolean) }),
-    select: (field) => {
+    checkbox: (field: Field) => ({ type: withNullableType(field, GraphQLBoolean) }),
+    select: (field: SelectField) => {
       const fullName = combineParentName(parentName, field.name);
 
-      let type = new GraphQLEnumType({
+      let type: GraphQLType = new GraphQLEnumType({
         name: fullName,
         values: field.options.reduce((values, option) => {
           if (typeof option === 'object' && option.value) {
@@ -156,7 +170,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
 
       return { type };
     },
-    relationship: (field) => {
+    relationship: (field: RelationshipField) => {
       const { relationTo, label } = field;
       const isRelatedToManyCollections = Array.isArray(relationTo);
       const hasManyValues = field.hasMany;
@@ -168,7 +182,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
       if (isRelatedToManyCollections) {
         relationToType = new GraphQLEnumType({
           name: `${relationshipName}_RelationTo`,
-          values: field.relationTo.reduce((relations, relation) => ({
+          values: (field as RelationshipManyField).relationTo.reduce((relations, relation) => ({
             ...relations,
             [formatName(relation)]: {
               value: relation,
@@ -200,7 +214,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
           },
         });
       } else {
-        ({ type } = this.collections[relationTo].graphQL);
+        ({ type } = this.collections[relationTo as string].graphQL);
       }
 
       // If the relationshipType is undefined at this point,
@@ -210,7 +224,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
 
       type = type || newlyCreatedBlockType;
 
-      const relationshipArgs = {};
+      const relationshipArgs = {} as LocaleInputType;
 
       if (this.config.localization) {
         relationshipArgs.locale = {

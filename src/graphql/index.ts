@@ -1,5 +1,5 @@
 import GraphQL, { GraphQLObjectType, GraphQLSchema } from 'graphql';
-import graphQLHTTP from 'express-graphql';
+import { graphqlHTTP } from 'express-graphql';
 import queryComplexity, { simpleEstimator, fieldExtensionsEstimator } from 'graphql-query-complexity';
 import buildObjectType from './schema/buildObjectType';
 import buildMutationInputType from './schema/buildMutationInputType';
@@ -12,7 +12,48 @@ import initCollections from '../collections/graphql/init';
 import initGlobals from '../globals/graphql/init';
 import buildWhereInputType from './schema/buildWhereInputType';
 import access from '../auth/graphql/resolvers/access';
+import { Config } from '../config/types';
+
+type GraphQLTypes = {
+  blockTypes: any;
+  blockInputTypes: any;
+  localeInputType: any;
+  fallbackLocaleInputType: any;
+}
+
 class InitializeGraphQL {
+  types: GraphQLTypes;
+
+  config: Config;
+
+  Query: { name: string; fields: { [key: string]: any } } = { name: 'Query', fields: {} };
+
+  Mutation: { name: string; fields: { [key: string]: any } } = { name: 'Mutation', fields: {} };
+
+  buildBlockType: typeof buildBlockType;
+
+  buildMutationInputType: typeof buildMutationInputType;
+
+  buildWhereInputType: (name: any, fields: any, parentName: any) => GraphQL.GraphQLInputObjectType;
+
+  buildObjectType: typeof buildObjectType;
+
+  buildPoliciesType: typeof buildPoliciesType;
+
+  initCollections: typeof initCollections;
+
+  initGlobals: typeof initGlobals;
+
+  schema: GraphQL.GraphQLSchema;
+
+  extensions: (info: any) => Promise<any>;
+
+  customFormatErrorFn: () => any;
+
+  validationRules: any;
+
+  errorResponse: any;
+
   constructor(init) {
     Object.assign(this, init);
     this.init = this.init.bind(this);
@@ -20,7 +61,7 @@ class InitializeGraphQL {
     this.types = {
       blockTypes: {},
       blockInputTypes: {},
-    };
+    } as GraphQLTypes;
 
     if (this.config.localization) {
       this.types.localeInputType = buildLocaleInputType(this.config.localization);
@@ -108,7 +149,7 @@ class InitializeGraphQL {
 
   init(req, res) {
     this.errorResponse = null;
-    return graphQLHTTP(
+    return graphqlHTTP(
       async (request, response, { variables }) => ({
         schema: this.schema,
         customFormatErrorFn: this.customFormatErrorFn,

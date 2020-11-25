@@ -1,4 +1,4 @@
-function uppercase(str) {
+function uppercase(str: string): string {
   const array1 = str.split(' ');
   const newarray1 = [];
 
