@@ -10,6 +10,8 @@ import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
 import { relationship } from '../../../../../fields/validations';
+import { PaginatedDocs } from '../../../../../collections/config/types';
+import { RelationshipProps, OptionsPage } from './types';
 
 import './index.scss';
 
@@ -17,7 +19,7 @@ const maxResultsPerRequest = 10;
 
 const baseClass = 'relationship';
 
-class Relationship extends Component {
+class Relationship extends Component<RelationshipProps> {
   constructor(props) {
     super(props);
 
@@ -77,7 +79,7 @@ class Relationship extends Component {
           const fieldToSearch = collection?.admin?.useAsTitle || 'id';
           const searchParam = search ? `&where[${fieldToSearch}][like]=${search}` : '';
           const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}${searchParam}`);
-          const data = await response.json();
+          const data: PaginatedDocs = await response.json();
 
           if (response.ok) {
             if (data.hasNextPage) {
@@ -87,7 +89,7 @@ class Relationship extends Component {
               });
             }
 
-            return callback({ relation, data });
+            return callback(true, { relation, data });
           }
 
           let error = 'There was a problem loading options for this field.';
@@ -99,7 +101,7 @@ class Relationship extends Component {
           return this.setState({
             errorLoading: error,
           });
-        }, (lastPage, nextPage) => {
+        }, (lastPage: OptionsPage, nextPage: OptionsPage) => {
           if (nextPage) {
             const { data, relation } = nextPage;
             this.addOptions(data, relation);

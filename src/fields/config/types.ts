@@ -39,7 +39,7 @@ type FieldBase = {
     readOnly?: boolean;
     disabled?: boolean;
     condition?: (...args: any[]) => any | void;
-    components?: { [key: string]: JSX.Element | (() => JSX.Element) };
+    components?: { [key: string]: React.ComponentType };
   };
   access?: {
     create?: Access;

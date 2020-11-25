@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useContext, useState } from 'react';
-import PropTypes from 'prop-types';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import useIntersect from '../../../hooks/useIntersect';
+import { Props, Context } from './types';
 
 const baseClass = 'render-fields';
 
@@ -9,11 +9,11 @@ const intersectionObserverOptions = {
   rootMargin: '1000px',
 };
 
-const RenderedFieldContext = createContext({});
+const RenderedFieldContext = createContext({} as Context);
 
-export const useRenderedFields = () => useContext(RenderedFieldContext);
+export const useRenderedFields = (): Context => useContext(RenderedFieldContext);
 
-const RenderFields: React.FC = (props) => {
+const RenderFields: React.FC<Props> = (props) => {
   const {
     fieldSchema,
     fieldTypes,
@@ -133,28 +133,6 @@ const RenderFields: React.FC = (props) => {
   }
 
   return null;
-};
-
-RenderFields.defaultProps = {
-  filter: null,
-  readOnly: false,
-  permissions: {},
-  operation: undefined,
-  className: undefined,
-};
-
-RenderFields.propTypes = {
-  fieldSchema: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
-  fieldTypes: PropTypes.shape({
-    hidden: PropTypes.function,
-  }).isRequired,
-  filter: PropTypes.func,
-  permissions: PropTypes.shape({}),
-  readOnly: PropTypes.bool,
-  operation: PropTypes.string,
-  className: PropTypes.string,
 };
 
 export default RenderFields;
