@@ -5,17 +5,17 @@ import PropTypes from 'prop-types';
 import { useConfig } from '@payloadcms/config-provider';
 import { useSearchParams } from '../SearchParams';
 
-const Context = createContext({});
+const Context = createContext('');
 
-export const LocaleProvider = ({ children }) => {
+export const LocaleProvider: React.FC = ({ children }) => {
   const { localization } = useConfig();
   const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
-  const [locale, setLocale] = useState(defaultLocale);
+  const [locale, setLocale] = useState<string>(defaultLocale);
   const searchParams = useSearchParams();
   const localeFromParams = searchParams.locale;
 
   useEffect(() => {
-    if (localeFromParams && localization.locales.indexOf(localeFromParams) > -1) setLocale(localeFromParams);
+    if (localeFromParams && localization.locales.indexOf(localeFromParams) > -1) setLocale(localeFromParams as string);
   }, [localeFromParams, localization]);
 
   return (
@@ -25,7 +25,7 @@ export const LocaleProvider = ({ children }) => {
   );
 };
 
-export const useLocale = () => useContext(Context);
+export const useLocale = (): string => useContext(Context);
 
 LocaleProvider.propTypes = {
   children: PropTypes.oneOfType([
