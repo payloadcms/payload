@@ -101,7 +101,7 @@ export default (config: Config): Configuration => {
           config.admin && config.admin.indexHTML
             ? path.join(config.paths.configDir, config.admin.indexHTML)
             : path.resolve(__dirname, '../admin/index.html'),
-        filename: './index.html',
+        filename: path.normalize('./index.html'),
       }),
       new webpack.HotModuleReplacementPlugin(),
     ],
