@@ -139,7 +139,6 @@ export class Payload {
     this.initCollections = initCollections.bind(this);
     this.initGlobals = initGlobals.bind(this);
     this.initGraphQLPlayground = initGraphQLPlayground.bind(this);
-    // this.buildEmail = buildEmail.bind(this);
     this.sendEmail = this.sendEmail.bind(this);
     this.getMockEmailCredentials = this.getMockEmailCredentials.bind(this);
     this.initStatic = initStatic.bind(this);

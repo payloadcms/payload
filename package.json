@@ -171,6 +171,7 @@
     "@types/mongodb": "^3.5.34",
     "@types/mongoose": "^5.10.1",
     "@types/mongoose-paginate-v2": "^1.3.8",
+    "@types/node-fetch": "^2.5.7",
     "@types/node-sass": "^4.11.1",
     "@types/nodemailer": "^6.4.0",
     "@types/nodemon": "^1.19.0",

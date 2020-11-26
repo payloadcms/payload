@@ -52,6 +52,7 @@ type FieldBase = {
 }
 
 export type StandardField = FieldBase & {
+  type: string;
   fields?: Field[];
 }
 
@@ -120,6 +121,7 @@ export type RadioField = FieldBase & {
     value: string;
     label: string;
   }[];
+  hasMany?: boolean;
 }
 
 export type Block = {
@@ -135,23 +137,16 @@ export type BlockField = FieldBase & {
   type: 'blocks';
   minRows?: number;
   maxRows?: number;
-  blocks?: Block[];
+  blocks?: Field[];
 };
 
-export type Field = NumberField
-  | TextField
-  | EmailField
-  | TextareaField
-  | CodeField
-  | CheckboxField
-  | DateField
+export type Field =
+  | StandardField
   | BlockField
   | RadioField
   | RelationshipField
   | ArrayField
   | RichTextField
-  | GroupField
-  | RowField
   | SelectField
   | SelectManyField
   | UploadField;
