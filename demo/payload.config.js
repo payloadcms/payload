@@ -33,11 +33,11 @@ module.exports = buildConfig({
   admin: {
     user: 'admins',
     // indexHTML: 'custom-index.html',
-    meta: {
-      titleSuffix: '- Payload Demo',
-      // ogImage: '/static/find-image-here.jpg',
-      // favicon: '/img/whatever.png',
-    },
+    // meta: {
+    //   titleSuffix: '- Payload Demo',
+    //   // ogImage: '/static/find-image-here.jpg',
+    //   // favicon: '/img/whatever.png',
+    // },
     disable: false,
     components: {
       // Nav: () => (

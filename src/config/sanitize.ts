@@ -11,8 +11,6 @@ const sanitizeConfig = (config: Config): Config => {
   // TODO: remove default values from sanitize in favor of assigning in the schema within validateSchema and use https://www.npmjs.com/package/ajv#coercing-data-types where needed
   if (sanitizedConfig.publicENV === undefined) sanitizedConfig.publicENV = {};
 
-  if (sanitizedConfig.defaultDepth === undefined) sanitizedConfig.defaultDepth = 2;
-
   sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig.collections, collection));
   checkDuplicateCollections(sanitizedConfig.collections);
 

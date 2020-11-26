@@ -1,20 +1,22 @@
-import Ajv from 'ajv';
-import * as configSchema from './schema.json';
-import * as collectionSchema from '../collections/config/schema.json';
-
-import InvalidSchema from '../errors/InvalidSchema';
+import schema from './schema';
 import { PayloadConfig, Config } from './types';
 
 const validateSchema = (config: PayloadConfig): Config => {
-  const ajv = new Ajv({ useDefaults: true });
-  const validate = ajv.addSchema(collectionSchema, '../collections/config/schema.json').compile(configSchema);
-  const valid = validate(config);
+  const result = schema.validate(config, {
+    abortEarly: false,
+  });
 
-  if (!valid) {
-    throw new InvalidSchema(`Invalid payload config provided. Found ${validate.errors.length} errors`, validate.errors);
+  if (result.error) {
+    console.error(`There were ${result.error.details.length} errors validating your Payload config`);
+
+    result.error.details.forEach(({ message }, i) => {
+      console.error(`${i + 1}: ${message}`);
+    });
+
+    process.exit(1);
   }
 
-  return config as Config;
+  return result.value as Config;
 };
 
 export default validateSchema;
