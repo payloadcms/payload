@@ -7,15 +7,16 @@ import { UpdateQuery } from 'mongodb';
 import apiKeyStrategy from '../auth/strategies/apiKey';
 import buildSchema from './buildSchema';
 import bindCollectionMiddleware from './bindCollection';
-import { Collection } from './config/types';
+import { CollectionConfig } from './config/types';
+import { Payload } from '../index';
 
 const LocalStrategy = Passport.Strategy;
 
-export default function registerCollections(): void {
-  this.config.collections = this.config.collections.map((collection: Collection) => {
+export default function registerCollections(ctx: Payload): void {
+  ctx.config.collections = ctx.config.collections.map((collection: CollectionConfig) => {
     const formattedCollection = collection;
 
-    const schema = buildSchema(formattedCollection, this.config);
+    const schema = buildSchema(formattedCollection, ctx.config);
 
     if (collection.auth) {
       schema.plugin(passportLocalMongoose, {
@@ -55,17 +56,17 @@ export default function registerCollections(): void {
       }
     }
 
-    this.collections[formattedCollection.slug] = {
+    ctx.collections[formattedCollection.slug] = {
       Model: mongoose.model(formattedCollection.slug, schema),
       config: formattedCollection,
     };
 
     // If not local, open routes
-    if (!this.config.local) {
+    if (!ctx.config.local) {
       const router = express.Router();
       const { slug } = collection;
 
-      router.all(`/${slug}*`, bindCollectionMiddleware(this.collections[formattedCollection.slug]));
+      router.all(`/${slug}*`, bindCollectionMiddleware(ctx.collections[formattedCollection.slug]));
 
       const {
         create,
@@ -73,14 +74,14 @@ export default function registerCollections(): void {
         update,
         findByID,
         delete: deleteHandler,
-      } = this.requestHandlers.collections;
+      } = ctx.requestHandlers.collections;
 
       if (collection.auth) {
-        const AuthCollection = this.collections[formattedCollection.slug];
+        const AuthCollection = ctx.collections[formattedCollection.slug];
         passport.use(new LocalStrategy(AuthCollection.Model.authenticate()));
 
         if (collection.auth.useAPIKey) {
-          passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(this, AuthCollection));
+          passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(ctx, AuthCollection));
         }
 
         const {
@@ -94,7 +95,7 @@ export default function registerCollections(): void {
           resetPassword,
           verifyEmail,
           unlock,
-        } = this.requestHandlers.collections.auth;
+        } = ctx.requestHandlers.collections.auth;
 
         if (collection.auth.verify) {
           router
@@ -150,7 +151,7 @@ export default function registerCollections(): void {
         .get(findByID)
         .delete(deleteHandler);
 
-      this.router.use(router);
+      ctx.router.use(router);
     }
 
     return formattedCollection;

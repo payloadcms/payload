@@ -1,6 +1,7 @@
 import passport from 'passport';
+import { PayloadConfig } from '../../config/types';
 
-export default (config) => {
+export default (config: PayloadConfig) => {
   const methods = config.collections.reduce((enabledMethods, collection) => {
     if (collection.auth && collection.auth.useAPIKey) {
       const collectionMethods = [...enabledMethods];

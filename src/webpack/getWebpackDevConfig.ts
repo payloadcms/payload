@@ -1,12 +1,12 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import path from 'path';
 import webpack, { Configuration } from 'webpack';
-import { Config } from '../config/types';
 import babelConfig from '../babel.config';
+import { PayloadConfig } from '../config/types';
 
 const mockModulePath = path.resolve(__dirname, './mocks/emptyModule.js');
 
-export default (config: Config): Configuration => {
+export default (config: PayloadConfig): Configuration => {
   let webpackConfig: Configuration = {
     entry: {
       main: [

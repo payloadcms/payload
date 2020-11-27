@@ -1,3 +1,4 @@
+import { Payload } from '../index';
 import access from '../auth/operations/access';
 import forgotPassword from '../auth/operations/forgotPassword';
 import init from '../auth/operations/init';
@@ -19,7 +20,7 @@ import deleteHandler from '../collections/operations/delete';
 import findOne from '../globals/operations/findOne';
 import globalUpdate from '../globals/operations/update';
 
-function bindOperations(ctx): void {
+function bindOperations(ctx: Payload): void {
   ctx.operations = {
     collections: {
       create: create.bind(ctx),

@@ -1,4 +1,4 @@
-import { Express } from 'express';
+import { Express, Response } from 'express';
 import joi from 'joi';
 import 'joi-extract-type';
 import { DeepRequired } from 'ts-essentials';
@@ -31,7 +31,7 @@ export type InitOptions = {
   license?: string;
   email?: EmailOptions;
   local?: boolean;
-  onInit?: () => void;
+  onInit?: (Payload) => void;
 };
 
 export type SendEmailOptions = {
@@ -50,9 +50,11 @@ export type MockEmailCredentials = {
 export type Access = (args?: any) => boolean;
 
 // Create type out of Joi schema
-// Extend the type with a bit more specificity
+// Extend the type with a bit more TypeScript specificity
 
-export type PayloadConfig = joi.extractType<typeof schema> & {
+type PayloadConfigFromSchema = joi.extractType<typeof schema>
+
+export interface PayloadConfig extends PayloadConfigFromSchema {
   graphQL: {
     mutations: {
       [key: string]: unknown
@@ -64,6 +66,9 @@ export type PayloadConfig = joi.extractType<typeof schema> & {
     disablePlaygroundInProduction: boolean;
   },
   email: EmailOptions,
-};
+  hooks: {
+    afterError: (err: Error, res: Response) => void,
+  }
+}
 
 export type Config = DeepRequired<PayloadConfig>

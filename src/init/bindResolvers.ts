@@ -17,8 +17,9 @@ import deleteResolver from '../collections/graphql/resolvers/delete';
 
 import findOne from '../globals/graphql/resolvers/findOne';
 import globalUpdate from '../globals/graphql/resolvers/update';
+import { Payload } from '../index';
 
-function bindResolvers(ctx): void {
+function bindResolvers(ctx: Payload): void {
   ctx.graphQL = {
     resolvers: {
       collections: {

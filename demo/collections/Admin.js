@@ -45,6 +45,7 @@ module.exports = {
     },
     {
       name: 'apiKey',
+      type: 'text',
       access: {
         read: ({ req: { user } }) => {
           if (checkRole(['admin'], user)) {

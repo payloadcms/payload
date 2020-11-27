@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import mongoose from 'mongoose';
 import Logger from '../utilities/logger';
+
 const logger = Logger();
 
 const connectMongoose = async (url: string) => {

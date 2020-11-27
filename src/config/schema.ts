@@ -89,6 +89,8 @@ const schema = joi.object().keys({
     .keys({
       window: joi.number().default(15 * 60 * 100),
       max: joi.number().default(500),
+      trustProxy: joi.boolean().default(false),
+      skip: joi.func(),
     }).default(),
   graphQL: joi.object()
     .keys({
@@ -97,6 +99,16 @@ const schema = joi.object().keys({
       maxComplexity: joi.number().default(1000),
       disablePlaygroundInProduction: joi.boolean().default(true),
     }).default(),
+  compression: joi.object().unknown(),
+  localization: joi.alternatives()
+    .try(
+      joi.object().keys({
+        locales: joi.array().items(joi.string()),
+        defaultLocale: joi.string(),
+        fallback: joi.boolean(),
+      }),
+      joi.boolean(),
+    ).default(false),
   email: joi.alternatives()
     .try(
       joi.object()
@@ -122,6 +134,6 @@ const schema = joi.object().keys({
       config: joi.string(),
       scss: joi.string().default(path.resolve(__dirname, '../admin/scss/overrides.scss')),
     }).default(),
-}).unknown();
+});
 
 export default schema;

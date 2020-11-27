@@ -13,6 +13,7 @@ const validateSchema = (config: PayloadConfig): Config => {
     logger.error(`There were ${result.error.details.length} errors validating your Payload config`);
 
     result.error.details.forEach(({ message }, i) => {
+      console.log(JSON.stringify(result.error.details[i]));
       logger.error(`${i + 1}: ${message}`);
     });
 

@@ -1,9 +1,10 @@
 import graphQLPlayground from 'graphql-playground-middleware-express';
+import { Payload } from '../index';
 
-function initPlayground(): void {
-  if ((!this.config.graphQL.disablePlaygroundInProduction && process.env.NODE_ENV === 'production') || process.env.NODE_ENV !== 'production') {
-    this.router.get(this.config.routes.graphQLPlayground, graphQLPlayground({
-      endpoint: `${this.config.routes.api}${this.config.routes.graphQL}`,
+function initPlayground(ctx: Payload): void {
+  if ((!ctx.config.graphQL.disablePlaygroundInProduction && process.env.NODE_ENV === 'production') || process.env.NODE_ENV !== 'production') {
+    ctx.router.get(ctx.config.routes.graphQLPlayground, graphQLPlayground({
+      endpoint: `${ctx.config.routes.api}${ctx.config.routes.graphQL}`,
       settings: {
         'request.credentials': 'include',
       },

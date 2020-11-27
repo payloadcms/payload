@@ -1,69 +1,48 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import joi from 'joi';
+import 'joi-extract-type';
+import { PaginateModel, Document, PassportLocalModel } from 'mongoose';
+import { DeepRequired } from 'ts-essentials';
 import { Access } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types/payloadRequest';
+import schema from './schema';
+
+interface PayloadModel extends PaginateModel<Document>, PassportLocalModel<Document>{}
 
 export type Collection = {
-  slug: string;
-  labels: {
-    singular: string;
-    plural: string;
-  };
-  fields: Field[];
-  admin: {
-    useAsTitle: string;
-    defaultColumns: string[];
-    components: any;
-  };
+  Model: PayloadModel;
+  config: CollectionConfig;
+};
+
+type PayloadCollectionConfigFromSchema = joi.extractType<typeof schema>
+
+interface PayloadCollectionConfig extends PayloadCollectionConfigFromSchema {
   hooks: {
-    beforeOperation?: BeforeOperationHook[];
-    beforeValidate?: BeforeValidateHook[];
-    beforeChange?: BeforeChangeHook[];
-    afterChange?: AfterChangeHook[];
-    beforeRead?: BeforeReadHook[];
-    afterRead?: AfterReadHook[];
-    beforeDelete?: BeforeDeleteHook[];
-    afterDelete?: AfterDeleteHook[];
-    beforeLogin?: BeforeLoginHook[];
-    afterLogin?: AfterLoginHook[];
-    afterForgotPassword?: AfterForgotPasswordHook[];
-  };
-  access: {
-    create: Access;
-    read: Access;
-    update: Access;
-    delete: Access;
-    admin: Access;
+    beforeOperation: BeforeOperationHook[];
+    beforeValidate: BeforeValidateHook[];
+    beforeChange: BeforeChangeHook[];
+    afterChange: AfterChangeHook[];
+    beforeRead: BeforeReadHook[];
+    afterRead: AfterReadHook[];
+    beforeDelete: BeforeDeleteHook[];
+    afterDelete: AfterDeleteHook[];
+    beforeLogin: BeforeLoginHook[];
+    afterLogin: AfterLoginHook[];
+    afterForgotPassword: AfterForgotPasswordHook[];
+  }
+  access?: {
+    create?: Access;
+    read?: Access;
+    update?: Access;
+    delete?: Access;
+    admin?: Access;
     unlock: Access;
   };
-  auth?: {
-    tokenExpiration: number;
-    verify:
-    | boolean
-    | { generateEmailHTML: string; generateEmailSubject: string };
-    maxLoginAttempts: number;
-    lockTime: number;
-    useAPIKey: boolean;
-    cookies:
-    | {
-      secure: boolean;
-      sameSite: string;
-      domain?: string;
-    }
-    | boolean;
-    forgotPassword?: {
-      generateEmailHTML?: (args?: { token?: string, email?: string, req?: PayloadRequest }) => string,
-      generateEmailSubject?: (args?: { req?: PayloadRequest }) => string,
-    }
-  };
-  upload: {
-    imageSizes: ImageSize[];
-    staticURL: string;
-    staticDir: string;
-    adminThumbnail?: string;
-  };
-};
+}
+
+export type CollectionConfig = DeepRequired<PayloadCollectionConfig>
 
 export type ImageSize = {
   name: string,

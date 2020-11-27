@@ -1,25 +1,26 @@
 import express from 'express';
 import buildModel from './buildModel';
+import { Payload } from '../index';
 
-export default function initGlobals(): void {
-  if (this.config.globals) {
-    this.globals = {
-      Model: buildModel(this.config),
-      config: this.config.globals,
+export default function initGlobals(ctx: Payload): void {
+  if (ctx.config.globals) {
+    ctx.globals = {
+      Model: buildModel(ctx.config),
+      config: ctx.config.globals,
     };
 
     // If not local, open routes
-    if (!this.config.local) {
+    if (!ctx.config.local) {
       const router = express.Router();
 
-      this.config.globals.forEach((global) => {
+      ctx.config.globals.forEach((global) => {
         router
           .route(`/globals/${global.slug}`)
-          .get(this.requestHandlers.globals.findOne(global))
-          .post(this.requestHandlers.globals.update(global));
+          .get(ctx.requestHandlers.globals.findOne(global))
+          .post(ctx.requestHandlers.globals.update(global));
       });
 
-      this.router.use(router);
+      ctx.router.use(router);
     }
   }
 }
