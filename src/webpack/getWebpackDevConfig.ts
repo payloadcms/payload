@@ -79,6 +79,7 @@ export default (config: Config): Configuration => {
       alias: {
         'payload/config': config.paths.config,
         '@payloadcms/payload$': mockModulePath,
+        'payload-scss-overrides': config.paths.scss,
       },
       extensions: ['.ts', '.tsx', '.js', '.json'],
     },
@@ -96,10 +97,7 @@ export default (config: Config): Configuration => {
         ),
       ),
       new HtmlWebpackPlugin({
-        template:
-          config.admin && config.admin.indexHTML
-            ? path.join(config.paths.configDir, config.admin.indexHTML)
-            : path.resolve(__dirname, '../admin/index.html'),
+        template: config.admin.indexHTML,
         filename: path.normalize('./index.html'),
       }),
       new webpack.HotModuleReplacementPlugin(),
@@ -110,13 +108,6 @@ export default (config: Config): Configuration => {
     config.serverModules.forEach((mod) => {
       webpackConfig.resolve.alias[mod] = mockModulePath;
     });
-  }
-
-  if (config.paths.scss) {
-    const overridePath = path.join(config.paths.configDir, config.paths.scss);
-    webpackConfig.resolve.alias['payload-scss-overrides'] = overridePath;
-  } else {
-    webpackConfig.resolve.alias['payload-scss-overrides'] = path.resolve(__dirname, '../admin/scss/overrides.scss');
   }
 
   if (config.webpack && typeof config.webpack === 'function') {

@@ -125,10 +125,6 @@ export class Payload {
 
     this.config = loadConfig();
 
-    if (typeof this.config.paths === 'undefined') this.config.paths = {};
-
-    // this.collections = {};
-
     bindOperations(this);
     bindRequestHandlers(this);
     bindResolvers(this);

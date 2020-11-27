@@ -1,5 +1,8 @@
 import schema from './schema';
+import Logger from '../utilities/logger';
 import { PayloadConfig, Config } from './types';
+
+const logger = Logger();
 
 const validateSchema = (config: PayloadConfig): Config => {
   const result = schema.validate(config, {
@@ -7,10 +10,10 @@ const validateSchema = (config: PayloadConfig): Config => {
   });
 
   if (result.error) {
-    console.error(`There were ${result.error.details.length} errors validating your Payload config`);
+    logger.error(`There were ${result.error.details.length} errors validating your Payload config`);
 
     result.error.details.forEach(({ message }, i) => {
-      console.error(`${i + 1}: ${message}`);
+      logger.error(`${i + 1}: ${message}`);
     });
 
     process.exit(1);

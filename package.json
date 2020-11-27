@@ -218,6 +218,7 @@
     "eslint-plugin-react-hooks": "^2.3.0",
     "form-data": "^3.0.0",
     "graphql-request": "^2.0.0",
+    "joi-extract-type": "^15.0.8",
     "mongodb": "^3.6.2",
     "nodemon": "^1.19.4",
     "passport-strategy": "^1.0.0",

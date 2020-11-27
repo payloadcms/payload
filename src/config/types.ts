@@ -1,11 +1,12 @@
 import { Express } from 'express';
+import joi from 'joi';
+import 'joi-extract-type';
 import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { GraphQLType } from 'graphql';
-import { Collection } from '../collections/config/types';
-import { Global } from '../globals/config/types';
-import { PayloadRequest } from '../express/types/payloadRequest';
+import schema from './schema';
+
 import InitializeGraphQL from '../graphql';
 
 type MockEmailTransport = {
@@ -13,6 +14,7 @@ type MockEmailTransport = {
   fromName?: string;
   fromAddress?: string;
 };
+
 type ValidEmailTransport = {
   transport: Transporter;
   transportOptions?: SMTPConnection.Options;
@@ -47,76 +49,21 @@ export type MockEmailCredentials = {
 
 export type Access = (args?: any) => boolean;
 
-export type PayloadConfig = {
-  admin?: {
-    user?: string;
-    meta?: {
-      titleSuffix?: string;
-      ogImage?: string;
-      favicon?: string;
-    }
-    disable?: boolean;
-    indexHTML?: string;
-    components?: {
-      Nav: React.ComponentType
-    }
-  };
-  collections?: Collection[];
-  globals?: Global[];
-  serverURL: string;
-  cookiePrefix?: string;
-  csrf?: string[];
-  cors?: string[];
-  publicENV?: { [key: string]: string };
-  routes?: {
-    api?: string;
-    admin?: string;
-    graphQL?: string;
-    graphQLPlayground?: string;
-  };
-  express?: {
-    json: {
-      limit?: number
-    }
+// Create type out of Joi schema
+// Extend the type with a bit more specificity
+
+export type PayloadConfig = joi.extractType<typeof schema> & {
+  graphQL: {
+    mutations: {
+      [key: string]: unknown
+    } | ((graphQL: GraphQLType, payload: InitializeGraphQL) => any),
+    queries: {
+      [key: string]: unknown
+    } | ((graphQL: GraphQLType, payload: InitializeGraphQL) => any),
+    maxComplexity: number;
+    disablePlaygroundInProduction: boolean;
   },
-  email?: EmailOptions;
-  local?: boolean;
-  defaultDepth?: number;
-  maxDepth?: number;
-  rateLimit?: {
-    window?: number;
-    max?: number;
-    trustProxy?: boolean;
-    skip?: (req: PayloadRequest) => boolean;
-  };
-  upload?: {
-    limits?: {
-      fileSize?: number;
-    };
-  };
-  localization?: {
-    locales: string[]
-    defaultLocale: string
-  };
-  defaultLocale?: string;
-  fallback?: boolean;
-  graphQL?: {
-    mutations?: {
-      [key: string]: unknown
-    } | ((graphQL: GraphQLType, payload: InitializeGraphQL) => any),
-    queries?: {
-      [key: string]: unknown
-    } | ((graphQL: GraphQLType, payload: InitializeGraphQL) => any),
-    maxComplexity?: number;
-    disablePlaygroundInProduction?: boolean;
-  };
-  components?: { [key: string]: JSX.Element | (() => JSX.Element) };
-  paths?: { [key: string]: string };
-  hooks?: {
-    afterError?: () => void;
-  };
-  webpack?: (config: any) => any;
-  serverModules?: string[];
+  email: EmailOptions,
 };
 
 export type Config = DeepRequired<PayloadConfig>
