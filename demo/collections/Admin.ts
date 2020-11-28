@@ -62,10 +62,6 @@ export default {
         },
       },
     },
-    {
-      name: 'upload',
-      type: 'uploads',
-    },
   ],
   timestamps: true,
   admin: {

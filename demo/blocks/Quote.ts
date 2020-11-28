@@ -17,7 +17,6 @@ export default {
       name: 'quote',
       label: 'Quote',
       type: 'textarea',
-      height: 100,
       required: true,
     },
     {

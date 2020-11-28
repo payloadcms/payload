@@ -43,7 +43,6 @@ export default {
       name: 'description',
       label: 'Description',
       type: 'textarea',
-      height: 100,
       required: true,
       localized: true,
     },

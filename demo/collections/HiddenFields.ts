@@ -15,7 +15,9 @@ const HiddenFields = {
       name: 'hiddenAdmin',
       type: 'text',
       label: 'Hidden on Admin',
-      hidden: 'admin',
+      admin: {
+        hidden: true,
+      },
       required: true,
     },
     {

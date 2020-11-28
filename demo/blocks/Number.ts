@@ -9,7 +9,7 @@ export default {
       name: 'testNumber',
       label: 'Test Number Field',
       type: 'number',
-      maxLength: 100,
+      max: 100,
       required: true,
     },
   ],

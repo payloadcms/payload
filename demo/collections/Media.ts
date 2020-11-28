@@ -44,20 +44,6 @@ export default {
       required: true,
       localized: true,
     },
-    {
-      name: 'sizes',
-      fields: [
-        {
-          name: 'icon',
-          access: {
-            read: ({ req: { user } }) => {
-              const result = checkRole(['admin'], user);
-              return result;
-            },
-          },
-        },
-      ],
-    },
   ],
   timestamps: true,
 };

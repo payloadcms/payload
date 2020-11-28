@@ -189,7 +189,7 @@ const DefaultValues = {
           name: 'checkbox',
           label: 'Checkbox',
           type: 'checkbox',
-          default: true,
+          defaultValue: true,
         },
       ],
     },

@@ -23,7 +23,7 @@ const NestedArray = {
         {
           name: 'parentIdentifier',
           label: 'Parent Identifier',
-          defaultValue: '',
+          defaultValue: ' ',
           type: 'text',
           required: true,
         },

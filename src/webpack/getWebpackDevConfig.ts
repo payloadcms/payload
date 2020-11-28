@@ -33,7 +33,7 @@ export default (config: PayloadConfig): Configuration => {
           use: [
             {
               loader: require.resolve('babel-loader'),
-              options: babelConfig({ env: () => false }),
+              options: babelConfig,
             },
           ],
         },

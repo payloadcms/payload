@@ -16,7 +16,6 @@ export default {
       name: 'url',
       label: 'URL',
       type: 'text',
-      height: 100,
       required: true,
     },
   ],

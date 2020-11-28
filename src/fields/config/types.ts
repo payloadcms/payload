@@ -1,81 +1,152 @@
 /* eslint-disable no-use-before-define */
-import joi from 'joi';
 import { CSSProperties } from 'react';
-import 'joi-extract-type';
-import { DeepRequired } from 'ts-essentials';
 import { PayloadRequest } from '../../express/types/payloadRequest';
 import { Access } from '../../config/types';
-import {
-  baseField,
-  adminFields,
-  text,
-  number,
-  textarea,
-  email,
-  code,
-  select,
-  row,
-} from './schema';
 
 // TODO: add generic type and use mongoose types for originalDoc & data
 export type FieldHook = (args: {
-  value?: unknown,
-  originalDoc?: unknown,
-  data?: unknown,
+  value?: any,
+  originalDoc?: any,
+  data?: any,
   operation?: 'create' | 'update',
   req?: PayloadRequest
-}) => Promise<unknown> | unknown;
+}) => Promise<any> | any;
 
-type BaseFieldFromSchema = joi.extractType<typeof baseField>;
-type BaseAdminFieldsFromSchema = joi.extractType<typeof adminFields>;
-
-interface BaseAdminFields extends BaseAdminFieldsFromSchema {
-  style: CSSProperties
+type FieldBase = {
+  name: string;
+  label: string;
+  slug?: string;
+  required?: boolean;
+  unique?: boolean;
+  index?: boolean;
+  defaultValue?: any;
+  hidden?: boolean;
+  localized?: boolean;
+  maxLength?: number;
+  height?: number;
+  validate?: (value: any, field: Field) => any;
+  // eslint-disable-next-line no-use-before-define
+  hooks?: {
+    beforeValidate?: FieldHook[];
+    beforeChange?: FieldHook[];
+    afterChange?: FieldHook[];
+    afterRead?: FieldHook[];
+  }
+  admin?: {
+    position?: 'sidebar';
+    width?: string;
+    style?: CSSProperties;
+    readOnly?: boolean;
+    disabled?: boolean;
+    condition?: (...args: any[]) => any | void;
+    components?: { [key: string]: React.ComponentType };
+  };
+  access?: {
+    create?: Access;
+    read?: Access;
+    update?: Access;
+    delete?: Access;
+    admin?: Access;
+    unlock?: Access;
+  };
 }
 
-interface BaseField extends BaseFieldFromSchema {
-  access: {
-    create: Access
-    read: Access
-    update: Access
-  }
-  hooks: {
-    beforeValidate: FieldHook[]
-    beforeChange: FieldHook[]
-    afterChange: FieldHook[]
-    afterRead: FieldHook[]
-  }
-  admin: BaseAdminFields
+export type StandardField = FieldBase & {
+  type: string;
+  fields?: Field[];
 }
 
-type TextFromSchema = joi.extractType<typeof text>;
-export interface TextField extends BaseField, TextFromSchema {}
+export type NumberField = StandardField & { type: 'number'; };
+export type TextField = StandardField & { type: 'text'; };
+export type EmailField = StandardField & { type: 'email'; };
+export type TextareaField = StandardField & { type: 'textarea'; };
+export type CodeField = StandardField & { type: 'code'; };
+export type CheckboxField = StandardField & { type: 'checkbox'; };
+export type DateField = StandardField & { type: 'date'; };
+export type GroupField = StandardField & { type: 'group'; };
+export type RowField = StandardField & { type: 'row'; };
 
-type NumberFromSchema = joi.extractType<typeof number>;
-export interface NumberField extends BaseField, NumberFromSchema {}
+export type UploadField = FieldBase & {
+  type: 'upload';
+  relationTo: string;
+}
 
-type TextareaFromSchema = joi.extractType<typeof textarea>;
-export interface TextareaField extends BaseField, TextareaFromSchema {}
+export type SelectField = FieldBase & {
+  type: 'select';
+  options: {
+    value: string;
+    label: string;
+  }[];
+  hasMany?: boolean;
+}
 
-type EmailFromSchema = joi.extractType<typeof email>;
-export interface EmailField extends BaseField, EmailFromSchema {}
+export type SelectManyField = SelectField & {
+  hasMany: true;
+}
 
-type CodeFromSchema = joi.extractType<typeof code>;
-export interface CodeField extends BaseField, CodeFromSchema {}
+export type RelationshipSingleField = FieldBase & {
+  type: 'relationship';
+  relationTo: string;
+  hasMany?: false;
+}
 
-type SelectFromSchema = joi.extractType<typeof select>;
-export interface SelectField extends BaseField, SelectFromSchema {}
+export type RelationshipManyField = FieldBase & {
+  type: 'relationship';
+  relationTo: string[];
+  hasMany: true;
+}
 
-type RowFromSchema = joi.extractType<typeof row>;
-export interface RowField extends BaseField, RowFromSchema {}
+export type RelationshipField = RelationshipSingleField | RelationshipManyField;
 
-type PayloadFieldConfig =
-  TextField
-  | NumberField
-  | TextareaField
-  | EmailField
-  | CodeField
+type RichTextElements = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link';
+type RichTextLeaves = 'bold' | 'italic' | 'underline' | 'strikethrough';
+export type RichTextField = FieldBase & {
+  type: 'richText';
+  admin?: {
+    elements?: RichTextElements[];
+    leaves?: RichTextLeaves[];
+  }
+}
+
+export type ArrayField = FieldBase & {
+  type: 'array';
+  minRows?: number;
+  maxRows?: number;
+  fields?: Field[];
+}
+
+export type RadioField = FieldBase & {
+  type: 'radio';
+  options: {
+    value: string;
+    label: string;
+  }[];
+  hasMany?: boolean;
+}
+
+export type Block = {
+  slug: string,
+  labels: {
+    singular: string;
+    plural: string;
+  };
+  fields: Field[],
+}
+
+export type BlockField = FieldBase & {
+  type: 'blocks';
+  minRows?: number;
+  maxRows?: number;
+  blocks?: Field[];
+};
+
+export type Field =
+  | StandardField
+  | BlockField
+  | RadioField
+  | RelationshipField
+  | ArrayField
+  | RichTextField
   | SelectField
-  | RowField
-
-export type FieldConfig = DeepRequired<PayloadFieldConfig>
+  | SelectManyField
+  | UploadField;

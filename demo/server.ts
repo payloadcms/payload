@@ -30,17 +30,6 @@ externalRouter.get('/', (req, res) => {
 
 expressApp.use('/external-route', externalRouter);
 
-export const start = (cb) => {
-  const server = expressApp.listen(3000, async () => {
-    payload.logger.info(`listening on ${3000}...`);
-
-    if (cb) cb();
-  });
-
-  return server;
-};
-
-// when server.js is launched directly
-if (module.id === require.main.id) {
-  start();
-}
+expressApp.listen(3000, async () => {
+  payload.logger.info(`listening on ${3000}...`);
+});

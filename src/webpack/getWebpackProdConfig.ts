@@ -45,7 +45,7 @@ export default (config: Config): Configuration => {
           exclude: /node_modules[\\/](?!(@payloadcms[\\/]payload)[\\/]).*/,
           use: {
             loader: require.resolve('babel-loader'),
-            options: babelConfig({ env: () => false }),
+            options: babelConfig,
           },
         },
 
