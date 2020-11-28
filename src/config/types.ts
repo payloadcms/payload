@@ -54,18 +54,20 @@ export type Access = (args?: any) => boolean;
 
 type PayloadConfigFromSchema = joi.extractType<typeof schema>
 
-export interface PayloadConfig extends PayloadConfigFromSchema {
-  graphQL: {
-    mutations: {
-      [key: string]: unknown
-    } | ((graphQL: GraphQLType, payload: InitializeGraphQL) => any),
-    queries: {
-      [key: string]: unknown
-    } | ((graphQL: GraphQLType, payload: InitializeGraphQL) => any),
-    maxComplexity: number;
-    disablePlaygroundInProduction: boolean;
-  },
-  email: EmailOptions,
+type PayloadConfigOmitted = Omit<PayloadConfigFromSchema, 'hooks' | 'email' | 'graphQL'>
+
+export type PayloadConfig = PayloadConfigOmitted & {
+  // graphQL: {
+  //   mutations: {
+  //     [key: string]: unknown
+  //   } | ((graphQL: GraphQLType, payload: InitializeGraphQL) => any),
+  //   queries: {
+  //     [key: string]: unknown
+  //   } | ((graphQL: GraphQLType, payload: InitializeGraphQL) => any),
+  //   maxComplexity: number;
+  //   disablePlaygroundInProduction: boolean;
+  // },
+  // email: EmailOptions,
   hooks: {
     afterError: (err: Error, res: Response) => void,
   }

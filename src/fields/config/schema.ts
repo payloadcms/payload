@@ -1,6 +1,20 @@
 import joi from 'joi';
 
-const baseField = joi.object().keys({
+export const adminFields = joi.object().keys({
+  position: joi.string().valid('sidebar'),
+  width: joi.string(),
+  style: joi.object().unknown(),
+  readOnly: joi.boolean().default(false),
+  disabled: joi.boolean().default(false),
+  condition: joi.func(),
+  components: joi.object().keys({
+    Cell: joi.func(),
+    Field: joi.func(),
+    Filter: joi.func(),
+  }).default({}),
+}).default();
+
+export const baseField = joi.object().keys({
   label: joi.string(),
   required: joi.boolean().default(false),
   saveToJWT: joi.boolean().default(false),
@@ -12,8 +26,6 @@ const baseField = joi.object().keys({
     create: joi.func(),
     read: joi.func(),
     update: joi.func(),
-    delete: joi.func(),
-    unlock: joi.func(),
   }),
   hooks: joi.object()
     .keys({
@@ -22,116 +34,84 @@ const baseField = joi.object().keys({
       afterChange: joi.array().items(joi.func()).default([]),
       afterRead: joi.array().items(joi.func()).default([]),
     }).default(),
-  admin: joi.object().keys({
-    position: joi.string().valid('sidebar'),
-    width: joi.string(),
-    style: joi.object().unknown(),
-    readOnly: joi.boolean().default(false),
-    disabled: joi.boolean().default(false),
-    condition: joi.func(),
-    components: joi.object().keys({
-      Cell: joi.func(),
-      Field: joi.func(),
-      Filter: joi.func(),
-    }).default({}),
-  }).default({}),
-});
+  admin: adminFields,
+}).default();
 
-// Joi.object({
-//   type: Joi.string().required().only(['pizza', 'salad'])
-// })
-// .when(Joi.object({ type: 'pizza' }).unknown(), {
-//   then: Joi.object({ pepperoni: Joi.boolean() })
-// })
-// .when(Joi.object({ type: 'salad' }).unknown(), {
-//   then: Joi.object({ croutons: Joi.boolean() })
-// })
-
-const types = {
-  text: baseField.keys({
-    name: joi.string().required(),
-    defaultValue: joi.string(),
-  }),
-  number: baseField.keys({
-    name: joi.string().required(),
-    defaultValue: joi.string(),
-  }),
-  email: baseField.keys({
-    name: joi.string().required(),
-    defaultValue: joi.string(),
-  }),
-  row: baseField.keys({
-    defaultValue: joi.object().unknown(),
-    fields: joi.array().items(joi.link('#field')),
-  }),
+const textProps = {
+  type: joi.string().valid('text').required(),
+  name: joi.string().required(),
+  defaultValue: joi.string(),
 };
 
-const allTypes = Object.keys(types);
+export const text = joi.object().keys(textProps);
 
-const fieldSchema = allTypes.reduce((prev, type) => prev.when(joi.object({ type }).unknown(), {
-  then: types[type],
-}),
-joi.object({
-  type: joi.string().valid(...allTypes).required(),
-})).id('field');
+const numberProps = {
+  type: joi.string().valid('number').required(),
+  name: joi.string().required(),
+  defaultValue: joi.number(),
+};
 
-// const fieldSchema = joi.object({
-//   type: joi.string()
-//     .required()
-//     .valid(
-//       'text',
-//       'number',
-//       'email',
-//       'textarea',
-//       'code',
-//       'select',
-//       'row',
-//     ).when(joi.object({ type: 'text' }).unknown(), {
-//       then: ,
-//     })
-//     .when(joi.object({ type: 'number' }).unknown(), {
-//       then: ,
-//     })
-//     .when(joi.object({ type: 'email' }).unknown(), {
-//       then:
-//     .when(joi.object({ type: 'row' }).unknown(), {
-//       then: baseField.keys({
-//         defaultValue: joi.object().unknown(),
-//         fields: joi.array().items(joi.link('#field')),
-//       }),
-//     }),
-// }).id('field');
+export const number = joi.object().keys(numberProps);
 
-// const fieldSchema = joi.alternatives()
-//   .try(
-// ,
-//     baseField.keys({
-//       type: joi.string().valid('number').required(),
-//       name: joi.string().required(),
-//       defaultValue: joi.number(),
-//     }),
-//     baseField.keys({
-//       type: joi.string().valid('email').required(),
-//       name: joi.string().required(),
-//     }),
-//     baseField.keys({
-//       type: joi.string().valid('textarea').required(),
-//       name: joi.string().required(),
-//     }),
-//     baseField.keys({
-//       type: joi.string().valid('code').required(),
-//       name: joi.string().required(),
-//     }),
-//     baseField.keys({
-//       type: joi.string().valid('select').required(),
-//       name: joi.string().required(),
-//       options: joi.array().items(joi.string()).required(),
-//       hasMany: joi.boolean().default(false),
-//     }).default(),
-//     baseField.keys({
-//       type: joi.string().valid('row').required(),
-//       fields: joi.array().items(joi.link('#field')),
-//     }),
-//   ).id('field');
+const textareaProps = {
+  type: joi.string().valid('textarea').required(),
+  name: joi.string().required(),
+  defaultValue: joi.string(),
+};
+
+export const textarea = joi.object().keys(textareaProps);
+
+const emailProps = {
+  type: joi.string().valid('email').required(),
+  name: joi.string().required(),
+  defaultValue: joi.string(),
+};
+
+export const email = joi.object().keys(emailProps);
+
+const codeProps = {
+  type: joi.string().valid('code').required(),
+  name: joi.string().required(),
+  defaultValue: joi.string(),
+};
+
+export const code = joi.object().keys(codeProps);
+
+const selectProps = {
+  type: joi.string().valid('select').required(),
+  name: joi.string().required(),
+  options: joi.array().items(joi.string()).required(),
+  hasMany: joi.boolean().default(false),
+  defaultValue: joi.string(),
+};
+
+export const select = joi.object().keys(selectProps);
+
+const rowProps = {
+  type: joi.string().valid('row').required(),
+  fields: joi.array().items(joi.link('#field')),
+};
+
+export const row = joi.object().keys(rowProps);
+
+const radioProps = {
+  type: joi.string().valid('radio').required(),
+  fields: joi.array().items(joi.link('#field')),
+};
+
+export const radio = joi.object().keys(radioProps);
+
+const fieldSchema = joi.alternatives()
+  .try(
+    baseField.keys(textProps),
+    baseField.keys(numberProps),
+    baseField.keys(textareaProps),
+    baseField.keys(emailProps),
+    baseField.keys(codeProps),
+    baseField.keys(selectProps),
+    baseField.keys(rowProps),
+    baseField.keys(radioProps),
+  )
+  .id('field');
 
 export default fieldSchema;

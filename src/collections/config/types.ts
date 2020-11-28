@@ -18,28 +18,30 @@ export type Collection = {
 
 type PayloadCollectionConfigFromSchema = joi.extractType<typeof schema>
 
-interface PayloadCollectionConfig extends PayloadCollectionConfigFromSchema {
-  hooks: {
-    beforeOperation: BeforeOperationHook[];
-    beforeValidate: BeforeValidateHook[];
-    beforeChange: BeforeChangeHook[];
-    afterChange: AfterChangeHook[];
-    beforeRead: BeforeReadHook[];
-    afterRead: AfterReadHook[];
-    beforeDelete: BeforeDeleteHook[];
-    afterDelete: AfterDeleteHook[];
-    beforeLogin: BeforeLoginHook[];
-    afterLogin: AfterLoginHook[];
-    afterForgotPassword: AfterForgotPasswordHook[];
-  }
-  access?: {
-    create?: Access;
-    read?: Access;
-    update?: Access;
-    delete?: Access;
-    admin?: Access;
-    unlock: Access;
-  };
+type PayloadCollectionConfigOmitted = Omit<PayloadCollectionConfigFromSchema, 'hooks' | 'access'>
+
+type PayloadCollectionConfig = PayloadCollectionConfigOmitted & {
+    hooks?: {
+      beforeOperation: BeforeOperationHook[];
+      beforeValidate: BeforeValidateHook[];
+      beforeChange: BeforeChangeHook[];
+      afterChange: AfterChangeHook[];
+      beforeRead: BeforeReadHook[];
+      afterRead: AfterReadHook[];
+      beforeDelete: BeforeDeleteHook[];
+      afterDelete: AfterDeleteHook[];
+      beforeLogin: BeforeLoginHook[];
+      afterLogin: AfterLoginHook[];
+      afterForgotPassword: AfterForgotPasswordHook[];
+    }
+    access?: {
+      create?: Access;
+      read?: Access;
+      update?: Access;
+      delete?: Access;
+      admin?: Access;
+      unlock: Access;
+    };
 }
 
 export type CollectionConfig = DeepRequired<PayloadCollectionConfig>

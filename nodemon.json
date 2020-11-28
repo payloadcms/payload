@@ -10,5 +10,6 @@
     "src/**/*.ts",
     "demo/"
   ],
-  "ext": "ts,js,json"
+  "ext": "ts,js,json",
+  "exec": "node ./demo/index.js"
 }

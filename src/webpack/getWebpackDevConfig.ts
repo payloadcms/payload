@@ -104,11 +104,9 @@ export default (config: PayloadConfig): Configuration => {
     ],
   };
 
-  if (Array.isArray(config.serverModules)) {
-    config.serverModules.forEach((mod) => {
-      webpackConfig.resolve.alias[mod] = mockModulePath;
-    });
-  }
+  config.serverModules.forEach((mod) => {
+    webpackConfig.resolve.alias[mod] = mockModulePath;
+  });
 
   if (config.webpack && typeof config.webpack === 'function') {
     webpackConfig = config.webpack(webpackConfig);
