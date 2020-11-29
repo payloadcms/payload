@@ -1,37 +1,21 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable global-require */
-/* eslint-disable import/no-dynamic-require */
 
 import webpack from 'webpack';
 import getWebpackProdConfig from '../webpack/getWebpackProdConfig';
 import findConfig from '../config/find';
 import loadConfig from '../config/load';
-import getBabelConfig from '../babel.config';
-
-const babelConfig = getBabelConfig({
-  env: () => false,
-});
+import { buildConfig } from '../config/build';
+import babelConfig from '../babel.config';
 
 const configPath = findConfig();
 
 const build = (): void => {
   try {
-    require('@babel/register')({
-      ...babelConfig,
-      extensions: ['.js', '.jsx', '.ts', '.tsx'],
-      plugins: [
-        [
-          require('babel-plugin-ignore-html-and-css-imports'),
-          {
-            removeExtensions: ['.svg', '.css', '.scss', '.png', '.jpg'],
-          },
-        ],
-        ...babelConfig.plugins,
-      ],
-    });
+    require('@babel/register')(babelConfig);
 
-    const config = loadConfig();
-
+    const loadedConfig = loadConfig();
+    const config = buildConfig(loadedConfig);
     const webpackProdConfig = getWebpackProdConfig({
       ...config,
       paths: {
