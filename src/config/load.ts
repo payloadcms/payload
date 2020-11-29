@@ -1,14 +1,14 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 import path from 'path';
-import { PayloadConfig } from './types';
+import { Config } from './types';
 import findConfig from './find';
 
 const removedExtensions = ['.scss', '.css', '.svg', '.png', '.jpg', '.eot', '.ttf', '.woff', '.woff2'];
 
 const configPath = findConfig();
 
-const loadConfig = (): PayloadConfig => {
+const loadConfig = (): Config => {
   removedExtensions.forEach((ext) => {
     require.extensions[ext] = () => null;
   });

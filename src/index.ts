@@ -53,7 +53,7 @@ require('isomorphic-fetch');
  * @description Payload
  */
 export class Payload {
-  config: Config = loadConfig();
+  config: Config;
 
   collections: Collection[] = [];
 

@@ -5,14 +5,12 @@ import webpack from 'webpack';
 import getWebpackProdConfig from '../webpack/getWebpackProdConfig';
 import findConfig from '../config/find';
 import loadConfig from '../config/load';
-import { buildConfig } from '../config/build';
 
 const configPath = findConfig();
 
 export const build = (): void => {
   try {
-    const loadedConfig = loadConfig();
-    const config = buildConfig(loadedConfig);
+    const config = loadConfig();
     const webpackProdConfig = getWebpackProdConfig({
       ...config,
       paths: {
