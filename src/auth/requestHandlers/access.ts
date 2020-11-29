@@ -1,8 +1,11 @@
 import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types/payloadRequest';
+import { Permissions } from '../types';
 
-export default async function policiesHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
+export type AccessRequestHandler = (req: PayloadRequest, res: Response, next: NextFunction) => unknown;
+
+export default async function accessRequestHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<Permissions> | void> {
   try {
     const accessResults = await this.operations.collections.auth.access({
       req,

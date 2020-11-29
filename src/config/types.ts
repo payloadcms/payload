@@ -76,6 +76,7 @@ export type PayloadConfig = {
     graphQL?: string;
     graphQLPlayground?: string;
   };
+  debug?: boolean
   express?: {
     json: {
       limit?: number

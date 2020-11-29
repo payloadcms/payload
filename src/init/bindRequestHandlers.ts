@@ -1,4 +1,4 @@
-import access from '../auth/requestHandlers/access';
+import access, { AccessRequestHandler } from '../auth/requestHandlers/access';
 import forgotPassword from '../auth/requestHandlers/forgotPassword';
 import init from '../auth/requestHandlers/init';
 import login from '../auth/requestHandlers/login';
@@ -23,6 +23,9 @@ import { Payload } from '../index';
 export type RequestHandlers = {
   collections: {
     create: CreateRequestHandler
+    auth: {
+      access: AccessRequestHandler
+    }
   }
 }
 

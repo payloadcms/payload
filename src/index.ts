@@ -11,6 +11,7 @@ import {
   Collection,
 } from './collections/config/types';
 import {
+  Document,
   CreateOptions,
   FindOptions,
   FindGlobalOptions,
@@ -201,7 +202,7 @@ export class Payload {
    * @param options
    * @returns created document
    */
-  async create(options: CreateOptions): Promise<any> {
+  async create(options: CreateOptions): Promise<Document> {
     let { create } = localOperations;
     create = create.bind(this);
     return create(options);
@@ -218,13 +219,13 @@ export class Payload {
     return find(options);
   }
 
-  async findGlobal(options: FindGlobalOptions): Promise<any> {
+  async findGlobal(options: FindGlobalOptions): Promise<Document> {
     let { findOne } = localGlobalOperations;
     findOne = findOne.bind(this);
     return findOne(options);
   }
 
-  async updateGlobal(options: UpdateGlobalOptions): Promise<any> {
+  async updateGlobal(options: UpdateGlobalOptions): Promise<Document> {
     let { update } = localGlobalOperations;
     update = update.bind(this);
     return update(options);
@@ -235,7 +236,7 @@ export class Payload {
    * @param options
    * @returns document with specified ID
    */
-  async findByID(options: FindByIDOptions): Promise<any> {
+  async findByID(options: FindByIDOptions): Promise<Document> {
     let { findByID } = localOperations;
     findByID = findByID.bind(this);
     return findByID(options);
@@ -246,13 +247,13 @@ export class Payload {
    * @param options
    * @returns Updated document
    */
-  async update(options: UpdateOptions): Promise<any> {
+  async update(options: UpdateOptions): Promise<Document> {
     let { update } = localOperations;
     update = update.bind(this);
     return update(options);
   }
 
-  async delete(options: DeleteOptions): Promise<any> {
+  async delete(options: DeleteOptions): Promise<Document> {
     let { localDelete: deleteOperation } = localOperations;
     deleteOperation = deleteOperation.bind(this);
     return deleteOperation(options);

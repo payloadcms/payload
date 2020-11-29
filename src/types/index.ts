@@ -9,7 +9,9 @@ export type Document = {
 
 export type CreateOptions = {
   collection: string;
-  data: any;
+  data: {
+    [key: string]: unknown
+  };
 };
 
 export type FindOptions = {
@@ -37,7 +39,9 @@ export type FindGlobalOptions = {
 };
 export type UpdateGlobalOptions = {
   global: string;
-  data: any;
+  data: {
+    [key: string]: unknown
+  };
 };
 
 export type FindByIDOptions = {
@@ -47,7 +51,9 @@ export type FindByIDOptions = {
 export type UpdateOptions = {
   collection: string;
   id: string;
-  data: any;
+  data: {
+    [key: string]: unknown
+  };
 };
 
 export type DeleteOptions = {
@@ -59,14 +65,16 @@ export type ForgotPasswordOptions = {
   collection: string;
   generateEmailHTML?: (token: string) => string;
   expiration: Date;
-  data: any;
+  data: {
+    [key: string]: unknown
+  };
 };
 
 export interface OperationArguments {
-  data?: {[key: string]: any};
-  originalDoc?: {[key: string]: any};
-  fullOriginalDoc?: {[key: string]: any};
-  fullData?: {[key: string]: any};
+  data?: {[key: string]: unknown};
+  originalDoc?: Document;
+  fullOriginalDoc?: {[key: string]: unknown};
+  fullData?: {[key: string]: unknown};
   operation?: unknown;
   hook?: string;
   req?: PayloadRequest;
