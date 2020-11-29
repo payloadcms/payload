@@ -252,7 +252,7 @@ export class Payload {
   }
 
   async delete(options: DeleteOptions): Promise<any> {
-    let { delete: deleteOperation } = localOperations;
+    let { localDelete: deleteOperation } = localOperations;
     deleteOperation = deleteOperation.bind(this);
     return deleteOperation(options);
   }

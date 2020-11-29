@@ -3,6 +3,7 @@ import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { GraphQLType } from 'graphql';
+import { Payload } from '..';
 import { Collection } from '../collections/config/types';
 import { Global } from '../globals/config/types';
 import { PayloadRequest } from '../express/types/payloadRequest';
@@ -29,7 +30,7 @@ export type InitOptions = {
   license?: string;
   email?: EmailOptions;
   local?: boolean;
-  onInit?: () => void;
+  onInit?: (payload: Payload) => void;
 };
 
 export type SendEmailOptions = {
