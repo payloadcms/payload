@@ -1,11 +1,11 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 import path from 'path';
-import { PayloadConfig } from './types';
+import { Config } from './types';
 import findConfig from './find';
 
 const configPath = findConfig();
-const loadConfig = (): PayloadConfig => {
+const loadConfig = (): Config => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   let publicConfig = require(configPath);
 
