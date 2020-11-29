@@ -2,6 +2,12 @@ import { PayloadRequest } from '../express/types/payloadRequest';
 import { Field } from '../fields/config/types';
 import { Payload } from '../index';
 
+export { FieldHook } from '../fields/config/types';
+
+export type Where = {
+  [key: string]: unknown
+}
+
 export type Document = {
   id: string;
   [key: string]: unknown;

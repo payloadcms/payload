@@ -118,13 +118,13 @@ export type PayloadCollectionConfig = {
     afterLogin?: AfterLoginHook[];
     afterForgotPassword?: AfterForgotPasswordHook[];
   };
-  access: {
-    create: Access;
-    read: Access;
-    update: Access;
-    delete: Access;
-    admin: Access;
-    unlock: Access;
+  access?: {
+    create?: Access;
+    read?: Access;
+    update?: Access;
+    delete?: Access;
+    admin?: Access;
+    unlock?: Access;
   };
   auth?: Auth | boolean;
   upload?: Upload | boolean;

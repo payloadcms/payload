@@ -44,42 +44,48 @@ const collectionSchema = joi.object().keys({
     afterLogin: joi.array().items(joi.func()).default([]),
     afterForgotPassword: joi.array().items(joi.func()).default([]),
   }).default(),
-  auth: joi.object({
-    tokenExpiration: joi.number(),
-    depth: joi.number().default(0),
-    verify: joi.alternatives().try(
-      joi.boolean(),
-      joi.object().keys({
+  auth: joi.alternatives().try(
+    joi.object({
+      tokenExpiration: joi.number(),
+      depth: joi.number().default(0),
+      verify: joi.alternatives().try(
+        joi.boolean(),
+        joi.object().keys({
+          generateEmailHTML: joi.func(),
+          generateEmailSubject: joi.func(),
+        }),
+      ),
+      lockTime: joi.number(),
+      useAPIKey: joi.boolean(),
+      cookies: joi.object().keys({
+        secure: joi.boolean(),
+        sameSite: joi.string(), // TODO: add further specificity with joi.xor
+        domain: joi.string(),
+      }),
+      forgotPassword: joi.object().keys({
         generateEmailHTML: joi.func(),
         generateEmailSubject: joi.func(),
       }),
-    ),
-    lockTime: joi.number(),
-    useAPIKey: joi.boolean(),
-    cookies: joi.object().keys({
-      secure: joi.boolean(),
-      sameSite: joi.string(), // TODO: add further specificity with joi.xor
-      domain: joi.string(),
+      maxLoginAttempts: joi.number(),
     }),
-    forgotPassword: joi.object().keys({
-      generateEmailHTML: joi.func(),
-      generateEmailSubject: joi.func(),
+    joi.boolean(),
+  ).default(false),
+  upload: joi.alternatives().try(
+    joi.object({
+      staticURL: joi.string(),
+      staticDir: joi.string(),
+      adminThumbnail: joi.string(),
+      imageSizes: joi.array().items(
+        joi.object().keys({
+          name: joi.string(),
+          width: joi.number(),
+          height: joi.number(),
+          crop: joi.string(), // TODO: add further specificity with joi.xor
+        }),
+      ),
     }),
-    maxLoginAttempts: joi.number(),
-  }).default(false),
-  upload: joi.object({
-    staticURL: joi.string(),
-    staticDir: joi.string(),
-    adminThumbnail: joi.string(),
-    imageSizes: joi.array().items(
-      joi.object().keys({
-        name: joi.string(),
-        width: joi.number(),
-        height: joi.number(),
-        crop: joi.string(), // TODO: add further specificity with joi.xor
-      }),
-    ),
-  }).default(false),
+    joi.boolean(),
+  ).default(false),
 });
 
 export default collectionSchema;

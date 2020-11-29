@@ -1,4 +1,4 @@
-export default function formatBytes(bytes, decimals = 0) {
+export default function formatBytes(bytes: number, decimals = 0): string {
   if (bytes === 0) return '0 bytes';
 
   const k = 1024;

@@ -207,6 +207,13 @@ export const richText = baseField.keys({
   }),
 });
 
+export const date = baseField.keys({
+  type: joi.string().valid('date').required(),
+  name: joi.string().required(),
+  defaultValue: joi.string(),
+});
+
+
 const fieldSchema = joi.alternatives()
   .try(
     text,
@@ -224,6 +231,7 @@ const fieldSchema = joi.alternatives()
     upload,
     richText,
     blocks,
+    date,
   )
   .id('field');
 

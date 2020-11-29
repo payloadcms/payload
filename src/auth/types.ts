@@ -59,8 +59,8 @@ export type User = {
 type GenerateVerifyEmailHTML = (args: { req: PayloadRequest, token: string, user: any}) => Promise<string> | string
 type GenerateVerifyEmailSubject = (args: { req: PayloadRequest, token: string, user: any}) => Promise<string> | string
 
-type GenerateForgotPasswordEmailHTML = (args?: { token?: string, email?: string, req?: PayloadRequest }) => string
-type GenerateForgotPasswordEmailSubject = (args?: { req?: PayloadRequest }) => string
+type GenerateForgotPasswordEmailHTML = (args?: { token?: string, email?: string, req?: PayloadRequest }) => Promise<string> | string
+type GenerateForgotPasswordEmailSubject = (args?: { req?: PayloadRequest }) => Promise<string> | string
 
 export interface IncomingAuthType {
   tokenExpiration?: number;

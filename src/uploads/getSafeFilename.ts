@@ -1,7 +1,7 @@
 import sanitize from 'sanitize-filename';
 import fileExists from './fileExists';
 
-const incrementName = (name) => {
+const incrementName = (name: string) => {
   const extension = name.split('.').pop();
   const baseFilename = sanitize(name.substr(0, name.lastIndexOf('.')) || name);
   let incrementedName = baseFilename;
@@ -19,7 +19,7 @@ const incrementName = (name) => {
   return `${incrementedName}.${extension}`;
 };
 
-async function getSafeFileName(staticPath, desiredFilename) {
+async function getSafeFileName(staticPath: string, desiredFilename: string): Promise<string> {
   let modifiedFilename = desiredFilename;
 
   // eslint-disable-next-line no-await-in-loop

@@ -35,7 +35,7 @@ export default buildConfig({
   serverURL: 'http://localhost:3000',
   admin: {
     user: 'admins',
-    // indexHTML: 'custom-index.html',
+    indexHTML: path.resolve(__dirname, './client/index.html'),
     // meta: {
     //   titleSuffix: '- Payload Demo',
     //   // ogImage: '/static/find-image-here.jpg',

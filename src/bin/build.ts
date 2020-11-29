@@ -6,14 +6,11 @@ import getWebpackProdConfig from '../webpack/getWebpackProdConfig';
 import findConfig from '../config/find';
 import loadConfig from '../config/load';
 import { buildConfig } from '../config/build';
-import babelConfig from '../babel.config';
 
 const configPath = findConfig();
 
-const build = (): void => {
+export const build = (): void => {
   try {
-    require('@babel/register')(babelConfig);
-
     const loadedConfig = loadConfig();
     const config = buildConfig(loadedConfig);
     const webpackProdConfig = getWebpackProdConfig({
@@ -43,6 +40,3 @@ const build = (): void => {
 if (module.id === require.main.id) {
   build();
 }
-
-
-export default build;

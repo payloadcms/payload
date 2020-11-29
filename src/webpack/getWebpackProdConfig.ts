@@ -91,6 +91,7 @@ export default (config: Config): Configuration => {
       alias: {
         'payload/config': config.paths.config,
         '@payloadcms/payload$': mockModulePath,
+        'payload-scss-overrides': config.paths.scss,
       },
       extensions: ['.ts', '.tsx', '.js', '.json'],
     },
@@ -99,9 +100,7 @@ export default (config: Config): Configuration => {
         { process: 'process/browser' },
       ),
       new HtmlWebpackPlugin({
-        template: config.admin && config.admin.indexHTML
-          ? path.join(config.paths.configDir, config.admin.indexHTML)
-          : path.resolve(__dirname, '../admin/index.html'),
+        template: config.admin.indexHTML,
         filename: path.normalize('./index.html'),
       }),
       new webpack.DefinePlugin(Object.entries(config.publicENV).reduce((values, [key, val]) => ({
@@ -123,12 +122,6 @@ export default (config: Config): Configuration => {
 
   if (process.env.PAYLOAD_ANALYZE_BUNDLE) {
     webpackConfig.plugins.push(new BundleAnalyzerPlugin());
-  }
-
-  if (config.paths.scss) {
-    webpackConfig.resolve.alias['payload-scss-overrides'] = path.join(config.paths.configDir, config.paths.scss);
-  } else {
-    webpackConfig.resolve.alias['payload-scss-overrides'] = path.resolve(__dirname, '../admin/scss/overrides.scss');
   }
 
   if (config.webpack && typeof config.webpack === 'function') {

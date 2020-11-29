@@ -1,5 +1,13 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import minimist from 'minimist';
-import build from './build';
+import babelConfig from '../babel.config';
+
+require('@babel/register')({
+  ...babelConfig,
+  extensions: ['.ts', '.tsx', '.js', '.jsx'],
+});
+
+const { build } = require('./build');
 
 const args = minimist(process.argv.slice(2));
 

@@ -2,15 +2,18 @@
 import { CSSProperties } from 'react';
 import { PayloadRequest } from '../../express/types/payloadRequest';
 import { Access } from '../../config/types';
+import { Document } from '../../types';
 
 // TODO: add generic type and use mongoose types for originalDoc & data
 export type FieldHook = (args: {
-  value?: any,
-  originalDoc?: any,
-  data?: any,
+  value?: unknown,
+  originalDoc?: Document,
+  data?: {
+    [key: string]: unknown
+  },
   operation?: 'create' | 'update',
   req?: PayloadRequest
-}) => Promise<any> | any;
+}) => Promise<unknown> | unknown;
 
 type FieldBase = {
   name: string;
@@ -33,7 +36,7 @@ type FieldBase = {
     afterRead?: FieldHook[];
   }
   admin?: {
-    position?: 'sidebar';
+    position?: string;
     width?: string;
     style?: CSSProperties;
     readOnly?: boolean;

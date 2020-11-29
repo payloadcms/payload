@@ -1,4 +1,6 @@
-export default async function find(options) {
+import { FindOptions } from '../../../types';
+
+export default async function find(options: FindOptions) {
   const {
     collection: collectionSlug,
     depth,

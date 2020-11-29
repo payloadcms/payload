@@ -1,6 +1,7 @@
 import isImage from './isImage';
+import { FileData } from './types';
 
-const getThumbnail = (mimeType, staticURL, filename, sizes, adminThumbnail): string | boolean => {
+const getThumbnail = (mimeType: string, staticURL: string, filename: string, sizes: FileData[], adminThumbnail: string): string | boolean => {
   if (isImage(mimeType)) {
     if (sizes?.[adminThumbnail]?.filename) {
       return `${staticURL}/${sizes[adminThumbnail].filename}`;

@@ -9,6 +9,7 @@ import { PayloadCollectionConfig } from '../collections/config/types';
 import { PayloadGlobalConfig } from '../globals/config/types';
 import { PayloadRequest } from '../express/types/payloadRequest';
 import InitializeGraphQL from '../graphql';
+import { Where } from '../types';
 
 type MockEmailTransport = {
   transport?: 'mock';
@@ -47,7 +48,7 @@ export type MockEmailCredentials = {
   web: string;
 };
 
-export type Access = (args?: any) => boolean;
+export type Access = (args?: any) => boolean | Where;
 
 export type PayloadConfig = {
   admin?: {

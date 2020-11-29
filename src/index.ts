@@ -3,9 +3,9 @@ import crypto from 'crypto';
 import { TestAccount } from 'nodemailer';
 import { AuthenticateOptions } from 'passport';
 import {
+  Config,
   EmailOptions,
   InitOptions,
-  PayloadConfig,
 } from './config/types';
 import {
   Collection,
@@ -53,7 +53,7 @@ require('isomorphic-fetch');
  * @description Payload
  */
 export class Payload {
-  config: PayloadConfig = loadConfig();
+  config: Config = loadConfig();
 
   collections: Collection[] = [];
 
