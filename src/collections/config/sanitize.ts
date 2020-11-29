@@ -1,5 +1,5 @@
 import merge from 'deepmerge';
-import { Collection } from './types';
+import { PayloadCollectionConfig, CollectionConfig } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
 import toKebabCase from '../../utilities/toKebabCase';
 import baseAuthFields from '../../fields/baseFields/baseFields';
@@ -53,48 +53,34 @@ const mergeBaseFields = (fields, baseFields) => {
   return baseFields;
 };
 
-const sanitizeCollection = (collections: Collection[], collection: Collection): Collection => {
+const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: PayloadCollectionConfig): CollectionConfig => {
   // /////////////////////////////////
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitized: Collection = { ...collection };
+  const sanitized: PayloadCollectionConfig = { ...collection };
   sanitized.slug = toKebabCase(sanitized.slug);
   sanitized.labels = !sanitized.labels ? formatLabels(sanitized.slug) : sanitized.labels;
-
-  // /////////////////////////////////
-  // Ensure that collection has required object structure
-  // /////////////////////////////////
-
-  if (!sanitized.hooks) sanitized.hooks = {};
-  if (!sanitized.access) sanitized.access = {};
-  if (!sanitized.admin) sanitized.admin = {};
-
-  if (!sanitized.hooks.beforeOperation) sanitized.hooks.beforeOperation = [];
-  if (!sanitized.hooks.beforeValidate) sanitized.hooks.beforeValidate = [];
-  if (!sanitized.hooks.beforeChange) sanitized.hooks.beforeChange = [];
-  if (!sanitized.hooks.afterChange) sanitized.hooks.afterChange = [];
-  if (!sanitized.hooks.beforeRead) sanitized.hooks.beforeRead = [];
-  if (!sanitized.hooks.afterRead) sanitized.hooks.afterRead = [];
-  if (!sanitized.hooks.beforeDelete) sanitized.hooks.beforeDelete = [];
-  if (!sanitized.hooks.afterDelete) sanitized.hooks.afterDelete = [];
-
-
-  if (sanitized.upload) {
-    if (!sanitized.upload.staticDir) sanitized.upload.staticDir = sanitized.slug;
-    if (!sanitized.upload.staticURL) sanitized.upload.staticURL = `/${sanitized.slug}`;
-    if (!sanitized.admin.useAsTitle) sanitized.admin.useAsTitle = 'filename';
-  }
 
   // /////////////////////////////////
   // Add required base fields
   // /////////////////////////////////
 
   if (collection.upload) {
+    if (typeof collection.upload === 'object') {
+      sanitized.upload = collection.upload;
+    } else {
+      sanitized.upload = {};
+    }
+
+    if (!sanitized.upload.staticDir) sanitized.upload.staticDir = sanitized.slug;
+    if (!sanitized.upload.staticURL) sanitized.upload.staticURL = `/${sanitized.slug}`;
+    if (!sanitized.admin.useAsTitle) sanitized.admin.useAsTitle = 'filename';
+
     let uploadFields = baseUploadFields;
 
-    if (collection.upload.imageSizes && Array.isArray(collection.upload.imageSizes)) {
-      uploadFields = uploadFields.concat(baseImageUploadFields(collection.upload.imageSizes));
+    if (sanitized.upload.imageSizes && Array.isArray(sanitized.upload.imageSizes)) {
+      uploadFields = uploadFields.concat(baseImageUploadFields(sanitized.upload.imageSizes));
     }
 
     uploadFields = mergeBaseFields(sanitized.fields, uploadFields);
@@ -106,21 +92,25 @@ const sanitizeCollection = (collections: Collection[], collection: Collection): 
   }
 
   if (collection.auth) {
-    if (collection.auth === true) sanitized.auth = {};
-    if (!sanitized.hooks.beforeLogin) sanitized.hooks.beforeLogin = [];
-    if (!sanitized.hooks.afterLogin) sanitized.hooks.afterLogin = [];
-    if (!sanitized.hooks.afterForgotPassword) sanitized.hooks.afterForgotPassword = [];
-    if (!collection.auth.forgotPassword) sanitized.auth.forgotPassword = {};
+    if (typeof collection.auth === 'object') {
+      sanitized.auth = collection.auth;
+    } else {
+      sanitized.auth = {};
+    }
 
     let authFields = baseAuthFields;
 
-    if (collection.auth.useAPIKey) {
+    if (sanitized.auth.useAPIKey) {
       authFields = authFields.concat(baseAPIKeyFields);
     }
 
-    if (collection.auth.verify) {
+    if (sanitized.auth.verify) {
       authFields = authFields.concat(baseVerificationFields);
     }
+
+    if (!sanitized?.hooks?.beforeLogin) sanitized.hooks.beforeLogin = [];
+    if (!sanitized?.hooks?.afterLogin) sanitized.hooks.afterLogin = [];
+    if (!sanitized?.hooks?.afterForgotPassword) sanitized.hooks.afterForgotPassword = [];
 
     sanitized.auth.maxLoginAttempts = typeof sanitized.auth.maxLoginAttempts === 'undefined' ? 5 : sanitized.auth.maxLoginAttempts;
     sanitized.auth.lockTime = sanitized.auth.lockTime || 600000; // 10 minutes

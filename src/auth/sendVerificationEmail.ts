@@ -1,4 +1,20 @@
-async function sendVerificationEmail(args) {
+import { Payload } from '..';
+import { PayloadRequest } from '../express/types/payloadRequest';
+import { Config } from '../config/types';
+import { Collection } from '../collections/config/types';
+import { User } from './types';
+
+type Args = {
+  config: Config,
+  collection: Collection,
+  user: User
+  disableEmail: boolean
+  req: PayloadRequest
+  token: string
+  sendEmail: Payload['sendEmail']
+}
+
+async function sendVerificationEmail(args: Args): Promise<void> {
   // Verify token from e-mail
   const {
     config,
@@ -36,7 +52,7 @@ async function sendVerificationEmail(args) {
       subject = await collectionConfig.auth.verify.generateEmailSubject({
         req,
         token,
-        email: user.email,
+        user,
       });
     }
 

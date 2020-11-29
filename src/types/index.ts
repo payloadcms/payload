@@ -4,7 +4,7 @@ import { Payload } from '../index';
 
 export type Document = {
   id: string;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export type CreateOptions = {

@@ -10,7 +10,7 @@ import resetPassword from '../auth/requestHandlers/resetPassword';
 import verifyEmail from '../auth/requestHandlers/verifyEmail';
 import unlock from '../auth/requestHandlers/unlock';
 
-import create from '../collections/requestHandlers/create';
+import create, { CreateRequestHandler } from '../collections/requestHandlers/create';
 import find from '../collections/requestHandlers/find';
 import findByID from '../collections/requestHandlers/findByID';
 import update from '../collections/requestHandlers/update';
@@ -19,6 +19,12 @@ import deleteHandler from '../collections/requestHandlers/delete';
 import findOne from '../globals/requestHandlers/findOne';
 import globalUpdate from '../globals/requestHandlers/update';
 import { Payload } from '../index';
+
+export type RequestHandlers = {
+  collections: {
+    create: CreateRequestHandler
+  }
+}
 
 function bindRequestHandlers(ctx: Payload): void {
   ctx.requestHandlers = {

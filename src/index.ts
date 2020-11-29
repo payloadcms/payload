@@ -22,7 +22,7 @@ import {
 } from './types';
 import Logger from './utilities/logger';
 import bindOperations from './init/bindOperations';
-import bindRequestHandlers from './init/bindRequestHandlers';
+import bindRequestHandlers, { RequestHandlers } from './init/bindRequestHandlers';
 import bindResolvers from './init/bindResolvers';
 import loadConfig from './config/load';
 import authenticate from './express/middleware/authenticate';
@@ -32,6 +32,7 @@ import initAdmin from './express/admin';
 import initAuth from './auth/init';
 import initCollections from './collections/init';
 import initGlobals from './globals/init';
+import { Globals } from './globals/config/types';
 import initGraphQLPlayground from './graphql/initPlayground';
 import initStatic from './express/static';
 import GraphQL from './graphql';
@@ -55,9 +56,9 @@ export class Payload {
 
   collections: Collection[] = [];
 
-  graphQL: any;
+  graphQL: GraphQL;
 
-  globals: any;
+  globals: Globals;
 
   logger = Logger();
 
@@ -89,7 +90,7 @@ export class Payload {
 
   performFieldOperations: typeof performFieldOperations;
 
-  requestHandlers: { [key: string]: any };
+  requestHandlers: RequestHandlers;
 
   /**
    * @description Initializes Payload
@@ -184,7 +185,7 @@ export class Payload {
     if (typeof options.onInit === 'function') options.onInit(this);
   }
 
-  sendEmail = async (message: Message): Promise<any> => {
+  sendEmail = async (message: Message): Promise<unknown> => {
     const email = await this.email;
     const result = email.transport.sendMail(message);
     return result;

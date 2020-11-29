@@ -1,7 +1,17 @@
 import httpStatus from 'http-status';
+import { Response, NextFunction } from 'express';
+import { PayloadRequest } from '../../express/types/payloadRequest';
 import formatSuccessResponse from '../../express/responses/formatSuccess';
+import { Document } from '../../types';
 
-export default async function create(req, res, next) {
+export type CreateRequestHandler = (req: PayloadRequest, res: Response, next: NextFunction) => unknown;
+
+export type CreateResult = {
+  message: string
+  doc: Document
+}
+
+export default async function create(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<CreateResult> | void> {
   try {
     const doc = await this.operations.collections.create({
       req,

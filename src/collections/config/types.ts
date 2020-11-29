@@ -1,78 +1,12 @@
-/* eslint-disable no-use-before-define */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { DeepRequired } from 'ts-essentials';
+import { PaginateModel, Document, PassportLocalModel } from 'mongoose';
 import { Access } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types/payloadRequest';
+import { Auth } from '../../auth/types';
 
-export type Collection = {
-  slug: string;
-  labels: {
-    singular: string;
-    plural: string;
-  };
-  fields: Field[];
-  admin: {
-    useAsTitle: string;
-    defaultColumns: string[];
-    components: any;
-  };
-  hooks: {
-    beforeOperation?: BeforeOperationHook[];
-    beforeValidate?: BeforeValidateHook[];
-    beforeChange?: BeforeChangeHook[];
-    afterChange?: AfterChangeHook[];
-    beforeRead?: BeforeReadHook[];
-    afterRead?: AfterReadHook[];
-    beforeDelete?: BeforeDeleteHook[];
-    afterDelete?: AfterDeleteHook[];
-    beforeLogin?: BeforeLoginHook[];
-    afterLogin?: AfterLoginHook[];
-    afterForgotPassword?: AfterForgotPasswordHook[];
-  };
-  access: {
-    create: Access;
-    read: Access;
-    update: Access;
-    delete: Access;
-    admin: Access;
-    unlock: Access;
-  };
-  auth?: {
-    tokenExpiration: number;
-    verify:
-    | boolean
-    | { generateEmailHTML: string; generateEmailSubject: string };
-    maxLoginAttempts: number;
-    lockTime: number;
-    useAPIKey: boolean;
-    cookies:
-    | {
-      secure: boolean;
-      sameSite: string;
-      domain?: string;
-    }
-    | boolean;
-    forgotPassword?: {
-      generateEmailHTML?: (args?: { token?: string, email?: string, req?: PayloadRequest }) => string,
-      generateEmailSubject?: (args?: { req?: PayloadRequest }) => string,
-    }
-  };
-  upload: {
-    imageSizes: ImageSize[];
-    staticURL: string;
-    staticDir: string;
-    adminThumbnail?: string;
-  };
-};
-
-export type ImageSize = {
-  name: string,
-  width: number,
-  height: number,
-  crop: string, // comes from sharp package
-};
-
-// Hooks
+interface CollectionModel extends PaginateModel<Document>, PassportLocalModel<Document>{}
 
 export type HookOperationType =
   | 'create'
@@ -144,6 +78,67 @@ export type AfterLoginHook = (args?: {
 export type AfterForgotPasswordHook = (args?: {
   args?: any;
 }) => any;
+
+export type ImageSize = {
+  name: string,
+  width: number,
+  height: number,
+  crop: string, // comes from sharp package
+};
+
+export type Upload = {
+  imageSizes?: ImageSize[];
+  staticURL?: string;
+  staticDir?: string;
+  adminThumbnail?: string;
+}
+
+export type PayloadCollectionConfig = {
+  slug: string;
+  labels?: {
+    singular?: string;
+    plural?: string;
+  };
+  fields: Field[];
+  admin?: {
+    useAsTitle?: string;
+    defaultColumns?: string[];
+    components?: any;
+  };
+  hooks?: {
+    beforeOperation?: BeforeOperationHook[];
+    beforeValidate?: BeforeValidateHook[];
+    beforeChange?: BeforeChangeHook[];
+    afterChange?: AfterChangeHook[];
+    beforeRead?: BeforeReadHook[];
+    afterRead?: AfterReadHook[];
+    beforeDelete?: BeforeDeleteHook[];
+    afterDelete?: AfterDeleteHook[];
+    beforeLogin?: BeforeLoginHook[];
+    afterLogin?: AfterLoginHook[];
+    afterForgotPassword?: AfterForgotPasswordHook[];
+  };
+  access: {
+    create: Access;
+    read: Access;
+    update: Access;
+    delete: Access;
+    admin: Access;
+    unlock: Access;
+  };
+  auth?: Auth | boolean;
+  upload?: Upload | boolean;
+};
+
+export interface CollectionConfig extends DeepRequired<PayloadCollectionConfig> {
+  auth: DeepRequired<Auth>
+  upload: DeepRequired<Upload>
+}
+
+export type Collection = {
+  Model: CollectionModel;
+  config: CollectionConfig;
+};
 
 export type PaginatedDocs = {
   docs: unknown[]
