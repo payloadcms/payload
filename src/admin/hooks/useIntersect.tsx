@@ -1,8 +1,17 @@
 /* eslint-disable no-shadow */
 import { useEffect, useRef, useState } from 'react';
 
-export default ({ root = null, rootMargin, threshold = 0 } = {}) => {
-  const [entry, updateEntry] = useState({});
+type Intersect = [
+  setNode: React.Dispatch<Element>,
+  entry: IntersectionObserverEntry
+]
+
+const useIntersect = ({
+  root = null,
+  rootMargin = '0px',
+  threshold = 0,
+} = {}): Intersect => {
+  const [entry, updateEntry] = useState<IntersectionObserverEntry>();
   const [node, setNode] = useState(null);
 
   const observer = useRef(
@@ -27,3 +36,5 @@ export default ({ root = null, rootMargin, threshold = 0 } = {}) => {
 
   return [setNode, entry];
 };
+
+export default useIntersect;

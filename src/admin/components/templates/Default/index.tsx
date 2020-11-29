@@ -1,16 +1,16 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import DefaultNav from '../../elements/Nav';
 import { useConfig } from '@payloadcms/config-provider';
+import DefaultNav from '../../elements/Nav';
 import { StepNavProvider } from '../../elements/StepNav';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import Meta from '../../utilities/Meta';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'template-default';
 
-const Default = ({ children, className }) => {
+const Default: React.FC<Props> = ({ children, className }) => {
   const {
     admin: {
       components: {
@@ -42,18 +42,6 @@ const Default = ({ children, className }) => {
       </StepNavProvider>
     </div>
   );
-};
-
-Default.defaultProps = {
-  className: '',
-};
-
-Default.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
-  className: PropTypes.string,
 };
 
 export default Default;

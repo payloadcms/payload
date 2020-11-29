@@ -5,10 +5,10 @@ import { objectToFormData } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
+import { useAuth } from '@payloadcms/config-provider';
 import { useLocale } from '../../utilities/Locale';
 import { requests } from '../../../api';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
-import { useAuth } from '@payloadcms/config-provider';
 import fieldReducer from './fieldReducer';
 import initContextState from './initContextState';
 import reduceFieldsToValues from './reduceFieldsToValues';
@@ -24,7 +24,7 @@ import './index.scss';
 
 const baseClass = 'form';
 
-const Form = (props) => {
+const Form: React.FC = (props) => {
   const {
     disabled,
     onSubmit,

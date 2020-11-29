@@ -15,19 +15,21 @@
     "moduleResolution": "node", /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
     "baseUrl": "",
     "paths": {
-      "payload/config": [
-        "src/admin/types/config" // Webpack alias to user config
+      "@payloadcms/payload/config": [
+        "src/config/types.ts"
       ],
+      "@payloadcms/payload/auth": [
+        "src/auth/types.ts"
+      ],
+      "@payloadcms/payload/types": [
+        "src/types/index.ts"
+      ]
     },
     "esModuleInterop": true, /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
     "resolveJsonModule": true,
     "inlineSourceMap": true, /* Emit a single file with source maps instead of having a separate file. */
     "skipLibCheck": true, /* Skip type checking of declaration files. */
     "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
-    // "typeRoots": [
-    //   "./src",
-    //   "./node_modules/@types"
-    // ]
   },
   "include": [
     "src/"
@@ -38,6 +40,6 @@
     "build",
     "src/tests",
     "src/tests/**/*.spec.ts",
-    //   "node_modules/"
+    "node_modules"
   ]
 }

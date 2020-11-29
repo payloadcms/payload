@@ -1,4 +1,5 @@
 import React from 'react';
+import Select from 'react-select';
 import { Props } from './types';
 import Chevron from '../../icons/Chevron';
 

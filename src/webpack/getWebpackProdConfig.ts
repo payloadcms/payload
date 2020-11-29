@@ -1,14 +1,14 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import TerserJSPlugin from 'terser-webpack-plugin';
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
-import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
+import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import path from 'path';
 import webpack, { Configuration } from 'webpack';
 import { Config } from '../config/types';
 import babelConfig from '../babel.config';
 
-const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js');
+const mockModulePath = path.resolve(__dirname, './mocks/emptyModule.js');
 
 export default (config: Config): Configuration => {
   let webpackConfig: Configuration = {
@@ -25,7 +25,7 @@ export default (config: Config): Configuration => {
     devtool: 'source-map',
     stats: 'errors-only',
     optimization: {
-      minimizer: [new TerserJSPlugin({}), new OptimizeCSSAssetsPlugin({})],
+      minimizer: [new TerserJSPlugin({}), new CssMinimizerPlugin()],
       splitChunks: {
         cacheGroups: {
           styles: {
@@ -41,53 +41,40 @@ export default (config: Config): Configuration => {
     module: {
       rules: [
         {
-          test: /\.js$/,
+          test: /\.(t|j|)sx?$/,
           exclude: /node_modules[\\/](?!(@payloadcms[\\/]payload)[\\/]).*/,
           use: {
             loader: require.resolve('babel-loader'),
             options: babelConfig({ env: () => false }),
           },
         },
+
+        {
+          test: /\.(sa|sc|c)ss$/,
+          sideEffects: true,
+          use: [
+            MiniCSSExtractPlugin.loader,
+            require.resolve('css-loader'),
+            {
+              loader: require.resolve('postcss-loader'),
+              options: {
+                postcssOptions: {
+                  plugins: [require.resolve('postcss-preset-env')],
+                },
+              },
+            },
+            require.resolve('sass-loader'),
+          ],
+        },
         {
           oneOf: [
             {
-              test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
-              loader: require.resolve('url-loader'),
-              options: {
-                limit: 10000,
-                name: 'static/media/[name].[hash:8].[ext]',
-              },
+              test: /\.(?:ico|gif|png|jpg|jpeg)$/i,
+              type: 'asset/resource',
             },
             {
-              test: /\.(sa|sc|c)ss$/,
-              sideEffects: true,
-              use: [
-                MiniCSSExtractPlugin.loader,
-                require.resolve('css-loader'),
-                {
-                  loader: require.resolve('postcss-loader'),
-                  options: {
-                    postcssOptions: {
-                      plugins: [
-                        [
-                          require.resolve('postcss-preset-env'),
-                          {
-                            // Options
-                          },
-                        ],
-                      ],
-                    },
-                  },
-                },
-                require.resolve('sass-loader'),
-              ],
-            },
-            {
-              exclude: [/\.(js|jsx|mjs)$/, /\.html$/, /\.json$/],
-              loader: require.resolve('file-loader'),
-              options: {
-                name: 'static/media/[name].[hash:8].[ext]',
-              },
+              test: /\.(woff(2)?|eot|ttf|otf|svg|)$/,
+              type: 'asset/inline',
             },
           ],
         },
@@ -99,20 +86,23 @@ export default (config: Config): Configuration => {
         crypto: false,
         https: false,
         http: false,
-        assert: false,
       },
       modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
       alias: {
         'payload/config': config.paths.config,
         '@payloadcms/payload$': mockModulePath,
       },
+      extensions: ['.ts', '.tsx', '.js', '.json'],
     },
     plugins: [
+      new webpack.ProvidePlugin(
+        { process: 'process/browser' },
+      ),
       new HtmlWebpackPlugin({
         template: config.admin && config.admin.indexHTML
           ? path.join(config.paths.configDir, config.admin.indexHTML)
           : path.resolve(__dirname, '../admin/index.html'),
-        filename: './index.html',
+        filename: path.normalize('./index.html'),
       }),
       new webpack.DefinePlugin(Object.entries(config.publicENV).reduce((values, [key, val]) => ({
         ...values,
@@ -142,7 +132,7 @@ export default (config: Config): Configuration => {
   }
 
   if (config.webpack && typeof config.webpack === 'function') {
-    webpackConfig = config.webpack(webpackConfig, 'production');
+    webpackConfig = config.webpack(webpackConfig);
   }
 
   return webpackConfig;

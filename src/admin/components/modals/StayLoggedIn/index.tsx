@@ -5,12 +5,13 @@ import { useModal, Modal } from '@faceless-ui/modal';
 import { useConfig } from '@payloadcms/config-provider';
 import MinimalTemplate from '../../templates/Minimal';
 import Button from '../../elements/Button';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'stay-logged-in';
 
-const StayLoggedInModal = (props) => {
+const StayLoggedInModal: React.FC<Props> = (props) => {
   const { refreshCookie } = props;
   const history = useHistory();
   const { routes: { admin } } = useConfig();

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
 
-const useMountEffect = func => useEffect(func, []);
+const useMountEffect = (func: () => void): void => useEffect(func, []);
 
 export default useMountEffect;

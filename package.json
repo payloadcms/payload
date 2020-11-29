@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/payload",
-  "version": "0.1.6",
+  "version": "0.1.9",
   "description": "CMS and Application Framework",
   "license": "ISC",
   "author": "Payload CMS LLC",
@@ -8,12 +8,12 @@
   "typings": "./dist/src/index.d.ts",
   "sideEffects": false,
   "bin": {
-    "payload": "./dist/src/bin/index.js"
+    "payload": "./bin.js"
   },
   "scripts": {
     "copyfiles": "copyfiles src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png} dist/",
     "build:components": "webpack --config src/webpack/components.config.js",
-    "build": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js node src/bin/build",
+    "build": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js node dist/src/bin/build",
     "build:tsc": "tsc",
     "build:analyze": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js PAYLOAD_ANALYZE_BUNDLE=true node src/bin/build",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
@@ -40,11 +40,11 @@
     "@faceless-ui/modal": "^1.0.4",
     "@faceless-ui/scroll-info": "^1.1.1",
     "@faceless-ui/window-info": "^1.2.2",
-    "@payloadcms/config-provider": "0.0.7",
+    "@payloadcms/config-provider": "0.0.9",
     "@typescript-eslint/parser": "4.0.1",
     "@udecode/slate-plugins": "^0.64.3",
     "ajv": "^6.12.6",
-    "async-some": "^1.0.2",
+    "asap": "^2.0.6",
     "autoprefixer": "^9.7.4",
     "babel-jest": "^26.3.0",
     "babel-loader": "^8.1.0",
@@ -52,6 +52,7 @@
     "compression": "^1.7.4",
     "connect-history-api-fallback": "^1.6.0",
     "css-loader": "^5.0.1",
+    "css-minimizer-webpack-plugin": "^1.1.5",
     "date-fns": "^2.14.0",
     "deepmerge": "^4.2.2",
     "dotenv": "^6.0.0",
@@ -61,6 +62,7 @@
     "express-rate-limit": "^5.1.3",
     "falsey": "^1.0.0",
     "file-loader": "^1.1.11",
+    "find-up": "^5.0.0",
     "flatley": "^5.2.0",
     "graphql": "15.4.0",
     "graphql-playground-middleware-express": "^1.7.14",
@@ -86,7 +88,6 @@
     "node-sass": "^4.14.1",
     "nodemailer": "^6.4.2",
     "object-to-formdata": "^3.0.9",
-    "optimize-css-assets-webpack-plugin": "^5.0.4",
     "passport": "^0.4.1",
     "passport-anonymous": "^1.0.1",
     "passport-headerapikey": "^1.2.1",
@@ -134,12 +135,14 @@
     "webpack-bundle-analyzer": "^3.8.0",
     "webpack-cli": "^4.2.0",
     "webpack-dev-middleware": "^4.0.2",
-    "webpack-hot-middleware": "^2.25.0"
+    "webpack-hot-middleware": "^2.25.0",
+    "wrappy": "^1.0.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.0.4",
     "@trbl/eslint-config": "^1.2.4",
+    "@types/asap": "^2.0.0",
     "@types/autoprefixer": "^9.7.2",
     "@types/babel__core": "^7.1.12",
     "@types/babel__plugin-transform-runtime": "^7.9.1",
@@ -154,6 +157,7 @@
     "@types/express-rate-limit": "^5.1.0",
     "@types/extract-text-webpack-plugin": "^3.0.4",
     "@types/file-loader": "^4.2.0",
+    "@types/find-up": "^4.0.0",
     "@types/html-webpack-plugin": "^3.2.4",
     "@types/ignore-styles": "^5.0.0",
     "@types/is-hotkey": "^0.1.2",
@@ -167,6 +171,7 @@
     "@types/mongodb": "^3.5.34",
     "@types/mongoose": "^5.10.1",
     "@types/mongoose-paginate-v2": "^1.3.8",
+    "@types/node-fetch": "^2.5.7",
     "@types/node-sass": "^4.11.1",
     "@types/nodemailer": "^6.4.0",
     "@types/nodemon": "^1.19.0",
@@ -220,6 +225,7 @@
     "typescript": "^4.1.2"
   },
   "files": [
+    "bin.js",
     "dist",
     "docs",
     "components",

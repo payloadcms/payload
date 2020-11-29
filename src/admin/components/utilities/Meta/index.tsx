@@ -13,9 +13,9 @@ const Meta: React.FC<Props> = ({
   keywords = 'CMS, Admin, Dashboard',
 }) => {
   const config = useConfig();
-  const titleSuffix = config?.admin?.meta?.titleSuffix ?? '- Payload';
-  const favicon = config?.admin?.meta?.favicon ?? payloadFavicon;
-  const ogImage = config?.admin?.meta?.ogImage ?? payloadOgImage;
+  const titleSuffix = config.admin.meta?.titleSuffix ?? '- Payload';
+  const favicon = config.admin.meta.favicon ?? payloadFavicon;
+  const ogImage = config.admin.meta.ogImage ?? payloadOgImage;
 
   return (
     <Helmet

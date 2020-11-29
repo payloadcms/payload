@@ -74,7 +74,6 @@ export default (config: PayloadConfig): Configuration => {
         crypto: false,
         https: false,
         http: false,
-        assert: false,
       },
       modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
       alias: {
