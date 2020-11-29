@@ -69,7 +69,7 @@ const collectionSchema = joi.object().keys({
         generateEmailSubject: joi.func(),
       }),
       maxLoginAttempts: joi.number(),
-    }).default(),
+    }).default(false),
   upload: joi.object()
     .keys({
       staticURL: joi.string(),
@@ -83,7 +83,7 @@ const collectionSchema = joi.object().keys({
           crop: joi.string(), // TODO: add further specificity with joi.xor
         }),
       ),
-    }).default(),
+    }).default(false),
 });
 
 export default collectionSchema;
