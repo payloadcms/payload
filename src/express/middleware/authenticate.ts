@@ -1,9 +1,12 @@
 import passport from 'passport';
-import { Payload } from '../../index';
+import { Request, Response, NextFunction } from 'express';
+import { Config } from '../../config/types';
 
-export default (config: Payload) => {
+export type PayloadAuthenticate = (req: Request, res: Response, next: NextFunction) => NextFunction;
+
+export default (config: Config): PayloadAuthenticate => {
   const methods = config.collections.reduce((enabledMethods, collection) => {
-    if (collection.auth && collection.auth.useAPIKey) {
+    if (typeof collection.auth === 'object' && collection.auth.useAPIKey) {
       const collectionMethods = [...enabledMethods];
       collectionMethods.unshift(`${collection.slug}-api-key`);
       return collectionMethods;
@@ -12,5 +15,6 @@ export default (config: Payload) => {
     return enabledMethods;
   }, ['jwt', 'anonymous']);
 
-  return passport.authenticate(methods, { session: false });
+  const authenticate = passport.authenticate(methods, { session: false });
+  return authenticate;
 };

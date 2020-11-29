@@ -16,6 +16,16 @@ payload.init({
   },
 });
 
+const demonstrateLocalTypes = async () => {
+  const demoFind = await payload.find({
+    collection: 'admins',
+  });
+
+  const [doc] = demoFind.docs;
+
+  console.log(doc.email);
+};
+
 const externalRouter = express.Router();
 
 externalRouter.use(payload.authenticate);

@@ -12,7 +12,7 @@ export type FieldHook = (args: {
     [key: string]: unknown
   },
   operation?: 'create' | 'update',
-  req?: PayloadRequest
+  req: PayloadRequest
 }) => Promise<unknown> | unknown;
 
 type FieldBase = {

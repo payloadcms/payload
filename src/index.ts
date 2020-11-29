@@ -26,7 +26,7 @@ import bindOperations from './init/bindOperations';
 import bindRequestHandlers, { RequestHandlers } from './init/bindRequestHandlers';
 import bindResolvers from './init/bindResolvers';
 import loadConfig from './config/load';
-import authenticate from './express/middleware/authenticate';
+import authenticate, { PayloadAuthenticate } from './express/middleware/authenticate';
 import connectMongoose from './mongoose/connect';
 import expressMiddleware from './express/middleware';
 import initAdmin from './express/admin';
@@ -87,7 +87,7 @@ export class Payload {
 
   errorHandler: any;
 
-  authenticate: (strategy: string | string[], options: AuthenticateOptions, callback?: (...args: any[]) => any) => any;
+  authenticate: PayloadAuthenticate;
 
   performFieldOperations: typeof performFieldOperations;
 
