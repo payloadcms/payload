@@ -23,8 +23,8 @@
     "lint": "eslint .",
     "test": "yarn test:int && yarn test:client",
     "pretest": "tsc-silent --project tsconfig.json --suppress @",
-    "test:int": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js NODE_ENV=test DISABLE_LOGGING=true jest --forceExit --runInBand",
-    "test:client": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js NODE_ENV=test jest --config=jest.react.config.js"
+    "test:int": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=test DISABLE_LOGGING=true jest --forceExit --runInBand",
+    "test:client": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=test jest --config=jest.react.config.js"
   },
   "dependencies": {
     "@babel/cli": "^7.12.8",

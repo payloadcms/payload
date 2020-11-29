@@ -7,6 +7,7 @@ import findConfig from './find';
 const removedExtensions = ['.scss', '.css', '.svg', '.png', '.jpg', '.eot', '.ttf', '.woff', '.woff2'];
 
 const configPath = findConfig();
+
 const loadConfig = (): PayloadConfig => {
   removedExtensions.forEach((ext) => {
     require.extensions[ext] = () => null;
