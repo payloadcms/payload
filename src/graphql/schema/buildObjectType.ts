@@ -13,10 +13,11 @@ import {
   GraphQLUnionType,
 } from 'graphql';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { Field, RadioField, RelationshipField, RelationshipManyField, SelectField, UploadField } from '../../fields/config/types';
+import { Field, RadioField, RelationshipField, SelectField, UploadField } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import withNullableType from './withNullableType';
+import { BaseFields } from '../../collections/graphql/types';
 
 type LocaleInputType = {
   locale: {
@@ -30,7 +31,7 @@ type LocaleInputType = {
   }
 }
 
-function buildObjectType(name, fields, parentName, baseFields = {}) {
+function buildObjectType(name: string, fields: Field[], parentName: string, baseFields: BaseFields = {}): GraphQLType {
   const recursiveBuildObjectType = buildObjectType.bind(this);
 
   const fieldToSchemaMap = {
@@ -182,7 +183,7 @@ function buildObjectType(name, fields, parentName, baseFields = {}) {
       if (isRelatedToManyCollections) {
         relationToType = new GraphQLEnumType({
           name: `${relationshipName}_RelationTo`,
-          values: (field as RelationshipManyField).relationTo.reduce((relations, relation) => ({
+          values: field.relationTo.reduce((relations, relation) => ({
             ...relations,
             [formatName(relation)]: {
               value: relation,

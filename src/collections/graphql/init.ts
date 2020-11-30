@@ -3,8 +3,9 @@ import { GraphQLString, GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, Graph
 
 import formatName from '../../graphql/utilities/formatName';
 import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
+import { BaseFields } from './types';
 
-function registerCollections() {
+function registerCollections(): void {
   const {
     create, find, findByID, deleteResolver, update,
   } = this.graphQL.resolvers.collections;
@@ -42,7 +43,7 @@ function registerCollections() {
 
     collection.graphQL = {};
 
-    const baseFields = {
+    const baseFields: BaseFields = {
       id: {
         type: new GraphQLNonNull(GraphQLString),
       },
