@@ -1,7 +1,8 @@
 import { unflatten, flatten } from 'flatley';
 import flattenFilters from './flattenFilters';
+import { Fields } from './types';
 
-const unflattenRowsFromState = (state, path) => {
+const unflattenRowsFromState = (state: Fields, path) => {
   // Take a copy of state
   const remainingFlattenedState = { ...state };
 
@@ -32,7 +33,7 @@ const unflattenRowsFromState = (state, path) => {
   };
 };
 
-function fieldReducer(state, action) {
+function fieldReducer(state: Fields, action): Fields {
   switch (action.type) {
     case 'REPLACE_STATE': {
       return action.state;

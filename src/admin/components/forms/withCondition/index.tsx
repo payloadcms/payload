@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-import { useFormFields } from '../Form/context';
+import { useWatchForm } from '../Form/context';
 
 const withCondition = (Field) => {
   const CheckForCondition = (props) => {
@@ -43,7 +43,7 @@ const withCondition = (Field) => {
 
     const path = pathFromProps || name;
 
-    const { getData, getSiblingData, getField, dispatchFields } = useFormFields();
+    const { getData, getSiblingData, getField, dispatchFields } = useWatchForm();
 
     const data = getData();
     const field = getField(path);

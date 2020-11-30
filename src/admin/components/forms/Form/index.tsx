@@ -3,7 +3,6 @@ import React, {
 } from 'react';
 import { objectToFormData } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 import { useAuth } from '@payloadcms/config-provider';
 import { useLocale } from '../../utilities/Locale';
@@ -17,14 +16,15 @@ import getDataByPathFunc from './getDataByPath';
 import wait from '../../../../utilities/wait';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
+import { Context as FormContextType, Props } from './types';
 
-import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FieldContext } from './context';
+import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormWatchContext } from './context';
 
 import './index.scss';
 
 const baseClass = 'form';
 
-const Form: React.FC = (props) => {
+const Form: React.FC<Props> = (props) => {
   const {
     disabled,
     onSubmit,
@@ -51,7 +51,7 @@ const Form: React.FC = (props) => {
   const [submitted, setSubmitted] = useState(false);
   const [formattedInitialData, setFormattedInitialData] = useState(buildInitialState(initialData));
 
-  const contextRef = useRef({ ...initContextState });
+  const contextRef = useRef({} as FormContextType);
 
   let initialFieldState = {};
 
@@ -72,10 +72,11 @@ const Form: React.FC = (props) => {
     const validationPromises = Object.entries(contextRef.current.fields).map(async ([path, field]) => {
       const validatedField = { ...field };
 
-      validatedField.valid = typeof field.validate === 'function' ? await field.validate(field.value) : true;
+      validatedField.valid = true;
+      const validationResult = typeof field.validate === 'function' ? await field.validate(field.value) : true;
 
-      if (typeof validatedField.valid === 'string') {
-        validatedField.errorMessage = validatedField.valid;
+      if (typeof validationResult === 'string') {
+        validatedField.errorMessage = validationResult;
         validatedField.valid = false;
         isValid = false;
       }
@@ -90,10 +91,10 @@ const Form: React.FC = (props) => {
     return isValid;
   }, [contextRef]);
 
-  const submit = useCallback(async (e) => {
+  const submit = useCallback(async (e): Promise<void> => {
     if (disabled) {
       e.preventDefault();
-      return false;
+      return;
     }
 
     e.stopPropagation();
@@ -111,12 +112,13 @@ const Form: React.FC = (props) => {
     if (!isValid) {
       toast.error('Please correct invalid fields.');
 
-      return false;
+      return;
     }
 
     // If submit handler comes through via props, run that
     if (onSubmit) {
-      return onSubmit(fields, reduceFieldsToValues(fields));
+      onSubmit(fields, reduceFieldsToValues(fields));
+      return;
     }
 
     const formData = contextRef.current.createFormData();
@@ -128,15 +130,18 @@ const Form: React.FC = (props) => {
 
       setModified(false);
 
-      if (typeof handleResponse === 'function') return handleResponse(res);
-
+      if (typeof handleResponse === 'function') {
+        handleResponse(res);
+        return;
+      }
 
       setProcessing(false);
 
       const contentType = res.headers.get('content-type');
       const isJSON = contentType && contentType.indexOf('application/json') !== -1;
 
-      let json = {};
+      let json: any = {};
+
       if (isJSON) json = await res.json();
 
       if (res.status < 400) {
@@ -147,9 +152,10 @@ const Form: React.FC = (props) => {
         if (redirect) {
           const destination = {
             pathname: redirect,
+            state: {},
           };
 
-          if (json.message && !disableSuccessStatus) {
+          if (typeof json === 'object' && json.message && !disableSuccessStatus) {
             destination.state = {
               status: [
                 {
@@ -170,16 +176,42 @@ const Form: React.FC = (props) => {
         if (json.message) {
           toast.error(json.message);
 
-          return json;
+          return;
         }
 
         if (Array.isArray(json.errors)) {
-          const [fieldErrors, nonFieldErrors] = (errors) => errors.reduce(([fieldErrs, nonFieldErrs], err) => {
-            if (err.data) {
-              return [[...fieldErrs, ...err.data], [...nonFieldErrs, err]];
-            }
-            return [fieldErrs, [...nonFieldErrs, err]];
-          }, [[], []]);
+          const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+            ([fieldErrs, nonFieldErrs], err) => {
+              const newFieldErrs = [];
+              const newNonFieldErrs = [];
+
+              if (err?.message) {
+                newNonFieldErrs.push(err);
+              }
+
+              if (Array.isArray(err?.data)) {
+                err.data.forEach((dataError) => {
+                  if (dataError?.field) {
+                    newFieldErrs.push(dataError);
+                  } else {
+                    newNonFieldErrs.push(dataError);
+                  }
+                });
+              }
+
+              return [
+                [
+                  ...fieldErrs,
+                  ...newFieldErrs,
+                ],
+                [
+                  ...nonFieldErrs,
+                  ...newNonFieldErrs,
+                ],
+              ];
+            },
+            [[], []],
+          );
 
           fieldErrors.forEach((err) => {
             dispatchFields({
@@ -194,7 +226,7 @@ const Form: React.FC = (props) => {
             toast.error(err.message || 'An unknown error occurred.');
           });
 
-          return json;
+          return;
         }
 
         const message = errorMessages[res.status] || 'An unknown error occurrred.';
@@ -202,7 +234,7 @@ const Form: React.FC = (props) => {
         toast.error(message);
       }
 
-      return json;
+      return;
     } catch (err) {
       setProcessing(false);
 
@@ -224,10 +256,10 @@ const Form: React.FC = (props) => {
 
 
   const getFields = useCallback(() => contextRef.current.fields, [contextRef]);
-  const getField = useCallback((path) => contextRef.current.fields[path], [contextRef]);
+  const getField = useCallback((path: string) => contextRef.current.fields[path], [contextRef]);
   const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [contextRef]);
-  const getSiblingData = useCallback((path) => getSiblingDataFunc(contextRef.current.fields, path), [contextRef]);
-  const getDataByPath = useCallback((path) => getDataByPathFunc(contextRef.current.fields, path), [contextRef]);
+  const getSiblingData = useCallback((path: string) => getSiblingDataFunc(contextRef.current.fields, path), [contextRef]);
+  const getDataByPath = useCallback((path: string) => getDataByPathFunc(contextRef.current.fields, path), [contextRef]);
   const getUnflattenedValues = useCallback(() => reduceFieldsToValues(contextRef.current.fields), [contextRef]);
 
   const createFormData = useCallback(() => {
@@ -255,14 +287,14 @@ const Form: React.FC = (props) => {
 
   useEffect(() => {
     if (initialState) {
-      contextRef.current = { ...initContextState };
+      contextRef.current = { ...initContextState } as FormContextType;
       dispatchFields({ type: 'REPLACE_STATE', state: initialState });
     }
   }, [initialState]);
 
   useEffect(() => {
     if (initialData) {
-      contextRef.current = { ...initContextState };
+      contextRef.current = { ...initContextState } as FormContextType;
       const builtState = buildInitialState(initialData);
       setFormattedInitialData(builtState);
       dispatchFields({ type: 'REPLACE_STATE', state: builtState });
@@ -297,7 +329,7 @@ const Form: React.FC = (props) => {
       className={classes}
     >
       <FormContext.Provider value={contextRef.current}>
-        <FieldContext.Provider value={{
+        <FormWatchContext.Provider value={{
           fields,
           ...contextRef.current,
         }}
@@ -309,46 +341,10 @@ const Form: React.FC = (props) => {
               </ModifiedContext.Provider>
             </ProcessingContext.Provider>
           </SubmittedContext.Provider>
-        </FieldContext.Provider>
+        </FormWatchContext.Provider>
       </FormContext.Provider>
     </form>
   );
-};
-
-Form.defaultProps = {
-  redirect: '',
-  onSubmit: null,
-  method: 'POST',
-  action: '',
-  handleResponse: null,
-  onSuccess: null,
-  className: '',
-  disableSuccessStatus: false,
-  disabled: false,
-  initialState: undefined,
-  waitForAutocomplete: false,
-  initialData: undefined,
-  log: false,
-};
-
-Form.propTypes = {
-  disableSuccessStatus: PropTypes.bool,
-  onSubmit: PropTypes.func,
-  method: PropTypes.oneOf(['post', 'POST', 'get', 'GET', 'put', 'PUT', 'delete', 'DELETE']),
-  action: PropTypes.string,
-  handleResponse: PropTypes.func,
-  onSuccess: PropTypes.func,
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
-  className: PropTypes.string,
-  redirect: PropTypes.string,
-  disabled: PropTypes.bool,
-  initialState: PropTypes.shape({}),
-  waitForAutocomplete: PropTypes.bool,
-  initialData: PropTypes.shape({}),
-  log: PropTypes.bool,
 };
 
 export default Form;

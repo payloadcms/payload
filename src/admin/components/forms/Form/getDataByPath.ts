@@ -1,7 +1,8 @@
 import { unflatten } from 'flatley';
 import reduceFieldsToValues from './reduceFieldsToValues';
+import { Fields } from './types';
 
-const getDataByPath = (fields, path) => {
+const getDataByPath = (fields: Fields, path: string): unknown => {
   const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1);
   const name = path.split('.').pop();
 

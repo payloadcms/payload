@@ -2,12 +2,12 @@ import React, { useCallback } from 'react';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import { useFormFields } from '../../Form/context';
+import { useWatchForm } from '../../Form/context';
 
 import './index.scss';
 
 const ConfirmPassword = () => {
-  const { getField } = useFormFields();
+  const { getField } = useWatchForm();
   const password = getField('password');
 
   const validate = useCallback((value) => {

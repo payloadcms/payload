@@ -1,6 +1,7 @@
 import { unflatten } from 'flatley';
+import { Fields, Data } from './types';
 
-const reduceFieldsToValues = (fields, flatten) => {
+const reduceFieldsToValues = (fields: Fields, flatten?: boolean): Data => {
   const data = {};
 
   Object.keys(fields).forEach((key) => {

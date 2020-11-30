@@ -4,7 +4,7 @@ import useFieldType from '../../../../forms/useFieldType';
 import Label from '../../../../forms/Label';
 import CopyToClipboard from '../../../../elements/CopyToClipboard';
 import { text } from '../../../../../../fields/validations';
-import { useFormFields } from '../../../../forms/Form/context';
+import { useWatchForm } from '../../../../forms/Form/context';
 
 import './index.scss';
 import GenerateConfirmation from '../../../../elements/GenerateConfirmation';
@@ -17,7 +17,7 @@ const APIKey = () => {
   const [initialAPIKey, setInitialAPIKey] = useState(null);
   const [highlightedField, setHighlightedField] = useState(false);
 
-  const { getField } = useFormFields();
+  const { getField } = useWatchForm();
 
   const apiKey = getField(path);
 

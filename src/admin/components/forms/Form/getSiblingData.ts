@@ -1,6 +1,7 @@
 import reduceFieldsToValues from './reduceFieldsToValues';
+import { Fields, Data } from './types';
 
-const getSiblingData = (fields, path) => {
+const getSiblingData = (fields: Fields, path: string): Data => {
   let siblingFields = fields;
 
   // If this field is nested

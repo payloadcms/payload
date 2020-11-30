@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
+import { useConfig } from '@payloadcms/config-provider';
 import Email from '../../../../forms/field-types/Email';
 import Password from '../../../../forms/field-types/Password';
 import Checkbox from '../../../../forms/field-types/Checkbox';
 import Button from '../../../../elements/Button';
 import ConfirmPassword from '../../../../forms/field-types/ConfirmPassword';
-import { useFormFields, useFormModified } from '../../../../forms/Form/context';
-import { useConfig } from '@payloadcms/config-provider';
+import { useWatchForm, useFormModified } from '../../../../forms/Form/context';
 
 import APIKey from './APIKey';
 
@@ -18,7 +18,7 @@ const baseClass = 'auth-fields';
 const Auth = (props) => {
   const { useAPIKey, requirePassword, verify, collection: { slug }, email } = props;
   const [changingPassword, setChangingPassword] = useState(requirePassword);
-  const { getField } = useFormFields();
+  const { getField } = useWatchForm();
   const modified = useFormModified();
 
   const enableAPIKey = getField('enableAPIKey');

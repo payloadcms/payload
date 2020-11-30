@@ -1,4 +1,7 @@
-const buildValidationPromise = async (fieldState, field) => {
+import { Field as FieldSchema } from '../../../../fields/config/types';
+import { Fields, Field, Data } from './types';
+
+const buildValidationPromise = async (fieldState: Field, field: FieldSchema) => {
   const validatedFieldState = fieldState;
 
   validatedFieldState.valid = typeof field.validate === 'function' ? await field.validate(fieldState.value, field) : true;
@@ -9,7 +12,7 @@ const buildValidationPromise = async (fieldState, field) => {
   }
 };
 
-const buildStateFromSchema = async (fieldSchema, fullData = {}) => {
+const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data = {}): Promise<Fields> => {
   if (fieldSchema) {
     const validationPromises = [];
 
@@ -19,6 +22,7 @@ const buildStateFromSchema = async (fieldSchema, fullData = {}) => {
       const fieldState = {
         value,
         initialValue: value,
+        valid: true,
       };
 
       validationPromises.push(buildValidationPromise(fieldState, field));
@@ -26,7 +30,7 @@ const buildStateFromSchema = async (fieldSchema, fullData = {}) => {
       return fieldState;
     };
 
-    const iterateFields = (fields, data, path = '') => fields.reduce((state, field) => {
+    const iterateFields = (fields: FieldSchema[], data: Data, path = '') => fields.reduce((state, field) => {
       let initialData = data;
 
       if (field.name && field.defaultValue && typeof initialData?.[field.name] === 'undefined') {
