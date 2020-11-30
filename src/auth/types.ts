@@ -74,6 +74,7 @@ export interface IncomingAuthType {
   maxLoginAttempts?: number;
   lockTime?: number;
   useAPIKey?: boolean;
+  depth?: number
   cookies?: {
     secure?: boolean;
     sameSite?: string;

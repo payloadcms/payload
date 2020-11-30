@@ -1,4 +1,6 @@
-const Conditions = {
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
+
+const Conditions: PayloadCollectionConfig = {
   slug: 'conditions',
   labels: {
     singular: 'Conditions',

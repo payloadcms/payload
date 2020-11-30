@@ -1,10 +1,11 @@
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
 import checkRole from '../access/checkRole';
 import Email from '../blocks/Email';
 import Quote from '../blocks/Quote';
 import NumberBlock from '../blocks/Number';
 import CallToAction from '../blocks/CallToAction';
 
-const AllFields = {
+const AllFields: PayloadCollectionConfig = {
   slug: 'all-fields',
   // labels: {
   //   singular: 'All Fields',

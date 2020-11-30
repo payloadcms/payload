@@ -23,7 +23,7 @@ export type ImageSize = {
   name: string,
   width: number,
   height: number,
-  crop: string, // comes from sharp package
+  crop?: string, // comes from sharp package
 };
 
 export type IncomingUploadType = {

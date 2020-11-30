@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeepRequired } from 'ts-essentials';
-import { PaginateModel, Document, PassportLocalModel } from 'mongoose';
+import { PaginateModel, Document as MongooseDocument, PassportLocalModel } from 'mongoose';
 import { Access } from '../../config/types';
 import { Field } from '../../fields/config/types';
+import { Document } from '../../types';
 import { PayloadRequest } from '../../express/types/payloadRequest';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 
-interface CollectionModel extends PaginateModel<Document>, PassportLocalModel<Document>{}
+interface CollectionModel extends PaginateModel<MongooseDocument>, PassportLocalModel<MongooseDocument>{}
 
 export type HookOperationType =
   | 'create'
@@ -91,7 +92,9 @@ export type PayloadCollectionConfig = {
     useAsTitle?: string;
     defaultColumns?: string[];
     components?: any;
+    enableRichTextRelationship?: boolean
   };
+  preview?: (doc: Document, token: string) => string
   hooks?: {
     beforeOperation?: BeforeOperationHook[];
     beforeValidate?: BeforeValidateHook[];

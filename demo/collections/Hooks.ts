@@ -1,5 +1,8 @@
 /* eslint-disable no-param-reassign */
-export default {
+
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
+
+const Hooks: PayloadCollectionConfig = {
   slug: 'hooks',
   labels: {
     singular: 'Hook',
@@ -88,3 +91,5 @@ export default {
   ],
   timestamps: true,
 };
+
+export default Hooks;

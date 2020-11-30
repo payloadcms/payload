@@ -1,6 +1,6 @@
-// No labels necessary
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
 
-const AutoLabel = {
+const AutoLabel: PayloadCollectionConfig = {
   slug: 'auto-label',
   fields: [{
     name: 'text',

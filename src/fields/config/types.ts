@@ -4,7 +4,6 @@ import { PayloadRequest } from '../../express/types/payloadRequest';
 import { Access } from '../../config/types';
 import { Document } from '../../types';
 
-// TODO: add generic type and use mongoose types for originalDoc & data
 export type FieldHook = (args: {
   value?: unknown,
   originalDoc?: Document,
@@ -15,7 +14,23 @@ export type FieldHook = (args: {
   req: PayloadRequest
 }) => Promise<unknown> | unknown;
 
-type FieldBase = {
+type Admin = {
+  position?: string;
+  width?: string;
+  style?: CSSProperties;
+  readOnly?: boolean;
+  disabled?: boolean;
+  condition?: (...args: any[]) => any | void;
+  components?: { [key: string]: React.ComponentType };
+  hidden?: boolean
+}
+
+type Labels = {
+  singular: string;
+  plural: string;
+};
+
+interface FieldBase {
   name?: string;
   label?: string;
   slug?: string;
@@ -24,53 +39,77 @@ type FieldBase = {
   index?: boolean;
   defaultValue?: any;
   hidden?: boolean;
+  saveToJWT?: boolean
   localized?: boolean;
-  maxLength?: number;
   validate?: (value: any, field: Field) => any;
-  // eslint-disable-next-line no-use-before-define
   hooks?: {
     beforeValidate?: FieldHook[];
     beforeChange?: FieldHook[];
     afterChange?: FieldHook[];
     afterRead?: FieldHook[];
   }
-  admin?: {
-    position?: string;
-    width?: string;
-    style?: CSSProperties;
-    readOnly?: boolean;
-    disabled?: boolean;
-    condition?: (...args: any[]) => any | void;
-    components?: { [key: string]: React.ComponentType };
-  };
+  admin?: Admin;
   access?: {
     create?: Access;
     read?: Access;
     update?: Access;
     delete?: Access;
-    admin?: Access;
     unlock?: Access;
   };
 }
 
-export type StandardField = FieldBase & {
-  type: string;
-  fields?: Field[];
+export type NumberField = FieldBase & {
+  type: 'number';
+  min?: number
+  max?: number
 }
 
-export type NumberField = StandardField & { type: 'number'; };
-export type TextField = StandardField & { type: 'text'; };
-export type EmailField = StandardField & { type: 'email'; };
-export type TextareaField = StandardField & { type: 'textarea'; };
-export type CodeField = StandardField & { type: 'code'; };
-export type CheckboxField = StandardField & { type: 'checkbox'; };
-export type DateField = StandardField & { type: 'date'; };
-export type GroupField = StandardField & { type: 'group'; };
-export type RowField = StandardField & { type: 'row'; };
+export type TextField = FieldBase & {
+  type: 'text';
+  maxLength?: number
+  minLength?: number
+}
+
+export type EmailField = FieldBase & {
+  type: 'email';
+}
+
+export type TextareaField = FieldBase & {
+  type: 'textarea';
+  maxLength?: number
+  minLength?: number
+}
+
+export type CheckboxField = FieldBase & {
+  type: 'checkbox';
+}
+
+export type DateField = FieldBase & {
+  type: 'date';
+}
+
+export type GroupField = FieldBase & {
+  type: 'group';
+  fields: Field[];
+}
+
+export type RowField = FieldBase & {
+  type: 'row';
+  fields: Field[];
+}
 
 export type UploadField = FieldBase & {
   type: 'upload';
   relationTo: string;
+}
+
+type CodeAdmin = Admin & {
+  language?: string;
+}
+
+export type CodeField = Omit<FieldBase, 'admin'> & {
+  admin?: CodeAdmin
+  type: 'code';
 }
 
 export type SelectField = FieldBase & {
@@ -78,42 +117,34 @@ export type SelectField = FieldBase & {
   options: {
     value: string;
     label: string;
-  }[];
+  }[] | string[];
   hasMany?: boolean;
 }
 
-export type SelectManyField = SelectField & {
-  hasMany: true;
-}
-
-export type RelationshipSingleField = FieldBase & {
+export type RelationshipField = FieldBase & {
   type: 'relationship';
-  relationTo: string;
-  hasMany?: false;
+  relationTo: string | string[];
+  hasMany?: boolean;
 }
-
-export type RelationshipManyField = FieldBase & {
-  type: 'relationship';
-  relationTo: string[];
-  hasMany: true;
-}
-
-export type RelationshipField = RelationshipSingleField | RelationshipManyField;
 
 type RichTextElements = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link';
 type RichTextLeaves = 'bold' | 'italic' | 'underline' | 'strikethrough';
-export type RichTextField = FieldBase & {
+
+type RichTextAdmin = Admin & {
+  elements?: RichTextElements[];
+  leaves?: RichTextLeaves[];
+}
+
+export type RichTextField = Omit<FieldBase, 'admin'> & {
   type: 'richText';
-  admin?: {
-    elements?: RichTextElements[];
-    leaves?: RichTextLeaves[];
-  }
+  admin?: RichTextAdmin
 }
 
 export type ArrayField = FieldBase & {
   type: 'array';
   minRows?: number;
   maxRows?: number;
+  labels?: Labels;
   fields?: Field[];
 }
 
@@ -122,16 +153,13 @@ export type RadioField = FieldBase & {
   options: {
     value: string;
     label: string;
-  }[];
+  }[] | string[];
   hasMany?: boolean;
 }
 
 export type Block = {
   slug: string,
-  labels: {
-    singular: string;
-    plural: string;
-  };
+  labels: Labels
   fields: Field[],
 }
 
@@ -139,16 +167,25 @@ export type BlockField = FieldBase & {
   type: 'blocks';
   minRows?: number;
   maxRows?: number;
-  blocks?: Field[];
-};
+  blocks?: Block[];
+  defaultValue?: unknown
+  labels?: Labels
+}
 
 export type Field =
-  | StandardField
+  TextField
+  | NumberField
+  | EmailField
+  | TextareaField
+  | CheckboxField
+  | DateField
   | BlockField
+  | GroupField
   | RadioField
   | RelationshipField
   | ArrayField
   | RichTextField
   | SelectField
-  | SelectManyField
-  | UploadField;
+  | UploadField
+  | CodeField
+  | RowField;

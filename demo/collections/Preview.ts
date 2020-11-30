@@ -1,4 +1,6 @@
-export default {
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
+
+const Preview: PayloadCollectionConfig = {
   slug: 'previewable-post',
   labels: {
     singular: 'Previewable Post',
@@ -27,3 +29,5 @@ export default {
   ],
   timestamps: true,
 };
+
+export default Preview;

@@ -1,4 +1,6 @@
-export default {
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
+
+const Validations: PayloadCollectionConfig = {
   slug: 'validations',
   labels: {
     singular: 'Validation',
@@ -106,5 +108,6 @@ export default {
       ],
     },
   ],
-  timestamps: true,
 };
+
+export default Validations;

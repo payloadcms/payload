@@ -1,4 +1,6 @@
-export default {
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
+
+const RelationshipB: PayloadCollectionConfig = {
   slug: 'relationship-b',
   access: {
     read: () => true,
@@ -19,3 +21,5 @@ export default {
   ],
   timestamps: true,
 };
+
+export default RelationshipB;

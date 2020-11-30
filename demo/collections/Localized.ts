@@ -1,4 +1,6 @@
-export default {
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
+
+const LocalizedPosts: PayloadCollectionConfig = {
   slug: 'localized-posts',
   labels: {
     singular: 'Localized Post',
@@ -56,3 +58,5 @@ export default {
   ],
   timestamps: true,
 };
+
+export default LocalizedPosts;

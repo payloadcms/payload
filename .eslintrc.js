@@ -28,6 +28,8 @@ module.exports = {
         'plugin:@typescript-eslint/recommended',
       ],
       rules: {
+        "no-shadow": "off",
+        "@typescript-eslint/no-shadow": ["error"],
         'import/no-unresolved': [
           2,
           {

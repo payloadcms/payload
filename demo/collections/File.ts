@@ -1,3 +1,4 @@
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
 import checkRole from '../access/checkRole';
 
 const access = ({ req: { user } }) => {
@@ -18,7 +19,7 @@ const access = ({ req: { user } }) => {
   return false;
 };
 
-export default {
+const Files: PayloadCollectionConfig = {
   slug: 'files',
   labels: {
     singular: 'File',
@@ -65,3 +66,5 @@ export default {
     useAsTitle: 'filename',
   },
 };
+
+export default Files;

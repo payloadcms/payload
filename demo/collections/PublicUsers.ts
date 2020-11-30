@@ -1,8 +1,9 @@
 import checkRole from '../access/checkRole';
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
 
 const access = ({ req: { user } }) => checkRole(['admin'], user);
 
-export default {
+const PublicUsers: PayloadCollectionConfig = {
   slug: 'public-users',
   labels: {
     singular: 'Public User',
@@ -56,3 +57,5 @@ export default {
   ],
   timestamps: true,
 };
+
+export default PublicUsers;

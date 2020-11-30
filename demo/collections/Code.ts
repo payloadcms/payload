@@ -1,4 +1,6 @@
-const Code = {
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
+
+const Code: PayloadCollectionConfig = {
   slug: 'code',
   labels: {
     singular: 'Code',

@@ -1,6 +1,7 @@
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
 import checkRole from '../access/checkRole';
 
-export default {
+const StrictAccess: PayloadCollectionConfig = {
   slug: 'strict-access',
   labels: {
     singular: 'Strict Access',
@@ -71,3 +72,5 @@ export default {
   ],
   timestamps: true,
 };
+
+export default StrictAccess;

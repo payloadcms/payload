@@ -1,3 +1,4 @@
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
 import roles from '../access/roles';
 import checkRole from '../access/checkRole';
 
@@ -6,7 +7,7 @@ const access = ({ req: { user } }) => {
   return result;
 };
 
-export default {
+const Admin: PayloadCollectionConfig = {
   slug: 'admins',
   labels: {
     singular: 'Admin',
@@ -68,3 +69,5 @@ export default {
     useAsTitle: 'email',
   },
 };
+
+export default Admin;

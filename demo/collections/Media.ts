@@ -1,6 +1,6 @@
-import checkRole from '../access/checkRole';
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
 
-export default {
+const Media: PayloadCollectionConfig = {
   slug: 'media',
   labels: {
     singular: 'Media',
@@ -47,3 +47,5 @@ export default {
   ],
   timestamps: true,
 };
+
+export default Media;

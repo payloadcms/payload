@@ -1,9 +1,10 @@
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
 import Email from '../blocks/Email';
 import Quote from '../blocks/Quote';
 import NumberBlock from '../blocks/Number';
 import CallToAction from '../blocks/CallToAction';
 
-export default {
+const Blocks: PayloadCollectionConfig = {
   slug: 'blocks',
   labels: {
     singular: 'Blocks',
@@ -38,3 +39,5 @@ export default {
     },
   ],
 };
+
+export default Blocks;

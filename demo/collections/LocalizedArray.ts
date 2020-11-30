@@ -1,4 +1,6 @@
-const LocalizedArrays = {
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
+
+const LocalizedArrays: PayloadCollectionConfig = {
   slug: 'localized-arrays',
   labels: {
     singular: 'Localized Array',

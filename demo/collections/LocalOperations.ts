@@ -1,4 +1,6 @@
-const LocalOperations = {
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
+
+const LocalOperations: PayloadCollectionConfig = {
   slug: 'local-operations',
   labels: {
     singular: 'Local Operation',

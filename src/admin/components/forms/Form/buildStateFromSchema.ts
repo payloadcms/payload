@@ -44,10 +44,12 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
 
         if (field.type === 'array' || field.type === 'blocks') {
           if (Array.isArray(initialData?.[field.name])) {
+            const rows = initialData[field.name] as Data[];
+
             if (field.type === 'array') {
               return {
                 ...state,
-                ...initialData[field.name].reduce((rowState, row, i) => ({
+                ...rows.reduce((rowState, row, i) => ({
                   ...rowState,
                   ...iterateFields(field.fields, row, `${path}${field.name}.${i}.`),
                 }), {}),
@@ -57,7 +59,7 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
             if (field.type === 'blocks') {
               return {
                 ...state,
-                ...initialData[field.name].reduce((rowState, row, i) => {
+                ...rows.reduce((rowState, row, i) => {
                   const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
                   const rowPath = `${path}${field.name}.${i}.`;
 
@@ -84,7 +86,7 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
         }
 
         // Handle non-array-based nested fields (group, etc)
-        if (field.fields) {
+        if (Array.isArray(field.fields)) {
           return {
             ...state,
             ...iterateFields(field.fields, initialData?.[field.name], `${path}${field.name}.`),

@@ -1,4 +1,6 @@
-const Select = {
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
+
+const Select: PayloadCollectionConfig = {
   slug: 'select',
   labels: {
     singular: 'Select',

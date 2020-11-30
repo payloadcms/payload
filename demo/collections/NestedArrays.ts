@@ -1,4 +1,6 @@
-const NestedArray = {
+import { PayloadCollectionConfig } from '../../src/collections/config/types';
+
+const NestedArray: PayloadCollectionConfig = {
   slug: 'nested-arrays',
   labels: {
     singular: 'Nested Array',
