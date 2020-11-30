@@ -1,7 +1,6 @@
 import express, { Express, Router } from 'express';
 import crypto from 'crypto';
 import { TestAccount } from 'nodemailer';
-import { AuthenticateOptions } from 'passport';
 import {
   Config,
   EmailOptions,

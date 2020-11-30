@@ -3,6 +3,7 @@
 import path from 'path';
 import { Config } from './types';
 import findConfig from './find';
+import validate from './validate';
 
 const removedExtensions = ['.scss', '.css', '.svg', '.png', '.jpg', '.eot', '.ttf', '.woff', '.woff2'];
 
@@ -14,14 +15,16 @@ const loadConfig = (): Config => {
   });
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  let publicConfig = require(configPath);
+  let config = require(configPath);
 
-  if (publicConfig.default) publicConfig = publicConfig.default;
+  if (config.default) config = config.default;
+
+  const validatedConfig = validate(config);
 
   return {
-    ...publicConfig,
+    ...validatedConfig,
     paths: {
-      ...(publicConfig.paths || {}),
+      ...(validatedConfig.paths || {}),
       configDir: path.dirname(configPath),
       config: configPath,
     },

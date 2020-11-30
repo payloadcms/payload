@@ -1,5 +1,5 @@
 import merge from 'deepmerge';
-import { PayloadCollectionConfig, CollectionConfig } from './types';
+import { CollectionConfig, PayloadCollectionConfig } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
 import toKebabCase from '../../utilities/toKebabCase';
 import baseAuthFields from '../../fields/baseFields/baseFields';
@@ -58,20 +58,30 @@ const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: 
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitized: PayloadCollectionConfig = { ...collection };
+  const sanitized = { ...collection };
   sanitized.slug = toKebabCase(sanitized.slug);
   sanitized.labels = !sanitized.labels ? formatLabels(sanitized.slug) : sanitized.labels;
 
   // /////////////////////////////////
-  // Add required base fields
+  // Ensure that collection has required object structure
   // /////////////////////////////////
 
-  if (collection.upload) {
-    if (typeof collection.upload === 'object') {
-      sanitized.upload = collection.upload;
-    } else {
-      sanitized.upload = {};
-    }
+  if (!sanitized.hooks) sanitized.hooks = {};
+  if (!sanitized.access) sanitized.access = {};
+  if (!sanitized.admin) sanitized.admin = {};
+
+  if (!sanitized.hooks.beforeOperation) sanitized.hooks.beforeOperation = [];
+  if (!sanitized.hooks.beforeValidate) sanitized.hooks.beforeValidate = [];
+  if (!sanitized.hooks.beforeChange) sanitized.hooks.beforeChange = [];
+  if (!sanitized.hooks.afterChange) sanitized.hooks.afterChange = [];
+  if (!sanitized.hooks.beforeRead) sanitized.hooks.beforeRead = [];
+  if (!sanitized.hooks.afterRead) sanitized.hooks.afterRead = [];
+  if (!sanitized.hooks.beforeDelete) sanitized.hooks.beforeDelete = [];
+  if (!sanitized.hooks.afterDelete) sanitized.hooks.afterDelete = [];
+
+
+  if (sanitized.upload) {
+    if (sanitized.upload === true) sanitized.upload = {};
 
     if (!sanitized.upload.staticDir) sanitized.upload.staticDir = sanitized.slug;
     if (!sanitized.upload.staticURL) sanitized.upload.staticURL = `/${sanitized.slug}`;
@@ -91,12 +101,17 @@ const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: 
     ];
   }
 
-  if (collection.auth) {
+  if (sanitized.auth) {
     if (typeof collection.auth === 'object') {
       sanitized.auth = collection.auth;
     } else {
       sanitized.auth = {};
     }
+
+    if (!sanitized.hooks.beforeLogin) sanitized.hooks.beforeLogin = [];
+    if (!sanitized.hooks.afterLogin) sanitized.hooks.afterLogin = [];
+    if (!sanitized.hooks.afterForgotPassword) sanitized.hooks.afterForgotPassword = [];
+    if (!sanitized.auth.forgotPassword) sanitized.auth.forgotPassword = {};
 
     let authFields = baseAuthFields;
 
@@ -105,12 +120,9 @@ const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: 
     }
 
     if (sanitized.auth.verify) {
+      if (sanitized.auth.verify === true) sanitized.auth.verify = {};
       authFields = authFields.concat(baseVerificationFields);
     }
-
-    if (!sanitized?.hooks?.beforeLogin) sanitized.hooks.beforeLogin = [];
-    if (!sanitized?.hooks?.afterLogin) sanitized.hooks.afterLogin = [];
-    if (!sanitized?.hooks?.afterForgotPassword) sanitized.hooks.afterForgotPassword = [];
 
     sanitized.auth.maxLoginAttempts = typeof sanitized.auth.maxLoginAttempts === 'undefined' ? 5 : sanitized.auth.maxLoginAttempts;
     sanitized.auth.lockTime = sanitized.auth.lockTime || 600000; // 10 minutes
@@ -129,7 +141,6 @@ const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: 
       if (!sanitized.auth.cookies.secure) sanitized.auth.cookies.secure = false;
       if (!sanitized.auth.cookies.sameSite) sanitized.auth.cookies.sameSite = 'Lax';
     }
-
     authFields = mergeBaseFields(sanitized.fields, authFields);
 
     sanitized.fields = [
@@ -145,7 +156,7 @@ const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: 
   const validRelationships = collections.map((c) => c.slug);
   sanitized.fields = sanitizeFields(sanitized.fields, validRelationships);
 
-  return sanitized;
+  return sanitized as CollectionConfig;
 };
 
 export default sanitizeCollection;

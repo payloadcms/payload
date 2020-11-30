@@ -8,10 +8,7 @@ export type Where = {
   [key: string]: unknown
 }
 
-export type Document = {
-  id: string;
-  [key: string]: unknown;
-};
+export type Document = any;
 
 export type CreateOptions = {
   collection: string;

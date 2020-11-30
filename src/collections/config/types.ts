@@ -4,7 +4,8 @@ import { PaginateModel, Document, PassportLocalModel } from 'mongoose';
 import { Access } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types/payloadRequest';
-import { Auth } from '../../auth/types';
+import { IncomingAuthType, Auth } from '../../auth/types';
+import { IncomingUploadType, Upload } from '../../uploads/types';
 
 interface CollectionModel extends PaginateModel<Document>, PassportLocalModel<Document>{}
 
@@ -79,20 +80,6 @@ export type AfterForgotPasswordHook = (args?: {
   args?: any;
 }) => any;
 
-export type ImageSize = {
-  name: string,
-  width: number,
-  height: number,
-  crop: string, // comes from sharp package
-};
-
-export type Upload = {
-  imageSizes?: ImageSize[];
-  staticURL?: string;
-  staticDir?: string;
-  adminThumbnail?: string;
-}
-
 export type PayloadCollectionConfig = {
   slug: string;
   labels?: {
@@ -126,13 +113,13 @@ export type PayloadCollectionConfig = {
     admin?: Access;
     unlock?: Access;
   };
-  auth?: Auth | boolean;
-  upload?: Upload | boolean;
+  auth?: IncomingAuthType | boolean;
+  upload?: IncomingUploadType | boolean;
 };
 
-export interface CollectionConfig extends DeepRequired<PayloadCollectionConfig> {
-  auth: DeepRequired<Auth>
-  upload: DeepRequired<Upload>
+export interface CollectionConfig extends Omit<DeepRequired<PayloadCollectionConfig>, 'auth' | 'upload'> {
+  auth: Auth | boolean
+  upload: Upload | boolean
 }
 
 export type Collection = {

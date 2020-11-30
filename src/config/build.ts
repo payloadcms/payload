@@ -1,6 +1,5 @@
 import { PayloadConfig, Config } from './types';
 import sanitize from './sanitize';
-import validate from './validate';
 
 /**
  * @description Builds and validates Payload configuration
@@ -8,8 +7,7 @@ import validate from './validate';
  * @returns Built and sanitized Payload Config
  */
 export function buildConfig(config: PayloadConfig): Config {
-  const validated = validate(config);
-  const sanitized = sanitize(validated);
+  const sanitized = sanitize(config);
 
   return sanitized;
 }

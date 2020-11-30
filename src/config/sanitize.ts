@@ -1,14 +1,16 @@
-import { Config } from './types';
+import { PayloadConfig, Config } from './types';
 import defaultUser from '../auth/defaultUser';
 import sanitizeCollection from '../collections/config/sanitize';
 import { InvalidConfiguration } from '../errors';
 import sanitizeGlobals from '../globals/config/sanitize';
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections';
 
-const sanitizeConfig = (config: Config): Config => {
+const sanitizeConfig = (config: PayloadConfig): Config => {
   const sanitizedConfig = { ...config };
 
-  sanitizedConfig.csrf.push(config.serverURL);
+  if (sanitizedConfig.publicENV === undefined) sanitizedConfig.publicENV = {};
+
+  if (sanitizedConfig.defaultDepth === undefined) sanitizedConfig.defaultDepth = 2;
 
   sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig.collections, collection));
   checkDuplicateCollections(sanitizedConfig.collections);
@@ -19,6 +21,21 @@ const sanitizeConfig = (config: Config): Config => {
     sanitizedConfig.globals = [];
   }
 
+  if (!sanitizedConfig.cookiePrefix) sanitizedConfig.cookiePrefix = 'payload';
+
+  sanitizedConfig.csrf = [
+    ...(Array.isArray(config.csrf) ? config.csrf : []),
+    config.serverURL,
+  ];
+
+  sanitizedConfig.admin = config.admin || {};
+
+  if (!sanitizedConfig.admin.meta) {
+    sanitizedConfig.admin.meta = {};
+  }
+
+  sanitizedConfig.upload = config.upload || {};
+
   if (!sanitizedConfig.admin.user) {
     sanitizedConfig.admin.user = 'users';
     sanitizedConfig.collections.push(sanitizeCollection(sanitizedConfig.collections, defaultUser));
@@ -26,7 +43,33 @@ const sanitizeConfig = (config: Config): Config => {
     throw new InvalidConfiguration(`${sanitizedConfig.admin.user} is not a valid admin user collection`);
   }
 
-  return sanitizedConfig;
+  sanitizedConfig.email = config.email || {};
+  // if (!sanitizedConfig.email.transport) sanitizedConfig.email.transport = 'mock';
+
+  sanitizedConfig.graphQL = config.graphQL || {};
+  sanitizedConfig.graphQL.maxComplexity = (sanitizedConfig.graphQL && sanitizedConfig.graphQL.maxComplexity) ? sanitizedConfig.graphQL.maxComplexity : 1000;
+  sanitizedConfig.graphQL.disablePlaygroundInProduction = (sanitizedConfig.graphQL && sanitizedConfig.graphQL.disablePlaygroundInProduction !== undefined) ? sanitizedConfig.graphQL.disablePlaygroundInProduction : true;
+
+  sanitizedConfig.routes = {
+    admin: (config.routes && config.routes.admin) ? config.routes.admin : '/admin',
+    api: (config.routes && config.routes.api) ? config.routes.api : '/api',
+    graphQL: (config.routes && config.routes.graphQL) ? config.routes.graphQL : '/graphql',
+    graphQLPlayground: (config.routes && config.routes.graphQLPlayground) ? config.routes.graphQLPlayground : '/graphql-playground',
+  };
+
+  sanitizedConfig.rateLimit = config.rateLimit || {};
+  sanitizedConfig.rateLimit.window = sanitizedConfig?.rateLimit?.window || 15 * 60 * 100; // 15min default
+  sanitizedConfig.rateLimit.max = sanitizedConfig?.rateLimit?.max || 500;
+
+  if (!sanitizedConfig.express) {
+    sanitizedConfig.express = {
+      json: {},
+    };
+  }
+
+  sanitizedConfig.hooks = { ...(config.hooks || {}) };
+
+  return sanitizedConfig as Config;
 };
 
 export default sanitizeConfig;

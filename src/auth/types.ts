@@ -1,3 +1,4 @@
+import { DeepRequired } from 'ts-essentials';
 import { PayloadRequest } from '../express/types/payloadRequest';
 
 export type Permission = {
@@ -67,30 +68,28 @@ export interface IncomingAuthType {
   verify?:
   | boolean
   | {
-    generateEmailHTML: GenerateVerifyEmailHTML;
-    generateEmailSubject: GenerateVerifyEmailSubject;
+    generateEmailHTML?: GenerateVerifyEmailHTML;
+    generateEmailSubject?: GenerateVerifyEmailSubject;
   };
   maxLoginAttempts?: number;
   lockTime?: number;
   useAPIKey?: boolean;
-  cookies?:
-  | {
+  cookies?: {
     secure?: boolean;
     sameSite?: string;
     domain?: string;
   }
-  | boolean;
   forgotPassword?: {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML,
     generateEmailSubject?: GenerateForgotPasswordEmailSubject,
   }
 }
 
-export interface Auth extends Omit<IncomingAuthType, 'verify' | 'forgotPassword'> {
+export interface Auth extends Omit<DeepRequired<IncomingAuthType>, 'verify' | 'forgotPassword'> {
   verify?: {
     generateEmailHTML?: GenerateVerifyEmailHTML
     generateEmailSubject?: GenerateVerifyEmailSubject
-  }
+  } | boolean
   forgotPassword?: {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
