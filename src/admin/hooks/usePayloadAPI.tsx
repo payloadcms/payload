@@ -7,7 +7,7 @@ type Result = [
   {
     isLoading: boolean
     isError: boolean
-    data: unknown
+    data: any
   },
   {
     setParams: React.Dispatch<unknown>
@@ -16,7 +16,7 @@ type Result = [
 
 type Options = {
   initialParams?: unknown
-  initialData?: unknown
+  initialData?: any
 }
 
 type UsePayloadAPI = (url: string, options?: Options) => Result;

@@ -63,6 +63,11 @@ export type PayloadConfig = {
     indexHTML?: string;
     components?: {
       Nav?: React.ComponentType
+      Account?: React.ComponentType
+      graphics?: {
+        Icon?: React.ComponentType
+        Logo?: React.ComponentType
+      }
     }
   };
   collections?: PayloadCollectionConfig[];

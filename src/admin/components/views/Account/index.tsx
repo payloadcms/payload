@@ -10,7 +10,7 @@ import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
 
-const AccountView = () => {
+const AccountView: React.FC = () => {
   const { state: locationState } = useLocation();
   const locale = useLocale();
   const { setStepNav } = useStepNav();
@@ -21,6 +21,7 @@ const AccountView = () => {
     routes: { api },
     collections,
     admin: {
+      user: adminUser,
       components: {
         Account: CustomAccount,
       } = {},
@@ -31,7 +32,7 @@ const AccountView = () => {
 
   const { fields } = collection;
 
-  const collectionPermissions = permissions?.collections?.[user?.collection];
+  const collectionPermissions = permissions?.collections?.[adminUser];
 
   const [{ data, isLoading }] = usePayloadAPI(
     `${serverURL}${api}/${collection?.slug}/${user?.id}?depth=0`,

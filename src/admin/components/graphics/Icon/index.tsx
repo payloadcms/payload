@@ -1,6 +1,6 @@
 import React from 'react';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import { useConfig } from '@payloadcms/config-provider';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
 const PayloadIcon: React.FC = () => (
   <svg
