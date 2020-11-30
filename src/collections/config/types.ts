@@ -119,8 +119,8 @@ export type PayloadCollectionConfig = {
 };
 
 export interface CollectionConfig extends Omit<DeepRequired<PayloadCollectionConfig>, 'auth' | 'upload'> {
-  auth: Auth | boolean
-  upload: Upload | boolean
+  auth: Auth;
+  upload: Upload;
 }
 
 export type Collection = {
