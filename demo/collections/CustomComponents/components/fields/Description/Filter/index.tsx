@@ -1,9 +1,9 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 
 import './index.scss';
 
-const Filter = ({ onChange, value }) => (
+const Filter: React.FC<Props> = ({ onChange, value }) => (
   <input
     className="custom-description-filter"
     type="text"
@@ -11,14 +11,5 @@ const Filter = ({ onChange, value }) => (
     value={value}
   />
 );
-
-Filter.defaultProps = {
-  value: '',
-};
-
-Filter.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
-};
 
 export default Filter;

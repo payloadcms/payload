@@ -16,6 +16,7 @@ type MockEmailTransport = {
   fromName?: string;
   fromAddress?: string;
 };
+
 type ValidEmailTransport = {
   transport: Transporter;
   transportOptions?: SMTPConnection.Options;
@@ -101,9 +102,13 @@ export type PayloadConfig = {
   localization?: {
     locales: string[]
     defaultLocale: string
+    fallback?: boolean
   };
   defaultLocale?: string;
   fallback?: boolean;
+  compression: {
+    [key: string]: unknown
+  },
   graphQL?: {
     mutations?: {
       [key: string]: unknown
@@ -117,7 +122,7 @@ export type PayloadConfig = {
   components?: { [key: string]: JSX.Element | (() => JSX.Element) };
   paths?: { [key: string]: string };
   hooks?: {
-    afterError?: () => void;
+    afterError?: (err: Error) => void;
   };
   webpack?: (config: Configuration) => Configuration;
   serverModules?: string[];

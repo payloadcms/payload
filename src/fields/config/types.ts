@@ -16,8 +16,8 @@ export type FieldHook = (args: {
 }) => Promise<unknown> | unknown;
 
 type FieldBase = {
-  name: string;
-  label: string;
+  name?: string;
+  label?: string;
   slug?: string;
   required?: boolean;
   unique?: boolean;
@@ -26,7 +26,6 @@ type FieldBase = {
   hidden?: boolean;
   localized?: boolean;
   maxLength?: number;
-  height?: number;
   validate?: (value: any, field: Field) => any;
   // eslint-disable-next-line no-use-before-define
   hooks?: {

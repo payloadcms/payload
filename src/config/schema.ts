@@ -1,5 +1,4 @@
 import joi from 'joi';
-import path from 'path';
 import collectionSchema from '../collections/config/schema';
 import globalSchema from '../globals/config/schema';
 
