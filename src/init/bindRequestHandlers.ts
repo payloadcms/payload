@@ -11,10 +11,10 @@ import verifyEmail from '../auth/requestHandlers/verifyEmail';
 import unlock from '../auth/requestHandlers/unlock';
 
 import create, { CreateRequestHandler } from '../collections/requestHandlers/create';
-import find from '../collections/requestHandlers/find';
-import findByID from '../collections/requestHandlers/findByID';
-import update from '../collections/requestHandlers/update';
-import deleteHandler from '../collections/requestHandlers/delete';
+import find, { FindRequestHandler } from '../collections/requestHandlers/find';
+import findByID, { FindByIDRequestHandler } from '../collections/requestHandlers/findByID';
+import update, { UpdateRequestHandler } from '../collections/requestHandlers/update';
+import deleteHandler, { DeleteRequestHandler } from '../collections/requestHandlers/delete';
 
 import findOne from '../globals/requestHandlers/findOne';
 import globalUpdate from '../globals/requestHandlers/update';
@@ -22,9 +22,13 @@ import { Payload } from '../index';
 
 export type RequestHandlers = {
   collections: {
-    create: CreateRequestHandler
+    create: CreateRequestHandler,
+    find: FindRequestHandler,
+    findByID: FindByIDRequestHandler,
+    update: UpdateRequestHandler,
+    delete: DeleteRequestHandler,
     auth: {
-      access: AccessRequestHandler
+      access: AccessRequestHandler,
     }
   }
 }
