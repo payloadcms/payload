@@ -3,7 +3,7 @@ import accessPromise from './accessPromise';
 import hookPromise from './hookPromise';
 import { OperationArguments } from '../types';
 
-const traverseFields = (args: OperationArguments) => {
+const traverseFields = (args: OperationArguments): void => {
   const {
     fields,
     data = {},
@@ -62,7 +62,7 @@ const traverseFields = (args: OperationArguments) => {
     }
 
     if (field.type === 'richText' && typeof data[field.name] === 'string') {
-      dataCopy[field.name] = JSON.parse(data[field.name]);
+      dataCopy[field.name] = JSON.parse(data[field.name] as string);
     }
 
     if (field.type === 'relationship' && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null')) {

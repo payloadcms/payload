@@ -86,10 +86,12 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
         }
 
         // Handle non-array-based nested fields (group, etc)
-        if (Array.isArray(field.fields)) {
+        if (field.type === 'row' || field.type === 'group') {
+          const subFieldData = initialData?.[field.name] as Data;
+
           return {
             ...state,
-            ...iterateFields(field.fields, initialData?.[field.name], `${path}${field.name}.`),
+            ...iterateFields(field.fields, subFieldData, `${path}${field.name}.`),
           };
         }
 
@@ -100,7 +102,7 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
       }
 
       // Handle field types that do not use names (row, etc)
-      if (field.fields) {
+      if (field.type === 'row' || field.type === 'group') {
         return {
           ...state,
           ...iterateFields(field.fields, data, path),

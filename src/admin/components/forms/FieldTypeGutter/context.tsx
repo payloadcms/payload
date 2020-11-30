@@ -1,11 +1,10 @@
 import React, { createContext, useContext } from 'react';
-import PropTypes from 'prop-types';
 import { useWindowInfo } from '@faceless-ui/window-info';
 
 const context = createContext(false);
 const { Provider } = context;
 
-export const NegativeFieldGutterProvider = ({ children, allow }) => {
+export const NegativeFieldGutterProvider: React.FC<{allow?: boolean}> = ({ children, allow }) => {
   const { breakpoints: { m: midBreak } } = useWindowInfo();
 
   return (
@@ -15,13 +14,4 @@ export const NegativeFieldGutterProvider = ({ children, allow }) => {
   );
 };
 
-export const useNegativeFieldGutter = () => useContext(context);
-
-NegativeFieldGutterProvider.defaultProps = {
-  allow: false,
-};
-
-NegativeFieldGutterProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-  allow: PropTypes.bool,
-};
+export const useNegativeFieldGutter = (): boolean => useContext(context);

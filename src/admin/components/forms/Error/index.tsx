@@ -1,11 +1,14 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import Tooltip from '../../elements/Tooltip';
+import { Props } from './types';
 
 import './index.scss';
 
-const Error = (props) => {
-  const { showError, message } = props;
+const Error: React.FC<Props> = (props) => {
+  const {
+    showError = false,
+    message = 'Please complete this field.',
+  } = props;
 
   if (showError) {
     return (
@@ -16,16 +19,6 @@ const Error = (props) => {
   }
 
   return null;
-};
-
-Error.defaultProps = {
-  showError: false,
-  message: 'Please complete this field.',
-};
-
-Error.propTypes = {
-  showError: PropTypes.bool,
-  message: PropTypes.string,
 };
 
 export default Error;

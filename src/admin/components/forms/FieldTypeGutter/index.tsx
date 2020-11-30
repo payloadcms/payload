@@ -1,13 +1,18 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useNegativeFieldGutter } from './context';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'field-type-gutter';
 
-const FieldTypeGutter = (props) => {
-  const { children, variant, verticalAlignment, className, dragHandleProps } = props;
+const FieldTypeGutter: React.FC<Props> = ({
+  children,
+  variant = 'left',
+  verticalAlignment = 'sticky',
+  className,
+  dragHandleProps = {},
+}) => {
   const allowNegativeGutter = useNegativeFieldGutter();
 
   const classes = [
@@ -30,24 +35,6 @@ const FieldTypeGutter = (props) => {
       </div>
     </div>
   );
-};
-
-const { oneOf, shape, string, node } = PropTypes;
-
-FieldTypeGutter.defaultProps = {
-  variant: 'left',
-  verticalAlignment: 'sticky',
-  dragHandleProps: {},
-  className: null,
-  children: null,
-};
-
-FieldTypeGutter.propTypes = {
-  variant: oneOf(['left', 'right']),
-  verticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
-  dragHandleProps: shape({}),
-  className: string,
-  children: node,
 };
 
 export default FieldTypeGutter;
