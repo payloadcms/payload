@@ -1,6 +1,13 @@
+import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
+import { FindResponse } from '../../types';
+import { PayloadRequest } from '../../express/types/payloadRequest';
 
-export default async function find(req, res, next) {
+export type FindRequestHandler = (req: PayloadRequest, res: Response, next: NextFunction) => unknown;
+
+export type FindResult = FindResponse;
+
+export default async function find(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<FindResult> | void> {
   try {
     const options = {
       req,

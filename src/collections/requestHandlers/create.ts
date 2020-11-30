@@ -9,7 +9,7 @@ export type CreateRequestHandler = (req: PayloadRequest, res: Response, next: Ne
 export type CreateResult = {
   message: string
   doc: Document
-}
+};
 
 export default async function create(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<CreateResult> | void> {
   try {
