@@ -1,16 +1,15 @@
 import React, {
   useState, createContext, useContext,
 } from 'react';
-
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Chevron from '../../icons/Chevron';
+import { Context } from './types';
 
 import './index.scss';
 
-const Context = createContext({});
+const Context = createContext({} as Context);
 
-const StepNavProvider = ({ children }) => {
+const StepNavProvider: React.FC = ({ children }) => {
   const [stepNav, setStepNav] = useState([]);
 
   return (
@@ -24,16 +23,9 @@ const StepNavProvider = ({ children }) => {
   );
 };
 
-StepNavProvider.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
-};
+const useStepNav = (): Context => useContext(Context);
 
-const useStepNav = () => useContext(Context);
-
-const StepNav = () => {
+const StepNav: React.FC = () => {
   const dashboardLabel = <span>Dashboard</span>;
   const { stepNav } = useStepNav();
 
@@ -46,8 +38,7 @@ const StepNav = () => {
             <Chevron />
           </Link>
         )
-        : dashboardLabel
-      }
+        : dashboardLabel}
       {stepNav.map((item, i) => {
         const StepLabel = <span key={i}>{item.label}</span>;
 

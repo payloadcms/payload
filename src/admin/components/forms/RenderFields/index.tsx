@@ -69,11 +69,7 @@ const RenderFields: React.FC<Props> = (props) => {
                 if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
                   const FieldComponent = field?.admin?.hidden ? fieldTypes.hidden : fieldTypes[field.type];
 
-                  let fieldPermissions = permissions?.[field.name];
-
-                  if (!field.name) {
-                    fieldPermissions = permissions;
-                  }
+                  const fieldPermissions = field?.name ? permissions?.[field.name] : permissions;
 
                   let { admin: { readOnly } = {} } = field;
 

@@ -1,5 +1,6 @@
-import { CollectionPermission, GlobalPermission } from '../../../../auth/types';
-import { Field } from '../../../../fields/config/types';
+import { CollectionFieldPermissions, GlobalFieldPermissions } from '../../../../auth/types';
+import { FieldWithPath } from '../../../../fields/config/types';
+import { FieldTypes } from '../field-types';
 
 export type Operation = 'create' | 'update'
 
@@ -11,7 +12,8 @@ export type Props = {
   className?: string
   operation: Operation
   readOnly: boolean
-  permissions: CollectionPermission | GlobalPermission
+  permissions: CollectionFieldPermissions | GlobalFieldPermissions
   filter: (field: Field) => boolean
-  fieldSchema: Field[]
+  fieldSchema: FieldWithPath[]
+  fieldTypes: FieldTypes
 }

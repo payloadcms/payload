@@ -189,3 +189,7 @@ export type Field =
   | UploadField
   | CodeField
   | RowField;
+
+export type FieldWithPath = Field & {
+  path?: string
+}

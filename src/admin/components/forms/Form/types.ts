@@ -14,13 +14,13 @@ export type Fields = {
 }
 
 export type Data = {
-  [key: string]: unknown
+  [key: string]: any
 }
 
 export type Props = {
   disabled?: boolean
   onSubmit?: (fields: Fields, data: Data) => void
-  method?: 'GET' | 'PUT' | 'DELETE' | 'POST'
+  method?: 'get' | 'put' | 'delete' | 'post'
   action?: string
   handleResponse?: (res: Response) => void
   onSuccess?: (json: unknown) => void

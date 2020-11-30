@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import format from 'date-fns/format';
 import { useConfig } from '@payloadcms/config-provider';
@@ -15,12 +14,13 @@ import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
 import Meta from '../../utilities/Meta';
 import Auth from '../collections/Edit/Auth';
 import Loading from '../../elements/Loading';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'account';
 
-const DefaultAccount = (props) => {
+const DefaultAccount: React.FC<Props> = (props) => {
   const {
     collection,
     data,
@@ -86,7 +86,7 @@ const DefaultAccount = (props) => {
                   operation="update"
                   permissions={permissions.fields}
                   readOnly={!hasSavePermission}
-                  filter={(field) => (!field.position || field?.admin?.position !== 'sidebar')}
+                  filter={(field) => field?.admin?.position !== 'sidebar'}
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
                 />
@@ -128,7 +128,6 @@ const DefaultAccount = (props) => {
               permissions={permissions.fields}
               readOnly={!hasSavePermission}
               filter={(field) => field?.admin?.position === 'sidebar'}
-              position="sidebar"
               fieldTypes={fieldTypes}
               fieldSchema={fields}
             />
@@ -160,56 +159,6 @@ const DefaultAccount = (props) => {
       </Form>
     </div>
   );
-};
-
-DefaultAccount.defaultProps = {
-  isEditing: false,
-  data: undefined,
-  onSave: null,
-};
-
-DefaultAccount.propTypes = {
-  hasSavePermission: PropTypes.bool.isRequired,
-  apiURL: PropTypes.string.isRequired,
-  action: PropTypes.string.isRequired,
-  collection: PropTypes.shape({
-    labels: PropTypes.shape({
-      plural: PropTypes.string,
-      singular: PropTypes.string,
-    }),
-    slug: PropTypes.string,
-    admin: PropTypes.shape({
-      useAsTitle: PropTypes.string,
-    }),
-    fields: PropTypes.arrayOf(PropTypes.shape({})),
-    preview: PropTypes.func,
-    timestamps: PropTypes.bool,
-    auth: PropTypes.shape({
-      useAPIKey: PropTypes.bool,
-    }),
-  }).isRequired,
-  isEditing: PropTypes.bool,
-  data: PropTypes.shape({
-    updatedAt: PropTypes.string,
-    createdAt: PropTypes.string,
-    id: PropTypes.string,
-    email: PropTypes.string,
-  }),
-  permissions: PropTypes.shape({
-    create: PropTypes.shape({
-      permission: PropTypes.bool,
-    }),
-    update: PropTypes.shape({
-      permission: PropTypes.bool,
-    }),
-    delete: PropTypes.shape({
-      permission: PropTypes.bool,
-    }),
-    fields: PropTypes.shape({}),
-  }).isRequired,
-  onSave: PropTypes.func,
-  initialState: PropTypes.shape({}).isRequired,
-  isLoading: PropTypes.bool.isRequired,
 };
 
 export default DefaultAccount;

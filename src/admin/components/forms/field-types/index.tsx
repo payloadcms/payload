@@ -19,7 +19,28 @@ import array from './Array';
 import row from './Row';
 import upload from './Upload';
 
-export default {
+export type FieldTypes = {
+  code: React.ComponentType
+  email: React.ComponentType
+  hidden: React.ComponentType
+  text: React.ComponentType
+  date: React.ComponentType
+  password: React.ComponentType
+  relationship: React.ComponentType
+  textarea: React.ComponentType
+  select: React.ComponentType
+  number: React.ComponentType
+  checkbox: React.ComponentType
+  richText: React.ComponentType
+  radio: React.ComponentType
+  blocks: React.ComponentType
+  group: React.ComponentType
+  array: React.ComponentType
+  row: React.ComponentType
+  upload: React.ComponentType
+}
+
+const fieldTypes: FieldTypes = {
   code,
   email,
   hidden,
@@ -39,3 +60,5 @@ export default {
   row,
   upload,
 };
+
+export default fieldTypes;
