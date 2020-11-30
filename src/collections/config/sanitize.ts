@@ -9,6 +9,7 @@ import baseAccountLockFields from '../../fields/baseFields/baseAccountLockFields
 import baseUploadFields from '../../fields/baseFields/baseUploadFields';
 import baseImageUploadFields from '../../fields/baseFields/baseImageUploadFields';
 import formatLabels from '../../utilities/formatLabels';
+import { defaults, authDefaults } from './defaults';
 
 const mergeBaseFields = (fields, baseFields) => {
   const mergedFields = [];
@@ -58,34 +59,17 @@ const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: 
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitized = { ...collection };
+  const sanitized: PayloadCollectionConfig = merge(defaults, collection);
+
   sanitized.slug = toKebabCase(sanitized.slug);
   sanitized.labels = !sanitized.labels ? formatLabels(sanitized.slug) : sanitized.labels;
-
-  // /////////////////////////////////
-  // Ensure that collection has required object structure
-  // /////////////////////////////////
-
-  if (!sanitized.hooks) sanitized.hooks = {};
-  if (!sanitized.access) sanitized.access = {};
-  if (!sanitized.admin) sanitized.admin = {};
-
-  if (!sanitized.hooks.beforeOperation) sanitized.hooks.beforeOperation = [];
-  if (!sanitized.hooks.beforeValidate) sanitized.hooks.beforeValidate = [];
-  if (!sanitized.hooks.beforeChange) sanitized.hooks.beforeChange = [];
-  if (!sanitized.hooks.afterChange) sanitized.hooks.afterChange = [];
-  if (!sanitized.hooks.beforeRead) sanitized.hooks.beforeRead = [];
-  if (!sanitized.hooks.afterRead) sanitized.hooks.afterRead = [];
-  if (!sanitized.hooks.beforeDelete) sanitized.hooks.beforeDelete = [];
-  if (!sanitized.hooks.afterDelete) sanitized.hooks.afterDelete = [];
-
 
   if (sanitized.upload) {
     if (sanitized.upload === true) sanitized.upload = {};
 
-    if (!sanitized.upload.staticDir) sanitized.upload.staticDir = sanitized.slug;
-    if (!sanitized.upload.staticURL) sanitized.upload.staticURL = `/${sanitized.slug}`;
-    if (!sanitized.admin.useAsTitle) sanitized.admin.useAsTitle = 'filename';
+    sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug;
+    sanitized.upload.staticURL = sanitized.upload.staticURL || `/${sanitized.slug}`;
+    sanitized.admin.useAsTitle = sanitized.admin.useAsTitle || 'filename';
 
     let uploadFields = baseUploadFields;
 
@@ -103,15 +87,10 @@ const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: 
 
   if (sanitized.auth) {
     if (typeof collection.auth === 'object') {
-      sanitized.auth = collection.auth;
+      sanitized.auth = merge(authDefaults, collection.auth);
     } else {
       sanitized.auth = {};
     }
-
-    if (!sanitized.hooks.beforeLogin) sanitized.hooks.beforeLogin = [];
-    if (!sanitized.hooks.afterLogin) sanitized.hooks.afterLogin = [];
-    if (!sanitized.hooks.afterForgotPassword) sanitized.hooks.afterForgotPassword = [];
-    if (!sanitized.auth.forgotPassword) sanitized.auth.forgotPassword = {};
 
     let authFields = baseAuthFields;
 
@@ -124,23 +103,10 @@ const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: 
       authFields = authFields.concat(baseVerificationFields);
     }
 
-    sanitized.auth.maxLoginAttempts = typeof sanitized.auth.maxLoginAttempts === 'undefined' ? 5 : sanitized.auth.maxLoginAttempts;
-    sanitized.auth.lockTime = sanitized.auth.lockTime || 600000; // 10 minutes
-
     if (sanitized.auth.maxLoginAttempts > 0) {
       authFields = authFields.concat(baseAccountLockFields);
-
-      if (!sanitized.access.unlock) sanitized.access.unlock = ({ req: { user } }) => Boolean(user);
     }
 
-    if (!sanitized.auth.tokenExpiration) sanitized.auth.tokenExpiration = 7200;
-
-    if (!sanitized.auth.cookies) sanitized.auth.cookies = {};
-
-    if (typeof sanitized.auth.cookies !== 'boolean') {
-      if (!sanitized.auth.cookies.secure) sanitized.auth.cookies.secure = false;
-      if (!sanitized.auth.cookies.sameSite) sanitized.auth.cookies.sameSite = 'Lax';
-    }
     authFields = mergeBaseFields(sanitized.fields, authFields);
 
     sanitized.fields = [

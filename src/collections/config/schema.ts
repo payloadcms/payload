@@ -15,39 +15,37 @@ const collectionSchema = joi.object().keys({
     delete: joi.func(),
     unlock: joi.func(),
     admin: joi.func(),
-  }).default({}),
-  timestamps: joi.boolean()
-    .default(true),
+  }),
+  timestamps: joi.boolean(),
   admin: joi.object({
-    useAsTitle: joi.string().default('id'),
+    useAsTitle: joi.string(),
     defaultColumns: joi.array().items(joi.string()),
-    enableRichTextRelationship: joi.boolean().default(false),
+    enableRichTextRelationship: joi.boolean(),
     components: joi.object()
       .keys({
         List: joi.func(),
         Edit: joi.func(),
-      }).default({}),
-  }).default(),
+      }),
+  }),
   fields: joi.array()
-    .items(fieldSchema)
-    .default([]),
+    .items(fieldSchema),
   hooks: joi.object({
-    beforeOperation: joi.array().items(joi.func()).default([]),
-    beforeValidate: joi.array().items(joi.func()).default([]),
-    beforeChange: joi.array().items(joi.func()).default([]),
-    afterChange: joi.array().items(joi.func()).default([]),
-    beforeRead: joi.array().items(joi.func()).default([]),
-    afterRead: joi.array().items(joi.func()).default([]),
-    beforeDelete: joi.array().items(joi.func()).default([]),
-    afterDelete: joi.array().items(joi.func()).default([]),
-    beforeLogin: joi.array().items(joi.func()).default([]),
-    afterLogin: joi.array().items(joi.func()).default([]),
-    afterForgotPassword: joi.array().items(joi.func()).default([]),
-  }).default(),
+    beforeOperation: joi.array().items(joi.func()),
+    beforeValidate: joi.array().items(joi.func()),
+    beforeChange: joi.array().items(joi.func()),
+    afterChange: joi.array().items(joi.func()),
+    beforeRead: joi.array().items(joi.func()),
+    afterRead: joi.array().items(joi.func()),
+    beforeDelete: joi.array().items(joi.func()),
+    afterDelete: joi.array().items(joi.func()),
+    beforeLogin: joi.array().items(joi.func()),
+    afterLogin: joi.array().items(joi.func()),
+    afterForgotPassword: joi.array().items(joi.func()),
+  }),
   auth: joi.alternatives().try(
     joi.object({
       tokenExpiration: joi.number(),
-      depth: joi.number().default(0),
+      depth: joi.number(),
       verify: joi.alternatives().try(
         joi.boolean(),
         joi.object().keys({
@@ -69,7 +67,7 @@ const collectionSchema = joi.object().keys({
       maxLoginAttempts: joi.number(),
     }),
     joi.boolean(),
-  ).default(false),
+  ),
   upload: joi.alternatives().try(
     joi.object({
       staticURL: joi.string(),
@@ -85,7 +83,7 @@ const collectionSchema = joi.object().keys({
       ),
     }),
     joi.boolean(),
-  ).default(false),
+  ),
 });
 
 export default collectionSchema;
