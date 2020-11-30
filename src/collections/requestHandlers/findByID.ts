@@ -1,4 +1,15 @@
-export default async function findByID(req, res, next) {
+import { Response, NextFunction } from 'express';
+import { PayloadRequest } from '../../express/types/payloadRequest';
+import { Document } from '../../types';
+
+export type FindByIDRequestHandler = (req: PayloadRequest, res: Response, next: NextFunction) => unknown;
+
+export type FindByIDResult = {
+  message: string;
+  doc: Document;
+};
+
+export default async function findByID(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<FindByIDResult> | void> {
   const options = {
     req,
     collection: req.collection,
