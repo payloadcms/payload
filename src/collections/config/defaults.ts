@@ -36,4 +36,5 @@ export const authDefaults = {
     sameSite: 'Lax',
   },
   verify: false,
+  forgotPassword: {},
 };
