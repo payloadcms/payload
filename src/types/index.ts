@@ -8,6 +8,7 @@ export type Where = {
   [key: string]: unknown
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any;
 
 export type CreateOptions = {
@@ -19,7 +20,7 @@ export type CreateOptions = {
 
 export type FindOptions = {
   collection: string;
-  where?: { [key: string]: any };
+  where?: { [key: string]: unknown };
   depth?: number;
   limit?: number;
 };

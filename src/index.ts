@@ -38,7 +38,7 @@ import initStatic from './express/static';
 import GraphQL from './graphql';
 import buildEmail from './email/build';
 import identifyAPI from './express/middleware/identifyAPI';
-import errorHandler from './express/middleware/errorHandler';
+import errorHandler, { ErrorHandler } from './express/middleware/errorHandler';
 import performFieldOperations from './fields/performFieldOperations';
 import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
@@ -84,7 +84,7 @@ export class Payload {
 
   operations: { [key: string]: any };
 
-  errorHandler: any;
+  errorHandler: ErrorHandler;
 
   authenticate: PayloadAuthenticate;
 

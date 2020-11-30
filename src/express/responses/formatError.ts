@@ -1,3 +1,5 @@
+export type ErrorResponse = unknown;
+
 const formatErrorResponse = (incoming) => {
   if (incoming) {
     if (incoming && incoming.data && incoming.data.length > 0) {

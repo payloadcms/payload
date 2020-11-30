@@ -23,9 +23,6 @@ const errorHandler = (config: Config, logger) => async (err: Error, req: Payload
     ...data,
   };
 
-  if (req.collection && typeof req.collection.config.hooks.afterError === 'function') {
-    ({ response, status } = await req.collection.config.hooks.afterError(err, response) || { response, status });
-  }
   if (typeof config.hooks.afterError === 'function') {
     ({ response, status } = await config.hooks.afterError(err, response) || { response, status });
   }
