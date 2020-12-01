@@ -195,3 +195,12 @@ export type Field =
 export type FieldWithPath = Field & {
   path?: string
 }
+
+export type FieldWithSubFields =
+  GroupField
+  | ArrayField
+  | RowField;
+
+export function fieldHasSubFields(field: Field): field is FieldWithSubFields {
+  return (field.type === 'group' || field.type === 'array' || field.type === 'row');
+}
