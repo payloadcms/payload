@@ -1,6 +1,7 @@
 import executeAccess from '../../auth/executeAccess';
 import removeInternalFields from '../../utilities/removeInternalFields';
 import { BeforeOperationHook, BeforeReadHook } from '../config/types';
+import { Query } from './types';
 
 async function find(incomingArgs) {
   let args = incomingArgs;
@@ -39,7 +40,7 @@ async function find(incomingArgs) {
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild = {};
+  const queryToBuild: Query = {};
 
   if (where) {
     let and = [];

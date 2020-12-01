@@ -156,7 +156,6 @@ export type RadioField = FieldBase & {
     value: string;
     label: string;
   }[] | string[];
-  hasMany?: boolean;
 }
 
 export type Block = {

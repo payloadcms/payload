@@ -4,6 +4,7 @@ import { BeforeOperationHook } from '../config/types';
 import removeInternalFields from '../../utilities/removeInternalFields';
 import { Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
+import { Query } from './types';
 
 async function findByID(incomingArgs) {
   let args = incomingArgs;
@@ -45,7 +46,7 @@ async function findByID(incomingArgs) {
   const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors, id }, collectionConfig.access.read) : true;
   const hasWhereAccess = typeof accessResults === 'object';
 
-  const queryToBuild = {
+  const queryToBuild: Query = {
     where: {
       and: [
         {
@@ -76,6 +77,8 @@ async function findByID(incomingArgs) {
     req.findByID[collectionConfig.slug] = memoize(nonMemoizedFindByID, {
       isPromise: true,
       maxSize: 100,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore This is straight from their docs, bad typings
       transformKey: JSON.stringify,
     });
   }
