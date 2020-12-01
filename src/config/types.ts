@@ -5,7 +5,7 @@ import { Configuration } from 'webpack';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { GraphQLType } from 'graphql';
 import { Payload } from '..';
-import { PayloadCollectionConfig } from '../collections/config/types';
+import { AfterErrorHook, PayloadCollectionConfig } from '../collections/config/types';
 import { PayloadGlobalConfig } from '../globals/config/types';
 import { PayloadRequest } from '../express/types/payloadRequest';
 import InitializeGraphQL from '../graphql';
@@ -127,7 +127,7 @@ export type PayloadConfig = {
   components?: { [key: string]: JSX.Element | (() => JSX.Element) };
   paths?: { [key: string]: string };
   hooks?: {
-    afterError?: (err: Error, res: unknown) => { response: unknown, status: number} | unknown;
+    afterError?: AfterErrorHook;
   };
   webpack?: (config: Configuration) => Configuration;
   serverModules?: string[];

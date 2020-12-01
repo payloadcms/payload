@@ -1,3 +1,4 @@
+import { PayloadGlobalConfig } from '../../src/globals/config/types';
 import checkRole from '../access/checkRole';
 
 export default {
@@ -31,4 +32,4 @@ export default {
       required: true,
     },
   ],
-};
+} as PayloadGlobalConfig;

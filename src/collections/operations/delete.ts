@@ -6,6 +6,7 @@ import { NotFound, Forbidden, ErrorDeletingFile } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import fileExists from '../../uploads/fileExists';
 import { BeforeOperationHook } from '../config/types';
+import { Query } from './types';
 
 async function deleteQuery(incomingArgs) {
   let args = incomingArgs;
@@ -56,7 +57,7 @@ async function deleteQuery(incomingArgs) {
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild = {
+  const queryToBuild: Query = {
     where: {
       and: [
         {

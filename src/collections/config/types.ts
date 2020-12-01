@@ -67,6 +67,8 @@ export type AfterDeleteHook = (args?: {
   doc: any;
 }) => any;
 
+export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
+
 export type BeforeLoginHook = (args?: {
   req: PayloadRequest;
 }) => any;
@@ -104,6 +106,7 @@ export type PayloadCollectionConfig = {
     afterRead?: AfterReadHook[];
     beforeDelete?: BeforeDeleteHook[];
     afterDelete?: AfterDeleteHook[];
+    afterError?: AfterErrorHook;
     beforeLogin?: BeforeLoginHook[];
     afterLogin?: AfterLoginHook[];
     afterForgotPassword?: AfterForgotPasswordHook[];

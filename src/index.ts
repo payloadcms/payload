@@ -135,7 +135,7 @@ export class Payload {
     }
 
     // Configure email service
-    this.email = buildEmail(this.config.email);
+    this.email = buildEmail(this.emailOptions);
 
     // Initialize collections & globals
     initCollections(this);

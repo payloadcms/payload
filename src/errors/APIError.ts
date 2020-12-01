@@ -7,13 +7,13 @@ import httpStatus from 'http-status';
 class ExtendableError extends Error {
   status: number;
 
-  data: any;
+  data: {[key: string]: unknown};
 
   isPublic: boolean;
 
   isOperational: boolean;
 
-  constructor(message: string, status: number, data: any, isPublic: boolean) {
+  constructor(message: string, status: number, data: { [key: string]: unknown }, isPublic: boolean) {
     super(message);
     this.name = this.constructor.name;
     this.message = message;
@@ -39,7 +39,7 @@ class APIError extends ExtendableError {
    * @param {object} data - response data to be returned.
    * @param {boolean} isPublic - Whether the message should be visible to user or not.
    */
-  constructor(message: string, status: number = httpStatus.INTERNAL_SERVER_ERROR, data: any = null, isPublic = false) {
+  constructor(message: string, status: number = httpStatus.INTERNAL_SERVER_ERROR, data: { [key: string]: unknown } = null, isPublic = false) {
     super(message, status, data, isPublic);
   }
 }

@@ -231,7 +231,7 @@ async function create(incomingArgs) {
   // Send verification email if applicable
   // /////////////////////////////////////
 
-  if (collectionConfig.auth && collectionConfig.auth.verify && !disableVerificationEmail) {
+  if (collectionConfig.auth && collectionConfig.auth.verify) {
     sendVerificationEmail({
       config: this.config,
       sendEmail: this.sendEmail,
@@ -239,6 +239,7 @@ async function create(incomingArgs) {
       user: result,
       token: data._verificationToken,
       req,
+      disableEmail: disableVerificationEmail,
     });
   }
 

@@ -1,6 +1,7 @@
 import checkRole from '../access/checkRole';
 import Quote from '../blocks/Quote';
 import CallToAction from '../blocks/CallToAction';
+import { PayloadGlobalConfig } from '../../src/globals/config/types';
 
 export default {
   slug: 'blocks-global',
@@ -18,4 +19,4 @@ export default {
       localized: true,
     },
   ],
-};
+} as PayloadGlobalConfig;
