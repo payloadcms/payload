@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Props } from './types';
+import { Props, RenderedTypeProps } from './types';
 
 import './index.scss';
 
@@ -25,7 +25,7 @@ const Banner: React.FC<Props> = ({
     icon && `${baseClass}--align-icon-${alignIcon}`,
   ].filter(Boolean).join(' ');
 
-  let RenderedType = 'div';
+  let RenderedType: string | React.ComponentType<RenderedTypeProps> = 'div';
 
   if (onClick && !to) RenderedType = 'button';
   if (to) RenderedType = Link;
@@ -34,7 +34,6 @@ const Banner: React.FC<Props> = ({
     <RenderedType
       className={classes}
       onClick={onClick}
-      type={RenderedType === 'button' ? 'button' : undefined}
       to={to || undefined}
     >
       {(icon && alignIcon === 'left') && (

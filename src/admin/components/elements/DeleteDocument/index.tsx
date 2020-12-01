@@ -83,7 +83,6 @@ const DeleteDocument: React.FC<Props> = (props) => {
       <React.Fragment>
         <button
           type="button"
-          slug={modalSlug}
           className={`${baseClass}__toggle`}
           onClick={(e) => {
             e.preventDefault();

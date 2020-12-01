@@ -127,7 +127,7 @@ const DefaultNav = () => {
   );
 };
 
-const Nav = () => {
+const Nav: React.FC = () => {
   const {
     admin: {
       components: {

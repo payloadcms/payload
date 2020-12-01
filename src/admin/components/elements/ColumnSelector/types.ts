@@ -1,6 +1,6 @@
-import { Collection } from '../../../../collections/config/types';
+import { CollectionConfig } from '../../../../collections/config/types';
 
 export type Props = {
-  collection: Collection,
+  collection: CollectionConfig,
   handleChange: (columns) => void,
 }

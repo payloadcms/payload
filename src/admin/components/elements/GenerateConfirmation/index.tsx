@@ -31,7 +31,6 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
       <Button
         size="small"
         buttonStyle="secondary"
-        slug={modalSlug}
         onClick={() => {
           toggle(modalSlug);
         }}
