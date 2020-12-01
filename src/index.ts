@@ -144,13 +144,13 @@ export class Payload {
     // Connect to database
     connectMongoose(this.mongoURL);
 
-    options.express.use((req: PayloadRequest, res, next) => {
-      req.payload = this;
-      next();
-    });
-
     // If not initializing locally, set up HTTP routing
-    if (!this.config.local) {
+    if (!this.local) {
+      options.express.use((req: PayloadRequest, res, next) => {
+        req.payload = this;
+        next();
+      });
+
       this.express = options.express;
       if (this.config.rateLimit.trustProxy) {
         this.express.set('trust proxy', 1);

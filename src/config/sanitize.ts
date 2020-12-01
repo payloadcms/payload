@@ -18,7 +18,7 @@ const sanitizeConfig = (config: PayloadConfig): Config => {
   }
 
   sanitizedConfig.csrf = [
-    ...config.csrf,
+    ...sanitizedConfig.csrf,
     config.serverURL,
   ];
 

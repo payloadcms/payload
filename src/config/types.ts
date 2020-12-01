@@ -111,7 +111,7 @@ export type PayloadConfig = {
   };
   defaultLocale?: string;
   fallback?: boolean;
-  compression: {
+  compression?: {
     [key: string]: unknown
   },
   graphQL?: {
