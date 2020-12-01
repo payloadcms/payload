@@ -2,6 +2,8 @@ import { PayloadRequest } from '../express/types/payloadRequest';
 import { Field } from '../fields/config/types';
 import { Payload } from '../index';
 
+export { PayloadCollectionConfig } from '../collections/config/types';
+
 export { FieldHook } from '../fields/config/types';
 
 export type Where = {
