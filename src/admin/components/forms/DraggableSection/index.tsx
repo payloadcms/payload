@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import AnimateHeight from 'react-animate-height';
 import { Draggable } from 'react-beautiful-dnd';
 
@@ -10,12 +9,13 @@ import Button from '../../elements/Button';
 import { NegativeFieldGutterProvider } from '../FieldTypeGutter/context';
 import FieldTypeGutter from '../FieldTypeGutter';
 import RenderFields from '../RenderFields';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'draggable-section';
 
-const DraggableSection = (props) => {
+const DraggableSection: React.FC<Props> = (props) => {
   const {
     moveRow,
     addRow,
@@ -29,8 +29,8 @@ const DraggableSection = (props) => {
     fieldTypes,
     toggleRowCollapse,
     id,
-    positionPanelVerticalAlignment,
-    actionPanelVerticalAlignment,
+    positionPanelVerticalAlignment = 'sticky',
+    actionPanelVerticalAlignment = 'sticky',
     permissions,
     isOpen,
     readOnly,
@@ -102,7 +102,7 @@ const DraggableSection = (props) => {
                     readOnly={readOnly}
                     fieldTypes={fieldTypes}
                     key={rowIndex}
-                    permissions={permissions}
+                    permissions={permissions?.fields}
                     fieldSchema={fieldSchema.map((field) => ({
                       ...field,
                       path: `${parentPath}.${rowIndex}${field.name ? `.${field.name}` : ''}`,
@@ -134,40 +134,6 @@ const DraggableSection = (props) => {
       )}
     </Draggable>
   );
-};
-
-DraggableSection.defaultProps = {
-  toggleRowCollapse: undefined,
-  rowCount: null,
-  initialData: undefined,
-  label: '',
-  blockType: '',
-  isOpen: true,
-  positionPanelVerticalAlignment: 'sticky',
-  actionPanelVerticalAlignment: 'sticky',
-  permissions: {},
-  readOnly: false,
-};
-
-DraggableSection.propTypes = {
-  moveRow: PropTypes.func.isRequired,
-  addRow: PropTypes.func.isRequired,
-  removeRow: PropTypes.func.isRequired,
-  toggleRowCollapse: PropTypes.func,
-  rowIndex: PropTypes.number.isRequired,
-  parentPath: PropTypes.string.isRequired,
-  label: PropTypes.string,
-  fieldSchema: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-  rowCount: PropTypes.number,
-  initialData: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.shape({})]),
-  isOpen: PropTypes.bool,
-  blockType: PropTypes.string,
-  fieldTypes: PropTypes.shape({}).isRequired,
-  id: PropTypes.string.isRequired,
-  positionPanelVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
-  actionPanelVerticalAlignment: PropTypes.oneOf(['top', 'center', 'sticky']),
-  permissions: PropTypes.shape({}),
-  readOnly: PropTypes.bool,
 };
 
 export default DraggableSection;

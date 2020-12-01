@@ -1,5 +1,4 @@
 import React, { useEffect, useReducer, useCallback, useState } from 'react';
-import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
 import withCondition from '../../withCondition';
@@ -13,23 +12,27 @@ import Error from '../../Error';
 import { array } from '../../../../../fields/validations';
 import getDataByPath from '../../Form/getDataByPath';
 import Banner from '../../../elements/Banner';
+import { Props, RenderArrayProps } from './types';
 
 import './index.scss';
 
 const baseClass = 'field-type array';
 
-const ArrayFieldType = (props) => {
+const ArrayFieldType: React.FC<Props> = (props) => {
   const {
     label,
     name,
     path: pathFromProps,
     fields,
     fieldTypes,
-    validate,
+    validate = array,
     required,
     maxRows,
     minRows,
-    labels,
+    labels = {
+      singular: 'Row',
+      plural: 'Rows',
+    },
     permissions,
     admin: {
       readOnly,
@@ -125,45 +128,7 @@ const ArrayFieldType = (props) => {
   );
 };
 
-ArrayFieldType.defaultProps = {
-  label: undefined,
-  validate: array,
-  required: false,
-  maxRows: undefined,
-  minRows: undefined,
-  labels: {
-    singular: 'Row',
-    plural: 'Rows',
-  },
-  permissions: {},
-  admin: {},
-};
-
-ArrayFieldType.propTypes = {
-  fields: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
-  label: PropTypes.string,
-  labels: PropTypes.shape({
-    singular: PropTypes.string,
-    plural: PropTypes.string,
-  }),
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string.isRequired,
-  fieldTypes: PropTypes.shape({}).isRequired,
-  validate: PropTypes.func,
-  required: PropTypes.bool,
-  maxRows: PropTypes.number,
-  minRows: PropTypes.number,
-  permissions: PropTypes.shape({
-    fields: PropTypes.shape({}),
-  }),
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-  }),
-};
-
-const RenderArray = React.memo((props) => {
+const RenderArray = React.memo((props: RenderArrayProps) => {
   const {
     onDragEnd,
     label,
@@ -180,8 +145,6 @@ const RenderArray = React.memo((props) => {
     permissions,
     value,
     readOnly,
-    style,
-    width,
     minRows,
     maxRows,
     required,
@@ -191,10 +154,6 @@ const RenderArray = React.memo((props) => {
     <DragDropContext onDragEnd={onDragEnd}>
       <div
         className={baseClass}
-        style={{
-          ...style,
-          width,
-        }}
       >
         <header className={`${baseClass}__header`}>
           <h3>{label}</h3>
@@ -223,7 +182,6 @@ const RenderArray = React.memo((props) => {
                   removeRow={() => removeRow(i)}
                   moveRow={moveRow}
                   parentPath={path}
-                  initNull={row.initNull}
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
                   permissions={permissions.fields}
@@ -267,57 +225,5 @@ const RenderArray = React.memo((props) => {
     </DragDropContext>
   );
 });
-
-RenderArray.defaultProps = {
-  label: undefined,
-  showError: false,
-  errorMessage: undefined,
-  rows: [],
-  labels: {
-    singular: 'Row',
-    plural: 'Rows',
-  },
-  path: '',
-  value: undefined,
-  readOnly: false,
-  style: {},
-  width: undefined,
-  maxRows: undefined,
-  minRows: undefined,
-  required: false,
-};
-
-RenderArray.propTypes = {
-  label: PropTypes.string,
-  showError: PropTypes.bool,
-  errorMessage: PropTypes.string,
-  rows: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ),
-  labels: PropTypes.shape({
-    singular: PropTypes.string,
-    plural: PropTypes.string,
-  }),
-  path: PropTypes.string,
-  name: PropTypes.string.isRequired,
-  value: PropTypes.number,
-  onDragEnd: PropTypes.func.isRequired,
-  addRow: PropTypes.func.isRequired,
-  removeRow: PropTypes.func.isRequired,
-  moveRow: PropTypes.func.isRequired,
-  fieldTypes: PropTypes.shape({}).isRequired,
-  fields: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
-  permissions: PropTypes.shape({
-    fields: PropTypes.shape({}),
-  }).isRequired,
-  readOnly: PropTypes.bool,
-  style: PropTypes.shape({}),
-  width: PropTypes.string,
-  maxRows: PropTypes.number,
-  minRows: PropTypes.number,
-  required: PropTypes.bool,
-};
 
 export default withCondition(ArrayFieldType);

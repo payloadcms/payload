@@ -6,21 +6,17 @@ export type Permission = {
   where?: Record<string, unknown>
 }
 
-export type CollectionFieldPermissions = {
-  [field: string]: {
-    create: {
-      permission: boolean
-    }
-    read: {
-      permission: boolean
-    }
-    update: {
-      permission: boolean
-    }
-    delete: {
-      permission: boolean
-    }
+export type FieldPermissions = {
+  create: {
+    permission: boolean
   }
+  read: {
+    permission: boolean
+  }
+  update: {
+    permission: boolean
+  }
+  fields?: FieldPermissions
 }
 
 export type CollectionPermission = {
@@ -28,24 +24,17 @@ export type CollectionPermission = {
   read: Permission
   update: Permission
   delete: Permission
-  fields: CollectionFieldPermissions
-}
-
-export type GlobalFieldPermissions = {
-  [field: string]: {
-    read: {
-      permission: boolean
-    }
-    update: {
-      permission: boolean
-    }
+  fields: {
+    [field: string]: FieldPermissions
   }
 }
 
 export type GlobalPermission = {
   read: Permission
   update: Permission
-  fields: GlobalFieldPermissions
+  fields: {
+    [field: string]: FieldPermissions
+  }
 }
 
 export type Permissions = {

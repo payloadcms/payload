@@ -25,10 +25,12 @@ type Admin = {
   hidden?: boolean
 }
 
-type Labels = {
+export type Labels = {
   singular: string;
   plural: string;
 };
+
+export type Validate = (value: unknown, options: unknown) => string | boolean;
 
 interface FieldBase {
   name?: string;
@@ -41,7 +43,7 @@ interface FieldBase {
   hidden?: boolean;
   saveToJWT?: boolean
   localized?: boolean;
-  validate?: (value: any, field: Field) => any;
+  validate?: Validate;
   hooks?: {
     beforeValidate?: FieldHook[];
     beforeChange?: FieldHook[];

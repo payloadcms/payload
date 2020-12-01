@@ -169,7 +169,6 @@ const DefaultEditView = (props) => {
                     readOnly={!hasSavePermission}
                     permissions={permissions.fields}
                     filter={(field) => field?.admin?.position === 'sidebar'}
-                    position="sidebar"
                     fieldTypes={fieldTypes}
                     fieldSchema={fields}
                   />

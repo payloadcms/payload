@@ -1,11 +1,10 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-
+import { Props } from './types';
 import './index.scss';
 
-const Label = (props) => {
+const Label: React.FC<Props> = (props) => {
   const {
-    label, required, htmlFor,
+    label, required = false, htmlFor,
   } = props;
 
   if (label) {
@@ -21,20 +20,6 @@ const Label = (props) => {
   }
 
   return null;
-};
-
-Label.defaultProps = {
-  required: false,
-  label: '',
-};
-
-Label.propTypes = {
-  label: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.node,
-  ]),
-  htmlFor: PropTypes.string.isRequired,
-  required: PropTypes.bool,
 };
 
 export default Label;

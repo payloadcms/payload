@@ -3,11 +3,11 @@ import React, {
 } from 'react';
 import { Link } from 'react-router-dom';
 import Chevron from '../../icons/Chevron';
-import { Context } from './types';
+import { Context as ContextType } from './types';
 
 import './index.scss';
 
-const Context = createContext({} as Context);
+const Context = createContext({} as ContextType);
 
 const StepNavProvider: React.FC = ({ children }) => {
   const [stepNav, setStepNav] = useState([]);
@@ -23,7 +23,7 @@ const StepNavProvider: React.FC = ({ children }) => {
   );
 };
 
-const useStepNav = (): Context => useContext(Context);
+const useStepNav = (): ContextType => useContext(Context);
 
 const StepNav: React.FC = () => {
   const dashboardLabel = <span>Dashboard</span>;

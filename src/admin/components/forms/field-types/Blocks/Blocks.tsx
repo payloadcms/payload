@@ -17,28 +17,30 @@ import BlockSelector from './BlockSelector';
 import { blocks as blocksValidator } from '../../../../../fields/validations';
 import getDataByPath from '../../Form/getDataByPath';
 import Banner from '../../../elements/Banner';
+import { Props, RenderBlockProps } from './types';
 
 import './index.scss';
 
 const baseClass = 'field-type blocks';
 
-const Blocks = (props) => {
+const Blocks: React.FC<Props> = (props) => {
   const {
     label,
     name,
     path: pathFromProps,
     blocks,
-    labels,
+    labels = {
+      singular: 'Block',
+      plural: 'Blocks',
+    },
     fieldTypes,
     maxRows,
     minRows,
     required,
-    validate,
+    validate = blocksValidator,
     permissions,
     admin: {
       readOnly,
-      style,
-      width,
     },
   } = props;
 
@@ -138,55 +140,14 @@ const Blocks = (props) => {
       value={value}
       blocks={blocks}
       readOnly={readOnly}
-      style={style}
-      width={width}
       minRows={minRows}
+      maxRows={maxRows}
       required={required}
     />
   );
 };
 
-Blocks.defaultProps = {
-  label: '',
-  labels: {
-    singular: 'Block',
-    plural: 'Blocks',
-  },
-  validate: blocksValidator,
-  required: false,
-  maxRows: undefined,
-  minRows: undefined,
-  permissions: {},
-  admin: {},
-};
-
-Blocks.propTypes = {
-  blocks: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
-  label: PropTypes.string,
-  labels: PropTypes.shape({
-    singular: PropTypes.string,
-    plural: PropTypes.string,
-  }),
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string.isRequired,
-  fieldTypes: PropTypes.shape({}).isRequired,
-  validate: PropTypes.func,
-  required: PropTypes.bool,
-  maxRows: PropTypes.number,
-  minRows: PropTypes.number,
-  permissions: PropTypes.shape({
-    fields: PropTypes.shape({}),
-  }),
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-    style: PropTypes.shape({}),
-    width: PropTypes.string,
-  }),
-};
-
-const RenderBlocks = React.memo((props) => {
+const RenderBlocks = React.memo((props: RenderBlockProps) => {
   const {
     onDragEnd,
     label,
@@ -204,8 +165,6 @@ const RenderBlocks = React.memo((props) => {
     toggleCollapse,
     blocks,
     readOnly,
-    style,
-    width,
     minRows,
     maxRows,
     required,
@@ -215,10 +174,6 @@ const RenderBlocks = React.memo((props) => {
     <DragDropContext onDragEnd={onDragEnd}>
       <div
         className={baseClass}
-        style={{
-          ...style,
-          width,
-        }}
       >
         <header className={`${baseClass}__header`}>
           <h3>{label}</h3>
@@ -330,58 +285,5 @@ const RenderBlocks = React.memo((props) => {
     </DragDropContext>
   );
 });
-
-RenderBlocks.defaultProps = {
-  label: undefined,
-  showError: false,
-  errorMessage: undefined,
-  rows: [],
-  labels: {
-    singular: 'Block',
-    plural: 'Blocks',
-  },
-  path: '',
-  value: undefined,
-  readOnly: false,
-  style: {},
-  width: undefined,
-  maxRows: undefined,
-  minRows: undefined,
-  required: false,
-};
-
-RenderBlocks.propTypes = {
-  label: PropTypes.string,
-  showError: PropTypes.bool,
-  errorMessage: PropTypes.string,
-  rows: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ),
-  labels: PropTypes.shape({
-    singular: PropTypes.string,
-    plural: PropTypes.string,
-  }),
-  path: PropTypes.string,
-  name: PropTypes.string.isRequired,
-  value: PropTypes.number,
-  onDragEnd: PropTypes.func.isRequired,
-  addRow: PropTypes.func.isRequired,
-  removeRow: PropTypes.func.isRequired,
-  moveRow: PropTypes.func.isRequired,
-  fieldTypes: PropTypes.shape({}).isRequired,
-  permissions: PropTypes.shape({
-    fields: PropTypes.shape({}),
-  }).isRequired,
-  blocks: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
-  toggleCollapse: PropTypes.func.isRequired,
-  readOnly: PropTypes.bool,
-  style: PropTypes.shape({}),
-  width: PropTypes.string,
-  maxRows: PropTypes.number,
-  minRows: PropTypes.number,
-  required: PropTypes.bool,
-};
 
 export default withCondition(Blocks);

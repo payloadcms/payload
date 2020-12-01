@@ -27,7 +27,7 @@ const EditView = (props) => {
           Edit: CustomEdit,
         } = {},
       } = {},
-    },
+    } = {},
     fields,
   } = collection;
 

@@ -3,10 +3,11 @@ import PropTypes from 'prop-types';
 
 import BlockSearch from './BlockSearch';
 import BlocksContainer from './BlocksContainer';
+import { Props } from './types';
 
 const baseClass = 'block-selector';
 
-const BlockSelector = (props) => {
+const BlockSelector: React.FC<Props> = (props) => {
   const {
     blocks, close, parentIsHovered, watchParentHover, ...remainingProps
   } = props;
