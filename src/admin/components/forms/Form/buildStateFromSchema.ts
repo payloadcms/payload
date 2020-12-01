@@ -4,11 +4,13 @@ import { Fields, Field, Data } from './types';
 const buildValidationPromise = async (fieldState: Field, field: FieldSchema) => {
   const validatedFieldState = fieldState;
 
-  validatedFieldState.valid = typeof field.validate === 'function' ? await field.validate(fieldState.value, field) : true;
+  const validationResult = typeof field.validate === 'function' ? await field.validate(fieldState.value, field) : true;
 
-  if (typeof validatedFieldState.valid === 'string') {
-    validatedFieldState.errorMessage = validatedFieldState.valid;
+  if (typeof validationResult === 'string') {
+    validatedFieldState.errorMessage = validationResult;
     validatedFieldState.valid = false;
+  } else {
+    validatedFieldState.valid = true;
   }
 };
 
@@ -86,7 +88,7 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
         }
 
         // Handle non-array-based nested fields (group, etc)
-        if (field.type === 'row' || field.type === 'group') {
+        if (field.type === 'group') {
           const subFieldData = initialData?.[field.name] as Data;
 
           return {
@@ -102,7 +104,7 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
       }
 
       // Handle field types that do not use names (row, etc)
-      if (field.type === 'row' || field.type === 'group') {
+      if (field.type === 'row') {
         return {
           ...state,
           ...iterateFields(field.fields, data, path),

@@ -1,6 +1,8 @@
+import { FileSizes } from '../../../../uploads/types';
+
 export type Props = {
   filename: string,
-  sizes?: unknown,
+  sizes?: FileSizes
   adminThumbnail?: string,
   mimeType?: string,
   staticURL: string,

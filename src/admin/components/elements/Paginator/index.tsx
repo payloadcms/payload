@@ -1,7 +1,7 @@
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import queryString from 'qs';
-import { Props } from './types';
+import { Props, Node } from './types';
 
 import Page from './Page';
 import Separator from './Separator';
@@ -58,7 +58,7 @@ const Pagination: React.FC<Props> = (props) => {
   const rangeEndIndex = (currentPage - 1) + numberOfNeighbors + 1;
 
   // Slice out the range of pages that we want to render
-  const nodes = pages.slice(rangeStartIndex, rangeEndIndex);
+  const nodes: Node[] = pages.slice(rangeStartIndex, rangeEndIndex);
 
   // Add prev separator if necessary
   if (currentPage - numberOfNeighbors - 1 >= 2) nodes.unshift({ type: 'Separator' });

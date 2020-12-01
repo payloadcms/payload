@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Props } from './types';
+import { Props, RenderedTypeProps } from './types';
 
 import './index.scss';
 
@@ -25,7 +25,7 @@ const Pill: React.FC<Props> = ({
     icon && `${baseClass}--align-icon-${alignIcon}`,
   ].filter(Boolean).join(' ');
 
-  let RenderedType = 'div';
+  let RenderedType: string | React.FC<RenderedTypeProps> = 'div';
 
   if (onClick && !to) RenderedType = 'button';
   if (to) RenderedType = Link;

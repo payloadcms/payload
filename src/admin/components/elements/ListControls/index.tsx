@@ -22,7 +22,6 @@ const ListControls: React.FC<Props> = (props) => {
       fields,
       admin: {
         useAsTitle,
-        defaultColumns,
       },
     },
   } = props;
@@ -31,7 +30,7 @@ const ListControls: React.FC<Props> = (props) => {
   const [search, setSearch] = useState('');
   const [columns, setColumns] = useState([]);
   const [where, setWhere] = useState({});
-  const [visibleDrawer, setVisibleDrawer] = useState(false);
+  const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>();
 
   useEffect(() => {
     if (useAsTitle) {
@@ -44,7 +43,7 @@ const ListControls: React.FC<Props> = (props) => {
   }, [useAsTitle, fields]);
 
   useEffect(() => {
-    const newState = {
+    const newState: any = {
       columns,
     };
 
@@ -83,7 +82,7 @@ const ListControls: React.FC<Props> = (props) => {
               <Button
                 className={`${baseClass}__toggle-columns`}
                 buttonStyle={visibleDrawer === 'columns' ? undefined : 'secondary'}
-                onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : false)}
+                onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
                 icon="chevron"
                 iconStyle="none"
               >
@@ -93,7 +92,7 @@ const ListControls: React.FC<Props> = (props) => {
             <Button
               className={`${baseClass}__toggle-where`}
               buttonStyle={visibleDrawer === 'where' ? undefined : 'secondary'}
-              onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : false)}
+              onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
               icon="chevron"
               iconStyle="none"
             >
@@ -103,7 +102,7 @@ const ListControls: React.FC<Props> = (props) => {
               <Button
                 className={`${baseClass}__toggle-sort`}
                 buttonStyle={visibleDrawer === 'sort' ? undefined : 'secondary'}
-                onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : false)}
+                onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
                 icon="chevron"
                 iconStyle="none"
               >
@@ -120,7 +119,6 @@ const ListControls: React.FC<Props> = (props) => {
         >
           <ColumnSelector
             collection={collection}
-            defaultColumns={defaultColumns}
             handleChange={setColumns}
           />
         </AnimateHeight>

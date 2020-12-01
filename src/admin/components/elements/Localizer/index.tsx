@@ -47,7 +47,7 @@ const Localizer: React.FC<Props> = () => {
                     return (
                       <li
                         key={localeOption}
-                        className={localeClasses}
+                        className={localeClasses.join(' ')}
                       >
                         <Link
                           to={{ search }}

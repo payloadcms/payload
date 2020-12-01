@@ -1,4 +1,6 @@
-const getInitialColumnState = (fields, useAsTitle, defaultColumns) => {
+import { Field, fieldHasSubFields } from '../../../../fields/config/types';
+
+const getInitialColumnState = (fields: Field[], useAsTitle: string, defaultColumns: string[]): { columns: string[] } => {
   let initialColumns = [];
 
   if (Array.isArray(defaultColumns) && defaultColumns.length >= 1) {
@@ -17,7 +19,7 @@ const getInitialColumnState = (fields, useAsTitle, defaultColumns) => {
       return remaining;
     }
 
-    if (!field.name && Array.isArray(field.fields)) {
+    if (!field.name && fieldHasSubFields(field)) {
       return [
         ...remaining,
         ...field.fields.map((subField) => subField.name),
@@ -39,4 +41,4 @@ const getInitialColumnState = (fields, useAsTitle, defaultColumns) => {
 };
 
 
-module.exports = getInitialColumnState;
+export default getInitialColumnState;

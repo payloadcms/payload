@@ -13,7 +13,7 @@ const Thumbnail: React.FC<Props> = (props) => {
     filename,
     mimeType,
     staticURL,
-    sizes = 'medium',
+    sizes,
     adminThumbnail,
     size,
   } = props;
