@@ -127,7 +127,7 @@ export type PayloadConfig = {
   components?: { [key: string]: JSX.Element | (() => JSX.Element) };
   paths?: { [key: string]: string };
   hooks?: {
-    afterError?: (err: Error, res: unknown) => { response: unknown, status: number} | unknown;
+    afterError?: (err: Error, res: unknown) => { response: any, status: number } | void;
   };
   webpack?: (config: Configuration) => Configuration;
   serverModules?: string[];

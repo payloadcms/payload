@@ -1,8 +1,10 @@
-export type ErrorResponse = unknown;
+import APIError from '../../errors/APIError';
 
-const formatErrorResponse = (incoming) => {
+export type ErrorResponse = { errors: unknown[], data?: any, stack?: string };
+
+const formatErrorResponse = (incoming: Error | APIError | { [key: string]: unknown }): ErrorResponse => {
   if (incoming) {
-    if (incoming && incoming.data && incoming.data.length > 0) {
+    if (incoming instanceof APIError && incoming.data && incoming.data.length > 0) {
       return {
         errors: [{
           name: incoming.name,
@@ -13,7 +15,7 @@ const formatErrorResponse = (incoming) => {
     }
 
     // mongoose
-    if (incoming.errors) {
+    if (!(incoming instanceof APIError || incoming instanceof Error) && incoming.errors) {
       return {
         errors: Object.keys(incoming.errors)
           .reduce((acc, key) => {
