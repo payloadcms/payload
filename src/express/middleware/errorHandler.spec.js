@@ -103,6 +103,7 @@ describe('errorHandler', () => {
     }, logger);
     await handler(testError, req, res);
     expect(afterError)
+      // eslint-disable-next-line jest/prefer-called-with
       .toHaveBeenCalled();
   });
 
@@ -113,6 +114,7 @@ describe('errorHandler', () => {
     }, logger);
     await handler(testError, req, res);
     expect(req.collection.config.hooks.afterError)
+      // eslint-disable-next-line jest/prefer-called-with
       .toHaveBeenCalled();
   });
 });
