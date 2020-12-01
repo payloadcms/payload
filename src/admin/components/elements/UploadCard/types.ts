@@ -1,10 +1,11 @@
-import { Collection } from '../../../../collections/config/types';
+import { CollectionConfig } from '../../../../collections/config/types';
+import { FileSizes } from '../../../../uploads/types';
 
 export type Props = {
-  collection: Collection,
+  collection: CollectionConfig,
   id: string,
   filename: string,
   mimeType: string,
-  sizes?: unknown,
+  sizes?: FileSizes,
   onClick?: () => void,
 }

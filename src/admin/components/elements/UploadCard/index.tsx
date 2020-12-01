@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
 import { Props } from './types';
 import Thumbnail from '../Thumbnail';

@@ -12,7 +12,6 @@ const Table: React.FC<Props> = ({ columns, data }) => {
         <table
           cellPadding="0"
           cellSpacing="0"
-          border="0"
         >
           <thead>
             <tr>

@@ -8,14 +8,14 @@ export type Props = {
   nextPage?: number,
   numberOfNeighbors?: number,
   disableHistoryChange?: boolean,
-  onChange?: (page) => void,
+  onChange?: (page: number) => void,
 }
 
 export type Node = {
   type: 'Page' | 'Separator' | 'ClickableArrow'
   props?: {
     page?: number
-    updatePage: (page: number) => void
+    updatePage: (page?: number) => void
     isFirstPage?: boolean
     isLastPage?: boolean
     isDisabled?: boolean

@@ -28,7 +28,7 @@ const PopupButton: React.FC<Props> = (props) => {
     return (
       <div
         role="button"
-        tabIndex="0"
+        tabIndex={0}
         onKeyDown={(e) => { if (e.key === 'Enter') handleClick(); }}
         onClick={handleClick}
         className={classes}

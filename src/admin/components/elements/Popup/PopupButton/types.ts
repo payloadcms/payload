@@ -1,7 +1,7 @@
 export type Props = {
     buttonType: 'custom' | 'default',
     button: React.ReactNode,
-    setActive: () => void,
+    setActive: (active: boolean) => void,
     active: boolean,
-    onToggleOpen: () => void,
+    onToggleOpen: (active: boolean) => void,
 }

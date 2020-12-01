@@ -6,6 +6,7 @@ import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
 import { select } from '../../../../../fields/validations';
+import { Props } from './types';
 
 import './index.scss';
 
@@ -62,7 +63,7 @@ const formatRenderValue = (value, options) => {
   return value;
 };
 
-const Select = (props) => {
+const Select: React.FC<Props> = (props) => {
   const {
     path: pathFromProps,
     name,
