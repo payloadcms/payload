@@ -30,8 +30,10 @@ export default joi.object({
       .keys({
         Nav: joi.func(),
         Dashboard: joi.func(),
-        Icon: joi.func(),
-        Logo: joi.func(),
+        graphics: joi.object({
+          Icon: joi.func(),
+          Logo: joi.func(),
+        }),
       }),
   }),
   defaultDepth: joi.number()
