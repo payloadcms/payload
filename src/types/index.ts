@@ -25,6 +25,7 @@ export type FindOptions = {
   where?: { [key: string]: unknown };
   depth?: number;
   limit?: number;
+  sort?: string;
 };
 
 export type FindResponse = {

@@ -12,12 +12,14 @@ export default async function find(options: FindOptions) {
     user,
     overrideAccess = true,
     showHiddenFields,
+    sort,
   } = options;
 
   const collection = this.collections[collectionSlug];
 
   return this.operations.collections.find({
     depth,
+    sort,
     page,
     limit,
     where,
