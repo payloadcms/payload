@@ -5,6 +5,7 @@ import babelConfig from '../babel.config';
 import { PayloadConfig } from '../config/types';
 
 const mockModulePath = path.resolve(__dirname, './mocks/emptyModule.js');
+const mockDotENVPath = path.resolve(__dirname, './mocks/dotENV.js');
 
 export default (config: PayloadConfig): Configuration => {
   let webpackConfig: Configuration = {
@@ -80,6 +81,7 @@ export default (config: PayloadConfig): Configuration => {
         'payload/config': config.paths.config,
         '@payloadcms/payload$': mockModulePath,
         'payload-scss-overrides': config.paths.scss,
+        dotenv: mockDotENVPath,
       },
       extensions: ['.ts', '.tsx', '.js', '.json'],
     },
