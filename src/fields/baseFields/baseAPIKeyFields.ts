@@ -1,8 +1,8 @@
 import crypto from 'crypto';
 import { Field, FieldHook } from '../config/types';
 
-const encryptKey: FieldHook = ({ req, value }) => (value ? req.payload.encrypt(value) : undefined);
-const decryptKey: FieldHook = ({ req, value }) => (value ? req.payload.decrypt(value) : undefined);
+const encryptKey: FieldHook = ({ req, value }) => (value ? req.payload.encrypt(value as string) : undefined);
+const decryptKey: FieldHook = ({ req, value }) => (value ? req.payload.decrypt(value as string) : undefined);
 
 export default [
   {
@@ -40,7 +40,7 @@ export default [
         async ({ data, req, value }) => {
           if (data.apiKey) {
             return crypto.createHmac('sha1', req.payload.secret)
-              .update(data.apiKey)
+              .update(data.apiKey as string)
               .digest('hex');
           }
           if (data.enableAPIKey === false) {

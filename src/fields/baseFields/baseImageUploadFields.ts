@@ -1,4 +1,4 @@
-import { ImageSize } from '../../collections/config/types';
+import { ImageSize } from '../../uploads/types';
 import { Field } from '../config/types';
 
 export default (imageSizes: ImageSize[]): Field[] => [
