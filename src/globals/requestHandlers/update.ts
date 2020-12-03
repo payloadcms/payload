@@ -1,7 +1,14 @@
+import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
+import { PayloadRequest } from '../../express/types/payloadRequest';
+import { GlobalConfig } from '../config/types';
+import { Document } from '../../types';
 
-function update(globalConfig) {
-  async function handler(req, res, next) {
+export type UpdateGlobalResult = Promise<Response<Document> | void>;
+export type UpdateGlobalResponse = (req: PayloadRequest, res: Response, next: NextFunction) => UpdateGlobalResult;
+
+function update(globalConfig: GlobalConfig): UpdateGlobalResponse {
+  async function handler(req: PayloadRequest, res: Response, next: NextFunction) {
     try {
       const { slug } = globalConfig;
 
