@@ -49,7 +49,8 @@ export type MockEmailCredentials = {
   web: string;
 };
 
-export type Access = (args?: any) => boolean | Where;
+export type AccessResult = boolean | Where;
+export type Access = (args?: any) => AccessResult;
 
 export type PayloadConfig = {
   admin?: {
