@@ -49,7 +49,7 @@ export default async function performFieldOperations(entityConfig: Collection, a
   // //////////////////////////////////////////
 
   traverseFields({
-    fields: entityConfig.config.fields, // Was this working before? Seemed to be pointing to non-existent property
+    fields: entityConfig.fields, // TODO: Bad typing, this exists
     data: fullData,
     originalDoc: fullOriginalDoc,
     path: '',
