@@ -15,6 +15,7 @@
     "build:components": "webpack --config src/webpack/components.config.js",
     "build": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts node dist/src/bin/build",
     "build:tsc": "tsc",
+    "build:watch": "nodemon --watch 'src/**' --ext 'ts' --exec 'yarn build:tsc'",
     "build:analyze": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js PAYLOAD_ANALYZE_BUNDLE=true node src/bin/build",
     "cov": "npm run core:build && node ./node_modules/jest/bin/jest.js src/tests --coverage",
     "debug": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts nodemon --inspect demo/server.js",
