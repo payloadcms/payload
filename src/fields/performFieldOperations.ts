@@ -4,7 +4,7 @@ import traverseFields from './traverseFields';
 import { Collection } from '../collections/config/types';
 import { OperationArguments } from '../types';
 
-export default async function performFieldOperations(entityConfig: Collection, args: OperationArguments): any {
+export default async function performFieldOperations(entityConfig: Collection, args: OperationArguments): Promise<{ [key: string]: unknown }> {
   const {
     data: fullData,
     originalDoc: fullOriginalDoc,
@@ -49,7 +49,7 @@ export default async function performFieldOperations(entityConfig: Collection, a
   // //////////////////////////////////////////
 
   traverseFields({
-    fields: entityConfig.fields,
+    fields: entityConfig.fields, // TODO: Bad typing, this exists
     data: fullData,
     originalDoc: fullOriginalDoc,
     path: '',
