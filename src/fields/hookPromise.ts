@@ -8,7 +8,7 @@ const hookPromise = async ({
   operation,
   fullOriginalDoc,
   fullData,
-}: OperationArguments) => {
+}: OperationArguments): Promise<void> => {
   const resultingData = data;
 
   if ((field.type === 'relationship' || field.type === 'upload') && (data[field.name] === 'null' || data[field.name] === null)) {

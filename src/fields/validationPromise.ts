@@ -7,7 +7,7 @@ const validationPromise = async ({
   existingData,
   field,
   path,
-}: OperationArguments) => {
+}: OperationArguments): Promise<string | boolean> => {
   if (hook !== 'beforeChange') return true;
 
   const hasCondition = field.admin && field.admin.condition;

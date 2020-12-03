@@ -14,7 +14,7 @@ const accessPromise = async ({
   currentDepth,
   hook,
   payload,
-}: OperationArguments) => {
+}: OperationArguments): Promise<void> => {
   const resultingData = data;
 
   let accessOperation;

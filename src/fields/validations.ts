@@ -59,11 +59,11 @@ export const number: Validator = (value: string, options: NumberOptions = {}) =>
 
 export const text: Validator = (value, options: FieldOptions = {}) => {
   if (options.maxLength && (value && value.length > options.maxLength)) {
-    return `This value must be shorter than the max length of ${options.max} characters.`;
+    return `This value must be shorter than the max length of ${options.maxLength} characters.`;
   }
 
   if (options.minLength && (value && value.length < options.minLength)) {
-    return `This value must be longer than the minimum length of ${options.max} characters.`;
+    return `This value must be longer than the minimum length of ${options.maxLength} characters.`;
   }
 
   if (options.required) {

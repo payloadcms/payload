@@ -17,7 +17,7 @@ const populate = async ({
   const dataToUpdate = dataReference;
 
   const fieldAsRelationship = field as RelationshipField;
-  const relation = Array.isArray(fieldAsRelationship.relationTo) ? data.relationTo : fieldAsRelationship.relationTo;
+  const relation = Array.isArray(fieldAsRelationship.relationTo) ? (data.relationTo as string) : fieldAsRelationship.relationTo;
   const relatedCollection = payload.collections[relation];
 
   if (relatedCollection) {
@@ -69,7 +69,7 @@ const relationshipPopulationPromise = ({
   req,
   overrideAccess,
   payload,
-}) => async () => {
+}) => async (): Promise<void> => {
   const resultingData = data;
 
   if (field.hasMany && Array.isArray(data[field.name])) {
