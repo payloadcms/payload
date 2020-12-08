@@ -4,7 +4,7 @@ import Logger from '../utilities/logger';
 
 const logger = Logger();
 
-const connectMongoose = async (url: string) => {
+const connectMongoose = async (url: string): Promise<void> => {
   let urlToConnect = url;
   let successfulConnectionMessage = 'Connected to Mongo server successfully!';
 
