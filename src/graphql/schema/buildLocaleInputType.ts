@@ -1,5 +1,5 @@
 import { GraphQLEnumType } from 'graphql';
-import { Config } from 'src/config/types';
+import { Config } from '../../config/types';
 
 const buildLocaleInputType = (localization: Config['localization']): GraphQLEnumType => new GraphQLEnumType({
   name: 'LocaleInputType',

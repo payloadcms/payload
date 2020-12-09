@@ -14,9 +14,9 @@ import { GraphQLJSON } from 'graphql-type-json';
 import withNullableType from './withNullableType';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
-import { ArrayField, Field, GroupField, RelationshipField, RelationshipManyField, RowField, SelectField } from '../../fields/config/types';
+import { ArrayField, Field, FieldWithSubFields, GroupField, RelationshipField, RowField, SelectField } from '../../fields/config/types';
 
-function buildMutationInputType(name, fields, parentName, forceNullable = false) {
+function buildMutationInputType(name: string, fields: Field[], parentName: string, forceNullable = false): GraphQLInputObjectType {
   const fieldToSchemaMap = {
     number: (field: Field) => ({ type: withNullableType(field, GraphQLFloat, forceNullable) }),
     text: (field: Field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
@@ -63,11 +63,11 @@ function buildMutationInputType(name, fields, parentName, forceNullable = false)
       return { type };
     },
     relationship: (field: RelationshipField) => {
-      const isRelatedToManyCollections = Array.isArray(field.relationTo);
+      const { relationTo } = field;
       type PayloadGraphQLRelationshipType = GraphQLScalarType | GraphQLList<GraphQLScalarType> | GraphQLInputObjectType;
       let type: PayloadGraphQLRelationshipType = GraphQLString;
 
-      if (isRelatedToManyCollections) {
+      if (Array.isArray(relationTo)) {
         const fullName = `${combineParentName(parentName, field.label)}RelationshipInput`;
         type = new GraphQLInputObjectType({
           name: fullName,
@@ -75,7 +75,7 @@ function buildMutationInputType(name, fields, parentName, forceNullable = false)
             relationTo: {
               type: new GraphQLEnumType({
                 name: `${fullName}RelationTo`,
-                values: (field as RelationshipManyField).relationTo.reduce((values, option) => ({
+                values: relationTo.reduce((values, option) => ({
                   ...values,
                   [formatName(option)]: {
                     value: option,
@@ -120,7 +120,7 @@ function buildMutationInputType(name, fields, parentName, forceNullable = false)
     }, []),
   };
 
-  const fieldTypes = fields.reduce((schema, field) => {
+  const fieldTypes = fields.reduce((schema, field: Field) => {
     if (!field.hidden) {
       const getFieldSchema = fieldToSchemaMap[field.type];
 
@@ -130,7 +130,7 @@ function buildMutationInputType(name, fields, parentName, forceNullable = false)
         if (Array.isArray(fieldSchema)) {
           return fieldSchema.reduce((acc, subField, i) => ({
             ...acc,
-            [field.fields[i].name]: subField,
+            [(field as FieldWithSubFields).fields[i].name]: subField,
           }), schema);
         }
 
