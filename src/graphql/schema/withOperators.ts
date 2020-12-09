@@ -1,8 +1,9 @@
-import { GraphQLBoolean, GraphQLInputObjectType, GraphQLList } from 'graphql';
+import { GraphQLBoolean, GraphQLInputObjectType, GraphQLList, GraphQLType } from 'graphql';
+import { Field } from '../../fields/config/types';
 import combineParentName from '../utilities/combineParentName';
 
-const withOperators = (field, type, parent, operators) => {
-  const name = `${combineParentName(parent, field.name)}_operator`;
+const withOperators = (field: Field, type: GraphQLType, parentName: string, operators: string[]): GraphQLInputObjectType => {
+  const name = `${combineParentName(parentName, field.name)}_operator`;
   const listOperators = ['in', 'not_in', 'all'];
 
   if (!field.required) operators.push('exists');
@@ -10,7 +11,7 @@ const withOperators = (field, type, parent, operators) => {
   return new GraphQLInputObjectType({
     name,
     fields: operators.reduce((fields, operator) => {
-      let gqlType;
+      let gqlType: GraphQLType;
       if (listOperators.indexOf(operator) > -1) {
         gqlType = new GraphQLList(type);
       } else if (operator === 'exists') {

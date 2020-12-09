@@ -16,6 +16,25 @@ import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import withOperators from './withOperators';
+import {
+  ArrayField,
+  CheckboxField,
+  CodeField,
+  DateField,
+  EmailField,
+  Field,
+  FieldWithSubFields,
+  GroupField,
+  NumberField,
+  RadioField,
+  RelationshipField,
+  RichTextField,
+  RowField,
+  SelectField,
+  TextareaField,
+  TextField,
+  UploadField,
+} from '../../fields/config/types';
 // buildWhereInputType is similar to buildObjectType and operates
 // on a field basis with a few distinct differences.
 //
@@ -23,10 +42,10 @@ import withOperators from './withOperators';
 // 2. Relationships, groups, repeaters and flex content are not
 //    directly searchable. Instead, we need to build a chained pathname
 //    using dot notation so Mongo can properly search nested paths.
-const buildWhereInputType = (name, fields, parentName) => {
+const buildWhereInputType = (name: string, fields: Field[], parentName: string): GraphQLInputObjectType => {
   // This is the function that builds nested paths for all
   // field types with nested paths.
-  const recursivelyBuildNestedPaths = (field) => {
+  const recursivelyBuildNestedPaths = (field: FieldWithSubFields) => {
     const nestedPaths = field.fields.reduce((nestedFields, nestedField) => {
       const getFieldSchema = fieldToSchemaMap[nestedField.type];
       const nestedFieldName = `${field.name}__${nestedField.name}`;
@@ -66,7 +85,7 @@ const buildWhereInputType = (name, fields, parentName) => {
   };
 
   const fieldToSchemaMap = {
-    number: (field) => {
+    number: (field: NumberField) => {
       const type = GraphQLFloat;
       return {
         type: withOperators(
@@ -77,7 +96,7 @@ const buildWhereInputType = (name, fields, parentName) => {
         ),
       };
     },
-    text: (field) => {
+    text: (field: TextField) => {
       const type = GraphQLString;
       return {
         type: withOperators(
@@ -88,7 +107,7 @@ const buildWhereInputType = (name, fields, parentName) => {
         ),
       };
     },
-    email: (field) => {
+    email: (field: EmailField) => {
       const type = EmailAddressResolver;
       return {
         type: withOperators(
@@ -99,7 +118,7 @@ const buildWhereInputType = (name, fields, parentName) => {
         ),
       };
     },
-    textarea: (field) => {
+    textarea: (field: TextareaField) => {
       const type = GraphQLString;
       return {
         type: withOperators(
@@ -110,7 +129,7 @@ const buildWhereInputType = (name, fields, parentName) => {
         ),
       };
     },
-    richText: (field) => {
+    richText: (field: RichTextField) => {
       const type = GraphQLJSON;
       return {
         type: withOperators(
@@ -121,7 +140,7 @@ const buildWhereInputType = (name, fields, parentName) => {
         ),
       };
     },
-    code: (field) => {
+    code: (field: CodeField) => {
       const type = GraphQLString;
       return {
         type: withOperators(
@@ -132,7 +151,7 @@ const buildWhereInputType = (name, fields, parentName) => {
         ),
       };
     },
-    radio: (field) => ({
+    radio: (field: RadioField) => ({
       type: withOperators(
         field,
         new GraphQLEnumType({
@@ -148,7 +167,7 @@ const buildWhereInputType = (name, fields, parentName) => {
         [...operators.equality, 'like'],
       ),
     }),
-    date: (field) => {
+    date: (field: DateField) => {
       const type = DateTimeResolver;
       return {
         type: withOperators(
@@ -159,7 +178,7 @@ const buildWhereInputType = (name, fields, parentName) => {
         ),
       };
     },
-    relationship: (field) => {
+    relationship: (field: RelationshipField) => {
       let type = withOperators(
         field,
         GraphQLString,
@@ -195,7 +214,7 @@ const buildWhereInputType = (name, fields, parentName) => {
 
       return { type };
     },
-    upload: (field) => ({
+    upload: (field: UploadField) => ({
       type: withOperators(
         field,
         GraphQLString,
@@ -203,7 +222,7 @@ const buildWhereInputType = (name, fields, parentName) => {
         [...operators.equality],
       ),
     }),
-    checkbox: (field) => ({
+    checkbox: (field: CheckboxField) => ({
       type: withOperators(
         field,
         GraphQLBoolean,
@@ -211,7 +230,7 @@ const buildWhereInputType = (name, fields, parentName) => {
         [...operators.equality],
       ),
     }),
-    select: (field) => ({
+    select: (field: SelectField) => ({
       type: withOperators(
         field,
         new GraphQLEnumType({
@@ -242,9 +261,9 @@ const buildWhereInputType = (name, fields, parentName) => {
         [...operators.equality, ...operators.contains],
       ),
     }),
-    array: (field) => recursivelyBuildNestedPaths(field),
-    group: (field) => recursivelyBuildNestedPaths(field),
-    row: (field) => field.fields.reduce((rowSchema, rowField) => {
+    array: (field: ArrayField) => recursivelyBuildNestedPaths(field),
+    group: (field: GroupField) => recursivelyBuildNestedPaths(field),
+    row: (field: RowField) => field.fields.reduce((rowSchema, rowField) => {
       const getFieldSchema = fieldToSchemaMap[rowField.type];
 
       if (getFieldSchema) {
