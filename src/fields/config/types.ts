@@ -203,3 +203,11 @@ export type FieldWithSubFields =
 export function fieldHasSubFields(field: Field): field is FieldWithSubFields {
   return (field.type === 'group' || field.type === 'array' || field.type === 'row');
 }
+
+export function fieldIsArrayType(field: Field): field is ArrayField {
+  return field.type === 'array';
+}
+
+export function fieldIsBlockType(field: Field): field is BlockField {
+  return field.type === 'blocks';
+}

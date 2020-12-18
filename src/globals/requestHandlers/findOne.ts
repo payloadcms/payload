@@ -1,7 +1,14 @@
+import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
+import { PayloadRequest } from '../../express/types/payloadRequest';
+import { GlobalConfig } from '../config/types';
+import { Document } from '../../types';
 
-function findOne(globalConfig) {
-  async function handler(req, res, next) {
+export type FindOneGlobalResult = Promise<Response<Document> | void>;
+export type FindOneGlobalResponse = (req: PayloadRequest, res: Response, next: NextFunction) => FindOneGlobalResult;
+
+export default function findOne(globalConfig: GlobalConfig): FindOneGlobalResponse {
+  async function handler(req: PayloadRequest, res: Response, next: NextFunction): FindOneGlobalResult {
     try {
       const { slug } = globalConfig;
 
@@ -22,5 +29,3 @@ function findOne(globalConfig) {
 
   return findOneHandler;
 }
-
-export default findOne;

@@ -4,4 +4,35 @@ label: Config
 order: 10
 ---
 
-Talk about how to write access control.
+Access can be configured at a Collection-level or field-level within your Collection configuration.
+
+```js
+// Collection config
+module.exports = {
+  slug: 'public-user',
+  // highlight-start
+  access: {
+    create: () => true,
+    read: () => true,
+    update: () => true,
+    delete: () => true,
+    admin: () => true,
+  },
+  // highlight-end
+  fields: [
+    {
+      name: 'lockedDownField',
+      label: 'Locked Down',
+      type: 'text'
+      // highlight-start
+      access: {
+        create: () => true,
+        read: () => true,
+        update: () => true,
+        delete: () => true,
+      },
+      // highlight-end
+    };
+  ],
+}
+```

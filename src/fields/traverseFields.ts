@@ -1,7 +1,9 @@
+import { Data } from '../admin/components/forms/Form/types';
 import validationPromise from './validationPromise';
 import accessPromise from './accessPromise';
 import hookPromise from './hookPromise';
 import { OperationArguments } from '../types';
+import { fieldHasSubFields, fieldIsArrayType, fieldIsBlockType } from './config/types';
 
 const traverseFields = (args: OperationArguments): void => {
   const {
@@ -96,15 +98,15 @@ const traverseFields = (args: OperationArguments): void => {
       payload,
     }));
 
-    if (field.fields) {
+    if (fieldHasSubFields(field)) {
       if (field.name === undefined) {
         traverseFields({
           ...args,
           fields: field.fields,
         });
-      } else if (field.type === 'array') {
+      } else if (fieldIsArrayType(field)) {
         if (Array.isArray(data[field.name])) {
-          data[field.name].forEach((rowData, i) => {
+          (data[field.name] as Data[]).forEach((rowData, i) => {
             const originalDocRow = originalDoc && originalDoc[field.name] && originalDoc[field.name][i];
             traverseFields({
               ...args,
@@ -119,16 +121,16 @@ const traverseFields = (args: OperationArguments): void => {
         traverseFields({
           ...args,
           fields: field.fields,
-          data: data[field.name],
+          data: data[field.name] as Data,
           originalDoc: originalDoc[field.name],
           path: `${path}${field.name}.`,
         });
       }
     }
 
-    if (field.type === 'blocks') {
+    if (fieldIsBlockType(field)) {
       if (Array.isArray(data[field.name])) {
-        data[field.name].forEach((rowData, i) => {
+        (data[field.name] as Data[]).forEach((rowData, i) => {
           const block = field.blocks.find((blockType) => blockType.slug === rowData.blockType);
           const originalDocRow = originalDoc && originalDoc[field.name] && originalDoc[field.name][i];
 
@@ -154,7 +156,7 @@ const traverseFields = (args: OperationArguments): void => {
 
       if (field.type === 'array' || field.type === 'blocks') {
         const hasRowsOfNewData = Array.isArray(data[field.name]);
-        const newRowCount = hasRowsOfNewData ? data[field.name].length : 0;
+        const newRowCount = hasRowsOfNewData ? (data[field.name] as Data[]).length : 0;
 
         // Handle cases of arrays being intentionally set to 0
         if (data[field.name] === '0' || data[field.name] === 0 || data[field.name] === null) {

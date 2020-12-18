@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import { Response } from 'express';
+import { NextFunction, Response } from 'express';
 import { Logger } from 'pino';
 import { Config } from '../../config/types';
 import formatErrorResponse, { ErrorResponse } from '../responses/formatError';
@@ -10,7 +10,7 @@ export type ErrorHandler = (err: Error, req: PayloadRequest, res: Response) => P
 
 // NextFunction must be passed for Express to use this middleware as error handler
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const errorHandler = (config: Config, logger: Logger) => async (err: APIError, req: PayloadRequest, res: Response): Promise<void> => {
+const errorHandler = (config: Config, logger: Logger) => async (err: APIError, req: PayloadRequest, res: Response, next: NextFunction): Promise<void> => {
   let response = formatErrorResponse(err);
   let status = err.status || httpStatus.INTERNAL_SERVER_ERROR;
 

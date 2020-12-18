@@ -1,6 +1,9 @@
 /* eslint-disable no-param-reassign */
 
-function findOne(globalConfig) {
+import { GlobalConfig } from '../../config/types';
+import { Document } from '../../../types';
+
+function findOne(globalConfig: GlobalConfig): Document {
   async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
