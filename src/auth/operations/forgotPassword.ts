@@ -1,8 +1,9 @@
 import crypto from 'crypto';
-import { AfterForgotPasswordHook, BeforeOperationHook } from '../../collections/config/types';
+import { Document } from 'mongoose';
+import { AuthOperationArguments } from '../../types';
 import { APIError } from '../../errors';
 
-async function forgotPassword(incomingArgs) {
+async function forgotPassword(incomingArgs: AuthOperationArguments): Promise<string | null> {
   const { config, sendEmail: email } = this;
 
   if (!Object.prototype.hasOwnProperty.call(incomingArgs.data, 'email')) {
@@ -15,7 +16,7 @@ async function forgotPassword(incomingArgs) {
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
     await priorHook;
 
     args = (await hook({
@@ -42,7 +43,11 @@ async function forgotPassword(incomingArgs) {
   let token: string | Buffer = crypto.randomBytes(20);
   token = token.toString('hex');
 
-  const user = await Model.findOne({ email: data.email.toLowerCase() });
+  type UserDoc = Document & {
+    resetPasswordToken?: string,
+    resetPasswordExpiration?: number | Date,
+  }
+  const user: UserDoc = await Model.findOne({ email: (data.email as string).toLowerCase() });
 
   if (!user) return null;
 
@@ -91,7 +96,7 @@ async function forgotPassword(incomingArgs) {
   // afterForgotPassword - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterForgotPassword.reduce(async (priorHook: AfterForgotPasswordHook, hook: AfterForgotPasswordHook) => {
+  await collectionConfig.hooks.afterForgotPassword.reduce(async (priorHook, hook) => {
     await priorHook;
     await hook({ args });
   }, Promise.resolve());

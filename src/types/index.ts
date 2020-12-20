@@ -1,3 +1,5 @@
+import { Response } from 'express';
+import { AuthCollection, Collection } from '../collections/config/types';
 import { PayloadRequest } from '../express/types/payloadRequest';
 import { Field } from '../fields/config/types';
 import { Payload } from '../index';
@@ -78,6 +80,7 @@ export type ForgotPasswordOptions = {
 };
 
 export interface OperationArguments {
+  collection: Collection;
   data?: {[key: string]: unknown};
   originalDoc?: Document;
   fullOriginalDoc?: {[key: string]: unknown};
@@ -85,6 +88,7 @@ export interface OperationArguments {
   operation?: unknown;
   hook?: string;
   req?: PayloadRequest;
+  res?: Response;
   id?: string;
   overrideAccess?: boolean;
   reduceLocales?: boolean;
@@ -107,6 +111,12 @@ export interface OperationArguments {
   existingData?: {[key: string]: any};
   dataReference?: {[key: string]: any};
   index?: number | string;
+}
+
+export type AuthOperationArguments = Omit<OperationArguments, 'collection'> & {
+  collection: AuthCollection;
+  disableEmail?: boolean;
+  expiration?: Date;
 }
 
 export type Operator = 'equals'

@@ -1,11 +1,20 @@
 import jwt from 'jsonwebtoken';
+import { CookieOptions } from 'express';
 import { AuthenticationError, LockedAuth } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import isLocked from '../isLocked';
 import removeInternalFields from '../../utilities/removeInternalFields';
-import { BeforeLoginHook, BeforeOperationHook } from '../../collections/config/types';
+import { OperationArguments } from '../../types';
+import { Field, fieldHasSubFields } from '../../fields/config/types';
+import { User } from '../types';
 
-async function login(incomingArgs) {
+type LoginResponse = {
+  user?: User,
+  token?: string,
+  exp?: string,
+}
+
+async function login(incomingArgs: OperationArguments): Promise<LoginResponse> {
   const { config, operations, secret } = this;
 
   let args = incomingArgs;
@@ -14,7 +23,7 @@ async function login(incomingArgs) {
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
     await priorHook;
 
     args = (await hook({
@@ -41,8 +50,10 @@ async function login(incomingArgs) {
 
   const { email: unsanitizedEmail, password } = data;
 
-  const email = unsanitizedEmail ? unsanitizedEmail.toLowerCase() : null;
+  const email = unsanitizedEmail ? (unsanitizedEmail as string).toLowerCase() : null;
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore Improper typing in library, additional args should be optional
   const userDoc = await Model.findByUsername(email);
 
   if (!userDoc || (args.collection.config.auth.verify && userDoc._verified === false)) {
@@ -78,12 +89,12 @@ async function login(incomingArgs) {
   user = removeInternalFields(user);
   user = JSON.parse(JSON.stringify(user));
 
-  const fieldsToSign = collectionConfig.fields.reduce((signedFields, field) => {
+  const fieldsToSign = collectionConfig.fields.reduce((signedFields, field: Field) => {
     const result = {
       ...signedFields,
     };
 
-    if (!field.name && field.fields) {
+    if (!field.name && fieldHasSubFields(field)) {
       field.fields.forEach((subField) => {
         if (subField.saveToJWT) {
           result[subField.name] = user[subField.name];
@@ -111,12 +122,13 @@ async function login(incomingArgs) {
   );
 
   if (args.res) {
-    const cookieOptions = {
+    const cookieOptions: CookieOptions = {
       path: '/',
       httpOnly: true,
       expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
       secure: collectionConfig.auth.cookies.secure,
       sameSite: collectionConfig.auth.cookies.sameSite,
+      domain: undefined,
     };
 
     if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
@@ -175,7 +187,7 @@ async function login(incomingArgs) {
   return {
     token,
     user,
-    exp: jwt.decode(token).exp,
+    exp: (jwt.decode(token) as { exp: string }).exp,
   };
 }
 

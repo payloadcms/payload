@@ -1,7 +1,17 @@
 import jwt from 'jsonwebtoken';
+import { Collection } from '../../collections/config/types';
+import { PayloadRequest } from '../../express/types/payloadRequest';
 import getExtractJWT from '../getExtractJWT';
+import { User } from '../types';
 
-async function me({ req }) {
+type MeResponse = {
+  user?: User,
+  collection?: Collection,
+  token?: string,
+  exp?: string,
+}
+
+async function me({ req }: { req: PayloadRequest }): Promise<MeResponse> {
   const extractJWT = getExtractJWT(this.config);
 
   if (req.user) {
@@ -16,7 +26,7 @@ async function me({ req }) {
 
     delete user.collection;
 
-    const response = {
+    const response: MeResponse = {
       user,
       collection: req.user.collection,
     };
@@ -25,7 +35,7 @@ async function me({ req }) {
 
     if (token) {
       response.token = token;
-      const decoded = jwt.decode(token);
+      const decoded = jwt.decode(token) as { exp: string };
       if (decoded) response.exp = decoded.exp;
     }
 
