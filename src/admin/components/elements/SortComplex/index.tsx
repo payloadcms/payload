@@ -24,6 +24,7 @@ const SortComplex: React.FC<Props> = (props) => {
     }
     return fields;
   }, []));
+
   const [sortField, setSortField] = useState(null);
   const [sortOrder, setSortOrder] = useState('-');
 

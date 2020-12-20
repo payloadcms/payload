@@ -1,18 +1,17 @@
-const reducer = (state, action = {}) => {
+import { OrClause, Action } from './types';
+
+const reducer = (state: OrClause[], action: Action): OrClause[] => {
   const newState = [...state];
 
   const {
-    type,
-    relation,
     orIndex,
     andIndex,
-    field,
-    operator,
-    value,
   } = action;
 
-  switch (type) {
+  switch (action.type) {
     case 'add': {
+      const { relation } = action;
+
       if (relation === 'and') {
         newState[orIndex].splice(andIndex, 0, {});
         return newState;
@@ -35,6 +34,8 @@ const reducer = (state, action = {}) => {
     }
 
     case 'update': {
+      const { field, operator, value } = action;
+
       newState[orIndex][andIndex] = {
         ...newState[orIndex][andIndex],
       };

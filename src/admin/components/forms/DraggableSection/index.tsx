@@ -8,7 +8,7 @@ import PositionPanel from './PositionPanel';
 import Button from '../../elements/Button';
 import { NegativeFieldGutterProvider } from '../FieldTypeGutter/context';
 import FieldTypeGutter from '../FieldTypeGutter';
-import RenderFields from '../RenderFields';
+import RenderFields, { useRenderedFields } from '../RenderFields';
 import { Props } from './types';
 
 import './index.scss';
@@ -29,14 +29,13 @@ const DraggableSection: React.FC<Props> = (props) => {
     fieldTypes,
     toggleRowCollapse,
     id,
-    positionPanelVerticalAlignment = 'sticky',
-    actionPanelVerticalAlignment = 'sticky',
     permissions,
     isOpen,
     readOnly,
   } = props;
 
   const [isHovered, setIsHovered] = useState(false);
+  const { operation } = useRenderedFields();
 
   const classes = [
     baseClass,
@@ -48,7 +47,7 @@ const DraggableSection: React.FC<Props> = (props) => {
     <Draggable
       draggableId={id}
       index={rowIndex}
-      isDropDisabled={readOnly}
+      isDragDisabled={readOnly}
     >
       {(providedDrag) => (
         <div
@@ -69,7 +68,6 @@ const DraggableSection: React.FC<Props> = (props) => {
                 moveRow={moveRow}
                 rowCount={rowCount}
                 positionIndex={rowIndex}
-                verticalAlignment={positionPanelVerticalAlignment}
               />
             </FieldTypeGutter>
 
@@ -85,7 +83,7 @@ const DraggableSection: React.FC<Props> = (props) => {
 
                   <Button
                     icon="chevron"
-                    onClick={toggleRowCollapse}
+                    onClick={() => toggleRowCollapse(rowIndex)}
                     buttonStyle="icon-label"
                     className={`toggle-collapse toggle-collapse--is-${isOpen ? 'open' : 'closed'}`}
                     round
@@ -99,6 +97,7 @@ const DraggableSection: React.FC<Props> = (props) => {
               >
                 <NegativeFieldGutterProvider allow={false}>
                   <RenderFields
+                    operation={operation}
                     readOnly={readOnly}
                     fieldTypes={fieldTypes}
                     key={rowIndex}
@@ -119,11 +118,10 @@ const DraggableSection: React.FC<Props> = (props) => {
             >
               {!readOnly && (
                 <ActionPanel
-                  rowIndex={rowIndex}
                   addRow={addRow}
                   removeRow={removeRow}
+                  rowIndex={rowIndex}
                   label={label}
-                  verticalAlignment={actionPanelVerticalAlignment}
                   isHovered={isHovered}
                   {...props}
                 />

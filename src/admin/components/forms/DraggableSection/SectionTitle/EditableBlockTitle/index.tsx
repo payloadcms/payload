@@ -7,7 +7,7 @@ import './index.scss';
 
 const baseClass = 'editable-block-title';
 
-const EditableBlockTitle = (props) => {
+const EditableBlockTitle: React.FC<{ path: string}> = (props) => {
   const { path } = props;
   const inputRef = useRef(null);
   const inputCloneRef = useRef(null);

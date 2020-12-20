@@ -178,8 +178,8 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
                   isOpen={row.open}
                   rowCount={rows.length}
                   rowIndex={i}
-                  addRow={() => addRow(i)}
-                  removeRow={() => removeRow(i)}
+                  addRow={addRow}
+                  removeRow={removeRow}
                   moveRow={moveRow}
                   parentPath={path}
                   fieldTypes={fieldTypes}

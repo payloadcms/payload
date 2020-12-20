@@ -1,7 +1,6 @@
 import React, {
   useEffect, useReducer, useCallback, useState,
 } from 'react';
-import PropTypes from 'prop-types';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
 import withCondition from '../../withCondition';
@@ -210,9 +209,9 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
                       rowCount={rows.length}
                       rowIndex={i}
                       addRow={addRow}
-                      removeRow={() => removeRow(i)}
+                      removeRow={removeRow}
                       moveRow={moveRow}
-                      toggleRowCollapse={() => toggleCollapse(i)}
+                      toggleRowCollapse={toggleCollapse}
                       parentPath={path}
                       fieldTypes={fieldTypes}
                       permissions={permissions.fields}

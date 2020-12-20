@@ -7,6 +7,7 @@ import Date from './Date';
 import Number from './Number';
 import Text from './Text';
 import useDebounce from '../../../../hooks/useDebounce';
+import { FieldCondition } from '../types';
 
 import './index.scss';
 
@@ -27,7 +28,7 @@ const Condition: React.FC<Props> = (props) => {
     andIndex,
   } = props;
 
-  const [activeField, setActiveField] = useState({ operators: [] });
+  const [activeField, setActiveField] = useState({ operators: [] } as FieldCondition);
   const [internalValue, setInternalValue] = useState(value.value);
   const debouncedValue = useDebounce(internalValue, 300);
 

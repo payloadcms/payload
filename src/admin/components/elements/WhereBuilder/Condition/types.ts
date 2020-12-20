@@ -1,15 +1,9 @@
+import { Action, AndClause, FieldCondition } from '../types';
+
 export type Props = {
-  fields: {
-    label: string,
-    value: string,
-    operators: [],
-  }[],
-  value: {
-    field: string,
-    operator: string,
-    value: string | number | Date,
-  },
-  dispatch: () => void
+  fields: FieldCondition[],
+  value: AndClause,
+  dispatch: (action: Action) => void
   orIndex: number,
   andIndex: number,
 }

@@ -1,41 +1,9 @@
 import defaultRichTextValue from './richText/defaultValue';
+import { Validate } from './config/types';
 
 const defaultMessage = 'This field is required.';
 
-type NumberOptions = {
-  required?: boolean;
-  min?: number;
-  max?: number;
-}
-
-type FieldOptions = {
-  required?: boolean;
-  minLength?: number;
-  maxLength?: number;
-}
-
-type RowOptions = {
-  required?: boolean;
-  minRows?: number;
-  maxRows?: number;
-}
-
-type SelectAndRadioOptions = {
-  required?: boolean;
-  options?: {
-    value: string
-  }[];
-}
-
-type RequiredOption = { required?: boolean };
-
-type Validator = (value?: any, options?: NumberOptions |
-  FieldOptions |
-  RequiredOption |
-  RowOptions |
-  SelectAndRadioOptions) => string | boolean;
-
-export const number: Validator = (value: string, options: NumberOptions = {}) => {
+export const number: Validate = (value: string, options = {}) => {
   const parsedValue = parseInt(value, 10);
 
   if ((value && typeof parsedValue !== 'number') || (options.required && Number.isNaN(parsedValue))) {
@@ -57,7 +25,7 @@ export const number: Validator = (value: string, options: NumberOptions = {}) =>
   return true;
 };
 
-export const text: Validator = (value, options: FieldOptions = {}) => {
+export const text: Validate = (value: string, options = {}) => {
   if (options.maxLength && (value && value.length > options.maxLength)) {
     return `This value must be shorter than the max length of ${options.maxLength} characters.`;
   }
@@ -75,7 +43,7 @@ export const text: Validator = (value, options: FieldOptions = {}) => {
   return true;
 };
 
-export const password: Validator = (value, options: FieldOptions = {}) => {
+export const password: Validate = (value: string, options = {}) => {
   if (options.maxLength && value.length > options.maxLength) {
     return `This value must be shorter than the max length of ${options.maxLength} characters.`;
   }
@@ -91,7 +59,7 @@ export const password: Validator = (value, options: FieldOptions = {}) => {
   return true;
 };
 
-export const email: Validator = (value, options: FieldOptions = {}) => {
+export const email: Validate = (value: string, options = {}) => {
   if ((value && !/\S+@\S+\.\S+/.test(value))
     || (!value && options.required)) {
     return 'Please enter a valid email address.';
@@ -100,7 +68,7 @@ export const email: Validator = (value, options: FieldOptions = {}) => {
   return true;
 };
 
-export const textarea: Validator = (value, options: FieldOptions = {}) => {
+export const textarea: Validate = (value: string, options = {}) => {
   if (options.maxLength && value.length > options.maxLength) {
     return `This value must be shorter than the max length of ${options.maxLength} characters.`;
   }
@@ -116,7 +84,7 @@ export const textarea: Validator = (value, options: FieldOptions = {}) => {
   return true;
 };
 
-export const wysiwyg: Validator = (value, options: RequiredOption = {}) => {
+export const wysiwyg: Validate = (value: string, options = {}) => {
   if (options.required && !value) {
     return defaultMessage;
   }
@@ -124,7 +92,7 @@ export const wysiwyg: Validator = (value, options: RequiredOption = {}) => {
   return true;
 };
 
-export const code: Validator = (value, options: RequiredOption = {}) => {
+export const code: Validate = (value: string, options = {}) => {
   if (options.required && value === undefined) {
     return defaultMessage;
   }
@@ -132,7 +100,7 @@ export const code: Validator = (value, options: RequiredOption = {}) => {
   return true;
 };
 
-export const richText: Validator = (value, options: RequiredOption = {}) => {
+export const richText: Validate = (value, options = {}) => {
   if (options.required) {
     const stringifiedDefaultValue = JSON.stringify(defaultRichTextValue);
     if (value && JSON.stringify(value) !== stringifiedDefaultValue) return true;
@@ -142,7 +110,7 @@ export const richText: Validator = (value, options: RequiredOption = {}) => {
   return true;
 };
 
-export const checkbox: Validator = (value, options: RequiredOption = {}) => {
+export const checkbox: Validate = (value: boolean, options = {}) => {
   if ((value && typeof value !== 'boolean')
     || (options.required && typeof value !== 'boolean')) {
     return 'This field can only be equal to true or false.';
@@ -151,7 +119,7 @@ export const checkbox: Validator = (value, options: RequiredOption = {}) => {
   return true;
 };
 
-export const date: Validator = (value, options: RequiredOption = {}) => {
+export const date: Validate = (value, options = {}) => {
   if (value && !isNaN(Date.parse(value.toString()))) { /* eslint-disable-line */
     return true;
   }
@@ -167,17 +135,17 @@ export const date: Validator = (value, options: RequiredOption = {}) => {
   return true;
 };
 
-export const upload: Validator = (value, options: RequiredOption = {}) => {
+export const upload: Validate = (value: string, options = {}) => {
   if (value || !options.required) return true;
   return defaultMessage;
 };
 
-export const relationship: Validator = (value, options = {}) => {
+export const relationship: Validate = (value, options = {}) => {
   if (value || !options.required) return true;
   return defaultMessage;
 };
 
-export const array: Validator = (value, options: RowOptions = {}) => {
+export const array: Validate = (value, options = {}) => {
   if (options.minRows && value < options.minRows) {
     return `This field requires at least ${options.minRows} row(s).`;
   }
@@ -193,7 +161,7 @@ export const array: Validator = (value, options: RowOptions = {}) => {
   return true;
 };
 
-export const select: Validator = (value, options: SelectAndRadioOptions = {}) => {
+export const select: Validate = (value, options = {}) => {
   if (Array.isArray(value) && value.find((input) => !options.options.find((option) => (option === input || option.value === input)))) {
     return 'This field has an invalid selection';
   }
@@ -209,13 +177,13 @@ export const select: Validator = (value, options: SelectAndRadioOptions = {}) =>
   return true;
 };
 
-export const radio: Validator = (value, options: SelectAndRadioOptions = {}) => {
+export const radio: Validate = (value, options = {}) => {
   const stringValue = String(value);
   if ((typeof value !== 'undefined' || !options.required) && (options.options.find((option) => String(option.value) === stringValue))) return true;
   return defaultMessage;
 };
 
-export const blocks: Validator = (value, options: RowOptions = {}) => {
+export const blocks: Validate = (value, options = {}) => {
   if (options.minRows && value < options.minRows) {
     return `This field requires at least ${options.minRows} row(s).`;
   }

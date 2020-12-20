@@ -1,5 +1,5 @@
 import React from 'react';
-import Select, { ValueType, OptionsType } from 'react-select';
+import Select, { OptionsType } from 'react-select';
 import { Props, Value } from './types';
 import Chevron from '../../icons/Chevron';
 
@@ -24,7 +24,7 @@ const ReactSelect: React.FC<Props> = (props) => {
     <Select
       {...props}
       value={value}
-      onChange={(selected: ValueType<Value>) => {
+      onChange={(selected: Value) => {
         if (formatValue) {
           onChange(formatValue(selected));
         } else {

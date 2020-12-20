@@ -1,4 +1,4 @@
-import { Field } from '../../../../fields/config/types';
+import { Field, Block } from '../../../../fields/config/types';
 import { FieldTypes } from '../field-types';
 import { FieldPermissions } from '../../../../auth/types';
 
@@ -20,4 +20,5 @@ export type Props = {
   permissions: FieldPermissions
   isOpen?: boolean
   readOnly: boolean
+  blocks?: Block[]
 }

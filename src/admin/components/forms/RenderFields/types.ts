@@ -12,9 +12,7 @@ export type Props = {
   className?: string
   operation: Operation
   readOnly: boolean
-  permissions: {
-    [field: string]: FieldPermissions
-  }
+  permissions: FieldPermissions
   filter?: (field: Field) => boolean
   fieldSchema: FieldWithPath[]
   fieldTypes: FieldTypes

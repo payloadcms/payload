@@ -1,8 +1,8 @@
+import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
+
 export type Props = {
   variant?: 'left' | 'right'
   verticalAlignment?: 'top' | 'center' | 'sticky'
-  dragHandleProps?: {
-    [prop: string]: unknown
-  }
+  dragHandleProps?: DraggableProvidedDragHandleProps
   className?: string
 }

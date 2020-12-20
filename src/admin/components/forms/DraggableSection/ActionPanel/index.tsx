@@ -1,21 +1,21 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import Button from '../../../elements/Button';
 import Popup from '../../../elements/Popup';
 import BlockSelector from '../../field-types/Blocks/BlockSelector';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'action-panel';
 
-const ActionPanel = (props) => {
+const ActionPanel: React.FC<Props> = (props) => {
   const {
     addRow,
     removeRow,
-    label,
+    label = 'Row',
     blockType,
-    blocks,
+    blocks = [],
     rowIndex,
     isHovered,
   } = props;
@@ -40,7 +40,7 @@ const ActionPanel = (props) => {
             icon="x"
             iconPosition="left"
             iconStyle="with-border"
-            onClick={removeRow}
+            onClick={() => removeRow(rowIndex)}
           />
         )}
       >
@@ -91,7 +91,7 @@ const ActionPanel = (props) => {
                 icon="plus"
                 iconPosition="left"
                 iconStyle="with-border"
-                onClick={addRow}
+                onClick={() => addRow(rowIndex)}
               />
             )}
           >
@@ -101,25 +101,6 @@ const ActionPanel = (props) => {
         )}
     </div>
   );
-};
-
-ActionPanel.defaultProps = {
-  label: 'Row',
-  blockType: null,
-  isHovered: false,
-  blocks: [],
-};
-
-ActionPanel.propTypes = {
-  label: PropTypes.string,
-  addRow: PropTypes.func.isRequired,
-  removeRow: PropTypes.func.isRequired,
-  blockType: PropTypes.oneOf(['blocks', 'array']),
-  blocks: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ),
-  isHovered: PropTypes.bool,
-  rowIndex: PropTypes.number.isRequired,
 };
 
 export default ActionPanel;

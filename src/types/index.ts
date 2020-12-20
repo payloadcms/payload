@@ -108,3 +108,14 @@ export interface OperationArguments {
   dataReference?: {[key: string]: any};
   index?: number | string;
 }
+
+export type Operator = 'equals'
+  | 'not_equals'
+  | 'in'
+  | 'not_in'
+  | 'exists'
+  | 'greater_than'
+  | 'greater_than_equals'
+  | 'less_than'
+  | 'less_than_equals'
+  | 'like'

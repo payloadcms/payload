@@ -30,7 +30,7 @@ export type Labels = {
   plural: string;
 };
 
-export type Validate = (value: unknown, options: unknown) => string | boolean;
+export type Validate = (value: unknown, options: any) => string | boolean;
 
 interface FieldBase {
   name?: string;

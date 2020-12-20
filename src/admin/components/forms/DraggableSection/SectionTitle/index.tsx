@@ -1,14 +1,13 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-
 import EditableBlockTitle from './EditableBlockTitle';
 import Pill from '../../../elements/Pill';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'section-title';
 
-const SectionTitle = (props) => {
+const SectionTitle: React.FC<Props> = (props) => {
   const { label, ...remainingProps } = props;
 
   const classes = [
@@ -21,14 +20,6 @@ const SectionTitle = (props) => {
       <EditableBlockTitle {...remainingProps} />
     </div>
   );
-};
-
-SectionTitle.defaultProps = {
-  label: '',
-};
-
-SectionTitle.propTypes = {
-  label: PropTypes.string,
 };
 
 export default SectionTitle;

@@ -1,13 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-
 import Button from '../../../elements/Button';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'position-panel';
 
-const PositionPanel = (props) => {
+const PositionPanel: React.FC<Props> = (props) => {
   const { moveRow, positionIndex, rowCount } = props;
 
   const adjustedIndex = positionIndex + 1;
@@ -38,16 +37,6 @@ const PositionPanel = (props) => {
       />
     </div>
   );
-};
-
-PositionPanel.defaultProps = {
-  positionIndex: null,
-};
-
-PositionPanel.propTypes = {
-  positionIndex: PropTypes.number,
-  moveRow: PropTypes.func.isRequired,
-  rowCount: PropTypes.number.isRequired,
 };
 
 export default PositionPanel;
