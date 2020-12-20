@@ -5,14 +5,15 @@ import { useConfig } from '@payloadcms/config-provider';
 import some from 'async-some';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
+import { Value } from '../../../elements/ReactSelect/types';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
 import { relationship } from '../../../../../fields/validations';
 import { PaginatedDocs } from '../../../../../collections/config/types';
-import { Props, OptionsPage, Option } from './types';
 import { useFormProcessing } from '../../Form/context';
 import optionsReducer from './optionsReducer';
+import { Props, OptionsPage, Option } from './types';
 
 import './index.scss';
 
@@ -44,6 +45,7 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
     collections,
   } = useConfig();
 
+
   const formProcessing = useFormProcessing();
 
   const hasMultipleRelations = Array.isArray(relationTo);
@@ -74,6 +76,7 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
     const collection = collections.find((coll) => coll.slug === relation);
     dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection });
   }, [collections, hasMultipleRelations]);
+
 
   const getNextOptions = useCallback((params = {} as Record<string, unknown>) => {
     const clear = params?.clear;
@@ -126,31 +129,56 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
     }
   }, [addOptions, api, collections, errorLoading, lastFullyLoadedRelation, lastLoadedPage, relations, required, search, serverURL]);
 
-  const findValueInOptions = useCallback((opts, val): Option | Option[] => {
-    let foundValue: Option | Option[];
+  const findOptionsByValue = useCallback((): Option | Option[] => {
+    if (value) {
+      if (hasMany) {
+        return value.map((val) => {
+          if (hasMultipleRelations) {
+            let matchedOption: Option;
 
-    if (hasMultipleRelations) {
-      opts.forEach((opt) => {
-        const potentialValue = opt.options && opt.options.find((subOption) => {
-          if (subOption?.value?.value && val?.value) {
-            return subOption.value.value === val.value;
+            options.forEach((opt) => {
+              if (opt.options) {
+                opt.options.some((subOpt) => {
+                  if (subOpt?.value === val.value) {
+                    matchedOption = subOpt;
+                    return true;
+                  }
+
+                  return false;
+                });
+              }
+            });
+
+            return matchedOption;
           }
 
-          return false;
+          return options.find((opt) => opt.value === val);
+        });
+      }
+
+      if (hasMultipleRelations) {
+        let matchedOption: Option;
+
+        options.forEach((opt) => {
+          if (opt?.options) {
+            opt.options.some((subOpt) => {
+              if (subOpt?.value === value.value) {
+                matchedOption = subOpt;
+                return true;
+              }
+              return false;
+            });
+          }
         });
 
-        if (potentialValue) foundValue = potentialValue;
-      });
-    } else if (val) {
-      if (hasMany && Array.isArray(val)) {
-        foundValue = val.map((v) => opts.find((opt) => opt.value === v));
-      } else {
-        foundValue = opts.find((opt) => opt.value === val);
+        return matchedOption;
       }
+
+      return options.find((opt) => opt.value === value);
     }
 
-    return foundValue || undefined;
-  }, [hasMany, hasMultipleRelations]);
+    return undefined;
+  }, [hasMany, hasMultipleRelations, value, options]);
 
   const handleInputChange = useCallback((newSearch) => {
     if (search !== newSearch) {
@@ -159,15 +187,6 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
       setLastLoadedPage(1);
     }
   }, [search]);
-
-  const formatSelectedValue = useCallback((selectedValue) => {
-    if (hasMany && Array.isArray(selectedValue)) {
-      return selectedValue.map((val) => val.value);
-    }
-
-    return selectedValue ? selectedValue.value : selectedValue;
-  }, [hasMany]);
-
 
   const addOptionByID = useCallback(async (id, relation) => {
     if (!errorLoading) {
@@ -183,26 +202,32 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
   }, [addOptions, api, errorLoading, serverURL]);
 
   useEffect(() => {
-    const locatedValue = findValueInOptions(options, value);
+    if (value) {
+      if (hasMany) {
+        const matchedOptions = findOptionsByValue();
 
-    if (hasMany && value?.length > 0) {
-      value.forEach((val, i) => {
-        if (!val && value[i]) {
+        (matchedOptions as Value[] || []).forEach((option, i) => {
+          if (!option) {
+            if (hasMultipleRelations) {
+              addOptionByID(value[i].value, value[i].relationTo);
+            } else {
+              addOptionByID(value[i], relationTo);
+            }
+          }
+        });
+      } else {
+        const matchedOption = findOptionsByValue();
+
+        if (!matchedOption) {
           if (hasMultipleRelations) {
-            addOptionByID(value[i].value, value[i].relationTo);
+            addOptionByID(value.value, value.relationTo);
           } else {
-            addOptionByID(value[i], relationTo);
+            addOptionByID(value, relationTo);
           }
         }
-      });
-    } else if (!locatedValue && value) {
-      if (hasMultipleRelations) {
-        addOptionByID(value.value, value.relationTo);
-      } else {
-        addOptionByID(value, relationTo);
       }
     }
-  }, [addOptionByID, findValueInOptions, hasMany, hasMultipleRelations, options, relationTo, value]);
+  }, [addOptionByID, findOptionsByValue, hasMany, hasMultipleRelations, relationTo, value]);
 
   useEffect(() => {
     const getFirstResults = async () => {
@@ -233,7 +258,7 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
     readOnly && `${baseClass}--read-only`,
   ].filter(Boolean).join(' ');
 
-  const valueToRender = findValueInOptions(options, value) || value;
+  const valueToRender = findOptionsByValue();
 
   return (
     <div
@@ -256,11 +281,24 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
         <ReactSelect
           isDisabled={readOnly}
           onInputChange={handleInputChange}
-          onChange={!readOnly ? setValue : undefined}
-          formatValue={formatSelectedValue}
+          onChange={!readOnly ? (selected) => {
+            if (hasMany) {
+              setValue(selected.map((option) => {
+                if (hasMultipleRelations) {
+                  return {
+                    relationTo: option.relationTo,
+                    value: option.value,
+                  };
+                }
+
+                return option.value;
+              }));
+            } else {
+              setValue(selected.value);
+            }
+          } : undefined}
           onMenuScrollToBottom={getNextOptions}
-          findValueInOptions={findValueInOptions}
-          value={valueToRender}
+          value={valueToRender || value}
           showError={showError}
           disabled={formProcessing}
           options={options}

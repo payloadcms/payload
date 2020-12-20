@@ -235,3 +235,7 @@ export function fieldIsBlockType(field: Field): field is BlockField {
 export function optionIsObject(option: Option): option is OptionObject {
   return typeof option === 'object';
 }
+
+export function optionIsValue(option: Option): option is any {
+  return typeof option !== 'object';
+}

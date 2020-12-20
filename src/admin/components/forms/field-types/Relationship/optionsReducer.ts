@@ -57,10 +57,8 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
             ...docs,
             {
               label: doc[labelKey],
-              value: {
-                relationTo: relation,
-                value: doc.id,
-              },
+              relationTo: relation,
+              value: doc.id,
             },
           ];
         }
@@ -77,6 +75,7 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
         newOptions.push({
           label: collection.labels.plural,
           options: newSubOptions,
+          value: undefined,
         });
       }
 

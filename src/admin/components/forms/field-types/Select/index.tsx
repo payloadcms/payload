@@ -1,76 +1,36 @@
-import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
+import React, { useCallback, useState } from 'react';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
 import { select } from '../../../../../fields/validations';
-import { Props } from './types';
+import { Option } from '../../../../../fields/config/types';
+import { Props, Option as ReactSelectOption } from './types';
 
 import './index.scss';
 
 const baseClass = 'select';
 
-const findFullOption = (value, options) => {
-  const matchedOption = options.find((option) => option?.value === value);
-
-  if (matchedOption) {
-    if (typeof matchedOption === 'object' && matchedOption.label && matchedOption.value) {
-      return matchedOption;
-    }
+const formatOptions = (options: Option[]): ReactSelectOption[] => options.map((option) => {
+  if (typeof option === 'object' && option.value) {
+    return option;
   }
 
   return {
-    label: value,
-    value,
+    label: option as string,
+    value: option,
   };
-};
-
-const formatFormValue = (value) => {
-  if (Array.isArray(value)) {
-    return value.map((subValue) => {
-      if (typeof subValue === 'object' && subValue.value) {
-        return subValue.value;
-      }
-
-      return subValue;
-    });
-  }
-
-  if (typeof value === 'object' && value !== null && value.value) {
-    return value.value;
-  }
-
-  return value;
-};
-
-const formatRenderValue = (value, options) => {
-  if (Array.isArray(value)) {
-    return value.map((subValue) => {
-      if (typeof subValue === 'string') {
-        return findFullOption(subValue, options);
-      }
-
-      return subValue;
-    });
-  }
-
-  if (typeof value === 'string') {
-    return findFullOption(value, options);
-  }
-
-  return value;
-};
+});
 
 const Select: React.FC<Props> = (props) => {
   const {
     path: pathFromProps,
     name,
     required,
-    validate,
+    validate = select,
     label,
-    options,
+    options: optionsFromProps,
     hasMany,
     admin: {
       readOnly,
@@ -80,6 +40,8 @@ const Select: React.FC<Props> = (props) => {
   } = props;
 
   const path = pathFromProps || name;
+
+  const [options] = useState(formatOptions(optionsFromProps));
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required, options });
@@ -105,7 +67,7 @@ const Select: React.FC<Props> = (props) => {
     readOnly && `${baseClass}--read-only`,
   ].filter(Boolean).join(' ');
 
-  const valueToRender = formatRenderValue(value, options);
+  const valueToRender = options.find((option) => option.value === value);
 
   return (
     <div
@@ -125,9 +87,10 @@ const Select: React.FC<Props> = (props) => {
         required={required}
       />
       <ReactSelect
-        onChange={!readOnly ? setValue : undefined}
+        onChange={!readOnly ? (selectedOption) => {
+          setValue(selectedOption.value);
+        } : undefined}
         value={valueToRender}
-        formatValue={formatFormValue}
         showError={showError}
         isDisabled={readOnly}
         options={options}
@@ -135,39 +98,6 @@ const Select: React.FC<Props> = (props) => {
       />
     </div>
   );
-};
-
-Select.defaultProps = {
-  admin: {},
-  required: false,
-  validate: select,
-  hasMany: false,
-  path: '',
-};
-
-Select.propTypes = {
-  required: PropTypes.bool,
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-    style: PropTypes.shape({}),
-    width: PropTypes.string,
-  }),
-  label: PropTypes.string.isRequired,
-  validate: PropTypes.func,
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string,
-  options: PropTypes.oneOfType([
-    PropTypes.arrayOf(
-      PropTypes.string,
-    ),
-    PropTypes.arrayOf(
-      PropTypes.shape({
-        value: PropTypes.string,
-        label: PropTypes.string,
-      }),
-    ),
-  ]).isRequired,
-  hasMany: PropTypes.bool,
 };
 
 export default withCondition(Select);
