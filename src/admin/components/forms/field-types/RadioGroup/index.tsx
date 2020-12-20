@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
@@ -7,17 +6,19 @@ import Error from '../../Error';
 import Label from '../../Label';
 import RadioInput from './RadioInput';
 import { radio } from '../../../../../fields/validations';
+import { optionIsObject } from '../../../../../fields/config/types';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'radio-group';
 
-const RadioGroup = (props) => {
+const RadioGroup: React.FC<Props> = (props) => {
   const {
     name,
     path: pathFromProps,
     required,
-    validate,
+    validate = radio,
     label,
     admin: {
       readOnly,
@@ -72,11 +73,19 @@ const RadioGroup = (props) => {
         required={required}
       />
       <ul className={`${baseClass}--group`}>
-        {options?.map((option) => {
-          const isSelected = String(option.value) === String(value);
+        {options.map((option) => {
+          let optionValue = '';
+
+          if (optionIsObject(option)) {
+            optionValue = option.value;
+          } else {
+            optionValue = option;
+          }
+
+          const isSelected = String(optionValue) === String(value);
 
           return (
-            <li key={`${path} - ${option.value}`}>
+            <li key={`${path} - ${optionValue}`}>
               <RadioInput
                 path={path}
                 isSelected={isSelected}
@@ -89,36 +98,6 @@ const RadioGroup = (props) => {
       </ul>
     </div>
   );
-};
-
-RadioGroup.defaultProps = {
-  label: null,
-  required: false,
-  validate: radio,
-  admin: {},
-  path: '',
-};
-
-RadioGroup.propTypes = {
-  path: PropTypes.string,
-  name: PropTypes.string.isRequired,
-  required: PropTypes.bool,
-  validate: PropTypes.func,
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-    style: PropTypes.shape({}),
-    width: PropTypes.string,
-  }),
-  label: PropTypes.string,
-  options: PropTypes.arrayOf(
-    PropTypes.shape({
-      label: PropTypes.string,
-      value: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.number,
-      ]),
-    }),
-  ).isRequired,
 };
 
 export default withCondition(RadioGroup);

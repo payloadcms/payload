@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
+import { Props } from './types';
 
-const HiddenInput = (props) => {
+const HiddenInput: React.FC<Props> = (props) => {
   const {
     name,
     path: pathFromProps,
@@ -30,17 +30,6 @@ const HiddenInput = (props) => {
       name={path}
     />
   );
-};
-
-HiddenInput.defaultProps = {
-  path: '',
-  value: undefined,
-};
-
-HiddenInput.propTypes = {
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string,
-  value: PropTypes.string,
 };
 
 export default withCondition(HiddenInput);

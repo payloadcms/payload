@@ -32,6 +32,13 @@ export type Labels = {
 
 export type Validate = (value: unknown, options: any) => string | boolean;
 
+export type OptionObjectType = {
+  label: string
+  value: string
+}
+
+export type Option = OptionObjectType | string
+
 export interface FieldBase {
   name?: string;
   label?: string;
@@ -62,30 +69,30 @@ export interface FieldBase {
 
 export type NumberField = FieldBase & {
   type: 'number';
+  admin?: Admin & {
+    placeholder?: string
+    step?: number
+  }
   min?: number
   max?: number
 }
 
-type TextAdmin = Admin & {
-  placeholder?: string
-  autoComplete?: string
-}
-
-export type TextField = Omit<FieldBase, 'admin'> & {
+export type TextField = FieldBase & {
   type: 'text';
   maxLength?: number
   minLength?: number
-  admin?: TextAdmin
+  admin?: Admin & {
+    placeholder?: string
+    autoComplete?: string
+  }
 }
 
-type EmailAdmin = Admin & {
-  placeholder?: string
-  autoComplete?: string
-}
-
-export type EmailField = Omit<FieldBase, 'admin'> & {
+export type EmailField = FieldBase & {
   type: 'email';
-  admin?: EmailAdmin
+  admin?: Admin & {
+    placeholder?: string
+    autoComplete?: string
+  }
 }
 
 export type TextareaField = FieldBase & {
@@ -130,10 +137,7 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
 
 export type SelectField = FieldBase & {
   type: 'select';
-  options: {
-    value: string;
-    label: string;
-  }[] | string[];
+  options: Option[];
   hasMany?: boolean;
 }
 
@@ -166,10 +170,10 @@ export type ArrayField = FieldBase & {
 
 export type RadioField = FieldBase & {
   type: 'radio';
-  options: {
-    value: string;
-    label: string;
-  }[] | string[];
+  options: Option[]
+  admin?: Admin & {
+    layout?: 'horizontal' | 'vertical'
+  }
 }
 
 export type Block = {
@@ -226,4 +230,8 @@ export function fieldIsArrayType(field: Field): field is ArrayField {
 
 export function fieldIsBlockType(field: Field): field is BlockField {
   return field.type === 'blocks';
+}
+
+export function optionIsObject(option: Option): option is OptionObjectType {
+  return typeof option === 'object';
 }

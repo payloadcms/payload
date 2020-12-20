@@ -18,7 +18,6 @@ import './index.scss';
 const maxResultsPerRequest = 10;
 
 const baseClass = 'relationship';
-
 class Relationship extends Component<RelationshipProps> {
   constructor(props) {
     super(props);
