@@ -1,7 +1,8 @@
 import httpStatus from 'http-status';
+import { OperationArguments } from '../../types';
 import { APIError } from '../../errors';
 
-async function logout(args) {
+async function logout(args: OperationArguments): Promise<string> {
   const { config } = this;
 
   const requestedSlug = args.req.route.path.split('/').filter((r) => r !== '')[0];

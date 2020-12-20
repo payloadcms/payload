@@ -8,7 +8,11 @@ import { PayloadRequest } from '../../express/types/payloadRequest';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 
-interface CollectionModel extends PaginateModel<MongooseDocument>, PassportLocalModel<MongooseDocument>{}
+export interface CollectionModel extends PaginateModel<MongooseDocument>, PassportLocalModel<MongooseDocument>{}
+export interface AuthCollectionModel extends CollectionModel {
+  resetPasswordToken: string;
+  resetPasswordExpiration: Date;
+}
 
 export type HookOperationType =
   | 'create'
@@ -53,7 +57,7 @@ export type BeforeReadHook = (args?: {
 export type AfterReadHook = (args?: {
   doc: any;
   req: PayloadRequest;
-  query: { [key: string]: any };
+  query?: { [key: string]: any };
 }) => any;
 
 export type BeforeDeleteHook = (args?: {
@@ -75,7 +79,7 @@ export type BeforeLoginHook = (args?: {
 
 export type AfterLoginHook = (args?: {
   req: PayloadRequest;
-  user: any;
+  doc: any;
   token: string;
 }) => any;
 
@@ -133,6 +137,11 @@ export type Collection = {
   Model: CollectionModel;
   config: CollectionConfig;
 };
+
+export type AuthCollection = {
+  Model: AuthCollectionModel;
+  config: CollectionConfig;
+}
 
 export type PaginatedDocs = {
   docs: unknown[]

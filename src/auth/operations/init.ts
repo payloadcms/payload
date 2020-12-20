@@ -1,4 +1,6 @@
-async function init(args) {
+import { Collection } from '../../collections/config/types';
+
+async function init(args: Collection): Promise<boolean> {
   const {
     Model,
   } = args;

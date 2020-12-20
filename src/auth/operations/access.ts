@@ -1,6 +1,9 @@
+import { OperationArguments } from '../../types';
+import { Permissions } from '../types';
+
 const allOperations = ['create', 'read', 'update', 'delete'];
 
-async function accessOperation(args) {
+async function accessOperation(args: OperationArguments): Promise<Permissions> {
   const { config } = this;
 
   const {
@@ -8,7 +11,7 @@ async function accessOperation(args) {
     req: { user },
   } = args;
 
-  const results = {};
+  const results = {} as Permissions;
   const promises = [];
 
   const isLoggedIn = !!(user);
