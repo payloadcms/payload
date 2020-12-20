@@ -1,15 +1,15 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import RenderFields from '../../RenderFields';
+import RenderFields, { useRenderedFields } from '../../RenderFields';
 import withCondition from '../../withCondition';
 import FieldTypeGutter from '../../FieldTypeGutter';
 import { NegativeFieldGutterProvider } from '../../FieldTypeGutter/context';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'group';
 
-const Group = (props) => {
+const Group: React.FC<Props> = (props) => {
   const {
     label,
     fields,
@@ -21,8 +21,10 @@ const Group = (props) => {
       style,
       width,
     },
+    permissions,
   } = props;
 
+  const { operation } = useRenderedFields();
   const path = pathFromProps || name;
 
   return (
@@ -42,6 +44,8 @@ const Group = (props) => {
         <div className={`${baseClass}__fields-wrapper`}>
           <NegativeFieldGutterProvider allow={false}>
             <RenderFields
+              permissions={permissions.fields}
+              operation={operation}
               readOnly={readOnly}
               fieldTypes={fieldTypes}
               fieldSchema={fields.map((subField) => ({
@@ -54,27 +58,6 @@ const Group = (props) => {
       </div>
     </div>
   );
-};
-
-Group.defaultProps = {
-  label: '',
-  path: '',
-  admin: {},
-};
-
-Group.propTypes = {
-  fields: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
-  label: PropTypes.string,
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string,
-  fieldTypes: PropTypes.shape({}).isRequired,
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-    style: PropTypes.shape({}),
-    width: PropTypes.string,
-  }),
 };
 
 export default withCondition(Group);

@@ -1,21 +1,21 @@
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Error from '../../Error';
 import { checkbox } from '../../../../../fields/validations';
 import Check from '../../../icons/Check';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'checkbox';
 
-const Checkbox = (props) => {
+const Checkbox: React.FC<Props> = (props) => {
   const {
     name,
     path: pathFromProps,
     required,
-    validate,
+    validate = checkbox,
     label,
     onChange,
     disableFormData,
@@ -67,7 +67,7 @@ const Checkbox = (props) => {
         type="checkbox"
         name={path}
         id={path}
-        checked={value ? 'on' : false}
+        checked={Boolean(value)}
         readOnly
       />
       <button
@@ -86,31 +86,6 @@ const Checkbox = (props) => {
       </button>
     </div>
   );
-};
-
-Checkbox.defaultProps = {
-  label: null,
-  required: false,
-  admin: {},
-  validate: checkbox,
-  path: '',
-  onChange: undefined,
-  disableFormData: false,
-};
-
-Checkbox.propTypes = {
-  path: PropTypes.string,
-  name: PropTypes.string.isRequired,
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-    style: PropTypes.shape({}),
-    width: PropTypes.string,
-  }),
-  required: PropTypes.bool,
-  validate: PropTypes.func,
-  label: PropTypes.string,
-  onChange: PropTypes.func,
-  disableFormData: PropTypes.bool,
 };
 
 export default withCondition(Checkbox);

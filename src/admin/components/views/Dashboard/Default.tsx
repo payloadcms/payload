@@ -1,17 +1,17 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { useConfig } from '@payloadcms/config-provider';
 
 import Eyebrow from '../../elements/Eyebrow';
 import Card from '../../elements/Card';
 import Button from '../../elements/Button';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'dashboard';
 
-const Dashboard = (props) => {
+const Dashboard: React.FC<Props> = (props) => {
   const {
     collections,
     globals,
@@ -73,16 +73,6 @@ const Dashboard = (props) => {
       </div>
     </div>
   );
-};
-
-Dashboard.propTypes = {
-  collections: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
-  globals: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
-  permissions: PropTypes.shape({}).isRequired,
 };
 
 export default Dashboard;

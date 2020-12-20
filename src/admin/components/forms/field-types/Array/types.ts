@@ -3,7 +3,7 @@ import { ArrayField, Labels, Field } from '../../../../../fields/config/types';
 import { FieldTypes } from '..';
 import { FieldPermissions } from '../../../../../auth/types';
 
-export type Props = ArrayField & {
+export type Props = Omit<ArrayField, 'type'> & {
   path?: string
   fieldTypes: FieldTypes
   permissions: FieldPermissions

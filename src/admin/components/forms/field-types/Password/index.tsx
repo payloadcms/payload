@@ -1,19 +1,19 @@
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
 import withCondition from '../../withCondition';
 import { password } from '../../../../../fields/validations';
+import { Props } from './types';
 
 import './index.scss';
 
-const Password = (props) => {
+const Password: React.FC<Props> = (props) => {
   const {
     path: pathFromProps,
     name,
     required,
-    validate,
+    validate = password,
     style,
     width,
     autoComplete,
@@ -66,7 +66,7 @@ const Password = (props) => {
       <input
         value={value || ''}
         onChange={setValue}
-        disabled={processing ? 'disabled' : undefined}
+        disabled={processing}
         type="password"
         autoComplete={autoComplete}
         id={path}
@@ -74,26 +74,6 @@ const Password = (props) => {
       />
     </div>
   );
-};
-
-Password.defaultProps = {
-  required: false,
-  validate: password,
-  width: undefined,
-  style: {},
-  path: '',
-  autoComplete: 'off',
-};
-
-Password.propTypes = {
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string,
-  required: PropTypes.bool,
-  width: PropTypes.string,
-  style: PropTypes.shape({}),
-  label: PropTypes.string.isRequired,
-  validate: PropTypes.func,
-  autoComplete: PropTypes.string,
 };
 
 export default withCondition(Password);

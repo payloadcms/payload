@@ -1,15 +1,14 @@
 import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
-
+import { FieldBase } from '../../../../fields/config/types';
 import { useWatchForm } from '../Form/context';
 
-const withCondition = (Field) => {
-  const CheckForCondition = (props) => {
+const withCondition = <P extends Record<string, unknown>>(Field: React.ComponentType<P>): React.FC<P> => {
+  const CheckForCondition: React.FC<P> = (props) => {
     const {
       admin: {
         condition,
       } = {},
-    } = props;
+    } = props as FieldBase;
 
     if (condition) {
       return <WithCondition {...props} />;
@@ -18,28 +17,16 @@ const withCondition = (Field) => {
     return <Field {...props} />;
   };
 
-  CheckForCondition.defaultProps = {
-    admin: undefined,
-    name: '',
-    path: '',
-  };
-
-  CheckForCondition.propTypes = {
-    admin: PropTypes.shape({
-      condition: PropTypes.func,
-    }),
-    name: PropTypes.string,
-    path: PropTypes.string,
-  };
-
-  const WithCondition = (props) => {
+  const WithCondition: React.FC<P> = (props) => {
     const {
       name,
       path: pathFromProps,
       admin: {
         condition,
       } = {},
-    } = props;
+    } = props as FieldBase & {
+      path?: string
+    };
 
     const path = pathFromProps || name;
 
@@ -62,20 +49,6 @@ const withCondition = (Field) => {
     }
 
     return null;
-  };
-
-  WithCondition.defaultProps = {
-    admin: undefined,
-    name: '',
-    path: '',
-  };
-
-  WithCondition.propTypes = {
-    admin: PropTypes.shape({
-      condition: PropTypes.func,
-    }),
-    name: PropTypes.string,
-    path: PropTypes.string,
   };
 
   return CheckForCondition;

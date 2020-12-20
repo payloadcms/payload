@@ -1,10 +1,12 @@
 import React, { Suspense, lazy } from 'react';
 import Loading from '../../../elements/Loading';
 
-const CodeField = lazy(() => import('./Code'));
+const Code = lazy(() => import('./Code'));
 
-export default (props) => (
+const CodeField: React.FC = (props) => (
   <Suspense fallback={<Loading />}>
-    <CodeField {...props} />
+    <Code {...props} />
   </Suspense>
 );
+
+export default CodeField;

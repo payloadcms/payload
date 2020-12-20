@@ -32,7 +32,7 @@ export type Labels = {
 
 export type Validate = (value: unknown, options: any) => string | boolean;
 
-interface FieldBase {
+export interface FieldBase {
   name?: string;
   label?: string;
   slug?: string;
@@ -66,14 +66,26 @@ export type NumberField = FieldBase & {
   max?: number
 }
 
-export type TextField = FieldBase & {
+type TextAdmin = Admin & {
+  placeholder?: string
+  autoComplete?: string
+}
+
+export type TextField = Omit<FieldBase, 'admin'> & {
   type: 'text';
   maxLength?: number
   minLength?: number
+  admin?: TextAdmin
 }
 
-export type EmailField = FieldBase & {
+type EmailAdmin = Admin & {
+  placeholder?: string
+  autoComplete?: string
+}
+
+export type EmailField = Omit<FieldBase, 'admin'> & {
   type: 'email';
+  admin?: EmailAdmin
 }
 
 export type TextareaField = FieldBase & {
@@ -111,6 +123,8 @@ type CodeAdmin = Admin & {
 
 export type CodeField = Omit<FieldBase, 'admin'> & {
   admin?: CodeAdmin
+  minLength?: number
+  maxLength?: number
   type: 'code';
 }
 
@@ -162,6 +176,8 @@ export type Block = {
   slug: string,
   labels: Labels
   fields: Field[],
+  blockImage?: string
+  blockImageAltText?: string
 }
 
 export type BlockField = FieldBase & {

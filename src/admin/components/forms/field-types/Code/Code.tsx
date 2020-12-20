@@ -1,5 +1,4 @@
 import React, { useCallback, useState } from 'react';
-import PropTypes from 'prop-types';
 import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
@@ -9,15 +8,16 @@ import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
 import { code } from '../../../../../fields/validations';
+import { Props } from './types';
 
 import './index.scss';
 
-const Code = (props) => {
+const Code: React.FC<Props> = (props) => {
   const {
     path: pathFromProps,
     name,
     required,
-    validate,
+    validate = code,
     admin: {
       readOnly,
       style,
@@ -81,7 +81,7 @@ const Code = (props) => {
       />
       <Editor
         value={value || ''}
-        onValueChange={readOnly ? () => { } : setValue}
+        onValueChange={readOnly ? () => null : setValue}
         highlight={highlighter}
         padding={25}
         style={{
@@ -94,32 +94,6 @@ const Code = (props) => {
       />
     </div>
   );
-};
-
-Code.defaultProps = {
-  required: false,
-  label: null,
-  validate: code,
-  path: '',
-  admin: {},
-  minLength: undefined,
-  maxLength: undefined,
-};
-
-Code.propTypes = {
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string,
-  required: PropTypes.bool,
-  validate: PropTypes.func,
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-    style: PropTypes.shape({}),
-    width: PropTypes.string,
-    language: PropTypes.oneOf(['js', 'json']),
-  }),
-  label: PropTypes.string,
-  minLength: PropTypes.number,
-  maxLength: PropTypes.number,
 };
 
 export default withCondition(Code);

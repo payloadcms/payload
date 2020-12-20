@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 import { useConfig } from '@payloadcms/config-provider';
 import Email from '../../../../forms/field-types/Email';
@@ -8,6 +7,7 @@ import Checkbox from '../../../../forms/field-types/Checkbox';
 import Button from '../../../../elements/Button';
 import ConfirmPassword from '../../../../forms/field-types/ConfirmPassword';
 import { useWatchForm, useFormModified } from '../../../../forms/Form/context';
+import { Props } from './types';
 
 import APIKey from './APIKey';
 
@@ -15,7 +15,7 @@ import './index.scss';
 
 const baseClass = 'auth-fields';
 
-const Auth = (props) => {
+const Auth: React.FC<Props> = (props) => {
   const { useAPIKey, requirePassword, verify, collection: { slug }, email } = props;
   const [changingPassword, setChangingPassword] = useState(requirePassword);
   const { getField } = useWatchForm();
@@ -61,7 +61,7 @@ const Auth = (props) => {
         required
         name="email"
         label="Email"
-        autoComplete="email"
+        admin={{ autoComplete: 'email' }}
       />
       {(changingPassword || requirePassword) && (
         <div className={`${baseClass}__changing-password`}>
@@ -119,24 +119,6 @@ const Auth = (props) => {
       )}
     </div>
   );
-};
-
-Auth.defaultProps = {
-  useAPIKey: false,
-  requirePassword: false,
-  verify: false,
-  collection: undefined,
-  email: '',
-};
-
-Auth.propTypes = {
-  useAPIKey: PropTypes.bool,
-  requirePassword: PropTypes.bool,
-  verify: PropTypes.bool,
-  collection: PropTypes.shape({
-    slug: PropTypes.string,
-  }),
-  email: PropTypes.string,
 };
 
 export default Auth;

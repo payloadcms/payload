@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 
 import DatePicker from '../../../elements/DatePicker';
 import withCondition from '../../withCondition';
@@ -7,20 +6,18 @@ import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
 import { date } from '../../../../../fields/validations';
+import { Props } from './types';
 
 import './index.scss';
 
-const defaultError = 'Please fill in the field with a valid date';
-
 const baseClass = 'date-time-field';
 
-const DateTime = (props) => {
+const DateTime: React.FC<Props> = (props) => {
   const {
     path: pathFromProps,
     name,
     required,
-    validate,
-    errorMessage,
+    validate = date,
     label,
     admin: {
       readOnly,
@@ -39,6 +36,7 @@ const DateTime = (props) => {
   const {
     value,
     showError,
+    errorMessage,
     setValue,
   } = useFieldType({
     path,
@@ -79,29 +77,6 @@ const DateTime = (props) => {
       </div>
     </div>
   );
-};
-
-DateTime.defaultProps = {
-  label: null,
-  required: false,
-  validate: date,
-  errorMessage: defaultError,
-  admin: {},
-  path: '',
-};
-
-DateTime.propTypes = {
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string,
-  label: PropTypes.string,
-  required: PropTypes.bool,
-  validate: PropTypes.func,
-  errorMessage: PropTypes.string,
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-    style: PropTypes.shape({}),
-    width: PropTypes.string,
-  }),
 };
 
 export default withCondition(DateTime);

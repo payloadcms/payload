@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 
 import BlockSearch from './BlockSearch';
 import BlocksContainer from './BlocksContainer';
@@ -43,19 +42,6 @@ const BlockSelector: React.FC<Props> = (props) => {
       />
     </div>
   );
-};
-
-BlockSelector.defaultProps = {
-  close: null,
-  parentIsHovered: false,
-  watchParentHover: false,
-};
-
-BlockSelector.propTypes = {
-  blocks: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-  close: PropTypes.func,
-  watchParentHover: PropTypes.bool,
-  parentIsHovered: PropTypes.bool,
 };
 
 export default BlockSelector;

@@ -1,27 +1,27 @@
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
 import { email } from '../../../../../fields/validations';
+import { Props } from './types';
 
 import './index.scss';
 
-const Email = (props) => {
+const Email: React.FC<Omit<Props, 'type'>> = (props) => {
   const {
     name,
     path: pathFromProps,
     required,
-    validate,
+    validate = email,
     admin: {
       readOnly,
       style,
       width,
+      placeholder,
+      autoComplete,
     } = {},
     label,
-    placeholder,
-    autoComplete,
   } = props;
 
   const path = pathFromProps || name;
@@ -71,7 +71,7 @@ const Email = (props) => {
       <input
         value={value || ''}
         onChange={setValue}
-        disabled={readOnly ? 'disabled' : undefined}
+        disabled={Boolean(readOnly)}
         placeholder={placeholder}
         type="email"
         id={path}
@@ -80,31 +80,6 @@ const Email = (props) => {
       />
     </div>
   );
-};
-
-Email.defaultProps = {
-  label: null,
-  required: false,
-  placeholder: undefined,
-  admin: {},
-  autoComplete: undefined,
-  validate: email,
-  path: '',
-};
-
-Email.propTypes = {
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string,
-  required: PropTypes.bool,
-  placeholder: PropTypes.string,
-  validate: PropTypes.func,
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-    style: PropTypes.shape({}),
-    width: PropTypes.string,
-  }),
-  label: PropTypes.string,
-  autoComplete: PropTypes.string,
 };
 
 export default withCondition(Email);

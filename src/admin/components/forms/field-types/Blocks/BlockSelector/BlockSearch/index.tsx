@@ -7,7 +7,7 @@ import './index.scss';
 
 const baseClass = 'block-search';
 
-const BlockSearch = (props) => {
+const BlockSearch: React.FC<{setSearchTerm: (term: string) => void}> = (props) => {
   const { setSearchTerm } = props;
 
   const handleChange = (e) => {

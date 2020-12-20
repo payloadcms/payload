@@ -6,7 +6,7 @@ import { useWatchForm } from '../../Form/context';
 
 import './index.scss';
 
-const ConfirmPassword = () => {
+const ConfirmPassword: React.FC = () => {
   const { getField } = useWatchForm();
   const password = getField('password');
 
