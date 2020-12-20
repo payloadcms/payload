@@ -1,13 +1,13 @@
 /* eslint-disable no-use-before-define */
-import { Schema } from 'mongoose';
+import { Schema, SchemaDefinition } from 'mongoose';
 import { MissingFieldInputOptions } from '../errors';
-import { ArrayField, BlockField, Field, RadioField, RelationshipField, SelectField, StandardField, UploadField } from '../fields/config/types';
+import { ArrayField, Block, BlockField, Field, GroupField, RadioField, RelationshipField, RowField, SelectField, UploadField } from '../fields/config/types';
 
-const setBlockDiscriminators = (fields: Field[], schema) => {
+const setBlockDiscriminators = (fields: Field[], schema: Schema) => {
   fields.forEach((field) => {
     const blockFieldType = field as BlockField;
     if (blockFieldType.type === 'blocks' && blockFieldType.blocks && blockFieldType.blocks.length > 0) {
-      blockFieldType.blocks.forEach((blockItem: StandardField) => {
+      blockFieldType.blocks.forEach((blockItem: Block) => {
         let blockSchemaFields = {};
 
         // TODO: Would this blow up on a relationship since it doesn't have fields?
@@ -19,6 +19,8 @@ const setBlockDiscriminators = (fields: Field[], schema) => {
         });
 
         const blockSchema = new Schema(blockSchemaFields, { _id: false });
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore Possible incorrect typing in mongoose types, this works
         schema.path(field.name).discriminator(blockItem.slug, blockSchema);
 
         setBlockDiscriminators(blockItem.fields, blockSchema);
@@ -60,31 +62,31 @@ const buildSchema = (configFields: Field[], options = {}): Schema => {
 };
 
 const fieldToSchemaMap = {
-  number: (field: Field, fields: Field[]) => ({
+  number: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
     ...fields,
     [field.name]: { ...formatBaseSchema(field), type: Number },
   }),
-  text: (field: Field, fields: Field[]) => ({
+  text: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
     ...fields,
     [field.name]: { ...formatBaseSchema(field), type: String },
   }),
-  email: (field: Field, fields: Field[]) => ({
+  email: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
     ...fields,
     [field.name]: { ...formatBaseSchema(field), type: String },
   }),
-  textarea: (field: Field, fields: Field[]) => ({
+  textarea: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
     ...fields,
     [field.name]: { ...formatBaseSchema(field), type: String },
   }),
-  richText: (field: Field, fields: Field[]) => ({
+  richText: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
     ...fields,
     [field.name]: { ...formatBaseSchema(field), type: Schema.Types.Mixed },
   }),
-  code: (field: Field, fields: Field[]) => ({
+  code: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
     ...fields,
     [field.name]: { ...formatBaseSchema(field), type: String },
   }),
-  radio: (field: RadioField, fields: Field[]) => {
+  radio: (field: RadioField, fields: SchemaDefinition) => {
     if (!field.options || field.options.length === 0) {
       throw new MissingFieldInputOptions(field);
     }
@@ -100,18 +102,18 @@ const fieldToSchemaMap = {
 
     return {
       ...fields,
-      [field.name]: field.hasMany ? [schema] : schema, // TODO: radio group with hasMany??
+      [field.name]: schema,
     };
   },
-  checkbox: (field: Field, fields: Field[]) => ({
+  checkbox: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
     ...fields,
     [field.name]: { ...formatBaseSchema(field), type: Boolean },
   }),
-  date: (field: Field, fields: Field[]) => ({
+  date: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
     ...fields,
     [field.name]: { ...formatBaseSchema(field), type: Date },
   }),
-  upload: (field: UploadField, fields: Field[]) => ({
+  upload: (field: UploadField, fields: SchemaDefinition): SchemaDefinition => ({
     ...fields,
     [field.name]: {
       ...formatBaseSchema(field),
@@ -119,7 +121,7 @@ const fieldToSchemaMap = {
       ref: field.relationTo,
     },
   }),
-  relationship: (field: RelationshipField, fields: Field[]) => {
+  relationship: (field: RelationshipField, fields: SchemaDefinition) => {
     let schema: { [key: string]: any } = {};
 
     if (Array.isArray(field.relationTo)) {
@@ -149,7 +151,7 @@ const fieldToSchemaMap = {
       [field.name]: schema,
     };
   },
-  row: (field: StandardField, fields: Field[]) => {
+  row: (field: RowField, fields: SchemaDefinition): SchemaDefinition => {
     const newFields = { ...fields };
 
     field.fields.forEach((rowField: Field) => {
@@ -163,7 +165,7 @@ const fieldToSchemaMap = {
 
     return newFields;
   },
-  array: (field: ArrayField, fields: Field[]) => {
+  array: (field: ArrayField, fields: SchemaDefinition) => {
     const schema = buildSchema(field.fields, { _id: false, id: false });
 
     return {
@@ -174,7 +176,7 @@ const fieldToSchemaMap = {
       },
     };
   },
-  group: (field: StandardField, fields: Field[]) => {
+  group: (field: GroupField, fields: SchemaDefinition): SchemaDefinition => {
     const schema = buildSchema(field.fields, { _id: false, id: false });
 
     return {
@@ -186,7 +188,7 @@ const fieldToSchemaMap = {
       },
     };
   },
-  select: (field: SelectField, fields: Field[]) => {
+  select: (field: SelectField, fields: SchemaDefinition) => {
     if (!field.options || field.options.length === 0) {
       throw new MissingFieldInputOptions(field);
     }
@@ -205,7 +207,7 @@ const fieldToSchemaMap = {
       [field.name]: field.hasMany ? [schema] : schema,
     };
   },
-  blocks: (field: BlockField, fields: Field[]) => {
+  blocks: (field: BlockField, fields: SchemaDefinition) => {
     const flexibleSchema = new Schema({ blockName: String }, { discriminatorKey: 'blockType', _id: false, id: false });
 
     return {
