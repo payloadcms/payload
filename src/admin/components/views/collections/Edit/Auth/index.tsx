@@ -114,7 +114,9 @@ const Auth: React.FC<Props> = (props) => {
         <Checkbox
           label="Verified"
           name="_verified"
-          readOnly
+          admin={{
+            readOnly: true,
+          }}
         />
       )}
     </div>

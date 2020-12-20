@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { Redirect, useRouteMatch, useHistory, useLocation } from 'react-router-dom';
 import { useConfig, useAuth } from '@payloadcms/config-provider';
 import { useStepNav } from '../../../elements/StepNav';
@@ -11,8 +10,10 @@ import DefaultEdit from './Default';
 import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema';
 import { NegativeFieldGutterProvider } from '../../../forms/FieldTypeGutter/context';
 import { useLocale } from '../../../utilities/Locale';
+import { Props } from './types';
+import { StepNavItem } from '../../../elements/StepNav/types';
 
-const EditView = (props) => {
+const EditView: React.FC<Props> = (props) => {
   const { collection, isEditing } = props;
 
   const {
@@ -33,7 +34,7 @@ const EditView = (props) => {
 
   const locale = useLocale();
   const { serverURL, routes: { admin, api } } = useConfig();
-  const { params: { id } = {} } = useRouteMatch();
+  const { params: { id } = {} } = useRouteMatch<Record<string, string>>();
   const { state: locationState } = useLocation();
   const history = useHistory();
   const { setStepNav } = useStepNav();
@@ -55,10 +56,10 @@ const EditView = (props) => {
     { initialParams: { 'fallback-locale': 'null', depth: 0 } },
   );
 
-  const dataToRender = locationState?.data || data;
+  const dataToRender = (locationState as Record<string, unknown>)?.data || data;
 
   useEffect(() => {
-    const nav = [{
+    const nav: StepNavItem[] = [{
       url: `${admin}/collections/${slug}`,
       label: pluralLabel,
     }];
@@ -118,29 +119,4 @@ const EditView = (props) => {
     </NegativeFieldGutterProvider>
   );
 };
-
-EditView.defaultProps = {
-  isEditing: false,
-};
-
-EditView.propTypes = {
-  collection: PropTypes.shape({
-    labels: PropTypes.shape({
-      plural: PropTypes.string,
-      singular: PropTypes.string,
-    }),
-    slug: PropTypes.string,
-    admin: PropTypes.shape({
-      useAsTitle: PropTypes.string,
-      components: PropTypes.shape({
-        Edit: PropTypes.node,
-      }),
-    }),
-    fields: PropTypes.arrayOf(PropTypes.shape({})),
-    preview: PropTypes.func,
-    auth: PropTypes.shape({}),
-  }).isRequired,
-  isEditing: PropTypes.bool,
-};
-
 export default EditView;

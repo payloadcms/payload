@@ -1,9 +1,8 @@
 import React, {
-  Component, useCallback,
+  useCallback, useEffect, useState, useReducer,
 } from 'react';
-import PropTypes from 'prop-types';
 import { useConfig } from '@payloadcms/config-provider';
-import some from '../../../../../utilities/asyncSome';
+import some from 'async-some';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
@@ -11,65 +10,84 @@ import Label from '../../Label';
 import Error from '../../Error';
 import { relationship } from '../../../../../fields/validations';
 import { PaginatedDocs } from '../../../../../collections/config/types';
-import { RelationshipProps, OptionsPage } from './types';
+import { Props, OptionsPage, Option } from './types';
+import { useFormProcessing } from '../../Form/context';
+import optionsReducer from './optionsReducer';
 
 import './index.scss';
 
 const maxResultsPerRequest = 10;
 
 const baseClass = 'relationship';
-class Relationship extends Component<RelationshipProps> {
-  constructor(props) {
-    super(props);
 
-    const { relationTo, hasMultipleRelations, required } = this.props;
-    const relations = hasMultipleRelations ? relationTo : [relationTo];
+const RelationshipFieldType: React.FC<Props> = (props) => {
+  const {
+    relationTo,
+    validate = relationship,
+    path,
+    name,
+    required,
+    label,
+    hasMany,
+    admin: {
+      readOnly,
+      style,
+      width,
+    } = {},
+  } = props;
 
-    this.initialOptions = required ? [] : [{ value: 'null', label: 'None' }];
+  const {
+    serverURL,
+    routes: {
+      api,
+    },
+    collections,
+  } = useConfig();
 
-    this.state = {
-      relations,
-      lastFullyLoadedRelation: -1,
-      lastLoadedPage: 1,
-      errorLoading: false,
-      loadedIDs: [],
-      options: this.initialOptions,
-    };
-  }
+  const formProcessing = useFormProcessing();
 
-  componentDidMount() {
-    this.getNextOptions();
-  }
+  const hasMultipleRelations = Array.isArray(relationTo);
+  const [relations] = useState(Array.isArray(relationTo) ? relationTo : [relationTo]);
+  const [options, dispatchOptions] = useReducer(optionsReducer, required ? [] : [{ value: 'null', label: 'None' }]);
+  const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
+  const [lastLoadedPage, setLastLoadedPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [errorLoading, setErrorLoading] = useState(false);
 
-  componentDidUpdate(_, prevState) {
-    const { search, options } = this.state;
-    if (search !== prevState.search) {
-      this.getNextOptions({ clear: true });
-    }
+  const memoizedValidate = useCallback((value) => {
+    const validationResult = validate(value, { required });
+    return validationResult;
+  }, [validate, required]);
 
-    if (options !== prevState.options) {
-      this.ensureValueHasOption();
-    }
-  }
+  const {
+    value,
+    showError,
+    errorMessage,
+    setValue,
+  } = useFieldType({
+    path: path || name,
+    validate: memoizedValidate,
+    required,
+  });
 
-  getNextOptions = (params = {}) => {
-    const { config: { serverURL, routes: { api }, collections } } = this.props;
-    const { errorLoading } = this.state;
-    const { clear } = params;
+  const addOptions = useCallback((data, relation) => {
+    const collection = collections.find((coll) => coll.slug === relation);
+    dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection });
+  }, [collections, hasMultipleRelations]);
+
+  const getNextOptions = useCallback((params = {} as Record<string, unknown>) => {
+    const clear = params?.clear;
 
     if (clear) {
-      this.setState({
-        options: this.initialOptions,
-        loadedIDs: [],
-        lastFullyLoadedRelation: -1,
+      dispatchOptions({
+        type: 'REPLACE',
+        payload: required ? [] : [{ value: 'null', label: 'None' }],
       });
+
+      setLastFullyLoadedRelation(-1);
     }
 
     if (!errorLoading) {
-      const {
-        relations, lastFullyLoadedRelation, lastLoadedPage, search,
-      } = this.state;
-
       const relationsToSearch = lastFullyLoadedRelation === -1 ? relations : relations.slice(lastFullyLoadedRelation + 1);
 
       if (relationsToSearch.length > 0) {
@@ -88,62 +106,34 @@ class Relationship extends Component<RelationshipProps> {
               });
             }
 
-            return callback(true, { relation, data });
+            return callback({ relation, data });
           }
 
-          let error = 'There was a problem loading options for this field.';
-
-          if (response.status === 403) {
-            error = 'You do not have permission to load options for this field.';
-          }
-
-          return this.setState({
-            errorLoading: error,
-          });
+          return setErrorLoading(true);
         }, (lastPage: OptionsPage, nextPage: OptionsPage) => {
           if (nextPage) {
             const { data, relation } = nextPage;
-            this.addOptions(data, relation);
-            this.setState({
-              lastLoadedPage: lastLoadedPage + 1,
-            });
+            addOptions(data, relation);
+            setLastLoadedPage(lastLoadedPage + 1);
           } else {
             const { data, relation } = lastPage;
-            this.addOptions(data, relation);
-            this.setState({
-              lastFullyLoadedRelation: relations.indexOf(relation),
-              lastLoadedPage: 1,
-            });
+            addOptions(data, relation);
+            setLastFullyLoadedRelation(relations.indexOf(relation));
+            setLastLoadedPage(1);
           }
         });
       }
     }
-  }
+  }, [addOptions, api, collections, errorLoading, lastFullyLoadedRelation, lastLoadedPage, relations, required, search, serverURL]);
 
-  // This is needed to reduce the selected option to only its value
-  // Essentially, remove the label
-  formatSelectedValue = (selectedValue) => {
-    const { hasMany } = this.props;
-
-    if (hasMany && Array.isArray(selectedValue)) {
-      return selectedValue.map((val) => val.value);
-    }
-
-    return selectedValue ? selectedValue.value : selectedValue;
-  }
-
-  // When ReactSelect prepopulates a selected option,
-  // if there are multiple relations, we need to find a nested option to match from
-  findValueInOptions = (options, value) => {
-    const { hasMultipleRelations, hasMany } = this.props;
-
-    let foundValue = false;
+  const findValueInOptions = useCallback((opts, val): Option | Option[] => {
+    let foundValue: Option | Option[];
 
     if (hasMultipleRelations) {
-      options.forEach((option) => {
-        const potentialValue = option.options && option.options.find((subOption) => {
-          if (subOption?.value?.value && value?.value) {
-            return subOption.value.value === value.value;
+      opts.forEach((opt) => {
+        const potentialValue = opt.options && opt.options.find((subOption) => {
+          if (subOption?.value?.value && val?.value) {
+            return subOption.value.value === val.value;
           }
 
           return false;
@@ -151,334 +141,139 @@ class Relationship extends Component<RelationshipProps> {
 
         if (potentialValue) foundValue = potentialValue;
       });
-    } else if (value) {
-      if (hasMany && Array.isArray(value)) {
-        foundValue = value.map((val) => options.find((option) => option.value === val));
+    } else if (val) {
+      if (hasMany && Array.isArray(val)) {
+        foundValue = val.map((v) => opts.find((opt) => opt.value === v));
       } else {
-        foundValue = options.find((option) => option.value === value);
+        foundValue = opts.find((opt) => opt.value === val);
       }
     }
 
-    return foundValue || undefined; // TODO - should set as None
-  }
+    return foundValue || undefined;
+  }, [hasMany, hasMultipleRelations]);
 
-  addOptions = (data, relation) => {
-    const { hasMultipleRelations, config: { collections } } = this.props;
-    const { options, loadedIDs } = this.state;
-    const collection = collections.find((coll) => coll.slug === relation);
+  const handleInputChange = useCallback((newSearch) => {
+    if (search !== newSearch) {
+      setSearch(newSearch);
+      setLastFullyLoadedRelation(-1);
+      setLastLoadedPage(1);
+    }
+  }, [search]);
 
-    const newlyLoadedIDs = [];
-
-    let newOptions = [];
-
-    if (!hasMultipleRelations) {
-      newOptions = [
-        ...options,
-        ...data.docs.reduce((docs, doc) => {
-          if (loadedIDs.indexOf(doc.id) === -1) {
-            newlyLoadedIDs.push(doc.id);
-
-            return [
-              ...docs,
-              {
-                label: doc[collection?.admin?.useAsTitle || 'id'],
-                value: doc.id,
-              },
-            ];
-          }
-          return docs;
-        }, []),
-      ];
-    } else {
-      newOptions = [...options];
-      const optionsToAddTo = newOptions.find((optionGroup) => optionGroup.label === collection.labels.plural);
-
-      const newSubOptions = data.docs.reduce((docs, doc) => {
-        if (loadedIDs.indexOf(doc.id) === -1) {
-          newlyLoadedIDs.push(doc.id);
-
-          return [
-            ...docs,
-            {
-              label: doc[collection?.admin?.useAsTitle || 'id'],
-              value: {
-                relationTo: collection.slug,
-                value: doc.id,
-              },
-            },
-          ];
-        }
-
-        return docs;
-      }, []);
-
-      if (optionsToAddTo) {
-        optionsToAddTo.options = [
-          ...optionsToAddTo.options,
-          ...newSubOptions,
-        ];
-      } else {
-        newOptions.push({
-          label: collection.labels.plural,
-          options: newSubOptions,
-        });
-      }
+  const formatSelectedValue = useCallback((selectedValue) => {
+    if (hasMany && Array.isArray(selectedValue)) {
+      return selectedValue.map((val) => val.value);
     }
 
-    this.setState({
-      options: newOptions,
-      loadedIDs: [
-        ...loadedIDs,
-        ...newlyLoadedIDs,
-      ],
-    });
-  }
+    return selectedValue ? selectedValue.value : selectedValue;
+  }, [hasMany]);
 
-  ensureValueHasOption = async () => {
-    const { relationTo, hasMany, value } = this.props;
-    const { options } = this.state;
-    const locatedValue = this.findValueInOptions(options, value);
 
-    const hasMultipleRelations = Array.isArray(relationTo);
+  const addOptionByID = useCallback(async (id, relation) => {
+    if (!errorLoading) {
+      const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`);
+
+      if (response.ok) {
+        const data = await response.json();
+        addOptions({ docs: [data] }, relation);
+      } else {
+        console.error(`There was a problem loading the document with ID of ${id}.`);
+      }
+    }
+  }, [addOptions, api, errorLoading, serverURL]);
+
+  useEffect(() => {
+    const locatedValue = findValueInOptions(options, value);
 
     if (hasMany && value?.length > 0) {
-      locatedValue.forEach((val, i) => {
+      value.forEach((val, i) => {
         if (!val && value[i]) {
           if (hasMultipleRelations) {
-            this.addOptionByID(value[i].value, value[i].relationTo);
+            addOptionByID(value[i].value, value[i].relationTo);
           } else {
-            this.addOptionByID(value[i], relationTo);
+            addOptionByID(value[i], relationTo);
           }
         }
       });
     } else if (!locatedValue && value) {
       if (hasMultipleRelations) {
-        this.addOptionByID(value.value, value.relationTo);
+        addOptionByID(value.value, value.relationTo);
       } else {
-        this.addOptionByID(value, relationTo);
+        addOptionByID(value, relationTo);
       }
     }
-  }
+  }, [addOptionByID, findValueInOptions, hasMany, hasMultipleRelations, options, relationTo, value]);
 
-  addOptionByID = async (id, relation) => {
-    const { config: { serverURL, routes: { api } } } = this.props;
-    const { errorLoading } = this.state;
-    if (!errorLoading) {
-      const response = await fetch(`${serverURL}${api}/${relation}/${id}`);
+  useEffect(() => {
+    const getFirstResults = async () => {
+      const relation = relations[0];
+      const res = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&depth=0`);
 
-      if (response.ok) {
-        const data = await response.json();
-        this.addOptions({ docs: [data] }, relation);
-      } else {
-        console.error(`There was a problem loading the document with ID of ${id}.`);
+      if (res.ok) {
+        const data: PaginatedDocs = await res.json();
+
+        addOptions(data, relation);
+
+        if (!data.hasNextPage) {
+          setLastFullyLoadedRelation(relations.indexOf(relation));
+        } else {
+          setLastLoadedPage(2);
+        }
       }
-    }
-  }
+    };
 
-  handleInputChange = (search) => {
-    const { search: existingSearch } = this.state;
+    getFirstResults();
+  }, [addOptions, api, relations, serverURL]);
 
-    if (search !== existingSearch) {
-      this.setState({
-        search,
-        lastFullyLoadedRelation: -1,
-        lastLoadedPage: 1,
-      });
-    }
-  }
+  const classes = [
+    'field-type',
+    baseClass,
+    showError && 'error',
+    errorLoading && 'error-loading',
+    readOnly && `${baseClass}--read-only`,
+  ].filter(Boolean).join(' ');
 
-  handleMenuScrollToBottom = () => {
-    this.getNextOptions();
-  }
-
-  render() {
-    const { options, errorLoading } = this.state;
-
-    const {
-      path,
-      required,
-      errorMessage,
-      label,
-      hasMany,
-      value,
-      showError,
-      formProcessing,
-      setValue,
-      admin: {
-        readOnly,
-        style,
-        width,
-      } = {},
-    } = this.props;
-
-    const classes = [
-      'field-type',
-      baseClass,
-      showError && 'error',
-      errorLoading && 'error-loading',
-      readOnly && `${baseClass}--read-only`,
-    ].filter(Boolean).join(' ');
-
-    const valueToRender = this.findValueInOptions(options, value) || value;
-
-    return (
-      <div
-        className={classes}
-        style={{
-          ...style,
-          width,
-        }}
-      >
-        <Error
-          showError={showError}
-          message={errorMessage}
-        />
-        <Label
-          htmlFor={path}
-          label={label}
-          required={required}
-        />
-        {!errorLoading && (
-          <ReactSelect
-            isDisabled={readOnly}
-            onInputChange={this.handleInputChange}
-            onChange={!readOnly ? setValue : undefined}
-            formatValue={this.formatSelectedValue}
-            onMenuScrollToBottom={this.handleMenuScrollToBottom}
-            findValueInOptions={this.findValueInOptions}
-            value={valueToRender}
-            showError={showError}
-            disabled={formProcessing}
-            options={options}
-            isMulti={hasMany}
-          />
-        )}
-        {errorLoading && (
-          <div className={`${baseClass}__error-loading`}>
-            {errorLoading}
-          </div>
-        )}
-      </div>
-    );
-  }
-}
-
-Relationship.defaultProps = {
-  required: false,
-  errorMessage: '',
-  hasMany: false,
-  showError: false,
-  value: undefined,
-  path: '',
-  formProcessing: false,
-  admin: {},
-};
-
-Relationship.propTypes = {
-  relationTo: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.arrayOf(
-      PropTypes.string,
-    ),
-  ]).isRequired,
-  required: PropTypes.bool,
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-    style: PropTypes.shape({}),
-    width: PropTypes.string,
-  }),
-  errorMessage: PropTypes.string,
-  showError: PropTypes.bool,
-  label: PropTypes.string.isRequired,
-  path: PropTypes.string,
-  formProcessing: PropTypes.bool,
-  hasMany: PropTypes.bool,
-  setValue: PropTypes.func.isRequired,
-  hasMultipleRelations: PropTypes.bool.isRequired,
-  value: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.array,
-    PropTypes.shape({}),
-  ]),
-  config: PropTypes.shape({
-    serverURL: PropTypes.string,
-    routes: PropTypes.shape({
-      admin: PropTypes.string,
-      api: PropTypes.string,
-    }),
-    collections: PropTypes.arrayOf(
-      PropTypes.shape({
-        slug: PropTypes.string,
-        labels: PropTypes.shape({
-          singular: PropTypes.string,
-          plural: PropTypes.string,
-        }),
-      }),
-    ),
-  }).isRequired,
-};
-
-const RelationshipFieldType = (props) => {
-  const {
-    relationTo, validate, path, name, required,
-  } = props;
-
-  const config = useConfig();
-
-  const hasMultipleRelations = Array.isArray(relationTo);
-
-  const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { required });
-    return validationResult;
-  }, [validate, required]);
-
-  const fieldType = useFieldType({
-    path: path || name,
-    validate: memoizedValidate,
-    required,
-  });
+  const valueToRender = findValueInOptions(options, value) || value;
 
   return (
-    <Relationship
-      config={config}
-      {...props}
-      {...fieldType}
-      hasMultipleRelations={hasMultipleRelations}
-    />
+    <div
+      className={classes}
+      style={{
+        ...style,
+        width,
+      }}
+    >
+      <Error
+        showError={showError}
+        message={errorMessage}
+      />
+      <Label
+        htmlFor={path}
+        label={label}
+        required={required}
+      />
+      {!errorLoading && (
+        <ReactSelect
+          isDisabled={readOnly}
+          onInputChange={handleInputChange}
+          onChange={!readOnly ? setValue : undefined}
+          formatValue={formatSelectedValue}
+          onMenuScrollToBottom={getNextOptions}
+          findValueInOptions={findValueInOptions}
+          value={valueToRender}
+          showError={showError}
+          disabled={formProcessing}
+          options={options}
+          isMulti={hasMany}
+        />
+      )}
+      {errorLoading && (
+        <div className={`${baseClass}__error-loading`}>
+          {errorLoading}
+        </div>
+      )}
+    </div>
   );
-};
-
-RelationshipFieldType.defaultProps = {
-  initialData: undefined,
-  defaultValue: undefined,
-  validate: relationship,
-  path: '',
-  hasMany: false,
-  required: false,
-};
-
-RelationshipFieldType.propTypes = {
-  required: PropTypes.bool,
-  defaultValue: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.array,
-    PropTypes.shape({}),
-  ]),
-  initialData: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.array,
-    PropTypes.shape({}),
-  ]),
-  relationTo: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.arrayOf(
-      PropTypes.string,
-    ),
-  ]).isRequired,
-  hasMany: PropTypes.bool,
-  validate: PropTypes.func,
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string,
 };
 
 export default withCondition(RelationshipFieldType);

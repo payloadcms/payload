@@ -1,4 +1,6 @@
-export default {
+import { Block } from '../../src/fields/config/types';
+
+const NumberBlock: Block = {
   slug: 'number',
   labels: {
     singular: 'Number',
@@ -14,3 +16,5 @@ export default {
     },
   ],
 };
+
+export default NumberBlock;

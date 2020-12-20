@@ -111,12 +111,12 @@ export default buildConfig({
     queries: {}, // TODO: needs typing
     disablePlaygroundInProduction: true,
   },
-  rateLimit: {
-    window: 15 * 60 * 100,
-    max: 100,
-    trustProxy: true,
-    skip: (req) => req.ip === '127.0.0.1',
-  },
+  // rateLimit: {
+  //   window: 15 * 60 * 100,
+  //   max: 100,
+  //   trustProxy: true,
+  //   skip: (req) => req.ip === '127.0.0.1',
+  // },
   maxDepth: 10,
   localization: {
     locales: [

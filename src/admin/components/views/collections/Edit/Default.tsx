@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Link, useRouteMatch } from 'react-router-dom';
 import format from 'date-fns/format';
 import { useConfig } from '@payloadcms/config-provider';
@@ -18,13 +17,14 @@ import RenderTitle from '../../../elements/RenderTitle';
 import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving';
 import Auth from './Auth';
 import Upload from './Upload';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'collection-edit';
 
-const DefaultEditView = (props) => {
-  const { params: { id } = {} } = useRouteMatch();
+const DefaultEditView: React.FC<Props> = (props) => {
+  const { params: { id } = {} } = useRouteMatch<Record<string, string>>();
   const { routes: { admin } } = useConfig();
 
   const {
@@ -205,64 +205,6 @@ const DefaultEditView = (props) => {
       </Form>
     </div>
   );
-};
-
-DefaultEditView.defaultProps = {
-  isEditing: false,
-  isLoading: true,
-  data: undefined,
-  initialState: undefined,
-  apiURL: undefined,
-};
-
-DefaultEditView.propTypes = {
-  hasSavePermission: PropTypes.bool.isRequired,
-  action: PropTypes.string.isRequired,
-  apiURL: PropTypes.string,
-  isLoading: PropTypes.bool,
-  collection: PropTypes.shape({
-    labels: PropTypes.shape({
-      plural: PropTypes.string,
-      singular: PropTypes.string,
-    }),
-    slug: PropTypes.string,
-    admin: PropTypes.shape({
-      useAsTitle: PropTypes.string,
-      disableDuplicate: PropTypes.bool,
-    }),
-    fields: PropTypes.arrayOf(PropTypes.shape({})),
-    preview: PropTypes.func,
-    timestamps: PropTypes.bool,
-    auth: PropTypes.shape({
-      useAPIKey: PropTypes.bool,
-      verify: PropTypes.oneOfType([
-        PropTypes.bool,
-        PropTypes.object,
-      ]),
-      maxLoginAttempts: PropTypes.number,
-    }),
-    upload: PropTypes.shape({}),
-  }).isRequired,
-  isEditing: PropTypes.bool,
-  data: PropTypes.shape({
-    updatedAt: PropTypes.string,
-    createdAt: PropTypes.string,
-    email: PropTypes.string,
-  }),
-  onSave: PropTypes.func.isRequired,
-  permissions: PropTypes.shape({
-    create: PropTypes.shape({
-      permission: PropTypes.bool,
-    }),
-    update: PropTypes.shape({
-      permission: PropTypes.bool,
-    }),
-    delete: PropTypes.shape({
-      permission: PropTypes.bool,
-    }),
-    fields: PropTypes.shape({}),
-  }).isRequired,
-  initialState: PropTypes.shape({}),
 };
 
 export default DefaultEditView;

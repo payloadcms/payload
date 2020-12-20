@@ -93,7 +93,13 @@ export type PayloadCollectionConfig = {
   admin?: {
     useAsTitle?: string;
     defaultColumns?: string[];
-    components?: any;
+    disableDuplicate?: boolean
+    components?: {
+      views?: {
+        Edit?: React.ComponentType
+        List?: React.ComponentType
+      }
+    };
     enableRichTextRelationship?: boolean
   };
   preview?: (doc: Document, token: string) => string
@@ -135,7 +141,7 @@ export type Collection = {
 };
 
 export type PaginatedDocs = {
-  docs: unknown[]
+  docs: any[]
   totalDocs: number
   limit: number
   totalPages: number

@@ -1,4 +1,6 @@
-export default {
+import { Block } from '../../src/fields/config/types';
+
+const CTA: Block = {
   slug: 'cta',
   labels: {
     singular: 'Call to Action',
@@ -20,3 +22,5 @@ export default {
     },
   ],
 };
+
+export default CTA;

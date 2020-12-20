@@ -16,7 +16,9 @@ export type FieldPermissions = {
   update: {
     permission: boolean
   }
-  fields?: FieldPermissions
+  fields?: {
+    [field: string]: FieldPermissions
+  }
 }
 
 export type CollectionPermission = {
@@ -79,11 +81,13 @@ export interface IncomingAuthType {
   }
 }
 
+export type VerifyConfig = {
+  generateEmailHTML?: GenerateVerifyEmailHTML
+  generateEmailSubject?: GenerateVerifyEmailSubject
+} | boolean;
+
 export interface Auth extends Omit<DeepRequired<IncomingAuthType>, 'verify' | 'forgotPassword'> {
-  verify?: {
-    generateEmailHTML?: GenerateVerifyEmailHTML
-    generateEmailSubject?: GenerateVerifyEmailSubject
-  } | boolean
+  verify?: VerifyConfig
   forgotPassword?: {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject

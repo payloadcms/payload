@@ -72,6 +72,7 @@ export default (config: PayloadConfig): Configuration => {
     resolve: {
       fallback: {
         path: require.resolve('path-browserify'),
+        assert: require.resolve('assert'),
         crypto: false,
         https: false,
         http: false,

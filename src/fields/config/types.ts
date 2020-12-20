@@ -32,12 +32,12 @@ export type Labels = {
 
 export type Validate = (value: unknown, options: any) => string | boolean;
 
-export type OptionObjectType = {
+export type OptionObject = {
   label: string
   value: string
 }
 
-export type Option = OptionObjectType | string
+export type Option = OptionObject | string
 
 export interface FieldBase {
   name?: string;
@@ -232,6 +232,6 @@ export function fieldIsBlockType(field: Field): field is BlockField {
   return field.type === 'blocks';
 }
 
-export function optionIsObject(option: Option): option is OptionObjectType {
+export function optionIsObject(option: Option): option is OptionObject {
   return typeof option === 'object';
 }

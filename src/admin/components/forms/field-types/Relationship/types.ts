@@ -1,25 +1,34 @@
-import React from 'react';
-import { PaginatedDocs } from '../../../../../collections/config/types';
-import { Config } from '../../../../../config/types';
+import { PaginatedDocs, CollectionConfig } from '../../../../../collections/config/types';
+import { RelationshipField } from '../../../../../fields/config/types';
 
 export type OptionsPage = {
   relation: string
   data: PaginatedDocs
 }
 
-export type RelationshipProps = {
-  required: boolean
-  errorMessage: string
-  hasMany: boolean
-  showError: boolean
-  value: unknown
-  path: string
-  formProcessing: boolean
-  admin: {
-    readOnly: boolean
-    style: React.CSSProperties
-    width: string
-  }
-  relationTo: string | string[]
-  config: Config
+export type Props = Omit<RelationshipField, 'type'> & {
+  path?: string
 }
+
+export type Option = {
+  label: string
+  value?: string
+  relationTo?: string
+  options?: Option[]
+}
+
+type REPLACE = {
+  type: 'REPLACE'
+  payload: Option[]
+}
+
+type ADD = {
+  type: 'ADD'
+  data: PaginatedDocs
+  relation: string
+  hasMultipleRelations: boolean
+  labelKey: string
+  collection: CollectionConfig
+}
+
+export type Action = REPLACE | ADD
