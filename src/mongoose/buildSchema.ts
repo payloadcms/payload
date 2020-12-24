@@ -125,6 +125,7 @@ const fieldToSchemaMap = {
     let schema: { [key: string]: any } = {};
 
     if (Array.isArray(field.relationTo)) {
+      schema._id = false;
       schema.value = {
         type: Schema.Types.ObjectId,
         refPath: `${field.name}${field.localized ? '.{{LOCALE}}' : ''}.relationTo`,
