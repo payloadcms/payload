@@ -11,10 +11,6 @@ const hookPromise = async ({
 }: OperationArguments): Promise<void> => {
   const resultingData = data;
 
-  if ((field.type === 'relationship' || field.type === 'upload') && (data[field.name] === 'null' || data[field.name] === null)) {
-    resultingData[field.name] = null;
-  }
-
   if (field.hooks && field.hooks[hook]) {
     await field.hooks[hook].reduce(async (priorHook, currentHook) => {
       await priorHook;

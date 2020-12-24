@@ -14,7 +14,6 @@ import getSafeFilename from '../../uploads/getSafeFilename';
 import resizeAndSave from '../../uploads/imageResizer';
 import { FileData } from '../../uploads/types';
 
-
 async function update(incomingArgs) {
   const { performFieldOperations, config } = this;
 

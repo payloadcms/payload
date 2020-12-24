@@ -36,25 +36,13 @@ const traverseFields = (args: OperationArguments): void => {
   fields.forEach((field) => {
     const dataCopy = data;
 
-    const hasLocalizedValue = (typeof data[field.name] === 'object' && data[field.name] !== null)
-      && field.name
-      && field.localized
-      && locale !== 'all'
-      && reduceLocales;
-
-    if (hasLocalizedValue) {
-      let localizedValue = data[field.name][locale];
-      if (typeof localizedValue === 'undefined' && fallbackLocale) localizedValue = data[field.name][fallbackLocale];
-      if (typeof localizedValue === 'undefined') localizedValue = null;
-      dataCopy[field.name] = localizedValue;
-    }
-
     if (operation === 'read' && field.hidden && typeof data[field.name] !== 'undefined' && !showHiddenFields) {
       delete data[field.name];
     }
 
-    if (field.type === 'upload') {
-      if (data[field.name] === '') dataCopy[field.name] = null;
+    if ((field.type === 'upload' || field.type === 'relationship')
+    && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null')) {
+      dataCopy[field.name] = null;
     }
 
     if (field.type === 'checkbox') {
@@ -67,8 +55,17 @@ const traverseFields = (args: OperationArguments): void => {
       dataCopy[field.name] = JSON.parse(data[field.name] as string);
     }
 
-    if (field.type === 'relationship' && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null')) {
-      dataCopy[field.name] = null;
+    const hasLocalizedValue = (typeof data[field.name] === 'object' && data[field.name] !== null)
+      && field.name
+      && field.localized
+      && locale !== 'all'
+      && reduceLocales;
+
+    if (hasLocalizedValue) {
+      let localizedValue = data[field.name][locale];
+      if (typeof localizedValue === 'undefined' && fallbackLocale) localizedValue = data[field.name][fallbackLocale];
+      if (typeof localizedValue === 'undefined') localizedValue = null;
+      dataCopy[field.name] = localizedValue;
     }
 
     accessPromises.push(accessPromise({

@@ -21,7 +21,7 @@ const maxResultsPerRequest = 10;
 
 const baseClass = 'relationship';
 
-const RelationshipFieldType: React.FC<Props> = (props) => {
+const Relationship: React.FC<Props> = (props) => {
   const {
     relationTo,
     validate = relationship,
@@ -55,6 +55,7 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [search, setSearch] = useState('');
   const [errorLoading, setErrorLoading] = useState(false);
+  const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false);
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required });
@@ -132,28 +133,32 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
       if (hasMany) {
-        return value.map((val) => {
-          if (hasMultipleRelations) {
-            let matchedOption: Option;
+        if (Array.isArray(value)) {
+          return value.map((val) => {
+            if (hasMultipleRelations) {
+              let matchedOption: Option;
 
-            options.forEach((opt) => {
-              if (opt.options) {
-                opt.options.some((subOpt) => {
-                  if (subOpt?.value === val.value) {
-                    matchedOption = subOpt;
-                    return true;
-                  }
+              options.forEach((opt) => {
+                if (opt.options) {
+                  opt.options.some((subOpt) => {
+                    if (subOpt?.value === val.value) {
+                      matchedOption = subOpt;
+                      return true;
+                    }
 
-                  return false;
-                });
-              }
-            });
+                    return false;
+                  });
+                }
+              });
 
-            return matchedOption;
-          }
+              return matchedOption;
+            }
 
-          return options.find((opt) => opt.value === val);
-        });
+            return options.find((opt) => opt.value === val);
+          });
+        }
+
+        return undefined;
       }
 
       if (hasMultipleRelations) {
@@ -202,7 +207,7 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
   }, [addOptions, api, errorLoading, serverURL]);
 
   useEffect(() => {
-    if (value) {
+    if (value && hasLoadedFirstOptions) {
       if (hasMany) {
         const matchedOptions = findOptionsByValue();
 
@@ -227,7 +232,7 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
         }
       }
     }
-  }, [addOptionByID, findOptionsByValue, hasMany, hasMultipleRelations, relationTo, value]);
+  }, [addOptionByID, findOptionsByValue, hasMany, hasMultipleRelations, relationTo, value, hasLoadedFirstOptions]);
 
   useEffect(() => {
     const getFirstResults = async () => {
@@ -244,6 +249,8 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
         } else {
           setLastLoadedPage(2);
         }
+
+        setHasLoadedFirstOptions(true);
       }
     };
 
@@ -283,7 +290,7 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
           onInputChange={handleInputChange}
           onChange={!readOnly ? (selected) => {
             if (hasMany) {
-              setValue(selected.map((option) => {
+              setValue(selected ? selected.map((option) => {
                 if (hasMultipleRelations) {
                   return {
                     relationTo: option.relationTo,
@@ -292,7 +299,7 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
                 }
 
                 return option.value;
-              }));
+              }) : null);
             } else {
               setValue(selected.value);
             }
@@ -314,4 +321,4 @@ const RelationshipFieldType: React.FC<Props> = (props) => {
   );
 };
 
-export default withCondition(RelationshipFieldType);
+export default withCondition(Relationship);
