@@ -27,7 +27,6 @@ type ADD = {
   data: PaginatedDocs
   relation: string
   hasMultipleRelations: boolean
-  labelKey: string
   collection: CollectionConfig
 }
 
