@@ -38,7 +38,7 @@
     "dist",
     "build",
     "tests",
-    "**/*.spec.ts",
+    "**/*.spec.js",
     "node_modules"
   ]
 }

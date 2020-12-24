@@ -1,2 +1,2 @@
-export { buildConfig } from './dist/src/config/build';
-export * from './dist/src/config/types';
+export { buildConfig } from './dist/config/build';
+export * from './dist/config/types';

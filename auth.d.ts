@@ -1,1 +1,1 @@
-export * from './dist/src/auth';
+export * from './dist/auth';

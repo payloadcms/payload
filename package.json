@@ -4,8 +4,8 @@
   "description": "CMS and Application Framework",
   "license": "ISC",
   "author": "Payload CMS LLC",
-  "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts",
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
   "sideEffects": false,
   "bin": {
     "payload": "./bin.js"
@@ -13,7 +13,7 @@
   "scripts": {
     "copyfiles": "copyfiles src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png} dist/",
     "build:components": "webpack --config src/webpack/components.config.js",
-    "build": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts node dist/src/bin/build",
+    "build": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts node dist/bin/build",
     "build:tsc": "tsc",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts' --exec 'yarn build:tsc'",
     "build:analyze": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.js PAYLOAD_ANALYZE_BUNDLE=true node src/bin/build",

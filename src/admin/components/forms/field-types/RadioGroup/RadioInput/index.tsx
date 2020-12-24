@@ -1,11 +1,11 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'radio-input';
 
-const RadioInput = (props) => {
+const RadioInput: React.FC<Props> = (props) => {
   const { isSelected, option, onChange, path } = props;
 
   const classes = [
@@ -31,24 +31,6 @@ const RadioInput = (props) => {
       </div>
     </label>
   );
-};
-
-RadioInput.defaultProps = {
-  isSelected: false,
-  onChange: undefined,
-};
-
-RadioInput.propTypes = {
-  isSelected: PropTypes.bool,
-  option: PropTypes.shape({
-    label: PropTypes.string,
-    value: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number,
-    ]),
-  }).isRequired,
-  onChange: PropTypes.func,
-  path: PropTypes.string.isRequired,
 };
 
 export default RadioInput;

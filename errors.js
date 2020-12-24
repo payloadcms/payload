@@ -1,4 +1,4 @@
-const { APIError, Forbidden } = require('./dist/src/errors');
+const { APIError, Forbidden } = require('./dist/errors');
 
 module.exports = {
   APIError,
