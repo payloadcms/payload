@@ -8,7 +8,7 @@ import { Props } from './types';
 
 import './index.scss';
 
-const Email: React.FC<Omit<Props, 'type'>> = (props) => {
+const Email: React.FC<Props> = (props) => {
   const {
     name,
     path: pathFromProps,

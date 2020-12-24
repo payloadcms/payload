@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import isHotkey from 'is-hotkey';
 import { Editable, withReact, Slate } from 'slate-react';
 import { createEditor } from 'slate';
@@ -17,34 +16,36 @@ import enablePlugins from './enablePlugins';
 import defaultValue from '../../../../../fields/richText/defaultValue';
 import FieldTypeGutter from '../../FieldTypeGutter';
 import withHTML from './plugins/withHTML';
+import { Props } from './types';
+import { RichTextElement, RichTextLeaf } from '../../../../../fields/config/types';
 
 import mergeCustomFunctions from './mergeCustomFunctions';
 
 import './index.scss';
 
-const defaultElements = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link', 'relationship'];
-const defaultLeaves = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
+const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link', 'relationship'];
+const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
 
 const baseClass = 'rich-text';
 
-const RichText = (props) => {
+const RichText: React.FC<Props> = (props) => {
   const {
     path: pathFromProps,
     name,
     required,
-    validate,
+    validate = richText,
     label,
-    placeholder,
     admin,
     admin: {
       readOnly,
       style,
       width,
+      placeholder,
     } = {},
   } = props;
 
-  const elements = admin?.elements || defaultElements;
-  const leaves = admin?.leaves || defaultLeaves;
+  const elements: RichTextElement[] = admin?.elements || defaultElements;
+  const leaves: RichTextLeaf[] = admin?.leaves || defaultLeaves;
 
   const path = pathFromProps || name;
 
@@ -177,7 +178,9 @@ const RichText = (props) => {
           <div className={`${baseClass}__wrapper`}>
             <div className={`${baseClass}__toolbar`}>
               {elements.map((element, i) => {
-                const elementName = element?.name || element;
+                let elementName: string;
+                if (typeof element === 'object' && element?.name) elementName = element.name;
+                if (typeof element === 'string') elementName = element;
 
                 const elementType = enabledElements[elementName];
                 const Button = elementType?.Button;
@@ -194,7 +197,10 @@ const RichText = (props) => {
                 return null;
               })}
               {leaves.map((leaf, i) => {
-                const leafName = leaf?.name || leaf;
+                let leafName: string;
+                if (typeof leaf === 'object' && leaf?.name) leafName = leaf.name;
+                if (typeof leaf === 'string') leafName = leaf;
+
                 const leafType = enabledLeaves[leafName];
                 const Button = leafType?.Button;
 
@@ -219,7 +225,7 @@ const RichText = (props) => {
               readOnly={readOnly}
               onKeyDown={(event) => {
                 Object.keys(hotkeys).forEach((hotkey) => {
-                  if (isHotkey(hotkey, event)) {
+                  if (isHotkey(hotkey, event as any)) {
                     event.preventDefault();
                     const mark = hotkeys[hotkey];
                     toggleLeaf(editor, mark);
@@ -233,44 +239,4 @@ const RichText = (props) => {
     </div>
   );
 };
-
-RichText.defaultProps = {
-  label: null,
-  required: false,
-  admin: {},
-  validate: richText,
-  path: '',
-  placeholder: undefined,
-};
-
-RichText.propTypes = {
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string,
-  required: PropTypes.bool,
-  validate: PropTypes.func,
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-    style: PropTypes.shape({}),
-    width: PropTypes.string,
-    elements: PropTypes.arrayOf(
-      PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.shape({
-          name: PropTypes.string,
-        }),
-      ]),
-    ),
-    leaves: PropTypes.arrayOf(
-      PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.shape({
-          name: PropTypes.string,
-        }),
-      ]),
-    ),
-  }),
-  label: PropTypes.string,
-  placeholder: PropTypes.string,
-};
-
 export default withCondition(RichText);

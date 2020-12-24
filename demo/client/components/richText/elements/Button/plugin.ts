@@ -1,4 +1,6 @@
-const withButton = (incomingEditor) => {
+import { Editor } from 'slate';
+
+const withButton = (incomingEditor: Editor): Editor => {
   const editor = incomingEditor;
   const { isVoid } = editor;
 

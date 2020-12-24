@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
+import { Editor } from 'slate';
 import { PayloadRequest } from '../../express/types/payloadRequest';
 import { Access } from '../../config/types';
 import { Document } from '../../types';
@@ -147,17 +148,32 @@ export type RelationshipField = FieldBase & {
   hasMany?: boolean;
 }
 
-type RichTextElements = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link';
-type RichTextLeaves = 'bold' | 'italic' | 'underline' | 'strikethrough';
+type RichTextPlugin = (editor: Editor) => Editor;
 
-type RichTextAdmin = Admin & {
-  elements?: RichTextElements[];
-  leaves?: RichTextLeaves[];
+type RichTextCustomElement = {
+  name: string
+  Button: React.ComponentType
+  Element: React.ComponentType
+  plugins: RichTextPlugin[]
 }
 
-export type RichTextField = Omit<FieldBase, 'admin'> & {
+type RichTextCustomLeaf = {
+  name: string
+  Button: React.ComponentType
+  Leaf: React.ComponentType
+  plugins: RichTextPlugin[]
+}
+
+export type RichTextElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link' | 'relationship' | RichTextCustomElement;
+export type RichTextLeaf = 'bold' | 'italic' | 'underline' | 'strikethrough' | 'code' | RichTextCustomLeaf;
+
+export type RichTextField = FieldBase & {
   type: 'richText';
-  admin?: RichTextAdmin
+  admin?: Admin & {
+    placeholder?: string
+    elements?: RichTextElement[];
+    leaves?: RichTextLeaf[];
+  }
 }
 
 export type ArrayField = FieldBase & {
