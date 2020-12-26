@@ -14,6 +14,7 @@ const reducer = (currentState, action) => {
           const row = {
             key: uuidv4(),
             open: true,
+            blockType: undefined,
           };
 
           if (dataRow.blockType) {
@@ -35,6 +36,7 @@ const reducer = (currentState, action) => {
       const newRow = {
         open: true,
         key: uuidv4(),
+        blockType: undefined,
       };
 
       if (blockType) newRow.blockType = blockType;

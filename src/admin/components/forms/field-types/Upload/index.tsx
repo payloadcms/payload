@@ -50,7 +50,6 @@ const Upload: React.FC<Props> = (props) => {
 
   const fieldType = useFieldType({
     path,
-    required,
     validate: memoizedValidate,
   });
 

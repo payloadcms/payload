@@ -3,10 +3,11 @@ import {
 } from 'react';
 import { useFormProcessing, useFormSubmitted, useFormModified, useForm } from '../Form/context';
 import useDebounce from '../../../hooks/useDebounce';
+import { Options, FieldType } from './types';
 
 import './index.scss';
 
-const useFieldType = (options) => {
+const useFieldType = (options: Options): FieldType => {
   const {
     path,
     validate,
@@ -43,13 +44,25 @@ const useFieldType = (options) => {
   // Method to send update field values from field component(s)
   // Should only be used internally
   const sendField = useCallback(async (valueToSend) => {
-    const fieldToDispatch = { path, value: valueToSend };
+    const fieldToDispatch = {
+      path,
+      value: valueToSend,
+      valid: false,
+      errorMessage: undefined,
+      stringify: false,
+      disableFormData: false,
+      ignoreWhileFlattening: false,
+      initialValue: undefined,
+      validate: undefined,
+    };
 
-    fieldToDispatch.valid = typeof validate === 'function' ? await validate(valueToSend) : true;
+    const validationResult = typeof validate === 'function' ? await validate(valueToSend) : true;
 
-    if (typeof fieldToDispatch.valid === 'string') {
+    if (typeof validationResult === 'string') {
       fieldToDispatch.errorMessage = fieldToDispatch.valid;
       fieldToDispatch.valid = false;
+    } else {
+      fieldToDispatch.valid = validationResult;
     }
 
     fieldToDispatch.stringify = stringify;

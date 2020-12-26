@@ -1,5 +1,4 @@
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import PropTypes from 'prop-types';
 import { ReactEditor, useSlate } from 'slate-react';
 import { useWindowInfo } from '@faceless-ui/window-info';
 import { Transforms } from 'slate';
@@ -19,7 +18,7 @@ const baseClass = 'rich-text-link';
 
 const Link = ({ attributes, children, element }) => {
   const editor = useSlate();
-  const linkRef = useRef();
+  const linkRef = useRef(null);
   const { height: windowHeight, width: windowWidth } = useWindowInfo();
   const [left, setLeft] = useState(0);
   const [top, setTop] = useState(0);
@@ -73,7 +72,6 @@ const Link = ({ attributes, children, element }) => {
           >
             <Popup
               initActive={url === undefined}
-              className={`${baseClass}__popup`}
               buttonType="custom"
               button={<span className={`${baseClass}__button`} />}
               size="small"
@@ -106,7 +104,6 @@ const Link = ({ attributes, children, element }) => {
                       className={`${baseClass}__confirm`}
                       buttonStyle="none"
                       icon="chevron"
-                      onToggleOpen={calculatePosition}
                       onClick={(e) => {
                         e.preventDefault();
 
@@ -141,20 +138,6 @@ const Link = ({ attributes, children, element }) => {
       </span>
     </span>
   );
-};
-
-Link.defaultProps = {
-  attributes: {},
-  children: null,
-};
-
-Link.propTypes = {
-  attributes: PropTypes.shape({}),
-  children: PropTypes.node,
-  element: PropTypes.shape({
-    url: PropTypes.string,
-    newTab: PropTypes.bool,
-  }).isRequired,
 };
 
 const LinkButton = () => {

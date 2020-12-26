@@ -1,15 +1,15 @@
 import { Editor, Transforms, Range } from 'slate';
 
-export const isLinkActive = (editor) => {
+export const isLinkActive = (editor: Editor): boolean => {
   const [link] = Editor.nodes(editor, { match: (n) => n.type === 'link' });
   return !!link;
 };
 
-export const unwrapLink = (editor) => {
+export const unwrapLink = (editor: Editor): void => {
   Transforms.unwrapNodes(editor, { match: (n) => n.type === 'link' });
 };
 
-export const wrapLink = (editor, url, newTab) => {
+export const wrapLink = (editor: Editor, url?: string, newTab?: boolean): void => {
   if (isLinkActive(editor)) {
     unwrapLink(editor);
   }
@@ -31,7 +31,7 @@ export const wrapLink = (editor, url, newTab) => {
   }
 };
 
-export const withLinks = (incomingEditor) => {
+export const withLinks = (incomingEditor: Editor): Editor => {
   const editor = incomingEditor;
   const { isInline } = editor;
 

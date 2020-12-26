@@ -25,7 +25,7 @@ const HiddenInput: React.FC<Props> = (props) => {
   return (
     <input
       type="hidden"
-      value={value || ''}
+      value={value as string || ''}
       onChange={setValue}
       name={path}
     />

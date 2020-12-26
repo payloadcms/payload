@@ -40,7 +40,6 @@ const DateTime: React.FC<Props> = (props) => {
     setValue,
   } = useFieldType({
     path,
-    required,
     validate: memoizedValidate,
   });
 
@@ -72,7 +71,7 @@ const DateTime: React.FC<Props> = (props) => {
         <DatePicker
           {...props}
           onChange={readOnly ? undefined : setValue}
-          value={value}
+          value={value as Date}
         />
       </div>
     </div>

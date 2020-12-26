@@ -40,7 +40,6 @@ const Checkbox: React.FC<Props> = (props) => {
     setValue,
   } = useFieldType({
     path,
-    required,
     validate: memoizedValidate,
     disableFormData,
   });

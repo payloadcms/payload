@@ -69,7 +69,7 @@ const Textarea: React.FC<Props> = (props) => {
         required={required}
       />
       <textarea
-        value={value || ''}
+        value={value as string || ''}
         onChange={setValue}
         disabled={readOnly}
         placeholder={placeholder}

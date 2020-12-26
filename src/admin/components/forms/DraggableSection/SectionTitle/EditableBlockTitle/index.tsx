@@ -35,7 +35,7 @@ const EditableBlockTitle: React.FC<{ path: string}> = (props) => {
         <input
           ref={inputRef}
           id={path}
-          value={value || ''}
+          value={value as string || ''}
           placeholder="Untitled"
           type="text"
           name={path}

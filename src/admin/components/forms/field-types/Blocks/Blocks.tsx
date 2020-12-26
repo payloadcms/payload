@@ -70,7 +70,6 @@ const Blocks: React.FC<Props> = (props) => {
     validate: memoizedValidate,
     disableFormData,
     ignoreWhileFlattening: true,
-    required,
   });
 
   const addRow = useCallback(async (rowIndex, blockType) => {
@@ -80,13 +79,13 @@ const Blocks: React.FC<Props> = (props) => {
 
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
     dispatchRows({ type: 'ADD', rowIndex, blockType });
-    setValue(value + 1);
+    setValue(value as number + 1);
   }, [path, setValue, value, blocks, dispatchFields]);
 
   const removeRow = useCallback((rowIndex) => {
     dispatchRows({ type: 'REMOVE', rowIndex });
     dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
-    setValue(value - 1);
+    setValue(value as number - 1);
   }, [path, setValue, value, dispatchFields]);
 
   const moveRow = useCallback((moveFromIndex, moveToIndex) => {
@@ -136,7 +135,7 @@ const Blocks: React.FC<Props> = (props) => {
       fieldTypes={fieldTypes}
       toggleCollapse={toggleCollapse}
       permissions={permissions}
-      value={value}
+      value={value as number}
       blocks={blocks}
       readOnly={readOnly}
       minRows={minRows}
@@ -214,7 +213,7 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
                       toggleRowCollapse={toggleCollapse}
                       parentPath={path}
                       fieldTypes={fieldTypes}
-                      permissions={permissions.fields}
+                      permissions={permissions}
                       fieldSchema={[
                         ...blockToRender.fields,
                         {

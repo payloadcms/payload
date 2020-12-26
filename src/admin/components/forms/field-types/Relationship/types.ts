@@ -31,3 +31,8 @@ type ADD = {
 }
 
 export type Action = REPLACE | ADD
+
+export type ValueWithRelation = {
+  relationTo: string
+  value: string
+}

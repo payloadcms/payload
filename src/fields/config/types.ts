@@ -31,7 +31,7 @@ export type Labels = {
   plural: string;
 };
 
-export type Validate = (value: unknown, options: any) => string | boolean;
+export type Validate = (value: unknown, options?: any) => string | boolean;
 
 export type OptionObject = {
   label: string

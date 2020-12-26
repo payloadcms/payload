@@ -69,7 +69,7 @@ const Email: React.FC<Props> = (props) => {
         required={required}
       />
       <input
-        value={value || ''}
+        value={value as string || ''}
         onChange={setValue}
         disabled={Boolean(readOnly)}
         placeholder={placeholder}

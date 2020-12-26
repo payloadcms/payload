@@ -55,8 +55,6 @@ const Select: React.FC<Props> = (props) => {
     errorMessage,
   } = useFieldType({
     path,
-    label,
-    required,
     validate: memoizedValidate,
   });
 

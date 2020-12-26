@@ -26,7 +26,6 @@ const ConfirmPassword: React.FC = () => {
   } = useFieldType({
     path: 'confirm-password',
     disableFormData: true,
-    required: true,
     validate,
     enableDebouncedValue: true,
   });
@@ -49,7 +48,7 @@ const ConfirmPassword: React.FC = () => {
         required
       />
       <input
-        value={value || ''}
+        value={value as string || ''}
         onChange={setValue}
         type="password"
         autoComplete="off"

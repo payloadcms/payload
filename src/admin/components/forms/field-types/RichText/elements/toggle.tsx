@@ -7,7 +7,7 @@ const toggleElement = (editor, format) => {
   const isList = listTypes.includes(format);
 
   Transforms.unwrapNodes(editor, {
-    match: (n) => listTypes.includes(n.type),
+    match: (n) => listTypes.includes(n.type as string),
     split: true,
   });
 

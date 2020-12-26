@@ -61,14 +61,13 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     validate: memoizedValidate,
     disableFormData,
     ignoreWhileFlattening: true,
-    required,
   });
 
   const addRow = useCallback(async (rowIndex) => {
     const subFieldState = await buildStateFromSchema(fields);
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
     dispatchRows({ type: 'ADD', rowIndex });
-    setValue(value + 1);
+    setValue(value as number + 1);
   }, [dispatchRows, dispatchFields, fields, path, setValue, value]);
 
   const removeRow = useCallback((rowIndex) => {
@@ -119,7 +118,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       fieldTypes={fieldTypes}
       fields={fields}
       permissions={permissions}
-      value={value}
+      value={value as number}
       readOnly={readOnly}
       minRows={minRows}
       maxRows={maxRows}
@@ -184,7 +183,7 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
                   parentPath={path}
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
-                  permissions={permissions.fields}
+                  permissions={permissions}
                 />
               ))}
               {(rows.length < minRows || (required && rows.length === 0)) && (

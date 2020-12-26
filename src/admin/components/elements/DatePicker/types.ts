@@ -10,8 +10,8 @@ export type Props = {
   maxTime?: Date,
   timeIntervals?: number,
   timeFormat?: string,
-  value?: Date | string,
-  onChange?: () => void,
+  value?: Date,
+  onChange?: (val: Date) => void,
   admin?: {
     readOnly?: boolean,
   }

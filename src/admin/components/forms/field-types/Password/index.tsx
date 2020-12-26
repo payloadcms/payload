@@ -30,12 +30,11 @@ const Password: React.FC<Props> = (props) => {
   const {
     value,
     showError,
-    processing,
+    formProcessing,
     setValue,
     errorMessage,
   } = useFieldType({
     path,
-    required,
     validate: memoizedValidate,
     enableDebouncedValue: true,
   });
@@ -64,9 +63,9 @@ const Password: React.FC<Props> = (props) => {
         required={required}
       />
       <input
-        value={value || ''}
+        value={value as string || ''}
         onChange={setValue}
-        disabled={processing}
+        disabled={formProcessing}
         type="password"
         autoComplete={autoComplete}
         id={path}

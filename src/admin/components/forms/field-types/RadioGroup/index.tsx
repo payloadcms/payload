@@ -43,7 +43,6 @@ const RadioGroup: React.FC<Props> = (props) => {
     setValue,
   } = useFieldType({
     path,
-    required,
     validate: memoizedValidate,
   });
 
@@ -89,7 +88,7 @@ const RadioGroup: React.FC<Props> = (props) => {
               <RadioInput
                 path={path}
                 isSelected={isSelected}
-                option={option}
+                option={optionIsObject(option) ? option : { label: option, value: option }}
                 onChange={readOnly ? undefined : setValue}
               />
             </li>

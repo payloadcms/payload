@@ -80,7 +80,7 @@ const Code: React.FC<Props> = (props) => {
         required={required}
       />
       <Editor
-        value={value || ''}
+        value={value as string || ''}
         onValueChange={readOnly ? () => null : setValue}
         highlight={highlighter}
         padding={25}

@@ -13,7 +13,7 @@ import { relationship } from '../../../../../fields/validations';
 import { PaginatedDocs } from '../../../../../collections/config/types';
 import { useFormProcessing } from '../../Form/context';
 import optionsReducer from './optionsReducer';
-import { Props, OptionsPage, Option } from './types';
+import { Props, OptionsPage, Option, ValueWithRelation } from './types';
 
 import './index.scss';
 
@@ -70,7 +70,6 @@ const Relationship: React.FC<Props> = (props) => {
   } = useFieldType({
     path: path || name,
     validate: memoizedValidate,
-    required,
   });
 
   const addOptions = useCallback((data, relation) => {
@@ -164,10 +163,12 @@ const Relationship: React.FC<Props> = (props) => {
       if (hasMultipleRelations) {
         let matchedOption: Option;
 
+        const valueWithRelation = value as ValueWithRelation;
+
         options.forEach((opt) => {
           if (opt?.options) {
             opt.options.some((subOpt) => {
-              if (subOpt?.value === value.value) {
+              if (subOpt?.value === valueWithRelation.value) {
                 matchedOption = subOpt;
                 return true;
               }
@@ -225,7 +226,8 @@ const Relationship: React.FC<Props> = (props) => {
 
         if (!matchedOption) {
           if (hasMultipleRelations) {
-            addOptionByID(value.value, value.relationTo);
+            const valueWithRelation = value as ValueWithRelation;
+            addOptionByID(valueWithRelation.value, valueWithRelation.relationTo);
           } else {
             addOptionByID(value, relationTo);
           }
@@ -265,7 +267,7 @@ const Relationship: React.FC<Props> = (props) => {
     readOnly && `${baseClass}--read-only`,
   ].filter(Boolean).join(' ');
 
-  const valueToRender = findOptionsByValue();
+  const valueToRender = (findOptionsByValue() || value) as Value;
 
   return (
     <div
@@ -305,7 +307,7 @@ const Relationship: React.FC<Props> = (props) => {
             }
           } : undefined}
           onMenuScrollToBottom={getNextOptions}
-          value={valueToRender || value}
+          value={valueToRender}
           showError={showError}
           disabled={formProcessing}
           options={options}

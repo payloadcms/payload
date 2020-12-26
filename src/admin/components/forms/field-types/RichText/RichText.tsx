@@ -99,7 +99,6 @@ const RichText: React.FC<Props> = (props) => {
 
   const fieldType = useFieldType({
     path,
-    required,
     validate: memoizedValidate,
     stringify: true,
   });
@@ -168,7 +167,7 @@ const RichText: React.FC<Props> = (props) => {
         />
         <Slate
           editor={editor}
-          value={valueToRender}
+          value={valueToRender as any[]}
           onChange={(val) => {
             if (val !== defaultValue && val !== value) {
               setValue(val);
