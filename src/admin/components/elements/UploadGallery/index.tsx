@@ -16,7 +16,7 @@ const UploadGallery: React.FC<Props> = (props) => {
         {docs.map((doc, i) => (
           <li key={i}>
             <UploadCard
-              {...doc}
+              {...doc as {id: string, filesize: number, mimeType: string, filename: string}}
               {...{ collection }}
               onClick={() => onCardClick(doc)}
             />

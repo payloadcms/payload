@@ -13,7 +13,7 @@ const path = 'apiKey';
 const baseClass = 'api-key';
 const validate = (val) => text(val, { minLength: 24, maxLength: 48 });
 
-const APIKey = () => {
+const APIKey: React.FC = () => {
   const [initialAPIKey, setInitialAPIKey] = useState(null);
   const [highlightedField, setHighlightedField] = useState(false);
 
@@ -28,7 +28,7 @@ const APIKey = () => {
       <span>
         API Key
       </span>
-      <CopyToClipboard value={apiKeyValue} />
+      <CopyToClipboard value={apiKeyValue as string} />
     </div>
   ), [apiKeyValue]);
 
@@ -83,9 +83,9 @@ const APIKey = () => {
           label={APIKeyLabel}
         />
         <input
-          value={value || ''}
+          value={value as string || ''}
           className={highlightedField ? 'highlight' : undefined}
-          disabled="disabled"
+          disabled
           type="text"
           id="apiKey"
           name="apiKey"

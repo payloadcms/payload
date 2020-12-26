@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 const BlocksCell = ({ data, field }) => {
   const selectedBlocks = data ? data.map(({ blockType }) => blockType) : [];
@@ -24,21 +23,4 @@ const BlocksCell = ({ data, field }) => {
     <span>{label}</span>
   );
 };
-
-BlocksCell.defaultProps = {
-  data: [],
-};
-
-BlocksCell.propTypes = {
-  data: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ),
-  field: PropTypes.shape({
-    label: PropTypes.string,
-    blocks: PropTypes.arrayOf(
-      PropTypes.shape({}),
-    ),
-  }).isRequired,
-};
-
 export default BlocksCell;

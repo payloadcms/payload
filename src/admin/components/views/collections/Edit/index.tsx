@@ -4,16 +4,15 @@ import { useConfig, useAuth } from '@payloadcms/config-provider';
 import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 
-
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import DefaultEdit from './Default';
 import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema';
 import { NegativeFieldGutterProvider } from '../../../forms/FieldTypeGutter/context';
 import { useLocale } from '../../../utilities/Locale';
-import { Props } from './types';
+import { IndexProps } from './types';
 import { StepNavItem } from '../../../elements/StepNav/types';
 
-const EditView: React.FC<Props> = (props) => {
+const EditView: React.FC<IndexProps> = (props) => {
   const { collection, isEditing } = props;
 
   const {

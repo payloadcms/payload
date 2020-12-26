@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import { useParams } from 'react-router-dom';
+import { useConfig, useAuth } from '@payloadcms/config-provider';
 import Logo from '../../graphics/Logo';
 import MinimalTemplate from '../../templates/Minimal';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
+import { CollectionConfig } from '../../../../collections/config/types';
 
-import { useConfig } from '@payloadcms/config-provider';
-import { useAuth } from '@payloadcms/config-provider';
 import Login from '../Login';
 import './index.scss';
 
 const baseClass = 'verify';
 
-const Verify = ({ collection }) => {
+const Verify: React.FC<{ collection: CollectionConfig }> = ({ collection }) => {
   const { slug: collectionSlug } = collection;
 
   const { user } = useAuth();
-  const { token } = useParams();
+  const { token } = useParams<{token?: string}>();
   const { serverURL, routes: { admin: adminRoute }, admin: { user: adminUser } } = useConfig();
 
   const isAdminUser = collectionSlug === adminUser;
@@ -65,11 +64,5 @@ const Verify = ({ collection }) => {
       )}
     </MinimalTemplate>
   );
-};
-
-Verify.propTypes = {
-  collection: PropTypes.shape({
-    slug: PropTypes.string,
-  }).isRequired,
 };
 export default Verify;

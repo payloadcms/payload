@@ -1,5 +1,5 @@
 export type Props = {
-  label?: string
+  label?: string | JSX.Element
   required?: boolean
   htmlFor?: string
 }

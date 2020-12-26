@@ -1,9 +1,9 @@
 /* eslint-disable react/jsx-max-props-per-line */
 import React from 'react';
 import { render } from '@testing-library/react';
-import BlocksCell from './types/Blocks';
-import DateCell from './types/Date';
-import Checkbox from './types/Checkbox';
+import BlocksCell from './field-types/Blocks';
+import DateCell from './field-types/Date';
+import Checkbox from './field-types/Checkbox';
 
 describe('Cell Types', () => {
   describe('Blocks', () => {

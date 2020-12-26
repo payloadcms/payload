@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig, useAuth } from '@payloadcms/config-provider';
 import MinimalTemplate from '../../templates/Minimal';
 import Form from '../../forms/Form';
 import Email from '../../forms/field-types/Email';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
-import { useAuth } from '@payloadcms/config-provider';
+
 
 import './index.scss';
 
 const baseClass = 'forgot-password';
 
-const ForgotPassword = () => {
+const ForgotPassword: React.FC = () => {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const { user } = useAuth();
   const {
@@ -78,9 +78,8 @@ const ForgotPassword = () => {
   return (
     <MinimalTemplate className={baseClass}>
       <Form
-        novalidate
         handleResponse={handleResponse}
-        method="POST"
+        method="post"
         action={`${serverURL}${api}/${userSlug}/forgot-password`}
       >
         <h1>Forgot Password</h1>
@@ -88,7 +87,7 @@ const ForgotPassword = () => {
         <Email
           label="Email Address"
           name="email"
-          autoComplete="email"
+          admin={{ autoComplete: 'email' }}
           required
         />
         <FormSubmit>Submit</FormSubmit>

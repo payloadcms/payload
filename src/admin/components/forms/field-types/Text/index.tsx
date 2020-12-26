@@ -32,7 +32,7 @@ const Text: React.FC<Props> = (props) => {
     return validationResult;
   }, [validate, maxLength, minLength, required]);
 
-  const fieldType = useFieldType({
+  const fieldType = useFieldType<string>({
     path,
     validate: memoizedValidate,
     enableDebouncedValue: true,
@@ -70,7 +70,7 @@ const Text: React.FC<Props> = (props) => {
         required={required}
       />
       <input
-        value={value as string || ''}
+        value={value || ''}
         onChange={setValue}
         disabled={readOnly}
         placeholder={placeholder}

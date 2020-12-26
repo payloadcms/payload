@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import './index.scss';
 
@@ -9,13 +8,4 @@ const Checkbox = ({ data }) => (
     <span>{JSON.stringify(data)}</span>
   </code>
 );
-
-Checkbox.defaultProps = {
-  data: undefined,
-};
-
-Checkbox.propTypes = {
-  data: PropTypes.bool,
-};
-
 export default Checkbox;

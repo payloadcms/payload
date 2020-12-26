@@ -4,7 +4,7 @@ import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
 import MinimalTemplate from '../../templates/Minimal';
 
-const Unauthorized = () => {
+const Unauthorized: React.FC = () => {
   const { routes: { admin } } = useConfig();
 
   return (

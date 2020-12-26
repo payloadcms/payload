@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { useConfig } from '@payloadcms/config-provider';
 
 const RelationshipCell = (props) => {
@@ -46,26 +45,6 @@ const RelationshipCell = (props) => {
       {data}
     </React.Fragment>
   );
-};
-
-RelationshipCell.defaultProps = {
-  data: undefined,
-};
-
-RelationshipCell.propTypes = {
-  data: PropTypes.oneOfType([
-    PropTypes.shape({}),
-    PropTypes.array,
-    PropTypes.string,
-  ]),
-  field: PropTypes.shape({
-    relationTo: PropTypes.oneOfType([
-      PropTypes.arrayOf(
-        PropTypes.string,
-      ),
-      PropTypes.string,
-    ]),
-  }).isRequired,
 };
 
 export default RelationshipCell;

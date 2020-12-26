@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { useConfig } from '@payloadcms/config-provider';
-import { useAuth } from '@payloadcms/config-provider';
+import { useConfig, useAuth } from '@payloadcms/config-provider';
+
 import Minimal from '../../templates/Minimal';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
@@ -10,7 +9,7 @@ import './index.scss';
 
 const baseClass = 'logout';
 
-const Logout = (props) => {
+const Logout: React.FC<{inactivity?: boolean}> = (props) => {
   const { inactivity } = props;
 
   const { logOut } = useAuth();
@@ -45,14 +44,6 @@ const Logout = (props) => {
       </div>
     </Minimal>
   );
-};
-
-Logout.defaultProps = {
-  inactivity: false,
-};
-
-Logout.propTypes = {
-  inactivity: PropTypes.bool,
 };
 
 export default Logout;

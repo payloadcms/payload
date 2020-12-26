@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import format from 'date-fns/format';
 
 const DateCell = ({ data }) => (
@@ -7,13 +6,5 @@ const DateCell = ({ data }) => (
     {data && format(new Date(data), 'MMMM do yyyy, h:mm a')}
   </span>
 );
-
-DateCell.defaultProps = {
-  data: undefined,
-};
-
-DateCell.propTypes = {
-  data: PropTypes.string,
-};
 
 export default DateCell;

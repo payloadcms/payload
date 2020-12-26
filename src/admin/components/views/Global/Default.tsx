@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import format from 'date-fns/format';
 import Eyebrow from '../../elements/Eyebrow';
 import Form from '../../forms/Form';
@@ -10,12 +9,13 @@ import CopyToClipboard from '../../elements/CopyToClipboard';
 import Meta from '../../utilities/Meta';
 import fieldTypes from '../../forms/field-types';
 import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'global-edit';
 
-const DefaultGlobalView = (props) => {
+const DefaultGlobalView: React.FC<Props> = (props) => {
   const {
     global, data, onSave, permissions, action, apiURL, initialState,
   } = props;
@@ -58,7 +58,7 @@ const DefaultGlobalView = (props) => {
               operation="update"
               readOnly={!hasSavePermission}
               permissions={permissions.fields}
-              filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
+              filter={(field) => (!field.admin.position || (field.admin.position && field.admin.position !== 'sidebar'))}
               fieldTypes={fieldTypes}
               fieldSchema={fields}
             />
@@ -92,8 +92,7 @@ const DefaultGlobalView = (props) => {
               operation="update"
               readOnly={!hasSavePermission}
               permissions={permissions.fields}
-              filter={(field) => field.position === 'sidebar'}
-              position="sidebar"
+              filter={(field) => field.admin.position === 'sidebar'}
               fieldTypes={fieldTypes}
               fieldSchema={fields}
             />
@@ -103,7 +102,7 @@ const DefaultGlobalView = (props) => {
               {data.updatedAt && (
                 <li>
                   <div className={`${baseClass}__label`}>Last Modified</div>
-                  <div>{format(new Date(data.updatedAt), 'MMMM do yyyy, h:mm a')}</div>
+                  <div>{format(new Date(data.updatedAt as string), 'MMMM do yyyy, h:mm a')}</div>
                 </li>
               )}
             </ul>
@@ -112,31 +111,6 @@ const DefaultGlobalView = (props) => {
       </Form>
     </div>
   );
-};
-
-DefaultGlobalView.defaultProps = {
-  data: undefined,
-};
-
-DefaultGlobalView.propTypes = {
-  global: PropTypes.shape({
-    label: PropTypes.string.isRequired,
-    fields: PropTypes.arrayOf(PropTypes.shape({})),
-    preview: PropTypes.func,
-  }).isRequired,
-  data: PropTypes.shape({
-    updatedAt: PropTypes.string,
-  }),
-  onSave: PropTypes.func.isRequired,
-  permissions: PropTypes.shape({
-    update: PropTypes.shape({
-      permission: PropTypes.bool,
-    }),
-    fields: PropTypes.shape({}),
-  }).isRequired,
-  action: PropTypes.string.isRequired,
-  apiURL: PropTypes.string.isRequired,
-  initialState: PropTypes.shape({}).isRequired,
 };
 
 export default DefaultGlobalView;

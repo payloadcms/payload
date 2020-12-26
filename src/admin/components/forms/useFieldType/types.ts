@@ -9,8 +9,8 @@ export type Options = {
   stringify?: boolean
 }
 
-export type FieldType = {
-  value: unknown
+export type FieldType<T> = {
+  value: T
   errorMessage?: string
   showError: boolean
   formSubmitted: boolean

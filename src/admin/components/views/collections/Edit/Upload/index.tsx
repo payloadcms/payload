@@ -1,11 +1,11 @@
 import React, {
   useState, useRef, useEffect, useCallback,
 } from 'react';
-import PropTypes from 'prop-types';
 import useFieldType from '../../../../forms/useFieldType';
 import Button from '../../../../elements/Button';
 import FileDetails from '../../../../elements/FileDetails';
 import Error from '../../../../forms/Error';
+import { Props, Data } from './types';
 
 import './index.scss';
 
@@ -24,9 +24,9 @@ const validate = (value) => {
   return true;
 };
 
-const File = (props) => {
-  const inputRef = useRef();
-  const dropRef = useRef();
+const File: React.FC<Props> = (props) => {
+  const inputRef = useRef(null);
+  const dropRef = useRef(null);
   const [fileList, setFileList] = useState(undefined);
   const [selectingFile, setSelectingFile] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -34,7 +34,9 @@ const File = (props) => {
   const [replacingFile, setReplacingFile] = useState(false);
 
   const {
-    data = {}, adminThumbnail, staticURL,
+    data = {} as Data,
+    adminThumbnail,
+    staticURL,
   } = props;
 
   const { filename } = data;
@@ -44,7 +46,7 @@ const File = (props) => {
     setValue,
     showError,
     errorMessage,
-  } = useFieldType({
+  } = useFieldType<{name: string}>({
     path: 'file',
     validate,
   });
@@ -111,7 +113,7 @@ const File = (props) => {
       };
     }
 
-    return () => { };
+    return () => null;
   }, [handleDragIn, handleDragOut, handleDrop, dropRef]);
 
   useEffect(() => {
@@ -195,22 +197,6 @@ const File = (props) => {
       )}
     </div>
   );
-};
-
-File.defaultProps = {
-  data: undefined,
-  adminThumbnail: undefined,
-};
-
-File.propTypes = {
-  fieldTypes: PropTypes.shape({}).isRequired,
-  data: PropTypes.shape({
-    filename: PropTypes.string,
-    mimeType: PropTypes.string,
-    filesize: PropTypes.number,
-  }),
-  staticURL: PropTypes.string.isRequired,
-  adminThumbnail: PropTypes.string,
 };
 
 export default File;

@@ -5,7 +5,7 @@ import { useStepNav } from '../../elements/StepNav';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultDashboard from './Default';
 
-const Dashboard = () => {
+const Dashboard: React.FC = () => {
   const { permissions } = useAuth();
   const { setStepNav } = useStepNav();
   const [filteredGlobals, setFilteredGlobals] = useState([]);
@@ -15,7 +15,9 @@ const Dashboard = () => {
     globals,
     admin: {
       components: {
-        Dashboard: CustomDashboard,
+        views: {
+          Dashboard: CustomDashboard,
+        } = {},
       } = {},
     } = {},
   } = useConfig();

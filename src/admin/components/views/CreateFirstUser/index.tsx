@@ -1,20 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig, useAuth } from '@payloadcms/config-provider';
 import MinimalTemplate from '../../templates/Minimal';
 import Meta from '../../utilities/Meta';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
 import fieldTypes from '../../forms/field-types';
 import FormSubmit from '../../forms/Submit';
-import { useAuth } from '@payloadcms/config-provider';
+import { Props } from './types';
+import { Field } from '../../../../fields/config/types';
+
 import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
 
 import './index.scss';
 
 const baseClass = 'create-first-user';
 
-const CreateFirstUser = (props) => {
+const CreateFirstUser: React.FC<Props> = (props) => {
   const { setInitialized } = props;
   const { setToken } = useAuth();
   const {
@@ -43,7 +45,7 @@ const CreateFirstUser = (props) => {
       type: 'password',
       required: true,
     },
-  ];
+  ] as Field[];
 
   return (
     <MinimalTemplate className={baseClass}>
@@ -56,7 +58,7 @@ const CreateFirstUser = (props) => {
       />
       <Form
         onSuccess={onSuccess}
-        method="POST"
+        method="post"
         redirect={admin}
         action={`${serverURL}${api}/${userSlug}/first-register`}
       >

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig, useAuth } from '@payloadcms/config-provider';
 import MinimalTemplate from '../../templates/Minimal';
 import Form from '../../forms/Form';
 import Password from '../../forms/field-types/Password';
@@ -8,16 +8,16 @@ import ConfirmPassword from '../../forms/field-types/ConfirmPassword';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
-import { useAuth } from '@payloadcms/config-provider';
+
 
 import './index.scss';
 import HiddenInput from '../../forms/field-types/HiddenInput';
 
 const baseClass = 'reset-password';
 
-const ResetPassword = () => {
+const ResetPassword: React.FC = () => {
   const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = useConfig();
-  const { token } = useParams();
+  const { token } = useParams<{token?: string}>();
   const history = useHistory();
   const { user, setToken } = useAuth();
 
@@ -65,12 +65,11 @@ const ResetPassword = () => {
         <h1>Reset Password</h1>
         <Form
           onSuccess={onSuccess}
-          method="POST"
+          method="post"
           action={`${serverURL}${api}/${userSlug}/reset-password`}
           redirect={admin}
         >
           <Password
-            error="password"
             label="New Password"
             name="password"
             autoComplete="off"

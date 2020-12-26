@@ -15,7 +15,7 @@ const useIntersect = ({
   const [node, setNode] = useState(null);
 
   const observer = useRef(
-    new window.IntersectionObserver(([entry]) => updateEntry(entry), {
+    new window.IntersectionObserver(([ent]) => updateEntry(ent), {
       root,
       rootMargin,
       threshold,

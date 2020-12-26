@@ -5,7 +5,7 @@ import { useStepNav } from '../../elements/StepNav';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
 
-const NotFound = () => {
+const NotFound: React.FC = () => {
   const { setStepNav } = useStepNav();
   const { routes: { admin } } = useConfig();
 

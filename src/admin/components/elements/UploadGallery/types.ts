@@ -1,5 +1,7 @@
+import { CollectionConfig } from '../../../../collections/config/types';
+
 export type Props = {
-    docs?: [],
-    collection: unknown,
+    docs?: unknown[],
+    collection: CollectionConfig,
     onCardClick: (doc) => void,
 }

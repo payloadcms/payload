@@ -69,6 +69,9 @@ export type PayloadConfig = {
         Icon?: React.ComponentType
         Logo?: React.ComponentType
       }
+      views?: {
+        Dashboard?: React.ComponentType
+      }
     }
   };
   collections?: PayloadCollectionConfig[];

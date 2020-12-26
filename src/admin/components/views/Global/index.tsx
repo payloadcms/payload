@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useConfig, useAuth } from '@payloadcms/config-provider';
 import { useStepNav } from '../../elements/StepNav';
@@ -11,9 +10,10 @@ import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultGlobal from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
+import { IndexProps } from './types';
 
-const GlobalView = (props) => {
-  const { state: locationState } = useLocation();
+const GlobalView: React.FC<IndexProps> = (props) => {
+  const { state: locationState } = useLocation<{data?: Record<string, unknown>}>();
   const history = useHistory();
   const locale = useLocale();
   const { setStepNav } = useStepNav();
@@ -97,18 +97,4 @@ const GlobalView = (props) => {
     </NegativeFieldGutterProvider>
   );
 };
-
-GlobalView.propTypes = {
-  global: PropTypes.shape({
-    label: PropTypes.string.isRequired,
-    slug: PropTypes.string.isRequired,
-    fields: PropTypes.arrayOf(PropTypes.shape({})),
-    admin: PropTypes.shape({
-      components: PropTypes.shape({
-        Edit: PropTypes.node,
-      }),
-    }),
-  }).isRequired,
-};
-
 export default GlobalView;

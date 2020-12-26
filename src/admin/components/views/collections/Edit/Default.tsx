@@ -100,7 +100,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   <Upload
                     data={data}
                     {...upload}
-                    fieldTypes={fieldTypes}
                   />
                 )}
                 <RenderFields

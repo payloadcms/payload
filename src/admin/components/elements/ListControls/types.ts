@@ -7,3 +7,8 @@ export type Props = {
   collection: CollectionConfig,
   handleChange: (newState) => void,
 }
+
+export type ListControls = {
+  where?: unknown
+  columns?: string[]
+}

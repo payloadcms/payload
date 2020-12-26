@@ -11,8 +11,8 @@ export type Context = {
 export type Props = {
   className?: string
   operation?: Operation
-  readOnly: boolean
-  permissions: {
+  readOnly?: boolean
+  permissions?: {
     [field: string]: FieldPermissions
   }
   filter?: (field: Field) => boolean

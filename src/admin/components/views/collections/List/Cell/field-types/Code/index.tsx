@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import './index.scss';
 
@@ -10,14 +9,6 @@ const CodeCell = ({ data }) => {
       <span>{textToShow}</span>
     </code>
   );
-};
-
-CodeCell.defaultProps = {
-  data: '',
-};
-
-CodeCell.propTypes = {
-  data: PropTypes.string,
 };
 
 export default CodeCell;

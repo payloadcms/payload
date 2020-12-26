@@ -11,7 +11,7 @@ import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
 
 const AccountView: React.FC = () => {
-  const { state: locationState } = useLocation();
+  const { state: locationState } = useLocation<{ data: unknown }>();
   const locale = useLocale();
   const { setStepNav } = useStepNav();
   const { user, permissions } = useAuth();

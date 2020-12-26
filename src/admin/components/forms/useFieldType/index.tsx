@@ -7,7 +7,7 @@ import { Options, FieldType } from './types';
 
 import './index.scss';
 
-const useFieldType = (options: Options): FieldType => {
+const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
   const {
     path,
     validate,

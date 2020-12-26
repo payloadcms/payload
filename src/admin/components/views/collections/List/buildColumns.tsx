@@ -1,8 +1,11 @@
 import React from 'react';
 import Cell from './Cell';
 import SortColumn from '../../../elements/SortColumn';
+import { CollectionConfig } from '../../../../../collections/config/types';
+import { Column } from '../../../elements/Table/types';
+import { fieldHasSubFields, Field } from '../../../../../fields/config/types';
 
-const buildColumns = (collection, columns, setSort) => (columns || []).reduce((cols, col, colIndex) => {
+const buildColumns = (collection: CollectionConfig, columns: string[], setSort: (sort: string) => void): Column[] => (columns || []).reduce((cols, col, colIndex) => {
   let field = null;
 
   const fields = [
@@ -11,17 +14,17 @@ const buildColumns = (collection, columns, setSort) => (columns || []).reduce((c
       name: 'id',
       type: 'text',
       label: 'ID',
-    },
+    } as Field,
     {
       name: 'updatedAt',
       type: 'date',
       label: 'Updated At',
-    },
+    } as Field,
     {
       name: 'createdAt',
       type: 'date',
       label: 'Created At',
-    },
+    } as Field,
   ];
 
   fields.forEach((fieldToCheck) => {
@@ -29,7 +32,7 @@ const buildColumns = (collection, columns, setSort) => (columns || []).reduce((c
       field = fieldToCheck;
     }
 
-    if (!fieldToCheck.name && Array.isArray(fieldToCheck.fields)) {
+    if (!fieldToCheck.name && fieldHasSubFields(fieldToCheck)) {
       fieldToCheck.fields.forEach((subField) => {
         if (subField.name === col) {
           field = subField;

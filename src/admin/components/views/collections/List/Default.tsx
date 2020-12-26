@@ -1,6 +1,5 @@
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { useConfig } from '@payloadcms/config-provider';
 import UploadGallery from '../../../elements/UploadGallery';
 import Eyebrow from '../../../elements/Eyebrow';
@@ -10,12 +9,13 @@ import Pill from '../../../elements/Pill';
 import Button from '../../../elements/Button';
 import Table from '../../../elements/Table';
 import Meta from '../../../utilities/Meta';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'collection-list';
 
-const DefaultList = (props) => {
+const DefaultList: React.FC<Props> = (props) => {
   const {
     collection,
     collection: {
@@ -130,51 +130,6 @@ const DefaultList = (props) => {
       </div>
     </div>
   );
-};
-
-DefaultList.defaultProps = {
-  data: null,
-};
-
-DefaultList.propTypes = {
-  collection: PropTypes.shape({
-    upload: PropTypes.shape({}),
-    labels: PropTypes.shape({
-      singular: PropTypes.string,
-      plural: PropTypes.string,
-    }),
-    slug: PropTypes.string,
-    admin: PropTypes.shape({
-      useAsTitle: PropTypes.string,
-    }),
-    fields: PropTypes.arrayOf(PropTypes.shape),
-    timestamps: PropTypes.bool,
-  }).isRequired,
-  newDocumentURL: PropTypes.string.isRequired,
-  data: PropTypes.shape({
-    docs: PropTypes.arrayOf(
-      PropTypes.shape({}),
-    ),
-    limit: PropTypes.number,
-    nextPage: PropTypes.number,
-    prevPage: PropTypes.number,
-    totalDocs: PropTypes.number,
-    hasNextPage: PropTypes.bool,
-    hasPrevPage: PropTypes.bool,
-    page: PropTypes.number,
-    totalPages: PropTypes.number,
-  }),
-  setListControls: PropTypes.func.isRequired,
-  setSort: PropTypes.func.isRequired,
-  listControls: PropTypes.shape({
-    columns: PropTypes.arrayOf(
-      PropTypes.string,
-    ),
-  }).isRequired,
-  hasCreatePermission: PropTypes.bool.isRequired,
-  columns: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
 };
 
 export default DefaultList;

@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import './index.scss';
 
@@ -15,19 +14,5 @@ const UploadCell = ({ data }) => (
     </span>
   </React.Fragment>
 );
-
-UploadCell.defaultProps = {
-  data: {},
-};
-
-UploadCell.propTypes = {
-  data: PropTypes.oneOfType([
-    PropTypes.shape({
-      filename: PropTypes.string,
-      mimeType: PropTypes.string,
-    }),
-    PropTypes.string,
-  ]),
-};
 
 export default UploadCell;

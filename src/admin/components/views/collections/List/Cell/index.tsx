@@ -1,11 +1,11 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useConfig } from '@payloadcms/config-provider';
 import RenderCustomComponent from '../../../../utilities/RenderCustomComponent';
-import cellComponents from './types';
+import cellComponents from './field-types';
+import { Props } from './types';
 
-const DefaultCell = (props) => {
+const DefaultCell: React.FC<Props> = (props) => {
   const {
     field,
     colIndex,
@@ -20,9 +20,11 @@ const DefaultCell = (props) => {
 
   const { routes: { admin } } = useConfig();
 
-  let WrapElement = 'span';
+  let WrapElement: React.ComponentType | string = 'span';
 
-  const wrapElementProps = {};
+  const wrapElementProps: {
+    to?: string
+  } = {};
 
   if (colIndex === 0) {
     WrapElement = Link;
@@ -52,7 +54,7 @@ const DefaultCell = (props) => {
   );
 };
 
-const Cell = (props) => {
+const Cell: React.FC<Props> = (props) => {
   const {
     colIndex,
     collection,
@@ -82,45 +84,5 @@ const Cell = (props) => {
     />
   );
 };
-
-const defaultProps = {
-  cellData: undefined,
-};
-
-const propTypes = {
-  colIndex: PropTypes.number.isRequired,
-  collection: PropTypes.shape({
-    slug: PropTypes.string,
-    upload: PropTypes.shape({
-      adminThumbnail: PropTypes.string,
-    }),
-  }).isRequired,
-  cellData: PropTypes.oneOfType([
-    PropTypes.shape({}),
-    PropTypes.string,
-    PropTypes.number,
-    PropTypes.instanceOf(Date),
-    PropTypes.array,
-    PropTypes.bool,
-  ]),
-  rowData: PropTypes.shape({
-    id: PropTypes.string,
-  }).isRequired,
-  field: PropTypes.shape({
-    name: PropTypes.string,
-    type: PropTypes.string,
-    label: PropTypes.string,
-    admin: PropTypes.shape({
-      components: PropTypes.shape({
-        Cell: PropTypes.func,
-      }),
-    }),
-  }).isRequired,
-};
-
-DefaultCell.defaultProps = defaultProps;
-DefaultCell.propTypes = propTypes;
-Cell.defaultProps = defaultProps;
-Cell.propTypes = propTypes;
 
 export default Cell;

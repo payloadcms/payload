@@ -15,7 +15,7 @@ import './index.scss';
 
 const baseClass = 'login';
 
-const Login = () => {
+const Login: React.FC = () => {
   const history = useHistory();
   const { user, setToken } = useAuth();
   const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = useConfig();
@@ -71,17 +71,16 @@ const Login = () => {
         disableSuccessStatus
         waitForAutocomplete
         onSuccess={onSuccess}
-        method="POST"
+        method="post"
         action={`${serverURL}${api}/${userSlug}/login`}
       >
         <Email
           label="Email Address"
           name="email"
-          autoComplete="email"
+          admin={{ autoComplete: 'email' }}
           required
         />
         <Password
-          error="password"
           label="Password"
           name="password"
           autoComplete="off"

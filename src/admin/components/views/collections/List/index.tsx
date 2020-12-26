@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import queryString from 'qs';
 import { useLocation } from 'react-router-dom';
 import { useConfig, useAuth } from '@payloadcms/config-provider';
@@ -8,10 +7,12 @@ import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import DefaultList from './Default';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import { useStepNav } from '../../../elements/StepNav';
+import { ListControls } from '../../../elements/ListControls/types';
 import formatFields from './formatFields';
 import buildColumns from './buildColumns';
+import { ListIndexProps } from './types';
 
-const ListView = (props) => {
+const ListView: React.FC<ListIndexProps> = (props) => {
   const {
     collection,
     collection: {
@@ -21,8 +22,14 @@ const ListView = (props) => {
       },
       admin: {
         components: {
-          List: CustomList,
-        } = {},
+          views: {
+            List: CustomList,
+          },
+        } = {
+          views: {
+            List: undefined,
+          },
+        },
       },
     },
   } = props;
@@ -33,7 +40,7 @@ const ListView = (props) => {
   const { setStepNav } = useStepNav();
 
   const [fields] = useState(() => formatFields(collection));
-  const [listControls, setListControls] = useState({});
+  const [listControls, setListControls] = useState<ListControls>({});
   const [columns, setColumns] = useState([]);
   const [sort, setSort] = useState(null);
 
@@ -51,6 +58,9 @@ const ListView = (props) => {
   useEffect(() => {
     const params = {
       depth: 1,
+      page: undefined,
+      sort: undefined,
+      where: undefined,
     };
 
     if (page) params.page = page;
@@ -88,23 +98,6 @@ const ListView = (props) => {
       }}
     />
   );
-};
-
-ListView.propTypes = {
-  collection: PropTypes.shape({
-    labels: PropTypes.shape({
-      singular: PropTypes.string,
-      plural: PropTypes.string,
-    }),
-    admin: PropTypes.shape({
-      components: PropTypes.shape({
-        List: PropTypes.node,
-      }),
-    }),
-    slug: PropTypes.string,
-    fields: PropTypes.arrayOf(PropTypes.shape),
-    timestamps: PropTypes.bool,
-  }).isRequired,
 };
 
 export default ListView;

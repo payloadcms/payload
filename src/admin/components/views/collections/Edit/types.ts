@@ -5,7 +5,7 @@ import { Fields } from '../../../forms/Form/types';
 
 export type IndexProps = {
   collection: CollectionConfig
-  isEditing: boolean
+  isEditing?: boolean
 }
 
 export type Props = IndexProps & {
