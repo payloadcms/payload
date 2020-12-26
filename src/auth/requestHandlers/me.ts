@@ -1,5 +1,5 @@
 import { NextFunction, Response } from 'express';
-import { PayloadRequest } from '../../express/types/payloadRequest';
+import { PayloadRequest } from '../../express/types';
 
 export default async function me(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {

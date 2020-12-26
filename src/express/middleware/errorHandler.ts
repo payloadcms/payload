@@ -3,14 +3,14 @@ import { NextFunction, Response } from 'express';
 import { Logger } from 'pino';
 import { Config } from '../../config/types';
 import formatErrorResponse, { ErrorResponse } from '../responses/formatError';
-import { PayloadRequest } from '../types/payloadRequest';
+import { PayloadRequest } from '../types';
 import APIError from '../../errors/APIError';
 
-export type ErrorHandler = (err: Error, req: PayloadRequest, res: Response) => Promise<Response<ErrorResponse> | void>
+export type ErrorHandler = (err: APIError, req: PayloadRequest, res: Response, next: NextFunction) => Promise<Response<ErrorResponse> | void>
 
 // NextFunction must be passed for Express to use this middleware as error handler
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const errorHandler = (config: Config, logger: Logger) => async (err: APIError, req: PayloadRequest, res: Response, next: NextFunction): Promise<void> => {
+const errorHandler = (config: Config, logger: Logger) => async (err: APIError, req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<ErrorResponse> | void> => {
   let response = formatErrorResponse(err);
   let status = err.status || httpStatus.INTERNAL_SERVER_ERROR;
 

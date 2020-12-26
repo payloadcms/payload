@@ -1,9 +1,7 @@
 import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import { FindResponse } from '../../types';
-import { PayloadRequest } from '../../express/types/payloadRequest';
-
-export type FindRequestHandler = (req: PayloadRequest, res: Response, next: NextFunction) => unknown;
+import { PayloadRequest } from '../../express/types';
 
 export type FindResult = FindResponse;
 

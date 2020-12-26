@@ -1,4 +1,4 @@
-export default function formatRefPathLocales(schema, parentSchema, parentPath) {
+export default function formatRefPathLocales(schema, parentSchema?: any, parentPath?: string): void {
   // Loop through all refPaths within schema
   schema.eachPath((pathname, schemaType) => {
     // If a dynamic refPath is found

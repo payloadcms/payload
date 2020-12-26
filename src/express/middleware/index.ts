@@ -15,6 +15,7 @@ const middleware = (payload: Payload) => {
   const rateLimitOptions = {
     windowMs: payload.config.rateLimit.window,
     max: payload.config.rateLimit.max,
+    skip: undefined,
   };
 
   if (typeof payload.config.rateLimit.skip === 'function') rateLimitOptions.skip = payload.config.rateLimit.skip;

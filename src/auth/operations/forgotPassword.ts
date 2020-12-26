@@ -1,9 +1,22 @@
 import crypto from 'crypto';
 import { Document } from 'mongoose';
-import { AuthOperationArguments } from '../../types';
 import { APIError } from '../../errors';
+import { PayloadRequest } from '../../express/types';
+import { Collection } from '../../collections/config/types';
 
-async function forgotPassword(incomingArgs: AuthOperationArguments): Promise<string | null> {
+export type Arguments = {
+  collection: Collection
+  data: {
+    [key: string]: unknown
+  }
+  disableEmail?: boolean
+  expiration?: number
+  req: PayloadRequest
+}
+
+export type Result = string;
+
+async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
   const { config, sendEmail: email } = this;
 
   if (!Object.prototype.hasOwnProperty.call(incomingArgs.data, 'email')) {

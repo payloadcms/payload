@@ -1,4 +1,4 @@
-import { PayloadRequest } from '../../express/types/payloadRequest';
+import { PayloadRequest } from '../../express/types';
 
 export const defaults = {
   access: {

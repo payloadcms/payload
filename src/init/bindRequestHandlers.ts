@@ -1,4 +1,4 @@
-import access, { AccessRequestHandler } from '../auth/requestHandlers/access';
+import access from '../auth/requestHandlers/access';
 import forgotPassword from '../auth/requestHandlers/forgotPassword';
 import init from '../auth/requestHandlers/init';
 import login from '../auth/requestHandlers/login';
@@ -10,11 +10,11 @@ import resetPassword from '../auth/requestHandlers/resetPassword';
 import verifyEmail from '../auth/requestHandlers/verifyEmail';
 import unlock from '../auth/requestHandlers/unlock';
 
-import create, { CreateRequestHandler } from '../collections/requestHandlers/create';
-import find, { FindRequestHandler } from '../collections/requestHandlers/find';
-import findByID, { FindByIDRequestHandler } from '../collections/requestHandlers/findByID';
-import update, { UpdateRequestHandler } from '../collections/requestHandlers/update';
-import deleteHandler, { DeleteRequestHandler } from '../collections/requestHandlers/delete';
+import create from '../collections/requestHandlers/create';
+import find from '../collections/requestHandlers/find';
+import findByID from '../collections/requestHandlers/findByID';
+import update from '../collections/requestHandlers/update';
+import deleteHandler from '../collections/requestHandlers/delete';
 
 import findOne from '../globals/requestHandlers/findOne';
 import globalUpdate from '../globals/requestHandlers/update';
@@ -22,14 +22,28 @@ import { Payload } from '../index';
 
 export type RequestHandlers = {
   collections: {
-    create: CreateRequestHandler,
-    find: FindRequestHandler,
-    findByID: FindByIDRequestHandler,
-    update: UpdateRequestHandler,
-    delete: DeleteRequestHandler,
+    create: typeof create,
+    find: typeof find,
+    findByID: typeof findByID,
+    update: typeof update,
+    delete: typeof deleteHandler,
     auth: {
-      access: AccessRequestHandler,
+      access: typeof access,
+      forgotPassword: typeof forgotPassword,
+      init: typeof init,
+      login: typeof login,
+      logout: typeof logout,
+      me: typeof me,
+      refresh: typeof refresh
+      registerFirstUser: typeof registerFirstUser,
+      resetPassword: typeof resetPassword,
+      verifyEmail: typeof verifyEmail,
+      unlock: typeof unlock,
     }
+  },
+  globals: {
+    findOne: typeof findOne,
+    update: typeof globalUpdate,
   }
 }
 

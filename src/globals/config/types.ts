@@ -31,5 +31,5 @@ export type GlobalConfig = DeepRequired<PayloadGlobalConfig>
 
 export type Globals = {
   Model: GlobalModel
-  config: GlobalConfig
+  config: GlobalConfig[]
 }

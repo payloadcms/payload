@@ -4,7 +4,7 @@ import { PaginateModel, Document as MongooseDocument, PassportLocalModel } from 
 import { Access } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { Document } from '../../types';
-import { PayloadRequest } from '../../express/types/payloadRequest';
+import { PayloadRequest } from '../../express/types';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 

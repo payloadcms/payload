@@ -2,12 +2,12 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import path from 'path';
 import webpack, { Configuration } from 'webpack';
 import babelConfig from '../babel.config';
-import { PayloadConfig } from '../config/types';
+import { Config } from '../config/types';
 
 const mockModulePath = path.resolve(__dirname, './mocks/emptyModule.js');
 const mockDotENVPath = path.resolve(__dirname, './mocks/dotENV.js');
 
-export default (config: PayloadConfig): Configuration => {
+export default (config: Config): Configuration => {
   let webpackConfig: Configuration = {
     entry: {
       main: [

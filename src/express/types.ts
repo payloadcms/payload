@@ -1,7 +1,7 @@
 import { Request } from 'express';
-import { Payload } from '../../index';
-import { Collection } from '../../collections/config/types';
-import { User } from '../../auth/types';
+import { Payload } from '../index';
+import { Collection } from '../collections/config/types';
+import { User } from '../auth/types';
 
 export type PayloadRequest = Request & {
   payload: Payload;

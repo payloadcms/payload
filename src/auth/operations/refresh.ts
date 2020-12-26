@@ -29,8 +29,9 @@ async function refresh(incomingArgs) {
     },
   } = args;
 
-  const opts = {};
-  opts.expiresIn = args.collection.config.auth.tokenExpiration;
+  const opts = {
+    expiresIn: args.collection.config.auth.tokenExpiration,
+  };
 
   if (typeof args.token !== 'string') throw new Forbidden();
 

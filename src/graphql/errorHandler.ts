@@ -15,6 +15,7 @@ const errorHandler = async (info, debug, afterErrorHook) => Promise.all(info.res
   let response = {
     message: err.message,
     data: (err && err.originalError && err.originalError.data) || undefined,
+    stack: undefined,
   };
 
   if (afterErrorHook) {

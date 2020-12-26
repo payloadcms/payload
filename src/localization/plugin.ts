@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import sanitizeFallbackLocale from './sanitizeFallbackLocale';
 import formatRefPathLocales from './formatRefPathLocales';
 
-export default function localizationPlugin(schema, options) {
+export default function localizationPlugin(schema: any, options): void {
   if (!options || !options.locales || !Array.isArray(options.locales) || !options.locales.length) {
     throw new mongoose.Error('Required locales array is missing');
   }
@@ -160,4 +160,4 @@ export default function localizationPlugin(schema, options) {
 
   // Find any dynamic {{LOCALE}} in refPaths and modify schemas appropriately
   formatRefPathLocales(schema);
-};
+}

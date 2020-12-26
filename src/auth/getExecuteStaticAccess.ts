@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import executeAccess from './executeAccess';
 import { Forbidden } from '../errors';
-import { PayloadRequest } from '../express/types/payloadRequest';
+import { PayloadRequest } from '../express/types';
 
 const getExecuteStaticAccess = ({ config, Model }) => async (req: PayloadRequest, res: Response, next: NextFunction) => {
   try {

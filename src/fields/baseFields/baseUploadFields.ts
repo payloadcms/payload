@@ -8,7 +8,7 @@ export default [
       beforeChange: [
         ({ req, operation, value }) => {
           if (operation === 'create') {
-            const file = (req.files && req.files.file) ? req.files.file : req.file;
+            const file = (req.files && req.files.file) ? req.files.file as { name: string } : req.file;
             return file.name;
           }
 

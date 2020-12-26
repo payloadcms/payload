@@ -1,10 +1,8 @@
 import httpStatus from 'http-status';
 import { Response, NextFunction } from 'express';
-import { PayloadRequest } from '../../express/types/payloadRequest';
+import { PayloadRequest } from '../../express/types';
 import formatSuccessResponse from '../../express/responses/formatSuccess';
 import { Document } from '../../types';
-
-export type CreateRequestHandler = (req: PayloadRequest, res: Response, next: NextFunction) => unknown;
 
 export type CreateResult = {
   message: string

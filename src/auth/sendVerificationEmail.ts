@@ -1,5 +1,5 @@
 import { Payload } from '..';
-import { PayloadRequest } from '../express/types/payloadRequest';
+import { PayloadRequest } from '../express/types';
 import { Config } from '../config/types';
 import { Collection } from '../collections/config/types';
 import { User } from './types';

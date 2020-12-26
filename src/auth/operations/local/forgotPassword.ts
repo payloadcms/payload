@@ -1,4 +1,17 @@
-async function forgotPassword(options) {
+import { PayloadRequest } from '../../../express/types';
+import { Result } from '../forgotPassword';
+
+export type Options = {
+  collection: string
+  data: {
+    email: string
+  }
+  expiration?: number
+  disableEmail?: boolean
+  req?: PayloadRequest
+}
+
+async function forgotPassword(options: Options): Promise<Result> {
   const {
     collection: collectionSlug,
     data,

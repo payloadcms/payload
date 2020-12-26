@@ -1,4 +1,23 @@
-async function login(args) {
+import { Response } from 'express';
+import { Result } from '../login';
+import { PayloadRequest } from '../../../express/types';
+
+export type Options = {
+  collection: string
+  data: {
+    email: string
+    password: string
+  }
+  req?: PayloadRequest
+  res?: Response
+  depth?: number
+  locale?: string
+  fallbackLocale?: string
+  overrideAccess?: boolean
+  showHiddenFields?: boolean
+}
+
+async function login(options: Options): Promise<Result> {
   const {
     collection: collectionSlug,
     req = {},
@@ -9,11 +28,11 @@ async function login(args) {
     data,
     overrideAccess = true,
     showHiddenFields,
-  } = args;
+  } = options;
 
   const collection = this.collections[collectionSlug];
 
-  const options = {
+  const args = {
     depth,
     collection,
     overrideAccess,
@@ -23,14 +42,16 @@ async function login(args) {
       ...req,
       payloadAPI: 'local',
       payload: this,
+      locale: undefined,
+      fallbackLocale: undefined,
     },
     res,
   };
 
-  if (locale) options.req.locale = locale;
-  if (fallbackLocale) options.req.fallbackLocale = fallbackLocale;
+  if (locale) args.req.locale = locale;
+  if (fallbackLocale) args.req.fallbackLocale = fallbackLocale;
 
-  return this.operations.collections.auth.login(options);
+  return this.operations.collections.auth.login(args);
 }
 
 export default login;

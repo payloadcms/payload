@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { Collection } from '../../collections/config/types';
-import { PayloadRequest } from '../../express/types/payloadRequest';
+import { PayloadRequest } from '../../express/types';
 import getExtractJWT from '../getExtractJWT';
 import { User } from '../types';
 

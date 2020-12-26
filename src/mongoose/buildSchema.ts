@@ -3,6 +3,8 @@ import { Schema, SchemaDefinition } from 'mongoose';
 import { MissingFieldInputOptions } from '../errors';
 import { ArrayField, Block, BlockField, Field, GroupField, RadioField, RelationshipField, RowField, SelectField, UploadField } from '../fields/config/types';
 
+type FieldSchemaGenerator = (field: Field, fields: SchemaDefinition) => SchemaDefinition;
+
 const setBlockDiscriminators = (fields: Field[], schema: Schema) => {
   fields.forEach((field) => {
     const blockFieldType = field as BlockField;
@@ -11,7 +13,7 @@ const setBlockDiscriminators = (fields: Field[], schema: Schema) => {
         let blockSchemaFields = {};
 
         blockItem.fields.forEach((blockField) => {
-          const fieldSchema = fieldToSchemaMap[blockField.type];
+          const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[blockField.type];
           if (fieldSchema) {
             blockSchemaFields = fieldSchema(blockField, blockSchemaFields);
           }
@@ -46,7 +48,7 @@ const buildSchema = (configFields: Field[], options = {}): Schema => {
   let fields = {};
 
   configFields.forEach((field) => {
-    const fieldSchema = fieldToSchemaMap[field.type];
+    const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[field.type];
 
     if (fieldSchema) {
       fields = fieldSchema(field, fields);
@@ -155,7 +157,7 @@ const fieldToSchemaMap = {
     const newFields = { ...fields };
 
     field.fields.forEach((rowField: Field) => {
-      const fieldSchemaMap = fieldToSchemaMap[rowField.type];
+      const fieldSchemaMap: FieldSchemaGenerator = fieldToSchemaMap[rowField.type];
 
       if (fieldSchemaMap) {
         const fieldSchema = fieldSchemaMap(rowField, fields);

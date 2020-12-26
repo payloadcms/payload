@@ -23,7 +23,6 @@ import {
 import Logger from './utilities/logger';
 import bindOperations from './init/bindOperations';
 import bindRequestHandlers, { RequestHandlers } from './init/bindRequestHandlers';
-import bindResolvers from './init/bindResolvers';
 import loadConfig from './config/load';
 import authenticate, { PayloadAuthenticate } from './express/middleware/authenticate';
 import connectMongoose from './mongoose/connect';
@@ -36,6 +35,7 @@ import { Globals } from './globals/config/types';
 import initGraphQLPlayground from './graphql/initPlayground';
 import initStatic from './express/static';
 import GraphQL from './graphql';
+import bindResolvers, { GraphQLResolvers } from './graphql/bindResolvers';
 import buildEmail from './email/build';
 import identifyAPI from './express/middleware/identifyAPI';
 import errorHandler, { ErrorHandler } from './express/middleware/errorHandler';
@@ -44,7 +44,7 @@ import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
 import { encrypt, decrypt } from './auth/crypto';
 import { MockEmailHandler, BuildEmailResult, Message } from './email/types';
-import { PayloadRequest } from './express/types/payloadRequest';
+import { PayloadRequest } from './express/types';
 
 require('isomorphic-fetch');
 
@@ -56,7 +56,9 @@ export class Payload {
 
   collections: Collection[] = [];
 
-  graphQL: GraphQL;
+  graphQL: {
+    resolvers: GraphQLResolvers
+  };
 
   globals: Globals;
 

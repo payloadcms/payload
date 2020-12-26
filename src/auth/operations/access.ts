@@ -1,9 +1,13 @@
-import { OperationArguments } from '../../types';
+import { PayloadRequest } from '../../express/types';
 import { Permissions } from '../types';
 
 const allOperations = ['create', 'read', 'update', 'delete'];
 
-async function accessOperation(args: OperationArguments): Promise<Permissions> {
+type Arguments = {
+  req: PayloadRequest
+}
+
+async function accessOperation(args: Arguments): Promise<Permissions> {
   const { config } = this;
 
   const {

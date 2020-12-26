@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import getExtractJWT from '../getExtractJWT';
-import { PayloadRequest } from '../../express/types/payloadRequest';
+import { PayloadRequest } from '../../express/types';
 
 export default async function refreshHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {

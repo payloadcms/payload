@@ -3,11 +3,11 @@ import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
 import { Configuration } from 'webpack';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
-import { GraphQLType } from 'graphql';
+import GraphQL from 'graphql';
 import { Payload } from '..';
 import { AfterErrorHook, PayloadCollectionConfig, CollectionConfig } from '../collections/config/types';
-import { PayloadGlobalConfig } from '../globals/config/types';
-import { PayloadRequest } from '../express/types/payloadRequest';
+import { PayloadGlobalConfig, GlobalConfig } from '../globals/config/types';
+import { PayloadRequest } from '../express/types';
 import InitializeGraphQL from '../graphql';
 import { Where } from '../types';
 
@@ -79,7 +79,7 @@ export type PayloadConfig = {
   serverURL: string;
   cookiePrefix?: string;
   csrf?: string[];
-  cors?: string[];
+  cors?: string[] | '*';
   publicENV?: { [key: string]: string };
   routes?: {
     api?: string;
@@ -121,10 +121,10 @@ export type PayloadConfig = {
   graphQL?: {
     mutations?: {
       [key: string]: unknown
-    } | ((graphQL: GraphQLType, payload: InitializeGraphQL) => any),
+    } | ((graphQL: typeof GraphQL, payload: InitializeGraphQL) => any),
     queries?: {
       [key: string]: unknown
-    } | ((graphQL: GraphQLType, payload: InitializeGraphQL) => any),
+    } | ((graphQL: typeof GraphQL, payload: InitializeGraphQL) => any),
     maxComplexity?: number;
     disablePlaygroundInProduction?: boolean;
   };
@@ -134,9 +134,11 @@ export type PayloadConfig = {
     afterError?: AfterErrorHook;
   };
   webpack?: (config: Configuration) => Configuration;
+  middleware?: any[]
   serverModules?: string[];
 };
 
 export type Config = Omit<DeepRequired<PayloadConfig>, 'collections'> & {
   collections: CollectionConfig[]
+  globals: GlobalConfig[]
 }

@@ -1,8 +1,6 @@
 import { Response, NextFunction } from 'express';
-import { PayloadRequest } from '../../express/types/payloadRequest';
+import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
-
-export type FindByIDRequestHandler = (req: PayloadRequest, res: Response, next: NextFunction) => unknown;
 
 export type FindByIDResult = {
   message: string;

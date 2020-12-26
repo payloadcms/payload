@@ -1,10 +1,8 @@
 import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types/payloadRequest';
+import { PayloadRequest } from '../../express/types';
 import { NotFound } from '../../errors';
 import { Document } from '../../types';
-
-export type DeleteRequestHandler = (req: PayloadRequest, res: Response, next: NextFunction) => unknown;
 
 export type DeleteResult = {
   message: string;

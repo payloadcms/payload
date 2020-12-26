@@ -1,20 +1,34 @@
 import jwt from 'jsonwebtoken';
-import { CookieOptions } from 'express';
+import { CookieOptions, Response } from 'express';
 import { AuthenticationError, LockedAuth } from '../../errors';
+import { PayloadRequest } from '../../express/types';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import isLocked from '../isLocked';
 import removeInternalFields from '../../utilities/removeInternalFields';
-import { OperationArguments } from '../../types';
 import { Field, fieldHasSubFields } from '../../fields/config/types';
 import { User } from '../types';
+import { Collection } from '../../collections/config/types';
 
-type LoginResponse = {
+export type Result = {
   user?: User,
   token?: string,
   exp?: string,
 }
 
-async function login(incomingArgs: OperationArguments): Promise<LoginResponse> {
+export type Arguments = {
+  collection: Collection,
+  data: {
+    email: string
+    password: string
+  }
+  req: PayloadRequest
+  res?: Response
+  depth?: number
+  overrideAccess?: boolean
+  showHiddenFields?: boolean
+}
+
+async function login(incomingArgs: Arguments): Promise<Result> {
   const { config, operations, secret } = this;
 
   let args = incomingArgs;

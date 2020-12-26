@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
-import { PayloadRequest } from '../../express/types/payloadRequest';
+import { PayloadRequest } from '../../express/types';
 import { Access } from '../../config/types';
 import { Document } from '../../types';
 

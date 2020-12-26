@@ -1,5 +1,5 @@
 import { DeepRequired } from 'ts-essentials';
-import { PayloadRequest } from '../express/types/payloadRequest';
+import { PayloadRequest } from '../express/types';
 
 export type Permission = {
   permission: boolean
@@ -55,7 +55,7 @@ export type User = {
 type GenerateVerifyEmailHTML = (args: { req: PayloadRequest, token: string, user: any}) => Promise<string> | string
 type GenerateVerifyEmailSubject = (args: { req: PayloadRequest, token: string, user: any}) => Promise<string> | string
 
-type GenerateForgotPasswordEmailHTML = (args?: { req?: PayloadRequest, token?: string, user?: string}) => Promise<string> | string
+type GenerateForgotPasswordEmailHTML = (args?: { req?: PayloadRequest, token?: string, user?: unknown}) => Promise<string> | string
 type GenerateForgotPasswordEmailSubject = (args?: { req?: PayloadRequest, token?: string, user?: any }) => Promise<string> | string
 
 export interface IncomingAuthType {

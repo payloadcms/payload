@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types/payloadRequest';
+import { PayloadRequest } from '../../express/types';
 import { GlobalConfig } from '../config/types';
 import { Document } from '../../types';
 

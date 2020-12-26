@@ -17,7 +17,34 @@ import deleteResolver from '../collections/graphql/resolvers/delete';
 
 import findOne from '../globals/graphql/resolvers/findOne';
 import globalUpdate from '../globals/graphql/resolvers/update';
+
 import { Payload } from '../index';
+
+export type GraphQLResolvers = {
+  collections: {
+    create: typeof create,
+    find: typeof find,
+    findByID: typeof findByID,
+    update: typeof update,
+    deleteResolver: typeof deleteResolver,
+    auth: {
+      access: typeof access,
+      forgotPassword: typeof forgotPassword,
+      init: typeof init,
+      login: typeof login,
+      logout: typeof logout,
+      me: typeof me,
+      refresh: typeof refresh,
+      resetPassword: typeof resetPassword,
+      verifyEmail: typeof verifyEmail,
+      unlock: typeof unlock,
+    }
+  }
+  globals: {
+    findOne: typeof findOne
+    update: typeof globalUpdate,
+  }
+}
 
 function bindResolvers(ctx: Payload): void {
   ctx.graphQL = {
