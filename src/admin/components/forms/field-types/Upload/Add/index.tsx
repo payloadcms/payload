@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 import { Modal, useModal } from '@faceless-ui/modal';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig, useAuth } from '@payloadcms/config-provider';
 import MinimalTemplate from '../../../../templates/Minimal';
 import Form from '../../../Form';
 import Button from '../../../../elements/Button';
@@ -9,12 +8,13 @@ import RenderFields from '../../../RenderFields';
 import FormSubmit from '../../../Submit';
 import Upload from '../../../../views/collections/Edit/Upload';
 import { NegativeFieldGutterProvider } from '../../../FieldTypeGutter/context';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'add-upload-modal';
 
-const AddUploadModal = (props) => {
+const AddUploadModal: React.FC<Props> = (props) => {
   const {
     collection,
     slug,
@@ -22,6 +22,7 @@ const AddUploadModal = (props) => {
     setValue,
   } = props;
 
+  const { permissions } = useAuth();
   const { serverURL, routes: { api } } = useConfig();
   const { closeAll } = useModal();
 
@@ -33,6 +34,8 @@ const AddUploadModal = (props) => {
   const classes = [
     baseClass,
   ].filter(Boolean).join(' ');
+
+  const collectionPermissions = permissions?.collections?.[collection.slug]?.fields;
 
   return (
     <Modal
@@ -67,7 +70,8 @@ const AddUploadModal = (props) => {
           />
           <NegativeFieldGutterProvider allow>
             <RenderFields
-              filter={(field) => (!field.position || (field.position && field.position !== 'sidebar'))}
+              permissions={collectionPermissions}
+              readOnly={false}
               fieldTypes={fieldTypes}
               fieldSchema={collection.fields}
             />
@@ -76,22 +80,6 @@ const AddUploadModal = (props) => {
       </MinimalTemplate>
     </Modal>
   );
-};
-
-AddUploadModal.propTypes = {
-  setValue: PropTypes.func.isRequired,
-  collection: PropTypes.shape({
-    labels: PropTypes.shape({
-      singular: PropTypes.string,
-    }),
-    slug: PropTypes.string,
-    fields: PropTypes.arrayOf(
-      PropTypes.shape({}),
-    ),
-    upload: PropTypes.shape({}),
-  }).isRequired,
-  slug: PropTypes.string.isRequired,
-  fieldTypes: PropTypes.shape({}).isRequired,
 };
 
 export default AddUploadModal;

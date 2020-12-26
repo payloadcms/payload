@@ -1,29 +1,29 @@
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
 import { textarea } from '../../../../../fields/validations';
+import { Props } from './types';
 
 import './index.scss';
 
-const Textarea = (props) => {
+const Textarea: React.FC<Props> = (props) => {
   const {
     path: pathFromProps,
     name,
     required,
-    validate,
+    validate = textarea,
     admin: {
       readOnly,
       style,
       width,
+      placeholder,
+      rows,
     } = {},
     label,
-    placeholder,
     minLength,
     maxLength,
-    rows,
   } = props;
 
   const path = pathFromProps || name;
@@ -71,7 +71,7 @@ const Textarea = (props) => {
       <textarea
         value={value || ''}
         onChange={setValue}
-        disabled={readOnly ? 'disabled' : undefined}
+        disabled={readOnly}
         placeholder={placeholder}
         id={path}
         name={path}
@@ -80,34 +80,4 @@ const Textarea = (props) => {
     </div>
   );
 };
-
-Textarea.defaultProps = {
-  required: false,
-  label: null,
-  validate: textarea,
-  placeholder: null,
-  path: '',
-  admin: {},
-  minLength: undefined,
-  maxLength: undefined,
-  rows: 8,
-};
-
-Textarea.propTypes = {
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string,
-  required: PropTypes.bool,
-  validate: PropTypes.func,
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-    style: PropTypes.shape({}),
-    width: PropTypes.string,
-  }),
-  label: PropTypes.string,
-  placeholder: PropTypes.string,
-  minLength: PropTypes.number,
-  maxLength: PropTypes.number,
-  rows: PropTypes.number,
-};
-
 export default withCondition(Textarea);

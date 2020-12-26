@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import PropTypes from 'prop-types';
 import { useModal } from '@faceless-ui/modal';
 import { useConfig } from '@payloadcms/config-provider';
 import useFieldType from '../../useFieldType';
@@ -11,12 +10,13 @@ import { upload } from '../../../../../fields/validations';
 import FileDetails from '../../../elements/FileDetails';
 import AddModal from './Add';
 import SelectExistingModal from './SelectExisting';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'upload';
 
-const Upload = (props) => {
+const Upload: React.FC<Props> = (props) => {
   const { toggle } = useModal();
   const [internalValue, setInternalValue] = useState(undefined);
   const [missingFile, setMissingFile] = useState(false);
@@ -32,7 +32,7 @@ const Upload = (props) => {
       width,
     } = {},
     label,
-    validate,
+    validate = upload,
     relationTo,
     fieldTypes,
   } = props;
@@ -165,31 +165,4 @@ const Upload = (props) => {
     </div>
   );
 };
-
-Upload.defaultProps = {
-  label: null,
-  required: false,
-  admin: {},
-  validate: upload,
-  path: '',
-};
-
-Upload.propTypes = {
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string,
-  required: PropTypes.bool,
-  validate: PropTypes.func,
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-    style: PropTypes.shape({}),
-    width: PropTypes.string,
-  }),
-  relationTo: PropTypes.string.isRequired,
-  fieldTypes: PropTypes.shape({}).isRequired,
-  label: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.node,
-  ]),
-};
-
 export default withCondition(Upload);

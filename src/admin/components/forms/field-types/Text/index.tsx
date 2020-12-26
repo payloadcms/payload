@@ -1,22 +1,22 @@
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
 import { text } from '../../../../../fields/validations';
+import { Props } from './types';
 
 import './index.scss';
 
-const Text = (props) => {
+const Text: React.FC<Props> = (props) => {
   const {
     path: pathFromProps,
     name,
     required,
-    validate,
+    validate = text,
     label,
-    placeholder,
     admin: {
+      placeholder,
       readOnly,
       style,
       width,
@@ -72,7 +72,7 @@ const Text = (props) => {
       <input
         value={value || ''}
         onChange={setValue}
-        disabled={readOnly ? 'disabled' : undefined}
+        disabled={readOnly}
         placeholder={placeholder}
         type="text"
         id={path}
@@ -80,36 +80,6 @@ const Text = (props) => {
       />
     </div>
   );
-};
-
-Text.defaultProps = {
-  label: null,
-  required: false,
-  admin: {},
-  placeholder: undefined,
-  validate: text,
-  path: '',
-  minLength: undefined,
-  maxLength: undefined,
-};
-
-Text.propTypes = {
-  name: PropTypes.string.isRequired,
-  path: PropTypes.string,
-  required: PropTypes.bool,
-  placeholder: PropTypes.string,
-  validate: PropTypes.func,
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-    style: PropTypes.shape({}),
-    width: PropTypes.string,
-  }),
-  label: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.node,
-  ]),
-  minLength: PropTypes.number,
-  maxLength: PropTypes.number,
 };
 
 export default withCondition(Text);

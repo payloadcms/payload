@@ -10,7 +10,7 @@ export type Context = {
 
 export type Props = {
   className?: string
-  operation: Operation
+  operation?: Operation
   readOnly: boolean
   permissions: {
     [field: string]: FieldPermissions

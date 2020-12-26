@@ -10,7 +10,6 @@ const setBlockDiscriminators = (fields: Field[], schema: Schema) => {
       blockFieldType.blocks.forEach((blockItem: Block) => {
         let blockSchemaFields = {};
 
-        // TODO: Would this blow up on a relationship since it doesn't have fields?
         blockItem.fields.forEach((blockField) => {
           const fieldSchema = fieldToSchemaMap[blockField.type];
           if (fieldSchema) {

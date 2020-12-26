@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useConfig } from '@payloadcms/config-provider';
 import MinimalTemplate from '../../../../templates/Minimal';
@@ -9,12 +8,13 @@ import usePayloadAPI from '../../../../../hooks/usePayloadAPI';
 import ListControls from '../../../../elements/ListControls';
 import Paginator from '../../../../elements/Paginator';
 import UploadGallery from '../../../../elements/UploadGallery';
+import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'select-existing-upload-modal';
 
-const SelectExistingUploadModal = (props) => {
+const SelectExistingUploadModal: React.FC<Props> = (props) => {
   const {
     setValue,
     collection,
@@ -27,7 +27,7 @@ const SelectExistingUploadModal = (props) => {
   const { serverURL, routes: { api } } = useConfig();
   const { closeAll, currentModal } = useModal();
   const [fields, setFields] = useState(collection.fields);
-  const [listControls, setListControls] = useState({});
+  const [listControls, setListControls] = useState<{where?: unknown}>({});
   const [page, setPage] = useState(null);
   const [sort, setSort] = useState(null);
 
@@ -46,7 +46,11 @@ const SelectExistingUploadModal = (props) => {
   }, [collection]);
 
   useEffect(() => {
-    const params = {};
+    const params: {
+      page?: number
+      sort?: string
+      where?: unknown
+    } = {};
 
     if (page) params.page = page;
     if (listControls?.where) params.where = listControls.where;
@@ -125,19 +129,6 @@ const SelectExistingUploadModal = (props) => {
       )}
     </Modal>
   );
-};
-
-SelectExistingUploadModal.propTypes = {
-  setValue: PropTypes.func.isRequired,
-  collection: PropTypes.shape({
-    labels: PropTypes.shape({
-      singular: PropTypes.string,
-    }),
-    fields: PropTypes.arrayOf(
-      PropTypes.shape({}),
-    ),
-  }).isRequired,
-  slug: PropTypes.string.isRequired,
 };
 
 export default SelectExistingUploadModal;

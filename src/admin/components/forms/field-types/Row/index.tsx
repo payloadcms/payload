@@ -1,11 +1,11 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
+import { Props } from './types';
 
 import './index.scss';
 
-const Row = (props) => {
+const Row: React.FC<Props> = (props) => {
   const {
     fields,
     fieldTypes,
@@ -20,7 +20,7 @@ const Row = (props) => {
     <RenderFields
       readOnly={readOnly}
       className="field-type row"
-      permissions={permissions}
+      permissions={permissions.fields}
       fieldTypes={fieldTypes}
       fieldSchema={fields.map((field) => ({
         ...field,
@@ -29,23 +29,4 @@ const Row = (props) => {
     />
   );
 };
-
-Row.defaultProps = {
-  path: '',
-  permissions: {},
-  admin: {},
-};
-
-Row.propTypes = {
-  fields: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ).isRequired,
-  fieldTypes: PropTypes.shape({}).isRequired,
-  path: PropTypes.string,
-  permissions: PropTypes.shape({}),
-  admin: PropTypes.shape({
-    readOnly: PropTypes.bool,
-  }),
-};
-
 export default withCondition(Row);

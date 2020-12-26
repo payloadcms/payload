@@ -100,6 +100,10 @@ export type TextareaField = FieldBase & {
   type: 'textarea';
   maxLength?: number
   minLength?: number
+  admin?: Admin & {
+    placeholder?: string
+    rows?: number
+  }
 }
 
 export type CheckboxField = FieldBase & {

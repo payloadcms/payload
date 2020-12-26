@@ -1,5 +1,5 @@
 import React from 'react';
-import RenderFields, { useRenderedFields } from '../../RenderFields';
+import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import FieldTypeGutter from '../../FieldTypeGutter';
 import { NegativeFieldGutterProvider } from '../../FieldTypeGutter/context';
@@ -24,7 +24,6 @@ const Group: React.FC<Props> = (props) => {
     permissions,
   } = props;
 
-  const { operation } = useRenderedFields();
   const path = pathFromProps || name;
 
   return (
@@ -45,7 +44,6 @@ const Group: React.FC<Props> = (props) => {
           <NegativeFieldGutterProvider allow={false}>
             <RenderFields
               permissions={permissions.fields}
-              operation={operation}
               readOnly={readOnly}
               fieldTypes={fieldTypes}
               fieldSchema={fields.map((subField) => ({
