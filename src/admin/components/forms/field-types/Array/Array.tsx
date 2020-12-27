@@ -216,7 +216,7 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
               iconStyle="with-border"
               iconPosition="left"
             >
-              {`Add ${label}`}
+              {`Add ${labels.singular}`}
             </Button>
           </div>
         )}

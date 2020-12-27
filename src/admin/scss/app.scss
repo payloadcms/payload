@@ -29,10 +29,10 @@ html {
   }
 }
 
+html,
+body,
 #app {
-  position: sticky;
-  top: 0;
-  z-index: $z-page;
+  height: 100%;
 }
 
 body {

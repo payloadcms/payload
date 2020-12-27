@@ -3,12 +3,12 @@
 .template-minimal {
   display: flex;
   width: 100%;
-  min-height: 100vh;
   justify-content: center;
   align-items: center;
   padding: base(3) $baseline;
   margin-left: auto;
   margin-right: auto;
+  min-height: 100%;
 
   &--width-normal {
     .template-minimal__wrap {

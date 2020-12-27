@@ -38,15 +38,20 @@
   }
 
   &__sidebar {
-    padding-top: base(3);
-    padding-bottom: base(1);
     width: base(22);
-    display: flex;
-    flex-direction: column;
     min-width: 0;
   }
 
   &__sidebar-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: scroll;
+  }
+
+  &__sidebar-sticky-wrap {
+    display: flex;
+    flex-direction: column;
     min-height: 100%;
   }
 
@@ -59,10 +64,6 @@
   }
 
   &__document-actions {
-    @include blur-bg;
-    position: sticky;
-    top: 0;
-    z-index: 2;
     padding-right: $baseline;
   }
 
@@ -106,7 +107,7 @@
   }
 
   &__meta {
-    margin: 0;
+    margin: auto 0 $baseline 0;
     padding-top: $baseline;
     list-style: none;
 
@@ -149,6 +150,11 @@
       width: unset;
     }
 
+    &__sidebar-sticky {
+      height: auto;
+      overflow: hidden;
+    }
+
     &__form {
       display: block;
     }
@@ -156,6 +162,7 @@
     &__edit {
       padding: $baseline;
       margin-bottom: $baseline;
+      overflow: scroll;
     }
 
     &__document-actions {
@@ -164,6 +171,8 @@
       left: 0;
       right: 0;
       top: auto;
+      @include blur-bg;
+      z-index: $z-nav;
     }
 
     &__document-actions,

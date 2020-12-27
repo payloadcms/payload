@@ -34,4 +34,11 @@
   .Toastify__toast--error {
     background: $color-red;
   }
+
+  @include mid-break {
+    .Toastify__toast-container {
+      left: $baseline;
+      right: $baseline;
+    }
+  }
 }
