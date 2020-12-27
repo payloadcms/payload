@@ -175,6 +175,7 @@ export const blocks = baseField.keys({
       fields: joi.array().items(joi.link('#field')),
     }),
   ),
+  defaultValue: joi.array().items(joi.object()),
 });
 
 export const richText = baseField.keys({

@@ -204,6 +204,15 @@ const DefaultValues: PayloadCollectionConfig = {
       },
       blocks: [Email, NumberBlock, Quote, CallToAction],
       localized: true,
+      admin: {
+        readOnly: true,
+      },
+      defaultValue: [
+        {
+          blockType: 'email',
+          testEmail: 'dev@payloadcms.com',
+        },
+      ],
     },
     {
       type: 'relationship',
