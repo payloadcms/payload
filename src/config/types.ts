@@ -80,7 +80,6 @@ export type PayloadConfig = {
   cookiePrefix?: string;
   csrf?: string[];
   cors?: string[] | '*';
-  publicENV?: { [key: string]: string };
   routes?: {
     api?: string;
     admin?: string;
@@ -135,7 +134,6 @@ export type PayloadConfig = {
   };
   webpack?: (config: Configuration) => Configuration;
   middleware?: any[]
-  serverModules?: string[];
 };
 
 export type Config = Omit<DeepRequired<PayloadConfig>, 'collections'> & {
