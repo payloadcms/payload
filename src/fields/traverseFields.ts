@@ -2,10 +2,38 @@ import { Data } from '../admin/components/forms/Form/types';
 import validationPromise from './validationPromise';
 import accessPromise from './accessPromise';
 import hookPromise from './hookPromise';
-import { OperationArguments } from '../types';
-import { fieldHasSubFields, fieldIsArrayType, fieldIsBlockType } from './config/types';
+import { Field, fieldHasSubFields, fieldIsArrayType, fieldIsBlockType, HookName } from './config/types';
+import { Operation } from '../types';
+import { PayloadRequest } from '../express/types';
+import { Payload } from '..';
 
-const traverseFields = (args: OperationArguments): void => {
+type Arguments = {
+  fields: Field[]
+  data: Record<string, any>
+  originalDoc: Record<string, any>
+  path: string
+  reduceLocales: boolean
+  locale: string
+  fallbackLocale: string
+  accessPromises: Promise<void>[]
+  operation: Operation
+  overrideAccess: boolean
+  req: PayloadRequest
+  id?: string
+  relationshipPopulations: (() => Promise<void>)[]
+  depth: number
+  currentDepth: number
+  hook: HookName
+  hookPromises: Promise<void>[]
+  fullOriginalDoc: Record<string, any>
+  fullData: Record<string, any>
+  validationPromises: (() => Promise<string | boolean>)[]
+  errors: {message: string, field: string}[]
+  payload: Payload
+  showHiddenFields: boolean
+}
+
+const traverseFields = (args: Arguments): void => {
   const {
     fields,
     data = {},
@@ -26,7 +54,6 @@ const traverseFields = (args: OperationArguments): void => {
     hookPromises,
     fullOriginalDoc,
     fullData,
-    performFieldOperations,
     validationPromises,
     errors,
     payload,
@@ -87,12 +114,10 @@ const traverseFields = (args: OperationArguments): void => {
       data,
       field,
       hook,
-      performFieldOperations,
       req,
       operation,
       fullOriginalDoc,
       fullData,
-      payload,
     }));
 
     if (fieldHasSubFields(field)) {

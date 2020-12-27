@@ -11,7 +11,7 @@ export type FieldHook = (args: {
   data?: {
     [key: string]: unknown
   },
-  operation?: 'create' | 'update',
+  operation?: 'create' | 'read' | 'update' | 'delete',
   req: PayloadRequest
 }) => Promise<unknown> | unknown;
 
@@ -240,6 +240,10 @@ export type FieldWithSubFields =
   | ArrayField
   | RowField;
 
+export type FieldWithMany =
+  SelectField
+  | RelationshipField
+
 export function fieldHasSubFields(field: Field): field is FieldWithSubFields {
   return (field.type === 'group' || field.type === 'array' || field.type === 'row');
 }
@@ -258,6 +262,10 @@ export function optionIsObject(option: Option): option is OptionObject {
 
 export function optionIsValue(option: Option): option is string {
   return typeof option === 'string';
+}
+
+export function fieldSupportsMany(field: Field): field is FieldWithMany {
+  return field.type === 'select' || field.type === 'relationship';
 }
 
 export type HookName = 'beforeChange' | 'beforeValidate' | 'afterChange' | 'afterRead';

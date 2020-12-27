@@ -1,6 +1,21 @@
+import { PayloadRequest } from '../express/types';
 import executeAccess from '../auth/executeAccess';
-import { OperationArguments } from '../types';
-import { RelationshipField } from './config/types';
+import { Field, RelationshipField, fieldSupportsMany } from './config/types';
+import { Payload } from '..';
+
+
+type PopulateArgs = {
+  depth: number
+  currentDepth: number
+  req: PayloadRequest
+  overrideAccess: boolean
+  dataReference: Record<string, any>
+  data: Record<string, unknown>
+  field: Field
+  index?: number
+  id?: string
+  payload: Payload
+}
 
 const populate = async ({
   depth,
@@ -13,7 +28,7 @@ const populate = async ({
   index,
   id,
   payload,
-}: OperationArguments) => {
+}: PopulateArgs) => {
   const dataToUpdate = dataReference;
 
   const fieldAsRelationship = field as RelationshipField;
@@ -61,6 +76,16 @@ const populate = async ({
   }
 };
 
+type PromiseArgs = {
+  data: Record<string, any>
+  field: Field
+  depth: number
+  currentDepth: number
+  req: PayloadRequest
+  overrideAccess: boolean
+  payload: Payload
+}
+
 const relationshipPopulationPromise = ({
   data,
   field,
@@ -69,10 +94,10 @@ const relationshipPopulationPromise = ({
   req,
   overrideAccess,
   payload,
-}) => async (): Promise<void> => {
+}: PromiseArgs) => async (): Promise<void> => {
   const resultingData = data;
 
-  if (field.hasMany && Array.isArray(data[field.name])) {
+  if (fieldSupportsMany(field) && field.hasMany && Array.isArray(data[field.name])) {
     const rowPromises = [];
 
     data[field.name].forEach((relatedDoc, index) => {

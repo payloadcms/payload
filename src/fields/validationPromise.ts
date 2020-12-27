@@ -1,4 +1,13 @@
-import { OperationArguments } from '../types';
+import { Field, HookName } from './config/types';
+
+type Arguments = {
+  hook: HookName
+  field: Field
+  path: string
+  errors: {message: string, field: string}[]
+  newData: Record<string, unknown>
+  existingData: Record<string, unknown>
+}
 
 const validationPromise = async ({
   errors,
@@ -7,7 +16,7 @@ const validationPromise = async ({
   existingData,
   field,
   path,
-}: OperationArguments): Promise<string | boolean> => {
+}: Arguments): Promise<string | boolean> => {
   if (hook !== 'beforeChange') return true;
 
   const hasCondition = field.admin && field.admin.condition;
@@ -19,7 +28,7 @@ const validationPromise = async ({
 
   const result = shouldValidate ? await field.validate(valueToValidate, field) : true;
 
-  if (!result || typeof result === 'string') {
+  if (typeof result === 'string') {
     errors.push({
       message: result,
       field: `${path}${field.name}`,

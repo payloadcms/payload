@@ -1,10 +1,27 @@
 import { ValidationError } from '../errors';
 import sanitizeFallbackLocale from '../localization/sanitizeFallbackLocale';
 import traverseFields from './traverseFields';
-import { Collection } from '../collections/config/types';
-import { OperationArguments } from '../types';
+import { CollectionConfig } from '../collections/config/types';
+import { GlobalConfig } from '../globals/config/types';
+import { Operation } from '../types';
+import { PayloadRequest } from '../express/types';
+import { HookName } from './config/types';
 
-export default async function performFieldOperations(entityConfig: Collection, args: OperationArguments): Promise<{ [key: string]: unknown }> {
+type Arguments = {
+  data: Record<string, unknown>
+  originalDoc: Record<string, unknown>
+  operation: Operation
+  hook: HookName
+  req: PayloadRequest
+  id: string
+  overrideAccess: boolean
+  reduceLocales: boolean
+  showHiddenFields: boolean
+  depth: number
+  currentDepth: number
+}
+
+export default async function performFieldOperations(entityConfig: CollectionConfig | GlobalConfig, args: Arguments): Promise<{ [key: string]: unknown }> {
   const {
     data: fullData,
     originalDoc: fullOriginalDoc,
@@ -20,8 +37,6 @@ export default async function performFieldOperations(entityConfig: Collection, a
     reduceLocales,
     showHiddenFields,
   } = args;
-
-  const recursivePerformFieldOperations = performFieldOperations.bind(this);
 
   const fallbackLocale = sanitizeFallbackLocale(req.fallbackLocale);
 
@@ -42,7 +57,7 @@ export default async function performFieldOperations(entityConfig: Collection, a
   const accessPromises = [];
   const relationshipPopulations = [];
   const hookPromises = [];
-  const errors = [];
+  const errors: { message: string, field: string }[] = [];
 
   // //////////////////////////////////////////
   // Entry point for field validation
@@ -68,7 +83,6 @@ export default async function performFieldOperations(entityConfig: Collection, a
     hookPromises,
     fullOriginalDoc,
     fullData,
-    performFieldOperations: recursivePerformFieldOperations,
     validationPromises,
     errors,
     payload: this,
