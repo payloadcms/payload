@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/payload",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "CMS and Application Framework",
   "license": "ISC",
   "author": "Payload CMS LLC",
@@ -8,7 +8,7 @@
   "typings": "./dist/index.d.ts",
   "sideEffects": false,
   "bin": {
-    "payload": "./bin.js"
+    "payload": "bin.js"
   },
   "scripts": {
     "copyfiles": "copyfiles src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png} dist/",
