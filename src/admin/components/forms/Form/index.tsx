@@ -1,7 +1,7 @@
 import React, {
   useReducer, useEffect, useRef, useState, useCallback,
 } from 'react';
-import { objectToFormData } from 'object-to-formdata';
+import { serialize } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '@payloadcms/config-provider';
@@ -266,7 +266,7 @@ const Form: React.FC<Props> = (props) => {
     const data = reduceFieldsToValues(contextRef.current.fields);
 
     // nullAsUndefineds is important to allow uploads and relationship fields to clear themselves
-    const formData = objectToFormData(data, { indices: true, nullsAsUndefineds: false });
+    const formData = serialize(data, { indices: true, nullsAsUndefineds: false });
     return formData;
   }, [contextRef]);
 
