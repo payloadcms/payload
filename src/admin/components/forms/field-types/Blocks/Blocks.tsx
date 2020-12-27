@@ -168,6 +168,8 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
     required,
   } = props;
 
+  const hasMaxRows = maxRows && rows.length >= maxRows;
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div
@@ -214,6 +216,7 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
                       parentPath={path}
                       fieldTypes={fieldTypes}
                       permissions={permissions}
+                      hasMaxRows={hasMaxRows}
                       fieldSchema={[
                         ...blockToRender.fields,
                         {

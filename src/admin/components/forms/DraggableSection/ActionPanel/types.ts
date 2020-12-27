@@ -8,4 +8,5 @@ export type Props = {
   isHovered: boolean
   rowIndex: number
   blocks?: Block[]
+  hasMaxRows?: boolean
 }

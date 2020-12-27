@@ -21,4 +21,5 @@ export type Props = {
   isOpen?: boolean
   readOnly: boolean
   blocks?: Block[]
+  hasMaxRows?: boolean
 }

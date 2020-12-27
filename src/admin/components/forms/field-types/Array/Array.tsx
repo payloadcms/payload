@@ -149,6 +149,8 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
     required,
   } = props;
 
+  const hasMaxRows = maxRows && rows.length >= maxRows;
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div
@@ -184,6 +186,7 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
                   permissions={permissions}
+                  hasMaxRows={hasMaxRows}
                 />
               ))}
               {(rows.length < minRows || (required && rows.length === 0)) && (
@@ -207,7 +210,7 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
             </div>
           )}
         </Droppable>
-        {(!readOnly && (rows.length < maxRows || maxRows === undefined)) && (
+        {(!readOnly && (!hasMaxRows)) && (
           <div className={`${baseClass}__add-button-wrap`}>
             <Button
               onClick={() => addRow(value)}

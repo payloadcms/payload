@@ -18,6 +18,7 @@ const ActionPanel: React.FC<Props> = (props) => {
     blocks = [],
     rowIndex,
     isHovered,
+    hasMaxRows,
   } = props;
 
   const classes = [
@@ -48,57 +49,61 @@ const ActionPanel: React.FC<Props> = (props) => {
         {label}
       </Popup>
 
-      {blockType === 'blocks'
-        ? (
-          <Popup
-            buttonType="custom"
-            size="large"
-            horizontalAlign="center"
-            button={(
-              <Button
-                className={`${baseClass}__add-row`}
-                round
-                buttonStyle="none"
-                icon="plus"
-                iconPosition="left"
-                iconStyle="with-border"
+      {!hasMaxRows && (
+        <React.Fragment>
+          {blockType === 'blocks'
+            ? (
+              <Popup
+                buttonType="custom"
+                size="large"
+                horizontalAlign="center"
+                button={(
+                  <Button
+                    className={`${baseClass}__add-row`}
+                    round
+                    buttonStyle="none"
+                    icon="plus"
+                    iconPosition="left"
+                    iconStyle="with-border"
+                  />
+              )}
+                render={({ close }) => (
+                  <BlockSelector
+                    blocks={blocks}
+                    addRow={addRow}
+                    addRowIndex={rowIndex}
+                    close={close}
+                    parentIsHovered={isHovered}
+                    watchParentHover
+                  />
+                )}
               />
+            )
+            : (
+              <Popup
+                showOnHover
+                size="wide"
+                color="dark"
+                horizontalAlign="center"
+                buttonType="custom"
+                button={(
+                  <Button
+                    className={`${baseClass}__add-row`}
+                    round
+                    buttonStyle="none"
+                    icon="plus"
+                    iconPosition="left"
+                    iconStyle="with-border"
+                    onClick={() => addRow(rowIndex)}
+                  />
+              )}
+              >
+                Add&nbsp;
+                {label}
+              </Popup>
             )}
-            render={({ close }) => (
-              <BlockSelector
-                blocks={blocks}
-                addRow={addRow}
-                addRowIndex={rowIndex}
-                close={close}
-                parentIsHovered={isHovered}
-                watchParentHover
-              />
-            )}
-          />
-        )
-        : (
-          <Popup
-            showOnHover
-            size="wide"
-            color="dark"
-            horizontalAlign="center"
-            buttonType="custom"
-            button={(
-              <Button
-                className={`${baseClass}__add-row`}
-                round
-                buttonStyle="none"
-                icon="plus"
-                iconPosition="left"
-                iconStyle="with-border"
-                onClick={() => addRow(rowIndex)}
-              />
-            )}
-          >
-            Add&nbsp;
-            {label}
-          </Popup>
-        )}
+        </React.Fragment>
+      )}
     </div>
   );
 };

@@ -32,6 +32,7 @@ const DraggableSection: React.FC<Props> = (props) => {
     permissions,
     isOpen,
     readOnly,
+    hasMaxRows,
   } = props;
 
   const [isHovered, setIsHovered] = useState(false);
@@ -123,6 +124,7 @@ const DraggableSection: React.FC<Props> = (props) => {
                   rowIndex={rowIndex}
                   label={label}
                   isHovered={isHovered}
+                  hasMaxRows={hasMaxRows}
                   {...props}
                 />
               )}
