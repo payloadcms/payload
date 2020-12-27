@@ -111,6 +111,7 @@ const Form: React.FC<Props> = (props) => {
     // If not valid, prevent submission
     if (!isValid) {
       toast.error('Please correct invalid fields.');
+      setProcessing(false);
 
       return;
     }

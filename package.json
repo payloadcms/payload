@@ -11,7 +11,7 @@
     "payload": "bin.js"
   },
   "scripts": {
-    "copyfiles": "copyfiles src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png} dist/",
+    "copyfiles": "copyfiles -u 1 src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png} dist/",
     "build:components": "webpack --config src/webpack/components.config.js",
     "demo:build": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts node dist/bin/build",
     "build": "tsc",
