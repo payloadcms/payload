@@ -13,8 +13,6 @@ export const defaults = {
   admin: {
     meta: {
       titleSuffix: '- Payload',
-      ogImage: '/static/img/find-image-here.jpg',
-      favicon: '/static/img/whatever.png',
     },
     disable: false,
     indexHTML: path.resolve(__dirname, '../admin/index.html'),
