@@ -10,6 +10,8 @@
 
   &__main {
     min-width: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   &__header {
@@ -35,6 +37,8 @@
   &__edit {
     background: white;
     padding: base(5) base(6) base(6);
+    margin-bottom: base(1.5);
+    flex-grow: 1;
   }
 
   &__sidebar {
@@ -46,7 +50,7 @@
     position: sticky;
     top: 0;
     height: 100vh;
-    overflow: scroll;
+    overflow: auto;
   }
 
   &__sidebar-sticky-wrap {
@@ -64,7 +68,10 @@
   }
 
   &__document-actions {
+    @include blur-bg;
     padding-right: $baseline;
+    position: sticky;
+    top: 0;
   }
 
   &__document-actions--with-preview {
@@ -171,7 +178,6 @@
       left: 0;
       right: 0;
       top: auto;
-      @include blur-bg;
       z-index: $z-nav;
     }
 

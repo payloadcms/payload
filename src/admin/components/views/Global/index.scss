@@ -10,6 +10,8 @@
 
   &__main {
     min-width: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   &__header {
@@ -34,6 +36,8 @@
   &__edit {
     background: white;
     padding: base(5) base(6) base(6);
+    margin-bottom: base(1.5);
+    flex-grow: 1;
   }
 
   &__sidebar {
@@ -43,6 +47,8 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+    overflow: auto;
+    height: 100vh;
   }
 
   &__collection-actions,
@@ -181,6 +187,7 @@
 
     &__sidebar {
       padding-bottom: base(4);
+      height: auto;
     }
   }
 }
