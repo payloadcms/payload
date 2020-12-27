@@ -2,7 +2,7 @@ import webpack from 'webpack';
 import express, { Router } from 'express';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
-import getWebpackDevConfig from './getWebpackDevConfig';
+import getWebpackDevConfig from './getDevConfig';
 import { Config } from '../config/types';
 
 const router = express.Router();

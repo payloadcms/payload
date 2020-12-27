@@ -2,7 +2,7 @@
 /* eslint-disable global-require */
 
 import webpack from 'webpack';
-import getWebpackProdConfig from '../webpack/getWebpackProdConfig';
+import getWebpackProdConfig from '../webpack/getProdConfig';
 import findConfig from '../config/find';
 import loadConfig from '../config/load';
 
