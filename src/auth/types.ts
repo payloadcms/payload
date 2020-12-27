@@ -50,6 +50,7 @@ export type Permissions = {
 export type User = {
   id: string
   email: string
+  collection: string
   [key: string]: unknown
 }
 

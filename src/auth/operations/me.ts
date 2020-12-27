@@ -1,12 +1,11 @@
 import jwt from 'jsonwebtoken';
-import { Collection } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 import getExtractJWT from '../getExtractJWT';
 import { User } from '../types';
 
 export type Result = {
   user?: User,
-  collection?: Collection,
+  collection?: string,
   token?: string,
   exp?: string,
 }
