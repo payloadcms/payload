@@ -47,6 +47,7 @@ export default (payloadConfig: Config): Configuration => {
     test: /\.(scss|css)$/,
     sideEffects: true,
     use: [
+      MiniCSSExtractPlugin.loader,
       require.resolve('css-loader'),
       {
         loader: require.resolve('postcss-loader'),
