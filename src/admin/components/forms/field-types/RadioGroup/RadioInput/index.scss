@@ -61,6 +61,8 @@
 
 .radio-group--read-only {
   .radio-input {
+    cursor: default;
+
     &__label {
       color: $color-gray;
     }
@@ -73,7 +75,8 @@
       }
     }
 
-    &:not(&--is-selected) {
+
+    &:not(.radio-input--is-selected) {
       &:hover {
         .radio-input__styled-radio {
           &:before {
