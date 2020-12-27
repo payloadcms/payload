@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { useModal, Modal } from '@faceless-ui/modal';
 import { useConfig } from '@payloadcms/config-provider';
@@ -46,10 +45,6 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
       </MinimalTemplate>
     </Modal>
   );
-};
-
-StayLoggedInModal.propTypes = {
-  refreshCookie: PropTypes.func.isRequired,
 };
 
 export default StayLoggedInModal;

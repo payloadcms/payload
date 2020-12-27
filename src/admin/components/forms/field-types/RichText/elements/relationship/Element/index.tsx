@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import { useConfig } from '@payloadcms/config-provider';
 import RelationshipIcon from '../../../../../../icons/Relationship';
 
@@ -30,20 +29,6 @@ const Element = ({ attributes, children, element }) => {
       {children}
     </div>
   );
-};
-
-Element.defaultProps = {
-  attributes: {},
-  children: null,
-};
-
-Element.propTypes = {
-  attributes: PropTypes.shape({}),
-  children: PropTypes.node,
-  element: PropTypes.shape({
-    value: PropTypes.shape({}),
-    relationTo: PropTypes.string,
-  }).isRequired,
 };
 
 export default Element;

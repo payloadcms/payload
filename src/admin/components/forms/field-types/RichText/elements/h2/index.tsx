@@ -1,21 +1,10 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import ElementButton from '../Button';
 import H2Icon from '../../../../../icons/headings/H2';
 
 const H2 = ({ attributes, children }) => (
   <h2 {...attributes}>{children}</h2>
 );
-
-H2.defaultProps = {
-  attributes: {},
-  children: null,
-};
-
-H2.propTypes = {
-  attributes: PropTypes.shape({}),
-  children: PropTypes.node,
-};
 
 const h2 = {
   Button: () => (

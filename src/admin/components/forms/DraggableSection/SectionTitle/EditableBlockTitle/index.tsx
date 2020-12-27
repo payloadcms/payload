@@ -1,13 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-
 import useFieldType from '../../../useFieldType';
 
 import './index.scss';
 
 const baseClass = 'editable-block-title';
 
-const EditableBlockTitle: React.FC<{ path: string}> = (props) => {
+const EditableBlockTitle: React.FC<{ path: string }> = (props) => {
   const { path } = props;
   const inputRef = useRef(null);
   const inputCloneRef = useRef(null);
@@ -54,10 +52,6 @@ const EditableBlockTitle: React.FC<{ path: string}> = (props) => {
       </span>
     </React.Fragment>
   );
-};
-
-EditableBlockTitle.propTypes = {
-  path: PropTypes.string.isRequired,
 };
 
 export default EditableBlockTitle;

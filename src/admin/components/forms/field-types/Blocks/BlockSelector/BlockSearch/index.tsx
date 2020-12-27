@@ -1,13 +1,11 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-
 import SearchIcon from '../../../../../graphics/Search';
 
 import './index.scss';
 
 const baseClass = 'block-search';
 
-const BlockSearch: React.FC<{setSearchTerm: (term: string) => void}> = (props) => {
+const BlockSearch: React.FC<{ setSearchTerm: (term: string) => void }> = (props) => {
   const { setSearchTerm } = props;
 
   const handleChange = (e) => {
@@ -24,10 +22,6 @@ const BlockSearch: React.FC<{setSearchTerm: (term: string) => void}> = (props) =
       <SearchIcon />
     </div>
   );
-};
-
-BlockSearch.propTypes = {
-  setSearchTerm: PropTypes.func.isRequired,
 };
 
 export default BlockSearch;

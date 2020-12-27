@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useSlate } from 'slate-react';
 import isMarkActive from './isActive';
 import toggleLeaf from './toggle';
@@ -26,15 +25,6 @@ const LeafButton = ({ format, children }) => {
       {children}
     </button>
   );
-};
-
-LeafButton.defaultProps = {
-  children: null,
-};
-
-LeafButton.propTypes = {
-  children: PropTypes.node,
-  format: PropTypes.string.isRequired,
 };
 
 export default LeafButton;

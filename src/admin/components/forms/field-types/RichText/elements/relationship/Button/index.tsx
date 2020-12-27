@@ -1,5 +1,4 @@
 import React, { Fragment, useCallback, useState } from 'react';
-import PropTypes from 'prop-types';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
 import { useSlate } from 'slate-react';
@@ -98,10 +97,6 @@ const RelationshipButton = ({ path }) => {
       </Modal>
     </Fragment>
   );
-};
-
-RelationshipButton.propTypes = {
-  path: PropTypes.string.isRequired,
 };
 
 export default RelationshipButton;

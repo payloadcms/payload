@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useConfig, useAuth } from '@payloadcms/config-provider';
 import MinimalTemplate from '../../templates/Minimal';
 import Meta from '../../utilities/Meta';
@@ -75,10 +74,6 @@ const CreateFirstUser: React.FC<Props> = (props) => {
       </Form>
     </MinimalTemplate>
   );
-};
-
-CreateFirstUser.propTypes = {
-  setInitialized: PropTypes.func.isRequired,
 };
 
 export default CreateFirstUser;

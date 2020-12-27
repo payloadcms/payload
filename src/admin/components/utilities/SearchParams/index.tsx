@@ -1,6 +1,5 @@
 import React, { createContext, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import qs from 'qs';
 
 const Context = createContext({});
@@ -18,13 +17,6 @@ export const SearchParamsProvider: React.FC = ({ children }) => {
       {children}
     </Context.Provider>
   );
-};
-
-SearchParamsProvider.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
 };
 
 export const useSearchParams = (): qs.ParsedQs => useContext(Context);

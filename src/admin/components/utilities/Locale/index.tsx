@@ -1,7 +1,6 @@
 import React, {
   createContext, useContext, useState, useEffect,
 } from 'react';
-import PropTypes from 'prop-types';
 import { useConfig } from '@payloadcms/config-provider';
 import { useSearchParams } from '../SearchParams';
 
@@ -26,12 +25,5 @@ export const LocaleProvider: React.FC = ({ children }) => {
 };
 
 export const useLocale = (): string => useContext(Context);
-
-LocaleProvider.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
-};
 
 export default Context;

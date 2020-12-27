@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 const ArrayCell = ({ data, field }) => {
   const arrayFields = data ?? [];
@@ -8,19 +7,6 @@ const ArrayCell = ({ data, field }) => {
   return (
     <span>{label}</span>
   );
-};
-
-ArrayCell.defaultProps = {
-  data: [],
-};
-
-ArrayCell.propTypes = {
-  data: PropTypes.arrayOf(
-    PropTypes.shape({}),
-  ),
-  field: PropTypes.shape({
-    label: PropTypes.string,
-  }).isRequired,
 };
 
 export default ArrayCell;
