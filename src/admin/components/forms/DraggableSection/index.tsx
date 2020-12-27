@@ -40,7 +40,7 @@ const DraggableSection: React.FC<Props> = (props) => {
   const classes = [
     baseClass,
     isOpen ? 'is-open' : 'is-closed',
-    isHovered && 'is-hovered',
+    (isHovered && !readOnly) && 'is-hovered',
   ].filter(Boolean).join(' ');
 
   return (
