@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useState, useEffect } from 'react';
 import {
-  Route, Switch, withRouter, Redirect, useHistory, useLocation,
+  Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
 import { useConfig, useAuth } from '@payloadcms/config-provider';
 import List from './views/collections/List';
@@ -24,8 +24,6 @@ const Unauthorized = lazy(() => import('./views/Unauthorized'));
 const Account = lazy(() => import('./views/Account'));
 
 const Routes = () => {
-  const { pathname } = useLocation();
-  const history = useHistory();
   const [initialized, setInitialized] = useState(null);
   const { user, permissions, permissions: { canAccessAdmin }, refreshCookie } = useAuth();
 
@@ -40,11 +38,6 @@ const Routes = () => {
       }
     }));
   }, [routes, userSlug]);
-
-  useEffect(() => {
-    // Clear location state on path change
-    history.replace(pathname, {});
-  }, [history, pathname]);
 
   return (
     <Suspense fallback={<Loading />}>
