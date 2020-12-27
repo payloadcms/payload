@@ -1,6 +1,19 @@
 /* eslint-disable no-param-reassign */
+import { Response } from 'express';
+import { PayloadRequest } from '../../../express/types';
+import { Collection } from '../../config/types';
 
-export default function create(collection) {
+export type Resolver = (_: unknown, args: {
+    data: Record<string, unknown>,
+    locale?: string
+  },
+  context: {
+    req: PayloadRequest,
+    res: Response
+  }
+) => Promise<Document>
+
+export default function create(collection: Collection): Resolver {
   async function resolver(_, args, context) {
     if (args.locale) {
       context.req.locale = args.locale;

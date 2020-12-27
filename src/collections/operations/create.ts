@@ -2,6 +2,7 @@ import mkdirp from 'mkdirp';
 import path from 'path';
 import crypto from 'crypto';
 
+import { UploadedFile } from 'express-fileupload';
 import executeAccess from '../../auth/executeAccess';
 import removeInternalFields from '../../utilities/removeInternalFields';
 
@@ -13,9 +14,21 @@ import isImage from '../../uploads/isImage';
 import { FileData } from '../../uploads/types';
 
 import sendVerificationEmail from '../../auth/sendVerificationEmail';
-import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook } from '../config/types';
+import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection } from '../config/types';
+import { PayloadRequest } from '../../express/types';
+import { Document } from '../../types';
 
-async function create(incomingArgs) {
+export type Arguments = {
+  collection: Collection
+  req: PayloadRequest
+  depth?: number
+  disableVerificationEmail?: boolean
+  overrideAccess?: boolean
+  showHiddenFields?: boolean
+  data: Record<string, unknown>
+}
+
+async function create(incomingArgs: Arguments): Promise<Document> {
   const { performFieldOperations, config } = this;
 
   let args = incomingArgs;
@@ -24,7 +37,7 @@ async function create(incomingArgs) {
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
     await priorHook;
 
     args = (await hook({
@@ -75,7 +88,7 @@ async function create(incomingArgs) {
   // beforeValidate - Collections
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook: BeforeValidateHook, hook: BeforeValidateHook) => {
+  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook: BeforeValidateHook | Promise<void>, hook: BeforeValidateHook) => {
     await priorHook;
 
     data = (await hook({
@@ -121,7 +134,7 @@ async function create(incomingArgs) {
 
     const { staticDir, imageSizes } = collectionConfig.upload;
 
-    const file = (req.files && req.files.file) ? req.files.file : req.file;
+    const file = ((req.files && req.files.file) ? req.files.file : req.file) as UploadedFile;
 
     if (!file) {
       throw new MissingFile();
@@ -169,15 +182,15 @@ async function create(incomingArgs) {
   // Create
   // /////////////////////////////////////
 
-  let result = new Model();
+  let doc = new Model();
 
-  if (locale && result.setLocale) {
-    result.setLocale(locale, fallbackLocale);
+  if (locale && doc.setLocale) {
+    doc.setLocale(locale, fallbackLocale);
   }
 
   if (collectionConfig.auth) {
     if (data.email) {
-      data.email = data.email.toLowerCase();
+      data.email = (data.email as string).toLowerCase();
     }
     if (collectionConfig.auth.verify) {
       data._verified = false;
@@ -185,15 +198,15 @@ async function create(incomingArgs) {
     }
   }
 
-  Object.assign(result, data);
+  Object.assign(doc, data);
 
   if (collectionConfig.auth) {
-    result = await Model.register(result, data.password);
+    doc = await Model.register(doc, data.password as string);
   } else {
-    await result.save();
+    await doc.save();
   }
 
-  result = result.toJSON({ virtuals: true });
+  let result: Document = doc.toJSON({ virtuals: true });
 
   result = removeInternalFields(result);
   result = JSON.stringify(result);
@@ -217,7 +230,7 @@ async function create(incomingArgs) {
   // afterChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterChange.reduce(async (priorHook: AfterChangeHook, hook: AfterChangeHook) => {
+  await collectionConfig.hooks.afterChange.reduce(async (priorHook: AfterChangeHook | Promise<void>, hook: AfterChangeHook) => {
     await priorHook;
 
     result = await hook({
@@ -237,7 +250,7 @@ async function create(incomingArgs) {
       sendEmail: this.sendEmail,
       collection: { config: collectionConfig, Model },
       user: result,
-      token: data._verificationToken,
+      token: data._verificationToken as string,
       req,
       disableEmail: disableVerificationEmail,
     });

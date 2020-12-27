@@ -1,11 +1,9 @@
 import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
-import { FindResponse } from '../../types';
 import { PayloadRequest } from '../../express/types';
+import { PaginatedDocs } from '../config/types';
 
-export type FindResult = FindResponse;
-
-export default async function find(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<FindResult> | void> {
+export default async function find(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs> | void> {
   try {
     const options = {
       req,

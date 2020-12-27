@@ -11,12 +11,9 @@ import {
 
 import { GraphQLJSON } from 'graphql-type-json';
 
-
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import formatName from '../utilities/formatName';
-import combineParentName from '../utilities/combineParentName';
-import withOperators from './withOperators';
 import {
+  optionIsObject,
   ArrayField,
   CheckboxField,
   CodeField,
@@ -35,6 +32,10 @@ import {
   TextField,
   UploadField,
 } from '../../fields/config/types';
+import formatName from '../utilities/formatName';
+import combineParentName from '../utilities/combineParentName';
+import withOperators from './withOperators';
+
 // buildWhereInputType is similar to buildObjectType and operates
 // on a field basis with a few distinct differences.
 //
@@ -156,12 +157,23 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
         field,
         new GraphQLEnumType({
           name: `${combineParentName(parentName, field.name)}_Input`,
-          values: field.options.reduce((values, option) => ({
-            ...values,
-            [formatName(option.value)]: {
-              value: option.value,
-            },
-          }), {}),
+          values: field.options.reduce((values, option) => {
+            if (optionIsObject(option)) {
+              return {
+                ...values,
+                [formatName(option.value)]: {
+                  value: option.value,
+                },
+              };
+            }
+
+            return {
+              ...values,
+              [formatName(option)]: {
+                value: option,
+              },
+            };
+          }, {}),
         }),
         parentName,
         [...operators.equality, 'like'],
@@ -318,7 +330,7 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
 
   fieldTypes.id = {
     type: withOperators(
-      { name: 'id' },
+      { name: 'id' } as Field,
       GraphQLString,
       parentName,
       [...operators.equality, ...operators.contains],

@@ -1,5 +1,23 @@
+import { Payload } from '..';
+import { Field, HookName } from './config/types';
 import relationshipPopulationPromise from './relationshipPopulationPromise';
-import { OperationArguments } from '../types';
+import { Operation } from '../types';
+import { PayloadRequest } from '../express/types';
+
+type Arguments = {
+  data: Record<string, unknown>
+  originalDoc: Record<string, unknown>
+  field: Field
+  operation: Operation
+  overrideAccess: boolean
+  req: PayloadRequest
+  id: string
+  relationshipPopulations: (() => Promise<void>)[]
+  depth: number
+  currentDepth: number
+  hook: HookName
+  payload: Payload
+}
 
 const accessPromise = async ({
   data,
@@ -14,7 +32,7 @@ const accessPromise = async ({
   currentDepth,
   hook,
   payload,
-}: OperationArguments): Promise<void> => {
+}: Arguments): Promise<void> => {
   const resultingData = data;
 
   let accessOperation;

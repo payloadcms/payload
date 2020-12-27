@@ -1,19 +1,32 @@
-import memoize from 'micro-memoize';
-import { BeforeOperationHook } from '../config/types';
 /* eslint-disable no-underscore-dangle */
+import memoize from 'micro-memoize';
+import { PayloadRequest } from '../../express/types';
+import { Collection } from '../config/types';
 import removeInternalFields from '../../utilities/removeInternalFields';
 import { Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
-import { Query } from './types';
+import { Document, Where } from '../../types';
+import { hasWhereAccessResult } from '../../auth/types';
 
-async function findByID(incomingArgs) {
+export type Arguments = {
+  collection: Collection
+  id: string
+  req: PayloadRequest
+  disableErrors?: boolean
+  currentDepth?: number
+  overrideAccess?: boolean
+  showHiddenFields?: boolean
+  depth?: number
+}
+
+async function findByID(incomingArgs: Arguments): Promise<Document> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
     await priorHook;
 
     args = (await hook({
@@ -46,7 +59,7 @@ async function findByID(incomingArgs) {
   const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors, id }, collectionConfig.access.read) : true;
   const hasWhereAccess = typeof accessResults === 'object';
 
-  const queryToBuild: Query = {
+  const queryToBuild: { where: Where } = {
     where: {
       and: [
         {
@@ -58,8 +71,8 @@ async function findByID(incomingArgs) {
     },
   };
 
-  if (hasWhereAccess) {
-    queryToBuild.where.and.push(accessResults);
+  if (hasWhereAccessResult(accessResults)) {
+    (queryToBuild.where.and as Where[]).push(accessResults);
   }
 
   const query = await Model.buildQuery(queryToBuild, locale);

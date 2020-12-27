@@ -1,5 +1,6 @@
 import { DeepRequired } from 'ts-essentials';
 import { PayloadRequest } from '../express/types';
+import { Where, PayloadMongooseDocument } from '../types';
 
 export type Permission = {
   permission: boolean
@@ -52,6 +53,13 @@ export type User = {
   [key: string]: unknown
 }
 
+export interface UserDocument extends PayloadMongooseDocument {
+  setPassword: (pass: string) => Promise<void>
+  authenticate: (pass: string) => Promise<void>
+  resetPasswordExpiration: number
+  email: string
+}
+
 type GenerateVerifyEmailHTML = (args: { req: PayloadRequest, token: string, user: any}) => Promise<string> | string
 type GenerateVerifyEmailSubject = (args: { req: PayloadRequest, token: string, user: any}) => Promise<string> | string
 
@@ -84,12 +92,16 @@ export interface IncomingAuthType {
 export type VerifyConfig = {
   generateEmailHTML?: GenerateVerifyEmailHTML
   generateEmailSubject?: GenerateVerifyEmailSubject
-} | boolean;
+};
 
 export interface Auth extends Omit<DeepRequired<IncomingAuthType>, 'verify' | 'forgotPassword'> {
-  verify?: VerifyConfig
+  verify?: VerifyConfig | boolean
   forgotPassword?: {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
+}
+
+export function hasWhereAccessResult(result: boolean | Where): result is Where {
+  return typeof result !== 'boolean';
 }

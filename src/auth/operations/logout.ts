@@ -1,8 +1,16 @@
 import httpStatus from 'http-status';
-import { OperationArguments } from '../../types';
+import { Response } from 'express';
+import { PayloadRequest } from '../../express/types';
 import { APIError } from '../../errors';
+import { Collection } from '../../collections/config/types';
 
-async function logout(args: OperationArguments): Promise<string> {
+export type Arguments = {
+  req: PayloadRequest
+  res: Response
+  collection: Collection
+}
+
+async function logout(args: Arguments): Promise<string> {
   const { config } = this;
 
   const requestedSlug = args.req.route.path.split('/').filter((r) => r !== '')[0];

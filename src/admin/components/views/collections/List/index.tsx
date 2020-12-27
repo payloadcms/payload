@@ -24,12 +24,8 @@ const ListView: React.FC<ListIndexProps> = (props) => {
         components: {
           views: {
             List: CustomList,
-          },
-        } = {
-          views: {
-            List: undefined,
-          },
-        },
+          } = {},
+        } = {},
       },
     },
   } = props;

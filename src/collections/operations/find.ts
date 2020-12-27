@@ -1,16 +1,30 @@
+import { Where } from '../../types';
+import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import removeInternalFields from '../../utilities/removeInternalFields';
-import { BeforeOperationHook, BeforeReadHook } from '../config/types';
-import { Query } from './types';
+import { Collection, PaginatedDocs } from '../config/types';
+import { hasWhereAccessResult } from '../../auth/types';
 
-async function find(incomingArgs) {
+export type Arguments = {
+  collection: Collection
+  where?: Where
+  page?: number
+  limit?: number
+  sort?: string
+  depth?: number
+  req?: PayloadRequest
+  overrideAccess?: boolean
+  showHiddenFields?: boolean
+}
+
+async function find(incomingArgs: Arguments): Promise<PaginatedDocs> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
     await priorHook;
 
     args = (await hook({
@@ -40,7 +54,7 @@ async function find(incomingArgs) {
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: Query = {};
+  const queryToBuild: { where?: Where} = {};
 
   if (where) {
     let and = [];
@@ -58,9 +72,8 @@ async function find(incomingArgs) {
 
   if (!overrideAccess) {
     const accessResults = await executeAccess({ req }, collectionConfig.access.read);
-    const hasWhereAccess = typeof accessResults === 'object';
 
-    if (hasWhereAccess) {
+    if (hasWhereAccessResult(accessResults)) {
       if (!where) {
         queryToBuild.where = {
           and: [
@@ -68,7 +81,7 @@ async function find(incomingArgs) {
           ],
         };
       } else {
-        queryToBuild.where.and.push(accessResults);
+        (queryToBuild.where.and as Where[]).push(accessResults);
       }
     }
   }
@@ -97,17 +110,17 @@ async function find(incomingArgs) {
     leanWithId: true,
   };
 
-  let result = await Model.paginate(query, optionsToExecute);
+  const paginatedDocs = await Model.paginate(query, optionsToExecute);
 
   // /////////////////////////////////////
   // beforeRead - Collection
   // /////////////////////////////////////
 
-  result = {
-    ...result,
-    docs: await Promise.all(result.docs.map(async (doc) => {
-      let docRef = JSON.stringify(doc);
-      docRef = JSON.parse(docRef);
+  let result = {
+    ...paginatedDocs,
+    docs: await Promise.all(paginatedDocs.docs.map(async (doc) => {
+      const docString = JSON.stringify(doc);
+      let docRef = JSON.parse(docString);
 
       await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
         await priorHook;
@@ -117,7 +130,7 @@ async function find(incomingArgs) {
 
       return docRef;
     })),
-  };
+  } as PaginatedDocs;
 
   // /////////////////////////////////////
   // afterRead - Fields

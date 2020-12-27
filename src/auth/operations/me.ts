@@ -4,14 +4,18 @@ import { PayloadRequest } from '../../express/types';
 import getExtractJWT from '../getExtractJWT';
 import { User } from '../types';
 
-type MeResponse = {
+export type Result = {
   user?: User,
   collection?: Collection,
   token?: string,
   exp?: string,
 }
 
-async function me({ req }: { req: PayloadRequest }): Promise<MeResponse> {
+export type Arguments = {
+  req: PayloadRequest
+}
+
+async function me({ req }: Arguments): Promise<Result> {
   const extractJWT = getExtractJWT(this.config);
 
   if (req.user) {
@@ -26,7 +30,7 @@ async function me({ req }: { req: PayloadRequest }): Promise<MeResponse> {
 
     delete user.collection;
 
-    const response: MeResponse = {
+    const response: Result = {
       user,
       collection: req.user.collection,
     };

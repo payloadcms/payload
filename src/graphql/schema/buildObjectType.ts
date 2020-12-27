@@ -13,7 +13,7 @@ import {
   GraphQLUnionType,
 } from 'graphql';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { Field, RadioField, RelationshipField, SelectField, UploadField } from '../../fields/config/types';
+import { Field, RadioField, RelationshipField, SelectField, UploadField, optionIsObject } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import withNullableType from './withNullableType';
@@ -128,12 +128,23 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
         field,
         new GraphQLEnumType({
           name: combineParentName(parentName, field.name),
-          values: field.options.reduce((values, option) => ({
-            ...values,
-            [formatName(option.value)]: {
-              value: option.value,
-            },
-          }), {}),
+          values: field.options.reduce((values, option) => {
+            if (optionIsObject(option)) {
+              return {
+                ...values,
+                [formatName(option.value)]: {
+                  value: option.value,
+                },
+              };
+            }
+
+            return {
+              ...values,
+              [formatName(option)]: {
+                value: option,
+              },
+            };
+          }, {}),
         }),
       ),
     }),
@@ -180,10 +191,10 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
       let type;
       let relationToType = null;
 
-      if (isRelatedToManyCollections) {
+      if (Array.isArray(relationTo)) {
         relationToType = new GraphQLEnumType({
           name: `${relationshipName}_RelationTo`,
-          values: field.relationTo.reduce((relations, relation) => ({
+          values: relationTo.reduce((relations, relation) => ({
             ...relations,
             [formatName(relation)]: {
               value: relation,
@@ -225,7 +236,13 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
 
       type = type || newlyCreatedBlockType;
 
-      const relationshipArgs = {} as LocaleInputType;
+      const relationshipArgs: {
+        locale?: unknown
+        fallbackLocale?: unknown
+        where?: unknown
+        page?: unknown
+        limit?: unknown
+      } = {};
 
       if (this.config.localization) {
         relationshipArgs.locale = {
@@ -269,7 +286,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
               }
 
               const result = await find({
-                collection: collections[relatedCollectionSlug],
+                collection: collections[relatedCollectionSlug as string],
                 where: {
                   ...(args.where || {}),
                   _id: {
@@ -320,7 +337,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
             id = id.toString();
 
             const relatedDocumentQuery = {
-              collection: collections[relatedCollectionSlug],
+              collection: collections[relatedCollectionSlug as string],
               where: {
                 ...(args.where || {}),
                 id: {
@@ -362,7 +379,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
         relationship.args.limit = { type: GraphQLInt };
       }
 
-      if (isRelatedToManyCollections) {
+      if (Array.isArray(relationTo)) {
         const relatedCollectionFields = relationTo.reduce((allFields, relation) => [
           ...allFields,
           ...collections[relation].config.fields,

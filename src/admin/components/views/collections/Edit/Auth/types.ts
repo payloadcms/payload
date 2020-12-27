@@ -4,7 +4,7 @@ import { VerifyConfig } from '../../../../../../auth/types';
 export type Props = {
   useAPIKey?: boolean
   requirePassword?: boolean
-  verify?: VerifyConfig
+  verify?: VerifyConfig | boolean
   collection: CollectionConfig
   email: string
 }

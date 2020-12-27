@@ -1,4 +1,6 @@
-function logout(collection) {
+import { Collection } from '../../../collections/config/types';
+
+function logout(collection: Collection): any {
   async function resolver(_, __, context) {
     const options = {
       collection,

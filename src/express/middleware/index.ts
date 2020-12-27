@@ -10,12 +10,16 @@ import localizationMiddleware from '../../localization/middleware';
 import authenticate from './authenticate';
 import identifyAPI from './identifyAPI';
 import { Payload } from '../..';
+import { PayloadRequest } from '../types';
 
-const middleware = (payload: Payload) => {
-  const rateLimitOptions = {
+const middleware = (payload: Payload): any => {
+  const rateLimitOptions: {
+    windowMs?: number
+    max?: number
+    skip?: (req: PayloadRequest) => boolean
+  } = {
     windowMs: payload.config.rateLimit.window,
     max: payload.config.rateLimit.max,
-    skip: undefined,
   };
 
   if (typeof payload.config.rateLimit.skip === 'function') rateLimitOptions.skip = payload.config.rateLimit.skip;

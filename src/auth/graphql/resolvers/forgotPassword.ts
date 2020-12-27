@@ -1,4 +1,6 @@
-function forgotPassword(collection) {
+import { Collection } from '../../../collections/config/types';
+
+function forgotPassword(collection: Collection): any {
   async function resolver(_, args, context) {
     const options = {
       collection,

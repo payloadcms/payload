@@ -7,19 +7,8 @@ import {
   InitOptions,
 } from './config/types';
 import {
-  Collection,
+  Collection, PaginatedDocs,
 } from './collections/config/types';
-import {
-  Document,
-  CreateOptions,
-  FindOptions,
-  FindGlobalOptions,
-  UpdateGlobalOptions,
-  FindByIDOptions,
-  UpdateOptions,
-  DeleteOptions,
-  FindResponse,
-} from './types';
 import Logger from './utilities/logger';
 import bindOperations from './init/bindOperations';
 import bindRequestHandlers, { RequestHandlers } from './init/bindRequestHandlers';
@@ -45,6 +34,12 @@ import localGlobalOperations from './globals/operations/local';
 import { encrypt, decrypt } from './auth/crypto';
 import { MockEmailHandler, BuildEmailResult, Message } from './email/types';
 import { PayloadRequest } from './express/types';
+
+import { Options as CreateOptions } from './collections/operations/local/create';
+import { Options as FindOptions } from './collections/operations/local/find';
+import { Options as FindByIDOptions } from './collections/operations/local/findByID';
+import { Options as UpdateOptions } from './collections/operations/local/update';
+import { Options as DeleteOptions } from './collections/operations/local/delete';
 
 require('isomorphic-fetch');
 
@@ -214,19 +209,19 @@ export class Payload {
    * @param options
    * @returns documents satisfying query
    */
-  async find(options: FindOptions): Promise<FindResponse> {
+  async find(options: FindOptions): Promise<PaginatedDocs> {
     let { find } = localOperations;
     find = find.bind(this);
     return find(options);
   }
 
-  async findGlobal(options: FindGlobalOptions): Promise<Document> {
+  async findGlobal(options): Promise<any> {
     let { findOne } = localGlobalOperations;
     findOne = findOne.bind(this);
     return findOne(options);
   }
 
-  async updateGlobal(options: UpdateGlobalOptions): Promise<Document> {
+  async updateGlobal(options): Promise<any> {
     let { update } = localGlobalOperations;
     update = update.bind(this);
     return update(options);

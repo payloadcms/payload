@@ -122,7 +122,7 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
 
   const fieldTypes = fields.reduce((schema, field: Field) => {
     if (!field.hidden) {
-      const getFieldSchema = fieldToSchemaMap[field.type];
+      const getFieldSchema: (field: Field) => { type: GraphQLType } = fieldToSchemaMap[field.type];
 
       if (getFieldSchema) {
         const fieldSchema = getFieldSchema(field);

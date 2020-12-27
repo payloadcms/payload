@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { PayloadRequest } from '../../express/types';
 
-export default async function logoutHandler(req: PayloadRequest, res: Response, next: NextFunction) {
+export default async function logoutHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<{ message: string}> | void> {
   try {
     const message = await this.operations.collections.auth.logout({
       collection: req.collection,

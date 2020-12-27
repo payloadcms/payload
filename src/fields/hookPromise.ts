@@ -1,4 +1,16 @@
-import { OperationArguments } from '../types';
+import { PayloadRequest } from '../express/types';
+import { Operation } from '../types';
+import { Field, HookName } from './config/types';
+
+type Arguments = {
+  data: Record<string, unknown>
+  field: Field
+  hook: HookName
+  req: PayloadRequest
+  operation: Operation
+  fullOriginalDoc: Record<string, unknown>
+  fullData: Record<string, unknown>
+}
 
 const hookPromise = async ({
   data,
@@ -8,7 +20,7 @@ const hookPromise = async ({
   operation,
   fullOriginalDoc,
   fullData,
-}: OperationArguments): Promise<void> => {
+}: Arguments): Promise<void> => {
   const resultingData = data;
 
   if (field.hooks && field.hooks[hook]) {

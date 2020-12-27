@@ -1,14 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeepRequired } from 'ts-essentials';
-import { PaginateModel, Document as MongooseDocument, PassportLocalModel } from 'mongoose';
+import { PaginateModel, PassportLocalModel } from 'mongoose';
 import { Access } from '../../config/types';
 import { Field } from '../../fields/config/types';
-import { Document } from '../../types';
+import { Document, PayloadMongooseDocument } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 
-export interface CollectionModel extends PaginateModel<MongooseDocument>, PassportLocalModel<MongooseDocument>{}
+export interface CollectionModel extends PaginateModel<PayloadMongooseDocument>, PassportLocalModel<PayloadMongooseDocument> {
+  buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
+}
+
 export interface AuthCollectionModel extends CollectionModel {
   resetPasswordToken: string;
   resetPasswordExpiration: Date;

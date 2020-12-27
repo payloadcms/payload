@@ -1,16 +1,30 @@
 import jwt from 'jsonwebtoken';
-import { BeforeOperationHook } from '../../collections/config/types';
+import { Response } from 'express';
+import { Collection, BeforeOperationHook } from '../../collections/config/types';
 import { Forbidden } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
+import { Document } from '../../types';
 
-async function refresh(incomingArgs) {
+export type Result = {
+  exp: number,
+  user: Document,
+  refreshedToken: string
+}
+
+export type Arguments = {
+  collection: Collection,
+  token: string
+  res?: Response
+}
+
+async function refresh(incomingArgs: Arguments): Promise<Result> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
     await priorHook;
 
     args = (await hook({
@@ -35,7 +49,7 @@ async function refresh(incomingArgs) {
 
   if (typeof args.token !== 'string') throw new Forbidden();
 
-  const payload = jwt.verify(args.token, this.secret, {});
+  const payload = jwt.verify(args.token, this.secret, {}) as Record<string, unknown>;
   delete payload.iat;
   delete payload.exp;
   const refreshedToken = jwt.sign(payload, this.secret, opts);
@@ -47,8 +61,8 @@ async function refresh(incomingArgs) {
       expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
       secure: collectionConfig.auth.cookies.secure,
       sameSite: collectionConfig.auth.cookies.sameSite,
+      domain: undefined,
     };
-
 
     if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
 
@@ -61,7 +75,7 @@ async function refresh(incomingArgs) {
 
   return {
     refreshedToken,
-    exp: jwt.decode(refreshedToken).exp,
+    exp: (jwt.decode(refreshedToken) as Record<string, unknown>).exp as number,
     user: payload,
   };
 }

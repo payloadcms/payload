@@ -1,8 +1,25 @@
 import jwt from 'jsonwebtoken';
+import { Response } from 'express';
+import { Collection } from '../../collections/config/types';
 import { APIError } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
+import { UserDocument } from '../types';
 
-async function resetPassword(args) {
+export type Result = {
+  token: string
+  user: UserDocument
+}
+
+export type Arguments = {
+  data: {
+    token: string
+    password: string
+  }
+  collection: Collection
+  res?: Response
+}
+
+async function resetPassword(args: Arguments): Promise<Result> {
   const { config, secret } = this;
 
   if (!Object.prototype.hasOwnProperty.call(args.data, 'token')
@@ -21,7 +38,7 @@ async function resetPassword(args) {
   const user = await Model.findOne({
     resetPasswordToken: data.token,
     resetPasswordExpiration: { $gt: Date.now() },
-  });
+  }) as UserDocument;
 
   if (!user) throw new APIError('Token is either invalid or has expired.');
 
@@ -62,6 +79,7 @@ async function resetPassword(args) {
       expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
       secure: collectionConfig.auth.cookies.secure,
       sameSite: collectionConfig.auth.cookies.sameSite,
+      domain: undefined,
     };
 
 

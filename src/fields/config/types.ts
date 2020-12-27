@@ -256,6 +256,8 @@ export function optionIsObject(option: Option): option is OptionObject {
   return typeof option === 'object';
 }
 
-export function optionIsValue(option: Option): option is any {
-  return typeof option !== 'object';
+export function optionIsValue(option: Option): option is string {
+  return typeof option === 'string';
 }
+
+export type HookName = 'beforeChange' | 'beforeValidate' | 'afterChange' | 'afterRead';

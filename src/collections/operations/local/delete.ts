@@ -1,4 +1,17 @@
-export default async function localDelete(options) {
+import { Document } from '../../../types';
+
+export type Options = {
+  collection: string
+  id: string
+  depth?: number
+  locale?: string
+  fallbackLocale?: string
+  user?: Document
+  overrideAccess?: boolean
+  showHiddenFields?: boolean
+}
+
+export default async function localDelete(options: Options): Promise<Document> {
   const {
     collection: collectionSlug,
     depth,

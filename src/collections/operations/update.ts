@@ -1,7 +1,9 @@
 import httpStatus from 'http-status';
 import deepmerge from 'deepmerge';
 import path from 'path';
-import { BeforeOperationHook, BeforeChangeHook, BeforeValidateHook } from '../config/types';
+import { UploadedFile } from 'express-fileupload';
+import { Where, Document } from '../../types';
+import { Collection } from '../config/types';
 
 import removeInternalFields from '../../utilities/removeInternalFields';
 import overwriteMerge from '../../utilities/overwriteMerge';
@@ -14,7 +16,21 @@ import getSafeFilename from '../../uploads/getSafeFilename';
 import resizeAndSave from '../../uploads/imageResizer';
 import { FileData } from '../../uploads/types';
 
-async function update(incomingArgs) {
+import { PayloadRequest } from '../../express/types';
+import { hasWhereAccessResult, UserDocument } from '../../auth/types';
+
+export type Arguments = {
+  collection: Collection
+  req: PayloadRequest
+  id: string
+  data: Record<string, unknown>
+  depth?: number
+  disableVerificationEmail?: boolean
+  overrideAccess?: boolean
+  showHiddenFields?: boolean
+}
+
+async function update(incomingArgs: Arguments): Promise<Document> {
   const { performFieldOperations, config } = this;
 
   let args = incomingArgs;
@@ -23,7 +39,7 @@ async function update(incomingArgs) {
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
     await priorHook;
 
     args = (await hook({
@@ -57,13 +73,13 @@ async function update(incomingArgs) {
   // /////////////////////////////////////
 
   const accessResults = !overrideAccess ? await executeAccess({ req, id }, collectionConfig.access.update) : true;
-  const hasWherePolicy = typeof accessResults === 'object';
+  const hasWherePolicy = hasWhereAccessResult(accessResults);
 
   // /////////////////////////////////////
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: { [key: string]: any } = {
+  const queryToBuild: { where: Where } = {
     where: {
       and: [
         {
@@ -75,13 +91,13 @@ async function update(incomingArgs) {
     },
   };
 
-  if (hasWherePolicy) {
-    queryToBuild.where.and.push(hasWherePolicy);
+  if (hasWhereAccessResult(accessResults)) {
+    (queryToBuild.where.and as Where[]).push(accessResults);
   }
 
   const query = await Model.buildQuery(queryToBuild, locale);
 
-  let doc = await Model.findOne(query);
+  const doc = await Model.findOne(query) as UserDocument;
 
   if (!doc && !hasWherePolicy) throw new NotFound();
   if (!doc && hasWherePolicy) throw new Forbidden();
@@ -90,7 +106,7 @@ async function update(incomingArgs) {
     doc.setLocale(locale, fallbackLocale);
   }
 
-  let originalDoc = doc.toJSON({ virtuals: true });
+  let originalDoc: Document = doc.toJSON({ virtuals: true });
 
   originalDoc = JSON.stringify(originalDoc);
   originalDoc = JSON.parse(originalDoc);
@@ -115,7 +131,7 @@ async function update(incomingArgs) {
   // beforeValidate - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook: BeforeValidateHook, hook: BeforeValidateHook) => {
+  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
     await priorHook;
 
     data = (await hook({
@@ -144,7 +160,7 @@ async function update(incomingArgs) {
   // beforeChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook: BeforeChangeHook, hook: BeforeChangeHook) => {
+  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
     data = (await hook({
@@ -176,7 +192,7 @@ async function update(incomingArgs) {
       staticPath = path.join(config.paths.configDir, staticDir);
     }
 
-    const file = (req.files && req.files.file) ? req.files.file : req.fileData;
+    const file = ((req.files && req.files.file) ? req.files.file : req.file) as UploadedFile;
 
     if (file) {
       const fsSafeName = await getSafeFilename(staticPath, file.name);
@@ -221,7 +237,7 @@ async function update(incomingArgs) {
   const { password } = data;
 
   if (password) {
-    await doc.setPassword(password);
+    await doc.setPassword(password as string);
     delete data.password;
   }
 
@@ -233,18 +249,18 @@ async function update(incomingArgs) {
 
   await doc.save();
 
-  doc = doc.toJSON({ virtuals: true });
+  let result: Document = doc.toJSON({ virtuals: true });
 
-  doc = removeInternalFields(doc);
-  doc = JSON.stringify(doc);
-  doc = JSON.parse(doc);
+  result = removeInternalFields(result);
+  result = JSON.stringify(result);
+  result = JSON.parse(result);
 
   // /////////////////////////////////////
   // afterChange - Fields
   // /////////////////////////////////////
 
-  doc = await performFieldOperations(collectionConfig, {
-    data: doc,
+  result = await performFieldOperations(collectionConfig, {
+    data: result,
     hook: 'afterChange',
     operation: 'update',
     req,
@@ -261,21 +277,21 @@ async function update(incomingArgs) {
   await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
-    doc = await hook({
-      doc,
+    result = await hook({
+      doc: result,
       req,
       operation: 'update',
-    }) || doc;
+    }) || result;
   }, Promise.resolve());
 
   // /////////////////////////////////////
   // afterRead - Fields
   // /////////////////////////////////////
 
-  doc = await performFieldOperations(collectionConfig, {
+  result = await performFieldOperations(collectionConfig, {
     depth,
     req,
-    data: doc,
+    data: result,
     hook: 'afterRead',
     operation: 'update',
     overrideAccess,
@@ -290,17 +306,17 @@ async function update(incomingArgs) {
   await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
     await priorHook;
 
-    doc = await hook({
+    result = await hook({
       req,
-      doc,
-    }) || doc;
+      doc: result,
+    }) || result;
   }, Promise.resolve());
 
   // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////
 
-  return doc;
+  return result;
 }
 
 export default update;

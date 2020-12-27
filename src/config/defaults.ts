@@ -42,7 +42,6 @@ export const defaults = {
   rateLimit: {
     window: 15 * 60 * 100, // 15min default,
     max: 500,
-    skip: undefined,
   },
   express: {
     json: {},

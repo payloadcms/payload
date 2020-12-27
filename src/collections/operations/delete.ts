@@ -1,21 +1,32 @@
 import fs from 'fs';
 import path from 'path';
 
+import { PayloadRequest } from '../../express/types';
 import removeInternalFields from '../../utilities/removeInternalFields';
 import { NotFound, Forbidden, ErrorDeletingFile } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import fileExists from '../../uploads/fileExists';
-import { BeforeOperationHook } from '../config/types';
-import { Query } from './types';
+import { BeforeOperationHook, Collection } from '../config/types';
+import { Document, Where } from '../../types';
+import { hasWhereAccessResult } from '../../auth/types';
 
-async function deleteQuery(incomingArgs) {
+export type Arguments = {
+  depth?: number
+  collection: Collection
+  id: string
+  req: PayloadRequest
+  overrideAccess?: boolean
+  showHiddenFields?: boolean
+}
+
+async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook, hook: BeforeOperationHook) => {
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
     await priorHook;
 
     args = (await hook({
@@ -45,7 +56,7 @@ async function deleteQuery(incomingArgs) {
   // /////////////////////////////////////
 
   const accessResults = !overrideAccess ? await executeAccess({ req, id }, collectionConfig.access.delete) : true;
-  const hasWhereAccess = typeof accessResults === 'object';
+  const hasWhereAccess = hasWhereAccessResult(accessResults);
 
   // /////////////////////////////////////
   // beforeDelete - Collection
@@ -57,7 +68,9 @@ async function deleteQuery(incomingArgs) {
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: Query = {
+  const queryToBuild: {
+    where: Where
+  } = {
     where: {
       and: [
         {
@@ -69,22 +82,22 @@ async function deleteQuery(incomingArgs) {
     },
   };
 
-  if (hasWhereAccess) {
-    queryToBuild.where.and.push(accessResults);
+  if (hasWhereAccessResult(accessResults)) {
+    (queryToBuild.where.and as Where[]).push(accessResults);
   }
 
   const query = await Model.buildQuery(queryToBuild, locale);
 
-  let resultToDelete = await Model.findOne(query);
+  const docToDelete = await Model.findOne(query);
 
-  if (!resultToDelete && !hasWhereAccess) throw new NotFound();
-  if (!resultToDelete && hasWhereAccess) throw new Forbidden();
+  if (!docToDelete && !hasWhereAccess) throw new NotFound();
+  if (!docToDelete && hasWhereAccess) throw new Forbidden();
 
-  resultToDelete = resultToDelete.toJSON({ virtuals: true });
-
-  if (locale && resultToDelete.setLocale) {
-    resultToDelete.setLocale(locale, fallbackLocale);
+  if (locale && docToDelete.setLocale) {
+    docToDelete.setLocale(locale, fallbackLocale);
   }
+
+  const resultToDelete = docToDelete.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
   // Delete any associated files
@@ -121,13 +134,13 @@ async function deleteQuery(incomingArgs) {
   // Delete document
   // /////////////////////////////////////
 
-  let result = await Model.findOneAndDelete({ _id: id });
+  const doc = await Model.findOneAndDelete({ _id: id });
 
-  if (locale && result.setLocale) {
-    result.setLocale(locale, fallbackLocale);
+  if (locale && doc.setLocale) {
+    doc.setLocale(locale, fallbackLocale);
   }
 
-  result = result.toJSON({ virtuals: true });
+  let result: Document = doc.toJSON({ virtuals: true });
 
   result = removeInternalFields(result);
   result = JSON.stringify(result);

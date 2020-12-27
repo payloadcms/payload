@@ -1,6 +1,21 @@
-import { FindOptions } from '../../../types';
+import { PaginatedDocs } from '../../config/types';
+import { Document, Where } from '../../../types';
 
-export default async function find(options: FindOptions) {
+export type Options = {
+  collection: string
+  depth?: number
+  page?: number
+  limit?: number
+  locale?: string
+  fallbackLocale?: string
+  user?: Document
+  overrideAccess?: boolean
+  showHiddenFields?: boolean
+  sort?: string
+  where?: Where
+}
+
+export default async function find(options: Options): Promise<PaginatedDocs> {
   const {
     collection: collectionSlug,
     depth,

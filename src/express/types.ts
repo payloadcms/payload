@@ -1,7 +1,9 @@
 import { Request } from 'express';
+import { UploadedFile } from 'express-fileupload';
 import { Payload } from '../index';
 import { Collection } from '../collections/config/types';
 import { User } from '../auth/types';
+import { Document } from '../types';
 
 export type PayloadRequest = Request & {
   payload: Payload;
@@ -9,8 +11,9 @@ export type PayloadRequest = Request & {
   fallbackLocale?: string;
   collection?: Collection;
   payloadAPI: 'REST' | 'local' | 'graphQL'
-  file?: {
-    name: string,
-  }
+  file?: UploadedFile
   user: User | null
+  findByID?: {
+    [slug: string]: (q: unknown) => Document
+  }
 };

@@ -2,7 +2,8 @@ import { Payload } from '..';
 import { PayloadRequest } from '../express/types';
 import { Config } from '../config/types';
 import { Collection } from '../collections/config/types';
-import { User } from './types';
+import { User, VerifyConfig } from './types';
+
 
 type Args = {
   config: Config,
@@ -36,9 +37,11 @@ async function sendVerificationEmail(args: Args): Promise<void> {
     <a href="${defaultVerificationURL}">${defaultVerificationURL}</a><br>
     After verifying your email, you will be able to log in successfully.`;
 
+    const verify = collectionConfig.auth.verify as VerifyConfig;
+
     // Allow config to override email content
-    if (typeof collectionConfig.auth.verify.generateEmailHTML === 'function') {
-      html = await collectionConfig.auth.verify.generateEmailHTML({
+    if (typeof verify.generateEmailHTML === 'function') {
+      html = await verify.generateEmailHTML({
         req,
         token,
         user,
@@ -48,8 +51,8 @@ async function sendVerificationEmail(args: Args): Promise<void> {
     let subject = 'Verify your email';
 
     // Allow config to override email subject
-    if (typeof collectionConfig.auth.verify.generateEmailSubject === 'function') {
-      subject = await collectionConfig.auth.verify.generateEmailSubject({
+    if (typeof verify.generateEmailSubject === 'function') {
+      subject = await verify.generateEmailSubject({
         req,
         token,
         user,
