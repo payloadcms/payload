@@ -12,9 +12,9 @@
   },
   "scripts": {
     "copyfiles": "copyfiles -u 1 src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png} dist/",
-    "build:components": "webpack --config src/webpack/components.config.js",
+    "build:components": "webpack --config dist/webpack/components.config.js",
     "demo:build": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts node dist/bin/build",
-    "build": "tsc",
+    "build": "yarn copyfiles && tsc && yarn build:components",
     "dev": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts nodemon",
     "test": "yarn test:int && yarn test:client",
     "pretest": "tsc-silent --project tsconfig.json --suppress @",
@@ -130,7 +130,6 @@
     "webpack-hot-middleware": "^2.25.0"
   },
   "devDependencies": {
-    "@typescript-eslint/parser": "4.0.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.0.4",
     "@trbl/eslint-config": "^1.2.4",
@@ -199,6 +198,7 @@
     "@types/webpack-env": "^1.15.3",
     "@types/webpack-hot-middleware": "^2.25.3",
     "@typescript-eslint/eslint-plugin": "^4.8.1",
+    "@typescript-eslint/parser": "4.0.1",
     "babel-eslint": "^10.0.1",
     "babel-plugin-ignore-html-and-css-imports": "^0.1.0",
     "copyfiles": "^2.4.0",
@@ -214,6 +214,7 @@
     "graphql-request": "^3.4.0",
     "mongodb": "^3.6.2",
     "nodemon": "^2.0.6",
+    "optimize-css-assets-webpack-plugin": "^5.0.4",
     "passport-strategy": "^1.0.0",
     "tsc-silent": "^1.2.1",
     "typescript": "^4.1.2"
