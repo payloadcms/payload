@@ -1,29 +1,29 @@
-const formatLabels = require('./formatLabels');
+import formatLabels from './formatLabels';
 
 describe('formatLabels', () => {
-  it('should format single word', () => {
+  it('should format singular slug', () => {
     expect(formatLabels('word')).toMatchObject({
       singular: 'Word',
       plural: 'Words',
     });
   });
 
-  it('should format already plural', () => {
+  it('should format plural slug', () => {
     expect(formatLabels('words')).toMatchObject({
-      singular: 'Words',
+      singular: 'Word',
       plural: 'Words',
     });
   });
 
   it('should format kebab case', () => {
-    expect(formatLabels('kebab-item')).toMatchObject({
-      singular: 'Kebab Item',
-      plural: 'Kebab Items',
+    expect(formatLabels('my-slugs')).toMatchObject({
+      singular: 'My Slug',
+      plural: 'My Slugs',
     });
   });
 
   it('should format camelCase', () => {
-    expect(formatLabels('camelCaseItem')).toMatchObject({
+    expect(formatLabels('camelCaseItems')).toMatchObject({
       singular: 'Camel Case Item',
       plural: 'Camel Case Items',
     });

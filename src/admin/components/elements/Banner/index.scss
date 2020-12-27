@@ -17,17 +17,10 @@
   }
 
   &--has-icon {
+    display: flex;
     svg {
       display: block;
     }
-  }
-
-  &--align-icon-left {
-    padding-left: base(.125);
-  }
-
-  &--align-icon-right {
-    padding-right: base(.125);
   }
 
   &--type-default {
@@ -45,6 +38,10 @@
   &--type-error {
     background: rgba($color-red, .1);
     color: $color-red;
+
+    svg {
+      @include color-svg($color-red);
+    }
 
     &.button--has-action {
       &:hover {

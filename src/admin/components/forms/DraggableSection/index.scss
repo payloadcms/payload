@@ -43,7 +43,7 @@
   }
 
   &__render-fields-wrapper {
-    width: 100%;
+    flex-grow: 1;
   }
 
   &.is-hovered > div {
@@ -99,6 +99,8 @@
   }
 
   @include mid-break {
+    min-width: base(16);
+
     .position-panel__move-forward,
     .position-panel__move-backward {
       opacity: 1;

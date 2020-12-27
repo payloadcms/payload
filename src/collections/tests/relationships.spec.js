@@ -1,6 +1,7 @@
+import getConfig from '../../config/load';
+import { email, password } from '../../../tests/api/credentials';
+
 require('isomorphic-fetch');
-const getConfig = require('../../utilities/getConfig');
-const { email, password } = require('../../../tests/api/credentials');
 
 const { serverURL: url } = getConfig();
 

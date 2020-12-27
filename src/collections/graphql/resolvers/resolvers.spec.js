@@ -1,11 +1,11 @@
 /**
  * @jest-environment node
  */
-// eslint-disable-next-line no-unused-vars
-const fetch = require('isomorphic-fetch');
-const { request, GraphQLClient } = require('graphql-request');
-const getConfig = require('../../../utilities/getConfig');
-const { email, password } = require('../../../../tests/api/credentials');
+import { request, GraphQLClient } from 'graphql-request';
+import getConfig from '../../../config/load';
+import { email, password } from '../../../../tests/api/credentials';
+
+require('isomorphic-fetch');
 
 const config = getConfig();
 

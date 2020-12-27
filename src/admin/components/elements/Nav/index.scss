@@ -136,6 +136,7 @@
       padding: 0;
       overflow: hidden;
       width: 100%;
+      display: block;
     }
 
     header,
@@ -158,6 +159,9 @@
       visibility: hidden;
       opacity: 0;
       overflow-y: scroll;
+      position: fixed;
+      top: base(4);
+      bottom: 0;
     }
 
     &.nav--menu-active {

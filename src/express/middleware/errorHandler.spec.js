@@ -1,5 +1,8 @@
-const errorHandler = require('./errorHandler');
-const APIError = require('../../errors/APIError');
+import Logger from '../../utilities/logger';
+import errorHandler from './errorHandler';
+import { APIError } from '../../errors';
+
+const logger = Logger();
 
 const testError = new APIError('test error', 503);
 
@@ -38,7 +41,7 @@ describe('errorHandler', () => {
   });
 
   it('should send the response with the error', async () => {
-    const handler = errorHandler({ debug: true, hooks: {} });
+    const handler = errorHandler({ debug: true, hooks: {} }, logger);
     await handler(testError, req, res);
     expect(res.send)
       .toHaveBeenCalledWith(
@@ -47,7 +50,7 @@ describe('errorHandler', () => {
   });
 
   it('should include stack trace when config debug is on', async () => {
-    const handler = errorHandler({ debug: true, hooks: {} });
+    const handler = errorHandler({ debug: true, hooks: {} }, logger);
     await handler(testError, req, res);
     expect(res.send)
       .toHaveBeenCalledWith(
@@ -56,7 +59,7 @@ describe('errorHandler', () => {
   });
 
   it('should not include stack trace when config debug is not set', async () => {
-    const handler = errorHandler({ hooks: {} });
+    const handler = errorHandler({ hooks: {} }, logger);
     await handler(testError, req, res);
     expect(res.send)
       .toHaveBeenCalledWith(
@@ -65,7 +68,7 @@ describe('errorHandler', () => {
   });
 
   it('should not include stack trace when config debug is false', async () => {
-    const handler = errorHandler({ debug: false, hooks: {} });
+    const handler = errorHandler({ debug: false, hooks: {} }, logger);
     await handler(testError, req, res);
     expect(res.send)
       .toHaveBeenCalledWith(
@@ -74,7 +77,7 @@ describe('errorHandler', () => {
   });
 
   it('should show the status code when given an error with a code', async () => {
-    const handler = errorHandler({ debug: false, hooks: {} });
+    const handler = errorHandler({ debug: false, hooks: {} }, logger);
     await handler(testError, req, res);
     expect(res.status)
       .toHaveBeenCalledWith(
@@ -83,7 +86,7 @@ describe('errorHandler', () => {
   });
 
   it('should default to 500 when an error does not have a status code', async () => {
-    const handler = errorHandler({ debug: false, hooks: {} });
+    const handler = errorHandler({ debug: false, hooks: {} }, logger);
     testError.status = undefined;
     await handler(testError, req, res);
     expect(res.status)
@@ -97,9 +100,10 @@ describe('errorHandler', () => {
     const handler = errorHandler({
       debug: false,
       hooks: { afterError },
-    });
+    }, logger);
     await handler(testError, req, res);
     expect(afterError)
+      // eslint-disable-next-line jest/prefer-called-with
       .toHaveBeenCalled();
   });
 
@@ -107,9 +111,10 @@ describe('errorHandler', () => {
     const handler = errorHandler({
       debug: false,
       hooks: {},
-    });
+    }, logger);
     await handler(testError, req, res);
     expect(req.collection.config.hooks.afterError)
+      // eslint-disable-next-line jest/prefer-called-with
       .toHaveBeenCalled();
   });
 });

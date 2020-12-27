@@ -1,6 +1,6 @@
 export {
   useForm,
-  useFormFields,
+  useWatchForm,
   useFormSubmitted,
   useFormProcessing,
   useFormModified,

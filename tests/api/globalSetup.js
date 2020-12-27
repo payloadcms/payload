@@ -1,14 +1,12 @@
 require('isomorphic-fetch');
+require('../../demo/server');
 
-const server = require('../../demo/server');
-const getConfig = require('../../src/utilities/getConfig');
+const loadConfig = require('../../src/config/load').default;
 const { email, password } = require('./credentials');
 
-const { serverURL } = getConfig();
+const { serverURL } = loadConfig();
 
 const globalSetup = async () => {
-  global.PAYLOAD_SERVER = server.start();
-
   const response = await fetch(`${serverURL}/api/admins/first-register`, {
     body: JSON.stringify({
       email,

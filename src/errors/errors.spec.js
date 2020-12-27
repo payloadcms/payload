@@ -1,4 +1,4 @@
-const { APIError } = require('.');
+import { APIError } from '.';
 
 describe('Errors', () => {
   describe('APIError', () => {
