@@ -10,7 +10,7 @@ export default function initGlobals(ctx: Payload): void {
     };
 
     // If not local, open routes
-    if (!ctx.config.local) {
+    if (!ctx.local) {
       const router = express.Router();
 
       ctx.config.globals.forEach((global) => {

@@ -21,7 +21,7 @@ function initAdmin(ctx: Payload): void {
         }
       });
 
-      router.use(compression(ctx.config.compression));
+      router.use(compression(ctx.config.express.compression));
       router.use(express.static(path.resolve(process.cwd(), 'build'), { redirect: false }));
 
       ctx.express.use(ctx.config.routes.admin, router);

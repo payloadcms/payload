@@ -125,7 +125,7 @@ export class Payload {
     this.performFieldOperations = performFieldOperations.bind(this);
 
     // If not initializing locally, scaffold router
-    if (!this.config.local) {
+    if (!this.local) {
       this.router = express.Router();
       this.router.use(...expressMiddleware(this));
       initAuth(this);

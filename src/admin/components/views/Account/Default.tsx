@@ -37,9 +37,9 @@ const DefaultAccount: React.FC<Props> = (props) => {
     fields,
     admin: {
       useAsTitle,
+      preview,
     },
     timestamps,
-    preview,
     auth,
   } = collection;
 
