@@ -1,22 +1,28 @@
 const path = require('path');
 const fse = require('fs-extra');
-const slugify = require('@sindresorhus/slugify');
 const execa = require('execa');
 const ora = require('ora');
+const { getArgs } = require('./getArgs');
 
 const { getProjectName } = require('./getProjectName');
+const { getProjectDir } = require('./getProjectDir');
 const { getTemplate } = require('./getTemplate');
+const { success, error } = require('./log');
 
 const createProjectDir = (projectDir) => {
   fse.mkdirpSync(projectDir);
   const readDir = fse.readdirSync(projectDir);
   if (readDir && readDir.length > 0) {
-    console.error(`The project directory "./${projectDir}" is not empty`);
+    error(`The project directory '${projectDir}' is not empty`);
     process.exit(1);
   }
 };
 
 const yarnInstall = async (dir) => {
+  const args = getArgs();
+  if (args['--dry-run']) {
+    return { failed: false };
+  }
   let result = false;
   try {
     result = execa.command('yarn', {
@@ -30,9 +36,9 @@ const yarnInstall = async (dir) => {
 
 const createProject = async () => {
   const projectName = await getProjectName();
-  createProjectDir(projectName);
+  const projectDir = await getProjectDir();
+  createProjectDir(projectDir);
   const templateDir = `./templates/${await getTemplate()}`;
-  const projectDir = slugify(projectName);
 
   try {
     await fse.copy(templateDir, projectDir);
@@ -47,7 +53,7 @@ const createProject = async () => {
   if (result.failed) {
     console.error('Error installing dependencies');
   } else {
-    console.log('Dependencies installed');
+    success('Dependencies installed');
   }
 }
 
