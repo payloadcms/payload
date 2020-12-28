@@ -21,10 +21,12 @@ const { writeEnvFile } = require('./utils/writeEnvFile');
   await getTemplate();
   await getDatabaseConnection();
   await getPayloadSecret();
-  await createProject();
-  await writeEnvFile();
+  if (!args['--dry-run']) {
+    await createProject();
+    await writeEnvFile();
+  }
 
-  success('Payload project successfully installed.');
+  success('Payload project successfully created.');
 
   console.log(await successMessage());
 

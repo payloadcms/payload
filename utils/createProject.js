@@ -17,14 +17,18 @@ const createProjectDir = (projectDir) => {
   }
 };
 
-const yarnInstall = async (dir) => {
+const installDeps = async (dir) => {
   const args = getArgs();
-  if (args['--dry-run']) {
+  if (args['--no-deps']) {
     return { failed: false };
   }
+
+  const cmd = args['--use-npm'] ? 'npm install' : 'yarn';
+  console.log(`Using cmd: ${cmd}`);
+
   let result = false;
   try {
-    result = execa.command('yarn', {
+    result = execa.command(cmd, {
       cwd: path.resolve(dir),
     });
   } catch (error) {
@@ -45,7 +49,7 @@ const createProject = async () => {
   }
 
   const spinner = ora('Installing dependencies').start();
-  const result = await yarnInstall(projectDir);
+  const result = await installDeps(projectDir);
   spinner.stop();
   spinner.clear();
   if (result.failed) {

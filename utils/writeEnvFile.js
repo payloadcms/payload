@@ -9,8 +9,7 @@ const writeEnvFile = async () => {
   const mongoURI = await getDatabaseConnection();
   const payloadSecret = await getPayloadSecret();
 
-  let content = `MONGODB_URI=${mongoURI}
-PAYLOAD_SECRET=${payloadSecret}`;
+  let content = `MONGODB_URI=${mongoURI}\nPAYLOAD_SECRET=${payloadSecret}`;
 
   try {
     await fs.outputFile(`${await getProjectDir()}/.env`, content);

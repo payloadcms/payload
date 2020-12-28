@@ -14,6 +14,8 @@ const getArgs = () => {
     '--template': String,
     '--db': String,
     '--secret': String,
+    '--use-npm': Boolean,
+    '--no-deps': Boolean,
     '--dry-run': Boolean,
 
     '-h': '--help',
