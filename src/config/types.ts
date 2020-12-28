@@ -90,10 +90,13 @@ export type PayloadConfig = {
   express?: {
     json: {
       limit?: number
-    }
+    },
+    compression?: {
+      [key: string]: unknown
+    },
+    middleware?: any[]
   },
   email?: EmailOptions;
-  local?: boolean;
   defaultDepth?: number;
   maxDepth?: number;
   rateLimit?: {
@@ -112,11 +115,6 @@ export type PayloadConfig = {
     defaultLocale: string
     fallback?: boolean
   };
-  defaultLocale?: string;
-  fallback?: boolean;
-  compression?: {
-    [key: string]: unknown
-  },
   graphQL?: {
     mutations?: {
       [key: string]: unknown
@@ -133,7 +131,6 @@ export type PayloadConfig = {
     afterError?: AfterErrorHook;
   };
   webpack?: (config: Configuration) => Configuration;
-  middleware?: any[]
 };
 
 export type Config = Omit<DeepRequired<PayloadConfig>, 'collections'> & {

@@ -101,7 +101,6 @@ export default buildConfig({
     graphQLPlayground: '/graphql-playground',
   },
   defaultDepth: 2,
-  compression: {},
   paths: {
     scss: path.resolve(__dirname, './client/scss/overrides.scss'),
   },

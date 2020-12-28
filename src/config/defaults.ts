@@ -1,15 +1,12 @@
 import path from 'path';
 
 export const defaults = {
-  publicENV: {},
   defaultDepth: 2,
   maxDepth: 10,
   globals: [],
   cookiePrefix: 'payload',
   csrf: [],
   cors: [],
-  serverModules: [],
-  local: false,
   admin: {
     meta: {
       titleSuffix: '- Payload',
@@ -24,7 +21,6 @@ export const defaults = {
     fromName: 'Payload CMS',
     fromAddress: 'cms@payloadcms.com',
   },
-  compression: {},
   graphQL: {
     mutations: {},
     queries: {},
@@ -43,6 +39,8 @@ export const defaults = {
   },
   express: {
     json: {},
+    compression: {},
+    middleware: [],
   },
   hooks: {},
   localization: false,

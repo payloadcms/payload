@@ -31,7 +31,7 @@ const middleware = (payload: Payload): any => {
     methodOverride('X-HTTP-Method-Override'),
     qsMiddleware({ depth: 10 }),
     bodyParser.urlencoded({ extended: true }),
-    compression(payload.config.compression),
+    compression(payload.config.express.compression),
     localizationMiddleware(payload.config.localization),
     express.json(payload.config.express.json),
     fileUpload({
@@ -54,7 +54,7 @@ const middleware = (payload: Payload): any => {
       next();
     },
     authenticate(payload.config),
-    ...(payload.config.middleware || []),
+    ...(payload.config.express.middleware || []),
   ];
 };
 

@@ -55,6 +55,8 @@ export default joi.object({
   express: joi.object()
     .keys({
       json: joi.object(),
+      compression: joi.object(),
+      middleware: joi.array().items(joi.object()),
     }),
   local: joi.boolean(),
   upload: joi.object()
@@ -81,7 +83,6 @@ export default joi.object({
       maxComplexity: joi.number(),
       disablePlaygroundInProduction: joi.boolean(),
     }),
-  compression: joi.object(),
   localization: joi.alternatives()
     .try(
       joi.object().keys({
