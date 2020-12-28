@@ -4,7 +4,7 @@ label: Collections
 order: 20
 ---
 
-Payload Collections are defined through configs of their own, and you can define as many as your application needs. Each Collection will map one-to-one with a MongoDB collection automatically based on fields that you define.
+Payload Collections are defined through configs of their own, and you can define as many as your application needs. Each Collection will scaffold a MongoDB collection automatically based on fields that you define.
 
 It's often best practice to write your Collections in separate files and then import them into the main Payload config.
 
@@ -14,10 +14,13 @@ It's often best practice to write your Collections in separate files and then im
 | ---------------- | -------------|
 | `slug`           | Unique, URL-friendly string that will act as a global identifier for this collection. |
 | `labels`         | Singular and plural labels for use in identifying this collection throughout Payload. |
-| `fields`         | Array of field types that will determine the structure and functionality of the data stored within this collection. |
+| `fields`         | Array of field types that will determine the structure and functionality of the data stored within this collection. [Click here](/docs/fields/overview) for a full list of field types as well as how to configure them. |
 | `admin`          | Admin-specific configuration. See below for [more detail](/docs/collections#admin). |
 | `preview`        | Function to generate preview URLS within the Admin panel that can point to your app. [More](/docs/collections#preview). |
-| `hooks`          |
+| `hooks`          | Entry points to "tie in" to collection actions at specific points. [More](/docs/hooks/config#collection-hooks) |
+| `access`         | Provide access control functions to define exactly who should be able to do what with documents in this collection. [More](/docs/access-control/config/#collections) |
+| `auth`           | Specify options if you would like this collection to feature authentication. For more, consult the [Authentication](/docs/authentication/config) documentation. |
+| `upload`         | Specify options if you would like this collection to support file uploads. For more, consult the [Uploads](/docs/uploads/config) documentation. |
 
 #### Simple example
 
@@ -44,11 +47,24 @@ const Order = {
 }
 ```
 
-#### Full examples
+#### More collection config examples
 
 You can find an assortment of [example collection configs](https://github.com/payloadcms/payload/blob/master/demo/collections) in the Payload source code on GitHub.
 
 ### Admin options
 
+You can customize the way that the Admin panel behaves on a collection-by-collection basis by defining the `admin` property on a collection's config.
+
+#### Admin Collection Options
+
+| Option                       | Description  |
+| ---------------------------- | -------------|
+| `useAsTitle`                 | Specify a top-level field to use for a document title throughout the Admin panel. If no field is defined, the ID of the document is used as the title. |
+| `defaultColumns`             | Array of field names that correspond to which columns to show by default in this collection's List view. |
+| `disableDuplicate `          | Disables the "Duplicate" button while editing documents within this collection. |
+| `enableRichTextRelationship` | The [Rich Text](/docs/fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set this field to `true` to enable the collection to be selected within it. |
+| `components`                 | Swap in your own React components to be used within this collection. [More](/docs/admin/components#collections) |
 
 ### Preview
+
+The Admin panel features a ``
