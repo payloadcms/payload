@@ -50,7 +50,7 @@ $controls-top-adjustment: base(.1);
   }
 
   &__content-container {
-    padding-right: base(.75);
+    padding-right: base(.5);
     position: relative;
     min-height: 100%;
     box-shadow: #{$style-stroke-width-s} 0px 0px 0px $color-light-gray;
@@ -72,6 +72,8 @@ $controls-top-adjustment: base(.1);
 
   @include mid-break {
     &--left {
+      margin-right: base(1);
+
       .field-type-gutter__content-container {
         padding-right: $style-stroke-width-m;
         padding-left: 0;
