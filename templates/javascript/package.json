@@ -1,0 +1,13 @@
+{
+  "name": "payload-starter",
+  "version": "1.0.0",
+  "main": "server.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "devDependencies": {
+    "express": "^4.17.1",
+    "@payloadcms/payload": "0.1.121"
+  }
+}
