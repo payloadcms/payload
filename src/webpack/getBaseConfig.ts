@@ -13,9 +13,6 @@ export default (config: Config): Configuration => ({
       path.resolve(__dirname, '../admin'),
     ],
   },
-  output: {
-    publicPath: config.routes.admin,
-  },
   resolveLoader: {
     modules: ['node_modules', path.join(__dirname, '../../node_modules')],
   },

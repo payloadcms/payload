@@ -15,7 +15,7 @@ export default (payloadConfig: Config): Configuration => {
       ],
     },
     output: {
-      ...baseConfig.output,
+      publicPath: payloadConfig.routes.admin,
       path: '/',
       filename: '[name].js',
     },

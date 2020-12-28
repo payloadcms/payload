@@ -13,7 +13,7 @@ export default (payloadConfig: Config): Configuration => {
   let config: Configuration = {
     ...baseConfig,
     output: {
-      ...baseConfig.output,
+      publicPath: `${payloadConfig.routes.admin}/`,
       path: path.resolve(process.cwd(), 'build'),
       filename: '[name].[chunkhash].js',
       chunkFilename: '[name].[chunkhash].js',
