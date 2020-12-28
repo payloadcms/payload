@@ -4,7 +4,6 @@ const execa = require('execa');
 const ora = require('ora');
 const { getArgs } = require('./getArgs');
 
-const { getProjectName } = require('./getProjectName');
 const { getProjectDir } = require('./getProjectDir');
 const { getTemplate } = require('./getTemplate');
 const { success, error } = require('./log');
@@ -35,7 +34,6 @@ const yarnInstall = async (dir) => {
 };
 
 const createProject = async () => {
-  const projectName = await getProjectName();
   const projectDir = await getProjectDir();
   createProjectDir(projectDir);
   const templateDir = `./templates/${await getTemplate()}`;

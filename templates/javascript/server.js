@@ -1,11 +1,13 @@
 const express = require('express');
 const payload = require('@payloadcms/payload');
+
+require('dotenv').config();
 const app = express();
 
 // Initialize Payload
 payload.init({
-  secret: 'SECRET_KEY',
-  mongoURL: 'mongodb://localhost/payload-starter',
+  secret: process.env.PAYLOAD_SECRET,
+  mongoURL: process.env.MONGODB_URI,
   express: app,
 });
 
