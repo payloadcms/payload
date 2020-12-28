@@ -1,0 +1,37 @@
+---
+title: The Payload Config
+label: Introduction
+order: 10
+---
+
+The Payload config is central to everything that Payload does. It scaffolds the data that Payload stores as well as maintains custom React components, hook logic, custom validations, and much more. The config itself and all of its dependencies are run through Babel, so you can take full advantage newer JavaScript features and even directly import React components containing JSX.
+
+<strong>It's also strongly typed with TypeScript, which means that even if you aren't using TypeScript to build your project, your IDE (such as VSCode) may still provide helpful information like typeahead suggestions.</strong>
+
+<Banner type="warning">
+	<strong>Important:</strong><br />This file is included in the Payload admin bundle, so make sure you do not embed any sensitive information.
+</Banner>
+
+## Options
+
+| Option               | Description  |
+| -------------------- | -------------|
+| `collections`        | An array of all Collections that Payload will manage. To read more about how to define your collection configs, [click here](/docs/configuration/collections).
+| `globals`            | An array of all Globals that Payload will manage. For more on Globals and their configs, [click here](/docs/configuration/globals).
+| `admin`              | Base Payload admin configuration. Specify custom components, control metadata, set the Admin user collection, and [more](/docs/admin/config#global). |
+| `localization`       | Opt-in and control how Payload handles the translation of your content into multiple locales. [More](/docs/configuration/localization) |
+| `graphQL`            | Manage GraphQL-specific functionality here. Define your own queries and mutations, manage query complexity limits, and [more](/docs/graphql/config). |
+| `cookiePrefix`       | A string that will be prefixed to all cookies that Payload sets. |
+| `cors`               | Either a whitelist array of URLS to allow CORS requests from, or a wildcard string (`'*'`) to accept incoming requests from any domain. |
+| `csrf`               | A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. [More](/docs/production/security#csrf) |
+| `defaultDepth`       | If a user does not specify `depth` while requesting a resource, this depth will be used. [More](/docs/getting-started/concepts#depth) |
+| `maxDepth`           | The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries. Defaults to `10`. |
+| `upload`             | Base Payload upload configuration. [More](/docs/admin/upload#global). |
+| `routes`             | Control the routing structure that Payload binds itself to. Specify `admin`, `api`, `graphQL`, and `graphQLPlayground`. |
+| `paths`              | Specific paths used to override Payload functionality. [More](/docs/configuration/paths) |
+| `email`              | Base email settings to allow Payload to generate email such as Forgot Password requests and other requirements. [More](/docs/email/overview#config) |
+| `express`            | Express-specific middleware options such as compression and JSON parsing. [More](/docs/configuration/express). |
+| `debug`              | Enable to expose more detailed error information. |
+| `rateLimit`          | Control IP-based rate limiting for all Payload resources. Used to prevent DDoS attacks and [more].(/docs/production/security#rate-limiting). |
+| `webpack`            | Customize the Webpack config used to generate the Payload Admin panel. Define ENV variables, alias server-only modules, and [more](/docs/configuration/webpack). |
+| `hooks`              | Tap into Payload-wide hooks. [More](/docs/configuration/hooks) |

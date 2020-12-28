@@ -37,3 +37,77 @@ You can define as many Collections as you need. On each Collection, you can spec
 </Banner>
 
 Payload comes with [many different types](../fields/overview) of Fields that give you a ton of flexibility while designing your API. Each Field type has its own potential properties that allow you to customize how they work.
+
+### Depth
+
+<Banner type="info">
+	"Depth" means how many levels down that related documents should be automatically populated when retrieved.
+</Banner>
+
+You can specify population `depth` via query parameter in the REST API and by an option in the local API. *Depth has no effect in the GraphQL API, because there, depth is based on the shape of your queries.*
+
+**For example, let's take the following Collections for example:**
+
+```
+{
+	slug: 'posts',
+	fields: [
+		{
+			name: 'title',
+			label: 'Title',
+			type: 'text',
+		},
+		{
+			name: 'author',
+			label: 'Post Author',
+			type: 'relationship',
+			relationTo: 'users',
+		}
+	]
+}
+
+{
+	slug: 'users',
+	fields: [
+		{
+			name: 'email',
+			label: 'Email',
+			type: 'email',
+		},
+		{
+			name: 'department'
+			label: 'Department',
+			type: 'relationship',
+			relationTo: 'departments'
+		}
+	]
+}
+
+{
+	slug: 'departments',
+	fields: [
+		{
+			name: 'name'
+			label: 'Name',
+			type: 'text',
+		}
+	]
+}
+```
+
+If you were to query the Posts endpoint at, say, `http://localhost:3000/api/posts?depth=1`, you will retrieve Posts with populations one level deep. A returned result may look like the following:
+
+```
+{
+	title: 'This post sucks',
+	author: {
+		id: '5f7dd05cd50d4005f8bcab17',
+		email: 'spiderman@superheroes.gov',
+		department: '5e3ca05cd50d4005f8bdab15'
+	}
+}
+```
+
+Notice how the `author` is fully populated but its `department` is left as a document ID. That's because the User counted as the first level of `depth` and got populated—but then prevented any further populations from taking place.
+
+To populate both the User and their department, a user can specify `?depth=2`.
