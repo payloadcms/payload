@@ -53,6 +53,9 @@ export const number = baseField.keys({
   defaultValue: joi.number(),
   min: joi.number(),
   max: joi.number(),
+  admin: baseAdminFields.keys({
+    step: joi.number(),
+  }),
 });
 
 export const textarea = baseField.keys({
@@ -84,7 +87,7 @@ export const select = baseField.keys({
   options: joi.array().items(joi.alternatives().try(
     joi.string(),
     joi.object({
-      value: joi.string().required(),
+      value: joi.string().allow('').required(),
       label: joi.string().required(),
     }),
   )).required(),
@@ -101,11 +104,14 @@ export const radio = baseField.keys({
   options: joi.array().items(joi.alternatives().try(
     joi.string(),
     joi.object({
-      value: joi.string().required(),
+      value: joi.string().allow('').required(),
       label: joi.string().required(),
     }),
   )).required(),
   defaultValue: joi.string(),
+  admin: baseAdminFields.keys({
+    layout: joi.string().valid('vertical', 'horizontal'),
+  }),
 });
 
 export const row = baseField.keys({
@@ -116,6 +122,7 @@ export const row = baseField.keys({
 export const group = baseField.keys({
   type: joi.string().valid('group').required(),
   name: joi.string().required(),
+  label: joi.string(),
   fields: joi.array().items(joi.link('#field')),
   defaultValue: joi.object(),
 });
@@ -164,6 +171,7 @@ export const blocks = baseField.keys({
     singular: joi.string(),
     plural: joi.string(),
   }),
+  label: joi.string(),
   blocks: joi.array().items(
     joi.object({
       slug: joi.string().required(),
@@ -212,8 +220,7 @@ export const date = baseField.keys({
   type: joi.string().valid('date').required(),
   name: joi.string().required(),
   defaultValue: joi.string(),
-});
-
+}).unknown(true); // remove when we better specify options allowed to pass to React Datepicker
 
 const fieldSchema = joi.alternatives()
   .try(
