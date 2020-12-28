@@ -1,5 +1,4 @@
 const prompts = require('prompts');
-const fs = require('fs');
 const slugify  = require('@sindresorhus/slugify');
 const { getArgs } = require('./getArgs');
 const { getProjectName } = require('./getProjectName');
