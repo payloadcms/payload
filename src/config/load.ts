@@ -4,14 +4,27 @@ import path from 'path';
 import { Config } from './types';
 import findConfig from './find';
 import validate from './validate';
-
-const removedExtensions = ['.scss', '.css', '.svg', '.png', '.jpg', '.eot', '.ttf', '.woff', '.woff2'];
+import babelConfig from '../babel.config';
 
 const configPath = findConfig();
+
+const removedExtensions = ['.scss', '.css', '.svg', '.png', '.jpg', '.eot', '.ttf', '.woff', '.woff2'];
 
 const loadConfig = (): Config => {
   removedExtensions.forEach((ext) => {
     require.extensions[ext] = () => null;
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('@babel/register')({
+    ...babelConfig,
+    extensions: ['.ts', '.tsx', '.js', '.jsx'],
+    env: {
+      development: {
+        sourceMaps: 'inline',
+        retainLines: true,
+      },
+    },
   });
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
