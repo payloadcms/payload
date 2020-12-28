@@ -23,7 +23,6 @@ const { createProject } = require('./utils/createProject');
     console.log(helpMessage);
     return 0;
   }
-  if (!args['--name']) throw new Error('--name is a required argument');
 
   console.log('args :>> ', args);
   await getProjectName();
