@@ -108,8 +108,8 @@ export type PayloadCollectionConfig = {
       }
     };
     enableRichTextRelationship?: boolean
+    preview?: (doc: Document, token: string) => string
   };
-  preview?: (doc: Document, token: string) => string
   hooks?: {
     beforeOperation?: BeforeOperationHook[];
     beforeValidate?: BeforeValidateHook[];

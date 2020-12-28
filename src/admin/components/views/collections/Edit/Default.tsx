@@ -46,9 +46,9 @@ const DefaultEditView: React.FC<Props> = (props) => {
     admin: {
       useAsTitle,
       disableDuplicate,
+      preview,
     },
     timestamps,
-    preview,
     auth,
     upload,
   } = collection;

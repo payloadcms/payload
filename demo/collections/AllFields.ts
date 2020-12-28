@@ -13,13 +13,13 @@ const AllFields: PayloadCollectionConfig = {
   // },
   admin: {
     useAsTitle: 'text',
-  },
-  preview: (doc, token) => {
-    if (doc && doc.text) {
-      return `http://localhost:3000/previewable-posts/${doc.text.value}?preview=true&token=${token}`;
-    }
+    preview: (doc, token) => {
+      if (doc && doc.text) {
+        return `http://localhost:3000/previewable-posts/${doc.text.value}?preview=true&token=${token}`;
+      }
 
-    return null;
+      return null;
+    },
   },
   access: {
     read: () => true,

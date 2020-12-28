@@ -12,7 +12,6 @@ const collectionSchema = joi.object().keys({
     singular: joi.string(),
     plural: joi.string(),
   }),
-  preview: joi.func(),
   access: joi.object({
     create: joi.func(),
     read: joi.func(),
@@ -32,6 +31,7 @@ const collectionSchema = joi.object().keys({
         Edit: component,
       }),
     }),
+    preview: joi.func(),
   }),
   fields: joi.array()
     .items(fieldSchema),

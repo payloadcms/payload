@@ -18,13 +18,6 @@ const LocalizedPosts: PayloadCollectionConfig = {
   access: {
     read: () => true,
   },
-  preview: (doc, token) => {
-    if (doc && doc.title) {
-      return `http://localhost:3000/posts/${doc.title.value}?preview=true&token=${token}`;
-    }
-
-    return null;
-  },
   fields: [
     {
       name: 'title',
