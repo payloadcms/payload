@@ -17,11 +17,7 @@
     color: $color-gray;
   }
 
-  @include large-break {
+  @include mid-break {
     padding-right: base(.5);
-
-    &__controls {
-      padding-right: base(.75);
-    }
   }
 }
