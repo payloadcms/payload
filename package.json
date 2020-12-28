@@ -12,9 +12,11 @@
   },
   "scripts": {
     "copyfiles": "copyfiles -u 1 src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png} dist/",
+    "build:tsc": "tsc --p tsconfig.admin.json && tsc --p tsconfig.server.json",
     "build:components": "webpack --config dist/webpack/components.config.js",
+    "build": "yarn copyfiles && yarn build:tsc && yarn build:components",
+    "demo:build:analyze": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts PAYLOAD_ANALYZE_BUNDLE=true node dist/bin/build",
     "demo:build": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts node dist/bin/build",
-    "build": "yarn copyfiles && tsc && yarn build:components",
     "dev": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts nodemon",
     "test": "yarn test:int && yarn test:client",
     "pretest": "tsc-silent --project tsconfig.json --suppress @",

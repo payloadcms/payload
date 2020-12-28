@@ -1,4 +1,3 @@
-import { Data } from '../admin/components/forms/Form/types';
 import validationPromise from './validationPromise';
 import accessPromise from './accessPromise';
 import hookPromise from './hookPromise';
@@ -128,7 +127,7 @@ const traverseFields = (args: Arguments): void => {
         });
       } else if (fieldIsArrayType(field)) {
         if (Array.isArray(data[field.name])) {
-          (data[field.name] as Data[]).forEach((rowData, i) => {
+          (data[field.name] as Record<string, unknown>[]).forEach((rowData, i) => {
             const originalDocRow = originalDoc && originalDoc[field.name] && originalDoc[field.name][i];
             traverseFields({
               ...args,
@@ -143,7 +142,7 @@ const traverseFields = (args: Arguments): void => {
         traverseFields({
           ...args,
           fields: field.fields,
-          data: data[field.name] as Data,
+          data: data[field.name] as Record<string, unknown>,
           originalDoc: originalDoc[field.name],
           path: `${path}${field.name}.`,
         });
@@ -152,7 +151,7 @@ const traverseFields = (args: Arguments): void => {
 
     if (fieldIsBlockType(field)) {
       if (Array.isArray(data[field.name])) {
-        (data[field.name] as Data[]).forEach((rowData, i) => {
+        (data[field.name] as Record<string, unknown>[]).forEach((rowData, i) => {
           const block = field.blocks.find((blockType) => blockType.slug === rowData.blockType);
           const originalDocRow = originalDoc && originalDoc[field.name] && originalDoc[field.name][i];
 
@@ -178,7 +177,7 @@ const traverseFields = (args: Arguments): void => {
 
       if (field.type === 'array' || field.type === 'blocks') {
         const hasRowsOfNewData = Array.isArray(data[field.name]);
-        const newRowCount = hasRowsOfNewData ? (data[field.name] as Data[]).length : 0;
+        const newRowCount = hasRowsOfNewData ? (data[field.name] as Record<string, unknown>[]).length : 0;
 
         // Handle cases of arrays being intentionally set to 0
         if (data[field.name] === '0' || data[field.name] === 0 || data[field.name] === null) {

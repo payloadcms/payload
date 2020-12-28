@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "esnext"
+  },
+  "include": [
+    "src/admin"
+  ],
+  "exclude": [
+    "**/*.spec.js",
+  ]
+}

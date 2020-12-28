@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "src/admin",
+    "**/*.spec.js",
+  ]
+}
