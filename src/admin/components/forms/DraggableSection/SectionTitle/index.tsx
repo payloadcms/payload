@@ -1,5 +1,5 @@
 import React from 'react';
-import EditableBlockTitle from './EditableBlockTitle';
+import useFieldType from '../../useFieldType';
 import Pill from '../../../elements/Pill';
 import { Props } from './types';
 
@@ -8,7 +8,9 @@ import './index.scss';
 const baseClass = 'section-title';
 
 const SectionTitle: React.FC<Props> = (props) => {
-  const { label, ...remainingProps } = props;
+  const { label, path, readOnly } = props;
+
+  const { value, setValue } = useFieldType({ path });
 
   const classes = [
     baseClass,
@@ -17,7 +19,17 @@ const SectionTitle: React.FC<Props> = (props) => {
   return (
     <div className={classes}>
       <Pill pillStyle="light-gray">{label}</Pill>
-      <EditableBlockTitle {...remainingProps} />
+
+      <input
+        className={`${baseClass}__input`}
+        id={path}
+        value={value as string || ''}
+        placeholder="Untitled"
+        type="text"
+        name={path}
+        onChange={setValue}
+        readOnly={readOnly}
+      />
     </div>
   );
 };
