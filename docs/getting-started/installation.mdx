@@ -26,7 +26,7 @@ Adding Payload to either a new or existing app is super straightforward. To add 
 
 From there, the first step is writing a baseline config. Create a new `payload.config.js` in the root of your project. The simplest config contains the following:
 
-```
+```js
 import { buildConfig } from 'payload';
 
 export default buildConfig({
@@ -46,7 +46,7 @@ Now that you've got a baseline Payload config, it's time to initialize Payload. 
 1. Create a new `server.js` file in the root folder of your app
 1. Add the following code to `server.js`:
 
-```
+```js
 const express = require('express');
 
 const app = express();
@@ -54,14 +54,13 @@ const app = express();
 app.listen(3000, async () => {
 	console.log('Express is now listening for incoming connections on port 3000.')
 });
-
 ```
 
 This server doesn't do anything just yet. But, after you have this in place, we can initialize Payload via its `init()` method, which accepts a small set of arguments to tell it how to operate. For a full list of `init` arguments, please consult the [main configuration](/docs/configuration/main#init) docs.
 
 To initialize Payload, update your `server.js` file to reflect the following code:
 
-```
+```js
 const express = require('express');
 const payload = require('payload');
 

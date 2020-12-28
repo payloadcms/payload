@@ -4,17 +4,51 @@ label: Collections
 order: 20
 ---
 
-Talk about how to write collection configs here.
+Payload Collections are defined through configs of their own, and you can define as many as your application needs. Each Collection will map one-to-one with a MongoDB collection automatically based on fields that you define.
 
-TODO: What collections are and what they represent
+It's often best practice to write your Collections in separate files and then import them into the main Payload config.
 
-### Stand-alone file
+## Collection Config Options
+
+| Option           | Description  |
+| ---------------- | -------------|
+| `slug`           | Unique, URL-friendly string that will act as a global identifier for this collection. |
+| `labels`         | Singular and plural labels for use in identifying this collection throughout Payload. |
+| `fields`         | Array of field types that will determine the structure and functionality of the data stored within this collection. |
+| `admin`          | Admin-specific configuration. See below for [more detail](/docs/collections#admin). |
+| `preview`        | Function to generate preview URLS within the Admin panel that can point to your app. [More](/docs/collections#preview). |
+| `hooks`          |
+
+#### Simple example
 
 ```js
-module.exports = {
-  slug: 'customer',
-  labels: {
-    singular: 'Customer',
-    plural: 'Customers',
-  }
+const Order = {
+	slug: 'orders',
+	labels: {
+		singular: 'Order',
+		plural: 'Orders',
+	},
+	fields: [
+		{
+			name: 'total',
+			type: 'number',
+			required: true,
+		},
+		{
+			name: 'placedBy',
+			type: 'relationship',
+			relationTo: 'customers',
+			required: true,
+		}
+	]
 }
+```
+
+#### Full examples
+
+You can find an assortment of [example collection configs](https://github.com/payloadcms/payload/blob/master/demo/collections) in the Payload source code on GitHub.
+
+### Admin options
+
+
+### Preview

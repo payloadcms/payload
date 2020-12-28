@@ -12,7 +12,7 @@ Payload is based around a small and intuitive set of concepts. Before starting t
 	The Payload config is where you configure everything that Payload does.
 </Banner>
 
-By default, the Payload config lives in the root folder of your code and is named `payload.config.js`, but you can customize where you store it. The `config` is plain old JavaScript, meaning you can write full JavaScript functions and even full React components right into your config.
+By default, the Payload config lives in the root folder of your code and is named `payload.config.js` (`payload.config.ts` if you're using TypeScript), but you can customize its name and where you store it. You can write full functions and even full React components right into your config.
 
 ### Collections
 
@@ -20,7 +20,9 @@ By default, the Payload config lives in the root folder of your code and is name
 	A Collection represents a type of content that Payload will store and can contain many documents.
 </Banner>
 
-Payload Collections are defined through Each Collection will map one-to-one with a MongoDB collection automatically based on fields that you define. You can have as many Collections as you need. It's often best practice to write your Collections in separate files,
+Collections define the shape of your data as well as all functionalities attached to that data. They will contain or many "documents", all corresponding with the same fields and functionalities that you define.
+
+They can represent anything you can store in a database - for example - pages, posts, users, people, orders, categories, events, customers, transactions, and anything else your app needs.
 
 ### Globals
 
@@ -28,7 +30,7 @@ Payload Collections are defined through Each Collection will map one-to-one with
 	A Global is a "one-off" piece of content that is perfect for storing navigational structures, themes, top-level meta data, and more.
 </Banner>
 
-You can define as many Collections as you need. On each Collection, you can specify the shape of your data through Fields.
+Globals are in many ways similar to Collections, but there is only ever **one** instance of a Global, whereas Collections can contain many documents.
 
 ### Fields
 
@@ -36,7 +38,17 @@ You can define as many Collections as you need. On each Collection, you can spec
 	Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data that they store.
 </Banner>
 
-Payload comes with [many different types](../fields/overview) of Fields that give you a ton of flexibility while designing your API. Each Field type has its own potential properties that allow you to customize how they work.
+Payload comes with [many different field types](../fields/overview) that give you a ton of flexibility while designing your API. Each Field type has its own potential properties that allow you to customize how they work.
+
+### Hooks
+
+<Banner type="info">
+	Hooks are where you can "tie in" to existing Payload actions to perform your own additional logic or modify how Payload operates altogether.
+</Banner>
+
+Hooks are an extremely powerful concept and are central to extending and customizing your app. Payload provides a wide variety of hooks which you can utilize. For example, imagine if you'd like to send an email every time a document is created in your Orders collection. To do so, you can add an `afterChange` hook function to your Orders collection that receives the Order data and allows you to send an email accordingly.
+
+There are many more potential reasons to use Hooks. For more, visit the [Hooks documentation](/docs/hooks/config).
 
 ### Depth
 
@@ -108,6 +120,6 @@ If you were to query the Posts endpoint at, say, `http://localhost:3000/api/post
 }
 ```
 
-Notice how the `author` is fully populated but its `department` is left as a document ID. That's because the User counted as the first level of `depth` and got populated—but then prevented any further populations from taking place.
+Notice how the `author` is fully populated, but its `department` is left as a document ID? That's because the User counted as the first level of `depth` and got populated—but then prevented any further populations from taking place.
 
-To populate both the User and their department, a user can specify `?depth=2`.
+To populate both the User and their department, a user could specify `?depth=2` or higher.
