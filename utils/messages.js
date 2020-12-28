@@ -1,6 +1,9 @@
 const chalk = require('chalk');
+const figures = require('figures');
 const terminalLink = require('terminal-link');
 const { getProjectDir } = require('./getProjectDir');
+
+const header = (message) => chalk.yellow(figures.star) + ' ' + chalk.bold(message);
 
 const helpMessage = chalk`
   {bold USAGE}
@@ -15,12 +18,12 @@ const helpMessage = chalk`
 `;
 
 const successMessage = async () => `
-  ${chalk.bold(`To launch your application:`)}
+  ${header('Launch Application:')}
 
     - cd ${await getProjectDir()}
     - yarn dev
 
-  ${chalk.bold(`Documentation:`)}
+  ${header('Documentation:')}
 
     - ${terminalLink('Getting Started', 'https://payloadcms.com/docs/getting-started/what-is-payload')}
     - ${terminalLink('Configuration', 'https://payloadcms.com/docs/configuration/main')}
