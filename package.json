@@ -1,4 +1,5 @@
 {
+  "name": "create-payload-app",
   "dependencies": {
     "@sindresorhus/slugify": "^1.1.0",
     "arg": "^5.0.0",
