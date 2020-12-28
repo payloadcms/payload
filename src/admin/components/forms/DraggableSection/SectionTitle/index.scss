@@ -3,4 +3,31 @@
 .section-title {
   display: flex;
   align-items: center;
+  width: 100%;
+
+  &__input {
+    width: 100%;
+    color: $color-dark-gray;
+    background-color: transparent;
+    font-family: $font-body;
+    font-weight: 600;
+    font-size: base(.75);
+    padding: base(.1) base(.2);
+    margin-left: base(.5);
+    margin-right: base(.5);
+    border: none;
+
+    &:hover {
+      box-shadow: inset 0px -2px 0px -1px $color-light-gray;
+    }
+
+    &:hover,
+    &:focus {
+      outline: 0;
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
 }
