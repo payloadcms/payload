@@ -1,6 +1,11 @@
 import joi from 'joi';
 import fieldSchema from '../../fields/config/schema';
 
+const component = joi.alternatives().try(
+  joi.object().unknown(),
+  joi.func(),
+);
+
 const collectionSchema = joi.object().keys({
   slug: joi.string().required(),
   labels: joi.object({
@@ -21,11 +26,12 @@ const collectionSchema = joi.object().keys({
     useAsTitle: joi.string(),
     defaultColumns: joi.array().items(joi.string()),
     enableRichTextRelationship: joi.boolean(),
-    components: joi.object()
-      .keys({
-        List: joi.func(),
-        Edit: joi.func(),
+    components: joi.object({
+      views: joi.object({
+        List: component,
+        Edit: component,
       }),
+    }),
   }),
   fields: joi.array()
     .items(fieldSchema),

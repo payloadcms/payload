@@ -101,7 +101,9 @@ const CustomComponents: PayloadCollectionConfig = {
   admin: {
     useAsTitle: 'title',
     components: {
-      List: ListView,
+      views: {
+        List: ListView,
+      },
     },
   },
 };

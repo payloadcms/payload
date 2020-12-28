@@ -158,14 +158,14 @@ type RichTextCustomElement = {
   name: string
   Button: React.ComponentType
   Element: React.ComponentType
-  plugins: RichTextPlugin[]
+  plugins?: RichTextPlugin[]
 }
 
 type RichTextCustomLeaf = {
   name: string
   Button: React.ComponentType
   Leaf: React.ComponentType
-  plugins: RichTextPlugin[]
+  plugins?: RichTextPlugin[]
 }
 
 export type RichTextElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link' | 'relationship' | RichTextCustomElement;

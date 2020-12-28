@@ -2,6 +2,11 @@ import joi from 'joi';
 import collectionSchema from '../collections/config/schema';
 import globalSchema from '../globals/config/schema';
 
+const component = joi.alternatives().try(
+  joi.object().unknown(),
+  joi.func(),
+);
+
 export default joi.object({
   serverURL: joi.string()
     .required(),
@@ -28,11 +33,11 @@ export default joi.object({
     indexHTML: joi.string(),
     components: joi.object()
       .keys({
-        Nav: joi.func(),
-        Dashboard: joi.func(),
+        Nav: component,
+        Dashboard: component,
         graphics: joi.object({
-          Icon: joi.func(),
-          Logo: joi.func(),
+          Icon: component,
+          Logo: component,
         }),
       }),
   }),

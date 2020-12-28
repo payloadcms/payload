@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const PurpleBackground = ({ attributes, children }) => (
+const PurpleBackground: React.FC<any> = ({ attributes, children }) => (
   <span
     {...attributes}
     style={{ backgroundColor: 'purple' }}
