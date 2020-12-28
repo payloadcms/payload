@@ -20,7 +20,7 @@ const Row: React.FC<Props> = (props) => {
     <RenderFields
       readOnly={readOnly}
       className="field-type row"
-      permissions={permissions.fields}
+      permissions={permissions?.fields}
       fieldTypes={fieldTypes}
       fieldSchema={fields.map((field) => ({
         ...field,

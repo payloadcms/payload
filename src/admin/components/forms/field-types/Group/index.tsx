@@ -43,7 +43,7 @@ const Group: React.FC<Props> = (props) => {
         <div className={`${baseClass}__fields-wrapper`}>
           <NegativeFieldGutterProvider allow={false}>
             <RenderFields
-              permissions={permissions.fields}
+              permissions={permissions?.fields}
               readOnly={readOnly}
               fieldTypes={fieldTypes}
               fieldSchema={fields.map((subField) => ({
