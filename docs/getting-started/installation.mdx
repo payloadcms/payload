@@ -34,9 +34,9 @@ export default buildConfig({
 });
 ```
 
-Write the above code into your newly created config file. This baseline config will automatically provide you with a default `User` collection. For more information about users and authentication, jump to the [Authentication](/docs/authentication/config) section.
+Write the above code into your newly created config file. This baseline config will automatically provide you with a default `User` collection. For more information about users and authentication, including how to provide your own user config, jump to the [Authentication](/docs/authentication/config) section.
 
-Although this is just the bare minimum config, there are *many* more options that you can control here. To reference the full config and all of its options, [click here](/docs/configuration/main).
+Although this is just the bare minimum config, there are *many* more options that you can control here. To reference the full config and all of its options, [click here](/docs/configuration/overview).
 
 ### Server
 
@@ -56,7 +56,7 @@ app.listen(3000, async () => {
 });
 ```
 
-This server doesn't do anything just yet. But, after you have this in place, we can initialize Payload via its `init()` method, which accepts a small set of arguments to tell it how to operate. For a full list of `init` arguments, please consult the [main configuration](/docs/configuration/main#init) docs.
+This server doesn't do anything just yet. But, after you have this in place, we can initialize Payload via its `init()` method, which accepts a small set of arguments to tell it how to operate. For a full list of `init` arguments, please consult the [main configuration](/docs/configuration/overview#init) docs.
 
 To initialize Payload, update your `server.js` file to reflect the following code:
 

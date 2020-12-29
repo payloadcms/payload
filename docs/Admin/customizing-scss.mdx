@@ -1,0 +1,67 @@
+---
+title: Customizing CSS
+label: Customizing CSS
+order: 30
+---
+
+### Adding your own CSS / SCSS
+
+You can add your own CSS by providing your base Payload config with a path to your own CSS or SCSS. Customize the styling of any part of the Payload dashboard as necessary.
+
+To do so, provide your base Payload config with a path to your own stylesheet. It can be either a CSS or SCSS file.
+
+**Example in payload.config.js:**
+```js
+import { buildConfig } from 'payload';
+import path from 'path';
+
+const config = buildConfig({
+	serverURL: 'http://localhost:3000',
+	admin: {
+		css: path.resolve(__dirname, 'relative/path/to/stylesheet.scss'),
+	},
+})
+```
+
+### Overriding SCSS variables
+
+You can specify your own SCSS variable stylesheet that will allow for the override of Payload's base theme. This unlocks a ton of powerful theming and design options such as:
+
+- Changing dashboard font families
+- Modifying color palette
+- Creating a dark theme
+- Etc.
+
+To do so, provide your base Payload config with a path to your own SCSS variable sheet.
+
+**Example in payload.config.js:**
+```js
+import { buildConfig } from 'payload';
+import path from 'path';
+
+const config = buildConfig({
+	serverURL: 'http://localhost:3000',
+	admin: {
+		scss: path.resolve(__dirname, 'relative/path/to/vars.scss'),
+	},
+})
+```
+
+**Example stylesheet override:**
+```scss
+$font-body: 'Papyrus';
+$style-radius-m: 10px;
+```
+
+To reference all Sass variables that you can override, look at the default [SCSS variable stylesheet](https://github.com/payloadcms/payload/blob/master/src/admin/scss/vars.scss) within the Payload source code.
+
+<Banner type="error">
+	<strong>Warning:</strong><br />
+	Only SCSS variables, mixins, functions, and extends are allowed in <strong>your SCSS overrides</strong>. Do not attempt to add any CSS declarations to this file, as this variable stylesheet is imported by many components throughout the Payload Admin panel and will result in your CSS definition(s) being duplicated many times. If you need to add real CSS definitions, see "Adding your own CSS / SCSS" the top of this page.
+</Banner>
+
+
+
+
+
+

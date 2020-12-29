@@ -31,6 +31,8 @@ export default joi.object({
       }),
     disable: joi.bool(),
     indexHTML: joi.string(),
+    css: joi.string(),
+    scss: joi.string(),
     components: joi.object()
       .keys({
         Nav: component,
@@ -109,10 +111,4 @@ export default joi.object({
   hooks: joi.object().keys({
     afterError: joi.func(),
   }),
-  paths: joi.object()
-    .keys({
-      configDir: joi.string(),
-      config: joi.string(),
-      scss: joi.string(),
-    }),
 });

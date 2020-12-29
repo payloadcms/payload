@@ -4,9 +4,9 @@ label: Overview
 order: 10
 ---
 
-The Payload config is central to everything that Payload does. It scaffolds the data that Payload stores as well as maintains custom React components, hook logic, custom validations, and much more. The config itself and all of its dependencies are run through Babel, so you can take full advantage newer JavaScript features and even directly import React components containing JSX.
+Payload is a *config-based*, code-first CMS and application framework. The Payload config is central to everything that Payload does. It scaffolds the data that Payload stores as well as maintains custom React components, hook logic, custom validations, and much more. The config itself and all of its dependencies are run through Babel, so you can take full advantage of newer JavaScript features and even directly import React components containing JSX.
 
-<strong>It's also strongly typed with TypeScript, which means that even if you aren't using TypeScript to build your project, your IDE (such as VSCode) may still provide helpful information like typeahead suggestions.</strong>
+<strong>Also, because the Payload source code is fully written in TypeScript, its configs are strongly typed—meaning that even if you aren't using TypeScript to build your project, your IDE (such as VSCode) may still provide helpful information like typeahead suggestions while you write your config.</strong>
 
 <Banner type="warning">
 	<strong>Important:</strong><br />This file is included in the Payload admin bundle, so make sure you do not embed any sensitive information.
@@ -28,7 +28,7 @@ The Payload config is central to everything that Payload does. It scaffolds the 
 | `maxDepth`           | The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries. Defaults to `10`. |
 | `upload`             | Base Payload upload configuration. [More](/docs/admin/upload#global). |
 | `routes`             | Control the routing structure that Payload binds itself to. Specify `admin`, `api`, `graphQL`, and `graphQLPlayground`. |
-| `paths`              | Specific paths used to override Payload functionality. [More](/docs/configuration/paths) |
+| `paths`              | Specific paths used to override Payload functionality. Currently used to allow for the customization and theming of the Payload admin panel, although more uses will come over time. [More](/docs/admin/customizing-scss) |
 | `email`              | Base email settings to allow Payload to generate email such as Forgot Password requests and other requirements. [More](/docs/email/overview#config) |
 | `express`            | Express-specific middleware options such as compression and JSON parsing. [More](/docs/configuration/express). |
 | `debug`              | Enable to expose more detailed error information. |
