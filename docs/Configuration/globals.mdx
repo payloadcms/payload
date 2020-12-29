@@ -4,4 +4,69 @@ label: Globals
 order: 30
 ---
 
-Talk about how to write Globals configs here.
+Global configs are in many ways similar to [Collections](/docs/configuration/collections). The big difference is that Collections will potentially contain *many* documents, while a Global is a "one-off". Globals are perfect for things like header nav, site-wide banner alerts, app-wide localized strings, and other "global" data that your site or app might rely on.
+
+As with Collection configs, it's often best practice to write your Globals in separate files and then import them into the main Payload config.
+
+## Options
+
+| Option           | Description  |
+| ---------------- | -------------|
+| `slug`           | Unique, URL-friendly string that will act as an identifier for this Global. |
+| `label`          | Singular label for use in identifying this Global throughout Payload. |
+| `fields`         | Array of field types that will determine the structure and functionality of the data stored within this Global. [Click here](/docs/fields/overview) for a full list of field types as well as how to configure them. |
+| `admin`          | Admin-specific configuration. See below for [more detail](/docs/globals#admin). |
+| `hooks`          | Entry points to "tie in" to collection actions at specific points. [More](/docs/hooks/config#global-hooks) |
+| `access`         | Provide access control functions to define exactly who should be able to do what with this Global. [More](/docs/access-control/config/#globals) |
+| `auth`           | Specify options if you would like this collection to feature authentication. For more, consult the [Authentication](/docs/authentication/config) documentation. |
+| `upload`         | Specify options if you would like this collection to support file uploads. For more, consult the [Uploads](/docs/uploads/config) documentation. |
+
+#### Simple Global example
+
+```js
+const Nav = {
+	slug: 'nav',
+	label: 'Nav',
+	fields: [
+		{
+			name: 'items',
+			type: 'array',
+			required: true,
+			maxRows: 8,
+			fields: [
+				{
+					name: 'page',
+					label: 'Page',
+					type: 'relationship',
+					relationTo: 'pages', // "pages" is the slug of an existing collection
+					required: true,
+				}
+			]
+		},
+	]
+}
+```
+
+#### More Global config examples
+
+You can find an assortment of [example Global configs](https://github.com/payloadcms/payload/blob/master/demo/globals) in the Payload source code on GitHub.
+
+### Admin options
+
+You can customize the way that the Admin panel behaves on a Global-by-Global basis by defining the `admin` property on a Global's config.
+
+| Option                       | Description  |
+| ---------------------------- | -------------|
+| `components`                 | Swap in your own React components to be used within this Global. [More](/docs/admin/components#globals) |
+
+### Access control
+
+As with Collections, you can specify extremely granular access control (what users can do with this Global) on a Global-by-Global basis. However, Globals only have `update` and `read` access control due to their nature of only having one document. To learn more, go to the [Access Control](/docs/access-control/config) docs.
+
+### Hooks
+
+Globals also fully support a smaller subset of Hooks. To learn more, go to the [Hooks](/docs/hooks/config) documentation.
+
+### Field types
+
+Globals support all field types that Payload has to offer—including simple fields like text and checkboxes all the way to more complicated layout-building field groups like Blocks. [Click here](/docs/fields/config) to learn more about field types.
