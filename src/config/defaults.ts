@@ -14,6 +14,8 @@ export const defaults = {
     disable: false,
     indexHTML: path.resolve(__dirname, '../admin/index.html'),
     components: {},
+    css: path.resolve(__dirname, '../admin/scss/custom.css'),
+    scss: path.resolve(__dirname, '../admin/scss/overrides.scss'),
   },
   upload: {},
   email: {
@@ -44,7 +46,4 @@ export const defaults = {
   },
   hooks: {},
   localization: false,
-  paths: {
-    scss: path.resolve(__dirname, '../admin/scss/overrides.scss'),
-  },
 };

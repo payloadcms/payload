@@ -62,6 +62,8 @@ export type PayloadConfig = {
     }
     disable?: boolean;
     indexHTML?: string;
+    css?: string
+    scss?: string
     components?: {
       Nav?: React.ComponentType
       Account?: React.ComponentType

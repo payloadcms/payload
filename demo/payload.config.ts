@@ -42,6 +42,7 @@ export default buildConfig({
     //   // favicon: '/img/whatever.png',
     // },
     disable: false,
+    scss: path.resolve(__dirname, './client/scss/overrides.scss'),
     components: {
       // Nav: () => (
       //   <div>Hello</div>
@@ -101,9 +102,6 @@ export default buildConfig({
     graphQLPlayground: '/graphql-playground',
   },
   defaultDepth: 2,
-  paths: {
-    scss: path.resolve(__dirname, './client/scss/overrides.scss'),
-  },
   graphQL: {
     maxComplexity: 1000,
     mutations: {}, // TODO: needs typing

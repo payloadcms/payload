@@ -54,7 +54,8 @@ export default (config: Config): Configuration => ({
     alias: {
       'payload/config': config.paths.config,
       '@payloadcms/payload$': mockModulePath,
-      'payload-scss-overrides': config.paths.scss,
+      'payload-user-css': config.admin.css,
+      'payload-scss-overrides': config.admin.scss,
       dotenv: mockDotENVPath,
     },
     extensions: ['.ts', '.tsx', '.js', '.json'],
