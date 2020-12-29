@@ -1,0 +1,6 @@
+{
+  "watch": [
+    "**/*.ts"
+  ],
+  "exec": "ts-node ./server.ts"
+}
