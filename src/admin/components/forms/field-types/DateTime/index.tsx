@@ -5,7 +5,7 @@ import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
-import { date } from '../../../../../fields/validations';
+import { date as dateValidation } from '../../../../../fields/validations';
 import { Props } from './types';
 
 import './index.scss';
@@ -17,12 +17,14 @@ const DateTime: React.FC<Props> = (props) => {
     path: pathFromProps,
     name,
     required,
-    validate = date,
+    validate = dateValidation,
     label,
     admin: {
+      placeholder,
       readOnly,
       style,
       width,
+      date,
     } = {},
   } = props;
 
@@ -69,7 +71,9 @@ const DateTime: React.FC<Props> = (props) => {
       />
       <div className={`${baseClass}__input-wrapper`}>
         <DatePicker
-          {...props}
+          {...date}
+          placeholder={placeholder}
+          readOnly={readOnly}
           onChange={readOnly ? undefined : setValue}
           value={value as Date}
         />

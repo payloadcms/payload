@@ -86,6 +86,37 @@ const AllFields: PayloadCollectionConfig = {
       hasMany: true,
     },
     {
+      name: 'dateFieldExample',
+      label: 'Day and Time',
+      type: 'date',
+      admin: {
+        date: {
+          timeIntervals: 30,
+        },
+      },
+    },
+    {
+      name: 'dayOnlyDateFieldExample',
+      label: 'Day Only',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayOnly',
+          monthsToShow: 2,
+        },
+      },
+    },
+    {
+      name: 'timeOnlyDateFieldExample',
+      label: 'Time Only',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'timeOnly',
+        },
+      },
+    },
+    {
       name: 'radioGroupExample',
       label: 'Radio Group Example',
       type: 'radio',

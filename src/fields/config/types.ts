@@ -4,6 +4,7 @@ import { Editor } from 'slate';
 import { PayloadRequest } from '../../express/types';
 import { Access } from '../../config/types';
 import { Document } from '../../types';
+import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 
 export type FieldHook = (args: {
   value?: unknown,
@@ -112,6 +113,10 @@ export type CheckboxField = FieldBase & {
 
 export type DateField = FieldBase & {
   type: 'date';
+  admin?: Admin & {
+    placeholder?: string
+    date?: ConditionalDateProps
+  }
 }
 
 export type GroupField = FieldBase & {

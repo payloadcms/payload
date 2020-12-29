@@ -225,7 +225,21 @@ export const date = baseField.keys({
   type: joi.string().valid('date').required(),
   name: joi.string().required(),
   defaultValue: joi.string(),
-}).unknown(true); // remove when we better specify options allowed to pass to React Datepicker
+  admin: baseAdminFields.keys({
+    date: joi.object({
+      displayFormat: joi.string(),
+      pickerAppearance: joi.string(),
+      minDate: joi.date(),
+      maxDate: joi.date(),
+      minTime: joi.date(),
+      maxTime: joi.date(),
+      timeIntervals: joi.number(),
+      timeFormat: joi.string(),
+      monthsToShow: joi.number(),
+
+    }),
+  }),
+});
 
 const fieldSchema = joi.alternatives()
   .try(

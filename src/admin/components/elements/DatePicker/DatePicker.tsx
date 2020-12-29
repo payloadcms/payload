@@ -10,29 +10,26 @@ const baseClass = 'date-time-picker';
 
 const DateTime: React.FC<Props> = (props) => {
   const {
-    inputDateTimeFormat,
-    useDate = true,
+    value,
+    onChange,
+    displayFormat,
+    pickerAppearance = 'dayAndTime',
     minDate,
     maxDate,
-    monthsShown = 1,
-    useTime = true,
+    monthsToShow = 1,
     minTime,
     maxTime,
     timeIntervals = 30,
     timeFormat = 'h:mm aa',
+    readOnly,
     placeholder: placeholderText,
-    value,
-    onChange,
-    admin: {
-      readOnly,
-    } = {},
   } = props;
 
-  let dateTimeFormat = inputDateTimeFormat;
+  let dateTimeFormat = displayFormat;
 
-  if (!dateTimeFormat) {
-    if (useTime && useDate) dateTimeFormat = 'MMM d, yyy h:mm a';
-    else if (useTime) dateTimeFormat = 'h:mm a';
+  if (dateTimeFormat === undefined) {
+    if (pickerAppearance === 'dayAndTime') dateTimeFormat = 'MMM d, yyy h:mm a';
+    else if (pickerAppearance === 'timeOnly') dateTimeFormat = 'h:mm a';
     else dateTimeFormat = 'MMM d, yyy';
   }
 
@@ -40,8 +37,8 @@ const DateTime: React.FC<Props> = (props) => {
     minDate,
     maxDate,
     dateFormat: dateTimeFormat,
-    monthsShown: Math.min(2, monthsShown),
-    showTimeSelect: useTime,
+    monthsShown: Math.min(2, monthsToShow),
+    showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
     minTime,
     maxTime,
     timeIntervals,
@@ -56,7 +53,7 @@ const DateTime: React.FC<Props> = (props) => {
 
   const classes = [
     baseClass,
-    !useDate && `${baseClass}--hide-dates`,
+    `${baseClass}__appearance--${pickerAppearance}`,
   ].filter(Boolean).join(' ');
 
   return (
