@@ -1,14 +1,34 @@
 ---
 title: Webpack
 label: Webpack
-order: 70
+order: 40
 ---
 
 Payload uses Webpack 5 to build the Admin panel. It comes with support for many common functionalities such as SCSS and Typescript out of the box, but there are many cases where you may need to add support for additional functionalities.
 
-Here are a few common reasons, with examples, to extend the Webpack config:
+To extend the Webpack config, add the `webpack` key to your base Payload config, and provide a function that accepts the default Webpack config as its only argument:
 
-## Alias server-only modules
+`payload.config.js`
+```js
+import { buildConfig } from 'payload';
+
+export default buildConfig({
+	serverURL: 'http://localhost:3000',
+	admin: {
+		// highlight-start
+		webpack: (config) => {
+			// Do something with the config here
+
+			return config;
+		}
+		// highlight-end
+	}
+})
+```
+
+### Aliasing server-only modules
+
+A common use case for extending the Payload config is to alias server-only modules, thus preventing them from inclusion into the browser JavaScript bundle.
 
 As the Payload config is used in both server **and** client contexts, you may find yourself writing code in your Payload config that may be incompatible with browser environments.
 
@@ -139,7 +159,7 @@ Now, when Webpack sees that you're attempting to import your `createStripeSubscr
 
 By default, `env` variables are **not** provided to the Admin panel for security and safety reasons. But, Payload provides you with a way to still provide `env` vars to your frontend code.
 
-Payload will automatically supply any present `env` variables that are prefixed with `PAYLOAD_PUBLIC_` directly to the Admin panel.
+**Payload will automatically supply any present `env` variables that are prefixed with `PAYLOAD_PUBLIC_` directly to the Admin panel.**
 
 For example, if you've got the following environment variable:
 

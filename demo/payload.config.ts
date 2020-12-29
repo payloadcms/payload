@@ -48,6 +48,7 @@ export default buildConfig({
       //   <div>Hello</div>
       // ),
     },
+    webpack: (config) => config,
   },
   email: {
     transport: 'mock',
@@ -133,5 +134,4 @@ export default buildConfig({
       fileSize: 10000000, // 10MB
     },
   },
-  webpack: (config) => config,
 });
