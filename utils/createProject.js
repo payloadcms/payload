@@ -24,7 +24,6 @@ const installDeps = async (dir) => {
   }
 
   const cmd = args['--use-npm'] ? 'npm install' : 'yarn';
-  console.log(`Using cmd: ${cmd}`);
 
   let result = false;
   try {
