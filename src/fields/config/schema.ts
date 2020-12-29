@@ -236,7 +236,6 @@ export const date = baseField.keys({
       timeIntervals: joi.number(),
       timeFormat: joi.string(),
       monthsToShow: joi.number(),
-
     }),
   }),
 });
