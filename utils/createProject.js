@@ -1,4 +1,5 @@
 const path = require('path');
+const chalk = require('chalk');
 const fse = require('fs-extra');
 const execa = require('execa');
 const ora = require('ora');
@@ -41,13 +42,16 @@ const createProject = async () => {
   createProjectDir(projectDir);
   const templateDir = `./templates/${await getTemplate()}`;
 
+  console.log(`\nCreating a new Payload app in ${chalk.green(path.resolve(projectDir))}\n`)
+
   try {
     await fse.copy(templateDir, projectDir);
+    success('Project directory created')
   } catch (err) {
     console.error(err);
   }
 
-  const spinner = ora('Installing dependencies').start();
+  const spinner = ora('Installing dependencies. This may take a few minutes.').start();
   const result = await installDeps(projectDir);
   spinner.stop();
   spinner.clear();
