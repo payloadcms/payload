@@ -8,291 +8,44 @@ order: 10
 	Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data that they store. Payload offers a wide-array of field-types - both simple and complex.
 </Banner>
 
-## Field types
+Fields are defined as an array on Collections and Globals via the `fields` key. They define the shape of the data that will be stored on Collections and Globals as well as automatically construct the corresponding Admin UI.
 
-The `type` property on a field determines how the input will be rendered in the admin interface, what values it can accept, and how it is presented in the API.
+The required `type` property on a field determines what values it can accept, how it is presented in the API, and how the field will be rendered in the admin interface.
 
+**Simple collection with two fields:**
 ```js
-// Collection config
-{
-  fields: [
-    {
-      name: 'my-field',
-      type: 'text', // highlight-line
-      label: 'Text',
-    }
-  ]
+const Pages = {
+	slug: 'pages',
+	fields: [
+		{
+			name: 'my-field',
+			type: 'text', // highlight-line
+			label: 'My Field',
+		},
+		{
+			name: 'other-field',
+			type: 'checkbox', // highlight-line
+			label: 'Other Field'
+		},
+	],
 }
 ```
 
-### Simple Types
+### Field types
 
-#### `text`
-
-Plain text
-
-#### `textarea`
-
-Large blocks of text. No formatting.
-
-#### `number`
-
-Simple number input
-
-#### `checkbox`
-
-Boolean value that renders a checkbox
-
-#### `date`
-
-Renders date-picker
-
-#### `email`
-
-Email. Includes validation.
-
-#### `code`
-
-Monospaced code block
-
-#### `richText`
-
-Large formatted text. Includes rich text editor in the admin interface.
-
-#### `select`
-
-Renders a select box with any number of options
-
-Options:
-
-- `hasMany` - Allows for multiple options to be selected
-
-```js
-{
-  name: 'select',
-  label: 'Select',
-  type: 'select',
-  hasMany: true // Optional
-  options: [
-    {
-      value: 'option-1',
-      label: 'Option 1 Label',
-    }, {
-      value: 'option-2',
-      label: 'Option 2 Label',
-    },
-  ],
-},
-```
-
-#### `radio`
-
-```js
-{
-  name: 'radioGroup',
-  label: 'Radio Group Example',
-  type: 'radio',
-  options: [
-    {
-      value: 'option-1',
-      label: 'Options 1 Label',
-    },
-    {
-      value: 'option-2',
-      label: 'Option 2 Label',
-    },
-  ],
-},
-```
-
-### Complex Types
-
-More powerful types but require more complex configuration
-
-#### `upload`
-
-Allows file and image upload. Useful for uploaded assets that can be referenced and re-used.
-
-_TODO: Link to Upload configuration docs_
-
-```js
-{
-  name: 'image',
-  type: 'upload',
-  label: 'Image',
-  relationTo: 'media', // A collection with the `upload` properties configured
-}
-```
-
-#### `row`
-
-Rows allow for deeper nesting of values. They have their own set of fields.
-
-```js
-{
-  type: 'row',
-  fields: [
-    {
-      name: 'text',
-      label: 'Text',
-      type: 'text',
-    },
-    {
-      name: 'number',
-      label: 'Number',
-      type: 'number',
-    },
-  ],
-}
-```
-
-#### `array`
-
-An array of the specified fields
-
-Options:
-
-- `minRows` - Minimum number of items required
-- `maxRows` - Maximum number of items allowed
-
-```js
-{
-  name: 'array',
-  label: 'Array',
-  type: 'array',
-  minRows: 2, // Optional
-  maxRows: 4, // Optional
-  fields: [
-    {
-      name: 'textField',
-      label: 'Text Field',
-      type: 'text'
-    },
-    {
-      name: 'checkbox',
-      label: 'Checkbox',
-      type: 'checkbox'
-    }
-  ]
-}
-```
-
-#### `group`
-
-A way to group related fields together. They will be rendered as a group in the admin interface.
-
-```js
-{
-  type: 'group',
-  label: 'Group',
-  name: 'group',
-  fields: [
-    {
-      type: 'row',
-      fields: [
-        {
-          name: 'nestedText1',
-          label: 'Nested Text 1',
-          type: 'text',
-        }, {
-          name: 'nestedText2',
-          label: 'Nested Text 2',
-          type: 'text',
-        },
-      ],
-    },
-  ],
-},
-```
-
-#### `blocks`
-
-Repeat any type of content any number of times
-
-The `blocks` property takes an array of the allowed fields
-
-_TODO: Link to more powerful and complex examples_
-
-Options:
-
-- `minRows` - Minimum number of items required
-- `maxRows` - Maximum number of items allowed
-
-```js
-{
-  name: 'page',
-  type: 'blocks',
-  label: 'Page',
-  labels: {
-    singular: 'Page',
-    plural: 'Pages',
-  },
-  minRows: 2, // Optional
-  maxRows: 4, // Optional
-  blocks: [
-    {
-      slug: 'quote'
-      label: 'Quote',
-      type: 'text'
-    },
-    {
-      slug: 'testimonial',
-      label: 'Testimonial',
-      type: 'textarea'
-    },
-    {
-      slug: 'cta',
-      label: 'Call To Action',
-      type: 'text'
-    }
-  ],
-}
-```
-
-## Common Options
-
-Most fields have the ability to use the following options
-
-#### `defaultValue`
-
-Initial value for the field
-
-#### `required`
-
-`true/false` value if the field is required to be populated
-
-#### `localized`
-
-`true/false` value to enable localization on the field
-
-#### `admin`
-
-The `admin` is an optional object with properties that specify how the field should be represented in the admin interface.
-
-Properties:
-
-- `position` - If specified as `sidebar`, the field will show in the admin interface's sidebar
-- `width` - A percentage value ie. `50%` that will control the max-width of the field
-- `readOnly` - `true/false` to set the field to read-only after it is saved
-
-### Common Options Example
-
-```js
-// Collection config
-{
-  fields: [
-    {
-      name: 'my-field',
-      type: 'text',
-      label: 'Text'
-      // highlight-start
-      admin: {
-        position: 'sidebar',
-        width: '50%',
-        readOnly: true,
-      }
-      // highlight-end
-    }
-  ]
-}
-```
+- [Array](/docs/fields/array) - for repeating content, supports nested fields
+- [Blocks](/docs/fields/blocks) - block-based fields, allowing powerful layout creation
+- [Checkbox](/docs/fields/checkbox) - boolean true / false checkbox
+- [Code](/docs/fields/code) - xode editor that saves a string to the database
+- [Date](/docs/fields/date) - date / time field that saves a timestamp
+- [Email](/docs/fields/email) - validates the entry is a properly formatted email
+- [Group](/docs/fields/group) -
+- [Number](/docs/fields/number) - field that enforces that its value be a number
+- [Radio](/docs/fields/radio) - Radio button group, allowing only one value to be selected
+- [Relationship](/docs/fields/relationship) - Assign relationships to other collections
+- [Rich Text](/docs/fields/rich-text) - Fully extensible Rich Text editor
+- [Row](/docs/fields/row) - Used for admin field layout, no effect on data shape
+- [Select](/docs/fields/select) - Dropdown / picklist style based on `react-select`
+- [Text](/docs/fields/text) - simple text input
+- [Textarea](/docs/fields/textarea) - allows a bit larger of a text editor
+- [Upload](/docs/fields/upload) - Allows local file and image upload
