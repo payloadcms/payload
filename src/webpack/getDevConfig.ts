@@ -47,7 +47,7 @@ export default (payloadConfig: Config): Configuration => {
   });
 
   if (payloadConfig.admin.webpack && typeof payloadConfig.admin.webpack === 'function') {
-    config = payloadConfig.webpack(config);
+    config = payloadConfig.admin.webpack(config);
   }
 
   return config;
