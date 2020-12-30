@@ -33,6 +33,8 @@ export const baseField = joi.object().keys({
     create: joi.func(),
     read: joi.func(),
     update: joi.func(),
+    delete: joi.func(),
+    unlock: joi.func(),
   }),
   hooks: joi.object()
     .keys({
