@@ -75,6 +75,7 @@ export type PayloadConfig = {
         Dashboard?: React.ComponentType
       }
     }
+    webpack?: (config: Configuration) => Configuration;
   };
   collections?: PayloadCollectionConfig[];
   globals?: PayloadGlobalConfig[];
@@ -132,7 +133,6 @@ export type PayloadConfig = {
   hooks?: {
     afterError?: AfterErrorHook;
   };
-  webpack?: (config: Configuration) => Configuration;
 };
 
 export type Config = Omit<DeepRequired<PayloadConfig>, 'collections'> & {

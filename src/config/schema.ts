@@ -42,6 +42,7 @@ export default joi.object({
           Logo: component,
         }),
       }),
+    webpack: joi.func(),
   }),
   defaultDepth: joi.number()
     .min(0)
@@ -68,7 +69,6 @@ export default joi.object({
           fileSize: joi.number(),
         }),
     }),
-  webpack: joi.func(),
   serverModules: joi.array()
     .items(joi.string()),
   rateLimit: joi.object()

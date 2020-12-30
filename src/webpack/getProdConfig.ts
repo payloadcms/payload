@@ -65,7 +65,7 @@ export default (payloadConfig: Config): Configuration => {
     config.plugins.push(new BundleAnalyzerPlugin());
   }
 
-  if (payloadConfig.webpack && typeof payloadConfig.webpack === 'function') {
+  if (payloadConfig.admin.webpack && typeof payloadConfig.admin.webpack === 'function') {
     config = payloadConfig.webpack(config);
   }
 
