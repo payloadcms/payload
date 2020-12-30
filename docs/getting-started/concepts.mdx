@@ -61,13 +61,21 @@ You can specify population `depth` via query parameter in the REST API and by an
 **For example, let's look the following Collections:** `departments`, `users`, `posts`
 
 ```
+// type: 'relationship' fields are equal to 1 depth level
+
 {
-	slug: 'departments',
+	slug: 'posts',
 	fields: [
 		{
-			name: 'name'
-			label: 'Name',
+			name: 'title',
+			label: 'Title',
 			type: 'text',
+		},
+		{
+			name: 'author',
+			label: 'Post Author',
+			type: 'relationship',
+			relationTo: 'users',
 		}
 	]
 }
@@ -90,18 +98,12 @@ You can specify population `depth` via query parameter in the REST API and by an
 }
 
 {
-	slug: 'posts',
+	slug: 'departments',
 	fields: [
 		{
-			name: 'title',
-			label: 'Title',
+			name: 'name'
+			label: 'Name',
 			type: 'text',
-		},
-		{
-			name: 'author',
-			label: 'Post Author',
-			type: 'relationship',
-			relationTo: 'users',
 		}
 	]
 }
@@ -122,7 +124,7 @@ If you were to query the Posts endpoint at, say, `http://localhost:3000/api/post
 }
 ```
 
-Notice how the `user.author` is fully populated, but `user.author.department` is left as a document ID? That's because the User counted as the first level of `depth` and got populated—but then prevented any further populations from taking place.
+Notice how the `user.author` is fully populated, but `user.author.department` is left as a document ID? That's because the User collection counted as the first level of `depth` and got populated—but then prevented any further populations from taking place.
 
 To populate `user.author.department` in it's entirety you could specify `?depth=2` or _higher_.
 
