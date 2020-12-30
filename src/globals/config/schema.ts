@@ -1,14 +1,14 @@
-import Joi from 'joi';
+import joi from 'joi';
 import fieldSchema from '../../fields/config/schema';
 
-const schema = Joi.object().keys({
-  slug: Joi.string().required(),
-  label: Joi.string(),
-  access: Joi.object({
-    read: Joi.func(),
-    update: Joi.func(),
+const schema = joi.object().keys({
+  slug: joi.string().required(),
+  label: joi.string(),
+  access: joi.object({
+    read: joi.func(),
+    update: joi.func(),
   }),
-  fields: Joi.array().items(fieldSchema),
+  fields: joi.array().items(fieldSchema),
 }).unknown();
 
 export default schema;
