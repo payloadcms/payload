@@ -15,3 +15,7 @@ indent_size = 2
 [*.scss]
 indent_style = space
 indent_size = 2
+
+[*.mdx]
+indent_style = space
+indent_size = 2
