@@ -128,16 +128,18 @@ export default buildConfig({
 	collections: [
 		Subscription
 	],
-	webpack: (config) => ({
-		...config,
-		resolve: {
-			...config.resolve,
-			alias: {
-				...config.resolve.alias,
-				[createStripeSubscriptionPath]: mockModulePath,
+	admin: {
+		webpack: (config) => ({
+			...config,
+			resolve: {
+				...config.resolve,
+				alias: {
+					...config.resolve.alias,
+					[createStripeSubscriptionPath]: mockModulePath,
+				}
 			}
-		}
-	})
+		})
+	}
 });
 ```
 
