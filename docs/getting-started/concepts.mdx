@@ -53,14 +53,16 @@ There are many more potential reasons to use Hooks. For more, visit the [Hooks d
 ### Depth
 
 <Banner type="info">
-	"Depth" means how many levels down that related documents should be automatically populated when retrieved.
+	"Depth" gives you control over how many levels down related documents should be automatically populated when retrieved.
 </Banner>
 
 You can specify population `depth` via query parameter in the REST API and by an option in the local API. *Depth has no effect in the GraphQL API, because there, depth is based on the shape of your queries.*
 
-**For example, let's take the following Collections for example:**
+**For example, let's look the following Collections:** `departments`, `users`, `posts`
 
 ```
+// type: 'relationship' fields are equal to 1 depth level
+
 {
 	slug: 'posts',
 	fields: [
@@ -110,6 +112,8 @@ You can specify population `depth` via query parameter in the REST API and by an
 If you were to query the Posts endpoint at, say, `http://localhost:3000/api/posts?depth=1`, you will retrieve Posts with populations one level deep. A returned result may look like the following:
 
 ```
+// ?depth=1
+
 {
 	title: 'This post sucks',
 	author: {
@@ -120,6 +124,21 @@ If you were to query the Posts endpoint at, say, `http://localhost:3000/api/post
 }
 ```
 
-Notice how the `author` is fully populated, but its `department` is left as a document ID? That's because the User counted as the first level of `depth` and got populated—but then prevented any further populations from taking place.
+Notice how the `user.author` is fully populated, but `user.author.department` is left as a document ID? That's because the User collection counted as the first level of `depth` and got populated—but then prevented any further populations from taking place.
 
-To populate both the User and their department, a user could specify `?depth=2` or higher.
+To populate `user.author.department` in it's entirety you could specify `?depth=2` or _higher_.
+
+```
+// ?depth=2
+
+{
+	title: 'This post sucks',
+	author: {
+		id: '5f7dd05cd50d4005f8bcab17',
+		email: 'spiderman@superheroes.gov',
+		department: {
+			name: 'Marvel'
+		}
+	}
+}
+```
