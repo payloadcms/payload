@@ -24,7 +24,7 @@ const Thumbnail: React.FC<Props> = (props) => {
 
   const classes = [
     baseClass,
-    `${baseClass}--size-${size}`,
+    `${baseClass}--size-${size || 'medium'}`,
   ].join(' ');
 
   return (
