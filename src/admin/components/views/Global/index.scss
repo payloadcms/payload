@@ -11,6 +11,7 @@
   &__main,
   &__sidebar {
     width: auto;
+    min-width: 0;
   }
 
   &__main {
@@ -48,6 +49,7 @@
   &__sidebar {
     width: base(15);
     flex-grow: 0;
+    flex-shrink: 0;
   }
 
   &__sidebar-sticky {

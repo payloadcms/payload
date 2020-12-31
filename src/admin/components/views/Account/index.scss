@@ -11,6 +11,7 @@
   &__main,
   &__sidebar {
     width: auto;
+    min-width: 0;
   }
 
   &__main {
@@ -53,6 +54,7 @@
     overflow: auto;
     height: 100vh;
     flex-grow: 0;
+    flex-shrink: 0;
   }
 
   &__collection-actions,
