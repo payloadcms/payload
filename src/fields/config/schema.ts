@@ -180,7 +180,8 @@ export const blocks = baseField.keys({
   blocks: joi.array().items(
     joi.object({
       slug: joi.string().required(),
-      blockImage: joi.string(),
+      imageURL: joi.string(),
+      imageAltText: joi.string(),
       labels: joi.object({
         singular: joi.string(),
         plural: joi.string(),
