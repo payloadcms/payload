@@ -14,9 +14,9 @@ order: 30
 - A form builder tool where available block configs might be `Text`, `Select`, or `Checkbox`.
 - Virtual event agenda "timeslots" where a timeslot could either be a `Break`, a `Presentation`, or a `BreakoutSession`.
 
-**Admin panel screenshot:**
-
 ![Blocks field in Payload admin panel](/images/fields/blocks.jpg)
+*Admin panel screenshot of a Blocks field type with Call to Action and Number block examples*
+
 
 ### Field config
 
@@ -25,7 +25,7 @@ order: 30
 | **`name`** *         | To be used as the property name when stored and retrieved from the database.  |
 | **`label`**          | Used as a heading in the Admin panel and to name the generated GraphQL type. |
 | **`blocks`** *       | Array of [block configs](/docs/fields/blocks#block-configs) to be made available to this field. |
-| **`validate`**       | Provide a custom validation function. [More](/docs/fields/overview#validation) |
+| **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
 | **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT. |
 | **`hooks`**          | Provide field-level hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks) |
 | **`access`**         | Provide field-level access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control) |

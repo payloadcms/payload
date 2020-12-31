@@ -14,9 +14,8 @@ order: 20
 - Navigational structures where editors can specify nav items containing pages ([relationship field](/docs/fields/relationship)), an "open in new tab" [checkbox field](/docs/fields/checkbox)
 - Event agenda "timeslots" where you need to specify start time ([date field](/docs/fields/date)), end time, label ([text field](/docs/fields/text)), and Learn More page [relationship](/docs/fields/relationship)
 
-**Admin panel screenshot:**
-
 ![Array field in Payload admin panel](/images/fields/array.jpg)
+*Admin panel screenshot of an Array field with a Row containing two text fields, a read-only text field and a checkbox*
 
 ### Config
 
@@ -25,7 +24,7 @@ order: 20
 | **`name`** *         | To be used as the property name when stored and retrieved from the database.  |
 | **`label`**          | Used as a heading in the Admin panel and to name the generated GraphQL type. |
 | **`fields`** *       | Array of field types to correspond to each row of the Array. |
-| **`validate`**       | Provide a custom validation function. [More](/docs/fields/overview#validation) |
+| **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
 | **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT. |
 | **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks) |
 | **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control) |
