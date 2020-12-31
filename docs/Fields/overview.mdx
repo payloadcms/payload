@@ -5,10 +5,10 @@ order: 10
 ---
 
 <Banner type="info">
-	Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data that they store. Payload offers a wide-array of field-types - both simple and complex.
+	Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data that they store. Payload offers a wide-array of field types - both simple and complex.
 </Banner>
 
-Fields are defined as an array on Collections and Globals via the `fields` key. They define the shape of the data that will be stored on Collections and Globals as well as automatically construct the corresponding Admin UI.
+Fields are defined as an array on Collections and Globals via the `fields` key. They define the shape of the data that will be stored as well as automatically construct the corresponding Admin UI.
 
 The required `type` property on a field determines what values it can accept, how it is presented in the API, and how the field will be rendered in the admin interface.
 
@@ -45,28 +45,126 @@ const Pages = {
 - [Relationship](/docs/fields/relationship) - assign relationships to other collections
 - [Rich Text](/docs/fields/rich-text) - fully extensible Rich Text editor
 - [Row](/docs/fields/row) - used for admin field layout, no effect on data shape
-- [Select](/docs/fields/select) - dropdown / picklist style based on `react-select`
+- [Select](/docs/fields/select) - dropdown / picklist style value selector
 - [Text](/docs/fields/text) - simple text input
 - [Textarea](/docs/fields/textarea) - allows a bit larger of a text editor
 - [Upload](/docs/fields/upload) - allows local file and image upload
 
 ### Field-level hooks
 
-Briefly talk about field hooks and then link to the Field Hooks docs.
+One of the most powerful parts about Payload is its ability for you to define field-level hooks that can control the logic of your fields to a fine-grained level. for more information about how to define field hooks, [click here](/docs/hooks/config#field-hooks).
 
 ### Field-level access control
 
-Briefly talk about field access control and then link to the Field access control docs.
+In addition to being able to define access control on a document-level, you can define extremely granular permissions on a field by field level. For more information about field-level access control, [click here](/docs/access-control/config#fields).
 
-### Admin options
+### Admin config
 
-Go through admin options here.
+In addition to each field's base configuration, you can define specific traits and properties for fields that only have effect on how they are rendered in the Admin panel. The following properties are available for all fields within the `admin` property:
 
-- position
-- width
-- style
-- readOnly
-- disabled
-- condition
-- components
-- hidden
+**`condition`**
+
+You can programmatically show / hide fields based on what other fields are doing. [Click here](#conditional-logic) for more info.
+
+**`components`**
+
+All field components can be completely and easily swapped out for custom components that you define. [Click here](#custom-admin-components) for more info.
+
+**`position`**
+
+Specify if the field should be rendered in the main editable area (leave the field undefined) or the sidebar, by defining `position: 'sidebar'`.
+
+**`width`**
+
+Restrict the width of a field. you can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally.
+
+**`readOnly`**
+
+Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value.
+
+**`disabled`**
+
+If a field is `disabled`, it is completely omitted from the Admin panel.
+
+**`hidden`**
+
+Setting a field's `hidden` property on its `admin` config will transform it into a `hidden` input type. Its value will still submit with the Admin panel's requests, but the field itself will not be visible to editors.
+
+### Conditional logic
+
+You can show and hide fields based on what other fields are doing by utilizing conditional logic on a field by field basis. The `condition` property on a field's admin config accepts a function which takes two arguments:
+
+- `data` - the entire document's data that is currently being edited
+- `siblingData` - only the fields that are direct siblings to the field with the condition
+
+The `condition` function should return a boolean that will control if the field should be displayed or not.
+
+**Example:**
+
+```js
+{
+  fields: [
+    {
+      name: 'enableGreeting',
+      type: 'checkbox',
+      defaultValue: false,
+    },
+    {
+      name: 'greeting',
+      type: 'text',
+      admin: {
+        // highlight-start
+        condition: (data, siblingData) => {
+          if (data.enableGreeting) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+        // highlight-end
+      }
+    }
+  ]
+}
+```
+
+### Custom components
+
+All Payload fields support the ability to swap in your own React components with ease. So, for example, instead of rendering a default Text input, you might need to render a color picker that provides the editor with a custom color picker interface to restrict the data entered to colors only.
+
+**Custom components will automatically be provided with all props that the default component would accept.**
+
+<Banner type="success">
+  <strong>Tip:</strong><br/>
+  Don't see a built-in field type that you need? Build it! Using a combination of custom validation and custom components, you can override the entirety of how a component functions within the admin panel and effectively create your own field type.
+</Banner>
+
+Fields support the following custom components:
+
+**`Filter`**
+
+Passing a `Filter` component will override the text input that is presented in the `List` view when a user is filtering documents by the customized field.
+
+**`Cell`**
+
+This component will be used in the `List` view's table to represent a table-based preview of the data stored in the field.
+
+**`Field`**
+
+Specifying this component will swap out the field itself within all `Edit` views. You will be responsible for sending and receiving the field's `value` from the form itself.
+
+Example:
+```js
+import { useFieldType } from 'payload/components/forms';
+
+const CustomTextField = ({ path }) => {
+  const { value, setValue } = useFieldType({ path });
+
+  return (
+    <input
+      onChange={(e) => setValue(e.target.value)}
+      value={value}
+    />
+  )
+}
+```
