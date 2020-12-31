@@ -4,4 +4,147 @@ label: Rich Text
 order: 120
 ---
 
-get out
+<Banner >
+  The Rich Text field is a powerful way to allow editors to write dynamic content. The content is saved as JSON in the database and can be converted into any format, including HTML, that you need.
+</Banner>
+
+The Admin component is built on the powerful [`slatejs`](https://docs.slatejs.org/) editor and is meant to be as extensible and customizable as possible.
+
+<Banner type="success">
+  <strong>Consistent with Payload's goal of making you learn as litle of Payload as possible, customizing and using the Rich Text Editor does not involve learning how to develop for a <em>Payload</em> rich text editor.</strong> Instead, you can invest your time and effort into learning Slate, an open-source tool that will allow you to apply your learnings elsewhere as well.
+</Banner>
+
+### Config
+
+| Option           | Description |
+| ---------------- | ----------- |
+| **`name`** *         | To be used as the property name when stored and retrieved from the database.  |
+| **`label`**          | Used as a field label in the Admin panel and to name the generated GraphQL type. |
+| **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
+| **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT. |
+| **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks) |
+| **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control) |
+| **`hidden`**         | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel. |
+| **`defaultValue`**   | Provide data to be used for this field's default value. |
+| **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
+| **`required`**       | Require this field to have a value. |
+| **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+
+*\* An asterisk denotes that an option is required.*
+
+### Admin config
+
+In addition to the default [field admin config](/docs/fields/overview#admin), the Rich Text editor allows for the following admin properties:
+
+**`placeholder`**
+
+Set this property to define a placeholder string in the text input.
+
+**`elements`**
+
+The `elements` property is used to specify which built-in or custom [SlateJS elements](https://docs.slatejs.org/concepts/02-nodes#element) should be made available to the field within the admin panel.
+
+The default `elements` available in Payload are:
+
+- `h1`
+- `h2`
+- `h3`
+- `h4`
+- `h5`
+- `h6`
+- `link`
+- `ol`
+- `ul`
+- [`relationship`](#relationship-element)
+
+**`leaves`**
+
+The `leaves` property specifies built-in or custom [SlateJS leaves](https://docs.slatejs.org/concepts/08-rendering#leaves) to be enabled within the Admin panel.
+
+The default `leaves` available in Payload are:
+
+- `bold`
+- `code`
+- `italic`
+- `strikethrough`
+- `underline`
+
+### Relationship element
+
+The built-in `relationship` element is a powerful way to reference other Documents directly within your Rich Text editor.
+
+<Banner type="success">
+  <strong>Tip:</strong><br/>
+  To enable collections to be selected within the Rich Text relationship, you need to enable the collection admin option of <strong>enableRichTextRelationship</strong>.
+</Banner>
+
+### Specifying which elements and leaves to allow
+
+To specify which default elements or leaves should be allowed to be used for this field, define arrays that contain string names for each element or leaf you wish to enable. To specify a custom element or leaf, pass an object with all corresponding properties as outlined below. View the [example](#example) to reference how this all works.
+
+### Building custom elements and leaves
+
+You can design and build your own Slate elements and leaves to extend the editor with your own functionality. To do so, first start by reading the [SlateJS documentation](https://docs.slatejs.org/) and looking at the [Slate examples](https://www.slatejs.org/examples/richtext) to familiarize yourself with the SlateJS editor as a whole.
+
+Once you're up to speed with the general concepts involved, you can pass in your own elements and leaves to your field's admin config.
+
+**Both custom elements and leaves are defined via the following config:**
+
+| Property         | Description |
+| ---------------- | ----------- |
+| **`name`** *     | The name to be used as a `type` for this element.  |
+| **`Button`** *   | A React component to be rendered in the Rich Text toolbar. |
+| **`plugins`**    | An array of plugins to provide to the Rich Text editor. |
+
+Custom `Element`s also require the `Element` property set to a Reactt component to be rendered as the `Element` within the rich text editor itself.
+
+Custom `Leaf` objects follow a similar pattern but require you to define the `Leaf` property instead.
+
+### Example
+
+`collections/ExampleCollection.js`
+```js
+{
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'content', // required
+      type: 'richText', // required
+      defaultValue: [{
+        children: [{ text: 'Here is some default content for this field' }],
+      }]
+      required: true,
+      admin: {
+        elements: [
+          'h2',
+          'h3',
+          'h4',
+          'link',
+          {
+            name: 'cta',
+            Button: CustomCallToActionButton,
+            Element: CustomCallToActionElement,
+            plugins: [
+              // any plugins that are required by this element go here
+            ]
+          }
+        ],
+        elements: [
+          'bold',
+          'italic',
+          {
+            name: 'highlight',
+            Button: CustomHighlightButton,
+            Leaf: CustomHighlightLeaf,
+            plugins: [
+              // any plugins that are required by this leaf go here
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+For more examples regarding how to define your own elements and leaves, check out the example [`RichText` collection](https://github.com/payloadcms/payload/blob/master/demo/collections/RichText.ts) within the Payload source code.
