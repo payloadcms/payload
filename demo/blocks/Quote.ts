@@ -1,7 +1,7 @@
 import { Block } from '../../src/fields/config/types';
 
 const Quote: Block = {
-  blockImage: '/static/assets/images/generic-block-image.svg',
+  imageURL: '/static/assets/images/generic-block-image.svg',
   slug: 'quote',
   labels: {
     singular: 'Quote',
