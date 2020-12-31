@@ -4,4 +4,57 @@ label: Textarea
 order: 160
 ---
 
-get out
+<Banner >
+  The Textarea field is almost identical to the Text field but it features a slightly larger input better suited to edit longer text.
+</Banner>
+
+### Config
+
+| Option           | Description |
+| ---------------- | ----------- |
+| **`name`** *         | To be used as the property name when stored and retrieved from the database.  |
+| **`label`**          | Used as a heading in the Admin panel and to name the generated GraphQL type. |
+| **`unique`**         | Enforce that each entry in the Collection has a unique value for this field. |
+| **`minLength`**      | Used by the default validation function to ensure values are of a minimum character length. |
+| **`maxLength`**      | Used by the default validation function to ensure values are of a maximum character length. |
+| **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
+| **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT. |
+| **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks) |
+| **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control) |
+| **`hidden`**         | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel. |
+| **`defaultValue`**   | Provide data to be used for this field's default value. |
+| **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
+| **`required`**       | Require this field to have a value. |
+| **`admin`**          | Admin-specific configuration. See below for [more detail](#admin). |
+
+*\* An asterisk denotes that an option is required.*
+
+### Admin config
+
+In addition to the default [field admin config](/docs/fields/overview#admin), the Textarea field type allows for the following `admin` properties:
+
+**`placeholder`**
+
+Set this property to define a placeholder string in the textarea.
+
+**`autoComplete`**
+
+Set this property to a string that will be used for browser autocomplete.
+
+### Example
+
+`collections/ExampleCollection.js`
+```js
+{
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'metaDescription', // required
+      type: 'textarea', // required
+      label: 'Page Meta Description',
+      required: true,
+    }
+  ]
+}
+
+```

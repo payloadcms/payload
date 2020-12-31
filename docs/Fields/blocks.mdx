@@ -55,9 +55,9 @@ Blocks are defined as separate configs of their own.
 | **`imageURL`**       | Provide a custom image thumbnail to help editors identify this block in the Admin UI. |
 | **`imageAltText`**   | Customize this block's image thumbnail alt text. |
 
-#### Required, auto-generated data per block
+#### Auto-generated data per block
 
-In addition to the field data that you define on each block, Payload will store two additional required properties on each block:
+In addition to the field data that you define on each block, Payload will store two additional properties on each block:
 
 **`blockType`**
 
@@ -67,11 +67,34 @@ The `blockType` is saved as the slug of the block that has been selected.
 
 The Admin panel provides each block with a `blockName` field which optionally allows editors to label their blocks for better editability and readability.
 
-### Full example
+### Admin config
+
+This field features default admin config at this time. For more on field default admin config, [click here](/docs/fields/overview#admin-options).
+
+### Example
 
 `collections/ExampleCollection.js`
 ```js
-{
+const QuoteBlock = {
+  slug: 'Quote', // required
+  imageURL: 'https://google.com/path/to/image.jpg',
+  imageAltText: 'A nice thumbnail image to show what this block looks like',
+  fields: [ // required
+    {
+      name: 'text',
+      label: 'Quote Text',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'text',
+      label: 'Quotee',
+      type: 'text',
+    },
+  ]
+};
+
+const ExampleCollection = {
   slug: 'example-collection',
   fields: [
     {
@@ -85,31 +108,10 @@ The Admin panel provides each block with a `blockName` field which optionally al
         plural: 'Layouts',
       },
       blocks: [ // required
-        {
-          slug: 'Quote', // required
-          imageURL: 'https://google.com/path/to/image.jpg',
-          imageAltText: 'A nice thumbnail image to show what this block looks like',
-          fields: [ // required
-            {
-              name: 'text',
-              label: 'Quote Text',
-              type: 'text',
-              required: true,
-            },
-            {
-              name: 'text',
-              label: 'Quotee',
-              type: 'text',
-            },
-          ]
-        },
+       QuoteBlock
       ]
     }
   ]
 }
 
 ```
-
-### Admin
-
-This field features default admin options at this time. For more on default admin options, [click here](/docs/fields/overview#admin-options).

@@ -69,6 +69,7 @@ export interface FieldBase {
 export type NumberField = FieldBase & {
   type: 'number';
   admin?: Admin & {
+    autoComplete?: string
     placeholder?: string
     step?: number
   }
