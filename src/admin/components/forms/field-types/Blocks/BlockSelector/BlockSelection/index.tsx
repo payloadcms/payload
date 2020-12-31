@@ -13,7 +13,7 @@ const BlockSelection: React.FC<Props> = (props) => {
   } = props;
 
   const {
-    labels, slug, blockImage, blockImageAltText,
+    labels, slug, imageURL, imageAltText,
   } = block;
 
   const handleBlockSelection = () => {
@@ -29,11 +29,11 @@ const BlockSelection: React.FC<Props> = (props) => {
       onClick={handleBlockSelection}
     >
       <div className={`${baseClass}__image`}>
-        {blockImage
+        {imageURL
           ? (
             <img
-              src={blockImage}
-              alt={blockImageAltText}
+              src={imageURL}
+              alt={imageAltText}
             />
           )
           : <DefaultBlockImage />}

@@ -44,7 +44,6 @@ export type Option = OptionObject | string
 export interface FieldBase {
   name?: string;
   label?: string;
-  slug?: string;
   required?: boolean;
   unique?: boolean;
   index?: boolean;
@@ -203,8 +202,8 @@ export type Block = {
   slug: string,
   labels: Labels
   fields: Field[],
-  blockImage?: string
-  blockImageAltText?: string
+  imageURL?: string
+  imageAltText?: string
 }
 
 export type BlockField = FieldBase & {
