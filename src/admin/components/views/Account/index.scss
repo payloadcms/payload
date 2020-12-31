@@ -8,8 +8,13 @@
     align-items: stretch;
   }
 
+  &__main,
+  &__sidebar {
+    width: auto;
+  }
+
   &__main {
-    min-width: 0;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
   }
@@ -42,12 +47,12 @@
 
   &__sidebar {
     padding-bottom: base(1);
-    width: base(22);
+    width: base(15);
     display: flex;
     flex-direction: column;
-    min-width: 0;
     overflow: auto;
     height: 100vh;
+    flex-grow: 0;
   }
 
   &__collection-actions,

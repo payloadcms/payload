@@ -65,48 +65,52 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
           </div>
         </div>
         <div className={`${baseClass}__sidebar`}>
-          <div className={`${baseClass}__document-actions${preview ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
-            <PreviewButton generatePreviewURL={preview} />
-            {hasSavePermission && (
-              <FormSubmit>Save</FormSubmit>
-            )}
-          </div>
-          {data && (
-            <div className={`${baseClass}__api-url`}>
-              <span className={`${baseClass}__label`}>
-                API URL
-                {' '}
-                <CopyToClipboard value={apiURL} />
-              </span>
-              <a
-                href={apiURL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {apiURL}
-              </a>
-            </div>
-          )}
-          <div className={`${baseClass}__sidebar-fields`}>
-            <RenderFields
-              operation="update"
-              readOnly={!hasSavePermission}
-              permissions={permissions.fields}
-              filter={(field) => field.admin.position === 'sidebar'}
-              fieldTypes={fieldTypes}
-              fieldSchema={fields}
-            />
-          </div>
-          {data && (
-            <ul className={`${baseClass}__meta`}>
-              {data.updatedAt && (
+          <div className={`${baseClass}__sidebar-sticky`}>
+            <div className={`${baseClass}__sidebar-sticky-wrap`}>
+              <div className={`${baseClass}__document-actions${preview ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
+                <PreviewButton generatePreviewURL={preview} />
+                {hasSavePermission && (
+                <FormSubmit>Save</FormSubmit>
+                )}
+              </div>
+              {data && (
+              <div className={`${baseClass}__api-url`}>
+                <span className={`${baseClass}__label`}>
+                  API URL
+                  {' '}
+                  <CopyToClipboard value={apiURL} />
+                </span>
+                <a
+                  href={apiURL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {apiURL}
+                </a>
+              </div>
+              )}
+              <div className={`${baseClass}__sidebar-fields`}>
+                <RenderFields
+                  operation="update"
+                  readOnly={!hasSavePermission}
+                  permissions={permissions.fields}
+                  filter={(field) => field.admin.position === 'sidebar'}
+                  fieldTypes={fieldTypes}
+                  fieldSchema={fields}
+                />
+              </div>
+              {data && (
+              <ul className={`${baseClass}__meta`}>
+                {data.updatedAt && (
                 <li>
                   <div className={`${baseClass}__label`}>Last Modified</div>
                   <div>{format(new Date(data.updatedAt as string), 'MMMM do yyyy, h:mm a')}</div>
                 </li>
+                )}
+              </ul>
               )}
-            </ul>
-          )}
+            </div>
+          </div>
         </div>
       </Form>
     </div>

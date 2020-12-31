@@ -8,10 +8,15 @@
     align-items: stretch;
   }
 
+  &__main,
+  &__sidebar {
+    width: auto;
+  }
+
   &__main {
-    min-width: 0;
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
   }
 
   &__header {
@@ -41,14 +46,23 @@
   }
 
   &__sidebar {
-    padding-top: base(3);
-    padding-bottom: base(1);
-    width: base(22);
+    width: base(15);
+    flex-grow: 0;
+  }
+
+  &__sidebar-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: auto;
+  }
+
+  &__sidebar-sticky-wrap {
     display: flex;
     flex-direction: column;
-    min-width: 0;
-    overflow: auto;
-    height: 100vh;
+    min-height: 100%;
+    padding-top: base(3);
+    padding-bottom: base(1);
   }
 
   &__collection-actions,
@@ -187,6 +201,9 @@
 
     &__sidebar {
       padding-bottom: base(4);
+    }
+
+    &__sidebar-sticky {
       height: auto;
     }
   }
