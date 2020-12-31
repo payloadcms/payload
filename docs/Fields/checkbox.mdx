@@ -13,7 +13,7 @@ order: 40
 | Option           | Description |
 | ---------------- | ----------- |
 | **`name`** *         | To be used as the property name when stored and retrieved from the database.  |
-| **`label`**          | Used as a heading in the Admin panel and to name the generated GraphQL type. |
+| **`label`**          | Used as a field label in the Admin panel and to name the generated GraphQL type. |
 | **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
 | **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT. |
 | **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks) |
@@ -22,13 +22,9 @@ order: 40
 | **`defaultValue`**   | Provide data to be used for this field's default value. |
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
-| **`admin`**          | Admin-specific configuration. See below for [more detail](#admin). |
+| **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin) for more details. |
 
 *\* An asterisk denotes that an option is required.*
-
-### Admin config
-
-This field features default admin config at this time. For more on field default admin config, [click here](/docs/fields/overview#admin).
 
 ### Example
 
