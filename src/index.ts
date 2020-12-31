@@ -198,7 +198,7 @@ export class Payload {
    * @param options
    * @returns created document
    */
-  async create(options: CreateOptions): Promise<Document> {
+  create = async (options: CreateOptions): Promise<Document> => {
     let { create } = localOperations;
     create = create.bind(this);
     return create(options);
@@ -209,19 +209,19 @@ export class Payload {
    * @param options
    * @returns documents satisfying query
    */
-  async find(options: FindOptions): Promise<PaginatedDocs> {
+  find = async (options: FindOptions): Promise<PaginatedDocs> => {
     let { find } = localOperations;
     find = find.bind(this);
     return find(options);
   }
 
-  async findGlobal(options): Promise<any> {
+  findGlobal = async (options): Promise<any> => {
     let { findOne } = localGlobalOperations;
     findOne = findOne.bind(this);
     return findOne(options);
   }
 
-  async updateGlobal(options): Promise<any> {
+  updateGlobal = async (options): Promise<any> => {
     let { update } = localGlobalOperations;
     update = update.bind(this);
     return update(options);
@@ -232,7 +232,7 @@ export class Payload {
    * @param options
    * @returns document with specified ID
    */
-  async findByID(options: FindByIDOptions): Promise<Document> {
+  findByID = async (options: FindByIDOptions): Promise<Document> => {
     let { findByID } = localOperations;
     findByID = findByID.bind(this);
     return findByID(options);
@@ -243,43 +243,43 @@ export class Payload {
    * @param options
    * @returns Updated document
    */
-  async update(options: UpdateOptions): Promise<Document> {
+  update = async (options: UpdateOptions): Promise<Document> => {
     let { update } = localOperations;
     update = update.bind(this);
     return update(options);
   }
 
-  async delete(options: DeleteOptions): Promise<Document> {
+  delete = async (options: DeleteOptions): Promise<Document> => {
     let { localDelete: deleteOperation } = localOperations;
     deleteOperation = deleteOperation.bind(this);
     return deleteOperation(options);
   }
 
-  async login(options): Promise<any> {
+  login = async (options): Promise<any> => {
     let { login } = localOperations.auth;
     login = login.bind(this);
     return login(options);
   }
 
-  async forgotPassword(options): Promise<any> {
+  forgotPassword = async (options): Promise<any> => {
     let { forgotPassword } = localOperations.auth;
     forgotPassword = forgotPassword.bind(this);
     return forgotPassword(options);
   }
 
-  async resetPassword(options): Promise<any> {
+  resetPassword = async (options): Promise<any> => {
     let { resetPassword } = localOperations.auth;
     resetPassword = resetPassword.bind(this);
     return resetPassword(options);
   }
 
-  async unlock(options): Promise<any> {
+  unlock = async (options): Promise<any> => {
     let { unlock } = localOperations.auth;
     unlock = unlock.bind(this);
     return unlock(options);
   }
 
-  async verifyEmail(options): Promise<any> {
+  verifyEmail = async (options): Promise<any> => {
     let { verifyEmail } = localOperations.auth;
     verifyEmail = verifyEmail.bind(this);
     return verifyEmail(options);
