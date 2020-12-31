@@ -64,8 +64,6 @@ export interface FieldBase {
     create?: Access;
     read?: Access;
     update?: Access;
-    delete?: Access;
-    unlock?: Access;
   };
 }
 
