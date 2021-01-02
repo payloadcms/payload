@@ -10,8 +10,8 @@ import buildLocaleInputType from './schema/buildLocaleInputType';
 import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType';
 import initCollections from '../collections/graphql/init';
 import initGlobals from '../globals/graphql/init';
+import { GraphQLResolvers } from './bindResolvers';
 import buildWhereInputType from './schema/buildWhereInputType';
-import access from '../auth/graphql/resolvers/access';
 import { Config } from '../config/types';
 
 type GraphQLTypes = {
@@ -25,6 +25,10 @@ class InitializeGraphQL {
   types: GraphQLTypes;
 
   config: Config;
+
+  graphQL: {
+    resolvers: GraphQLResolvers
+  };
 
   Query: { name: string; fields: { [key: string]: any } } = { name: 'Query', fields: {} };
 
@@ -90,7 +94,7 @@ class InitializeGraphQL {
 
     this.Query.fields.Access = {
       type: this.buildPoliciesType(),
-      resolve: access,
+      resolve: this.graphQL.resolvers.collections.auth.access,
     };
 
     if (typeof this.config.graphQL.queries === 'function') {
