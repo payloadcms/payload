@@ -66,6 +66,11 @@ Once enabled, each document that is created within the Collection can be thought
 
 Successfully logging in returns a `JWT` (JSON web token) which is how a user will identify themselves to Payload. By providing this JWT via either an HTTP-only cookie or an `Authorization` header, Payload will automatically identify the user and add its user JWT data to the Express `req`, which is available throughout Payload including within access control, hooks, and more.
 
+<Banner type="success">
+  <strong>Tip:</strong><br/>
+  You can access the logged in user from access control functions and hooks via the Express <strong>req</strong>. The logged in user is automatically added as the <strong>user</strong> property.
+</Banner>
+
 ### HTTP-only cookies
 
 Payload `login`, `logout`, and `refresh` operations make use of HTTP-only cookies for authentication purposes. HTTP-only cookies are a highly secure method of storing identifiable data on a user's device so that Payload can automatically recognize a returning user until their cookie expires. They are totally protected from common XSS attacks and cannot be read at all via JavaScript in the browser.
