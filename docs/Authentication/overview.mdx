@@ -101,7 +101,7 @@ CSRF (cross-site request forgery) attacks are common and dangerous. By using an 
 
 For example, let's say you have a very popular app running at coolsite.com. This app allows users to manage finances and send / receive money. As Payload is using HTTP-only cookies, that means that browsers automatically will include cookies when sending requests to your domain - no matter what page created the request.
 
-So, if a user of coolsite.com is logged in and just browsing around on the internet, they might stumble onto a page with bad intentions. That bad page might automatically make requests to all sorts of sites to see if they can find one that they can log into - and coolsite.com might be on their list. If your user was logged in while they visited that evil site, the attacker could do whatever they wanted as if they were your coolsite.com user—including send themselves a bunch of money from your user's account. This is what a CSRF attack is.
+So, if a user of coolsite.com is logged in and just browsing around on the internet, they might stumble onto a page with bad intentions. That bad page might automatically make requests to all sorts of sites to see if they can find one that they can log into - and coolsite.com might be on their list. If your user was logged in while they visited that evil site, the attacker could do whatever they wanted as if they were your coolsite.com user by just sending requests to the coolsite API (which would automatically include the auth cookie). They could send themselves a bunch of money from your user's account, change the user's password, etc. This is what a CSRF attack is.
 
 <Banner type="warning">
   <strong>To protect against CSRF attacks, Payload only accepts cookie-based authentication from domains that you explicitly whitelist.</strong>
@@ -118,10 +118,12 @@ const config = buildConfig({
   collections: [
     // collections here
   ],
-  csrf: [
+  // highlight-start
+  csrf: [ // whitelist of domains to allow cookie auth from
     'https://your-frontend-app.com',
     'https://your-other-frontend-app.com',
   ],
+  // highlight-end
 });
 
 export default config;

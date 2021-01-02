@@ -55,6 +55,11 @@ You can customize how the Forgot Password workflow operates with the following o
 
 Function that accepts one argument, containing `{ req, token, user }`, that allows for overriding the HTML within emails that are sent to users attempting to reset their password. The function should return a string that supports HTML, which can be a full HTML email.
 
+<Banner type="success">
+  <strong>Tip:</strong><br />
+  HTML templating can be used to create custom email templates, inline CSS automatically, and more. You can make a reusable function that standardizes all email sent from Payload, which makes sending custom emails more DRY. Payload doesn't ship with an HTML templating engine, so you are free to choose your own.
+</Banner>
+
 Example:
 
 ```js
@@ -62,12 +67,107 @@ Example:
   slug: 'customers',
   auth: {
     forgotPassword: {
+      // highlight-start
       generateEmailHTML: ({ req, token, user }) => {
+        // Use the token provided to allow your user to reset their password
+        const resetPasswordURL = `https://yourfrontend.com/reset-password?token=${token}`;
 
+        return `
+          <!doctype html>
+          <html>
+            <body>
+              <h1>Here is my custom email template!</h1>
+              <p>Hello, ${user.email}!</p>
+              <p>Click below to reset your password.</p>
+              <p>
+                <a href="${resetPasswordURL}">${resetPasswordURL}</a>
+              </p>
+            </body>
+          </html>
+        `;
       }
+      // highlight-end
     }
   }
 }
 ```
 
+<Banner type="warning">
+  <strong>Important:</strong><br />
+  If you specify a different URL to send your users to for resetting their password, such as a page on the frontend of your app or similar, you need to handle making the call to the Payload REST or GraphQL reset-password operation yourself on your frontend, using the token that was provided for you. Above, it was passed via query parameter.
+</Banner>
 
+**`generateEmailSubject`**
+
+Similarly to the above `generateEmailHTML`, you can also customize the subject of the email. The function argument are the same but you can only return a string - not HTML.
+
+Example:
+
+```js
+{
+  slug: 'customers',
+  auth: {
+    forgotPassword: {
+      // highlight-start
+      generateEmailSubject: ({ req, user }) => {
+        return `Hey ${user.email}, reset your password!`;
+      }
+      // highlight-end
+    }
+  }
+}
+```
+
+### Email Verification
+
+If you'd like to require email verification before a user can successfully log in, you can enable it by passing `true` or an `options` object to `auth.verify`. The following options are available:
+
+**`generateEmailHTML`**
+
+Function that accepts one argument, containing `{ req, token, user }`, that allows for overriding the HTML within emails that are sent to users indicating how to validate their account. The function should return a string that supports HTML, which can optionally be a full HTML email.
+
+Example:
+
+```js
+{
+  slug: 'customers',
+  auth: {
+    verify: {
+      // highlight-start
+      generateEmailHTML: ({ req, token, user }) => {
+        // Use the token provided to allow your user to verify their account
+        const url = `https://yourfrontend.com/verify?token=${token}`;
+
+        return `Hey ${user.email}, verify your email by clicking here: ${url}`;
+      }
+      // highlight-end
+    }
+  }
+}
+```
+
+<Banner type="warning">
+  <strong>Important:</strong><br />
+  If you specify a different URL to send your users to for email verification, such as a page on the frontend of your app or similar, you need to handle making the call to the Payload REST or GraphQL verification operation yourself on your frontend, using the token that was provided for you. Above, it was passed via query parameter.
+</Banner>
+
+**`generateEmailSubject`**
+
+Similarly to the above `generateEmailHTML`, you can also customize the subject of the email. The function argument are the same but you can only return a string - not HTML.
+
+Example:
+
+```js
+{
+  slug: 'customers',
+  auth: {
+    forgotPassword: {
+      // highlight-start
+      generateEmailSubject: ({ req, user }) => {
+        return `Hey ${user.email}, reset your password!`;
+      }
+      // highlight-end
+    }
+  }
+}
+```
