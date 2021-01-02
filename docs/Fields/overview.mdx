@@ -5,7 +5,7 @@ order: 10
 ---
 
 <Banner type="info">
-	Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data that they store. Payload offers a wide-array of field types - both simple and complex.
+	Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data that they store. Payload offers a wide variety of field types - both simple and complex.
 </Banner>
 
 Fields are defined as an array on Collections and Globals via the `fields` key. They define the shape of the data that will be stored as well as automatically construct the corresponding Admin UI.
@@ -58,37 +58,44 @@ One of the most powerful parts about Payload is its ability for you to define fi
 
 In addition to being able to define access control on a document-level, you can define extremely granular permissions on a field by field level. For more information about field-level access control, [click here](/docs/access-control/config#fields).
 
+### Validation
+
+You can provide your own validation function for all field types. It will be used on both the frontend and the backend, so it should not rely on any Node-specific packages. The validation function can be either synchronous or asynchronous and accepts the field's value and expects to return either `true` or a string error message to display in both API responses and within the Admin panel.
+
+Example:
+```js
+{
+  slug: 'orders',
+  fields: [
+    {
+      name: 'customerNumber',
+      type: 'text',
+      validate: async (val) => {
+        const response = await fetch(`https://your-api.com/customers/${val}`);
+        if (response.ok) {
+          return true;
+        }
+
+        return 'The customer number provided does not match any customers within our records.';
+      },
+    },
+  ],
+}
+```
+
 ### Admin config
 
 In addition to each field's base configuration, you can define specific traits and properties for fields that only have effect on how they are rendered in the Admin panel. The following properties are available for all fields within the `admin` property:
 
-**`condition`**
-
-You can programmatically show / hide fields based on what other fields are doing. [Click here](#conditional-logic) for more info.
-
-**`components`**
-
-All field components can be completely and easily swapped out for custom components that you define. [Click here](#custom-admin-components) for more info.
-
-**`position`**
-
-Specify if the field should be rendered in the main editable area (leave the field undefined) or the sidebar, by defining `position: 'sidebar'`.
-
-**`width`**
-
-Restrict the width of a field. you can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally.
-
-**`readOnly`**
-
-Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value.
-
-**`disabled`**
-
-If a field is `disabled`, it is completely omitted from the Admin panel.
-
-**`hidden`**
-
-Setting a field's `hidden` property on its `admin` config will transform it into a `hidden` input type. Its value will still submit with the Admin panel's requests, but the field itself will not be visible to editors.
+| Option        | Description  |
+| ------------- | -------------|
+| `condition`   | You can programmatically show / hide fields based on what other fields are doing. [Click here](#conditional-logic) for more info. |
+| `components`  | All field components can be completely and easily swapped out for custom components that you define. [Click here](#custom-admin-components) for more info. |
+| `position`    | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`. |
+| `width`       | Restrict the width of a field. you can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
+| `readOnly`    | Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value. |
+| `disabled`    | If a field is `disabled`, it is completely omitted from the Admin panel. |
+| `hidden`      | Setting a field's `hidden` property on its `admin` config will transform it into a `hidden` input type. Its value will still submit with the Admin panel's requests, but the field itself will not be visible to editors. |
 
 ### Conditional logic
 
@@ -130,41 +137,4 @@ The `condition` function should return a boolean that will control if the field 
 
 ### Custom components
 
-All Payload fields support the ability to swap in your own React components with ease. So, for example, instead of rendering a default Text input, you might need to render a color picker that provides the editor with a custom color picker interface to restrict the data entered to colors only.
-
-**Custom components will automatically be provided with all props that the default component would accept.**
-
-<Banner type="success">
-  <strong>Tip:</strong><br/>
-  Don't see a built-in field type that you need? Build it! Using a combination of custom validation and custom components, you can override the entirety of how a component functions within the admin panel and effectively create your own field type.
-</Banner>
-
-Fields support the following custom components:
-
-**`Filter`**
-
-Passing a `Filter` component will override the text input that is presented in the `List` view when a user is filtering documents by the customized field.
-
-**`Cell`**
-
-This component will be used in the `List` view's table to represent a table-based preview of the data stored in the field.
-
-**`Field`**
-
-Specifying this component will swap out the field itself within all `Edit` views. You will be responsible for sending and receiving the field's `value` from the form itself.
-
-Example:
-```js
-import { useFieldType } from 'payload/components/forms';
-
-const CustomTextField = ({ path }) => {
-  const { value, setValue } = useFieldType({ path });
-
-  return (
-    <input
-      onChange={(e) => setValue(e.target.value)}
-      value={value}
-    />
-  )
-}
-```
+All Payload fields support the ability to swap in your own React components with ease. For more information, including examples, [click here](/docs/admin/components#fields).

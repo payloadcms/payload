@@ -4,13 +4,103 @@ label: Custom Components
 order: 20
 ---
 
-Talk about how to build custom components. Show a list of all components that can be swapped out.
+While designing the Payload Admin panel, we determined it should be as minimal and straightforward as possible to allow easy customization and control. There are many times where you may want to completely control how a whole view or a field works. You might even want to add in your own routes entirely. In order for Payload to support that level of customization without introducing versioning / future-proofing issues, Payload provides for a pattern to supply your own React components via your Payload config.
 
+To swap in your own React component, first, consult the list of available component overrides below. Determine the scope that corresponds to what you are trying to accomplish, and then author your React component accordingly.
+
+<Banner type="success">
+  <strong>Tip:</strong><br/>
+  Custom components will automatically be provided with all props that the default component would accept.
+</Banner>
+
+### Base Component Overrides
+
+You can override a set of admin panel-wide components by providing a component to your base Payload config's `admin.components` property. The following options are available:
+
+| Path                 | Description  |
+| -------------------- | -------------|
+| **`Nav`              | Contains the sidebar and mobile Nav in its entirety. |
+| **`views.Account`    | The Account view is used to show the currently logged in user's Account page. |
+| **`views.Dashboard`  | The main landing page of the Admin panel. |
+| **`graphics.Icon`    | Used as a graphic within the `Nav` component. Often represents a condensed version of a full logo. |
+| **`graphics.Logo`    | The full logo to be used in contexts like the `Login` view. |
+
+#### Full example:
+
+`payload.config.js`
+```js
+import { buildConfig } from 'payload/config';
+import { MyCustomNav, MyCustomLogo, MyCustomIcon, MyCustomAccount, MyCustomDashboard } from './customComponents.js';
+
+export default buildConfig({
+  serverURL: 'http://localhost:3000',
+  admin: {
+    components: {
+      Nav: MyCustomNav,
+      graphics: {
+        Icon: MyCustomIcon,
+        Logo: MyCustomLogo,
+      },
+      views: {
+        Account: MyCustomAccount,
+        Dashboard: MyCustomDashboard,
+      }
+    }
+  }
+})
+```
+
+*For more examples regarding how to customize components, look at the [demo app](https://github.com/payloadcms/payload/tree/master/demo).*
 
 ### Collections
 
-Talk about Collection-based components here.
+You can override components on a Collection-by-Collection basis via each Collection's `admin` property.
+
+| Path    | Description  |
+| ----------------  | -------------|
+| **`views.Edit`**  | Used while a document within this Collection is being edited. |
+| **`views.List`**  | The `List` view is used to render a paginated, filterable table of Documents in this Collection. |
 
 ### Globals
 
-Talk about Global-based componeents here.
+As with Collections, You can override components on a global-by-global basis via their `admin` property.
+
+| Path    | Description  |
+| ----------------  | -------------|
+| **`views.Edit`**  | Used while this Global is being edited. |
+
+### Fields
+
+All Payload fields support the ability to swap in your own React components. So, for example, instead of rendering a default Text input, you might need to render a color picker that provides the editor with a custom color picker interface to restrict the data entered to colors only.
+
+<Banner type="success">
+  <strong>Tip:</strong><br/>
+  Don't see a built-in field type that you need? Build it! Using a combination of custom validation and custom components, you can override the entirety of how a component functions within the admin panel and effectively create your own field type.
+</Banner>
+
+**Fields support the following custom components:**
+
+| Component       | Description  |
+| --------------- | -------------|
+| **`Filter`**    | Override the text input that is presented in the `List` view when a user is filtering documents by the customized field. |
+| **`Cell`**      | Used in the `List` view's table to represent a table-based preview of the data stored in the field. |
+| **`Field`**     | Swap out the field itself within all `Edit` views. |
+
+#### Sending and receiving values from the form
+
+When swapping out the `Field` component, you'll be responsible for sending and receiving the field's `value` from the form itself. To do so, import the `useFieldType` hook as follows:
+
+```js
+import { useFieldType } from 'payload/components/forms';
+
+const CustomTextField = ({ path }) => {
+  const { value, setValue } = useFieldType({ path });
+
+  return (
+    <input
+      onChange={(e) => setValue(e.target.value)}
+      value={value}
+    />
+  )
+}
+```

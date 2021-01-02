@@ -10,7 +10,7 @@ To extend the Webpack config, add the `webpack` key to your base Payload config,
 
 `payload.config.js`
 ```js
-import { buildConfig } from 'payload';
+import { buildConfig } from 'payload/config';
 
 export default buildConfig({
 	serverURL: 'http://localhost:3000',
@@ -96,7 +96,9 @@ const createStripeSubscription = async ({ data, operation }) => {
 
 		// Automatically add the Stripe subscription ID
 		// to the data that will be saved to this Subscription doc
-		datawithStripeID.stripeSubscriptionID = subscription.id;
+    dataWithStripeID.stripeSubscriptionID = subscription.id;
+
+    return dataWithStripeID
 	}
 
 	return data;
@@ -116,7 +118,7 @@ To remedy this issue you can extend the Payload Webpack config to alias your ent
 
 Example in `payload.config.js`:
 ```js
-import { buildConfig } from 'payload';
+import { buildConfig } from 'payload/config';
 import path from 'path';
 import Subscription from './collections/Subscription';
 

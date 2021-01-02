@@ -1,0 +1,77 @@
+---
+title: The Admin Panel
+label: Overview
+order: 10
+---
+
+Payload dynamically generates a beautiful, fully functional React admin panel to manage your data. It's extremely powerful and can be customized / extended upon easily by swapping in your own React components. You can add additional views, modify how built-in views look / work, swap out Payload branding for your client's, build your own field types and much more.
+
+The Payload Admin panel is built with Webpack, code-split, highly performant (even with 100+ fields), and written fully in TypeScript. It's meant to be simple enough to give you a starting point but not bring too much complexity, so that you can easily customize it to suit the needs of your application and your editors.
+<br/>
+
+![Array field in Payload admin panel](/images/admin.jpg)
+
+*Screenshot of the Admin panel while editing a document from an example `AllFields` collection*
+
+## Admin Options
+
+All options for the Admin panel are defined in your base Payload config file.
+
+| Option               | Description  |
+| -------------------- | -------------|
+| `user`               | The `slug` of a Collection that you want be used to log in to the Admin dashboard. [More](/docs/admin/overview#the-admin-user-collection) |
+| `meta`               | Base meta data to use for the Admin panel. Included properties are `titleSuffix`, `ogImage`, and `favicon`. |
+| `disable`            | If set to `true`, the entire Admin panel will be disabled. |
+| `indexHTML`          | Optionally replace the entirety of the `index.html` file used by the Admin panel. Reference the [base index.html file](https://github.com/payloadcms/payload/blob/master/src/admin/index.html) to ensure your replacement has the appropriate HTML elements. |
+| `css`                | Absolute path to a stylesheet that you can use to override / customize the Admin panel styling. [More](/docs/admin/customizing-css). |
+| `scss`               | Absolute path to a Sass variables / mixins stylesheet meant to override Payload styles to make for an easy re-skinning of the Admin panel. [More](/docs/admin/customizing-css#overriding-scss-variables). |
+| `components`         | Component overrides that affect the entirety of the Admin panel. [More](/docs/admin/components) |
+| `webpack`            | Customize the Webpack config that's used to generate the Admin panel. [More](/docs/admin/webpack) |
+
+
+### The Admin User Collection
+
+<Banner type="warning">
+  <strong>Important:</strong><br />
+  The Payload Admin panel can only be used by one Collection that supports <a href="/docs/authentication/">Authentication</a>.
+</Banner>
+
+To specify which Collection to use to log in to the Admin panel, pass the `admin` options a `user` key equal to the slug of the Collection that you'd like to use.
+
+`payload.config.js`:
+```js
+import { buildConfig } from 'payload/config';
+
+const config = buildConfig({
+  serverURL: 'http://localhost:3000',
+  admin: {
+    user: 'admins', // highlight-line
+  },
+})
+```
+
+By default, if you have not specified a Collection, Payload will automatically provide you with a `User` Collection which will be used to access the Admin panel. You can customize or override the fields and settings of the default `User` Collection by passing your own collection using `users` as its `slug` to Payload. When this is done, Payload will use your provided `User` Collection instead of its default version.
+
+**Note: you can use whatever Collection you'd like to access the Admin panel as long as the Collection supports Authentication. It doesn't need to be called `users`!**
+
+For example, you may wish to have two Collections that both support `Authentication`:
+
+- `admins` - meant to have a higher level of permissions to manage your data and access the Admin panel
+- `customers` - meant for end users of your app that should not be allowed to log into the Admin panel
+
+This is totally possible. For the above scenario, by specifying `admin: { user: 'admins' }`, your Payload Admin panel will use `admins` and `customers` will not be able to log in via the Admin panel.
+
+### Restricting user access
+
+If you would like to restrict which users from a single Collection can access the Admin panel, you can use the `admin` access control function. [Click here](/docs/access-control/config#admin) to learn more.
+
+### License enforcement
+
+Payload requires a valid license key to be used on production domains. You can use it as much as you'd like locally and on staging / UAT domains, but when you deploy to production, you'll need a license key to activate Payload's Admin panel. For more information, [click here](/docs/production/licensing).
+
+- Main config
+- Collection-level config
+- Global-level config
+- Field-level config
+
+

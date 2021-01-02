@@ -66,12 +66,12 @@ export type PayloadConfig = {
     scss?: string
     components?: {
       Nav?: React.ComponentType
-      Account?: React.ComponentType
       graphics?: {
         Icon?: React.ComponentType
         Logo?: React.ComponentType
       }
       views?: {
+        Account?: React.ComponentType
         Dashboard?: React.ComponentType
       }
     }

@@ -23,7 +23,9 @@ const AccountView: React.FC = () => {
     admin: {
       user: adminUser,
       components: {
-        Account: CustomAccount,
+        views: {
+          Account: CustomAccount,
+        } = {},
       } = {},
     } = {},
   } = useConfig();

@@ -5,14 +5,14 @@ order: 20
 ---
 
 <Banner >
-  The Array field type is used when you need to have a set of "repeating" fields, and stores an array of objects containing the fields that you define. Its uses can be simple or highly complex.
+  The Array field type is used when you need to have a set of "repeating" fields. It stores an array of objects containing the fields that you define. Its uses can be simple or highly complex.
 </Banner>
 
 **Example uses:**
 
 - A "slider" with an image ([upload field](/docs/fields/upload)) and a caption ([text field](/docs/fields/text))
 - Navigational structures where editors can specify nav items containing pages ([relationship field](/docs/fields/relationship)), an "open in new tab" [checkbox field](/docs/fields/checkbox)
-- Event agenda "timeslots" where you need to specify start time ([date field](/docs/fields/date)), end time, label ([text field](/docs/fields/text)), and Learn More page [relationship](/docs/fields/relationship)
+- Event agenda "timeslots" where you need to specify start & end time ([date field](/docs/fields/date)), label ([text field](/docs/fields/text)), and Learn More page [relationship](/docs/fields/relationship)
 
 ![Array field in Payload admin panel](/images/fields/array.jpg)
 *Admin panel screenshot of an Array field with a Row containing two text fields, a read-only text field and a checkbox*
@@ -35,7 +35,7 @@ order: 20
 | **`labels`**         | Customize the row labels appearing in the Admin dashboard. |
 | **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin) for more details. |
 
-*\* An asterisk denotes that an option is required.*
+*\* An asterisk denotes that a property is required.*
 
 ### Example
 
