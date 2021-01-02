@@ -13,16 +13,15 @@ export type Arguments = {
 async function logout(args: Arguments): Promise<string> {
   const { config } = this;
 
-  const requestedSlug = args.req.route.path.split('/').filter((r) => r !== '')[0];
-  if (!args.req.user) throw new APIError('No User', httpStatus.BAD_REQUEST);
-  if (args.req.user.collection !== requestedSlug) throw new APIError('Incorrect collection', httpStatus.FORBIDDEN);
-
   const {
     res,
     collection: {
       config: collectionConfig,
     },
   } = args;
+
+  if (!args.req.user) throw new APIError('No User', httpStatus.BAD_REQUEST);
+  if (args.req.user.collection !== collectionConfig.slug) throw new APIError('Incorrect collection', httpStatus.FORBIDDEN);
 
   const cookieOptions = {
     path: '/',
