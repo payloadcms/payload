@@ -1,0 +1,101 @@
+---
+title: Global Hooks
+label: Globals
+order: 40
+---
+
+Globals feature the ability to define the following hooks:
+
+- [beforeValidate](#beforeValidate)
+- [beforeChange](#beforeChange)
+- [afterChange](#afterChange)
+- [beforeRead](#beforeRead)
+- [afterRead](#afterRead)
+
+## Config
+
+All Global Hook properties accept arrays of synchronous or asynchronous functions. Each Hook type receives specific arguments and has the ability to modify specific outputs.
+
+`globals/example-hooks.js`
+```js
+// Global config
+module.exports = {
+  slug: 'header',
+  fields: [
+    { name: 'title', label: 'Title', type: 'text'},
+  ]
+  hooks: {
+    beforeValidate: [(args) => {...}],
+    beforeChange: [(args) => {...}],
+    beforeRead: [(args) => {...}],
+    afterChange: [(args) => {...}],
+    afterRead: [(args) => {...}],
+  }
+}
+```
+
+### beforeValidate
+
+Runs before the `create` and `update` operations. This hook allows you to add or format data before the incoming data is validated.
+
+```js
+const beforeValidateHook = async ({
+  data, // incoming data to update or create with
+  req, // full express request
+  operation, // name of the operation ie. 'create', 'update'
+  originalDoc, // original document
+}) => {
+  return data; // Return data to either create or update a document with
+}
+```
+
+### beforeChange
+
+Immediately following validation, `beforeChange` hooks will run within `create` and `update` operations. At this stage, you can be confident that the data that will be saved to the document is valid in accordance to your field validations. You can optionally modify the shape of data to be saved.
+
+```js
+const beforeChangeHook = async ({
+  data, // incoming data to update or create with
+  req, // full express request
+  operation, // name of the operation ie. 'create', 'update'
+  originalDoc, // original document
+}) => {
+  return data; // Return data to either create or update a document with
+}
+```
+
+### afterChange
+
+After a global is created or updated, the `afterChange` hook runs. Use this hook to purge caches of your applications, sync site data to CRMs, and more.
+
+```js
+const afterChangeHook = async ({
+  doc, // full document data
+  req, // full express request
+  operation, // name of the operation ie. 'create', 'update'
+}) => {
+  return data;
+}
+```
+
+### beforeRead
+
+Runs before `findOne` global operation is transformed for output by `afterRead`. This hook fires before hidden fields are removed and before localized fields are flattened into the requested locale. Using this Hook will provide you with all locales and all hidden fields via the `doc` argument.
+
+```js
+const beforeReadHook = async ({
+  doc, // full document data
+  req, // full express request
+}) => {...}
+```
+
+### afterRead
+
+Runs as the last step before a global is returned. Flattens locales, hides protected fields, and removes fields that users do not have access to.
+
+```js
+const afterReadHook = async ({
+  doc, // full document data
+  req, // full express request
+}) => {...}
+```

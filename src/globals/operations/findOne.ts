@@ -19,13 +19,7 @@ async function findOne(args) {
   await executeAccess({ req }, globalConfig.access.read);
 
   // /////////////////////////////////////
-  // 2. Execute before collection hook
-  // /////////////////////////////////////
-
-  globalConfig.hooks.beforeRead.forEach((hook) => hook({ req }));
-
-  // /////////////////////////////////////
-  // 3. Perform database operation
+  // 2. Perform database operation
   // /////////////////////////////////////
 
   let doc = await Model.findOne({ globalType: slug }).lean();
@@ -36,6 +30,19 @@ async function findOne(args) {
     doc.id = doc._id;
     delete doc._id;
   }
+
+  // /////////////////////////////////////
+  // 3. Execute before collection hook
+  // /////////////////////////////////////
+
+  await globalConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    doc = await hook({
+      req,
+      doc,
+    }) || doc;
+  }, Promise.resolve());
 
   // /////////////////////////////////////
   // 4. Execute field-level hooks and access

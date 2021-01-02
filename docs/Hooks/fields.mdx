@@ -1,0 +1,71 @@
+---
+title: Field Hooks
+label: Fields
+order: 30
+---
+
+Field-level hooks offer incredible potential for encapsulating your logic. They help to isolate concerns and package up functionalities to be easily reusable across your projects.
+
+Example use cases include:
+
+- Automatically add an `owner` relationship to a Document based on the `req.user.id`
+- Encrypt / decrypt a sensitive field using `beforeValidate` and `afterRead` hooks
+- Auto-generate field data using a `beforeValidate` hook
+- Format incoming data such as kebab-casing a document `slug` with `beforeValidate`
+- Restrict updating a document to only once every X hours using the `beforeChange` hook
+
+All field types provide the following hooks:
+
+- [beforeValidate](#beforeValidate)
+- [beforeChange](#beforeChange)
+- [afterChange](#afterChange)
+- [afterRead](#afterRead)
+
+## Config
+
+Example field configuration:
+```js
+{
+  name: 'name',
+  label: 'Name',
+  type: 'text',
+  // highlight-start
+  hooks: {
+    beforeValidate: [(args) => {...}],
+    beforeChange: [(args) => {...}],
+    afterChange: [(args) => {...}],
+    afterRead: [(args) => {...}],
+  }
+  // highlight-end
+}
+```
+
+## Arguments and return values
+
+All field-level hooks are formatted to accept the same arguments, although some may be `undefined` based on which field hook you are utilizing.
+
+<Banner type="success">
+  <strong>Tip:</strong><br />
+  It's a good idea to conditionally scope your logic based on which operation is executing.
+</Banner>
+
+#### Arguments
+
+Field Hooks receive one `args` argument that contains the following properties:
+
+| Option            | Description  |
+| ----------------- | -------------|
+| **`value`**       | The value of the field, before any updating. Will return `undefined` within `create` operations. |
+| **`data`**        | The data passed to update the field with in `create` and `update` operations. |
+| **`originalDoc`** | The full original document in `update` or `read` operations. |
+| **`operation`**   | A string relating to which operation the field type is currently executing within. |
+| **`req`**         | The Express `request` object. It is mocked for Local API operations. |
+
+#### Return value
+
+All field hooks can optionally modify the return value of the field before the operation continues. Field Hooks may optionally return the value that should be used within the field.
+
+<Banner type="warning">
+  <strong>Important</strong><br/>
+  Due to GraphQL's typed nature, you should never change the type of data that you return from a field, otherwise GraphQL will produce errors. If you need to change the shape or type of data, reconsider Field Hooks and instead evaluate if Collection / Global hooks might suit you better.
+</Banner>

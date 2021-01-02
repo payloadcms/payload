@@ -54,13 +54,13 @@ async function update(args) {
   // 3. Execute before validate collection hooks
   // /////////////////////////////////////
 
-  await globalConfig.hooks.beforeValidate.reduce(async (priorHook: BeforeValidateHook, hook: BeforeValidateHook) => {
+  await globalConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
     await priorHook;
 
     data = (await hook({
       data,
       req,
-      operation: 'update',
+      originalDoc: globalJSON,
     })) || data;
   }, Promise.resolve());
 
@@ -87,7 +87,6 @@ async function update(args) {
       data,
       req,
       originalDoc: global,
-      operation: 'update',
     })) || data;
   }, Promise.resolve());
 
@@ -124,13 +123,12 @@ async function update(args) {
   // 9. Execute after global hook
   // /////////////////////////////////////
 
-  await globalConfig.hooks.afterChange.reduce(async (priorHook: AfterChangeHook, hook: AfterChangeHook) => {
+  await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
     global = await hook({
       doc: global,
       req,
-      operation: 'update',
     }) || global;
   }, Promise.resolve());
 

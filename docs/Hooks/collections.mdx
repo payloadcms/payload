@@ -1,0 +1,188 @@
+---
+title: Collection Hooks
+label: Collections
+order: 20
+---
+
+Collections feature the ability to define the following hooks:
+
+- [beforeOperation](#beforeOperation)
+- [beforeValidate](#beforeValidate)
+- [beforeChange](#beforeChange)
+- [afterChange](#afterChange)
+- [beforeRead](#beforeRead)
+- [afterRead](#afterRead)
+- [beforeDelete](#beforeDelete)
+- [afterDelete](#afterDelete)
+
+Additionally, `auth`-enabled collections feature the following hooks:
+
+- [afterLogin](#afterLogin)
+- [afterForgotPassword](#afterForgotPassword)
+
+## Config
+
+All collection Hook properties accept arrays of synchronous or asynchronous functions. Each Hook type receives specific arguments and has the ability to modify specific outputs.
+
+`collections/example-hooks.js`
+```js
+// Collection config
+module.exports = {
+  slug: 'example-hooks',
+  fields: [
+    { name: 'name', label: 'Name', type: 'text'},
+  ]
+  hooks: {
+    beforeOperation: [(args) => {...}],
+    beforeValidate: [(args) => {...}],
+    beforeDelete: [(args) => {...}],
+    beforeChange: [(args) => {...}],
+    beforeRead: [(args) => {...}],
+    afterChange: [(args) => {...}],
+    afterRead: [(args) => {...}],
+    afterDelete: [(args) => {...}],
+
+    // Auth-enabled hooks
+    afterLogin: [(args) => {...}],
+    afterForgotPassword: [(args) => {...}],
+  }
+}
+```
+
+### beforeOperation
+
+The `beforeOperation` Hook type can be used to modify the arguments that operations accept or execute side-effects that run before an operation begins.
+
+Available Collection operations include `create`, `read`, `update`, `delete`, `refresh`, and `forgotPassword`.
+
+```js
+const beforeOperationHook = async ({
+  args, // Original arguments passed into the operation
+  operation, // name of the operation
+}) => {
+  return args; // Return operation arguments as necessary
+}
+```
+
+### beforeValidate
+
+Runs before the `create` and `update` operations. This hook allows you to add or format data before the incoming data is validated.
+
+```js
+const beforeValidateHook = async ({
+  data, // incoming data to update or create with
+  req, // full express request
+  operation, // name of the operation ie. 'create', 'update'
+  originalDoc, // original document
+}) => {
+  return data; // Return data to either create or update a document with
+}
+```
+
+### beforeChange
+
+Immediately following validation, `beforeChange` hooks will run within `create` and `update` operations. At this stage, you can be confident that the data that will be saved to the document is valid in accordance to your field validations. You can optionally modify the shape of data to be saved.
+
+```js
+const beforeChangeHook = async ({
+  data, // incoming data to update or create with
+  req, // full express request
+  operation, // name of the operation ie. 'create', 'update'
+  originalDoc, // original document
+}) => {
+  return data; // Return data to either create or update a document with
+}
+```
+
+### afterChange
+
+After a document is created or updated, the `afterChange` hook runs. This hook is helpful to recalculate statistics such as total sales within a global, syncing user profile changes to a CRM, and more.
+
+```js
+const afterChangeHook = async ({
+  doc, // full document data
+  req, // full express request
+  operation, // name of the operation ie. 'create', 'update'
+}) => {
+  return data;
+}
+```
+
+### beforeRead
+
+Runs before `find` and `findByID` operations are transformed for output by `afterRead`. This hook fires before hidden fields are removed and before localized fields are flattened into the requested locale. Using this Hook will provide you with all locales and all hidden fields via the `doc` argument.
+
+```js
+const beforeReadHook = async ({
+  doc, // full document data
+  req, // full express request
+  query, // JSON formatted query
+}) => {
+  return doc;
+}
+```
+
+### afterRead
+
+Runs as the last step before documents are returned. Flattens locales, hides protected fields, and removes fields that users do not have access to.
+
+```js
+const afterReadHook = async ({
+  doc, // full document data
+  req, // full express request
+  query, // JSON formatted query
+}) => {
+  return doc;
+}
+```
+
+### beforeDelete
+
+Runs before the `delete` operation. Returned values are discarded.
+
+```js
+const beforeDeleteHook = async ({
+  req, // full express request
+  id, // id of document to delete
+}) => {...}
+```
+
+### afterDelete
+
+Runs immediately after the `delete` operation removes records from the database. Returned values are discarded.
+
+```js
+const afterDeleteHook = async ({
+  req, // full express request
+  id, // id of document to delete
+  doc, // deleted document
+}) => {...}
+```
+
+### afterLogin
+
+For auth-enabled Collections, this hook runs after successful `login` operations. You can optionally modify the user that is returned.
+
+```js
+const afterLoginHook = async ({
+  req, // full express request
+  user, // user being logged in
+  token, // user token
+}) => {
+  return user;
+}
+```
+
+### afterForgotPassword
+
+For auth-enabled Collections, this hook runs after successful `forgotPassword` operations. Returned values are discarded.
+
+```js
+const afterLoginHook = async ({
+  req, // full express request
+  user, // user being logged in
+  token, // user token
+}) => {
+  return user;
+}
+```
