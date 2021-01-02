@@ -29,7 +29,7 @@ const Admin: PayloadCollectionConfig = {
     depth: 0,
     cookies: {
       secure: false,
-      sameSite: 'Lax',
+      sameSite: 'lax',
       domain: undefined,
     },
   },

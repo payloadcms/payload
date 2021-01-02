@@ -4,4 +4,132 @@ label: Overview
 order: 10
 ---
 
-Talk about how Payload authentication works.
+Payload provides for highly secure and customizable user Authentication out of the box, which allows for users to identify themselves to Payload. Authentication is used within the Payload Admin panel itself as well as throughout your app(s) themselves however you determine necessary.
+
+Here are some common use cases of Authentication outside of Payload's dashboard itself:
+
+- Customer accounts for an ecommerce app
+- Customer accounts for a SaaS product
+- P2P app or social site where users need to log in and manage their profiles
+- Online game where players need to track their progress over time
+
+By default, Payload provides you with a `User` collection that supports Authentication, which is used to access the Admin panel. But, you can add support to one or many Collections of your own. For more information on how to customize, override, or remove the default `User` collection, [click here](/docs/admin#the-admin-user-collection).
+
+### How it works
+
+Every Payload Collection can opt-in to supporting Authentication by specifying the `auth` property on the Collection's config to either `true` or to an object containing `auth` options.
+
+**For a full list of all `auth` options, [click here](/docs/authentication/config).**
+
+Simple example collection:
+
+```js
+const Admins = {
+  slug:
+  // highlight-start
+  auth: {
+    tokenExpiration: 300,
+    verify: true,
+    maxLoginAttempts: 5,
+    lockTime: 600 * 1000, // lock time in ms
+  },
+  // highlight-end
+  fields: [
+    {
+      name: 'role',
+      type: 'select',
+      required: true,
+      options: [
+        'user',
+        'admin',
+        'editor',
+        'developer',
+      ],
+    }
+  ],
+}
+```
+
+**By enabling Authetication on a config, the following modifications will automatically be made to your Collection:**
+
+1. `email` as well as password `salt` & `hash` fields will be added to your Collection's schema
+1. The Admin panel will feature a new set of corresponding UI to allow for changing password and editing email
+1. [A new set of `operations`](/docs/authentication/operations) will be exposed via Payload's REST, Local, and GraphQL APIs
+
+Once enabled, each document that is created within the Collection can be thought of as a `user` - who can make use of commonly required authentication functions such as logging in / out, resetting their password, and more.
+
+### HTTP-only cookies
+
+Payload `login`, `logout`, and `refresh` operations make use of HTTP-only cookies for authentication purposes. HTTP-only cookies are a highly secure method of storing identifiable data on a user's device so that Payload can automatically recognize a returning user until their cookie expires. They are totally protected from common XSS attacks and cannot be read at all via JavaScript in the browser.
+
+##### Automatic browser inclusion
+
+Modern browsers automatically include `http-only` cookies when making requests directly to URLs—meaning that if you are running your API on http://example.com, and you have logged in and visit http://example.com/test-page, your browser will automatically include the Payload authentication cookie for you.
+
+##### Using Fetch or other HTTP APIs
+
+However, if you use `fetch` or similar APIs to retrieve Payload resources from its REST or GraphQL API, you need to specify to include credentials (cookies).
+
+Fetch example, including credentials:
+
+```js
+const response = await fetch('http://localhost:3000/api/pages', {
+  credentials: 'include',
+});
+
+const pages = await response.json();
+```
+
+For more about how to automatically include cookies in requests from your app to your Payload API, [click here](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#Sending_a_request_with_credentials_included).
+
+<Banner type="success">
+  <strong>Tip:</strong><br/>
+  To make sure you have a Payload cookie set properly in your browser after logging in, you can use Chrome's Developer Tools - Application - Cookies - [your-domain-here]. The Chrome Developer tools will still show HTTP-only cookies, even when JavaScript running on the page can't.
+</Banner>
+
+### CSRF Protection
+
+CSRF (cross-site request forgery) attacks are common and dangerous. By using an HTTP-only cookie, Payload removes any XSS vulnerabilities, however, CSRF attacks can still be possible.
+
+For example, let's say you have a very popular app running at coolsite.com. This app allows users to manage finances and send / receive money. As Payload is using HTTP-only cookies, that means that browsers automatically will include cookies when sending requests to your domain - no matter what page created the request.
+
+So, if a user of coolsite.com is logged in and just browsing around on the internet, they might stumble onto a page with bad intentions. That bad page might automatically make requests to all sorts of sites to see if they can find one that they can log into - and coolsite.com might be on their list. If your user was logged in while they visited that evil site, the attacker could do whatever they wanted as if they were your coolsite.com user—including send themselves a bunch of money from your user's account. This is what a CSRF attack is.
+
+<Banner type="success">
+  <strong>To protect against CSRF attacks, Payload only accepts cookie-based authentication from domains that you explicitly whitelist.</strong>
+</Banner>
+
+To define domains that should allow users to identify themselves via the Payload HTTP-only cookie, use the `csrf` option on the base Payload config to whitelist domains that you trust.
+
+`payload.config.js`:
+```js
+import { buildConfig } from 'payload/config';
+
+const config = buildConfig({
+  serverURL: 'http://localhost:3000',
+  collections: [
+    // collections here
+  ],
+  csrf: [
+    'https://your-frontend-app.com',
+    'https://your-other-frontend-app.com',
+  ],
+});
+
+export default config;
+```
+
+### Identifying users via the Authorization Header
+
+In addition to authenticating via an HTTP-only cookie, you can also identify users via the `Authorization` header on an HTTP request.
+
+Example:
+```js
+const request = await fetch('http://localhost:3000', {
+  headers: {
+    Authorization: `JWT ${token}`
+  }
+})
+```
+
+You can retrieve a user's token via the response to `login`, `refresh`, and `me` auth operations.

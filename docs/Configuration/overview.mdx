@@ -23,7 +23,7 @@ Payload is a *config-based*, code-first CMS and application framework. The Paylo
 | `graphQL`            | Manage GraphQL-specific functionality here. Define your own queries and mutations, manage query complexity limits, and [more](/docs/graphql/config). |
 | `cookiePrefix`       | A string that will be prefixed to all cookies that Payload sets. |
 | `cors`               | Either a whitelist array of URLS to allow CORS requests from, or a wildcard string (`'*'`) to accept incoming requests from any domain. |
-| `csrf`               | A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. [More](/docs/production/security#csrf) |
+| `csrf`               | A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. [More](/docs/authentication/overview#csrf-protection) |
 | `defaultDepth`       | If a user does not specify `depth` while requesting a resource, this depth will be used. [More](/docs/getting-started/concepts#depth) |
 | `maxDepth`           | The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries. Defaults to `10`. |
 | `upload`             | Base Payload upload configuration. [More](/docs/admin/upload#global). |

@@ -38,7 +38,7 @@ const PublicUsers: PayloadCollectionConfig = {
     lockTime: 600 * 1000, // lock time in ms
     cookies: {
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Lax',
+      sameSite: 'lax',
       domain: undefined,
     },
   },
