@@ -1,9 +1,15 @@
-const getExtractJWT = require('../../getExtractJWT');
+import getExtractJWT from '../../getExtractJWT';
 
 function refresh(collection) {
-  async function resolver(_, __, context) {
+  async function resolver(_, args, context) {
+    let token;
+
     const extractJWT = getExtractJWT(this.config);
-    const token = extractJWT(context.req);
+    token = extractJWT(context.req);
+
+    if (args.token) {
+      token = args.token;
+    }
 
     const options = {
       collection,

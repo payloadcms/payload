@@ -291,6 +291,9 @@ function registerCollections(): void {
             },
           },
         }),
+        args: {
+          token: { type: GraphQLString },
+        },
         resolve: refresh(collection),
       };
     }

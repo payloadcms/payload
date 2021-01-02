@@ -4,8 +4,14 @@ import { PayloadRequest } from '../../express/types';
 
 export default async function refreshHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {
+    let token;
+
     const extractJWT = getExtractJWT(this.config);
-    const token = extractJWT(req);
+    token = extractJWT(req);
+
+    if (req.body.token) {
+      token = req.body.token;
+    }
 
     const result = await this.operations.collections.auth.refresh({
       req,
