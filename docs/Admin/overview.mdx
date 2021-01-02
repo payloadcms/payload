@@ -59,7 +59,7 @@ For example, you may wish to have two Collections that both support `Authenticat
 - `admins` - meant to have a higher level of permissions to manage your data and access the Admin panel
 - `customers` - meant for end users of your app that should not be allowed to log into the Admin panel
 
-This is totally possible. For the above scenario, by specifying `admin: { user: 'admins' }`, your Payload Admin panel will use `admins` and `customers` will not be able to log in via the Admin panel.
+This is totally possible. For the above scenario, by specifying `admin: { user: 'admins' }`, your Payload Admin panel will use `admins`. Any users logged in as `customers` will not be able to log in via the Admin panel.
 
 ### Restricting user access
 
@@ -68,10 +68,3 @@ If you would like to restrict which users from a single Collection can access th
 ### License enforcement
 
 Payload requires a valid license key to be used on production domains. You can use it as much as you'd like locally and on staging / UAT domains, but when you deploy to production, you'll need a license key to activate Payload's Admin panel. For more information, [click here](/docs/production/licensing).
-
-- Main config
-- Collection-level config
-- Global-level config
-- Field-level config
-
-

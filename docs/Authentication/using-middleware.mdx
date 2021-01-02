@@ -4,4 +4,45 @@ label: Using the Middleware
 order: 40
 ---
 
-Talk about how to use `payload.authenticate()` outside of Payload - show examples
+Because Payload uses your existing Express server, you are free to add whatever logic you need to your app through endpoints of your own. However, Payload does not add its middleware to your Express app itself—instead, ist scopes all of its middelware to Payload-specific routers.
+
+This approach has a ton of benefits - it's great for isolation of concerns and limiting scope, but it also means that your additional routes won't have access to Payload's user authentication.
+
+If you would like to make use of Payload's built-in authentication within your custom routes, you can to add Payload's authentication middeware.
+
+Example in `server.js`:
+```js
+import express from 'express';
+import payload from 'payload';
+
+const app = express();
+
+payload.init({
+  secret: 'PAYLOAD_SECRET_KEY',
+  mongoURL: 'mongodb://localhost/payload',
+  express: app,
+});
+
+const router = express.Router();
+
+router.use(payload.authenticate); // highlight-line
+
+router.get('/', (req, res) => {
+  if (req.user) {
+    return res.send(`Authenticated successfully as ${req.user.email}.`);
+  }
+
+  return res.send('Not authenticated');
+});
+
+app.use('/some-route-here', router);
+
+app.listen(3000, async () => {
+  payload.logger.info(`listening on ${3000}...`);
+});
+
+```
+
+<Banner type="success">
+  With Payload's auth middleware, you can make full use of Payload's authentication features within your own Express endpoints.
+</Banner>

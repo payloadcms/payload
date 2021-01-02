@@ -4,7 +4,11 @@ label: Overview
 order: 10
 ---
 
-Payload provides for highly secure and customizable user Authentication out of the box, which allows for users to identify themselves to Payload. Authentication is used within the Payload Admin panel itself as well as throughout your app(s) themselves however you determine necessary.
+<Banner>
+  Payload provides for highly secure and customizable user Authentication out of the box, which allows for users to identify themselves to Payload.
+</Banner>
+
+Authentication is used within the Payload Admin panel itself as well as throughout your app(s) themselves however you determine necessary.
 
 Here are some common use cases of Authentication outside of Payload's dashboard itself:
 
@@ -15,7 +19,7 @@ Here are some common use cases of Authentication outside of Payload's dashboard 
 
 By default, Payload provides you with a `User` collection that supports Authentication, which is used to access the Admin panel. But, you can add support to one or many Collections of your own. For more information on how to customize, override, or remove the default `User` collection, [click here](/docs/admin#the-admin-user-collection).
 
-### How it works
+### Enabling Auth on a collection
 
 Every Payload Collection can opt-in to supporting Authentication by specifying the `auth` property on the Collection's config to either `true` or to an object containing `auth` options.
 
@@ -32,6 +36,7 @@ const Admins = {
     verify: true, // Require email verification before being allowed to authenticate
     maxLoginAttempts: 5, // Automatically lock a user out after X amount of failed logins
     lockTime: 600 * 1000, // Time period to allow the max login attempts
+    // More options are available
   },
   // highlight-end
   fields: [
@@ -62,7 +67,7 @@ Once enabled, each document that is created within the Collection can be thought
 
 [Click here](/docs/authentication/operations) for a list of all automatically-enabled Auth operations, including `login`, `logout`, `refresh`, and others.
 
-### Token-based
+### Token-based auth
 
 Successfully logging in returns a `JWT` (JSON web token) which is how a user will identify themselves to Payload. By providing this JWT via either an HTTP-only cookie or an `Authorization` header, Payload will automatically identify the user and add its user JWT data to the Express `req`, which is available throughout Payload including within access control, hooks, and more.
 
