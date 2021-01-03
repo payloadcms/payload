@@ -50,11 +50,6 @@ export default buildConfig({
     },
     webpack: (config) => config,
   },
-  email: {
-    transport: 'mock',
-    fromName: 'Payload',
-    fromAddress: 'hello@payloadcms.com',
-  },
   collections: [
     Admin,
     AllFields,

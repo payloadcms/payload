@@ -11,6 +11,10 @@ payload.init({
   secret: 'SECRET_KEY',
   mongoURL: 'mongodb://localhost/payload',
   express: expressApp,
+  email: {
+    fromName: 'Payload',
+    fromAddress: 'hello@payloadcms.com',
+  },
   onInit: (app) => {
     app.logger.info('Payload Demo Initialized');
   },
