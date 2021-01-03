@@ -1,16 +1,108 @@
 ---
-title: Upload Config
+title: Uploads
 label: Config
 order: 10
 ---
 
-Talk about how to configure uploads here.
+<Banner>
+  Payload provides for everything you need to enable file upload, storage, and management directly on your server—including extremely powerful file access control.
+</Banner>
+
+![Upload admin panel functionality](/images/upload-admin.jpg)
+*Admin panel screenshot depicting a Media Collection with Upload enabled*
+
+**Here are some common use cases of Uploads:**
+
+- Creating a "Media Library" that contains images for use throughout your site or app
+- Building a Gated Content library where users need to sign up to gain access to downloadable assets like ebook PDFs, whitepapers, etc.
+- Storing publicly available, downloadable assets like software, ZIP files, MP4s, etc.
+
+**By simply enabling Upload functionality on a Collection, Payload will automatically transform your Collection into a robust file management / storage solution. The following modifications will be made:**
+
+1. `filename`, `mimeType`, and `filesize` fields will be automatically added to your Collection. Optionally, if you pass `imageSizes` to your Collection's Upload config, a [`sizes` array](#image-sizes) will also be added containing auto-resized image sizes and filenames.
+1.  The Admin panel will modify its built-in `List` component to show a thumbnail gallery of your Uploads instead of the default Table view
+1. The Admin panel will modify its `Edit` view(s) to add a new set of corresponding Upload UI which will allow for file upload
+1. The `create`, `update`, and `delete` Collection operations will be modified to support file upload, re-upload, and deletion
+
+### Enabling Uploads
+
+Every Payload Collection can opt-in to supporting Uploads by specifying the `upload` property on the Collection's config to either `true` or to an object containing `upload` options.
+
+<Banner type="success">
+  <strong>Tip:</strong><br/>
+  A common pattern is to create a <strong>Media</strong> collection and enable <strong>upload</strong> on that collection.
+</Banner>
+
+#### Collection Upload Options
+
+| Option                 | Description  |
+| ---------------------- | -------------|
+| **`staticURL`** *      | The base URL path to use to access you uploads. Example: `/media` |
+| **`staticDir`** *      | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. |
+| **`imageSizes`**       | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes) |
+| **`adminThumbnail`**   | Which of your provided image sizes to use for the admin panel's thumbnail. Typically a size around 500x500px or so works well. |
+
+*An asterisk denotes that a property above is required.*
+
+**Example Upload collection:**
+```js
+const Media = {
+  slug: 'media',
+  upload: {
+    staticURL: '/media',
+    staticDir: 'media',
+    imageSizes: [
+      {
+        name: 'thumbnail',
+        width: 400,
+        height: 300,
+        crop: 'centre',
+      },
+      {
+        name: 'card',
+        width: 768,
+        height: 1024,
+        crop: 'centre',
+      }
+    ]
+  }
+}
+```
+
+### Payload-wide Upload Options
+
+Payload relies on the [`express-fileupload`](https://www.npmjs.com/package/express-fileupload) package to manage file uploads in Express. In addition to the Upload options specifiable on a Collection by Collection basis, you can also control the `express-fileupload` options by passing your base Payload config an `upload` property containing an object supportive of all `express-fileupload` properties which use `Busboy` under the hood. [Click here](https://github.com/mscdex/busboy#api) for more documentation about what you can control.
+
+A common example of what you might want to customize within Payload-wide Upload options would be to increase the allowed `fileSize` of uploads sent to Payload:
+
+```js
+import { buildConfig } from 'payload/config';
+
+export default buildConfig({
+  serverURL: 'http://localhost:3000',
+  collections: [
+    {
+      slug: 'media',
+      fields: [
+        {
+          name: 'alt',
+          type: 'text',
+        },
+      ],
+      upload: true,
+    },
+  ],
+  upload: {
+    limits: {
+      fileSize: 5000000, // 5MB, written in bytes
+    }
+  }
+});
+```
+
 
 Need to cover:
 
-1. Global upload config #global
-1. Can have multiple collections
-1. Static directory
 1. How to upload (multipart/form-data)
 1. Uploading is REST-only
 1. Access control

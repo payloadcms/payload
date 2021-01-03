@@ -37,7 +37,20 @@ The `find` endpoint supports the following additional query parameters:
 - [sort](/docs/queries/overview#sort) - sort by field
 - [where](/docs/queries/overview) - pass a `where` query to constrain returned documents
 - [limit](/docs/queries/pagination#pagination-controls) - limit the returned documents to a certain number
-- [page](/docs/queries/pagination#pagination-controls) - get a specfic page of documents
+- [page](/docs/queries/pagination#pagination-controls) - get a specific page of documents
+
+## Auth Operations
+
+| Method   | Path                        | Description |
+| -------- | --------------------------- | ----------- |
+| `POST`   | `/api/{collectionSlug}/verify/:token`   | [Email verification](/docs/authentication/operations#verify-by-email), if enabled. |
+| `POST`   | `/api/{collectionSlug}/unlock`          | [Unlock a user's account](/docs/authentication/operations#unlock), if enabled. |
+| `POST`   | `/api/{collectionSlug}/login`           | [Logs in](/docs/authentication/operations#login) a user with email / password. |
+| `POST`   | `/api/{collectionSlug}/logout`          | [Logs out](/docs/authentication/operations#logout) a user. |
+| `POST`   | `/api/{collectionSlug}/refresh-token`   | [Refreshes a token](/docs/authentication/operations#refresh) that has not yet expired. |
+| `GET`    | `/api/{collectionSlug}/me`              | [Returns the currently logged in user with token](/docs/authentication/operations#me). |
+| `POST`   | `/api/{collectionSlug}/forgot-password` | [Password reset workflow](/docs/authentication/operations#forgot-password) entry point. |
+| `POST`   | `/api/{collectionSlug}/reset-password`  | [To reset the user's password](/docs/authentication/operations#reset-password). |
 
 ## Globals
 

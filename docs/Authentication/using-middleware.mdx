@@ -4,11 +4,11 @@ label: Using the Middleware
 order: 40
 ---
 
-Because Payload uses your existing Express server, you are free to add whatever logic you need to your app through endpoints of your own. However, Payload does not add its middleware to your Express app itself—instead, ist scopes all of its middelware to Payload-specific routers.
+Because Payload uses your existing Express server, you are free to add whatever logic you need to your app through endpoints of your own. However, Payload does not add its middleware to your Express app itself—instead, ist scopes all of its middleware to Payload-specific routers.
 
 This approach has a ton of benefits - it's great for isolation of concerns and limiting scope, but it also means that your additional routes won't have access to Payload's user authentication.
 
-If you would like to make use of Payload's built-in authentication within your custom routes, you can to add Payload's authentication middeware.
+If you would like to make use of Payload's built-in authentication within your custom routes, you can to add Payload's authentication middleware.
 
 Example in `server.js`:
 ```js

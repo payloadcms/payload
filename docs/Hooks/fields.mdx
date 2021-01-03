@@ -6,7 +6,7 @@ order: 30
 
 Field-level hooks offer incredible potential for encapsulating your logic. They help to isolate concerns and package up functionalities to be easily reusable across your projects.
 
-Example use cases include:
+**Example use cases include:**
 
 - Automatically add an `owner` relationship to a Document based on the `req.user.id`
 - Encrypt / decrypt a sensitive field using `beforeValidate` and `afterRead` hooks
@@ -14,12 +14,12 @@ Example use cases include:
 - Format incoming data such as kebab-casing a document `slug` with `beforeValidate`
 - Restrict updating a document to only once every X hours using the `beforeChange` hook
 
-All field types provide the following hooks:
+**All field types provide the following hooks:**
 
-- [beforeValidate](#beforeValidate)
-- [beforeChange](#beforeChange)
-- [afterChange](#afterChange)
-- [afterRead](#afterRead)
+- `beforeValidate`
+- `beforeChange`
+- `afterChange`
+- `afterRead`
 
 ## Config
 
