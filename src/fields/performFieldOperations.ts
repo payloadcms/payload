@@ -9,16 +9,16 @@ import { HookName } from './config/types';
 
 type Arguments = {
   data: Record<string, unknown>
-  originalDoc: Record<string, unknown>
   operation: Operation
   hook: HookName
   req: PayloadRequest
-  id: string
   overrideAccess: boolean
-  reduceLocales: boolean
-  showHiddenFields: boolean
-  depth: number
-  currentDepth: number
+  reduceLocales?: boolean
+  originalDoc?: Record<string, unknown>
+  id?: string
+  showHiddenFields?: boolean
+  depth?: number
+  currentDepth?: number
 }
 
 export default async function performFieldOperations(entityConfig: CollectionConfig | GlobalConfig, args: Arguments): Promise<{ [key: string]: unknown }> {
@@ -35,7 +35,7 @@ export default async function performFieldOperations(entityConfig: CollectionCon
     },
     overrideAccess,
     reduceLocales,
-    showHiddenFields,
+    showHiddenFields = false,
   } = args;
 
   const fallbackLocale = sanitizeFallbackLocale(req.fallbackLocale);

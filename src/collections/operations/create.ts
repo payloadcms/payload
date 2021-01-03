@@ -17,6 +17,7 @@ import sendVerificationEmail from '../../auth/sendVerificationEmail';
 import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection } from '../config/types';
 import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
+import { Payload } from '../..';
 
 export type Arguments = {
   collection: Collection
@@ -28,7 +29,7 @@ export type Arguments = {
   data: Record<string, unknown>
 }
 
-async function create(incomingArgs: Arguments): Promise<Document> {
+async function create(this: Payload, incomingArgs: Arguments): Promise<Document> {
   const { performFieldOperations, config, emailOptions } = this;
 
   let args = incomingArgs;
