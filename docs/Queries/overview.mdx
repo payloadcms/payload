@@ -1,0 +1,169 @@
+---
+title: Queries
+label: Overview
+order: 10
+---
+
+Payload provides an extremely granular querying language through all APIs. Each API takes the same syntax and fully supports all options.
+
+<Banner>
+  <strong>Here, "querying" relates to filtering or searching through documents within a Collection.</strong> You can build queries to pass to Find operations as well as to <a href="/docs/access-control/config">restrict which documents certain users can access</a> via access control functions.
+</Banner>
+
+### Simple queries
+
+For example, say you have a collection as follows:
+
+```js
+const Post = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'color',
+      type: 'select',
+      options: [
+        'mint',
+        'dark-gray',
+        'white',
+      ],
+    },
+    {
+      name: 'featured',
+      type: 'checkbox',
+    }
+  ]
+}
+```
+
+You may eventually have a lot of documents within this Collection. If you wanted to find only documents with `color` equal to `red`, you could write a query as follows:
+
+```js
+const query = {
+  color: { // property name to filter on
+    equals: 'red', // operator to use and value to compare against
+  },
+}
+```
+
+The above example demonstrates a simple query but you can get much more complex.
+
+### Operators
+
+| Operator             | Description  |
+| -------------------- | ------------ |
+| `equals`             | The value must be exactly equal. |
+| `not_equals`         | The query will return all documents where the value is not equal. |
+| `greater_than`       | For numeric or date-based fields. |
+| `greater_than_equal` | For numeric or date-based fields. |
+| `less_than`          | For numeric or date-based fields. |
+| `less_than_equal`    | For numeric or date-based fields. |
+| `like`               | The value must partially match. |
+| `in`                 | The value must be found within the provided comma-delimited list of values. |
+| `not_in`             | The value must NOT be within the provided comma-delimited list of values. |
+| `exists`             | Only return documents where the value either exists (`true`) or does not exist (`false`). |
+
+<Banner type="success">
+  <strong>Tip</strong>:<br/>
+  If you know your users will be querying on certain fields a lot, you can add `index: true` to a field's config which will speed up searches using that field immensely.
+</Banner>
+
+### And / Or Logic
+
+In addition to defining simple queries, you can join multiple queries together using simple AND / OR logic. Let's take the above `Post` collection for example and write a more complex query usnig AND / OR:
+
+```js
+const query = {
+  or: [ // array of OR conditions
+    {
+      color: {
+        equals: 'red',
+      },
+    },
+    {
+      and: [ // nested array of AND conditions
+        {
+          color: {
+            equals: 'white',
+          }
+        },
+        {
+          featured: {
+            equals: false,
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+Written in plain English, if the above query were passed to a `find` operation, it would translate to finding posts where either the `color` is `red` OR the `color` is `white` AND `featured` is set to false.
+
+### GraphQL Find Queries
+
+All GraphQL `find` queries support the `where` argument, which accepts queries exactly as detailed above.
+
+**For example:**
+
+```
+query {
+  Posts(where: { color: { equals: red } }) {
+    docs {
+      color
+    }
+    totalDocs
+  }
+}
+```
+
+### REST Queries
+
+With the REST API, you can use the full power of Payload queries as well but they become a bit more unwieldy the more complex that they get.
+
+Simple queries are fairly straightforward to write. To understand the syntax, you need to understand how Express and similar languages would go about parsing a complex URL search string into a JSON object. For example, the above [simple query](#simple-queries) would be parsed into a string like this:
+
+**`https://localhost:3000/api/posts?where[color][equals]=red`**
+
+This one isn't too bad, but more complex queries get unavoidably more difficult to write as query strings. For this reason, we recommend to use the extremely helpful and ubiquitous [`qs`](https://www.npmjs.com/package/qs) package to parse your JSON / object-formatted queries into query strings for use with the REST API.
+
+**For example, using fetch:**
+
+```js
+import qs from 'qs';
+
+const query = {
+  color: {
+    equals: 'red',
+  },
+  // This query could be much more complex
+  // and QS would handle it beautifully
+}
+
+const getPosts = async () => {
+  const stringifiedQuery = qs.stringify({
+    where: query // ensure that `qs` adds the `where` property, too!
+  }, { addQueryPrefix: true });
+
+  const response = await fetch(`http://localhost:3000/api/posts${stringifiedQuery}`);
+  // Continue to handle the response below...
+}
+```
+
+### Local API Queries
+
+The Local API's `find` operation accepts an object exactly how you write it. For example:
+
+```js
+const getPosts = async () => {
+  const posts = await payload.find({
+    collection: 'posts',
+    where: {
+      color: {
+        equals: 'red',
+      },
+    },
+  });
+
+  return posts;
+}
+```
