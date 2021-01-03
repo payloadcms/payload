@@ -107,7 +107,7 @@ For more about how to automatically include cookies in requests from your app to
 
 ### CSRF Protection
 
-CSRF (cross-site request forgery) attacks are common and dangerous. By using an HTTP-only cookie, Payload removes any XSS vulnerabilities, however, CSRF attacks can still be possible.
+CSRF (cross-site request forgery) attacks are common and dangerous. By using an HTTP-only cookie, Payload removes many XSS vulnerabilities, however, CSRF attacks can still be possible.
 
 For example, let's say you have a very popular app running at coolsite.com. This app allows users to manage finances and send / receive money. As Payload is using HTTP-only cookies, that means that browsers automatically will include cookies when sending requests to your domain - no matter what page created the request.
 

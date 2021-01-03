@@ -1,0 +1,93 @@
+---
+title: GraphQL Overview
+label: Overview
+order: 10
+---
+
+In addition to its REST and Local APIs, Payload ships with a fully featured and extensible GraphQL API.
+
+By default, the GraphQL API is exposed via `/api/graphql`, but you can customize this URL via specifying your `routes` within the main Payload config.
+
+The labels you provide for your Collections and Globals are used to format the GraphQL types that are created to correspond to your config. Special characters and spaces are removed.
+
+### Collections
+
+Everything that can be done to a Collection via the REST or Local API can be done with GraphQL (outside of uploading files, which is REST-only). If you have a collection as follows:
+
+```js
+const Post = {
+  slug: 'public-users',
+  auth: true, // Auth is enabled
+  labels: {
+    singular: 'Public User',
+    plural: 'Public Users',
+  },
+  fields: [
+    ...
+  ],
+}
+```
+
+**Payload will automatically open up the following queries:**
+
+| Query Name             | Operation    |
+| ---------------------- | -------------|
+| **`PublicUser`**       | `findByID` |
+| **`PublicUsers`**      | `find` |
+| **`mePublicUser`**     | `me` auth operation |
+
+**And the following mutations:**
+
+| Query Name                     | Operation    |
+| ------------------------------ | -------------|
+| **`createPublicUser`**         | `create` |
+| **`updatePublicUser`**         | `update` |
+| **`deletePublicUser`**         | `delete` |
+| **`forgotPasswordPublicUser`** | `forgotPassword` auth operation |
+| **`resetPasswordPublicUser`**  | `resetPassword` auth operation |
+| **`unlockPublicUser`**         | `unlock` auth operation |
+| **`verifyPublicUser`**         | `verify` auth operation |
+| **`loginPublicUser`**          | `login` auth operation |
+| **`logoutPublicUser`**         | `logout` auth operation |
+| **`refreshTokenPublicUser`**   | `refresh` auth operation |
+
+### Globals
+
+Globals are also fully supported. For example:
+
+```js
+const Header = {
+  slug: 'header',
+  label: 'Header',
+  fields: [
+    ...
+  ],
+}
+```
+
+**Payload will open the following query:**
+
+| Query Name             | Operation    |
+| ---------------------- | -------------|
+| **`Header`**           | `findOne`    |
+
+**And the following mutation:**
+
+| Query Name             | Operation    |
+| ---------------------- | -------------|
+| **`updateHeader`**     | `update`     |
+
+### GraphQL Playground
+
+GraphQL Playground is enabled by default for development purposes, but disabled in production. You can enable it in production by passing `graphQL.disablePlaygroundInProduction` a `false` setting in the main Payload config.
+
+You can even log in using the `login` mutation to use the Playground as an authenticated user.
+
+<Banner type="success">
+  <strong>Tip:</strong><br/>
+  To see more regarding how the above queries and mutations are used, visit your GraphQL playground (by default at <a href="http://localhost:3000/api/graphql-playground">(http://localhost:3000/api/graphql-playground)</a> while your server is running. There, you can use the "Schema" and "Docs" buttons on the right to see a ton of detail about how GraphQL operates within Payload.
+</Banner>
+
+### Query complexity limits
+
+Payload comes with a built-in query complexity limiter to prevent bad people from trying to slow down your server by running massive queries. To learn more, [click here](/docs/production/security#graphql-complexity).

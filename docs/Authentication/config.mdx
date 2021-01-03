@@ -34,6 +34,10 @@ Technically, both of these options will work for third-party integrations but th
 
 To enable API keys on a collection, set the `useAPIKey` auth option to `true`. From there, a new interface will appear in the Admin panel for each document within the collection that allows you to generate an API key for each user in the Collection.
 
+<Banner type="success">
+  User API keys are encrypted within the database, meaning that if your database is compromised, your API keys will not be.
+</Banner>
+
 ##### Authenticating via API Key
 
 To utilize your API key while interacting with the REST or GraphQL API, add the `Authorization` header.
