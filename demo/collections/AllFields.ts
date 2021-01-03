@@ -7,10 +7,10 @@ import CallToAction from '../blocks/CallToAction';
 
 const AllFields: PayloadCollectionConfig = {
   slug: 'all-fields',
-  // labels: {
-  //   singular: 'All Fields',
-  //   plural: 'All Fields',
-  // },
+  labels: {
+    singular: 'All Fields',
+    plural: 'All Fields',
+  },
   admin: {
     useAsTitle: 'text',
     preview: (doc, token) => {
