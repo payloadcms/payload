@@ -65,7 +65,13 @@ const Select: React.FC<Props> = (props) => {
     readOnly && `${baseClass}--read-only`,
   ].filter(Boolean).join(' ');
 
-  const valueToRender = options.find((option) => option.value === value);
+  let valueToRender;
+
+  if (hasMany && Array.isArray(value)) {
+    valueToRender = value.map((val) => options.find((option) => option.value === val));
+  } else {
+    valueToRender = options.find((option) => option.value === value);
+  }
 
   return (
     <div
@@ -86,7 +92,15 @@ const Select: React.FC<Props> = (props) => {
       />
       <ReactSelect
         onChange={!readOnly ? (selectedOption) => {
-          setValue(selectedOption.value);
+          if (hasMany) {
+            if (Array.isArray(selectedOption)) {
+              setValue(selectedOption.map((option) => option.value));
+            } else {
+              setValue([]);
+            }
+          } else {
+            setValue(selectedOption.value);
+          }
         } : undefined}
         value={valueToRender}
         showError={showError}
