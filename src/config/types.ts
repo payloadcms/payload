@@ -55,19 +55,6 @@ export type InitOptions = {
   onInit?: (payload: Payload) => void;
 };
 
-export type SendEmailOptions = {
-  from: string;
-  to: string;
-  subject: string;
-  html: string;
-};
-
-export type MockEmailCredentials = {
-  user: string;
-  pass: string;
-  web: string;
-};
-
 export type AccessResult = boolean | Where;
 export type Access = (args?: any) => AccessResult;
 
@@ -118,7 +105,6 @@ export type PayloadConfig = {
     },
     middleware?: any[]
   },
-  email?: EmailOptions;
   defaultDepth?: number;
   maxDepth?: number;
   rateLimit?: {
