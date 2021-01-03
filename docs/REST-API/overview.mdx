@@ -1,0 +1,49 @@
+---
+title: REST API
+label: Overview
+order: 10
+---
+
+<Banner>
+  A fully functional REST API is automatically generated from your Collection and Global configs.
+</Banner>
+
+All Payload API routes are mounted prefixed to your config's `routes.api` URL segment (default: `/api`).
+
+**REST query parameters:**
+
+- [depth](/docs/getting-started/concepts#depth) - automatically populates relationships and uploads
+- [locale](/docs/configuration/localization#retrieving-localized-docs) - retrieves document(s) in a specific locale
+- [fallback-locale](/docs/configuration/localization#retrieving-localized-docs) - specifies a fallback locale if no locale value exists
+
+## Collections
+
+Each collection is mounted using its `slug` value. For example, if a collection's slug is `users`, all corresponding routes will be mounted on `/api/users`.
+
+**All CRUD operations are exposed as follows:**
+
+| Method   | Path                        | Description                            |
+| -------- | --------------------------- | -------------------------------------- |
+| `GET`    | `/api/{collectionSlug}`     | Find paginated documents               |
+| `GET`    | `/api/{collectionSlug}/:id` | Find a specific document by ID         |
+| `POST`   | `/api/{collectionSlug}`     | Create a new document                  |
+| `PUT`    | `/api/{collectionSlug}/:id` | Update a document by ID                |
+| `DELETE` | `/api/{collectionSlug}/:id` | Delete an existing document by ID      |
+
+##### Additiional `find` query parameters
+
+The `find` endpoint supports the following additional query parameters:
+
+- [sort](/docs/queries/overview#sort) - sort by field
+- [where](/docs/queries/overview) - pass a `where` query to constrain returned documents
+- [limit](/docs/queries/pagination#pagination-controls) - limit the returned documents to a certain number
+- [page](/docs/queries/pagination#pagination-controls) - get a specfic page of documents
+
+## Globals
+
+Globals cannot be created or deleted, so there are only two REST endpoints opened:
+
+| Method   | Path                        | Description             |
+| -------- | --------------------------- | ----------------------- |
+| `GET`    | `/api/globals/{globalSlug}` | Get a global by slug    |
+| `POST`   | `/api/globals/{globalSlug}` | Update a global by slug |

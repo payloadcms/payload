@@ -1,5 +1,5 @@
 ---
-title: Queries
+title: Query Parameters
 label: Overview
 order: 10
 ---
@@ -162,6 +162,38 @@ const getPosts = async () => {
         equals: 'red',
       },
     },
+  });
+
+  return posts;
+}
+```
+
+
+## Sort
+
+Payload `find` queries support a `sort` parameter through all APIs. Pass the `name` of a top-level field to sort by that field in ascending order. Prefix the name of the field with a minus symbol ("-") to sort in descending order.
+
+**REST example:**
+**`https://localhost:3000/api/posts?sort=-createdAt`**
+
+**GraphQL example:**
+```
+query {
+  Posts(sort: "-createdAt") {
+    docs {
+      color
+    }
+  }
+}
+```
+
+**Local API example:**
+
+```js
+const getPosts = async () => {
+  const posts = await payload.find({
+    collection: 'posts',
+    sort: '-createdAt',
   });
 
   return posts;
