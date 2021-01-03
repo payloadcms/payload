@@ -11,20 +11,39 @@ import { PayloadRequest } from '../express/types';
 import InitializeGraphQL from '../graphql';
 import { Where } from '../types';
 
-type MockEmailTransport = {
-  transport?: 'mock';
-  fromName?: string;
-  fromAddress?: string;
-};
-
-type ValidEmailTransport = {
-  transport: Transporter;
-  transportOptions?: SMTPConnection.Options;
+type Email = {
   fromName: string;
   fromAddress: string;
+}
+
+export type EmailTransport = Email & {
+  transport: Transporter;
+  transportOptions?: SMTPConnection.Options;
 };
 
-export type EmailOptions = ValidEmailTransport | MockEmailTransport;
+export type EmailTransportOptions = Email & {
+  transport?: Transporter;
+  transportOptions: SMTPConnection.Options;
+};
+
+export type EmailOptions = EmailTransport | EmailTransportOptions | Email;
+
+/**
+ * type guard for EmailOptions
+ * @param emailConfig
+ */
+export function hasTransport(emailConfig: EmailOptions): emailConfig is EmailTransport {
+  return (emailConfig as EmailTransport).transport !== undefined;
+}
+
+/**
+ * type guard for EmailOptions
+ * @param emailConfig
+ */
+export function hasTransportOptions(emailConfig: EmailOptions): emailConfig is EmailTransportOptions {
+  return (emailConfig as EmailTransportOptions).transportOptions !== undefined;
+}
+
 
 export type InitOptions = {
   express?: Express;
@@ -34,19 +53,6 @@ export type InitOptions = {
   email?: EmailOptions;
   local?: boolean;
   onInit?: (payload: Payload) => void;
-};
-
-export type SendEmailOptions = {
-  from: string;
-  to: string;
-  subject: string;
-  html: string;
-};
-
-export type MockEmailCredentials = {
-  user: string;
-  pass: string;
-  web: string;
 };
 
 export type AccessResult = boolean | Where;
@@ -99,7 +105,6 @@ export type PayloadConfig = {
     },
     middleware?: any[]
   },
-  email?: EmailOptions;
   defaultDepth?: number;
   maxDepth?: number;
   rateLimit?: {

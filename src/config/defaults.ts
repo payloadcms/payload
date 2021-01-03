@@ -18,11 +18,6 @@ export const defaults = {
     scss: path.resolve(__dirname, '../admin/scss/overrides.scss'),
   },
   upload: {},
-  email: {
-    transport: 'mock',
-    fromName: 'Payload CMS',
-    fromAddress: 'cms@payloadcms.com',
-  },
   graphQL: {
     mutations: {},
     queries: {},

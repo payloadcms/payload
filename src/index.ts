@@ -106,7 +106,7 @@ export class Payload {
     }
 
     this.license = options.license;
-    this.emailOptions = { ...(options.email || {}) };
+    this.emailOptions = { ...(options.email) };
     this.secret = crypto
       .createHash('sha256')
       .update(options.secret)
