@@ -17,7 +17,7 @@ export type Arguments = {
 export type Result = string;
 
 async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
-  const { config, sendEmail: email } = this;
+  const { config, sendEmail: email, emailOptions } = this;
 
   if (!Object.prototype.hasOwnProperty.call(incomingArgs.data, 'email')) {
     throw new APIError('Missing email.', 400);
@@ -98,7 +98,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     }
 
     email({
-      from: `"${config.email.fromName}" <${config.email.fromAddress}>`,
+      from: `"${emailOptions.fromName}" <${emailOptions.fromAddress}>`,
       to: data.email,
       subject,
       html,

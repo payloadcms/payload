@@ -29,7 +29,7 @@ export type Arguments = {
 }
 
 async function create(incomingArgs: Arguments): Promise<Document> {
-  const { performFieldOperations, config } = this;
+  const { performFieldOperations, config, emailOptions } = this;
 
   let args = incomingArgs;
 
@@ -246,6 +246,7 @@ async function create(incomingArgs: Arguments): Promise<Document> {
 
   if (collectionConfig.auth && collectionConfig.auth.verify) {
     sendVerificationEmail({
+      emailOptions,
       config: this.config,
       sendEmail: this.sendEmail,
       collection: { config: collectionConfig, Model },

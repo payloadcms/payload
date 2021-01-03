@@ -20,19 +20,22 @@ async function handleTransport(transport: Transporter, email: EmailTransport): B
   return { ...email, transport };
 }
 
-export default async function buildEmail(emailConfig: EmailOptions): BuildEmailResult {
-
+const ensureConfigHasFrom = (emailConfig) => {
   if (!emailConfig.fromName || !emailConfig.fromAddress) {
     throw new InvalidConfiguration('Email fromName and fromAddress must be configured when transport is configured');
   }
+};
 
+export default async function buildEmail(emailConfig: EmailOptions): BuildEmailResult {
   if (hasTransport(emailConfig) && emailConfig.transport) {
+    ensureConfigHasFrom(emailConfig);
     const email = { ...emailConfig };
     const { transport } : {transport: Transporter} = emailConfig;
     return handleTransport(transport, email);
   }
 
   if (hasTransportOptions(emailConfig) && emailConfig.transportOptions) {
+    ensureConfigHasFrom(emailConfig);
     const email = { ...emailConfig } as EmailTransport;
     const transport = nodemailer.createTransport(emailConfig.transportOptions);
     return handleTransport(transport, email);

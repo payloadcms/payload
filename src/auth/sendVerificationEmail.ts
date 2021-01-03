@@ -1,6 +1,6 @@
 import { Payload } from '..';
 import { PayloadRequest } from '../express/types';
-import { Config } from '../config/types';
+import { Config, EmailOptions } from '../config/types';
 import { Collection } from '../collections/config/types';
 import { User, VerifyConfig } from './types';
 
@@ -13,12 +13,14 @@ type Args = {
   req: PayloadRequest
   token: string
   sendEmail: Payload['sendEmail']
+  emailOptions: EmailOptions
 }
 
 async function sendVerificationEmail(args: Args): Promise<void> {
   // Verify token from e-mail
   const {
     config,
+    emailOptions,
     sendEmail,
     collection: {
       config: collectionConfig,
@@ -60,7 +62,7 @@ async function sendVerificationEmail(args: Args): Promise<void> {
     }
 
     sendEmail({
-      from: `"${config.email.fromName}" <${config.email.fromAddress}>`,
+      from: `"${emailOptions.fromName}" <${emailOptions.fromAddress}>`,
       to: user.email,
       subject,
       html,
