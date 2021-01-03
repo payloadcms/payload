@@ -4,4 +4,84 @@ label: Collections
 order: 20
 ---
 
-Collections
+Collections access control is specified inside a collection config.
+
+## Available Functions
+
+| Function     | Allows/Denies Access                      |
+|--------------|-------------------------------------------|
+| **create** | creating a collection document            |
+| **read**   | reading a collection document             |
+| **update** | updating a collection document            |
+| **delete** | deleting a collection document            |
+| **admin**  | viewing collection in the admin interface |
+
+```js
+// Collection config
+module.exports = {
+  slug: 'public-user',
+  // highlight-start
+  access: {
+    create: () => true,
+    read: () => true,
+    update: () => true,
+    delete: () => true,
+    admin: () => true,
+  },
+  // highlight-end
+}
+```
+
+### Create
+
+Create access functions return a boolean result which allows/denies access
+
+#### Arguments
+
+The function receives one `args` argument that contains the following properties:
+
+| Option    | Description                                                                                         |
+|-----------|-----------------------------------------------------------------------------------------------------|
+| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+
+### Read
+
+Read access functions can return a boolean result or optionally return a [where constraint](/docs/queries/overview).
+
+#### Arguments
+
+The function receives one `args` argument that contains the following properties:
+
+| Option    | Description                                                                                         |
+|-----------|-----------------------------------------------------------------------------------------------------|
+| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+| **`id`**  | `id` of document requested. Value is `undefined` if not querying for specific ID                    |
+
+### Update
+
+Update access functions can return a boolean result or optionally return a [where constraint](/docs/queries/overview).
+
+#### Arguments
+
+The function receives one `args` argument that contains the following properties:
+
+| Option    | Description                                                                                         |
+|-----------|-----------------------------------------------------------------------------------------------------|
+| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+
+### Delete
+
+Delete access functions can return a boolean result or optionally return a [where constraint](/docs/queries/overview).
+
+#### Arguments
+
+The function receives one `args` argument that contains the following properties:
+
+| Option    | Description                                                                                         |
+|-----------|-----------------------------------------------------------------------------------------------------|
+| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+| **`id`**  | `id` of the document being deleted                                                                  |
+
+### Admin
+
+_TODO: Find an example of this_

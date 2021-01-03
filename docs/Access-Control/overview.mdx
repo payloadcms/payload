@@ -6,46 +6,17 @@ order: 10
 
 Access can be configured at a Collection-level or field-level within your Collection configuration.
 
-Talk about how you can access the user from the req
-
-Talk about how you can return either a boolean, or in certain access functions, a `where` query constraint. This will be difficult to understand soo we should be very descriptive and low-level.
-
-Can't return a `where` for a create, because it doesn't make sensitive
+Access control functions return a boolean result in most cases. Certain functions also support returning a [where constraint object](/docs/queries/overview)
 
 **Default access control requires a logged in user to do anything.**
 
 Local API skips access control by default, but can be enabled if you pass a user to the operation.
 
-```js
-// Collection config
-module.exports = {
-  slug: 'public-user',
-  // highlight-start
-  access: {
-    create: () => true,
-    read: () => true,
-    update: () => true,
-    delete: () => true,
-    admin: () => true,
-  },
-  // highlight-end
-  fields: [
-    {
-      name: 'lockedDownField',
-      label: 'Locked Down',
-      type: 'text'
-      // highlight-start
-      access: {
-        create: () => true,
-        read: () => true,
-        update: () => true,
-        delete: () => true,
-      },
-      // highlight-end
-    };
-  ],
-}
-```
+## Access Control Types
+
+- [Collections](/docs/access-control/collections)
+- [Fields](/docs/access-control/fields)
+- [Globals](/docs/access-control/globals)
 
 ### Collections
 
