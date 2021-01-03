@@ -1,6 +1,6 @@
 ---
 title: Uploads
-label: Config
+label: Overview
 order: 10
 ---
 
@@ -19,7 +19,7 @@ order: 10
 
 **By simply enabling Upload functionality on a Collection, Payload will automatically transform your Collection into a robust file management / storage solution. The following modifications will be made:**
 
-1. `filename`, `mimeType`, and `filesize` fields will be automatically added to your Collection. Optionally, if you pass `imageSizes` to your Collection's Upload config, a [`sizes` array](#image-sizes) will also be added containing auto-resized image sizes and filenames.
+1. `filename`, `mimeType`, and `filesize` fields will be automatically added to your Collection. Optionally, if you pass `imageSizes` to your Collection's Upload config, a [`sizes`](#image-sizes) array will also be added containing auto-resized image sizes and filenames.
 1.  The Admin panel will modify its built-in `List` component to show a thumbnail gallery of your Uploads instead of the default Table view
 1. The Admin panel will modify its `Edit` view(s) to add a new set of corresponding Upload UI which will allow for file upload
 1. The `create`, `update`, and `delete` Collection operations will be modified to support file upload, re-upload, and deletion
@@ -100,10 +100,27 @@ export default buildConfig({
 });
 ```
 
+### Image Sizes
 
-Need to cover:
+If you specify an array of `imageSizes` to your `upload` config, Payload will automatically crop and resize your uploads to fit each of the sizes specified by your config.
 
-1. How to upload (multipart/form-data)
-1. Uploading is REST-only
-1. Access control
-1. Image sizes
+The Payload Admin panel will also automatically display all available files, including width, height, and filesize, for each of your uploaded files.
+
+Behind the scenes, Payload relies on [`sharp`](https://sharp.pixelplumbing.com/api-resize#resize) to perform its image resizing. You can specify additional options for `sharp` to use while resizing your images.
+
+### Uploading Files
+
+<Banner type="warning">
+  <strong>Important:</strong><br/>
+  Uploading files is currently only possible through the REST API due to how GraphQL works. It's difficult and fairly nonsensical to support uploading files through GraphQL.
+</Banner>
+
+To upload a file, use your collection's [`create`](/docs/rest-api/overview#collections) endpoint. Send it all the data that your Collection requires, as well as a `file` key containing the file that you'd like to upload.
+
+Send your request as a `multipart/form-data` request, using [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) if possible.
+
+[Here is a walkthrough](https://muffinman.io/blog/uploading-files-using-fetch-multipart-form-data/) detailing how to upload files as `multipart/form-data` using React.
+
+### Access Control
+
+All files that are uploaded to each Collection automatically support the `read` [Access Control](/docs/access-control/overview) function from the Collection itself. You can use this to control who should be allowed to see your uploads, and who should not.

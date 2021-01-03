@@ -1,5 +1,5 @@
 ---
-title: Query Parameters
+title: Querying your Documents
 label: Overview
 order: 10
 ---
@@ -35,12 +35,12 @@ const Post = {
 }
 ```
 
-You may eventually have a lot of documents within this Collection. If you wanted to find only documents with `color` equal to `red`, you could write a query as follows:
+You may eventually have a lot of documents within this Collection. If you wanted to find only documents with `color` equal to `mint`, you could write a query as follows:
 
 ```js
 const query = {
   color: { // property name to filter on
-    equals: 'red', // operator to use and value to compare against
+    equals: 'mint', // operator to use and value to compare against
   },
 }
 ```
@@ -64,7 +64,7 @@ The above example demonstrates a simple query but you can get much more complex.
 
 <Banner type="success">
   <strong>Tip</strong>:<br/>
-  If you know your users will be querying on certain fields a lot, you can add `index: true` to a field's config which will speed up searches using that field immensely.
+  If you know your users will be querying on certain fields a lot, you can add <strong>index: true</strong> to a field's config which will speed up searches using that field immensely.
 </Banner>
 
 ### And / Or Logic
@@ -76,7 +76,7 @@ const query = {
   or: [ // array of OR conditions
     {
       color: {
-        equals: 'red',
+        equals: 'mint',
       },
     },
     {
@@ -97,7 +97,7 @@ const query = {
 }
 ```
 
-Written in plain English, if the above query were passed to a `find` operation, it would translate to finding posts where either the `color` is `red` OR the `color` is `white` AND `featured` is set to false.
+Written in plain English, if the above query were passed to a `find` operation, it would translate to finding posts where either the `color` is `mint` OR the `color` is `white` AND `featured` is set to false.
 
 ### GraphQL Find Queries
 
@@ -107,7 +107,7 @@ All GraphQL `find` queries support the `where` argument, which accepts queries e
 
 ```
 query {
-  Posts(where: { color: { equals: red } }) {
+  Posts(where: { color: { equals: mint } }) {
     docs {
       color
     }
@@ -122,7 +122,7 @@ With the REST API, you can use the full power of Payload queries as well but the
 
 Simple queries are fairly straightforward to write. To understand the syntax, you need to understand how Express and similar languages would go about parsing a complex URL search string into a JSON object. For example, the above [simple query](#simple-queries) would be parsed into a string like this:
 
-**`https://localhost:3000/api/posts?where[color][equals]=red`**
+**`https://localhost:3000/api/posts?where[color][equals]=mint`**
 
 This one isn't too bad, but more complex queries get unavoidably more difficult to write as query strings. For this reason, we recommend to use the extremely helpful and ubiquitous [`qs`](https://www.npmjs.com/package/qs) package to parse your JSON / object-formatted queries into query strings for use with the REST API.
 
@@ -133,7 +133,7 @@ import qs from 'qs';
 
 const query = {
   color: {
-    equals: 'red',
+    equals: 'mint',
   },
   // This query could be much more complex
   // and QS would handle it beautifully
@@ -159,7 +159,7 @@ const getPosts = async () => {
     collection: 'posts',
     where: {
       color: {
-        equals: 'red',
+        equals: 'mint',
       },
     },
   });
