@@ -49,17 +49,251 @@ const afterChangeHook = async ({ req: { payload }}) => {
 }
 ```
 
+### Local options available
+
+You can specify more options within the Local API vs. REST or GraphQL due to the server-only context that they are executed in.
+
+| Local Option         | Description  |
+| -------------------- | ------------ |
+| `collection`         | Required for Collection operations. Specifies the Collection slug to operate against. |
+| `data`               | The data to use within the operation. Required for `create`, `update`. |
+| `depth`              | [Control auto-population](/docs/getting-started/concepts#depth) of nested relationship and upload fields. |
+| `locale`             | Specify [locale](/docs/configuration/localization) for any returned documents. |
+| `fallbackLocale`     | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents. |
+| `overrideAccess`     | Skip access control. By default, this property is set to false. |
+| `user`               | If you re-enable access control, you can specify a user to use against the access control checks. |
+| `showHiddenFields`   | Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config. |
+
+*There are more options available on an operation by operation basis outlined below.*
+
+<Banner type="warning">
+  <strong>Note:</strong><br/>
+  By default, all access control checks are disabled in the Local API, but you can re-enable them if you'd like, as well as pass a specific user to run the operation with.
+</Banner>
+
 ## Collections
 
 The following Collection operations are available through the Local API:
 
-**`create`**
+#### Create
 
 ```js
-import { }
+// The created Post document is returned
+const post = await payload.create({
+  collection: 'posts', // required
+  data: { // required
+    title: 'sure',
+    description: 'maybe',
+  },
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUserDoc,
+  overrideAccess: true,
+  showHiddenFields: false,
+
+  // If creating verification-enabled auth doc,
+  // you can optionally disable the email that is auto-sent
+  disableVerificationEmail: true,
+})
 ```
 
+#### Find
 
-- Access control
-- Providing a user
+```js
+// Result will be a paginated set of Posts.
+// See /docs/queries/pagination for more.
+const result = await payload.find({
+  collection: 'posts', // required
+  depth: 2,
+  page: 1,
+  limit: 10,
+  where: {} // pass a `where` query here
+  sort: '-title',
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
 
+#### Find by ID
+
+```js
+// Result will be a Post document.
+const result = await payload.findByID({
+  collection: 'posts', // required
+  id: '507f1f77bcf86cd799439011', // required
+  depth: 2,
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+#### Update
+
+```js
+// Result will be the updated Post document.
+const result = await payload.update({
+  collection: 'posts', // required
+  id: '507f1f77bcf86cd799439011', // required
+  data: { // required
+    title: 'sure',
+    description: 'maybe',
+  },
+  depth: 2,
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+#### Delete
+
+```js
+// Result will be the now-deleted Post document.
+const result = await payload.delete({
+  collection: 'posts', // required
+  id: '507f1f77bcf86cd799439011', // required
+  depth: 2,
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+## Auth Operations
+
+If a collection has [`Authentication`](/docs/authentication/overview) enabled, additional Local API operations will be available:
+
+#### Login
+
+```js
+// result will be formatted as follows:
+// {
+//   token: 'o38jf0q34jfij43f3f...', // JWT used for auth
+//   user: { ... } // the user document that just logged in
+//   exp: 1609619861 // the UNIX timestamp when the JWT will expire
+// }
+
+const result = await payload.login({
+  collection: 'users', // required
+  data: { // required
+    email: 'dev@payloadcms.com',
+    password: 'rip',
+  },
+  req: req, // pass an Express `req` which will be provided to all hooks
+  res: res, // used to automatically set an HTTP-only auth cookie
+  depth: 2,
+  locale: 'en',
+  fallbackLocale: false,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+#### Forgot Password
+
+```js
+// Returned token will allow for a password reset
+const token = await payload.forgotPassword({
+  collection: 'users', // required
+  data: { // required
+    email: 'dev@payloadcms.com',
+  },
+  req: req, // pass an Express `req` which will be provided to all hooks
+})
+```
+
+#### Reset Password
+
+```js
+// Result will be formatted as follows:
+// {
+//   token: 'o38jf0q34jfij43f3f...', // JWT used for auth
+//   user: { ... } // the user document that just logged in
+// }
+const result = await payload.forgotPassword({
+  collection: 'users', // required
+  data: { // required
+    token: 'afh3o2jf2p3f...', // the token generated from the forgotPassword operation
+  },
+  req: req, // pass an Express `req` which will be provided to all hooks
+  res: res, // used to automatically set an HTTP-only auth cookie
+})
+```
+
+#### Unlock
+
+```js
+// Returned result will be a boolean representing success or failure
+const result = await payload.unlock({
+  collection: 'users', // required
+  data: { // required
+    email: 'dev@payloadcms.com',
+  },
+  req: req, // pass an Express `req` which will be provided to all hooks
+  overrideAccess: true,
+})
+```
+
+#### Verify
+
+```js
+// Returned result will be a boolean representing success or failure
+const result = await payload.verify({
+  collection: 'users', // required
+  token: 'afh3o2jf2p3f...', // the token saved on the user as `_verificationToken`
+})
+```
+
+## Globals
+
+The following Global operations are available through the Local API:
+
+#### Find
+
+```js
+// Result will be the Header Global.
+const result = await payload.findGlobal({
+  global: 'header', // required
+  depth: 2,
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+#### Update
+
+```js
+// Result will be the updated Header Global.
+const result = await payload.updateGlobal({
+  global: 'header', // required
+  data: { // required
+    nav: [
+      {
+        url: 'https://google.com',
+      },
+      {
+        url: 'https://payloadcms.com',
+      },
+    ],
+  },
+  depth: 2,
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
