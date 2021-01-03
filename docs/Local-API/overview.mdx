@@ -1,10 +1,64 @@
 ---
-title: Server-Side Operations
+title: Local API
 label: Overview
 order: 10
 ---
 
-Talk about how to run server-side operations.
+The Payload Local API gives you the ability to execute the same operations that are available through REST and GraphQL within Node, directly on your server. Here, you don't need to deal with server latency or network speed whatsoever and can interact directly with your database.
+
+<Banner type="success">
+  <strong>Tip:</strong><br/>
+  The Local API is incredibly powerful when used with server-side rendering app frameworks like NextJS. With other headless CMS, you need to request your data from third-party servers which can add significant loading time to your server-rendered pages. With Payload, you don't have to leave your server to gather the data you need. It can be incredibly fast and is definitely a game changer.
+</Banner>
+
+Here are some common examples of how you can use the Local API:
+
+- Seeding data via Node seed scripts that you write and maintain
+- Opening custom Express routes which feature additional functionality but still rely on Payload
+- Within access control and hook functions
+
+### Accessing payload
+
+You can gain access to the currently running `payload` object via two ways:
+
+##### Importing it
+
+You can import or require `payload` into your own files after it's been initialized, but you need to make sure that your `import` / `require` statements come **after** you call `payload.init()`—otherwise Payload won't have been initialized yet. That might be obvious. To us, it's usually not.
+
+Example:
+```js
+import payload from 'payload';
+
+const afterChangeHook = async () => {
+  const posts = await payload.find({
+    collection: 'posts',
+  });
+}
+```
+
+##### Accessing from the `req`
+
+Payload is available anywhere you have access to the Express `req` - including within your access control and hook functions.
+
+Example:
+```js
+const afterChangeHook = async ({ req: { payload }}) => {
+  const posts = await payload.find({
+    collection: 'posts',
+  });
+}
+```
+
+## Collections
+
+The following Collection operations are available through the Local API:
+
+**`create`**
+
+```js
+import { }
+```
+
 
 - Access control
 - Providing a user
