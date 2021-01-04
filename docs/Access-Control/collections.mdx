@@ -8,8 +8,8 @@ Collections access control is specified with functions inside a collection confi
 
 ## Available Functions
 
-| Function     | Allows/Denies Access                      |
-|--------------|-------------------------------------------|
+| Function   | Allows/Denies Access                      |
+| ---------- | ----------------------------------------- |
 | **create** | creating a collection document            |
 | **read**   | reading a collection document             |
 | **update** | updating a collection document            |
@@ -19,7 +19,7 @@ Collections access control is specified with functions inside a collection confi
 ```js
 // Collection config
 module.exports = {
-  slug: 'public-user',
+  slug: "public-user",
   // highlight-start
   access: {
     create: () => true,
@@ -29,7 +29,7 @@ module.exports = {
     admin: () => true,
   },
   // highlight-end
-}
+};
 ```
 
 ### Create
@@ -41,7 +41,7 @@ Create access functions return a boolean result which allows/denies access to cr
 The function receives one `args` argument that contains the following properties:
 
 | Option    | Description                                                                                         |
-|-----------|-----------------------------------------------------------------------------------------------------|
+| --------- | --------------------------------------------------------------------------------------------------- |
 | **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
 
 ### Read
@@ -53,7 +53,7 @@ Read access functions can return a boolean result or optionally return a [where 
 The function receives one `args` argument that contains the following properties:
 
 | Option    | Description                                                                                         |
-|-----------|-----------------------------------------------------------------------------------------------------|
+| --------- | --------------------------------------------------------------------------------------------------- |
 | **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
 | **`id`**  | `id` of document requested. Value is `undefined` if not querying for specific ID                    |
 
@@ -66,7 +66,7 @@ Update access functions can return a boolean result or optionally return a [wher
 The function receives one `args` argument that contains the following properties:
 
 | Option    | Description                                                                                         |
-|-----------|-----------------------------------------------------------------------------------------------------|
+| --------- | --------------------------------------------------------------------------------------------------- |
 | **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
 
 ### Delete
@@ -78,7 +78,7 @@ Delete access functions can return a boolean result or optionally return a [wher
 The function receives one `args` argument that contains the following properties:
 
 | Option    | Description                                                                                         |
-|-----------|-----------------------------------------------------------------------------------------------------|
+| --------- | --------------------------------------------------------------------------------------------------- |
 | **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
 | **`id`**  | `id` of the document being deleted                                                                  |
 
@@ -91,5 +91,5 @@ Admin access functions determine whether or not a user can access the admin UI.
 It receives one `args` argument that contains the following properties:
 
 | Option    | Description                                                                                         |
-|-----------|-----------------------------------------------------------------------------------------------------|
+| --------- | --------------------------------------------------------------------------------------------------- |
 | **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
