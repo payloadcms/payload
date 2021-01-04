@@ -4,7 +4,7 @@ label: Collections
 order: 20
 ---
 
-Collections access control is specified inside a collection config.
+Collections access control is specified with functions inside a collection config.
 
 ## Available Functions
 
@@ -34,7 +34,7 @@ module.exports = {
 
 ### Create
 
-Create access functions return a boolean result which allows/denies access
+Create access functions return a boolean result which allows/denies access to create a document
 
 #### Arguments
 
@@ -84,4 +84,12 @@ The function receives one `args` argument that contains the following properties
 
 ### Admin
 
-_TODO: Find an example of this_
+Admin access functions determine whether or not a user can access the admin UI.
+
+** Only applicable on collections that have auth **
+
+It receives one `args` argument that contains the following properties:
+
+| Option    | Description                                                                                         |
+|-----------|-----------------------------------------------------------------------------------------------------|
+| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |

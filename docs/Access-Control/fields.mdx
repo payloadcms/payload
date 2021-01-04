@@ -4,4 +4,71 @@ label: Fields
 order: 30
 ---
 
-Fields
+Field access control is specified with functions inside a field's config. The functions return a boolean value to allow or deny access for the specified operation.
+
+## Available Functions
+
+| Function   | Allows/Denies Access                    |
+| ---------- | --------------------------------------- |
+| **create** | setting a field's value on new document |
+| **read**   | reading a field's value                 |
+| **update** | updating a field's value                |
+
+```js
+// Collection config
+module.exports = {
+  slug: 'public-user',
+  fields: [
+    {
+      name: 'lockedDownField',
+      label: 'Locked Down',
+      type: 'text'
+      // highlight-start
+      access: {
+        create: () => true,
+        read: () => true,
+        update: () => true,
+      },
+      // highlight-end
+    };
+  ],
+}
+```
+
+### Create
+
+Create access functions return a boolean result which allows or denies the ability to set a field's value when creating a new document
+
+#### Arguments
+
+The function receives one `args` argument that contains the following properties:
+
+| Option    | Description                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------------- |
+| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+
+### Read
+
+Read access functions return a boolean result which allows or denies the ability to read a field's value
+
+#### Arguments
+
+The function receives one `args` argument that contains the following properties:
+
+| Option    | Description                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------------- |
+| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+| **`id`**  | `id` of the document being read                                                                     |
+
+### Update
+
+Update access functions return a boolean result which allows or denies the ability to update a field's value
+
+#### Arguments
+
+The function receives one `args` argument that contains the following properties:
+
+| Option    | Description                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------------- |
+| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+| **`id`**  | `id` of the document being updated                                                                     |
