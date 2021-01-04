@@ -4,4 +4,48 @@ label: Globals
 order: 40
 ---
 
-Globals
+Globals access control is specified with functions inside a globals config. The functions return a boolean value to allow or deny access for the specified operation.
+
+## Available Functions
+
+| Function   | Allows/Denies Access       |
+| ---------- | -------------------------- |
+| **read**   | reading a global document  |
+| **update** | updating a global document |
+
+```js
+// Collection config
+module.exports = {
+  slug: "public-user",
+  // highlight-start
+  access: {
+    read: () => true,
+    update: () => true,
+  },
+  // highlight-end
+};
+```
+
+### Read
+
+A read access function allows or denies the ability to read a global. The function must return a boolean result.
+
+#### Arguments
+
+The function receives one `args` argument that contains the following properties:
+
+| Option    | Description                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------------- |
+| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+
+### Update
+
+An update access function allows or denies the ability to update a global. The function must return a boolean result.
+
+#### Arguments
+
+The function receives one `args` argument that contains the following properties:
+
+| Option    | Description                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------------- |
+| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
