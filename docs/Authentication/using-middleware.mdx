@@ -8,7 +8,9 @@ Because Payload uses your existing Express server, you are free to add whatever 
 
 This approach has a ton of benefits - it's great for isolation of concerns and limiting scope, but it also means that your additional routes won't have access to Payload's user authentication.
 
-If you would like to make use of Payload's built-in authentication within your custom routes, you can to add Payload's authentication middleware.
+<Banner type="success">
+  You can make full use of Payload's built-in authentication within your own custom Express endpoints by adding Payload's authentication middleware.
+</Banner>
 
 Example in `server.js`:
 ```js
@@ -42,7 +44,3 @@ app.listen(3000, async () => {
 });
 
 ```
-
-<Banner type="success">
-  With Payload's auth middleware, you can make full use of Payload's authentication features within your own Express endpoints.
-</Banner>

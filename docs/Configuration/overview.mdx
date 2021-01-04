@@ -132,3 +132,9 @@ But, you can specify where your Payload config is located as well as what it's n
 	}
 }
 ```
+
+### Developing within the Config
+
+The Payload config itself, as well as all files that it requires or imports, are run through Babel. TypeScript and all common ES6 features are fully supported. To see the Babel config that is used to parse Payload configs, check out the Payload source code [here](https://github.com/payloadcms/payload/blob/master/src/babel.config.js).
+
+Payload comes with `isomorphic-fetch` installed which means that even in Node, you can use the `fetch` API just as you would within the browser. No need to import `axios` or similar, unless you want to!

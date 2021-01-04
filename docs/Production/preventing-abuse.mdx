@@ -1,0 +1,16 @@
+---
+title: Preventing Production API Abuse
+label: Preventing Abuse
+order: 20
+---
+
+- Rate limiting - talk about config, and about how if behind proxy, need `app.set('trust proxy', true)`, otherwise all traffic is treated as 127.0.0.1
+- GraphQL Complexity
+- Limits - ?? this might not be a thing but it should be if it's not. We should limit the max number of records returned per page via config setting.
+- Max Depth - recursive relationships, could create infinite loops with no max depth. this should be as small as possible without interrupting dev experience
+- CSRF - link to config section with a quick blurb about how CSRF prevention is good for security
+- CORS - link to config section with a quick blurb about how CORS restrictions are good for security
+
+### Limiting GraphQL Complexity
+
+^^ Keep this header here -> it is being linked to
