@@ -27,7 +27,7 @@ When you initialize Payload, you provide it with a `secret` property. This prope
 Because _**you**_ are in complete control of who can do what with your data, you should double and triple-check that you wield that power responsibly before deploying to Production.
 
 <Banner type="error">
-  <strong>By default, all Access Control functions require that a user is successfully logged in to Payload to create, read, update, or delete data.</strong> But, if you allow public user registration, for example, you will want to make sure that your access control functions are more strict - permitting <strong>only appropriate users</strong> to perform appropriate actions accordingly.
+  <strong>By default, all Access Control functions require that a user is successfully logged in to Payload to create, read, update, or delete data.</strong> But, if you allow public user registration, for example, you will want to make sure that your access control functions are more strict - permitting <strong>only appropriate users</strong> to perform appropriate actions.
 </Banner>
 
 ##### Building the Admin panel
@@ -46,7 +46,7 @@ Before running in Production, you need to have built a production-ready copy of 
   },
 ```
 
-Then, to build Payload, you would run `npm run build` in your project folder.
+Then, to build Payload, you would run `npm run build` in your project folder. A production-ready Admin bundle will be created in the `build` directory.
 
 ##### Setting Node to Production
 
@@ -68,22 +68,22 @@ If you are using a [persistent filesystem-based cloud host](#persistent-vs-ephem
 
 ##### Letting someone else do it
 
-Alternatively, you can rely on a third-party MongoDB host such as [MongoDB Atlas](https://www.mongodb.com/). With Atlas or a similar cloud provider, you can trust them to take care of your database's availability, security, redundancy, and backups. Scaling is often easier to accomplish with cloud MongoDB hosts.
+Alternatively, you can rely on a third-party MongoDB host such as [MongoDB Atlas](https://www.mongodb.com/). With Atlas or a similar cloud provider, you can trust them to take care of your database's availability, security, redundancy, and backups.
 
 ## File storage
 
-If you are using Payload to manage file uploads, you need to consider where your uploaded files will be permanently stored. If not, then this section does not impact your app whatsoever in Production.
+If you are using Payload to [manage file uploads](/docs/upload/overview), you need to consider where your uploaded files will be permanently stored. If you do not use Payload for file uploads, then this section does not impact your app whatsoever.
 
 #### Persistent vs Ephemeral Filesystems
 
-Some cloud app hosts such as [Heroku](https://heroku.com) use `ephemeral` file systems, which means that any filesystem changes while your server is running only last until it restarts or shuts down. Heroku and similar providers schedule restarts and shutdowns without your control, meaning your uploads will accidentally disappear without any way to get them back.
+Some cloud app hosts such as [Heroku](https://heroku.com) use `ephemeral` file systems, which means that any files uploaded to your server only last until the server restarts or shuts down. Heroku and similar providers schedule restarts and shutdowns without your control, meaning your uploads will accidentally disappear without any way to get them back.
 
 Alternatively, persistent filesystems will never delete your files and can be trusted to reliably host uploads perpetually.
 
 **Popular cloud providers with ephemeral filesystems:**
 
-- DigitalOcean Apps
 - Heroku
+- DigitalOcean Apps
 
 **Popular cloud providers with persistent filesystems:**
 
