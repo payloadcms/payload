@@ -4,33 +4,40 @@ label: Overview
 order: 10
 ---
 
-Access can be configured at a Collection-level or field-level within your Collection configuration.
+Access control within Payload is extremely powerful while remaining easy and intuitive to manage. Declaring who should have access to what documents is no more complex than writing a simple JavaScript function that either returns a `boolean` or a [`query`](/docs/queries/overview) constraint to restrict which documents users can interact with.
 
-Access control functions return a boolean result in most cases. Certain functions also support returning a [where constraint object](/docs/queries/overview)
+**Example use cases:**
 
-**Default access control requires a logged in user to do anything.**
+- Allowing anyone `read` access to all `Post`s
+- Only allowing public access to `Post`s where a `status` field is equal to `published`
+- Giving only `User`s with a `role` field equal to `admin` the ability to delete `Page`(s)
+- Allowing anyone to create `ContactSubmission`s, but only logged in users to `read`, `update` or `delete` them
+- Restricting a `User` to only be able to see their own `Order`(s), but no others
+- Allowing `User`s that belong to a certain `Organization` to access only that `Organization`'s `Resource`s
 
-Local API skips access control by default, but can be enabled if you pass a user to the operation.
+### Default Settings
 
-## Access Control Types
+**By default, all Collections and Globals require that a user is logged in to be able to interact in any way.** The default Access Control function evaluates the `user` from the Express `req` and returns `true` if a user is logged in, and `false` if not.
+
+**Default Access function:**
+
+```js
+const defaultPayloadAccess = ({ req: { user } }) => {
+  // Return `true` if a user is found
+  // and `false` if it is undefined or null
+  return Boolean(user);
+}
+```
+
+<Banner type="success">
+  <strong>Note:</strong><br/>
+  In the Local API, all Access Control functions are skipped by default, allowing your server to do whatever it needs. But, you can opt back in by setting the option <strong>overrideAccess</strong> to <strong>true</strong>.
+</Banner>
+
+### Access Control Types
+
+You can manage access within Payload on three different levels:
 
 - [Collections](/docs/access-control/collections)
 - [Fields](/docs/access-control/fields)
 - [Globals](/docs/access-control/globals)
-
-### Collections
-
-Talk about collection-level access control here.
-
-
-### Globals
-
-Talk about global access control here.
-
-### Fields
-
-Talk about field-level access control here.
-
-### Admin
-
-Talk about how to restrict collections' access to the Admin panel here.

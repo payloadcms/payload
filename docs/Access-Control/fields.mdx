@@ -4,30 +4,30 @@ label: Fields
 order: 30
 ---
 
-Field access control is specified with functions inside a field's config. The functions return a boolean value to allow or deny access for the specified operation.
+Field Access Control is specified with functions inside a field's config. All field-level Controls return a boolean value to allow or deny access for the specified operation. No field-level Access Controls support returning query constraints.
 
-## Available Functions
+## Available Controls
 
-| Function   | Allows/Denies Access                    |
-| ---------- | --------------------------------------- |
-| **create** | setting a field's value on new document |
-| **read**   | reading a field's value                 |
-| **update** | updating a field's value                |
+| Function                 | Purpose |
+| ------------------------ | ------- |
+| **[`create`](#create)**  | Allows or denies the ability to set a field's value when creating a new document |
+| **[`read`](#read)**      | Allows or denies the ability to read a field's value |
+| **[`update`](#update)**  | Allows or denies the ability to update a field's value |
 
+**Example Collection config:**
 ```js
-// Collection config
-module.exports = {
-  slug: 'public-user',
+export default {
+  slug: 'posts',
   fields: [
     {
-      name: 'lockedDownField',
-      label: 'Locked Down',
+      name: 'title',
+      label: 'Title',
       type: 'text'
       // highlight-start
       access: {
-        create: () => true,
-        read: () => true,
-        update: () => true,
+        create: ({ req: { user } }) => { ... },
+        read: ({ req: { user } }) => { ... },
+        update: ({ req: { user } }) => { ... },
       },
       // highlight-end
     };
@@ -37,38 +37,32 @@ module.exports = {
 
 ### Create
 
-Create access functions return a boolean result which allows or denies the ability to set a field's value when creating a new document
+Returns a boolean which allows or denies the ability to set a field's value when creating a new document. If `false` is returned, any passed values will be discarded.
 
-#### Arguments
+**Available arguments:**
 
-The function receives one `args` argument that contains the following properties:
-
-| Option    | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
-| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+| Option    | Description |
+| --------- | ----------- |
+| **`req`** | The Express `request` object containing the currently authenticated `user` |
 
 ### Read
 
-Read access functions return a boolean result which allows or denies the ability to read a field's value
+Returns a boolean which allows or denies the ability to read a field's value. If `false`, the entire property is omitted from the resulting document.
 
-#### Arguments
+**Available arguments:**
 
-The function receives one `args` argument that contains the following properties:
-
-| Option    | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
-| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
-| **`id`**  | `id` of the document being read                                                                     |
+| Option    | Description |
+| --------- | ----------- |
+| **`req`** | The Express `request` object containing the currently authenticated `user` |
+| **`id`**  | `id` of the document being read |
 
 ### Update
 
-Update access functions return a boolean result which allows or denies the ability to update a field's value
+Returns a boolean which allows or denies the ability to update a field's value. If `false` is returned, any passed values will be discarded.
 
-#### Arguments
+**Available arguments:**
 
-The function receives one `args` argument that contains the following properties:
-
-| Option    | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
-| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
-| **`id`**  | `id` of the document being updated                                                                     |
+| Option    | Description |
+| --------- | ----------- |
+| **`req`** | The Express `request` object containing the currently authenticated `user` |
+| **`id`**  | `id` of the document being updated |

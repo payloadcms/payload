@@ -4,29 +4,37 @@ label: Collections
 order: 20
 ---
 
-Collections access control is specified with functions inside a collection config.
+You can define Collection-level Access Control within each Collection's `access` property.
 
-## Available Functions
+## Available Controls
 
-| Function   | Allows/Denies Access                      |
-| ---------- | ----------------------------------------- |
-| **create** | creating a collection document            |
-| **read**   | reading a collection document             |
-| **update** | updating a collection document            |
-| **delete** | deleting a collection document            |
-| **admin**  | viewing collection in the admin interface |
+| Function                 | Allows/Denies Access |
+| ------------------------ | -------------------- |
+| **[`create`](#create)**  | Used in the `create` operation |
+| **[`read`](#read)**      | Used in the `find` and `findByID` operations |
+| **[`update`](#update)**  | Used in the `update` operation |
+| **[`delete`](#delete)**  | Used in the `delete` operation |
 
+#### Auth-enabled Controls
+
+If a Collection supports [`Authentication`](/docs/authentication/overview), the following Access Controls become available:
+
+| Function                | Allows/Denies Access |
+| ----------------------- | -------------------- |
+| **[`admin`](#admin)**   | Used to restrict access to the Payload Admin panel |
+| **[`unlock`](#unlock)** | Used to restrict which users can access the `unlock` operation |
+
+**Example Collection config:**
 ```js
-// Collection config
-module.exports = {
-  slug: "public-user",
+export default {
+  slug: "posts",
   // highlight-start
   access: {
-    create: () => true,
-    read: () => true,
-    update: () => true,
-    delete: () => true,
-    admin: () => true,
+    create: ({ req: { user } }) => { ... },
+    read: ({ req: { user } }) => { ... },
+    update: ({ req: { user } }) => { ... },
+    delete: ({ req: { user } }) => { ... },
+    admin: ({ req: { user } }) => { ... },
   },
   // highlight-end
 };
@@ -34,62 +42,63 @@ module.exports = {
 
 ### Create
 
-Create access functions return a boolean result which allows/denies access to create a document
+Returns a boolean which allows/denies access to the `create` request.
 
-#### Arguments
+**Available arguments:**
 
-The function receives one `args` argument that contains the following properties:
-
-| Option    | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
-| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+| Option    | Description |
+| --------- | ----------- |
+| **`req`** | The Express `request` object containing the currently authenticated `user` |
 
 ### Read
 
-Read access functions can return a boolean result or optionally return a [where constraint](/docs/queries/overview).
+Read access functions can return a boolean result or optionally return a [query constraint](/docs/queries/overview) which limits the documents that are returned to only those that match the constraint you provide. This can be helpful to restrict users' access to only certain documents however you specify.
 
-#### Arguments
+**Available arguments:**
 
-The function receives one `args` argument that contains the following properties:
-
-| Option    | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
-| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
-| **`id`**  | `id` of document requested. Value is `undefined` if not querying for specific ID                    |
+| Option    | Description |
+| --------- | ----------- |
+| **`req`** | The Express `request` object containing the currently authenticated `user` |
+| **`id`**  | `id` of document requested, if within `findByID`. Otherwise, `id` is undefined. |
 
 ### Update
 
-Update access functions can return a boolean result or optionally return a [where constraint](/docs/queries/overview).
+Update access functions can return a boolean result or optionally return a [query constraint](/docs/queries/overview) to limit the document(s) that can be updated by the currently authenticated user. For example, returning a `query` from the `update` Access Control is helpful in cases where you would like to restrict a user to only being able to update the documents containing a `createdBy` relationship field equal to the user's ID.
 
-#### Arguments
+**Available arguments:**
 
-The function receives one `args` argument that contains the following properties:
-
-| Option    | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
-| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+| Option    | Description |
+| --------- | ----------- |
+| **`req`** | The Express `request` object containing the currently authenticated `user` |
+| **`id`**  | `id` of document requested to update |
 
 ### Delete
 
-Delete access functions can return a boolean result or optionally return a [where constraint](/docs/queries/overview).
+Similarly to the Update function, returns a boolean or a [query constraint](/docs/queries/overview) to limit which documents can be deleted by which users.
 
-#### Arguments
+**Available arguments:**
 
-The function receives one `args` argument that contains the following properties:
-
-| Option    | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
+| Option    | Description |
+| --------- | ----------- |
 | **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
-| **`id`**  | `id` of the document being deleted                                                                  |
+| **`id`**  | `id` of document requested to delete |
 
 ### Admin
 
-Admin access functions determine whether or not a user can access the admin UI.
+If the Collection is [used to access the Payload Admin panel](/docs/admin/overview#the-admin-user-collection), the `Admin` Access Control function determines whether or not the currently logged in user can access the admin UI.
 
-** Only applicable on collections that have auth **
+**Available arguments:**
 
-It receives one `args` argument that contains the following properties:
+| Option    | Description |
+| --------- | ----------- |
+| **`req`** | The Express `request` object containing the currently authenticated `user` |
 
-| Option    | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
-| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+### Unlock
+
+Determines which users can [unlock](/docs/authentication/operations#unlock) other users who may be blocked from authenticating successfully due to [failing too many login attempts](/docs/authentication/config#options).
+
+**Available arguments:**
+
+| Option    | Description |
+| --------- | ----------- |
+| **`req`** | The Express `request` object containing the currently authenticated `user` |

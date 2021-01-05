@@ -50,6 +50,16 @@ Hooks are an extremely powerful concept and are central to extending and customi
 
 There are many more potential reasons to use Hooks. For more, visit the [Hooks documentation](/docs/hooks/overview).
 
+### Access Control
+
+<Banner type="info">
+  Access Control refers to Payload's system of defining who can do what to your API.
+</Banner>
+
+Access Control is extremely powerful but easy and intuitive to manage. You can easily define your own full-blown RBAC (role-based access control) or any other access control pattern that your scenario requires. No conventions or structure is forced on you whatsoever.
+
+For more, visit the [Access Control documentation](/docs/access-control/overview).
+
 ### Depth
 
 <Banner type="info">
@@ -115,12 +125,13 @@ If you were to query the Posts endpoint at, say, `http://localhost:3000/api/post
 // ?depth=1
 
 {
-	title: 'This post sucks',
-	author: {
-		id: '5f7dd05cd50d4005f8bcab17',
-		email: 'spiderman@superheroes.gov',
-		department: '5e3ca05cd50d4005f8bdab15'
-	}
+  id: '5ae8f9bde69e394e717c8832',
+  title: 'This post sucks',
+  author: {
+    id: '5f7dd05cd50d4005f8bcab17',
+    email: 'spiderman@superheroes.gov',
+    department: '5e3ca05cd50d4005f8bdab15'
+  }
 }
 ```
 
@@ -132,13 +143,15 @@ To populate `user.author.department` in it's entirety you could specify `?depth=
 // ?depth=2
 
 {
-	title: 'This post sucks',
-	author: {
-		id: '5f7dd05cd50d4005f8bcab17',
-		email: 'spiderman@superheroes.gov',
-		department: {
-			name: 'Marvel'
-		}
-	}
+  id: '5ae8f9bde69e394e717c8832',
+  title: 'This post sucks',
+  author: {
+    id: '5f7dd05cd50d4005f8bcab17',
+    email: 'spiderman@superheroes.gov',
+    department: {
+      id: '5e3ca05cd50d4005f8bdab15',
+      name: 'Marvel'
+    }
+  }
 }
 ```

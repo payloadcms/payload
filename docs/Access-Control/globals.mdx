@@ -4,23 +4,23 @@ label: Globals
 order: 40
 ---
 
-Globals access control is specified with functions inside a globals config. The functions return a boolean value to allow or deny access for the specified operation.
+You can define Global-level Access Control within each Global's `access` property.
 
-## Available Functions
+## Available Controls
 
-| Function   | Allows/Denies Access       |
-| ---------- | -------------------------- |
-| **read**   | reading a global document  |
-| **update** | updating a global document |
+| Function                 | Allows/Denies Access |
+| ------------------------ | -------------------- |
+| **[`read`](#read)**      | Used in the `findOne` Global operation |
+| **[`update`](#update)**  | Used in the `update` Global operation |
 
+**Example Global config:**
 ```js
-// Collection config
-module.exports = {
-  slug: "public-user",
+export default {
+  slug: "header",
   // highlight-start
   access: {
-    read: () => true,
-    update: () => true,
+    read: ({ req: { user } }) => { ... },
+    update: ({ req: { user } }) => { ... },
   },
   // highlight-end
 };
@@ -28,24 +28,20 @@ module.exports = {
 
 ### Read
 
-A read access function allows or denies the ability to read a global. The function must return a boolean result.
+Returns a boolean result to allow or deny a user's ability to read the Global.
 
-#### Arguments
+**Available arguments:**
 
-The function receives one `args` argument that contains the following properties:
-
-| Option    | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
-| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+| Option    | Description |
+| --------- | ----------- |
+| **`req`** | The Express `request` object containing the currently authenticated `user` |
 
 ### Update
 
-An update access function allows or denies the ability to update a global. The function must return a boolean result.
+Returns a boolean result to allow or deny a user's ability to update the Global.
 
-#### Arguments
+**Available arguments:**
 
-The function receives one `args` argument that contains the following properties:
-
-| Option    | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
-| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+| Option    | Description |
+| --------- | ----------- |
+| **`req`** | The Express `request` object containing the currently authenticated `user` |
