@@ -19,7 +19,6 @@ export default (payloadConfig: Config): Configuration => {
       chunkFilename: '[name].[chunkhash].js',
     },
     mode: 'production',
-    devtool: 'none',
     stats: 'errors-only',
     optimization: {
       minimizer: [new TerserJSPlugin({}), new CssMinimizerPlugin()],
