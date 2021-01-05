@@ -1,4 +1,4 @@
-const { buildConfig } = require('@payloadcms/payload/config');
+const { buildConfig } = require('payload/config');
 const Todo = require('./collections/Todo');
 
 module.exports = buildConfig({

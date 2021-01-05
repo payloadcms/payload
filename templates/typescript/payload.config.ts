@@ -1,4 +1,4 @@
-import { buildConfig } from '@payloadcms/payload/config';
+import { buildConfig } from 'payload/config';
 import Todo from './collections/Todo';
 
 export default buildConfig({

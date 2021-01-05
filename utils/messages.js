@@ -26,7 +26,7 @@ const successMessage = async () => `
   ${header('Documentation:')}
 
     - ${terminalLink('Getting Started', 'https://payloadcms.com/docs/getting-started/what-is-payload')}
-    - ${terminalLink('Configuration', 'https://payloadcms.com/docs/configuration/main')}
+    - ${terminalLink('Configuration', 'https://payloadcms.com/docs/configuration/overview')}
 
 `;
 

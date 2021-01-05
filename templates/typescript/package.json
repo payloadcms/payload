@@ -4,10 +4,14 @@
   "main": "server.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "build:payload": "payload build",
+    "build:server": "tsc",
+    "build": "yarn build:payload && yarn build:server",
+    "serve": "NODE_ENV=production node dist/server.js"
   },
   "dependencies": {
-    "@payloadcms/payload": "0.1.121",
+    "payload": "0.1.131",
     "dotenv": "^8.2.0",
     "express": "^4.17.1"
   },

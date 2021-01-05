@@ -4,10 +4,12 @@
   "main": "server.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "build": "payload build",
+    "serve": "NODE_ENV=production node server.js"
   },
   "dependencies": {
-    "@payloadcms/payload": "0.1.121",
+    "payload": "0.1.128",
     "dotenv": "^8.2.0",
     "express": "^4.17.1"
   },

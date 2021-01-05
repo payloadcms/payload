@@ -1,5 +1,5 @@
 const express = require('express');
-const payload = require('@payloadcms/payload');
+const payload = require('payload');
 
 require('dotenv').config();
 const app = express();

@@ -1,5 +1,14 @@
 {
   "name": "create-payload-app",
+  "bin": {
+    "create-payload-app": "cli.js"
+  },
+  "files": [
+    "cli.js",
+    "package.json",
+    "utils",
+    "templates"
+  ],
   "dependencies": {
     "@sindresorhus/slugify": "^1.1.0",
     "arg": "^5.0.0",
