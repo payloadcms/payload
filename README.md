@@ -1,8 +1,22 @@
-# Payload
+<p align="center"><a href="https://github.com/nastyox/Rando.js#nastyox"></a></p>
+<h1 align="center">Payload</h1>
+<p align="center">A self-hosted, JavaScript headless CMS & application framework built with Express, MongoDB and React.</p>
 
-A self-hosted, JavaScript headless CMS & application framework built with Express, MongoDB and React.
+<a href="https://payloadcms.com">
+<img src="https://payloadcms.com/images/admin.jpg" alt="Payload headless CMS Admin panel built with React" />
+</a>
 
-![Payload headless CMS Admin panel built with React](https://payloadcms.com/images/admin.jpg)
+### Quick Start
+
+```
+npx create-payload-app
+```
+
+Alternatively, it only takes about five minutes to [write out your own app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
+
+### Documentation
+
+Check out the [Payload website](https://payloadcms.com/docs/getting-started/what-is-payload) to find in-depth documentation for everything that Payload offers.
 
 ### Features
 
@@ -35,9 +49,6 @@ If you know JavaScript, you know Payload. Payload is a _code-first_ CMS, which a
 
 Payload is 100% free for use on local environments such as `localhost` and staging sites such as `staging.mycoolsite.com`. When it's time to go to production, Payload charges a low and flat fee that doesn't change whatsoever based on your usage.
 
-## Documentation
-
-Check out the [Payload website](https://payloadcms.com/docs/getting-started/what-is-payload) to find in-depth documentation for everything that Payload offers.
 ## Installation
 
 Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/getting-started/installation).
