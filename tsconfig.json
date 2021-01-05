@@ -15,13 +15,13 @@
     "moduleResolution": "node", /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
     "baseUrl": "",
     "paths": {
-      "@payloadcms/payload/config": [
+      "payload/config": [
         "src/config/types.ts"
       ],
-      "@payloadcms/payload/auth": [
+      "payload/auth": [
         "src/auth/types.ts"
       ],
-      "@payloadcms/payload/types": [
+      "payload/types": [
         "src/types/index.ts"
       ]
     },

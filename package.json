@@ -1,7 +1,7 @@
 {
-  "name": "@payloadcms/payload",
+  "name": "payload",
   "version": "0.1.127",
-  "description": "CMS and Application Framework",
+  "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "ISC",
   "author": "Payload CMS LLC",
   "main": "./dist/index.js",

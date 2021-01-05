@@ -69,7 +69,7 @@ Many third party mail providers are available and offer benefits beyond basic SM
 
 ```js
 const nodemailerSendgrid = require('nodemailer-sendgrid');
-const payload = require('@payloadcms/payload');
+const payload = require('payload');
 
 const sendGridAPIKey = process.env.SENDGRID_API_KEY;
 
@@ -90,7 +90,7 @@ payload.init({
 To take full control of the mail transport you may wish to use `nodemailer.createTransport()` on your server and provide it to Payload init.
 
 ```js
-const payload = require('@payloadcms/payload');
+const payload = require('payload');
 const nodemailer = require('nodemailer');
 
 const transport = await nodemailer.createTransport({
