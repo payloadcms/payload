@@ -132,7 +132,9 @@ const Nav: React.FC = () => {
     admin: {
       components: {
         Nav: CustomNav,
-      } = {},
+      } = {
+        Nav: undefined,
+      },
     } = {},
   } = useConfig();
 

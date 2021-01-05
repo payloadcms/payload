@@ -1388,10 +1388,10 @@
   dependencies:
     mkdirp "^1.0.4"
 
-"@payloadcms/config-provider@0.0.14":
-  version "0.0.14"
-  resolved "https://registry.yarnpkg.com/@payloadcms/config-provider/-/config-provider-0.0.14.tgz#72dec764afa1816bc4c2364d6b445163866464d2"
-  integrity sha512-UQdjqdoz1xTnrDNhDDeL8s1B4QfYIFUJW6Z483WN70FXMP8CKYxeuI7eYxWpK9NHenl4duqx2aKtqVaG1CqYpw==
+"@payloadcms/config-provider@0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@payloadcms/config-provider/-/config-provider-0.0.19.tgz#305b34ccebbf7f4ea996c69522a1e28b9d9c5f28"
+  integrity sha512-SSPlz6eUe8ashJNiG8MCJDlXw5HWSyKk9h7TORZ1VDCw3IzgCaUi/HrJo2xxQJmZxP+xenTfjyJD8iuWg7CDdg==
   dependencies:
     jwt-decode "^3.1.2"
 

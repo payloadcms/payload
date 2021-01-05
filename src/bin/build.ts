@@ -22,10 +22,15 @@ export const build = (): void => {
     webpack(webpackProdConfig, (err, stats) => { // Stats Object
       if (err || stats.hasErrors()) {
         // Handle errors here
-        console.error(stats.toString({
-          chunks: false,
-          colors: true,
-        }));
+
+        if (stats) {
+          console.error(stats.toString({
+            chunks: false,
+            colors: true,
+          }));
+        } else {
+          console.error(err.message);
+        }
       }
     });
   } catch (err) {

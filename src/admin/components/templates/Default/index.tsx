@@ -15,7 +15,9 @@ const Default: React.FC<Props> = ({ children, className }) => {
     admin: {
       components: {
         Nav: CustomNav,
-      } = {},
+      } = {
+        Nav: undefined,
+      },
     } = {},
   } = useConfig();
 
