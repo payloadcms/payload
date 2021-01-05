@@ -53,7 +53,7 @@ export default (config: Config): Configuration => ({
     modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
     alias: {
       'payload/config': config.paths.config,
-      '@payloadcms/payload$': mockModulePath,
+      payload$: mockModulePath,
       'payload-user-css': config.admin.css,
       'payload-scss-overrides': config.admin.scss,
       dotenv: mockDotENVPath,
