@@ -4,7 +4,7 @@ label: Collections
 order: 20
 ---
 
-You can define Collection-level Access Control within each Collection's `access` property.
+You can define Collection-level Access Control within each Collection's `access` property. All Access Control functions accept one `args` argument.
 
 ## Available Controls
 
@@ -44,7 +44,7 @@ export default {
 
 Returns a boolean which allows/denies access to the `create` request.
 
-**Available arguments:**
+**Available argument properties :**
 
 | Option    | Description |
 | --------- | ----------- |
@@ -54,7 +54,7 @@ Returns a boolean which allows/denies access to the `create` request.
 
 Read access functions can return a boolean result or optionally return a [query constraint](/docs/queries/overview) which limits the documents that are returned to only those that match the constraint you provide. This can be helpful to restrict users' access to only certain documents however you specify.
 
-**Available arguments:**
+**Available argument properties :**
 
 | Option    | Description |
 | --------- | ----------- |
@@ -65,7 +65,7 @@ Read access functions can return a boolean result or optionally return a [query 
 
 Update access functions can return a boolean result or optionally return a [query constraint](/docs/queries/overview) to limit the document(s) that can be updated by the currently authenticated user. For example, returning a `query` from the `update` Access Control is helpful in cases where you would like to restrict a user to only being able to update the documents containing a `createdBy` relationship field equal to the user's ID.
 
-**Available arguments:**
+**Available argument properties :**
 
 | Option    | Description |
 | --------- | ----------- |
@@ -76,7 +76,7 @@ Update access functions can return a boolean result or optionally return a [quer
 
 Similarly to the Update function, returns a boolean or a [query constraint](/docs/queries/overview) to limit which documents can be deleted by which users.
 
-**Available arguments:**
+**Available argument properties :**
 
 | Option    | Description |
 | --------- | ----------- |
@@ -87,7 +87,7 @@ Similarly to the Update function, returns a boolean or a [query constraint](/doc
 
 If the Collection is [used to access the Payload Admin panel](/docs/admin/overview#the-admin-user-collection), the `Admin` Access Control function determines whether or not the currently logged in user can access the admin UI.
 
-**Available arguments:**
+**Available argument properties :**
 
 | Option    | Description |
 | --------- | ----------- |
@@ -97,7 +97,7 @@ If the Collection is [used to access the Payload Admin panel](/docs/admin/overvi
 
 Determines which users can [unlock](/docs/authentication/operations#unlock) other users who may be blocked from authenticating successfully due to [failing too many login attempts](/docs/authentication/config#options).
 
-**Available arguments:**
+**Available argument properties :**
 
 | Option    | Description |
 | --------- | ----------- |
