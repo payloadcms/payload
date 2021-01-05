@@ -34,7 +34,7 @@ module.exports = {
           2,
           {
             ignore: [
-              'payload/config',
+              'payload-config',
             ],
           },
         ],
