@@ -17,7 +17,9 @@ const Dashboard: React.FC = () => {
       components: {
         views: {
           Dashboard: CustomDashboard,
-        } = {},
+        } = {
+          Dashboard: undefined,
+        },
       } = {},
     } = {},
   } = useConfig();

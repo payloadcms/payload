@@ -26,7 +26,9 @@ const Icon: React.FC = () => {
       components: {
         graphics: {
           Icon: CustomIcon,
-        } = {},
+        } = {
+          Icon: undefined,
+        },
       } = {},
     } = {},
   } = useConfig();

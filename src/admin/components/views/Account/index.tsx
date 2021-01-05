@@ -25,9 +25,13 @@ const AccountView: React.FC = () => {
       components: {
         views: {
           Account: CustomAccount,
-        } = {},
+        } = {
+          Account: undefined,
+        },
       } = {},
-    } = {},
+    } = {
+      user: 'users',
+    },
   } = useConfig();
 
   const collection = collections.find((coll) => coll.slug === user.collection);

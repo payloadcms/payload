@@ -56,7 +56,9 @@ const Logo: React.FC = () => {
       components: {
         graphics: {
           Logo: CustomLogo,
-        } = {},
+        } = {
+          Logo: undefined,
+        },
       } = {},
     } = {},
   } = useConfig();
