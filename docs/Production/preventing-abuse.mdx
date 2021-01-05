@@ -4,14 +4,34 @@ label: Preventing Abuse
 order: 20
 ---
 
-- Max failed login attempts
-- Rate limiting - talk about config, and about how if behind proxy, need `app.set('trust proxy', true)`, otherwise all traffic is treated as 127.0.0.1
-- GraphQL Complexity
-- Limits - ?? this might not be a thing but it should be if it's not. We should limit the max number of records returned per page via config setting.
-- Max Depth - recursive relationships, could create infinite loops with no max depth. this should be as small as possible without interrupting dev experience
-- CSRF - link to config section with a quick blurb about how CSRF prevention is good for security
-- CORS - link to config section with a quick blurb about how CORS restrictions are good for security
+## Introduction
+Payload has built-in security best practices that can be configured to application specific needs.
+
+#### Limit Failed Login Attempts
+Set the max number of failed login attempts before a user account is locked out for a period of time. Set the `maxLoginAttempts` on the collections that have authentication to a reasonable but low number for your users to get in. Use the `lockTime` to set a number in milliseconds from the time a user fails their last allowed attempt that a user must wait to try again.
+
+#### Rate Limiting Requests
+To prevent attacks, request rate limits are enabled so that once a certain threshold further requests from the same IP will be ignored. The Payload config property object of `rateLimit` has the following properties:
+| Option                       | Description  |
+| ---------------------------- | -------------|
+| **`window`**                | Time in milliseconds to track requests |
+| **`max`**                   | Number of requests served from a single IP before limiting |
+| **`skip`**                  | Express middleware function that can return true (or promise resulting in true) that will bypass limit |
+| **`trustProxy`**            | True or false, to enable to allow requests to pass through a proxy such as a load balancer |
+
+<Banner type="warning">
+  <strong>Warning:</strong><br/>
+  The `trustProxy` will limit requests of all traffic by the same IP if the traffic is behind a proxy. If this option is enabled when it shouldn't be then a bad actor can work around the limits entirely so it rather important to get it right.
+</Banner>
+
+#### Max Depth
+Querying a collection that has related data can have consequences. With the `maxDepth` setting of the Payload config, it is easy to prevent the problem of querying data with a recursive relationship where a circular dependency exists. The maximum allowed depth should be as small as possible without interrupting dev experience.
+
+#### Cross-Site Request Forgery (CSRF)
+CSRF prevention will verify the authenticity of each request to your API to prevent a malicious action from another site from authorized users. See how to configure CSRF [here](/docs/authentication/overview#csrf-protection).
+
+#### Cross Origin Resource Sharing (CORS)
+To securely allow headless operation you will need to configure the allowed origins for requests to be able to use the Payload API. You can see how to set CORS as well as other payload configuration settings [here](http://localhost:3000/docs/configuration/overview)
 
 ### Limiting GraphQL Complexity
-
-^^ Keep this header here -> it is being linked to
+Because GraphQL gives the power of query writing outside a server's control, it can be abused in the case of a bad actor submitting to overwhelm a host. To prevent resource intensive gql requests that may overwhelm the backend, Payload provides a way specify limits based on a complexity score calculated for each request. Any GraphQL request that is calculated to be too expensive is not fulfilled. This setting is an integer number. On the Payload config, in `graphQL` you can set the `maxComplexity` complexity. For reference, the default of each added field will have a complexity number of 1, a relationship of 10 and a file upload is 20.
