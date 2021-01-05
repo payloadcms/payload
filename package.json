@@ -2,7 +2,7 @@
   "name": "payload",
   "version": "0.1.128",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
-  "license": "SEE LICENSE in license.md",
+  "license": "SEE LICENSE IN license.md",
   "author": "Payload CMS LLC",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
