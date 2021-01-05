@@ -20,8 +20,6 @@ import { Context as FormContextType, Props } from './types';
 
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormWatchContext } from './context';
 
-import './index.scss';
-
 const baseClass = 'form';
 
 const Form: React.FC<Props> = (props) => {
