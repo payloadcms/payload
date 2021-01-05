@@ -1,4 +1,4 @@
-module.exports = {
+const Todo = {
   slug: 'todo',
   labels: {
     singular: 'Todo List',
@@ -31,3 +31,5 @@ module.exports = {
     },
   ],
 }
+
+export default Todo;

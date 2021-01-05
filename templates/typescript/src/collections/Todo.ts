@@ -1,4 +1,6 @@
-export default {
+import { CollectionConfig } from 'payload/types';
+
+const Todo: CollectionConfig = {
   slug: 'todo',
   labels: {
     singular: 'Todo List',
@@ -31,3 +33,5 @@ export default {
     },
   ],
 }
+
+export default Todo;

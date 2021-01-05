@@ -1,14 +1,14 @@
 {
   "name": "payload-starter-typescript",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "dist/server.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon",
-    "build:payload": "payload build",
+    "dev": "PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
+    "build:payload": "PAYLOAD_CONFIG_PATH=src/payload.config.ts payload build",
     "build:server": "tsc",
     "build": "yarn build:payload && yarn build:server",
-    "serve": "NODE_ENV=production node dist/server.js"
+    "serve": "PAYLOAD_CONFIG_PATH=dist/payload.config.js NODE_ENV=production node dist/server.js"
   },
   "dependencies": {
     "payload": "0.1.137",

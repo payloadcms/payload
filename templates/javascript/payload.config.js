@@ -1,7 +1,7 @@
-const { buildConfig } = require('payload/config');
-const Todo = require('./collections/Todo');
+import { buildConfig } from 'payload/config';
+import Todo from './collections/Todo';
 
-module.exports = buildConfig({
+export default buildConfig({
   serverURL: 'http://localhost:3000',
   collections: [
     Todo
