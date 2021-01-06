@@ -1,11 +1,11 @@
 {
   "name": "create-payload-app",
   "bin": {
-    "create-payload-app": "cli.js"
+    "create-payload-app": "bin/cli.js"
   },
   "files": [
-    "cli.js",
     "package.json",
+    "bin",
     "utils",
     "templates"
   ],
