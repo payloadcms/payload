@@ -1,13 +1,15 @@
+export type FileSize = {
+  filename: string;
+  filesize: number;
+  mimeType: string;
+  name: string;
+  width: number;
+  height: number;
+  crop: string;
+}
+
 export type FileSizes = {
-  [size: string]: {
-    filename: string;
-    filesize: number;
-    mimeType: string;
-    name: string;
-    width: number;
-    height: number;
-    crop: string;
-  }
+  [size: string]: FileSize
 }
 
 export type FileData = {
