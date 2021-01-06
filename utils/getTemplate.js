@@ -1,5 +1,6 @@
 const prompts = require('prompts');
 const fs = require('fs');
+const path = require('path');
 const { getArgs } = require('./getArgs');
 
 const getDirectories = (path) => fs.readdirSync(path).filter(file => {
@@ -23,7 +24,7 @@ const getTemplate = async () => {
       type: 'select',
       name: 'value',
       message: 'Choose project template',
-      choices: getDirectories('./templates').map(p => {
+      choices: getDirectories(path.resolve(__dirname, '../templates')).map(p => {
         return { title: p, value: p };
       }),
       validate: value => value.length,
