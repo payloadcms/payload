@@ -96,6 +96,10 @@ In contrast to running Mongo locally, a popular option is to sign up for a free 
 
 This is your Express app as shown above. Payload will tie into your existing `app` and scope all of its functionalities to sub-routers. By default, Payload will add an `/admin` router and an `/api` router, but you can customize these paths.
 
+##### `license`
+
+Your Paylaod license key. Not needed for development purposes, but when it's time to deploy to production, you need to add your license key here. More info about how Payload licensing works can be found [here](/docs/production/licensing).
+
 ### Test it out
 
 After you've gotten this far, it's time to boot up Payload. At the command line, run `npm install` and then `node server.js` in your application's folder to start up your app and initialize Payload.
