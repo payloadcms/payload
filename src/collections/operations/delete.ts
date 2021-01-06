@@ -9,7 +9,7 @@ import fileExists from '../../uploads/fileExists';
 import { BeforeOperationHook, Collection } from '../config/types';
 import { Document, Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
-import { FileSize } from '../../uploads/types';
+import { FileData } from '../../uploads/types';
 
 export type Arguments = {
   depth?: number
@@ -119,7 +119,7 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
     }
 
     if (resultToDelete.sizes) {
-      Object.values(resultToDelete.sizes).forEach(async (size: FileSize) => {
+      Object.values(resultToDelete.sizes).forEach(async (size: FileData) => {
         if (await fileExists(`${staticPath}/${size.filename}`)) {
           fs.unlink(`${staticPath}/${size.filename}`, (err) => {
             if (err) {
