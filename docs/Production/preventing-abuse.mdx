@@ -5,33 +5,43 @@ order: 20
 ---
 
 ## Introduction
-Payload has built-in security best practices that can be configured to application specific needs.
+
+Payload has built-in security best practices that can be configured to your application-specific needs.
 
 #### Limit Failed Login Attempts
-Set the max number of failed login attempts before a user account is locked out for a period of time. Set the `maxLoginAttempts` on the collections that have authentication to a reasonable but low number for your users to get in. Use the `lockTime` to set a number in milliseconds from the time a user fails their last allowed attempt that a user must wait to try again.
+
+Set the max number of failed login attempts before a user account is locked out for a period of time. Set the `maxLoginAttempts` on the collections that feature Authentication to a reasonable but low number for your users to get in. Use the `lockTime` to set a number in milliseconds from the time a user fails their last allowed attempt that a user must wait to try again.
 
 #### Rate Limiting Requests
-To prevent attacks, request rate limits are enabled so that once a certain threshold further requests from the same IP will be ignored. The Payload config property object of `rateLimit` has the following properties:
+
+To prevent DDoS, brute-force, and similar attacks, you can set IP-based rate limits so that once a certain threshold of requests has been hit by a single IP, further requests from the same IP will be ignored. The Payload config `rateLimit` property accepts an object with the following properties:
+
 | Option                       | Description  |
 | ---------------------------- | -------------|
-| **`window`**                | Time in milliseconds to track requests |
-| **`max`**                   | Number of requests served from a single IP before limiting |
-| **`skip`**                  | Express middleware function that can return true (or promise resulting in true) that will bypass limit |
-| **`trustProxy`**            | True or false, to enable to allow requests to pass through a proxy such as a load balancer |
+| **`window`**                 | Time in milliseconds to track requests per IP |
+| **`max`**                    | Number of requests served from a single IP before limiting |
+| **`skip`**                   | Express middleware function that can return true (or promise resulting in true) that will bypass limit |
+| **`trustProxy`**             | True or false, to enable to allow requests to pass through a proxy such as a load balancer or an `nginx` reverse proxy |
 
 <Banner type="warning">
   <strong>Warning:</strong><br/>
-  The `trustProxy` will limit requests of all traffic by the same IP if the traffic is behind a proxy. If this option is enabled when it shouldn't be then a bad actor can work around the limits entirely so it rather important to get it right.
+  Very commonly, NodeJS apps are served behind `nginx` reverse proxies and similar. If you use rate-limiting while you're behind a proxy, <strong>all</strong> IP addresses from everyone that uses your API will appear as if they are from a local origin (127.0.0.1), and your users will get rate-limited very quickly without cause. If you plan to host your app behind a proxy, make sure you set <strong>trustProxy</strong> to <strong>true</strong>.
 </Banner>
 
 #### Max Depth
-Querying a collection that has related data can have consequences. With the `maxDepth` setting of the Payload config, it is easy to prevent the problem of querying data with a recursive relationship where a circular dependency exists. The maximum allowed depth should be as small as possible without interrupting dev experience.
+
+Querying a collection and automatically including related documents via `depth` incurs a performance cost. Also, it's possible that your configs may have circular relationships, meaning scenarios where an infinite amount of relationships might populate back and forth until your server times out and crashes. You can prevent any potential of depth-related issues by setting a `maxDepth` property on your Payload config.. The maximum allowed depth should be as small as possible without interrupting dev experience, and it defaults to `10`.
 
 #### Cross-Site Request Forgery (CSRF)
+
 CSRF prevention will verify the authenticity of each request to your API to prevent a malicious action from another site from authorized users. See how to configure CSRF [here](/docs/authentication/overview#csrf-protection).
 
 #### Cross Origin Resource Sharing (CORS)
+
 To securely allow headless operation you will need to configure the allowed origins for requests to be able to use the Payload API. You can see how to set CORS as well as other payload configuration settings [here](http://localhost:3000/docs/configuration/overview)
 
 ### Limiting GraphQL Complexity
-Because GraphQL gives the power of query writing outside a server's control, it can be abused in the case of a bad actor submitting to overwhelm a host. To prevent resource intensive gql requests that may overwhelm the backend, Payload provides a way specify limits based on a complexity score calculated for each request. Any GraphQL request that is calculated to be too expensive is not fulfilled. This setting is an integer number. On the Payload config, in `graphQL` you can set the `maxComplexity` complexity. For reference, the default of each added field will have a complexity number of 1, a relationship of 10 and a file upload is 20.
+
+Because GraphQL gives the power of query writing outside a server's control, someone with bad intentions might write a maliciously complex query and bog down your server. To prevent resource-intensive GraphQL requests, Payload provides a way specify complexity limits which are based on a complexity score that is calculated for each request.
+
+Any GraphQL request that is calculated to be too expensive is rejected. On the Payload config, in `graphQL` you can set the `maxComplexity` value as an integer. For reference, the default complexity value for each added field is 1, and all `relationship` and `upload` fields are assigned a value of 10.

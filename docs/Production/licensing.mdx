@@ -5,25 +5,36 @@ order: 30
 ---
 
 ## Try it for free
-Payload is free to try and use for as long as you like. There is no obligation to purchase a subscription until you wish to get support or it is time to run your Payload application in production. At that time you can purchase a license and manage your subscriptions from your [Payload account](/account). For information on cost, see the [pricing](/pricing) page for details.
+
+Payload is free to use locally for development purposes for as long as you like. There is no obligation to purchase a subscription until you wish to get support or it's time to deploy to production. At that time, you can purchase a license and manage your subscriptions from your [Payload account](/account). For information on cost, see the [pricing](/pricing) page for details.
 
 ## Purchasing a license
-1. Complete the [checkout](/checkout) process. At the end you will have access to your license key.
-1. Add your license to a `.env` variable to call payload.init in production.
+
+1. Complete the [checkout](/checkout) process. You'll be provided with a license key after successfully checking out.
+1. Add your license to a `.env` variable, and then add the `license` property to your `payload.init()` call.
+
+`payload.config.js`:
 ```js
-const payload = require('@payloadcms/payload');
+const payload = require('payload');
 
 payload.init({
   license: process.env.PAYLOAD_LICENSE_KEY,
   // the rest of your init options
 });
 ```
-3. All set! You can open the admin panel of your Payload application on a public domain address.
 
-## How it works
-Each time a web browser visits the admin portal of a running Payload instance, a request is made to our licensing server that looks at the domain being referred from and is able to verify the subscription requirements are active. The API of your Payload application will always be available regardless of subscription status so have peace of mind that your critical operations are not going to be hindered because of a lapse in billing issue or a network problem between systems.
+3. All set! You can open the Admin panel of your Payload application on a public domain and your copy of Payload will be fully licensed.
 
-If your domain is not yet licensed your subscription has expired from a production instance, you will have a chance to renew. In the meantime the admin portal will display an informative message before allowing you to access to notify you that your subscription is not valid.
+## How Payload license enforcement works
+
+Each time a web browser visits the Admin panel of a running Payload instance, a request is made to our licensing server that evaluates the domain being referred from. We then verify that you have a valid, active license key and that the domain being used is licensed accordingly.
+
+<Banner type="success">
+  <strong>Note:</strong><br/>
+  Your Payload APIs will always be available, regardless of subscription status. This means you can have peace of mind that your critical operations are not going to be hindered because of a lapse in billing issue or a network problem between systems. Only the Admin panel will be affected.
+</Banner>
+
+If your domain is not yet licensed, your subscription has expired from a production instance, you will have a chance to renew. In the meantime, the Admin panel will display an informative message before allowing you to access to notify you that your subscription is not valid.
 
 <Banner type="warning">
   <strong>Warning:</strong><br/>
@@ -31,7 +42,9 @@ If your domain is not yet licensed your subscription has expired from a producti
 </Banner>
 
 #### How does Payload know if the license is production or not?
+
 The domain is sent along with the license key and that determines whether it is a public domain or not. Anything of a developer sounding name is allowed without a valid license. The following traits of the admin URL will allow Payload to work without a license:
+
 1. An IP address
 1. A private port. That is any port that is not 80 or 443. For example: 'dev.example.com:8000'
 1. Any of these subdomains: 'test', 'testing', 'dev', 'stage', 'staging', 'sandbox', 'acc', 'acceptance', 'demo', 'local', 'loc'
