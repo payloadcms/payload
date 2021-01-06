@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const { getArgs } = require('../utils/getArgs');
 const { getTemplate } = require('../utils/getTemplate');
 const { getProjectName } = require('../utils/getProjectName');
