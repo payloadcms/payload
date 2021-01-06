@@ -40,7 +40,7 @@ const installDeps = async (dir) => {
 const createProject = async () => {
   const projectDir = await getProjectDir();
   createProjectDir(projectDir);
-  const templateDir = `./templates/${await getTemplate()}`;
+  const templateDir = path.resolve(__dirname, `../templates/${await getTemplate()}`);
 
   console.log(`\nCreating a new Payload app in ${chalk.green(path.resolve(projectDir))}\n`)
 
