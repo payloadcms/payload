@@ -5,6 +5,10 @@ const { getProjectDir } = require('./getProjectDir');
 
 const header = (message) => chalk.yellow(figures.star) + ' ' + chalk.bold(message);
 
+const welcomeMessage = chalk`
+  {green Welcome to Payload. Let's create a project! }
+`;
+
 const helpMessage = chalk`
   {bold USAGE}
 
@@ -13,8 +17,11 @@ const helpMessage = chalk`
 
   {bold OPTIONS}
 
-      --template {underline template-name}           Choose specific template
-      --help                             Shows this help message
+      --template {underline template_name}           Choose specific template
+
+        {dim Available templates: javascript, typescript}
+
+      --help                             Show help
 `;
 
 const successMessage = async () => `
@@ -31,6 +38,7 @@ const successMessage = async () => `
 `;
 
 module.exports = {
+  welcomeMessage,
   helpMessage,
   successMessage,
 }

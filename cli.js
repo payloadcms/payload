@@ -2,7 +2,7 @@ const { getArgs } = require('./utils/getArgs');
 const { getTemplate } = require('./utils/getTemplate');
 const { getProjectName } = require('./utils/getProjectName');
 const { createProject } = require('./utils/createProject');
-const { helpMessage, successMessage } = require('./utils/messages');
+const { welcomeMessage, helpMessage, successMessage } = require('./utils/messages');
 const { success } = require('./utils/log');
 const { getDatabaseConnection } = require('./utils/getDatabaseConnection');
 const { getPayloadSecret } = require('./utils/getPayloadSecret');
@@ -14,6 +14,7 @@ const { writeEnvFile } = require('./utils/writeEnvFile');
     console.log(helpMessage);
     return 0;
   }
+  console.log(welcomeMessage);
 
   await getProjectName();
   await getTemplate();
