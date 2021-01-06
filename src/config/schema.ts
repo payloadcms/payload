@@ -84,6 +84,7 @@ export default joi.object({
       queries: joi.object(),
       maxComplexity: joi.number(),
       disablePlaygroundInProduction: joi.boolean(),
+      disable: joi.boolean(),
     }),
   localization: joi.alternatives()
     .try(
