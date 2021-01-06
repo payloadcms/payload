@@ -6,7 +6,7 @@ order: 30
 
 ## Try it for free
 
-Payload is free to use locally for development purposes for as long as you like. There is no obligation to purchase a subscription until you wish to get support or it's time to deploy to production. At that time, you can purchase a license and manage your subscriptions from your [Payload account](/account). For information on cost, see the [pricing](/pricing) page for details.
+Payload is free to use locally for development purposes for as long as you like. There is no obligation to purchase a subscription until it's time to deploy to production or you'd like to receive support from Payload developers. At that time, you can purchase a license and manage your subscriptions from your [Payload account](/account). For information on cost, see the [pricing](/pricing) page for details.
 
 ## Purchasing a license
 
@@ -27,32 +27,40 @@ payload.init({
 
 ## How Payload license enforcement works
 
-Each time a web browser visits the Admin panel of a running Payload instance, a request is made to our licensing server that evaluates the domain being referred from. We then verify that you have a valid, active license key and that the domain being used is licensed accordingly.
+Payload licensing is enforced only through its Admin panel. Each the Admin panel is loaded, a request is made to our licensing server that evaluates the domain that the panel was loaded from. We then verify that you have a valid, active license key and that the domain being used matches the license accordingly.
 
 <Banner type="success">
   <strong>Note:</strong><br/>
-  Your Payload APIs will always be available, regardless of subscription status. This means you can have peace of mind that your critical operations are not going to be hindered because of a lapse in billing issue or a network problem between systems. Only the Admin panel will be affected.
+  Your Payload APIs will always be available, regardless of subscription status. This means you can have peace of mind that your critical operations relying on your API will not going to be hindered because of a lapse in billing issue or a network problem between systems. Only the Admin panel will be affected.
 </Banner>
 
-If your domain is not yet licensed, your subscription has expired from a production instance, you will have a chance to renew. In the meantime, the Admin panel will display an informative message before allowing you to access to notify you that your subscription is not valid.
+### How to choose the domain for your license
 
-<Banner type="warning">
-  <strong>Warning:</strong><br/>
-  The license is specific to the URL used to access the admin panel of your Payload application. With one license, you might have your admin panel accessed from https://admin.example.com, make data available from https://api.example.com to run your site at https://example.com. In this scenario you would only want to license admin.example.com regardless of the addresses used for the API and other sites or apps.
+Payload licenses are specific to **one** domain, but you can use your Payload API from an unlimited amount of sources. But, you can *only access your Payload Admin panel from one domain*. This means that when you are selecting the domain you'd like to tie to your Payload license, you should choose the domain that you'd like to use to access your admin panel in production.
+
+**Examples:**
+
+- If you'd like to access your admin panel from a subdomain like `api.yourdomainhere.com/admin`, you would use `api.yourdomain.com` for your license.
+- If you'd like to access via a root-level domain like `coolsitehere.com/admin`, you would use `coolsitehere.com` for your license.
+
+<Banner type="success">
+  <strong>Note:</strong><br/>
+  Even though your Payload license is tied to one domain, you can use your Admin panel for dev purposes however and wherever you'd like.
 </Banner>
 
-#### How does Payload know if the license is production or not?
+#### How does Payload know if the license is being used for dev or production purposes?
 
-The domain is sent along with the license key and that determines whether it is a public domain or not. Anything of a developer sounding name is allowed without a valid license. The following traits of the admin URL will allow Payload to work without a license:
+Our licensing service checks for any of the following criteria to determine if your domain is regarded as `production` or `development`:
 
-1. An IP address
-1. A private port. That is any port that is not 80 or 443. For example: 'dev.example.com:8000'
-1. Any of these subdomains: 'test', 'testing', 'dev', 'stage', 'staging', 'sandbox', 'acc', 'acceptance', 'demo', 'local', 'loc'
+1. If your Admin panel was loaded from an `ip`
+1. If it includes a port other than `80` or `443`. For example: `dev.example.com:8000`
+1. If your domain includes any of these keywords: `test`, `testing`, `dev`, `stage`, `staging`, `sandbox`, `acc`, `acceptance`, `demo`, `local`, `loc`
 
 ### FAQ
+
 1. **Why am I paying for open-source software?** Payload is not open source. You can view the code, but that doesn't mean it is free. A subscription license is required for production use you're not permitted to take parts of Payload for your own purposes. Those details aside, we are like an open-source software in that we encourage our community to participate as they see fit by exploring the code, reporting any issues to our [issue tracker](https://github.com/payloadcms/payload/issues) and you can even go as far as opening pull request if you wish.
 1. **Do you have educational or non-profit pricing available?** It would make us very happy to support your organization through the use of Payload. Please [contact](/contact) us to get started. We will ask to see verification of your organization's status.
-1. **Can I transfer a license?** You can change the domain name of a license in your Payload account by clicking on the license domain name, finding the "Change domain" link and following the instructions. If you need to transfer ownership to another user or organization, at this time we advise cancelling your license subscription and instructing the other party on purchasing a new subscription.
+1. **Can I transfer a license?** You can change the domain name of a license in your Payload account by clicking on the license domain name, finding the "Change domain" link and following the instructions. If you need to transfer ownership to another user or organization, you can [contact us](mailto:info@payloadcms.com) for help.
 
 ### Read The full license
 You can read the entirety of the Payload license directly in the distribution files or at [github.com](https://github.com/payloadcms/payload/blob/master/license.md)
