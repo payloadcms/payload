@@ -1,9 +1,16 @@
-<p align="center"><a href="https://github.com/nastyox/Rando.js#nastyox"></a></p>
 <h1 align="center">Payload</h1>
 <p align="center">A self-hosted, JavaScript headless CMS & application framework built with Express, MongoDB and React.</p>
+<p align="center">
+  <a href="https://github.com/payloadcms/payload/actions">
+    <img src="https://github.com/payloadcms/payload/workflows/build/badge.svg">
+  </a>
+  <a href="https://www.npmjs.com/package/payload">
+    <img alt="npm" src="https://img.shields.io/npm/v/payload">
+  </a>
+</p>
 
 <a href="https://payloadcms.com">
-<img src="https://payloadcms.com/images/admin.jpg" alt="Payload headless CMS Admin panel built with React" />
+  <img src="https://payloadcms.com/images/admin.jpg" alt="Payload headless CMS Admin panel built with React" />
 </a>
 
 ### Quick Start
@@ -12,7 +19,7 @@
 npx create-payload-app
 ```
 
-Alternatively, it only takes about five minutes to [write out your own app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
+Alternatively, it only takes about five minutes to [create an app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
 
 ### Documentation
 

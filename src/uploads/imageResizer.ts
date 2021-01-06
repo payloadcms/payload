@@ -4,9 +4,9 @@ import sanitize from 'sanitize-filename';
 import getImageSize from './getImageSize';
 import fileExists from './fileExists';
 import { CollectionConfig } from '../collections/config/types';
-import { FileSizes } from './types';
+import { FileSizes, ImageSize } from './types';
 
-function getOutputImage(sourceImage, size) {
+function getOutputImage(sourceImage: string, size: ImageSize) {
   const extension = sourceImage.split('.').pop();
   const name = sanitize(sourceImage.substr(0, sourceImage.lastIndexOf('.')) || sourceImage);
 
