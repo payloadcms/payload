@@ -25,6 +25,9 @@ const loadConfig = (): Config => {
         retainLines: true,
       },
     },
+    ignore: [
+      /node_modules[\\/](?!payload[\\/]dist[\\/]admin|payload[\\/]components).*/,
+    ],
   });
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
