@@ -59,7 +59,7 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
     const validationResult = typeof validate === 'function' ? await validate(valueToSend) : true;
 
     if (typeof validationResult === 'string') {
-      fieldToDispatch.errorMessage = fieldToDispatch.valid;
+      fieldToDispatch.errorMessage = validationResult;
       fieldToDispatch.valid = false;
     } else {
       fieldToDispatch.valid = validationResult;
