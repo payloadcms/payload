@@ -132,6 +132,7 @@ export type PayloadConfig = {
     } | ((graphQL: typeof GraphQL, payload: InitializeGraphQL) => any),
     maxComplexity?: number;
     disablePlaygroundInProduction?: boolean;
+    disable?: boolean;
   };
   components?: { [key: string]: JSX.Element | (() => JSX.Element) };
   paths?: { [key: string]: string };

@@ -100,9 +100,10 @@ export default buildConfig({
   defaultDepth: 2,
   graphQL: {
     maxComplexity: 1000,
-    mutations: {}, // TODO: needs typing
-    queries: {}, // TODO: needs typing
+    mutations: {},
+    queries: {},
     disablePlaygroundInProduction: true,
+    disable: false,
   },
   // rateLimit: {
   //   window: 15 * 60 * 100,

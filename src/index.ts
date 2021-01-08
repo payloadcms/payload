@@ -159,13 +159,15 @@ export class Payload {
 
       const graphQLHandler = new GraphQL(this);
 
-      this.router.use(
-        this.config.routes.graphQL,
-        identifyAPI('GraphQL'),
-        (req, res) => graphQLHandler.init(req, res)(req, res),
-      );
+      if (!this.config.graphQL.disable) {
+        this.router.use(
+          this.config.routes.graphQL,
+          identifyAPI('GraphQL'),
+          (req, res) => graphQLHandler.init(req, res)(req, res),
+        );
+        initGraphQLPlayground(this);
+      }
 
-      initGraphQLPlayground(this);
 
       // Bind router to API
       this.express.use(this.config.routes.api, this.router);
