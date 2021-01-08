@@ -32,6 +32,7 @@ const collectionSchema = joi.object().keys({
       }),
     }),
     preview: joi.func(),
+    disableDuplicate: joi.bool(),
   }),
   fields: joi.array()
     .items(fieldSchema),
