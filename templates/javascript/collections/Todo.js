@@ -12,13 +12,18 @@ const Todo = {
   },
   fields: [
     {
+      name: 'name',
+      label: 'List Name',
+      type: 'text',
+    },
+    {
       name: 'items',
       label: 'Items',
       type: 'array',
       fields: [
         {
           name: 'name',
-          label: 'Name',
+          label: 'Task Name',
           type: 'text',
         },
         {

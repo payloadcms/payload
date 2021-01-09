@@ -9,10 +9,15 @@ payload.init({
   secret: process.env.PAYLOAD_SECRET,
   mongoURL: process.env.MONGODB_URI,
   express: app,
+  onInit: () => {
+    setTimeout(() => {
+      payload.logger.info('');
+      payload.logger.info(`Payload Admin URL: ${payload.getAdminURL()}`);
+      payload.logger.info(`Payload API URL:   ${payload.getAPIURL()}`);
+    }, 2000);
+  },
 });
 
 // Add your own express routes here
 
-app.listen(3000, async () => {
-  console.log('Payload running on port 3000');
-});
+app.listen(3000);
