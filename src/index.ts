@@ -195,6 +195,10 @@ export class Payload {
     return email.account;
   }
 
+  getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`;
+
+  getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`;
+
   /**
    * @description Performs create operation
    * @param options
