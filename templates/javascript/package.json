@@ -9,7 +9,7 @@
     "serve": "NODE_ENV=production node server.js"
   },
   "dependencies": {
-    "payload": "0.1.137",
+    "payload": "0.1.142",
     "dotenv": "^8.2.0",
     "express": "^4.17.1"
   },

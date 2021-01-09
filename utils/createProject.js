@@ -42,7 +42,7 @@ const createProject = async () => {
   createProjectDir(projectDir);
   const templateDir = path.resolve(__dirname, `../templates/${await getTemplate()}`);
 
-  console.log(`\nCreating a new Payload app in ${chalk.green(path.resolve(projectDir))}\n`)
+  console.log(`\n  Creating a new Payload app in ${chalk.green(path.resolve(projectDir))}\n`)
 
   try {
     await fse.copy(templateDir, projectDir);
