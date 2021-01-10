@@ -52,8 +52,12 @@ export default joi.object({
     .max(100),
   csrf: joi.array()
     .items(joi.string()),
-  cors: joi.array()
-    .items(joi.string()),
+  cors: [
+    joi.string()
+      .valid('*'),
+    joi.array()
+      .items(joi.string()),
+  ],
   publicENV: joi.object(),
   express: joi.object()
     .keys({
