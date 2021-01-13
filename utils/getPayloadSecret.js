@@ -17,7 +17,7 @@ const getPayloadSecret = async () => {
     {
       type: 'text',
       name: 'value',
-      message: 'Enter Payload Secret',
+      message: 'Enter a long, complex string for Payload’s secret encryption key',
       validate: value => value.length,
     },
     {
