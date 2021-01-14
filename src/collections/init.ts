@@ -28,7 +28,7 @@ export default function registerCollections(ctx: Payload): void {
 
       if (maxLoginAttempts > 0) {
         // eslint-disable-next-line func-names
-        schema.methods.incLoginAttempts = function (cb) {
+        schema.methods.incLoginAttempts = function (this: any, cb) {
           // Expired lock, restart count at 1
           if (this.lockUntil && this.lockUntil < Date.now()) {
             return this.updateOne({
