@@ -27,8 +27,14 @@ export default function registerCollections(ctx: Payload): void {
       const { maxLoginAttempts, lockTime } = collection.auth;
 
       if (maxLoginAttempts > 0) {
+        type LoginSchema = {
+          loginAttempts: number
+          lockUntil: number
+          isLocked: boolean
+        };
+
         // eslint-disable-next-line func-names
-        schema.methods.incLoginAttempts = function (cb) {
+        schema.methods.incLoginAttempts = function (this: mongoose.Document<any> & LoginSchema, cb) {
           // Expired lock, restart count at 1
           if (this.lockUntil && this.lockUntil < Date.now()) {
             return this.updateOne({
@@ -37,7 +43,6 @@ export default function registerCollections(ctx: Payload): void {
             }, cb);
           }
 
-          type LoginSchema = { loginAttempts: number; };
           const updates: UpdateQuery<LoginSchema> = { $inc: { loginAttempts: 1 } };
           // Lock the account if at max attempts and not already locked
           if (this.loginAttempts + 1 >= maxLoginAttempts && !this.isLocked) {

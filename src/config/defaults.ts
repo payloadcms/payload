@@ -3,6 +3,7 @@ import path from 'path';
 export const defaults = {
   defaultDepth: 2,
   maxDepth: 10,
+  collections: [],
   globals: [],
   cookiePrefix: 'payload',
   csrf: [],
