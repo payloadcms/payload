@@ -85,7 +85,7 @@ export type PayloadConfig = {
   };
   collections?: PayloadCollectionConfig[];
   globals?: PayloadGlobalConfig[];
-  serverURL: string;
+  serverURL?: string;
   cookiePrefix?: string;
   csrf?: string[];
   cors?: string[] | '*';
