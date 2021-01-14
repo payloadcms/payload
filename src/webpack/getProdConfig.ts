@@ -3,7 +3,7 @@ import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import path from 'path';
-import { Configuration, WebpackPluginInstance } from 'webpack';
+import { Configuration } from 'webpack';
 import { Config } from '../config/types';
 import getBaseConfig from './getBaseConfig';
 
