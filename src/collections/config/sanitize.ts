@@ -86,11 +86,7 @@ const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: 
   }
 
   if (sanitized.auth) {
-    if (typeof collection.auth === 'object') {
-      sanitized.auth = merge(authDefaults, collection.auth);
-    } else {
-      sanitized.auth = {};
-    }
+    sanitized.auth = merge(authDefaults, typeof sanitized.auth === 'object' ? sanitized.auth : {});
 
     let authFields = baseAuthFields;
 
