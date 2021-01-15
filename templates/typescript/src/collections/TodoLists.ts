@@ -1,7 +1,7 @@
 import { CollectionConfig } from 'payload/types';
 
 const Todo: CollectionConfig = {
-  slug: 'todo',
+  slug: 'todos',
   labels: {
     singular: 'Todo List',
     plural: 'Todo Lists',

@@ -1,5 +1,5 @@
 const Todo = {
-  slug: 'todo',
+  slug: 'todos',
   labels: {
     singular: 'Todo List',
     plural: 'Todo Lists',
