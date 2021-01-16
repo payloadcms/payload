@@ -10,6 +10,14 @@ import { defaults } from './defaults';
 const sanitizeConfig = (config: PayloadConfig): Config => {
   const sanitizedConfig = merge(defaults, config) as PayloadConfig;
 
+  if (!sanitizedConfig.admin.user) {
+    sanitizedConfig.admin.user = 'users';
+    const sanitizedDefaultUser = sanitizeCollection(sanitizedConfig.collections, defaultUser);
+    sanitizedConfig.collections.push(sanitizedDefaultUser);
+  } else if (!sanitizedConfig.collections.find((c) => c.slug === sanitizedConfig.admin.user)) {
+    throw new InvalidConfiguration(`${sanitizedConfig.admin.user} is not a valid admin user collection`);
+  }
+
   sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig.collections, collection));
   checkDuplicateCollections(sanitizedConfig.collections);
 
@@ -21,13 +29,6 @@ const sanitizeConfig = (config: PayloadConfig): Config => {
     ...sanitizedConfig.csrf,
     config.serverURL,
   ];
-
-  if (!sanitizedConfig.admin.user) {
-    sanitizedConfig.admin.user = 'users';
-    sanitizedConfig.collections.push(sanitizeCollection(sanitizedConfig.collections, defaultUser));
-  } else if (!sanitizedConfig.collections.find((c) => c.slug === sanitizedConfig.admin.user)) {
-    throw new InvalidConfiguration(`${sanitizedConfig.admin.user} is not a valid admin user collection`);
-  }
 
   return sanitizedConfig as Config;
 };
