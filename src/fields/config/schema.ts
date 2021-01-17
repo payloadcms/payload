@@ -67,6 +67,8 @@ export const textarea = baseField.keys({
   type: joi.string().valid('textarea').required(),
   name: joi.string().required(),
   defaultValue: joi.string(),
+  minLength: joi.number(),
+  maxLength: joi.number(),
 });
 
 export const email = baseField.keys({
