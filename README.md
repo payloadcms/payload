@@ -14,9 +14,8 @@
 </p>
 
 <a href="https://payloadcms.com">
-  <img src="https://payloadcms.com/images/admin.jpg" alt="Payload headless CMS Admin panel built with React" />
+  <img src="https://payloadcms.com/images/og-image.jpg" alt="Payload headless CMS Admin panel built with React" />
 </a>
-
 
 ### Quick Start
 
