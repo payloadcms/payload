@@ -31,7 +31,7 @@ export const text: Validate = (value: string, options = {}) => {
   }
 
   if (options.minLength && (value && value.length < options.minLength)) {
-    return `This value must be longer than the minimum length of ${options.maxLength} characters.`;
+    return `This value must be longer than the minimum length of ${options.minLength} characters.`;
   }
 
   if (options.required) {
@@ -49,7 +49,7 @@ export const password: Validate = (value: string, options = {}) => {
   }
 
   if (options.minLength && value.length < options.minLength) {
-    return `This value must be longer than the minimum length of ${options.maxLength} characters.`;
+    return `This value must be longer than the minimum length of ${options.minLength} characters.`;
   }
 
   if (options.required && !value) {
@@ -74,7 +74,7 @@ export const textarea: Validate = (value: string, options = {}) => {
   }
 
   if (options.minLength && value.length < options.minLength) {
-    return `This value must be longer than the minimum length of ${options.maxLength} characters.`;
+    return `This value must be longer than the minimum length of ${options.minLength} characters.`;
   }
 
   if (options.required && !value) {
