@@ -14,6 +14,7 @@
     "@sindresorhus/slugify": "^1.1.0",
     "arg": "^5.0.0",
     "chalk": "^4.1.0",
+    "command-exists": "^1.2.9",
     "execa": "^5.0.0",
     "figures": "^3.2.0",
     "fs-extra": "^9.0.1",

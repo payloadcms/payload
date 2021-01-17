@@ -8,6 +8,7 @@ const { getArgs } = require('./getArgs');
 const { getProjectDir } = require('./getProjectDir');
 const { getTemplate } = require('./getTemplate');
 const { success, error } = require('./log');
+const { getPackageManager } = require('./getPackageManager');
 
 const createProjectDir = (projectDir) => {
   fse.mkdirpSync(projectDir);
@@ -18,13 +19,12 @@ const createProjectDir = (projectDir) => {
   }
 };
 
-const installDeps = async (dir) => {
+const installDeps = async (dir, packageManager) => {
   const args = getArgs();
   if (args['--no-deps']) {
     return { failed: false };
   }
-
-  const cmd = args['--use-npm'] ? 'npm install' : 'yarn';
+  let cmd = packageManager === 'yarn' ? 'yarn' : 'npm install';
 
   let result = false;
   try {
@@ -51,8 +51,10 @@ const createProject = async () => {
     console.error(err);
   }
 
+  const packageManager = await getPackageManager();
+  success(`Using ${packageManager} as package manager`);
   const spinner = ora('Installing dependencies. This may take a few minutes.').start();
-  const result = await installDeps(projectDir);
+  const result = await installDeps(projectDir, packageManager);
   spinner.stop();
   spinner.clear();
   if (result.failed) {

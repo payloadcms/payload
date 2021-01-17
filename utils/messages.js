@@ -2,6 +2,7 @@ const chalk = require('chalk');
 const figures = require('figures');
 const terminalLink = require('terminal-link');
 const { getProjectDir } = require('./getProjectDir');
+const { getPackageManager } = require('./getPackageManager');
 
 const header = (message) => chalk.yellow(figures.star) + ' ' + chalk.bold(message);
 
@@ -21,6 +22,7 @@ const helpMessage = chalk`
 
         {dim Available templates: javascript, typescript}
 
+      --use-npm                          Use npm to install dependencies
       --help                             Show help
 `;
 
@@ -28,7 +30,7 @@ const successMessage = async () => `
   ${header('Launch Application:')}
 
     - cd ${await getProjectDir()}
-    - yarn dev
+    - ${await getPackageManager() === 'yarn' ? 'yarn' : 'npm run'} dev
 
   ${header('Documentation:')}
 
