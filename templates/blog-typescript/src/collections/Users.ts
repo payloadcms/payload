@@ -10,8 +10,12 @@ const Users: CollectionConfig = {
     read: () => true,
   },
   hooks: {
-    beforeRead: [({ req: { user, data }}) => {
-      data.email = undefined;
+    beforeRead: [({ req: { user }, doc }) => {
+      // Only return name if not logged in
+      if (!user) {
+        return { name: doc.name };
+      }
+      return doc;
     }]
   },
   fields: [
