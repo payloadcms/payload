@@ -7,11 +7,16 @@ const success = (message) => {
   console.log(chalk.green(figures.tick) + ' ' + chalk.bold(message));
 }
 
+const warning = (message) => {
+  console.log(chalk.yellow('? ') + chalk.bold(message));
+}
+
 const error = (message) => {
   console.log(chalk.red(figures.cross) + ' ' + chalk.bold(message));
 }
 
 module.exports = {
   success,
+  warning,
   error,
 }

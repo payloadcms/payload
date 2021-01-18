@@ -7,7 +7,7 @@ const { getArgs } = require('./getArgs');
 
 const { getProjectDir } = require('./getProjectDir');
 const { getTemplate } = require('./getTemplate');
-const { success, error } = require('./log');
+const { success, error, warning } = require('./log');
 const { getPackageManager } = require('./getPackageManager');
 
 const createProjectDir = (projectDir) => {
@@ -37,6 +37,34 @@ const installDeps = async (dir, packageManager) => {
   return result;
 };
 
+const getLatestPayloadVersion = async () => {
+  let result = false;
+  try {
+    const { stdout } = await execa('npm info payload version', [], { shell: true });
+    return stdout;
+  } catch (error) {
+    result = error;
+  }
+  return result;
+}
+
+const updatePayloadVersion = async (projectDir) => {
+  const payloadVersion = await getLatestPayloadVersion();
+  if (payloadVersion.failed) {
+    warning('Error retrieving latest Payload version. Please update your package.json manually.');
+    return;
+  }
+
+  const pjson = path.resolve(projectDir, 'package.json');
+  try {
+    const packageObj = await fse.readJson(pjson);
+    packageObj.dependencies.payload = payloadVersion;
+    await fse.writeJson(pjson, packageObj, { spaces: 2 });
+  } catch (err) {
+    warning('Unable to write Payload version to package.json. Please update your package.json manually.');
+  }
+}
+
 const createProject = async () => {
   const projectDir = await getProjectDir();
   createProjectDir(projectDir);
@@ -48,17 +76,19 @@ const createProject = async () => {
     await fse.copy(templateDir, projectDir);
     success('Project directory created')
   } catch (err) {
-    console.error(err);
+    error('Unable to copy template files', err);
+    return;
   }
 
+  await updatePayloadVersion(projectDir);
+
   const packageManager = await getPackageManager();
-  success(`Using ${packageManager} as package manager`);
   const spinner = ora('Installing dependencies. This may take a few minutes.').start();
   const result = await installDeps(projectDir, packageManager);
   spinner.stop();
   spinner.clear();
   if (result.failed) {
-    console.error('Error installing dependencies');
+    error('Error installing dependencies');
   } else {
     success('Dependencies installed');
   }
