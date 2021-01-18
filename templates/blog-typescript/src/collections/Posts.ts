@@ -7,10 +7,7 @@ const Posts: CollectionConfig = {
     useAsTitle: 'title',
   },
   access: {
-    create: () => true,
     read: () => true,
-    update: () => true,
-    delete: () => true,
   },
   fields: [
     {
@@ -23,6 +20,11 @@ const Posts: CollectionConfig = {
       label: 'Author',
       type: 'relationship',
       relationTo: 'users',
+    },
+    {
+      name: 'publishedDate',
+      label: 'Published Date',
+      type: 'date',
     },
     {
       name: 'category',

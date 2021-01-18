@@ -7,17 +7,25 @@ const Users: CollectionConfig = {
     useAsTitle: 'email',
   },
   access: {
-    create: () => true,
-    // read: () => true,  // Only admin panel access until modified
-    // update: () => true, // Only admin panel access until modified
-    // delete: () => true, // Only admin panel access until modified
-
+    read: () => true,
+  },
+  hooks: {
+    beforeRead: [({ req: { user }, doc }) => {
+      // Only return name if not logged in
+      if (!user) {
+        return { name: doc.name };
+      }
+      return doc;
+    }]
   },
   fields: [
     // Email added by default
-    // Add more fields as needed
+    {
+      name: 'name',
+      label: 'Name',
+      type: 'text',
+    }
   ],
 };
-
 
 export default Users;

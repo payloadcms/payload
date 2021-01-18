@@ -6,10 +6,7 @@ const Tags: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    create: () => true,
     read: () => true,
-    update: () => true,
-    delete: () => true,
   },
   fields: [
     {

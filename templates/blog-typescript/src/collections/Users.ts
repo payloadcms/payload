@@ -7,7 +7,12 @@ const Users: CollectionConfig = {
     useAsTitle: 'email',
   },
   access: {
-    create: () => true,
+    read: () => true,
+  },
+  hooks: {
+    beforeRead: [({ req: { user, data }}) => {
+      data.email = undefined;
+    }]
   },
   fields: [
     // Email added by default
