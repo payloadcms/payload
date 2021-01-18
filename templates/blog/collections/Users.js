@@ -1,6 +1,12 @@
-import { CollectionConfig } from 'payload/types';
+const onlyNameIfPublic = ({ req: { user }, doc }) => {
+  // Only return name if not logged in
+  if (!user) {
+    return { name: doc.name };
+  }
+  return doc;
+};
 
-const Users: CollectionConfig = {
+const Users = {
   slug: 'users',
   auth: true,
   admin: {
@@ -10,13 +16,7 @@ const Users: CollectionConfig = {
     read: () => true,
   },
   hooks: {
-    beforeRead: [({ req: { user }, doc }) => {
-      // Only return name if not logged in
-      if (!user) {
-        return { name: doc.name };
-      }
-      return doc;
-    }]
+    beforeRead: [onlyNameIfPublic]
   },
   fields: [
     // Email added by default
