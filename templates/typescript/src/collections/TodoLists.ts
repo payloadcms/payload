@@ -6,6 +6,10 @@ const Todo: CollectionConfig = {
     singular: 'Todo List',
     plural: 'Todo Lists',
   },
+  admin: {
+    defaultColumns: ['name', 'items', 'updatedAt'],
+    useAsTitle: 'name',
+  },
   access: {
     create: () => true,
     read: () => true,
