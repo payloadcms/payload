@@ -4,6 +4,7 @@ import { render } from '@testing-library/react';
 import BlocksCell from './field-types/Blocks';
 import DateCell from './field-types/Date';
 import Checkbox from './field-types/Checkbox';
+import Textarea from './field-types/Textarea';
 
 describe('Cell Types', () => {
   describe('Blocks', () => {
@@ -85,6 +86,19 @@ describe('Cell Types', () => {
       const { container } = render(<Checkbox data={false} />);
       const el = container.querySelector('span');
       expect(el).toHaveTextContent('false');
+    });
+  });
+
+  describe('Textarea', () => {
+    it('renders data', () => {
+      const { container } = render(<Textarea data="data" />);
+      const el = container.querySelector('span');
+      expect(el).toHaveTextContent('data');
+    });
+    it('handle undefined - bug/13', () => {
+      const { container } = render(<Textarea data={undefined} />);
+      const el = container.querySelector('span');
+      expect(el).toHaveTextContent('');
     });
   });
 });

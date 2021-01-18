@@ -26,16 +26,16 @@ export const number: Validate = (value: string, options = {}) => {
 };
 
 export const text: Validate = (value: string, options = {}) => {
-  if (options.maxLength && (value && value.length > options.maxLength)) {
+  if (value && options.maxLength && value.length > options.maxLength) {
     return `This value must be shorter than the max length of ${options.maxLength} characters.`;
   }
 
-  if (options.minLength && (value && value.length < options.minLength)) {
+  if (value && options.minLength && value?.length < options.minLength) {
     return `This value must be longer than the minimum length of ${options.minLength} characters.`;
   }
 
   if (options.required) {
-    if (typeof value !== 'string' || (typeof value === 'string' && value.length === 0)) {
+    if (typeof value !== 'string' || (typeof value === 'string' && value?.length === 0)) {
       return defaultMessage;
     }
   }
@@ -44,11 +44,11 @@ export const text: Validate = (value: string, options = {}) => {
 };
 
 export const password: Validate = (value: string, options = {}) => {
-  if (options.maxLength && value.length > options.maxLength) {
+  if (value && options.maxLength && value.length > options.maxLength) {
     return `This value must be shorter than the max length of ${options.maxLength} characters.`;
   }
 
-  if (options.minLength && value.length < options.minLength) {
+  if (value && options.minLength && value.length < options.minLength) {
     return `This value must be longer than the minimum length of ${options.minLength} characters.`;
   }
 
@@ -69,11 +69,11 @@ export const email: Validate = (value: string, options = {}) => {
 };
 
 export const textarea: Validate = (value: string, options = {}) => {
-  if (options.maxLength && value.length > options.maxLength) {
+  if (value && options.maxLength && value.length > options.maxLength) {
     return `This value must be shorter than the max length of ${options.maxLength} characters.`;
   }
 
-  if (options.minLength && value.length < options.minLength) {
+  if (value && options.minLength && value.length < options.minLength) {
     return `This value must be longer than the minimum length of ${options.minLength} characters.`;
   }
 
