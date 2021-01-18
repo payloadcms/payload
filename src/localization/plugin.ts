@@ -73,18 +73,6 @@ export default function localizationPlugin(schema: any, options): void {
         return value;
       })
       .set(function (value) {
-        // multiple locales are set as an object
-        if (value && typeof value === 'object' && !Array.isArray(value)) {
-          const { locales } = options;
-          locales.forEach((locale) => {
-            if (!value[locale]) {
-              return;
-            }
-            this.set(`${path}.${locale}`, value[locale]);
-          }, this);
-          return;
-        }
-
         // embedded and sub-documents will use locale methods from the top level document
         const owner = this.ownerDocument ? this.ownerDocument() : this;
         const locale = owner.getLocale();

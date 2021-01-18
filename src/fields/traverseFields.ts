@@ -81,7 +81,7 @@ const traverseFields = (args: Arguments): void => {
       dataCopy[field.name] = JSON.parse(data[field.name] as string);
     }
 
-    const hasLocalizedValue = (typeof data[field.name] === 'object' && data[field.name] !== null)
+    const hasLocalizedValue = (typeof data?.[field.name] === 'object' && data?.[field.name] !== null)
       && field.name
       && field.localized
       && locale !== 'all'
