@@ -1,7 +1,4 @@
-import { BeforeReadHook } from 'payload/dist/collections/config/types';
-import { CollectionConfig } from 'payload/types';
-
-const onlyNameIfPublic: BeforeReadHook = ({ req: { user }, doc }) => {
+const onlyNameIfPublic = ({ req: { user }, doc }) => {
   // Only return name if not logged in
   if (!user) {
     return { name: doc.name };
@@ -9,7 +6,7 @@ const onlyNameIfPublic: BeforeReadHook = ({ req: { user }, doc }) => {
   return doc;
 };
 
-const Users: CollectionConfig = {
+const Users = {
   slug: 'users',
   auth: true,
   admin: {

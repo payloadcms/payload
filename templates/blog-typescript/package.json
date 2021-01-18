@@ -1,5 +1,5 @@
 {
-  "name": "payload-starter-typescript",
+  "name": "payload-blog-typescript",
   "version": "1.0.0",
   "main": "dist/server.js",
   "license": "MIT",
