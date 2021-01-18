@@ -9,22 +9,8 @@ const Users: CollectionConfig = {
   access: {
     read: () => true,
   },
-  hooks: {
-    beforeRead: [({ req: { user }, doc }) => {
-      // Only return name if not logged in
-      if (!user) {
-        return { name: doc.name };
-      }
-      return doc;
-    }]
-  },
   fields: [
     // Email added by default
-    {
-      name: 'name',
-      label: 'Name',
-      type: 'text',
-    }
   ],
 };
 

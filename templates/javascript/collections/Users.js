@@ -5,10 +5,7 @@ const Users = {
     useAsTitle: 'email',
   },
   access: {
-    create: () => true,
-    // read: () => true,  // Only admin panel access until modified
-    // update: () => true, // Only admin panel access until modified
-    // delete: () => true, // Only admin panel access until modified
+    read: () => true,
   },
   fields: [
     // Email added by default
