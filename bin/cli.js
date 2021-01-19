@@ -10,6 +10,7 @@ const { getDatabaseConnection } = require('../utils/getDatabaseConnection');
 const { getPayloadSecret } = require('../utils/getPayloadSecret');
 const { writeEnvFile } = require('../utils/writeEnvFile');
 const { getLanguage } = require('../utils/getLanguage');
+const { validateTemplate } = require('../utils/getValidTemplates');
 
 (async () => {
   const args = getArgs();
@@ -17,6 +18,15 @@ const { getLanguage } = require('../utils/getLanguage');
     console.log(await helpMessage());
     return 0;
   }
+  const templateArg = args['--template']
+  if (templateArg) {
+    const valid = await validateTemplate(templateArg);
+    if (!valid) {
+      console.log(await helpMessage());
+      process.exit(1);
+    }
+  }
+
   console.log(welcomeMessage);
 
   await getProjectName();

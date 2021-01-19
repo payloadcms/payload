@@ -78,7 +78,7 @@ const createProject = async () => {
   } catch (err) {
     const msg = 'Unable to copy template files. Please check template name or directory permissions.';
     error(msg);
-    process.exit(0);
+    process.exit(1);
   }
 
   await updatePayloadVersion(projectDir);

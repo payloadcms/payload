@@ -16,16 +16,17 @@ const helpMessage = async () => {
   return chalk`
   {bold USAGE}
 
-      {dim $} {bold yarn create payload-app} --name {underline my-payload-app}
-      {dim $} {bold npx create-payload-app} --name {underline my-payload-app}
+      {dim $} {bold npx create-payload-app}
 
   {bold OPTIONS}
 
+      --name {underline my-payload-app}              Set project name
       --template {underline template_name}           Choose specific template
 
         {dim Available templates: ${validTemplates.join(', ')}}
 
       --use-npm                          Use npm to install dependencies
+      --no-deps                          Do not install any dependencies
       --help                             Show help
 `;
 };

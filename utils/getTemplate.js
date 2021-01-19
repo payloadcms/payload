@@ -13,13 +13,7 @@ const getTemplate = async () => {
   const args = getArgs();
   const templates = await getValidTemplates();
   if (args['--template']) {
-    const templateArg = args['--template'];
-    if (!templates.includes(templateArg)) {
-      error(`${templateArg} is not a valid template.`);
-      info(`Valid templates: ${templates.join(', ')}`);
-      process.exit(0);
-    }
-    TEMPLATE = templateArg;
+    TEMPLATE = args['--template'];
     return TEMPLATE;
   }
 
