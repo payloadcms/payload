@@ -18,6 +18,7 @@ Payload is a *config-based*, code-first CMS and application framework. The Paylo
 
 | Option               | Description  |
 | -------------------- | -------------|
+| `serverURL`          | A string used to define the absolute URL of your app including the protocol, for example `https://'example.com`. Defaults to using a relative path. |
 | `collections`        | An array of all Collections that Payload will manage. To read more about how to define your collection configs, [click here](/docs/configuration/collections). |
 | `globals`            | An array of all Globals that Payload will manage. For more on Globals and their configs, [click here](/docs/configuration/globals). |
 | `admin`              | Base Payload admin configuration. Specify custom components, control metadata, set the Admin user collection, and [more](/docs/admin/overview#options). |
@@ -42,7 +43,6 @@ Payload is a *config-based*, code-first CMS and application framework. The Paylo
 import { buildConfig } from 'payload/config';
 
 const config = buildConfig({
-	serverURL: 'http://localhost:3000',
 	collections: [
 		{
 			slug: 'pages',

@@ -1,11 +1,11 @@
 import merge from 'deepmerge';
-import { PayloadConfig, Config } from './types';
+import {PayloadConfig, Config} from './types';
 import defaultUser from '../auth/defaultUser';
 import sanitizeCollection from '../collections/config/sanitize';
-import { InvalidConfiguration } from '../errors';
+import {InvalidConfiguration} from '../errors';
 import sanitizeGlobals from '../globals/config/sanitize';
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections';
-import { defaults } from './defaults';
+import {defaults} from './defaults';
 
 const sanitizeConfig = (config: PayloadConfig): Config => {
   const sanitizedConfig = merge(defaults, config) as PayloadConfig;
@@ -28,7 +28,7 @@ const sanitizeConfig = (config: PayloadConfig): Config => {
   sanitizedConfig.csrf = [
     ...sanitizedConfig.csrf,
     config.serverURL,
-  ];
+  ].filter((item) => item);
 
   return sanitizedConfig as Config;
 };
