@@ -34,6 +34,7 @@ import localGlobalOperations from './globals/operations/local';
 import { encrypt, decrypt } from './auth/crypto';
 import { MockEmailHandler, BuildEmailResult, Message } from './email/types';
 import { PayloadRequest } from './express/types';
+import sendEmail from './email/sendEmail';
 
 import { Options as CreateOptions } from './collections/operations/local/create';
 import { Options as FindOptions } from './collections/operations/local/find';
@@ -66,6 +67,8 @@ export class Payload {
   emailOptions: EmailOptions;
 
   email: BuildEmailResult;
+
+  sendEmail: (message: Message) => Promise<unknown>;
 
   license: string;
 
@@ -133,6 +136,7 @@ export class Payload {
 
     // Configure email service
     this.email = buildEmail(this.emailOptions);
+    this.sendEmail = sendEmail.bind(this);
 
     // Initialize collections & globals
     initCollections(this);
@@ -182,17 +186,6 @@ export class Payload {
     }
 
     if (typeof options.onInit === 'function') options.onInit(this);
-  }
-
-  sendEmail = async (message: Message): Promise<unknown> => {
-    const email = await this.email;
-    const result = email.transport.sendMail(message);
-    return result;
-  }
-
-  getMockEmailCredentials = async (): Promise<TestAccount> => {
-    const email = await this.email as MockEmailHandler;
-    return email.account;
   }
 
   getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`;
