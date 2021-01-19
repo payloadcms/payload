@@ -26,6 +26,24 @@ const ensureConfigHasFrom = (emailConfig) => {
   }
 };
 
+const handleMockAccount = async (emailConfig: EmailOptions) => {
+  let mockAccount;
+  try {
+    mockAccount = await mockHandler(emailConfig);
+    const { account: { web, user, pass } } = mockAccount;
+    logger.info('E-mail configured with mock configuration');
+    logger.info(`Log into mock email provider at ${web}`);
+    logger.info(`Mock email account username: ${user}`);
+    logger.info(`Mock email account password: ${pass}`);
+  } catch (err) {
+    logger.error(
+      'There was a problem setting up the mock email handler',
+      err,
+    );
+  }
+  return mockAccount;
+};
+
 export default async function buildEmail(emailConfig: EmailOptions): BuildEmailResult {
   if (hasTransport(emailConfig) && emailConfig.transport) {
     ensureConfigHasFrom(emailConfig);
@@ -41,12 +59,5 @@ export default async function buildEmail(emailConfig: EmailOptions): BuildEmailR
     return handleTransport(transport, email);
   }
 
-  const mockAccount = await mockHandler(emailConfig);
-  // Only log mock credentials if was explicitly set in config
-  const { account: { web, user, pass } } = mockAccount;
-  logger.info('E-mail configured with mock configuration');
-  logger.info(`Log into mock email provider at ${web}`);
-  logger.info(`Mock email account username: ${user}`);
-  logger.info(`Mock email account password: ${pass}`);
-  return mockAccount;
+  return handleMockAccount(emailConfig);
 }
