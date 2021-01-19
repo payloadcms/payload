@@ -3,6 +3,7 @@ const figures = require('figures');
 const terminalLink = require('terminal-link');
 const { getProjectDir } = require('./getProjectDir');
 const { getPackageManager } = require('./getPackageManager');
+const { getValidTemplates } = require('./getValidTemplates');
 
 const header = (message) => chalk.yellow(figures.star) + ' ' + chalk.bold(message);
 
@@ -10,7 +11,9 @@ const welcomeMessage = chalk`
   {green Welcome to Payload. Let's create a project! }
 `;
 
-const helpMessage = chalk`
+const helpMessage = async () => {
+  const validTemplates = await getValidTemplates();
+  return chalk`
   {bold USAGE}
 
       {dim $} {bold yarn create payload-app} --name {underline my-payload-app}
@@ -20,11 +23,12 @@ const helpMessage = chalk`
 
       --template {underline template_name}           Choose specific template
 
-        {dim Available templates: javascript, typescript}
+        {dim Available templates: ${validTemplates.join(', ')}}
 
       --use-npm                          Use npm to install dependencies
       --help                             Show help
 `;
+};
 
 const successMessage = async () => `
   ${header('Launch Application:')}

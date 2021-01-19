@@ -76,8 +76,9 @@ const createProject = async () => {
     await fse.copy(templateDir, projectDir);
     success('Project directory created')
   } catch (err) {
-    error('Unable to copy template files', err);
-    return;
+    const msg = 'Unable to copy template files. Please check template name or directory permissions.';
+    error(msg);
+    process.exit(0);
   }
 
   await updatePayloadVersion(projectDir);

@@ -11,6 +11,10 @@ const warning = (message) => {
   console.log(chalk.yellow('? ') + chalk.bold(message));
 }
 
+const info = (message) => {
+  console.log(chalk.yellow(figures.info) + ' ' + chalk.bold(message));
+}
+
 const error = (message) => {
   console.log(chalk.red(figures.cross) + ' ' + chalk.bold(message));
 }
@@ -18,5 +22,6 @@ const error = (message) => {
 module.exports = {
   success,
   warning,
+  info,
   error,
 }

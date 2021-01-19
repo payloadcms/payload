@@ -1,11 +1,8 @@
 const prompts = require('prompts');
-const fs = require('fs');
-const path = require('path');
 const { getArgs } = require('./getArgs');
-
-const getDirectories = (path) => fs.readdirSync(path).filter(file => {
-  return fs.statSync(path + '/' + file).isDirectory();
-});
+const { getLanguage } = require('./getLanguage');
+const { info, error } = require('./log');
+const { getValidTemplates } = require('./getValidTemplates');
 
 let TEMPLATE;
 const getTemplate = async () => {
@@ -14,17 +11,29 @@ const getTemplate = async () => {
   }
 
   const args = getArgs();
+  const templates = await getValidTemplates();
   if (args['--template']) {
-    TEMPLATE = args['--template'];
+    const templateArg = args['--template'];
+    if (!templates.includes(templateArg)) {
+      error(`${templateArg} is not a valid template.`);
+      info(`Valid templates: ${templates.join(', ')}`);
+      process.exit(0);
+    }
+    TEMPLATE = templateArg;
     return TEMPLATE;
   }
+
+  const lang = await getLanguage();
+  const filteredTemplates = templates
+    .filter(d => d.startsWith(lang))
+    .map(t => t.replace(`${lang}-`, ''));
 
   const response = await prompts(
     {
       type: 'select',
       name: 'value',
       message: 'Choose project template',
-      choices: getDirectories(path.resolve(__dirname, '../templates')).map(p => {
+      choices: filteredTemplates.map(p => {
         return { title: p, value: p };
       }),
       validate: value => value.length,
@@ -36,7 +45,7 @@ const getTemplate = async () => {
     }
   );
 
-  TEMPLATE = response.value;
+  TEMPLATE = `${lang}-${response.value}`;
   return TEMPLATE;
 };
 

@@ -9,16 +9,18 @@ const { success } = require('../utils/log');
 const { getDatabaseConnection } = require('../utils/getDatabaseConnection');
 const { getPayloadSecret } = require('../utils/getPayloadSecret');
 const { writeEnvFile } = require('../utils/writeEnvFile');
+const { getLanguage } = require('../utils/getLanguage');
 
 (async () => {
   const args = getArgs();
   if (args['--help'] || args.count === 0) {
-    console.log(helpMessage);
+    console.log(await helpMessage());
     return 0;
   }
   console.log(welcomeMessage);
 
   await getProjectName();
+  await getLanguage();
   await getTemplate();
   await getDatabaseConnection();
   await getPayloadSecret();
