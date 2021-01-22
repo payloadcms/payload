@@ -33,11 +33,9 @@ const hookPromise = async ({
         data: fullData,
         operation,
         req,
-      }) || data[field.name];
+      });
 
-      if (hookedValue !== undefined) {
-        resultingData[field.name] = hookedValue;
-      }
+      resultingData[field.name] = hookedValue;
     }, Promise.resolve());
   }
 };
