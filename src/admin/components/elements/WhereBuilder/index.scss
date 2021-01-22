@@ -17,10 +17,15 @@
 
   &__add-or,
   &__add-first-filter {
-    margin-bottom: 0;
+
+    &.btn {
+      margin-bottom: 0;
+    }
   }
 
   &__add-first-filter {
-    margin-top: 0;
+    &.btn {
+      margin-top: 0;
+    }
   }
 }
