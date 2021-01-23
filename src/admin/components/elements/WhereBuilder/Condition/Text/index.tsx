@@ -11,7 +11,7 @@ const Text: React.FC<Props> = ({ onChange, value }) => (
     className={baseClass}
     type="text"
     onChange={(e) => onChange(e.target.value)}
-    value={value}
+    value={value || ''}
   />
 );
 

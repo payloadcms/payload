@@ -63,7 +63,7 @@ const Condition: React.FC<Props> = (props) => {
                 type: 'update',
                 orIndex,
                 andIndex,
-                field,
+                field: field.value,
               })}
             />
           </div>
@@ -75,7 +75,7 @@ const Condition: React.FC<Props> = (props) => {
                 type: 'update',
                 orIndex,
                 andIndex,
-                operator,
+                operator: operator.value,
               })}
             />
           </div>
