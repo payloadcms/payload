@@ -44,7 +44,7 @@ Example field configuration:
 
 ## Arguments and return values
 
-All field-level hooks are formatted to accept the same arguments, although some may be `undefined` based on which field hook you are utilizing.
+All field-level hooks are formatted to accept the same arguments, although some arguments may be `undefined` based on which field hook you are utilizing.
 
 <Banner type="success">
   <strong>Tip:</strong><br />
@@ -65,7 +65,7 @@ Field Hooks receive one `args` argument that contains the following properties:
 
 #### Return value
 
-All field hooks can optionally modify the return value of the field before the operation continues. Field Hooks may optionally return the value that should be used within the field.
+Field hooks **must** return the intended value for the field to be used in the operation. You can modify the return value of the field before the operation continues, or simply send the `value` that you receive through the hook's argument. If you return `undefined` within a `beforeChange` or `beforeValidate` hook, the property will be unset from its document.
 
 <Banner type="warning">
   <strong>Important</strong><br/>
