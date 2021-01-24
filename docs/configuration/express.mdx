@@ -16,6 +16,7 @@ Payload utilizes a few Express-specific middleware packages within its own route
 
 ```js
 {
+	serverURL: 'http://localhost:3000',
 	express: {
 		json: {
 			limit: '4mb',
@@ -36,6 +37,7 @@ To customize compression options, pass an object to the Payload config's `expres
 
 ```js
 {
+	serverURL: 'http://localhost:3000',
 	express: {
 		compression: {
 			// settings go here

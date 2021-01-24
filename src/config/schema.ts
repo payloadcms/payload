@@ -9,7 +9,7 @@ const component = joi.alternatives().try(
 
 export default joi.object({
   serverURL: joi.string()
-    .allow(null, ''),
+    .required(),
   cookiePrefix: joi.string(),
   routes: joi.object({
     admin: joi.string(),

@@ -11,7 +11,6 @@ import { NegativeFieldGutterProvider } from '../../../forms/FieldTypeGutter/cont
 import { useLocale } from '../../../utilities/Locale';
 import { IndexProps } from './types';
 import { StepNavItem } from '../../../elements/StepNav/types';
-import getAbsoluteURL from '../../../../utilities/getAbsoluteURL';
 
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection, isEditing } = props;
@@ -94,7 +93,7 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const collectionPermissions = permissions?.collections?.[slug];
 
-  const apiURL = `${getAbsoluteURL(serverURL)}${api}/${slug}/${id}`;
+  const apiURL = `${serverURL}${api}/${slug}/${id}`;
   const action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
   const hasSavePermission = (isEditing && collectionPermissions?.update?.permission) || (!isEditing && collectionPermissions?.create?.permission);
 
