@@ -18,7 +18,12 @@ const SectionTitle: React.FC<Props> = (props) => {
 
   return (
     <div className={classes}>
-      <Pill pillStyle="light-gray">{label}</Pill>
+      <Pill
+        pillStyle="light-gray"
+        className={`${baseClass}__pill`}
+      >
+        {label}
+      </Pill>
 
       <input
         className={`${baseClass}__input`}
