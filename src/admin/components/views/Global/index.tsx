@@ -11,7 +11,6 @@ import DefaultGlobal from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
 import { IndexProps } from './types';
-import getAbsoluteURL from '../../../utilities/getAbsoluteURL';
 
 const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{data?: Record<string, unknown>}>();
@@ -91,7 +90,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
           initialState,
           global,
           onSave,
-          apiURL: `${getAbsoluteURL(serverURL)}${api}/globals/${slug}?depth=0`,
+          apiURL: `${serverURL}${api}/globals/${slug}?depth=0`,
           action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
         }}
       />
