@@ -157,14 +157,14 @@ export type RelationshipField = FieldBase & {
 
 type RichTextPlugin = (editor: Editor) => Editor;
 
-type RichTextCustomElement = {
+export type RichTextCustomElement = {
   name: string
   Button: React.ComponentType
   Element: React.ComponentType
   plugins?: RichTextPlugin[]
 }
 
-type RichTextCustomLeaf = {
+export type RichTextCustomLeaf = {
   name: string
   Button: React.ComponentType
   Leaf: React.ComponentType
