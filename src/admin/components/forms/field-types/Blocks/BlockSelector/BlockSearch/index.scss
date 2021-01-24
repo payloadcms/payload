@@ -17,7 +17,7 @@ $icon-margin: base(.25);
 
   .search {
     position: absolute;
-    right: 0;
+    right: base(.25);
     width: $icon-width;
     margin: 0 $icon-margin;
   }

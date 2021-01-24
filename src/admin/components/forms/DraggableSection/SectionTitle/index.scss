@@ -6,7 +6,7 @@
   width: 100%;
 
   &__input {
-    width: 100%;
+    flex-grow: 1;
     color: $color-dark-gray;
     background-color: transparent;
     font-family: $font-body;
@@ -29,5 +29,9 @@
     &:focus {
       box-shadow: none;
     }
+  }
+
+  &__pill {
+    flex-shrink: 0;
   }
 }

@@ -63,7 +63,7 @@
     }
 
     .popup__scroll {
-      padding: base(1) base(1.5);
+      padding: base(1.5) calc(var(--scrollbar-width) + #{base(1.5)}) base(1) base(1.5);
     }
   }
 
@@ -131,6 +131,8 @@
   &--force-h-align-left {
     .popup__content {
       left: - base(1.75);
+      right: unset;
+      transform: unset;
 
       &:after {
         left: base(1.75);
@@ -143,6 +145,8 @@
   &--force-h-align-right {
     .popup__content {
       right: - base(1.75);
+      left: unset;
+      transform: unset;
 
       &:after {
         right: base(1.75);
