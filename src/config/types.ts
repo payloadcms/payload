@@ -135,7 +135,6 @@ export type PayloadConfig = {
     disable?: boolean;
   };
   components?: { [key: string]: JSX.Element | (() => JSX.Element) };
-  paths?: { [key: string]: string };
   hooks?: {
     afterError?: AfterErrorHook;
   };
@@ -144,4 +143,5 @@ export type PayloadConfig = {
 export type Config = Omit<DeepRequired<PayloadConfig>, 'collections'> & {
   collections: CollectionConfig[]
   globals: GlobalConfig[]
+  paths: { [key: string]: string };
 }

@@ -9,7 +9,21 @@ const component = joi.alternatives().try(
 
 export default joi.object({
   serverURL: joi.string()
-    .required(),
+    .uri()
+    .required()
+    .custom((value, helper) => {
+      const urlWithoutProtocol = value.split('//')[1];
+
+      if (!urlWithoutProtocol) {
+        return helper.message({ custom: 'You need to include either "https://" or "http://" in your serverURL.' });
+      }
+
+      if (urlWithoutProtocol.indexOf('/') > -1) {
+        return helper.message({ custom: 'Your serverURL cannot have a path. It can only contain a protocol, a domain, and an optional port.' });
+      }
+
+      return value;
+    }),
   cookiePrefix: joi.string(),
   routes: joi.object({
     admin: joi.string(),
@@ -58,7 +72,6 @@ export default joi.object({
     joi.array()
       .items(joi.string()),
   ],
-  publicENV: joi.object(),
   express: joi.object()
     .keys({
       json: joi.object(),
@@ -73,8 +86,6 @@ export default joi.object({
           fileSize: joi.number(),
         }),
     }),
-  serverModules: joi.array()
-    .items(joi.string()),
   rateLimit: joi.object()
     .keys({
       window: joi.number(),
@@ -98,20 +109,6 @@ export default joi.object({
         fallback: joi.boolean(),
       }),
       joi.boolean(),
-    ),
-  email: joi.alternatives()
-    .try(
-      joi.object({
-        transport: 'mock',
-        fromName: joi.string(),
-        fromAddress: joi.string(),
-      }),
-      joi.object({
-        transport: joi.object(),
-        transportOptions: joi.object(),
-        fromName: joi.string(),
-        fromAddress: joi.string(),
-      }),
     ),
   hooks: joi.object().keys({
     afterError: joi.func(),
