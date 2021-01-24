@@ -116,6 +116,10 @@ dialog {
   padding: 0;
 }
 
+.payload__modal-item {
+  min-height: 100vh;
+}
+
 .payload__modal-container--enterDone {
   overflow: scroll;
 }
