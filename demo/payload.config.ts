@@ -32,7 +32,6 @@ import GlobalWithStrictAccess from './globals/GlobalWithStrictAccess';
 
 export default buildConfig({
   cookiePrefix: 'payload',
-  serverURL: 'http://localhost:3000',
   admin: {
     user: 'admins',
     indexHTML: path.resolve(__dirname, './client/index.html'),

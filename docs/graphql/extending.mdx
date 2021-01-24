@@ -38,6 +38,7 @@ import { buildConfig } from 'payload/config';
 import myCustomQueryResolver from './graphQL/resolvers/myCustomQueryResolver';
 
 export default buildConfig({
+  serverURL: 'http://localhost:3000',
   graphQL: {
     // highlight-start
     queries: (GraphQL, payload) => {

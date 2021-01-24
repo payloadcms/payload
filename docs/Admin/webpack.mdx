@@ -15,6 +15,7 @@ To extend the Webpack config, add the `webpack` key to your base Payload config,
 import { buildConfig } from 'payload/config';
 
 export default buildConfig({
+	serverURL: 'http://localhost:3000',
 	admin: {
 		// highlight-start
 		webpack: (config) => {
@@ -127,6 +128,7 @@ const createStripeSubscriptionPath = path.resolve(__dirname, 'collections/Subscr
 const mockModulePath = path.resolve(__dirname, 'mocks/emptyObject.js');
 
 export default buildConfig({
+	serverURL: 'http://localhost:3000',
 	collections: [
 		Subscription
 	],
