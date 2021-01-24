@@ -59,7 +59,7 @@ $style-stroke-width-m : 2px;
 // MISC
 //////////////////////////////
 
-$top-header-offset: base(4);
+$top-header-offset: calc(#{base(4)} - 1px);
 $top-header-offset-m: base(3);
 $focus-box-shadow: 0 0 0 $style-stroke-width-m $color-green;
 
@@ -158,17 +158,6 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m $color-green;
       border-color: $color-light-gray;
     }
   }
-
-  // Thanks, Klarna:
-
-  // &:-webkit-autofill {
-  //   animation-name: onAutoFillStart;
-  //   transition: background-color 50000s ease-in-out 0s;
-  // }
-
-  // &:not(:-webkit-autofill) {
-  //   animation-name: onAutoFillCancel;
-  // }
 
   @include small-break {
       margin-bottom: base(.5);
