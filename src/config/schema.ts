@@ -72,7 +72,6 @@ export default joi.object({
     joi.array()
       .items(joi.string()),
   ],
-  publicENV: joi.object(),
   express: joi.object()
     .keys({
       json: joi.object(),
@@ -87,8 +86,6 @@ export default joi.object({
           fileSize: joi.number(),
         }),
     }),
-  serverModules: joi.array()
-    .items(joi.string()),
   rateLimit: joi.object()
     .keys({
       window: joi.number(),
@@ -112,20 +109,6 @@ export default joi.object({
         fallback: joi.boolean(),
       }),
       joi.boolean(),
-    ),
-  email: joi.alternatives()
-    .try(
-      joi.object({
-        transport: 'mock',
-        fromName: joi.string(),
-        fromAddress: joi.string(),
-      }),
-      joi.object({
-        transport: joi.object(),
-        transportOptions: joi.object(),
-        fromName: joi.string(),
-        fromAddress: joi.string(),
-      }),
     ),
   hooks: joi.object().keys({
     afterError: joi.func(),
