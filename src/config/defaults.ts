@@ -6,7 +6,6 @@ export const defaults = {
   collections: [],
   globals: [],
   cookiePrefix: 'payload',
-  serverURL: '',
   csrf: [],
   cors: [],
   admin: {

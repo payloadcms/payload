@@ -9,7 +9,6 @@ import DefaultAccount from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
-import getAbsoluteURL from '../../../utilities/getAbsoluteURL';
 
 const AccountView: React.FC = () => {
   const { state: locationState } = useLocation<{ data: unknown }>();
@@ -48,7 +47,7 @@ const AccountView: React.FC = () => {
 
   const hasSavePermission = collectionPermissions?.update?.permission;
   const dataToRender = locationState?.data || data;
-  const apiURL = `${getAbsoluteURL(serverURL)}${api}/${user.collection}/${data?.id}`;
+  const apiURL = `${serverURL}${api}/${user.collection}/${data?.id}`;
 
   const action = `${serverURL}${api}/${user.collection}/${data?.id}?locale=${locale}&depth=0`;
 
