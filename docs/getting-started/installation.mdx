@@ -38,12 +38,7 @@ From there, the first step is writing a baseline config. Create a new `payload.c
 import { buildConfig } from 'payload/config';
 
 export default buildConfig({
-  // By default, nothing is required in your config.
-  // Payload will boot up normally and you will be provided with
-  // a base `User` collection.
-  // But, here is where you define how you'd like Payload to work!
-  // Check out the options below to see everything you can do
-  // with Payload.
+  serverURL: 'http://localhost:3000',
 });
 ```
 
