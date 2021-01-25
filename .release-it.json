@@ -1,0 +1,18 @@
+{
+  "git": {
+    "commitMessage": "chore(release): v${version}",
+    "requireCleanWorkingDir": false
+  },
+  "github": {
+    "release": true
+  },
+  "hooks": {
+    "before:init": ["yarn clean", "yarn build"]
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": "angular",
+      "infile": "CHANGELOG.md"
+    }
+  }
+}
