@@ -22,7 +22,9 @@
     "test": "yarn test:int && yarn test:client",
     "pretest": "yarn build:tsc",
     "test:int": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=test DISABLE_LOGGING=true jest --forceExit --runInBand",
-    "test:client": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=test jest --config=jest.react.config.js"
+    "test:client": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=test jest --config=jest.react.config.js",
+    "clean": "rimraf dist",
+    "release": "release-it"
   },
   "dependencies": {
     "@babel/cli": "^7.12.8",
@@ -132,6 +134,7 @@
     "webpack-hot-middleware": "^2.25.0"
   },
   "devDependencies": {
+    "@release-it/conventional-changelog": "^2.0.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.0.4",
     "@trbl/eslint-config": "^1.2.4",
@@ -218,6 +221,8 @@
     "nodemon": "^2.0.6",
     "optimize-css-assets-webpack-plugin": "^5.0.4",
     "passport-strategy": "^1.0.0",
+    "release-it": "^14.2.2",
+    "rimraf": "^3.0.2",
     "typescript": "^4.1.2"
   },
   "files": [
