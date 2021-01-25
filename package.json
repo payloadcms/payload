@@ -20,7 +20,7 @@
     "demo:build": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts node dist/bin/build",
     "dev": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts nodemon",
     "test": "yarn test:int && yarn test:client",
-    "pretest": "yarn build:tsc",
+    "pretest": "yarn build",
     "test:int": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=test DISABLE_LOGGING=true jest --forceExit --runInBand",
     "test:client": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=test jest --config=jest.react.config.js",
     "clean": "rimraf dist",

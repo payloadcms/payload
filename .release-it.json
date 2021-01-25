@@ -13,8 +13,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "hooks": {
-    "before:init": ["yarn", "yarn test"],
-    "after:bump": ["yarn clean", "yarn build"]
+    "before:init": ["yarn", "yarn clean", "yarn test"]
   },
   "plugins": {
     "@release-it/conventional-changelog": {
