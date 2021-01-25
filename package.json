@@ -235,5 +235,8 @@
     "*.d.ts",
     "!jest.config.js",
     "!jest.react.config.js"
-  ]
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  }
 }

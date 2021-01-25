@@ -9,9 +9,6 @@
   "npm": {
     "skipChecks": true
   },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
   "hooks": {
     "before:init": ["yarn", "yarn clean", "yarn test"]
   },
