@@ -1,13 +1,14 @@
 {
   "git": {
     "commitMessage": "chore(release): v${version}",
-    "requireCleanWorkingDir": false
+    "requireCleanWorkingDir": true
   },
   "github": {
     "release": true
   },
   "hooks": {
-    "before:init": ["yarn clean", "yarn build"]
+    "before:init": ["yarn", "yarn test"],
+    "after:bump": ["yarn clean", "yarn build"]
   },
   "plugins": {
     "@release-it/conventional-changelog": {
