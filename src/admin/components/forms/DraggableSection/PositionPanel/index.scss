@@ -17,7 +17,5 @@
     color: $color-gray;
   }
 
-  @include mid-break {
-    padding-right: base(.5);
-  }
+  padding-right: base(.5);
 }

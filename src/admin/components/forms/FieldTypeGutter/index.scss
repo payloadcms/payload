@@ -50,7 +50,7 @@ $controls-top-adjustment: base(.1);
   }
 
   &__content-container {
-    padding-right: base(.5);
+    padding-right: $style-stroke-width-s;
     position: relative;
     min-height: 100%;
     box-shadow: #{$style-stroke-width-s} 0px 0px 0px $color-light-gray;
