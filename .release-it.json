@@ -6,6 +6,9 @@
   "github": {
     "release": true
   },
+  "npm": {
+    "skipChecks": true
+  },
   "hooks": {
     "before:init": ["yarn", "yarn test"],
     "after:bump": ["yarn clean", "yarn build"]
