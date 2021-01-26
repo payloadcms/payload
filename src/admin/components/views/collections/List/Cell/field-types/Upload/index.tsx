@@ -10,6 +10,7 @@ const UploadCell = ({ data }) => (
       {data?.filename}
     </span>
     <span className={`${baseClass}--mime-type`}>
+      {' '}
       {data?.mimeType}
     </span>
   </React.Fragment>
