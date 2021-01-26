@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "SEE LICENSE IN license.md",
   "author": "Payload CMS LLC",
@@ -26,6 +26,30 @@
     "clean": "rimraf dist",
     "release": "release-it"
   },
+  "bugs": {
+    "url": "https://github.com/payloadcms/payload"
+  },
+  "keywords": [
+    "payload",
+    "cms",
+    "content management",
+    "framework",
+    "typescript",
+    "javascript",
+    "node",
+    "express",
+    "headless",
+    "graphQL",
+    "restful",
+    "access control",
+    "dashboard",
+    "admin panel",
+    "api",
+    "MongoDB",
+    "self hosted",
+    "react",
+    "auth"
+  ],
   "dependencies": {
     "@babel/cli": "^7.12.8",
     "@babel/core": "^7.11.6",
