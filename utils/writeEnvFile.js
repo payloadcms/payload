@@ -13,7 +13,7 @@ const writeEnvFile = async () => {
 
   try {
     await fs.outputFile(`${await getProjectDir()}/.env`, content);
-    success('Wrote .env file');
+    success('.env file created');
   } catch (err) {
     error('Unable to write .env file');
     error(err);

@@ -81,10 +81,11 @@ const createProject = async () => {
     process.exit(1);
   }
 
+  const spinner = ora('Checking latest Payload version...').start();
   await updatePayloadVersion(projectDir);
 
   const packageManager = await getPackageManager();
-  const spinner = ora('Installing dependencies. This may take a few minutes.').start();
+  spinner.text = 'Installing dependencies...';
   const result = await installDeps(projectDir, packageManager);
   spinner.stop();
   spinner.clear();

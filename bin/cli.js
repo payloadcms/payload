@@ -39,7 +39,7 @@ const { validateTemplate } = require('../utils/getValidTemplates');
     await writeEnvFile();
   }
 
-  success('Payload project successfully created.');
+  success('Payload project successfully created');
 
   console.log(await successMessage());
 
