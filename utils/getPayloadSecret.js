@@ -15,9 +15,9 @@ const getPayloadSecret = async () => {
 
   const response = await prompts(
     {
-      type: 'text',
+      type: 'password',
       name: 'value',
-      message: 'Enter a long, complex string for Payload’s secret encryption key',
+      message: 'Enter a long, complex string for Payload’s encryption key',
       validate: value => value.length,
     },
     {
