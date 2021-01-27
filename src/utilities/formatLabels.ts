@@ -1,6 +1,6 @@
 import pluralize, { isPlural, singular } from 'pluralize';
 
-const capitalizeFirstLetter = (string: string) => string.charAt(0).toUpperCase() + string.slice(1);
+const capitalizeFirstLetter = (string: string): string => string.charAt(0).toUpperCase() + string.slice(1);
 
 const toWords = (inputString: string): string => {
   const notNullString = inputString || '';
@@ -18,7 +18,7 @@ const toWords = (inputString: string): string => {
   return splitStringsArray.join(' ');
 };
 
-const formatLabels = ((slug: string): { singular: string, plural: string} => {
+const formatLabels = ((slug: string): { singular: string, plural: string } => {
   const words = toWords(slug);
   return (isPlural(slug))
     ? {
@@ -31,4 +31,7 @@ const formatLabels = ((slug: string): { singular: string, plural: string} => {
     };
 });
 
-export default formatLabels;
+export {
+  formatLabels,
+  toWords,
+};

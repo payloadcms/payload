@@ -3,9 +3,18 @@ import { PayloadCollectionConfig } from '../../src/collections/config/types';
 const AutoLabel: PayloadCollectionConfig = {
   slug: 'auto-label',
   fields: [{
-    name: 'text',
+    name: 'autoLabelField',
     type: 'text',
-    label: 'Text',
+  },
+  {
+    name: 'noLabel',
+    type: 'text',
+    label: false,
+  },
+  {
+    name: 'labelOverride',
+    type: 'text',
+    label: 'Custom Label',
   }],
 };
 

@@ -43,7 +43,7 @@ export type Option = OptionObject | string
 
 export interface FieldBase {
   name?: string;
-  label?: string;
+  label?: string | false;
   required?: boolean;
   unique?: boolean;
   index?: boolean;

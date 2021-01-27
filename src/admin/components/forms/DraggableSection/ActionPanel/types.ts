@@ -1,7 +1,7 @@
 import { Block } from '../../../../../fields/config/types';
 
 export type Props = {
-  label: string
+  label: string | false
   addRow?: (index: number, blockType?: string) => void
   removeRow?: (index: number) => void
   blockType?: string

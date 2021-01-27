@@ -8,7 +8,7 @@ import baseVerificationFields from '../../fields/baseFields/baseVerificationFiel
 import baseAccountLockFields from '../../fields/baseFields/baseAccountLockFields';
 import baseUploadFields from '../../fields/baseFields/baseUploadFields';
 import baseImageUploadFields from '../../fields/baseFields/baseImageUploadFields';
-import formatLabels from '../../utilities/formatLabels';
+import { formatLabels } from '../../utilities/formatLabels';
 import { defaults, authDefaults } from './defaults';
 
 const mergeBaseFields = (fields, baseFields) => {

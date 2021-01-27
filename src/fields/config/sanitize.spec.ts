@@ -11,6 +11,39 @@ describe('sanitizeFields', () => {
       sanitizeFields(fields, []);
     }).toThrow(MissingFieldType);
   });
+  it('should populate label if missing', () => {
+    const fields = [{
+      name: 'someCollection',
+      type: 'text',
+    }];
+    const sanitizedField = sanitizeFields(fields, [])[0];
+    expect(sanitizedField.name).toStrictEqual('someCollection');
+    expect(sanitizedField.label).toStrictEqual('Some Collection');
+    expect(sanitizedField.type).toStrictEqual('text');
+  });
+  it('should allow auto-label override', () => {
+    const fields = [{
+      name: 'someCollection',
+      type: 'text',
+      label: 'Do not label',
+    }];
+    const sanitizedField = sanitizeFields(fields, [])[0];
+    expect(sanitizedField.name).toStrictEqual('someCollection');
+    expect(sanitizedField.label).toStrictEqual('Do not label');
+    expect(sanitizedField.type).toStrictEqual('text');
+  });
+  it('should allow label opt-out', () => {
+    const fields = [{
+      name: 'someCollection',
+      type: 'text',
+      label: false,
+    }];
+    const sanitizedField = sanitizeFields(fields, [])[0];
+    expect(sanitizedField.name).toStrictEqual('someCollection');
+    expect(sanitizedField.label).toStrictEqual(false);
+    expect(sanitizedField.type).toStrictEqual('text');
+  });
+
 
   describe('relationships', () => {
     it('should not throw on valid relationship', () => {

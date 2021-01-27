@@ -7,6 +7,7 @@ export type Props = Omit<ArrayField, 'type'> & {
   path?: string
   fieldTypes: FieldTypes
   permissions: FieldPermissions
+  label: string
 }
 
 export type RenderArrayProps = {
