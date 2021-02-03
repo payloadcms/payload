@@ -58,6 +58,8 @@ const DefaultEditView: React.FC<Props> = (props) => {
     isEditing && `${baseClass}--is-editing`,
   ].filter(Boolean).join(' ');
 
+  const operation = isEditing ? 'update' : 'create';
+
   return (
     <div className={classes}>
       <Form
@@ -94,6 +96,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                     verify={auth.verify}
                     collection={collection}
                     email={data?.email}
+                    operation={operation}
                   />
                 )}
                 {upload && (
@@ -103,7 +106,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   />
                 )}
                 <RenderFields
-                  operation={isEditing ? 'update' : 'create'}
+                  operation={operation}
                   readOnly={!hasSavePermission}
                   permissions={permissions.fields}
                   filter={(field) => (!field?.admin?.position || (field?.admin?.position !== 'sidebar'))}

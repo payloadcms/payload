@@ -7,4 +7,5 @@ export type Props = {
   verify?: VerifyConfig | boolean
   collection: CollectionConfig
   email: string
+  operation: 'update' | 'create'
 }

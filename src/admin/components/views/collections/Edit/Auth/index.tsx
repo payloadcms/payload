@@ -16,7 +16,7 @@ import './index.scss';
 const baseClass = 'auth-fields';
 
 const Auth: React.FC<Props> = (props) => {
-  const { useAPIKey, requirePassword, verify, collection: { slug }, email } = props;
+  const { useAPIKey, requirePassword, verify, collection: { slug }, email, operation } = props;
   const [changingPassword, setChangingPassword] = useState(requirePassword);
   const { getField } = useWatchForm();
   const modified = useFormModified();
@@ -92,13 +92,15 @@ const Auth: React.FC<Props> = (props) => {
           Change Password
         </Button>
       )}
-      <Button
-        size="small"
-        buttonStyle="secondary"
-        onClick={() => unlock()}
-      >
-        Force Unlock
-      </Button>
+      {operation === 'update' && (
+        <Button
+          size="small"
+          buttonStyle="secondary"
+          onClick={() => unlock()}
+        >
+          Force Unlock
+        </Button>
+      )}
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <Checkbox

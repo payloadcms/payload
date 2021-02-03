@@ -81,6 +81,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
                   useAPIKey={auth.useAPIKey}
                   collection={collection}
                   email={data?.email}
+                  operation="update"
                 />
                 <RenderFields
                   operation="update"
