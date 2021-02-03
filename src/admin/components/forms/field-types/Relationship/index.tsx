@@ -302,6 +302,11 @@ const Relationship: React.FC<Props> = (props) => {
 
                 return option.value;
               }) : null);
+            } else if (hasMultipleRelations) {
+              setValue({
+                relationTo: selected.relationTo,
+                value: selected.value,
+              });
             } else {
               setValue(selected.value);
             }
