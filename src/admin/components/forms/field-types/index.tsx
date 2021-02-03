@@ -5,6 +5,7 @@ import text from './Text';
 import date from './DateTime';
 
 import password from './Password';
+import confirmPassword from './ConfirmPassword';
 import relationship from './Relationship';
 import textarea from './Textarea';
 import select from './Select';
@@ -26,6 +27,7 @@ export type FieldTypes = {
   text: React.ComponentType
   date: React.ComponentType
   password: React.ComponentType
+  confirmPassword: React.ComponentType
   relationship: React.ComponentType
   textarea: React.ComponentType
   select: React.ComponentType
@@ -47,6 +49,7 @@ const fieldTypes: FieldTypes = {
   text,
   date,
   password,
+  confirmPassword,
   relationship,
   textarea,
   select,

@@ -43,6 +43,11 @@ const CreateFirstUser: React.FC<Props> = (props) => {
       label: 'Password',
       type: 'password',
       required: true,
+    }, {
+      name: 'confirm-password',
+      label: 'Confirm Password',
+      type: 'confirmPassword',
+      required: true,
     },
   ] as Field[];
 
