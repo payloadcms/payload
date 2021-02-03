@@ -2,7 +2,7 @@
 title: Access Control
 label: Overview
 order: 10
-desc: Payload is a headless CMS and application framework.
+desc: Payload makes it simple to define and manage access control. By declaring roles, you can set permissions and restrict what your users can interact with.
 keywords: overview, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
@@ -28,12 +28,15 @@ const defaultPayloadAccess = ({ req: { user } }) => {
   // Return `true` if a user is found
   // and `false` if it is undefined or null
   return Boolean(user);
-}
+};
 ```
 
 <Banner type="success">
-  <strong>Note:</strong><br/>
-  In the Local API, all Access Control functions are skipped by default, allowing your server to do whatever it needs. But, you can opt back in by setting the option <strong>overrideAccess</strong> to <strong>true</strong>.
+  <strong>Note:</strong>
+  <br />
+  In the Local API, all Access Control functions are skipped by default,
+  allowing your server to do whatever it needs. But, you can opt back in by
+  setting the option <strong>overrideAccess</strong> to <strong>true</strong>.
 </Banner>
 
 ### Access Control Types

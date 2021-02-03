@@ -2,17 +2,22 @@
 title: Upload Field
 label: Upload
 order: 170
-desc: Payload is a headless CMS and application framework.
+desc: Upload fields will allow a file to be uploaded, only from a collection supporting Uploads. Learn how to use Upload fields, see examples and options.
 keywords: upload, images media, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-<Banner >
-  The Upload field allows for the selection of a Document from a collection supporting Uploads, and formats the selection as a thumbnail in the Admin panel.
+<Banner>
+  The Upload field allows for the selection of a Document from a collection
+  supporting Uploads, and formats the selection as a thumbnail in the Admin
+  panel.
 </Banner>
 
 <Banner type="warning">
-  <strong>Important:</strong><br/>
-  To use this field, you need to have a Collection configured to allow Uploads. For more information, <a href="/docs/upload/config">click here</a> to read about how to enable Uploads on a collection by collection basis.
+  <strong>Important:</strong>
+  <br />
+  To use this field, you need to have a Collection configured to allow Uploads.
+  For more information, <a href="/docs/upload/config">click here</a> to read
+  about how to enable Uploads on a collection by collection basis.
 </Banner>
 
 **Example uses:**
@@ -23,29 +28,30 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
 
 ### Config
 
-| Option           | Description |
-| ---------------- | ----------- |
-| **`name`** *         | To be used as the property name when stored and retrieved from the database.  |
-| **`*relationTo`** *  | Provide a single collection `slug` to allow this field to accept a relation to. <strong>Note: the related collection must be configured to support Uploads.</strong> |
-| **`hasMany`**        | Boolean when, if set to `true`, allows this field to have many relations instead of only one. |
-| **`label`**          | Used as a field label in the Admin panel and to name the generated GraphQL type. |
-| **`unique`**         | Enforce that each entry in the Collection has a unique value for this field. |
-| **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
+| Option               | Description                                                                                                                                                                                         |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*        | To be used as the property name when stored and retrieved from the database.                                                                                                                        |
+| **`*relationTo`** \* | Provide a single collection `slug` to allow this field to accept a relation to. <strong>Note: the related collection must be configured to support Uploads.</strong>                                |
+| **`hasMany`**        | Boolean when, if set to `true`, allows this field to have many relations instead of only one.                                                                                                       |
+| **`label`**          | Used as a field label in the Admin panel and to name the generated GraphQL type.                                                                                                                    |
+| **`unique`**         | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                        |
+| **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
 | **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
-| **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT. |
-| **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks) |
-| **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control) |
-| **`hidden`**         | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel. |
-| **`defaultValue`**   | Provide data to be used for this field's default value. |
-| **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
-| **`required`**       | Require this field to have a value. |
-| **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details. |
+| **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
+| **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                          |
+| **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                             |
+| **`hidden`**         | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                                                    |
+| **`defaultValue`**   | Provide data to be used for this field's default value.                                                                                                                                             |
+| **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
+| **`required`**       | Require this field to have a value.                                                                                                                                                                 |
+| **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                                            |
 
-*\* An asterisk denotes that a property is required.*
+_\* An asterisk denotes that a property is required._
 
 ### Example
 
 `collections/ExampleCollection.js`
+
 ```js
 {
   slug: 'example-collection',

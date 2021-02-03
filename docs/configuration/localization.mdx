@@ -2,7 +2,7 @@
 title: Localization
 label: Localization
 order: 50
-desc: Payload is a headless CMS and application framework.
+desc: Add and maintain as many locales as you need by adding Localization to your Payload config, set options for default locale, fallbacks, fields and more.
 keywords: localization, internationalization, i18n, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
@@ -68,8 +68,13 @@ With the above configuration, the `title` field will now be saved in the databas
 All field types with a `name` property support the `localized` property—even the more complex field types like `array`s and `block`s.
 
 <Banner>
-	<strong>Note:</strong><br/>
-	Enabling localization for field types that support nested fields will automatically create localized "sets" of all fields contained within the field. For example, if you have a page layout using a blocks field type, you have the choice of either localizing the full layout, by enabling localization on the top-level blocks field, or only certain fields within the layout.
+  <strong>Note:</strong>
+  <br />
+  Enabling localization for field types that support nested fields will
+  automatically create localized "sets" of all fields contained within the
+  field. For example, if you have a page layout using a blocks field type, you
+  have the choice of either localizing the full layout, by enabling localization
+  on the top-level blocks field, or only certain fields within the layout.
 </Banner>
 
 ### Retrieving localized docs
@@ -106,16 +111,19 @@ The `fallbackLocale` arg will accept valid locales as well as `none` to disable 
 
 ```graphql
 query {
-	Posts(locale: de, fallbackLocale: none) {
-		docs {
-			title
-		}
-	}
+  Posts(locale: de, fallbackLocale: none) {
+    docs {
+      title
+    }
+  }
 }
 ```
 
 <Banner>
-	In GraphQL, specifying the locale at the top level of a query will automatically apply it throughout all nested relationship fields. You can override this behavior by re-specifying locale arguments in nested related document queries.
+  In GraphQL, specifying the locale at the top level of a query will
+  automatically apply it throughout all nested relationship fields. You can
+  override this behavior by re-specifying locale arguments in nested related
+  document queries.
 </Banner>
 
 ##### Local API
@@ -126,8 +134,8 @@ You can specify `locale` as well as `fallbackLocale` within the Local API as wel
 
 ```js
 const posts = await payload.find({
-	collection: 'posts',
-	locale: 'es',
-	fallbackLocale: false,
-})
+  collection: "posts",
+  locale: "es",
+  fallbackLocale: false,
+});
 ```

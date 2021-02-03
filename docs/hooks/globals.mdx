@@ -2,7 +2,7 @@
 title: Global Hooks
 label: Globals
 order: 40
-desc: Payload is a headless CMS and application framework.
+desc: Hooks can be added to any Global and allow you to validate data, flatten locales, hide protected fields, remove fields and more.
 keywords: hooks, globals, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
@@ -19,6 +19,7 @@ Globals feature the ability to define the following hooks:
 All Global Hook properties accept arrays of synchronous or asynchronous functions. Each Hook type receives specific arguments and has the ability to modify specific outputs.
 
 `globals/example-hooks.js`
+
 ```js
 // Global config
 module.exports = {
@@ -48,7 +49,7 @@ const beforeValidateHook = async ({
   originalDoc, // original document
 }) => {
   return data; // Return data to either create or update a document with
-}
+};
 ```
 
 ### beforeChange
@@ -63,7 +64,7 @@ const beforeChangeHook = async ({
   originalDoc, // original document
 }) => {
   return data; // Return data to either create or update a document with
-}
+};
 ```
 
 ### afterChange
@@ -77,7 +78,7 @@ const afterChangeHook = async ({
   operation, // name of the operation ie. 'create', 'update'
 }) => {
   return data;
-}
+};
 ```
 
 ### beforeRead

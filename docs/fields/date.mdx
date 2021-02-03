@@ -2,34 +2,35 @@
 title: Date Field
 label: Date
 order: 60
-desc: Payload is a headless CMS and application framework.
+desc: The Date field type stores a Date in the database. Learn how to use and customize the Date field, see examples and options.
 keywords: date, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-<Banner >
-  The Date field type saves a Date in the database and provides the Admin panel with a customizable time picker interface.
+<Banner>
+  The Date field type saves a Date in the database and provides the Admin panel
+  with a customizable time picker interface.
 </Banner>
 
 This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepicker) for the Admin panel component.
 
 ### Config
 
-| Option           | Description |
-| ---------------- | ----------- |
-| **`name`** *         | To be used as the property name when stored and retrieved from the database.  |
-| **`label`**          | Used as a field label in the Admin panel and to name the generated GraphQL type. |
-| **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
-| **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
-| **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT. |
-| **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks) |
-| **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control) |
-| **`hidden`**         | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel. |
-| **`defaultValue`**   | Provide data to be used for this field's default value. |
-| **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
-| **`required`**       | Require this field to have a value. |
-| **`admin`**          | Admin-specific configuration. See below for [more detail](#admin). |
+| Option             | Description                                                                                                                                                                                         |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*      | To be used as the property name when stored and retrieved from the database.                                                                                                                        |
+| **`label`**        | Used as a field label in the Admin panel and to name the generated GraphQL type.                                                                                                                    |
+| **`index`**        | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
+| **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
+| **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
+| **`hooks`**        | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                          |
+| **`access`**       | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                             |
+| **`hidden`**       | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                                                    |
+| **`defaultValue`** | Provide data to be used for this field's default value.                                                                                                                                             |
+| **`localized`**    | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
+| **`required`**     | Require this field to have a value.                                                                                                                                                                 |
+| **`admin`**        | Admin-specific configuration. See below for [more detail](#admin).                                                                                                                                  |
 
-*\* An asterisk denotes that a property is required.*
+_\* An asterisk denotes that a property is required._
 
 ### Admin config
 
@@ -42,6 +43,7 @@ Common use cases for customizing the `date` property are to restrict your field 
 ### Example
 
 `collections/ExampleCollection.js`
+
 ```js
 {
   slug: 'example-collection',

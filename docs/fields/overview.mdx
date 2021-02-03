@@ -2,12 +2,14 @@
 title: Fields Overview
 label: Overview
 order: 10
-desc: Payload is a headless CMS and application framework.
+desc: Fields are the building blocks of Payload, find out how to add or remove a field, change field type, add hooks, define access control and validation.
 keywords: overview, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
 <Banner type="info">
-	Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data that they store. Payload offers a wide variety of field types - both simple and complex.
+  Fields are the building blocks of Payload. Collections and Globals both use
+  Fields to define the shape of the data that they store. Payload offers a wide
+  variety of field types - both simple and complex.
 </Banner>
 
 Fields are defined as an array on Collections and Globals via the `fields` key. They define the shape of the data that will be stored as well as automatically construct the corresponding Admin UI.
@@ -15,22 +17,23 @@ Fields are defined as an array on Collections and Globals via the `fields` key. 
 The required `type` property on a field determines what values it can accept, how it is presented in the API, and how the field will be rendered in the admin interface.
 
 **Simple collection with two fields:**
+
 ```js
 const Pages = {
-	slug: 'pages',
-	fields: [
-		{
-			name: 'my-field',
-			type: 'text', // highlight-line
-			label: 'My Field',
-		},
-		{
-			name: 'other-field',
-			type: 'checkbox', // highlight-line
-			label: 'Other Field'
-		},
-	],
-}
+  slug: "pages",
+  fields: [
+    {
+      name: "my-field",
+      type: "text", // highlight-line
+      label: "My Field",
+    },
+    {
+      name: "other-field",
+      type: "checkbox", // highlight-line
+      label: "Other Field",
+    },
+  ],
+};
 ```
 
 ### Field types
@@ -65,6 +68,7 @@ In addition to being able to define access control on a document-level, you can 
 You can provide your own validation function for all field types. It will be used on both the frontend and the backend, so it should not rely on any Node-specific packages. The validation function can be either synchronous or asynchronous and accepts the field's value and expects to return either `true` or a string error message to display in both API responses and within the Admin panel.
 
 Example:
+
 ```js
 {
   slug: 'orders',
@@ -89,15 +93,15 @@ Example:
 
 In addition to each field's base configuration, you can define specific traits and properties for fields that only have effect on how they are rendered in the Admin panel. The following properties are available for all fields within the `admin` property:
 
-| Option        | Description  |
-| ------------- | -------------|
-| `condition`   | You can programmatically show / hide fields based on what other fields are doing. [Click here](#conditional-logic) for more info. |
-| `components`  | All field components can be completely and easily swapped out for custom components that you define. [Click here](#custom-admin-components) for more info. |
-| `position`    | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`. |
-| `width`       | Restrict the width of a field. you can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
-| `readOnly`    | Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value. |
-| `disabled`    | If a field is `disabled`, it is completely omitted from the Admin panel. |
-| `hidden`      | Setting a field's `hidden` property on its `admin` config will transform it into a `hidden` input type. Its value will still submit with the Admin panel's requests, but the field itself will not be visible to editors. |
+| Option       | Description                                                                                                                                                                                                                      |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `condition`  | You can programmatically show / hide fields based on what other fields are doing. [Click here](#conditional-logic) for more info.                                                                                                |
+| `components` | All field components can be completely and easily swapped out for custom components that you define. [Click here](#custom-admin-components) for more info.                                                                       |
+| `position`   | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`.                                                                                                                                        |
+| `width`      | Restrict the width of a field. you can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
+| `readOnly`   | Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value.                                                            |
+| `disabled`   | If a field is `disabled`, it is completely omitted from the Admin panel.                                                                                                                                                         |
+| `hidden`     | Setting a field's `hidden` property on its `admin` config will transform it into a `hidden` input type. Its value will still submit with the Admin panel's requests, but the field itself will not be visible to editors.        |
 
 ### Conditional logic
 
@@ -114,13 +118,13 @@ The `condition` function should return a boolean that will control if the field 
 {
   fields: [
     {
-      name: 'enableGreeting',
-      type: 'checkbox',
+      name: "enableGreeting",
+      type: "checkbox",
       defaultValue: false,
     },
     {
-      name: 'greeting',
-      type: 'text',
+      name: "greeting",
+      type: "text",
       admin: {
         // highlight-start
         condition: (data, siblingData) => {
@@ -129,11 +133,11 @@ The `condition` function should return a boolean that will control if the field 
           } else {
             return false;
           }
-        }
+        },
         // highlight-end
-      }
-    }
-  ]
+      },
+    },
+  ];
 }
 ```
 

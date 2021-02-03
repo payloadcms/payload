@@ -2,26 +2,28 @@
 title: Row Field
 label: Row
 order: 130
-desc: Payload is a headless CMS and application framework.
+desc: With the Row field you can arrange fields next to each other in the Admin Panel to help you customize your Dashboard.
 keywords: row, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-<Banner >
-  The Row field is presentational-only and only affects the Admin panel. By using it, you can arrange fields next to each other horizontally.
+<Banner>
+  The Row field is presentational-only and only affects the Admin panel. By
+  using it, you can arrange fields next to each other horizontally.
 </Banner>
 
 ### Config
 
-| Option           | Description |
-| ---------------- | ----------- |
-| **`fields`** *       | Array of field types to nest within this Row. |
-| **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details. |
+| Option          | Description                                                                                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **`fields`** \* | Array of field types to nest within this Row.                                                                            |
+| **`admin`**     | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details. |
 
-*\* An asterisk denotes that a property is required.*
+_\* An asterisk denotes that a property is required._
 
 ### Example
 
 `collections/ExampleCollection.js`
+
 ```js
 {
   slug: 'example-collection',

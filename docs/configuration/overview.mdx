@@ -2,16 +2,24 @@
 title: The Payload Config
 label: Overview
 order: 10
-desc: Payload is a headless CMS and application framework.
+desc: The Payload config is central to everything that Payload does, from adding custom React components, to modifying collections, controlling localization and much more.
 keywords: overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Payload is a *config-based*, code-first CMS and application framework. The Payload config is central to everything that Payload does. It scaffolds the data that Payload stores as well as maintains custom React components, hook logic, custom validations, and much more. The config itself and all of its dependencies are run through Babel, so you can take full advantage of newer JavaScript features and even directly import React components containing JSX.
+Payload is a _config-based_, code-first CMS and application framework. The Payload config is central to everything that Payload does. It scaffolds the data that Payload stores as well as maintains custom React components, hook logic, custom validations, and much more. The config itself and all of its dependencies are run through Babel, so you can take full advantage of newer JavaScript features and even directly import React components containing JSX.
 
-<strong>Also, because the Payload source code is fully written in TypeScript, its configs are strongly typed—meaning that even if you aren't using TypeScript to build your project, your IDE (such as VSCode) may still provide helpful information like type-ahead suggestions while you write your config.</strong>
+<strong>
+  Also, because the Payload source code is fully written in TypeScript, its
+  configs are strongly typed—meaning that even if you aren't using TypeScript to
+  build your project, your IDE (such as VSCode) may still provide helpful
+  information like type-ahead suggestions while you write your config.
+</strong>
 
 <Banner type="warning">
-	<strong>Important:</strong><br />This file is included in the Payload admin bundle, so make sure you do not embed any sensitive information.
+  <strong>Important:</strong>
+  <br />
+  This file is included in the Payload admin bundle, so make sure you do not
+  embed any sensitive information.
 </Banner>
 
 ## Options
@@ -40,54 +48,53 @@ Payload is a *config-based*, code-first CMS and application framework. The Paylo
 #### Simple example
 
 ```js
-import { buildConfig } from 'payload/config';
+import { buildConfig } from "payload/config";
 
 const config = buildConfig({
-	serverURL: 'http://localhost:3000',
-	collections: [
-		{
-			slug: 'pages',
-			fields: [
-				{
-					name: 'title',
-					label: 'Title',
-					type: 'text',
-					required: true,
-				},
-				{
-					name: 'content',
-					label: 'Content',
-					type: 'richText',
-					required: true,
-				}
-			]
-		}
-	],
-	globals: [
-		{
-			slug: 'header',
-			label: 'Header',
-			fields: [
-				{
-					name: 'nav',
-					label: 'Nav',
-					type: 'array',
-					fields: [
-						{
-							name: 'page',
-							label: 'Page',
-							type: 'relationship',
-							relationTo: 'pages',
-						},
-					]
-				}
-			]
-		}
-	]
+  serverURL: "http://localhost:3000",
+  collections: [
+    {
+      slug: "pages",
+      fields: [
+        {
+          name: "title",
+          label: "Title",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "content",
+          label: "Content",
+          type: "richText",
+          required: true,
+        },
+      ],
+    },
+  ],
+  globals: [
+    {
+      slug: "header",
+      label: "Header",
+      fields: [
+        {
+          name: "nav",
+          label: "Nav",
+          type: "array",
+          fields: [
+            {
+              name: "page",
+              label: "Page",
+              type: "relationship",
+              relationTo: "pages",
+            },
+          ],
+        },
+      ],
+    },
+  ],
 });
 
 export default config;
-
 ```
 
 #### Full example config
@@ -99,6 +106,7 @@ You can see a full [example config](https://github.com/payloadcms/payload/blob/m
 We suggest using the `dotenv` package to handle environment variables alongside of Payload. All that's necessary to do is to require the package as high up in your application as possible (for example, at the top of your `server.js` file), and ensure that it can find an `.env` file that you create.
 
 **Add this line to the top of your server:**
+
 ```
 require('dotenv').config()
 // ...
@@ -116,8 +124,13 @@ project-name
 ```
 
 <Banner type="warning">
-	<strong>Important:</strong><br />
-	If you use an environment variable to configure any properties that are required for the Admin panel to function (ex. serverURL or any routes), you need to make sure that your Admin panel code can access it. <a href="/docs/admin/webpack#admin-environment-vars">Click here</a> for more info.
+  <strong>Important:</strong>
+  <br />
+  If you use an environment variable to configure any properties that are
+  required for the Admin panel to function (ex. serverURL or any routes), you
+  need to make sure that your Admin panel code can access it.{" "}
+  <a href="/docs/admin/webpack#admin-environment-vars">Click here</a> for more
+  info.
 </Banner>
 
 ### Customizing & overriding the config location

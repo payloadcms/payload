@@ -2,7 +2,7 @@
 title: Collection Hooks
 label: Collections
 order: 20
-desc: Payload is a headless CMS and application framework.
+desc: You can add hooks to any Collection, several hook types are available including beforeChange, afterRead, afterDelete and more.
 keywords: hooks, collections, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
@@ -27,6 +27,7 @@ Additionally, `auth`-enabled collections feature the following hooks:
 All collection Hook properties accept arrays of synchronous or asynchronous functions. Each Hook type receives specific arguments and has the ability to modify specific outputs.
 
 `collections/example-hooks.js`
+
 ```js
 // Collection config
 module.exports = {
@@ -63,7 +64,7 @@ const beforeOperationHook = async ({
   operation, // name of the operation
 }) => {
   return args; // Return operation arguments as necessary
-}
+};
 ```
 
 ### beforeValidate
@@ -78,7 +79,7 @@ const beforeValidateHook = async ({
   originalDoc, // original document
 }) => {
   return data; // Return data to either create or update a document with
-}
+};
 ```
 
 ### beforeChange
@@ -93,7 +94,7 @@ const beforeChangeHook = async ({
   originalDoc, // original document
 }) => {
   return data; // Return data to either create or update a document with
-}
+};
 ```
 
 ### afterChange
@@ -107,7 +108,7 @@ const afterChangeHook = async ({
   operation, // name of the operation ie. 'create', 'update'
 }) => {
   return data;
-}
+};
 ```
 
 ### beforeRead
@@ -121,7 +122,7 @@ const beforeReadHook = async ({
   query, // JSON formatted query
 }) => {
   return doc;
-}
+};
 ```
 
 ### afterRead
@@ -135,7 +136,7 @@ const afterReadHook = async ({
   query, // JSON formatted query
 }) => {
   return doc;
-}
+};
 ```
 
 ### beforeDelete
@@ -172,7 +173,7 @@ const afterLoginHook = async ({
   token, // user token
 }) => {
   return user;
-}
+};
 ```
 
 ### afterForgotPassword
@@ -186,5 +187,5 @@ const afterLoginHook = async ({
   token, // user token
 }) => {
   return user;
-}
+};
 ```

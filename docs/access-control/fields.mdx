@@ -2,7 +2,7 @@
 title: Field-level Access Control
 label: Fields
 order: 30
-desc: Payload is a headless CMS and application framework.
+desc: Field-level Access Control is specified within a field's config, and allows you to define which users can create, read or update Fields.
 keywords: fields, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
@@ -10,13 +10,14 @@ Field Access Control is specified with functions inside a field's config. All fi
 
 ## Available Controls
 
-| Function                 | Purpose |
-| ------------------------ | ------- |
-| **[`create`](#create)**  | Allows or denies the ability to set a field's value when creating a new document |
-| **[`read`](#read)**      | Allows or denies the ability to read a field's value |
-| **[`update`](#update)**  | Allows or denies the ability to update a field's value |
+| Function                | Purpose                                                                          |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| **[`create`](#create)** | Allows or denies the ability to set a field's value when creating a new document |
+| **[`read`](#read)**     | Allows or denies the ability to read a field's value                             |
+| **[`update`](#update)** | Allows or denies the ability to update a field's value                           |
 
 **Example Collection config:**
+
 ```js
 export default {
   slug: 'posts',
@@ -43,8 +44,8 @@ Returns a boolean which allows or denies the ability to set a field's value when
 
 **Available argument properties:**
 
-| Option    | Description |
-| --------- | ----------- |
+| Option    | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
 | **`req`** | The Express `request` object containing the currently authenticated `user` |
 
 ### Read
@@ -53,10 +54,10 @@ Returns a boolean which allows or denies the ability to read a field's value. If
 
 **Available argument properties:**
 
-| Option    | Description |
-| --------- | ----------- |
+| Option    | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
 | **`req`** | The Express `request` object containing the currently authenticated `user` |
-| **`id`**  | `id` of the document being read |
+| **`id`**  | `id` of the document being read                                            |
 
 ### Update
 
@@ -64,7 +65,7 @@ Returns a boolean which allows or denies the ability to update a field's value. 
 
 **Available argument properties:**
 
-| Option    | Description |
-| --------- | ----------- |
+| Option    | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
 | **`req`** | The Express `request` object containing the currently authenticated `user` |
-| **`id`**  | `id` of the document being updated |
+| **`id`**  | `id` of the document being updated                                         |

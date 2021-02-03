@@ -2,15 +2,21 @@
 title: Local API
 label: Overview
 order: 10
-desc: Payload is a headless CMS and application framework.
+desc: The Payload Local API allows you to interact with your database and execute the same operations that are available through REST and GraphQL within Node, directly on your server.
 keywords: local api, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
 The Payload Local API gives you the ability to execute the same operations that are available through REST and GraphQL within Node, directly on your server. Here, you don't need to deal with server latency or network speed whatsoever and can interact directly with your database.
 
 <Banner type="success">
-  <strong>Tip:</strong><br/>
-  The Local API is incredibly powerful when used with server-side rendering app frameworks like NextJS. With other headless CMS, you need to request your data from third-party servers which can add significant loading time to your server-rendered pages. With Payload, you don't have to leave your server to gather the data you need. It can be incredibly fast and is definitely a game changer.
+  <strong>Tip:</strong>
+  <br />
+  The Local API is incredibly powerful when used with server-side rendering app
+  frameworks like NextJS. With other headless CMS, you need to request your data
+  from third-party servers which can add significant loading time to your
+  server-rendered pages. With Payload, you don't have to leave your server to
+  gather the data you need. It can be incredibly fast and is definitely a game
+  changer.
 </Banner>
 
 Here are some common examples of how you can use the Local API:
@@ -28,14 +34,15 @@ You can gain access to the currently running `payload` object via two ways:
 You can import or require `payload` into your own files after it's been initialized, but you need to make sure that your `import` / `require` statements come **after** you call `payload.init()`—otherwise Payload won't have been initialized yet. That might be obvious. To us, it's usually not.
 
 Example:
+
 ```js
-import payload from 'payload';
+import payload from "payload";
 
 const afterChangeHook = async () => {
   const posts = await payload.find({
-    collection: 'posts',
+    collection: "posts",
   });
-}
+};
 ```
 
 ##### Accessing from the `req`
@@ -43,34 +50,38 @@ const afterChangeHook = async () => {
 Payload is available anywhere you have access to the Express `req` - including within your access control and hook functions.
 
 Example:
+
 ```js
-const afterChangeHook = async ({ req: { payload }}) => {
+const afterChangeHook = async ({ req: { payload } }) => {
   const posts = await payload.find({
-    collection: 'posts',
+    collection: "posts",
   });
-}
+};
 ```
 
 ### Local options available
 
 You can specify more options within the Local API vs. REST or GraphQL due to the server-only context that they are executed in.
 
-| Local Option         | Description  |
-| -------------------- | ------------ |
-| `collection`         | Required for Collection operations. Specifies the Collection slug to operate against. |
-| `data`               | The data to use within the operation. Required for `create`, `update`. |
-| `depth`              | [Control auto-population](/docs/getting-started/concepts#depth) of nested relationship and upload fields. |
-| `locale`             | Specify [locale](/docs/configuration/localization) for any returned documents. |
-| `fallbackLocale`     | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents. |
-| `overrideAccess`     | Skip access control. By default, this property is set to false. |
-| `user`               | If you re-enable access control, you can specify a user to use against the access control checks. |
-| `showHiddenFields`   | Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config. |
+| Local Option       | Description                                                                                                          |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `collection`       | Required for Collection operations. Specifies the Collection slug to operate against.                                |
+| `data`             | The data to use within the operation. Required for `create`, `update`.                                               |
+| `depth`            | [Control auto-population](/docs/getting-started/concepts#depth) of nested relationship and upload fields.            |
+| `locale`           | Specify [locale](/docs/configuration/localization) for any returned documents.                                       |
+| `fallbackLocale`   | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents.                     |
+| `overrideAccess`   | Skip access control. By default, this property is set to false.                                                      |
+| `user`             | If you re-enable access control, you can specify a user to use against the access control checks.                    |
+| `showHiddenFields` | Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config. |
 
-*There are more options available on an operation by operation basis outlined below.*
+_There are more options available on an operation by operation basis outlined below._
 
 <Banner type="warning">
-  <strong>Note:</strong><br/>
-  By default, all access control checks are disabled in the Local API, but you can re-enable them if you'd like, as well as pass a specific user to run the operation with.
+  <strong>Note:</strong>
+  <br />
+  By default, all access control checks are disabled in the Local API, but you
+  can re-enable them if you'd like, as well as pass a specific user to run the
+  operation with.
 </Banner>
 
 ## Collections
@@ -82,12 +93,13 @@ The following Collection operations are available through the Local API:
 ```js
 // The created Post document is returned
 const post = await payload.create({
-  collection: 'posts', // required
-  data: { // required
-    title: 'sure',
-    description: 'maybe',
+  collection: "posts", // required
+  data: {
+    // required
+    title: "sure",
+    description: "maybe",
   },
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   user: dummyUserDoc,
   overrideAccess: true,
@@ -96,7 +108,7 @@ const post = await payload.create({
   // If creating verification-enabled auth doc,
   // you can optionally disable the email that is auto-sent
   disableVerificationEmail: true,
-})
+});
 ```
 
 #### Find
@@ -124,15 +136,15 @@ const result = await payload.find({
 ```js
 // Result will be a Post document.
 const result = await payload.findByID({
-  collection: 'posts', // required
-  id: '507f1f77bcf86cd799439011', // required
+  collection: "posts", // required
+  id: "507f1f77bcf86cd799439011", // required
   depth: 2,
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
 #### Update
@@ -140,19 +152,20 @@ const result = await payload.findByID({
 ```js
 // Result will be the updated Post document.
 const result = await payload.update({
-  collection: 'posts', // required
-  id: '507f1f77bcf86cd799439011', // required
-  data: { // required
-    title: 'sure',
-    description: 'maybe',
+  collection: "posts", // required
+  id: "507f1f77bcf86cd799439011", // required
+  data: {
+    // required
+    title: "sure",
+    description: "maybe",
   },
   depth: 2,
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
 #### Delete
@@ -160,15 +173,15 @@ const result = await payload.update({
 ```js
 // Result will be the now-deleted Post document.
 const result = await payload.delete({
-  collection: 'posts', // required
-  id: '507f1f77bcf86cd799439011', // required
+  collection: "posts", // required
+  id: "507f1f77bcf86cd799439011", // required
   depth: 2,
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
 ## Auth Operations
@@ -186,19 +199,20 @@ If a collection has [`Authentication`](/docs/authentication/overview) enabled, a
 // }
 
 const result = await payload.login({
-  collection: 'users', // required
-  data: { // required
-    email: 'dev@payloadcms.com',
-    password: 'rip',
+  collection: "users", // required
+  data: {
+    // required
+    email: "dev@payloadcms.com",
+    password: "rip",
   },
   req: req, // pass an Express `req` which will be provided to all hooks
   res: res, // used to automatically set an HTTP-only auth cookie
   depth: 2,
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
 #### Forgot Password
@@ -206,12 +220,13 @@ const result = await payload.login({
 ```js
 // Returned token will allow for a password reset
 const token = await payload.forgotPassword({
-  collection: 'users', // required
-  data: { // required
-    email: 'dev@payloadcms.com',
+  collection: "users", // required
+  data: {
+    // required
+    email: "dev@payloadcms.com",
   },
   req: req, // pass an Express `req` which will be provided to all hooks
-})
+});
 ```
 
 #### Reset Password
@@ -223,13 +238,14 @@ const token = await payload.forgotPassword({
 //   user: { ... } // the user document that just logged in
 // }
 const result = await payload.forgotPassword({
-  collection: 'users', // required
-  data: { // required
-    token: 'afh3o2jf2p3f...', // the token generated from the forgotPassword operation
+  collection: "users", // required
+  data: {
+    // required
+    token: "afh3o2jf2p3f...", // the token generated from the forgotPassword operation
   },
   req: req, // pass an Express `req` which will be provided to all hooks
   res: res, // used to automatically set an HTTP-only auth cookie
-})
+});
 ```
 
 #### Unlock
@@ -237,13 +253,14 @@ const result = await payload.forgotPassword({
 ```js
 // Returned result will be a boolean representing success or failure
 const result = await payload.unlock({
-  collection: 'users', // required
-  data: { // required
-    email: 'dev@payloadcms.com',
+  collection: "users", // required
+  data: {
+    // required
+    email: "dev@payloadcms.com",
   },
   req: req, // pass an Express `req` which will be provided to all hooks
   overrideAccess: true,
-})
+});
 ```
 
 #### Verify
@@ -251,9 +268,9 @@ const result = await payload.unlock({
 ```js
 // Returned result will be a boolean representing success or failure
 const result = await payload.verify({
-  collection: 'users', // required
-  token: 'afh3o2jf2p3f...', // the token saved on the user as `_verificationToken`
-})
+  collection: "users", // required
+  token: "afh3o2jf2p3f...", // the token saved on the user as `_verificationToken`
+});
 ```
 
 ## Globals
@@ -265,14 +282,14 @@ The following Global operations are available through the Local API:
 ```js
 // Result will be the Header Global.
 const result = await payload.findGlobal({
-  global: 'header', // required
+  global: "header", // required
   depth: 2,
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
 #### Update
@@ -280,22 +297,23 @@ const result = await payload.findGlobal({
 ```js
 // Result will be the updated Header Global.
 const result = await payload.updateGlobal({
-  global: 'header', // required
-  data: { // required
+  global: "header", // required
+  data: {
+    // required
     nav: [
       {
-        url: 'https://google.com',
+        url: "https://google.com",
       },
       {
-        url: 'https://payloadcms.com',
+        url: "https://payloadcms.com",
       },
     ],
   },
   depth: 2,
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
