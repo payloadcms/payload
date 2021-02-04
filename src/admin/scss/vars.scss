@@ -7,17 +7,17 @@
 // BREAKPOINTS
 /////////////////////////////
 
-$breakpoint-xs-width: 400px;
-$breakpoint-s-width: 768px;
-$breakpoint-m-width: 1024px;
-$breakpoint-l-width: 1440px;
+$breakpoint-xs-width: 400px !default;
+$breakpoint-s-width: 768px !default;
+$breakpoint-m-width: 1024px !default;
+$breakpoint-l-width: 1440px !default;
 
 //////////////////////////////
 // BASELINE GRID
 //////////////////////////////
 
-$baseline-px         : 25px;
-$baseline-body-size  : 13px;
+$baseline-px         : 25px !default;
+$baseline-body-size  : 13px !default;
 $baseline            : ($baseline-px / $baseline-body-size) + rem;
 
 @function base($multiplier) {
@@ -28,32 +28,32 @@ $baseline            : ($baseline-px / $baseline-body-size) + rem;
 // FONTS
 //////////////////////////////
 
-$font-body  : 'Suisse Intl';
-$font-mono  : monospace;
+$font-body  : 'Suisse Intl' !default;
+$font-mono  : monospace !default;
 
 //////////////////////////////
 // COLORS
 //////////////////////////////
 
-$color-dark-gray       : #333333;
-$color-gray            : #9A9A9A;
-$color-light-gray      : #DADADA;
-$color-background-gray : #F3F3F3;
-$color-red             : #ff6f76;
-$color-yellow          : #FDFFA4;
-$color-green           : #B2FFD6;
-$color-purple          : #F3DDF3;
+$color-dark-gray       : #333333 !default;
+$color-gray            : #9A9A9A !default;
+$color-light-gray      : #DADADA !default;
+$color-background-gray : #F3F3F3 !default;
+$color-red             : #ff6f76 !default;
+$color-yellow          : #FDFFA4 !default;
+$color-green           : #B2FFD6 !default;
+$color-purple          : #F3DDF3 !default;
 
 //////////////////////////////
 // STYLES
 //////////////////////////////
 
-$style-radius-s     : 3px;
-$style-radius-m     : 4px;
-$style-stroke-width : 1px;
+$style-radius-s     : 3px !default;
+$style-radius-m     : 4px !default;
+$style-stroke-width : 1px !default;
 
-$style-stroke-width-s : 1px;
-$style-stroke-width-m : 2px;
+$style-stroke-width-s : 1px !default;
+$style-stroke-width-m : 2px !default;
 
 //////////////////////////////
 // MISC
