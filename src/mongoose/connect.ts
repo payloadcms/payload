@@ -1,12 +1,19 @@
 /* eslint-disable no-console */
-import mongoose from 'mongoose';
+import mongoose, { ConnectionOptions } from 'mongoose';
 import Logger from '../utilities/logger';
 
 const logger = Logger();
 
-const connectMongoose = async (url: string): Promise<void> => {
+const connectMongoose = async (url: string, options: ConnectionOptions): Promise<void> => {
   let urlToConnect = url;
   let successfulConnectionMessage = 'Connected to Mongo server successfully!';
+  const connectionOptions = {
+    ...options,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    autoIndex: false,
+  };
 
   if (process.env.NODE_ENV === 'test') {
     // eslint-disable-next-line global-require
@@ -22,12 +29,7 @@ const connectMongoose = async (url: string): Promise<void> => {
   }
 
   try {
-    await mongoose.connect(urlToConnect, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true,
-      autoIndex: false,
-    });
+    await mongoose.connect(urlToConnect, connectionOptions);
     logger.info(successfulConnectionMessage);
   } catch (err) {
     logger.error('Error: cannot connect to MongoDB. Details: ', err);

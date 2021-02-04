@@ -4,6 +4,7 @@ import { Transporter } from 'nodemailer';
 import { Configuration } from 'webpack';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
+import { ConnectionOptions } from 'mongoose';
 import { Payload } from '..';
 import { AfterErrorHook, PayloadCollectionConfig, CollectionConfig } from '../collections/config/types';
 import { PayloadGlobalConfig, GlobalConfig } from '../globals/config/types';
@@ -48,6 +49,7 @@ export function hasTransportOptions(emailConfig: EmailOptions): emailConfig is E
 export type InitOptions = {
   express?: Express;
   mongoURL: string;
+  mongoOptions?: ConnectionOptions;
   secret: string;
   license?: string;
   email?: EmailOptions;

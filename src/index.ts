@@ -1,6 +1,5 @@
 import express, { Express, Router } from 'express';
 import crypto from 'crypto';
-import { TestAccount } from 'nodemailer';
 import {
   Config,
   EmailOptions,
@@ -32,7 +31,7 @@ import performFieldOperations from './fields/performFieldOperations';
 import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
 import { encrypt, decrypt } from './auth/crypto';
-import { MockEmailHandler, BuildEmailResult, Message } from './email/types';
+import { BuildEmailResult, Message } from './email/types';
 import { PayloadRequest } from './express/types';
 import sendEmail from './email/sendEmail';
 
@@ -143,7 +142,7 @@ export class Payload {
     initGlobals(this);
 
     // Connect to database
-    connectMongoose(this.mongoURL);
+    connectMongoose(this.mongoURL, options.mongoOptions);
 
     // If not initializing locally, set up HTTP routing
     if (!this.local) {
