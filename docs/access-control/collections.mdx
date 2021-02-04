@@ -10,24 +10,23 @@ You can define Collection-level Access Control within each Collection's `access`
 
 ## Available Controls
 
-| Function                | Allows/Denies Access                         |
-| ----------------------- | -------------------------------------------- |
-| **[`create`](#create)** | Used in the `create` operation               |
-| **[`read`](#read)**     | Used in the `find` and `findByID` operations |
-| **[`update`](#update)** | Used in the `update` operation               |
-| **[`delete`](#delete)** | Used in the `delete` operation               |
+| Function                 | Allows/Denies Access |
+| ------------------------ | -------------------- |
+| **[`create`](#create)**  | Used in the `create` operation |
+| **[`read`](#read)**      | Used in the `find` and `findByID` operations |
+| **[`update`](#update)**  | Used in the `update` operation |
+| **[`delete`](#delete)**  | Used in the `delete` operation |
 
 #### Auth-enabled Controls
 
 If a Collection supports [`Authentication`](/docs/authentication/overview), the following Access Controls become available:
 
-| Function                | Allows/Denies Access                                           |
-| ----------------------- | -------------------------------------------------------------- |
-| **[`admin`](#admin)**   | Used to restrict access to the Payload Admin panel             |
+| Function                | Allows/Denies Access |
+| ----------------------- | -------------------- |
+| **[`admin`](#admin)**   | Used to restrict access to the Payload Admin panel |
 | **[`unlock`](#unlock)** | Used to restrict which users can access the `unlock` operation |
 
 **Example Collection config:**
-
 ```js
 export default {
   slug: "posts",
@@ -49,8 +48,8 @@ Returns a boolean which allows/denies access to the `create` request.
 
 **Available argument properties :**
 
-| Option    | Description                                                                |
-| --------- | -------------------------------------------------------------------------- |
+| Option    | Description |
+| --------- | ----------- |
 | **`req`** | The Express `request` object containing the currently authenticated `user` |
 
 ### Read
@@ -59,9 +58,9 @@ Read access functions can return a boolean result or optionally return a [query 
 
 **Available argument properties :**
 
-| Option    | Description                                                                     |
-| --------- | ------------------------------------------------------------------------------- |
-| **`req`** | The Express `request` object containing the currently authenticated `user`      |
+| Option    | Description |
+| --------- | ----------- |
+| **`req`** | The Express `request` object containing the currently authenticated `user` |
 | **`id`**  | `id` of document requested, if within `findByID`. Otherwise, `id` is undefined. |
 
 ### Update
@@ -70,10 +69,10 @@ Update access functions can return a boolean result or optionally return a [quer
 
 **Available argument properties :**
 
-| Option    | Description                                                                |
-| --------- | -------------------------------------------------------------------------- |
+| Option    | Description |
+| --------- | ----------- |
 | **`req`** | The Express `request` object containing the currently authenticated `user` |
-| **`id`**  | `id` of document requested to update                                       |
+| **`id`**  | `id` of document requested to update |
 
 ### Delete
 
@@ -81,10 +80,10 @@ Similarly to the Update function, returns a boolean or a [query constraint](/doc
 
 **Available argument properties :**
 
-| Option    | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
+| Option    | Description |
+| --------- | ----------- |
 | **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
-| **`id`**  | `id` of document requested to delete                                                                |
+| **`id`**  | `id` of document requested to delete |
 
 ### Admin
 
@@ -92,8 +91,8 @@ If the Collection is [used to access the Payload Admin panel](/docs/admin/overvi
 
 **Available argument properties :**
 
-| Option    | Description                                                                |
-| --------- | -------------------------------------------------------------------------- |
+| Option    | Description |
+| --------- | ----------- |
 | **`req`** | The Express `request` object containing the currently authenticated `user` |
 
 ### Unlock
@@ -102,6 +101,6 @@ Determines which users can [unlock](/docs/authentication/operations#unlock) othe
 
 **Available argument properties :**
 
-| Option    | Description                                                                |
-| --------- | -------------------------------------------------------------------------- |
+| Option    | Description |
+| --------- | ----------- |
 | **`req`** | The Express `request` object containing the currently authenticated `user` |

@@ -7,9 +7,7 @@ keywords: deployment, production, config, configuration, documentation, Content 
 ---
 
 <Banner type="success">
-  So you've developed a Payload app, it's fully tested, and running great
-  locally. Now it's time to launch. <strong>Awesome! Great work!</strong> Now,
-  what's next?
+  So you've developed a Payload app, it's fully tested, and running great locally. Now it's time to launch. <strong>Awesome! Great work!</strong> Now, what's next?
 </Banner>
 
 There are many ways to deploy Payload to a production environment. When evaluating how you will deploy Payload, you need to consider these main aspects:
@@ -31,13 +29,7 @@ When you initialize Payload, you provide it with a `secret` property. This prope
 Because _**you**_ are in complete control of who can do what with your data, you should double and triple-check that you wield that power responsibly before deploying to Production.
 
 <Banner type="error">
-  <strong>
-    By default, all Access Control functions require that a user is successfully
-    logged in to Payload to create, read, update, or delete data.
-  </strong>{" "}
-  But, if you allow public user registration, for example, you will want to make
-  sure that your access control functions are more strict - permitting{" "}
-  <strong>only appropriate users</strong> to perform appropriate actions.
+  <strong>By default, all Access Control functions require that a user is successfully logged in to Payload to create, read, update, or delete data.</strong> But, if you allow public user registration, for example, you will want to make sure that your access control functions are more strict - permitting <strong>only appropriate users</strong> to perform appropriate actions.
 </Banner>
 
 ##### Building the Admin panel
@@ -45,7 +37,6 @@ Because _**you**_ are in complete control of who can do what with your data, you
 Before running in Production, you need to have built a production-ready copy of the Payload Admin panel. To do this, Payload provides the `build` NPM script. You can use it by adding a `script` to your `package.json` file like this:
 
 `package.json`:
-
 ```js
 {
   "name": "project-name-here",
@@ -104,18 +95,15 @@ Alternatively, persistent filesystems will never delete your files and can be tr
 - Many other more traditional web hosts
 
 <Banner type="error">
-  <strong>Warning:</strong>
-  <br />
-  If you rely on Payload's <strong>Upload</strong> functionality, make sure you
-  either use a host with a persistent filesystem or have an integration with a
-  third-party file host like Amazon S3.
+  <strong>Warning:</strong><br/>
+  If you rely on Payload's <strong>Upload</strong> functionality, make sure you either use a host with a persistent filesystem or have an integration with a third-party file host like Amazon S3.
 </Banner>
 
 ##### Using ephemeral filesystem providers like Heroku
 
 If you don't use Payload's `upload` functionality, you can go ahead and use Heroku or similar platform easily. Everything will work exactly as you want it to.
 
-But, if you do, and you still want to use an ephemeral filesystem provider, you can write a hook-based solution to _copy_ the files your users upload to a more permanent storage solution like Amazon S3 or DigitalOcean Spaces.
+But, if you do, and you still want to use an ephemeral filesystem provider, you can write a hook-based solution to *copy* the files your users upload to a more permanent storage solution like Amazon S3 or DigitalOcean Spaces.
 
 **To automatically send uploaded files to S3 or similar, you could:**
 

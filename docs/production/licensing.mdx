@@ -16,9 +16,8 @@ Payload is free to use locally for development purposes for as long as you like.
 1. Add your license to a `.env` variable, and then add the `license` property to your `payload.init()` call.
 
 `server.js`:
-
 ```js
-const payload = require("payload");
+const payload = require('payload');
 
 payload.init({
   license: process.env.PAYLOAD_LICENSE_KEY,
@@ -33,17 +32,13 @@ payload.init({
 Payload licensing is enforced only through its Admin panel. Each time the Admin panel is loaded, a request is made to our licensing server that evaluates the domain that the panel was loaded from. We then verify that you have a valid, active license key and that the domain being used matches the license accordingly.
 
 <Banner type="success">
-  <strong>Note:</strong>
-  <br />
-  Your Payload APIs will always be available, regardless of subscription status.
-  This means you can have peace of mind that your critical operations relying on
-  your API will not going to be hindered because of a lapse in billing issue or
-  a network problem between systems. Only the Admin panel will be affected.
+  <strong>Note:</strong><br/>
+  Your Payload APIs will always be available, regardless of subscription status. This means you can have peace of mind that your critical operations relying on your API will not going to be hindered because of a lapse in billing issue or a network problem between systems. Only the Admin panel will be affected.
 </Banner>
 
 ### How to choose the domain for your license
 
-Payload licenses are specific to **one** domain, but you can use your Payload API from an unlimited amount of sources. However, you can _only access your Payload Admin panel from one domain_. This means that when you are selecting the domain you'd like to tie to your Payload license, you should choose the domain that you'd like to use to access your admin panel in production.
+Payload licenses are specific to **one** domain, but you can use your Payload API from an unlimited amount of sources. However, you can *only access your Payload Admin panel from one domain*. This means that when you are selecting the domain you'd like to tie to your Payload license, you should choose the domain that you'd like to use to access your admin panel in production.
 
 **Examples:**
 
@@ -51,10 +46,8 @@ Payload licenses are specific to **one** domain, but you can use your Payload AP
 - If you'd like to access via a root-level domain like `coolsitehere.com/admin`, you would use `coolsitehere.com` for your license.
 
 <Banner type="success">
-  <strong>Note:</strong>
-  <br />
-  Even though your Payload license is tied to one domain, you can use your Admin
-  panel for dev purposes however and wherever you'd like.
+  <strong>Note:</strong><br/>
+  Even though your Payload license is tied to one domain, you can use your Admin panel for dev purposes however and wherever you'd like.
 </Banner>
 
 #### How does Payload know if the license is being used for dev or production purposes?
@@ -72,5 +65,4 @@ Our licensing service checks for any of the following criteria to determine if y
 1. **Can I transfer a license?** You can change the domain name of a license in your Payload account by clicking on the license domain name, finding the "Change domain" link and following the instructions. If you need to transfer ownership to another user or organization, you can [contact us](mailto:info@payloadcms.com) for help.
 
 ### Read the full license
-
 You can read the entirety of the Payload license directly in the distributed NPM package or in the Payload source code at [github.com](https://github.com/payloadcms/payload/blob/master/license.md)

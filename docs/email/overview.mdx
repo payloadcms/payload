@@ -25,21 +25,20 @@ in the `email` property object of your payload init call. Payload will make use 
 
 The following options are configurable in the `email` property object as part of the options object when calling payload.init().
 
-| Option                 | Description                                                                                                                                                                                  |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`transport`**        | The NodeMailer transport object for when you want to do it yourself, not needed when transportOptions is set                                                                                 |
-| **`transportOptions`** | An object that configures the transporter that Payload will create. For all the available options see the [NodeMailer documentation](https://nodemailer.com/smtp/) or see the examples below |
-| **`fromName`** \*      | The name part of the From field that will be seen on the delivered email                                                                                                                     |
-| **`fromAddress`** \*   | The email address part of the From field that will be used when delivering email                                                                                                             |
+| Option                       | Description  |
+| ---------------------------- | -------------|
+| **`transport`**              | The NodeMailer transport object for when you want to do it yourself, not needed when transportOptions is set |
+| **`transportOptions`**       | An object that configures the transporter that Payload will create. For all the available options see the [NodeMailer documentation](https://nodemailer.com/smtp/) or see the examples below |
+| **`fromName`** *             | The name part of the From field that will be seen on the delivered email |
+| **`fromAddress`** *          | The email address part of the From field that will be used when delivering email |
 
-_\* An asterisk denotes that a property is required._
+*\* An asterisk denotes that a property is required.*
 
 ### Use SMTP
 
 Simple Mail Transfer Protocol, also known as SMTP can be passed in using the `transportOptions` object on the `email` options.
 
 **Example email part using SMTP:**
-
 ```js
 payload.init({
   email: {
@@ -63,12 +62,7 @@ payload.init({
 ```
 
 <Banner type="warning">
-  It is best practice to avoid saving credentials or API keys directly in your
-  code, use{" "}
-  <a href="/docs/configuration/overview#using-environment-variables-in-your-config">
-    environment variables
-  </a>
-  .
+  It is best practice to avoid saving credentials or API keys directly in your code, use <a href="/docs/configuration/overview#using-environment-variables-in-your-config">environment variables</a>.
 </Banner>
 
 ### Use an email service
@@ -76,28 +70,25 @@ payload.init({
 Many third party mail providers are available and offer benefits beyond basic SMTP. As an example your payload init could look this if you wanted to use SendGrid.com though the same approach would work for any other [NodeMailer transports](https://nodemailer.com/transports/) shown here or provided by another third party.
 
 ```js
-const nodemailerSendgrid = require("nodemailer-sendgrid");
-const payload = require("payload");
+const nodemailerSendgrid = require('nodemailer-sendgrid');
+const payload = require('payload');
 
 const sendGridAPIKey = process.env.SENDGRID_API_KEY;
 
 payload.init({
-  ...(sendGridAPIKey
-    ? {
-        email: {
-          transportOptions: nodemailerSendgrid({
-            apiKey: sendGridAPIKey,
-          }),
-          fromName: "Admin",
-          fromAddress: "admin@example.com",
-        },
-      }
-    : {}),
+  ...sendGridAPIKey ? {
+    email: {
+      transportOptions: nodemailerSendgrid({
+        apiKey: sendGridAPIKey,
+      }),
+      fromName: 'Admin',
+      fromAddress: 'admin@example.com',
+    },
+  } : {},
 });
 ```
 
 ### Use a custom NodeMailer transport
-
 To take full control of the mail transport you may wish to use `nodemailer.createTransport()` on your server and provide it to Payload init.
 
 ```js
@@ -123,15 +114,12 @@ payload.init({
 ```
 
 ### Sending Mail
-
 With a working transport you can call it anywhere you have access to payload by calling `payload.sendEmail(message)`. The `message` will contain the `to`, `subject` and `email` or `text` for the email being sent. To see all available message configuration options see [NodeMailer](https://nodemailer.com/message).
 
 ### Mock transport
-
 By default, Payload uses a mock implementation that only sends mail to the [ethereal](https://ethereal.email) capture service that will never reach a user's inbox. While in development you may wish to make use of the captured messages which is why the payload output during server output helpfully logs this out on the server console.
 
 **Console output when starting payload with a mock email instance**
-
 ```
 [06:37:21] INFO  (payload): Starting Payload...
 [06:37:22] INFO  (payload): Payload Demo Initialized
@@ -146,8 +134,7 @@ By default, Payload uses a mock implementation that only sends mail to the [ethe
 The mock email handler is used when payload is started with neither `transport` or `transportOptions` to know how to deliver email.
 
 <Banner type="warning">
-  The randomly generated email account username and password will be different
-  each time the Payload server starts.
+  The randomly generated email account username and password will be different each time the Payload server starts.
 </Banner>
 
 ### Using multiple mail providers

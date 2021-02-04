@@ -12,16 +12,16 @@ To enable Authentication on a collection, define an `auth` property and set it t
 
 ## Options
 
-| Option                 | Description                                                                                                                                                                                                                         |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`useAPIKey`**        | Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection. [More](/docs/authentication/config#api-keys)                                                                       |
-| **`tokenExpiration`**  | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time.                                                                                                                     |
-| **`maxLoginAttempts`** | Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to `0` to disable.                                                                       |
-| **`lockTime`**         | Set the time that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for.                                                                                                            |
+| Option                 | Description  |
+| ---------------------- | -------------|
+| **`useAPIKey`**        | Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection. [More](/docs/authentication/config#api-keys) |
+| **`tokenExpiration`**  | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time. |
+| **`maxLoginAttempts`** | Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to `0` to disable. |
+| **`lockTime`**         | Set the time that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for. |
 | **`depth`**            | How many levels deep a `user` document should be populated when creating the JWT and binding the `user` to the express `req`. Defaults to `0` and should only be modified if absolutely necessary, as this will affect performance. |
-| **`cookies`**          | Set cookie options, including `secure`, `sameSite`, and `domain`. For advanced users.                                                                                                                                               |
-| **`forgotPassword`**   | Customize the way that the `forgotPassword` operation functions. [More](/docs/authentication/config#forgot-password)                                                                                                                |
-| **`verify`**           | Set to `true` or pass an object with verification options to require users to verify by email before they are allowed to log into your app. [More](/docs/authentication/config#email-verification)                                  |
+| **`cookies`**          | Set cookie options, including `secure`, `sameSite`, and `domain`. For advanced users. |
+| **`forgotPassword`**   | Customize the way that the `forgotPassword` operation functions. [More](/docs/authentication/config#forgot-password) |
+| **`verify`**           | Set to `true` or pass an object with verification options to require users to verify by email before they are allowed to log into your app. [More](/docs/authentication/config#email-verification) |
 
 ### API keys
 
@@ -37,8 +37,7 @@ Technically, both of these options will work for third-party integrations but th
 To enable API keys on a collection, set the `useAPIKey` auth option to `true`. From there, a new interface will appear in the Admin panel for each document within the collection that allows you to generate an API key for each user in the Collection.
 
 <Banner type="success">
-  User API keys are encrypted within the database, meaning that if your database
-  is compromised, your API keys will not be.
+  User API keys are encrypted within the database, meaning that if your database is compromised, your API keys will not be.
 </Banner>
 
 ##### Authenticating via API Key
@@ -46,9 +45,8 @@ To enable API keys on a collection, set the `useAPIKey` auth option to `true`. F
 To utilize your API key while interacting with the REST or GraphQL API, add the `Authorization` header.
 
 **For example, using Fetch:**
-
 ```js
-const response = await fetch("http://localhost:3000/api/pages", {
+const response = await fetch('http://localhost:3000/api/pages', {
   headers: {
     Authorization: `${collection.labels.singular} API-Key ${YOUR_API_KEY}`,
   },
@@ -64,13 +62,8 @@ You can customize how the Forgot Password workflow operates with the following o
 Function that accepts one argument, containing `{ req, token, user }`, that allows for overriding the HTML within emails that are sent to users attempting to reset their password. The function should return a string that supports HTML, which can be a full HTML email.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
-  HTML templating can be used to create custom email templates, inline CSS
-  automatically, and more. You can make a reusable function that standardizes
-  all email sent from Payload, which makes sending custom emails more DRY.
-  Payload doesn't ship with an HTML templating engine, so you are free to choose
-  your own.
+  <strong>Tip:</strong><br />
+  HTML templating can be used to create custom email templates, inline CSS automatically, and more. You can make a reusable function that standardizes all email sent from Payload, which makes sending custom emails more DRY. Payload doesn't ship with an HTML templating engine, so you are free to choose your own.
 </Banner>
 
 Example:
@@ -106,13 +99,8 @@ Example:
 ```
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  <br />
-  If you specify a different URL to send your users to for resetting their
-  password, such as a page on the frontend of your app or similar, you need to
-  handle making the call to the Payload REST or GraphQL reset-password operation
-  yourself on your frontend, using the token that was provided for you. Above,
-  it was passed via query parameter.
+  <strong>Important:</strong><br />
+  If you specify a different URL to send your users to for resetting their password, such as a page on the frontend of your app or similar, you need to handle making the call to the Payload REST or GraphQL reset-password operation yourself on your frontend, using the token that was provided for you. Above, it was passed via query parameter.
 </Banner>
 
 **`generateEmailSubject`**
@@ -165,13 +153,8 @@ Example:
 ```
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  <br />
-  If you specify a different URL to send your users to for email verification,
-  such as a page on the frontend of your app or similar, you need to handle
-  making the call to the Payload REST or GraphQL verification operation yourself
-  on your frontend, using the token that was provided for you. Above, it was
-  passed via query parameter.
+  <strong>Important:</strong><br />
+  If you specify a different URL to send your users to for email verification, such as a page on the frontend of your app or similar, you need to handle making the call to the Payload REST or GraphQL verification operation yourself on your frontend, using the token that was provided for you. Above, it was passed via query parameter.
 </Banner>
 
 **`generateEmailSubject`**

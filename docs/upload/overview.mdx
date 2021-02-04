@@ -7,13 +7,11 @@ keywords: uploads, images, media, overview, documentation, Content Management Sy
 ---
 
 <Banner>
-  Payload provides for everything you need to enable file upload, storage, and
-  management directly on your server—including extremely powerful file access
-  control.
+  Payload provides for everything you need to enable file upload, storage, and management directly on your server—including extremely powerful file access control.
 </Banner>
 
 ![Upload admin panel functionality](https://payloadcms.com/images/upload-admin.jpg)
-_Admin panel screenshot depicting a Media Collection with Upload enabled_
+*Admin panel screenshot depicting a Media Collection with Upload enabled*
 
 **Here are some common use cases of Uploads:**
 
@@ -24,7 +22,7 @@ _Admin panel screenshot depicting a Media Collection with Upload enabled_
 **By simply enabling Upload functionality on a Collection, Payload will automatically transform your Collection into a robust file management / storage solution. The following modifications will be made:**
 
 1. `filename`, `mimeType`, and `filesize` fields will be automatically added to your Collection. Optionally, if you pass `imageSizes` to your Collection's Upload config, a [`sizes`](#image-sizes) array will also be added containing auto-resized image sizes and filenames.
-1. The Admin panel will modify its built-in `List` component to show a thumbnail gallery of your Uploads instead of the default Table view
+1.  The Admin panel will modify its built-in `List` component to show a thumbnail gallery of your Uploads instead of the default Table view
 1. The Admin panel will modify its `Edit` view(s) to add a new set of corresponding Upload UI which will allow for file upload
 1. The `create`, `update`, and `delete` Collection operations will be modified to support file upload, re-upload, and deletion
 
@@ -33,47 +31,45 @@ _Admin panel screenshot depicting a Media Collection with Upload enabled_
 Every Payload Collection can opt-in to supporting Uploads by specifying the `upload` property on the Collection's config to either `true` or to an object containing `upload` options.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />A common pattern is to create a <strong>Media</strong> collection and
-  enable <strong>upload</strong> on that collection.
+  <strong>Tip:</strong><br/>
+  A common pattern is to create a <strong>Media</strong> collection and enable <strong>upload</strong> on that collection.
 </Banner>
 
 #### Collection Upload Options
 
-| Option               | Description                                                                                                                           |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| **`staticURL`** \*   | The base URL path to use to access you uploads. Example: `/media`                                                                     |
-| **`staticDir`** \*   | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. |
-| **`imageSizes`**     | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                    |
-| **`adminThumbnail`** | Which of your provided image sizes to use for the admin panel's thumbnail. Typically a size around 500x500px or so works well.        |
+| Option                 | Description  |
+| ---------------------- | -------------|
+| **`staticURL`** *      | The base URL path to use to access you uploads. Example: `/media` |
+| **`staticDir`** *      | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. |
+| **`imageSizes`**       | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes) |
+| **`adminThumbnail`**   | Which of your provided image sizes to use for the admin panel's thumbnail. Typically a size around 500x500px or so works well. |
 
-_An asterisk denotes that a property above is required._
+*An asterisk denotes that a property above is required.*
 
 **Example Upload collection:**
-
 ```js
 const Media = {
-  slug: "media",
+  slug: 'media',
   upload: {
-    staticURL: "/media",
-    staticDir: "media",
+    staticURL: '/media',
+    staticDir: 'media',
     imageSizes: [
       {
-        name: "thumbnail",
+        name: 'thumbnail',
         width: 400,
         height: 300,
-        crop: "centre",
+        crop: 'centre',
       },
       {
-        name: "card",
+        name: 'card',
         width: 768,
         height: 1024,
-        crop: "centre",
-      },
+        crop: 'centre',
+      }
     ],
-    adminThumbnail: "thumbnail",
-  },
-};
+    adminThumbnail: 'thumbnail',
+  }
+}
 ```
 
 ### Payload-wide Upload Options
@@ -83,17 +79,17 @@ Payload relies on the [`express-fileupload`](https://www.npmjs.com/package/expre
 A common example of what you might want to customize within Payload-wide Upload options would be to increase the allowed `fileSize` of uploads sent to Payload:
 
 ```js
-import { buildConfig } from "payload/config";
+import { buildConfig } from 'payload/config';
 
 export default buildConfig({
-  serverURL: "http://localhost:3000",
+  serverURL: 'http://localhost:3000',
   collections: [
     {
-      slug: "media",
+      slug: 'media',
       fields: [
         {
-          name: "alt",
-          type: "text",
+          name: 'alt',
+          type: 'text',
         },
       ],
       upload: true,
@@ -102,8 +98,8 @@ export default buildConfig({
   upload: {
     limits: {
       fileSize: 5000000, // 5MB, written in bytes
-    },
-  },
+    }
+  }
 });
 ```
 
@@ -118,11 +114,8 @@ Behind the scenes, Payload relies on [`sharp`](https://sharp.pixelplumbing.com/a
 ### Uploading Files
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  <br />
-  Uploading files is currently only possible through the REST API due to how
-  GraphQL works. It's difficult and fairly nonsensical to support uploading
-  files through GraphQL.
+  <strong>Important:</strong><br/>
+  Uploading files is currently only possible through the REST API due to how GraphQL works. It's difficult and fairly nonsensical to support uploading files through GraphQL.
 </Banner>
 
 To upload a file, use your collection's [`create`](/docs/rest-api/overview#collections) endpoint. Send it all the data that your Collection requires, as well as a `file` key containing the file that you'd like to upload.

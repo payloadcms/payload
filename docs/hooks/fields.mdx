@@ -26,7 +26,6 @@ Field-level hooks offer incredible potential for encapsulating your logic. They 
 ## Config
 
 Example field configuration:
-
 ```js
 {
   name: 'name',
@@ -48,33 +47,27 @@ Example field configuration:
 All field-level hooks are formatted to accept the same arguments, although some arguments may be `undefined` based on which field hook you are utilizing.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
-  It's a good idea to conditionally scope your logic based on which operation is
-  executing.
+  <strong>Tip:</strong><br />
+  It's a good idea to conditionally scope your logic based on which operation is executing.
 </Banner>
 
 #### Arguments
 
 Field Hooks receive one `args` argument that contains the following properties:
 
-| Option            | Description                                                                                      |
-| ----------------- | ------------------------------------------------------------------------------------------------ |
+| Option            | Description  |
+| ----------------- | -------------|
 | **`value`**       | The value of the field, before any updating. Will return `undefined` within `create` operations. |
-| **`data`**        | The data passed to update the field with in `create` and `update` operations.                    |
-| **`originalDoc`** | The full original document in `update` or `read` operations.                                     |
-| **`operation`**   | A string relating to which operation the field type is currently executing within.               |
-| **`req`**         | The Express `request` object. It is mocked for Local API operations.                             |
+| **`data`**        | The data passed to update the field with in `create` and `update` operations. |
+| **`originalDoc`** | The full original document in `update` or `read` operations. |
+| **`operation`**   | A string relating to which operation the field type is currently executing within. |
+| **`req`**         | The Express `request` object. It is mocked for Local API operations. |
 
 #### Return value
 
 Field hooks **must** return the intended value for the field to be used in the operation. You can modify the return value of the field before the operation continues, or simply send the `value` that you receive through the hook's argument. If you return `undefined` within a `beforeChange` or `beforeValidate` hook, the property will be unset from its document.
 
 <Banner type="warning">
-  <strong>Important</strong>
-  <br />
-  Due to GraphQL's typed nature, you should never change the type of data that
-  you return from a field, otherwise GraphQL will produce errors. If you need to
-  change the shape or type of data, reconsider Field Hooks and instead evaluate
-  if Collection / Global hooks might suit you better.
+  <strong>Important</strong><br/>
+  Due to GraphQL's typed nature, you should never change the type of data that you return from a field, otherwise GraphQL will produce errors. If you need to change the shape or type of data, reconsider Field Hooks and instead evaluate if Collection / Global hooks might suit you better.
 </Banner>

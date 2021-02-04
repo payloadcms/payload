@@ -7,8 +7,7 @@ keywords: rest, api, documentation, Content Management System, cms, headless, ja
 ---
 
 <Banner>
-  A fully functional REST API is automatically generated from your Collection
-  and Global configs.
+  A fully functional REST API is automatically generated from your Collection and Global configs.
 </Banner>
 
 All Payload API routes are mounted prefixed to your config's `routes.api` URL segment (default: `/api`).
@@ -25,13 +24,13 @@ Each collection is mounted using its `slug` value. For example, if a collection'
 
 **All CRUD operations are exposed as follows:**
 
-| Method   | Path                        | Description                       |
-| -------- | --------------------------- | --------------------------------- |
-| `GET`    | `/api/{collectionSlug}`     | Find paginated documents          |
-| `GET`    | `/api/{collectionSlug}/:id` | Find a specific document by ID    |
-| `POST`   | `/api/{collectionSlug}`     | Create a new document             |
-| `PUT`    | `/api/{collectionSlug}/:id` | Update a document by ID           |
-| `DELETE` | `/api/{collectionSlug}/:id` | Delete an existing document by ID |
+| Method   | Path                        | Description                            |
+| -------- | --------------------------- | -------------------------------------- |
+| `GET`    | `/api/{collectionSlug}`     | Find paginated documents               |
+| `GET`    | `/api/{collectionSlug}/:id` | Find a specific document by ID         |
+| `POST`   | `/api/{collectionSlug}`     | Create a new document                  |
+| `PUT`    | `/api/{collectionSlug}/:id` | Update a document by ID                |
+| `DELETE` | `/api/{collectionSlug}/:id` | Delete an existing document by ID      |
 
 ##### Additional `find` query parameters
 
@@ -44,22 +43,22 @@ The `find` endpoint supports the following additional query parameters:
 
 ## Auth Operations
 
-| Method | Path                                    | Description                                                                             |
-| ------ | --------------------------------------- | --------------------------------------------------------------------------------------- |
-| `POST` | `/api/{collectionSlug}/verify/:token`   | [Email verification](/docs/authentication/operations#verify-by-email), if enabled.      |
-| `POST` | `/api/{collectionSlug}/unlock`          | [Unlock a user's account](/docs/authentication/operations#unlock), if enabled.          |
-| `POST` | `/api/{collectionSlug}/login`           | [Logs in](/docs/authentication/operations#login) a user with email / password.          |
-| `POST` | `/api/{collectionSlug}/logout`          | [Logs out](/docs/authentication/operations#logout) a user.                              |
-| `POST` | `/api/{collectionSlug}/refresh-token`   | [Refreshes a token](/docs/authentication/operations#refresh) that has not yet expired.  |
-| `GET`  | `/api/{collectionSlug}/me`              | [Returns the currently logged in user with token](/docs/authentication/operations#me).  |
-| `POST` | `/api/{collectionSlug}/forgot-password` | [Password reset workflow](/docs/authentication/operations#forgot-password) entry point. |
-| `POST` | `/api/{collectionSlug}/reset-password`  | [To reset the user's password](/docs/authentication/operations#reset-password).         |
+| Method   | Path                        | Description |
+| -------- | --------------------------- | ----------- |
+| `POST`   | `/api/{collectionSlug}/verify/:token`   | [Email verification](/docs/authentication/operations#verify-by-email), if enabled. |
+| `POST`   | `/api/{collectionSlug}/unlock`          | [Unlock a user's account](/docs/authentication/operations#unlock), if enabled. |
+| `POST`   | `/api/{collectionSlug}/login`           | [Logs in](/docs/authentication/operations#login) a user with email / password. |
+| `POST`   | `/api/{collectionSlug}/logout`          | [Logs out](/docs/authentication/operations#logout) a user. |
+| `POST`   | `/api/{collectionSlug}/refresh-token`   | [Refreshes a token](/docs/authentication/operations#refresh) that has not yet expired. |
+| `GET`    | `/api/{collectionSlug}/me`              | [Returns the currently logged in user with token](/docs/authentication/operations#me). |
+| `POST`   | `/api/{collectionSlug}/forgot-password` | [Password reset workflow](/docs/authentication/operations#forgot-password) entry point. |
+| `POST`   | `/api/{collectionSlug}/reset-password`  | [To reset the user's password](/docs/authentication/operations#reset-password). |
 
 ## Globals
 
 Globals cannot be created or deleted, so there are only two REST endpoints opened:
 
-| Method | Path                        | Description             |
-| ------ | --------------------------- | ----------------------- |
-| `GET`  | `/api/globals/{globalSlug}` | Get a global by slug    |
-| `POST` | `/api/globals/{globalSlug}` | Update a global by slug |
+| Method   | Path                        | Description             |
+| -------- | --------------------------- | ----------------------- |
+| `GET`    | `/api/globals/{globalSlug}` | Get a global by slug    |
+| `POST`   | `/api/globals/{globalSlug}` | Update a global by slug |
