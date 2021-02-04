@@ -105,6 +105,10 @@ This is a fully qualified MongoDB connection string that points to your Mongo da
 
 In contrast to running Mongo locally, a popular option is to sign up for a free [MongoDB Atlas account](https://www.mongodb.com/cloud/atlas), which is a fully hosted and cloud-based installation of Mongo that you don't need to ever worry about.
 
+##### `mongoOptions`
+
+An optional object to customize connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose.
+
 ##### `express`
 
 This is your Express app as shown above. Payload will tie into your existing `app` and scope all of its functionalities to sub-routers. By default, Payload will add an `/admin` router and an `/api` router, but you can customize these paths.
