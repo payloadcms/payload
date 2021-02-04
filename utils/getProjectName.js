@@ -13,6 +13,11 @@ const getProjectName = async () => {
     return PROJECT_NAME;
   }
 
+  if (args._[0]) {
+    PROJECT_NAME = args._[0];
+    return PROJECT_NAME;
+  }
+
   const response = await prompts(
     {
       type: 'text',
