@@ -41,7 +41,7 @@ const getLatestPayloadVersion = async () => {
   let result = false;
   try {
     const { stdout } = await execa('npm info payload version', [], { shell: true });
-    return stdout;
+    return `^${stdout}`;
   } catch (error) {
     result = error;
   }
