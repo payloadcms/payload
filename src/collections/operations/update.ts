@@ -1,5 +1,6 @@
 import httpStatus from 'http-status';
 import deepmerge from 'deepmerge';
+import merge from 'lodash.merge';
 import path from 'path';
 import { UploadedFile } from 'express-fileupload';
 import { Where, Document } from '../../types';
@@ -245,7 +246,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // Update
   // /////////////////////////////////////
 
-  Object.assign(doc, data);
+  merge(doc, data);
 
   await doc.save();
 
