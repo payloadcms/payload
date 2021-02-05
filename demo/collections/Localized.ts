@@ -2,9 +2,9 @@ import { PayloadCollectionConfig } from '../../src/collections/config/types';
 import { Block } from '../../src/fields/config/types';
 
 const RichTextBlock: Block = {
-  slug: 'test',
+  slug: 'richTextBlock',
   labels: {
-    singular: 'Rich Text Test',
+    singular: 'Rich Text Block',
     plural: 'Rich Text Blocks',
   },
   fields: [

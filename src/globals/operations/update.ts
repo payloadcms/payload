@@ -1,8 +1,8 @@
 import deepmerge from 'deepmerge';
+import merge from 'lodash.merge';
 import overwriteMerge from '../../utilities/overwriteMerge';
 import executeAccess from '../../auth/executeAccess';
 import removeInternalFields from '../../utilities/removeInternalFields';
-import { AfterChangeHook, BeforeValidateHook } from '../../collections/config/types';
 
 async function update(args) {
   const { globals: { Model } } = this;
@@ -39,7 +39,7 @@ async function update(args) {
   }
 
   if (locale && global.setLocale) {
-    global.setLocale(locale, fallbackLocale);
+    global.setLocale(locale, null);
   }
 
   const globalJSON = global.toJSON({ virtuals: true });
@@ -100,9 +100,13 @@ async function update(args) {
   // 7. Perform database operation
   // /////////////////////////////////////
 
-  Object.assign(global, data);
+  merge(global, data);
 
   await global.save();
+
+  if (locale && global.setLocale) {
+    global.setLocale(locale, fallbackLocale);
+  }
 
   global = global.toJSON({ virtuals: true });
 

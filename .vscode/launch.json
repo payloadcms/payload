@@ -14,7 +14,7 @@
         "--runInBand"
       ],
       "env": {
-        "PAYLOAD_CONFIG_PATH": "demo/payload.config.js"
+        "PAYLOAD_CONFIG_PATH": "demo/payload.config.ts"
       },
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",

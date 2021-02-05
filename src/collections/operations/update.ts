@@ -104,7 +104,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   if (!doc && hasWherePolicy) throw new Forbidden();
 
   if (locale && doc.setLocale) {
-    doc.setLocale(locale, fallbackLocale);
+    doc.setLocale(locale, null);
   }
 
   let originalDoc: Document = doc.toJSON({ virtuals: true });
@@ -249,6 +249,10 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   merge(doc, data);
 
   await doc.save();
+
+  if (locale && doc.setLocale) {
+    doc.setLocale(locale, fallbackLocale);
+  }
 
   let result: Document = doc.toJSON({ virtuals: true });
 
