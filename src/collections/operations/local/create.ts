@@ -1,3 +1,4 @@
+import { UploadedFile } from 'express-fileupload';
 import { Document } from '../../../types';
 
 export type Options = {
@@ -10,6 +11,7 @@ export type Options = {
   overrideAccess?: boolean
   disableVerificationEmail?: boolean
   showHiddenFields?: boolean
+  file?: UploadedFile
 }
 
 export default async function create(options: Options): Promise<Document> {
@@ -23,6 +25,7 @@ export default async function create(options: Options): Promise<Document> {
     overrideAccess = true,
     disableVerificationEmail,
     showHiddenFields,
+    file,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -40,6 +43,7 @@ export default async function create(options: Options): Promise<Document> {
       locale,
       fallbackLocale,
       payload: this,
+      file,
     },
   });
 }
