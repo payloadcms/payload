@@ -1,5 +1,5 @@
-import { UploadedFile } from 'express-fileupload';
 import { Document } from '../../../types';
+import getFileByPath from '../../../uploads/getFileByPath';
 
 export type Options = {
   collection: string
@@ -11,7 +11,7 @@ export type Options = {
   user?: Document
   overrideAccess?: boolean
   showHiddenFields?: boolean
-  file?: UploadedFile
+  filePath?: string
 }
 
 export default async function update(options: Options): Promise<Document> {
@@ -25,7 +25,7 @@ export default async function update(options: Options): Promise<Document> {
     user,
     overrideAccess = true,
     showHiddenFields,
-    file,
+    filePath,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -43,7 +43,7 @@ export default async function update(options: Options): Promise<Document> {
       locale,
       fallbackLocale,
       payload: this,
-      file,
+      file: getFileByPath(filePath),
     },
   };
 

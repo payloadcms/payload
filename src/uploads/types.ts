@@ -41,3 +41,9 @@ export type Upload = {
   staticDir: string
   adminThumbnail?: string
 }
+
+export type File = {
+  data: Buffer
+  mimetype: string
+  name: string
+}

@@ -18,6 +18,7 @@ import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection } 
 import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
 import { Payload } from '../..';
+import saveBufferToFile from '../../uploads/saveBufferToFile';
 
 export type Arguments = {
   collection: Collection
@@ -152,7 +153,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     const fsSafeName = await getSafeFilename(staticPath, file.name);
 
     try {
-      await file.mv(`${staticPath}/${fsSafeName}`);
+      await saveBufferToFile(file.data, `${staticPath}/${fsSafeName}`);
 
       if (isImage(file.mimetype)) {
         const dimensions = await getImageSize(`${staticPath}/${fsSafeName}`);
