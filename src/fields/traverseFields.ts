@@ -171,7 +171,7 @@ const traverseFields = (args: Arguments): void => {
     if ((operation === 'create' || operation === 'update') && field.name) {
       const updatedData = data;
 
-      if (data[field.name] === undefined && originalDoc[field.name] === undefined && field.defaultValue) {
+      if (data?.[field.name] === undefined && originalDoc?.[field.name] === undefined && field.defaultValue) {
         updatedData[field.name] = field.defaultValue;
       }
 

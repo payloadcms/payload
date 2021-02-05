@@ -27,7 +27,8 @@ const LocalizedArrays: PayloadCollectionConfig = {
               label: 'Array Text 1',
               type: 'text',
               required: true,
-            }, {
+            },
+            {
               name: 'arrayText2',
               label: 'Array Text 2',
               type: 'text',
