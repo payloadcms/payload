@@ -1,5 +1,6 @@
 import httpStatus from 'http-status';
 import deepmerge from 'deepmerge';
+import merge from 'lodash.merge';
 import path from 'path';
 import { UploadedFile } from 'express-fileupload';
 import { Where, Document } from '../../types';
@@ -103,7 +104,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   if (!doc && hasWherePolicy) throw new Forbidden();
 
   if (locale && doc.setLocale) {
-    doc.setLocale(locale, fallbackLocale);
+    doc.setLocale(locale, null);
   }
 
   let originalDoc: Document = doc.toJSON({ virtuals: true });
@@ -245,9 +246,13 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // Update
   // /////////////////////////////////////
 
-  Object.assign(doc, data);
+  merge(doc, data);
 
   await doc.save();
+
+  if (locale && doc.setLocale) {
+    doc.setLocale(locale, fallbackLocale);
+  }
 
   let result: Document = doc.toJSON({ virtuals: true });
 

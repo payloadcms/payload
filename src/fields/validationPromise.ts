@@ -22,8 +22,8 @@ const validationPromise = async ({
   const hasCondition = field.admin && field.admin.condition;
   const shouldValidate = field.validate && !hasCondition;
 
-  let valueToValidate = newData[field.name];
-  if (valueToValidate === undefined) valueToValidate = existingData[field.name];
+  let valueToValidate = newData?.[field.name];
+  if (valueToValidate === undefined) valueToValidate = existingData?.[field.name];
   if (valueToValidate === undefined) valueToValidate = field.defaultValue;
 
   const result = shouldValidate ? await field.validate(valueToValidate, field) : true;

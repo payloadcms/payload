@@ -14,7 +14,7 @@ const buildModel = (config: Config): mongoose.PaginateModel<any> | null => {
     const Globals = mongoose.model('globals', globalsSchema);
 
     Object.values(config.globals).forEach((globalConfig) => {
-      const globalSchema = buildSchema(globalConfig.fields);
+      const globalSchema = buildSchema(config, globalConfig.fields, {});
 
       if (config.localization) {
         globalSchema.plugin(localizationPlugin, config.localization);

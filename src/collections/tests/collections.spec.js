@@ -44,6 +44,26 @@ describe('Collections - REST', () => {
           title: 'title',
           description: englishPostDesc,
           priority: 1,
+          nonLocalizedGroup: {
+            text: 'english',
+          },
+          localizedGroup: {
+            text: 'english',
+          },
+          nonLocalizedArray: [
+            {
+              localizedEmbeddedText: 'english',
+            },
+          ],
+          richTextBlocks: [
+            {
+              blockType: 'richTextBlock',
+              blockName: 'Test Block Name',
+              content: [{
+                children: [{ text: 'english' }],
+              }],
+            },
+          ],
         }),
         headers,
         method: 'post',
@@ -54,6 +74,11 @@ describe('Collections - REST', () => {
       expect(response.status).toBe(201);
       expect(data.doc.title).not.toBeNull();
       expect(data.doc.id).not.toBeNull();
+      expect(data.doc.nonLocalizedGroup.text).toStrictEqual('english');
+      expect(data.doc.localizedGroup.text).toStrictEqual('english');
+      expect(data.doc.nonLocalizedArray[0].localizedEmbeddedText).toStrictEqual('english');
+      expect(data.doc.richTextBlocks[0].content[0].children[0].text).toStrictEqual('english');
+
       const timestampRegex = /^(\d{4})(?:-?W(\d+)(?:-?(\d+)D?)?|(?:-(\d+))?-(\d+))(?:[T ](\d+):(\d+)(?::(\d+)(?:\.(\d+))?)?)?(?:Z(-?\d*))?$/;
       expect(data.doc.createdAt).toStrictEqual(expect.stringMatching(timestampRegex));
       expect(data.doc.updatedAt).toStrictEqual(expect.stringMatching(timestampRegex));
@@ -101,6 +126,26 @@ describe('Collections - REST', () => {
           title: 'title',
           description: spanishPostDesc,
           priority: 1,
+          nonLocalizedGroup: {
+            text: 'spanish',
+          },
+          localizedGroup: {
+            text: 'spanish',
+          },
+          nonLocalizedArray: [
+            {
+              localizedEmbeddedText: 'spanish',
+            },
+          ],
+          richTextBlocks: [
+            {
+              blockType: 'richTextBlock',
+              blockName: 'Test Block Name',
+              content: [{
+                children: [{ text: 'spanish' }],
+              }],
+            },
+          ],
         }),
         headers,
         method: 'put',
@@ -110,6 +155,10 @@ describe('Collections - REST', () => {
 
       expect(response.status).toBe(200);
       expect(data.doc.description).toBe(spanishPostDesc);
+      expect(data.doc.nonLocalizedGroup.text).toStrictEqual('spanish');
+      expect(data.doc.localizedGroup.text).toStrictEqual('spanish');
+      expect(data.doc.nonLocalizedArray[0].localizedEmbeddedText).toStrictEqual('spanish');
+      expect(data.doc.richTextBlocks[0].content[0].children[0].text).toStrictEqual('spanish');
     });
   });
 
@@ -121,6 +170,10 @@ describe('Collections - REST', () => {
 
         expect(response.status).toBe(200);
         expect(data.description).toBe(englishPostDesc);
+        expect(data.nonLocalizedGroup.text).toStrictEqual('english');
+        expect(data.localizedGroup.text).toStrictEqual('english');
+        expect(data.nonLocalizedArray[0].localizedEmbeddedText).toStrictEqual('english');
+        expect(data.richTextBlocks[0].content[0].children[0].text).toStrictEqual('english');
       });
 
       it('should allow a localized post to be retrieved in specified English locale', async () => {
@@ -129,6 +182,10 @@ describe('Collections - REST', () => {
 
         expect(response.status).toBe(200);
         expect(data.description).toBe(englishPostDesc);
+        expect(data.nonLocalizedGroup.text).toStrictEqual('english');
+        expect(data.localizedGroup.text).toStrictEqual('english');
+        expect(data.nonLocalizedArray[0].localizedEmbeddedText).toStrictEqual('english');
+        expect(data.richTextBlocks[0].content[0].children[0].text).toStrictEqual('english');
       });
 
       it('should allow a localized post to be retrieved in Spanish', async () => {
@@ -137,6 +194,10 @@ describe('Collections - REST', () => {
 
         expect(response.status).toBe(200);
         expect(data.description).toBe(spanishPostDesc);
+        expect(data.nonLocalizedGroup.text).toStrictEqual('spanish');
+        expect(data.localizedGroup.text).toStrictEqual('spanish');
+        expect(data.nonLocalizedArray[0].localizedEmbeddedText).toStrictEqual('spanish');
+        expect(data.richTextBlocks[0].content[0].children[0].text).toStrictEqual('spanish');
       });
 
       it('should allow a localized post to be retrieved in all locales', async () => {

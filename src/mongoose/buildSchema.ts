@@ -1,11 +1,13 @@
 /* eslint-disable no-use-before-define */
 import { Schema, SchemaDefinition } from 'mongoose';
+import { Config } from '../config/types';
 import { MissingFieldInputOptions } from '../errors';
 import { ArrayField, Block, BlockField, Field, GroupField, RadioField, RelationshipField, RowField, SelectField, UploadField } from '../fields/config/types';
+import localizationPlugin from '../localization/plugin';
 
-type FieldSchemaGenerator = (field: Field, fields: SchemaDefinition) => SchemaDefinition;
+type FieldSchemaGenerator = (field: Field, fields: SchemaDefinition, config: Config) => SchemaDefinition;
 
-const setBlockDiscriminators = (fields: Field[], schema: Schema) => {
+const setBlockDiscriminators = (fields: Field[], schema: Schema, config: Config) => {
   fields.forEach((field) => {
     const blockFieldType = field as BlockField;
     if (blockFieldType.type === 'blocks' && blockFieldType.blocks && blockFieldType.blocks.length > 0) {
@@ -15,16 +17,21 @@ const setBlockDiscriminators = (fields: Field[], schema: Schema) => {
         blockItem.fields.forEach((blockField) => {
           const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[blockField.type];
           if (fieldSchema) {
-            blockSchemaFields = fieldSchema(blockField, blockSchemaFields);
+            blockSchemaFields = fieldSchema(blockField, blockSchemaFields, config);
           }
         });
 
         const blockSchema = new Schema(blockSchemaFields, { _id: false });
+
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore Possible incorrect typing in mongoose types, this works
         schema.path(field.name).discriminator(blockItem.slug, blockSchema);
 
-        setBlockDiscriminators(blockItem.fields, blockSchema);
+        if (config.localization) {
+          blockSchema.plugin(localizationPlugin, config.localization);
+        }
+
+        setBlockDiscriminators(blockItem.fields, blockSchema, config);
       });
     }
   });
@@ -44,20 +51,20 @@ const formatBaseSchema = (field: Field) => {
   };
 };
 
-const buildSchema = (configFields: Field[], options = {}): Schema => {
+const buildSchema = (config: Config, configFields: Field[], options = {}): Schema => {
   let fields = {};
 
   configFields.forEach((field) => {
     const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[field.type];
 
     if (fieldSchema) {
-      fields = fieldSchema(field, fields);
+      fields = fieldSchema(field, fields, config);
     }
   });
 
   const schema = new Schema(fields, options);
 
-  setBlockDiscriminators(configFields, schema);
+  setBlockDiscriminators(configFields, schema, config);
 
   return schema;
 };
@@ -153,22 +160,22 @@ const fieldToSchemaMap = {
       [field.name]: schema,
     };
   },
-  row: (field: RowField, fields: SchemaDefinition): SchemaDefinition => {
+  row: (field: RowField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
     const newFields = { ...fields };
 
     field.fields.forEach((rowField: Field) => {
       const fieldSchemaMap: FieldSchemaGenerator = fieldToSchemaMap[rowField.type];
 
       if (fieldSchemaMap) {
-        const fieldSchema = fieldSchemaMap(rowField, fields);
+        const fieldSchema = fieldSchemaMap(rowField, fields, config);
         newFields[rowField.name] = fieldSchema[rowField.name];
       }
     });
 
     return newFields;
   },
-  array: (field: ArrayField, fields: SchemaDefinition) => {
-    const schema = buildSchema(field.fields, { _id: false, id: false });
+  array: (field: ArrayField, fields: SchemaDefinition, config: Config) => {
+    const schema = buildSchema(config, field.fields, { _id: false, id: false });
 
     return {
       ...fields,
@@ -178,8 +185,8 @@ const fieldToSchemaMap = {
       },
     };
   },
-  group: (field: GroupField, fields: SchemaDefinition): SchemaDefinition => {
-    const schema = buildSchema(field.fields, { _id: false, id: false });
+  group: (field: GroupField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+    const schema = buildSchema(config, field.fields, { _id: false, id: false });
 
     return {
       ...fields,
@@ -210,12 +217,12 @@ const fieldToSchemaMap = {
     };
   },
   blocks: (field: BlockField, fields: SchemaDefinition) => {
-    const flexibleSchema = new Schema({ blockName: String }, { discriminatorKey: 'blockType', _id: false, id: false });
+    const blocksSchema = new Schema({ blockName: String }, { discriminatorKey: 'blockType', _id: false, id: false });
 
     return {
       ...fields,
       [field.name]: {
-        type: [flexibleSchema],
+        type: [blocksSchema],
         localized: field.localized || false,
       },
     };
