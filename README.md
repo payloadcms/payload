@@ -8,11 +8,16 @@ CLI for easily starting new Payload project
 
   USAGE
 
-      $ yarn create payload-app --name my-payload-app
-      $ npx create-payload-app --name my-payload-app
+      $ npx create-payload-app
 
   OPTIONS
 
-      --template template-name           Choose specific template
-      --help                             Shows this help message
+      --name my-payload-app              Set project name
+      --template template_name           Choose specific template
+
+        Available templates: js-blog, js-todo, ts-blog, ts-todo
+
+      --use-npm                          Use npm to install dependencies
+      --no-deps                          Do not install any dependencies
+      --help                             Show help
 ```
