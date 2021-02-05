@@ -1,5 +1,6 @@
 import fs from 'fs';
 import mime from 'mime';
+import path from 'path';
 import { File } from './types';
 
 const getFileByPath = (filePath: string): File => {
@@ -7,7 +8,7 @@ const getFileByPath = (filePath: string): File => {
     const data = fs.readFileSync(filePath);
     const mimetype = mime.getType(filePath);
 
-    const name = filePath.split('/').pop();
+    const name = path.basename(filePath);
 
     return {
       data,
