@@ -19,6 +19,7 @@ import { FileData } from '../../uploads/types';
 
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult, UserDocument } from '../../auth/types';
+import saveBufferToFile from '../../uploads/saveBufferToFile';
 
 export type Arguments = {
   collection: Collection
@@ -199,7 +200,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
       const fsSafeName = await getSafeFilename(staticPath, file.name);
 
       try {
-        await file.mv(`${staticPath}/${fsSafeName}`);
+        await saveBufferToFile(file.data, `${staticPath}/${fsSafeName}`);
 
         fileData.filename = fsSafeName;
         fileData.filesize = file.size;

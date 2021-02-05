@@ -96,6 +96,11 @@ const post = await payload.create({
   // If creating verification-enabled auth doc,
   // you can optionally disable the email that is auto-sent
   disableVerificationEmail: true,
+
+  // If your collection supports uploads, you can upload
+  // a file directly through the Local API by providing
+  // its full, absolute file path.
+  filePath: path.resolve(__dirname, './path-to-image.jpg'),
 })
 ```
 
@@ -152,6 +157,11 @@ const result = await payload.update({
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
+
+  // If your collection supports uploads, you can upload
+  // a file directly through the Local API by providing
+  // its full, absolute file path.
+  filePath: path.resolve(__dirname, './path-to-image.jpg'),
 })
 ```
 

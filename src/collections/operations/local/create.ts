@@ -1,4 +1,5 @@
 import { Document } from '../../../types';
+import getFileByPath from '../../../uploads/getFileByPath';
 
 export type Options = {
   collection: string
@@ -10,8 +11,8 @@ export type Options = {
   overrideAccess?: boolean
   disableVerificationEmail?: boolean
   showHiddenFields?: boolean
+  filePath?: string
 }
-
 export default async function create(options: Options): Promise<Document> {
   const {
     collection: collectionSlug,
@@ -23,6 +24,7 @@ export default async function create(options: Options): Promise<Document> {
     overrideAccess = true,
     disableVerificationEmail,
     showHiddenFields,
+    filePath,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -40,6 +42,7 @@ export default async function create(options: Options): Promise<Document> {
       locale,
       fallbackLocale,
       payload: this,
+      file: getFileByPath(filePath),
     },
   });
 }
