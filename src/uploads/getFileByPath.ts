@@ -7,6 +7,7 @@ const getFileByPath = (filePath: string): File => {
   if (typeof filePath === 'string') {
     const data = fs.readFileSync(filePath);
     const mimetype = mime.getType(filePath);
+    const { size } = fs.statSync(filePath);
 
     const name = path.basename(filePath);
 
@@ -14,6 +15,7 @@ const getFileByPath = (filePath: string): File => {
       data,
       mimetype,
       name,
+      size,
     };
   }
 
