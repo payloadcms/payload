@@ -4,6 +4,7 @@ import path from 'path';
 import getExecuteStaticAccess from '../auth/getExecuteStaticAccess';
 import authenticate from './middleware/authenticate';
 import { Payload } from '../index';
+import corsHeaders from './middleware/corsHeaders';
 
 function initStatic(ctx: Payload) {
   Object.entries(ctx.collections).forEach(([_, collection]) => {
@@ -16,6 +17,7 @@ function initStatic(ctx: Payload) {
       router.use(authenticate(ctx.config));
 
       router.use(getExecuteStaticAccess(collection));
+      router.use(corsHeaders(ctx.config));
 
       const staticPath = path.resolve(ctx.config.paths.configDir, config.upload.staticDir);
 
