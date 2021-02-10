@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import payload from '../../..';
 
@@ -13,18 +14,21 @@ describe('Collections - Local', () => {
   describe('Create', () => {
     it('should allow an upload-enabled file to be created and uploaded', async () => {
       const alt = 'Alt Text Here';
+      const filePath = path.resolve(__dirname, '../../../admin/assets/images/generic-block-image.svg');
+      const { size } = fs.statSync(filePath);
 
       const result = await payload.create({
         collection: 'media',
         data: {
           alt,
         },
-        filePath: path.resolve(__dirname, '../../../admin/assets/images/generic-block-image.svg'),
+        filePath,
       });
 
       expect(result.id).not.toBeNull();
       expect(result.alt).toStrictEqual(alt);
       expect(result.filename).toStrictEqual('generic-block-image.svg');
+      expect(result.filesize).toStrictEqual(size);
       createdMediaID = result.id;
     });
   });

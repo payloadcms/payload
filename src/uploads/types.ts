@@ -46,4 +46,5 @@ export type File = {
   data: Buffer
   mimetype: string
   name: string
+  size: number
 }
