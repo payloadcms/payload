@@ -58,6 +58,11 @@ const LocalizedPosts: PayloadCollectionConfig = {
       localized: true,
     },
     {
+      type: 'richText',
+      name: 'richText',
+      label: 'Rich Text',
+    },
+    {
       name: 'priority',
       label: 'Priority',
       type: 'number',

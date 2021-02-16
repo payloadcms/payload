@@ -93,6 +93,9 @@ describe('Collections - REST', () => {
         body: JSON.stringify({
           title: 'title',
           description: 'original description',
+          richText: [{
+            children: [{ text: 'english' }],
+          }],
           priority: 1,
         }),
         headers,
@@ -104,10 +107,23 @@ describe('Collections - REST', () => {
       const { id } = createData.doc;
 
       const updatedDesc = 'updated description';
+      const updatedRichText = [{
+        children: [{ text: 'english update' }],
+      }];
+      const updatedNonLocalizedArray = [
+        {
+          localizedEmbeddedText: 'english',
+        },
+        {
+          localizedEmbeddedText: 'english update',
+        },
+      ];
       const response = await fetch(`${url}/api/localized-posts/${id}`, {
         body: JSON.stringify({
           title: 'title',
           description: updatedDesc,
+          richText: updatedRichText,
+          nonLocalizedArray: updatedNonLocalizedArray,
           priority: 1,
         }),
         headers,
@@ -118,6 +134,16 @@ describe('Collections - REST', () => {
 
       expect(response.status).toBe(200);
       expect(data.doc.description).toBe(updatedDesc);
+      expect(data.doc.nonLocalizedArray).toHaveLength(2);
+      expect(data.doc.richText[0].children[0].text).toBe('english update');
+
+      // make certain the stored object is exactly the same as the returned object
+      const stored = await (await fetch(`${url}/api/localized-posts/${id}`, {
+        method: 'get',
+        headers,
+      })).json();
+
+      expect(data.doc).toMatchObject(stored);
     });
 
     it('should allow a Spanish locale to be added to an existing post', async () => {
