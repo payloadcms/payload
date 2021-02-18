@@ -1,9 +1,7 @@
 /* eslint-disable no-use-before-define */
 import { Schema, SchemaDefinition } from 'mongoose';
 import { Config } from '../config/types';
-import { MissingFieldInputOptions } from '../errors';
 import { ArrayField, Block, BlockField, Field, GroupField, RadioField, RelationshipField, RowField, SelectField, UploadField } from '../fields/config/types';
-import localizationPlugin from '../localization/plugin';
 
 type FieldSchemaGenerator = (field: Field, fields: SchemaDefinition, config: Config) => SchemaDefinition;
 
@@ -23,33 +21,30 @@ const setBlockDiscriminators = (fields: Field[], schema: Schema, config: Config)
 
         const blockSchema = new Schema(blockSchemaFields, { _id: false });
 
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore Possible incorrect typing in mongoose types, this works
-        schema.path(field.name).discriminator(blockItem.slug, blockSchema);
-
-        if (config.localization) {
-          blockSchema.plugin(localizationPlugin, config.localization);
+        if (field.localized) {
+          config.localization.locales.forEach((locale) => {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore Possible incorrect typing in mongoose types, this works
+            schema.path(`${field.name}.${locale}`).discriminator(blockItem.slug, blockSchema);
+            setBlockDiscriminators(blockItem.fields, blockSchema, config);
+          });
+        } else {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore Possible incorrect typing in mongoose types, this works
+          schema.path(field.name).discriminator(blockItem.slug, blockSchema);
+          setBlockDiscriminators(blockItem.fields, blockSchema, config);
         }
-
-        setBlockDiscriminators(blockItem.fields, blockSchema, config);
       });
     }
   });
 };
 
-const formatBaseSchema = (field: Field) => {
-  const createAccess = field.access && field.access.create;
-
-  const condition = field.admin && field.admin.condition;
-
-  return {
-    localized: field.localized || false,
-    unique: field.unique || false,
-    required: (field.required && !field.localized && !condition && !createAccess) || false,
-    default: field.defaultValue || undefined,
-    index: field.index || field.unique || false,
-  };
-};
+const formatBaseSchema = (field: Field) => ({
+  unique: field.unique || false,
+  required: (field.required && !field.localized && !field?.admin?.condition && !field?.access?.create) || false,
+  default: field.defaultValue || undefined,
+  index: field.index || field.unique || false,
+});
 
 const buildSchema = (config: Config, configFields: Field[], options = {}): Schema => {
   let fields = {};
@@ -70,36 +65,134 @@ const buildSchema = (config: Config, configFields: Field[], options = {}): Schem
 };
 
 const fieldToSchemaMap = {
-  number: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
-    ...fields,
-    [field.name]: { ...formatBaseSchema(field), type: Number },
-  }),
-  text: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
-    ...fields,
-    [field.name]: { ...formatBaseSchema(field), type: String },
-  }),
-  email: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
-    ...fields,
-    [field.name]: { ...formatBaseSchema(field), type: String },
-  }),
-  textarea: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
-    ...fields,
-    [field.name]: { ...formatBaseSchema(field), type: String },
-  }),
-  richText: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
-    ...fields,
-    [field.name]: { ...formatBaseSchema(field), type: Schema.Types.Mixed },
-  }),
-  code: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
-    ...fields,
-    [field.name]: { ...formatBaseSchema(field), type: String },
-  }),
-  radio: (field: RadioField, fields: SchemaDefinition) => {
-    if (!field.options || field.options.length === 0) {
-      throw new MissingFieldInputOptions(field);
+  number: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field), type: Number };
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((localeSchema, locale) => ({
+          ...localeSchema,
+          [locale]: baseSchema,
+        }), {}),
+        localized: true,
+      };
+    } else {
+      schemaToReturn = baseSchema;
     }
 
-    const schema = {
+    return {
+      ...fields,
+      [field.name]: schemaToReturn,
+    };
+  },
+  text: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field), type: String };
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((localeSchema, locale) => ({
+          ...localeSchema,
+          [locale]: baseSchema,
+        }), {}),
+        localized: true,
+      };
+    } else {
+      schemaToReturn = baseSchema;
+    }
+
+    return {
+      ...fields,
+      [field.name]: schemaToReturn,
+    };
+  },
+  email: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field), type: String };
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((localeSchema, locale) => ({
+          ...localeSchema,
+          [locale]: baseSchema,
+        }), {}),
+        localized: true,
+      };
+    } else {
+      schemaToReturn = baseSchema;
+    }
+
+    return {
+      ...fields,
+      [field.name]: schemaToReturn,
+    };
+  },
+  textarea: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field), type: String };
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((localeSchema, locale) => ({
+          ...localeSchema,
+          [locale]: baseSchema,
+        }), {}),
+        localized: true,
+      };
+    } else {
+      schemaToReturn = baseSchema;
+    }
+
+    return {
+      ...fields,
+      [field.name]: schemaToReturn,
+    };
+  },
+  richText: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field), type: Schema.Types.Mixed };
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((localeSchema, locale) => ({
+          ...localeSchema,
+          [locale]: baseSchema,
+        }), {}),
+        localized: true,
+      };
+    } else {
+      schemaToReturn = baseSchema;
+    }
+
+    return {
+      ...fields,
+      [field.name]: schemaToReturn,
+    };
+  },
+  code: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field), type: String };
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((localeSchema, locale) => ({
+          ...localeSchema,
+          [locale]: baseSchema,
+        }), {}),
+        localized: true,
+      };
+    } else {
+      schemaToReturn = baseSchema;
+    }
+
+    return {
+      ...fields,
+      [field.name]: schemaToReturn,
+    };
+  },
+  radio: (field: RadioField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+    const baseSchema = {
       ...formatBaseSchema(field),
       type: String,
       enum: field.options.map((option) => {
@@ -107,57 +200,146 @@ const fieldToSchemaMap = {
         return option;
       }),
     };
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((localeSchema, locale) => ({
+          ...localeSchema,
+          [locale]: baseSchema,
+        }), {}),
+        localized: true,
+      };
+    } else {
+      schemaToReturn = baseSchema;
+    }
 
     return {
       ...fields,
-      [field.name]: schema,
+      [field.name]: schemaToReturn,
     };
   },
-  checkbox: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
-    ...fields,
-    [field.name]: { ...formatBaseSchema(field), type: Boolean },
-  }),
-  date: (field: Field, fields: SchemaDefinition): SchemaDefinition => ({
-    ...fields,
-    [field.name]: { ...formatBaseSchema(field), type: Date },
-  }),
-  upload: (field: UploadField, fields: SchemaDefinition): SchemaDefinition => ({
-    ...fields,
-    [field.name]: {
+  checkbox: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field), type: Boolean };
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((localeSchema, locale) => ({
+          ...localeSchema,
+          [locale]: baseSchema,
+        }), {}),
+        localized: true,
+      };
+    } else {
+      schemaToReturn = baseSchema;
+    }
+
+    return {
+      ...fields,
+      [field.name]: schemaToReturn,
+    };
+  },
+  date: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field), type: Date };
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((localeSchema, locale) => ({
+          ...localeSchema,
+          [locale]: baseSchema,
+        }), {}),
+        localized: true,
+      };
+    } else {
+      schemaToReturn = baseSchema;
+    }
+
+    return {
+      ...fields,
+      [field.name]: schemaToReturn,
+    };
+  },
+  upload: (field: UploadField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+    const baseSchema = {
       ...formatBaseSchema(field),
       type: Schema.Types.ObjectId,
       ref: field.relationTo,
-    },
-  }),
-  relationship: (field: RelationshipField, fields: SchemaDefinition) => {
-    let schema: { [key: string]: any } = {};
+    };
 
-    if (Array.isArray(field.relationTo)) {
-      schema._id = false;
-      schema.value = {
-        type: Schema.Types.ObjectId,
-        refPath: `${field.name}${field.localized ? '.{{LOCALE}}' : ''}.relationTo`,
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((localeSchema, locale) => ({
+          ...localeSchema,
+          [locale]: baseSchema,
+        }), {}),
+        localized: true,
       };
-      schema.relationTo = { type: String, enum: field.relationTo };
     } else {
-      schema = {
-        ...formatBaseSchema(field),
-      };
-
-      schema.type = Schema.Types.ObjectId;
-      schema.ref = field.relationTo;
-    }
-
-    if (field.hasMany) {
-      schema = {
-        type: [schema],
-        localized: field.localized || false,
-      };
+      schemaToReturn = baseSchema;
     }
 
     return {
       ...fields,
-      [field.name]: schema,
+      [field.name]: schemaToReturn,
+    };
+  },
+  relationship: (field: RelationshipField, fields: SchemaDefinition, config: Config) => {
+    const hasManyRelations = Array.isArray(field.relationTo);
+    let schemaToReturn: { [key: string]: any } = {};
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((locales, locale) => {
+          let localeSchema: { [key: string]: any } = {};
+
+          if (hasManyRelations) {
+            localeSchema._id = false;
+            localeSchema.value = {
+              type: Schema.Types.ObjectId,
+              refPath: `${field.name}.${locale}.relationTo`,
+            };
+            localeSchema.relationTo = { type: String, enum: field.relationTo };
+          } else {
+            localeSchema = {
+              ...formatBaseSchema(field),
+              type: Schema.Types.ObjectId,
+              ref: field.relationTo,
+            };
+          }
+
+          return {
+            ...locales,
+            [locale]: field.hasMany ? [localeSchema] : localeSchema,
+          };
+        }, {}),
+        localized: true,
+      };
+    } else if (hasManyRelations) {
+      schemaToReturn._id = false;
+      schemaToReturn.value = {
+        type: Schema.Types.ObjectId,
+        refPath: `${field.name}.relationTo`,
+      };
+      schemaToReturn.relationTo = { type: String, enum: field.relationTo };
+
+      if (field.hasMany) schemaToReturn = [schemaToReturn];
+    } else {
+      schemaToReturn = {
+        ...formatBaseSchema(field),
+        type: Schema.Types.ObjectId,
+        ref: field.relationTo,
+      };
+
+      if (field.hasMany) schemaToReturn = [schemaToReturn];
+    }
+
+    return {
+      ...fields,
+      [field.name]: schemaToReturn,
     };
   },
   row: (field: RowField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
@@ -175,34 +357,58 @@ const fieldToSchemaMap = {
     return newFields;
   },
   array: (field: ArrayField, fields: SchemaDefinition, config: Config) => {
-    const schema = buildSchema(config, field.fields, { _id: false, id: false });
+    const baseSchema = {
+      ...formatBaseSchema(field),
+      type: [buildSchema(config, field.fields, { _id: false, id: false })],
+    };
+
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((localeSchema, locale) => ({
+          ...localeSchema,
+          [locale]: baseSchema,
+        }), {}),
+        localized: true,
+      };
+    } else {
+      schemaToReturn = baseSchema;
+    }
 
     return {
       ...fields,
-      [field.name]: {
-        ...formatBaseSchema(field),
-        type: [schema],
-      },
+      [field.name]: schemaToReturn,
     };
   },
   group: (field: GroupField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
-    const schema = buildSchema(config, field.fields, { _id: false, id: false });
+    const baseSchema = {
+      ...formatBaseSchema(field),
+      required: field.fields.some((subField) => subField.required === true),
+      type: buildSchema(config, field.fields, { _id: false, id: false }),
+    };
+
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((localeSchema, locale) => ({
+          ...localeSchema,
+          [locale]: baseSchema,
+        }), {}),
+        localized: true,
+      };
+    } else {
+      schemaToReturn = baseSchema;
+    }
 
     return {
       ...fields,
-      [field.name]: {
-        ...formatBaseSchema(field),
-        required: field.fields.some((subField) => subField.required === true),
-        type: schema,
-      },
+      [field.name]: schemaToReturn,
     };
   },
-  select: (field: SelectField, fields: SchemaDefinition) => {
-    if (!field.options || field.options.length === 0) {
-      throw new MissingFieldInputOptions(field);
-    }
-
-    const schema = {
+  select: (field: SelectField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+    const baseSchema = {
       ...formatBaseSchema(field),
       type: String,
       enum: field.options.map((option) => {
@@ -211,20 +417,43 @@ const fieldToSchemaMap = {
       }),
     };
 
-    return {
-      ...fields,
-      [field.name]: field.hasMany ? [schema] : schema,
-    };
-  },
-  blocks: (field: BlockField, fields: SchemaDefinition) => {
-    const blocksSchema = new Schema({ blockName: String }, { discriminatorKey: 'blockType', _id: false, id: false });
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((localeSchema, locale) => ({
+          ...localeSchema,
+          [locale]: baseSchema,
+        }), {}),
+        localized: true,
+      };
+    } else {
+      schemaToReturn = baseSchema;
+    }
+
+    if (field.hasMany) schemaToReturn = [schemaToReturn];
 
     return {
       ...fields,
-      [field.name]: {
-        type: [blocksSchema],
-        localized: field.localized || false,
-      },
+      [field.name]: schemaToReturn,
+    };
+  },
+  blocks: (field: BlockField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+    const baseSchema = [new Schema({ blockName: String }, { discriminatorKey: 'blockType', _id: false, id: false })];
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = config.localization.locales.reduce((localeSchema, locale) => ({
+        ...localeSchema,
+        [locale]: baseSchema,
+      }), {});
+    } else {
+      schemaToReturn = baseSchema;
+    }
+
+    return {
+      ...fields,
+      [field.name]: schemaToReturn,
     };
   },
 };

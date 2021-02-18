@@ -148,7 +148,7 @@ async function find(incomingArgs: Arguments): Promise<PaginatedDocs> {
         hook: 'afterRead',
         operation: 'read',
         overrideAccess,
-        reduceLocales: true,
+        flattenLocales: true,
         showHiddenFields,
       },
       find,

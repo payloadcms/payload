@@ -94,10 +94,6 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
   if (!docToDelete && !hasWhereAccess) throw new NotFound();
   if (!docToDelete && hasWhereAccess) throw new Forbidden();
 
-  if (locale && docToDelete.setLocale) {
-    docToDelete.setLocale(locale, fallbackLocale);
-  }
-
   const resultToDelete = docToDelete.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
@@ -137,10 +133,6 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
 
   const doc = await Model.findOneAndDelete({ _id: id });
 
-  if (locale && doc.setLocale) {
-    doc.setLocale(locale, fallbackLocale);
-  }
-
   let result: Document = doc.toJSON({ virtuals: true });
 
   result = removeInternalFields(result);
@@ -169,7 +161,7 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
     hook: 'afterRead',
     operation: 'delete',
     overrideAccess,
-    reduceLocales: false,
+    flattenLocales: true,
     showHiddenFields,
   });
 

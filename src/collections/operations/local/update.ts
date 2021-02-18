@@ -18,8 +18,8 @@ export default async function update(options: Options): Promise<Document> {
   const {
     collection: collectionSlug,
     depth,
-    locale,
-    fallbackLocale,
+    locale = this?.config?.localization?.defaultLocale,
+    fallbackLocale = null,
     data,
     id,
     user,

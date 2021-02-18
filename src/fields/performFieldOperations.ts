@@ -1,3 +1,4 @@
+import { Payload } from '..';
 import { ValidationError } from '../errors';
 import sanitizeFallbackLocale from '../localization/sanitizeFallbackLocale';
 import traverseFields from './traverseFields';
@@ -6,25 +7,29 @@ import { GlobalConfig } from '../globals/config/types';
 import { Operation } from '../types';
 import { PayloadRequest } from '../express/types';
 import { HookName } from './config/types';
+import deepCopyObject from '../utilities/deepCopyObject';
 
 type Arguments = {
   data: Record<string, unknown>
   operation: Operation
-  hook: HookName
+  hook?: HookName
   req: PayloadRequest
   overrideAccess: boolean
-  reduceLocales?: boolean
+  flattenLocales?: boolean
+  unflattenLocales?: boolean
   originalDoc?: Record<string, unknown>
+  docWithLocales?: Record<string, unknown>
   id?: string
   showHiddenFields?: boolean
   depth?: number
   currentDepth?: number
 }
 
-export default async function performFieldOperations(entityConfig: CollectionConfig | GlobalConfig, args: Arguments): Promise<{ [key: string]: unknown }> {
+export default async function performFieldOperations(this: Payload, entityConfig: CollectionConfig | GlobalConfig, args: Arguments): Promise<{ [key: string]: unknown }> {
   const {
-    data: fullData,
+    data,
     originalDoc: fullOriginalDoc,
+    docWithLocales,
     operation,
     hook,
     req,
@@ -34,9 +39,12 @@ export default async function performFieldOperations(entityConfig: CollectionCon
       locale,
     },
     overrideAccess,
-    reduceLocales,
+    flattenLocales,
+    unflattenLocales = false,
     showHiddenFields = false,
   } = args;
+
+  const fullData = deepCopyObject(data);
 
   const fallbackLocale = sanitizeFallbackLocale(req.fallbackLocale);
 
@@ -57,6 +65,7 @@ export default async function performFieldOperations(entityConfig: CollectionCon
   const accessPromises = [];
   const relationshipPopulations = [];
   const hookPromises = [];
+  const unflattenLocaleActions = [];
   const errors: { message: string, field: string }[] = [];
 
   // //////////////////////////////////////////
@@ -64,11 +73,11 @@ export default async function performFieldOperations(entityConfig: CollectionCon
   // //////////////////////////////////////////
 
   traverseFields({
-    fields: entityConfig.fields, // TODO: Bad typing, this exists
+    fields: entityConfig.fields,
     data: fullData,
     originalDoc: fullOriginalDoc,
     path: '',
-    reduceLocales,
+    flattenLocales,
     locale,
     fallbackLocale,
     accessPromises,
@@ -87,6 +96,9 @@ export default async function performFieldOperations(entityConfig: CollectionCon
     errors,
     payload: this,
     showHiddenFields,
+    unflattenLocales,
+    unflattenLocaleActions,
+    docWithLocales,
   });
 
   await Promise.all(hookPromises);
@@ -98,6 +110,8 @@ export default async function performFieldOperations(entityConfig: CollectionCon
   if (errors.length > 0) {
     throw new ValidationError(errors);
   }
+
+  unflattenLocaleActions.forEach((action) => action());
 
   await Promise.all(accessPromises);
 

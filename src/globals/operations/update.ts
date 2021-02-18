@@ -1,5 +1,4 @@
 import deepmerge from 'deepmerge';
-import merge from 'lodash.merge';
 import overwriteMerge from '../../utilities/overwriteMerge';
 import executeAccess from '../../auth/executeAccess';
 import removeInternalFields from '../../utilities/removeInternalFields';
@@ -11,10 +10,6 @@ async function update(args) {
     globalConfig,
     slug,
     req,
-    req: {
-      locale,
-      fallbackLocale,
-    },
     depth,
     overrideAccess,
     showHiddenFields,
@@ -33,25 +28,48 @@ async function update(args) {
   // /////////////////////////////////////
 
   let global = await Model.findOne({ globalType: slug });
+  let globalJSON;
 
-  if (!global) {
-    global = new Model({ globalType: slug });
+  if (global) {
+    globalJSON = global.toJSON({ virtuals: true });
+    globalJSON = JSON.stringify(globalJSON);
+    globalJSON = JSON.parse(globalJSON);
+
+    if (globalJSON._id) {
+      delete globalJSON._id;
+    }
+  } else {
+    globalJSON = { globalType: slug };
   }
 
-  if (locale && global.setLocale) {
-    global.setLocale(locale, null);
-  }
-
-  const globalJSON = global.toJSON({ virtuals: true });
-
-  if (globalJSON._id) {
-    delete globalJSON._id;
-  }
+  const originalDoc = await this.performFieldOperations(globalConfig, {
+    depth,
+    req,
+    data: globalJSON,
+    hook: 'afterRead',
+    operation: 'update',
+    overrideAccess,
+    flattenLocales: true,
+    showHiddenFields,
+  });
 
   let { data } = args;
 
   // /////////////////////////////////////
-  // 3. Execute before validate collection hooks
+  // beforeValidate - Fields
+  // /////////////////////////////////////
+
+  data = await this.performFieldOperations(globalConfig, {
+    data,
+    req,
+    originalDoc,
+    hook: 'beforeValidate',
+    operation: 'update',
+    overrideAccess,
+  });
+
+  // /////////////////////////////////////
+  // beforeValidate - Global
   // /////////////////////////////////////
 
   await globalConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
@@ -60,24 +78,12 @@ async function update(args) {
     data = (await hook({
       data,
       req,
-      originalDoc: globalJSON,
+      originalDoc,
     })) || data;
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 4. Execute field-level hooks, access, and validation
-  // /////////////////////////////////////
-
-  data = await this.performFieldOperations(globalConfig, {
-    data,
-    req,
-    hook: 'beforeChange',
-    operation: 'update',
-    originalDoc: global,
-  });
-
-  // /////////////////////////////////////
-  // 5. Execute before global hook
+  // beforeChange - Global
   // /////////////////////////////////////
 
   await globalConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
@@ -86,32 +92,51 @@ async function update(args) {
     data = (await hook({
       data,
       req,
-      originalDoc: global,
+      originalDoc,
     })) || data;
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 6. Merge updates into existing data
+  // Merge updates into existing data
   // /////////////////////////////////////
 
-  data = deepmerge(globalJSON, data, { arrayMerge: overwriteMerge });
+  data = deepmerge(originalDoc, data, { arrayMerge: overwriteMerge });
 
   // /////////////////////////////////////
-  // 7. Perform database operation
+  // beforeChange - Fields
   // /////////////////////////////////////
 
-  merge(global, data);
+  const result = await this.performFieldOperations(globalConfig, {
+    data,
+    req,
+    hook: 'beforeChange',
+    operation: 'update',
+    unflattenLocales: true,
+    originalDoc,
+    docWithLocales: globalJSON,
+  });
 
-  await global.save();
+  // /////////////////////////////////////
+  // Update
+  // /////////////////////////////////////
 
-  if (locale && global.setLocale) {
-    global.setLocale(locale, fallbackLocale);
+  if (global) {
+    global = await Model.findOneAndUpdate(
+      { globalType: slug },
+      result,
+      { overwrite: true, new: true },
+    );
+  } else {
+    global = await Model.create(result);
   }
 
   global = global.toJSON({ virtuals: true });
+  global = removeInternalFields(global);
+  global = JSON.stringify(global);
+  global = JSON.parse(global);
 
   // /////////////////////////////////////
-  // 8. Execute field-level hooks and access
+  // afterRead - Fields
   // /////////////////////////////////////
 
   global = await this.performFieldOperations(globalConfig, {
@@ -121,10 +146,11 @@ async function update(args) {
     req,
     depth,
     showHiddenFields,
+    flattenLocales: true,
   });
 
   // /////////////////////////////////////
-  // 9. Execute after global hook
+  // afterRead - Global
   // /////////////////////////////////////
 
   await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
@@ -137,10 +163,8 @@ async function update(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 10. Return global
+  // Return results
   // /////////////////////////////////////
-
-  global = removeInternalFields(global);
 
   return global;
 }

@@ -17,8 +17,8 @@ export default async function create(options: Options): Promise<Document> {
   const {
     collection: collectionSlug,
     depth,
-    locale,
-    fallbackLocale,
+    locale = this?.config?.localization?.defaultLocale,
+    fallbackLocale = null,
     data,
     user,
     overrideAccess = true,

@@ -99,7 +99,6 @@
     "jest": "26.6.3",
     "joi": "^17.3.0",
     "jsonwebtoken": "^8.5.1",
-    "lodash.merge": "^4.6.2",
     "method-override": "^3.0.0",
     "micro-memoize": "^4.0.9",
     "mime": "^2.5.0",

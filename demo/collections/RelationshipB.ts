@@ -18,6 +18,14 @@ const RelationshipB: PayloadCollectionConfig = {
       localized: false,
       hasMany: true,
     },
+    {
+      name: 'postManyRelationships',
+      label: 'Post Many Relationships',
+      type: 'relationship',
+      relationTo: ['relationship-a'],
+      localized: true,
+      hasMany: false,
+    },
   ],
   timestamps: true,
 };
