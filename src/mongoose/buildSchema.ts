@@ -40,6 +40,7 @@ const setBlockDiscriminators = (fields: Field[], schema: Schema, config: Config)
 };
 
 const formatBaseSchema = (field: Field) => ({
+  sparse: field.unique && field.localized,
   unique: field.unique || false,
   required: (field.required && !field.localized && !field?.admin?.condition && !field?.access?.create) || false,
   default: field.defaultValue || undefined,
