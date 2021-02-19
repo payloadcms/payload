@@ -77,6 +77,10 @@ const traverseFields = (args: Arguments): void => {
       dataCopy[field.name] = null;
     }
 
+    if (field.type === 'number' && typeof data[field.name] === 'string') {
+      dataCopy[field.name] = parseFloat(data[field.name]);
+    }
+
     if (field.type === 'checkbox') {
       if (data[field.name] === 'true') dataCopy[field.name] = true;
       if (data[field.name] === 'false') dataCopy[field.name] = false;
