@@ -68,9 +68,12 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
           <div className={`${baseClass}__sidebar-sticky`}>
             <div className={`${baseClass}__sidebar-sticky-wrap`}>
               <div className={`${baseClass}__document-actions${preview ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
-                <PreviewButton generatePreviewURL={preview} />
+                <PreviewButton
+                  generatePreviewURL={preview}
+                  data={data}
+                />
                 {hasSavePermission && (
-                <FormSubmit>Save</FormSubmit>
+                  <FormSubmit>Save</FormSubmit>
                 )}
               </div>
               {data && (

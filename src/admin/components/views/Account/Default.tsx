@@ -104,7 +104,10 @@ const DefaultAccount: React.FC<Props> = (props) => {
             )}
           </ul>
           <div className={`${baseClass}__document-actions${preview ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
-            <PreviewButton generatePreviewURL={preview} />
+            <PreviewButton
+              generatePreviewURL={preview}
+              data={data}
+            />
             {hasSavePermission && (
               <FormSubmit>Save</FormSubmit>
             )}

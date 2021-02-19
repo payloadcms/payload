@@ -142,7 +142,10 @@ const DefaultEditView: React.FC<Props> = (props) => {
               ) : undefined}
               <div className={`${baseClass}__document-actions${(preview && isEditing) ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
                 {isEditing && (
-                <PreviewButton generatePreviewURL={preview} />
+                  <PreviewButton
+                    generatePreviewURL={preview}
+                    data={data}
+                  />
                 )}
                 {hasSavePermission && (
                 <FormSubmit>Save</FormSubmit>
