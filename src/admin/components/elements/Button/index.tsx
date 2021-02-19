@@ -52,6 +52,7 @@ const Button: React.FC<Props> = (props) => {
     round,
     size = 'medium',
     iconPosition = 'right',
+    newTab,
   } = props;
 
   const classes = [
@@ -76,6 +77,8 @@ const Button: React.FC<Props> = (props) => {
     type,
     className: classes,
     onClick: handleClick,
+    rel: newTab ? 'noopener noreferrer' : undefined,
+    target: newTab ? '_blank' : undefined
   };
 
   switch (el) {

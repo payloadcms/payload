@@ -7,6 +7,7 @@ import { Document, PayloadMongooseDocument } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
+import { GeneratedPreviewURL } from '../../admin/components/elements/PreviewButton/types'
 
 export interface CollectionModel extends PaginateModel<PayloadMongooseDocument>, PassportLocalModel<PayloadMongooseDocument> {
   buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
@@ -108,7 +109,7 @@ export type PayloadCollectionConfig = {
       }
     };
     enableRichTextRelationship?: boolean
-    preview?: (doc: Document, token: string) => string
+    preview?: (doc: Document, token: string) => GeneratedPreviewURL
   };
   hooks?: {
     beforeOperation?: BeforeOperationHook[];
