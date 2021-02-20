@@ -1,3 +1,11 @@
+import { Data } from "../../forms/Form/types";
+
+export type GeneratedPreviewURL = {
+  url: string,
+  newTab: boolean
+}
+
 export type Props = {
-  generatePreviewURL?: (fields: unknown, token: string) => string
+  generatePreviewURL?: (data: unknown, token: string) => GeneratedPreviewURL,
+  data?: Data
 }

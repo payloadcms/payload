@@ -1,25 +1,26 @@
 import React from 'react';
 import { useAuth } from '@payloadcms/config-provider';
-import { useForm } from '../../forms/Form/context';
 import Button from '../Button';
 import { Props } from './types';
 
 const baseClass = 'preview-btn';
 
-const PreviewButton: React.FC<Props> = ({ generatePreviewURL }) => {
+const PreviewButton: React.FC<Props> = ({ generatePreviewURL, data }) => {
   const { token } = useAuth();
-  const { getFields } = useForm();
-  const fields = getFields();
 
   if (generatePreviewURL && typeof generatePreviewURL === 'function') {
-    const previewURL = generatePreviewURL(fields, token);
+    const {
+      url,
+      newTab
+    } = generatePreviewURL(data, token);
 
     return (
       <Button
         el="anchor"
         className={baseClass}
         buttonStyle="secondary"
-        url={previewURL}
+        url={url}
+        newTab={newTab}
       >
         Preview
       </Button>

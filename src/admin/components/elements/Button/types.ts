@@ -14,5 +14,6 @@ export type Props = {
     buttonStyle?: 'primary' | 'secondary' | 'transparent' | 'error' | 'none' | 'icon-label',
     round?: boolean,
     size?: 'small' | 'medium',
-    iconPosition?: 'left' | 'right'
+    iconPosition?: 'left' | 'right',
+    newTab?: boolean
 }
