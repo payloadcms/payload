@@ -177,7 +177,7 @@ async function login(incomingArgs: Arguments): Promise<Result> {
     hook: 'afterRead',
     operation: 'login',
     overrideAccess,
-    reduceLocales: true,
+    flattenLocales: true,
     showHiddenFields,
   });
 

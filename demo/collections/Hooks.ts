@@ -28,7 +28,7 @@ const Hooks: PayloadCollectionConfig = {
     beforeChange: [
       (operation) => {
         if (operation.req.headers.hook === 'beforeChange') {
-          operation.req.body.description += '-beforeChangeSuffix';
+          operation.data.description += '-beforeChangeSuffix';
         }
         return operation.data;
       },

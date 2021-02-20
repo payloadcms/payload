@@ -1,13 +1,12 @@
-import httpStatus from 'http-status';
 import deepmerge from 'deepmerge';
-import merge from 'lodash.merge';
+import httpStatus from 'http-status';
 import path from 'path';
 import { UploadedFile } from 'express-fileupload';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 
-import removeInternalFields from '../../utilities/removeInternalFields';
 import overwriteMerge from '../../utilities/overwriteMerge';
+import removeInternalFields from '../../utilities/removeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { NotFound, Forbidden, APIError, FileUploadError } from '../../errors';
 import isImage from '../../uploads/isImage';
@@ -60,7 +59,6 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     req,
     req: {
       locale,
-      fallbackLocale,
     },
     overrideAccess,
     showHiddenFields,
@@ -104,14 +102,20 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   if (!doc && !hasWherePolicy) throw new NotFound();
   if (!doc && hasWherePolicy) throw new Forbidden();
 
-  if (locale && doc.setLocale) {
-    doc.setLocale(locale, null);
-  }
+  let docWithLocales: Document = doc.toJSON({ virtuals: true });
+  docWithLocales = JSON.stringify(docWithLocales);
+  docWithLocales = JSON.parse(docWithLocales);
 
-  let originalDoc: Document = doc.toJSON({ virtuals: true });
-
-  originalDoc = JSON.stringify(originalDoc);
-  originalDoc = JSON.parse(originalDoc);
+  const originalDoc = await performFieldOperations(collectionConfig, {
+    depth,
+    req,
+    data: docWithLocales,
+    hook: 'afterRead',
+    operation: 'update',
+    overrideAccess,
+    flattenLocales: true,
+    showHiddenFields,
+  });
 
   let { data } = args;
 
@@ -145,20 +149,6 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // beforeChange - Fields
-  // /////////////////////////////////////
-
-  data = await performFieldOperations(collectionConfig, {
-    data,
-    req,
-    id,
-    originalDoc,
-    hook: 'beforeChange',
-    operation: 'update',
-    overrideAccess,
-  });
-
-  // /////////////////////////////////////
   // beforeChange - Collection
   // /////////////////////////////////////
 
@@ -178,6 +168,22 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // /////////////////////////////////////
 
   data = deepmerge(originalDoc, data, { arrayMerge: overwriteMerge });
+
+  // /////////////////////////////////////
+  // beforeChange - Fields
+  // /////////////////////////////////////
+
+  let result = await performFieldOperations(collectionConfig, {
+    data,
+    req,
+    id,
+    originalDoc,
+    hook: 'beforeChange',
+    operation: 'update',
+    overrideAccess,
+    unflattenLocales: true,
+    docWithLocales,
+  });
 
   // /////////////////////////////////////
   // Upload and resize potential files
@@ -219,13 +225,13 @@ async function update(incomingArgs: Arguments): Promise<Document> {
         throw new FileUploadError();
       }
 
-      data = {
-        ...data,
+      result = {
+        ...result,
         ...fileData,
       };
-    } else if (data.file === null) {
-      data = {
-        ...data,
+    } else if (result.file === null) {
+      result = {
+        ...result,
         filename: null,
         sizes: null,
       };
@@ -241,25 +247,51 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   if (password) {
     await doc.setPassword(password as string);
     delete data.password;
+    delete result.password;
   }
 
   // /////////////////////////////////////
   // Update
   // /////////////////////////////////////
 
-  merge(doc, data);
+  result = await Model.findByIdAndUpdate(
+    { _id: id },
+    result,
+    { overwrite: true, new: true },
+  );
 
-  await doc.save();
-
-  if (locale && doc.setLocale) {
-    doc.setLocale(locale, fallbackLocale);
-  }
-
-  let result: Document = doc.toJSON({ virtuals: true });
-
+  result = result.toJSON({ virtuals: true });
   result = removeInternalFields(result);
   result = JSON.stringify(result);
   result = JSON.parse(result);
+
+  // /////////////////////////////////////
+  // afterRead - Fields
+  // /////////////////////////////////////
+
+  result = await performFieldOperations(collectionConfig, {
+    depth,
+    req,
+    data: result,
+    hook: 'afterRead',
+    operation: 'update',
+    overrideAccess,
+    flattenLocales: true,
+    showHiddenFields,
+  });
+
+  // /////////////////////////////////////
+  // afterRead - Collection
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    result = await hook({
+      req,
+      doc: result,
+    }) || result;
+  }, Promise.resolve());
 
   // /////////////////////////////////////
   // afterChange - Fields
@@ -287,34 +319,6 @@ async function update(incomingArgs: Arguments): Promise<Document> {
       doc: result,
       req,
       operation: 'update',
-    }) || result;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // afterRead - Fields
-  // /////////////////////////////////////
-
-  result = await performFieldOperations(collectionConfig, {
-    depth,
-    req,
-    data: result,
-    hook: 'afterRead',
-    operation: 'update',
-    overrideAccess,
-    reduceLocales: false,
-    showHiddenFields,
-  });
-
-  // /////////////////////////////////////
-  // afterRead - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result = await hook({
-      req,
-      doc: result,
     }) || result;
   }, Promise.resolve());
 

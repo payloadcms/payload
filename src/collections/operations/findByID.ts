@@ -141,7 +141,7 @@ async function findByID(incomingArgs: Arguments): Promise<Document> {
     operation: 'read',
     currentDepth,
     overrideAccess,
-    reduceLocales: true,
+    flattenLocales: true,
     showHiddenFields,
   });
 

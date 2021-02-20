@@ -31,6 +31,10 @@ async function findOne(args) {
     delete doc._id;
   }
 
+  doc = removeInternalFields(doc);
+  doc = JSON.stringify(doc);
+  doc = JSON.parse(doc);
+
   // /////////////////////////////////////
   // 3. Execute before collection hook
   // /////////////////////////////////////
@@ -54,7 +58,7 @@ async function findOne(args) {
     operation: 'read',
     req,
     depth,
-    reduceLocales: true,
+    flattenLocales: true,
     showHiddenFields,
   });
 
@@ -74,10 +78,6 @@ async function findOne(args) {
   // /////////////////////////////////////
   // 6. Return results
   // /////////////////////////////////////
-
-  doc = removeInternalFields(doc);
-  doc = JSON.stringify(doc);
-  doc = JSON.parse(doc);
 
   return doc;
 }

@@ -3,13 +3,13 @@ import { DeepRequired } from 'ts-essentials';
 import { PaginateModel, PassportLocalModel } from 'mongoose';
 import { Access } from '../../config/types';
 import { Field } from '../../fields/config/types';
-import { Document, PayloadMongooseDocument } from '../../types';
+import { Document } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { GeneratedPreviewURL } from '../../admin/components/elements/PreviewButton/types'
 
-export interface CollectionModel extends PaginateModel<PayloadMongooseDocument>, PassportLocalModel<PayloadMongooseDocument> {
+export interface CollectionModel extends PaginateModel<any>, PassportLocalModel<any> {
   buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
 }
 

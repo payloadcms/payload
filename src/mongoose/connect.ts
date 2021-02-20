@@ -13,6 +13,7 @@ const connectMongoose = async (url: string, options: ConnectionOptions): Promise
     useUnifiedTopology: true,
     useCreateIndex: true,
     autoIndex: false,
+    useFindAndModify: false,
   };
 
   if (process.env.NODE_ENV === 'test') {

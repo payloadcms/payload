@@ -11,7 +11,7 @@ type Arguments = {
   data: Record<string, any>
   originalDoc: Record<string, any>
   path: string
-  reduceLocales: boolean
+  flattenLocales: boolean
   locale: string
   fallbackLocale: string
   accessPromises: Promise<void>[]
@@ -30,6 +30,9 @@ type Arguments = {
   errors: {message: string, field: string}[]
   payload: Payload
   showHiddenFields: boolean
+  unflattenLocales: boolean
+  unflattenLocaleActions: (() => void)[]
+  docWithLocales?: Record<string, any>
 }
 
 const traverseFields = (args: Arguments): void => {
@@ -38,7 +41,7 @@ const traverseFields = (args: Arguments): void => {
     data = {},
     originalDoc = {},
     path,
-    reduceLocales,
+    flattenLocales,
     locale,
     fallbackLocale,
     accessPromises,
@@ -57,6 +60,9 @@ const traverseFields = (args: Arguments): void => {
     errors,
     payload,
     showHiddenFields,
+    unflattenLocaleActions,
+    unflattenLocales,
+    docWithLocales = {},
   } = args;
 
   fields.forEach((field) => {
@@ -69,6 +75,10 @@ const traverseFields = (args: Arguments): void => {
     if ((field.type === 'upload' || field.type === 'relationship')
     && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null')) {
       dataCopy[field.name] = null;
+    }
+
+    if (field.type === 'number' && typeof data[field.name] === 'string') {
+      dataCopy[field.name] = parseFloat(data[field.name]);
     }
 
     if (field.type === 'checkbox') {
@@ -85,13 +95,22 @@ const traverseFields = (args: Arguments): void => {
       && field.name
       && field.localized
       && locale !== 'all'
-      && reduceLocales;
+      && flattenLocales;
 
     if (hasLocalizedValue) {
       let localizedValue = data[field.name][locale];
       if (typeof localizedValue === 'undefined' && fallbackLocale) localizedValue = data[field.name][fallbackLocale];
       if (typeof localizedValue === 'undefined') localizedValue = null;
       dataCopy[field.name] = localizedValue;
+    }
+
+    if (field.localized && unflattenLocales) {
+      unflattenLocaleActions.push(() => {
+        data[field.name] = payload.config.localization.locales.reduce((locales, localeID) => ({
+          ...locales,
+          [localeID]: localeID === locale ? data[field.name] : docWithLocales?.[field.name]?.[localeID],
+        }), {});
+      });
     }
 
     accessPromises.push(accessPromise({
@@ -128,12 +147,12 @@ const traverseFields = (args: Arguments): void => {
       } else if (fieldIsArrayType(field)) {
         if (Array.isArray(data[field.name])) {
           (data[field.name] as Record<string, unknown>[]).forEach((rowData, i) => {
-            const originalDocRow = originalDoc && originalDoc[field.name] && originalDoc[field.name][i];
             traverseFields({
               ...args,
               fields: field.fields,
               data: rowData,
-              originalDoc: originalDocRow || undefined,
+              originalDoc: originalDoc?.[field.name]?.[i],
+              docWithLocales: docWithLocales?.[field.name]?.[i],
               path: `${path}${field.name}.${i}.`,
             });
           });
@@ -144,6 +163,7 @@ const traverseFields = (args: Arguments): void => {
           fields: field.fields,
           data: data[field.name] as Record<string, unknown>,
           originalDoc: originalDoc[field.name],
+          docWithLocales: docWithLocales?.[field.name],
           path: `${path}${field.name}.`,
         });
       }
@@ -153,14 +173,14 @@ const traverseFields = (args: Arguments): void => {
       if (Array.isArray(data[field.name])) {
         (data[field.name] as Record<string, unknown>[]).forEach((rowData, i) => {
           const block = field.blocks.find((blockType) => blockType.slug === rowData.blockType);
-          const originalDocRow = originalDoc && originalDoc[field.name] && originalDoc[field.name][i];
 
           if (block) {
             traverseFields({
               ...args,
               fields: block.fields,
               data: rowData,
-              originalDoc: originalDocRow || undefined,
+              originalDoc: originalDoc?.[field.name]?.[i],
+              docWithLocales: docWithLocales?.[field.name]?.[i],
               path: `${path}${field.name}.${i}.`,
             });
           }
@@ -168,7 +188,7 @@ const traverseFields = (args: Arguments): void => {
       }
     }
 
-    if ((operation === 'create' || operation === 'update') && field.name) {
+    if (hook === 'beforeChange' && field.name) {
       const updatedData = data;
 
       if (data?.[field.name] === undefined && originalDoc?.[field.name] === undefined && field.defaultValue) {

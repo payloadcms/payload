@@ -31,7 +31,7 @@ export type Arguments = {
 }
 
 async function create(this: Payload, incomingArgs: Arguments): Promise<Document> {
-  const { performFieldOperations, config, emailOptions } = this;
+  const { config, emailOptions } = this;
 
   let args = incomingArgs;
 
@@ -54,10 +54,6 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
       config: collectionConfig,
     },
     req,
-    req: {
-      locale,
-      fallbackLocale,
-    },
     disableVerificationEmail,
     depth,
     overrideAccess,
@@ -101,18 +97,6 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // beforeChange - Fields
-  // /////////////////////////////////////
-
-  data = await performFieldOperations(collectionConfig, {
-    data,
-    hook: 'beforeChange',
-    operation: 'create',
-    req,
-    overrideAccess,
-  });
-
-  // /////////////////////////////////////
   // beforeChange - Collection
   // /////////////////////////////////////
 
@@ -127,9 +111,21 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // Upload and resize potential files
+  // beforeChange - Fields
   // /////////////////////////////////////
 
+  let resultWithLocales = await this.performFieldOperations(collectionConfig, {
+    data,
+    hook: 'beforeChange',
+    operation: 'create',
+    req,
+    overrideAccess,
+    unflattenLocales: true,
+  });
+
+  // /////////////////////////////////////
+  // Upload and resize potential files
+  // /////////////////////////////////////
 
   if (collectionConfig.upload) {
     const fileData: Partial<FileData> = {};
@@ -174,8 +170,8 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     fileData.filesize = file.size;
     fileData.mimeType = file.mimetype;
 
-    data = {
-      ...data,
+    resultWithLocales = {
+      ...resultWithLocales,
       ...fileData,
     };
   }
@@ -184,28 +180,22 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // Create
   // /////////////////////////////////////
 
-  let doc = new Model();
-
-  if (locale && doc.setLocale) {
-    doc.setLocale(locale, fallbackLocale);
-  }
-
   if (collectionConfig.auth) {
     if (data.email) {
-      data.email = (data.email as string).toLowerCase();
+      resultWithLocales.email = (data.email as string).toLowerCase();
     }
     if (collectionConfig.auth.verify) {
-      data._verified = false;
-      data._verificationToken = crypto.randomBytes(20).toString('hex');
+      resultWithLocales._verified = false;
+      resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex');
     }
   }
 
-  Object.assign(doc, data);
+  let doc;
 
   if (collectionConfig.auth) {
-    doc = await Model.register(doc, data.password as string);
+    doc = await Model.register(resultWithLocales, data.password as string);
   } else {
-    await doc.save();
+    doc = await Model.create(resultWithLocales);
   }
 
   let result: Document = doc.toJSON({ virtuals: true });
@@ -218,7 +208,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // afterChange - Fields
   // /////////////////////////////////////
 
-  result = await performFieldOperations(collectionConfig, {
+  result = await this.performFieldOperations(collectionConfig, {
     data: result,
     hook: 'afterChange',
     operation: 'create',
@@ -270,7 +260,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     hook: 'afterRead',
     operation: 'create',
     overrideAccess,
-    reduceLocales: false,
+    flattenLocales: true,
     showHiddenFields,
   });
 

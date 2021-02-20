@@ -2,8 +2,8 @@ async function findOne(options) {
   const {
     global: globalSlug,
     depth,
-    locale,
-    fallbackLocale,
+    locale = this?.config?.localization?.defaultLocale,
+    fallbackLocale = null,
     user,
     overrideAccess = true,
     showHiddenFields,
