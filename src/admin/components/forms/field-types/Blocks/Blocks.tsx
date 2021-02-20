@@ -22,16 +22,18 @@ import './index.scss';
 
 const baseClass = 'field-type blocks';
 
+const labelDefaults = {
+  singular: 'Block',
+  plural: 'Blocks',
+};
+
 const Blocks: React.FC<Props> = (props) => {
   const {
     label,
     name,
     path: pathFromProps,
     blocks,
-    labels = {
-      singular: 'Block',
-      plural: 'Blocks',
-    },
+    labels = labelDefaults,
     fieldTypes,
     maxRows,
     minRows,
