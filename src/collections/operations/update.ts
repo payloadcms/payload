@@ -257,7 +257,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   result = await Model.findByIdAndUpdate(
     { _id: id },
     result,
-    { overwrite: true, new: true },
+    { new: true },
   );
 
   result = result.toJSON({ virtuals: true });
