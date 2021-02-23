@@ -107,7 +107,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   docWithLocales = JSON.parse(docWithLocales);
 
   const originalDoc = await performFieldOperations(collectionConfig, {
-    depth,
+    depth: 0,
     req,
     data: docWithLocales,
     hook: 'afterRead',
@@ -257,7 +257,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   result = await Model.findByIdAndUpdate(
     { _id: id },
     result,
-    { overwrite: true, new: true },
+    { new: true },
   );
 
   result = result.toJSON({ virtuals: true });
