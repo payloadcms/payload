@@ -12,7 +12,6 @@ import { ConfigProvider, AuthProvider } from '@payloadcms/config-provider';
 import { SearchParamsProvider } from './components/utilities/SearchParams';
 import { LocaleProvider } from './components/utilities/Locale';
 import Routes from './components/Routes';
-import getCSSVariable from '../utilities/getCSSVariable';
 
 import './scss/app.scss';
 
@@ -20,17 +19,17 @@ const Index = () => (
   <React.Fragment>
     <ConfigProvider config={config}>
       <WindowInfoProvider breakpoints={{
-        xs: parseInt(getCSSVariable('breakpoint-xs-width').replace('px', ''), 10),
-        s: parseInt(getCSSVariable('breakpoint-s-width').replace('px', ''), 10),
-        m: parseInt(getCSSVariable('breakpoint-m-width').replace('px', ''), 10),
-        l: parseInt(getCSSVariable('breakpoint-l-width').replace('px', ''), 10),
+        xs: 400,
+        s: 768,
+        m: 1024,
+        l: 1440,
       }}
       >
         <ScrollInfoProvider>
           <Router>
             <ModalProvider
               classPrefix="payload"
-              zIndex={parseInt(getCSSVariable('z-modal'), 10)}
+              zIndex={50}
             >
               <AuthProvider>
                 <SearchParamsProvider>
