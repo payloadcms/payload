@@ -7,7 +7,6 @@ import { Document } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
-import { GeneratedPreviewURL } from '../../admin/components/elements/PreviewButton/types'
 
 export interface CollectionModel extends PaginateModel<any>, PassportLocalModel<any> {
   buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
@@ -109,7 +108,7 @@ export type PayloadCollectionConfig = {
       }
     };
     enableRichTextRelationship?: boolean
-    preview?: (doc: Document, token: string) => GeneratedPreviewURL
+    preview?: (doc: Document, token: string) => string
   };
   hooks?: {
     beforeOperation?: BeforeOperationHook[];
