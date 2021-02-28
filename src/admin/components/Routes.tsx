@@ -21,6 +21,7 @@ const Edit = lazy(() => import('./views/collections/Edit'));
 const EditGlobal = lazy(() => import('./views/Global'));
 const ResetPassword = lazy(() => import('./views/ResetPassword'));
 const Unauthorized = lazy(() => import('./views/Unauthorized'));
+const UnauthorizedUser = lazy(() => import('./views/UnauthorizedUser'));
 const Account = lazy(() => import('./views/Account'));
 
 const Routes = () => {
@@ -75,8 +76,11 @@ const Routes = () => {
                 <Route path={`${match.url}/reset/:token`}>
                   <ResetPassword />
                 </Route>
-                <Route path={`${match.url}/unlicensed`}>
+                <Route path={`${match.url}/unlicensed-domain`}>
                   <Unlicensed />
+                </Route>
+                <Route path={`${match.url}/unauthorized-user`}>
+                  <UnauthorizedUser />
                 </Route>
 
                 {collections.map((collection) => {
