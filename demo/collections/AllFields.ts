@@ -15,7 +15,7 @@ const AllFields: PayloadCollectionConfig = {
     useAsTitle: 'text',
     preview: (doc, token) => {
       if (doc && doc.text) {
-        return `http://localhost:3000/previewable-posts/${doc.text.value}?preview=true&token=${token}`;
+        return `http://localhost:3000/previewable-posts/${doc.text}?preview=true&token=${token}`;
       }
 
       return null;

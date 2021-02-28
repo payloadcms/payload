@@ -9,10 +9,7 @@ const PreviewButton: React.FC<Props> = ({ generatePreviewURL, data }) => {
   const { token } = useAuth();
 
   if (generatePreviewURL && typeof generatePreviewURL === 'function') {
-    const {
-      url,
-      newTab
-    } = generatePreviewURL(data, token);
+    const url = generatePreviewURL(data, token);
 
     return (
       <Button
@@ -20,7 +17,7 @@ const PreviewButton: React.FC<Props> = ({ generatePreviewURL, data }) => {
         className={baseClass}
         buttonStyle="secondary"
         url={url}
-        newTab={newTab}
+        newTab
       >
         Preview
       </Button>
