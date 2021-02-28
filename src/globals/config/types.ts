@@ -3,14 +3,13 @@ import { Model, Document } from 'mongoose';
 import { DeepRequired } from 'ts-essentials';
 import { Access } from '../../config/types';
 import { Field } from '../../fields/config/types';
-import { GeneratedPreviewURL } from 'src/admin/components/elements/PreviewButton/types';
 
 export type GlobalModel = Model<Document>
 
 export type PayloadGlobalConfig = {
   slug: string
   label?: string
-  preview?: (doc: Document, token: string) => GeneratedPreviewURL
+  preview?: (doc: Document, token: string) => string
   access?: {
     create?: Access;
     read?: Access;
