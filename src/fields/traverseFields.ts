@@ -106,10 +106,33 @@ const traverseFields = (args: Arguments): void => {
 
     if (field.localized && unflattenLocales) {
       unflattenLocaleActions.push(() => {
-        data[field.name] = payload.config.localization.locales.reduce((locales, localeID) => ({
-          ...locales,
-          [localeID]: localeID === locale ? data[field.name] : docWithLocales?.[field.name]?.[localeID],
-        }), {});
+        const localeData = payload.config.localization.locales.reduce((locales, localeID) => {
+          let valueToSet;
+
+          if (localeID === locale) {
+            if (data[field.name]) {
+              valueToSet = data[field.name];
+            } else if (docWithLocales?.[field.name]?.[localeID]) {
+              valueToSet = docWithLocales?.[field.name]?.[localeID];
+            }
+          } else {
+            valueToSet = docWithLocales?.[field.name]?.[localeID];
+          }
+
+          if (valueToSet) {
+            return {
+              ...locales,
+              [localeID]: valueToSet,
+            };
+          }
+
+          return locales;
+        }, {});
+
+        // If there are locales with data, set the data
+        if (Object.keys(localeData).length > 0) {
+          data[field.name] = localeData;
+        }
       });
     }
 
