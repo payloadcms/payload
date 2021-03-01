@@ -21,9 +21,9 @@ Payload is a *config-based*, code-first CMS and application framework. The Paylo
 | `serverURL`          | A _required_ string used to define the absolute URL of your app including the protocol, for example `https://'example.com`. No paths allowed, only protocol, domain and (optionally) port |
 | `collections`        | An array of all Collections that Payload will manage. To read more about how to define your collection configs, [click here](/docs/configuration/collections). |
 | `globals`            | An array of all Globals that Payload will manage. For more on Globals and their configs, [click here](/docs/configuration/globals). |
-| `admin`              | Base Payload admin configuration. Specify custom components, control metadata, set the Admin user collection, and [more](/docs/admin/overview#options). |
+| `admin`              | Base Payload admin configuration. Specify custom components, control metadata, set the Admin user collection, and [more](/docs/admin/overview#admin-options). |
 | `localization`       | Opt-in and control how Payload handles the translation of your content into multiple locales. [More](/docs/configuration/localization) |
-| `graphQL`            | Manage GraphQL-specific functionality here. Define your own queries and mutations, manage query complexity limits, and [more](/docs/graphql/overview#config). |
+| `graphQL`            | Manage GraphQL-specific functionality here. Define your own queries and mutations, manage query complexity limits, and [more](/docs/graphql/overview). |
 | `cookiePrefix`       | A string that will be prefixed to all cookies that Payload sets. |
 | `cors`               | Either a whitelist array of URLS to allow CORS requests from, or a wildcard string (`'*'`) to accept incoming requests from any domain. |
 | `csrf`               | A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. [More](/docs/authentication/overview#csrf-protection) |
@@ -31,10 +31,10 @@ Payload is a *config-based*, code-first CMS and application framework. The Paylo
 | `maxDepth`           | The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries. Defaults to `10`. |
 | `upload`             | Base Payload upload configuration. [More](/docs/upload/overview#payload-wide-upload-options). |
 | `routes`             | Control the routing structure that Payload binds itself to. Specify `admin`, `api`, `graphQL`, and `graphQLPlayground`. |
-| `email`              | Base email settings to allow Payload to generate email such as Forgot Password requests and other requirements. [More](/docs/email/overview#config) |
+| `email`              | Base email settings to allow Payload to generate email such as Forgot Password requests and other requirements. [More](/docs/email/overview#configuration) |
 | `express`            | Express-specific middleware options such as compression and JSON parsing. [More](/docs/configuration/express). |
 | `debug`              | Enable to expose more detailed error information. |
-| `rateLimit`          | Control IP-based rate limiting for all Payload resources. Used to prevent DDoS attacks and [more](/docs/production/preventing-abuse#rate-limiting). |
+| `rateLimit`          | Control IP-based rate limiting for all Payload resources. Used to prevent DDoS attacks and [more](/docs/production/preventing-abuse#rate-limiting-requests). |
 | `hooks`              | Tap into Payload-wide hooks. [More](/docs/hooks/overview) |
 
 #### Simple example
