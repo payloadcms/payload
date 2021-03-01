@@ -51,14 +51,14 @@ Check out the [Payload website](https://payloadcms.com/docs/getting-started/what
 
 If you know JavaScript, you know Payload. Payload is a _code-first_ CMS, which allows us to do a lot of things right:
 
-- Payload gives you everything you need, but then steps back and lets you build what you want in JavaScript or TypeScript - with no unnecessary complexity brought by GUIs. You'll understand how your CMS works, because you will have wrote it exactly how you want it.
+- Payload gives you everything you need, but then steps back and lets you build what you want in JavaScript or TypeScript - with no unnecessary complexity brought by GUIs. You'll understand how your CMS works, because you will have written it exactly how you want it.
 - Bring your own Express server and do whatever you need on top of Payload. Payload doesn't impose anything on you or your app.
 - Completely control the Admin panel by using your own React components. Swap out fields or even entire views with ease.
 - Use your data however and wherever you need thanks to auto-generated, yet fully extensible REST, GraphQL and Local Node APIs.
 
-### Free for development use
+### Free forever for personal use and small projects
 
-Payload is 100% free for use on local environments such as `localhost` and staging sites such as `staging.mycoolsite.com`. When it's time to go to production, Payload charges a low and flat fee that doesn't change whatsoever based on your usage.
+Payload is 100% free for personal projects or small use cases where only one admin user is required. You can also get started without an account whatsoever while running on `localhost`.
 
 ## Installation
 
