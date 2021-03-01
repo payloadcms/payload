@@ -1503,10 +1503,10 @@
     "@octokit/openapi-types" "^3.2.0"
     "@types/node" ">= 8"
 
-"@payloadcms/config-provider@0.0.20":
-  version "0.0.20"
-  resolved "https://registry.yarnpkg.com/@payloadcms/config-provider/-/config-provider-0.0.20.tgz#c2884f222b91db2da9539e02d96e380a56d73639"
-  integrity sha512-oDLPwdhfaFV6SjAUjLc474RO2ubnW0bB65jA9HHY63ZARPxHUhVNkmywcedb53p77/l9ocTmNFnFiplNJQGthQ==
+"@payloadcms/config-provider@^0.0.21":
+  version "0.0.21"
+  resolved "https://registry.yarnpkg.com/@payloadcms/config-provider/-/config-provider-0.0.21.tgz#9a8abe68cc9536a4037baa416ea215a7ab6ae2fd"
+  integrity sha512-jG6bvT7D+bVzmb6XpgLaA8cTM0YLxanR/owcPerxgdbmHxG6kj3/wXsb1O4welQfHV/1qJUHiQjdayats15Z1w==
   dependencies:
     jwt-decode "^3.1.2"
 

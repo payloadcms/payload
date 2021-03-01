@@ -11,7 +11,7 @@ import './index.scss';
 const baseClass = 'unauthorized-user';
 
 const UnauthorizedUser: React.FC = () => {
-  const { licenseType, user } = useAuth();
+  const { licensePlan, user } = useAuth();
   const {
     routes: {
       admin,
@@ -34,7 +34,7 @@ const UnauthorizedUser: React.FC = () => {
         Sorry, the
         {' '}
         <strong className={`${baseClass}__plan-name`}>
-          {licenseType}
+          {licensePlan}
         </strong>
         {' '}
         license associated with this domain does not grant access to your email address (
