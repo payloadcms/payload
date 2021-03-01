@@ -1,11 +1,9 @@
-import deepmerge from 'deepmerge';
 import httpStatus from 'http-status';
 import path from 'path';
 import { UploadedFile } from 'express-fileupload';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 
-import overwriteMerge from '../../utilities/overwriteMerge';
 import removeInternalFields from '../../utilities/removeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { NotFound, Forbidden, APIError, FileUploadError } from '../../errors';
@@ -133,9 +131,9 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     overrideAccess,
   });
 
-  // /////////////////////////////////////
-  // beforeValidate - Collection
-  // /////////////////////////////////////
+  // // /////////////////////////////////////
+  // // beforeValidate - Collection
+  // // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
     await priorHook;
@@ -162,12 +160,6 @@ async function update(incomingArgs: Arguments): Promise<Document> {
       operation: 'update',
     })) || data;
   }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // Merge updates into existing data
-  // /////////////////////////////////////
-
-  data = deepmerge(originalDoc, data, { arrayMerge: overwriteMerge });
 
   // /////////////////////////////////////
   // beforeChange - Fields

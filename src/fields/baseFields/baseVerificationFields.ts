@@ -6,7 +6,7 @@ const autoRemoveVerificationToken: FieldHook = ({ originalDoc, data, value }) =>
   // This is useful because the admin panel
   // allows users to set `_verified` to true manually
   if (data?._verified === true && originalDoc?._verified === false) {
-    return undefined;
+    return null;
   }
 
   return value;

@@ -1,5 +1,3 @@
-import deepmerge from 'deepmerge';
-import overwriteMerge from '../../utilities/overwriteMerge';
 import executeAccess from '../../auth/executeAccess';
 import removeInternalFields from '../../utilities/removeInternalFields';
 
@@ -38,8 +36,6 @@ async function update(args) {
     if (globalJSON._id) {
       delete globalJSON._id;
     }
-  } else {
-    globalJSON = { globalType: slug };
   }
 
   const originalDoc = await this.performFieldOperations(globalConfig, {
@@ -97,12 +93,6 @@ async function update(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // Merge updates into existing data
-  // /////////////////////////////////////
-
-  data = deepmerge(originalDoc, data, { arrayMerge: overwriteMerge });
-
-  // /////////////////////////////////////
   // beforeChange - Fields
   // /////////////////////////////////////
 
@@ -124,9 +114,10 @@ async function update(args) {
     global = await Model.findOneAndUpdate(
       { globalType: slug },
       result,
-      { overwrite: true, new: true },
+      { new: true },
     );
   } else {
+    result.globalType = slug;
     global = await Model.create(result);
   }
 
