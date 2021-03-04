@@ -19,7 +19,7 @@ in the `email` property object of your payload init call. Payload will make use 
 
 **Three ways to set it up**
 
-1. **Default**: When email is not needed, a mock email handler will be created and used when nothing is provided. This is ideal for development environments and can be changed later when ready to [go to production](/docs/production).
+1. **Default**: When email is not needed, a mock email handler will be created and used when nothing is provided. This is ideal for development environments and can be changed later when ready to [go to production](/docs/production/deployment).
 1. **Recommended**: Set the `transportOptions` and Payload will do the set up for you.
 1. **Advanced**: The `transport` object can be assigned a nodemailer transport object set up in your server scripts and given for Payload to use.
 
@@ -139,4 +139,4 @@ The mock email handler is used when payload is started with neither `transport` 
 
 ### Using multiple mail providers
 
-Payload supports the use of a single transporter of email, but there is nothing stopping you from having more. Consider a use case where sending bulk email is handled differently than transactional email and could be done using a [hook](/docs/hooks/config).
+Payload supports the use of a single transporter of email, but there is nothing stopping you from having more. Consider a use case where sending bulk email is handled differently than transactional email and could be done using a [hook](/docs/hooks/overview).
