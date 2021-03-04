@@ -1,3 +1,8 @@
+## [0.4.1](https://github.com/payloadcms/payload/compare/v0.4.0...v0.4.1) (2021-03-04)
+
+### Documentation
+* fixed broken links throughout docs
+
 ## [0.4.0](https://github.com/payloadcms/payload/compare/v0.3.0...v0.4.0) (2021-02-28)
 
 ### Breaking Changes
