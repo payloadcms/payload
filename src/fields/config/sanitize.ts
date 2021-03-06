@@ -1,4 +1,4 @@
-import { toWords } from '../../utilities/formatLabels';
+import { formatLabels, toWords } from '../../utilities/formatLabels';
 import { MissingFieldType, InvalidFieldRelationship } from '../../errors';
 import validations from '../validations';
 
@@ -39,6 +39,7 @@ const sanitizeFields = (fields, validRelationships: string[]) => {
     if (field.blocks) {
       field.blocks = field.blocks.map((block) => {
         const unsanitizedBlock = { ...block };
+        unsanitizedBlock.labels = !unsanitizedBlock.labels ? formatLabels(unsanitizedBlock.slug) : unsanitizedBlock.labels;
         unsanitizedBlock.fields = sanitizeFields(block.fields, validRelationships);
         return unsanitizedBlock;
       });

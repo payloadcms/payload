@@ -201,7 +201,7 @@ export type RadioField = FieldBase & {
 
 export type Block = {
   slug: string,
-  labels: Labels
+  labels?: Labels
   fields: Field[],
   imageURL?: string
   imageAltText?: string
