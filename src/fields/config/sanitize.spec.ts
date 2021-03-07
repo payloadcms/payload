@@ -1,5 +1,6 @@
 import sanitizeFields from './sanitize';
 import { MissingFieldType, InvalidFieldRelationship } from '../../errors';
+import { Block } from './types';
 
 describe('sanitizeFields', () => {
   it('should throw on missing type field', () => {
@@ -74,6 +75,15 @@ describe('sanitizeFields', () => {
 
     it('should not throw on valid relationship inside blocks', () => {
       const validRelationships = ['some-collection'];
+      const relationshipBlock: Block = {
+        slug: 'relationshipBlock',
+        fields: [{
+          type: 'relationship',
+          label: 'my-relationship',
+          name: 'My Relationship',
+          relationTo: 'some-collection',
+        }],
+      };
       const fields = [{
         name: 'layout',
         label: 'Layout Blocks',
@@ -81,14 +91,7 @@ describe('sanitizeFields', () => {
           singular: 'Block',
         },
         type: 'blocks',
-        blocks: [{
-          fields: [{
-            type: 'relationship',
-            label: 'my-relationship',
-            name: 'My Relationship',
-            relationTo: 'some-collection',
-          }],
-        }],
+        blocks: [relationshipBlock],
       }];
       expect(() => {
         sanitizeFields(fields, validRelationships);
@@ -123,6 +126,15 @@ describe('sanitizeFields', () => {
 
     it('should throw on invalid relationship inside blocks', () => {
       const validRelationships = ['some-collection'];
+      const relationshipBlock: Block = {
+        slug: 'relationshipBlock',
+        fields: [{
+          type: 'relationship',
+          label: 'my-relationship',
+          name: 'My Relationship',
+          relationTo: 'not-valid',
+        }],
+      };
       const fields = [{
         name: 'layout',
         label: 'Layout Blocks',
@@ -130,14 +142,7 @@ describe('sanitizeFields', () => {
           singular: 'Block',
         },
         type: 'blocks',
-        blocks: [{
-          fields: [{
-            type: 'relationship',
-            label: 'my-relationship',
-            name: 'My Relationship',
-            relationTo: 'not-valid',
-          }],
-        }],
+        blocks: [relationshipBlock],
       }];
       expect(() => {
         sanitizeFields(fields, validRelationships);
