@@ -199,6 +199,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   }
 
   let result: Document = doc.toJSON({ virtuals: true });
+  const verificationToken = result._verificationToken;
 
   result = removeInternalFields(result);
   result = JSON.stringify(result);
@@ -243,7 +244,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
       sendEmail: this.sendEmail,
       collection: { config: collectionConfig, Model },
       user: result,
-      token: data._verificationToken as string,
+      token: verificationToken,
       req,
       disableEmail: disableVerificationEmail,
     });
