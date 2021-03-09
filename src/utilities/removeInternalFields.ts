@@ -1,4 +1,4 @@
-const internalFields = ['_id', '__v', 'salt', 'hash'];
+const internalFields = ['_id', '__v', 'salt', 'hash', '_verificationToken'];
 
 const removeInternalFields = (incomingDoc) => Object.entries(incomingDoc).reduce((newDoc, [key, val]) => {
   if (internalFields.indexOf(key) > -1) {
