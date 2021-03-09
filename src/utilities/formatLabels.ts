@@ -2,7 +2,7 @@ import pluralize, { isPlural, singular } from 'pluralize';
 
 const capitalizeFirstLetter = (string: string): string => string.charAt(0).toUpperCase() + string.slice(1);
 
-const toWords = (inputString: string): string => {
+const toWords = (inputString: string, joinWords = false): string => {
   const notNullString = inputString || '';
   const trimmedString = notNullString.trim();
   const arrayOfStrings = trimmedString.split(/[\s-]/);
@@ -15,7 +15,9 @@ const toWords = (inputString: string): string => {
     }
   });
 
-  return splitStringsArray.join(' ');
+  return joinWords
+    ? splitStringsArray.join('').replace(/\s/gi, '')
+    : splitStringsArray.join(' ');
 };
 
 const formatLabels = ((slug: string): { singular: string, plural: string } => {
