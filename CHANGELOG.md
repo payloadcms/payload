@@ -1,3 +1,8 @@
+## [0.4.4](https://github.com/payloadcms/payload/compare/v0.4.3...v0.4.4) (2021-03-04)
+
+### Bug Fixes
+* email verification template missing token
+
 ## [0.4.1](https://github.com/payloadcms/payload/compare/v0.4.0...v0.4.3) (2021-03-04)
 
 ### Documentation
