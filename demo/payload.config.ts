@@ -47,6 +47,10 @@ export default buildConfig({
       // Nav: () => (
       //   <div>Hello</div>
       // ),
+      views: {
+        // Dashboard: CustomDashboardView,
+        // Account: CustomAccountView,
+      },
     },
     webpack: (config) => config,
   },
