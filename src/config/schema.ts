@@ -50,7 +50,10 @@ export default joi.object({
     components: joi.object()
       .keys({
         Nav: component,
-        Dashboard: component,
+        views: joi.object({
+          Dashboard: component,
+          Account: component,
+        }),
         graphics: joi.object({
           Icon: component,
           Logo: component,
