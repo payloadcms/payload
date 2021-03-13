@@ -118,6 +118,59 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   let { data } = args;
 
   // /////////////////////////////////////
+  // Upload and resize potential files
+  // /////////////////////////////////////
+
+  if (collectionConfig.upload) {
+    const fileData: Partial<FileData> = {};
+
+    const { staticDir, imageSizes } = collectionConfig.upload;
+
+    let staticPath = staticDir;
+
+    if (staticDir.indexOf('/') !== 0) {
+      staticPath = path.join(config.paths.configDir, staticDir);
+    }
+
+    const file = ((req.files && req.files.file) ? req.files.file : req.file) as UploadedFile;
+
+    if (file) {
+      const fsSafeName = await getSafeFilename(staticPath, file.name);
+
+      try {
+        await saveBufferToFile(file.data, `${staticPath}/${fsSafeName}`);
+
+        fileData.filename = fsSafeName;
+        fileData.filesize = file.size;
+        fileData.mimeType = file.mimetype;
+
+        if (isImage(file.mimetype)) {
+          const dimensions = await getImageSize(`${staticPath}/${fsSafeName}`);
+          fileData.width = dimensions.width;
+          fileData.height = dimensions.height;
+
+          if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
+            fileData.sizes = await resizeAndSave(staticPath, collectionConfig, fsSafeName, fileData.mimeType);
+          }
+        }
+      } catch (err) {
+        throw new FileUploadError();
+      }
+
+      data = {
+        ...data,
+        ...fileData,
+      };
+    } else if (data.file === null) {
+      data = {
+        ...data,
+        filename: null,
+        sizes: null,
+      };
+    }
+  }
+
+  // /////////////////////////////////////
   // beforeValidate - Fields
   // /////////////////////////////////////
 
@@ -176,59 +229,6 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     unflattenLocales: true,
     docWithLocales,
   });
-
-  // /////////////////////////////////////
-  // Upload and resize potential files
-  // /////////////////////////////////////
-
-  if (collectionConfig.upload) {
-    const fileData: Partial<FileData> = {};
-
-    const { staticDir, imageSizes } = collectionConfig.upload;
-
-    let staticPath = staticDir;
-
-    if (staticDir.indexOf('/') !== 0) {
-      staticPath = path.join(config.paths.configDir, staticDir);
-    }
-
-    const file = ((req.files && req.files.file) ? req.files.file : req.file) as UploadedFile;
-
-    if (file) {
-      const fsSafeName = await getSafeFilename(staticPath, file.name);
-
-      try {
-        await saveBufferToFile(file.data, `${staticPath}/${fsSafeName}`);
-
-        fileData.filename = fsSafeName;
-        fileData.filesize = file.size;
-        fileData.mimeType = file.mimetype;
-
-        if (isImage(file.mimetype)) {
-          const dimensions = await getImageSize(`${staticPath}/${fsSafeName}`);
-          fileData.width = dimensions.width;
-          fileData.height = dimensions.height;
-
-          if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
-            fileData.sizes = await resizeAndSave(staticPath, collectionConfig, fsSafeName, fileData.mimeType);
-          }
-        }
-      } catch (err) {
-        throw new FileUploadError();
-      }
-
-      result = {
-        ...result,
-        ...fileData,
-      };
-    } else if (result.file === null) {
-      result = {
-        ...result,
-        filename: null,
-        sizes: null,
-      };
-    }
-  }
 
   // /////////////////////////////////////
   // Handle potential password update

@@ -71,59 +71,6 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   }
 
   // /////////////////////////////////////
-  // beforeValidate - Fields
-  // /////////////////////////////////////
-
-  data = await this.performFieldOperations(collectionConfig, {
-    data,
-    req,
-    hook: 'beforeValidate',
-    operation: 'create',
-    overrideAccess,
-  });
-
-  // /////////////////////////////////////
-  // beforeValidate - Collections
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook: BeforeValidateHook | Promise<void>, hook: BeforeValidateHook) => {
-    await priorHook;
-
-    data = (await hook({
-      data,
-      req,
-      operation: 'create',
-    })) || data;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // beforeChange - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    data = (await hook({
-      data,
-      req,
-      operation: 'create',
-    })) || data;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // beforeChange - Fields
-  // /////////////////////////////////////
-
-  let resultWithLocales = await this.performFieldOperations(collectionConfig, {
-    data,
-    hook: 'beforeChange',
-    operation: 'create',
-    req,
-    overrideAccess,
-    unflattenLocales: true,
-  });
-
-  // /////////////////////////////////////
   // Upload and resize potential files
   // /////////////////////////////////////
 
@@ -170,11 +117,64 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     fileData.filesize = file.size;
     fileData.mimeType = file.mimetype;
 
-    resultWithLocales = {
-      ...resultWithLocales,
+    data = {
+      ...data,
       ...fileData,
     };
   }
+
+  // /////////////////////////////////////
+  // beforeValidate - Fields
+  // /////////////////////////////////////
+
+  data = await this.performFieldOperations(collectionConfig, {
+    data,
+    req,
+    hook: 'beforeValidate',
+    operation: 'create',
+    overrideAccess,
+  });
+
+  // /////////////////////////////////////
+  // beforeValidate - Collections
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook: BeforeValidateHook | Promise<void>, hook: BeforeValidateHook) => {
+    await priorHook;
+
+    data = (await hook({
+      data,
+      req,
+      operation: 'create',
+    })) || data;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // beforeChange - Collection
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    data = (await hook({
+      data,
+      req,
+      operation: 'create',
+    })) || data;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // beforeChange - Fields
+  // /////////////////////////////////////
+
+  const resultWithLocales = await this.performFieldOperations(collectionConfig, {
+    data,
+    hook: 'beforeChange',
+    operation: 'create',
+    req,
+    overrideAccess,
+    unflattenLocales: true,
+  });
 
   // /////////////////////////////////////
   // Create
