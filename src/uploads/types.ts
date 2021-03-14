@@ -27,19 +27,21 @@ export type ImageSize = {
   height: number,
   crop?: string, // comes from sharp package
 };
+export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => string
 
 export type IncomingUploadType = {
   imageSizes?: ImageSize[];
   staticURL?: string;
   staticDir?: string;
-  adminThumbnail?: string;
+  adminThumbnail?: string | GetAdminThumbnail;
 }
+
 
 export type Upload = {
   imageSizes?: ImageSize[]
   staticURL: string
   staticDir: string
-  adminThumbnail?: string
+  adminThumbnail?: string | GetAdminThumbnail
 }
 
 export type File = {

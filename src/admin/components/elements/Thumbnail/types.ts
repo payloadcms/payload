@@ -1,10 +1,7 @@
-import { FileSizes } from '../../../../uploads/types';
+import { CollectionConfig } from '../../../../collections/config/types';
 
 export type Props = {
-  filename: string,
-  sizes?: FileSizes
-  adminThumbnail?: string,
-  mimeType?: string,
-  staticURL: string,
+  doc: Record<string, unknown>
+  collection: CollectionConfig
   size?: 'small' | 'medium' | 'large' | 'expand',
 }

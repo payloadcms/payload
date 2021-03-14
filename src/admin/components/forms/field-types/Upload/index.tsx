@@ -107,8 +107,8 @@ const Upload: React.FC<Props> = (props) => {
         <React.Fragment>
           {(internalValue && !missingFile) && (
             <FileDetails
-              {...collection.upload}
-              {...internalValue}
+              collection={collection}
+              doc={internalValue}
               handleRemove={() => {
                 setInternalValue(undefined);
                 setValue(null);

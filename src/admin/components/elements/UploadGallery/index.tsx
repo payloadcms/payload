@@ -9,14 +9,13 @@ const baseClass = 'upload-gallery';
 const UploadGallery: React.FC<Props> = (props) => {
   const { docs, onCardClick, collection } = props;
 
-
   if (docs && docs.length > 0) {
     return (
       <ul className={baseClass}>
         {docs.map((doc, i) => (
           <li key={i}>
             <UploadCard
-              {...doc as {id: string, filesize: number, mimeType: string, filename: string}}
+              doc={doc}
               {...{ collection }}
               onClick={() => onCardClick(doc)}
             />

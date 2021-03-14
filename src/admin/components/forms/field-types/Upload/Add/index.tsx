@@ -65,7 +65,7 @@ const AddUploadModal: React.FC<Props> = (props) => {
             />
           </header>
           <Upload
-            {...collection.upload}
+            collection={collection}
           />
           <NegativeFieldGutterProvider allow>
             <RenderFields
