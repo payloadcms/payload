@@ -3,7 +3,7 @@
   "version": "0.4.5",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "SEE LICENSE IN license.md",
-  "author": "Payload CMS LLC",
+  "author": "payloadjs",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "sideEffects": false,
