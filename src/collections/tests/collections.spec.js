@@ -464,4 +464,60 @@ describe('Collections - REST', () => {
       expect(sortedData.docs[1].id).toStrictEqual(id1);
     });
   });
+
+  describe('Field Access', () => {
+    it('should properly prevent / allow public users from reading a restricted field', async () => {
+      const firstArrayText1 = 'test 1';
+      const firstArrayText2 = 'test 2';
+
+      const response = await fetch(`${url}/api/localized-arrays`, {
+        body: JSON.stringify({
+          array: [
+            {
+              arrayText1: firstArrayText1,
+              arrayText2: 'test 2',
+              arrayText3: 'test 3',
+              allowPublicReadability: true,
+            },
+            {
+              arrayText1: firstArrayText2,
+              arrayText2: 'test 2',
+              arrayText3: 'test 3',
+              allowPublicReadability: false,
+            },
+          ],
+        }),
+        headers,
+        method: 'post',
+      });
+
+      const data = await response.json();
+      const docId = data.doc.id;
+      expect(response.status).toBe(201);
+      expect(data.doc.array[1].arrayText1).toStrictEqual(firstArrayText2);
+
+      const unauthenticatedResponse = await fetch(`${url}/api/localized-arrays/${docId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      expect(unauthenticatedResponse.status).toBe(200);
+      const unauthenticatedData = await unauthenticatedResponse.json();
+
+      // This string should be allowed to come back
+      expect(unauthenticatedData.array[0].arrayText1).toBe(firstArrayText1);
+
+      // This string should be prevented from coming back
+      expect(unauthenticatedData.array[1].arrayText1).toBeUndefined();
+
+      const authenticatedResponse = await fetch(`${url}/api/localized-arrays/${docId}`, {
+        headers,
+      });
+
+      const authenticatedData = await authenticatedResponse.json();
+
+      // If logged in, we should get this field back
+      expect(authenticatedData.array[1].arrayText1).toStrictEqual(firstArrayText2);
+    });
+  });
 });

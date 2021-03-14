@@ -1,4 +1,16 @@
 import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { FieldAccess } from '../../src/fields/config/types';
+import checkRole from '../access/checkRole';
+
+const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) => {
+  if (checkRole(['admin'], user)) {
+    return true;
+  }
+
+  if (siblingData.allowPublicReadability) return true;
+
+  return false;
+};
 
 const LocalizedArrays: PayloadCollectionConfig = {
   slug: 'localized-arrays',
@@ -23,16 +35,30 @@ const LocalizedArrays: PayloadCollectionConfig = {
           type: 'row',
           fields: [
             {
+              name: 'allowPublicReadability',
+              label: 'Allow Public Readability',
+              type: 'checkbox',
+            },
+            {
               name: 'arrayText1',
               label: 'Array Text 1',
               type: 'text',
               required: true,
+              admin: {
+                width: '50%',
+              },
+              access: {
+                read: PublicReadabilityAccess,
+              },
             },
             {
               name: 'arrayText2',
               label: 'Array Text 2',
               type: 'text',
               required: true,
+              admin: {
+                width: '50%',
+              },
             },
           ],
         },

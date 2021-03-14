@@ -2,7 +2,6 @@
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
 import { PayloadRequest } from '../../express/types';
-import { Access } from '../../config/types';
 import { Document } from '../../types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 
@@ -15,6 +14,13 @@ export type FieldHook = (args: {
   operation?: 'create' | 'read' | 'update' | 'delete',
   req: PayloadRequest
 }) => Promise<unknown> | unknown;
+
+export type FieldAccess = (args: {
+  req: PayloadRequest
+  id?: string
+  data: Record<string, unknown>
+  siblingData: Record<string, unknown>
+}) => Promise<boolean> | boolean;
 
 type Admin = {
   position?: string;
@@ -60,9 +66,9 @@ export interface FieldBase {
   }
   admin?: Admin;
   access?: {
-    create?: Access;
-    read?: Access;
-    update?: Access;
+    create?: FieldAccess;
+    read?: FieldAccess;
+    update?: FieldAccess;
   };
 }
 

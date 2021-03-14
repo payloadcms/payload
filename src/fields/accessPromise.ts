@@ -6,6 +6,7 @@ import { PayloadRequest } from '../express/types';
 
 type Arguments = {
   data: Record<string, unknown>
+  fullData: Record<string, unknown>
   originalDoc: Record<string, unknown>
   field: Field
   operation: Operation
@@ -21,6 +22,7 @@ type Arguments = {
 
 const accessPromise = async ({
   data,
+  fullData,
   originalDoc,
   field,
   operation,
@@ -45,7 +47,7 @@ const accessPromise = async ({
   }
 
   if (field.access && field.access[accessOperation]) {
-    const result = overrideAccess ? true : await field.access[accessOperation]({ req, id });
+    const result = overrideAccess ? true : await field.access[accessOperation]({ req, id, siblingData: data, data: fullData });
 
     if (!result && accessOperation === 'update' && originalDoc[field.name] !== undefined) {
       resultingData[field.name] = originalDoc[field.name];
