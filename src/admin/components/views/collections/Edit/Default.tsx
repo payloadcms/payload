@@ -102,7 +102,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                 {upload && (
                   <Upload
                     data={data}
-                    {...upload}
+                    collection={collection}
                   />
                 )}
                 <RenderFields

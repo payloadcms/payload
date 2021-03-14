@@ -1,8 +1,25 @@
+import { CollectionConfig } from '../collections/config/types';
 import isImage from './isImage';
-import { FileSizes } from './types';
 
-const getThumbnail = (mimeType: string, staticURL: string, filename: string, sizes: FileSizes, adminThumbnail: string): string | boolean => {
-  if (isImage(mimeType)) {
+const getThumbnail = (collection: CollectionConfig, doc: Record<string, unknown>): string | boolean => {
+  const {
+    upload: {
+      staticURL,
+      adminThumbnail,
+    },
+  } = collection;
+
+  const {
+    mimeType,
+    sizes,
+    filename,
+  } = doc;
+
+  if (typeof adminThumbnail === 'function') {
+    return adminThumbnail({ doc });
+  }
+
+  if (isImage(mimeType as string)) {
     if (sizes?.[adminThumbnail]?.filename) {
       return `${staticURL}/${sizes[adminThumbnail].filename}`;
     }

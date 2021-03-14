@@ -10,17 +10,17 @@ const baseClass = 'thumbnail';
 
 const Thumbnail: React.FC<Props> = (props) => {
   const {
-    filename,
-    mimeType,
-    staticURL,
-    sizes,
-    adminThumbnail,
+    doc,
+    doc: {
+      filename,
+    },
+    collection,
     size,
   } = props;
 
   const { serverURL } = useConfig();
 
-  const thumbnail = getThumbnail(mimeType, staticURL, filename, sizes, adminThumbnail);
+  const thumbnail = getThumbnail(collection, doc);
 
   const classes = [
     baseClass,
@@ -32,7 +32,7 @@ const Thumbnail: React.FC<Props> = (props) => {
       {thumbnail && (
         <img
           src={`${serverURL}${thumbnail}`}
-          alt={filename}
+          alt={filename as string}
         />
       )}
       {!thumbnail && (

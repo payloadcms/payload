@@ -1,3 +1,5 @@
+import { CollectionConfig } from '../../../../../../collections/config/types';
+
 export type Data = {
   filename: string
   mimeType: string
@@ -6,6 +8,6 @@ export type Data = {
 
 export type Props = {
   data?: Data
+  collection: CollectionConfig
   adminThumbnail?: string
-  staticURL: string
 }
