@@ -42,7 +42,7 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
 | **`staticURL`** *      | The base URL path to use to access you uploads. Example: `/media` |
 | **`staticDir`** *      | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. |
 | **`imageSizes`**       | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes) |
-| **`adminThumbnail`**   | Which of your provided image sizes to use for the admin panel's thumbnail. Typically a size around 500x500px or so works well. |
+| **`adminThumbnail`**   | Set the way that the Admin panel will display thumbnails for this Collection. [More](#admin-thumbnails) |
 
 *An asterisk denotes that a property above is required.*
 
@@ -110,6 +110,28 @@ If you specify an array of `imageSizes` to your `upload` config, Payload will au
 The Payload Admin panel will also automatically display all available files, including width, height, and filesize, for each of your uploaded files.
 
 Behind the scenes, Payload relies on [`sharp`](https://sharp.pixelplumbing.com/api-resize#resize) to perform its image resizing. You can specify additional options for `sharp` to use while resizing your images.
+
+### Admin thumbnails
+
+You can specify how Payload retrieves admin thumbnails for your upload-enabled Collections. This property accepts two different configurations:
+
+1. A string equal to one of your provided image size names to use for the admin panel's thumbnail (seen in the example Media collection above)
+1. A function that takes the document's data and sends back a full URL to load the thumbnail. For example, to dynamically set an admin thumbnail URL, you could write a function that returns a string pointing to a different file source:
+
+**Example custom Admin thumbnail:**
+```js
+const Media = {
+  slug: 'media',
+  upload: {
+    staticURL: '/media',
+    staticDir: 'media',
+    imageSizes: [
+      // ... image sizes here
+    ],
+    adminThumbnail: ({ doc }) => `https://google.com/custom-path-to-file/${doc.filename}`,
+  }
+}
+```
 
 ### Uploading Files
 
