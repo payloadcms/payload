@@ -15,11 +15,11 @@ const getThumbnail = (collection: CollectionConfig, doc: Record<string, unknown>
     filename,
   } = doc;
 
-  if (typeof adminThumbnail === 'function') {
-    return adminThumbnail({ doc });
-  }
-
   if (isImage(mimeType as string)) {
+    if (typeof adminThumbnail === 'function') {
+      return adminThumbnail({ doc });
+    }
+
     if (sizes?.[adminThumbnail]?.filename) {
       return `${staticURL}/${sizes[adminThumbnail].filename}`;
     }
