@@ -138,6 +138,7 @@ const traverseFields = (args: Arguments): void => {
 
     accessPromises.push(accessPromise({
       data,
+      fullData,
       originalDoc,
       field,
       operation,
