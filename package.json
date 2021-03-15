@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "SEE LICENSE IN license.md",
   "author": "payloadjs",
