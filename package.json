@@ -65,7 +65,7 @@
     "@faceless-ui/modal": "^1.1.2",
     "@faceless-ui/scroll-info": "^1.2.3",
     "@faceless-ui/window-info": "^1.2.4",
-    "@payloadcms/config-provider": "^0.0.21",
+    "@payloadcms/config-provider": "^0.0.22",
     "@udecode/slate-plugins": "^0.71.9",
     "assert": "^2.0.0",
     "async-some": "^1.0.2",
