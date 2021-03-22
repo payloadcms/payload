@@ -275,7 +275,7 @@ The following Global operations are available through the Local API:
 ```js
 // Result will be the Header Global.
 const result = await payload.findGlobal({
-  global: 'header', // required
+  slug: 'header', // required
   depth: 2,
   locale: 'en',
   fallbackLocale: false,
@@ -290,7 +290,7 @@ const result = await payload.findGlobal({
 ```js
 // Result will be the updated Header Global.
 const result = await payload.updateGlobal({
-  global: 'header', // required
+  slug: 'header', // required
   data: { // required
     nav: [
       {
