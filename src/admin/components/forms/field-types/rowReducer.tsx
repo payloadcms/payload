@@ -54,6 +54,7 @@ const reducer = (currentState, action) => {
       const movingRowState = { ...stateCopy[moveFromIndex] };
       stateCopy.splice(moveFromIndex, 1);
       stateCopy.splice(moveToIndex, 0, movingRowState);
+
       return stateCopy;
     }
 
