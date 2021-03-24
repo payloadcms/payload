@@ -170,16 +170,20 @@ const traverseFields = (args: Arguments): void => {
         });
       } else if (fieldIsArrayType(field)) {
         if (Array.isArray(data[field.name])) {
-          (data[field.name] as Record<string, unknown>[]).forEach((rowData, i) => {
+          for (let i = 0; i < data[field.name].length; i += 1) {
+            if (typeof (data[field.name][i]) === 'undefined') {
+              data[field.name][i] = {};
+            }
+
             traverseFields({
               ...args,
               fields: field.fields,
-              data: rowData,
+              data: data[field.name][i] || {},
               originalDoc: originalDoc?.[field.name]?.[i],
               docWithLocales: docWithLocales?.[field.name]?.[i],
               path: `${path}${field.name}.${i}.`,
             });
-          });
+          }
         }
       } else {
         traverseFields({
@@ -202,7 +206,7 @@ const traverseFields = (args: Arguments): void => {
             traverseFields({
               ...args,
               fields: block.fields,
-              data: rowData,
+              data: rowData || {},
               originalDoc: originalDoc?.[field.name]?.[i],
               docWithLocales: docWithLocales?.[field.name]?.[i],
               path: `${path}${field.name}.${i}.`,
