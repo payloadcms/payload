@@ -25,6 +25,7 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
         value,
         initialValue: value,
         valid: true,
+        validate: field.validate,
       };
 
       validationPromises.push(buildValidationPromise(fieldState, field));

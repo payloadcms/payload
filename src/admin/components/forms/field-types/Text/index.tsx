@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
@@ -21,20 +21,13 @@ const Text: React.FC<Props> = (props) => {
       style,
       width,
     } = {},
-    minLength,
-    maxLength,
   } = props;
 
   const path = pathFromProps || name;
 
-  const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { minLength, maxLength, required });
-    return validationResult;
-  }, [validate, maxLength, minLength, required]);
-
   const fieldType = useFieldType<string>({
     path,
-    validate: memoizedValidate,
+    validate,
     enableDebouncedValue: true,
   });
 
