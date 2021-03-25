@@ -1,8 +1,7 @@
 import React, { Fragment, useCallback } from 'react';
-import PropTypes from 'prop-types';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
-import { useSlate } from 'slate-react';
+import { useSlate, ReactEditor } from 'slate-react';
 import MinimalTemplate from '../../../../../../../src/admin/components/templates/Minimal';
 import { ElementButton } from '../../../../../../../components/rich-text';
 import X from '../../../../../../../src/admin/components/icons/X';
@@ -17,7 +16,7 @@ const initialFormData = {
   style: 'primary',
 };
 
-const insertButton = (editor, { href, label, style, newTab = false }) => {
+const insertButton = (editor, { href, label, style, newTab = false }: any) => {
   const text = { text: ' ' };
   const button = {
     type: 'button',
@@ -32,10 +31,20 @@ const insertButton = (editor, { href, label, style, newTab = false }) => {
 
   const nodes = [button, { children: [{ text: '' }] }];
 
+  if (editor.blurSelection) {
+    Transforms.select(editor, editor.blurSelection);
+  }
+
   Transforms.insertNodes(editor, nodes);
+
+  const currentPath = editor.selection.anchor.path[0];
+  const newSelection = { anchor: { path: [currentPath + 1, 0], offset: 0 }, focus: { path: [currentPath + 1, 0], offset: 0 } };
+
+  Transforms.select(editor, newSelection);
+  ReactEditor.focus(editor);
 };
 
-const ToolbarButton: React.FC = ({ path }) => {
+const ToolbarButton: React.FC<{path: string}> = ({ path }) => {
   const { open, closeAll } = useModal();
   const editor = useSlate();
 
@@ -110,10 +119,6 @@ const ToolbarButton: React.FC = ({ path }) => {
       </Modal>
     </Fragment>
   );
-};
-
-ToolbarButton.propTypes = {
-  path: PropTypes.string.isRequired,
 };
 
 export default ToolbarButton;

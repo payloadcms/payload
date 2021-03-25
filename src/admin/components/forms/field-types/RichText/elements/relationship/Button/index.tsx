@@ -1,7 +1,7 @@
 import React, { Fragment, useCallback, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
-import { useSlate } from 'slate-react';
+import { ReactEditor, useSlate } from 'slate-react';
 import { useConfig } from '@payloadcms/config-provider';
 import ElementButton from '../../Button';
 import RelationshipIcon from '../../../../../../icons/Relationship';
@@ -36,7 +36,17 @@ const insertRelationship = (editor, { value, relationTo, depth }) => {
 
   const nodes = [relationship, { children: [{ text: '' }] }];
 
+  if (editor.blurSelection) {
+    Transforms.select(editor, editor.blurSelection);
+  }
+
   Transforms.insertNodes(editor, nodes);
+
+  const currentPath = editor.selection.anchor.path[0];
+  const newSelection = { anchor: { path: [currentPath + 1, 0], offset: 0 }, focus: { path: [currentPath + 1, 0], offset: 0 } };
+
+  Transforms.select(editor, newSelection);
+  ReactEditor.focus(editor);
 };
 
 const RelationshipButton = ({ path }) => {

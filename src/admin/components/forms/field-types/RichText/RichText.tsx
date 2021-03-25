@@ -126,6 +126,10 @@ const RichText: React.FC<Props> = (props) => {
     return CreatedEditor;
   }, [elements, leaves]);
 
+  const onBlur = useCallback(() => {
+    editor.blurSelection = editor.selection;
+  }, [editor]);
+
   useEffect(() => {
     if (!loaded) {
       const mergedElements = mergeCustomFunctions(elements, elementTypes);
@@ -222,6 +226,7 @@ const RichText: React.FC<Props> = (props) => {
               placeholder={placeholder}
               spellCheck
               readOnly={readOnly}
+              onBlur={onBlur}
               onKeyDown={(event) => {
                 Object.keys(hotkeys).forEach((hotkey) => {
                   if (isHotkey(hotkey, event as any)) {
