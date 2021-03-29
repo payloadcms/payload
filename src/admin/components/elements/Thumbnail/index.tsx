@@ -1,8 +1,7 @@
 import React from 'react';
-import { useConfig } from '@payloadcms/config-provider';
 import { Props } from './types';
 import FileGraphic from '../../graphics/File';
-import getThumbnail from '../../../../uploads/getThumbnail';
+import useThumbnail from '../../../hooks/useThumbnail';
 
 import './index.scss';
 
@@ -18,9 +17,7 @@ const Thumbnail: React.FC<Props> = (props) => {
     size,
   } = props;
 
-  const { serverURL } = useConfig();
-
-  const thumbnail = getThumbnail(collection, doc);
+  const thumbnailSRC = useThumbnail(collection, doc);
 
   const classes = [
     baseClass,
@@ -29,13 +26,13 @@ const Thumbnail: React.FC<Props> = (props) => {
 
   return (
     <div className={classes}>
-      {thumbnail && (
+      {thumbnailSRC && (
         <img
-          src={`${serverURL}${thumbnail}`}
+          src={thumbnailSRC}
           alt={filename as string}
         />
       )}
-      {!thumbnail && (
+      {!thumbnailSRC && (
         <FileGraphic />
       )}
     </div>
