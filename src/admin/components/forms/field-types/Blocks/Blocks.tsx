@@ -14,7 +14,6 @@ import useFieldType from '../../useFieldType';
 import Popup from '../../../elements/Popup';
 import BlockSelector from './BlockSelector';
 import { blocks as blocksValidator } from '../../../../../fields/validations';
-import getDataByPath from '../../Form/getDataByPath';
 import Banner from '../../../elements/Banner';
 import { Props, RenderBlockProps } from './types';
 
@@ -48,7 +47,7 @@ const Blocks: React.FC<Props> = (props) => {
   const path = pathFromProps || name;
 
   const [rows, dispatchRows] = useReducer(reducer, []);
-  const { initialState, dispatchFields } = useForm();
+  const { getDataByPath, dispatchFields } = useForm();
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(
@@ -107,9 +106,9 @@ const Blocks: React.FC<Props> = (props) => {
   }, [moveRow]);
 
   useEffect(() => {
-    const data = getDataByPath(initialState, path);
+    const data = getDataByPath(path);
     dispatchRows({ type: 'SET_ALL', data: data || [] });
-  }, [initialState, path]);
+  }, [getDataByPath, path]);
 
   useEffect(() => {
     setValue(rows?.length || 0);
