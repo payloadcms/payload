@@ -78,7 +78,7 @@ const Button: React.FC<Props> = (props) => {
     className: classes,
     onClick: handleClick,
     rel: newTab ? 'noopener noreferrer' : undefined,
-    target: newTab ? '_blank' : undefined
+    target: newTab ? '_blank' : undefined,
   };
 
   switch (el) {
