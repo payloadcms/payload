@@ -1,3 +1,10 @@
+## [0.5.3](https://github.com/payloadcms/payload/compare/v0.5.2...v0.5.3) (2021-04-01)
+
+
+### Bug Fixes
+
+* unique indices ([23c45f1](https://github.com/payloadcms/payload/commit/23c45f137ac97c99ed38969bed64928f2ce2795e))
+
 ## [0.5.2](https://github.com/payloadcms/payload/compare/v0.5.1...v0.5.2) (2021-03-31)
 
 
