@@ -25,6 +25,7 @@ import RichText from './collections/RichText';
 import Select from './collections/Select';
 import StrictPolicies from './collections/StrictPolicies';
 import Validations from './collections/Validations';
+import Uniques from './collections/Uniques';
 
 import BlocksGlobal from './globals/BlocksGlobal';
 import NavigationArray from './globals/NavigationArray';
@@ -79,6 +80,7 @@ export default buildConfig({
     Select,
     StrictPolicies,
     Validations,
+    Uniques,
   ],
   globals: [
     NavigationArray,

@@ -520,4 +520,33 @@ describe('Collections - REST', () => {
       expect(authenticatedData.array[1].arrayText1).toStrictEqual(firstArrayText2);
     });
   });
+
+  describe('Unique', () => {
+    it('should prevent unique fields from duplicating data', async () => {
+      const nonUniqueTitle = 'title';
+
+      const response = await fetch(`${url}/api/uniques`, {
+        body: JSON.stringify({
+          title: nonUniqueTitle,
+        }),
+        headers,
+        method: 'post',
+      });
+
+      const data = await response.json();
+
+      expect(response.status).toBe(201);
+      expect(data.doc.title).toStrictEqual(nonUniqueTitle);
+
+      const failedResponse = await fetch(`${url}/api/uniques`, {
+        body: JSON.stringify({
+          title: nonUniqueTitle,
+        }),
+        headers,
+        method: 'post',
+      });
+
+      expect(failedResponse.status).toStrictEqual(500);
+    });
+  });
 });
