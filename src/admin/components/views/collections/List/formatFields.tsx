@@ -27,10 +27,6 @@ const formatFields = (config) => {
   if (config.auth) {
     fields = fields.concat([
       {
-        name: 'email',
-        label: 'Email',
-        type: 'email',
-      }, {
         name: 'enableAPIKey',
         label: 'Enable API Key for this user',
         type: 'checkbox',

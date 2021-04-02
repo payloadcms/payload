@@ -12,9 +12,7 @@ const buildValidationPromise = async (fieldState: Field, field: FieldSchema, ful
 
   let validationResult: boolean | string = true;
 
-  if (!passesConditionalLogic) {
-    validationResult = true;
-  } else if (typeof field.validate === 'function') {
+  if (passesConditionalLogic && typeof field.validate === 'function') {
     validationResult = await field.validate(fieldState.value, field);
   }
 

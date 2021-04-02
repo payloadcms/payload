@@ -8,7 +8,9 @@ export default [
     type: 'email',
     validate: email,
     admin: {
-      disabled: true,
+      components: {
+        Field: () => null,
+      },
     },
   },
   {
