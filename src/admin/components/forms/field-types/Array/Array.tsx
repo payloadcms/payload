@@ -39,7 +39,9 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   } = props;
 
   const [rows, dispatchRows] = useReducer(reducer, []);
-  const { getDataByPath, dispatchFields } = useForm();
+  const formContext = useForm();
+
+  const { dispatchFields } = formContext;
 
   const path = pathFromProps || name;
 
@@ -87,9 +89,9 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   }, [moveRow]);
 
   useEffect(() => {
-    const data = getDataByPath(path);
+    const data = formContext.getDataByPath(path);
     dispatchRows({ type: 'SET_ALL', data: data || [] });
-  }, [getDataByPath, path]);
+  }, [formContext, path]);
 
   useEffect(() => {
     setValue(rows?.length || 0);

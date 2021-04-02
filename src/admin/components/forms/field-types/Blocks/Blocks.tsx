@@ -47,7 +47,8 @@ const Blocks: React.FC<Props> = (props) => {
   const path = pathFromProps || name;
 
   const [rows, dispatchRows] = useReducer(reducer, []);
-  const { getDataByPath, dispatchFields } = useForm();
+  const formContext = useForm();
+  const { dispatchFields } = formContext;
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(
@@ -106,9 +107,9 @@ const Blocks: React.FC<Props> = (props) => {
   }, [moveRow]);
 
   useEffect(() => {
-    const data = getDataByPath(path);
+    const data = formContext.getDataByPath(path);
     dispatchRows({ type: 'SET_ALL', data: data || [] });
-  }, [getDataByPath, path]);
+  }, [formContext, path]);
 
   useEffect(() => {
     setValue(rows?.length || 0);
