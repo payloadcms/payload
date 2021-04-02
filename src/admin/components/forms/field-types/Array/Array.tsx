@@ -35,6 +35,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     permissions,
     admin: {
       readOnly,
+      condition,
     },
   } = props;
 
@@ -62,6 +63,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     validate: memoizedValidate,
     disableFormData,
     ignoreWhileFlattening: true,
+    condition,
   });
 
   const addRow = useCallback(async (rowIndex) => {

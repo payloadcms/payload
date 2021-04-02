@@ -1,10 +1,22 @@
 import { Field as FieldSchema } from '../../../../fields/config/types';
 import { Fields, Field, Data } from './types';
 
-const buildValidationPromise = async (fieldState: Field, field: FieldSchema) => {
+const buildValidationPromise = async (fieldState: Field, field: FieldSchema, fullData: Data = {}, data: Data = {}) => {
   const validatedFieldState = fieldState;
 
-  const validationResult = typeof field.validate === 'function' ? await field.validate(fieldState.value, field) : true;
+  let passesConditionalLogic = true;
+
+  if (field?.admin?.condition) {
+    passesConditionalLogic = await field.admin.condition(fullData, data);
+  }
+
+  let validationResult: boolean | string = true;
+
+  if (!passesConditionalLogic) {
+    validationResult = true;
+  } else if (typeof field.validate === 'function') {
+    validationResult = await field.validate(fieldState.value, field);
+  }
 
   if (typeof validationResult === 'string') {
     validatedFieldState.errorMessage = validationResult;
@@ -26,9 +38,10 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
         initialValue: value,
         valid: true,
         validate: field.validate,
+        condition: field?.admin?.condition,
       };
 
-      validationPromises.push(buildValidationPromise(fieldState, field));
+      validationPromises.push(buildValidationPromise(fieldState, field, fullData, data));
 
       return fieldState;
     };

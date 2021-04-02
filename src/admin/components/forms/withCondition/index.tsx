@@ -36,13 +36,15 @@ const withCondition = <P extends Record<string, unknown>>(Field: React.Component
     const field = getField(path);
     const siblingData = getSiblingData(path);
     const passesCondition = condition ? condition(data, siblingData) : true;
-    const fieldExists = Boolean(field);
 
     useEffect(() => {
-      if (!passesCondition && fieldExists) {
-        dispatchFields({ type: 'REMOVE', path });
+      if (!passesCondition) {
+        dispatchFields({
+          ...field,
+          valid: true,
+        });
       }
-    }, [dispatchFields, passesCondition, path, fieldExists]);
+    }, [passesCondition, field, dispatchFields]);
 
     if (passesCondition) {
       return <Field {...props} />;

@@ -36,6 +36,7 @@ const Select: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
+      condition,
     } = {},
   } = props;
 
@@ -56,6 +57,7 @@ const Select: React.FC<Props> = (props) => {
   } = useFieldType({
     path,
     validate: memoizedValidate,
+    condition,
   });
 
   const classes = [
