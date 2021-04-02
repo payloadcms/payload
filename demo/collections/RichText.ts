@@ -32,6 +32,20 @@ const RichText: PayloadCollectionConfig = {
         ],
       },
     },
+    {
+      name: 'editablePropsRichText',
+      type: 'richText',
+      label: 'Rich Text with Editable props',
+      required: true,
+      admin: {
+        editableProps: {
+          onClick: (e) => console.log('Clicked RichText', e),
+          style: {
+            color: 'rebeccapurple',
+          },
+        },
+      }
+    },
   ],
 };
 

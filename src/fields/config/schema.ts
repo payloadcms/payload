@@ -221,6 +221,7 @@ export const richText = baseField.keys({
         }),
       ),
     ),
+    editableProps: joi.object(),
   }),
 });
 

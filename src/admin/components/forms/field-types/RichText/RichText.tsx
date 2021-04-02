@@ -44,8 +44,10 @@ const RichText: React.FC<Props> = (props) => {
     } = {},
   } = props;
 
+
   const elements: RichTextElement[] = admin?.elements || defaultElements;
   const leaves: RichTextLeaf[] = admin?.leaves || defaultLeaves;
+  const editableProps: object = admin?.editableProps || {};
 
   const path = pathFromProps || name;
 
@@ -236,6 +238,7 @@ const RichText: React.FC<Props> = (props) => {
                   }
                 });
               }}
+              {...editableProps}
             />
           </div>
         </Slate>
