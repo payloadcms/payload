@@ -27,6 +27,7 @@ module.exports = {
       extends: [
         'plugin:@typescript-eslint/recommended',
       ],
+      ignorePatterns: ["cypress"]
       rules: {
         'no-shadow': 'off',
         '@typescript-eslint/no-shadow': ['error'],
