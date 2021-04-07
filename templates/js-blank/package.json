@@ -1,0 +1,19 @@
+{
+  "name": "payload-starter-javascript",
+  "version": "1.0.0",
+  "main": "server.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon",
+    "build": "payload build",
+    "serve": "NODE_ENV=production node server.js"
+  },
+  "dependencies": {
+    "payload": "0.1.145",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  }
+}
