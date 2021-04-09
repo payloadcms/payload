@@ -19,7 +19,6 @@ const baseClass = 'field-type array';
 
 const ArrayFieldType: React.FC<Props> = (props) => {
   const {
-    label,
     name,
     path: pathFromProps,
     fields,
@@ -28,15 +27,22 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     required,
     maxRows,
     minRows,
-    labels = {
-      singular: 'Row',
-      plural: 'Rows',
-    },
     permissions,
     admin: {
       readOnly,
     },
   } = props;
+
+  // Handle labeling for Arrays, Global Arrays, and Blocks
+  const getLabels = (p: Props) => {
+    if (p?.labels) return p.labels;
+    if (p?.label) return { singular: p.label, plural: undefined };
+    return { singular: 'Row', plural: 'Rows' };
+  };
+
+  const labels = getLabels(props);
+  // eslint-disable-next-line react/destructuring-assignment
+  const label = props?.label ?? props?.labels?.singular;
 
   const [rows, dispatchRows] = useReducer(reducer, []);
   const formContext = useForm();
