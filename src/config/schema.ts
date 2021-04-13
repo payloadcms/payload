@@ -95,8 +95,8 @@ export default joi.object({
     }),
   graphQL: joi.object()
     .keys({
-      mutations: joi.object(),
-      queries: joi.object(),
+      mutations: joi.function(),
+      queries: joi.function(),
       maxComplexity: joi.number(),
       disablePlaygroundInProduction: joi.boolean(),
       disable: joi.boolean(),

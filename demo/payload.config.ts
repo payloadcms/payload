@@ -100,8 +100,6 @@ export default buildConfig({
   defaultDepth: 2,
   graphQL: {
     maxComplexity: 1000,
-    mutations: {},
-    queries: {},
     disablePlaygroundInProduction: true,
     disable: false,
   },
