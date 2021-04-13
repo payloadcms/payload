@@ -10,19 +10,23 @@ const reducer = (currentState, action) => {
   switch (type) {
     case 'SET_ALL': {
       if (Array.isArray(data)) {
-        return data.map((dataRow) => {
-          const row = {
-            key: uuidv4(),
-            open: true,
-            blockType: undefined,
-          };
+        if (currentState.length !== data.length) {
+          return data.map((dataRow) => {
+            const row = {
+              key: uuidv4(),
+              open: true,
+              blockType: undefined,
+            };
 
-          if (dataRow.blockType) {
-            row.blockType = dataRow.blockType;
-          }
+            if (dataRow.blockType) {
+              row.blockType = dataRow.blockType;
+            }
 
-          return row;
-        });
+            return row;
+          });
+        }
+
+        return currentState;
       }
 
       return [];

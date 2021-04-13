@@ -94,10 +94,10 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
   const valueToSend = enableDebouncedValue ? debouncedValue : internalValue;
 
   useEffect(() => {
-    if (valueToSend !== undefined || !fieldExists) {
+    if (field?.value !== valueToSend && valueToSend !== undefined) {
       sendField(valueToSend);
     }
-  }, [valueToSend, sendField, fieldExists]);
+  }, [valueToSend, sendField, field]);
 
   return {
     ...options,
