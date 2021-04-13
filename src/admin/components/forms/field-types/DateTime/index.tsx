@@ -25,6 +25,7 @@ const DateTime: React.FC<Props> = (props) => {
       style,
       width,
       date,
+      condition,
     } = {},
   } = props;
 
@@ -43,6 +44,7 @@ const DateTime: React.FC<Props> = (props) => {
   } = useFieldType({
     path,
     validate: memoizedValidate,
+    condition,
   });
 
   const classes = [

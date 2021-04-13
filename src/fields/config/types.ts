@@ -22,13 +22,15 @@ export type FieldAccess = (args: {
   siblingData: Record<string, unknown>
 }) => Promise<boolean> | boolean;
 
+export type Condition = (data: Record<string, unknown>, siblingData: Record<string, unknown>) => boolean
+
 type Admin = {
   position?: string;
   width?: string;
   style?: CSSProperties;
   readOnly?: boolean;
   disabled?: boolean;
-  condition?: (...args: any[]) => any | void;
+  condition?: Condition;
   components?: { [key: string]: React.ComponentType };
   hidden?: boolean
 }

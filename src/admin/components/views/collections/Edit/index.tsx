@@ -40,14 +40,15 @@ const EditView: React.FC<IndexProps> = (props) => {
   const [initialState, setInitialState] = useState({});
   const { permissions } = useAuth();
 
-  const onSave = (json) => {
-    history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`, {
-      status: {
-        message: json.message,
-        type: 'success',
-      },
-      data: json.doc,
-    });
+  const onSave = async (json) => {
+    if (!isEditing) {
+      history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`, {
+        data: json.doc,
+      });
+    } else {
+      const state = await buildStateFromSchema(fields, json.doc);
+      setInitialState(state);
+    }
   };
 
   const [{ data, isLoading, isError }] = usePayloadAPI(

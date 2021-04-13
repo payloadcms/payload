@@ -1,4 +1,8 @@
 import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import Email from '../blocks/Email';
+import Quote from '../blocks/Quote';
+import NumberBlock from '../blocks/Number';
+import CallToAction from '../blocks/CallToAction';
 
 const Conditions: PayloadCollectionConfig = {
   slug: 'conditions',
@@ -47,6 +51,20 @@ const Conditions: PayloadCollectionConfig = {
       label: 'Number is either greater than 20 AND enableTest is checked, OR number is less than 20 and enableTest is NOT checked',
       admin: {
         condition: (_, siblings) => (siblings.number > 20 && siblings.enableTest === true) || (siblings.number < 20 && siblings.enableTest === false),
+      },
+    },
+    {
+      name: 'blocks',
+      label: 'Blocks',
+      labels: {
+        singular: 'Block',
+        plural: 'Blocks',
+      },
+      type: 'blocks',
+      blocks: [Email, NumberBlock, Quote, CallToAction],
+      required: true,
+      admin: {
+        condition: (_, siblings) => siblings?.enableTest === true,
       },
     },
   ],

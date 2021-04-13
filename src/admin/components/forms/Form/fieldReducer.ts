@@ -119,6 +119,7 @@ function fieldReducer(state: Fields, action): Fields {
         initialValue: action.initialValue,
         stringify: action.stringify,
         validate: action.validate,
+        condition: action.condition,
       };
 
       return {

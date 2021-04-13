@@ -41,6 +41,7 @@ const RichText: React.FC<Props> = (props) => {
       style,
       width,
       placeholder,
+      condition,
     } = {},
   } = props;
 
@@ -101,6 +102,7 @@ const RichText: React.FC<Props> = (props) => {
     path,
     validate: memoizedValidate,
     stringify: true,
+    condition,
   });
 
   const {

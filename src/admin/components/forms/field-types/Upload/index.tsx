@@ -30,6 +30,7 @@ const Upload: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
+      condition,
     } = {},
     label,
     validate = upload,
@@ -51,6 +52,7 @@ const Upload: React.FC<Props> = (props) => {
   const fieldType = useFieldType({
     path,
     validate: memoizedValidate,
+    condition,
   });
 
   const {

@@ -7,7 +7,7 @@ const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) =>
     return true;
   }
 
-  if (siblingData.allowPublicReadability) return true;
+  if (siblingData?.allowPublicReadability) return true;
 
   return false;
 };

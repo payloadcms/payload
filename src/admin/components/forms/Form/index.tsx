@@ -67,11 +67,27 @@ const Form: React.FC<Props> = (props) => {
     const validatedFieldState = {};
     let isValid = true;
 
-    const validationPromises = Object.entries(contextRef.current.fields).map(async ([path, field]) => {
-      const validatedField = { ...field };
+    const data = contextRef.current.getData();
 
-      validatedField.valid = true;
-      const validationResult = typeof field.validate === 'function' ? await field.validate(field.value) : true;
+    const validationPromises = Object.entries(contextRef.current.fields).map(async ([path, field]) => {
+      const validatedField = {
+        ...field,
+        valid: true,
+      };
+
+      const siblingData = contextRef.current.getSiblingData(path);
+
+      let passesConditionalLogic = true;
+
+      if (typeof field?.condition === 'function') {
+        passesConditionalLogic = await field.condition(data, siblingData);
+      }
+
+      let validationResult: boolean | string = true;
+
+      if (passesConditionalLogic && typeof field.validate === 'function') {
+        validationResult = await field.validate(field.value);
+      }
 
       if (typeof validationResult === 'string') {
         validatedField.errorMessage = validationResult;

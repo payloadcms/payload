@@ -15,6 +15,7 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
     disableFormData,
     ignoreWhileFlattening,
     stringify,
+    condition,
   } = options;
 
   const formContext = useForm();
@@ -46,14 +47,15 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
   const sendField = useCallback(async (valueToSend) => {
     const fieldToDispatch = {
       path,
+      stringify,
+      disableFormData,
+      ignoreWhileFlattening,
+      initialValue,
+      validate,
+      condition,
       value: valueToSend,
       valid: false,
       errorMessage: undefined,
-      stringify: false,
-      disableFormData: false,
-      ignoreWhileFlattening: false,
-      initialValue: undefined,
-      validate: undefined,
     };
 
     const validationResult = typeof validate === 'function' ? await validate(valueToSend) : true;
@@ -65,14 +67,8 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
       fieldToDispatch.valid = validationResult;
     }
 
-    fieldToDispatch.stringify = stringify;
-    fieldToDispatch.disableFormData = disableFormData;
-    fieldToDispatch.ignoreWhileFlattening = ignoreWhileFlattening;
-    fieldToDispatch.initialValue = initialValue;
-    fieldToDispatch.validate = validate;
-
     dispatchFields(fieldToDispatch);
-  }, [path, dispatchFields, validate, disableFormData, ignoreWhileFlattening, initialValue, stringify]);
+  }, [path, dispatchFields, validate, disableFormData, ignoreWhileFlattening, initialValue, stringify, condition]);
 
   // Method to return from `useFieldType`, used to
   // update internal field values from field component(s)
@@ -98,10 +94,10 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
   const valueToSend = enableDebouncedValue ? debouncedValue : internalValue;
 
   useEffect(() => {
-    if (valueToSend !== undefined || !fieldExists) {
+    if (field?.value !== valueToSend && valueToSend !== undefined) {
       sendField(valueToSend);
     }
-  }, [valueToSend, sendField, fieldExists]);
+  }, [valueToSend, sendField, field]);
 
   return {
     ...options,
