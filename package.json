@@ -108,7 +108,7 @@
     "http-status": "^1.4.2",
     "is-hotkey": "^0.2.0",
     "isomorphic-fetch": "^3.0.0",
-    "jest": "26.6.3",
+    "jest": "^26.6.3",
     "joi": "^17.3.0",
     "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",

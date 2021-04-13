@@ -126,12 +126,8 @@ export type PayloadConfig = {
     fallback?: boolean
   };
   graphQL?: {
-    mutations?: {
-      [key: string]: unknown
-    } | ((graphQL: typeof GraphQL, payload: InitializeGraphQL) => any),
-    queries?: {
-      [key: string]: unknown
-    } | ((graphQL: typeof GraphQL, payload: InitializeGraphQL) => any),
+    mutations?: ((graphQL: typeof GraphQL, payload: InitializeGraphQL) => any),
+    queries?: ((graphQL: typeof GraphQL, payload: InitializeGraphQL) => any),
     maxComplexity?: number;
     disablePlaygroundInProduction?: boolean;
     disable?: boolean;

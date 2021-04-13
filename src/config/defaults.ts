@@ -20,8 +20,6 @@ export const defaults = {
   },
   upload: {},
   graphQL: {
-    mutations: {},
-    queries: {},
     maxComplexity: 1000,
     disablePlaygroundInProduction: true,
   },
