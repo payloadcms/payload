@@ -1,9 +1,27 @@
+import { Document } from '../../types';
 import { Forbidden } from '../../errors';
+import { Payload } from '../..';
+import { Collection } from '../../collections/config/types';
 
-async function registerFirstUser(args) {
+export type Arguments = {
+  collection: Collection
+}
+
+export type Result = {
+  message: string,
+  user: Document
+}
+
+async function registerFirstUser(this: Payload, args: Arguments): Promise<Result> {
   const {
     collection: {
       Model,
+      config: {
+        slug,
+        auth: {
+          verify,
+        },
+      },
     },
   } = args;
 
@@ -20,6 +38,16 @@ async function registerFirstUser(args) {
     overrideAccess: true,
   });
 
+  // auto-verify (if applicable)
+  if (verify) {
+    await this.update({
+      id: result.id,
+      collection: slug,
+      data: {
+        _verified: true,
+      },
+    });
+  }
 
   // /////////////////////////////////////
   // Log in new user

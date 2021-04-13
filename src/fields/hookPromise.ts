@@ -27,13 +27,17 @@ const hookPromise = async ({
     await field.hooks[hook].reduce(async (priorHook, currentHook) => {
       await priorHook;
 
-      const hookedValue = await currentHook({
+      let hookedValue = await currentHook({
         value: data[field.name],
         originalDoc: fullOriginalDoc,
         data: fullData,
         operation,
         req,
-      }) || data[field.name];
+      });
+
+      if (typeof hookedValue === 'undefined') {
+        hookedValue = data[field.name];
+      }
 
       if (hookedValue !== undefined) {
         resultingData[field.name] = hookedValue;
