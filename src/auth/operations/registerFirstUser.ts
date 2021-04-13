@@ -40,7 +40,7 @@ async function registerFirstUser(this: Payload, args: Arguments): Promise<Result
 
   // auto-verify (if applicable)
   if (verify) {
-    await this.operations.collections.update({
+    await this.update({
       id: result.id,
       collection: slug,
       data: {
