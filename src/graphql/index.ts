@@ -1,4 +1,5 @@
-import GraphQL, { GraphQLObjectType, GraphQLSchema } from 'graphql';
+import * as GraphQL from 'graphql';
+import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { graphqlHTTP } from 'express-graphql';
 import queryComplexity, { simpleEstimator, fieldExtensionsEstimator } from 'graphql-query-complexity';
 import buildObjectType from './schema/buildObjectType';
