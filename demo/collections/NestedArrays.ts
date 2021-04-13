@@ -57,7 +57,6 @@ const NestedArray: PayloadCollectionConfig = {
                   name: 'grandchildIdentifier',
                   label: 'Grandchild Identifier',
                   type: 'text',
-                  required: true,
                 },
               ],
             },

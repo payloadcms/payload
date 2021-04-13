@@ -1,6 +1,6 @@
 async function findOne(options) {
   const {
-    global: globalSlug,
+    slug: globalSlug,
     depth,
     locale = this?.config?.localization?.defaultLocale,
     fallbackLocale = null,

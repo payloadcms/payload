@@ -1,7 +1,7 @@
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
-import { useSlate } from 'slate-react';
+import { ReactEditor, useSlate } from 'slate-react';
 import { useConfig } from '@payloadcms/config-provider';
 import ElementButton from '../../Button';
 import RelationshipIcon from '../../../../../../icons/Relationship';
@@ -36,15 +36,27 @@ const insertRelationship = (editor, { value, relationTo, depth }) => {
 
   const nodes = [relationship, { children: [{ text: '' }] }];
 
+  if (editor.blurSelection) {
+    Transforms.select(editor, editor.blurSelection);
+  }
+
   Transforms.insertNodes(editor, nodes);
+
+  const currentPath = editor.selection.anchor.path[0];
+  const newSelection = { anchor: { path: [currentPath + 1, 0], offset: 0 }, focus: { path: [currentPath + 1, 0], offset: 0 } };
+
+  Transforms.select(editor, newSelection);
+  ReactEditor.focus(editor);
 };
 
-const RelationshipButton = ({ path }) => {
+const RelationshipButton: React.FC<{path: string}> = ({ path }) => {
   const { open, closeAll } = useModal();
   const editor = useSlate();
   const { serverURL, routes: { api }, collections } = useConfig();
+  const [renderModal, setRenderModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [hasEnabledCollections] = useState(() => collections.find(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship));
+  const modalSlug = `${path}-add-relationship`;
 
   const handleAddRelationship = useCallback(async (_, { relationTo, value, depth }) => {
     setLoading(true);
@@ -54,9 +66,15 @@ const RelationshipButton = ({ path }) => {
 
     insertRelationship(editor, { value: json, depth, relationTo });
     closeAll();
+    setRenderModal(false);
+    setLoading(false);
   }, [editor, closeAll, api, serverURL]);
 
-  const modalSlug = `${path}-add-relationship`;
+  useEffect(() => {
+    if (renderModal) {
+      open(modalSlug);
+    }
+  }, [renderModal, open, modalSlug]);
 
   if (!hasEnabledCollections) return null;
 
@@ -65,36 +83,41 @@ const RelationshipButton = ({ path }) => {
       <ElementButton
         className={baseClass}
         format="relationship"
-        onClick={() => open(modalSlug)}
+        onClick={() => setRenderModal(true)}
       >
         <RelationshipIcon />
       </ElementButton>
-      <Modal
-        slug={modalSlug}
-        className={`${baseClass}__modal`}
-      >
-        <MinimalTemplate>
-          <header className={`${baseClass}__header`}>
-            <h3>Add Relationship</h3>
-            <Button
-              buttonStyle="none"
-              onClick={closeAll}
+      {renderModal && (
+        <Modal
+          slug={modalSlug}
+          className={`${baseClass}__modal`}
+        >
+          <MinimalTemplate>
+            <header className={`${baseClass}__header`}>
+              <h3>Add Relationship</h3>
+              <Button
+                buttonStyle="none"
+                onClick={() => {
+                  closeAll();
+                  setRenderModal(false);
+                }}
+              >
+                <X />
+              </Button>
+            </header>
+            <Form
+              onSubmit={handleAddRelationship}
+              initialData={initialFormData}
+              disabled={loading}
             >
-              <X />
-            </Button>
-          </header>
-          <Form
-            onSubmit={handleAddRelationship}
-            initialData={initialFormData}
-            disabled={loading}
-          >
-            <Fields />
-            <Submit>
-              Add relationship
-            </Submit>
-          </Form>
-        </MinimalTemplate>
-      </Modal>
+              <Fields />
+              <Submit>
+                Add relationship
+              </Submit>
+            </Form>
+          </MinimalTemplate>
+        </Modal>
+      )}
     </Fragment>
   );
 };

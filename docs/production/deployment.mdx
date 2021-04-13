@@ -108,7 +108,7 @@ But, if you do, and you still want to use an ephemeral filesystem provider, you 
 **To automatically send uploaded files to S3 or similar, you could:**
 
 - Write an asynchronous `beforeChange` hook for all Collections that support Uploads, which takes any uploaded `file` from the Express `req` and sends it to an S3 bucket
-- Write an `afterRead` hook for the `filename` field that automatically adjusts the `filename` stored to add its full S3 URL
+- Write an `afterRead` hook to save a `s3URL` field that automatically takes the `filename` stored and formats a full S3 URL
 - Write an `afterDelete` hook that automatically deletes files from the S3 bucket
 
 With the above configuration, deploying to Heroku or similar becomes no problem.

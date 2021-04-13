@@ -8,12 +8,28 @@ keywords: licensing, production, fields, config, configuration, documentation, C
 
 ## Try it for free
 
-Payload is free to use locally for development purposes for as long as you like. There is no obligation to purchase a subscription until it's time to deploy to production or you'd like to receive support from Payload developers. At that time, you can purchase a license and manage your subscriptions from your [Payload account](/account). For information on cost, see the [pricing](/pricing) page for details.
+Payload is free to use locally for development purposes for as long as you like. There is no obligation to sign up for either a free or paid account until it's time to deploy to production or you'd like to receive support from Payload developers. At that time, you can sign up for a license and manage your licenses from your [Payload account](/account). For information on plans and available packages, see the [pricing](/pricing) page.
 
-## Purchasing a license
+## Signing up for a license
 
-1. Complete the [checkout](/checkout) process. You'll be provided with a license key after successfully checking out.
-1. Add your license to a `.env` variable, and then add the `license` property to your `payload.init()` call.
+Payload offers three license options that are meant to give you the flexibility you need for your project:
+
+##### Personal
+
+Completely free forever. Only one email address can be used to access the admin panel, but all other features that Payload offers are available. You still need to [sign up for a license key](/checkout) to be given a Personal license, but no credit card is required!
+
+##### Team
+
+Economically priced for small teams of five admin users or less. The Team package also includes automatic support for as many staging or UAT-style domains that you need.
+
+##### Pro
+
+Unlimited admin users, staging domain support, and dev-to-dev support directly with the Payload team. With this package, you can use the Payload Admin panel for customer-facing account management and much more.
+
+**To sign up for a license,**
+
+1. Complete the [checkout](/checkout) process. Choose your plan and billing period, if applicable, and you'll be provided with a license key after successfully checking out.
+1. Within your project, add your license to a `.env` variable, and then add the `license` property to your `payload.init()` call.
 
 `server.js`:
 ```js
@@ -50,7 +66,7 @@ Payload licenses are specific to **one** domain, but you can use your Payload AP
   Even though your Payload license is tied to one domain, you can use your Admin panel for dev purposes however and wherever you'd like.
 </Banner>
 
-#### How does Payload know if the license is being used for dev or production purposes?
+#### Within the Team and Pro plans, how does Payload know if the license is being used for staging or production purposes?
 
 Our licensing service checks for any of the following criteria to determine if your domain is regarded as `production` or `development`:
 

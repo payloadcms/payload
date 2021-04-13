@@ -25,6 +25,7 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
         value,
         initialValue: value,
         valid: true,
+        validate: field.validate,
       };
 
       validationPromises.push(buildValidationPromise(fieldState, field));
@@ -35,87 +36,91 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
     const iterateFields = (fields: FieldSchema[], data: Data, path = '') => fields.reduce((state, field) => {
       let initialData = data;
 
-      if (field.name && field.defaultValue && typeof initialData?.[field.name] === 'undefined') {
-        initialData = { [field.name]: field.defaultValue };
-      }
-
-      if (field.name) {
-        if (field.type === 'relationship' && initialData?.[field.name] === null) {
-          initialData[field.name] = 'null';
+      if (!field?.admin?.disabled) {
+        if (field.name && field.defaultValue && typeof initialData?.[field.name] === 'undefined') {
+          initialData = { [field.name]: field.defaultValue };
         }
 
-        if (field.type === 'array' || field.type === 'blocks') {
-          if (Array.isArray(initialData?.[field.name])) {
-            const rows = initialData[field.name] as Data[];
-
-            if (field.type === 'array') {
-              return {
-                ...state,
-                ...rows.reduce((rowState, row, i) => ({
-                  ...rowState,
-                  ...iterateFields(field.fields, row, `${path}${field.name}.${i}.`),
-                }), {}),
-              };
-            }
-
-            if (field.type === 'blocks') {
-              return {
-                ...state,
-                ...rows.reduce((rowState, row, i) => {
-                  const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
-                  const rowPath = `${path}${field.name}.${i}.`;
-
-                  return {
-                    ...rowState,
-                    [`${rowPath}blockType`]: {
-                      value: row.blockType,
-                      initialValue: row.blockType,
-                      valid: true,
-                    },
-                    [`${rowPath}blockName`]: {
-                      value: row.blockName,
-                      initialValue: row.blockName,
-                      valid: true,
-                    },
-                    ...(block?.fields ? iterateFields(block.fields, row, rowPath) : {}),
-                  };
-                }, {}),
-              };
-            }
+        if (field.name) {
+          if (field.type === 'relationship' && initialData?.[field.name] === null) {
+            initialData[field.name] = 'null';
           }
 
-          return state;
-        }
+          if (field.type === 'array' || field.type === 'blocks') {
+            if (Array.isArray(initialData?.[field.name])) {
+              const rows = initialData[field.name] as Data[];
 
-        // Handle non-array-based nested fields (group, etc)
-        if (field.type === 'group') {
-          const subFieldData = initialData?.[field.name] as Data;
+              if (field.type === 'array') {
+                return {
+                  ...state,
+                  ...rows.reduce((rowState, row, i) => ({
+                    ...rowState,
+                    ...iterateFields(field.fields, row, `${path}${field.name}.${i}.`),
+                  }), {}),
+                };
+              }
+
+              if (field.type === 'blocks') {
+                return {
+                  ...state,
+                  ...rows.reduce((rowState, row, i) => {
+                    const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
+                    const rowPath = `${path}${field.name}.${i}.`;
+
+                    return {
+                      ...rowState,
+                      [`${rowPath}blockType`]: {
+                        value: row.blockType,
+                        initialValue: row.blockType,
+                        valid: true,
+                      },
+                      [`${rowPath}blockName`]: {
+                        value: row.blockName,
+                        initialValue: row.blockName,
+                        valid: true,
+                      },
+                      ...(block?.fields ? iterateFields(block.fields, row, rowPath) : {}),
+                    };
+                  }, {}),
+                };
+              }
+            }
+
+            return state;
+          }
+
+          // Handle non-array-based nested fields (group, etc)
+          if (field.type === 'group') {
+            const subFieldData = initialData?.[field.name] as Data;
+
+            return {
+              ...state,
+              ...iterateFields(field.fields, subFieldData, `${path}${field.name}.`),
+            };
+          }
 
           return {
             ...state,
-            ...iterateFields(field.fields, subFieldData, `${path}${field.name}.`),
+            [`${path}${field.name}`]: structureFieldState(field, data),
           };
         }
 
+        // Handle field types that do not use names (row, etc)
+        if (field.type === 'row') {
+          return {
+            ...state,
+            ...iterateFields(field.fields, data, path),
+          };
+        }
+
+        // Handle normal fields
         return {
           ...state,
           [`${path}${field.name}`]: structureFieldState(field, data),
         };
       }
 
-      // Handle field types that do not use names (row, etc)
-      if (field.type === 'row') {
-        return {
-          ...state,
-          ...iterateFields(field.fields, data, path),
-        };
-      }
-
-      // Handle normal fields
-      return {
-        ...state,
-        [`${path}${field.name}`]: structureFieldState(field, data),
-      };
+      return state;
     }, {});
 
     const resultingState = iterateFields(fieldSchema, fullData);

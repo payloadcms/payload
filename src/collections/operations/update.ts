@@ -1,11 +1,9 @@
-import deepmerge from 'deepmerge';
 import httpStatus from 'http-status';
 import path from 'path';
 import { UploadedFile } from 'express-fileupload';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 
-import overwriteMerge from '../../utilities/overwriteMerge';
 import removeInternalFields from '../../utilities/removeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { NotFound, Forbidden, APIError, FileUploadError } from '../../errors';
@@ -120,72 +118,6 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   let { data } = args;
 
   // /////////////////////////////////////
-  // beforeValidate - Fields
-  // /////////////////////////////////////
-
-  data = await performFieldOperations(collectionConfig, {
-    data,
-    req,
-    id,
-    originalDoc,
-    hook: 'beforeValidate',
-    operation: 'update',
-    overrideAccess,
-  });
-
-  // /////////////////////////////////////
-  // beforeValidate - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    data = (await hook({
-      data,
-      req,
-      operation: 'update',
-      originalDoc,
-    })) || data;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // beforeChange - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    data = (await hook({
-      data,
-      req,
-      originalDoc,
-      operation: 'update',
-    })) || data;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // Merge updates into existing data
-  // /////////////////////////////////////
-
-  data = deepmerge(originalDoc, data, { arrayMerge: overwriteMerge });
-
-  // /////////////////////////////////////
-  // beforeChange - Fields
-  // /////////////////////////////////////
-
-  let result = await performFieldOperations(collectionConfig, {
-    data,
-    req,
-    id,
-    originalDoc,
-    hook: 'beforeChange',
-    operation: 'update',
-    overrideAccess,
-    unflattenLocales: true,
-    docWithLocales,
-  });
-
-  // /////////////////////////////////////
   // Upload and resize potential files
   // /////////////////////////////////////
 
@@ -225,18 +157,78 @@ async function update(incomingArgs: Arguments): Promise<Document> {
         throw new FileUploadError();
       }
 
-      result = {
-        ...result,
+      data = {
+        ...data,
         ...fileData,
       };
-    } else if (result.file === null) {
-      result = {
-        ...result,
+    } else if (data.file === null) {
+      data = {
+        ...data,
         filename: null,
         sizes: null,
       };
     }
   }
+
+  // /////////////////////////////////////
+  // beforeValidate - Fields
+  // /////////////////////////////////////
+
+  data = await performFieldOperations(collectionConfig, {
+    data,
+    req,
+    id,
+    originalDoc,
+    hook: 'beforeValidate',
+    operation: 'update',
+    overrideAccess,
+  });
+
+  // // /////////////////////////////////////
+  // // beforeValidate - Collection
+  // // /////////////////////////////////////
+
+  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    data = (await hook({
+      data,
+      req,
+      operation: 'update',
+      originalDoc,
+    })) || data;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // beforeChange - Collection
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    data = (await hook({
+      data,
+      req,
+      originalDoc,
+      operation: 'update',
+    })) || data;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // beforeChange - Fields
+  // /////////////////////////////////////
+
+  let result = await performFieldOperations(collectionConfig, {
+    data,
+    req,
+    id,
+    originalDoc,
+    hook: 'beforeChange',
+    operation: 'update',
+    overrideAccess,
+    unflattenLocales: true,
+    docWithLocales,
+  });
 
   // /////////////////////////////////////
   // Handle potential password update

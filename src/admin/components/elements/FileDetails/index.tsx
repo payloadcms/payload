@@ -13,16 +13,25 @@ const baseClass = 'file-details';
 
 const FileDetails: React.FC<Props> = (props) => {
   const {
-    filename,
-    mimeType,
-    filesize,
-    staticURL,
-    adminThumbnail,
-    sizes,
+    doc,
+    collection,
     handleRemove,
+  } = props;
+
+  const {
+    upload: {
+      staticURL,
+    },
+  } = collection;
+
+  const {
+    filename,
+    filesize,
     width,
     height,
-  } = props;
+    mimeType,
+    sizes,
+  } = doc;
 
   const [moreInfoOpen, setMoreInfoOpen] = useState(false);
 
@@ -31,18 +40,18 @@ const FileDetails: React.FC<Props> = (props) => {
   return (
     <div className={baseClass}>
       <header>
-        <Thumbnail {...{
-          mimeType, adminThumbnail, sizes, staticURL, filename,
-        }}
+        <Thumbnail
+          doc={doc}
+          collection={collection}
         />
         <div className={`${baseClass}__main-detail`}>
           <Meta
             staticURL={staticURL}
-            filename={filename}
-            filesize={filesize}
-            width={width}
-            height={height}
-            mimeType={mimeType}
+            filename={filename as string}
+            filesize={filesize as number}
+            width={width as number}
+            height={height as number}
+            mimeType={mimeType as string}
           />
           {hasSizes && (
             <Button

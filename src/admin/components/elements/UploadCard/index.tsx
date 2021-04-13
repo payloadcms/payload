@@ -10,15 +10,8 @@ const baseClass = 'upload-card';
 const UploadCard: React.FC<Props> = (props) => {
   const {
     onClick,
-    mimeType,
-    sizes,
-    filename,
-    collection: {
-      upload: {
-        adminThumbnail,
-        staticURL,
-      } = {},
-    } = {},
+    doc,
+    collection,
   } = props;
 
   const classes = [
@@ -33,12 +26,11 @@ const UploadCard: React.FC<Props> = (props) => {
     >
       <Thumbnail
         size="expand"
-        {...{
-          mimeType, adminThumbnail, sizes, staticURL, filename,
-        }}
+        doc={doc}
+        collection={collection}
       />
       <div className={`${baseClass}__filename`}>
-        {filename}
+        {doc?.filename}
       </div>
     </div>
   );

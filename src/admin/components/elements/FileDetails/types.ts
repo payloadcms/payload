@@ -1,13 +1,7 @@
-import { FileSizes } from '../../../../uploads/types';
+import { CollectionConfig } from '../../../../collections/config/types';
 
 export type Props = {
-  filename: string,
-  mimeType: string,
-  filesize: number,
-  staticURL: string,
-  width?: number,
-  height?: number,
-  sizes?: FileSizes,
-  adminThumbnail?: string,
+  collection: CollectionConfig
+  doc: Record<string, unknown>
   handleRemove?: () => void,
 }

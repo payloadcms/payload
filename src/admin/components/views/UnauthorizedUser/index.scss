@@ -1,0 +1,15 @@
+@import '../../../scss/styles.scss';
+
+.unauthorized-user {
+  &__plan-name {
+    text-transform: capitalize;
+  }
+
+  &__button-group {
+    display: flex;
+
+    > *:first-child {
+      margin-right: base(.5);
+    }
+  }
+}

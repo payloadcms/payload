@@ -98,7 +98,7 @@ fetch('https://localhost:3000/api/pages?locale=es&fallback-locale=none');
 
 In the GraphQL API, you can specify `locale` and `fallbackLocale` args to all relevant queries and mutations.
 
-The `locale` arg will only accept valid locales, but locales will be formatted automatically as valid GraphQL enum values (dashes or special characters will be converted to underscores, spaces will be removed, etc.). If you are curious to see how locales are auto-formatted, you can use the [GraphQL playground](/docs/graphql/playground).
+The `locale` arg will only accept valid locales, but locales will be formatted automatically as valid GraphQL enum values (dashes or special characters will be converted to underscores, spaces will be removed, etc.). If you are curious to see how locales are auto-formatted, you can use the [GraphQL playground](/docs/graphql/overview#graphql-playground).
 
 The `fallbackLocale` arg will accept valid locales as well as `none` to disable falling back.
 

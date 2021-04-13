@@ -2,11 +2,11 @@ import { Field, FieldHook } from '../config/types';
 
 const autoRemoveVerificationToken: FieldHook = ({ originalDoc, data, value }) => {
   // If a user manually sets `_verified` to true,
-  // and it was `false`, set _verificationToken to `undefined`.
+  // and it was `false`, set _verificationToken to `null`.
   // This is useful because the admin panel
   // allows users to set `_verified` to true manually
   if (data?._verified === true && originalDoc?._verified === false) {
-    return undefined;
+    return null;
   }
 
   return value;

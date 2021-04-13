@@ -106,15 +106,39 @@ const traverseFields = (args: Arguments): void => {
 
     if (field.localized && unflattenLocales) {
       unflattenLocaleActions.push(() => {
-        data[field.name] = payload.config.localization.locales.reduce((locales, localeID) => ({
-          ...locales,
-          [localeID]: localeID === locale ? data[field.name] : docWithLocales?.[field.name]?.[localeID],
-        }), {});
+        const localeData = payload.config.localization.locales.reduce((locales, localeID) => {
+          let valueToSet;
+
+          if (localeID === locale) {
+            if (data[field.name]) {
+              valueToSet = data[field.name];
+            } else if (docWithLocales?.[field.name]?.[localeID]) {
+              valueToSet = docWithLocales?.[field.name]?.[localeID];
+            }
+          } else {
+            valueToSet = docWithLocales?.[field.name]?.[localeID];
+          }
+
+          if (valueToSet) {
+            return {
+              ...locales,
+              [localeID]: valueToSet,
+            };
+          }
+
+          return locales;
+        }, {});
+
+        // If there are locales with data, set the data
+        if (Object.keys(localeData).length > 0) {
+          data[field.name] = localeData;
+        }
       });
     }
 
     accessPromises.push(accessPromise({
       data,
+      fullData,
       originalDoc,
       field,
       operation,
@@ -146,16 +170,20 @@ const traverseFields = (args: Arguments): void => {
         });
       } else if (fieldIsArrayType(field)) {
         if (Array.isArray(data[field.name])) {
-          (data[field.name] as Record<string, unknown>[]).forEach((rowData, i) => {
+          for (let i = 0; i < data[field.name].length; i += 1) {
+            if (typeof (data[field.name][i]) === 'undefined') {
+              data[field.name][i] = {};
+            }
+
             traverseFields({
               ...args,
               fields: field.fields,
-              data: rowData,
+              data: data[field.name][i] || {},
               originalDoc: originalDoc?.[field.name]?.[i],
               docWithLocales: docWithLocales?.[field.name]?.[i],
               path: `${path}${field.name}.${i}.`,
             });
-          });
+          }
         }
       } else {
         traverseFields({
@@ -178,7 +206,7 @@ const traverseFields = (args: Arguments): void => {
             traverseFields({
               ...args,
               fields: block.fields,
-              data: rowData,
+              data: rowData || {},
               originalDoc: originalDoc?.[field.name]?.[i],
               docWithLocales: docWithLocales?.[field.name]?.[i],
               path: `${path}${field.name}.${i}.`,

@@ -1074,47 +1074,32 @@
   resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.2.5.tgz#8eed982e2ee6f7f4e44c253e12962980791efd46"
   integrity sha512-6U71C2Wp7r5XtFtQzYrW5iKFT67OixrSxjI4MptCHzdSVlgabczzqLe0ZSgnub/5Kp4hSbpDB1tMytZY9pwxxA==
 
-"@faceless-ui/collapsibles@^0.1.0":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@faceless-ui/collapsibles/-/collapsibles-0.1.3.tgz#2fa35d49795628100e2f047608e601d8bee38e32"
-  integrity sha512-Z7kuT7J7oYe4Z5ebIrFY0CYUtY3+7UomVC/AOuHgSRnB3lAZ6JrWaPHxfaUVEXD8ttFlajl4EgrlrZdub0O92g==
+"@faceless-ui/collapsibles@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@faceless-ui/collapsibles/-/collapsibles-1.0.0.tgz#af6b21586f1489cbe720753a99364107bd5f2fcf"
+  integrity sha512-u81ZMHHo9Oc9NdZB6uwsYD+nwKmf213M575npeCsmFOEz828FxfP/pKx4g8gzO/QUi2IXApn1aCdeDyP1eMQfQ==
   dependencies:
-    "@faceless-ui/html-element" "^1.0.3"
-    prop-types "^15.7.2"
     react-animate-height "^2.0.16"
     react-transition-group "^4.3.0"
 
-"@faceless-ui/html-element@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@faceless-ui/html-element/-/html-element-1.0.3.tgz#c8c4281d2e75fe775dfab7e3b108e7e5b431196e"
-  integrity sha512-mm65eZxbJ/ZN1Pu4m44lgDdmGipTAI6fRq588+BrtB63CuzVbdJQMeUW+VKtL+4z0Ub0mbHVYsdiUlztGETQ+w==
+"@faceless-ui/modal@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@faceless-ui/modal/-/modal-1.1.2.tgz#2e1fb55014e50524af9d859f242f2dc75fd3757c"
+  integrity sha512-u6yKc7I618U5lL3eVdMlRIHrriofmRXx8H1RL/KUEh4C9ASFPqQDn3GPQQ91sU5ZFYehOEQ743pHlAM53V9R/g==
   dependencies:
-    prop-types "^15.7.2"
-
-"@faceless-ui/modal@^1.0.4":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@faceless-ui/modal/-/modal-1.1.0.tgz#dcc713f7f779880344a46e3d5f033abb6dd5766f"
-  integrity sha512-VLId+Uj0SxoymPIlkj/FQkLCb/CeOTmmrIY+kdA5+rKgqVVqCV03flEPiVqZBPNkMmJpYOICLx5FJ7k5vqFm2w==
-  dependencies:
-    "@faceless-ui/html-element" "^1.0.3"
-    body-scroll-lock "^3.0.1"
-    prop-types "^15.7.2"
+    body-scroll-lock "^3.1.5"
     qs "^6.9.1"
     react-transition-group "^4.3.0"
 
-"@faceless-ui/scroll-info@^1.1.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@faceless-ui/scroll-info/-/scroll-info-1.2.1.tgz#3b28fad3ae70c6b54d226b0a60988bd08849b9b7"
-  integrity sha512-9lHOIcT1mWukecZ7jl7dVvwGx+3YxqvoipcLp7qJPHf4For3N/Ysn8ZNFwQGLT8q9wwlNxzuFUfHgA8jhMWpKQ==
-  dependencies:
-    prop-types "^15.7.2"
+"@faceless-ui/scroll-info@^1.2.3":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@faceless-ui/scroll-info/-/scroll-info-1.2.3.tgz#35765c5d80db4870524d70bdf77878f5c7f6f48d"
+  integrity sha512-iaoXs63z1l+0Xjs8CsAa05An7VjEa7KmQeoQwusILtcCbolV0ZtHIdIElH5IbANPXFvcyakVWeUMF0hHmn6BQA==
 
-"@faceless-ui/window-info@^1.2.2":
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/@faceless-ui/window-info/-/window-info-1.2.2.tgz#3308de7087a8bb134dc171c12c84479eb13cfb5e"
-  integrity sha512-N/zd4PzC7iLbS1HMYn1vhVDgFMBmyOVX8XIlx3oJvBTCpOVJnM1YbNTZzIXh9MlGsmz/lSjNqC7rGXCgxcEVCA==
-  dependencies:
-    prop-types "^15.7.2"
+"@faceless-ui/window-info@^1.2.4":
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/@faceless-ui/window-info/-/window-info-1.2.4.tgz#0b54298307b1975192f4045e92c7bd0709765400"
+  integrity sha512-dIzc/ZzkD+Ld6u1yeG42GOyPmc9KKanPJApICb4Z4APvqOXac/a72KiIhqMylPwz5STu36rtB0zXa4rk+bRPXw==
 
 "@fluentui/dom-utilities@^1.1.1":
   version "1.1.1"
@@ -1503,10 +1488,10 @@
     "@octokit/openapi-types" "^3.2.0"
     "@types/node" ">= 8"
 
-"@payloadcms/config-provider@0.0.19":
-  version "0.0.19"
-  resolved "https://registry.yarnpkg.com/@payloadcms/config-provider/-/config-provider-0.0.19.tgz#305b34ccebbf7f4ea996c69522a1e28b9d9c5f28"
-  integrity sha512-SSPlz6eUe8ashJNiG8MCJDlXw5HWSyKk9h7TORZ1VDCw3IzgCaUi/HrJo2xxQJmZxP+xenTfjyJD8iuWg7CDdg==
+"@payloadcms/config-provider@^0.0.22":
+  version "0.0.22"
+  resolved "https://registry.npmjs.org/@payloadcms/config-provider/-/config-provider-0.0.22.tgz#40a31ba3e11e918d7146344ead6f05cf9bcc8f35"
+  integrity sha512-bTLy90BdQtywlxyrxoFztgmnWJEyNJxYG3KvMee/kztnv1KepP0KZnUD+Ead3yoWaeUbBEcVKE5itW16dGzLWw==
   dependencies:
     jwt-decode "^3.1.2"
 
@@ -3451,7 +3436,7 @@ body-parser@1.19.0, body-parser@^1.19.0:
     raw-body "2.4.0"
     type-is "~1.6.17"
 
-body-scroll-lock@^3.0.1:
+body-scroll-lock@^3.1.5:
   version "3.1.5"
   resolved "https://registry.yarnpkg.com/body-scroll-lock/-/body-scroll-lock-3.1.5.tgz#c1392d9217ed2c3e237fee1e910f6cdd80b7aaec"
   integrity sha512-Yi1Xaml0EvNA0OYWxXiYNqY24AfWkbA6w5vxE7GWxtKfzIbZM+Qw+aSmkgsbWzbHiy/RCSkUZBplVxTA+E4jJg==

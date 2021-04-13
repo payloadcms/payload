@@ -43,9 +43,11 @@ Returns a boolean which allows or denies the ability to set a field's value when
 
 **Available argument properties:**
 
-| Option    | Description |
-| --------- | ----------- |
-| **`req`** | The Express `request` object containing the currently authenticated `user` |
+| Option            | Description |
+| ----------------- | ----------- |
+| **`req`**         | The Express `request` object containing the currently authenticated `user` |
+| **`data`**        | The full data passed to create the document. |
+| **`siblingData`** | Immediately adjacent field data passed to create the document. |
 
 ### Read
 
@@ -53,10 +55,12 @@ Returns a boolean which allows or denies the ability to read a field's value. If
 
 **Available argument properties:**
 
-| Option    | Description |
-| --------- | ----------- |
-| **`req`** | The Express `request` object containing the currently authenticated `user` |
-| **`id`**  | `id` of the document being read |
+| Option            | Description |
+| ----------------- | ----------- |
+| **`req`**         | The Express `request` object containing the currently authenticated `user` |
+| **`id`**          | `id` of the document being read |
+| **`data`**        | The full data of the document being read. |
+| **`siblingData`** | Immediately adjacent field data of the document being read. |
 
 ### Update
 
@@ -64,7 +68,9 @@ Returns a boolean which allows or denies the ability to update a field's value. 
 
 **Available argument properties:**
 
-| Option    | Description |
-| --------- | ----------- |
-| **`req`** | The Express `request` object containing the currently authenticated `user` |
-| **`id`**  | `id` of the document being updated |
+| Option            | Description |
+| ----------------- | ----------- |
+| **`req`**         | The Express `request` object containing the currently authenticated `user` |
+| **`id`**          | `id` of the document being updated |
+| **`data`**        | The full data passed to update the document. |
+| **`siblingData`** | Immediately adjacent field data passed to update the document with. |

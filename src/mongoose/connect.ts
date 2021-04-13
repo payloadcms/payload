@@ -12,7 +12,7 @@ const connectMongoose = async (url: string, options: ConnectionOptions): Promise
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
-    autoIndex: false,
+    autoIndex: true,
     useFindAndModify: false,
   };
 

@@ -1,9 +1,20 @@
 {
   "name": "payload",
-  "version": "0.3.0",
+  "version": "0.5.5",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "SEE LICENSE IN license.md",
-  "author": "Payload CMS LLC",
+  "author": {
+    "email": "info@payloadcms.com",
+    "name": "Payload CMS",
+    "url": "https://payloadcms.com"
+  },
+  "maintainers": [
+    {
+      "name": "Payload CMS",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "sideEffects": false,
@@ -61,11 +72,11 @@
     "@babel/preset-typescript": "^7.12.1",
     "@babel/register": "^7.11.5",
     "@date-io/date-fns": "^2.10.6",
-    "@faceless-ui/collapsibles": "^0.1.0",
-    "@faceless-ui/modal": "^1.0.4",
-    "@faceless-ui/scroll-info": "^1.1.1",
-    "@faceless-ui/window-info": "^1.2.2",
-    "@payloadcms/config-provider": "0.0.19",
+    "@faceless-ui/collapsibles": "^1.0.0",
+    "@faceless-ui/modal": "^1.1.2",
+    "@faceless-ui/scroll-info": "^1.2.3",
+    "@faceless-ui/window-info": "^1.2.4",
+    "@payloadcms/config-provider": "^0.0.22",
     "@udecode/slate-plugins": "^0.71.9",
     "assert": "^2.0.0",
     "async-some": "^1.0.2",

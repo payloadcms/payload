@@ -24,7 +24,7 @@ const validate = (value) => {
   return true;
 };
 
-const File: React.FC<Props> = (props) => {
+const Upload: React.FC<Props> = (props) => {
   const inputRef = useRef(null);
   const dropRef = useRef(null);
   const [fileList, setFileList] = useState(undefined);
@@ -35,8 +35,7 @@ const File: React.FC<Props> = (props) => {
 
   const {
     data = {} as Data,
-    adminThumbnail,
-    staticURL,
+    collection,
   } = props;
 
   const { filename } = data;
@@ -140,9 +139,8 @@ const File: React.FC<Props> = (props) => {
       />
       {(filename && !replacingFile) && (
         <FileDetails
-          {...data}
-          staticURL={staticURL}
-          adminThumbnail={adminThumbnail}
+          doc={data}
+          collection={collection}
           handleRemove={() => {
             setReplacingFile(true);
             setFileList(null);
@@ -199,4 +197,4 @@ const File: React.FC<Props> = (props) => {
   );
 };
 
-export default File;
+export default Upload;

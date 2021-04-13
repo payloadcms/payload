@@ -33,6 +33,7 @@ const Unlicensed: React.FC = () => (
     <Button
       el="anchor"
       url="https://payloadcms.com/login"
+      newTab
     >
       Review your licenses
     </Button>

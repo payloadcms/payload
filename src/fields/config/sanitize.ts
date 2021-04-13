@@ -20,8 +20,11 @@ const sanitizeFields = (fields, validRelationships) => {
 
     if (typeof field.validate === 'undefined') {
       const defaultValidate = validations[field.type];
-      const noValidate = () => true;
-      field.validate = defaultValidate || noValidate;
+      if (defaultValidate) {
+        field.validate = (val) => defaultValidate(val, field);
+      } else {
+        field.validate = () => true;
+      }
     }
 
     if (!field.hooks) field.hooks = {};

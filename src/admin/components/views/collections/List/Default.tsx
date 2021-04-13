@@ -117,9 +117,9 @@ const DefaultList: React.FC<Props> = (props) => {
           />
           {data?.totalDocs > 0 && (
             <div className={`${baseClass}__page-info`}>
-              {data.page}
+              {(data.page * data.limit) - (data.limit - 1)}
               -
-              {data.totalPages > 1 ? data.limit : data.totalDocs}
+              {data.totalPages > 1 && data.totalPages !== data.page ? (data.limit * data.page) : data.totalDocs}
               {' '}
               of
               {' '}

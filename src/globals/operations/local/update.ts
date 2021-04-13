@@ -1,6 +1,6 @@
 async function update(options) {
   const {
-    global: globalSlug,
+    slug: globalSlug,
     depth,
     locale = this?.config?.localization?.defaultLocale,
     fallbackLocale = null,

@@ -48,7 +48,7 @@ All field-level hooks are formatted to accept the same arguments, although some 
 
 <Banner type="success">
   <strong>Tip:</strong><br />
-  It's a good idea to conditionally scope your logic based on which operation is executing.
+  It's a good idea to conditionally scope your logic based on which operation is executing. For example, if you are writing a <code>beforeChange</code> hook, you may want to perform different logic based on if the current <code>operation</code> is <code>create</code> or <code>update</code>.
 </Banner>
 
 #### Arguments
@@ -57,15 +57,15 @@ Field Hooks receive one `args` argument that contains the following properties:
 
 | Option            | Description  |
 | ----------------- | -------------|
-| **`value`**       | The value of the field, before any updating. Will return `undefined` within `create` operations. |
-| **`data`**        | The data passed to update the field with in `create` and `update` operations. |
-| **`originalDoc`** | The full original document in `update` or `read` operations. |
-| **`operation`**   | A string relating to which operation the field type is currently executing within. |
+| **`value`**       | The value of the field. |
+| **`data`**        | The data passed to update the field with in `create` and `update` operations, and the full document itself in the `afterRead` hook. |
+| **`originalDoc`** | The full original document in `update` operations. |
+| **`operation`**   | A string relating to which operation the field type is currently executing within. Useful within `beforeValidate`, `beforeChange`, and `afterChange` hooks to differentiate between `create` and `update` operations. |
 | **`req`**         | The Express `request` object. It is mocked for Local API operations. |
 
 #### Return value
 
-Field hooks **must** return the intended value for the field to be used in the operation. You can modify the return value of the field before the operation continues, or simply send the `value` that you receive through the hook's argument. If you return `undefined` within a `beforeChange` or `beforeValidate` hook, the property will be unset from its document.
+All field hooks can optionally modify the return value of the field before the operation continues. Field Hooks may optionally return the value that should be used within the field.
 
 <Banner type="warning">
   <strong>Important</strong><br/>

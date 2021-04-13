@@ -79,7 +79,10 @@ const collectionSchema = joi.object().keys({
     joi.object({
       staticURL: joi.string(),
       staticDir: joi.string(),
-      adminThumbnail: joi.string(),
+      adminThumbnail: joi.alternatives().try(
+        joi.string(),
+        joi.func(),
+      ),
       imageSizes: joi.array().items(
         joi.object().keys({
           name: joi.string(),

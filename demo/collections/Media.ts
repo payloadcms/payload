@@ -15,7 +15,7 @@ const Media: PayloadCollectionConfig = {
   upload: {
     staticURL: '/media',
     staticDir: './media',
-    adminThumbnail: 'mobile',
+    adminThumbnail: ({ doc }) => `/media/${doc.filename}`,
     imageSizes: [
       {
         name: 'tablet',

@@ -118,13 +118,23 @@ const RichText: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   const editor = useMemo(() => {
-    let CreatedEditor = withHTML(withHistory(withReact(createEditor())));
+    let CreatedEditor = withHTML(
+      withHistory(
+        withReact(
+          createEditor(),
+        ),
+      ),
+    );
 
     CreatedEditor = enablePlugins(CreatedEditor, elements);
     CreatedEditor = enablePlugins(CreatedEditor, leaves);
 
     return CreatedEditor;
   }, [elements, leaves]);
+
+  const onBlur = useCallback(() => {
+    editor.blurSelection = editor.selection;
+  }, [editor]);
 
   useEffect(() => {
     if (!loaded) {
@@ -222,7 +232,13 @@ const RichText: React.FC<Props> = (props) => {
               placeholder={placeholder}
               spellCheck
               readOnly={readOnly}
+              onBlur={onBlur}
               onKeyDown={(event) => {
+                if (event.key === 'Enter' && event.shiftKey) {
+                  event.preventDefault();
+                  editor.insertText('\n');
+                }
+
                 Object.keys(hotkeys).forEach((hotkey) => {
                   if (isHotkey(hotkey, event as any)) {
                     event.preventDefault();
