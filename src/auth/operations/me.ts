@@ -11,17 +11,20 @@ export type Result = {
 }
 
 export type Arguments = {
-  req: PayloadRequest
+  req: PayloadRequest,
+  collectionSlug: string
 }
 
-async function me({ req }: Arguments): Promise<Result> {
+async function me({
+  req,
+  collectionSlug,
+}: Arguments): Promise<Result> {
   const extractJWT = getExtractJWT(this.config);
 
   if (req.user) {
-    const requestedSlug = req.route.path.split('/').filter((r) => r !== '')[0];
     const user = { ...req.user };
 
-    if (user.collection !== requestedSlug) {
+    if (user.collection !== collectionSlug) {
       return {
         user: null,
       };
