@@ -198,7 +198,7 @@ function registerCollections(): void {
             },
           },
         }),
-        resolve: me,
+        resolve: me(slug),
       };
 
       if (collection.config.auth.maxLoginAttempts > 0) {
