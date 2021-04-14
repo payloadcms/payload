@@ -205,7 +205,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
         const types = relationTo.map((relation) => this.collections[relation].graphQL.type);
 
         let resolveType = function resolveType(data) {
-          return this.collections[data.collection].graphQL.type;
+          return this.collections[data.collection].graphQL.type.name;
         };
 
         resolveType = resolveType.bind(this);
@@ -428,7 +428,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
       const type = new GraphQLList(new GraphQLUnionType({
         name: combineParentName(parentName, field.label),
         types: blockTypes,
-        resolveType: (data) => this.types.blockTypes[data.blockType],
+        resolveType: (data) => this.types.blockTypes[data.blockType].name,
       }));
 
       return { type };
