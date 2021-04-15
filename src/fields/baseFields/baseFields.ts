@@ -7,6 +7,7 @@ export default [
     label: 'Email',
     type: 'email',
     validate: email,
+    unique: true,
     admin: {
       components: {
         Field: () => null,
