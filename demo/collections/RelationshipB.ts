@@ -26,6 +26,13 @@ const RelationshipB: PayloadCollectionConfig = {
       localized: true,
       hasMany: false,
     },
+    {
+      name: 'localizedPosts',
+      label: 'Localized Posts',
+      type: 'relationship',
+      hasMany: true,
+      relationTo: 'localized-posts',
+    },
   ],
   timestamps: true,
 };
