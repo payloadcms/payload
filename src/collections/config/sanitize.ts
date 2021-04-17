@@ -62,7 +62,7 @@ const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: 
   const sanitized: PayloadCollectionConfig = merge(defaults, collection);
 
   sanitized.slug = toKebabCase(sanitized.slug);
-  sanitized.labels = !sanitized.labels ? formatLabels(sanitized.slug) : sanitized.labels;
+  sanitized.labels = sanitized.labels || formatLabels(sanitized.slug);
 
   if (sanitized.upload) {
     if (sanitized.upload === true) sanitized.upload = {};

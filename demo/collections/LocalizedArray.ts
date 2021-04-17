@@ -24,7 +24,7 @@ const LocalizedArrays: PayloadCollectionConfig = {
   fields: [
     {
       type: 'array',
-      label: 'Array',
+      label: false,
       name: 'array',
       localized: true,
       required: true,

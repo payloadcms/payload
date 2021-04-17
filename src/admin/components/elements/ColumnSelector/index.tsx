@@ -69,7 +69,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
             pillStyle={isEnabled ? 'dark' : undefined}
             className={`${baseClass}__active-column`}
           >
-            {field.label}
+            {field.label || field.name}
           </Pill>
         );
       })}

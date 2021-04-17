@@ -1,8 +1,14 @@
 import React from 'react';
+import { ArrayField } from '../../../../../../../../fields/config/types';
 
-const ArrayCell = ({ data, field }) => {
+type Props = {
+  data: Record<string, unknown>
+  field: ArrayField
+}
+
+const ArrayCell: React.FC<Props> = ({ data, field }) => {
   const arrayFields = data ?? [];
-  const label = `${arrayFields.length} ${field.label} rows`;
+  const label = `${arrayFields.length} ${field?.labels?.plural || 'Rows'}`;
 
   return (
     <span>{label}</span>

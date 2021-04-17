@@ -24,6 +24,10 @@ const sanitizeFields = (fields, validRelationships: string[]) => {
       });
     }
 
+    if (field.type === 'blocks') {
+      field.labels = field.labels || formatLabels(field.name);
+    }
+
     if (typeof field.validate === 'undefined') {
       const defaultValidate = validations[field.type];
       if (defaultValidate) {
