@@ -15,6 +15,7 @@ import withNullableType from './withNullableType';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import { ArrayField, Field, FieldWithSubFields, GroupField, RelationshipField, RowField, SelectField } from '../../fields/config/types';
+import { toWords } from '../../utilities/formatLabels';
 
 function buildMutationInputType(name: string, fields: Field[], parentName: string, forceNullable = false): GraphQLInputObjectType {
   const fieldToSchemaMap = {
@@ -68,7 +69,7 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
       let type: PayloadGraphQLRelationshipType = GraphQLString;
 
       if (Array.isArray(relationTo)) {
-        const fullName = `${combineParentName(parentName, field.label)}RelationshipInput`;
+        const fullName = `${combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label)}RelationshipInput`;
         type = new GraphQLInputObjectType({
           name: fullName,
           fields: {
@@ -91,14 +92,14 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
       return { type: field.hasMany ? new GraphQLList(type) : type };
     },
     array: (field: ArrayField) => {
-      const fullName = combineParentName(parentName, field.label);
+      const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
       let type: GraphQLType | GraphQLList<GraphQLType> = buildMutationInputType(fullName, field.fields, fullName);
       type = new GraphQLList(withNullableType(field, type, forceNullable));
       return { type };
     },
     group: (field: GroupField) => {
       const requiresAtLeastOneField = field.fields.some((subField) => (subField.required && !subField.localized));
-      const fullName = combineParentName(parentName, field.label);
+      const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
       let type: GraphQLType = buildMutationInputType(fullName, field.fields, fullName);
       if (requiresAtLeastOneField) type = new GraphQLNonNull(type);
       return { type };

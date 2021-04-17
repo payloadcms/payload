@@ -36,7 +36,7 @@ const DefaultCell: React.FC<Props> = (props) => {
   if (!CellComponent) {
     return (
       <WrapElement {...wrapElementProps}>
-        {(cellData === '' || typeof cellData === 'undefined') && `<No ${field.label ?? 'data'}>`}
+        {(cellData === '' || typeof cellData === 'undefined') && `<No ${typeof field.label === 'string' ? field.label : 'data'}>`}
         {typeof cellData === 'string' && cellData}
         {typeof cellData === 'number' && cellData}
         {typeof cellData === 'object' && JSON.stringify(cellData)}

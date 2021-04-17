@@ -24,7 +24,7 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
 | Option           | Description |
 | ---------------- | ----------- |
 | **`name`** *         | To be used as the property name when stored and retrieved from the database.  |
-| **`label`**          | Used as a heading in the Admin panel and to name the generated GraphQL type. |
+| **`label`**          | Used as a heading in the Admin panel and to name the generated GraphQL type. Auto-generated from name if not defined. |
 | **`fields`** *       | Array of field types to correspond to each row of the Array. |
 | **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
 | **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT. |
@@ -59,14 +59,12 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
       fields: [ // required
         {
           name: 'image',
-          label: 'Image',
           type: 'upload',
           relationTo: 'media',
           required: true,
         },
         {
           name: 'caption',
-          label: 'Caption',
           type: 'text',
         }
       ]

@@ -51,7 +51,7 @@ const buildColumns = (collection: CollectionConfig, columns: string[], setSort: 
         components: {
           Heading: (
             <SortColumn
-              label={field.label}
+              label={field.label || field.name}
               name={field.name}
               handleChange={setSort}
               disable={field.disableSort || undefined}

@@ -6,7 +6,7 @@ import { Collection } from '../config/types';
 
 import removeInternalFields from '../../utilities/removeInternalFields';
 import executeAccess from '../../auth/executeAccess';
-import { NotFound, Forbidden, APIError, FileUploadError } from '../../errors';
+import { NotFound, Forbidden, APIError, FileUploadError, ValidationError } from '../../errors';
 import isImage from '../../uploads/isImage';
 import getImageSize from '../../uploads/getImageSize';
 import getSafeFilename from '../../uploads/getSafeFilename';
@@ -246,11 +246,18 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // Update
   // /////////////////////////////////////
 
-  result = await Model.findByIdAndUpdate(
-    { _id: id },
-    result,
-    { new: true },
-  );
+  try {
+    result = await Model.findByIdAndUpdate(
+      { _id: id },
+      result,
+      { new: true },
+    );
+  } catch (error) {
+    // Handle uniqueness error from MongoDB
+    throw error.code === 11000
+      ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }])
+      : error;
+  }
 
   result = result.toJSON({ virtuals: true });
   result = removeInternalFields(result);

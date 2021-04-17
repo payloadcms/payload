@@ -8,7 +8,7 @@ import baseVerificationFields from '../../fields/baseFields/baseVerificationFiel
 import baseAccountLockFields from '../../fields/baseFields/baseAccountLockFields';
 import baseUploadFields from '../../fields/baseFields/baseUploadFields';
 import baseImageUploadFields from '../../fields/baseFields/baseImageUploadFields';
-import formatLabels from '../../utilities/formatLabels';
+import { formatLabels } from '../../utilities/formatLabels';
 import { defaults, authDefaults } from './defaults';
 
 const mergeBaseFields = (fields, baseFields) => {
@@ -62,7 +62,7 @@ const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: 
   const sanitized: PayloadCollectionConfig = merge(defaults, collection);
 
   sanitized.slug = toKebabCase(sanitized.slug);
-  sanitized.labels = !sanitized.labels ? formatLabels(sanitized.slug) : sanitized.labels;
+  sanitized.labels = sanitized.labels || formatLabels(sanitized.slug);
 
   if (sanitized.upload) {
     if (sanitized.upload === true) sanitized.upload = {};

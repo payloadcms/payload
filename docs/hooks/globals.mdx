@@ -24,7 +24,7 @@ All Global Hook properties accept arrays of synchronous or asynchronous function
 module.exports = {
   slug: 'header',
   fields: [
-    { name: 'title', label: 'Title', type: 'text'},
+    { name: 'title', type: 'text'},
   ]
   hooks: {
     beforeValidate: [(args) => {...}],
@@ -38,43 +38,40 @@ module.exports = {
 
 ### beforeValidate
 
-Runs before the `create` and `update` operations. This hook allows you to add or format data before the incoming data is validated.
+Runs before the `update` operation. This hook allows you to add or format data before the incoming data is validated.
 
 ```js
 const beforeValidateHook = async ({
   data, // incoming data to update or create with
   req, // full express request
-  operation, // name of the operation ie. 'create', 'update'
   originalDoc, // original document
 }) => {
-  return data; // Return data to either create or update a document with
+  return data; // Return data to update the document with
 }
 ```
 
 ### beforeChange
 
-Immediately following validation, `beforeChange` hooks will run within `create` and `update` operations. At this stage, you can be confident that the data that will be saved to the document is valid in accordance to your field validations. You can optionally modify the shape of data to be saved.
+Immediately following validation, `beforeChange` hooks will run within the `update` operation. At this stage, you can be confident that the data that will be saved to the document is valid in accordance to your field validations. You can optionally modify the shape of data to be saved.
 
 ```js
 const beforeChangeHook = async ({
   data, // incoming data to update or create with
   req, // full express request
-  operation, // name of the operation ie. 'create', 'update'
   originalDoc, // original document
 }) => {
-  return data; // Return data to either create or update a document with
+  return data; // Return data to update the document with
 }
 ```
 
 ### afterChange
 
-After a global is created or updated, the `afterChange` hook runs. Use this hook to purge caches of your applications, sync site data to CRMs, and more.
+After a global is updated, the `afterChange` hook runs. Use this hook to purge caches of your applications, sync site data to CRMs, and more.
 
 ```js
 const afterChangeHook = async ({
   doc, // full document data
   req, // full express request
-  operation, // name of the operation ie. 'create', 'update'
 }) => {
   return data;
 }

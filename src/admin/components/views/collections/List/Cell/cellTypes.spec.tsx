@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-max-props-per-line */
 import React from 'react';
 import { render } from '@testing-library/react';
 import BlocksCell from './field-types/Blocks';
@@ -13,6 +12,7 @@ describe('Cell Types', () => {
       name: 'blocks',
       labels: {
         singular: 'Block',
+        plural: 'Blocks Content',
       },
       type: 'blocks',
       blocks: [
@@ -30,14 +30,20 @@ describe('Cell Types', () => {
         { blockType: 'number' },
         { blockType: 'number' },
       ];
-      const { container } = render(<BlocksCell data={data} field={field} />);
+      const { container } = render(<BlocksCell
+        data={data}
+        field={field}
+      />);
       const el = container.querySelector('span');
       expect(el).toHaveTextContent('2 Blocks Content - Number, Number');
     });
 
     it('renders zero', () => {
       const data = [];
-      const { container } = render(<BlocksCell data={data} field={field} />);
+      const { container } = render(<BlocksCell
+        data={data}
+        field={field}
+      />);
       const el = container.querySelector('span');
       expect(el).toHaveTextContent('0 Blocks Content');
     });
@@ -52,7 +58,10 @@ describe('Cell Types', () => {
         { blockType: 'number' },
       ];
 
-      const { container } = render(<BlocksCell data={data} field={field} />);
+      const { container } = render(<BlocksCell
+        data={data}
+        field={field}
+      />);
       const el = container.querySelector('span');
       expect(el).toHaveTextContent('6 Blocks Content - Number, Number, Number, Number, Number and 1 more');
     });

@@ -1,4 +1,4 @@
-import formatLabels from './formatLabels';
+import { formatLabels, toWords } from './formatLabels';
 
 describe('formatLabels', () => {
   it('should format singular slug', () => {
@@ -26,6 +26,16 @@ describe('formatLabels', () => {
     expect(formatLabels('camelCaseItems')).toMatchObject({
       singular: 'Camel Case Item',
       plural: 'Camel Case Items',
+    });
+  });
+
+  describe('toWords', () => {
+    it('should convert camel to capitalized words', () => {
+      expect(toWords('camelCaseItems')).toBe('Camel Case Items');
+    });
+
+    it('should allow no separator (used for building GraphQL label from name)', () => {
+      expect(toWords('myGraphField', true)).toBe('MyGraphField');
     });
   });
 });
