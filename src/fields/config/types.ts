@@ -51,7 +51,7 @@ export type Option = OptionObject | string
 
 export interface FieldBase {
   name?: string;
-  label?: string;
+  label?: string | false;
   required?: boolean;
   unique?: boolean;
   index?: boolean;
@@ -209,7 +209,7 @@ export type RadioField = FieldBase & {
 
 export type Block = {
   slug: string,
-  labels: Labels
+  labels?: Labels
   fields: Field[],
   imageURL?: string
   imageAltText?: string

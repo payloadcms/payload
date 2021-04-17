@@ -7,6 +7,7 @@ export type Props = Omit<ArrayField, 'type'> & {
   path?: string
   fieldTypes: FieldTypes
   permissions: FieldPermissions
+  label: string | false
 }
 
 export type RenderArrayProps = {
@@ -16,7 +17,7 @@ export type RenderArrayProps = {
   fields: Field[]
   permissions: FieldPermissions
   onDragEnd: (result: any) => void
-  label: string
+  label: string | false
   value: number
   readOnly: boolean
   minRows: number

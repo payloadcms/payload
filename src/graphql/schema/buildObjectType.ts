@@ -13,11 +13,12 @@ import {
   GraphQLUnionType,
 } from 'graphql';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { Field, RadioField, RelationshipField, SelectField, UploadField, optionIsObject } from '../../fields/config/types';
+import { Field, RadioField, RelationshipField, SelectField, UploadField, optionIsObject, ArrayField, GroupField, BlockField, RowField } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import withNullableType from './withNullableType';
 import { BaseFields } from '../../collections/graphql/types';
+import { toWords } from '../../utilities/formatLabels';
 
 type LocaleInputType = {
   locale: {
@@ -44,7 +45,8 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
     date: (field: Field) => ({ type: withNullableType(field, DateTimeResolver) }),
     upload: (field: UploadField) => {
       const { relationTo, label } = field;
-      const uploadName = combineParentName(parentName, label);
+
+      const uploadName = combineParentName(parentName, label === false ? toWords(field.name, true) : label);
 
       // If the relationshipType is undefined at this point,
       // it can be assumed that this blockType can have a relationship
@@ -186,7 +188,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
       const { relationTo, label } = field;
       const isRelatedToManyCollections = Array.isArray(relationTo);
       const hasManyValues = field.hasMany;
-      const relationshipName = combineParentName(parentName, label);
+      const relationshipName = combineParentName(parentName, label === false ? toWords(field.name, true) : label);
 
       let type;
       let relationToType = null;
@@ -406,15 +408,15 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
 
       return relationship;
     },
-    array: (field) => {
-      const fullName = combineParentName(parentName, field.label);
+    array: (field: ArrayField) => {
+      const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
       let type = recursiveBuildObjectType(fullName, field.fields, fullName);
       type = new GraphQLList(withNullableType(field, type));
 
       return { type };
     },
-    group: (field) => {
-      const fullName = combineParentName(parentName, field.label);
+    group: (field: GroupField) => {
+      const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
       const type = recursiveBuildObjectType(fullName, field.fields, fullName);
 
       return { type };
@@ -425,8 +427,10 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
         return this.types.blockTypes[block.slug];
       });
 
+      const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
+
       const type = new GraphQLList(new GraphQLUnionType({
-        name: combineParentName(parentName, field.label),
+        name: fullName,
         types: blockTypes,
         resolveType: (data) => this.types.blockTypes[data.blockType].name,
       }));

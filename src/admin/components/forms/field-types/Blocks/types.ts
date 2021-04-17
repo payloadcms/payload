@@ -15,7 +15,7 @@ export type RenderBlockProps = {
   fieldTypes: FieldTypes
   permissions: FieldPermissions
   onDragEnd: (result: any) => void
-  label: string
+  label: string | false
   value: number
   readOnly: boolean
   minRows: number

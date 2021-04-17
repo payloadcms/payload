@@ -3,7 +3,6 @@ import checkRole from '../access/checkRole';
 
 export default {
   slug: 'navigation-array',
-  label: 'Navigation Array',
   access: {
     update: ({ req: { user } }) => checkRole(['admin', 'user'], user),
     read: () => true,

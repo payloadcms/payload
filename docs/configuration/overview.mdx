@@ -50,13 +50,11 @@ const config = buildConfig({
 			fields: [
 				{
 					name: 'title',
-					label: 'Title',
 					type: 'text',
 					required: true,
 				},
 				{
 					name: 'content',
-					label: 'Content',
 					type: 'richText',
 					required: true,
 				}
@@ -66,16 +64,13 @@ const config = buildConfig({
 	globals: [
 		{
 			slug: 'header',
-			label: 'Header',
 			fields: [
 				{
 					name: 'nav',
-					label: 'Nav',
 					type: 'array',
 					fields: [
 						{
 							name: 'page',
-							label: 'Page',
 							type: 'relationship',
 							relationTo: 'pages',
 						},
