@@ -6,7 +6,7 @@ import { UploadedFile } from 'express-fileupload';
 import executeAccess from '../../auth/executeAccess';
 import removeInternalFields from '../../utilities/removeInternalFields';
 
-import { MissingFile, FileUploadError } from '../../errors';
+import { MissingFile, FileUploadError, ValidationError } from '../../errors';
 import resizeAndSave from '../../uploads/imageResizer';
 import getSafeFilename from '../../uploads/getSafeFilename';
 import getImageSize from '../../uploads/getImageSize';
@@ -180,6 +180,8 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // Create
   // /////////////////////////////////////
 
+  let doc;
+
   if (collectionConfig.auth) {
     if (data.email) {
       resultWithLocales.email = (data.email as string).toLowerCase();
@@ -188,14 +190,25 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
       resultWithLocales._verified = false;
       resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex');
     }
-  }
 
-  let doc;
-
-  if (collectionConfig.auth) {
-    doc = await Model.register(resultWithLocales, data.password as string);
+    try {
+      doc = await Model.register(resultWithLocales, data.password as string);
+    } catch (error) {
+      // Handle user already exists from passport-local-mongoose
+      if (error.name === 'UserExistsError') {
+        throw new ValidationError([{ message: error.message, field: 'email' }]);
+      }
+      throw error;
+    }
   } else {
-    doc = await Model.create(resultWithLocales);
+    try {
+      doc = await Model.create(resultWithLocales);
+    } catch (error) {
+      // Handle uniqueness error from MongoDB
+      throw error.code === 11000
+        ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }])
+        : error;
+    }
   }
 
   let result: Document = doc.toJSON({ virtuals: true });
