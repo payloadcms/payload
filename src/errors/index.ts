@@ -13,6 +13,5 @@ export { default as MissingCollectionLabel } from './MissingCollectionLabel';
 export { default as MissingFieldInputOptions } from './MissingFieldInputOptions';
 export { default as MissingFieldType } from './MissingFieldType';
 export { default as MissingFile } from './MissingFile';
-export { default as MissingGlobalLabel } from './MissingGlobalLabel';
 export { default as NotFound } from './NotFound';
 export { default as ValidationError } from './ValidationError';

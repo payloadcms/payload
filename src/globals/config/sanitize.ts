@@ -1,19 +1,13 @@
-import { MissingGlobalLabel } from '../../errors';
+import { toWords } from '../../utilities/formatLabels';
+import { PayloadCollectionConfig } from '../../collections/config/types';
 import sanitizeFields from '../../fields/config/sanitize';
+import { PayloadGlobalConfig, GlobalConfig } from './types';
 
-const sanitizeGlobals = (collections, globals) => {
-  // /////////////////////////////////
-  // Ensure globals are valid
-  // /////////////////////////////////
-
-  globals.forEach((globalConfig) => {
-    if (!globalConfig.label) {
-      throw new MissingGlobalLabel(globalConfig);
-    }
-  });
-
+const sanitizeGlobals = (collections: PayloadCollectionConfig[], globals: PayloadGlobalConfig[]): GlobalConfig[] => {
   const sanitizedGlobals = globals.map((global) => {
     const sanitizedGlobal = { ...global };
+
+    sanitizedGlobal.label = sanitizedGlobal.label || toWords(sanitizedGlobal.slug);
 
     // /////////////////////////////////
     // Ensure that collection has required object structure
@@ -36,7 +30,7 @@ const sanitizeGlobals = (collections, globals) => {
     const validRelationships = collections.map((c) => c.slug);
     sanitizedGlobal.fields = sanitizeFields(global.fields, validRelationships);
 
-    return sanitizedGlobal;
+    return sanitizedGlobal as GlobalConfig;
   });
 
   return sanitizedGlobals;
