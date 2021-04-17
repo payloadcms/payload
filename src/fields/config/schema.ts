@@ -21,7 +21,10 @@ export const baseAdminFields = joi.object().keys({
 });
 
 export const baseField = joi.object().keys({
-  label: joi.string(),
+  label: joi.alternatives().try(
+    joi.string(),
+    joi.valid(false),
+  ),
   required: joi.boolean().default(false),
   saveToJWT: joi.boolean().default(false),
   unique: joi.boolean().default(false),

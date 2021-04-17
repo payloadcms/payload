@@ -44,7 +44,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
     date: (field: Field) => ({ type: withNullableType(field, DateTimeResolver) }),
     upload: (field: UploadField) => {
       const { relationTo, label } = field;
-      const uploadName = combineParentName(parentName, label);
+      const uploadName = combineParentName(parentName, !label ? '' : label);
 
       // If the relationshipType is undefined at this point,
       // it can be assumed that this blockType can have a relationship
@@ -186,7 +186,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
       const { relationTo, label } = field;
       const isRelatedToManyCollections = Array.isArray(relationTo);
       const hasManyValues = field.hasMany;
-      const relationshipName = combineParentName(parentName, label);
+      const relationshipName = combineParentName(parentName, !label ? '' : label);
 
       let type;
       let relationToType = null;

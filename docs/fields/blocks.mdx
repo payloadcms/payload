@@ -53,7 +53,7 @@ Blocks are defined as separate configs of their own.
 | ---------------- | ----------- |
 | **`slug`** *         | Identifier for this block type. Will be saved on each block as the `blockType` property. |
 | **`fields`** *       | Array of fields to be stored in this block. |
-| **`labels`**         | Customize the block labels that appear in the Admin dashboard. Also used to name corresponding GraphQL schema types. |
+| **`labels`**         | Customize the block labels that appear in the Admin dashboard. Also used to name corresponding GraphQL schema types. Auto-generated from slug if not defined. |
 | **`imageURL`**       | Provide a custom image thumbnail to help editors identify this block in the Admin UI. |
 | **`imageAltText`**   | Customize this block's image thumbnail alt text. |
 
@@ -79,14 +79,12 @@ const QuoteBlock = {
   imageAltText: 'A nice thumbnail image to show what this block looks like',
   fields: [ // required
     {
-      name: 'text',
-      label: 'Quote Text',
+      name: 'quoteHeader',
       type: 'text',
       required: true,
     },
     {
-      name: 'text',
-      label: 'Quotee',
+      name: 'quoteText',
       type: 'text',
     },
   ]
@@ -98,13 +96,8 @@ const ExampleCollection = {
     {
       name: 'layout', // required
       type: 'blocks', // required
-      label: 'layout',
       minRows: 1,
       maxRows: 20,
-      labels: {
-        singular: 'Layout',
-        plural: 'Layouts',
-      },
       blocks: [ // required
        QuoteBlock
       ]

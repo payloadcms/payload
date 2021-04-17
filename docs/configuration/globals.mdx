@@ -28,7 +28,6 @@ As with Collection configs, it's often best practice to write your Globals in se
 ```js
 const Nav = {
 	slug: 'nav',
-	label: 'Nav',
 	fields: [
 		{
 			name: 'items',
@@ -38,7 +37,6 @@ const Nav = {
 			fields: [
 				{
 					name: 'page',
-					label: 'Page',
 					type: 'relationship',
 					relationTo: 'pages', // "pages" is the slug of an existing collection
 					required: true,

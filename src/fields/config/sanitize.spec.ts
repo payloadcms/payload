@@ -1,5 +1,6 @@
 import sanitizeFields from './sanitize';
 import { MissingFieldType, InvalidFieldRelationship } from '../../errors';
+import { Block } from './types';
 
 describe('sanitizeFields', () => {
   it('should throw on missing type field', () => {
@@ -11,6 +12,39 @@ describe('sanitizeFields', () => {
       sanitizeFields(fields, []);
     }).toThrow(MissingFieldType);
   });
+  it('should populate label if missing', () => {
+    const fields = [{
+      name: 'someCollection',
+      type: 'text',
+    }];
+    const sanitizedField = sanitizeFields(fields, [])[0];
+    expect(sanitizedField.name).toStrictEqual('someCollection');
+    expect(sanitizedField.label).toStrictEqual('Some Collection');
+    expect(sanitizedField.type).toStrictEqual('text');
+  });
+  it('should allow auto-label override', () => {
+    const fields = [{
+      name: 'someCollection',
+      type: 'text',
+      label: 'Do not label',
+    }];
+    const sanitizedField = sanitizeFields(fields, [])[0];
+    expect(sanitizedField.name).toStrictEqual('someCollection');
+    expect(sanitizedField.label).toStrictEqual('Do not label');
+    expect(sanitizedField.type).toStrictEqual('text');
+  });
+  it('should allow label opt-out', () => {
+    const fields = [{
+      name: 'someCollection',
+      type: 'text',
+      label: false,
+    }];
+    const sanitizedField = sanitizeFields(fields, [])[0];
+    expect(sanitizedField.name).toStrictEqual('someCollection');
+    expect(sanitizedField.label).toStrictEqual(false);
+    expect(sanitizedField.type).toStrictEqual('text');
+  });
+
 
   describe('relationships', () => {
     it('should not throw on valid relationship', () => {
@@ -41,6 +75,15 @@ describe('sanitizeFields', () => {
 
     it('should not throw on valid relationship inside blocks', () => {
       const validRelationships = ['some-collection'];
+      const relationshipBlock: Block = {
+        slug: 'relationshipBlock',
+        fields: [{
+          type: 'relationship',
+          label: 'my-relationship',
+          name: 'My Relationship',
+          relationTo: 'some-collection',
+        }],
+      };
       const fields = [{
         name: 'layout',
         label: 'Layout Blocks',
@@ -48,14 +91,7 @@ describe('sanitizeFields', () => {
           singular: 'Block',
         },
         type: 'blocks',
-        blocks: [{
-          fields: [{
-            type: 'relationship',
-            label: 'my-relationship',
-            name: 'My Relationship',
-            relationTo: 'some-collection',
-          }],
-        }],
+        blocks: [relationshipBlock],
       }];
       expect(() => {
         sanitizeFields(fields, validRelationships);
@@ -90,6 +126,15 @@ describe('sanitizeFields', () => {
 
     it('should throw on invalid relationship inside blocks', () => {
       const validRelationships = ['some-collection'];
+      const relationshipBlock: Block = {
+        slug: 'relationshipBlock',
+        fields: [{
+          type: 'relationship',
+          label: 'my-relationship',
+          name: 'My Relationship',
+          relationTo: 'not-valid',
+        }],
+      };
       const fields = [{
         name: 'layout',
         label: 'Layout Blocks',
@@ -97,14 +142,7 @@ describe('sanitizeFields', () => {
           singular: 'Block',
         },
         type: 'blocks',
-        blocks: [{
-          fields: [{
-            type: 'relationship',
-            label: 'my-relationship',
-            name: 'My Relationship',
-            relationTo: 'not-valid',
-          }],
-        }],
+        blocks: [relationshipBlock],
       }];
       expect(() => {
         sanitizeFields(fields, validRelationships);
