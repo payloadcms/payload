@@ -79,14 +79,12 @@ const QuoteBlock = {
   imageAltText: 'A nice thumbnail image to show what this block looks like',
   fields: [ // required
     {
-      name: 'text',
-      label: 'Quote Text',
+      name: 'quoteHeader',
       type: 'text',
       required: true,
     },
     {
-      name: 'text',
-      label: 'Quotee',
+      name: 'quoteText',
       type: 'text',
     },
   ]
@@ -98,13 +96,8 @@ const ExampleCollection = {
     {
       name: 'layout', // required
       type: 'blocks', // required
-      label: 'layout',
       minRows: 1,
       maxRows: 20,
-      labels: {
-        singular: 'Layout',
-        plural: 'Layouts',
-      },
       blocks: [ // required
        QuoteBlock
       ]
