@@ -14,6 +14,7 @@ import { PaginatedDocs } from '../../../../../collections/config/types';
 import { useFormProcessing } from '../../Form/context';
 import optionsReducer from './optionsReducer';
 import { Props, OptionsPage, Option, ValueWithRelation } from './types';
+import useDebounce from '../../../../hooks/useDebounce';
 
 import './index.scss';
 
@@ -57,6 +58,7 @@ const Relationship: React.FC<Props> = (props) => {
   const [search, setSearch] = useState('');
   const [errorLoading, setErrorLoading] = useState(false);
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false);
+  const debouncedSearch = useDebounce(search, 120);
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required });
@@ -99,8 +101,8 @@ const Relationship: React.FC<Props> = (props) => {
         some(relationsToSearch, async (relation, callback) => {
           const collection = collections.find((coll) => coll.slug === relation);
           const fieldToSearch = collection?.admin?.useAsTitle || 'id';
-          const searchParam = search ? `&where[${fieldToSearch}][like]=${search}` : '';
-          const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPage}${searchParam}`);
+          const searchParam = debouncedSearch ? `&where[${fieldToSearch}][like]=${debouncedSearch}` : '';
+          const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&depth=0&page=${lastLoadedPage}${searchParam}`);
           const data: PaginatedDocs = await response.json();
 
           if (response.ok) {
@@ -129,7 +131,7 @@ const Relationship: React.FC<Props> = (props) => {
         });
       }
     }
-  }, [addOptions, api, collections, errorLoading, lastFullyLoadedRelation, lastLoadedPage, relations, required, search, serverURL]);
+  }, [addOptions, api, collections, errorLoading, lastFullyLoadedRelation, lastLoadedPage, relations, required, debouncedSearch, serverURL]);
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
@@ -191,13 +193,11 @@ const Relationship: React.FC<Props> = (props) => {
   const handleInputChange = useCallback((newSearch) => {
     if (search !== newSearch) {
       setSearch(newSearch);
-      setLastFullyLoadedRelation(-1);
-      setLastLoadedPage(1);
     }
   }, [search]);
 
   const addOptionByID = useCallback(async (id, relation) => {
-    if (!errorLoading) {
+    if (!errorLoading && id !== 'null') {
       const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`);
 
       if (response.ok) {
@@ -248,6 +248,7 @@ const Relationship: React.FC<Props> = (props) => {
 
         addOptions(data, relation);
 
+
         if (!data.hasNextPage) {
           setLastFullyLoadedRelation(relations.indexOf(relation));
         } else {
@@ -260,6 +261,52 @@ const Relationship: React.FC<Props> = (props) => {
 
     getFirstResults();
   }, [addOptions, api, relations, serverURL]);
+
+  useEffect(() => {
+    if (debouncedSearch) {
+      dispatchOptions({
+        type: 'REPLACE',
+        payload: required ? [] : [{ value: 'null', label: 'None' }],
+      });
+
+      setLastLoadedPage(1);
+      setLastFullyLoadedRelation(-1);
+
+      if (relations.length > 0) {
+        some(relations, async (relation, callback) => {
+          const collection = collections.find((coll) => coll.slug === relation);
+          const fieldToSearch = collection?.admin?.useAsTitle || 'id';
+          const searchParam = debouncedSearch ? `&where[${fieldToSearch}][like]=${debouncedSearch}` : '';
+          const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=1&depth=0${searchParam}`);
+          const data: PaginatedDocs = await response.json();
+
+          if (response.ok) {
+            if (data.hasNextPage) {
+              return callback(false, {
+                data,
+                relation,
+              });
+            }
+
+            return callback({ relation, data });
+          }
+
+          return setErrorLoading(true);
+        }, (lastPage: OptionsPage, nextPage: OptionsPage) => {
+          if (nextPage) {
+            const { data, relation } = nextPage;
+            addOptions(data, relation);
+            setLastLoadedPage((l) => l + 1);
+          } else {
+            const { data, relation } = lastPage;
+            addOptions(data, relation);
+            setLastFullyLoadedRelation(relations.indexOf(relation));
+            setLastLoadedPage(1);
+          }
+        });
+      }
+    }
+  }, [addOptions, api, collections, debouncedSearch, relations, required, serverURL]);
 
   const classes = [
     'field-type',

@@ -31,7 +31,7 @@ const RelationshipB: PayloadCollectionConfig = {
       label: 'Localized Posts',
       type: 'relationship',
       hasMany: true,
-      relationTo: 'localized-posts',
+      relationTo: ['localized-posts', 'previewable-post'],
     },
   ],
   timestamps: true,

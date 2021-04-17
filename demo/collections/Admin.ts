@@ -45,22 +45,16 @@ const Admin: PayloadCollectionConfig = {
       hasMany: true,
     },
     {
+      name: 'publicUser',
+      type: 'relationship',
+      hasMany: true,
+      relationTo: 'public-users',
+    },
+    {
       name: 'apiKey',
       type: 'text',
       access: {
-        read: ({ req: { user } }) => {
-          if (checkRole(['admin'], user)) {
-            return true;
-          }
-
-          if (user) {
-            return {
-              email: user.email,
-            };
-          }
-
-          return false;
-        },
+        read: ({ req: { user } }) => checkRole(['admin'], user),
       },
     },
   ],

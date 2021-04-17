@@ -34,7 +34,6 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
 
   // Get field by path
   const field = getField(path);
-  const fieldExists = Boolean(field);
 
   const initialValue = field?.initialValue;
 
