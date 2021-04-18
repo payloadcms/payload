@@ -69,7 +69,7 @@ const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: 
 
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug;
     sanitized.upload.staticURL = sanitized.upload.staticURL || `/${sanitized.slug}`;
-    sanitized.admin.useAsTitle = sanitized.admin.useAsTitle || 'filename';
+    sanitized.admin.useAsTitle = (sanitized.admin.useAsTitle && sanitized.admin.useAsTitle !== 'id') ? sanitized.admin.useAsTitle : 'filename';
 
     let uploadFields = baseUploadFields;
 
