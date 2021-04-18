@@ -246,19 +246,44 @@ const Relationship: React.FC<Props> = (props) => {
 
   useEffect(() => {
     const getFirstResults = async () => {
-      const relation = relations[0];
-      const res = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&depth=0`);
+      const res = await fetch(`${serverURL}${api}/${relations[0]}?limit=${maxResultsPerRequest}&depth=0`);
 
       if (res.ok) {
         const data: PaginatedDocs = await res.json();
 
-        addOptions(data, relation);
+        addOptions(data, relations[0]);
 
 
         if (!data.hasNextPage) {
-          setLastFullyLoadedRelation(relations.indexOf(relation));
-        } else {
-          setLastLoadedPage(2);
+          setLastFullyLoadedRelation(0);
+
+          if (relations[1]) {
+            const secondRes = await fetch(`${serverURL}${api}/${relations[1]}?limit=${maxResultsPerRequest}&depth=0`);
+
+            if (res.ok) {
+              const secondData: PaginatedDocs = await secondRes.json();
+
+              addOptions(secondData, relations[1]);
+
+              if (!secondData.hasNextPage) {
+                setLastFullyLoadedRelation(1);
+
+                if (relations[2]) {
+                  const thirdRes = await fetch(`${serverURL}${api}/${relations[2]}?limit=${maxResultsPerRequest}&depth=0`);
+
+                  if (res.ok) {
+                    const thirdData: PaginatedDocs = await thirdRes.json();
+
+                    addOptions(thirdData, relations[2]);
+
+                    if (!thirdData.hasNextPage) {
+                      setLastFullyLoadedRelation(2);
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
 
         setHasLoadedFirstOptions(true);

@@ -3,7 +3,6 @@ import executeAccess from '../auth/executeAccess';
 import { Field, RelationshipField, fieldSupportsMany } from './config/types';
 import { Payload } from '..';
 
-
 type PopulateArgs = {
   depth: number
   currentDepth: number

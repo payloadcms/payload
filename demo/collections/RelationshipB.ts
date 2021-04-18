@@ -22,7 +22,7 @@ const RelationshipB: PayloadCollectionConfig = {
       name: 'postManyRelationships',
       label: 'Post Many Relationships',
       type: 'relationship',
-      relationTo: ['relationship-a'],
+      relationTo: ['relationship-a', 'media'],
       localized: true,
       hasMany: false,
     },

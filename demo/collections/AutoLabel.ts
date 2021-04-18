@@ -1,7 +1,12 @@
 import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { relationship } from '../../src/fields/config/schema';
 
 const AutoLabel: PayloadCollectionConfig = {
   slug: 'auto-label',
+  admin: {
+    useAsTitle: 'autoLabelField',
+    enableRichTextRelationship: true,
+  },
   fields: [
     {
       name: 'autoLabelField',
@@ -16,6 +21,11 @@ const AutoLabel: PayloadCollectionConfig = {
       name: 'labelOverride',
       type: 'text',
       label: 'Custom Label',
+    },
+    {
+      name: 'testRelationship',
+      type: 'relationship',
+      relationTo: 'all-fields',
     },
     {
       name: 'specialBlock',
