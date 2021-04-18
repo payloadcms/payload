@@ -5,9 +5,9 @@ import { PayloadRequest } from '../express/types';
 
 type Arguments = {
   data: unknown
-  overrideAccess: boolean
+  overrideAccess?: boolean
   depth: number
-  currentDepth: number
+  currentDepth?: number
   payload: Payload
   field: RichTextField
   req: PayloadRequest
@@ -40,7 +40,10 @@ const populate = async ({
   const dataRef = data as Record<string, unknown>;
 
   const doc = await payload.operations.collections.findByID({
-    req,
+    req: {
+      ...req,
+      payloadAPI: 'local',
+    },
     collection,
     id,
     currentDepth: currentDepth + 1,
@@ -60,9 +63,9 @@ const recurseRichText = ({
   req,
   children,
   payload,
-  overrideAccess,
+  overrideAccess = false,
   depth,
-  currentDepth,
+  currentDepth = 0,
   field,
   promises,
 }: RecurseRichTextArgs) => {

@@ -13,12 +13,13 @@ import {
   GraphQLUnionType,
 } from 'graphql';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { Field, RadioField, RelationshipField, SelectField, UploadField, optionIsObject, ArrayField, GroupField, BlockField, RowField } from '../../fields/config/types';
+import { Field, RadioField, RelationshipField, SelectField, UploadField, optionIsObject, ArrayField, GroupField, RichTextField } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import withNullableType from './withNullableType';
 import { BaseFields } from '../../collections/graphql/types';
 import { toWords } from '../../utilities/formatLabels';
+import createRichTextRelationshipPromise from '../../fields/richTextRelationshipPromise';
 
 type LocaleInputType = {
   locale: {
@@ -40,9 +41,31 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
     text: (field: Field) => ({ type: withNullableType(field, GraphQLString) }),
     email: (field: Field) => ({ type: withNullableType(field, EmailAddressResolver) }),
     textarea: (field: Field) => ({ type: withNullableType(field, GraphQLString) }),
-    richText: (field: Field) => ({ type: withNullableType(field, GraphQLJSON) }),
     code: (field: Field) => ({ type: withNullableType(field, GraphQLString) }),
     date: (field: Field) => ({ type: withNullableType(field, DateTimeResolver) }),
+    richText: (field: RichTextField) => ({
+      type: withNullableType(field, GraphQLJSON),
+      async resolve(parent, args, context) {
+        if (args.depth > 0) {
+          const richTextRelationshipPromise = createRichTextRelationshipPromise({
+            req: context.req,
+            data: parent,
+            payload: context.req.payload,
+            depth: args.depth,
+            field,
+          });
+
+          await richTextRelationshipPromise();
+        }
+
+        return parent[field.name];
+      },
+      args: {
+        depth: {
+          type: GraphQLInt,
+        },
+      },
+    }),
     upload: (field: UploadField) => {
       const { relationTo, label } = field;
 
