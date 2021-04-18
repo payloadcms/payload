@@ -77,6 +77,10 @@ const traverseFields = (args: Arguments): void => {
       dataCopy[field.name] = null;
     }
 
+    if (field.type === 'relationship' && field.hasMany && (data[field.name]?.[0] === '' || data[field.name]?.[0] === 'none' || data[field.name]?.[0] === 'null')) {
+      dataCopy[field.name] = [];
+    }
+
     if (field.type === 'number' && typeof data[field.name] === 'string') {
       dataCopy[field.name] = parseFloat(data[field.name]);
     }
