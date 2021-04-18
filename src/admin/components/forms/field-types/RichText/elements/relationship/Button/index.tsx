@@ -15,19 +15,16 @@ import { requests } from '../../../../../../../api';
 
 import './index.scss';
 
-const initialFormData = {
-  depth: 0,
-};
+const initialFormData = {};
 
 const baseClass = 'relationship-rich-text-button';
 
-const insertRelationship = (editor, { value, relationTo, depth }) => {
+const insertRelationship = (editor, { value, relationTo }) => {
   const text = { text: ' ' };
 
   const relationship = {
     type: 'relationship',
     value,
-    depth,
     relationTo,
     children: [
       text,
@@ -58,13 +55,13 @@ const RelationshipButton: React.FC<{path: string}> = ({ path }) => {
   const [hasEnabledCollections] = useState(() => collections.find(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship));
   const modalSlug = `${path}-add-relationship`;
 
-  const handleAddRelationship = useCallback(async (_, { relationTo, value, depth }) => {
+  const handleAddRelationship = useCallback(async (_, { relationTo, value }) => {
     setLoading(true);
 
-    const res = await requests.get(`${serverURL}${api}/${relationTo}/${value}?depth=${depth}`);
+    const res = await requests.get(`${serverURL}${api}/${relationTo}/${value}?depth=0`);
     const json = await res.json();
 
-    insertRelationship(editor, { value: json, depth, relationTo });
+    insertRelationship(editor, { value: { id: json.id }, relationTo });
     closeAll();
     setRenderModal(false);
     setLoading(false);

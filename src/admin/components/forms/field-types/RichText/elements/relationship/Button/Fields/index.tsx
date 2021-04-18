@@ -2,9 +2,7 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { useConfig, useAuth } from '@payloadcms/config-provider';
 import { useWatchForm } from '../../../../../../Form/context';
 import Relationship from '../../../../../Relationship';
-import Number from '../../../../../Number';
 import Select from '../../../../../Select';
-
 
 const createOptions = (collections, permissions) => collections.reduce((options, collection) => {
   if (permissions?.collections?.[collection.slug]?.read?.permission && collection?.admin?.enableRichTextRelationship) {
@@ -21,7 +19,7 @@ const createOptions = (collections, permissions) => collections.reduce((options,
 }, []);
 
 const RelationshipFields = () => {
-  const { collections, maxDepth } = useConfig();
+  const { collections } = useConfig();
   const { permissions } = useAuth();
 
   const [options, setOptions] = useState(() => createOptions(collections, permissions));
@@ -49,13 +47,6 @@ const RelationshipFields = () => {
           required
         />
       )}
-      <Number
-        required
-        name="depth"
-        label="Depth"
-        min={0}
-        max={maxDepth}
-      />
     </Fragment>
   );
 };

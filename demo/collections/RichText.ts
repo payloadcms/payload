@@ -8,6 +8,9 @@ const RichText: PayloadCollectionConfig = {
     singular: 'Rich Text',
     plural: 'Rich Texts',
   },
+  access: {
+    read: () => true,
+  },
   fields: [
     {
       name: 'defaultRichText',

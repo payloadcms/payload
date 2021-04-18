@@ -5,6 +5,7 @@ import { Field, fieldHasSubFields, fieldIsArrayType, fieldIsBlockType, HookName 
 import { Operation } from '../types';
 import { PayloadRequest } from '../express/types';
 import { Payload } from '..';
+import richTextRelationshipPromise from './richTextRelationshipPromise';
 
 type Arguments = {
   fields: Field[]
@@ -91,8 +92,22 @@ const traverseFields = (args: Arguments): void => {
       if (data[field.name] === '') dataCopy[field.name] = false;
     }
 
-    if (field.type === 'richText' && typeof data[field.name] === 'string') {
-      dataCopy[field.name] = JSON.parse(data[field.name] as string);
+    if (field.type === 'richText') {
+      if (typeof data[field.name] === 'string') {
+        dataCopy[field.name] = JSON.parse(data[field.name] as string);
+      }
+
+      if ((field.admin?.elements?.includes('relationship') || !field?.admin?.elements) && hook === 'afterRead') {
+        relationshipPopulations.push(richTextRelationshipPromise({
+          req,
+          data,
+          payload,
+          overrideAccess,
+          depth,
+          field,
+          currentDepth,
+        }));
+      }
     }
 
     const hasLocalizedValue = (typeof data?.[field.name] === 'object' && data?.[field.name] !== null)

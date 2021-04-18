@@ -57,6 +57,10 @@ async function findByID(incomingArgs: Arguments): Promise<Document> {
   // /////////////////////////////////////
 
   const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors, id }, collectionConfig.access.read) : true;
+
+  // If errors are disabled, and access returns false, return null
+  if (accessResults === false) return null;
+
   const hasWhereAccess = typeof accessResults === 'object';
 
   const queryToBuild: { where: Where } = {
