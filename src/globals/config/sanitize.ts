@@ -2,6 +2,7 @@ import { toWords } from '../../utilities/formatLabels';
 import { PayloadCollectionConfig } from '../../collections/config/types';
 import sanitizeFields from '../../fields/config/sanitize';
 import { PayloadGlobalConfig, GlobalConfig } from './types';
+import defaultAccess from '../../auth/defaultAccess';
 
 const sanitizeGlobals = (collections: PayloadCollectionConfig[], globals: PayloadGlobalConfig[]): GlobalConfig[] => {
   const sanitizedGlobals = globals.map((global) => {
@@ -16,6 +17,9 @@ const sanitizeGlobals = (collections: PayloadCollectionConfig[], globals: Payloa
     if (!sanitizedGlobal.hooks) sanitizedGlobal.hooks = {};
     if (!sanitizedGlobal.access) sanitizedGlobal.access = {};
     if (!sanitizedGlobal.admin) sanitizedGlobal.admin = {};
+
+    if (!sanitizedGlobal.access.read) sanitizedGlobal.access.read = defaultAccess;
+    if (!sanitizedGlobal.access.update) sanitizedGlobal.access.update = defaultAccess;
 
     if (!sanitizedGlobal.hooks.beforeValidate) sanitizedGlobal.hooks.beforeValidate = [];
     if (!sanitizedGlobal.hooks.beforeChange) sanitizedGlobal.hooks.beforeChange = [];

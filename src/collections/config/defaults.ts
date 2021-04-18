@@ -1,8 +1,12 @@
-import { PayloadRequest } from '../../express/types';
+import defaultAccess from '../../auth/defaultAccess';
 
 export const defaults = {
   access: {
-    unlock: ({ req: { user } }: { req: PayloadRequest}): boolean => Boolean(user),
+    create: defaultAccess,
+    read: defaultAccess,
+    update: defaultAccess,
+    delete: defaultAccess,
+    unlock: defaultAccess,
   },
   timestamps: true,
   admin: {
