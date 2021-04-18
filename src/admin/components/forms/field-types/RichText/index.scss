@@ -19,7 +19,7 @@
   &__editor {
     min-height: base(10);
 
-    span[data-slate-node=element] {
+    [data-slate-node=element] {
       margin-bottom: base(0.25);
     }
 

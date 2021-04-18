@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import isHotkey from 'is-hotkey';
 import { Editable, withReact, Slate } from 'slate-react';
-import { createEditor } from 'slate';
+import { createEditor, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
 import { richText } from '../../../../../fields/validations';
 import useFieldType from '../../useFieldType';
@@ -236,9 +236,15 @@ const RichText: React.FC<Props> = (props) => {
               readOnly={readOnly}
               onBlur={onBlur}
               onKeyDown={(event) => {
-                if (event.key === 'Enter' && event.shiftKey) {
-                  event.preventDefault();
-                  editor.insertText('\n');
+                if (event.key === 'Enter') {
+                  if (event.shiftKey) {
+                    event.preventDefault();
+                    editor.insertText('\n');
+                  } else {
+                    setTimeout(() => {
+                      Transforms.setNodes(editor, { type: 'p' });
+                    }, 0);
+                  }
                 }
 
                 Object.keys(hotkeys).forEach((hotkey) => {
