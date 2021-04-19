@@ -1,3 +1,17 @@
+## [0.6.1](https://github.com/payloadcms/payload/compare/v0.6.0...v0.6.1) (2021-04-19)
+
+
+### Bug Fixes
+
+* cleans up duplicative columns ([5f2073a](https://github.com/payloadcms/payload/commit/5f2073ae685f22d099bc8f0d3e406e73ee59cd1d))
+* graphql localized relationship bugs ([280f809](https://github.com/payloadcms/payload/commit/280f8094217de759ba6424dfd2294a6bfcb1d57a))
+* moves enableRichTextRelationship to proper spot ([16ca22b](https://github.com/payloadcms/payload/commit/16ca22b4cc0d8e5d106fa8c8c6e2dde0ff972839))
+
+
+### Features
+
+* sets enableRichTextRelationship to true by default ([9970470](https://github.com/payloadcms/payload/commit/99704707dda25f8617d26552942915aa6e9d7a57))
+
 # [0.6.0](https://github.com/payloadcms/payload/compare/v0.5.10...v0.6.0) (2021-04-19)
 
 ### BREAKING CHANGES
