@@ -1,11 +1,44 @@
 # [0.6.0](https://github.com/payloadcms/payload/compare/v0.5.10...v0.6.0) (2021-04-19)
 
+### BREAKING CHANGES
+
+* All Collection and Global access control functions are now set to require a user to be logged in to interact through GraphQL or REST APIs. This default access control is set to ensure that your API data is secure by default. From there, you can opt to publicly expose API actions as you need.
+
+#### Migration Instructions to `0.6.x`:
+
+If you have any Collections or Globals that should be publicly available without being logged in, you need to define an access control function for each operation that needs to be publicly available.
+
+For example, if you have a `pages` collection with no existing access control, and it should be publicly readable, you should change its config from this:
+
+```js
+const Page = {
+  slug: 'pages',
+  access: {
+    // No `read` access control was set
+  }
+}
+```
+
+To:
+
+```js
+const Page = {
+  slug: 'pages',
+  access: {
+    // Now we explicitly allow public read access
+    // to this collection's documents
+    read: () => true
+  }
+}
+```
+
+If none of your collections or globals should be publicly exposed, you don't need to do anything to upgrade.
 
 ### Bug Fixes
 
 * clears richtext element on enter, refocuses on toolbar button click ([4b19795](https://github.com/payloadcms/payload/commit/4b1979540d2ec33ce8396f572baba5e64962c0da))
 * ensures api keys are properly populated in admin ([4359a70](https://github.com/payloadcms/payload/commit/4359a70a8b0bca380cc513dfcb83b2fbe28cbef4))
-* ensures first options are loaded only once ([75a5b04](https://github.com/payloadcms/payload/commit/75a5b047056b4e4e7a415a6903a1131cc61b0318))
+* ensures first relationship options are loaded only once ([75a5b04](https://github.com/payloadcms/payload/commit/75a5b047056b4e4e7a415a6903a1131cc61b0318))
 * searching on relationship fields properly fetches results ([b86c3da](https://github.com/payloadcms/payload/commit/b86c3daa9952ccc9db324fecd53bb75f69cecfd4))
 * upload useAsTitle set to filename by default ([7db23f8](https://github.com/payloadcms/payload/commit/7db23f8ebbf115ca45fa55718b0d1be18ca54cd3))
 
@@ -14,8 +47,8 @@
 
 * autolabel fields when label is omitted ([#42](https://github.com/payloadcms/payload/issues/42)) ([b383eb6](https://github.com/payloadcms/payload/commit/b383eb65c6b524fd7cfddb7ac60a3f263e1b891e))
 * dynamically populates richtext relationships ([3530424](https://github.com/payloadcms/payload/commit/353042467f12458994d734cf54423eb95eea9003))
-* improve uniqueness error handling ([21b2bd4](https://github.com/payloadcms/payload/commit/21b2bd4b6708823880fb87035495ab4c2c55da90))
-* improves margins in rich text ([20d7a01](https://github.com/payloadcms/payload/commit/20d7a01919634faa366add792f98a36e68f213e9))
+* improve unique field value error handling ([21b2bd4](https://github.com/payloadcms/payload/commit/21b2bd4b6708823880fb87035495ab4c2c55da90))
+* improves margins in rich text elements ([20d7a01](https://github.com/payloadcms/payload/commit/20d7a01919634faa366add792f98a36e68f213e9))
 
 ## [0.5.10](https://github.com/payloadcms/payload/compare/v0.5.9...v0.5.10) (2021-04-14)
 
