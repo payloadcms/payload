@@ -278,12 +278,18 @@ const Relationship: React.FC<Props> = (props) => {
 
                     if (!thirdData.hasNextPage) {
                       setLastFullyLoadedRelation(2);
+                    } else {
+                      setLastLoadedPage(2);
                     }
                   }
                 }
+              } else {
+                setLastLoadedPage(2);
               }
             }
           }
+        } else {
+          setLastLoadedPage(2);
         }
 
         setHasLoadedFirstOptions(true);
