@@ -77,7 +77,7 @@ The built-in `relationship` element is a powerful way to reference other Documen
 
 <Banner type="success">
   <strong>Tip:</strong><br/>
-  To enable collections to be selected within the Rich Text relationship, you need to enable the collection admin option of <strong>enableRichTextRelationship</strong>.
+  Collections are automatically allowed to be selected within the Rich Text relationship by default. If you want to disable a collection from being able to be referenced in Rich Text fields, set the collection admin option of <strong>enableRichTextRelationship</strong> to false.
 </Banner>
 
 Relationships are populated dynamically into your Rich Text field' content. Within the REST and Local APIs, any present RichText `relationship` elements will respect the `depth` option that you pass, and will be populated accordingly. In GraphQL, each `richText` field accepts an argument of `depth` for you to utilize.
