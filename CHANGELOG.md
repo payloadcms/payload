@@ -1,3 +1,10 @@
+## [0.6.2](https://github.com/payloadcms/payload/compare/v0.6.1...v0.6.2) (2021-04-19)
+
+
+### Features
+
+* modifies relationship field to react to changing relationTo ([ddf25fb](https://github.com/payloadcms/payload/commit/ddf25fbb6559d93dd5b9105bd4a0a952fc72154b))
+
 ## [0.6.1](https://github.com/payloadcms/payload/compare/v0.6.0...v0.6.1) (2021-04-19)
 
 
