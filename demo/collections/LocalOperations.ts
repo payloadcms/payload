@@ -15,7 +15,7 @@ const LocalOperations: PayloadCollectionConfig = {
         });
 
         const blocksGlobal = await req.payload.findGlobal({
-          global: 'blocks-global',
+          slug: 'blocks-global',
         });
 
         formattedData.localizedPosts = localizedPosts;

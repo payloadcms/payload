@@ -10,14 +10,18 @@ export default [
     type: 'checkbox',
     defaultValue: false,
     admin: {
-      disabled: true,
+      components: {
+        Field: () => null,
+      },
     },
   },
   {
     name: 'apiKey',
     type: 'text',
     admin: {
-      disabled: true,
+      components: {
+        Field: () => null,
+      },
     },
     hooks: {
       beforeChange: [
