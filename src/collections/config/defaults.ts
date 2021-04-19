@@ -12,6 +12,7 @@ export const defaults = {
   admin: {
     useAsTitle: 'id',
     components: {},
+    enableRichTextRelationship: true,
   },
   fields: [],
   hooks: {

@@ -17,7 +17,6 @@ export const defaults = {
     components: {},
     css: path.resolve(__dirname, '../admin/scss/custom.css'),
     scss: path.resolve(__dirname, '../admin/scss/overrides.scss'),
-    enableRichTextRelationship: true,
   },
   upload: {},
   graphQL: {
