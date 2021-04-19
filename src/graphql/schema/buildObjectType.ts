@@ -101,8 +101,8 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
         extensions: { complexity: 20 },
         async resolve(parent, args, context) {
           const value = parent[field.name];
-          const locale = args.locale || context.locale;
-          const fallbackLocale = args.fallbackLocale || context.fallbackLocale;
+          const locale = args.locale || context.req.locale;
+          const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale;
 
           let id = value;
 
@@ -229,12 +229,6 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
 
         const types = relationTo.map((relation) => this.collections[relation].graphQL.type);
 
-        let resolveType = function resolveType(data) {
-          return this.collections[data.collection].graphQL.type.name;
-        };
-
-        resolveType = resolveType.bind(this);
-
         type = new GraphQLObjectType({
           name: `${relationshipName}_Relationship`,
           fields: {
@@ -245,7 +239,9 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
               type: new GraphQLUnionType({
                 name: relationshipName,
                 types,
-                resolveType,
+                async resolveType(data, { req: { payload } }) {
+                  return payload.collections[data.collection].graphQL.type.name;
+                },
               }),
             },
           },
@@ -294,24 +290,25 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
         extensions: { complexity: 10 },
         async resolve(parent, args, context) {
           const value = parent[field.name];
-          const locale = args.locale || context.locale;
-          const fallbackLocale = args.fallbackLocale || context.fallbackLocale;
+          const locale = args.locale || context.req.locale;
+          const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale;
           let relatedCollectionSlug = field.relationTo;
 
           if (hasManyValues) {
             const results = [];
             const resultPromises = [];
 
-            const createPopulationPromise = async (relatedDoc) => {
+            const createPopulationPromise = async (relatedDoc, i) => {
               let id = relatedDoc;
+              let collectionSlug = field.relationTo;
 
               if (isRelatedToManyCollections) {
-                relatedCollectionSlug = relatedDoc.relationTo;
+                collectionSlug = relatedDoc.relationTo;
                 id = relatedDoc.value;
               }
 
               const result = await find({
-                collection: collections[relatedCollectionSlug as string],
+                collection: collections[collectionSlug as string],
                 where: {
                   ...(args.where || {}),
                   _id: {
@@ -329,22 +326,22 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
 
               if (result.docs.length === 1) {
                 if (isRelatedToManyCollections) {
-                  results.push({
-                    relationTo: relatedCollectionSlug,
+                  results[i] = {
+                    relationTo: collectionSlug,
                     value: {
                       ...result.docs[0],
-                      collection: relatedCollectionSlug,
+                      collection: collectionSlug,
                     },
-                  });
+                  };
                 } else {
-                  results.push(result.docs[0]);
+                  [results[i]] = result.docs;
                 }
               }
             };
 
             if (value) {
-              value.forEach((relatedDoc) => {
-                resultPromises.push(createPopulationPromise(relatedDoc));
+              value.forEach((relatedDoc, i) => {
+                resultPromises.push(createPopulationPromise(relatedDoc, i));
               });
             }
 
