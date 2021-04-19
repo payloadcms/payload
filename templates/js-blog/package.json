@@ -1,5 +1,6 @@
 {
   "name": "payload-blog",
+  "description": "Blog template",
   "version": "1.0.0",
   "main": "server.js",
   "license": "MIT",

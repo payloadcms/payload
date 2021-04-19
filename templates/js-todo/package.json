@@ -1,5 +1,6 @@
 {
   "name": "payload-starter-javascript",
+  "description": "Simple to-do list example",
   "version": "1.0.0",
   "main": "server.js",
   "license": "MIT",
