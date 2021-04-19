@@ -25,7 +25,6 @@ const Users: CollectionConfig = {
     // Email added by default
     {
       name: 'name',
-      label: 'Name',
       type: 'text',
     }
   ],

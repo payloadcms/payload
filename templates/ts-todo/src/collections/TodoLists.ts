@@ -2,13 +2,9 @@ import { CollectionConfig } from 'payload/types';
 
 const Todo: CollectionConfig = {
   slug: 'todos',
-  labels: {
-    singular: 'Todo List',
-    plural: 'Todo Lists',
-  },
   admin: {
-    defaultColumns: ['name', 'items', 'updatedAt'],
-    useAsTitle: 'name',
+    defaultColumns: ['listName', 'tasks', 'updatedAt'],
+    useAsTitle: 'listName',
   },
   access: {
     create: () => true,
@@ -18,23 +14,19 @@ const Todo: CollectionConfig = {
   },
   fields: [
     {
-      name: 'name',
-      label: 'List Name',
+      name: 'listName',
       type: 'text',
     },
     {
-      name: 'items',
-      label: 'Items',
+      name: 'tasks',
       type: 'array',
       fields: [
         {
           name: 'name',
-          label: 'Task Name',
           type: 'text',
         },
         {
           name: 'complete',
-          label: 'Complete',
           type: 'checkbox',
           defaultValue: false,
         }

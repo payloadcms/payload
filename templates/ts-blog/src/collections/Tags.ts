@@ -11,7 +11,6 @@ const Tags: CollectionConfig = {
   fields: [
     {
       name: 'name',
-      label: 'Name',
       type: 'text',
     },
   ],

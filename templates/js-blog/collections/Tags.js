@@ -9,7 +9,6 @@ const Tags = {
   fields: [
     {
       name: 'name',
-      label: 'Name',
       type: 'text',
     },
   ],

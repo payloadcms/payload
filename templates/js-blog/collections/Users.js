@@ -22,7 +22,6 @@ const Users = {
     // Email added by default
     {
       name: 'name',
-      label: 'Name',
       type: 'text',
     }
   ],

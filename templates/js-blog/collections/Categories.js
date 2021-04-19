@@ -9,7 +9,6 @@ const Categories = {
   fields: [
     {
       name: 'name',
-      label: 'Name',
       type: 'text',
     },
   ],
