@@ -7,6 +7,7 @@ const decryptKey: FieldHook = ({ req, value }) => (value ? req.payload.decrypt(v
 export default [
   {
     name: 'enableAPIKey',
+    label: 'Enable API Key',
     type: 'checkbox',
     defaultValue: false,
     admin: {
@@ -17,6 +18,7 @@ export default [
   },
   {
     name: 'apiKey',
+    label: 'API Key',
     type: 'text',
     admin: {
       components: {

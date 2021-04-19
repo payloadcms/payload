@@ -24,16 +24,6 @@ const formatFields = (config) => {
     ]);
   }
 
-  if (config.auth) {
-    fields = fields.concat([
-      {
-        name: 'enableAPIKey',
-        label: 'Enable API Key for this user',
-        type: 'checkbox',
-      },
-    ]);
-  }
-
   if (config.upload) {
     fields = fields.concat([
       {
