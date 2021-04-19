@@ -2,7 +2,7 @@
 
 ### BREAKING CHANGES
 
-* All Collection and Global access control functions are now set to require a user to be logged in to interact through GraphQL or REST APIs. This default access control is set to ensure that your API data is secure by default. From there, you can opt to publicly expose API actions as you need.
+* By default, all Collection and Global access control functions are now set to require a user to be logged in to interact through GraphQL or REST APIs. This default access control is set to ensure that your API data is secure out of the box. From there, you can opt to publicly expose API actions as you need.
 
 #### Migration Instructions to `0.6.x`:
 
