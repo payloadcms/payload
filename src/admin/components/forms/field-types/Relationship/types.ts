@@ -17,9 +17,9 @@ export type Option = {
   options?: Option[]
 }
 
-type REPLACE = {
-  type: 'REPLACE'
-  payload: Option[]
+type CLEAR = {
+  type: 'CLEAR'
+  required: boolean
 }
 
 type ADD = {
@@ -30,7 +30,7 @@ type ADD = {
   collection: CollectionConfig
 }
 
-export type Action = REPLACE | ADD
+export type Action = CLEAR | ADD
 
 export type ValueWithRelation = {
   relationTo: string

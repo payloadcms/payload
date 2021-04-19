@@ -51,7 +51,6 @@ const Relationship: React.FC<Props> = (props) => {
   const formProcessing = useFormProcessing();
 
   const hasMultipleRelations = Array.isArray(relationTo);
-  const [relations] = useState(Array.isArray(relationTo) ? relationTo : [relationTo]);
   const [options, dispatchOptions] = useReducer(optionsReducer, required ? [] : [{ value: 'null', label: 'None' }]);
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
@@ -108,6 +107,7 @@ const Relationship: React.FC<Props> = (props) => {
           addOptions(data, relation);
           setLastLoadedPage((l) => l + 1);
         } else {
+          const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
           const { data, relation } = lastPage;
           addOptions(data, relation);
           setLastFullyLoadedRelation(relations.indexOf(relation));
@@ -115,15 +115,16 @@ const Relationship: React.FC<Props> = (props) => {
         }
       });
     }
-  }, [addOptions, api, collections, relations, search, serverURL]);
+  }, [addOptions, api, collections, relationTo, search, serverURL]);
 
   const getNextOptions = useCallback((params = {} as Record<string, unknown>) => {
     const clear = params?.clear;
+    const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
 
     if (clear) {
       dispatchOptions({
-        type: 'REPLACE',
-        payload: required ? [] : [{ value: 'null', label: 'None' }],
+        type: 'CLEAR',
+        required,
       });
 
       setLastFullyLoadedRelation(-1);
@@ -137,7 +138,7 @@ const Relationship: React.FC<Props> = (props) => {
         lastLoadedPage,
       });
     }
-  }, [errorLoading, required, lastFullyLoadedRelation, relations, getResults, lastLoadedPage]);
+  }, [errorLoading, required, lastFullyLoadedRelation, relationTo, getResults, lastLoadedPage]);
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
@@ -246,6 +247,16 @@ const Relationship: React.FC<Props> = (props) => {
 
   useEffect(() => {
     const getFirstResults = async () => {
+      dispatchOptions({
+        type: 'CLEAR',
+        required,
+      });
+
+      setLastLoadedPage(1);
+      setLastFullyLoadedRelation(-1);
+      setHasLoadedFirstOptions(false);
+
+      const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
       const res = await fetch(`${serverURL}${api}/${relations[0]}?limit=${maxResultsPerRequest}&depth=0`);
 
       if (res.ok) {
@@ -297,24 +308,25 @@ const Relationship: React.FC<Props> = (props) => {
     };
 
     getFirstResults();
-  }, [addOptions, api, relations, serverURL]);
+  }, [addOptions, api, required, relationTo, serverURL]);
 
   useEffect(() => {
     if (debouncedSearch) {
       dispatchOptions({
-        type: 'REPLACE',
-        payload: required ? [] : [{ value: 'null', label: 'None' }],
+        type: 'CLEAR',
+        required,
       });
 
       setLastLoadedPage(1);
       setLastFullyLoadedRelation(-1);
+      const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
 
       getResults({
         relations,
         lastLoadedPage: 1,
       });
     }
-  }, [getResults, debouncedSearch, relations, required]);
+  }, [getResults, debouncedSearch, relationTo, required]);
 
   const classes = [
     'field-type',

@@ -16,8 +16,8 @@ const reduceToIDs = (options) => options.reduce((ids, option) => {
 
 const optionsReducer = (state: Option[], action: Action): Option[] => {
   switch (action.type) {
-    case 'REPLACE': {
-      return action.payload;
+    case 'CLEAR': {
+      return action.required ? [] : [{ value: 'null', label: 'None' }];
     }
 
     case 'ADD': {
