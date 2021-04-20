@@ -4,7 +4,7 @@ export type ErrorResponse = { errors: unknown[], data?: any, stack?: string };
 
 const formatErrorResponse = (incoming: Error | APIError | { [key: string]: unknown }): ErrorResponse => {
   if (incoming) {
-    if (incoming instanceof APIError && incoming.data && incoming.data.length > 0) {
+    if (incoming instanceof APIError && incoming.data) {
       return {
         errors: [{
           name: incoming.name,
