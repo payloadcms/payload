@@ -24,7 +24,7 @@ const sanitizeFields = (fields, validRelationships: string[]) => {
       });
     }
 
-    if (field.type === 'blocks') {
+    if ((field.type === 'blocks' || field.type === 'array') && field.label !== false) {
       field.labels = field.labels || formatLabels(field.name);
     }
 

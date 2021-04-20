@@ -181,7 +181,6 @@ export const blocks = baseField.keys({
     singular: joi.string(),
     plural: joi.string(),
   }),
-  label: joi.string(),
   blocks: joi.array().items(
     joi.object({
       slug: joi.string().required(),
