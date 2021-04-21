@@ -69,7 +69,7 @@ const traverseFields = (args: Arguments): void => {
   fields.forEach((field) => {
     const dataCopy = data;
 
-    if (operation === 'read' && field.hidden && typeof data[field.name] !== 'undefined' && !showHiddenFields) {
+    if (hook === 'afterRead' && field.hidden && typeof data[field.name] !== 'undefined' && !showHiddenFields) {
       delete data[field.name];
     }
 
