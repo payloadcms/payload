@@ -1,3 +1,10 @@
+## [0.6.4](https://github.com/payloadcms/payload/compare/v0.6.3...v0.6.4) (2021-04-21)
+
+
+### Bug Fixes
+
+* allows _verificationToken to come back via showHiddenFields ([74430ea](https://github.com/payloadcms/payload/commit/74430ea1519c1ba0ad655daf4e8f5d8dae855358))
+
 ## [0.6.3](https://github.com/payloadcms/payload/compare/v0.6.2...v0.6.3) (2021-04-21)
 
 
