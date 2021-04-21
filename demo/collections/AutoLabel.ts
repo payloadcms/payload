@@ -1,5 +1,4 @@
 import { PayloadCollectionConfig } from '../../src/collections/config/types';
-import { relationship } from '../../src/fields/config/schema';
 
 const AutoLabel: PayloadCollectionConfig = {
   slug: 'auto-label',
@@ -51,6 +50,38 @@ const AutoLabel: PayloadCollectionConfig = {
               type: 'number',
             },
           ],
+        },
+      ],
+    },
+    {
+      name: 'noLabelBlock',
+      type: 'blocks',
+      label: false,
+      minRows: 1,
+      maxRows: 20,
+      blocks: [
+        {
+          slug: 'number',
+          // labels: {
+          //   singular: 'Number',
+          //   plural: 'Numbers',
+          // },
+          fields: [
+            {
+              name: 'testNumber',
+              type: 'number',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'items',
+      type: 'array',
+      fields: [
+        {
+          name: 'itemName',
+          type: 'text',
         },
       ],
     },

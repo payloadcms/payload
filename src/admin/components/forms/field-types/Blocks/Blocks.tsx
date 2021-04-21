@@ -241,9 +241,7 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
                 <Banner type="error">
                   This field requires at least
                   {' '}
-                  {minRows
-                    ? `${minRows} ${labels.plural}`
-                    : `1 ${labels.singular}`}
+                  {`${minRows} ${minRows === 1 ? labels.singular : labels.plural}`}
                 </Banner>
               )}
               {(rows.length === 0 && readOnly) && (

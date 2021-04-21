@@ -12,39 +12,124 @@ describe('sanitizeFields', () => {
       sanitizeFields(fields, []);
     }).toThrow(MissingFieldType);
   });
-  it('should populate label if missing', () => {
-    const fields = [{
-      name: 'someCollection',
-      type: 'text',
-    }];
-    const sanitizedField = sanitizeFields(fields, [])[0];
-    expect(sanitizedField.name).toStrictEqual('someCollection');
-    expect(sanitizedField.label).toStrictEqual('Some Collection');
-    expect(sanitizedField.type).toStrictEqual('text');
-  });
-  it('should allow auto-label override', () => {
-    const fields = [{
-      name: 'someCollection',
-      type: 'text',
-      label: 'Do not label',
-    }];
-    const sanitizedField = sanitizeFields(fields, [])[0];
-    expect(sanitizedField.name).toStrictEqual('someCollection');
-    expect(sanitizedField.label).toStrictEqual('Do not label');
-    expect(sanitizedField.type).toStrictEqual('text');
-  });
-  it('should allow label opt-out', () => {
-    const fields = [{
-      name: 'someCollection',
-      type: 'text',
-      label: false,
-    }];
-    const sanitizedField = sanitizeFields(fields, [])[0];
-    expect(sanitizedField.name).toStrictEqual('someCollection');
-    expect(sanitizedField.label).toStrictEqual(false);
-    expect(sanitizedField.type).toStrictEqual('text');
-  });
 
+  describe('auto-labeling', () => {
+    it('should populate label if missing', () => {
+      const fields = [{
+        name: 'someField',
+        type: 'text',
+      }];
+      const sanitizedField = sanitizeFields(fields, [])[0];
+      expect(sanitizedField.name).toStrictEqual('someField');
+      expect(sanitizedField.label).toStrictEqual('Some Field');
+      expect(sanitizedField.type).toStrictEqual('text');
+    });
+    it('should allow auto-label override', () => {
+      const fields = [{
+        name: 'someField',
+        type: 'text',
+        label: 'Do not label',
+      }];
+      const sanitizedField = sanitizeFields(fields, [])[0];
+      expect(sanitizedField.name).toStrictEqual('someField');
+      expect(sanitizedField.label).toStrictEqual('Do not label');
+      expect(sanitizedField.type).toStrictEqual('text');
+    });
+
+    describe('opt-out', () => {
+      it('should allow label opt-out', () => {
+        const fields = [{
+          name: 'someField',
+          type: 'text',
+          label: false,
+        }];
+        const sanitizedField = sanitizeFields(fields, [])[0];
+        expect(sanitizedField.name).toStrictEqual('someField');
+        expect(sanitizedField.label).toStrictEqual(false);
+        expect(sanitizedField.type).toStrictEqual('text');
+      });
+
+      it('should allow label opt-out for arrays', () => {
+        const fields = [{
+          name: 'items',
+          type: 'array',
+          label: false,
+          fields: [
+            {
+              name: 'itemName',
+              type: 'text',
+            },
+          ],
+        }];
+        const sanitizedField = sanitizeFields(fields, [])[0];
+        expect(sanitizedField.name).toStrictEqual('items');
+        expect(sanitizedField.label).toStrictEqual(false);
+        expect(sanitizedField.type).toStrictEqual('array');
+        expect(sanitizedField.labels).toBeUndefined();
+      });
+      it('should allow label opt-out for blocks', () => {
+        const fields = [{
+          name: 'noLabelBlock',
+          type: 'blocks',
+          label: false,
+          blocks: [
+            {
+              slug: 'number',
+              fields: [
+                {
+                  name: 'testNumber',
+                  type: 'number',
+                },
+              ],
+            },
+          ],
+        }];
+        const sanitizedField = sanitizeFields(fields, [])[0];
+        expect(sanitizedField.name).toStrictEqual('noLabelBlock');
+        expect(sanitizedField.label).toStrictEqual(false);
+        expect(sanitizedField.type).toStrictEqual('blocks');
+        expect(sanitizedField.labels).toBeUndefined();
+      });
+    });
+
+
+    it('should label arrays with plural and singular', () => {
+      const fields = [{
+        name: 'items',
+        type: 'array',
+        fields: [
+          {
+            name: 'itemName',
+            type: 'text',
+          },
+        ],
+      }];
+      const sanitizedField = sanitizeFields(fields, [])[0];
+      expect(sanitizedField.name).toStrictEqual('items');
+      expect(sanitizedField.label).toStrictEqual('Items');
+      expect(sanitizedField.type).toStrictEqual('array');
+      expect(sanitizedField.labels).toMatchObject({ singular: 'Item', plural: 'Items' });
+    });
+
+    it('should label blocks with plural and singular', () => {
+      const fields = [{
+        name: 'specialBlock',
+        type: 'blocks',
+        blocks: [
+          {
+            slug: 'number',
+            fields: [{ name: 'testNumber', type: 'number' }],
+          },
+        ],
+      }];
+      const sanitizedField = sanitizeFields(fields, [])[0];
+      expect(sanitizedField.name).toStrictEqual('specialBlock');
+      expect(sanitizedField.label).toStrictEqual('Special Block');
+      expect(sanitizedField.type).toStrictEqual('blocks');
+      expect(sanitizedField.labels).toMatchObject({ singular: 'Special Block', plural: 'Special Blocks' });
+      expect(sanitizedField.blocks[0].fields[0].label).toStrictEqual('Test Number');
+    });
+  });
 
   describe('relationships', () => {
     it('should not throw on valid relationship', () => {

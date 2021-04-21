@@ -53,6 +53,10 @@ export const text = baseField.keys({
   defaultValue: joi.string(),
   minLength: joi.number(),
   maxLength: joi.number(),
+  admin: baseAdminFields.keys({
+    placeholder: joi.string(),
+    autoComplete: joi.string(),
+  }),
 });
 
 export const number = baseField.keys({
@@ -62,6 +66,8 @@ export const number = baseField.keys({
   min: joi.number(),
   max: joi.number(),
   admin: baseAdminFields.keys({
+    placeholder: joi.string(),
+    autoComplete: joi.string(),
     step: joi.number(),
   }),
 });
@@ -72,6 +78,10 @@ export const textarea = baseField.keys({
   defaultValue: joi.string(),
   minLength: joi.number(),
   maxLength: joi.number(),
+  admin: baseAdminFields.keys({
+    placeholder: joi.string(),
+    rows: joi.number(),
+  }),
 });
 
 export const email = baseField.keys({
@@ -80,6 +90,10 @@ export const email = baseField.keys({
   defaultValue: joi.string(),
   minLength: joi.number(),
   maxLength: joi.number(),
+  admin: baseAdminFields.keys({
+    placeholder: joi.string(),
+    autoComplete: joi.string(),
+  }),
 });
 
 export const code = baseField.keys({
@@ -181,7 +195,6 @@ export const blocks = baseField.keys({
     singular: joi.string(),
     plural: joi.string(),
   }),
-  label: joi.string(),
   blocks: joi.array().items(
     joi.object({
       slug: joi.string().required(),
@@ -202,6 +215,7 @@ export const richText = baseField.keys({
   name: joi.string().required(),
   defaultValue: joi.array().items(joi.object()),
   admin: baseAdminFields.keys({
+    placeholder: joi.string(),
     elements: joi.array().items(
       joi.alternatives().try(
         joi.string(),
@@ -232,6 +246,7 @@ export const date = baseField.keys({
   name: joi.string().required(),
   defaultValue: joi.string(),
   admin: baseAdminFields.keys({
+    placeholder: joi.string(),
     date: joi.object({
       displayFormat: joi.string(),
       pickerAppearance: joi.string(),
