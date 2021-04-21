@@ -1,3 +1,12 @@
+## [0.6.3](https://github.com/payloadcms/payload/compare/v0.6.2...v0.6.3) (2021-04-21)
+
+
+### Bug Fixes
+
+* make admin field properties in joi schema match TS types ([519c021](https://github.com/payloadcms/payload/commit/519c021525be114f43ad321233a9b8211d309ed0))
+* properly label arrays/blocks with plural and singular ([fa49811](https://github.com/payloadcms/payload/commit/fa49811377103db9241f43537e508da62eb19076))
+* safely parses incoming stringified richtext json ([9c95c75](https://github.com/payloadcms/payload/commit/9c95c750305633e99e7d80b5ba407b5b3146d691))
+
 ## [0.6.2](https://github.com/payloadcms/payload/compare/v0.6.1...v0.6.2) (2021-04-19)
 
 
