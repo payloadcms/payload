@@ -94,7 +94,13 @@ const traverseFields = (args: Arguments): void => {
 
     if (field.type === 'richText') {
       if (typeof data[field.name] === 'string') {
-        dataCopy[field.name] = JSON.parse(data[field.name] as string);
+        try {
+          const richTextJSON = JSON.parse(data[field.name] as string);
+          dataCopy[field.name] = richTextJSON;
+        } catch {
+          // Disregard this data as it is not valid.
+          // Will be reported to user by field validation
+        }
       }
 
       if ((field.admin?.elements?.includes('relationship') || !field?.admin?.elements) && hook === 'afterRead') {
