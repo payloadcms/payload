@@ -240,4 +240,43 @@ describe('GrahpQL Resolvers', () => {
       expect(deletedId).toStrictEqual(id);
     });
   });
+
+  describe('Error Handler', () => {
+    it('should return have an array of errors when making a bad request', async () => {
+      let error;
+
+      // language=graphQL
+      const query = `query {
+        LocalizedPosts(where: { summary: { exists: true }}) {
+          docs {
+            badFieldName
+          }
+        }
+      }`;
+      await client.request(query).catch((err) => {
+        error = err;
+      });
+      expect(Array.isArray(error.response.errors)).toBe(true);
+      expect(typeof error.response.errors[0].message).toBe('string');
+    });
+
+    it('should return have an array of errors when failing to pass validation', async () => {
+      let error;
+      // language=graphQL
+      const query = `mutation {
+          createLocalizedPost(data: {priority: 10}) {
+          id
+          priority
+          createdAt
+          updatedAt
+        }
+      }`;
+
+      await client.request(query).catch((err) => {
+        error = err;
+      });
+      expect(Array.isArray(error.response.errors)).toBe(true);
+      expect(typeof error.response.errors[0].message).toBe('string');
+    });
+  });
 });
