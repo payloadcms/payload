@@ -1,3 +1,10 @@
+## [0.6.5](https://github.com/payloadcms/payload/compare/v0.6.4...v0.6.5) (2021-04-22)
+
+
+### Features
+
+* builds plugin infrastructure ([#149](https://github.com/payloadcms/payload/issues/149)) ([f17c6e4](https://github.com/payloadcms/payload/commit/f17c6e4010de07578af21398f667fa55bc8343bc))
+
 ## [0.6.4](https://github.com/payloadcms/payload/compare/v0.6.3...v0.6.4) (2021-04-21)
 
 
