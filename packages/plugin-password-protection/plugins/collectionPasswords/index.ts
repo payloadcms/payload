@@ -20,7 +20,7 @@ const collectionPasswords = (incomingOptions: Options) => (incomingConfig: Confi
     whitelistUsers: incomingOptions.whitelistUsers || (({ payloadAPI, user }) => Boolean(user) || payloadAPI === 'local'),
     passwordFieldName: incomingOptions.passwordFieldName || 'docPassword',
     passwordProtectedFieldName: incomingOptions.passwordFieldName || 'passwordProtected',
-    mutationName: incomingOptions.mutationName || 'ValidatePassword',
+    mutationName: incomingOptions.mutationName || 'validatePassword',
   };
 
   const config: Config = {
@@ -72,9 +72,9 @@ const collectionPasswords = (incomingOptions: Options) => (incomingConfig: Confi
         if (!doc[options.passwordFieldName] || whitelistUsersResponse) return doc;
 
         const cookies = parseCookies(req);
-        const cookiePagePassword = cookies[`${cookiePrefix}-${doc.id}`];
+        const cookiePassword = cookies[`${cookiePrefix}-${doc.id}`];
 
-        if (cookiePagePassword === doc[options.passwordFieldName]) {
+        if (cookiePassword === doc[options.passwordFieldName]) {
           return doc;
         }
 
@@ -94,7 +94,19 @@ const collectionPasswords = (incomingOptions: Options) => (incomingConfig: Confi
           ],
         },
         fields: [
-          ...collectionConfig?.fields,
+          ...collectionConfig?.fields.map((field) => {
+            const newField = { ...field };
+            newField.admin = {
+              ...newField.admin,
+              condition: (data, siblingData) => {
+                const existingConditionResult = field?.admin?.condition ? field.admin.condition(data, siblingData) : true;
+                if (!existingConditionResult) return false;
+                return Boolean(data?.passwordProtected);
+              },
+            };
+
+            return newField;
+          }),
           {
             name: options.passwordFieldName,
             label: 'Password',

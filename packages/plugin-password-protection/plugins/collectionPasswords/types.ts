@@ -1,6 +1,6 @@
 import { PayloadRequest } from 'payload/dist/express/types';
 
-export type AllowUsers = (req: PayloadRequest) => boolean;
+export type AllowUsers = (req: PayloadRequest) => Promise<boolean> | boolean;
 
 export type Options = {
   passwordFieldName?: string
