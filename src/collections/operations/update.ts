@@ -238,6 +238,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
   if (password) {
     await doc.setPassword(password as string);
+    await doc.save();
     delete data.password;
     delete result.password;
   }
