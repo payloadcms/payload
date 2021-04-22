@@ -1,5 +1,5 @@
 import * as GraphQL from 'graphql';
-import { GraphQLObjectType, GraphQLSchema } from 'graphql';
+import { GraphQLError, GraphQLFormattedError, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { graphqlHTTP } from 'express-graphql';
 import queryComplexity, { simpleEstimator, fieldExtensionsEstimator } from 'graphql-query-complexity';
 import buildObjectType from './schema/buildObjectType';
@@ -53,7 +53,7 @@ class InitializeGraphQL {
 
   extensions: (info: any) => Promise<any>;
 
-  customFormatErrorFn: () => any;
+  customFormatErrorFn: (error: GraphQLError) => GraphQLFormattedError;
 
   validationRules: any;
 
@@ -138,7 +138,7 @@ class InitializeGraphQL {
       }
       return null;
     };
-    this.customFormatErrorFn = () => (this.errorResponse);
+    this.customFormatErrorFn = (error) => (this.errorResponse || error);
     this.validationRules = (variables) => ([
       queryComplexity({
         estimators: [
