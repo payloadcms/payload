@@ -9,13 +9,15 @@ import { Payload } from '..';
 import { AfterErrorHook, PayloadCollectionConfig, CollectionConfig } from '../collections/config/types';
 import { PayloadGlobalConfig, GlobalConfig } from '../globals/config/types';
 import { PayloadRequest } from '../express/types';
-import InitializeGraphQL from '../graphql';
 import { Where } from '../types';
 
 type Email = {
   fromName: string;
   fromAddress: string;
 }
+
+// eslint-disable-next-line no-use-before-define
+type Plugin = (config: Config) => Config;
 
 export type EmailTransport = Email & {
   transport: Transporter;
@@ -99,7 +101,7 @@ export type PayloadConfig = {
   };
   debug?: boolean
   express?: {
-    json: {
+    json?: {
       limit?: number
     },
     compression?: {
@@ -126,8 +128,8 @@ export type PayloadConfig = {
     fallback?: boolean
   };
   graphQL?: {
-    mutations?: ((graphQL: typeof GraphQL, payload: InitializeGraphQL) => any),
-    queries?: ((graphQL: typeof GraphQL, payload: InitializeGraphQL) => any),
+    mutations?: ((graphQL: typeof GraphQL, payload: Payload) => Record<string, unknown>),
+    queries?: ((graphQL: typeof GraphQL, payload: Payload) => Record<string, unknown>),
     maxComplexity?: number;
     disablePlaygroundInProduction?: boolean;
     disable?: boolean;
@@ -136,9 +138,10 @@ export type PayloadConfig = {
   hooks?: {
     afterError?: AfterErrorHook;
   };
+  plugins?: Plugin[]
 };
 
-export type Config = Omit<DeepRequired<PayloadConfig>, 'collections'> & {
+export type Config = Omit<DeepRequired<PayloadConfig>, 'collections' | 'globals'> & {
   collections: CollectionConfig[]
   globals: GlobalConfig[]
   paths: { [key: string]: string };

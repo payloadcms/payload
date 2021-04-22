@@ -79,7 +79,7 @@ export default joi.object({
     .keys({
       json: joi.object(),
       compression: joi.object(),
-      middleware: joi.array().items(joi.object()),
+      middleware: joi.array().items(joi.func()),
     }),
   local: joi.boolean(),
   upload: joi.object()
@@ -116,4 +116,7 @@ export default joi.object({
   hooks: joi.object().keys({
     afterError: joi.func(),
   }),
+  plugins: joi.array().items(
+    joi.func(),
+  ),
 });

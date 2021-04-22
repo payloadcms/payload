@@ -62,7 +62,9 @@ export type PayloadGlobalConfig = {
   }
 }
 
-export type GlobalConfig = DeepRequired<PayloadGlobalConfig>
+export interface GlobalConfig extends Omit<DeepRequired<PayloadGlobalConfig>, 'fields'> {
+  fields: Field[]
+}
 
 export type Globals = {
   Model: GlobalModel
