@@ -9,5 +9,9 @@ import sanitize from './sanitize';
 export function buildConfig(config: PayloadConfig): Config {
   const sanitized = sanitize(config);
 
+  if (Array.isArray(config.plugins)) {
+    return sanitized.plugins.reduce((configWithPlugins, plugin) => plugin(configWithPlugins), sanitized);
+  }
+
   return sanitized;
 }

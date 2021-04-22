@@ -137,9 +137,10 @@ export type PayloadCollectionConfig = {
   timestamps?: boolean
 };
 
-export interface CollectionConfig extends Omit<DeepRequired<PayloadCollectionConfig>, 'auth' | 'upload'> {
+export interface CollectionConfig extends Omit<DeepRequired<PayloadCollectionConfig>, 'auth' | 'upload' | 'fields'> {
   auth: Auth;
   upload: Upload;
+  fields: Field[];
 }
 
 export type Collection = {
