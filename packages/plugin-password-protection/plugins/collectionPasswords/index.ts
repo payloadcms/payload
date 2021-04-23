@@ -100,8 +100,7 @@ const collectionPasswords = (incomingOptions: Options) => (incomingConfig: Confi
               ...newField.admin,
               condition: (data, siblingData) => {
                 const existingConditionResult = field?.admin?.condition ? field.admin.condition(data, siblingData) : true;
-                if (!existingConditionResult) return false;
-                return Boolean(!data?.passwordProtected);
+                return data?.passwordProtected ? false : existingConditionResult;
               },
             };
 
