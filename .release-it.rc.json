@@ -1,0 +1,25 @@
+{
+  "preReleaseId": "rc",
+  "git": {
+    "requireCleanWorkingDir": false,
+    "commit": false,
+    "push": false,
+    "tag": false
+  },
+  "github": {
+    "release": false
+  },
+  "npm": {
+    "skipChecks": true,
+    "tag": "rc"
+  },
+  "hooks": {
+    "before:init": ["yarn", "yarn clean", "yarn test"]
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": "angular",
+      "infile": "CHANGELOG.md"
+    }
+  }
+}
