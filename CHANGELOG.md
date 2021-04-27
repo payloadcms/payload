@@ -1,3 +1,14 @@
+## [0.6.6](https://github.com/payloadcms/payload/compare/v0.6.5...v0.6.6) (2021-04-27)
+
+
+### Bug Fixes
+
+* graphql returns compatible error format ([6f188b1](https://github.com/payloadcms/payload/commit/6f188b1fa6e631a992439f055e8e76c341ca6dfa))
+* handle rich text saving as empty string ([382089b](https://github.com/payloadcms/payload/commit/382089b484b278e6ff491a2447ad06c41b96d5e3))
+* removes incoming.data.length check, since data is typed as a keyed array when it is an instance of APIError ([2643e1a](https://github.com/payloadcms/payload/commit/2643e1a1006f86b24001f65cf39da245fa4daaad))
+* support image resizing on M1 chip ([8cfc039](https://github.com/payloadcms/payload/commit/8cfc039cd0ffd497728f185b6ab45695302d3b95))
+* update operation can save password changes ([a85bf9e](https://github.com/payloadcms/payload/commit/a85bf9e836f9463d94f13857254f5d4df6f68c72))
+
 ## [0.6.5](https://github.com/payloadcms/payload/compare/v0.6.4...v0.6.5) (2021-04-22)
 
 
