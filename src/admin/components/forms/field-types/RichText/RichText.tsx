@@ -155,7 +155,14 @@ const RichText: React.FC<Props> = (props) => {
   }
 
   let valueToRender = value;
-  if (typeof valueToRender === 'string') valueToRender = JSON.parse(valueToRender);
+  if (typeof valueToRender === 'string') {
+    try {
+      const parsedJSON = JSON.parse(valueToRender);
+      valueToRender = parsedJSON;
+    } catch (err) {
+      // do nothing
+    }
+  }
   if (!valueToRender) valueToRender = defaultValue;
 
   return (
