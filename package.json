@@ -155,7 +155,7 @@
     "sanitize-filename": "^1.6.3",
     "sass": "^1.29.0",
     "sass-loader": "^10.1.0",
-    "sharp": "^0.27.0",
+    "sharp": "^0.28.1",
     "slate": "^0.59.0",
     "slate-history": "^0.59.0",
     "slate-hyperscript": "^0.59.0",
