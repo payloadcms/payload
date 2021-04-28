@@ -11,6 +11,7 @@
     "templates"
   ],
   "dependencies": {
+    "@sentry/node": "^6.3.3",
     "@sindresorhus/slugify": "^1.1.0",
     "arg": "^5.0.0",
     "chalk": "^4.1.0",
