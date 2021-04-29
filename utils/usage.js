@@ -8,10 +8,10 @@ const init = () => {
   });
 
   Sentry.setTags({
-    os: os.type(),
-    platform: os.platform(),
-    release: os.release(),
-    nodeVersion: process.version,
+    os_type: os.type(),
+    os_platform: os.platform(),
+    os_release: os.release(),
+    node_version: process.version,
   });
 
   return Sentry.startTransaction({

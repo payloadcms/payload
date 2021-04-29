@@ -14,6 +14,7 @@ const getTemplate = async () => {
   const templates = await getValidTemplates();
   if (args['--template']) {
     TEMPLATE = args['--template'];
+    setTags({ template: TEMPLATE });
     return TEMPLATE;
   }
 
