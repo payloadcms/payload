@@ -5,6 +5,10 @@ import DateCell from './field-types/Date';
 import Checkbox from './field-types/Checkbox';
 import Textarea from './field-types/Textarea';
 
+jest.mock('@payloadcms/config-provider', () => ({
+  useConfig: () => ({ admin: { dateFormat: 'MMMM do yyyy, h:mm a' } }),
+}));
+
 describe('Cell Types', () => {
   describe('Blocks', () => {
     const field = {
