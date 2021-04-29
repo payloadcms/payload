@@ -11,6 +11,10 @@ const { getPayloadSecret } = require('../utils/getPayloadSecret');
 const { writeEnvFile } = require('../utils/writeEnvFile');
 const { getLanguage } = require('../utils/getLanguage');
 const { validateTemplate } = require('../utils/getValidTemplates');
+const { error } = require('../utils/log');
+const { init, handleException } = require('../utils/usage');
+
+const trx = init();
 
 (async () => {
   const args = getArgs();
@@ -18,7 +22,7 @@ const { validateTemplate } = require('../utils/getValidTemplates');
     console.log(await helpMessage());
     return 0;
   }
-  const templateArg = args['--template']
+  const templateArg = args['--template'];
   if (templateArg) {
     const valid = await validateTemplate(templateArg);
     if (!valid) {
@@ -28,19 +32,22 @@ const { validateTemplate } = require('../utils/getValidTemplates');
   }
 
   console.log(welcomeMessage);
-
-  await getProjectName();
-  await getLanguage();
-  await getTemplate();
-  await getDatabaseConnection();
-  await getPayloadSecret();
-  if (!args['--dry-run']) {
-    await createProject();
-    await writeEnvFile();
+  try {
+    await getProjectName();
+    await getLanguage();
+    await getTemplate();
+    await getDatabaseConnection();
+    await getPayloadSecret();
+    if (!args['--dry-run']) {
+      await createProject();
+      await writeEnvFile();
+    }
+    success('Payload project successfully created');
+    console.log(await successMessage());
+  } catch (e) {
+    handleException(e);
+    error(`An error has occurred: ${e?.message}`);
+  } finally {
+    trx.finish();
   }
-
-  success('Payload project successfully created');
-
-  console.log(await successMessage());
-
 })();

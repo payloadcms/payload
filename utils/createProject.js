@@ -9,6 +9,7 @@ const { getProjectDir } = require('./getProjectDir');
 const { getTemplate } = require('./getTemplate');
 const { success, error, warning } = require('./log');
 const { getPackageManager } = require('./getPackageManager');
+const { setTags } = require('./usage');
 
 const createProjectDir = (projectDir) => {
   fse.mkdirpSync(projectDir);
@@ -54,6 +55,7 @@ const updatePayloadVersion = async (projectDir) => {
     warning('Error retrieving latest Payload version. Please update your package.json manually.');
     return;
   }
+  setTags({ payload_version: payloadVersion });
 
   const pjson = path.resolve(projectDir, 'package.json');
   try {

@@ -1,8 +1,8 @@
 const prompts = require('prompts');
 const { getArgs } = require('./getArgs');
 const { getLanguage } = require('./getLanguage');
-const { info, error } = require('./log');
 const { getValidTemplates } = require('./getValidTemplates');
+const { setTags } = require('./usage');
 
 let TEMPLATE;
 const getTemplate = async () => {
@@ -14,6 +14,7 @@ const getTemplate = async () => {
   const templates = await getValidTemplates();
   if (args['--template']) {
     TEMPLATE = args['--template'];
+    setTags({ template: TEMPLATE });
     return TEMPLATE;
   }
 
@@ -40,6 +41,8 @@ const getTemplate = async () => {
   );
 
   TEMPLATE = `${lang}-${response.value}`;
+  setTags({ template: TEMPLATE });
+
   return TEMPLATE;
 };
 
