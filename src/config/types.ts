@@ -74,6 +74,7 @@ export type PayloadConfig = {
     indexHTML?: string;
     css?: string
     scss?: string
+    dateFormat?: string
     components?: {
       Nav?: React.ComponentType
       graphics?: {

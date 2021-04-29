@@ -47,6 +47,7 @@ export default joi.object({
     indexHTML: joi.string(),
     css: joi.string(),
     scss: joi.string(),
+    dateFormat: joi.string(),
     components: joi.object()
       .keys({
         Nav: component,

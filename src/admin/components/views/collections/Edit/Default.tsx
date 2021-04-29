@@ -25,7 +25,7 @@ const baseClass = 'collection-edit';
 
 const DefaultEditView: React.FC<Props> = (props) => {
   const { params: { id } = {} } = useRouteMatch<Record<string, string>>();
-  const { routes: { admin } } = useConfig();
+  const { admin: { dateFormat }, routes: { admin } } = useConfig();
 
   const {
     collection,
@@ -190,13 +190,13 @@ const DefaultEditView: React.FC<Props> = (props) => {
                           {data.updatedAt && (
                             <li>
                               <div className={`${baseClass}__label`}>Last Modified</div>
-                              <div>{format(new Date(data.updatedAt), 'MMMM do yyyy, h:mm a')}</div>
+                              <div>{format(new Date(data.updatedAt), dateFormat)}</div>
                             </li>
                           )}
                           {data.createdAt && (
                             <li>
                               <div className={`${baseClass}__label`}>Created</div>
-                              <div>{format(new Date(data.createdAt), 'MMMM do yyyy, h:mm a')}</div>
+                              <div>{format(new Date(data.createdAt), dateFormat)}</div>
                             </li>
                           )}
                         </React.Fragment>

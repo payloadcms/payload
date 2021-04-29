@@ -12,10 +12,12 @@ import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
 import { Props } from './types';
 
 import './index.scss';
+import { useConfig } from '@payloadcms/config-provider';
 
 const baseClass = 'global-edit';
 
 const DefaultGlobalView: React.FC<Props> = (props) => {
+  const { admin: { dateFormat } } = useConfig();
   const {
     global, data, onSave, permissions, action, apiURL, initialState,
   } = props;
@@ -77,20 +79,20 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                 )}
               </div>
               {data && (
-              <div className={`${baseClass}__api-url`}>
-                <span className={`${baseClass}__label`}>
-                  API URL
+                <div className={`${baseClass}__api-url`}>
+                  <span className={`${baseClass}__label`}>
+                    API URL
                   {' '}
-                  <CopyToClipboard value={apiURL} />
-                </span>
-                <a
-                  href={apiURL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {apiURL}
-                </a>
-              </div>
+                    <CopyToClipboard value={apiURL} />
+                  </span>
+                  <a
+                    href={apiURL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {apiURL}
+                  </a>
+                </div>
               )}
               <div className={`${baseClass}__sidebar-fields`}>
                 <RenderFields
@@ -103,14 +105,14 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                 />
               </div>
               {data && (
-              <ul className={`${baseClass}__meta`}>
-                {data.updatedAt && (
-                <li>
-                  <div className={`${baseClass}__label`}>Last Modified</div>
-                  <div>{format(new Date(data.updatedAt as string), 'MMMM do yyyy, h:mm a')}</div>
-                </li>
-                )}
-              </ul>
+                <ul className={`${baseClass}__meta`}>
+                  {data.updatedAt && (
+                    <li>
+                      <div className={`${baseClass}__label`}>Last Modified</div>
+                      <div>{format(new Date(data.updatedAt as string), dateFormat)}</div>
+                    </li>
+                  )}
+                </ul>
               )}
             </div>
           </div>
