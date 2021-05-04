@@ -149,6 +149,9 @@ export const group = baseField.keys({
   label: joi.string(),
   fields: joi.array().items(joi.link('#field')),
   defaultValue: joi.object(),
+  admin: baseAdminFields.keys({
+    hideGutter: joi.boolean().default(false),
+  }),
 });
 
 export const array = baseField.keys({

@@ -63,10 +63,6 @@ The default `elements` available in Payload are:
 
 The `leaves` property specifies built-in or custom [SlateJS leaves](https://docs.slatejs.org/concepts/08-rendering#leaves) to be enabled within the Admin panel.
 
-**`hideGutter`**
-
-Set this property to hide the gutter.
-
 The default `leaves` available in Payload are:
 
 - `bold`
@@ -74,6 +70,10 @@ The default `leaves` available in Payload are:
 - `italic`
 - `strikethrough`
 - `underline`
+
+**`hideGutter`**
+
+Set this property to `true` to hide this field's gutter within the admin panel. The field gutter is rendered as a vertical line and padding, but often if this field is nested within a Group, Block, or Array, you may want to hide the gutter.
 
 ### Relationship element
 

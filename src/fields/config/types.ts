@@ -128,6 +128,9 @@ export type DateField = FieldBase & {
 export type GroupField = FieldBase & {
   type: 'group';
   fields: Field[];
+  admin?: Admin & {
+    hideGutter?: boolean
+  }
 }
 
 export type RowField = FieldBase & {

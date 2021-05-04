@@ -20,6 +20,7 @@ const Group: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
+      hideGutter,
     },
     permissions,
   } = props;
@@ -34,7 +35,7 @@ const Group: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <FieldTypeGutter />
+      { !hideGutter && (<FieldTypeGutter />) }
 
       <div className={`${baseClass}__content-wrapper`}>
         {label && (
