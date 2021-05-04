@@ -188,6 +188,7 @@ export type RichTextField = FieldBase & {
     placeholder?: string
     elements?: RichTextElement[];
     leaves?: RichTextLeaf[];
+    hideGutter?: boolean;
   }
 }
 

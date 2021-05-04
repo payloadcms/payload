@@ -42,6 +42,7 @@ const RichText: React.FC<Props> = (props) => {
       width,
       placeholder,
       condition,
+      hideGutter,
     } = {},
   } = props;
 
@@ -164,7 +165,6 @@ const RichText: React.FC<Props> = (props) => {
     }
   }
   if (!valueToRender) valueToRender = defaultValue;
-
   return (
     <div
       className={classes}
@@ -173,7 +173,7 @@ const RichText: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <FieldTypeGutter />
+      { !hideGutter && (<FieldTypeGutter />) }
       <div className={`${baseClass}__wrap`}>
         <Error
           showError={showError}

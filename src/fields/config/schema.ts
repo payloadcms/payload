@@ -238,6 +238,7 @@ export const richText = baseField.keys({
         }),
       ),
     ),
+    hideGutter: joi.boolean().default(false),
   }),
 });
 
