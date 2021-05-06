@@ -130,3 +130,7 @@ const posts = await payload.find({
 	fallbackLocale: false,
 })
 ```
+
+<Banner type="alert">
+  <strong>Tip:</strong><br/>The REST and Local APIs can return all localization data in one request by passing 'all' or '*' as the <strong>locale</strong> parameter. The response will be structured so that field values come back as the full objects keyed for each locale instead of the single, translated value.
+</Banner>
