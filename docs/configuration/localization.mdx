@@ -81,7 +81,7 @@ REST API locale functionality relies on URL query parameters.
 
 **`?locale=`**
 
-Specify your desired locale by providing the `locale` query parameter directly in the endpoint URL.
+Specify your desired locale by providing the `locale` query parameter directly in the endpoint URL. To return all localization data in one request use `'all'` or `'*'`. The response will be structured so that field values come back as the full objects keyed for each locale instead of the single, translated value.
 
 **`?fallback-locale=`**
 
