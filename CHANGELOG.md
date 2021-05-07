@@ -1,3 +1,14 @@
+## [0.6.7](https://github.com/payloadcms/payload/compare/v0.6.6...v0.6.7) (2021-05-07)
+
+
+### Features
+
+* add ability to hide gutter for RichText fields ([e791c5b](https://github.com/payloadcms/payload/commit/e791c5b7b325e58d273041ff426d19bafc4fc102))
+* allows group field gutter to be disabled ([9aebeaf](https://github.com/payloadcms/payload/commit/9aebeaf579b9c8add64734dce92e4d92c0a1a24c))
+* exposes component types ([99466fa](https://github.com/payloadcms/payload/commit/99466fa41e24779705f517d29d57e6174508ebcc))
+* shrink image thumbnails on larger screens ([e565fa6](https://github.com/payloadcms/payload/commit/e565fa6f1ce13d76b8111e543d4c799a5d7f450e))
+* support global date format ([670ccf2](https://github.com/payloadcms/payload/commit/670ccf2f589c306d13f3060b8acf4f4d33fcdd23))
+
 ## [0.6.6](https://github.com/payloadcms/payload/compare/v0.6.5...v0.6.6) (2021-04-27)
 
 
