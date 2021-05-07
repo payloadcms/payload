@@ -25,7 +25,7 @@ const installDeps = async (dir, packageManager) => {
   if (args['--no-deps']) {
     return { failed: false };
   }
-  let cmd = packageManager === 'yarn' ? 'yarn' : 'npm install';
+  let cmd = packageManager === 'yarn' ? 'yarn' : 'npm install --legacy-peer-deps';
 
   let result = false;
   try {
