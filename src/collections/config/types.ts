@@ -90,6 +90,13 @@ export type AfterForgotPasswordHook = (args?: {
   args?: any;
 }) => any;
 
+type GeneratePreviewURLOptions = {
+  locale: string
+  token: string
+}
+
+export type GeneratePreviewURL = (doc: Document, options: GeneratePreviewURLOptions) => string
+
 export type PayloadCollectionConfig = {
   slug: string;
   labels?: {
@@ -108,7 +115,7 @@ export type PayloadCollectionConfig = {
       }
     };
     enableRichTextRelationship?: boolean
-    preview?: (doc: Document, token: string) => string
+    preview?: GeneratePreviewURL
   };
   hooks?: {
     beforeOperation?: BeforeOperationHook[];

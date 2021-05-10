@@ -1,6 +1,7 @@
 import { Data } from '../../forms/Form/types';
+import { GeneratePreviewURL } from '../../../../collections/config/types';
 
 export type Props = {
-  generatePreviewURL?: (data: unknown, token: string) => string,
+  generatePreviewURL?: GeneratePreviewURL,
   data?: Data
 }
