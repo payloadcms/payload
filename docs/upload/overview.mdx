@@ -43,6 +43,7 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
 | **`staticDir`** *      | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. |
 | **`imageSizes`**       | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes) |
 | **`adminThumbnail`**   | Set the way that the Admin panel will display thumbnails for this Collection. [More](#admin-thumbnails) |
+| **`mimeTypes`**   | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes) |
 
 *An asterisk denotes that a property above is required.*
 
@@ -68,6 +69,7 @@ const Media = {
       }
     ],
     adminThumbnail: 'thumbnail',
+    mimeTypes: ['image/*'],
   }
 }
 ```
@@ -128,7 +130,10 @@ const Media = {
     imageSizes: [
       // ... image sizes here
     ],
-    adminThumbnail: ({ doc }) => `https://google.com/custom-path-to-file/${doc.filename}`,
+    // highlight-start
+    adminThumbnail: ({ doc }) =>
+      `https://google.com/custom-path-to-file/${doc.filename}`,
+    // highlight-end
   }
 }
 ```
@@ -137,6 +142,24 @@ const Media = {
   <strong>Note:</strong><br/>
   If you specify a function to return an admin thumbnail, but your upload is not an image file type (for example, PDF or TXT) your function will not be used. Instead, Payload will display its generic file upload graphic.
 </Banner>
+
+### MimeTypes
+
+Specifying the `mimeTypes` property can restrict what files are allowed from the user's file picker. This accepts an array of strings, which can be any valid mimetype or mimetype wildcards
+
+Some example values are: `image/*`, `audio/*`, `video/*`, `image/png`, `application/pdf`
+
+**Example mimeTypes usage:**
+```js
+const Media = {
+  slug: 'media',
+  upload: {
+    staticURL: '/media',
+    staticDir: 'media',
+    mimeTypes: ['image/*', 'application/pdf'], // highlight-line
+  }
+}
+```
 
 ### Uploading Files
 
