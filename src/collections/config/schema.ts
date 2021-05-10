@@ -91,6 +91,7 @@ const collectionSchema = joi.object().keys({
           crop: joi.string(), // TODO: add further specificity with joi.xor
         }),
       ),
+      mimeTypes: joi.array().items(joi.string()),
     }),
     joi.boolean(),
   ),

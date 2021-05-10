@@ -10,4 +10,5 @@ export type Props = {
   data?: Data
   collection: CollectionConfig
   adminThumbnail?: string
+  mimeTypes?: string[];
 }

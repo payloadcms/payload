@@ -189,6 +189,7 @@ const Upload: React.FC<Props> = (props) => {
           <input
             ref={inputRef}
             type="file"
+            accept={collection?.upload?.mimeTypes?.join(',')}
             onChange={handleInputChange}
           />
         </div>
