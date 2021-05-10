@@ -54,10 +54,10 @@ jobs:
       uses: actions/cache@v1
       with:
         path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        key: ${{ runner.os }}-node-npm-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
-          ${{ runner.os }}-build-${{ env.cache-name }}-
-          ${{ runner.os }}-build-
+          ${{ runner.os }}-build_npm-${{ env.cache-name }}-
+          ${{ runner.os }}-build_npm-
           ${{ runner.os }}-
     - run: npm install --legacy-peer-deps
       env:
