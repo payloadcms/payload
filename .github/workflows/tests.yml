@@ -3,7 +3,7 @@ name: build
 on: [push]
 
 jobs:
-  build:
+  build_yarn:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -33,5 +33,37 @@ jobs:
     - run: yarn build
     - run: yarn test:client
     - run: yarn test:int # In-memory db + api tests
+      env:
+        CI: true
+  build_npm:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x, 15.x, 16.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+        registry-url: https://registry.npmjs.org
+        scope: '@payloadcms'
+        always-auth: true
+    - name: Cache node modules
+      uses: actions/cache@v1
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - run: npm install
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    - run: npm run build
+    - run: npm run test:client
+    - run: npm run test:int # In-memory db + api tests
       env:
         CI: true
