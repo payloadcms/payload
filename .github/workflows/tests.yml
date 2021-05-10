@@ -35,11 +35,11 @@ jobs:
     - run: yarn test:int # In-memory db + api tests
       env:
         CI: true
-  build_npm:
+  install_npm:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 15.x, 16.x]
+        node-version: [16.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -56,14 +56,9 @@ jobs:
         path: ~/.npm
         key: ${{ runner.os }}-node-npm-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
-          ${{ runner.os }}-build_npm-${{ env.cache-name }}-
-          ${{ runner.os }}-build_npm-
+          ${{ runner.os }}-npm-${{ env.cache-name }}-
+          ${{ runner.os }}-npm-
           ${{ runner.os }}-
     - run: npm install --legacy-peer-deps
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-    - run: npm run build
-    - run: npm run test:client
-    - run: npm run test:int # In-memory db + api tests
-      env:
-        CI: true
