@@ -13,9 +13,11 @@ const AllFields: PayloadCollectionConfig = {
   },
   admin: {
     useAsTitle: 'text',
-    preview: (doc, token) => {
-      if (doc && doc.text) {
-        return `http://localhost:3000/previewable-posts/${doc.text}?preview=true&token=${token}`;
+    preview: (doc, { token }) => {
+      const { text } = doc;
+
+      if (doc && text) {
+        return `http://localhost:3000/previewable-posts/${text}?preview=true&token=${token}`;
       }
 
       return null;
@@ -84,16 +86,6 @@ const AllFields: PayloadCollectionConfig = {
       defaultValue: 'option-1',
       required: true,
       hasMany: true,
-    },
-    {
-      name: 'dateFieldExample',
-      label: 'Day and Time',
-      type: 'date',
-      admin: {
-        date: {
-          timeIntervals: 30,
-        },
-      },
     },
     {
       name: 'dayOnlyDateFieldExample',
@@ -296,6 +288,17 @@ const AllFields: PayloadCollectionConfig = {
           'underline',
           'strikethrough',
         ],
+      },
+    },
+    {
+      name: 'dateFieldExample',
+      label: 'Day and Time',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        date: {
+          timeIntervals: 30,
+        },
       },
     },
   ],

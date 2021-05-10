@@ -8,9 +8,10 @@ const Preview: PayloadCollectionConfig = {
   },
   admin: {
     useAsTitle: 'title',
-    preview: (doc, token) => {
-      if (doc.title) {
-        return `http://localhost:3000/previewable-posts/${doc.title}?preview=true&token=${token}`;
+    preview: (doc, { token }) => {
+      const { title } = doc;
+      if (title) {
+        return `http://localhost:3000/previewable-posts/${title}?preview=true&token=${token}`;
       }
 
       return null;
