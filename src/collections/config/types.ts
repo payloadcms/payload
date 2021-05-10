@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeepRequired } from 'ts-essentials';
 import { PaginateModel, PassportLocalModel } from 'mongoose';
-import { Access } from '../../config/types';
+import { Access, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
-import { Document } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
@@ -89,13 +88,6 @@ export type AfterLoginHook = (args?: {
 export type AfterForgotPasswordHook = (args?: {
   args?: any;
 }) => any;
-
-type GeneratePreviewURLOptions = {
-  locale: string
-  token: string
-}
-
-export type GeneratePreviewURL = (doc: Document, options: GeneratePreviewURLOptions) => string
 
 export type PayloadCollectionConfig = {
   slug: string;

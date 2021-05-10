@@ -19,6 +19,13 @@ type Email = {
 // eslint-disable-next-line no-use-before-define
 type Plugin = (config: Config) => Config;
 
+type GeneratePreviewURLOptions = {
+  locale: string
+  token: string
+}
+
+export type GeneratePreviewURL = (doc: Record<string, unknown>, options: GeneratePreviewURLOptions) => string
+
 export type EmailTransport = Email & {
   transport: Transporter;
   transportOptions?: SMTPConnection.Options;

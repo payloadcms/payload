@@ -1,5 +1,6 @@
 import React from 'react';
 import format from 'date-fns/format';
+import { useConfig } from '@payloadcms/config-provider';
 import Eyebrow from '../../elements/Eyebrow';
 import Form from '../../forms/Form';
 import PreviewButton from '../../elements/PreviewButton';
@@ -12,7 +13,6 @@ import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
 import { Props } from './types';
 
 import './index.scss';
-import { useConfig } from '@payloadcms/config-provider';
 
 const baseClass = 'global-edit';
 
@@ -82,7 +82,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                 <div className={`${baseClass}__api-url`}>
                   <span className={`${baseClass}__label`}>
                     API URL
-                  {' '}
+                    {' '}
                     <CopyToClipboard value={apiURL} />
                   </span>
                   <a

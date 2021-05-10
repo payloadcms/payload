@@ -2,7 +2,7 @@ import React from 'react';
 import { Model, Document } from 'mongoose';
 import { DeepRequired } from 'ts-essentials';
 import { PayloadRequest } from '../../express/types';
-import { Access } from '../../config/types';
+import { Access, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 
 export type BeforeValidateHook = (args?: {
@@ -39,7 +39,7 @@ export type GlobalModel = Model<Document>
 export type PayloadGlobalConfig = {
   slug: string
   label?: string
-  preview?: (doc: Document, token: string) => string
+  preview?: GeneratePreviewURL
   hooks?: {
     beforeValidate?: BeforeValidateHook[]
     beforeChange?: BeforeChangeHook[]
