@@ -1,3 +1,13 @@
+## [0.6.8](https://github.com/payloadcms/payload/compare/v0.6.7...v0.6.8) (2021-05-12)
+
+
+### Features
+
+* add mimeTypes validation for uploads ([a5fcdf0](https://github.com/payloadcms/payload/commit/a5fcdf03bae681c5b2e0de6b681d20efe8ebdd7f))
+* disables user scalable in mobile ([#177](https://github.com/payloadcms/payload/issues/177)) ([46c1a36](https://github.com/payloadcms/payload/commit/46c1a36fdb9363201b65ecdec44088cb41532bd6))
+* exposes locale within preview function ([2d67448](https://github.com/payloadcms/payload/commit/2d67448d8ad1a7d4238820d0ccd93da961fc051c))
+* restrict upload mime types in file picker ([1c6f32f](https://github.com/payloadcms/payload/commit/1c6f32f2881410a1534b61711af05fd35e7977c2))
+
 ## [0.6.7](https://github.com/payloadcms/payload/compare/v0.6.6...v0.6.7) (2021-05-07)
 
 
