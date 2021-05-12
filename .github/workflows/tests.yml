@@ -3,11 +3,11 @@ name: build
 on: [push]
 
 jobs:
-  build:
+  build_yarn:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x, 15.x]
+        node-version: [12.x, 14.x, 15.x, 16.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -35,3 +35,30 @@ jobs:
     - run: yarn test:int # In-memory db + api tests
       env:
         CI: true
+  install_npm:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+        registry-url: https://registry.npmjs.org
+        scope: '@payloadcms'
+        always-auth: true
+    - name: Cache node modules
+      uses: actions/cache@v1
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-npm-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-npm-${{ env.cache-name }}-
+          ${{ runner.os }}-npm-
+          ${{ runner.os }}-
+    - run: npm install --legacy-peer-deps
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
