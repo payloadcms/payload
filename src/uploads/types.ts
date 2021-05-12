@@ -34,6 +34,7 @@ export type IncomingUploadType = {
   staticURL?: string;
   staticDir?: string;
   adminThumbnail?: string | GetAdminThumbnail;
+  mimeTypes?: string[];
 }
 
 
@@ -42,6 +43,7 @@ export type Upload = {
   staticURL: string
   staticDir: string
   adminThumbnail?: string | GetAdminThumbnail
+  mimeTypes?: string[];
 }
 
 export type File = {
