@@ -1,5 +1,6 @@
 const commandExists = require('command-exists');
 const { getArgs } = require('./getArgs');
+const { setTags } = require('./usage');
 
 let PACKAGE_MANAGER = false;
 const getPackageManager = async () => {
@@ -19,6 +20,7 @@ const getPackageManager = async () => {
       PACKAGE_MANAGER = 'npm';
     }
   }
+  setTags({ package_manager: PACKAGE_MANAGER });
   return PACKAGE_MANAGER;
 }
 
