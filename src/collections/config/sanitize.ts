@@ -10,6 +10,7 @@ import baseUploadFields from '../../fields/baseFields/baseUploadFields';
 import baseImageUploadFields from '../../fields/baseFields/baseImageUploadFields';
 import { formatLabels } from '../../utilities/formatLabels';
 import { defaults, authDefaults } from './defaults';
+import { mimeTypeValidator } from '../../fields/baseFields/mimeTypeValidator';
 
 const mergeBaseFields = (fields, baseFields) => {
   const mergedFields = [];
@@ -72,6 +73,10 @@ const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: 
     sanitized.admin.useAsTitle = (sanitized.admin.useAsTitle && sanitized.admin.useAsTitle !== 'id') ? sanitized.admin.useAsTitle : 'filename';
 
     let uploadFields = baseUploadFields;
+
+    if (sanitized.upload.mimeTypes) {
+      uploadFields.find((f) => f.name === 'mimeType').validate = mimeTypeValidator(sanitized.upload.mimeTypes);
+    }
 
     if (sanitized.upload.imageSizes && Array.isArray(sanitized.upload.imageSizes)) {
       uploadFields = uploadFields.concat(baseImageUploadFields(sanitized.upload.imageSizes));
