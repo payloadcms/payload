@@ -4,6 +4,10 @@
   margin: base(2) 0;
   min-width: base(15);
 
+  &__error-wrap {
+    position: relative;
+  }
+
   &__add-button-wrap {
     margin-left: base(0);
 

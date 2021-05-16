@@ -301,36 +301,6 @@ const AllFields: PayloadCollectionConfig = {
         },
       },
     },
-    {
-      name: 'slug1',
-      type: 'text',
-      admin: {
-        position: 'sidebar',
-      },
-      localized: true,
-      unique: true,
-      required: true,
-    },
-    {
-      name: 'slug2',
-      type: 'text',
-      admin: {
-        position: 'sidebar',
-      },
-      localized: true,
-      unique: true,
-      required: true,
-    },
-    {
-      name: 'slug3',
-      type: 'text',
-      admin: {
-        position: 'sidebar',
-      },
-      localized: true,
-      unique: true,
-      required: true,
-    },
   ],
   timestamps: true,
 };
