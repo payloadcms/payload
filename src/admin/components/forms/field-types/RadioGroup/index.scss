@@ -1,6 +1,8 @@
 @import '../../../../scss/styles.scss';
 
 .radio-group {
+  margin-bottom: $baseline;
+
   &--layout-horizontal {
     ul {
       display: flex;

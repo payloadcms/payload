@@ -1,6 +1,8 @@
 @import '../../../../scss/styles';
 
 .date-time-field {
+  margin-bottom: $baseline;
+
   &--has-error {
     .react-datepicker__input-container input {
       background-color: lighten($color-red, 20%);

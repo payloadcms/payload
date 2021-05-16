@@ -8,6 +8,21 @@ $cal-icon-width: 18px;
     width: 120px;
   }
 
+  &__icon-wrap {
+    position: relative;
+    z-index: 2;
+
+    .icon {
+      pointer-events: none;
+      position: absolute;
+      right: base(.75);
+      top: base(.625);
+      width: $cal-icon-width;
+      height: auto;
+      @include color-svg($color-dark-gray);
+    }
+  }
+
   &__appearance--timeOnly {
     .react-datepicker {
       width: 100%;
@@ -32,21 +47,6 @@ $cal-icon-width: 18px;
           }
         }
       }
-    }
-  }
-
-  &__input-wrapper {
-    position: relative;
-
-    .icon {
-      pointer-events: none;
-      position: absolute;
-      right: base(.75);
-      top: 50%;
-      transform: translateY(-50%);
-      width: $cal-icon-width;
-      height: auto;
-      @include color-svg($color-dark-gray);
     }
   }
 

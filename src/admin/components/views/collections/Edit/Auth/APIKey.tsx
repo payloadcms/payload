@@ -6,7 +6,6 @@ import CopyToClipboard from '../../../../elements/CopyToClipboard';
 import { text } from '../../../../../../fields/validations';
 import { useWatchForm } from '../../../../forms/Form/context';
 
-import './index.scss';
 import GenerateConfirmation from '../../../../elements/GenerateConfirmation';
 
 const path = 'apiKey';

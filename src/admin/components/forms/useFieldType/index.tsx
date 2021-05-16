@@ -5,8 +5,6 @@ import { useFormProcessing, useFormSubmitted, useFormModified, useForm } from '.
 import useDebounce from '../../../hooks/useDebounce';
 import { Options, FieldType } from './types';
 
-import './index.scss';
-
 const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
   const {
     path,

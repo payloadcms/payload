@@ -2,6 +2,8 @@
 
 .upload {
 	position: relative;
+  margin-bottom: $baseline;
+  min-width: base(15);
 
   &__wrap {
     display: flex;
@@ -11,8 +13,12 @@
     .btn {
       margin: 0 $baseline base(.5) 0;
     }
+  }
 
-    @include mid-break {
+  @include mid-break {
+    min-width: calc(100vw - #{base(2)});
+
+    &__wrap {
       display: block;
       padding: $baseline $baseline base(.5);
 

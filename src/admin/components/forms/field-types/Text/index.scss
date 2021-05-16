@@ -2,6 +2,7 @@
 
 .field-type.text {
 	position: relative;
+  margin-bottom: $baseline;
 
 	input {
 		@include formInput;

@@ -2,6 +2,7 @@
 
 .field-type.code {
   position: relative;
+  margin-bottom: $baseline;
 
   &.error {
     textarea {

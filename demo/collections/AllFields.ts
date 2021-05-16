@@ -246,25 +246,6 @@ const AllFields: PayloadCollectionConfig = {
       name: 'textarea',
     },
     {
-      name: 'slug',
-      type: 'text',
-      label: 'Slug',
-      admin: {
-        position: 'sidebar',
-      },
-      localized: true,
-      unique: true,
-      required: true,
-    },
-    {
-      name: 'checkbox',
-      type: 'checkbox',
-      label: 'Checkbox',
-      admin: {
-        position: 'sidebar',
-      },
-    },
-    {
       name: 'richText',
       type: 'richText',
       label: 'Rich Text',
@@ -291,6 +272,25 @@ const AllFields: PayloadCollectionConfig = {
       },
     },
     {
+      name: 'slug',
+      type: 'text',
+      label: 'Slug',
+      admin: {
+        position: 'sidebar',
+      },
+      localized: true,
+      unique: true,
+      required: true,
+    },
+    {
+      name: 'checkbox',
+      type: 'checkbox',
+      label: 'Checkbox',
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
       name: 'dateFieldExample',
       label: 'Day and Time',
       type: 'date',
@@ -300,6 +300,36 @@ const AllFields: PayloadCollectionConfig = {
           timeIntervals: 30,
         },
       },
+    },
+    {
+      name: 'slug1',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+      },
+      localized: true,
+      unique: true,
+      required: true,
+    },
+    {
+      name: 'slug2',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+      },
+      localized: true,
+      unique: true,
+      required: true,
+    },
+    {
+      name: 'slug3',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+      },
+      localized: true,
+      unique: true,
+      required: true,
     },
   ],
   timestamps: true,

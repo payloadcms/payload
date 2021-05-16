@@ -11,6 +11,7 @@
   > * {
     padding-left: base(.5);
     padding-right: base(.5);
+    flex-grow: 1;
   }
 
   @include mid-break {
