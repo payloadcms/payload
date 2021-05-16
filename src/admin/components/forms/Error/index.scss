@@ -1,6 +1,8 @@
 @import '../../../scss/styles';
 
-.error-message {
+.field-error.tooltip {
+  top: 0;
+  bottom: auto;
   left: auto;
   right: base(.5);
   transform: none;

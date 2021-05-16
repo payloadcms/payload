@@ -8,6 +8,10 @@
     right: auto;
   }
 
+  &__error-wrap {
+    position: relative;
+  }
+
   button {
     @extend %btn-reset;
     display: flex;

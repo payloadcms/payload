@@ -3,6 +3,10 @@
 .radio-group {
   margin-bottom: $baseline;
 
+  &__error-wrap {
+    position: relative;
+  }
+
   &--layout-horizontal {
     ul {
       display: flex;
