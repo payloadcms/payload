@@ -1,3 +1,10 @@
+## [0.6.9](https://github.com/payloadcms/payload/compare/v0.6.8...v0.6.9) (2021-05-16)
+
+
+### Bug Fixes
+
+* misc responsive improvements, date clipping in sidebar ([#165](https://github.com/payloadcms/payload/issues/165)), express-fileupload schema validation ([#180](https://github.com/payloadcms/payload/issues/180)) ([a2e57b0](https://github.com/payloadcms/payload/commit/a2e57b09f2e89aa64a413eb496d5aeb565d4fc6e))
+
 ## [0.6.8](https://github.com/payloadcms/payload/compare/v0.6.7...v0.6.8) (2021-05-12)
 
 
