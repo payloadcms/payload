@@ -39,6 +39,7 @@
     padding: base(5) base(6) base(6);
     margin-bottom: base(1.5);
     overflow-x: scroll;
+    flex-grow: 1;
   }
 
   &__sidebar-wrap {
