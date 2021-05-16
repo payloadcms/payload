@@ -58,9 +58,18 @@ const DateTime: React.FC<Props> = (props) => {
 
   return (
     <div className={classes}>
-      <div className={`${baseClass}__input-wrapper`}>
-        <DatePicker {...dateTimePickerProps} />
+      <div className={`${baseClass}__icon-wrap`}>
         <CalendarIcon />
+      </div>
+      <div className={`${baseClass}__input-wrapper`}>
+        <DatePicker
+          {...dateTimePickerProps}
+          popperModifiers={{
+            preventOverflow: {
+              enabled: true,
+            },
+          }}
+        />
       </div>
     </div>
   );

@@ -83,13 +83,7 @@ export default joi.object({
       middleware: joi.array().items(joi.func()),
     }),
   local: joi.boolean(),
-  upload: joi.object()
-    .keys({
-      limits: joi.object()
-        .keys({
-          fileSize: joi.number(),
-        }),
-    }),
+  upload: joi.object(),
   rateLimit: joi.object()
     .keys({
       window: joi.number(),

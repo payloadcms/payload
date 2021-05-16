@@ -2,6 +2,11 @@
 
 .field-type.blocks {
   margin: base(2) 0;
+  min-width: base(15);
+
+  &__error-wrap {
+    position: relative;
+  }
 
   &__add-button-wrap {
 
@@ -23,6 +28,10 @@
     > div > div {
       width: 100%;
     }
+  }
+
+  @include mid-break {
+    min-width: calc(100vw - #{base(2)});
   }
 }
 

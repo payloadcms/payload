@@ -246,25 +246,6 @@ const AllFields: PayloadCollectionConfig = {
       name: 'textarea',
     },
     {
-      name: 'slug',
-      type: 'text',
-      label: 'Slug',
-      admin: {
-        position: 'sidebar',
-      },
-      localized: true,
-      unique: true,
-      required: true,
-    },
-    {
-      name: 'checkbox',
-      type: 'checkbox',
-      label: 'Checkbox',
-      admin: {
-        position: 'sidebar',
-      },
-    },
-    {
       name: 'richText',
       type: 'richText',
       label: 'Rich Text',
@@ -288,6 +269,25 @@ const AllFields: PayloadCollectionConfig = {
           'underline',
           'strikethrough',
         ],
+      },
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      label: 'Slug',
+      admin: {
+        position: 'sidebar',
+      },
+      localized: true,
+      unique: true,
+      required: true,
+    },
+    {
+      name: 'checkbox',
+      type: 'checkbox',
+      label: 'Checkbox',
+      admin: {
+        position: 'sidebar',
       },
     },
     {

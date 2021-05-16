@@ -46,7 +46,7 @@
       @include shadow-sm;
     }
 
-    &.popup--align-left {
+    &.popup--h-align-left {
       .popup__content {
         left: - base(.5);
 
@@ -175,6 +175,7 @@
         top: unset;
         bottom: calc(100% - 1px);
         border-top-color: transparent !important;
+        border-bottom-color: white;
       }
     }
 

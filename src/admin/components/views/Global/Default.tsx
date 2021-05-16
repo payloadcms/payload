@@ -66,8 +66,8 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
             />
           </div>
         </div>
-        <div className={`${baseClass}__sidebar`}>
-          <div className={`${baseClass}__sidebar-sticky`}>
+        <div className={`${baseClass}__sidebar-wrap`}>
+          <div className={`${baseClass}__sidebar`}>
             <div className={`${baseClass}__sidebar-sticky-wrap`}>
               <div className={`${baseClass}__document-actions${preview ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
                 <PreviewButton
@@ -78,22 +78,6 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                   <FormSubmit>Save</FormSubmit>
                 )}
               </div>
-              {data && (
-                <div className={`${baseClass}__api-url`}>
-                  <span className={`${baseClass}__label`}>
-                    API URL
-                    {' '}
-                    <CopyToClipboard value={apiURL} />
-                  </span>
-                  <a
-                    href={apiURL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {apiURL}
-                  </a>
-                </div>
-              )}
               <div className={`${baseClass}__sidebar-fields`}>
                 <RenderFields
                   operation="update"
@@ -106,6 +90,22 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
               </div>
               {data && (
                 <ul className={`${baseClass}__meta`}>
+                  {data && (
+                    <li className={`${baseClass}__api-url`}>
+                      <span className={`${baseClass}__label`}>
+                        API URL
+                        {' '}
+                        <CopyToClipboard value={apiURL} />
+                      </span>
+                      <a
+                        href={apiURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {apiURL}
+                      </a>
+                    </li>
+                  )}
                   {data.updatedAt && (
                     <li>
                       <div className={`${baseClass}__label`}>Last Modified</div>

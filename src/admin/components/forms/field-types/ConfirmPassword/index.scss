@@ -2,6 +2,7 @@
 
 .field-type.confirm-password {
 	position: relative;
+  margin-bottom: $baseline;
 
 	input {
 		@include formInput;

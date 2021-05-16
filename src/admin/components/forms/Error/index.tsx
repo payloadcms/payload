@@ -4,6 +4,8 @@ import { Props } from './types';
 
 import './index.scss';
 
+const baseClass = 'field-error';
+
 const Error: React.FC<Props> = (props) => {
   const {
     showError = false,
@@ -12,7 +14,7 @@ const Error: React.FC<Props> = (props) => {
 
   if (showError) {
     return (
-      <Tooltip className="error-message">
+      <Tooltip className={baseClass}>
         {message}
       </Tooltip>
     );

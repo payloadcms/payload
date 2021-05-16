@@ -60,10 +60,12 @@ const Checkbox: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <Error
-        showError={showError}
-        message={errorMessage}
-      />
+      <div className={`${baseClass}__error-wrap`}>
+        <Error
+          showError={showError}
+          message={errorMessage}
+        />
+      </div>
       <input
         type="checkbox"
         name={path}

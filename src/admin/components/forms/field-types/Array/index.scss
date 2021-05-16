@@ -2,6 +2,11 @@
 
 .field-type.array {
   margin: base(2) 0;
+  min-width: base(15);
+
+  &__error-wrap {
+    position: relative;
+  }
 
   &__add-button-wrap {
     margin-left: base(0);
@@ -32,6 +37,10 @@
         margin-bottom: 0;
       }
     }
+  }
+
+  @include mid-break {
+    min-width: calc(100vw - #{base(2)});
   }
 }
 

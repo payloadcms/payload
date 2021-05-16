@@ -16,6 +16,8 @@
 }
 
 .field-type.api-key {
+  margin-bottom: $baseline;
+
   input {
     @include formInput;
   }

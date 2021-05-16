@@ -31,7 +31,7 @@ const ActionPanel: React.FC<Props> = (props) => {
         showOnHover
         size="wide"
         color="dark"
-        horizontalAlign="center"
+        horizontalAlign="right"
         buttonType="custom"
         button={(
           <Button
@@ -56,7 +56,7 @@ const ActionPanel: React.FC<Props> = (props) => {
               <Popup
                 buttonType="custom"
                 size="large"
-                horizontalAlign="center"
+                horizontalAlign="right"
                 button={(
                   <Button
                     className={`${baseClass}__add-row`}

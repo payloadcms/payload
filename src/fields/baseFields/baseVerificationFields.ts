@@ -25,7 +25,9 @@ export default [
       read: ({ req: { user } }) => Boolean(user),
     },
     admin: {
-      disabled: true,
+      components: {
+        Field: () => null,
+      },
     },
   },
   {

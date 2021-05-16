@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
+import { classes } from 'http-status';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import reducer from '../rowReducer';
@@ -179,13 +180,14 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
       <div
         className={baseClass}
       >
-        <header className={`${baseClass}__header`}>
-          <h3>{label}</h3>
-
+        <div className={`${baseClass}__error-wrap`}>
           <Error
             showError={showError}
             message={errorMessage}
           />
+        </div>
+        <header className={`${baseClass}__header`}>
+          <h3>{label}</h3>
         </header>
 
         <Droppable

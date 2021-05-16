@@ -2,6 +2,7 @@
 
 .field-type.textarea {
   position: relative;
+  margin-bottom: $baseline;
 
   textarea {
     @include formInput();

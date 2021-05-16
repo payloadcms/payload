@@ -165,12 +165,14 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
       <div
         className={baseClass}
       >
-        <header className={`${baseClass}__header`}>
-          <h3>{label}</h3>
+        <div className={`${baseClass}__error-wrap`}>
           <Error
             showError={showError}
             message={errorMessage}
           />
+        </div>
+        <header className={`${baseClass}__header`}>
+          <h3>{label}</h3>
         </header>
         <Droppable droppableId="array-drop">
           {(provided) => (

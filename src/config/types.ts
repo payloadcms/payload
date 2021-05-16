@@ -1,6 +1,7 @@
 import { Express } from 'express';
 import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
+import { Options } from 'express-fileupload';
 import { Configuration } from 'webpack';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
@@ -125,11 +126,7 @@ export type PayloadConfig = {
     trustProxy?: boolean;
     skip?: (req: PayloadRequest) => boolean;
   };
-  upload?: {
-    limits?: {
-      fileSize?: number;
-    };
-  };
+  upload?: Options;
   localization?: {
     locales: string[]
     defaultLocale: string
