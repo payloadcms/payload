@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { User } from '../../auth';
+import { User } from '../auth';
 
 export type Preference = {
   user: string;
