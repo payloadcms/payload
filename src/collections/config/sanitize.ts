@@ -2,7 +2,7 @@ import merge from 'deepmerge';
 import { CollectionConfig, PayloadCollectionConfig } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
 import toKebabCase from '../../utilities/toKebabCase';
-import baseAuthFields from '../../fields/baseFields/baseFields';
+import baseAuthFields from '../../fields/baseFields/baseAuthFields';
 import baseAPIKeyFields from '../../fields/baseFields/baseAPIKeyFields';
 import baseVerificationFields from '../../fields/baseFields/baseVerificationFields';
 import baseAccountLockFields from '../../fields/baseFields/baseAccountLockFields';
