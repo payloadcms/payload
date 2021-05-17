@@ -20,6 +20,10 @@ import deleteHandler from '../collections/operations/delete';
 import findOne from '../globals/operations/findOne';
 import globalUpdate from '../globals/operations/update';
 
+import preferenceUpdate from '../preferences/operations/update';
+import preferenceFindOne from '../preferences/operations/findOne';
+import preferenceDelete from '../preferences/operations/delete';
+
 function bindOperations(ctx: Payload): void {
   ctx.operations = {
     collections: {
@@ -45,6 +49,11 @@ function bindOperations(ctx: Payload): void {
     globals: {
       findOne: findOne.bind(ctx),
       update: globalUpdate.bind(ctx),
+    },
+    preferences: {
+      update: preferenceUpdate.bind(ctx),
+      findOne: preferenceFindOne.bind(ctx),
+      delete: preferenceDelete.bind(ctx),
     },
   };
 }
