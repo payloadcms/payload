@@ -15,6 +15,10 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git"
+  },
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "sideEffects": false,
