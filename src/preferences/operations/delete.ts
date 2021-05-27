@@ -28,7 +28,7 @@ async function handleDelete(args: PreferenceRequest): Promise<DeleteWriteOpResul
     userCollection: user.collection,
   };
 
-  const result = await Model.deleteOne(filter);
+  const result = await Model.findOneAndDelete(filter);
 
   if (result.deletedCount === 0) {
     throw new NotFound();
