@@ -1,3 +1,5 @@
+@use 'sass:math';
+
 ///////////////////////////////////////////////////////////////////////////////////////
 // All variables and mixins within this file are able to be overridden by
 // developers using Payload. No CSS definitions should be placed in this file.
@@ -18,10 +20,10 @@ $breakpoint-l-width: 1440px !default;
 
 $baseline-px         : 25px !default;
 $baseline-body-size  : 13px !default;
-$baseline            : ($baseline-px / $baseline-body-size) + rem;
+$baseline            : math.div($baseline-px, $baseline-body-size) + rem;
 
 @function base($multiplier) {
-	@return ($baseline-px / $baseline-body-size) * $multiplier + rem;
+	@return math.div($baseline-px, $baseline-body-size) * $multiplier + rem;
 }
 
 //////////////////////////////
