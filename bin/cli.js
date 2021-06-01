@@ -46,7 +46,7 @@ const trx = init();
     console.log(await successMessage());
   } catch (e) {
     handleException(e);
-    error(`An error has occurred: ${e?.message}`);
+    error(`An error has occurred: ${e && e.message}`);
   } finally {
     trx.finish();
   }
