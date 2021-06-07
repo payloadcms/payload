@@ -11,7 +11,7 @@ export default async function findOne(req: PayloadRequest, res: Response, next: 
       key: req.params.key,
     });
 
-    return res.status(httpStatus.OK).json(result);
+    return res.status(httpStatus.OK).json(result || { message: 'No Preference Found', value: null });
   } catch (error) {
     return next(error);
   }

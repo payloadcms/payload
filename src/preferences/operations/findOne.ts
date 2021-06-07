@@ -30,7 +30,7 @@ async function findOne(args: PreferenceRequest): Promise<Preference> {
 
   const doc = await Model.findOne(filter);
 
-  if (!doc) throw new NotFound();
+  if (!doc) return null;
 
   return doc;
 }

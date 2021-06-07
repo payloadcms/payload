@@ -121,7 +121,6 @@ describe('GrahpQL Preferences', () => {
   });
 
   it('should return null when query key is not found', async () => {
-    let error;
     const key = 'bad-key';
     const readQuery = `query {
         Preference(key: "${key}") {
@@ -129,12 +128,8 @@ describe('GrahpQL Preferences', () => {
           value
         }
       }`;
-    await client.request(readQuery).catch((err) => {
-      error = err;
-    });
+    const response = await client.request(readQuery);
 
-    expect(Array.isArray(error.response.errors)).toBe(true);
-    expect(typeof error.response.errors[0].message).toBe('string');
-    expect(error.response.data.Preference).toBeNull();
+    expect(response.Preference).toBeNull();
   });
 });
