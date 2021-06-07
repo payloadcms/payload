@@ -12,6 +12,7 @@ const Context = createContext({} as PreferencesContext);
 
 export const PreferencesProvider: React.FC = ({ children }) => {
   const contextRef = useRef({} as PreferencesContext);
+  const preferencesRef = useRef({});
   const [preferences, setPreferences] = useState({});
   const config = useConfig();
   const { user } = useAuth();
@@ -23,42 +24,40 @@ export const PreferencesProvider: React.FC = ({ children }) => {
     }
   }, [user]);
 
-  // TODO: need to prevent having same fetch call many times from outside hooks
   const getPreference = useCallback(async (key: string) => {
-    if (!user) return null;
-    if (preferences[key]) return preferences[key];
-    const request = await requests.get(`${serverURL}${api}/_preferences/${key}`);
-    let preference;
-    if (request.status === 200) {
-      preference = await request.json();
-      setPreferences({ ...preferences, [key]: preference.value });
-    }
-    if (request.status === 404) {
-      setPreferences({ ...preferences, [key]: null });
-      return null;
-    }
-    return preference.value;
-  }, [api, preferences, serverURL, user]);
+    if (preferencesRef.current[key]) return preferencesRef.current[key];
+    const promise = new Promise((resolve) => {
+      (async () => {
+        const request = await requests.get(`${serverURL}${api}/_preferences/${key}`);
+        setPreferences((prevPreferences) => ({ ...prevPreferences, [key]: request }));
+        let value = null;
+        if (request.status === 200) {
+          const preference = await request.json();
+          value = preference.value;
+        }
+        setPreferences((prevPreferences) => ({ ...prevPreferences, [key]: value }));
+        resolve(value);
+      })();
+    });
+    setPreferences((prevPreferences) => ({ ...prevPreferences, [key]: promise }));
+    return promise;
+  }, [api, preferencesRef, serverURL]);
 
-  function setPreference<T>(key: string, value: T): void {
-    if (!user) throw new Error('You must be logged in to set preferences');
-    if (preferences[key] === value) return;
+  const setPreference = useCallback(async (key: string, value: unknown): Promise<void> => {
+    if (preferencesRef.current[key] && JSON.stringify(await preferencesRef.current[key]) === JSON.stringify(value)) return;
     const options = {
       body: JSON.stringify({ value }),
       headers: {
         'Content-Type': 'application/json',
       },
     };
-    setPreferences({ ...preferences, [key]: value });
-    if (preferences[key] !== value) {
-      requests.post(`${serverURL}${api}/_preferences/${key}`, options);
-    }
-  }
+    setPreferences((prevPreferences) => ({ ...prevPreferences, [key]: value }));
+    await requests.post(`${serverURL}${api}/_preferences/${key}`, options);
+  }, [api, preferencesRef, serverURL]);
 
-  // did not work to prevent same fetch
-  // contextRef.current.getPreference = useCallback((key: string) => getPreference(key), [getPreference]);
   contextRef.current.getPreference = getPreference;
   contextRef.current.setPreference = setPreference;
+  preferencesRef.current = preferences;
 
   return (
     <Context.Provider value={contextRef.current}>
