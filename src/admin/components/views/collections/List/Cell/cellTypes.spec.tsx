@@ -1,9 +1,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
+import { SelectField } from '../../../../../../fields/config/types';
 import BlocksCell from './field-types/Blocks';
 import DateCell from './field-types/Date';
 import Checkbox from './field-types/Checkbox';
 import Textarea from './field-types/Textarea';
+import Select from './field-types/Select';
 
 jest.mock('@payloadcms/config-provider', () => ({
   useConfig: () => ({ admin: { dateFormat: 'MMMM do yyyy, h:mm a' } }),
@@ -112,6 +114,57 @@ describe('Cell Types', () => {
       const { container } = render(<Textarea data={undefined} />);
       const el = container.querySelector('span');
       expect(el).toHaveTextContent('');
+    });
+  });
+  describe('Select', () => {
+    const fieldWithOptionsObject: SelectField = {
+      type: 'select',
+      options: [{
+        value: 'one',
+        label: 'One',
+      }, {
+        value: 'two',
+        label: 'Two',
+      }],
+    };
+    const fieldWithStringsOptions: SelectField = {
+      type: 'select',
+      options: ['blue', 'green', 'yellow'],
+    };
+    it('renders options objects', () => {
+      const { container } = render(<Select
+        data="one"
+        field={fieldWithOptionsObject}
+      />);
+      const el = container.querySelector('span');
+      expect(el).toHaveTextContent('One');
+    });
+    it('renders option strings', () => {
+      const { container } = render(<Select
+        data="blue"
+        field={fieldWithStringsOptions}
+      />);
+      const el = container.querySelector('span');
+      expect(el).toHaveTextContent('blue');
+    });
+
+    describe('HasMany', () => {
+      it('renders options objects', () => {
+        const { container } = render(<Select
+          data={['one', 'two']}
+          field={fieldWithOptionsObject}
+        />);
+        const el = container.querySelector('span');
+        expect(el).toHaveTextContent('One, Two');
+      });
+      it('renders option strings', () => {
+        const { container } = render(<Select
+          data={['blue', 'green']}
+          field={fieldWithStringsOptions}
+        />);
+        const el = container.querySelector('span');
+        expect(el).toHaveTextContent('blue, green');
+      });
     });
   });
 });
