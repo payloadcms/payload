@@ -275,6 +275,10 @@ export function optionIsObject(option: Option): option is OptionObject {
   return typeof option === 'object';
 }
 
+export function optionsAreObjects(options: Option[]): options is OptionObject[] {
+  return Array.isArray(options) && typeof options?.[0] === 'object';
+}
+
 export function optionIsValue(option: Option): option is string {
   return typeof option === 'string';
 }
