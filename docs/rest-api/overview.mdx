@@ -62,3 +62,13 @@ Globals cannot be created or deleted, so there are only two REST endpoints opene
 | -------- | --------------------------- | ----------------------- |
 | `GET`    | `/api/globals/{globalSlug}` | Get a global by slug    |
 | `POST`   | `/api/globals/{globalSlug}` | Update a global by slug |
+
+## Preferences
+
+In addition to the dynamically generated endpoints above Payload also has REST endpoints to manage the admin user [preferences](/docs/admin#preferences) for data specific to the authenticated user.
+
+| Method   | Path                        | Description             |
+| -------- | --------------------------- | ----------------------- |
+| `GET`    | `/api/_preferences/{key}` | Get a preference by key   |
+| `POST`   | `/api/_preferences/{key}` | Create or update by key   |
+| `DELETE` | `/api/_preferences/{key}` | Delete a user preference by key |

@@ -71,6 +71,10 @@ This is totally possible. For the above scenario, by specifying `admin: { user: 
 
 If you would like to restrict which users from a single Collection can access the Admin panel, you can use the `admin` access control function. [Click here](/docs/access-control/overview#admin) to learn more.
 
-### License enforcement
+## License enforcement
 
 Payload requires a valid license key to be used on production domains. You can use it as much as you'd like locally and on staging / UAT domains, but when you deploy to production, you'll need a license key to activate Payload's Admin panel. For more information, [click here](/docs/production/licensing).
+
+## Preferences
+
+When using the admin panel Payload stores user specific preference data to the database in the `_preferences` collection. Each `preference` is tied to one user and accessed using a `key` string. The preference `value` is not given a type and can be any data needed such as a `locale` string or collection list columns as an array of strings. Preferences are available to both [GraphQL](/docs/graphql/overview#preferences) and [REST](/docs/rest-api/overview#) APIs. The preferences endpoints can be used to add functionality to custom components as part of the admin UI or for an external need. It can be thought of a user specific key-value store.
