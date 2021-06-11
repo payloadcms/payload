@@ -77,9 +77,13 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
                   ...rows.reduce((rowState, row, i) => {
                     const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
                     const rowPath = `${path}${field.name}.${i}.`;
-
                     return {
                       ...rowState,
+                      [`${rowPath}id`]: {
+                        value: row._id,
+                        initialValue: row._id,
+                        valid: true,
+                      },
                       [`${rowPath}blockType`]: {
                         value: row.blockType,
                         initialValue: row.blockType,

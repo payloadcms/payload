@@ -19,6 +19,7 @@ import errorMessages from './errorMessages';
 import { Context as FormContextType, Props } from './types';
 
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormWatchContext } from './context';
+import { usePreferences } from '../../utilities/Preferences';
 
 const baseClass = 'form';
 
@@ -38,12 +39,15 @@ const Form: React.FC<Props> = (props) => {
     initialData, // values only, paths are required as key - form should build initial state as convenience
     waitForAutocomplete,
     log,
+    preferenceKey,
   } = props;
 
   const history = useHistory();
   const locale = useLocale();
+  const { getPreference, setPreference } = usePreferences();
   const { refreshCookie } = useAuth();
 
+  const [preferences, setPreferences] = useState({});
   const [modified, setModified] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -269,13 +273,34 @@ const Form: React.FC<Props> = (props) => {
     waitForAutocomplete,
   ]);
 
-
   const getFields = useCallback(() => contextRef.current.fields, [contextRef]);
   const getField = useCallback((path: string) => contextRef.current.fields[path], [contextRef]);
   const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [contextRef]);
   const getSiblingData = useCallback((path: string) => getSiblingDataFunc(contextRef.current.fields, path), [contextRef]);
   const getDataByPath = useCallback((path: string) => getDataByPathFunc(contextRef.current.fields, path), [contextRef]);
   const getUnflattenedValues = useCallback(() => reduceFieldsToValues(contextRef.current.fields), [contextRef]);
+
+  const getFormPreference = useCallback((key: string) => contextRef.current.formPreferences[key], [contextRef]);
+  const setFormPreference = useCallback((key: string, path: string, value: unknown) => {
+    setPreferences((prevState) => ({
+      ...prevState,
+      [key]: {
+        [path]: value,
+      },
+    }));
+  }, [setPreferences]);
+  const setFormPreferences = useCallback((key: string, value: unknown) => {
+    setPreferences((prevState) => ({
+      ...prevState,
+      [key]: value,
+    }));
+  }, [setPreferences]);
+
+  useEffect(() => {
+    if (preferenceKey && preferences && Object.keys(preferences).length > 0) {
+      setPreference(preferenceKey, preferences);
+    }
+  }, [preferences, preferenceKey, setPreference]);
 
   const createFormData = useCallback(() => {
     const data = reduceFieldsToValues(contextRef.current.fields);
@@ -299,6 +324,10 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.setProcessing = setProcessing;
   contextRef.current.setSubmitted = setSubmitted;
   contextRef.current.disabled = disabled;
+  contextRef.current.getFormPreference = getFormPreference;
+  contextRef.current.setFormPreference = setFormPreference;
+  contextRef.current.setFormPreferences = setFormPreferences;
+  contextRef.current.formPreferences = preferences;
 
   useEffect(() => {
     if (initialState) {
@@ -315,6 +344,15 @@ const Form: React.FC<Props> = (props) => {
       dispatchFields({ type: 'REPLACE_STATE', state: builtState });
     }
   }, [initialData]);
+
+  useEffect(() => {
+    (async () => {
+      if (preferenceKey) {
+        const result = await getPreference(preferenceKey);
+        setPreferences(result || {});
+      }
+    })();
+  }, [getPreference, preferenceKey]);
 
   useThrottledEffect(() => {
     refreshCookie();

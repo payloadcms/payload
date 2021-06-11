@@ -69,6 +69,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
         onSuccess={onSave}
         disabled={!hasSavePermission}
         initialState={initialState}
+        preferenceKey={id ? `${collection.slug}-${id}` : null}
       >
         <div className={`${baseClass}__main`}>
           <Meta
