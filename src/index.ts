@@ -1,5 +1,6 @@
 import express, { Express, Router } from 'express';
 import crypto from 'crypto';
+import { Document, Model } from 'mongoose';
 import {
   Config,
   EmailOptions,
@@ -18,6 +19,7 @@ import expressMiddleware from './express/middleware';
 import initAdmin from './express/admin';
 import initAuth from './auth/init';
 import initCollections from './collections/init';
+import initPreferences from './preferences/init';
 import initGlobals from './globals/init';
 import { Globals } from './globals/config/types';
 import initGraphQLPlayground from './graphql/initPlayground';
@@ -40,6 +42,7 @@ import { Options as FindOptions } from './collections/operations/local/find';
 import { Options as FindByIDOptions } from './collections/operations/local/findByID';
 import { Options as UpdateOptions } from './collections/operations/local/update';
 import { Options as DeleteOptions } from './collections/operations/local/delete';
+import { Preference } from './preferences/types';
 
 require('isomorphic-fetch');
 
@@ -54,6 +57,8 @@ export class Payload {
   graphQL: {
     resolvers: GraphQLResolvers
   };
+
+  preferences: { Model: Model<Document<Preference>> };
 
   globals: Globals;
 
@@ -140,6 +145,7 @@ export class Payload {
     // Initialize collections & globals
     initCollections(this);
     initGlobals(this);
+    initPreferences(this);
 
     // Connect to database
     connectMongoose(this.mongoURL, options.mongoOptions);

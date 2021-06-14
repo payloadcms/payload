@@ -12,7 +12,7 @@ By default, the GraphQL API is exposed via `/api/graphql`, but you can customize
 
 The labels you provide for your Collections and Globals are used to name the GraphQL types that are created to correspond to your config. Special characters and spaces are removed.
 
-### Collections
+## Collections
 
 Everything that can be done to a Collection via the REST or Local API can be done with GraphQL (outside of uploading files, which is REST-only). If you have a collection as follows:
 
@@ -53,7 +53,7 @@ const PublicUser = {
 | **`logoutPublicUser`**         | `logout` auth operation |
 | **`refreshTokenPublicUser`**   | `refresh` auth operation |
 
-### Globals
+## Globals
 
 Globals are also fully supported. For example:
 
@@ -78,7 +78,24 @@ const Header = {
 | ---------------------- | -------------|
 | **`updateHeader`**     | `update`     |
 
-### GraphQL Playground
+## Preferences
+
+User [preferences](/docs/admin/overview#preferences)  for the admin panel are also available to GraphQL. To query preferences you must supply an authorization token in the header and only the preferences of that user will be accessible and of the `key` argument.
+
+**Payload will open the following query:**
+
+| Query Name             | Operation    |
+| ---------------------- | -------------|
+| **`Preference`**       | `findOne`    |
+
+**And the following mutations:**
+
+| Query Name             | Operation    |
+| ---------------------- | -------------|
+| **`updatePreference`** | `update`     |
+| **`deletePreference`** | `delete`     |
+
+## GraphQL Playground
 
 GraphQL Playground is enabled by default for development purposes, but disabled in production. You can enable it in production by passing `graphQL.disablePlaygroundInProduction` a `false` setting in the main Payload config.
 
@@ -89,6 +106,6 @@ You can even log in using the `login[collection-singular-label-here]` mutation t
   To see more regarding how the above queries and mutations are used, visit your GraphQL playground (by default at <a href="http://localhost:3000/api/graphql-playground">(http://localhost:3000/api/graphql-playground)</a> while your server is running. There, you can use the "Schema" and "Docs" buttons on the right to see a ton of detail about how GraphQL operates within Payload.
 </Banner>
 
-### Query complexity limits
+## Query complexity limits
 
 Payload comes with a built-in query complexity limiter to prevent bad people from trying to slow down your server by running massive queries. To learn more, [click here](/docs/production/preventing-abuse#limiting-graphql-complexity).

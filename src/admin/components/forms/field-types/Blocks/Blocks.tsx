@@ -3,7 +3,6 @@ import React, {
 } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
-import { classes } from 'http-status';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import reducer from '../rowReducer';
@@ -50,7 +49,12 @@ const Blocks: React.FC<Props> = (props) => {
 
   const [rows, dispatchRows] = useReducer(reducer, []);
   const formContext = useForm();
-  const { dispatchFields } = formContext;
+  const {
+    dispatchFields,
+    formPreferences,
+    setFormPreference,
+    setFormPreferences,
+  } = formContext;
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(
@@ -99,8 +103,10 @@ const Blocks: React.FC<Props> = (props) => {
   }, [dispatchRows, dispatchFields, path]);
 
   const toggleCollapse = useCallback((rowIndex) => {
+    const key = `${formContext.getDataByPath(path)[rowIndex].id}`;
+    setFormPreference(`${path}.collapsed`, key, !formPreferences[key]);
     dispatchRows({ type: 'TOGGLE_COLLAPSE', rowIndex });
-  }, []);
+  }, [path, formContext, setFormPreference, formPreferences]);
 
   const onDragEnd = useCallback((result) => {
     if (!result.destination) return;
@@ -112,7 +118,20 @@ const Blocks: React.FC<Props> = (props) => {
   useEffect(() => {
     const data = formContext.getDataByPath(path);
     dispatchRows({ type: 'SET_ALL', data: data || [] });
-  }, [formContext, path]);
+    if (formPreferences[`${path}.collapsed`]) {
+      // const updatedPreferences = {};
+      Object.keys(formPreferences[`${path}.collapsed`]).forEach((preference, rowIndex) => {
+        const id = `${formContext.getDataByPath(path)[rowIndex].id}`;
+        if (formPreferences[`${path}.collapsed`][id] && data[rowIndex].blockType) {
+          // updatedPreferences[id] = true;
+          // TODO: cannot set toggle this way without going in to rerender loops or undefined state.open
+          // dispatchRows({ type: 'TOGGLE_COLLAPSE', rowIndex });
+        }
+      });
+      // TODO: save updated preferences as a cleanup step if data is out of sync with preferences
+      // setFormPreferences(`${path}.collapsed`, updatedPreference);
+    }
+  }, [formContext, formPreferences, path]);
 
   useEffect(() => {
     setValue(rows?.length || 0);
