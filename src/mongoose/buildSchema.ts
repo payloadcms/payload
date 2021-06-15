@@ -360,7 +360,7 @@ const fieldToSchemaMap = {
   array: (field: ArrayField, fields: SchemaDefinition, config: Config) => {
     const baseSchema = {
       ...formatBaseSchema(field),
-      type: [buildSchema(config, field.fields)],
+      type: [buildSchema(config, field.fields, { _id: false })],
     };
 
     let schemaToReturn;
