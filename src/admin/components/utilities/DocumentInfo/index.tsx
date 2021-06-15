@@ -2,26 +2,24 @@ import React, {
   createContext, useContext,
 } from 'react';
 
-type BaseType = {
-  preferencesKey: string
-}
-
 type CollectionDoc = {
   type: 'collection'
   slug: string
   id: string
-} & BaseType
+}
 
 type GlobalDoc = {
   type: 'global'
   slug: string
-} & BaseType
+}
 
-type ContextType = CollectionDoc | GlobalDoc
+type ContextType = (CollectionDoc | GlobalDoc) & {
+  preferencesKey: string
+}
 
 const Context = createContext({} as ContextType);
 
-export const DocumentInfoProvider: React.FC<ContextType> = (props) => {
+export const DocumentInfoProvider: React.FC<CollectionDoc | GlobalDoc> = (props) => {
   const { children, type, slug } = props;
 
   if (type === 'global') {

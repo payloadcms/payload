@@ -187,7 +187,6 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
                   _key={row._key}
                   blockType="array"
                   label={labels.singular}
-                  isOpen={row.open}
                   rowCount={rows.length}
                   rowIndex={i}
                   addRow={addRow}
