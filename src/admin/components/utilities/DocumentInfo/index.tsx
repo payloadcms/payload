@@ -5,7 +5,7 @@ import React, {
 type CollectionDoc = {
   type: 'collection'
   slug: string
-  id: string
+  id?: string
 }
 
 type GlobalDoc = {
@@ -14,7 +14,7 @@ type GlobalDoc = {
 }
 
 type ContextType = (CollectionDoc | GlobalDoc) & {
-  preferencesKey: string
+  preferencesKey?: string
 }
 
 const Context = createContext({} as ContextType);
@@ -38,14 +38,18 @@ export const DocumentInfoProvider: React.FC<CollectionDoc | GlobalDoc> = (props)
   if (type === 'collection') {
     const { id } = props as CollectionDoc;
 
+    const value: ContextType = {
+      type,
+      slug,
+    };
+
+    if (id) {
+      value.id = id;
+      value.preferencesKey = `collection-${slug}-${id}`;
+    }
+
     return (
-      <Context.Provider value={{
-        type,
-        id,
-        slug,
-        preferencesKey: `collection-${slug}-${id}`,
-      }}
-      >
+      <Context.Provider value={value}>
         {children}
       </Context.Provider>
     );

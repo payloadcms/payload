@@ -105,27 +105,30 @@ const Blocks: React.FC<Props> = (props) => {
 
   const setCollapse = useCallback(async (_key, collapsed) => {
     dispatchRows({ type: 'SET_COLLAPSE', _key, collapsed });
-    const preferences: DocumentPreferences = await getPreference(preferencesKey);
-    const preferencesToSet = preferences || { fields: { } };
 
-    let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed || [];
+    if (preferencesKey) {
+      const preferences: DocumentPreferences = await getPreference(preferencesKey);
+      const preferencesToSet = preferences || { fields: { } };
 
-    if (!collapsed) {
-      newCollapsedState = newCollapsedState.filter((_existingKey) => _existingKey !== _key);
-    } else {
-      newCollapsedState.push(_key);
-    }
+      let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed || [];
 
-    setPreference(preferencesKey, {
-      ...preferencesToSet,
-      fields: {
-        ...preferencesToSet?.fields || {},
-        [path]: {
-          ...preferencesToSet?.fields?.[path],
-          collapsed: newCollapsedState,
+      if (!collapsed) {
+        newCollapsedState = newCollapsedState.filter((_existingKey) => _existingKey !== _key);
+      } else {
+        newCollapsedState.push(_key);
+      }
+
+      setPreference(preferencesKey, {
+        ...preferencesToSet,
+        fields: {
+          ...preferencesToSet?.fields || {},
+          [path]: {
+            ...preferencesToSet?.fields?.[path],
+            collapsed: newCollapsedState,
+          },
         },
-      },
-    });
+      });
+    }
   }, [getPreference, setPreference, preferencesKey, path]);
 
   const onDragEnd = useCallback((result) => {
@@ -137,9 +140,8 @@ const Blocks: React.FC<Props> = (props) => {
 
   useEffect(() => {
     const fetchPreferences = async () => {
-      const preferences = await getPreference<DocumentPreferences>(preferencesKey);
+      const preferences = preferencesKey ? await getPreference<DocumentPreferences>(preferencesKey) : undefined;
       const data = formContext.getDataByPath(path);
-
       dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
     };
 
