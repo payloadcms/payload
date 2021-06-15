@@ -3,9 +3,11 @@ import React, {
 } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
+import { usePreferences } from '../../../utilities/Preferences';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import reducer from '../rowReducer';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { useForm } from '../../Form/context';
 import buildStateFromSchema from '../../Form/buildStateFromSchema';
 import DraggableSection from '../../DraggableSection';
@@ -16,6 +18,7 @@ import BlockSelector from './BlockSelector';
 import { blocks as blocksValidator } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
 import { Props, RenderBlockProps } from './types';
+import { DocumentPreferences } from '../../../../../preferences/types';
 
 import './index.scss';
 
@@ -47,14 +50,12 @@ const Blocks: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
+  const { preferencesKey } = useDocumentInfo();
+
+  const { getPreference, setPreference } = usePreferences();
   const [rows, dispatchRows] = useReducer(reducer, []);
   const formContext = useForm();
-  const {
-    dispatchFields,
-    formPreferences,
-    setFormPreference,
-    setFormPreferences,
-  } = formContext;
+  const { dispatchFields } = formContext;
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(
@@ -102,11 +103,30 @@ const Blocks: React.FC<Props> = (props) => {
     dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
   }, [dispatchRows, dispatchFields, path]);
 
-  const toggleCollapse = useCallback((rowIndex) => {
-    const key = `${formContext.getDataByPath(path)[rowIndex].id}`;
-    setFormPreference(`${path}.collapsed`, key, !formPreferences[key]);
-    dispatchRows({ type: 'TOGGLE_COLLAPSE', rowIndex });
-  }, [path, formContext, setFormPreference, formPreferences]);
+  const setCollapse = useCallback(async (_key, collapsed) => {
+    dispatchRows({ type: 'SET_COLLAPSE', _key, collapsed });
+    const preferences: DocumentPreferences = await getPreference(preferencesKey);
+    const preferencesToSet = preferences || { fields: { } };
+
+    let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed || [];
+
+    if (!collapsed) {
+      newCollapsedState = newCollapsedState.filter((_existingKey) => _existingKey !== _key);
+    } else {
+      newCollapsedState.push(_key);
+    }
+
+    setPreference(preferencesKey, {
+      ...preferencesToSet,
+      fields: {
+        ...preferencesToSet?.fields || {},
+        [path]: {
+          ...preferencesToSet?.fields?.[path],
+          collapsed: newCollapsedState,
+        },
+      },
+    });
+  }, [getPreference, setPreference, preferencesKey, path]);
 
   const onDragEnd = useCallback((result) => {
     if (!result.destination) return;
@@ -116,22 +136,15 @@ const Blocks: React.FC<Props> = (props) => {
   }, [moveRow]);
 
   useEffect(() => {
-    const data = formContext.getDataByPath(path);
-    dispatchRows({ type: 'SET_ALL', data: data || [] });
-    if (formPreferences[`${path}.collapsed`]) {
-      // const updatedPreferences = {};
-      Object.keys(formPreferences[`${path}.collapsed`]).forEach((preference, rowIndex) => {
-        const id = `${formContext.getDataByPath(path)[rowIndex].id}`;
-        if (formPreferences[`${path}.collapsed`][id] && data[rowIndex].blockType) {
-          // updatedPreferences[id] = true;
-          // TODO: cannot set toggle this way without going in to rerender loops or undefined state.open
-          // dispatchRows({ type: 'TOGGLE_COLLAPSE', rowIndex });
-        }
-      });
-      // TODO: save updated preferences as a cleanup step if data is out of sync with preferences
-      // setFormPreferences(`${path}.collapsed`, updatedPreference);
-    }
-  }, [formContext, formPreferences, path]);
+    const fetchPreferences = async () => {
+      const preferences = await getPreference<DocumentPreferences>(preferencesKey);
+      const data = formContext.getDataByPath(path);
+
+      dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
+    };
+
+    fetchPreferences();
+  }, [formContext, path, preferencesKey, getPreference]);
 
   useEffect(() => {
     setValue(rows?.length || 0);
@@ -157,7 +170,7 @@ const Blocks: React.FC<Props> = (props) => {
       path={path}
       name={name}
       fieldTypes={fieldTypes}
-      toggleCollapse={toggleCollapse}
+      setCollapse={setCollapse}
       permissions={permissions}
       value={value as number}
       blocks={blocks}
@@ -184,7 +197,7 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
     fieldTypes,
     permissions,
     value,
-    toggleCollapse,
+    setCollapse,
     blocks,
     readOnly,
     minRows,
@@ -226,18 +239,18 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
                   return (
                     <DraggableSection
                       readOnly={readOnly}
-                      key={row.key}
-                      id={row.key}
+                      key={row._key}
+                      _key={row._key}
                       blockType="blocks"
                       blocks={blocks}
                       label={blockToRender?.labels?.singular}
-                      isOpen={row.open}
+                      isCollapsed={row.collapsed}
                       rowCount={rows.length}
                       rowIndex={i}
                       addRow={addRow}
                       removeRow={removeRow}
                       moveRow={moveRow}
-                      toggleRowCollapse={toggleCollapse}
+                      setRowCollapse={setCollapse}
                       parentPath={path}
                       fieldTypes={fieldTypes}
                       permissions={permissions}
@@ -262,7 +275,7 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
                 <Banner type="error">
                   This field requires at least
                   {' '}
-                  {`${minRows} ${minRows === 1 ? labels.singular : labels.plural}`}
+                  {`${minRows || 1} ${minRows === 1 || typeof minRows === 'undefined' ? labels.singular : labels.plural}`}
                 </Banner>
               )}
               {(rows.length === 0 && readOnly) && (

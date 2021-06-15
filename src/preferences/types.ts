@@ -18,3 +18,15 @@ export type PreferenceRequest = {
 };
 
 export type PreferenceUpdateRequest = PreferenceRequest & {value: undefined};
+
+export type CollapsedPreferences = string[]
+
+export type FieldsPreferences = {
+  [key: string]: {
+    collapsed: CollapsedPreferences
+  }
+}
+
+export type DocumentPreferences = {
+  fields: FieldsPreferences
+}

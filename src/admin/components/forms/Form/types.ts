@@ -38,7 +38,6 @@ export type Props = {
   initialData?: Data
   waitForAutocomplete?: boolean
   log?: boolean
-  preferenceKey?: string
 }
 
 export type DispatchFields = React.Dispatch<any>
@@ -54,9 +53,6 @@ export type GetDataByPath = (path: string) => unknown;
 export type SetModified = (modified: boolean) => void;
 export type SetSubmitted = (submitted: boolean) => void;
 export type SetProcessing = (processing: boolean) => void;
-export type GetPreference = (key: string, path: string) => unknown;
-export type SetPreference = (key: string, path: string, value: unknown) => void;
-export type SetPreferences = (key: string, value: unknown) => void;
 
 export type Context = {
   dispatchFields: DispatchFields
@@ -75,8 +71,4 @@ export type Context = {
   setModified: SetModified
   setProcessing: SetProcessing
   setSubmitted: SetSubmitted
-  formPreferences: Preferences
-  getFormPreference: GetPreference
-  setFormPreference: SetPreference
-  setFormPreferences: SetPreferences
 }

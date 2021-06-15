@@ -70,10 +70,10 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
   // Method to return from `useFieldType`, used to
   // update internal field values from field component(s)
   // as fast as they arrive. NOTE - this method is NOT debounced
-  const setValue = useCallback((e) => {
+  const setValue = useCallback((e, modifyForm = true) => {
     const val = (e && e.target) ? e.target.value : e;
 
-    if (!ignoreWhileFlattening && !modified) {
+    if ((!ignoreWhileFlattening && !modified) && modifyForm) {
       setModified(true);
     }
 

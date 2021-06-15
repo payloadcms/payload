@@ -44,7 +44,6 @@ export const PreferencesProvider: React.FC = ({ children }) => {
   }, [api, preferencesRef, serverURL]);
 
   const setPreference = useCallback(async (key: string, value: unknown): Promise<void> => {
-    if (preferencesRef.current[key] && JSON.stringify(await preferencesRef.current[key]) === JSON.stringify(value)) return;
     const options = {
       body: JSON.stringify({ value }),
       headers: {
@@ -53,7 +52,7 @@ export const PreferencesProvider: React.FC = ({ children }) => {
     };
     setPreferences((prevPreferences) => ({ ...prevPreferences, [key]: value }));
     await requests.post(`${serverURL}${api}/_preferences/${key}`, options);
-  }, [api, preferencesRef, serverURL]);
+  }, [api, serverURL]);
 
   contextRef.current.getPreference = getPreference;
   contextRef.current.setPreference = setPreference;
