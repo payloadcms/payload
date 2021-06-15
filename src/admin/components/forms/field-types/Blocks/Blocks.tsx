@@ -259,13 +259,6 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
                       hasMaxRows={hasMaxRows}
                       fieldSchema={[
                         ...blockToRender.fields,
-                        {
-                          name: 'blockType',
-                          type: 'text',
-                          admin: {
-                            hidden: true,
-                          },
-                        },
                       ]}
                     />
                   );

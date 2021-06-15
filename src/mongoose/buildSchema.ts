@@ -440,7 +440,7 @@ const fieldToSchemaMap = {
     };
   },
   blocks: (field: BlockField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
-    const baseSchema = [new Schema({ blockName: String, _key: String }, { _id: false, discriminatorKey: 'blockType' })];
+    const baseSchema = [new Schema({ }, { _id: false, discriminatorKey: 'blockType' })];
     let schemaToReturn;
 
     if (field.localized) {
