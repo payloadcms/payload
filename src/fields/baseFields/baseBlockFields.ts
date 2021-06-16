@@ -9,7 +9,6 @@ export default {
       name: '_key',
       label: 'Key',
       type: 'text',
-      unique: true,
       admin: {
         hidden: true,
       },
