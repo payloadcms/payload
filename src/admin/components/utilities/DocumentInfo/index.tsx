@@ -1,7 +1,6 @@
 import React, {
-  createContext, useContext, useRef,
+  createContext, useContext,
 } from 'react';
-import { usePreferences } from '../Preferences';
 
 type CollectionDoc = {
   type: 'collection'
@@ -22,8 +21,6 @@ const Context = createContext({} as ContextType);
 
 export const DocumentInfoProvider: React.FC<CollectionDoc | GlobalDoc> = (props) => {
   const { children, type, slug } = props;
-  const prevKey = useRef('undefined');
-  const { movePreference } = usePreferences();
 
   if (type === 'global') {
     return (
@@ -44,17 +41,11 @@ export const DocumentInfoProvider: React.FC<CollectionDoc | GlobalDoc> = (props)
     const value: ContextType = {
       type,
       slug,
-      preferencesKey: 'undefined',
     };
 
     if (id) {
       value.id = id;
       value.preferencesKey = `collection-${slug}-${id}`;
-      if (prevKey.current === 'undefined') {
-        movePreference('undefined', value.preferencesKey);
-      }
-    } else {
-      prevKey.current = 'undefined';
     }
 
     return (
