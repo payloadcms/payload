@@ -241,8 +241,7 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
                   return (
                     <DraggableSection
                       readOnly={readOnly}
-                      key={row._key}
-                      _key={row._key}
+                      _key={`${i}`}
                       blockType="blocks"
                       blocks={blocks}
                       label={blockToRender?.labels?.singular}

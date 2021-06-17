@@ -13,7 +13,6 @@ const reducer = (currentState, action) => {
         if (currentState.length !== data.length) {
           return data.map((dataRow) => {
             const row = {
-              _key: dataRow?._key || uuidv4(),
               collapsed: (collapsedState || []).includes(dataRow?._key),
               blockType: dataRow?.blockType,
             };
@@ -40,7 +39,6 @@ const reducer = (currentState, action) => {
     case 'ADD': {
       const newRow = {
         open: true,
-        _key: uuidv4(),
         blockType: undefined,
       };
 
