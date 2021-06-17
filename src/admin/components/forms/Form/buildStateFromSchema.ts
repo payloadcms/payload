@@ -84,6 +84,11 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
                         initialValue: row.blockType,
                         valid: true,
                       },
+                      [`${rowPath}_id`]: {
+                        value: row._id,
+                        initialValue: row._id,
+                        valid: true,
+                      },
                       [`${rowPath}blockName`]: {
                         value: row.blockName,
                         initialValue: row.blockName,

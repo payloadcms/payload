@@ -103,8 +103,8 @@ const Blocks: React.FC<Props> = (props) => {
     dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
   }, [dispatchRows, dispatchFields, path]);
 
-  const setCollapse = useCallback(async (_key, collapsed) => {
-    dispatchRows({ type: 'SET_COLLAPSE', _key, collapsed });
+  const setCollapse = useCallback(async (_id, collapsed) => {
+    dispatchRows({ type: 'SET_COLLAPSE', _id, collapsed });
 
     if (preferencesKey) {
       const preferences: DocumentPreferences = await getPreference(preferencesKey);
@@ -113,9 +113,9 @@ const Blocks: React.FC<Props> = (props) => {
       let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed || [];
 
       if (!collapsed) {
-        newCollapsedState = newCollapsedState.filter((_existingKey) => _existingKey !== _key);
+        newCollapsedState = newCollapsedState.filter((_existingKey) => _existingKey !== _id);
       } else {
-        newCollapsedState.push(_key);
+        newCollapsedState.push(_id);
       }
 
       setPreference(preferencesKey, {
@@ -241,7 +241,9 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
                   return (
                     <DraggableSection
                       readOnly={readOnly}
-                      _key={`${i}`}
+                      key={row.draggableID}
+                      draggableID={row.draggableID}
+                      _id={row?._id}
                       blockType="blocks"
                       blocks={blocks}
                       label={blockToRender?.labels?.singular}

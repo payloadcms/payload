@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const reducer = (currentState, action) => {
   const {
-    type, rowIndex, moveFromIndex, moveToIndex, data, blockType, collapsedState, collapsed, _key,
+    type, rowIndex, moveFromIndex, moveToIndex, data, blockType, collapsedState, collapsed, _id,
   } = action;
 
   const stateCopy = [...currentState];
@@ -10,25 +10,23 @@ const reducer = (currentState, action) => {
   switch (type) {
     case 'SET_ALL': {
       if (Array.isArray(data)) {
-        if (currentState.length !== data.length) {
-          return data.map((dataRow) => {
-            const row = {
-              collapsed: (collapsedState || []).includes(dataRow?._key),
-              blockType: dataRow?.blockType,
-            };
+        return data.map((dataRow, i) => {
+          const row = {
+            _id: dataRow?._id,
+            draggableID: stateCopy[i]?.draggableID || uuidv4(),
+            collapsed: (collapsedState || []).includes(dataRow?._id),
+            blockType: dataRow?.blockType,
+          };
 
-            return row;
-          });
-        }
-
-        return currentState;
+          return row;
+        });
       }
 
       return [];
     }
 
     case 'SET_COLLAPSE': {
-      const matchedRowIndex = stateCopy.findIndex(({ _key: rowID }) => rowID === _key);
+      const matchedRowIndex = stateCopy.findIndex(({ _id: rowID }) => rowID === _id);
 
       if (matchedRowIndex > -1 && stateCopy[matchedRowIndex]) {
         stateCopy[matchedRowIndex].collapsed = collapsed;
@@ -38,6 +36,7 @@ const reducer = (currentState, action) => {
 
     case 'ADD': {
       const newRow = {
+        draggableID: uuidv4(),
         open: true,
         blockType: undefined,
       };

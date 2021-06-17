@@ -13,7 +13,8 @@ export type Props = {
   label?: string
   blockType?: string
   fieldTypes: FieldTypes
-  _key: string
+  _id: string
+  draggableID: string
   isCollapsed?: boolean
   setRowCollapse?: (id: string, open: boolean) => void
   positionPanelVerticalAlignment?: 'top' | 'center' | 'sticky'

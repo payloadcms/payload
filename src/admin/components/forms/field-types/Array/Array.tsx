@@ -184,7 +184,8 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
                 <DraggableSection
                   readOnly={readOnly}
                   key={row._key}
-                  _key={row._key}
+                  draggableID={row.draggableID}
+                  _id={row._id}
                   blockType="array"
                   label={labels.singular}
                   rowCount={rows.length}
