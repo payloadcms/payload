@@ -180,7 +180,6 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
               ref={provided.innerRef}
               {...provided.droppableProps}
             >
-              { console.log(rows) }
               {rows.length > 0 && rows.map((row, i) => (
                 <DraggableSection
                   readOnly={readOnly}
