@@ -32,7 +32,7 @@ export const PreferencesProvider: React.FC = ({ children }) => {
   }, [user]);
 
   const getPreference = useCallback(async (key: string) => {
-    if (preferencesRef.current[key]) return preferencesRef.current[key];
+    if (typeof preferencesRef.current[key] !== 'undefined') return preferencesRef.current[key];
     const promise = new Promise((resolve) => {
       (async () => {
         const request = await requests.get(`${serverURL}${api}/_preferences/${key}`);
