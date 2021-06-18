@@ -360,7 +360,7 @@ const fieldToSchemaMap = {
   array: (field: ArrayField, fields: SchemaDefinition, config: Config) => {
     const baseSchema = {
       ...formatBaseSchema(field),
-      type: [buildSchema(config, field.fields)],
+      type: [buildSchema(config, field.fields, { _id: false })],
     };
 
     let schemaToReturn;
@@ -440,7 +440,7 @@ const fieldToSchemaMap = {
     };
   },
   blocks: (field: BlockField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
-    const baseSchema = [new Schema({ }, { discriminatorKey: 'blockType' })];
+    const baseSchema = [new Schema({ }, { _id: false, discriminatorKey: 'blockType' })];
     let schemaToReturn;
 
     if (field.localized) {

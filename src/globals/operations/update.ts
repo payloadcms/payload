@@ -122,9 +122,9 @@ async function update(args) {
   }
 
   global = global.toJSON({ virtuals: true });
-  global = removeInternalFields(global);
   global = JSON.stringify(global);
   global = JSON.parse(global);
+  global = removeInternalFields(global);
 
   // /////////////////////////////////////
   // afterRead - Fields

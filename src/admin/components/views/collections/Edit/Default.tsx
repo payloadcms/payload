@@ -185,6 +185,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       </li>
                       {timestamps && (
                         <React.Fragment>
+                          { console.log(data) }
                           {data.updatedAt && (
                             <li>
                               <div className={`${baseClass}__label`}>Last Modified</div>

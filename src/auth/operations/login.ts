@@ -100,8 +100,8 @@ async function login(incomingArgs: Arguments): Promise<Result> {
   }
 
   let user = userDoc.toJSON({ virtuals: true });
-  user = removeInternalFields(user);
   user = JSON.parse(JSON.stringify(user));
+  user = removeInternalFields(user);
 
   const fieldsToSign = collectionConfig.fields.reduce((signedFields, field: Field) => {
     const result = {

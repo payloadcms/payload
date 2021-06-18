@@ -31,9 +31,9 @@ async function findOne(args) {
     delete doc._id;
   }
 
-  doc = removeInternalFields(doc);
   doc = JSON.stringify(doc);
   doc = JSON.parse(doc);
+  doc = removeInternalFields(doc);
 
   // /////////////////////////////////////
   // 3. Execute before collection hook

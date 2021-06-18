@@ -261,9 +261,9 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   }
 
   result = result.toJSON({ virtuals: true });
-  result = removeInternalFields(result);
   result = JSON.stringify(result);
   result = JSON.parse(result);
+  result = removeInternalFields(result);
 
   // /////////////////////////////////////
   // afterRead - Fields

@@ -135,9 +135,9 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
 
   let result: Document = doc.toJSON({ virtuals: true });
 
-  result = removeInternalFields(result);
   result = JSON.stringify(result);
   result = JSON.parse(result);
+  result = removeInternalFields(result);
 
   // /////////////////////////////////////
   // afterDelete - Collection

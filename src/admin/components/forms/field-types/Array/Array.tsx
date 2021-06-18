@@ -180,12 +180,13 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
               ref={provided.innerRef}
               {...provided.droppableProps}
             >
+              { console.log(rows) }
               {rows.length > 0 && rows.map((row, i) => (
                 <DraggableSection
                   readOnly={readOnly}
                   key={row.draggableID}
                   draggableID={row.draggableID}
-                  _id={row._id}
+                  id={row.id}
                   blockType="array"
                   label={labels.singular}
                   rowCount={rows.length}

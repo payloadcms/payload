@@ -214,9 +214,9 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   let result: Document = doc.toJSON({ virtuals: true });
   const verificationToken = result._verificationToken;
 
-  result = removeInternalFields(result);
   result = JSON.stringify(result);
   result = JSON.parse(result);
+  result = removeInternalFields(result);
 
   // /////////////////////////////////////
   // afterChange - Fields

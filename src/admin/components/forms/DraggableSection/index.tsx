@@ -28,7 +28,7 @@ const DraggableSection: React.FC<Props> = (props) => {
     label,
     blockType,
     fieldTypes,
-    _id,
+    id,
     draggableID,
     setRowCollapse,
     isCollapsed,
@@ -79,8 +79,8 @@ const DraggableSection: React.FC<Props> = (props) => {
               {blockType === 'blocks' && (
                 <div className={`${baseClass}__section-header`}>
                   <HiddenInput
-                    name={`${parentPath}.${rowIndex}._id`}
-                    value={_id}
+                    name={`${parentPath}.${rowIndex}.id`}
+                    value={id}
                     modifyForm={false}
                   />
                   <SectionTitle
@@ -91,7 +91,7 @@ const DraggableSection: React.FC<Props> = (props) => {
 
                   <Button
                     icon="chevron"
-                    onClick={() => setRowCollapse(_id, !isCollapsed)}
+                    onClick={() => setRowCollapse(id, !isCollapsed)}
                     buttonStyle="icon-label"
                     className={`toggle-collapse toggle-collapse--is-${isCollapsed ? 'collapsed' : 'open'}`}
                     round

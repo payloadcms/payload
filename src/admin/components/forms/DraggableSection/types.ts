@@ -13,7 +13,7 @@ export type Props = {
   label?: string
   blockType?: string
   fieldTypes: FieldTypes
-  _id: string
+  id: string
   draggableID: string
   isCollapsed?: boolean
   setRowCollapse?: (id: string, open: boolean) => void
