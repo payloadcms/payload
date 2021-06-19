@@ -140,6 +140,15 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
   result = removeInternalFields(result);
 
   // /////////////////////////////////////
+  // Delete Preferences
+  // /////////////////////////////////////
+
+  if (collectionConfig.auth) {
+    await this.preferences.Model.deleteMany({ user: id, userCollection: collectionConfig.slug });
+  }
+  await this.preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` });
+
+  // /////////////////////////////////////
   // afterDelete - Collection
   // /////////////////////////////////////
 
