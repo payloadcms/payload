@@ -28,8 +28,19 @@ const ColumnSelector: React.FC<Props> = (props) => {
     const { columns: initializedColumns } = getInitialState(fields, useAsTitle, defaultColumns);
     return initializedColumns;
   });
-  const { setPreference } = usePreferences();
+  const { setPreference, getPreference } = usePreferences();
+  const preferenceKey = `${collection.slug}-list-columns`;
 
+  useEffect(() => {
+    (async () => {
+      const columnPreference: string[] = await getPreference<string[]>(preferenceKey);
+      if (columnPreference) {
+        // filter invalid columns to clean up removed fields
+        const filteredColumnPreferences = columnPreference.filter((preference: string) => fields.find((field) => (field.name === preference)));
+        if (filteredColumnPreferences.length > 0) setColumns(filteredColumnPreferences);
+      }
+    })();
+  }, [fields, getPreference, preferenceKey]);
 
   useEffect(() => {
     if (typeof handleChange === 'function') handleChange(columns);
@@ -49,7 +60,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
                 newState.unshift(field.name);
               }
               setColumns(newState);
-              setPreference(`${collection.slug}-list-columns`, newState);
+              setPreference(preferenceKey, newState);
             }}
             alignIcon="left"
             key={field.name || i}
