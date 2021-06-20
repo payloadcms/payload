@@ -30,6 +30,7 @@ const reducer = (currentState, action) => {
       if (matchedRowIndex > -1 && stateCopy[matchedRowIndex]) {
         stateCopy[matchedRowIndex].collapsed = collapsed;
       }
+
       return stateCopy;
     }
 
