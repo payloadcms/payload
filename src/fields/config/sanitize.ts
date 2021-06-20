@@ -2,6 +2,7 @@ import { formatLabels, toWords } from '../../utilities/formatLabels';
 import { MissingFieldType, InvalidFieldRelationship } from '../../errors';
 import { baseBlockFields } from '../baseFields/baseBlockFields';
 import validations from '../validations';
+import { baseIDField } from '../baseFields/baseIDField';
 
 const sanitizeFields = (fields, validRelationships: string[]) => {
   if (!fields) return [];
@@ -27,6 +28,10 @@ const sanitizeFields = (fields, validRelationships: string[]) => {
 
     if (field.type === 'blocks') {
       field.blocks = field.blocks.map((block) => ({ ...block, fields: block.fields.concat(baseBlockFields) }));
+    }
+
+    if (field.type === 'array') {
+      field.fields.push(baseIDField);
     }
 
     if ((field.type === 'blocks' || field.type === 'array') && field.label !== false) {

@@ -4,7 +4,7 @@ import { AuthenticationError, LockedAuth } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import isLocked from '../isLocked';
-import removeInternalFields from '../../utilities/removeInternalFields';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Field, fieldHasSubFields } from '../../fields/config/types';
 import { User } from '../types';
 import { Collection } from '../../collections/config/types';
@@ -101,7 +101,7 @@ async function login(incomingArgs: Arguments): Promise<Result> {
 
   let user = userDoc.toJSON({ virtuals: true });
   user = JSON.parse(JSON.stringify(user));
-  user = removeInternalFields(user);
+  user = sanitizeInternalFields(user);
 
   const fieldsToSign = collectionConfig.fields.reduce((signedFields, field: Field) => {
     const result = {

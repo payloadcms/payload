@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { PayloadRequest } from '../../express/types';
-import removeInternalFields from '../../utilities/removeInternalFields';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { NotFound, Forbidden, ErrorDeletingFile } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import fileExists from '../../uploads/fileExists';
@@ -137,7 +137,7 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
 
   result = JSON.stringify(result);
   result = JSON.parse(result);
-  result = removeInternalFields(result);
+  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // Delete Preferences

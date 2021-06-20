@@ -4,7 +4,7 @@ import crypto from 'crypto';
 
 import { UploadedFile } from 'express-fileupload';
 import executeAccess from '../../auth/executeAccess';
-import removeInternalFields from '../../utilities/removeInternalFields';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
 import { MissingFile, FileUploadError, ValidationError } from '../../errors';
 import resizeAndSave from '../../uploads/imageResizer';
@@ -216,7 +216,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
 
   result = JSON.stringify(result);
   result = JSON.parse(result);
-  result = removeInternalFields(result);
+  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // afterChange - Fields

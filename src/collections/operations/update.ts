@@ -4,7 +4,7 @@ import { UploadedFile } from 'express-fileupload';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 
-import removeInternalFields from '../../utilities/removeInternalFields';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { NotFound, Forbidden, APIError, FileUploadError, ValidationError } from '../../errors';
 import isImage from '../../uploads/isImage';
@@ -263,7 +263,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   result = result.toJSON({ virtuals: true });
   result = JSON.stringify(result);
   result = JSON.parse(result);
-  result = removeInternalFields(result);
+  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // afterRead - Fields

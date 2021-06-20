@@ -19,7 +19,7 @@ const setBlockDiscriminators = (fields: Field[], schema: Schema, config: Config)
           }
         });
 
-        const blockSchema = new Schema(blockSchemaFields, { });
+        const blockSchema = new Schema(blockSchemaFields, { _id: false, id: false });
 
         if (field.localized) {
           config.localization.locales.forEach((locale) => {
@@ -360,7 +360,7 @@ const fieldToSchemaMap = {
   array: (field: ArrayField, fields: SchemaDefinition, config: Config) => {
     const baseSchema = {
       ...formatBaseSchema(field),
-      type: [buildSchema(config, field.fields, { })],
+      type: [buildSchema(config, field.fields, { _id: false, id: false })],
     };
 
     let schemaToReturn;

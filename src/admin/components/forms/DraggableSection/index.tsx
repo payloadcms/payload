@@ -10,9 +10,9 @@ import { NegativeFieldGutterProvider } from '../FieldTypeGutter/context';
 import FieldTypeGutter from '../FieldTypeGutter';
 import RenderFields, { useRenderedFields } from '../RenderFields';
 import { Props } from './types';
+import HiddenInput from '../field-types/HiddenInput';
 
 import './index.scss';
-import HiddenInput from '../field-types/HiddenInput';
 
 const baseClass = 'draggable-section';
 
@@ -29,7 +29,6 @@ const DraggableSection: React.FC<Props> = (props) => {
     blockType,
     fieldTypes,
     id,
-    draggableID,
     setRowCollapse,
     isCollapsed,
     permissions,
@@ -48,7 +47,7 @@ const DraggableSection: React.FC<Props> = (props) => {
 
   return (
     <Draggable
-      draggableId={draggableID}
+      draggableId={id}
       index={rowIndex}
       isDragDisabled={readOnly}
     >
@@ -101,7 +100,7 @@ const DraggableSection: React.FC<Props> = (props) => {
 
               <AnimateHeight
                 height={isCollapsed ? 0 : 'auto'}
-                duration={0}
+                duration={200}
               >
                 <NegativeFieldGutterProvider allow={false}>
                   <RenderFields

@@ -1,8 +1,8 @@
-import { v4 as uuidv4 } from 'uuid';
+import ObjectID from 'bson-objectid';
 
 const reducer = (currentState, action) => {
   const {
-    type, rowIndex, moveFromIndex, moveToIndex, data, blockType, collapsedState, collapsed, _id,
+    type, rowIndex, moveFromIndex, moveToIndex, data, blockType, collapsedState, collapsed, id,
   } = action;
 
   const stateCopy = [...currentState];
@@ -12,9 +12,8 @@ const reducer = (currentState, action) => {
       if (Array.isArray(data)) {
         return data.map((dataRow, i) => {
           const row = {
-            _id: dataRow?._id,
-            draggableID: stateCopy[i]?.draggableID || uuidv4(),
-            collapsed: (collapsedState || []).includes(dataRow?._id),
+            id: dataRow?.id || new ObjectID().toHexString(),
+            collapsed: (collapsedState || []).includes(dataRow?.id),
             blockType: dataRow?.blockType,
           };
 
@@ -26,7 +25,7 @@ const reducer = (currentState, action) => {
     }
 
     case 'SET_COLLAPSE': {
-      const matchedRowIndex = stateCopy.findIndex(({ _id: rowID }) => rowID === _id);
+      const matchedRowIndex = stateCopy.findIndex(({ id: rowID }) => rowID === id);
 
       if (matchedRowIndex > -1 && stateCopy[matchedRowIndex]) {
         stateCopy[matchedRowIndex].collapsed = collapsed;
@@ -36,7 +35,7 @@ const reducer = (currentState, action) => {
 
     case 'ADD': {
       const newRow = {
-        draggableID: uuidv4(),
+        id: new ObjectID().toHexString(),
         open: true,
         blockType: undefined,
       };

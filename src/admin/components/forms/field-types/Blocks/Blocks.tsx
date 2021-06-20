@@ -113,7 +113,7 @@ const Blocks: React.FC<Props> = (props) => {
       let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed || [];
 
       if (!collapsed) {
-        newCollapsedState = newCollapsedState.filter((_existingKey) => _existingKey !== id);
+        newCollapsedState = newCollapsedState.filter((existingID) => existingID !== id);
       } else {
         newCollapsedState.push(id);
       }
@@ -241,9 +241,8 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
                   return (
                     <DraggableSection
                       readOnly={readOnly}
-                      key={row.draggableID}
-                      draggableID={row.draggableID}
-                      id={row?.id}
+                      key={row.id}
+                      id={row.id}
                       blockType="blocks"
                       blocks={blocks}
                       label={blockToRender?.labels?.singular}

@@ -430,7 +430,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
     },
     array: (field: ArrayField) => {
       const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
-      let type = recursiveBuildObjectType(fullName, field.fields.concat([{ type: 'text', name: 'id' }]), fullName);
+      let type = recursiveBuildObjectType(fullName, field.fields, fullName);
       type = new GraphQLList(withNullableType(field, type));
 
       return { type };

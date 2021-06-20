@@ -43,9 +43,7 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const onSave = async (json) => {
     if (!isEditing) {
-      history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`, {
-        data: json.doc,
-      });
+      history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
     } else {
       const state = await buildStateFromSchema(fields, json.doc);
       setInitialState(state);
