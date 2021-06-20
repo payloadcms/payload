@@ -12,7 +12,7 @@ import { Collection } from '../../collections/config/types';
 export type Result = {
   user?: User,
   token?: string,
-  exp?: string,
+  exp?: number,
 }
 
 export type Arguments = {
@@ -201,7 +201,7 @@ async function login(incomingArgs: Arguments): Promise<Result> {
   return {
     token,
     user,
-    exp: (jwt.decode(token) as { exp: string }).exp,
+    exp: (jwt.decode(token) as jwt.JwtPayload).exp,
   };
 }
 
