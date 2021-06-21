@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 
 import { useAuth, useConfig } from '@payloadcms/config-provider';
 import { requests } from '../../../api';
@@ -10,54 +10,52 @@ type PreferencesContext = {
 
 const Context = createContext({} as PreferencesContext);
 
+const requestOptions = (value) => ({
+  body: JSON.stringify({ value }),
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
 export const PreferencesProvider: React.FC = ({ children }) => {
   const contextRef = useRef({} as PreferencesContext);
   const preferencesRef = useRef({});
-  const [preferences, setPreferences] = useState({});
   const config = useConfig();
   const { user } = useAuth();
   const { serverURL, routes: { api } } = config;
 
   useEffect(() => {
     if (!user) {
-      setPreferences({});
+      // clear preferences between users
+      preferencesRef.current = {};
     }
   }, [user]);
 
   const getPreference = useCallback(async (key: string) => {
-    if (preferencesRef.current[key]) return preferencesRef.current[key];
+    if (typeof preferencesRef.current[key] !== 'undefined') return preferencesRef.current[key];
     const promise = new Promise((resolve) => {
       (async () => {
         const request = await requests.get(`${serverURL}${api}/_preferences/${key}`);
-        setPreferences((prevPreferences) => ({ ...prevPreferences, [key]: request }));
         let value = null;
         if (request.status === 200) {
           const preference = await request.json();
           value = preference.value;
         }
-        setPreferences((prevPreferences) => ({ ...prevPreferences, [key]: value }));
+        preferencesRef.current[key] = value;
         resolve(value);
       })();
     });
-    setPreferences((prevPreferences) => ({ ...prevPreferences, [key]: promise }));
+    preferencesRef.current[key] = promise;
     return promise;
   }, [api, preferencesRef, serverURL]);
 
   const setPreference = useCallback(async (key: string, value: unknown): Promise<void> => {
-    if (preferencesRef.current[key] && JSON.stringify(await preferencesRef.current[key]) === JSON.stringify(value)) return;
-    const options = {
-      body: JSON.stringify({ value }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-    setPreferences((prevPreferences) => ({ ...prevPreferences, [key]: value }));
-    await requests.post(`${serverURL}${api}/_preferences/${key}`, options);
-  }, [api, preferencesRef, serverURL]);
+    preferencesRef.current[key] = value;
+    await requests.post(`${serverURL}${api}/_preferences/${key}`, requestOptions(value));
+  }, [api, serverURL]);
 
   contextRef.current.getPreference = getPreference;
   contextRef.current.setPreference = setPreference;
-  preferencesRef.current = preferences;
 
   return (
     <Context.Provider value={contextRef.current}>

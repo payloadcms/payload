@@ -16,10 +16,6 @@ function buildBlockType(block: Block): void {
       [
         ...block.fields,
         {
-          name: 'blockName',
-          type: 'text',
-        },
-        {
           name: 'blockType',
           type: 'text',
         },

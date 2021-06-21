@@ -3,10 +3,11 @@ import React, {
 } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
-import { classes } from 'http-status';
+import { usePreferences } from '../../../utilities/Preferences';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import reducer from '../rowReducer';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { useForm } from '../../Form/context';
 import buildStateFromSchema from '../../Form/buildStateFromSchema';
 import DraggableSection from '../../DraggableSection';
@@ -17,6 +18,7 @@ import BlockSelector from './BlockSelector';
 import { blocks as blocksValidator } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
 import { Props, RenderBlockProps } from './types';
+import { DocumentPreferences } from '../../../../../preferences/types';
 
 import './index.scss';
 
@@ -48,6 +50,9 @@ const Blocks: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
+  const { preferencesKey } = useDocumentInfo();
+
+  const { getPreference, setPreference } = usePreferences();
   const [rows, dispatchRows] = useReducer(reducer, []);
   const formContext = useForm();
   const { dispatchFields } = formContext;
@@ -98,9 +103,34 @@ const Blocks: React.FC<Props> = (props) => {
     dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
   }, [dispatchRows, dispatchFields, path]);
 
-  const toggleCollapse = useCallback((rowIndex) => {
-    dispatchRows({ type: 'TOGGLE_COLLAPSE', rowIndex });
-  }, []);
+  const setCollapse = useCallback(async (id: string, collapsed: boolean) => {
+    dispatchRows({ type: 'SET_COLLAPSE', id, collapsed });
+
+    if (preferencesKey) {
+      const preferences: DocumentPreferences = await getPreference(preferencesKey);
+      const preferencesToSet = preferences || { fields: { } };
+      let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed
+        .filter((filterID) => (rows.find((row) => row.id === filterID)))
+        || [];
+
+      if (!collapsed) {
+        newCollapsedState = newCollapsedState.filter((existingID) => existingID !== id);
+      } else {
+        newCollapsedState.push(id);
+      }
+
+      setPreference(preferencesKey, {
+        ...preferencesToSet,
+        fields: {
+          ...preferencesToSet?.fields || {},
+          [path]: {
+            ...preferencesToSet?.fields?.[path],
+            collapsed: newCollapsedState,
+          },
+        },
+      });
+    }
+  }, [preferencesKey, getPreference, path, setPreference, rows]);
 
   const onDragEnd = useCallback((result) => {
     if (!result.destination) return;
@@ -110,9 +140,14 @@ const Blocks: React.FC<Props> = (props) => {
   }, [moveRow]);
 
   useEffect(() => {
-    const data = formContext.getDataByPath(path);
-    dispatchRows({ type: 'SET_ALL', data: data || [] });
-  }, [formContext, path]);
+    const fetchPreferences = async () => {
+      const preferences = preferencesKey ? await getPreference<DocumentPreferences>(preferencesKey) : undefined;
+      const data = formContext.getDataByPath(path);
+      dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
+    };
+
+    fetchPreferences();
+  }, [formContext, path, preferencesKey, getPreference]);
 
   useEffect(() => {
     setValue(rows?.length || 0);
@@ -138,7 +173,7 @@ const Blocks: React.FC<Props> = (props) => {
       path={path}
       name={name}
       fieldTypes={fieldTypes}
-      toggleCollapse={toggleCollapse}
+      setCollapse={setCollapse}
       permissions={permissions}
       value={value as number}
       blocks={blocks}
@@ -165,7 +200,7 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
     fieldTypes,
     permissions,
     value,
-    toggleCollapse,
+    setCollapse,
     blocks,
     readOnly,
     minRows,
@@ -207,31 +242,24 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
                   return (
                     <DraggableSection
                       readOnly={readOnly}
-                      key={row.key}
-                      id={row.key}
+                      key={row.id}
+                      id={row.id}
                       blockType="blocks"
                       blocks={blocks}
                       label={blockToRender?.labels?.singular}
-                      isOpen={row.open}
+                      isCollapsed={row.collapsed}
                       rowCount={rows.length}
                       rowIndex={i}
                       addRow={addRow}
                       removeRow={removeRow}
                       moveRow={moveRow}
-                      toggleRowCollapse={toggleCollapse}
+                      setRowCollapse={setCollapse}
                       parentPath={path}
                       fieldTypes={fieldTypes}
                       permissions={permissions}
                       hasMaxRows={hasMaxRows}
                       fieldSchema={[
                         ...blockToRender.fields,
-                        {
-                          name: 'blockType',
-                          type: 'text',
-                          admin: {
-                            hidden: true,
-                          },
-                        },
                       ]}
                     />
                   );
@@ -243,7 +271,7 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
                 <Banner type="error">
                   This field requires at least
                   {' '}
-                  {`${minRows} ${minRows === 1 ? labels.singular : labels.plural}`}
+                  {`${minRows || 1} ${minRows === 1 || typeof minRows === 'undefined' ? labels.singular : labels.plural}`}
                 </Banner>
               )}
               {(rows.length === 0 && readOnly) && (

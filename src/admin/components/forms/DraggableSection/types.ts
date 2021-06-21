@@ -13,12 +13,12 @@ export type Props = {
   label?: string
   blockType?: string
   fieldTypes: FieldTypes
-  toggleRowCollapse?: (index: number) => void
   id: string
+  isCollapsed?: boolean
+  setRowCollapse?: (id: string, open: boolean) => void
   positionPanelVerticalAlignment?: 'top' | 'center' | 'sticky'
   actionPanelVerticalAlignment?: 'top' | 'center' | 'sticky'
   permissions: FieldPermissions
-  isOpen?: boolean
   readOnly: boolean
   blocks?: Block[]
   hasMaxRows?: boolean

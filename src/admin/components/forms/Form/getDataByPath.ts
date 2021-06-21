@@ -19,6 +19,7 @@ const getDataByPath = (fields: Fields, path: string): unknown => {
 
   const values = reduceFieldsToValues(data, true);
   const unflattenedData = unflatten(values);
+
   return unflattenedData?.[name];
 };
 

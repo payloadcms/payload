@@ -3,6 +3,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { useConfig, useAuth } from '@payloadcms/config-provider';
 import { useStepNav } from '../../elements/StepNav';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
+import { DocumentInfoProvider } from '../../utilities/DocumentInfo';
 
 import { useLocale } from '../../utilities/Locale';
 
@@ -80,21 +81,26 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const globalPermissions = permissions?.globals?.[slug];
 
   return (
-    <NegativeFieldGutterProvider allow>
-      <RenderCustomComponent
-        DefaultComponent={DefaultGlobal}
-        CustomComponent={CustomEdit}
-        componentProps={{
-          data: dataToRender,
-          permissions: globalPermissions,
-          initialState,
-          global,
-          onSave,
-          apiURL: `${serverURL}${api}/globals/${slug}?depth=0`,
-          action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
-        }}
-      />
-    </NegativeFieldGutterProvider>
+    <DocumentInfoProvider
+      slug={slug}
+      type="global"
+    >
+      <NegativeFieldGutterProvider allow>
+        <RenderCustomComponent
+          DefaultComponent={DefaultGlobal}
+          CustomComponent={CustomEdit}
+          componentProps={{
+            data: dataToRender,
+            permissions: globalPermissions,
+            initialState,
+            global,
+            onSave,
+            apiURL: `${serverURL}${api}/globals/${slug}?depth=0`,
+            action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
+          }}
+        />
+      </NegativeFieldGutterProvider>
+    </DocumentInfoProvider>
   );
 };
 export default GlobalView;

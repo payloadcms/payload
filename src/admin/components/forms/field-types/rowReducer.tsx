@@ -1,8 +1,8 @@
-import { v4 as uuidv4 } from 'uuid';
+import ObjectID from 'bson-objectid';
 
 const reducer = (currentState, action) => {
   const {
-    type, rowIndex, moveFromIndex, moveToIndex, data, blockType,
+    type, rowIndex, moveFromIndex, moveToIndex, data, blockType, collapsedState, collapsed, id,
   } = action;
 
   const stateCopy = [...currentState];
@@ -10,36 +10,34 @@ const reducer = (currentState, action) => {
   switch (type) {
     case 'SET_ALL': {
       if (Array.isArray(data)) {
-        if (currentState.length !== data.length) {
-          return data.map((dataRow) => {
-            const row = {
-              key: uuidv4(),
-              open: true,
-              blockType: undefined,
-            };
+        return data.map((dataRow, i) => {
+          const row = {
+            id: dataRow?.id || new ObjectID().toHexString(),
+            collapsed: (collapsedState || []).includes(dataRow?.id),
+            blockType: dataRow?.blockType,
+          };
 
-            if (dataRow.blockType) {
-              row.blockType = dataRow.blockType;
-            }
-
-            return row;
-          });
-        }
-
-        return currentState;
+          return row;
+        });
       }
 
       return [];
     }
 
-    case 'TOGGLE_COLLAPSE':
-      stateCopy[rowIndex].open = !stateCopy[rowIndex].open;
+    case 'SET_COLLAPSE': {
+      const matchedRowIndex = stateCopy.findIndex(({ id: rowID }) => rowID === id);
+
+      if (matchedRowIndex > -1 && stateCopy[matchedRowIndex]) {
+        stateCopy[matchedRowIndex].collapsed = collapsed;
+      }
+
       return stateCopy;
+    }
 
     case 'ADD': {
       const newRow = {
+        id: new ObjectID().toHexString(),
         open: true,
-        key: uuidv4(),
         blockType: undefined,
       };
 

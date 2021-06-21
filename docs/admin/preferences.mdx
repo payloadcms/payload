@@ -1,0 +1,157 @@
+---
+title: Managing User Preferences
+label: Preferences
+order: 40
+desc: Store the preferences of your users as they interact with the Admin panel.
+keywords: admin, preferences, custom, customize, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+As your users interact with your Admin panel, you might want to store their preferences in a persistent manner, so that when they revisit the Admin panel, they can pick right back up where they left off.
+
+Out of the box, Payload handles the persistence of your users' preferences in a handful of ways, including:
+
+1. Collection `List` view active columns, and their order, that users define
+1. Their last active locale
+1. The "collapsed" state of blocks, on a document level, as users edit or interact with documents
+
+<Banner type="warning">
+	<strong>Important:</strong><br/>
+	All preferences are stored on an individual user basis. Payload automatically recognizes the user that is reading or setting a preference via all provided authentication methods.
+</Banner>
+
+### Use cases
+
+This API is used significantly for internal operations of the Admin panel, as mentioned above. But, if you're building your own React components for use in the Admin panel, you can allow users to set their own preferences in correspondence to their usage of your components. For example:
+
+- If you have built a "color picker", you could "remember" the last used colors that the user has set for easy access next time
+- If you've built a custom `Nav` component, and you've built in an "accordion-style" UI, you might want to store the `collapsed` state of each Nav collapsible item. This way, if an editor returns to the panel, their `Nav` state is persisted automatically
+- You might want to store `recentlyAccessed` documents to give admin editors an easy shortcut back to their recently accessed documents on the `Dashboard` or similar
+- Many other use cases exist. Invent your own! Give your editors an intelligent and persistent editing experience.
+
+### Database
+
+Payload automatically creates an internally used `_preferences` collection that stores user preferences. Each document in the `_preferences` collection contains the following shape:
+
+| Key                  | Value  |
+| -------------------- | -------------|
+| `id`                 | A unique ID for each preference stored. |
+| `key`                | A unique `key` that corresponds to the preference. |
+| `user`               | The ID of the `user` that is storing its preference. |
+| `userCollection`     | The `slug` of the collection that the `user` is logged in as. |
+| `value`              | The value of the preference. Can be any data shape that you need. |
+| `createdAt`          | A timestamp of when the preference was created. |
+| `updatedAt`          | A timestamp set to the last time the preference was updated.
+
+### APIs
+
+Preferences are available to both [GraphQL](/docs/graphql/overview#preferences) and [REST](/docs/rest-api/overview#) APIs.
+
+### Adding or reading Preferences in your own components
+
+The Payload admin panel offers a `usePreferences` hook. The hook is only meant for use within the admin panel itself. It provides you with two methods:
+
+##### `getPreference`
+
+This async method provides an easy way to retrieve a user's preferences by `key`. It will return a promise containing the resulting preference value.
+
+**Arguments**
+
+- `key`: the `key` of your preference to retrieve.
+
+##### `setPreference`
+
+Also async, this method provides you with an easy way to set a user preference. It returns `void`.
+
+**Arguments:**
+
+- `key`: the `key` of your preference to set.
+- `value`: the `value` of your preference that you're looking to set.
+
+## Example
+
+Here is an example for how you can utilize `usePreferences` within your custom Admin panel components. Note - this example is not fully useful and is more just a reference for how to utilize the Preferences API. In this case, we are demonstrating how to set and retrieve a user's last used colors history within a `ColorPicker` or similar type component.
+
+```
+import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import { usePreferences } from 'payload/components/preferences';
+
+const lastUsedColorsPreferenceKey = 'last-used-colors';
+
+const CustomComponent = (props) => {
+  const { getPreference, setPreference } = usePreferences();
+
+  // Store the last used colors in local state
+  const [lastUsedColors, setLastUsedColors] = useState([]);
+
+  // Callback to add a color to the last used colors
+  const updateLastUsedColors = useCallback((color) => {
+    // First, check if color already exists in last used colors.
+    // If it already exists, there is no need to update preferences
+    const colorAlreadyExists = lastUsedColors.indexOf(color) > -1;
+
+    if (!colorAlreadyExists) {
+      const newLastUsedColors = [
+        ...lastUsedColors,
+        color,
+      ];
+
+      setLastUsedColors(newLastUsedColors);
+      setPreference(lastUsedColorsPreferenceKey, newLastUsedColors);
+    }
+  }, [lastUsedColors, setPreference]);
+
+  // Retrieve preferences on component mount
+  // This will only be run one time, because the `getPreference` method never changes
+  useEffect(() => {
+    const asyncGetPreference = async () => {
+      const lastUsedColorsFromPreferences = await getPreference(lastUsedColorsPreferenceKey);
+      setLastUsedColors(lastUsedColorsFromPreferences);
+    };
+
+    asyncGetPreference();
+  }, [getPreference]);
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => updateLastUsedColors('red')}
+      >
+        Use red
+      </button>
+      <button
+        type="button"
+        onClick={() => updateLastUsedColors('blue')}
+      >
+        Use blue
+      </button>
+      <button
+        type="button"
+        onClick={() => updateLastUsedColors('purple')}
+      >
+        Use purple
+      </button>
+      <button
+        type="button"
+        onClick={() => updateLastUsedColors('yellow')}
+      >
+        Use yellow
+      </button>
+      {lastUsedColors && (
+        <Fragment>
+          <h5>Last used colors:</h5>
+          <ul>
+            {lastUsedColors?.map((color) => (
+              <li key={color}>
+                {color}
+              </li>
+            ))}
+          </ul>
+        </Fragment>
+      )}
+    </div>
+  );
+};
+
+export default CustomComponent;
+```

@@ -1,18 +1,22 @@
 import React from 'react';
+import { OptionObject, optionsAreObjects, SelectField } from '../../../../../../../../fields/config/types';
 
-const SelectCell = ({ data, field }) => {
-  const findLabel = (items) => items.map((i) => {
-    const found = field.options.filter((f) => f.value === i)?.[0]?.label;
+const SelectCell = ({ data, field }: {data: any, field: SelectField}) => {
+  const findLabel = (items: string[]) => items.map((i) => {
+    const found = (field.options as OptionObject[])
+      .filter((f: OptionObject) => f.value === i)?.[0]?.label;
     return found;
   }).join(', ');
 
   let content = '';
-  if (field?.options?.[0]?.value) {
-    content = (Array.isArray(data))
+  if (optionsAreObjects(field.options)) {
+    content = Array.isArray(data)
       ? findLabel(data) // hasMany
       : findLabel([data]);
   } else {
-    content = data.join(', ');
+    content = Array.isArray(data)
+      ? data.join(', ') // hasMany
+      : data;
   }
   return (
     <span>

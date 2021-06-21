@@ -1,7 +1,7 @@
 import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
-import removeInternalFields from '../../utilities/removeInternalFields';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection, PaginatedDocs } from '../config/types';
 import { hasWhereAccessResult } from '../../auth/types';
 
@@ -180,7 +180,7 @@ async function find(incomingArgs: Arguments): Promise<PaginatedDocs> {
 
   result = {
     ...result,
-    docs: result.docs.map((doc) => removeInternalFields(doc)),
+    docs: result.docs.map((doc) => sanitizeInternalFields(doc)),
   };
 
   return result;

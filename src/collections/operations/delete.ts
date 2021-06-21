@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { PayloadRequest } from '../../express/types';
-import removeInternalFields from '../../utilities/removeInternalFields';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { NotFound, Forbidden, ErrorDeletingFile } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import fileExists from '../../uploads/fileExists';
@@ -135,9 +135,18 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
 
   let result: Document = doc.toJSON({ virtuals: true });
 
-  result = removeInternalFields(result);
   result = JSON.stringify(result);
   result = JSON.parse(result);
+  result = sanitizeInternalFields(result);
+
+  // /////////////////////////////////////
+  // Delete Preferences
+  // /////////////////////////////////////
+
+  if (collectionConfig.auth) {
+    await this.preferences.Model.deleteMany({ user: id, userCollection: collectionConfig.slug });
+  }
+  await this.preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` });
 
   // /////////////////////////////////////
   // afterDelete - Collection

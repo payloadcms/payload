@@ -29,5 +29,5 @@ export type RenderBlockProps = {
   errorMessage: string
   rows: Data[]
   blocks: Block[],
-  toggleCollapse: (row: number) => void
+  setCollapse: (id: string, collapsed: boolean) => void
 }

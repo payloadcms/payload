@@ -1,5 +1,5 @@
 import executeAccess from '../../auth/executeAccess';
-import removeInternalFields from '../../utilities/removeInternalFields';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
 async function update(args) {
   const { globals: { Model } } = this;
@@ -122,9 +122,9 @@ async function update(args) {
   }
 
   global = global.toJSON({ virtuals: true });
-  global = removeInternalFields(global);
   global = JSON.stringify(global);
   global = JSON.parse(global);
+  global = sanitizeInternalFields(global);
 
   // /////////////////////////////////////
   // afterRead - Fields

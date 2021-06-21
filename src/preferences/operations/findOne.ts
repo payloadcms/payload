@@ -1,9 +1,7 @@
 import { Preference, PreferenceRequest } from '../types';
 import executeAccess from '../../auth/executeAccess';
 import defaultAccess from '../../auth/defaultAccess';
-import { NotFound } from '../../errors';
 import UnauthorizedError from '../../errors/UnathorizedError';
-
 
 async function findOne(args: PreferenceRequest): Promise<Preference> {
   const { preferences: { Model } } = this;

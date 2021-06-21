@@ -1,3 +1,4 @@
+import ObjectID from 'bson-objectid';
 import { Field as FieldSchema } from '../../../../fields/config/types';
 import { Fields, Field, Data } from './types';
 
@@ -64,10 +65,19 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
               if (field.type === 'array') {
                 return {
                   ...state,
-                  ...rows.reduce((rowState, row, i) => ({
-                    ...rowState,
-                    ...iterateFields(field.fields, row, `${path}${field.name}.${i}.`),
-                  }), {}),
+                  ...rows.reduce((rowState, row, i) => {
+                    const rowPath = `${path}${field.name}.${i}.`;
+
+                    return {
+                      ...rowState,
+                      [`${rowPath}id`]: {
+                        value: row.id,
+                        initialValue: row.id || new ObjectID().toHexString(),
+                        valid: true,
+                      },
+                      ...iterateFields(field.fields, row, rowPath),
+                    };
+                  }, {}),
                 };
               }
 
@@ -77,7 +87,6 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
                   ...rows.reduce((rowState, row, i) => {
                     const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
                     const rowPath = `${path}${field.name}.${i}.`;
-
                     return {
                       ...rowState,
                       [`${rowPath}blockType`]: {
@@ -88,6 +97,11 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
                       [`${rowPath}blockName`]: {
                         value: row.blockName,
                         initialValue: row.blockName,
+                        valid: true,
+                      },
+                      [`${rowPath}id`]: {
+                        value: row.id,
+                        initialValue: row.id || new ObjectID().toHexString(),
                         valid: true,
                       },
                       ...(block?.fields ? iterateFields(block.fields, row, rowPath) : {}),

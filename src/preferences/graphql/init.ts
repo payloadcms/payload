@@ -6,7 +6,7 @@ import {
 } from 'graphql';
 import { DateTimeResolver } from 'graphql-scalars';
 
-function registerPreferences() {
+function registerPreferences(): void {
   const {
     findOne, update, delete: deleteOperation,
   } = this.operations.preferences;
