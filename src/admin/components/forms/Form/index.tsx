@@ -269,7 +269,6 @@ const Form: React.FC<Props> = (props) => {
     waitForAutocomplete,
   ]);
 
-
   const getFields = useCallback(() => contextRef.current.fields, [contextRef]);
   const getField = useCallback((path: string) => contextRef.current.fields[path], [contextRef]);
   const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [contextRef]);

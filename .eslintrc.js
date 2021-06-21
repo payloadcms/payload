@@ -42,7 +42,8 @@ module.exports = {
     },
   ],
   rules: {
-    "import/no-extraneous-dependencies": ["error", { "packageDir": "./" }],
+    'no-sparse-arrays': 'off',
+    'import/no-extraneous-dependencies': ["error", { "packageDir": "./" }],
     'react/jsx-filename-extension': [2, { extensions: ['.js', '.jsx', '.ts', '.tsx'] }],
     'import/prefer-default-export': 'off',
     'react/prop-types': 'off',

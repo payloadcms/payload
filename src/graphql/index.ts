@@ -11,6 +11,7 @@ import buildLocaleInputType from './schema/buildLocaleInputType';
 import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType';
 import initCollections from '../collections/graphql/init';
 import initGlobals from '../globals/graphql/init';
+import initPreferences from '../preferences/graphql/init';
 import { GraphQLResolvers } from './bindResolvers';
 import buildWhereInputType from './schema/buildWhereInputType';
 import { Config } from '../config/types';
@@ -48,6 +49,8 @@ class InitializeGraphQL {
   initCollections: typeof initCollections;
 
   initGlobals: typeof initGlobals;
+
+  initPreferences: typeof initPreferences;
 
   schema: GraphQL.GraphQLSchema;
 
@@ -89,9 +92,11 @@ class InitializeGraphQL {
     this.buildPoliciesType = buildPoliciesType.bind(this);
     this.initCollections = initCollections.bind(this);
     this.initGlobals = initGlobals.bind(this);
+    this.initPreferences = initPreferences.bind(this);
 
     this.initCollections();
     this.initGlobals();
+    this.initPreferences();
 
     this.Query.fields.Access = {
       type: this.buildPoliciesType(),

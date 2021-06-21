@@ -19,6 +19,9 @@ import deleteHandler from '../collections/requestHandlers/delete';
 import findOne from '../globals/requestHandlers/findOne';
 import globalUpdate from '../globals/requestHandlers/update';
 import { Payload } from '../index';
+import preferenceUpdate from '../preferences/requestHandlers/update';
+import preferenceFindOne from '../preferences/requestHandlers/findOne';
+import preferenceDelete from '../preferences/requestHandlers/delete';
 
 export type RequestHandlers = {
   collections: {
@@ -44,7 +47,12 @@ export type RequestHandlers = {
   globals: {
     findOne: typeof findOne,
     update: typeof globalUpdate,
-  }
+  },
+  preferences: {
+    update: typeof preferenceUpdate,
+    findOne: typeof preferenceFindOne,
+    delete: typeof preferenceDelete,
+  },
 }
 
 function bindRequestHandlers(ctx: Payload): void {
@@ -72,6 +80,11 @@ function bindRequestHandlers(ctx: Payload): void {
     globals: {
       findOne: findOne.bind(ctx),
       update: globalUpdate.bind(ctx),
+    },
+    preferences: {
+      update: preferenceUpdate.bind(ctx),
+      findOne: preferenceFindOne.bind(ctx),
+      delete: preferenceDelete.bind(ctx),
     },
   };
 }

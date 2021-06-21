@@ -71,12 +71,6 @@ function fieldReducer(state: Fields, action): Fields {
           initialValue: blockType,
           valid: true,
         };
-
-        subFieldState.blockName = {
-          value: null,
-          initialValue: null,
-          valid: true,
-        };
       }
 
       // Add new object containing subfield names to unflattenedRows array

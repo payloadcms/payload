@@ -2,7 +2,7 @@
 import memoize from 'micro-memoize';
 import { PayloadRequest } from '../../express/types';
 import { Collection } from '../config/types';
-import removeInternalFields from '../../utilities/removeInternalFields';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { Document, Where } from '../../types';
@@ -114,9 +114,7 @@ async function findByID(incomingArgs: Arguments): Promise<Document> {
   // Clone the result - it may have come back memoized
   result = JSON.parse(JSON.stringify(result));
 
-  result.id = result._id;
-
-  result = removeInternalFields(result);
+  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // beforeRead - Collection

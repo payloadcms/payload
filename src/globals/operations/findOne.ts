@@ -1,5 +1,5 @@
 import executeAccess from '../../auth/executeAccess';
-import removeInternalFields from '../../utilities/removeInternalFields';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
 async function findOne(args) {
   const { globals: { Model } } = this;
@@ -31,9 +31,9 @@ async function findOne(args) {
     delete doc._id;
   }
 
-  doc = removeInternalFields(doc);
   doc = JSON.stringify(doc);
   doc = JSON.parse(doc);
+  doc = sanitizeInternalFields(doc);
 
   // /////////////////////////////////////
   // 3. Execute before collection hook
