@@ -1,3 +1,16 @@
+# [0.7.0](https://github.com/payloadcms/payload/compare/v0.6.10...v0.7.0) (2021-06-21)
+
+
+### Bug Fixes
+
+* handle all scenarios in select cell ([dd40ab0](https://github.com/payloadcms/payload/commit/dd40ab07fa359802578ed948136018dfc9a538c5))
+
+
+### Features
+
+* exposes babel config via payload/babel ([#203](https://github.com/payloadcms/payload/issues/203)) ([67c1e28](https://github.com/payloadcms/payload/commit/67c1e280eb891a736703e242518bbeac8b8c2878))
+* user preferences ([#195](https://github.com/payloadcms/payload/issues/195)) ([fb60bc7](https://github.com/payloadcms/payload/commit/fb60bc79a11d69c5dab6b4921d62614a7b914fef))
+
 ## [0.6.10](https://github.com/payloadcms/payload/compare/v0.6.9...v0.6.10) (2021-05-23)
 
 ## [0.6.9](https://github.com/payloadcms/payload/compare/v0.6.8...v0.6.9) (2021-05-16)
