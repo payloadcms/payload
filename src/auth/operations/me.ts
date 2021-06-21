@@ -7,7 +7,7 @@ export type Result = {
   user?: User,
   collection?: string,
   token?: string,
-  exp?: string,
+  exp?: number,
 }
 
 export type Arguments = {
@@ -41,7 +41,7 @@ async function me({
 
     if (token) {
       response.token = token;
-      const decoded = jwt.decode(token) as { exp: string };
+      const decoded = jwt.decode(token) as jwt.JwtPayload;
       if (decoded) response.exp = decoded.exp;
     }
 
