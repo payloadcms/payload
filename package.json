@@ -279,7 +279,6 @@
     "*.js",
     "*.d.ts",
     "!jest.config.js",
-    "!babel.config.js",
     "!jest.react.config.js"
   ],
   "publishConfig": {
