@@ -11,6 +11,7 @@ import { ListControls } from '../../../elements/ListControls/types';
 import formatFields from './formatFields';
 import buildColumns from './buildColumns';
 import { ListIndexProps } from './types';
+import { usePreferences } from '../../../utilities/Preferences';
 
 const ListView: React.FC<ListIndexProps> = (props) => {
   const {
@@ -34,6 +35,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const { permissions } = useAuth();
   const location = useLocation();
   const { setStepNav } = useStepNav();
+  const { getPreference, setPreference } = usePreferences();
 
   const [fields] = useState(() => formatFields(collection));
   const [listControls, setListControls] = useState<ListControls>({});
@@ -75,8 +77,11 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   }, [setStepNav, plural]);
 
   useEffect(() => {
-    setColumns(buildColumns(collection, listControlsColumns, setSort));
-  }, [collection, listControlsColumns, setSort]);
+    (async () => {
+      const columnPreferences = await getPreference<string[]>(`${collection.slug}-list-columns`);
+      setColumns(buildColumns(collection, columnPreferences || listControlsColumns, setSort));
+    })();
+  }, [collection, listControlsColumns, setSort, getPreference]);
 
   return (
     <RenderCustomComponent

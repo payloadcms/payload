@@ -9,6 +9,7 @@ import { WindowInfoProvider } from '@faceless-ui/window-info';
 import { ModalProvider, ModalContainer } from '@faceless-ui/modal';
 import { ToastContainer, Slide } from 'react-toastify';
 import { ConfigProvider, AuthProvider } from '@payloadcms/config-provider';
+import { PreferencesProvider } from './components/utilities/Preferences';
 import { SearchParamsProvider } from './components/utilities/SearchParams';
 import { LocaleProvider } from './components/utilities/Locale';
 import Routes from './components/Routes';
@@ -32,12 +33,14 @@ const Index = () => (
               zIndex={50}
             >
               <AuthProvider>
-                <SearchParamsProvider>
-                  <LocaleProvider>
-                    <Routes />
-                  </LocaleProvider>
-                </SearchParamsProvider>
-                <ModalContainer />
+                <PreferencesProvider>
+                  <SearchParamsProvider>
+                    <LocaleProvider>
+                      <Routes />
+                    </LocaleProvider>
+                  </SearchParamsProvider>
+                  <ModalContainer />
+                </PreferencesProvider>
               </AuthProvider>
             </ModalProvider>
           </Router>

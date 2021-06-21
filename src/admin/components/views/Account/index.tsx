@@ -5,6 +5,7 @@ import { useStepNav } from '../../elements/StepNav';
 
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import { useLocale } from '../../utilities/Locale';
+import { DocumentInfoProvider } from '../../utilities/DocumentInfo';
 import DefaultAccount from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
@@ -69,22 +70,28 @@ const AccountView: React.FC = () => {
   }, [dataToRender, fields]);
 
   return (
-    <NegativeFieldGutterProvider allow>
-      <RenderCustomComponent
-        DefaultComponent={DefaultAccount}
-        CustomComponent={CustomAccount}
-        componentProps={{
-          action,
-          data,
-          collection,
-          permissions: collectionPermissions,
-          hasSavePermission,
-          initialState,
-          apiURL,
-          isLoading,
-        }}
-      />
-    </NegativeFieldGutterProvider>
+    <DocumentInfoProvider
+      type="collection"
+      slug={collection?.slug}
+      id={user?.id}
+    >
+      <NegativeFieldGutterProvider allow>
+        <RenderCustomComponent
+          DefaultComponent={DefaultAccount}
+          CustomComponent={CustomAccount}
+          componentProps={{
+            action,
+            data,
+            collection,
+            permissions: collectionPermissions,
+            hasSavePermission,
+            initialState,
+            apiURL,
+            isLoading,
+          }}
+        />
+      </NegativeFieldGutterProvider>
+    </DocumentInfoProvider>
   );
 };
 

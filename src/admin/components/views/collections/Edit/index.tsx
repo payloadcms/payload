@@ -5,6 +5,7 @@ import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
+import { DocumentInfoProvider } from '../../../utilities/DocumentInfo';
 import DefaultEdit from './Default';
 import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema';
 import { NegativeFieldGutterProvider } from '../../../forms/FieldTypeGutter/context';
@@ -42,9 +43,7 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const onSave = async (json) => {
     if (!isEditing) {
-      history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`, {
-        data: json.doc,
-      });
+      history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
     } else {
       const state = await buildStateFromSchema(fields, json.doc);
       setInitialState(state);
@@ -99,24 +98,30 @@ const EditView: React.FC<IndexProps> = (props) => {
   const hasSavePermission = (isEditing && collectionPermissions?.update?.permission) || (!isEditing && collectionPermissions?.create?.permission);
 
   return (
-    <NegativeFieldGutterProvider allow>
-      <RenderCustomComponent
-        DefaultComponent={DefaultEdit}
-        CustomComponent={CustomEdit}
-        componentProps={{
-          isLoading,
-          data: dataToRender,
-          collection,
-          permissions: collectionPermissions,
-          isEditing,
-          onSave,
-          initialState,
-          hasSavePermission,
-          apiURL,
-          action,
-        }}
-      />
-    </NegativeFieldGutterProvider>
+    <DocumentInfoProvider
+      id={id}
+      slug={collection.slug}
+      type="collection"
+    >
+      <NegativeFieldGutterProvider allow>
+        <RenderCustomComponent
+          DefaultComponent={DefaultEdit}
+          CustomComponent={CustomEdit}
+          componentProps={{
+            isLoading,
+            data: dataToRender,
+            collection,
+            permissions: collectionPermissions,
+            isEditing,
+            onSave,
+            initialState,
+            hasSavePermission,
+            apiURL,
+            action,
+          }}
+        />
+      </NegativeFieldGutterProvider>
+    </DocumentInfoProvider>
   );
 };
 export default EditView;

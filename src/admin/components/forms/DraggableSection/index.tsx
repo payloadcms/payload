@@ -10,6 +10,7 @@ import { NegativeFieldGutterProvider } from '../FieldTypeGutter/context';
 import FieldTypeGutter from '../FieldTypeGutter';
 import RenderFields, { useRenderedFields } from '../RenderFields';
 import { Props } from './types';
+import HiddenInput from '../field-types/HiddenInput';
 
 import './index.scss';
 
@@ -27,10 +28,10 @@ const DraggableSection: React.FC<Props> = (props) => {
     label,
     blockType,
     fieldTypes,
-    toggleRowCollapse,
     id,
+    setRowCollapse,
+    isCollapsed,
     permissions,
-    isOpen,
     readOnly,
     hasMaxRows,
   } = props;
@@ -40,7 +41,7 @@ const DraggableSection: React.FC<Props> = (props) => {
 
   const classes = [
     baseClass,
-    isOpen ? 'is-open' : 'is-closed',
+    isCollapsed ? 'is-collapsed' : 'is-open',
     (isHovered && !readOnly) && 'is-hovered',
   ].filter(Boolean).join(' ');
 
@@ -76,6 +77,11 @@ const DraggableSection: React.FC<Props> = (props) => {
 
               {blockType === 'blocks' && (
                 <div className={`${baseClass}__section-header`}>
+                  <HiddenInput
+                    name={`${parentPath}.${rowIndex}.id`}
+                    value={id}
+                    modifyForm={false}
+                  />
                   <SectionTitle
                     label={label}
                     path={`${parentPath}.${rowIndex}.blockName`}
@@ -84,17 +90,17 @@ const DraggableSection: React.FC<Props> = (props) => {
 
                   <Button
                     icon="chevron"
-                    onClick={() => toggleRowCollapse(rowIndex)}
+                    onClick={() => setRowCollapse(id, !isCollapsed)}
                     buttonStyle="icon-label"
-                    className={`toggle-collapse toggle-collapse--is-${isOpen ? 'open' : 'closed'}`}
+                    className={`toggle-collapse toggle-collapse--is-${isCollapsed ? 'collapsed' : 'open'}`}
                     round
                   />
                 </div>
               )}
 
               <AnimateHeight
-                height={isOpen ? 'auto' : 0}
-                duration={0}
+                height={isCollapsed ? 0 : 'auto'}
+                duration={200}
               >
                 <NegativeFieldGutterProvider allow={false}>
                   <RenderFields

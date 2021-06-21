@@ -20,6 +20,10 @@ export type Data = {
   [key: string]: any
 }
 
+export type Preferences = {
+  [key: string]: unknown
+}
+
 export type Props = {
   disabled?: boolean
   onSubmit?: (fields: Fields, data: Data) => void

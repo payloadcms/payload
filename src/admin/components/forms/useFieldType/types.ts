@@ -16,5 +16,5 @@ export type FieldType<T> = {
   showError: boolean
   formSubmitted: boolean
   formProcessing: boolean
-  setValue: (val: unknown) => void
+  setValue: (val: unknown, modifyForm?: boolean) => void
 }
