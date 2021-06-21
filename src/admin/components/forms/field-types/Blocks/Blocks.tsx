@@ -103,14 +103,15 @@ const Blocks: React.FC<Props> = (props) => {
     dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
   }, [dispatchRows, dispatchFields, path]);
 
-  const setCollapse = useCallback(async (id, collapsed) => {
+  const setCollapse = useCallback(async (id: string, collapsed: boolean) => {
     dispatchRows({ type: 'SET_COLLAPSE', id, collapsed });
 
     if (preferencesKey) {
       const preferences: DocumentPreferences = await getPreference(preferencesKey);
       const preferencesToSet = preferences || { fields: { } };
-
-      let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed || [];
+      let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed
+        .filter((filterID) => (rows.find((row) => row.id === filterID)))
+        || [];
 
       if (!collapsed) {
         newCollapsedState = newCollapsedState.filter((existingID) => existingID !== id);
@@ -129,7 +130,7 @@ const Blocks: React.FC<Props> = (props) => {
         },
       });
     }
-  }, [getPreference, setPreference, preferencesKey, path]);
+  }, [preferencesKey, getPreference, path, setPreference, rows]);
 
   const onDragEnd = useCallback((result) => {
     if (!result.destination) return;
