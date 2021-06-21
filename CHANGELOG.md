@@ -1,3 +1,10 @@
+## [0.7.1](https://github.com/payloadcms/payload/compare/v0.7.0...v0.7.1) (2021-06-21)
+
+
+### Bug Fixes
+
+* babel config file error ([3af2554](https://github.com/payloadcms/payload/commit/3af2554eacab45317745ad72c8848b4dd1ddc16a))
+
 # [0.7.0](https://github.com/payloadcms/payload/compare/v0.6.10...v0.7.0) (2021-06-21)
 
 
