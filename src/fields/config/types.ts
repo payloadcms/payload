@@ -141,6 +141,7 @@ export type RowField = FieldBase & {
 export type UploadField = FieldBase & {
   type: 'upload';
   relationTo: string;
+  maxDepth?: number;
 }
 
 type CodeAdmin = Admin & {
@@ -164,6 +165,7 @@ export type RelationshipField = FieldBase & {
   type: 'relationship';
   relationTo: string | string[];
   hasMany?: boolean;
+  maxDepth?: number;
 }
 
 type RichTextPlugin = (editor: Editor) => Editor;
@@ -259,6 +261,10 @@ export type FieldWithMany =
   SelectField
   | RelationshipField
 
+export type FieldWithMaxDepth =
+  UploadField
+  | RelationshipField
+
 export function fieldHasSubFields(field: Field): field is FieldWithSubFields {
   return (field.type === 'group' || field.type === 'array' || field.type === 'row');
 }
@@ -285,6 +291,10 @@ export function optionIsValue(option: Option): option is string {
 
 export function fieldSupportsMany(field: Field): field is FieldWithMany {
   return field.type === 'select' || field.type === 'relationship';
+}
+
+export function fieldHasMaxDepth(field: Field): field is FieldWithMaxDepth {
+  return (field.type === 'upload' || field.type === 'relationship') && typeof field.maxDepth === 'number';
 }
 
 export type HookName = 'beforeChange' | 'beforeValidate' | 'afterChange' | 'afterRead';

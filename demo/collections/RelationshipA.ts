@@ -41,6 +41,14 @@ const RelationshipA: PayloadCollectionConfig = {
       localized: true,
       hasMany: false,
     },
+    {
+      name: 'postMaxDepth',
+      maxDepth: 0,
+      label: 'Post With MaxDepth',
+      type: 'relationship',
+      relationTo: 'relationship-b',
+      hasMany: false,
+    },
   ],
   timestamps: true,
 };

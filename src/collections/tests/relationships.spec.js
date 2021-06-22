@@ -58,6 +58,7 @@ describe('Collections - REST', () => {
       const updateA = await fetch(`${url}/api/relationship-a/${createAData.doc.id}`, {
         body: JSON.stringify({
           post: documentB.id,
+          postMaxDepth: documentB.id,
         }),
         headers,
         method: 'put',
@@ -89,6 +90,18 @@ describe('Collections - REST', () => {
       [nested] = nested.post;
       expect(nested).not.toHaveProperty('post');
       expect(nested).toBe(documentA.id);
+    });
+
+    it('should respect max depth at the field level', async () => {
+      const response = await fetch(`${url}/api/relationship-a?depth=1`, {
+        headers,
+        method: 'get',
+      });
+      const data = await response.json();
+      const [doc] = data.docs;
+      // asserts postMaxDepth is not populated
+      expect(doc.postMaxDepth).toBe(documentB.id);
+      expect(doc.postMaxDepth).not.toHaveProperty('post');
     });
   });
 });

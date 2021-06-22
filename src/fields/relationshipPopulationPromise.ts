@@ -1,6 +1,6 @@
 import { PayloadRequest } from '../express/types';
 import executeAccess from '../auth/executeAccess';
-import { Field, RelationshipField, fieldSupportsMany } from './config/types';
+import { Field, RelationshipField, fieldSupportsMany, fieldHasMaxDepth } from './config/types';
 import { Payload } from '..';
 
 type PopulateArgs = {
@@ -95,6 +95,7 @@ const relationshipPopulationPromise = ({
   payload,
 }: PromiseArgs) => async (): Promise<void> => {
   const resultingData = data;
+  const populateDepth = fieldHasMaxDepth(field) && field.maxDepth < depth ? field.maxDepth : depth;
 
   if (fieldSupportsMany(field) && field.hasMany && Array.isArray(data[field.name])) {
     const rowPromises = [];
@@ -103,7 +104,7 @@ const relationshipPopulationPromise = ({
       const rowPromise = async () => {
         if (relatedDoc) {
           await populate({
-            depth,
+            depth: populateDepth,
             currentDepth,
             req,
             overrideAccess,
@@ -122,7 +123,7 @@ const relationshipPopulationPromise = ({
     await Promise.all(rowPromises);
   } else if (data[field.name]) {
     await populate({
-      depth,
+      depth: populateDepth,
       currentDepth,
       req,
       overrideAccess,
