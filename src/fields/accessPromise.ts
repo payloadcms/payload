@@ -60,7 +60,7 @@ const accessPromise = async ({
     relationshipPopulations.push(relationshipPopulationPromise({
       data,
       field,
-      depth: field.maxDepth || depth,
+      depth,
       currentDepth,
       req,
       overrideAccess,
