@@ -1,3 +1,17 @@
+## [0.7.2](https://github.com/payloadcms/payload/compare/v0.7.1...v0.7.2) (2021-06-22)
+
+
+### Bug Fixes
+
+* parses incoming numbers through query string for use in where clauses ([4933b34](https://github.com/payloadcms/payload/commit/4933b34f6b5dfa960c2a830a8c74769d6712130a))
+* respect maxDepth 0 ([95c1650](https://github.com/payloadcms/payload/commit/95c165018edf8e80c4dc828d3d77b6fa6d799de9))
+* safely stringifies ObjectIDs while populating relationships ([d6bc6f9](https://github.com/payloadcms/payload/commit/d6bc6f9f0e8391818783cdf7edf282506e2c9fed))
+
+
+### Features
+
+* adds maxDepth to relationships and upload fields ([880dabd](https://github.com/payloadcms/payload/commit/880dabdcad10dcd9f057da71a601190fbeecf92d))
+
 ## [0.7.1](https://github.com/payloadcms/payload/compare/v0.7.0...v0.7.1) (2021-06-21)
 
 
