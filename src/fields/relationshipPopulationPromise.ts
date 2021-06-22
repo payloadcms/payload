@@ -42,7 +42,7 @@ const populate = async ({
     if (accessResult && (depth && currentDepth <= depth)) {
       let idString = Array.isArray(fieldAsRelationship.relationTo) ? data.value : data;
 
-      if (typeof idString !== 'string') {
+      if (typeof idString !== 'string' && typeof idString?.toString === 'function') {
         idString = idString.toString();
       }
 
