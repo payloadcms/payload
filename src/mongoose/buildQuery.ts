@@ -168,13 +168,22 @@ class ParamParser {
       }
     }
     let formattedValue = val;
-    if (schemaObject && schemaObject.type === Boolean && typeof val === 'string') {
+
+    const schemaObjectType = schemaObject?.localized ? schemaObject?.type[this.locale].type : schemaObject?.type;
+
+    if (schemaObject && schemaObjectType === Boolean && typeof val === 'string') {
       if (val.toLowerCase() === 'true') formattedValue = true;
       if (val.toLowerCase() === 'false') formattedValue = false;
     }
+
+    if (schemaObject && schemaObjectType === Number && typeof val === 'string') {
+      formattedValue = Number(val);
+    }
+
     if (schemaObject && schemaObject.ref && val === 'null') {
       formattedValue = null;
     }
+
     if (operator && validOperators.includes(operator)) {
       switch (operator) {
         case 'greater_than_equal':
