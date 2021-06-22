@@ -141,6 +141,7 @@ export type RowField = FieldBase & {
 export type UploadField = FieldBase & {
   type: 'upload';
   relationTo: string;
+  maxDepth?: number;
 }
 
 type CodeAdmin = Admin & {
@@ -164,6 +165,7 @@ export type RelationshipField = FieldBase & {
   type: 'relationship';
   relationTo: string | string[];
   hasMany?: boolean;
+  maxDepth?: number;
 }
 
 type RichTextPlugin = (editor: Editor) => Editor;

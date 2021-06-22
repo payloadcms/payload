@@ -241,6 +241,13 @@ const AllFields: PayloadCollectionConfig = {
       relationTo: ['localized-posts', 'conditions'],
     },
     {
+      type: 'relationship',
+      label: 'Relationship with maxDepth',
+      name: 'relationshipMaxDepth',
+      relationTo: 'relationship-a',
+      maxDepth: 1,
+    },
+    {
       type: 'textarea',
       label: 'Textarea',
       name: 'textarea',

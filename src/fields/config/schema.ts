@@ -171,6 +171,7 @@ export const upload = baseField.keys({
   type: joi.string().valid('upload').required(),
   relationTo: joi.string().required(),
   name: joi.string().required(),
+  maxDepth: joi.number(),
 });
 
 export const checkbox = baseField.keys({
@@ -187,6 +188,7 @@ export const relationship = baseField.keys({
     joi.array().items(joi.string()),
   ),
   name: joi.string().required(),
+  maxDepth: joi.number(),
 });
 
 export const blocks = baseField.keys({
