@@ -15,5 +15,6 @@ export { default as Group } from '../dist/admin/components/forms/field-types/Gro
 export { default as Select } from '../dist/admin/components/forms/field-types/Select';
 export { default as Checkbox } from '../dist/admin/components/forms/field-types/Checkbox';
 export { default as Submit } from '../dist/admin/components/forms/Submit';
+export { default as Label } from '../dist/admin/components/forms/Label';
 
 export { default as reduceFieldsToValues } from '../dist/admin/components/forms/Form/reduceFieldsToValues';
