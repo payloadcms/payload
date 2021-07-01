@@ -62,7 +62,6 @@ The most simple pattern of a relationship is to use `hasMany: false` with a `rel
       type: 'relationship', // required
       relationTo: 'users', // required
       hasMany: false,
-      required: true,
     }
   ]
 }
@@ -75,8 +74,11 @@ The shape of the data to save for a document with the field configured this way 
   }
 ```
 
+When making a `GET` request to the api, the query params in the URL would be:
+`?where[owner][equals]=6031ac9e1289176380734024`.
+
 #### Has One - Polymorphic
-Also called **dynamic references**, in this configuration the `relationTo` field is an array of collection slugs to tell Payload what is allowed.
+Also known as **dynamic references**, in this configuration the `relationTo` field is an array of slugs to tell Payload what the collections to reference are.
 ```js
 {
   slug: 'example-collection',
@@ -86,7 +88,6 @@ Also called **dynamic references**, in this configuration the `relationTo` field
       type: 'relationship', // required
       relationTo: ['users', 'organizations'], // required
       hasMany: false,
-      required: true,
     }
   ]
 }
@@ -102,6 +103,11 @@ The shape of the data to save for a document with more than one relationship typ
   }
 ```
 
+When making a `GET` request to the api, note the difference in referencing the `owner.value`:
+`?where[owner.value][equals]=6031ac9e1289176380734024`.
+
+You can also query for collections where a field has a relationship to a specific slug: `?where[owners.relationTo][equals]=organizations` which would return only documents that have an owner relationship to organizations.
+
 #### Has Many
 The `hasMany` tells Payload that there may be more than one collection saved to the field.
 ```js
@@ -113,7 +119,6 @@ The `hasMany` tells Payload that there may be more than one collection saved to 
       type: 'relationship', // required
       relationTo: 'users', // required
       hasMany: true,
-      required: true,
     }
   ]
 }
@@ -125,6 +130,9 @@ To save the to `hasMany` relationship field we need to send an array of IDs:
     "owners": [ "6031ac9e1289176380734024", "602c3c327b811235943ee12b" ]
   }
 ```
+
+When making a `GET` request to the api, the format does not change for arrays:
+`?where[owners][equals]=6031ac9e1289176380734024`.
 
 #### Has Many - Polymorphic
 ```js
@@ -156,3 +164,6 @@ To save to `hasMany` relationship of more than one kind of collections, use an a
   ]
 }
 ```
+
+When making a `GET` request to the api, in the same way as the earlier polymorphic:
+`?where[owners.value][equals]=6031ac9e1289176380734024`.
