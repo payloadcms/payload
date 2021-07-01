@@ -1,3 +1,10 @@
+## [0.7.4](https://github.com/payloadcms/payload/compare/v0.7.3...v0.7.4) (2021-07-01)
+
+
+### Bug Fixes
+
+* adds proper scss stylesheets to payload/scss ([84e31ae](https://github.com/payloadcms/payload/commit/84e31aed141efe5aa1b0c24a61bf35eb3d671242))
+
 ## [0.7.3](https://github.com/payloadcms/payload/compare/v0.7.2...v0.7.3) (2021-07-01)
 
 
