@@ -108,5 +108,11 @@ const CustomTextField = ({ path }) => {
 ```
 
 ### Styling Custom Components
-To maintain a consistent look in your admin UI you may wish to import styles and make use
-By importing Payload styles directly and making use of rem for sizing, the UI elements we are adding will not standout and look unfamiliar to our admin panel users.
+
+Payload exports its SCSS variables and mixins for reuse in your own custom components. This is helpful in cases where you might want to style a custom input similarly to Payload's built-ini styling so it blends more thoroughly into the existing admin UI.
+
+To make use of Payload SCSS variables / mixins to use directly in your own components, you can import them as follows:
+
+```
+@import '~payload/scss';
+```
