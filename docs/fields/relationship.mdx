@@ -44,15 +44,14 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
   The <a href="/docs/getting-started/concepts#depth">Depth</a> parameter can be used to automatically populate related documents that are returned by the API.
 </Banner>
 
-### Example Patterns
-Given the variety of options possible for relationships the shape of the data needed for creating and updating collections can vary. When `hasMany` is true, the field data is an array. When `relationTo` is an array, an object with `relationTo` property for the collection slug and `value` for the ID.
+### How the data is saved
 
-<Banner>
-  The Payload admin panel will send the correct format of form data needed, the below examples are most useful for understanding Local API operations or saving to the database directly.
-</Banner>
+Given the variety of options possible within the `relationship` field type, the shape of the data needed for creating and updating these fields can vary. The following sections will describe the variety of data shapes that can arise from this field.
 
 #### Has One
+
 The most simple pattern of a relationship is to use `hasMany: false` with a `relationTo` that allows for only one type of collection.
+
 ```js
 {
   slug: 'example-collection',
@@ -68,17 +67,22 @@ The most simple pattern of a relationship is to use `hasMany: false` with a `rel
 ```
 
 The shape of the data to save for a document with the field configured this way would be:
+
 ```json
   {
+     // Mongo ObjectID of the related user
     "owner": "6031ac9e1289176380734024"
   }
 ```
 
-When making a `GET` request to the api, the query params in the URL would be:
+When querying documents in this collection via REST API, you could query as follows:
+
 `?where[owner][equals]=6031ac9e1289176380734024`.
 
 #### Has One - Polymorphic
-Also known as **dynamic references**, in this configuration the `relationTo` field is an array of slugs to tell Payload what the collections to reference are.
+
+Also known as **dynamic references**, in this configuration, the `relationTo` field is an array of Collection slugs that tells Payload which Collections are valid to reference.
+
 ```js
 {
   slug: 'example-collection',
@@ -94,6 +98,7 @@ Also known as **dynamic references**, in this configuration the `relationTo` fie
 ```
 
 The shape of the data to save for a document with more than one relationship type would be:
+
 ```json
   {
     "owner": {
@@ -103,13 +108,20 @@ The shape of the data to save for a document with more than one relationship typ
   }
 ```
 
-When making a `GET` request to the api, note the difference in referencing the `owner.value`:
+Here is an example for how to query documents by this data (note the difference in referencing the `owner.value`):
+
 `?where[owner.value][equals]=6031ac9e1289176380734024`.
 
-You can also query for collections where a field has a relationship to a specific slug: `?where[owners.relationTo][equals]=organizations` which would return only documents that have an owner relationship to organizations.
+You can also query for documents where a field has a relationship to a specific Collection:
+
+`?where[owners.relationTo][equals]=organizations`.
+
+This query would return only documents that have an owner relationship to organizations.
 
 #### Has Many
+
 The `hasMany` tells Payload that there may be more than one collection saved to the field.
+
 ```js
 {
   slug: 'example-collection',
@@ -125,16 +137,19 @@ The `hasMany` tells Payload that there may be more than one collection saved to 
 ```
 
 To save the to `hasMany` relationship field we need to send an array of IDs:
+
 ```json
   {
     "owners": [ "6031ac9e1289176380734024", "602c3c327b811235943ee12b" ]
   }
 ```
 
-When making a `GET` request to the api, the format does not change for arrays:
+When querying documents, the format does not change for arrays:
+
 `?where[owners][equals]=6031ac9e1289176380734024`.
 
 #### Has Many - Polymorphic
+
 ```js
 {
   slug: 'example-collection',
@@ -150,7 +165,8 @@ When making a `GET` request to the api, the format does not change for arrays:
 }
 ```
 
-To save to `hasMany` relationship of more than one kind of collections, use an array of objects having the collection `slug` as the `relationTo` and the related document `id` for the `value`:
+Relationship fields with `hasMany` set to more than one kind of collections save their data as an array of objects—each containing the Collection `slug` as the `relationTo` value, and the related document `id` for the `value`:
+
 ```json
 {
   "owners": [
@@ -165,5 +181,6 @@ To save to `hasMany` relationship of more than one kind of collections, use an a
 }
 ```
 
-When making a `GET` request to the api, in the same way as the earlier polymorphic:
+Querying is done in the same way as the earlier Polymorphic example:
+
 `?where[owners.value][equals]=6031ac9e1289176380734024`.
