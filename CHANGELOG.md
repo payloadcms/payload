@@ -1,3 +1,15 @@
+## [0.7.3](https://github.com/payloadcms/payload/compare/v0.7.2...v0.7.3) (2021-07-01)
+
+
+### Bug Fixes
+
+* changes scss imports to allow vars imports to payload projects ([ea80fd6](https://github.com/payloadcms/payload/commit/ea80fd68b14139cb01259a47ea597d33526d0c76))
+
+
+### Features
+
+* export all field prop types for custom components ([5bea9ae](https://github.com/payloadcms/payload/commit/5bea9ae1263f1d93e8b011ae97bb067a8c9bb4e1))
+
 ## [0.7.2](https://github.com/payloadcms/payload/compare/v0.7.1...v0.7.2) (2021-06-22)
 
 
