@@ -164,7 +164,9 @@ const RichText: React.FC<Props> = (props) => {
       // do nothing
     }
   }
+
   if (!valueToRender) valueToRender = defaultValue;
+
   return (
     <div
       className={classes}

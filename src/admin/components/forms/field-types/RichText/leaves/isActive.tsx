@@ -5,5 +5,4 @@ const isLeafActive = (editor, format) => {
   return leaves ? leaves[format] === true : false;
 };
 
-
 export default isLeafActive;

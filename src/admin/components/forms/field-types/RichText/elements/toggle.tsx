@@ -7,11 +7,6 @@ const toggleElement = (editor, format) => {
   const isActive = isElementActive(editor, format);
   const isList = listTypes.includes(format);
 
-  Transforms.unwrapNodes(editor, {
-    match: (n) => listTypes.includes(n.type as string),
-    split: true,
-  });
-
   let type = format;
 
   if (isActive) {
@@ -23,6 +18,11 @@ const toggleElement = (editor, format) => {
   if (editor.blurSelection) {
     Transforms.select(editor, editor.blurSelection);
   }
+
+  Transforms.unwrapNodes(editor, {
+    match: (n) => listTypes.includes(n.type as string),
+    split: true,
+  });
 
   Transforms.setNodes(editor, { type });
 
