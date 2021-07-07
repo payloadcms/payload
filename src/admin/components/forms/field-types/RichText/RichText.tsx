@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import isHotkey from 'is-hotkey';
 import { Editable, withReact, Slate } from 'slate-react';
-import { createEditor, Transforms } from 'slate';
+import { createEditor, Transforms, Node } from 'slate';
 import { withHistory } from 'slate-history';
 import { richText } from '../../../../../fields/validations';
 import useFieldType from '../../useFieldType';
@@ -18,6 +18,7 @@ import FieldTypeGutter from '../../FieldTypeGutter';
 import withHTML from './plugins/withHTML';
 import { Props } from './types';
 import { RichTextElement, RichTextLeaf } from '../../../../../fields/config/types';
+import listTypes from './elements/listTypes';
 
 import mergeCustomFunctions from './mergeCustomFunctions';
 
@@ -25,6 +26,7 @@ import './index.scss';
 
 const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link', 'relationship'];
 const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
+const enterBreakOutTypes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
 const baseClass = 'rich-text';
 
@@ -164,7 +166,9 @@ const RichText: React.FC<Props> = (props) => {
       // do nothing
     }
   }
+
   if (!valueToRender) valueToRender = defaultValue;
+
   return (
     <div
       className={classes}
@@ -248,9 +252,39 @@ const RichText: React.FC<Props> = (props) => {
                     event.preventDefault();
                     editor.insertText('\n');
                   } else {
-                    setTimeout(() => {
+                    const selectedElement = Node.descendant(editor, editor.selection.anchor.path.slice(0, -1));
+
+                    // Allow hard enter to "break out" of certain elements
+                    if (enterBreakOutTypes.includes(String(selectedElement.type))) {
+                      event.preventDefault();
+                      const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
+
+                      if (String(selectedLeaf.text).length === editor.selection.anchor.offset) {
+                        Transforms.insertNodes(editor, {
+                          type: 'p',
+                          children: [{ text: '', marks: [] }],
+                        });
+                      } else {
+                        Transforms.splitNodes(editor);
+                        Transforms.setNodes(editor, { type: 'p' });
+                      }
+                    }
+                  }
+                }
+
+                if (event.key === 'Backspace') {
+                  const selectedElement = Node.descendant(editor, editor.selection.anchor.path.slice(0, -1));
+
+                  if (selectedElement.type === 'li') {
+                    const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
+                    if (String(selectedLeaf.text).length === 1) {
+                      Transforms.unwrapNodes(editor, {
+                        match: (n) => listTypes.includes(n.type as string),
+                        split: true,
+                      });
+
                       Transforms.setNodes(editor, { type: 'p' });
-                    }, 0);
+                    }
                   }
                 }
 
