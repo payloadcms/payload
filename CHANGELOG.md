@@ -1,3 +1,17 @@
+## [0.7.5](https://github.com/payloadcms/payload/compare/v0.7.4...v0.7.5) (2021-07-07)
+
+
+### Bug Fixes
+
+* crash on bullet list de-selection ([5388513](https://github.com/payloadcms/payload/commit/538851325d1558425918098e35e108595189774b))
+* updates demo richtext elements with proper SCSS ([0075912](https://github.com/payloadcms/payload/commit/007591272f77e5dcc5e5a4a8f71459402f6605d4))
+
+
+### Features
+
+* adds plugins infrastructure ([6b25531](https://github.com/payloadcms/payload/commit/6b255315e0c475d700383f2738839966449fc563))
+* enables backspace to deactivate richtext list elements ([91141ad](https://github.com/payloadcms/payload/commit/91141ad62f0f6ef3528e62eef23711e937d302ce))
+
 ## [0.7.4](https://github.com/payloadcms/payload/compare/v0.7.3...v0.7.4) (2021-07-01)
 
 
