@@ -262,7 +262,7 @@
     "form-data": "^3.0.0",
     "graphql-request": "^3.4.0",
     "mongodb": "^3.6.2",
-    "mongodb-memory-server": "6.5.2",
+    "mongodb-memory-server": "^7.2.0",
     "nodemon": "^2.0.6",
     "optimize-css-assets-webpack-plugin": "^5.0.4",
     "passport-strategy": "^1.0.0",

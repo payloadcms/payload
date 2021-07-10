@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import MongoClient from 'mongodb';
 import getConfig from '../config/load';
 import { email, password, mongo } from '../../tests/api/credentials';
 

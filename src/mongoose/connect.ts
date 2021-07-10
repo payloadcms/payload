@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import mongoose, { ConnectionOptions } from 'mongoose';
 import Logger from '../utilities/logger';
 
@@ -17,15 +16,17 @@ const connectMongoose = async (url: string, options: ConnectionOptions): Promise
   };
 
   if (process.env.NODE_ENV === 'test') {
+    connectionOptions.dbName = 'payloadmemory';
     // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
     const { MongoMemoryServer } = require('mongodb-memory-server');
-    const mongod = new MongoMemoryServer({
+    const mongo = await MongoMemoryServer.create({
       instance: {
         port: 27018,
         dbName: 'payloadmemory',
       },
     });
-    urlToConnect = await mongod.getUri();
+
+    urlToConnect = mongo.getUri();
     successfulConnectionMessage = 'Connected to in-memory Mongo server successfully!';
   }
 
