@@ -1,7 +1,6 @@
 import joi from 'joi';
-import fieldSchema from '../../fields/config/schema';
 
-const schema = joi.object().keys({
+const globalSchema = joi.object().keys({
   slug: joi.string().required(),
   label: joi.string(),
   hooks: joi.object({
@@ -15,7 +14,7 @@ const schema = joi.object().keys({
     read: joi.func(),
     update: joi.func(),
   }),
-  fields: joi.array().items(fieldSchema),
+  fields: joi.array(),
 }).unknown();
 
-export default schema;
+export default globalSchema;

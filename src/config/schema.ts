@@ -1,5 +1,4 @@
 import joi from 'joi';
-import globalSchema from '../globals/config/schema';
 
 const component = joi.alternatives().try(
   joi.object().unknown(),
@@ -31,8 +30,7 @@ export default joi.object({
     graphQLPlayground: joi.string(),
   }),
   collections: joi.array(),
-  globals: joi.array()
-    .items(globalSchema),
+  globals: joi.array(),
   admin: joi.object({
     user: joi.string(),
     meta: joi.object()
