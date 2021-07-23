@@ -6,6 +6,10 @@ const component = joi.alternatives().try(
 );
 
 export const baseAdminFields = joi.object().keys({
+  description: joi.alternatives().try(
+    joi.string(),
+    joi.func(),
+  ),
   position: joi.string().valid('sidebar'),
   width: joi.string(),
   style: joi.object().unknown(),
@@ -17,6 +21,7 @@ export const baseAdminFields = joi.object().keys({
     Cell: component,
     Field: component,
     Filter: component,
+    Description: component,
   }).default({}),
 });
 

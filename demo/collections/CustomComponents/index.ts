@@ -7,6 +7,7 @@ import GroupField from './components/fields/Group/Field';
 import NestedGroupField from './components/fields/NestedGroupCustomField/Field';
 import NestedText1Field from './components/fields/NestedText1/Field';
 import ListView from './components/views/List';
+import CustomDescriptionComponent from '../../customComponents/Description';
 
 const CustomComponents: PayloadCollectionConfig = {
   slug: 'custom-components',
@@ -35,6 +36,17 @@ const CustomComponents: PayloadCollectionConfig = {
           Field: DescriptionField,
           Cell: DescriptionCell,
           Filter: DescriptionFilter,
+        },
+      },
+    },
+    {
+      name: 'descriptionComponent',
+      type: 'text',
+      label: 'Text with description component',
+      defaultValue: 'Default Value',
+      admin: {
+        components: {
+          Description: CustomDescriptionComponent,
         },
       },
     },

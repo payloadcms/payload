@@ -99,7 +99,7 @@ export type PayloadCollectionConfig = {
   admin?: {
     useAsTitle?: string;
     defaultColumns?: string[];
-    disableDuplicate?: boolean
+    disableDuplicate?: boolean;
     components?: {
       views?: {
         Edit?: React.ComponentType

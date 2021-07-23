@@ -22,7 +22,7 @@ export type FieldAccess = (args: {
   siblingData: Record<string, unknown>
 }) => Promise<boolean> | boolean;
 
-export type Condition = (data: Record<string, unknown>, siblingData: Record<string, unknown>) => boolean
+export type Condition = (data: Record<string, unknown>, siblingData: Record<string, unknown>) => boolean;
 
 type Admin = {
   position?: string;
@@ -31,7 +31,13 @@ type Admin = {
   readOnly?: boolean;
   disabled?: boolean;
   condition?: Condition;
-  components?: { [key: string]: React.ComponentType };
+  description?: string | ((data: Record<string, unknown>) => string);
+  components?: {
+    Filter?: React.ComponentType;
+    Cell?: React.ComponentType;
+    Field?: React.ComponentType;
+    Description?: React.ComponentType<{value: unknown}>
+  }
   hidden?: boolean
 }
 
@@ -214,11 +220,11 @@ export type RadioField = FieldBase & {
 }
 
 export type Block = {
-  slug: string,
-  labels?: Labels
-  fields: Field[],
-  imageURL?: string
-  imageAltText?: string
+  slug: string;
+  labels?: Labels;
+  fields: Field[];
+  imageURL?: string;
+  imageAltText?: string;
 }
 
 export type BlockField = FieldBase & {

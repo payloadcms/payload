@@ -41,6 +41,25 @@ const AllFields: PayloadCollectionConfig = {
       },
     },
     {
+      name: 'descriptionText',
+      type: 'text',
+      label: 'Text with text description',
+      defaultValue: 'Default Value',
+      admin: {
+        description: 'This text describes the field',
+      },
+    },
+    {
+      name: 'descriptionFunction',
+      type: 'text',
+      label: 'Text with function description',
+      defaultValue: 'Default Value',
+      maxLength: 20,
+      admin: {
+        description: ({ value }) => (typeof value === 'string' ? `${20 - value.length} characters left` : ''),
+      },
+    },
+    {
       name: 'image',
       type: 'upload',
       label: 'Image',
