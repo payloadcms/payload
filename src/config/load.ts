@@ -6,11 +6,12 @@ import findConfig from './find';
 import validate from './validate';
 import babelConfig from '../babel.config';
 
-const configPath = findConfig();
 
 const removedExtensions = ['.scss', '.css', '.svg', '.png', '.jpg', '.eot', '.ttf', '.woff', '.woff2'];
 
 const loadConfig = (): Config => {
+  const configPath = findConfig();
+
   removedExtensions.forEach((ext) => {
     require.extensions[ext] = () => null;
   });
