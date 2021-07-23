@@ -146,7 +146,6 @@ export const row = baseField.keys({
 export const group = baseField.keys({
   type: joi.string().valid('group').required(),
   name: joi.string().required(),
-  label: joi.string(),
   fields: joi.array().items(joi.link('#field')),
   defaultValue: joi.object(),
   admin: baseAdminFields.keys({
