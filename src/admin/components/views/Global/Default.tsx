@@ -26,6 +26,9 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
     fields,
     preview,
     label,
+    admin: {
+      description,
+    } = {},
   } = global;
 
   const hasSavePermission = permissions?.update?.permission;
@@ -55,6 +58,9 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                 {' '}
                 {label}
               </h1>
+              {description && (
+                <div className={`${baseClass}__sub-header`}>{description}</div>
+              )}
             </header>
             <RenderFields
               operation="update"

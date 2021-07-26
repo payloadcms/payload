@@ -25,6 +25,9 @@ const DefaultList: React.FC<Props> = (props) => {
         singular: singularLabel,
         plural: pluralLabel,
       },
+      admin: {
+        description,
+      },
     },
     data,
     newDocumentURL,
@@ -51,6 +54,9 @@ const DefaultList: React.FC<Props> = (props) => {
             <Pill to={newDocumentURL}>
               Create New
             </Pill>
+          )}
+          {description && (
+            <div className={`${baseClass}__sub-header`}>{description}</div>
           )}
         </header>
         <ListControls

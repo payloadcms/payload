@@ -23,6 +23,7 @@ const collectionSchema = joi.object().keys({
   admin: joi.object({
     useAsTitle: joi.string(),
     defaultColumns: joi.array().items(joi.string()),
+    description: joi.string(),
     enableRichTextRelationship: joi.boolean(),
     components: joi.object({
       views: joi.object({

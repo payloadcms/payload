@@ -22,6 +22,7 @@ const AllFields: PayloadCollectionConfig = {
 
       return null;
     },
+    description: 'Every type of field in one place',
   },
   access: {
     read: () => true,

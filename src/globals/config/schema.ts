@@ -3,6 +3,9 @@ import joi from 'joi';
 const globalSchema = joi.object().keys({
   slug: joi.string().required(),
   label: joi.string(),
+  admin: joi.object({
+    description: joi.string(),
+  }),
   hooks: joi.object({
     beforeValidate: joi.array().items(joi.func()),
     beforeChange: joi.array().items(joi.func()),
