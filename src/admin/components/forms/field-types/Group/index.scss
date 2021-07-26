@@ -29,6 +29,10 @@
     }
   }
 
+  &--no-label {
+    margin-top: 0,
+  }
+
   @include mid-break {
     &__fields-wrapper {
       display: flex;

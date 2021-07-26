@@ -29,7 +29,11 @@ const Group: React.FC<Props> = (props) => {
 
   return (
     <div
-      className="field-type group"
+      className={[
+        'field-type',
+        baseClass,
+        !label && `${baseClass}--no-label`,
+      ].filter(Boolean).join(' ')}
       style={{
         ...style,
         width,
