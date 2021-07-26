@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
+import FieldDescription from '../../FieldDescription';
 import withCondition from '../../withCondition';
 import { number } from '../../../../../fields/validations';
 import { Props } from './types';
@@ -24,6 +25,7 @@ const NumberField: React.FC<Props> = (props) => {
       step,
       placeholder,
       condition,
+      description,
     } = {},
   } = props;
 
@@ -89,6 +91,10 @@ const NumberField: React.FC<Props> = (props) => {
         id={path}
         name={path}
         step={step}
+      />
+      <FieldDescription
+        value={value || 0}
+        description={description}
       />
     </div>
   );

@@ -7,6 +7,7 @@ import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
+import FieldDescription from '../../FieldDescription';
 import { code } from '../../../../../fields/validations';
 import { Props } from './types';
 
@@ -24,6 +25,7 @@ const Code: React.FC<Props> = (props) => {
       width,
       language,
       condition,
+      description,
     } = {},
     label,
     minLength,
@@ -93,6 +95,10 @@ const Code: React.FC<Props> = (props) => {
           fontSize: 12,
           pointerEvents: readOnly ? 'none' : 'auto',
         }}
+      />
+      <FieldDescription
+        value={value || ''}
+        description={description}
       />
     </div>
   );

@@ -65,6 +65,9 @@ const AllFields: PayloadCollectionConfig = {
       type: 'upload',
       label: 'Image',
       relationTo: 'media',
+      admin: {
+        description: 'No selfies',
+      },
     },
     {
       name: 'select',
@@ -246,6 +249,9 @@ const AllFields: PayloadCollectionConfig = {
       label: 'Relationship to One Collection',
       name: 'relationship',
       relationTo: 'conditions',
+      admin: {
+        description: 'Relates to description',
+      },
     },
     {
       type: 'relationship',
@@ -264,6 +270,9 @@ const AllFields: PayloadCollectionConfig = {
       type: 'textarea',
       label: 'Textarea',
       name: 'textarea',
+      admin: {
+        description: 'Hello textarea description',
+      },
     },
     {
       name: 'richText',

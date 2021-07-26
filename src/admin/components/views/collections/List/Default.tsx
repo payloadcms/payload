@@ -27,7 +27,7 @@ const DefaultList: React.FC<Props> = (props) => {
       },
       admin: {
         description,
-      },
+      } = {},
     },
     data,
     newDocumentURL,

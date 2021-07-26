@@ -4,6 +4,14 @@
   margin: base(2) 0;
   min-width: base(15);
 
+  &__header {
+    h3 {
+      margin-bottom: 0;
+    }
+
+    margin-bottom: base(1);
+  }
+
   &__error-wrap {
     position: relative;
   }

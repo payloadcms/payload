@@ -21,7 +21,6 @@ export const baseAdminFields = joi.object().keys({
     Cell: component,
     Field: component,
     Filter: component,
-    Description: component,
   }).default({}),
 });
 
@@ -146,6 +145,11 @@ export const radio = baseField.keys({
 export const row = baseField.keys({
   type: joi.string().valid('row').required(),
   fields: joi.array().items(joi.link('#field')),
+  admin: baseAdminFields.keys({
+    description: joi.forbidden(),
+    readOnly: joi.forbidden(),
+    hidden: joi.forbidden(),
+  }),
 });
 
 export const group = baseField.keys({
@@ -155,6 +159,7 @@ export const group = baseField.keys({
   defaultValue: joi.object(),
   admin: baseAdminFields.keys({
     hideGutter: joi.boolean().default(false),
+    description: joi.string(),
   }),
 });
 

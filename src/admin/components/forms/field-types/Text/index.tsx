@@ -5,7 +5,7 @@ import Label from '../../Label';
 import Error from '../../Error';
 import { text } from '../../../../../fields/validations';
 import { Props } from './types';
-import RenderFieldDescription from '../../RenderFieldDescription';
+import FieldDescription from '../../FieldDescription';
 
 import './index.scss';
 
@@ -23,9 +23,6 @@ const Text: React.FC<Props> = (props) => {
       width,
       condition,
       description,
-      components: {
-        Description,
-      } = {},
     } = {},
   } = props;
 
@@ -78,10 +75,9 @@ const Text: React.FC<Props> = (props) => {
         id={path}
         name={path}
       />
-      <RenderFieldDescription
+      <FieldDescription
         value={value || ''}
         description={description}
-        CustomComponent={Description}
       />
     </div>
   );

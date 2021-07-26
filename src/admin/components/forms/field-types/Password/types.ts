@@ -1,5 +1,5 @@
 import React from 'react';
-import { Validate } from '../../../../../fields/config/types';
+import { Description, Validate } from '../../../../../fields/config/types';
 
 export type Props = {
   autoComplete?: string
@@ -10,4 +10,5 @@ export type Props = {
   style?: React.CSSProperties
   width?: string
   label?: string
+  description?: Description
 }

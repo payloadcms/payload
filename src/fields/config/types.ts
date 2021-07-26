@@ -31,15 +31,16 @@ type Admin = {
   readOnly?: boolean;
   disabled?: boolean;
   condition?: Condition;
-  description?: string | ((data: Record<string, unknown>) => string);
+  description?: Description;
   components?: {
     Filter?: React.ComponentType;
     Cell?: React.ComponentType;
     Field?: React.ComponentType;
-    Description?: React.ComponentType<{value: unknown}>
   }
   hidden?: boolean
 }
+
+export type Description = string | ((value: Record<string, unknown>) => string);
 
 export type Labels = {
   singular: string;
@@ -136,6 +137,7 @@ export type GroupField = FieldBase & {
   fields: Field[];
   admin?: Admin & {
     hideGutter?: boolean
+    description?: string
   }
 }
 

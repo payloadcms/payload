@@ -4,6 +4,7 @@ import withCondition from '../../withCondition';
 import Error from '../../Error';
 import { checkbox } from '../../../../../fields/validations';
 import Check from '../../../icons/Check';
+import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
 
 import './index.scss';
@@ -24,6 +25,7 @@ const Checkbox: React.FC<Props> = (props) => {
       style,
       width,
       condition,
+      description,
     } = {},
   } = props;
 
@@ -87,6 +89,10 @@ const Checkbox: React.FC<Props> = (props) => {
           {label}
         </span>
       </button>
+      <FieldDescription
+        value={value}
+        description={description}
+      />
     </div>
   );
 };
