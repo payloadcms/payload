@@ -177,8 +177,8 @@ const RichText: React.FC<Props> = (props) => {
         width,
       }}
     >
-      { !hideGutter && (<FieldTypeGutter />) }
       <div className={`${baseClass}__wrap`}>
+        { !hideGutter && (<FieldTypeGutter />) }
         <Error
           showError={showError}
           message={errorMessage}
