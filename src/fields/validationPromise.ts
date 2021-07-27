@@ -19,7 +19,7 @@ const validationPromise = async ({
   path,
   skipValidation,
 }: Arguments): Promise<string | boolean> => {
-  if (hook !== 'beforeChange' || !skipValidation) return true;
+  if (hook !== 'beforeChange' || skipValidation) return true;
 
   const hasCondition = field.admin && field.admin.condition;
   const shouldValidate = field.validate && !hasCondition;
