@@ -83,7 +83,7 @@ const DateTime: React.FC<Props> = (props) => {
         />
       </div>
       <FieldDescription
-        value={value || new Date()}
+        value={value}
         description={description}
       />
     </div>

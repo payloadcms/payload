@@ -91,7 +91,7 @@ In addition to each field's base configuration, you can define specific traits a
 | ------------- | -------------|
 | `condition`   | You can programmatically show / hide fields based on what other fields are doing. [Click here](#conditional-logic) for more info. |
 | `components`  | All field components can be completely and easily swapped out for custom components that you define. [Click here](#custom-admin-components) for more info. |
-| `description` | Text to display with the field to provide more information for the editor user using a string or function returning a string. [Click here](#description) for more info. |
+| `description` | Helper text to display with the field to provide more information for the editor user. [Click here](#description) for more info. |
 | `position`    | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`. |
 | `width`       | Restrict the width of a field. you can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
 | `readOnly`    | Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value. |
@@ -142,11 +142,14 @@ All Payload fields support the ability to swap in your own React components with
 
 ### Description
 
-You can simply provide a string that will show by the field, but there are use cases where you may want to create some dynamic feedback. By using a function for the `description` property you can provide rich feedback in realtime the user interacts with the form.
+A description can be configured three ways.
+- As a string
+- As a function that accepts an object containing the field's value, which returns a string
+- As a React component that accepts value as a prop
 
-The `description` can be assigned a function can wth the parameter `{ value }` and can return the `string` you wish to display.
+As shown above, you can simply provide a string that will show by the field, but there are use cases where you may want to create some dynamic feedback. By using a function or a component for the `description` property you can provide rich feedback in realtime the user interacts with the form.
 
-**Example:**
+**Function Example:**
 
 ```js
 {
@@ -156,10 +159,34 @@ The `description` can be assigned a function can wth the parameter `{ value }` a
       type: 'text',
       maxLength: 20,
       admin: {
-        description: ({ value }) => (`${20 - value.length} characters left`)
+        description: ({ value }) => (`${typeof value === 'string' ? 20 - value.length : '20'} characters left`)
       }
     }
   ]
 }
 ```
 This example will display the number of characters allowed as the user types.
+
+**Component Example:**
+```js
+{
+  fields: [
+    {
+      name: 'message',
+      type: 'text',
+      maxLength: 20,
+      admin: {
+        description:
+          ({ value }) => (
+            <div>
+              Character count:
+              {' '}
+              { value?.length || 0 }
+            </div>
+          )
+      }
+    }
+  ]
+}
+```
+This component will count the number of characters entered.

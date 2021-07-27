@@ -113,7 +113,7 @@ const Select: React.FC<Props> = (props) => {
         isMulti={hasMany}
       />
       <FieldDescription
-        value={value || ''}
+        value={value}
         description={description}
       />
     </div>

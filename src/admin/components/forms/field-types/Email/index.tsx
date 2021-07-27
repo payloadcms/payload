@@ -83,7 +83,7 @@ const Email: React.FC<Props> = (props) => {
         autoComplete={autoComplete}
       />
       <FieldDescription
-        value={value || ''}
+        value={value}
         description={description}
       />
     </div>

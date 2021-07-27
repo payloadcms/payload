@@ -93,7 +93,7 @@ const NumberField: React.FC<Props> = (props) => {
         step={step}
       />
       <FieldDescription
-        value={value || 0}
+        value={value}
         description={description}
       />
     </div>

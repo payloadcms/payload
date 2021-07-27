@@ -1,5 +1,5 @@
 import React from 'react';
-import { Props } from './types';
+import { Props, isComponent } from './types';
 import './index.scss';
 
 const FieldDescription: React.FC<Props> = (props) => {
@@ -7,6 +7,12 @@ const FieldDescription: React.FC<Props> = (props) => {
     description,
     value,
   } = props;
+
+
+  if (isComponent(description)) {
+    const Description = description;
+    return <Description value={value} />;
+  }
 
   if (description) {
     return (

@@ -164,7 +164,7 @@ const Upload: React.FC<Props> = (props) => {
           }}
           />
           <FieldDescription
-            value={value || ''}
+            value={value}
             description={description}
           />
         </React.Fragment>

@@ -302,7 +302,7 @@ const RichText: React.FC<Props> = (props) => {
           </div>
         </Slate>
         <FieldDescription
-          value={value || ''}
+          value={value}
           description={description}
         />
       </div>

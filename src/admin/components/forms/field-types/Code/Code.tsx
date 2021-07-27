@@ -97,7 +97,7 @@ const Code: React.FC<Props> = (props) => {
         }}
       />
       <FieldDescription
-        value={value || ''}
+        value={value}
         description={description}
       />
     </div>

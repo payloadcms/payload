@@ -82,7 +82,7 @@ const Textarea: React.FC<Props> = (props) => {
         rows={rows}
       />
       <FieldDescription
-        value={value || ''}
+        value={value}
         description={description}
       />
     </div>

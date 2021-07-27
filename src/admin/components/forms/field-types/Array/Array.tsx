@@ -178,7 +178,7 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
         <header className={`${baseClass}__header`}>
           <h3>{label}</h3>
           <FieldDescription
-            value={value || []}
+            value={value}
             description={description}
           />
         </header>

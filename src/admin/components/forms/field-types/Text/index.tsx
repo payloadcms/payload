@@ -67,7 +67,7 @@ const Text: React.FC<Props> = (props) => {
         required={required}
       />
       <input
-        value={value || ''}
+        value={value}
         onChange={setValue}
         disabled={readOnly}
         placeholder={placeholder}
@@ -76,7 +76,7 @@ const Text: React.FC<Props> = (props) => {
         name={path}
       />
       <FieldDescription
-        value={value || ''}
+        value={value}
         description={description}
       />
     </div>
