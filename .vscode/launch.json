@@ -18,6 +18,7 @@
       },
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/babel-node",
       "port": 9229,
       "skipFiles": [
         "<node_internals>/**"
