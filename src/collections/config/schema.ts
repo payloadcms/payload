@@ -1,5 +1,4 @@
 import joi from 'joi';
-import fieldSchema from '../../fields/config/schema';
 
 const component = joi.alternatives().try(
   joi.object().unknown(),
@@ -34,8 +33,7 @@ const collectionSchema = joi.object().keys({
     preview: joi.func(),
     disableDuplicate: joi.bool(),
   }),
-  fields: joi.array()
-    .items(fieldSchema),
+  fields: joi.array(),
   hooks: joi.object({
     beforeOperation: joi.array().items(joi.func()),
     beforeValidate: joi.array().items(joi.func()),
