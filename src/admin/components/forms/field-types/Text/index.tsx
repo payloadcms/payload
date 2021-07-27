@@ -65,7 +65,7 @@ const Text: React.FC<Props> = (props) => {
         required={required}
       />
       <input
-        value={value}
+        value={value || ''}
         onChange={setValue}
         disabled={readOnly}
         placeholder={placeholder}
