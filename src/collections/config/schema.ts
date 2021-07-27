@@ -1,10 +1,5 @@
 import joi from 'joi';
-import fieldSchema from '../../fields/config/schema';
-
-const component = joi.alternatives().try(
-  joi.object().unknown(),
-  joi.func(),
-);
+import { componentSchema } from '../../utilities/componentSchema';
 
 const collectionSchema = joi.object().keys({
   slug: joi.string().required(),
@@ -24,18 +19,21 @@ const collectionSchema = joi.object().keys({
   admin: joi.object({
     useAsTitle: joi.string(),
     defaultColumns: joi.array().items(joi.string()),
+    description: joi.alternatives().try(
+      joi.string(),
+      componentSchema,
+    ),
     enableRichTextRelationship: joi.boolean(),
     components: joi.object({
       views: joi.object({
-        List: component,
-        Edit: component,
+        List: componentSchema,
+        Edit: componentSchema,
       }),
     }),
     preview: joi.func(),
     disableDuplicate: joi.bool(),
   }),
-  fields: joi.array()
-    .items(fieldSchema),
+  fields: joi.array(),
   hooks: joi.object({
     beforeOperation: joi.array().items(joi.func()),
     beforeValidate: joi.array().items(joi.func()),

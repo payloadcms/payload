@@ -9,6 +9,7 @@ import { Value } from '../../../elements/ReactSelect/types';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
+import FieldDescription from '../../FieldDescription';
 import { relationship } from '../../../../../fields/validations';
 import { PaginatedDocs } from '../../../../../collections/config/types';
 import { useFormProcessing } from '../../Form/context';
@@ -35,6 +36,7 @@ const Relationship: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
+      description,
     } = {},
   } = props;
 
@@ -391,6 +393,10 @@ const Relationship: React.FC<Props> = (props) => {
           {errorLoading}
         </div>
       )}
+      <FieldDescription
+        value={value}
+        description={description}
+      />
     </div>
   );
 };

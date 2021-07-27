@@ -29,6 +29,11 @@
     }
   }
 
+  &__sub-header {
+    flex-basis: 100%;
+    margin-top: base(.25);
+  }
+
   .table {
     table {
       width: 100%;

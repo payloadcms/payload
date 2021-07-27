@@ -3,6 +3,7 @@ import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
+import FieldDescription from '../../FieldDescription';
 import { email } from '../../../../../fields/validations';
 import { Props } from './types';
 
@@ -20,6 +21,7 @@ const Email: React.FC<Props> = (props) => {
       width,
       placeholder,
       autoComplete,
+      description,
     } = {},
     label,
   } = props;
@@ -77,6 +79,10 @@ const Email: React.FC<Props> = (props) => {
         id={path}
         name={path}
         autoComplete={autoComplete}
+      />
+      <FieldDescription
+        value={value}
+        description={description}
       />
     </div>
   );

@@ -17,6 +17,7 @@ import Popup from '../../../elements/Popup';
 import BlockSelector from './BlockSelector';
 import { blocks as blocksValidator } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
+import FieldDescription from '../../FieldDescription';
 import { Props, RenderBlockProps } from './types';
 import { DocumentPreferences } from '../../../../../preferences/types';
 
@@ -44,6 +45,7 @@ const Blocks: React.FC<Props> = (props) => {
     permissions,
     admin: {
       readOnly,
+      description,
     },
   } = props;
 
@@ -179,6 +181,7 @@ const Blocks: React.FC<Props> = (props) => {
       minRows={minRows}
       maxRows={maxRows}
       required={required}
+      description={description}
     />
   );
 };
@@ -204,6 +207,7 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
     minRows,
     maxRows,
     required,
+    description,
   } = props;
 
   const hasMaxRows = maxRows && rows.length >= maxRows;
@@ -221,6 +225,10 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
         </div>
         <header className={`${baseClass}__header`}>
           <h3>{label}</h3>
+          <FieldDescription
+            value={value}
+            description={description}
+          />
         </header>
 
         <Droppable

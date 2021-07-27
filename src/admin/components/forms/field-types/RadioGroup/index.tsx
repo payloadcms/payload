@@ -4,6 +4,7 @@ import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Error from '../../Error';
 import Label from '../../Label';
+import FieldDescription from '../../FieldDescription';
 import RadioInput from './RadioInput';
 import { radio } from '../../../../../fields/validations';
 import { optionIsObject } from '../../../../../fields/config/types';
@@ -25,6 +26,7 @@ const RadioGroup: React.FC<Props> = (props) => {
       layout = 'horizontal',
       style,
       width,
+      description,
     } = {},
     options,
   } = props;
@@ -97,6 +99,10 @@ const RadioGroup: React.FC<Props> = (props) => {
           );
         })}
       </ul>
+      <FieldDescription
+        value={value}
+        description={description}
+      />
     </div>
   );
 };

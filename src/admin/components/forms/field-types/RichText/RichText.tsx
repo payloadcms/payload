@@ -15,6 +15,7 @@ import hotkeys from './hotkeys';
 import enablePlugins from './enablePlugins';
 import defaultValue from '../../../../../fields/richText/defaultValue';
 import FieldTypeGutter from '../../FieldTypeGutter';
+import FieldDescription from '../../FieldDescription';
 import withHTML from './plugins/withHTML';
 import { Props } from './types';
 import { RichTextElement, RichTextLeaf } from '../../../../../fields/config/types';
@@ -43,6 +44,7 @@ const RichText: React.FC<Props> = (props) => {
       style,
       width,
       placeholder,
+      description,
       hideGutter,
     } = {},
   } = props;
@@ -297,6 +299,10 @@ const RichText: React.FC<Props> = (props) => {
             />
           </div>
         </Slate>
+        <FieldDescription
+          value={value}
+          description={description}
+        />
       </div>
     </div>
   );

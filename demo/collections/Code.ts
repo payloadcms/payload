@@ -14,6 +14,7 @@ const Code: PayloadCollectionConfig = {
       required: true,
       admin: {
         language: 'js',
+        description: 'javascript example',
       },
     },
   ],

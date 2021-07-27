@@ -1,5 +1,5 @@
 import { Data } from '../../Form/types';
-import { BlockField, Labels, Block } from '../../../../../fields/config/types';
+import { BlockField, Labels, Block, Description } from '../../../../../fields/config/types';
 import { FieldTypes } from '..';
 import { FieldPermissions } from '../../../../../auth/types';
 
@@ -28,6 +28,7 @@ export type RenderBlockProps = {
   showError: boolean
   errorMessage: string
   rows: Data[]
-  blocks: Block[],
+  blocks: Block[]
   setCollapse: (id: string, collapsed: boolean) => void
+  description?: Description
 }
