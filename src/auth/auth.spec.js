@@ -1,10 +1,10 @@
 import MongoClient from 'mongodb';
 import getConfig from '../config/load';
-import { email, password, mongo } from '../../tests/api/credentials';
+import { email, password, connection } from '../mongoose/testCredentials';
 
 require('isomorphic-fetch');
 
-const { url: mongoURL, port: mongoPort, name: mongoDBName } = mongo;
+const { url: mongoURL, port: mongoPort, name: mongoDBName } = connection;
 
 const { serverURL: url } = getConfig();
 
@@ -137,7 +137,10 @@ describe('Users REST API', () => {
     });
 
     expect(response.status).toBe(201);
-    const client = await MongoClient.connect(`${mongoURL}:${mongoPort}`);
+    const client = await MongoClient.connect(`${mongoURL}:${mongoPort}`, {
+      useUnifiedTopology: true,
+    });
+
     const db = client.db(mongoDBName);
     const userResult = await db.collection('public-users').findOne({ email: emailToVerify });
     const { _verified, _verificationToken } = userResult;

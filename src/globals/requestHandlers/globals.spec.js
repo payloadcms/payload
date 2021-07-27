@@ -3,7 +3,7 @@
  */
 
 import getConfig from '../../config/load';
-import { email, password } from '../../../tests/api/credentials';
+import { email, password } from '../../mongoose/testCredentials';
 
 require('isomorphic-fetch');
 

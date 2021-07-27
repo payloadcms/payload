@@ -2,7 +2,7 @@ require('isomorphic-fetch');
 require('../../demo/server');
 
 const loadConfig = require('../../src/config/load').default;
-const { email, password } = require('./credentials');
+const { email, password } = require('../../src/mongoose/testCredentials');
 
 const { serverURL } = loadConfig();
 
