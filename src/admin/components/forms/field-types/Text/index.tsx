@@ -5,6 +5,7 @@ import Label from '../../Label';
 import Error from '../../Error';
 import { text } from '../../../../../fields/validations';
 import { Props } from './types';
+import FieldDescription from '../../FieldDescription';
 
 import './index.scss';
 
@@ -21,6 +22,7 @@ const Text: React.FC<Props> = (props) => {
       style,
       width,
       condition,
+      description,
     } = {},
   } = props;
 
@@ -65,13 +67,17 @@ const Text: React.FC<Props> = (props) => {
         required={required}
       />
       <input
-        value={value || ''}
+        value={value}
         onChange={setValue}
         disabled={readOnly}
         placeholder={placeholder}
         type="text"
         id={path}
         name={path}
+      />
+      <FieldDescription
+        value={value}
+        description={description}
       />
     </div>
   );

@@ -11,6 +11,7 @@ const Media: PayloadCollectionConfig = {
   },
   admin: {
     enableRichTextRelationship: true,
+    description: 'No selfies please',
   },
   upload: {
     staticURL: '/media',

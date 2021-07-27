@@ -1,6 +1,7 @@
 import React from 'react';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
+import FieldDescription from '../../FieldDescription';
 import FieldTypeGutter from '../../FieldTypeGutter';
 import { NegativeFieldGutterProvider } from '../../FieldTypeGutter/context';
 import { Props } from './types';
@@ -21,6 +22,7 @@ const Group: React.FC<Props> = (props) => {
       style,
       width,
       hideGutter,
+      description,
     },
     permissions,
   } = props;
@@ -42,8 +44,16 @@ const Group: React.FC<Props> = (props) => {
       { !hideGutter && (<FieldTypeGutter />) }
 
       <div className={`${baseClass}__content-wrapper`}>
-        {label && (
-          <h2 className={`${baseClass}__title`}>{label}</h2>
+        {(label || description) && (
+          <header className={`${baseClass}__header`}>
+            {label && (
+              <h2 className={`${baseClass}__title`}>{label}</h2>
+            )}
+            <FieldDescription
+              value={null}
+              description={description}
+            />
+          </header>
         )}
         <div className={`${baseClass}__fields-wrapper`}>
           <NegativeFieldGutterProvider allow={false}>

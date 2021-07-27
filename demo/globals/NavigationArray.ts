@@ -7,6 +7,9 @@ export default {
     update: ({ req: { user } }) => checkRole(['admin', 'user'], user),
     read: () => true,
   },
+  admin: {
+    description: 'A description for the editor',
+  },
   fields: [
     {
       name: 'array',

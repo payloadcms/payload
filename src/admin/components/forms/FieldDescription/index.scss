@@ -1,0 +1,8 @@
+@import '../../../scss/styles.scss';
+
+.field-description {
+  display: flex;
+  padding-top: base(.25);
+  padding-bottom: base(.25);
+  color: $color-gray;
+}

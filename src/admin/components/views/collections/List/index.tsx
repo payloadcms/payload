@@ -35,7 +35,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const { permissions } = useAuth();
   const location = useLocation();
   const { setStepNav } = useStepNav();
-  const { getPreference, setPreference } = usePreferences();
+  const { getPreference } = usePreferences();
 
   const [fields] = useState(() => formatFields(collection));
   const [listControls, setListControls] = useState<ListControls>({});

@@ -5,6 +5,14 @@
   margin-bottom: base(2);
   display: flex;
 
+  &__header {
+    margin-bottom: base(1);
+  }
+
+  &__title {
+    margin-bottom: 0;
+  }
+
   &:hover {
     .field-type-gutter__content-container {
       box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;

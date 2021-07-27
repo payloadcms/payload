@@ -5,6 +5,7 @@ import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
+import FieldDescription from '../../FieldDescription';
 import { date as dateValidation } from '../../../../../fields/validations';
 import { Props } from './types';
 
@@ -26,6 +27,7 @@ const DateTime: React.FC<Props> = (props) => {
       width,
       date,
       condition,
+      description,
     } = {},
   } = props;
 
@@ -80,6 +82,10 @@ const DateTime: React.FC<Props> = (props) => {
           value={value as Date}
         />
       </div>
+      <FieldDescription
+        value={value}
+        description={description}
+      />
     </div>
   );
 };
