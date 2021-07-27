@@ -1,10 +1,14 @@
 import joi from 'joi';
+import { componentSchema } from '../../utilities/componentSchema';
 
 const globalSchema = joi.object().keys({
   slug: joi.string().required(),
   label: joi.string(),
   admin: joi.object({
-    description: joi.string(),
+    description: joi.alternatives().try(
+      joi.string(),
+      componentSchema,
+    ),
   }),
   hooks: joi.object({
     beforeValidate: joi.array().items(joi.func()),

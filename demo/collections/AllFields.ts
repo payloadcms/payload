@@ -4,6 +4,7 @@ import Email from '../blocks/Email';
 import Quote from '../blocks/Quote';
 import NumberBlock from '../blocks/Number';
 import CallToAction from '../blocks/CallToAction';
+import CollectionDescription from '../customComponents/CollectionDescription';
 
 const AllFields: PayloadCollectionConfig = {
   slug: 'all-fields',
@@ -22,7 +23,7 @@ const AllFields: PayloadCollectionConfig = {
 
       return null;
     },
-    description: 'Every type of field in one place',
+    description: CollectionDescription,
   },
   access: {
     read: () => true,

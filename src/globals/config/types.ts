@@ -54,7 +54,7 @@ export type PayloadGlobalConfig = {
   }
   fields: Field[];
   admin?: {
-    description?: string,
+    description?: string | (() => string);
     components?: {
       views?: {
         Edit?: React.ComponentType

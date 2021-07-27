@@ -1,9 +1,5 @@
 import joi from 'joi';
-
-const component = joi.alternatives().try(
-  joi.object().unknown(),
-  joi.func(),
-);
+import { componentSchema } from '../../utilities/componentSchema';
 
 const collectionSchema = joi.object().keys({
   slug: joi.string().required(),
@@ -23,12 +19,15 @@ const collectionSchema = joi.object().keys({
   admin: joi.object({
     useAsTitle: joi.string(),
     defaultColumns: joi.array().items(joi.string()),
-    description: joi.string(),
+    description: joi.alternatives().try(
+      joi.string(),
+      componentSchema,
+    ),
     enableRichTextRelationship: joi.boolean(),
     components: joi.object({
       views: joi.object({
-        List: component,
-        Edit: component,
+        List: componentSchema,
+        Edit: componentSchema,
       }),
     }),
     preview: joi.func(),

@@ -13,6 +13,7 @@ import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
 import { Props } from './types';
 
 import './index.scss';
+import ViewDescription from '../../elements/ViewDescription';
 
 const baseClass = 'global-edit';
 
@@ -59,7 +60,9 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                 {label}
               </h1>
               {description && (
-                <div className={`${baseClass}__sub-header`}>{description}</div>
+                <div className={`${baseClass}__sub-header`}>
+                  <ViewDescription description={description} />
+                </div>
               )}
             </header>
             <RenderFields

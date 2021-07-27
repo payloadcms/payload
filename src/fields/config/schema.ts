@@ -1,14 +1,10 @@
 import joi from 'joi';
-
-const component = joi.alternatives().try(
-  joi.object().unknown(),
-  joi.func(),
-);
+import { componentSchema } from '../../utilities/componentSchema';
 
 export const baseAdminFields = joi.object().keys({
   description: joi.alternatives().try(
     joi.string(),
-    joi.func(),
+    componentSchema,
   ),
   position: joi.string().valid('sidebar'),
   width: joi.string(),
@@ -18,9 +14,9 @@ export const baseAdminFields = joi.object().keys({
   disabled: joi.boolean().default(false),
   condition: joi.func(),
   components: joi.object().keys({
-    Cell: component,
-    Field: component,
-    Filter: component,
+    Cell: componentSchema,
+    Field: componentSchema,
+    Filter: componentSchema,
   }).default({}),
 });
 
@@ -235,9 +231,9 @@ export const richText = baseField.keys({
         joi.string(),
         joi.object({
           name: joi.string().required(),
-          Button: component,
-          Element: component,
-          plugins: joi.array().items(component),
+          Button: componentSchema,
+          Element: componentSchema,
+          plugins: joi.array().items(componentSchema),
         }),
       ),
     ),
@@ -246,9 +242,9 @@ export const richText = baseField.keys({
         joi.string(),
         joi.object({
           name: joi.string().required(),
-          Button: component,
-          Leaf: component,
-          plugins: joi.array().items(component),
+          Button: componentSchema,
+          Leaf: componentSchema,
+          plugins: joi.array().items(componentSchema),
         }),
       ),
     ),

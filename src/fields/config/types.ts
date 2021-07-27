@@ -137,7 +137,6 @@ export type GroupField = FieldBase & {
   fields: Field[];
   admin?: Admin & {
     hideGutter?: boolean
-    description?: string
   }
 }
 

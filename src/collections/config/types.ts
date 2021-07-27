@@ -99,7 +99,7 @@ export type PayloadCollectionConfig = {
   admin?: {
     useAsTitle?: string;
     defaultColumns?: string[];
-    description?: string;
+    description?: string | (() => string);
     disableDuplicate?: boolean;
     components?: {
       views?: {

@@ -12,6 +12,7 @@ import Meta from '../../../utilities/Meta';
 import { Props } from './types';
 
 import './index.scss';
+import ViewDescription from '../../../elements/ViewDescription';
 
 const baseClass = 'collection-list';
 
@@ -56,7 +57,9 @@ const DefaultList: React.FC<Props> = (props) => {
             </Pill>
           )}
           {description && (
-            <div className={`${baseClass}__sub-header`}>{description}</div>
+            <div className={`${baseClass}__sub-header`}>
+              <ViewDescription description={description} />
+            </div>
           )}
         </header>
         <ListControls

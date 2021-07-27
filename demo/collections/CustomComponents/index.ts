@@ -41,7 +41,7 @@ const CustomComponents: PayloadCollectionConfig = {
     },
     {
       name: 'componentDescription',
-      label: 'Component Description',
+      label: 'Component ViewDescription',
       type: 'text',
       admin: {
         description: CustomDescriptionComponent,
