@@ -21,7 +21,6 @@ const Textarea: React.FC<Props> = (props) => {
       width,
       placeholder,
       rows,
-      condition,
       description,
     } = {},
     label,
@@ -45,7 +44,6 @@ const Textarea: React.FC<Props> = (props) => {
     path,
     validate: memoizedValidate,
     enableDebouncedValue: true,
-    condition,
   });
 
   const classes = [

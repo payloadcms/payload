@@ -24,7 +24,6 @@ const Code: React.FC<Props> = (props) => {
       style,
       width,
       language,
-      condition,
       description,
     } = {},
     label,
@@ -56,7 +55,6 @@ const Code: React.FC<Props> = (props) => {
     path,
     validate: memoizedValidate,
     enableDebouncedValue: true,
-    condition,
   });
 
   const classes = [

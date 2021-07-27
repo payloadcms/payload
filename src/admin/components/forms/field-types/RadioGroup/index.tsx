@@ -26,7 +26,6 @@ const RadioGroup: React.FC<Props> = (props) => {
       layout = 'horizontal',
       style,
       width,
-      condition,
       description,
     } = {},
     options,
@@ -47,7 +46,6 @@ const RadioGroup: React.FC<Props> = (props) => {
   } = useFieldType({
     path,
     validate: memoizedValidate,
-    condition,
   });
 
   const classes = [

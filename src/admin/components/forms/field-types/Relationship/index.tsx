@@ -36,7 +36,6 @@ const Relationship: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
-      condition,
       description,
     } = {},
   } = props;
@@ -74,7 +73,6 @@ const Relationship: React.FC<Props> = (props) => {
   } = useFieldType({
     path: path || name,
     validate: memoizedValidate,
-    condition,
   });
 
   const addOptions = useCallback((data, relation) => {

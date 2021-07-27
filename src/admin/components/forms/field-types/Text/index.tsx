@@ -21,7 +21,6 @@ const Text: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
-      condition,
       description,
     } = {},
   } = props;
@@ -31,7 +30,6 @@ const Text: React.FC<Props> = (props) => {
   const fieldType = useFieldType<string>({
     path,
     validate,
-    condition,
     enableDebouncedValue: true,
   });
 

@@ -34,6 +34,7 @@ type Arguments = {
   unflattenLocales: boolean
   unflattenLocaleActions: (() => void)[]
   docWithLocales?: Record<string, any>
+  skipValidation?: boolean
 }
 
 const traverseFields = (args: Arguments): void => {
@@ -64,6 +65,7 @@ const traverseFields = (args: Arguments): void => {
     unflattenLocaleActions,
     unflattenLocales,
     docWithLocales = {},
+    skipValidation,
   } = args;
 
   fields.forEach((field) => {
@@ -187,11 +189,15 @@ const traverseFields = (args: Arguments): void => {
       fullData,
     }));
 
+    const passesCondition = (field.admin?.condition && hook === 'beforeChange') ? field.admin.condition(fullData, data) : true;
+    const skipValidationFromHere = skipValidation || !passesCondition;
+
     if (fieldHasSubFields(field)) {
       if (field.name === undefined) {
         traverseFields({
           ...args,
           fields: field.fields,
+          skipValidation: skipValidationFromHere,
         });
       } else if (fieldIsArrayType(field)) {
         if (Array.isArray(data[field.name])) {
@@ -207,6 +213,7 @@ const traverseFields = (args: Arguments): void => {
               originalDoc: originalDoc?.[field.name]?.[i],
               docWithLocales: docWithLocales?.[field.name]?.[i],
               path: `${path}${field.name}.${i}.`,
+              skipValidation: skipValidationFromHere,
             });
           }
         }
@@ -218,6 +225,7 @@ const traverseFields = (args: Arguments): void => {
           originalDoc: originalDoc[field.name],
           docWithLocales: docWithLocales?.[field.name],
           path: `${path}${field.name}.`,
+          skipValidation: skipValidationFromHere,
         });
       }
     }
@@ -235,6 +243,7 @@ const traverseFields = (args: Arguments): void => {
               originalDoc: originalDoc?.[field.name]?.[i],
               docWithLocales: docWithLocales?.[field.name]?.[i],
               path: `${path}${field.name}.${i}.`,
+              skipValidation: skipValidationFromHere,
             });
           }
         });
@@ -267,6 +276,7 @@ const traverseFields = (args: Arguments): void => {
           existingData: { [field.name]: existingRowCount },
           field,
           path,
+          skipValidation: skipValidationFromHere,
         }));
       } else {
         validationPromises.push(() => validationPromise({
@@ -276,6 +286,7 @@ const traverseFields = (args: Arguments): void => {
           existingData: originalDoc,
           field,
           path,
+          skipValidation: skipValidationFromHere,
         }));
       }
     }

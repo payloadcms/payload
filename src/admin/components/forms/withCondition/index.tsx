@@ -34,20 +34,24 @@ const withCondition = <P extends Record<string, unknown>>(Field: React.Component
 
     const data = getData();
     const siblingData = getSiblingData(path);
-    const passesCondition = condition ? condition(data, siblingData) : true;
+    const hasCondition = Boolean(condition);
+    const currentlyPassesCondition = hasCondition ? condition(data, siblingData) : true;
+    const field = getField(path);
+    const existingConditionPasses = field?.passesCondition;
 
     useEffect(() => {
-      if (!passesCondition) {
-        const field = getField(path);
-        dispatchFields({
-          ...field,
-          path,
-          valid: true,
-        });
-      }
-    }, [passesCondition, getField, dispatchFields, path]);
+      if (hasCondition) {
+        if (!existingConditionPasses && currentlyPassesCondition) {
+          dispatchFields({ type: 'MODIFY_CONDITION', path, result: true });
+        }
 
-    if (passesCondition) {
+        if (!currentlyPassesCondition && (existingConditionPasses || typeof existingConditionPasses === 'undefined')) {
+          dispatchFields({ type: 'MODIFY_CONDITION', path, result: false });
+        }
+      }
+    }, [currentlyPassesCondition, existingConditionPasses, dispatchFields, path, hasCondition]);
+
+    if (currentlyPassesCondition) {
       return <Field {...props} />;
     }
 
