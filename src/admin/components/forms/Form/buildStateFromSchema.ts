@@ -2,18 +2,12 @@ import ObjectID from 'bson-objectid';
 import { Field as FieldSchema } from '../../../../fields/config/types';
 import { Fields, Field, Data } from './types';
 
-const buildValidationPromise = async (fieldState: Field, field: FieldSchema, fullData: Data = {}, data: Data = {}) => {
+const buildValidationPromise = async (fieldState: Field, field: FieldSchema) => {
   const validatedFieldState = fieldState;
-
-  let passesConditionalLogic = true;
-
-  if (field?.admin?.condition) {
-    passesConditionalLogic = await field.admin.condition(fullData, data);
-  }
 
   let validationResult: boolean | string = true;
 
-  if (passesConditionalLogic && typeof field.validate === 'function') {
+  if (typeof field.validate === 'function') {
     validationResult = await field.validate(fieldState.value, field);
   }
 
@@ -37,10 +31,9 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
         initialValue: value,
         valid: true,
         validate: field.validate,
-        condition: field?.admin?.condition,
       };
 
-      validationPromises.push(buildValidationPromise(fieldState, field, fullData, data));
+      validationPromises.push(buildValidationPromise(fieldState, field));
 
       return fieldState;
     };

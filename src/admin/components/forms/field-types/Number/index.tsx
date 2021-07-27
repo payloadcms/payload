@@ -23,7 +23,6 @@ const NumberField: React.FC<Props> = (props) => {
       width,
       step,
       placeholder,
-      condition,
     } = {},
   } = props;
 
@@ -43,7 +42,6 @@ const NumberField: React.FC<Props> = (props) => {
     path,
     validate: memoizedValidate,
     enableDebouncedValue: true,
-    condition,
   });
 
   const handleChange = useCallback((e) => {

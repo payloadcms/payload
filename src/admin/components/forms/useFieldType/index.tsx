@@ -13,7 +13,6 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
     disableFormData,
     ignoreWhileFlattening,
     stringify,
-    condition,
   } = options;
 
   const formContext = useForm();
@@ -49,7 +48,6 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
       ignoreWhileFlattening,
       initialValue,
       validate,
-      condition,
       value: valueToSend,
       valid: false,
       errorMessage: undefined,
@@ -65,7 +63,7 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
     }
 
     dispatchFields(fieldToDispatch);
-  }, [path, dispatchFields, validate, disableFormData, ignoreWhileFlattening, initialValue, stringify, condition]);
+  }, [path, dispatchFields, validate, disableFormData, ignoreWhileFlattening, initialValue, stringify]);
 
   // Method to return from `useFieldType`, used to
   // update internal field values from field component(s)

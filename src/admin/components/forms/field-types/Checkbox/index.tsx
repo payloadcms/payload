@@ -23,7 +23,6 @@ const Checkbox: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
-      condition,
     } = {},
   } = props;
 
@@ -43,7 +42,6 @@ const Checkbox: React.FC<Props> = (props) => {
     path,
     validate: memoizedValidate,
     disableFormData,
-    condition,
   });
 
   return (

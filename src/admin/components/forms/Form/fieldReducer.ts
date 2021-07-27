@@ -103,6 +103,29 @@ function fieldReducer(state: Fields, action): Fields {
       return newState;
     }
 
+    case 'MODIFY_CONDITION': {
+      const { path, result } = action;
+
+      return Object.entries(state).reduce((newState, [key, val]) => {
+        if (key === path || key.indexOf(`${path}.`) === 0) {
+          return {
+            ...newState,
+            [key]: {
+              ...val,
+              passesCondition: result,
+            },
+          };
+        }
+
+        return {
+          ...newState,
+          [key]: {
+            ...val,
+          },
+        };
+      }, {});
+    }
+
     default: {
       const newField = {
         value: action.value,
@@ -113,7 +136,7 @@ function fieldReducer(state: Fields, action): Fields {
         initialValue: action.initialValue,
         stringify: action.stringify,
         validate: action.validate,
-        condition: action.condition,
+        passesCondition: action.passesCondition,
       };
 
       return {
