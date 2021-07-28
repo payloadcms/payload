@@ -1,10 +1,10 @@
-import { CollectionConfig } from '../../../../../collections/config/types';
+import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { CollectionPermission } from '../../../../../auth/types';
 import { Document } from '../../../../../types';
 import { Fields } from '../../../forms/Form/types';
 
 export type IndexProps = {
-  collection: CollectionConfig
+  collection: SanitizedCollectionConfig
   isEditing?: boolean
 }
 

@@ -7,13 +7,13 @@ import { UpdateQuery } from 'mongodb';
 import apiKeyStrategy from '../auth/strategies/apiKey';
 import buildSchema from './buildSchema';
 import bindCollectionMiddleware from './bindCollection';
-import { CollectionConfig } from './config/types';
+import { SanitizedCollectionConfig } from './config/types';
 import { Payload } from '../index';
 
 const LocalStrategy = Passport.Strategy;
 
 export default function registerCollections(ctx: Payload): void {
-  ctx.config.collections = ctx.config.collections.map((collection: CollectionConfig) => {
+  ctx.config.collections = ctx.config.collections.map((collection: SanitizedCollectionConfig) => {
     const formattedCollection = collection;
 
     const schema = buildSchema(formattedCollection, ctx.config);

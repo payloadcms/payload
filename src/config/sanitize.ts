@@ -1,5 +1,5 @@
 import merge from 'deepmerge';
-import { PayloadConfig, Config } from './types';
+import { Config, SanitizedConfig } from './types';
 import defaultUser from '../auth/defaultUser';
 import sanitizeCollection from '../collections/config/sanitize';
 import { InvalidConfiguration } from '../errors';
@@ -7,8 +7,8 @@ import sanitizeGlobals from '../globals/config/sanitize';
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections';
 import { defaults } from './defaults';
 
-const sanitizeConfig = (config: PayloadConfig): Config => {
-  const sanitizedConfig = merge(defaults, config) as PayloadConfig;
+const sanitizeConfig = (config: Config): SanitizedConfig => {
+  const sanitizedConfig = merge(defaults, config) as Config;
 
   if (!sanitizedConfig.admin.user) {
     sanitizedConfig.admin.user = 'users';
@@ -30,7 +30,7 @@ const sanitizeConfig = (config: PayloadConfig): Config => {
     config.serverURL,
   ];
 
-  return sanitizedConfig as Config;
+  return sanitizedConfig as SanitizedConfig;
 };
 
 export default sanitizeConfig;

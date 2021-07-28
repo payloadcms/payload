@@ -111,3 +111,24 @@ Hooks are a powerful way to extend collection functionality and execute your own
 ### Field types
 
 Collections support all field types that Payload has to offer—including simple fields like text and checkboxes all the way to more complicated layout-building field groups like Blocks. [Click here](/docs/fields/overview) to learn more about field types.
+
+### TypeScript
+
+You can import collection types as follows:
+
+```js
+import { CollectionConfig } from 'payload/types';
+
+// This is the type used for incoming collection configs.
+// Only the bare minimum properties are marked as required.
+```
+
+```js
+import { SanitizedCollectionConfig } from 'payload/types';
+
+// This is the type used after an incoming collection config is fully sanitized.
+
+// If you are building a plugin, you might benefit from this type,
+// as plugins interact will fully defaulted, sanitized, and validated
+// collection configs.
+```

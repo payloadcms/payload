@@ -2,8 +2,8 @@ import { Payload } from '..';
 import { ValidationError } from '../errors';
 import sanitizeFallbackLocale from '../localization/sanitizeFallbackLocale';
 import traverseFields from './traverseFields';
-import { CollectionConfig } from '../collections/config/types';
-import { GlobalConfig } from '../globals/config/types';
+import { SanitizedCollectionConfig } from '../collections/config/types';
+import { SanitizedGlobalConfig } from '../globals/config/types';
 import { Operation } from '../types';
 import { PayloadRequest } from '../express/types';
 import { HookName } from './config/types';
@@ -25,7 +25,7 @@ type Arguments = {
   currentDepth?: number
 }
 
-export default async function performFieldOperations(this: Payload, entityConfig: CollectionConfig | GlobalConfig, args: Arguments): Promise<{ [key: string]: unknown }> {
+export default async function performFieldOperations(this: Payload, entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig, args: Arguments): Promise<{ [key: string]: unknown }> {
   const {
     data,
     originalDoc: fullOriginalDoc,

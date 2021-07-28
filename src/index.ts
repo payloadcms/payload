@@ -2,7 +2,7 @@ import express, { Express, Router } from 'express';
 import crypto from 'crypto';
 import { Document, Model } from 'mongoose';
 import {
-  Config,
+  SanitizedConfig,
   EmailOptions,
   InitOptions,
 } from './config/types';
@@ -50,7 +50,7 @@ require('isomorphic-fetch');
  * @description Payload
  */
 export class Payload {
-  config: Config;
+  config: SanitizedConfig;
 
   collections: Collection[] = [];
 

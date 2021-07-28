@@ -1,13 +1,13 @@
 import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
-import { GlobalConfig } from '../config/types';
+import { SanitizedGlobalConfig } from '../config/types';
 import { Document } from '../../types';
 
 export type FindOneGlobalResult = Promise<Response<Document> | void>;
 export type FindOneGlobalResponse = (req: PayloadRequest, res: Response, next: NextFunction) => FindOneGlobalResult;
 
-export default function findOne(globalConfig: GlobalConfig): FindOneGlobalResponse {
+export default function findOne(globalConfig: SanitizedGlobalConfig): FindOneGlobalResponse {
   async function handler(req: PayloadRequest, res: Response, next: NextFunction): FindOneGlobalResult {
     try {
       const { slug } = globalConfig;

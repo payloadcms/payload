@@ -1,5 +1,5 @@
 import merge from 'deepmerge';
-import { CollectionConfig, PayloadCollectionConfig } from './types';
+import { SanitizedCollectionConfig, CollectionConfig } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
 import toKebabCase from '../../utilities/toKebabCase';
 import baseAuthFields from '../../fields/baseFields/baseAuthFields';
@@ -55,12 +55,12 @@ const mergeBaseFields = (fields, baseFields) => {
   return baseFields;
 };
 
-const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: PayloadCollectionConfig): CollectionConfig => {
+const sanitizeCollection = (collections: CollectionConfig[], collection: CollectionConfig): SanitizedCollectionConfig => {
   // /////////////////////////////////
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitized: PayloadCollectionConfig = merge(defaults, collection);
+  const sanitized: CollectionConfig = merge(defaults, collection);
 
   sanitized.slug = toKebabCase(sanitized.slug);
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug);
@@ -123,7 +123,7 @@ const sanitizeCollection = (collections: PayloadCollectionConfig[], collection: 
   const validRelationships = collections.map((c) => c.slug);
   sanitized.fields = sanitizeFields(sanitized.fields, validRelationships);
 
-  return sanitized as CollectionConfig;
+  return sanitized as SanitizedCollectionConfig;
 };
 
 export default sanitizeCollection;

@@ -5,14 +5,14 @@ import Logo from '../../graphics/Logo';
 import MinimalTemplate from '../../templates/Minimal';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
-import { CollectionConfig } from '../../../../collections/config/types';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 
 import Login from '../Login';
 import './index.scss';
 
 const baseClass = 'verify';
 
-const Verify: React.FC<{ collection: CollectionConfig }> = ({ collection }) => {
+const Verify: React.FC<{ collection: SanitizedCollectionConfig }> = ({ collection }) => {
   const { slug: collectionSlug } = collection;
 
   const { user } = useAuth();

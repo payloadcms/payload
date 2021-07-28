@@ -1,12 +1,12 @@
 import { Payload } from '..';
 import { PayloadRequest } from '../express/types';
-import { Config, EmailOptions } from '../config/types';
+import { SanitizedConfig, EmailOptions } from '../config/types';
 import { Collection } from '../collections/config/types';
 import { User, VerifyConfig } from './types';
 
 
 type Args = {
-  config: Config,
+  config: SanitizedConfig,
   collection: Collection,
   user: User
   disableEmail: boolean

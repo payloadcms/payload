@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import buildSchema from '../mongoose/buildSchema';
-import { Config } from '../config/types';
+import { SanitizedConfig } from '../config/types';
 
-const buildModel = (config: Config): mongoose.PaginateModel<any> | null => {
+const buildModel = (config: SanitizedConfig): mongoose.PaginateModel<any> | null => {
   if (config.globals && config.globals.length > 0) {
     const globalsSchema = new mongoose.Schema({}, { discriminatorKey: 'globalType', timestamps: true });
 

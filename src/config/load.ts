@@ -1,15 +1,14 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 import path from 'path';
-import { Config } from './types';
+import { SanitizedConfig } from './types';
 import findConfig from './find';
 import validate from './validate';
 import babelConfig from '../babel.config';
 
-
 const removedExtensions = ['.scss', '.css', '.svg', '.png', '.jpg', '.eot', '.ttf', '.woff', '.woff2'];
 
-const loadConfig = (): Config => {
+const loadConfig = (): SanitizedConfig => {
   const configPath = findConfig();
 
   removedExtensions.forEach((ext) => {

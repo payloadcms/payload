@@ -89,7 +89,7 @@ export type AfterForgotPasswordHook = (args?: {
   args?: any;
 }) => any;
 
-export type PayloadCollectionConfig = {
+export type CollectionConfig = {
   slug: string;
   labels?: {
     singular?: string;
@@ -137,7 +137,7 @@ export type PayloadCollectionConfig = {
   timestamps?: boolean
 };
 
-export interface CollectionConfig extends Omit<DeepRequired<PayloadCollectionConfig>, 'auth' | 'upload' | 'fields'> {
+export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields'> {
   auth: Auth;
   upload: Upload;
   fields: Field[];
@@ -145,12 +145,12 @@ export interface CollectionConfig extends Omit<DeepRequired<PayloadCollectionCon
 
 export type Collection = {
   Model: CollectionModel;
-  config: CollectionConfig;
+  config: SanitizedCollectionConfig;
 };
 
 export type AuthCollection = {
   Model: AuthCollectionModel;
-  config: CollectionConfig;
+  config: SanitizedCollectionConfig;
 }
 
 export type PaginatedDocs = {
