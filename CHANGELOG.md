@@ -1,5 +1,23 @@
 # [0.8.0](https://github.com/payloadcms/payload/compare/v0.7.10...v0.8.0) (2021-07-28)
 
+### BREAKING CHANGES
+
+* There have been a few very minor, yet breaking TypeScript changes in this release. If you are accessing Payload config types from directly within the `dist` folder, like any of the following:
+
+- `import { PayloadCollectionConfig, CollectionConfig } from 'payload/dist/collections/config/types';`
+- `import { PayloadGlobalConfig, GlobalConfig } from 'payload/dist/globals/config/types';`
+- `import { Config, PayloadConfig } from 'payload/config';`
+
+You may need to modify your code to work with this release. The TL;DR of the change is that we have improved our naming conventions of internally used types, which will become more important over time. Now, we have landed on a naming convention as follows:
+
+- Incoming configs, typed correctly for optional / required config properties, are named `Config`, `CollectionConfig`, and `GlobalConfig`.
+- Fully defaulted, sanitized, and validated configs are now named `SanitizedConfig`, `SanitizedCollectionConfig`, and `SanitizedGlobalConfig`.
+
+They can be imported safely outside of the `dist` folder now as well. For more information on how to properly import which types you need, see the following Docs pages which have now been updated with examples on how to properly access the new types:
+
+- [Base Payload config docs](https://payloadcms.com/docs/configuration/overview)
+- [Collection config docs](https://payloadcms.com/docs/configuration/collections)
+- [Global config docs](https://payloadcms.com/docs/configuration/globals)
 
 ### Bug Fixes
 
