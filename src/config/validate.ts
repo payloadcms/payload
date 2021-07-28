@@ -1,28 +1,28 @@
 import schema from './schema';
 import collectionSchema from '../collections/config/schema';
 import Logger from '../utilities/logger';
-import { PayloadConfig, Config } from './types';
-import { PayloadCollectionConfig } from '../collections/config/types';
+import { SanitizedConfig } from './types';
+import { SanitizedCollectionConfig } from '../collections/config/types';
 import fieldSchema from '../fields/config/schema';
-import { PayloadGlobalConfig } from '../globals/config/types';
+import { SanitizedGlobalConfig } from '../globals/config/types';
 import globalSchema from '../globals/config/schema';
 
 const logger = Logger();
 
-const validateFields = (context: string, collection: PayloadCollectionConfig): string[] => {
+const validateFields = (context: string, entity: SanitizedCollectionConfig | SanitizedGlobalConfig): string[] => {
   const errors: string[] = [];
-  collection.fields.forEach((field) => {
+  entity.fields.forEach((field) => {
     const result = fieldSchema.validate(field, { abortEarly: false });
     if (result.error) {
       result.error.details.forEach(({ message }) => {
-        errors.push(`${context} "${collection.slug}" > Field "${field.name}" > ${message}`);
+        errors.push(`${context} "${entity.slug}" > Field "${field.name}" > ${message}`);
       });
     }
   });
   return errors;
 };
 
-const validateCollections = (collections: PayloadCollectionConfig[]): string[] => {
+const validateCollections = (collections: SanitizedCollectionConfig[]): string[] => {
   const errors: string[] = [];
   collections.forEach((collection) => {
     const result = collectionSchema.validate(collection, { abortEarly: false });
@@ -37,7 +37,7 @@ const validateCollections = (collections: PayloadCollectionConfig[]): string[] =
   return errors;
 };
 
-const validateGlobals = (globals: PayloadGlobalConfig[]): string[] => {
+const validateGlobals = (globals: SanitizedGlobalConfig[]): string[] => {
   const errors: string[] = [];
   globals.forEach((global) => {
     const result = globalSchema.validate(global, { abortEarly: false });
@@ -52,7 +52,7 @@ const validateGlobals = (globals: PayloadGlobalConfig[]): string[] => {
   return errors;
 };
 
-const validateSchema = (config: PayloadConfig): Config => {
+const validateSchema = (config: SanitizedConfig): SanitizedConfig => {
   const result = schema.validate(config, {
     abortEarly: false,
   });
@@ -81,7 +81,7 @@ const validateSchema = (config: PayloadConfig): Config => {
   }
 
 
-  return result.value as Config;
+  return result.value;
 };
 
 export default validateSchema;

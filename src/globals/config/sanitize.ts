@@ -1,10 +1,10 @@
 import { toWords } from '../../utilities/formatLabels';
-import { PayloadCollectionConfig } from '../../collections/config/types';
+import { CollectionConfig } from '../../collections/config/types';
 import sanitizeFields from '../../fields/config/sanitize';
-import { PayloadGlobalConfig, GlobalConfig } from './types';
+import { GlobalConfig, SanitizedGlobalConfig } from './types';
 import defaultAccess from '../../auth/defaultAccess';
 
-const sanitizeGlobals = (collections: PayloadCollectionConfig[], globals: PayloadGlobalConfig[]): GlobalConfig[] => {
+const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[]): SanitizedGlobalConfig[] => {
   const sanitizedGlobals = globals.map((global) => {
     const sanitizedGlobal = { ...global };
 
@@ -34,7 +34,7 @@ const sanitizeGlobals = (collections: PayloadCollectionConfig[], globals: Payloa
     const validRelationships = collections.map((c) => c.slug);
     sanitizedGlobal.fields = sanitizeFields(global.fields, validRelationships);
 
-    return sanitizedGlobal as GlobalConfig;
+    return sanitizedGlobal as SanitizedGlobalConfig;
   });
 
   return sanitizedGlobals;

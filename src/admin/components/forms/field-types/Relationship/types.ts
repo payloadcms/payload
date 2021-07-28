@@ -1,4 +1,4 @@
-import { PaginatedDocs, CollectionConfig } from '../../../../../collections/config/types';
+import { PaginatedDocs, SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { RelationshipField } from '../../../../../fields/config/types';
 
 export type OptionsPage = {
@@ -27,7 +27,7 @@ type ADD = {
   data: PaginatedDocs
   relation: string
   hasMultipleRelations: boolean
-  collection: CollectionConfig
+  collection: SanitizedCollectionConfig
 }
 
 export type Action = CLEAR | ADD

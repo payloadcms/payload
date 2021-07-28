@@ -1,11 +1,11 @@
 import React from 'react';
 import Cell from './Cell';
 import SortColumn from '../../../elements/SortColumn';
-import { CollectionConfig } from '../../../../../collections/config/types';
+import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { Column } from '../../../elements/Table/types';
 import { fieldHasSubFields, Field } from '../../../../../fields/config/types';
 
-const buildColumns = (collection: CollectionConfig, columns: string[], setSort: (sort: string) => void): Column[] => (columns || []).reduce((cols, col, colIndex) => {
+const buildColumns = (collection: SanitizedCollectionConfig, columns: string[], setSort: (sort: string) => void): Column[] => (columns || []).reduce((cols, col, colIndex) => {
   let field = null;
 
   const fields = [

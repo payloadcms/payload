@@ -36,7 +36,7 @@ export type AfterReadHook = (args?: {
 
 export type GlobalModel = Model<Document>
 
-export type PayloadGlobalConfig = {
+export type GlobalConfig = {
   slug: string
   label?: string
   preview?: GeneratePreviewURL
@@ -63,11 +63,11 @@ export type PayloadGlobalConfig = {
   }
 }
 
-export interface GlobalConfig extends Omit<DeepRequired<PayloadGlobalConfig>, 'fields'> {
+export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields'> {
   fields: Field[]
 }
 
 export type Globals = {
   Model: GlobalModel
-  config: GlobalConfig[]
+  config: SanitizedGlobalConfig[]
 }

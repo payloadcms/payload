@@ -1,4 +1,4 @@
-import { PayloadConfig, Config } from './types';
+import { Config, SanitizedConfig } from './types';
 import sanitize from './sanitize';
 
 /**
@@ -6,7 +6,7 @@ import sanitize from './sanitize';
  * @param config Payload Config
  * @returns Built and sanitized Payload Config
  */
-export function buildConfig(config: PayloadConfig): Config {
+export function buildConfig(config: Config): SanitizedConfig {
   const sanitized = sanitize(config);
 
   if (Array.isArray(config.plugins)) {

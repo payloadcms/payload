@@ -1,4 +1,4 @@
-import { CollectionConfig } from '../../../../../../collections/config/types';
+import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
 
 export type Data = {
   filename: string
@@ -8,7 +8,7 @@ export type Data = {
 
 export type Props = {
   data?: Data
-  collection: CollectionConfig
+  collection: SanitizedCollectionConfig
   adminThumbnail?: string
   mimeTypes?: string[];
 }

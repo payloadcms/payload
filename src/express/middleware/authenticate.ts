@@ -1,10 +1,10 @@
 import passport from 'passport';
 import { Request, Response, NextFunction } from 'express';
-import { Config } from '../../config/types';
+import { SanitizedConfig } from '../../config/types';
 
 export type PayloadAuthenticate = (req: Request, res: Response, next: NextFunction) => NextFunction;
 
-export default (config: Config): PayloadAuthenticate => {
+export default (config: SanitizedConfig): PayloadAuthenticate => {
   const methods = config.collections.reduce((enabledMethods, collection) => {
     if (typeof collection.auth === 'object' && collection.auth.useAPIKey) {
       const collectionMethods = [...enabledMethods];

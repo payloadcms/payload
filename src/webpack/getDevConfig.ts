@@ -1,8 +1,8 @@
 import webpack, { Configuration } from 'webpack';
-import { Config } from '../config/types';
+import { SanitizedConfig } from '../config/types';
 import getBaseConfig from './getBaseConfig';
 
-export default (payloadConfig: Config): Configuration => {
+export default (payloadConfig: SanitizedConfig): Configuration => {
   const baseConfig = getBaseConfig(payloadConfig) as any;
 
   let config: Configuration = {

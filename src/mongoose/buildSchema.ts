@@ -1,11 +1,11 @@
 /* eslint-disable no-use-before-define */
 import { Schema, SchemaDefinition } from 'mongoose';
-import { Config } from '../config/types';
+import { SanitizedConfig } from '../config/types';
 import { ArrayField, Block, BlockField, Field, GroupField, RadioField, RelationshipField, RowField, SelectField, UploadField } from '../fields/config/types';
 
-type FieldSchemaGenerator = (field: Field, fields: SchemaDefinition, config: Config) => SchemaDefinition;
+type FieldSchemaGenerator = (field: Field, fields: SchemaDefinition, config: SanitizedConfig) => SchemaDefinition;
 
-const setBlockDiscriminators = (fields: Field[], schema: Schema, config: Config) => {
+const setBlockDiscriminators = (fields: Field[], schema: Schema, config: SanitizedConfig) => {
   fields.forEach((field) => {
     const blockFieldType = field as BlockField;
     if (blockFieldType.type === 'blocks' && blockFieldType.blocks && blockFieldType.blocks.length > 0) {
@@ -47,7 +47,7 @@ const formatBaseSchema = (field: Field) => ({
   index: field.index || field.unique || false,
 });
 
-const buildSchema = (config: Config, configFields: Field[], options = {}): Schema => {
+const buildSchema = (config: SanitizedConfig, configFields: Field[], options = {}): Schema => {
   let fields = {};
 
   configFields.forEach((field) => {
@@ -66,7 +66,7 @@ const buildSchema = (config: Config, configFields: Field[], options = {}): Schem
 };
 
 const fieldToSchemaMap = {
-  number: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+  number: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: Number };
     let schemaToReturn;
 
@@ -87,7 +87,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  text: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+  text: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: String };
     let schemaToReturn;
 
@@ -108,7 +108,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  email: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+  email: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: String };
     let schemaToReturn;
 
@@ -129,7 +129,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  textarea: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+  textarea: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: String };
     let schemaToReturn;
 
@@ -150,7 +150,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  richText: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+  richText: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: Schema.Types.Mixed };
     let schemaToReturn;
 
@@ -171,7 +171,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  code: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+  code: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: String };
     let schemaToReturn;
 
@@ -192,7 +192,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  radio: (field: RadioField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+  radio: (field: RadioField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = {
       ...formatBaseSchema(field),
       type: String,
@@ -220,7 +220,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  checkbox: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+  checkbox: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: Boolean };
     let schemaToReturn;
 
@@ -241,7 +241,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  date: (field: Field, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+  date: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: Date };
     let schemaToReturn;
 
@@ -262,7 +262,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  upload: (field: UploadField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+  upload: (field: UploadField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = {
       ...formatBaseSchema(field),
       type: Schema.Types.ObjectId,
@@ -288,7 +288,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  relationship: (field: RelationshipField, fields: SchemaDefinition, config: Config) => {
+  relationship: (field: RelationshipField, fields: SchemaDefinition, config: SanitizedConfig) => {
     const hasManyRelations = Array.isArray(field.relationTo);
     let schemaToReturn: { [key: string]: any } = {};
 
@@ -343,7 +343,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  row: (field: RowField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+  row: (field: RowField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const newFields = { ...fields };
 
     field.fields.forEach((rowField: Field) => {
@@ -357,7 +357,7 @@ const fieldToSchemaMap = {
 
     return newFields;
   },
-  array: (field: ArrayField, fields: SchemaDefinition, config: Config) => {
+  array: (field: ArrayField, fields: SchemaDefinition, config: SanitizedConfig) => {
     const baseSchema = {
       ...formatBaseSchema(field),
       type: [buildSchema(config, field.fields, { _id: false, id: false })],
@@ -382,7 +382,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  group: (field: GroupField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+  group: (field: GroupField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = {
       ...formatBaseSchema(field),
       required: field.fields.some((subField) => subField.required === true),
@@ -408,7 +408,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  select: (field: SelectField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+  select: (field: SelectField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = {
       ...formatBaseSchema(field),
       type: String,
@@ -439,7 +439,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  blocks: (field: BlockField, fields: SchemaDefinition, config: Config): SchemaDefinition => {
+  blocks: (field: BlockField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = [new Schema({ }, { _id: false, discriminatorKey: 'blockType' })];
     let schemaToReturn;
 

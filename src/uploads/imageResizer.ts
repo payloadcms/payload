@@ -3,7 +3,7 @@ import sharp from 'sharp';
 import sanitize from 'sanitize-filename';
 import getImageSize from './getImageSize';
 import fileExists from './fileExists';
-import { CollectionConfig } from '../collections/config/types';
+import { SanitizedCollectionConfig } from '../collections/config/types';
 import { FileSizes, ImageSize } from './types';
 
 function getOutputImage(sourceImage: string, size: ImageSize) {
@@ -28,7 +28,7 @@ function getOutputImage(sourceImage: string, size: ImageSize) {
  */
 export default async function resizeAndSave(
   staticPath: string,
-  config: CollectionConfig,
+  config: SanitizedCollectionConfig,
   savedFilename: string,
   mimeType: string,
 ): Promise<FileSizes> {

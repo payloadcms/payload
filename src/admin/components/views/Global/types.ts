@@ -1,13 +1,13 @@
 import { GlobalPermission } from '../../../../auth/types';
-import { GlobalConfig } from '../../../../globals/config/types';
+import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 import { Fields } from '../../forms/Form/types';
 
 export type IndexProps = {
-  global: GlobalConfig
+  global: SanitizedGlobalConfig
 }
 
 export type Props = {
-  global: GlobalConfig
+  global: SanitizedGlobalConfig
   data: Record<string, unknown>
   onSave: () => void
   permissions: GlobalPermission

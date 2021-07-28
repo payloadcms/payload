@@ -1,7 +1,8 @@
 export * from './dist/types';
 
 export {
-  PayloadCollectionConfig as CollectionConfig,
+  CollectionConfig,
+  SanitizedCollectionConfig,
   BeforeOperationHook as CollectionBeforeOperationHook,
   BeforeValidateHook as CollectionBeforeValidateHook,
   BeforeChangeHook as CollectionBeforeChangeHook,
@@ -14,5 +15,5 @@ export {
   AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
 } from './dist/collections/config/types';
 
-export { PayloadGlobalConfig as GlobalConfig } from './dist/globals/config/types';
+export { GlobalConfig, SanitizedGlobalConfig } from './dist/globals/config/types';
 export { Field, FieldHook, FieldAccess, RichTextCustomElement, RichTextCustomLeaf, Block } from './dist/fields/config/types';

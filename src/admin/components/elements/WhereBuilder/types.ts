@@ -1,10 +1,10 @@
-import { CollectionConfig } from '../../../../collections/config/types';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { Field } from '../../../../fields/config/types';
 import { Operator } from '../../../../types';
 
 export type Props = {
   handleChange: (controls: any) => void,
-  collection: CollectionConfig,
+  collection: SanitizedCollectionConfig,
 }
 
 export type FieldCondition = {

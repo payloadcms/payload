@@ -1,5 +1,5 @@
-import { PayloadCollectionConfig } from './types';
+import { CollectionConfig } from './types';
 
-const buildCollection = (collection: PayloadCollectionConfig): PayloadCollectionConfig => collection;
+const buildCollection = (collection: CollectionConfig): CollectionConfig => collection;
 
 export default buildCollection;

@@ -1,13 +1,13 @@
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack, { Configuration } from 'webpack';
-import { Config } from '../config/types';
+import { SanitizedConfig } from '../config/types';
 import babelConfig from '../babel.config';
 
 const mockModulePath = path.resolve(__dirname, './mocks/emptyModule.js');
 const mockDotENVPath = path.resolve(__dirname, './mocks/dotENV.js');
 
-export default (config: Config): Configuration => ({
+export default (config: SanitizedConfig): Configuration => ({
   entry: {
     main: [
       path.resolve(__dirname, '../admin'),

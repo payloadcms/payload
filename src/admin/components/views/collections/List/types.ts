@@ -1,8 +1,8 @@
-import { CollectionConfig, PaginatedDocs } from '../../../../../collections/config/types';
+import { SanitizedCollectionConfig, PaginatedDocs } from '../../../../../collections/config/types';
 import { Column } from '../../../elements/Table/types';
 
 export type Props = {
-  collection: CollectionConfig
+  collection: SanitizedCollectionConfig
   data: PaginatedDocs
   newDocumentURL: string
   setListControls: (controls: unknown) => void
@@ -12,5 +12,5 @@ export type Props = {
 }
 
 export type ListIndexProps = {
-  collection: CollectionConfig
+  collection: SanitizedCollectionConfig
 }
