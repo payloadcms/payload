@@ -3,6 +3,37 @@
 
 ### Features
 
+### BREAKING CHANGES
+
+* If you have any plugins that are written in TypeScript, we have changed plugin types to make them more flexible. Whereas before you needed to take in a fully sanitized config, and return a fully sanitized config, we now have simplified that requirement so that you can write configs in your own plugins just as an end user of Payload can write their own configs.
+
+Now, configs will be sanitized **_before_** plugins are executed **_as well as_** after plugins are executed.
+
+So, where your plugin may have been typed like this before:
+
+```ts
+ import { SanitizedConfig } from 'payload/config';
+ 
+ const plugin = (config: SanitizedConfig): SanitizedConfig => {
+  return {
+    ...config,
+  }
+ }
+```
+
+It can now be written like this:
+
+```ts
+ import { Config } from 'payload/config';
+ 
+ const plugin = (config: Config): Config => {
+  return {
+    ...config,
+  }
+ }
+```
+
+
 * improves plugin writability ([a002b71](https://github.com/payloadcms/payload/commit/a002b7105f5c312e846c80032a350046db10236c))
 
 # [0.8.0](https://github.com/payloadcms/payload/compare/v0.7.10...v0.8.0) (2021-07-28)
