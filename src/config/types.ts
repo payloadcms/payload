@@ -18,7 +18,7 @@ type Email = {
 }
 
 // eslint-disable-next-line no-use-before-define
-type Plugin = (config: SanitizedConfig) => SanitizedConfig;
+type Plugin = (config: Config) => Config;
 
 type GeneratePreviewURLOptions = {
   locale: string

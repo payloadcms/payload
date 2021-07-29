@@ -78,6 +78,8 @@ export default config;
 
 Payload Plugins are executed _after_ the incoming config is validated, sanitized, and default options are merged in.
 
+However, after all plugins are executed, the full config with all plugins will be re-sanitized.
+
 ## Simple example
 
 Here is an example for how to automatically add a `lastModifiedBy` field to all Payload collections using a Plugin written in TypeScript.

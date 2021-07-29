@@ -10,7 +10,8 @@ export function buildConfig(config: Config): SanitizedConfig {
   const sanitized = sanitize(config);
 
   if (Array.isArray(config.plugins)) {
-    return sanitized.plugins.reduce((configWithPlugins, plugin) => plugin(configWithPlugins), sanitized);
+    const configWithPlugins = sanitized.plugins.reduce((updatedConfig, plugin) => plugin(updatedConfig), sanitized);
+    return sanitize(configWithPlugins);
   }
 
   return sanitized;
