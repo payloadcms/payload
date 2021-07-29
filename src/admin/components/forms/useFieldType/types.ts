@@ -1,4 +1,4 @@
-import { Validate } from '../../../../fields/config/types';
+import { Condition, Validate } from '../../../../fields/config/types';
 
 export type Options = {
   path: string
@@ -7,6 +7,7 @@ export type Options = {
   disableFormData?: boolean
   ignoreWhileFlattening?: boolean
   stringify?: boolean
+  condition?: Condition
 }
 
 export type FieldType<T> = {

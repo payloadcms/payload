@@ -1,5 +1,7 @@
 import { unflatten, flatten } from 'flatley';
 import flattenFilters from './flattenFilters';
+import getSiblingData from './getSiblingData';
+import reduceFieldsToValues from './reduceFieldsToValues';
 import { Fields } from './types';
 
 const unflattenRowsFromState = (state: Fields, path) => {
@@ -106,21 +108,31 @@ function fieldReducer(state: Fields, action): Fields {
     case 'MODIFY_CONDITION': {
       const { path, result } = action;
 
-      return Object.entries(state).reduce((newState, [key, val]) => {
-        if (key === path || key.indexOf(`${path}.`) === 0) {
+      return Object.entries(state).reduce((newState, [fieldPath, field]) => {
+        if (fieldPath === path || fieldPath.indexOf(`${path}.`) === 0) {
+          let passesCondition = result;
+
+          // If a condition is being set to true,
+          // Set all conditions to true
+          // Besides those who still fail their own conditions
+
+          if (passesCondition && field.condition) {
+            passesCondition = field.condition(reduceFieldsToValues(state), getSiblingData(state, path));
+          }
+
           return {
             ...newState,
-            [key]: {
-              ...val,
-              passesCondition: result,
+            [fieldPath]: {
+              ...field,
+              passesCondition,
             },
           };
         }
 
         return {
           ...newState,
-          [key]: {
-            ...val,
+          [fieldPath]: {
+            ...field,
           },
         };
       }, {});
@@ -136,6 +148,7 @@ function fieldReducer(state: Fields, action): Fields {
         initialValue: action.initialValue,
         stringify: action.stringify,
         validate: action.validate,
+        condition: action.condition,
         passesCondition: action.passesCondition,
       };
 

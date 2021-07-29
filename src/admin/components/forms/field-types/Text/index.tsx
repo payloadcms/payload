@@ -22,6 +22,7 @@ const Text: React.FC<Props> = (props) => {
       style,
       width,
       description,
+      condition,
     } = {},
   } = props;
 
@@ -31,6 +32,7 @@ const Text: React.FC<Props> = (props) => {
     path,
     validate,
     enableDebouncedValue: true,
+    condition,
   });
 
   const {
