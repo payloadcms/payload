@@ -25,6 +25,7 @@ const Code: React.FC<Props> = (props) => {
       width,
       language,
       description,
+      condition,
     } = {},
     label,
     minLength,
@@ -55,6 +56,7 @@ const Code: React.FC<Props> = (props) => {
     path,
     validate: memoizedValidate,
     enableDebouncedValue: true,
+    condition,
   });
 
   const classes = [

@@ -46,6 +46,7 @@ const Blocks: React.FC<Props> = (props) => {
     admin: {
       readOnly,
       description,
+      condition,
     },
   } = props;
 
@@ -80,6 +81,7 @@ const Blocks: React.FC<Props> = (props) => {
     validate: memoizedValidate,
     disableFormData,
     ignoreWhileFlattening: true,
+    condition,
   });
 
   const addRow = useCallback(async (rowIndex, blockType) => {

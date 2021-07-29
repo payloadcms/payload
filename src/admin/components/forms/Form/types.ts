@@ -1,3 +1,5 @@
+import { Condition } from '../../../../fields/config/types';
+
 export type Field = {
   value: unknown
   initialValue: unknown
@@ -7,6 +9,7 @@ export type Field = {
   disableFormData?: boolean
   ignoreWhileFlattening?: boolean
   stringify?: boolean
+  condition?: Condition
   passesCondition?: boolean
 }
 

@@ -22,6 +22,7 @@ const Email: React.FC<Props> = (props) => {
       placeholder,
       autoComplete,
       description,
+      condition,
     } = {},
     label,
   } = props;
@@ -37,6 +38,7 @@ const Email: React.FC<Props> = (props) => {
     path,
     validate: memoizedValidate,
     enableDebouncedValue: true,
+    condition,
   });
 
   const {
