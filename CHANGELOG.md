@@ -1,8 +1,6 @@
 ## [0.8.1](https://github.com/payloadcms/payload/compare/v0.8.0...v0.8.1) (2021-07-29)
 
 
-### Features
-
 ### BREAKING CHANGES
 
 * If you have any plugins that are written in TypeScript, we have changed plugin types to make them more flexible. Whereas before you needed to take in a fully sanitized config, and return a fully sanitized config, we now have simplified that requirement so that you can write configs in your own plugins just as an end user of Payload can write their own configs.
@@ -33,6 +31,7 @@ It can now be written like this:
  }
 ```
 
+### Features
 
 * improves plugin writability ([a002b71](https://github.com/payloadcms/payload/commit/a002b7105f5c312e846c80032a350046db10236c))
 
