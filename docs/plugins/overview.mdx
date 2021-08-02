@@ -76,9 +76,9 @@ export default config;
 
 #### When Plugins are initialized
 
-Payload Plugins are executed _after_ the incoming config is validated, sanitized, and default options are merged in.
+Payload Plugins are executed _after_ the incoming config is validated, but before it is sanitized and had default options merged in.
 
-However, after all plugins are executed, the full config with all plugins will be re-sanitized.
+After all plugins are executed, the full config with all plugins will be sanitized.
 
 ## Simple example
 
