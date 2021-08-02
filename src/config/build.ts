@@ -7,12 +7,10 @@ import sanitize from './sanitize';
  * @returns Built and sanitized Payload Config
  */
 export function buildConfig(config: Config): SanitizedConfig {
-  const sanitized = sanitize(config);
-
   if (Array.isArray(config.plugins)) {
-    const configWithPlugins = sanitized.plugins.reduce((updatedConfig, plugin) => plugin(updatedConfig), sanitized);
+    const configWithPlugins = config.plugins.reduce((updatedConfig, plugin) => plugin(updatedConfig), config);
     return sanitize(configWithPlugins);
   }
 
-  return sanitized;
+  return sanitize(config);
 }
