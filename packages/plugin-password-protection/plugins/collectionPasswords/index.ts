@@ -28,7 +28,7 @@ const collectionPasswords = (incomingOptions: Options) => (incomingConfig: Confi
     graphQL: {
       ...incomingConfig.graphQL,
       mutations: (GraphQL, payload) => ({
-        ...(typeof incomingConfig.graphQL.mutations === 'function' ? incomingConfig.graphQL.mutations(GraphQL, payload) : {}),
+        ...(typeof incomingConfig?.graphQL?.mutations === 'function' ? incomingConfig.graphQL.mutations(GraphQL, payload) : {}),
         [options.mutationName]: getMutation(GraphQL, payload, incomingConfig, options),
       }),
     },
