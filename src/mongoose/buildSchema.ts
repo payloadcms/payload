@@ -383,9 +383,12 @@ const fieldToSchemaMap = {
     };
   },
   group: (field: GroupField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
+    let { required } = field;
+    if (field?.admin?.condition || field?.localized || field?.access?.create) required = false;
+
     const baseSchema = {
       ...formatBaseSchema(field),
-      required: field.fields.some((subField) => subField.required === true),
+      required: required && field.fields.some((subField) => (subField.required && !subField.localized && !subField?.admin?.condition && !subField?.access?.create)),
       type: buildSchema(config, field.fields, { _id: false, id: false }),
     };
 
