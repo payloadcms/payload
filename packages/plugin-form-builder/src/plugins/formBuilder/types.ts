@@ -100,6 +100,7 @@ export type MessageField = {
 export type FormFieldBlock = TextField | SelectField | EmailField | StateField | CountryField | CheckboxField | MessageField
 
 export type Form = {
+  title: string
   fields: FormFieldBlock[]
 }
 
