@@ -7,6 +7,7 @@ export {
   BeforeValidateHook as CollectionBeforeValidateHook,
   BeforeChangeHook as CollectionBeforeChangeHook,
   AfterChangeHook as CollectionAfterChangeHook,
+  AfterReadHook as CollectionAfterReadHook,
   BeforeReadHook as CollectionBeforeReadHook,
   BeforeDeleteHook as CollectionBeforeDeleteHook,
   AfterDeleteHook as CollectionAfterDeleteHook,
