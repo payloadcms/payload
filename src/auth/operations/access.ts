@@ -30,7 +30,7 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
         permission: true,
         where: result,
       };
-    } else {
+    } else if (updatedObj[operation]?.permission !== false) {
       updatedObj[operation] = {
         permission: !!(result),
       };
