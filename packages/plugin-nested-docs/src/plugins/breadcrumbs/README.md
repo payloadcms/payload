@@ -128,6 +128,10 @@ const examplePageConfig: CollectionConfig = {
       },
     ),
     createBreadcrumbsField(
+      // First argument is equal to the slug of the collection
+      // that the field references
+      'pages',
+
       // Argument equal to field overrides that you specify,
       // which will be merged into the base `breadcrumbs` field config
       {

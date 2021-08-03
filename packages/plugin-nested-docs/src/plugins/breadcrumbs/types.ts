@@ -1,6 +1,7 @@
 export type Breadcrumb = {
   url?: string
   label: string
+  doc: string
 }
 
 export type GenerateURL = (breadcrumbs: Breadcrumb[], currentDoc: Record<string, unknown>) => string;

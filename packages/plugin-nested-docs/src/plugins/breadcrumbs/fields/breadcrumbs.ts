@@ -1,10 +1,18 @@
 import { Field } from 'payload/types';
 import deepMerge from '../../../utilities/deepMerge';
 
-const createBreadcrumbsField = (overrides: Partial<Field> = {}): Field => deepMerge({
+const createBreadcrumbsField = (relationTo: string, overrides: Partial<Field> = {}): Field => deepMerge({
   name: 'breadcrumbs',
   type: 'array',
   fields: [
+    {
+      name: 'doc',
+      type: 'relationship',
+      relationTo,
+      admin: {
+        disabled: true,
+      },
+    },
     {
       type: 'row',
       fields: [

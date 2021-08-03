@@ -24,6 +24,7 @@ const formatBreadcrumb = (
   return {
     label,
     url,
+    doc: doc.id as string,
   };
 };
 
