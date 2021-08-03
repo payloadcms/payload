@@ -24,3 +24,91 @@ export type SanitizedOptions = {
   formSubmissionsOverrides?: CollectionConfig
   formsOverrides?: CollectionConfig
 }
+
+export type TextField = {
+  blockType: 'text'
+  blockName?: string
+  width?: string
+  name: string
+  label?: string
+  defaultValue?: string
+  required?: boolean
+}
+
+export type SelectFieldOption = {
+  label: string
+  value: string
+}
+
+export type SelectField = {
+  blockType: 'select'
+  blockName?: string
+  width?: string
+  name: string
+  label?: string
+  defaultValue?: string
+  required?: boolean
+  options: SelectFieldOption[]
+}
+
+export type EmailField = {
+  blockType: 'email'
+  blockName?: string
+  width?: string
+  name: string
+  label?: string
+  defaultValue?: string
+  required?: boolean
+}
+
+export type StateField = {
+  blockType: 'state'
+  blockName?: string
+  width?: string
+  name: string
+  label?: string
+  defaultValue?: string
+  required?: boolean
+}
+
+export type CountryField = {
+  blockType: 'country'
+  blockName?: string
+  width?: string
+  name: string
+  label?: string
+  defaultValue?: string
+  required?: boolean
+}
+
+export type CheckboxField = {
+  blockType: 'checkbox'
+  blockName?: string
+  width?: string
+  name: string
+  label?: string
+  defaultValue?: boolean
+  required?: boolean
+}
+
+export type MessageField = {
+  blockType: 'message'
+  blockName?: string
+  message: string
+}
+
+export type FormFieldBlock = TextField | SelectField | EmailField | StateField | CountryField | CheckboxField | MessageField
+
+export type Form = {
+  fields: FormFieldBlock[]
+}
+
+export type SubmissionValue = {
+  field: string
+  value: unknown
+}
+
+export type FormSubmission = {
+  form: string | Form
+  submissionData: SubmissionValue[]
+}

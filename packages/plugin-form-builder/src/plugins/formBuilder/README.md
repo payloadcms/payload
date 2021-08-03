@@ -8,7 +8,6 @@ This plugin adds full, headless, form-building functionality to Payload CMS.
 import { buildConfig } from 'payload/config';
 import payloadFormBuilder from '@payloadcms/plugin-form-builder';
 
-
 export default buildConfig({
   serverURL: 'https://localhost:3000',
   plugins: [
