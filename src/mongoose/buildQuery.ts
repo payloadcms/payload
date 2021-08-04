@@ -125,9 +125,6 @@ class ParamParser {
     let localizedKey = this.getLocalizedKey(sanitizedKey, schemaObject);
     if (key === '_id' || key === 'id') {
       localizedKey = '_id';
-      if (!mongoose.Types.ObjectId.isValid(val)) {
-        return null;
-      }
     }
     if (key.includes('.') || key.includes('__')) {
       const paths = key.split('.');

@@ -71,6 +71,17 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   }
 
   // /////////////////////////////////////
+  // Custom id
+  // /////////////////////////////////////
+
+  if (args.collection.config.id !== undefined) {
+    data = {
+      _id: data.id,
+      ...data,
+    };
+  }
+
+  // /////////////////////////////////////
   // Upload and resize potential files
   // /////////////////////////////////////
 

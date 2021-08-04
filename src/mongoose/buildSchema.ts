@@ -342,6 +342,23 @@ const fieldToSchemaMap = {
     const hasManyRelations = Array.isArray(field.relationTo);
     let schemaToReturn: { [key: string]: any } = {};
 
+    const relationTo = [].concat(field.relationTo);
+    const relatedCollections = relationTo.map((slug) => (
+      config.collections.find((collection) => collection.slug === slug)
+    ));
+    const ids = relatedCollections.map(({ id }) => id);
+    const areIdTypesConsistent = ids.every((id) => ids[0] === id);
+    let idType;
+    if (areIdTypesConsistent) {
+      if (ids[0] === undefined) {
+        idType = Schema.Types.ObjectId;
+      } else {
+        [idType] = ids;
+      }
+    } else {
+      idType = Schema.Types.Mixed;
+    }
+
     if (field.localized) {
       schemaToReturn = {
         type: config.localization.locales.reduce((locales, locale) => {
@@ -350,14 +367,14 @@ const fieldToSchemaMap = {
           if (hasManyRelations) {
             localeSchema._id = false;
             localeSchema.value = {
-              type: Schema.Types.ObjectId,
+              type: idType,
               refPath: `${field.name}.${locale}.relationTo`,
             };
             localeSchema.relationTo = { type: String, enum: field.relationTo };
           } else {
             localeSchema = {
               ...formatBaseSchema(field),
-              type: Schema.Types.ObjectId,
+              type: idType,
               ref: field.relationTo,
             };
           }
@@ -372,7 +389,7 @@ const fieldToSchemaMap = {
     } else if (hasManyRelations) {
       schemaToReturn._id = false;
       schemaToReturn.value = {
-        type: Schema.Types.ObjectId,
+        type: idType,
         refPath: `${field.name}.relationTo`,
       };
       schemaToReturn.relationTo = { type: String, enum: field.relationTo };
@@ -381,7 +398,7 @@ const fieldToSchemaMap = {
     } else {
       schemaToReturn = {
         ...formatBaseSchema(field),
-        type: Schema.Types.ObjectId,
+        type: idType,
         ref: field.relationTo,
       };
 

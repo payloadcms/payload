@@ -97,9 +97,17 @@ function registerCollections(): void {
       });
     }
 
+    const mutationInputFields = collection.config.id
+      ? [{
+        name: 'id',
+        type: 'text',
+        required: true,
+      }, ...fields]
+      : fields;
+
     collection.graphQL.mutationInputType = new GraphQLNonNull(this.buildMutationInputType(
       singularLabel,
-      fields,
+      mutationInputFields,
       singularLabel,
     ));
 

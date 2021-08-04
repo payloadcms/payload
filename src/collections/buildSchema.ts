@@ -11,6 +11,9 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
     collection.fields,
     { timestamps: collection.timestamps !== false, ...schemaOptions },
   );
+  if (collection.id) {
+    schema.add({ _id: collection.id });
+  }
 
   schema.plugin(paginate, { useEstimatedCount: true })
     .plugin(buildQueryPlugin);

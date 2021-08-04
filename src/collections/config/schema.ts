@@ -7,6 +7,7 @@ const collectionSchema = joi.object().keys({
     singular: joi.string(),
     plural: joi.string(),
   }),
+  id: joi.any(),
   access: joi.object({
     create: joi.func(),
     read: joi.func(),

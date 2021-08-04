@@ -95,6 +95,7 @@ export type CollectionConfig = {
     singular?: string;
     plural?: string;
   };
+  id?: any,
   fields: Field[];
   admin?: {
     useAsTitle?: string;
