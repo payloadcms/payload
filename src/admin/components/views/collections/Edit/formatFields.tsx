@@ -4,7 +4,7 @@ const formatFields = (collection, isEditing) => {
   let fields = [
     ...collection.fields,
   ];
-  if (collection.id !== undefined && !isEditing) {
+  if (collection.id && !isEditing) {
     fields = [
       {
         name: 'id',
