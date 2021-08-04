@@ -47,7 +47,7 @@ const Group: React.FC<Props> = (props) => {
         {(label || description) && (
           <header className={`${baseClass}__header`}>
             {label && (
-              <h2 className={`${baseClass}__title`}>{label}</h2>
+              <h3 className={`${baseClass}__title`}>{label}</h3>
             )}
             <FieldDescription
               value={null}
