@@ -5,6 +5,7 @@ import getImageSize from './getImageSize';
 import fileExists from './fileExists';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { FileSizes, ImageSize } from './types';
+import { PayloadRequest } from '../express/types';
 
 function getOutputImage(sourceImage: string, size: ImageSize) {
   const extension = sourceImage.split('.').pop();
@@ -27,6 +28,7 @@ function getOutputImage(sourceImage: string, size: ImageSize) {
  * @returns image sizes keyed to strings
  */
 export default async function resizeAndSave(
+  req: PayloadRequest,
   staticPath: string,
   config: SanitizedCollectionConfig,
   savedFilename: string,
@@ -50,16 +52,20 @@ export default async function resizeAndSave(
         fs.unlinkSync(imagePath);
       }
 
-      const output = await sharp(sourceImage)
+      const resized = await sharp(sourceImage)
         .resize(desiredSize.width, desiredSize.height, {
           position: desiredSize.crop || 'centre',
-        })
-        .toFile(imagePath);
+        });
+
+      const file = await resized.toFile(imagePath);
+      const buffer = await resized.toBuffer();
+
+      req.payloadUploadSizes[desiredSize.name] = buffer;
 
       return {
         ...desiredSize,
         filename: imageNameWithDimensions,
-        filesize: output.size,
+        filesize: file.size,
         mimeType,
       };
     });

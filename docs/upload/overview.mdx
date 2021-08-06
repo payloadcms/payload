@@ -113,6 +113,12 @@ The Payload Admin panel will also automatically display all available files, inc
 
 Behind the scenes, Payload relies on [`sharp`](https://sharp.pixelplumbing.com/api-resize#resize) to perform its image resizing. You can specify additional options for `sharp` to use while resizing your images.
 
+##### Accessing the resized images in hooks
+
+All auto-resized images are exposed to be re-used in hooks and similar via an object that is bound to `req.payloadUploadSizes`.
+
+The object will have keys for each size generated, and each key will be set equal to a buffer containing the file data.
+
 ### Admin thumbnails
 
 You can specify how Payload retrieves admin thumbnails for your upload-enabled Collections. This property accepts two different configurations:

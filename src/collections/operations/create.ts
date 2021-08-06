@@ -104,7 +104,8 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
         fileData.height = dimensions.height;
 
         if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
-          fileData.sizes = await resizeAndSave(staticPath, collectionConfig, fsSafeName, fileData.mimeType);
+          req.payloadUploadSizes = {};
+          fileData.sizes = await resizeAndSave(req, staticPath, collectionConfig, fsSafeName, fileData.mimeType);
         }
       }
     } catch (err) {
