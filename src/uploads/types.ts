@@ -33,6 +33,7 @@ export type IncomingUploadType = {
   imageSizes?: ImageSize[];
   staticURL?: string;
   staticDir?: string;
+  disableLocalStorage?: boolean
   adminThumbnail?: string | GetAdminThumbnail;
   mimeTypes?: string[];
 }
@@ -42,6 +43,7 @@ export type Upload = {
   imageSizes?: ImageSize[]
   staticURL: string
   staticDir: string
+  disableLocalStorage: boolean
   adminThumbnail?: string | GetAdminThumbnail
   mimeTypes?: string[];
 }

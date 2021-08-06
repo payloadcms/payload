@@ -77,7 +77,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   if (collectionConfig.upload) {
     const fileData: Partial<FileData> = {};
 
-    const { staticDir, imageSizes } = collectionConfig.upload;
+    const { staticDir, imageSizes, disableLocalStorage } = collectionConfig.upload;
 
     const file = ((req.files && req.files.file) ? req.files.file : req.file) as UploadedFile;
 
@@ -91,28 +91,31 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
       staticPath = path.join(config.paths.configDir, staticDir);
     }
 
-    mkdirp.sync(staticPath);
+    if (!disableLocalStorage) {
+      mkdirp.sync(staticPath);
+    }
 
     const fsSafeName = await getSafeFilename(staticPath, file.name);
 
     try {
-      await saveBufferToFile(file.data, `${staticPath}/${fsSafeName}`);
+      if (!disableLocalStorage) {
+        await saveBufferToFile(file.data, `${staticPath}/${fsSafeName}`);
+      }
 
       if (isImage(file.mimetype)) {
-        const dimensions = await getImageSize(`${staticPath}/${fsSafeName}`);
+        const dimensions = await getImageSize(file);
         fileData.width = dimensions.width;
         fileData.height = dimensions.height;
 
         if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
           req.payloadUploadSizes = {};
-          fileData.sizes = await resizeAndSave(req, staticPath, collectionConfig, fsSafeName, fileData.mimeType);
+          fileData.sizes = await resizeAndSave(req, file.data, dimensions, staticPath, collectionConfig, fsSafeName, fileData.mimeType);
         }
       }
     } catch (err) {
       console.error(err);
       throw new FileUploadError();
     }
-
 
     fileData.filename = fsSafeName;
     fileData.filesize = file.size;

@@ -1,14 +1,13 @@
-import fs from 'fs';
+import { UploadedFile } from 'express-fileupload';
 import probeImageSize from 'probe-image-size';
 
-type ProbedImageSize = {
+export type ProbedImageSize = {
   width: number,
   height: number,
   type: string,
   mime: string,
 }
 
-export default async function (path: string): Promise<ProbedImageSize> {
-  const image = fs.createReadStream(path);
-  return probeImageSize(image);
+export default async function (image: UploadedFile): Promise<ProbedImageSize> {
+  return probeImageSize.sync(image.data);
 }

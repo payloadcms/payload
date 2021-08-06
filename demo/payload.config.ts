@@ -30,6 +30,7 @@ import Uniques from './collections/Uniques';
 import BlocksGlobal from './globals/BlocksGlobal';
 import NavigationArray from './globals/NavigationArray';
 import GlobalWithStrictAccess from './globals/GlobalWithStrictAccess';
+import UnstoredMedia from './collections/UnstoredMedia';
 
 export default buildConfig({
   cookiePrefix: 'payload',
@@ -81,6 +82,7 @@ export default buildConfig({
     StrictPolicies,
     Validations,
     Uniques,
+    UnstoredMedia,
   ],
   globals: [
     NavigationArray,
