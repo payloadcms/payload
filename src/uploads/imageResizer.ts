@@ -41,8 +41,17 @@ export default async function resizeAndSave(
   const sizes = imageSizes
     .filter((desiredSize) => desiredSize.width < dimensions.width)
     .map(async (desiredSize) => {
+      const resized = await sharp(sourceImage)
+        .resize(desiredSize.width, desiredSize.height, {
+          position: desiredSize.crop || 'centre',
+        });
+
+      const bufferObject = await resized.toBuffer({
+        resolveWithObject: true,
+      });
+
       const outputImage = getOutputImage(savedFilename, desiredSize);
-      const imageNameWithDimensions = `${outputImage.name}-${outputImage.width}x${outputImage.height}.${outputImage.extension}`;
+      const imageNameWithDimensions = `${outputImage.name}-${bufferObject.info.width}x${bufferObject.info.height}.${outputImage.extension}`;
       const imagePath = `${staticPath}/${imageNameWithDimensions}`;
       const fileAlreadyExists = await fileExists(imagePath);
 
@@ -50,16 +59,14 @@ export default async function resizeAndSave(
         fs.unlinkSync(imagePath);
       }
 
-      const output = await sharp(sourceImage)
-        .resize(desiredSize.width, desiredSize.height, {
-          position: desiredSize.crop || 'centre',
-        })
-        .toFile(imagePath);
+      await resized.toFile(imagePath);
 
       return {
-        ...desiredSize,
+        name: desiredSize.name,
+        width: bufferObject.info.width,
+        height: bufferObject.info.height,
         filename: imageNameWithDimensions,
-        filesize: output.size,
+        filesize: bufferObject.info.size,
         mimeType,
       };
     });

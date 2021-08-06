@@ -19,6 +19,12 @@ const Media: PayloadCollectionConfig = {
     adminThumbnail: ({ doc }) => `/media/${doc.filename}`,
     imageSizes: [
       {
+        name: 'maintainedAspectRatio',
+        width: 1024,
+        height: null,
+        crop: 'center',
+      },
+      {
         name: 'tablet',
         width: 640,
         height: 480,
