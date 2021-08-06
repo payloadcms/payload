@@ -1,7 +1,7 @@
 import fs from 'fs';
 import sharp from 'sharp';
 import sanitize from 'sanitize-filename';
-import getImageSize from './getImageSize';
+import { ProbedImageSize } from './getImageSize';
 import fileExists from './fileExists';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { FileSizes, ImageSize } from './types';
@@ -29,21 +29,19 @@ function getOutputImage(sourceImage: string, size: ImageSize) {
  */
 export default async function resizeAndSave(
   req: PayloadRequest,
+  file: Buffer,
+  dimensions: ProbedImageSize,
   staticPath: string,
   config: SanitizedCollectionConfig,
   savedFilename: string,
   mimeType: string,
 ): Promise<FileSizes> {
-  const { imageSizes } = config.upload;
-
-  const sourceImage = `${staticPath}/${savedFilename}`;
-
-  const dimensions = await getImageSize(sourceImage);
+  const { imageSizes, disableLocalStorage } = config.upload;
 
   const sizes = imageSizes
     .filter((desiredSize) => desiredSize.width < dimensions.width)
     .map(async (desiredSize) => {
-      const resized = await sharp(sourceImage)
+      const resized = await sharp(file)
         .resize(desiredSize.width, desiredSize.height, {
           position: desiredSize.crop || 'centre',
         });
@@ -63,7 +61,9 @@ export default async function resizeAndSave(
         fs.unlinkSync(imagePath);
       }
 
-      await resized.toFile(imagePath);
+      if (!disableLocalStorage) {
+        await resized.toFile(imagePath);
+      }
 
       return {
         name: desiredSize.name,
