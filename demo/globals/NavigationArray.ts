@@ -1,4 +1,4 @@
-import { PayloadGlobalConfig } from '../../src/globals/config/types';
+import { GlobalConfig } from '../../src/globals/config/types';
 import checkRole from '../access/checkRole';
 
 export default {
@@ -27,4 +27,4 @@ export default {
       }],
     },
   ],
-} as PayloadGlobalConfig;
+} as GlobalConfig;

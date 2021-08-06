@@ -1,6 +1,6 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 
-const HiddenFields: PayloadCollectionConfig = {
+const HiddenFields: CollectionConfig = {
   slug: 'hidden-fields',
   labels: {
     singular: 'Hidden Fields',

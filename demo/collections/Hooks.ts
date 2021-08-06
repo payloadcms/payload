@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
 
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 
-const Hooks: PayloadCollectionConfig = {
+const Hooks: CollectionConfig = {
   slug: 'hooks',
   labels: {
     singular: 'Hook',

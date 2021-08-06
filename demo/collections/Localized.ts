@@ -1,4 +1,4 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 import { Block } from '../../src/fields/config/types';
 
 const RichTextBlock: Block = {
@@ -19,7 +19,7 @@ const RichTextBlock: Block = {
   ],
 };
 
-const LocalizedPosts: PayloadCollectionConfig = {
+const LocalizedPosts: CollectionConfig = {
   slug: 'localized-posts',
   labels: {
     singular: 'Localized Post',

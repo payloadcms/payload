@@ -1,6 +1,6 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 
-const AutoLabel: PayloadCollectionConfig = {
+const AutoLabel: CollectionConfig = {
   slug: 'auto-label',
   admin: {
     useAsTitle: 'autoLabelField',

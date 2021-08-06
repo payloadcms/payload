@@ -1,8 +1,8 @@
 import Button from '../client/components/richText/elements/Button';
 import PurpleBackground from '../client/components/richText/leaves/PurpleBackground';
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 
-const RichText: PayloadCollectionConfig = {
+const RichText: CollectionConfig = {
   slug: 'rich-text',
   labels: {
     singular: 'Rich Text',

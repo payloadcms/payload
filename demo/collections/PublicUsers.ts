@@ -1,9 +1,9 @@
 import checkRole from '../access/checkRole';
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 
 const access = ({ req: { user } }) => checkRole(['admin'], user);
 
-const PublicUsers: PayloadCollectionConfig = {
+const PublicUsers: CollectionConfig = {
   slug: 'public-users',
   labels: {
     singular: 'Public User',

@@ -1,6 +1,6 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 
-const RelationshipA: PayloadCollectionConfig = {
+const RelationshipA: CollectionConfig = {
   slug: 'relationship-a',
   access: {
     read: () => true,

@@ -1,7 +1,7 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 import checkRole from '../access/checkRole';
 
-const StrictAccess: PayloadCollectionConfig = {
+const StrictAccess: CollectionConfig = {
   slug: 'strict-access',
   labels: {
     singular: 'Strict Access',

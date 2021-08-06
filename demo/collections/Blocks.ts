@@ -1,10 +1,10 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 import Email from '../blocks/Email';
 import Quote from '../blocks/Quote';
 import NumberBlock from '../blocks/Number';
 import CallToAction from '../blocks/CallToAction';
 
-const Blocks: PayloadCollectionConfig = {
+const Blocks: CollectionConfig = {
   slug: 'blocks',
   labels: {
     singular: 'Blocks',

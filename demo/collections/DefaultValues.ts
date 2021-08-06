@@ -1,11 +1,11 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 import checkRole from '../access/checkRole';
 import Email from '../blocks/Email';
 import Quote from '../blocks/Quote';
 import NumberBlock from '../blocks/Number';
 import CallToAction from '../blocks/CallToAction';
 
-const DefaultValues: PayloadCollectionConfig = {
+const DefaultValues: CollectionConfig = {
   slug: 'default-values',
   labels: {
     singular: 'Default Value Test',

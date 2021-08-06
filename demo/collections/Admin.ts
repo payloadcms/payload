@@ -1,4 +1,4 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 import roles from '../access/roles';
 import checkRole from '../access/checkRole';
 
@@ -7,7 +7,7 @@ const access = ({ req: { user } }) => {
   return result;
 };
 
-const Admin: PayloadCollectionConfig = {
+const Admin: CollectionConfig = {
   slug: 'admins',
   labels: {
     singular: 'Admin',
