@@ -140,7 +140,13 @@ export type GroupField = FieldBase & {
   }
 }
 
-export type RowField = FieldBase & {
+export type RowAdmin = Omit<Admin, 'description'> & {
+  readOnly?: false;
+  hidden?: false;
+};
+
+export type RowField = Omit<FieldBase, 'admin'> & {
+  admin?: RowAdmin;
   type: 'row';
   fields: Field[];
 }
