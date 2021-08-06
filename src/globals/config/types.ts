@@ -5,30 +5,30 @@ import { PayloadRequest } from '../../express/types';
 import { Access, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 
-export type BeforeValidateHook = (args?: {
+export type BeforeValidateHook = (args: {
   data?: any;
   req?: PayloadRequest;
   originalDoc?: any;
 }) => any;
 
-export type BeforeChangeHook = (args?: {
+export type BeforeChangeHook = (args: {
   data: any;
   req: PayloadRequest;
   originalDoc?: any;
 }) => any;
 
-export type AfterChangeHook = (args?: {
+export type AfterChangeHook = (args: {
   doc: any;
   req: PayloadRequest;
 }) => any;
 
-export type BeforeReadHook = (args?: {
+export type BeforeReadHook = (args: {
   doc: any;
   req: PayloadRequest;
   query: { [key: string]: any };
 }) => any;
 
-export type AfterReadHook = (args?: {
+export type AfterReadHook = (args: {
   doc: any;
   req: PayloadRequest;
   query?: { [key: string]: any };
