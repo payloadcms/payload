@@ -99,6 +99,12 @@ describe('Collections - REST', () => {
                 height: 480,
               },
             },
+
+            // We have a hook to check if upload sizes
+            // are properly bound to the Payload `req`.
+            // This field should be automatically set
+            // if they are found.
+            foundUploadSizes: true,
           },
         });
       });

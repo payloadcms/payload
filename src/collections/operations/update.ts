@@ -150,10 +150,12 @@ async function update(incomingArgs: Arguments): Promise<Document> {
           fileData.height = dimensions.height;
 
           if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
+            req.payloadUploadSizes = {};
             fileData.sizes = await resizeAndSave(req, staticPath, collectionConfig, fsSafeName, fileData.mimeType);
           }
         }
       } catch (err) {
+        console.error(err);
         throw new FileUploadError();
       }
 
