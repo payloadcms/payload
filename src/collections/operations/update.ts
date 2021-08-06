@@ -150,7 +150,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
           fileData.height = dimensions.height;
 
           if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
-            fileData.sizes = await resizeAndSave(staticPath, collectionConfig, fsSafeName, fileData.mimeType);
+            fileData.sizes = await resizeAndSave(req, staticPath, collectionConfig, fsSafeName, fileData.mimeType);
           }
         }
       } catch (err) {

@@ -13,6 +13,7 @@ export type PayloadRequest = Request & {
   payloadAPI: 'REST' | 'local' | 'graphQL'
   file?: UploadedFile
   user: User | null
+  payloadUploadSizes?: Record<string, Buffer>
   findByID?: {
     [slug: string]: (q: unknown) => Document
   }
