@@ -17,8 +17,9 @@ const SortColumn: React.FC<Props> = (props) => {
     handleChange(sort);
   }, [sort, handleChange]);
 
-  const desc = `-${name}`;
-  const asc = name;
+  const formattedName = name === 'id' ? '_id' : name;
+  const desc = `-${formattedName}`;
+  const asc = formattedName;
 
   const ascClasses = [`${baseClass}__asc`];
   if (sort === asc) ascClasses.push(`${baseClass}--active`);
