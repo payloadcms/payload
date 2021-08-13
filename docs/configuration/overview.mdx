@@ -148,7 +148,7 @@ import { config } from 'payload/babel';
 
 ### TypeScript
 
-You can import collection types as follows:
+You can import config types as follows:
 
 ```js
 import { Config } from 'payload/config';
@@ -161,8 +161,5 @@ import { Config } from 'payload/config';
 import { SanitizedConfig } from 'payload/config';
 
 // This is the type used after an incoming Payload config is fully sanitized.
-
-// If you are building a plugin, you might benefit from this type,
-// as plugins interact will fully defaulted, sanitized, and validated
-// Payload configs.
+// Generally, this is only used internally by Payload.
 ```
