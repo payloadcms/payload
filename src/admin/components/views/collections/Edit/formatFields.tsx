@@ -1,4 +1,5 @@
 import { Field } from '../../../../../fields/config/types';
+import { text } from '../../../../../fields/validations';
 
 const formatFields = (collection, isEditing) => {
   let fields = [
@@ -10,6 +11,8 @@ const formatFields = (collection, isEditing) => {
         name: 'id',
         type: 'text',
         label: 'ID',
+        required: true,
+        validate: (val) => text(val, { required: true }),
       } as Field,
       ...fields,
     ];
