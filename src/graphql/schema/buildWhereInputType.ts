@@ -344,7 +344,7 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
   fieldTypes.id = {
     type: withOperators(
       { name: 'id' } as Field,
-      GraphQLString,
+      GraphQLJSON,
       parentName,
       [...operators.equality, ...operators.contains],
     ),

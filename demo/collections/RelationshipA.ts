@@ -49,6 +49,14 @@ const RelationshipA: CollectionConfig = {
       relationTo: 'relationship-b',
       hasMany: false,
     },
+    {
+      name: 'customID',
+      label: 'CustomID Relation',
+      type: 'relationship',
+      relationTo: 'custom-id',
+      hasMany: true,
+      localized: true,
+    },
   ],
   timestamps: true,
 };

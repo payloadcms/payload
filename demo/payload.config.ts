@@ -9,6 +9,7 @@ import Conditions from './collections/Conditions';
 import CustomComponents from './collections/CustomComponents';
 import File from './collections/File';
 import Blocks from './collections/Blocks';
+import CustomID from './collections/CustomID';
 import DefaultValues from './collections/DefaultValues';
 import HiddenFields from './collections/HiddenFields';
 import Hooks from './collections/Hooks';
@@ -64,6 +65,7 @@ export default buildConfig({
     Code,
     Conditions,
     CustomComponents,
+    CustomID,
     File,
     DefaultValues,
     Blocks,

@@ -265,6 +265,9 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   }
 
   result = result.toJSON({ virtuals: true });
+
+  // custom id type reset
+  result.id = result._id;
   result = JSON.stringify(result);
   result = JSON.parse(result);
   result = sanitizeInternalFields(result);

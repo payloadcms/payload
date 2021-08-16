@@ -229,6 +229,8 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   let result: Document = doc.toJSON({ virtuals: true });
   const verificationToken = result._verificationToken;
 
+  // custom id type reset
+  result.id = result._id;
   result = JSON.stringify(result);
   result = JSON.parse(result);
   result = sanitizeInternalFields(result);

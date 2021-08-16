@@ -4,6 +4,7 @@ import {
   GraphQLEnumType,
   GraphQLFloat,
   GraphQLInputObjectType,
+  GraphQLInt,
   GraphQLList,
   GraphQLNonNull,
   GraphQLScalarType,
@@ -16,6 +17,17 @@ import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import { ArrayField, Field, FieldWithSubFields, GroupField, RelationshipField, RowField, SelectField } from '../../fields/config/types';
 import { toWords } from '../../utilities/formatLabels';
+import payload from '../../index';
+
+const getCollectionIDType = (id) => {
+  switch (id) {
+    case Number:
+      return GraphQLInt;
+
+    default:
+      return GraphQLString;
+  }
+};
 
 function buildMutationInputType(name: string, fields: Field[], parentName: string, forceNullable = false): GraphQLInputObjectType {
   const fieldToSchemaMap = {
@@ -85,9 +97,11 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
                 }), {}),
               }),
             },
-            value: { type: GraphQLString },
+            value: { type: GraphQLJSON },
           },
         });
+      } else {
+        type = getCollectionIDType(payload.collections[relationTo].config.id);
       }
 
       return { type: field.hasMany ? new GraphQLList(type) : type };

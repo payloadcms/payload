@@ -279,4 +279,139 @@ describe('GrahpQL Resolvers', () => {
       expect(typeof error.response.errors[0].message).toBe('string');
     });
   });
+
+  describe('Custom ID', () => {
+    it('should create', async () => {
+      const id = 10;
+      const query = `mutation {
+        createCustomID(data: {
+          id: ${id},
+          name: "custom"
+        }) {
+          id,
+          name
+        }
+      }`;
+      const response = await client.request(query);
+      const data = response.createCustomID;
+      expect(data.id).toStrictEqual(id);
+    });
+
+    it('should update', async () => {
+      const id = 11;
+      const name = 'custom name';
+
+      const query = `
+      mutation {
+        createCustomID(data: {
+          id: ${id},
+          name: "${name}"
+          }) {
+          id
+          name
+        }
+      }`;
+
+      await client.request(query);
+      const updatedName = 'updated name';
+
+      const update = `
+        mutation {
+          updateCustomID(id: ${id} data: {name: "${updatedName}"}) {
+          name
+        }
+      }`;
+
+      const response = await client.request(update);
+      const data = response.updateCustomID;
+
+      expect(data.name).toStrictEqual(updatedName);
+      expect(data.name).not.toStrictEqual(name);
+    });
+
+    it('should query on id', async () => {
+      const id = 15;
+      const name = 'custom name';
+
+      const create = `mutation {
+          createCustomID(data: {
+          id: ${id},
+          name: "${name}"
+          }) {
+          id
+          name
+        }
+      }`;
+
+      await client.request(create);
+
+      const query = `
+      query {
+        CustomIDs(where: { id: { equals: ${id} } }) {
+          docs {
+            id
+            name
+          }
+        }
+      }`;
+      const response = await client.request(query);
+      const [doc] = response.CustomIDs.docs;
+      expect(doc.id).toStrictEqual(id);
+      expect(doc.name).toStrictEqual(name);
+    });
+
+    it('should delete', async () => {
+      const id = 12;
+      const query = `mutation {
+          createCustomID(data: {
+          id: ${id},
+          name: "delete me"
+          }) {
+          id
+          name
+        }
+      }`;
+
+      await client.request(query);
+
+      const deleteMutation = `mutation {
+        deleteCustomID(id: ${id}) {
+          id
+        }
+      }`;
+      const deleteResponse = await client.request(deleteMutation);
+      const deletedId = deleteResponse.deleteCustomID.id;
+
+      expect(deletedId).toStrictEqual(id);
+    });
+
+    it('should allow relationships', async () => {
+      const id = 13;
+      const query = `mutation {
+          createCustomID(data: {
+            id: ${id},
+            name: "relate me"
+          }) {
+            id
+            name
+        }
+      }`;
+
+      await client.request(query);
+      const relation = `mutation {
+        createRelationshipA(data: {
+          customID: [ ${id} ]
+        }) {
+          customID {
+            id
+          }
+        }
+      }`;
+      const relationResponse = await client.request(relation);
+      const { customID } = relationResponse.createRelationshipA;
+
+      expect(customID).toHaveLength(1);
+      expect(customID).toHaveLength(1);
+    });
+  });
 });
