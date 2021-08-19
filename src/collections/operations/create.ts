@@ -74,7 +74,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // Custom id
   // /////////////////////////////////////
 
-  if (args.collection.config.id !== undefined) {
+  if (args.collection.config.idType) {
     data = {
       _id: data.id,
       ...data,

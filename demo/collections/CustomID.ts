@@ -6,7 +6,7 @@ const CustomID: CollectionConfig = {
     singular: 'CustomID',
     plural: 'CustomIDs',
   },
-  id: Number,
+  idType: 'number',
   fields: [
     {
       name: 'name',

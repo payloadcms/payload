@@ -16,6 +16,10 @@ export interface AuthCollectionModel extends CollectionModel {
   resetPasswordExpiration: Date;
 }
 
+export type IdType =
+  | 'text'
+  | 'number';
+
 export type HookOperationType =
   | 'create'
   | 'read'
@@ -95,7 +99,7 @@ export type CollectionConfig = {
     singular?: string;
     plural?: string;
   };
-  id?: any,
+  idType?: IdType,
   fields: Field[];
   admin?: {
     useAsTitle?: string;

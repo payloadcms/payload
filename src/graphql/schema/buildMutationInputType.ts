@@ -19,15 +19,7 @@ import { ArrayField, Field, FieldWithSubFields, GroupField, RelationshipField, R
 import { toWords } from '../../utilities/formatLabels';
 import payload from '../../index';
 
-const getCollectionIDType = (id) => {
-  switch (id) {
-    case Number:
-      return GraphQLInt;
-
-    default:
-      return GraphQLString;
-  }
-};
+const getCollectionIDType = (idType) => (idType === 'number' ? GraphQLInt : GraphQLString);
 
 function buildMutationInputType(name: string, fields: Field[], parentName: string, forceNullable = false): GraphQLInputObjectType {
   const fieldToSchemaMap = {
@@ -101,7 +93,7 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
           },
         });
       } else {
-        type = getCollectionIDType(payload.collections[relationTo].config.id);
+        type = getCollectionIDType(payload.collections[relationTo].config.idType);
       }
 
       return { type: field.hasMany ? new GraphQLList(type) : type };

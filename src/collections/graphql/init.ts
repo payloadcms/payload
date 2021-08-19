@@ -49,18 +49,10 @@ function registerCollections(): void {
 
     collection.graphQL = {};
 
-    let idType;
-    let idFieldType;
-    switch (collection.config.id) {
-      case Number:
-        idType = GraphQLInt;
-        idFieldType = 'number';
-        break;
+    const idType = collection.config.idType === 'number'
+      ? GraphQLInt
+      : GraphQLString;
 
-      default:
-        idType = GraphQLString;
-        idFieldType = 'text';
-    }
     const baseFields: BaseFields = {
       id: {
         type: new GraphQLNonNull(idType),
@@ -71,10 +63,10 @@ function registerCollections(): void {
       ...fields,
     ];
 
-    if (collection.config.id) {
+    if (collection.config.idType) {
       whereInputFields.push({
         name: 'id',
-        type: collection.config.id,
+        type: collection.config.idType,
       });
     }
 
@@ -122,10 +114,10 @@ function registerCollections(): void {
       });
     }
 
-    const mutationInputFields = collection.config.id
+    const mutationInputFields = collection.config.idType
       ? [{
         name: 'id',
-        type: idFieldType,
+        type: collection.config.idType,
         required: true,
       }, ...fields]
       : fields;
