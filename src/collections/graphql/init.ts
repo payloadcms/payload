@@ -33,7 +33,7 @@ function registerCollections(): void {
       },
     } = collection;
 
-    const fields = [...initialFields];
+    const fields = initialFields.filter(({ name }) => name !== 'id');
 
     const singularLabel = formatName(singular);
     let pluralLabel = formatName(plural);
@@ -49,9 +49,8 @@ function registerCollections(): void {
 
     collection.graphQL = {};
 
-    const idType = collection.config.idType === 'number'
-      ? GraphQLInt
-      : GraphQLString;
+    const idField = initialFields.find(({ name }) => name === 'id');
+    const idType = idField && idField.type === 'number' ? GraphQLInt : GraphQLString;
 
     const baseFields: BaseFields = {
       id: {
@@ -63,10 +62,10 @@ function registerCollections(): void {
       ...fields,
     ];
 
-    if (collection.config.idType) {
+    if (idField) {
       whereInputFields.push({
         name: 'id',
-        type: collection.config.idType,
+        type: idField.type,
       });
     }
 
@@ -114,10 +113,10 @@ function registerCollections(): void {
       });
     }
 
-    const mutationInputFields = collection.config.idType
+    const mutationInputFields = idField
       ? [{
         name: 'id',
-        type: collection.config.idType,
+        type: idField.type,
         required: true,
       }, ...fields]
       : fields;
@@ -130,7 +129,7 @@ function registerCollections(): void {
 
     collection.graphQL.updateMutationInputType = new GraphQLNonNull(this.buildMutationInputType(
       `${singularLabel}Update`,
-      mutationInputFields,
+      fields,
       `${singularLabel}Update`,
       true,
     ));

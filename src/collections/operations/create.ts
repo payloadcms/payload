@@ -74,7 +74,8 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // Custom id
   // /////////////////////////////////////
 
-  if (args.collection.config.idType) {
+  const hasIdField = collectionConfig.fields.findIndex(({ name }) => name === 'id') > -1;
+  if (hasIdField) {
     data = {
       _id: data.id,
       ...data,

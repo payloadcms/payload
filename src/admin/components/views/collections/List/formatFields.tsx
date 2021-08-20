@@ -1,4 +1,5 @@
 const formatFields = (config) => {
+  const hasIdField = config.fields.findIndex(({ name }) => name === 'id') > -1;
   let fields = config.fields.reduce((formatted, field) => {
     if (field.hidden === true || field?.admin?.disabled === true) {
       return formatted;
@@ -8,7 +9,7 @@ const formatFields = (config) => {
       ...formatted,
       field,
     ];
-  }, [{ name: 'id', label: 'ID', type: 'text' }]);
+  }, hasIdField ? [] : [{ name: 'id', label: 'ID', type: 'text' }]);
 
   if (config.timestamps) {
     fields = fields.concat([

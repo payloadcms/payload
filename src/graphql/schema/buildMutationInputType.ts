@@ -19,11 +19,17 @@ import { ArrayField, Field, FieldWithSubFields, GroupField, RelationshipField, R
 import { toWords } from '../../utilities/formatLabels';
 import payload from '../../index';
 
-const getCollectionIDType = (idType) => (idType === 'number' ? GraphQLInt : GraphQLString);
+const getCollectionIDType = (config) => {
+  const idField = config.fields.find(({ name }) => name === 'id');
+  return idField && idField.type === 'number' ? GraphQLInt : GraphQLString;
+};
 
 function buildMutationInputType(name: string, fields: Field[], parentName: string, forceNullable = false): GraphQLInputObjectType {
   const fieldToSchemaMap = {
-    number: (field: Field) => ({ type: withNullableType(field, GraphQLFloat, forceNullable) }),
+    number: (field: Field) => {
+      const type = field.name === 'id' ? GraphQLInt : GraphQLFloat;
+      return { type: withNullableType(field, type, forceNullable) };
+    },
     text: (field: Field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
     email: (field: Field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
     textarea: (field: Field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
@@ -93,7 +99,7 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
           },
         });
       } else {
-        type = getCollectionIDType(payload.collections[relationTo].config.idType);
+        type = getCollectionIDType(payload.collections[relationTo].config);
       }
 
       return { type: field.hasMany ? new GraphQLList(type) : type };
