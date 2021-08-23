@@ -1,3 +1,11 @@
+## [0.9.5](https://github.com/payloadcms/payload/compare/v0.9.4...v0.9.5) (2021-08-23)
+
+
+### Bug Fixes
+
+* obscure conditional logic bug ([b0dc125](https://github.com/payloadcms/payload/commit/b0dc12560423af5083d36cfd16f464f08ab66d9d))
+* windows compatible absolute paths for staticDir ([b21316b](https://github.com/payloadcms/payload/commit/b21316b6cc392c793614024648c5301c7e03c326))
+
 ## [0.9.4](https://github.com/payloadcms/payload/compare/v0.9.3...v0.9.4) (2021-08-06)
 
 ## [0.9.3](https://github.com/payloadcms/payload/compare/v0.9.2...v0.9.3) (2021-08-06)
