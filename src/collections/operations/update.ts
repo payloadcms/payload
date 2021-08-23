@@ -129,7 +129,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     let staticPath = staticDir;
 
     if (staticDir.indexOf('/') !== 0) {
-      staticPath = path.join(config.paths.configDir, staticDir);
+      staticPath = path.resolve(config.paths.configDir, staticDir);
     }
 
     const file = ((req.files && req.files.file) ? req.files.file : req.file) as UploadedFile;

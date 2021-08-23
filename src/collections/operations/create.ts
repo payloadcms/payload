@@ -88,7 +88,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     let staticPath = staticDir;
 
     if (staticDir.indexOf('/') !== 0) {
-      staticPath = path.join(config.paths.configDir, staticDir);
+      staticPath = path.resolve(config.paths.configDir, staticDir);
     }
 
     if (!disableLocalStorage) {
