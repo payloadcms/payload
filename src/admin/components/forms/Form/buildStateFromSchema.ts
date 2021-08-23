@@ -48,7 +48,7 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
           initialData = { [field.name]: field.defaultValue };
         }
 
-        const passesCondition = (field?.admin?.condition ? field.admin.condition(fullData || {}, initialData || {}) : true) && parentPassesCondition;
+        const passesCondition = Boolean((field?.admin?.condition ? field.admin.condition(fullData || {}, initialData || {}) : true) && parentPassesCondition);
 
         if (field.name) {
           if (field.type === 'relationship' && initialData?.[field.name] === null) {
