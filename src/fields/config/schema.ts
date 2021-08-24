@@ -185,6 +185,11 @@ export const checkbox = baseField.keys({
   defaultValue: joi.boolean(),
 });
 
+export const point = baseField.keys({
+  type: joi.string().valid('point').required(),
+  name: joi.string().required(),
+});
+
 export const relationship = baseField.keys({
   type: joi.string().valid('relationship').required(),
   hasMany: joi.boolean().default(false),
@@ -290,6 +295,7 @@ const fieldSchema = joi.alternatives()
     richText,
     blocks,
     date,
+    point,
   )
   .id('field');
 

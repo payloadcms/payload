@@ -243,6 +243,10 @@ export type BlockField = FieldBase & {
   labels?: Labels
 }
 
+export type PointField = FieldBase & {
+  type: 'point',
+}
+
 export type Field =
   TextField
   | NumberField
@@ -259,6 +263,7 @@ export type Field =
   | SelectField
   | UploadField
   | CodeField
+  | PointField
   | RowField;
 
 export type FieldWithPath = Field & {
@@ -277,6 +282,11 @@ export type FieldWithMany =
 export type FieldWithMaxDepth =
   UploadField
   | RelationshipField
+
+export type PointValue = {
+  type: 'Point';
+  coordinates: [number, number];
+}
 
 export function fieldHasSubFields(field: Field): field is FieldWithSubFields {
   return (field.type === 'group' || field.type === 'array' || field.type === 'row');
