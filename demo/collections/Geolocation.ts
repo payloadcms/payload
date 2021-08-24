@@ -7,6 +7,9 @@ const Geolocation: CollectionConfig = {
     singular: 'Geolocation',
     plural: 'Geolocations',
   },
+  access: {
+    read: () => true,
+  },
   hooks: {
     beforeRead: [
       (operation) => operation.doc,

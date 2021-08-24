@@ -84,6 +84,7 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
     equality: ['equals', 'not_equals'],
     contains: ['in', 'not_in', 'all'],
     comparison: ['greater_than_equal', 'greater_than', 'less_than_equal', 'less_than'],
+    geo: ['near'],
   };
 
   const fieldToSchemaMap = {
@@ -198,7 +199,7 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
           field,
           type,
           parentName,
-          [...operators.equality, ...operators.comparison, 'near'],
+          [...operators.equality, ...operators.comparison, ...operators.geo],
         ),
       };
     },

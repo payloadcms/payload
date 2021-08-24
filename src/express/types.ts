@@ -9,7 +9,7 @@ export type PayloadRequest = Request & {
   payload: Payload;
   locale?: string;
   fallbackLocale?: string;
-  collection?: Collection;
+  collection?: Collection | string;
   payloadAPI: 'REST' | 'local' | 'graphQL'
   file?: UploadedFile
   user: User | null

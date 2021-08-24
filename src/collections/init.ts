@@ -8,6 +8,7 @@ import apiKeyStrategy from '../auth/strategies/apiKey';
 import buildSchema from './buildSchema';
 import bindCollectionMiddleware from './bindCollection';
 import { SanitizedCollectionConfig } from './config/types';
+import { SanitizedConfig } from '../../config';
 import { Payload } from '../index';
 
 const LocalStrategy = Passport.Strategy;
@@ -16,7 +17,7 @@ export default function registerCollections(ctx: Payload): void {
   ctx.config.collections = ctx.config.collections.map((collection: SanitizedCollectionConfig) => {
     const formattedCollection = collection;
 
-    const schema = buildSchema(formattedCollection, ctx.config);
+    const schema = buildSchema(formattedCollection, ctx.config as SanitizedConfig);
 
     if (collection.auth) {
       schema.plugin(passportLocalMongoose, {

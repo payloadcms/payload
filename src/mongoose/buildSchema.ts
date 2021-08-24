@@ -56,10 +56,10 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], options = {
 
     if (fieldSchema) {
       fields = fieldSchema(field, fields, config);
-      // geospatial field index must be created after the schema is created
-      if (fieldIndexMap[field.type]) {
-        indexFields.push(field);
-      }
+    }
+    // geospatial field index must be created after the schema is created
+    if (fieldIndexMap[field.type]) {
+      indexFields.push(...fieldIndexMap[field.type](field, config));
     }
   });
 
@@ -74,7 +74,12 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], options = {
 };
 
 const fieldIndexMap = {
-  point: (field: Field) => ({ [field.name]: field.index === false ? undefined : field.index || '2dsphere' }),
+  point: (field: Field, config: SanitizedConfig) => {
+    if (field.localized) {
+      return config.localization.locales.map((locale) => ({ [`${field.name}.${locale}`]: field.index === false ? undefined : field.index || '2dsphere' }));
+    }
+    return [{ [field.name]: field.index === false ? undefined : field.index || '2dsphere' }];
+  },
 };
 
 const fieldToSchemaMap = {

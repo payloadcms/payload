@@ -45,6 +45,15 @@ const numeric = [
   },
 ];
 
+const geo = [
+  ...base,
+  ...boolean,
+  {
+    label: 'near',
+    value: 'near',
+  },
+];
+
 const like = {
   label: 'is like',
   value: 'like',
@@ -78,6 +87,10 @@ const fieldTypeConditions = {
   date: {
     component: 'Date',
     operators: [...base, ...numeric],
+  },
+  point: {
+    component: 'Point',
+    operators: [...geo],
   },
   upload: {
     component: 'Text',
