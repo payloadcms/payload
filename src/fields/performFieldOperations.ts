@@ -103,12 +103,6 @@ export default async function performFieldOperations(this: Payload, entityConfig
     docWithLocales,
   });
 
-  if (hook === 'beforeChange') {
-    transformActions.forEach((action) => action());
-  }
-
-  unflattenLocaleActions.forEach((action) => action());
-
   if (hook === 'afterRead') {
     transformActions.forEach((action) => action());
   }
@@ -125,6 +119,11 @@ export default async function performFieldOperations(this: Payload, entityConfig
     throw new ValidationError(errors);
   }
 
+  if (hook === 'beforeChange') {
+    transformActions.forEach((action) => action());
+  }
+
+  unflattenLocaleActions.forEach((action) => action());
 
   await Promise.all(accessPromises);
 

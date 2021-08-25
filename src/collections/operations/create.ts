@@ -223,34 +223,6 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
-  // afterChange - Fields
-  // /////////////////////////////////////
-
-  result = await this.performFieldOperations(collectionConfig, {
-    data: result,
-    hook: 'afterChange',
-    operation: 'create',
-    req,
-    depth,
-    overrideAccess,
-    showHiddenFields,
-  });
-
-  // /////////////////////////////////////
-  // afterChange - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterChange.reduce(async (priorHook: AfterChangeHook | Promise<void>, hook: AfterChangeHook) => {
-    await priorHook;
-
-    result = await hook({
-      doc: result,
-      req: args.req,
-      operation: 'create',
-    }) || result;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
   // Send verification email if applicable
   // /////////////////////////////////////
 
@@ -292,6 +264,34 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     result = await hook({
       req,
       doc: result,
+    }) || result;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterChange - Fields
+  // /////////////////////////////////////
+
+  result = await this.performFieldOperations(collectionConfig, {
+    data: result,
+    hook: 'afterChange',
+    operation: 'create',
+    req,
+    depth,
+    overrideAccess,
+    showHiddenFields,
+  });
+
+  // /////////////////////////////////////
+  // afterChange - Collection
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.afterChange.reduce(async (priorHook: AfterChangeHook | Promise<void>, hook: AfterChangeHook) => {
+    await priorHook;
+
+    result = await hook({
+      doc: result,
+      req: args.req,
+      operation: 'create',
     }) || result;
   }, Promise.resolve());
 

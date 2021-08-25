@@ -110,7 +110,7 @@ export default buildConfig({
   defaultDepth: 2,
   graphQL: {
     maxComplexity: 1000,
-    disablePlaygroundInProduction: true,
+    disablePlaygroundInProduction: false,
     disable: false,
   },
   // rateLimit: {

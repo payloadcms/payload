@@ -1,8 +1,9 @@
 import { CollectionConfig } from '../../src/collections/config/types';
+import { PayloadRequest } from '../../src/express/types';
 import { Block } from '../../src/fields/config/types';
 
-const validateLocalizationTransform = (hook: string, value = null) => {
-  if (value !== null && typeof value !== 'string') {
+const validateLocalizationTransform = (hook: string, value, req: PayloadRequest) => {
+  if (req.locale !== 'all' && value !== undefined && typeof value !== 'string') {
     console.error(hook, value);
     throw new Error('Field text transformation in hook is wonky');
   }
@@ -55,10 +56,10 @@ const LocalizedPosts: CollectionConfig = {
       unique: true,
       localized: true,
       hooks: {
-        beforeValidate: [({ value }) => validateLocalizationTransform('beforeValidate', value)],
-        beforeChange: [({ value }) => validateLocalizationTransform('beforeChange', value)],
-        afterChange: [({ value }) => validateLocalizationTransform('afterChange', value)],
-        afterRead: [({ value }) => validateLocalizationTransform('afterRead', value)],
+        beforeValidate: [({ value, req }) => validateLocalizationTransform('beforeValidate', value, req)],
+        beforeChange: [({ value, req }) => validateLocalizationTransform('beforeChange', value, req)],
+        afterChange: [({ value, req }) => validateLocalizationTransform('afterChange', value, req)],
+        afterRead: [({ value, req }) => validateLocalizationTransform('afterRead', value, req)],
       },
     },
     {
