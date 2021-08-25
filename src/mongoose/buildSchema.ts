@@ -213,9 +213,7 @@ const fieldToSchemaMap = {
     const baseSchema = {
       type: {
         type: String,
-        default: 'Point',
         enum: ['Point'],
-        required: true,
       },
       coordinates: {
         type: [Number],

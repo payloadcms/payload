@@ -24,7 +24,7 @@ type Arguments = {
   depth: number
   currentDepth: number
   hook: HookName
-  hookPromises: Promise<void>[]
+  hookPromises: (() => Promise<void>)[]
   fullOriginalDoc: Record<string, any>
   fullData: Record<string, any>
   validationPromises: (() => Promise<string | boolean>)[]
@@ -269,13 +269,15 @@ const traverseFields = (args: Arguments): void => {
 
       if (field.type === 'point' && data[field.name]) {
         transformActions.push(() => {
-          data[field.name] = {
-            type: 'Point',
-            coordinates: [
-              parseFloat(data[field.name][0]),
-              parseFloat(data[field.name][1]),
-            ],
-          };
+          if (Array.isArray(data[field.name]) && data[field.name][0] !== null && data[field.name][1] !== null) {
+            data[field.name] = {
+              type: 'Point',
+              coordinates: [
+                parseFloat(data[field.name][0]),
+                parseFloat(data[field.name][1]),
+              ],
+            };
+          }
         });
       }
 

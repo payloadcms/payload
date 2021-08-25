@@ -39,7 +39,6 @@ describe('GeoJSON', () => {
     let doc;
 
     beforeAll(async (done) => {
-      // create document a
       const create = await fetch(`${serverURL}/api/geolocation`, {
         body: JSON.stringify({ location, localizedPoint }),
         headers,

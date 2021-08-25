@@ -1,6 +1,14 @@
 /* eslint-disable no-param-reassign */
 import { CollectionConfig } from '../../src/collections/config/types';
 
+const validateFieldTransformAction = (hook: string, value = null) => {
+  if (value !== null && !Array.isArray(value)) {
+    console.error(hook, value);
+    throw new Error('Field transformAction should convert value to array [x, y] and not { coordinates: [x, y] }');
+  }
+  return value;
+};
+
 const Geolocation: CollectionConfig = {
   slug: 'geolocation',
   labels: {
@@ -24,7 +32,6 @@ const Geolocation: CollectionConfig = {
     afterRead: [
       (operation) => {
         const { doc } = operation;
-        // console.log(doc);
         doc.afterReadHook = !doc.location?.coordinates;
         return doc;
       },
@@ -32,15 +39,15 @@ const Geolocation: CollectionConfig = {
     afterChange: [
       (operation) => {
         const { doc } = operation;
-        operation.doc.afterChangeHook = !doc.location?.coordinates;
-        return operation.doc;
+        doc.afterChangeHook = !doc.location?.coordinates;
+        return doc;
       },
     ],
     afterDelete: [
       (operation) => {
         const { doc } = operation;
         operation.doc.afterDeleteHook = !doc.location?.coordinates;
-        return operation.doc;
+        return doc;
       },
     ],
   },
@@ -49,6 +56,12 @@ const Geolocation: CollectionConfig = {
       name: 'location',
       type: 'point',
       label: 'Location',
+      hooks: {
+        beforeValidate: [({ value }) => validateFieldTransformAction('beforeValidate', value)],
+        beforeChange: [({ value }) => validateFieldTransformAction('beforeChange', value)],
+        afterChange: [({ value }) => validateFieldTransformAction('afterChange', value)],
+        afterRead: [({ value }) => validateFieldTransformAction('afterRead', value)],
+      },
     },
     {
       name: 'localizedPoint',

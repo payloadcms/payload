@@ -8,7 +8,7 @@ import apiKeyStrategy from '../auth/strategies/apiKey';
 import buildSchema from './buildSchema';
 import bindCollectionMiddleware from './bindCollection';
 import { SanitizedCollectionConfig } from './config/types';
-import { SanitizedConfig } from '../../config';
+import { SanitizedConfig } from '../config/types';
 import { Payload } from '../index';
 
 const LocalStrategy = Passport.Strategy;
