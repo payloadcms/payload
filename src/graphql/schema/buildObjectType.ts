@@ -43,6 +43,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
     textarea: (field: Field) => ({ type: withNullableType(field, GraphQLString) }),
     code: (field: Field) => ({ type: withNullableType(field, GraphQLString) }),
     date: (field: Field) => ({ type: withNullableType(field, DateTimeResolver) }),
+    point: (field: Field) => ({ type: withNullableType(field, new GraphQLList(GraphQLFloat)) }),
     richText: (field: RichTextField) => ({
       type: withNullableType(field, GraphQLJSON),
       async resolve(parent, args, context) {

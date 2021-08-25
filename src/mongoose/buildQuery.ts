@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 import mongoose, { FilterQuery } from 'mongoose';
 
-const validOperators = ['like', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists'];
+const validOperators = ['like', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near'];
 function addSearchParam(key, value, searchParams) {
   return {
     ...searchParams,
@@ -215,6 +215,17 @@ class ParamParser {
           break;
         case 'exists':
           formattedValue = { $exists: (formattedValue === 'true' || formattedValue === true) };
+          break;
+        case 'near':
+          // eslint-disable-next-line no-case-declarations
+          const [longitude, latitude, maxDistance, minDistance] = convertArrayFromCommaDelineated(formattedValue);
+          formattedValue = {
+            $near: {
+              $geometry: { type: 'Point', coordinates: [parseFloat(longitude), parseFloat(latitude)] },
+            },
+          };
+          if (maxDistance) formattedValue.$near.$maxDistance = parseFloat(maxDistance);
+          if (minDistance) formattedValue.$near.$maxDistance = parseFloat(maxDistance);
           break;
         default:
           break;

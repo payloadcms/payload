@@ -66,6 +66,7 @@ export default async function performFieldOperations(this: Payload, entityConfig
   const relationshipPopulations = [];
   const hookPromises = [];
   const unflattenLocaleActions = [];
+  const transformActions = [];
   const errors: { message: string, field: string }[] = [];
 
   // //////////////////////////////////////////
@@ -98,8 +99,21 @@ export default async function performFieldOperations(this: Payload, entityConfig
     showHiddenFields,
     unflattenLocales,
     unflattenLocaleActions,
+    transformActions,
     docWithLocales,
   });
+
+  if (hook === 'beforeChange') {
+    transformActions.forEach((action) => action());
+  }
+
+  unflattenLocaleActions.forEach((action) => action());
+
+  if (hook === 'afterRead') {
+    transformActions.forEach((action) => action());
+  }
+
+  hookPromises.forEach((promise) => promise());
 
   await Promise.all(hookPromises);
 
@@ -111,7 +125,6 @@ export default async function performFieldOperations(this: Payload, entityConfig
     throw new ValidationError(errors);
   }
 
-  unflattenLocaleActions.forEach((action) => action());
 
   await Promise.all(accessPromises);
 
