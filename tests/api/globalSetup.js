@@ -5,13 +5,17 @@ require('../../demo/server');
 
 const loadConfig = require('../../src/config/load').default;
 const { email, password } = require('../../src/mongoose/testCredentials');
+const fileExists = require('./utils/fileExists');
 
 const { serverURL } = loadConfig();
 
 const mediaDir = path.join(__dirname, '../../demo', 'media');
 
 const globalSetup = async () => {
-  fs.rmdirSync(mediaDir, { recursive: true });
+  const mediaDirExists = await fileExists(mediaDir);
+  if (mediaDirExists) {
+    fs.rmdirSync(mediaDir, { recursive: true });
+  }
   const response = await fetch(`${serverURL}/api/admins/first-register`, {
     body: JSON.stringify({
       email,
