@@ -218,14 +218,18 @@ class ParamParser {
           break;
         case 'near':
           // eslint-disable-next-line no-case-declarations
-          const [longitude, latitude, maxDistance, minDistance] = convertArrayFromCommaDelineated(formattedValue);
+          const [x, y, maxDistance, minDistance] = convertArrayFromCommaDelineated(formattedValue);
+          if (!x || !y || (!maxDistance && !minDistance)) {
+            formattedValue = undefined;
+            break;
+          }
           formattedValue = {
             $near: {
-              $geometry: { type: 'Point', coordinates: [parseFloat(longitude), parseFloat(latitude)] },
+              $geometry: { type: 'Point', coordinates: [parseFloat(x), parseFloat(y)] },
             },
           };
           if (maxDistance) formattedValue.$near.$maxDistance = parseFloat(maxDistance);
-          if (minDistance) formattedValue.$near.$maxDistance = parseFloat(maxDistance);
+          if (minDistance) formattedValue.$near.$minDistance = parseFloat(minDistance);
           break;
         default:
           break;

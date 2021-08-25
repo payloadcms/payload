@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
 import { CollectionConfig } from '../../src/collections/config/types';
 
-const validateFieldTransformAction = (hook: string, value = null) => {
-  if (value !== null && !Array.isArray(value)) {
+const validateFieldTransformAction = (hook: string, value) => {
+  if (value !== undefined && value !== null && !Array.isArray(value)) {
     console.error(hook, value);
     throw new Error('Field transformAction should convert value to array [x, y] and not { coordinates: [x, y] }');
   }
@@ -68,6 +68,12 @@ const Geolocation: CollectionConfig = {
       type: 'point',
       label: 'Localized Point',
       localized: true,
+      hooks: {
+        beforeValidate: [({ value }) => validateFieldTransformAction('beforeValidate', value)],
+        beforeChange: [({ value }) => validateFieldTransformAction('beforeChange', value)],
+        afterChange: [({ value }) => validateFieldTransformAction('afterChange', value)],
+        afterRead: [({ value }) => validateFieldTransformAction('afterRead', value)],
+      },
     },
   ],
 };

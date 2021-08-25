@@ -5,7 +5,7 @@ import { Block } from '../../src/fields/config/types';
 const validateLocalizationTransform = (hook: string, value, req: PayloadRequest) => {
   if (req.locale !== 'all' && value !== undefined && typeof value !== 'string') {
     console.error(hook, value);
-    throw new Error('Field text transformation in hook is wonky');
+    throw new Error('Locale transformation should happen before hook is called');
   }
   return value;
 };

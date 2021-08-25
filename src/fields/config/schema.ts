@@ -188,6 +188,7 @@ export const checkbox = baseField.keys({
 export const point = baseField.keys({
   type: joi.string().valid('point').required(),
   name: joi.string().required(),
+  defaultValue: joi.array().items(joi.number()).max(2).min(2),
 });
 
 export const relationship = baseField.keys({

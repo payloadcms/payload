@@ -46,8 +46,11 @@ const numeric = [
 ];
 
 const geo = [
-  ...base,
   ...boolean,
+  {
+    label: 'exists',
+    value: 'exists',
+  },
   {
     label: 'near',
     value: 'near',
