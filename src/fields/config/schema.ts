@@ -47,6 +47,13 @@ export const baseField = joi.object().keys({
   admin: baseAdminFields.default(),
 }).default();
 
+export const idField = baseField.keys({
+  name: joi.string().valid('id'),
+  type: joi.string().valid('text', 'number', 'email', 'date'),
+  required: joi.not(false, 0).default(true),
+  localized: joi.invalid(true),
+});
+
 export const text = baseField.keys({
   type: joi.string().valid('text').required(),
   name: joi.string().required(),

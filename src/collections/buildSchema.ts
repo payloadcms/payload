@@ -12,11 +12,6 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
     { timestamps: collection.timestamps !== false, ...schemaOptions },
   );
 
-  if (collection.idType) {
-    const idSchemaType = collection.idType === 'number' ? Number : String;
-    schema.add({ _id: idSchemaType });
-  }
-
   schema.plugin(paginate, { useEstimatedCount: true })
     .plugin(buildQueryPlugin);
 

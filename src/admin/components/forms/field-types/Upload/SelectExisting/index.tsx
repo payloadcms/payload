@@ -8,6 +8,7 @@ import usePayloadAPI from '../../../../../hooks/usePayloadAPI';
 import ListControls from '../../../../elements/ListControls';
 import Paginator from '../../../../elements/Paginator';
 import UploadGallery from '../../../../elements/UploadGallery';
+import { Field } from '../../../../../../fields/config/types';
 import { Props } from './types';
 
 import './index.scss';
@@ -45,7 +46,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
   const [{ data }, { setParams }] = usePayloadAPI(apiURL, {});
 
   useEffect(() => {
-    setFields(formatFields(collection));
+    setFields(formatFields(collection) as Field[]);
   }, [collection]);
 
   useEffect(() => {

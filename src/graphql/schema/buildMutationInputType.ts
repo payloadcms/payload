@@ -12,16 +12,28 @@ import {
   GraphQLType,
 } from 'graphql';
 import { GraphQLJSON } from 'graphql-type-json';
+import { GraphQLDateTime, GraphQLEmailAddress } from 'graphql-scalars';
 import withNullableType from './withNullableType';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import { ArrayField, Field, FieldWithSubFields, GroupField, RelationshipField, RowField, SelectField } from '../../fields/config/types';
 import { toWords } from '../../utilities/formatLabels';
 import payload from '../../index';
+import { SanitizedCollectionConfig } from '../../collections/config/types';
 
-const getCollectionIDType = (config) => {
+export const getCollectionIDType = (config: SanitizedCollectionConfig): GraphQLScalarType => {
   const idField = config.fields.find(({ name }) => name === 'id');
-  return idField && idField.type === 'number' ? GraphQLInt : GraphQLString;
+  if (!idField) return GraphQLString;
+  switch (idField.type) {
+    case 'number':
+      return GraphQLInt;
+    case 'email':
+      return GraphQLEmailAddress;
+    case 'date':
+      return GraphQLDateTime;
+    default:
+      return GraphQLString;
+  }
 };
 
 function buildMutationInputType(name: string, fields: Field[], parentName: string, forceNullable = false): GraphQLInputObjectType {
@@ -77,7 +89,7 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
     relationship: (field: RelationshipField) => {
       const { relationTo } = field;
       type PayloadGraphQLRelationshipType = GraphQLScalarType | GraphQLList<GraphQLScalarType> | GraphQLInputObjectType;
-      let type: PayloadGraphQLRelationshipType = GraphQLString;
+      let type: PayloadGraphQLRelationshipType;
 
       if (Array.isArray(relationTo)) {
         const fullName = `${combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label)}RelationshipInput`;
