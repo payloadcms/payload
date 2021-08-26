@@ -1,4 +1,4 @@
-import { CollectionBeforeChangeHook } from '../../../../payload/types';
+import { CollectionBeforeChangeHook } from 'payload/types';
 import { SanitizedOptions } from './types';
 
 const sendEmail = (options: SanitizedOptions): CollectionBeforeChangeHook => async ({ data, req: { payload } }) => {
