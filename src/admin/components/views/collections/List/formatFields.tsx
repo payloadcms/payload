@@ -1,5 +1,8 @@
-const formatFields = (config) => {
-  const hasIdField = config.fields.findIndex(({ name }) => name === 'id') > -1;
+import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
+import { Field } from '../../../../../fields/config/types';
+
+const formatFields = (config: SanitizedCollectionConfig): (Field | { name: string, label: string, type: string })[] => {
+  const hasID = config.fields.findIndex(({ name }) => name === 'id') > -1;
   let fields = config.fields.reduce((formatted, field) => {
     if (field.hidden === true || field?.admin?.disabled === true) {
       return formatted;
@@ -9,7 +12,7 @@ const formatFields = (config) => {
       ...formatted,
       field,
     ];
-  }, hasIdField ? [] : [{ name: 'id', label: 'ID', type: 'text' }]);
+  }, hasID ? [] : [{ name: 'id', label: 'ID', type: 'text' }]);
 
   if (config.timestamps) {
     fields = fields.concat([

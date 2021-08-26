@@ -10,6 +10,7 @@ import {
 import formatName from '../../graphql/utilities/formatName';
 import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
 import { BaseFields } from './types';
+import { getCollectionIDType } from '../../graphql/schema/buildMutationInputType';
 
 function registerCollections(): void {
   const {
@@ -28,12 +29,10 @@ function registerCollections(): void {
           singular,
           plural,
         },
-        fields: initialFields,
+        fields,
         timestamps,
       },
     } = collection;
-
-    const fields = initialFields.filter(({ name }) => name !== 'id');
 
     const singularLabel = formatName(singular);
     let pluralLabel = formatName(plural);
@@ -49,23 +48,20 @@ function registerCollections(): void {
 
     collection.graphQL = {};
 
-    const idField = initialFields.find(({ name }) => name === 'id');
-    const idType = idField && idField.type === 'number' ? GraphQLInt : GraphQLString;
+    const idField = fields.find(({ name }) => name === 'id');
+    const idType = getCollectionIDType(collection.config);
 
-    const baseFields: BaseFields = {
-      id: {
-        type: new GraphQLNonNull(idType),
-      },
-    };
+    const baseFields: BaseFields = {};
 
     const whereInputFields = [
       ...fields,
     ];
 
-    if (idField) {
+    if (!idField) {
+      baseFields.id = { type: idType };
       whereInputFields.push({
         name: 'id',
-        type: idField.type,
+        type: 'text',
       });
     }
 
@@ -129,7 +125,7 @@ function registerCollections(): void {
 
     collection.graphQL.updateMutationInputType = new GraphQLNonNull(this.buildMutationInputType(
       `${singularLabel}Update`,
-      fields,
+      fields.filter((field) => field.name !== 'id'),
       `${singularLabel}Update`,
       true,
     ));
