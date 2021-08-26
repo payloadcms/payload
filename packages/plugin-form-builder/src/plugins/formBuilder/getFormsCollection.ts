@@ -8,11 +8,39 @@ const getFormsCollection = (options: SanitizedOptions): CollectionConfig => deep
   admin: {
     useAsTitle: 'title',
   },
+  access: {
+    read: () => true,
+  },
   fields: [
     {
       name: 'title',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'emailTo',
+      type: 'text',
+      admin: {
+        description: 'Enter a comma-separated list of email addresses that should receive a copy of this form submission.',
+      },
+    },
+    {
+      name: 'successMessage',
+      type: 'richText',
+      admin: {
+        description: 'Enter a message to display to the user after they submit the form.',
+      },
+    },
+    {
+      name: 'redirect',
+      type: 'text',
+      admin: {
+        description: 'Enter a URL if you\'d like to redirect the user to a URL after they submit the form.',
+      },
+    },
+    {
+      name: 'submitButtonLabel',
+      type: 'text',
     },
     {
       name: 'fields',

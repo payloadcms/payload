@@ -1,12 +1,18 @@
 import { CollectionConfig } from 'payload/types';
 import { SanitizedOptions } from './types';
 import deepMerge from './deepMerge';
+import sendEmail from './sendEmail';
 
 const getFormSubmissionsCollection = (options: SanitizedOptions): CollectionConfig => deepMerge({
   slug: options?.formsOverrides?.slug || 'formSubmissions',
   access: {
     create: () => true,
     update: () => false,
+  },
+  hooks: {
+    beforeChange: [
+      sendEmail(options),
+    ],
   },
   fields: [
     {

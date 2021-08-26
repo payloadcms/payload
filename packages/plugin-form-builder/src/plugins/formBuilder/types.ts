@@ -97,10 +97,14 @@ export type MessageField = {
   message: string
 }
 
-export type FormFieldBlock = TextField | SelectField | EmailField | StateField | CountryField | CheckboxField | MessageField
+export type FormFieldBlock = TextField | SelectField | EmailField | StateField | CountryField | CheckboxField | MessageField | unknown
 
 export type Form = {
   title: string
+  emailTo?: string
+  successMessage?: unknown
+  redirect?: string
+  submitButtonLabel?: string
   fields: FormFieldBlock[]
 }
 
