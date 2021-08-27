@@ -5,7 +5,7 @@ import { IncomingOptions } from './types';
 
 const FormBuilder = (incomingOptions?: IncomingOptions) => (config: Config): Config => {
   const options = {
-    fields: incomingOptions?.fields || ['text', 'select', 'email', 'state', 'country', 'checkbox'],
+    fields: incomingOptions?.fields || ['text', 'select', 'email', 'state', 'country', 'checkbox', 'message'],
   };
 
   return {

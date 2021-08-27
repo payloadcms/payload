@@ -11,7 +11,7 @@ export function isValidBlockConfig(blockConfig: BlockConfig | string): blockConf
     && Array.isArray(blockConfig?.block?.fields);
 }
 
-export type FieldType = 'select' | 'text' | 'email' | 'state' | 'country' | 'checkbox'
+export type FieldType = 'select' | 'text' | 'email' | 'state' | 'country' | 'checkbox' | 'message'
 
 export type IncomingOptions = {
   fields?: FieldType[]
@@ -94,7 +94,7 @@ export type CheckboxField = {
 export type MessageField = {
   blockType: 'message'
   blockName?: string
-  message: string
+  message: unknown
 }
 
 export type FormFieldBlock = TextField | SelectField | EmailField | StateField | CountryField | CheckboxField | MessageField | unknown

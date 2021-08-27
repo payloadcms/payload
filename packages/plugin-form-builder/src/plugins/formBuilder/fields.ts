@@ -299,7 +299,7 @@ const Message: Block = {
   fields: [
     {
       name: 'message',
-      type: 'textarea',
+      type: 'richText',
     },
   ],
 };
