@@ -15,7 +15,7 @@ type Arguments = {
   flattenLocales: boolean
   locale: string
   fallbackLocale: string
-  accessPromises: Promise<void>[]
+  accessPromises: (() => Promise<void>)[]
   operation: Operation
   overrideAccess: boolean
   req: PayloadRequest
@@ -173,7 +173,7 @@ const traverseFields = (args: Arguments): void => {
       });
     }
 
-    accessPromises.push(accessPromise({
+    accessPromises.push(() => accessPromise({
       data,
       fullData,
       originalDoc,
@@ -189,7 +189,7 @@ const traverseFields = (args: Arguments): void => {
       payload,
     }));
 
-    hookPromises.push(hookPromise({
+    hookPromises.push(() => hookPromise({
       data,
       field,
       hook,

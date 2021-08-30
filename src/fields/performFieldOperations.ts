@@ -107,12 +107,10 @@ export default async function performFieldOperations(this: Payload, entityConfig
     transformActions.forEach((action) => action());
   }
 
-  hookPromises.forEach((promise) => promise());
-
-  await Promise.all(hookPromises);
+  const hookResults = hookPromises.map((promise) => promise());
+  await Promise.all(hookResults);
 
   validationPromises.forEach((promise) => promise());
-
   await Promise.all(validationPromises);
 
   if (errors.length > 0) {
@@ -125,11 +123,11 @@ export default async function performFieldOperations(this: Payload, entityConfig
 
   unflattenLocaleActions.forEach((action) => action());
 
-  await Promise.all(accessPromises);
+  const accessResults = accessPromises.map((promise) => promise());
+  await Promise.all(accessResults);
 
-  const relationshipPopulationPromises = relationshipPopulations.map((population) => population());
-
-  await Promise.all(relationshipPopulationPromises);
+  const relationshipPopulationResults = relationshipPopulations.map((population) => population());
+  await Promise.all(relationshipPopulationResults);
 
   return fullData;
 }
