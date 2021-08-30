@@ -6,7 +6,7 @@ import createParentField from './fields/parent';
 import getParents from './getParents';
 import formatBreadcrumb from './formatBreadcrumb';
 
-const populateBreadcrumbs = (options: Options, collection: CollectionConfig): CollectionBeforeReadHook => async ({ req: { payload, payloadAPI }, doc }) => {
+const populateBreadcrumbs = (options: Options, collection: CollectionConfig): CollectionBeforeReadHook => async ({ req: { payload }, doc }) => {
   const newDoc = doc;
   const breadcrumbs = await getParents(payload, options, collection, doc);
   const currentDocBreadcrumb = formatBreadcrumb(options, collection, doc, breadcrumbs);

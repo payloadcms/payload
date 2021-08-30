@@ -29,30 +29,7 @@ const getParents = async (
     }
 
     if (retrievedParent) {
-      const parentBreadcrumb = formatBreadcrumb(
-        options,
-        collection,
-        retrievedParent,
-        breadcrumbs,
-      );
-
-      if (retrievedParent.parent) {
-        return getParents(
-          payload,
-          options,
-          collection,
-          retrievedParent.parent,
-          [
-            parentBreadcrumb,
-            ...breadcrumbs,
-          ],
-        );
-      }
-
-      return [
-        parentBreadcrumb,
-        ...breadcrumbs,
-      ];
+      return retrievedParent.breadcrumbs;
     }
   }
 
