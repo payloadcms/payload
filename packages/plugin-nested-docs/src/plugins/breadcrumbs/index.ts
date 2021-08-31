@@ -42,9 +42,9 @@ const breadcrumbs = (options: Options) => (config: Config): Config => ({
             async ({ req, data }) => populateBreadcrumbs(req, options, collection, data),
             ...collection?.hooks?.beforeChange || [],
           ],
-          afterRead: [
+          beforeRead: [
             async ({ req, doc }) => populateBreadcrumbs(req, options, collection, doc),
-            ...collection?.hooks?.afterRead || [],
+            ...collection?.hooks?.beforeRead || [],
           ],
         },
         fields,
