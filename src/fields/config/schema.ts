@@ -111,7 +111,7 @@ export const select = baseField.keys({
   options: joi.array().items(joi.alternatives().try(
     joi.string(),
     joi.object({
-      value: joi.string().allow('').required(),
+      value: joi.string().required(),
       label: joi.string().required(),
     }),
   )).required(),
@@ -128,7 +128,7 @@ export const radio = baseField.keys({
   options: joi.array().items(joi.alternatives().try(
     joi.string(),
     joi.object({
-      value: joi.string().allow('').required(),
+      value: joi.string().required(),
       label: joi.string().required(),
     }),
   )).required(),
