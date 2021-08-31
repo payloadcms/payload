@@ -1,18 +1,19 @@
 import { Config } from 'payload/config';
-import { CollectionBeforeReadHook, CollectionConfig } from 'payload/types';
+import { CollectionConfig } from 'payload/types';
 import { Options } from './types';
 import createBreadcrumbsField from './fields/breadcrumbs';
 import createParentField from './fields/parent';
 import getParents from './getParents';
 import formatBreadcrumb from './formatBreadcrumb';
+import { PayloadRequest } from '../../../../payload/dist/express/types';
 
-const populateBreadcrumbs = (options: Options, collection: CollectionConfig): CollectionBeforeReadHook => async ({ req: { payload }, doc }) => {
-  const newDoc = doc;
-  const breadcrumbs = await getParents(payload, options, collection, doc);
-  const currentDocBreadcrumb = formatBreadcrumb(options, collection, doc, breadcrumbs);
+const populateBreadcrumbs = async (req: PayloadRequest, options: Options, collection: CollectionConfig, data: any) => {
+  const newData = data;
+  const breadcrumbs = await getParents(req.payload, options, collection, data);
+  const currentDocBreadcrumb = formatBreadcrumb(options, collection, data, breadcrumbs);
 
   return {
-    ...newDoc,
+    ...newData,
     [options?.breadcrumbsFieldSlug || 'breadcrumbs']: [
       ...breadcrumbs,
       currentDocBreadcrumb,
@@ -38,9 +39,13 @@ const breadcrumbs = (options: Options) => (config: Config): Config => ({
         ...collection,
         hooks: {
           ...collection.hooks || {},
-          beforeRead: [
-            populateBreadcrumbs(options, collection),
-            ...collection?.hooks?.beforeRead || [],
+          beforeChange: [
+            async ({ req, data }) => populateBreadcrumbs(req, options, collection, data),
+            ...collection?.hooks?.beforeChange || [],
+          ],
+          afterRead: [
+            async ({ req, doc }) => populateBreadcrumbs(req, options, collection, doc),
+            ...collection?.hooks?.afterRead || [],
           ],
         },
         fields,
