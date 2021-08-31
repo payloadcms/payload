@@ -283,11 +283,6 @@ export type FieldWithMaxDepth =
   UploadField
   | RelationshipField
 
-export type PointValue = {
-  type: 'Point';
-  coordinates: [number, number];
-}
-
 export function fieldHasSubFields(field: Field): field is FieldWithSubFields {
   return (field.type === 'group' || field.type === 'array' || field.type === 'row');
 }

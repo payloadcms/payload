@@ -9,6 +9,8 @@ import { Props } from './types';
 
 import './index.scss';
 
+const baseClass = 'point';
+
 const PointField: React.FC<Props> = (props) => {
   const {
     name,
@@ -58,7 +60,7 @@ const PointField: React.FC<Props> = (props) => {
 
   const classes = [
     'field-type',
-    'number',
+    baseClass,
     showError && 'error',
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');
@@ -75,32 +77,42 @@ const PointField: React.FC<Props> = (props) => {
         showError={showError}
         message={errorMessage}
       />
-      <Label
-        htmlFor={path}
-        label={label}
-        required={required}
-      />
-      <input
-        value={(value && typeof value[0] === 'number') ? value[0] : ''}
-        onChange={(e) => handleChange(e, 0)}
-        disabled={readOnly}
-        placeholder={placeholder}
-        type="number"
-        id={path}
-        name={path}
-        step={step}
-      />
-      ,
-      <input
-        value={(value && typeof value[1] === 'number') ? value[1] : ''}
-        onChange={(e) => handleChange(e, 1)}
-        disabled={readOnly}
-        placeholder={placeholder}
-        type="number"
-        id={path}
-        name={path}
-        step={step}
-      />
+      <ul className={`${baseClass}__wrap`}>
+        <li>
+          <Label
+            htmlFor={`${path}.longitude`}
+            label={`${label} - Longitude`}
+            required={required}
+          />
+          <input
+            value={(value && typeof value[0] === 'number') ? value[0] : ''}
+            onChange={(e) => handleChange(e, 0)}
+            disabled={readOnly}
+            placeholder={placeholder}
+            type="number"
+            id={`${path}.longitude`}
+            name={`${path}.longitude`}
+            step={step}
+          />
+        </li>
+        <li>
+          <Label
+            htmlFor={`${path}.latitude`}
+            label={`${label} - Latitude`}
+            required={required}
+          />
+          <input
+            value={(value && typeof value[1] === 'number') ? value[1] : ''}
+            onChange={(e) => handleChange(e, 1)}
+            disabled={readOnly}
+            placeholder={placeholder}
+            type="number"
+            id={`${path}.latitude`}
+            name={`${path}.latitude`}
+            step={step}
+          />
+        </li>
+      </ul>
       <FieldDescription
         value={value}
         description={description}
