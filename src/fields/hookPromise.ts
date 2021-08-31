@@ -12,7 +12,7 @@ type Arguments = {
   fullData: Record<string, unknown>
 }
 
-const hookPromise = ({
+const hookPromise = async ({
   data,
   field,
   hook,
@@ -20,7 +20,7 @@ const hookPromise = ({
   operation,
   fullOriginalDoc,
   fullData,
-}: Arguments) => async (): Promise<void> => {
+}: Arguments): Promise<void> => {
   const resultingData = data;
 
   if (field.hooks && field.hooks[hook]) {
