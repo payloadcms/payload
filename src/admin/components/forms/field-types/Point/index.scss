@@ -1,0 +1,16 @@
+@import '../../../../scss/styles.scss';
+
+.field-type.number {
+	position: relative;
+  margin-bottom: $baseline;
+
+	input {
+		@include formInput;
+	}
+
+	&.error {
+		input {
+      background-color: lighten($color-red, 20%);
+		}
+	}
+}

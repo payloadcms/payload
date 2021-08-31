@@ -26,6 +26,7 @@ import Select from './collections/Select';
 import StrictPolicies from './collections/StrictPolicies';
 import Validations from './collections/Validations';
 import Uniques from './collections/Uniques';
+import Geolocation from './collections/Geolocation';
 
 import BlocksGlobal from './globals/BlocksGlobal';
 import NavigationArray from './globals/NavigationArray';
@@ -83,6 +84,7 @@ export default buildConfig({
     Validations,
     Uniques,
     UnstoredMedia,
+    Geolocation,
   ],
   globals: [
     NavigationArray,
@@ -108,7 +110,7 @@ export default buildConfig({
   defaultDepth: 2,
   graphQL: {
     maxComplexity: 1000,
-    disablePlaygroundInProduction: true,
+    disablePlaygroundInProduction: false,
     disable: false,
   },
   // rateLimit: {

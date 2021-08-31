@@ -24,7 +24,7 @@ type Arguments = {
   depth: number
   currentDepth: number
   hook: HookName
-  hookPromises: Promise<void>[]
+  hookPromises: (() => Promise<void>)[]
   fullOriginalDoc: Record<string, any>
   fullData: Record<string, any>
   validationPromises: (() => Promise<string | boolean>)[]
@@ -33,6 +33,7 @@ type Arguments = {
   showHiddenFields: boolean
   unflattenLocales: boolean
   unflattenLocaleActions: (() => void)[]
+  transformActions: (() => void)[]
   docWithLocales?: Record<string, any>
   skipValidation?: boolean
 }
@@ -64,6 +65,7 @@ const traverseFields = (args: Arguments): void => {
     showHiddenFields,
     unflattenLocaleActions,
     unflattenLocales,
+    transformActions,
     docWithLocales = {},
     skipValidation,
   } = args;
@@ -73,6 +75,14 @@ const traverseFields = (args: Arguments): void => {
 
     if (hook === 'afterRead' && field.hidden && typeof data[field.name] !== 'undefined' && !showHiddenFields) {
       delete data[field.name];
+    }
+
+    if (hook === 'afterRead' && field.type === 'point') {
+      transformActions.push(() => {
+        if (data[field.name]?.coordinates && Array.isArray(data[field.name].coordinates) && data[field.name].coordinates.length === 2) {
+          data[field.name] = data[field.name].coordinates;
+        }
+      });
     }
 
     if ((field.type === 'upload' || field.type === 'relationship')
@@ -255,6 +265,20 @@ const traverseFields = (args: Arguments): void => {
 
       if (data?.[field.name] === undefined && originalDoc?.[field.name] === undefined && field.defaultValue) {
         updatedData[field.name] = field.defaultValue;
+      }
+
+      if (field.type === 'point' && data[field.name]) {
+        transformActions.push(() => {
+          if (Array.isArray(data[field.name]) && data[field.name][0] !== null && data[field.name][1] !== null) {
+            data[field.name] = {
+              type: 'Point',
+              coordinates: [
+                parseFloat(data[field.name][0]),
+                parseFloat(data[field.name][1]),
+              ],
+            };
+          }
+        });
       }
 
       if (field.type === 'array' || field.type === 'blocks') {

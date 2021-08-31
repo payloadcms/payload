@@ -49,6 +49,7 @@ const formatBaseSchema = (field: Field) => ({
 
 const buildSchema = (config: SanitizedConfig, configFields: Field[], options = {}): Schema => {
   let fields = {};
+  const indexFields = [];
 
   configFields.forEach((field) => {
     const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[field.type];
@@ -56,13 +57,29 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], options = {
     if (fieldSchema) {
       fields = fieldSchema(field, fields, config);
     }
+    // geospatial field index must be created after the schema is created
+    if (fieldIndexMap[field.type]) {
+      indexFields.push(...fieldIndexMap[field.type](field, config));
+    }
   });
 
   const schema = new Schema(fields, options);
+  indexFields.forEach((index) => {
+    schema.index(index);
+  });
 
   setBlockDiscriminators(configFields, schema, config);
 
   return schema;
+};
+
+const fieldIndexMap = {
+  point: (field: Field, config: SanitizedConfig) => {
+    if (field.localized) {
+      return config.localization.locales.map((locale) => ({ [`${field.name}.${locale}`]: field.index === false ? undefined : field.index || '2dsphere' }));
+    }
+    return [{ [field.name]: field.index === false ? undefined : field.index || '2dsphere' }];
+  },
 };
 
 const fieldToSchemaMap = {
@@ -173,6 +190,39 @@ const fieldToSchemaMap = {
   },
   code: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: String };
+    let schemaToReturn;
+
+    if (field.localized) {
+      schemaToReturn = {
+        type: config.localization.locales.reduce((localeSchema, locale) => ({
+          ...localeSchema,
+          [locale]: baseSchema,
+        }), {}),
+        localized: true,
+      };
+    } else {
+      schemaToReturn = baseSchema;
+    }
+
+    return {
+      ...fields,
+      [field.name]: schemaToReturn,
+    };
+  },
+  point: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
+    const baseSchema = {
+      type: {
+        type: String,
+        enum: ['Point'],
+      },
+      coordinates: {
+        type: [Number],
+        sparse: field.unique && field.localized,
+        unique: field.unique || false,
+        required: (field.required && !field.localized && !field?.admin?.condition && !field?.access?.create) || false,
+        default: field.defaultValue || undefined,
+      },
+    };
     let schemaToReturn;
 
     if (field.localized) {
