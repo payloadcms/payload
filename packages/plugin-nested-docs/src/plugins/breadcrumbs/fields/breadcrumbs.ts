@@ -9,6 +9,7 @@ const createBreadcrumbsField = (relationTo: string, overrides: Partial<Field> = 
       name: 'doc',
       type: 'relationship',
       relationTo,
+      maxDepth: 1,
       admin: {
         disabled: true,
       },

@@ -5,6 +5,7 @@ const createParentField = (relationTo: string, overrides: Partial<Field> = {}): 
   name: 'parent',
   relationTo,
   type: 'relationship',
+  maxDepth: 1,
   admin: {
     position: 'sidebar',
   },
