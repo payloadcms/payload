@@ -5,9 +5,8 @@ import createBreadcrumbsField from './fields/breadcrumbs';
 import createParentField from './fields/parent';
 import getParents from './getParents';
 import formatBreadcrumb from './formatBreadcrumb';
-import { PayloadRequest } from '../../../../payload/dist/express/types';
 
-const populateBreadcrumbs = async (req: PayloadRequest, options: Options, collection: CollectionConfig, data: any) => {
+const populateBreadcrumbs = async (req: any, options: Options, collection: CollectionConfig, data: any) => {
   const newData = data;
   const breadcrumbs = await getParents(req.payload, options, collection, data);
   const currentDocBreadcrumb = formatBreadcrumb(options, collection, data, breadcrumbs);
