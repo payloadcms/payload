@@ -243,6 +243,10 @@ export type BlockField = FieldBase & {
   labels?: Labels
 }
 
+export type PointField = FieldBase & {
+  type: 'point',
+}
+
 export type Field =
   TextField
   | NumberField
@@ -259,6 +263,7 @@ export type Field =
   | SelectField
   | UploadField
   | CodeField
+  | PointField
   | RowField;
 
 export type FieldWithPath = Field & {

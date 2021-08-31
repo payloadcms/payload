@@ -199,6 +199,24 @@ export const blocks: Validate = (value, options = {}) => {
   return true;
 };
 
+export const point: Validate = (value: [number | string, number | string] = ['', ''], options = {}) => {
+  const x = parseFloat(String(value[0]));
+  const y = parseFloat(String(value[1]));
+  if (
+    (value[0] && value[1] && typeof x !== 'number' && typeof y !== 'number')
+    || (options.required && (Number.isNaN(x) || Number.isNaN(y)))
+    || (Array.isArray(value) && value.length !== 2)
+  ) {
+    return 'This field requires two numbers';
+  }
+
+  if (!options.required && typeof value[0] !== typeof value[1]) {
+    return 'This field requires two numbers or both can be empty';
+  }
+
+  return true;
+};
+
 export default {
   number,
   text,
@@ -216,4 +234,5 @@ export default {
   select,
   radio,
   blocks,
+  point,
 };

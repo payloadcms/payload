@@ -1,0 +1,30 @@
+@import '../../../../scss/styles.scss';
+
+.point {
+	position: relative;
+  margin-bottom: $baseline;
+
+  &__wrap {
+    display: flex;
+    width: calc(100% + #{base(1)});
+    margin-left: base(-.5);
+    margin-right: base(-.5);
+    list-style: none;
+    padding: 0;
+
+    li {
+      padding: 0 base(.5);
+      width: 50%;
+    }
+  }
+
+	input {
+		@include formInput;
+	}
+
+	&.error {
+		input {
+      background-color: lighten($color-red, 20%);
+		}
+	}
+}

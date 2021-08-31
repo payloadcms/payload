@@ -108,6 +108,7 @@ async function find(incomingArgs: Arguments): Promise<PaginatedDocs> {
     sort,
     lean: true,
     leanWithId: true,
+    useEstimatedCount: true,
   };
 
   const paginatedDocs = await Model.paginate(query, optionsToExecute);

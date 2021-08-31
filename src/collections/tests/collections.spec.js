@@ -406,7 +406,6 @@ describe('Collections - REST', () => {
       expect(data.docs.length).toBeGreaterThan(0);
       expect(data.totalDocs).toBeGreaterThan(0);
       expect(data.limit).toBe(10);
-      expect(data.totalPages).toBe(2);
       expect(data.page).toBe(1);
       expect(data.pagingCounter).toBe(1);
       expect(data.hasPrevPage).toBe(false);

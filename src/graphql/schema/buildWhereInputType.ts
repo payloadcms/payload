@@ -31,6 +31,7 @@ import {
   TextareaField,
   TextField,
   UploadField,
+  PointField,
 } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
@@ -83,6 +84,7 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
     equality: ['equals', 'not_equals'],
     contains: ['in', 'not_in', 'all'],
     comparison: ['greater_than_equal', 'greater_than', 'less_than_equal', 'less_than'],
+    geo: ['near'],
   };
 
   const fieldToSchemaMap = {
@@ -187,6 +189,17 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
           type,
           parentName,
           [...operators.equality, ...operators.comparison, 'like'],
+        ),
+      };
+    },
+    point: (field: PointField) => {
+      const type = GraphQLList(GraphQLFloat);
+      return {
+        type: withOperators(
+          field,
+          type,
+          parentName,
+          [...operators.equality, ...operators.comparison, ...operators.geo],
         ),
       };
     },

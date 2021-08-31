@@ -13,6 +13,7 @@ import number from './Number';
 import checkbox from './Checkbox';
 import richText from './RichText';
 import radio from './RadioGroup';
+import point from './Point';
 
 import blocks from './Blocks';
 import group from './Group';
@@ -32,6 +33,7 @@ export type FieldTypes = {
   textarea: React.ComponentType
   select: React.ComponentType
   number: React.ComponentType
+  point: React.ComponentType
   checkbox: React.ComponentType
   richText: React.ComponentType
   radio: React.ComponentType
@@ -56,6 +58,7 @@ const fieldTypes: FieldTypes = {
   number,
   checkbox,
   richText,
+  point,
   radio,
   blocks,
   group,
