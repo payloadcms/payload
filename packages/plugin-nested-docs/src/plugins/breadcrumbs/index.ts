@@ -8,7 +8,7 @@ import formatBreadcrumb from './formatBreadcrumb';
 
 const populateBreadcrumbs = async (req: any, options: Options, collection: CollectionConfig, data: any) => {
   const newData = data;
-  const breadcrumbs = await getParents(req.payload, options, collection, data);
+  const breadcrumbs = await getParents(req, options, collection, data);
   const currentDocBreadcrumb = formatBreadcrumb(options, collection, data, breadcrumbs);
 
   return {

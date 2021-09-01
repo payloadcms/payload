@@ -1,10 +1,8 @@
-import { Payload } from 'payload';
 import { CollectionConfig } from 'payload/types';
 import { Options, Breadcrumb } from './types';
-import formatBreadcrumb from './formatBreadcrumb';
 
 const getParents = async (
-  payload: Payload,
+  req: any,
   options: Options,
   collection: CollectionConfig,
   doc: Record<string, unknown>,
@@ -16,7 +14,8 @@ const getParents = async (
   if (parent) {
     // If not auto-populated, and we have an ID
     if (typeof parent === 'string') {
-      retrievedParent = await payload.findByID({
+      retrievedParent = await req.payload.findByID({
+        req,
         id: parent,
         collection: collection.slug,
         depth: 0,
