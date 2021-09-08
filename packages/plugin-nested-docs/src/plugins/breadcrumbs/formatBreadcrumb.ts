@@ -4,27 +4,28 @@ import { Options, Breadcrumb } from './types';
 const formatBreadcrumb = (
   options: Options,
   collection: CollectionConfig,
-  doc: Record<string, unknown>,
-  breadcrumbs: Breadcrumb[] = [],
+  docs: Record<string, unknown>[],
 ): Breadcrumb => {
   let url: string;
-  let label = doc.id as string;
+  let label: string;
+
+  const lastDoc = docs[docs.length - 1];
 
   if (typeof options?.generateURL === 'function') {
-    url = options.generateURL(breadcrumbs, doc);
+    url = options.generateURL(docs, lastDoc);
   }
 
   if (typeof options?.generateLabel === 'function') {
-    label = options.generateLabel(breadcrumbs, doc);
+    label = options.generateLabel(docs, lastDoc);
   } else {
     const useAsTitle = collection?.admin?.useAsTitle || 'id';
-    label = doc[useAsTitle] as string;
+    label = lastDoc[useAsTitle] as string;
   }
 
   return {
     label,
     url,
-    doc: doc.id as string,
+    doc: lastDoc.id as string,
   };
 };
 

@@ -1,13 +1,13 @@
 import { CollectionConfig } from 'payload/types';
-import { Options, Breadcrumb } from './types';
+import { Options } from './types';
 
 const getParents = async (
   req: any,
   options: Options,
   collection: CollectionConfig,
   doc: Record<string, unknown>,
-  breadcrumbs: Breadcrumb[] = [],
-): Promise<Breadcrumb[]> => {
+  docs: Record<string, unknown>[] = [],
+): Promise<Record<string, unknown>[]> => {
   const parent = doc[options?.parentFieldSlug || 'parent'];
   let retrievedParent;
 
@@ -28,11 +28,27 @@ const getParents = async (
     }
 
     if (retrievedParent) {
-      return retrievedParent.breadcrumbs;
+      if (retrievedParent.parent) {
+        return getParents(
+          req,
+          options,
+          collection,
+          retrievedParent,
+          [
+            retrievedParent,
+            ...docs,
+          ],
+        );
+      }
+
+      return [
+        retrievedParent,
+        ...docs,
+      ];
     }
   }
 
-  return breadcrumbs;
+  return docs;
 };
 
 export default getParents;

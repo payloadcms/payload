@@ -1,24 +1,10 @@
 import { Config } from 'payload/config';
-import { CollectionConfig } from 'payload/types';
 import { Options } from './types';
 import createBreadcrumbsField from './fields/breadcrumbs';
 import createParentField from './fields/parent';
-import getParents from './getParents';
-import formatBreadcrumb from './formatBreadcrumb';
+import populateBreadcrumbs from './populateBreadcrumbs';
+import resaveChildren from './hooks/resaveChildren';
 
-const populateBreadcrumbs = async (req: any, options: Options, collection: CollectionConfig, data: any) => {
-  const newData = data;
-  const breadcrumbs = await getParents(req, options, collection, data);
-  const currentDocBreadcrumb = formatBreadcrumb(options, collection, data, breadcrumbs);
-
-  return {
-    ...newData,
-    [options?.breadcrumbsFieldSlug || 'breadcrumbs']: [
-      ...breadcrumbs,
-      currentDocBreadcrumb,
-    ],
-  };
-};
 
 const breadcrumbs = (options: Options) => (config: Config): Config => ({
   ...config,
@@ -42,9 +28,8 @@ const breadcrumbs = (options: Options) => (config: Config): Config => ({
             async ({ req, data }) => populateBreadcrumbs(req, options, collection, data),
             ...collection?.hooks?.beforeChange || [],
           ],
-          beforeRead: [
-            async ({ req, doc }) => populateBreadcrumbs(req, options, collection, doc),
-            ...collection?.hooks?.beforeRead || [],
+          afterChange: [
+            resaveChildren(options, collection),
           ],
         },
         fields,

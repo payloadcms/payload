@@ -4,9 +4,9 @@ export type Breadcrumb = {
   doc: string
 }
 
-export type GenerateURL = (breadcrumbs: Breadcrumb[], currentDoc: Record<string, unknown>) => string;
+export type GenerateURL = (docs: Record<string, unknown>[], currentDoc: Record<string, unknown>) => string;
 
-export type GenerateLabel = (breadcrumbs: Breadcrumb[], currentDoc: Record<string, unknown>) => string;
+export type GenerateLabel = (docs: Record<string, unknown>[], currentDoc: Record<string, unknown>) => string;
 
 export type Options = {
   collections: string[]

@@ -35,10 +35,6 @@ const createBreadcrumbsField = (relationTo: string, overrides: Partial<Field> = 
       ],
     },
   ],
-  access: {
-    create: () => false,
-    update: () => false,
-  },
   admin: {
     readOnly: true,
   },
