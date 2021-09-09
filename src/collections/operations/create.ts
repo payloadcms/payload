@@ -71,6 +71,18 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   }
 
   // /////////////////////////////////////
+  // Custom id
+  // /////////////////////////////////////
+
+  const hasIdField = collectionConfig.fields.findIndex(({ name }) => name === 'id') > -1;
+  if (hasIdField) {
+    data = {
+      _id: data.id,
+      ...data,
+    };
+  }
+
+  // /////////////////////////////////////
   // Upload and resize potential files
   // /////////////////////////////////////
 
@@ -218,6 +230,8 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   let result: Document = doc.toJSON({ virtuals: true });
   const verificationToken = result._verificationToken;
 
+  // custom id type reset
+  result.id = result._id;
   result = JSON.stringify(result);
   result = JSON.parse(result);
   result = sanitizeInternalFields(result);

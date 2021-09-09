@@ -100,6 +100,8 @@ async function find(incomingArgs: Arguments): Promise<PaginatedDocs> {
     } else {
       sort = '-_id';
     }
+  } else if (sort === 'id' || sort === '-id') {
+    sort = sort.replace('id', '_id');
   }
 
   const optionsToExecute = {

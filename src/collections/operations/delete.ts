@@ -135,6 +135,8 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
 
   let result: Document = doc.toJSON({ virtuals: true });
 
+  // custom id type reset
+  result.id = result._id;
   result = JSON.stringify(result);
   result = JSON.parse(result);
   result = sanitizeInternalFields(result);

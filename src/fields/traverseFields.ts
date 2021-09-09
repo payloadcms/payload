@@ -87,15 +87,28 @@ const traverseFields = (args: Arguments): void => {
 
     if ((field.type === 'upload' || field.type === 'relationship')
     && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null')) {
-      dataCopy[field.name] = null;
+      if (field.type === 'relationship' && field.hasMany === true) {
+        dataCopy[field.name] = [];
+      } else {
+        dataCopy[field.name] = null;
+      }
     }
 
-    if (field.type === 'relationship' && field.hasMany && (data[field.name]?.[0] === '' || data[field.name]?.[0] === 'none' || data[field.name]?.[0] === 'null')) {
+    if (field.type === 'relationship' && field.hasMany && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null')) {
       dataCopy[field.name] = [];
     }
 
     if (field.type === 'number' && typeof data[field.name] === 'string') {
       dataCopy[field.name] = parseFloat(data[field.name]);
+    }
+
+    if (field.name === 'id') {
+      if (field.type === 'number' && typeof data[field.name] === 'string') {
+        dataCopy[field.name] = parseFloat(data[field.name]);
+      }
+      if (field.type === 'text' && typeof data[field.name]?.toString === 'function' && typeof data[field.name] !== 'string') {
+        dataCopy[field.name] = dataCopy[field.name].toString();
+      }
     }
 
     if (field.type === 'checkbox') {
@@ -265,6 +278,44 @@ const traverseFields = (args: Arguments): void => {
 
       if (data?.[field.name] === undefined && originalDoc?.[field.name] === undefined && field.defaultValue) {
         updatedData[field.name] = field.defaultValue;
+      }
+
+      if (field.type === 'relationship' || field.type === 'upload') {
+        if (Array.isArray(field.relationTo)) {
+          if (Array.isArray(dataCopy[field.name])) {
+            dataCopy[field.name].forEach((relatedDoc: {value: unknown, relationTo: string}, i) => {
+              const relatedCollection = payload.config.collections.find((collection) => collection.slug === relatedDoc.relationTo);
+              const relationshipIDField = relatedCollection.fields.find((collectionField) => collectionField.name === 'id');
+              if (relationshipIDField?.type === 'number') {
+                dataCopy[field.name][i] = { ...relatedDoc, value: parseFloat(relatedDoc.value as string) };
+              }
+            });
+          }
+          if (field.type === 'relationship' && field.hasMany !== true && dataCopy[field.name]?.relationTo) {
+            const relatedCollection = payload.config.collections.find((collection) => collection.slug === dataCopy[field.name].relationTo);
+            const relationshipIDField = relatedCollection.fields.find((collectionField) => collectionField.name === 'id');
+            if (relationshipIDField?.type === 'number') {
+              dataCopy[field.name] = { ...dataCopy[field.name], value: parseFloat(dataCopy[field.name].value as string) };
+            }
+          }
+        } else {
+          if (Array.isArray(dataCopy[field.name])) {
+            dataCopy[field.name].forEach((relatedDoc: unknown, i) => {
+              const relatedCollection = payload.config.collections.find((collection) => collection.slug === field.relationTo);
+              const relationshipIDField = relatedCollection.fields.find((collectionField) => collectionField.name === 'id');
+              if (relationshipIDField?.type === 'number') {
+                dataCopy[field.name][i] = parseFloat(relatedDoc as string);
+              }
+            });
+          }
+          if (field.type === 'relationship' && field.hasMany !== true && dataCopy[field.name]) {
+            const relatedCollection = payload.config.collections.find((collection) => collection.slug === field.relationTo);
+            const relationshipIDField = relatedCollection.fields.find((collectionField) => collectionField.name === 'id');
+            if (relationshipIDField?.type === 'number') {
+              dataCopy[field.name] = parseFloat(dataCopy[field.name]);
+            }
+          }
+        }
       }
 
       if (field.type === 'point' && data[field.name]) {

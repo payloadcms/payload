@@ -548,4 +548,92 @@ describe('Collections - REST', () => {
       expect(failedResponse.status).toStrictEqual(500);
     });
   });
+
+  describe('Custom ID', () => {
+    const document = {
+      id: 1,
+      name: 'name',
+    };
+    let data;
+    beforeAll(async (done) => {
+      // create document
+      const create = await fetch(`${url}/api/custom-id`, {
+        body: JSON.stringify(document),
+        headers,
+        method: 'post',
+      });
+      data = await create.json();
+      done();
+    });
+
+
+    it('should create collections with custom ID', async () => {
+      expect(data.doc.id).toBe(document.id);
+    });
+
+    it('should read collections by custom ID', async () => {
+      const response = await fetch(`${url}/api/custom-id/${document.id}`, {
+        headers,
+        method: 'get',
+      });
+
+      const result = await response.json();
+
+      expect(result.id).toStrictEqual(document.id);
+      expect(result.name).toStrictEqual(document.name);
+    });
+
+    it('should update collection by custom ID', async () => {
+      const updatedDoc = { id: 'cannot-update-id', name: 'updated' };
+      const response = await fetch(`${url}/api/custom-id/${document.id}`, {
+        headers,
+        body: JSON.stringify(updatedDoc),
+        method: 'put',
+      });
+
+      const result = await response.json();
+
+      expect(result.doc.id).not.toStrictEqual(updatedDoc.id);
+      expect(result.doc.name).not.toStrictEqual(document.name);
+      expect(result.doc.name).toStrictEqual(updatedDoc.name);
+    });
+
+    it('should delete collection by custom ID', async () => {
+      const doc = {
+        id: 2,
+        name: 'delete me',
+      };
+      const createResponse = await fetch(`${url}/api/custom-id`, {
+        body: JSON.stringify(doc),
+        headers,
+        method: 'post',
+      });
+      const result = await createResponse.json();
+      const response = await fetch(`${url}/api/custom-id/${result.doc.id}`, {
+        headers,
+        method: 'delete',
+      });
+
+      expect(response.status).toBe(200);
+      const deleteData = await response.json();
+      expect(deleteData.id).toBe(doc.id);
+    });
+
+    it('should allow querying by custom ID', async () => {
+      const response = await fetch(`${url}/api/custom-id?where[id][equals]=${document.id}`, {
+        headers,
+        method: 'get',
+      });
+      const emptyResponse = await fetch(`${url}/api/custom-id?where[id][equals]=900`, {
+        headers,
+        method: 'get',
+      });
+
+      const result = await response.json();
+      const emptyResult = await emptyResponse.json();
+
+      expect(result.docs).toHaveLength(1);
+      expect(emptyResult.docs).toHaveLength(0);
+    });
+  });
 });

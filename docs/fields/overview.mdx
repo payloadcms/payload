@@ -84,6 +84,24 @@ Example:
 }
 ```
 
+### Customizable ID
+
+Collections ID fields are generated automatically by default. An explicit `id` field can be declared in the `fields` array to override this behavior.
+Users are then required to provide a custom ID value when creating a record through the Admin UI or API.
+Valid ID types are `number` and `text`.
+
+Example:
+```js
+{
+  fields: [
+    {
+      name: 'id',
+      type: 'number',
+    },
+  ],
+}
+```
+
 ### Admin config
 
 In addition to each field's base configuration, you can define specific traits and properties for fields that only have effect on how they are rendered in the Admin panel. The following properties are available for all fields within the `admin` property:
