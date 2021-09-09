@@ -12,7 +12,6 @@ import {
   GraphQLType,
 } from 'graphql';
 import { GraphQLJSON } from 'graphql-type-json';
-import { GraphQLDateTime, GraphQLEmailAddress } from 'graphql-scalars';
 import withNullableType from './withNullableType';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
@@ -27,10 +26,6 @@ export const getCollectionIDType = (config: SanitizedCollectionConfig): GraphQLS
   switch (idField.type) {
     case 'number':
       return GraphQLInt;
-    case 'email':
-      return GraphQLEmailAddress;
-    case 'date':
-      return GraphQLDateTime;
     default:
       return GraphQLString;
   }

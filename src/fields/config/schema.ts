@@ -49,7 +49,7 @@ export const baseField = joi.object().keys({
 
 export const idField = baseField.keys({
   name: joi.string().valid('id'),
-  type: joi.string().valid('text', 'number', 'email', 'date'),
+  type: joi.string().valid('text', 'number'),
   required: joi.not(false, 0).default(true),
   localized: joi.invalid(true),
 });

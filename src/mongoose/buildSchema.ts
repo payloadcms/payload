@@ -326,7 +326,7 @@ const fieldToSchemaMap = {
   upload: (field: UploadField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = {
       ...formatBaseSchema(field),
-      type: Schema.Types.ObjectId,
+      type: Schema.Types.Mixed,
       ref: field.relationTo,
     };
 
@@ -353,20 +353,6 @@ const fieldToSchemaMap = {
     const hasManyRelations = Array.isArray(field.relationTo);
     let schemaToReturn: { [key: string]: any } = {};
 
-    const relationTo = [].concat(field.relationTo);
-    const relatedCollection = config.collections.find(({ slug }) => slug === relationTo[0]);
-    const relatedIdField = relatedCollection.fields.find(({ name }) => name === 'id');
-    let idSchemaType;
-    if (relatedIdField) {
-      if (relatedIdField.type === 'number') {
-        idSchemaType = Number;
-      } else {
-        idSchemaType = String;
-      }
-    } else {
-      idSchemaType = Schema.Types.ObjectId;
-    }
-
     if (field.localized) {
       schemaToReturn = {
         type: config.localization.locales.reduce((locales, locale) => {
@@ -375,14 +361,14 @@ const fieldToSchemaMap = {
           if (hasManyRelations) {
             localeSchema._id = false;
             localeSchema.value = {
-              type: idSchemaType,
+              type: Schema.Types.Mixed,
               refPath: `${field.name}.${locale}.relationTo`,
             };
             localeSchema.relationTo = { type: String, enum: field.relationTo };
           } else {
             localeSchema = {
               ...formatBaseSchema(field),
-              type: idSchemaType,
+              type: Schema.Types.Mixed,
               ref: field.relationTo,
             };
           }
@@ -397,7 +383,7 @@ const fieldToSchemaMap = {
     } else if (hasManyRelations) {
       schemaToReturn._id = false;
       schemaToReturn.value = {
-        type: idSchemaType,
+        type: Schema.Types.Mixed,
         refPath: `${field.name}.relationTo`,
       };
       schemaToReturn.relationTo = { type: String, enum: field.relationTo };
@@ -406,7 +392,7 @@ const fieldToSchemaMap = {
     } else {
       schemaToReturn = {
         ...formatBaseSchema(field),
-        type: idSchemaType,
+        type: Schema.Types.Mixed,
         ref: field.relationTo,
       };
 

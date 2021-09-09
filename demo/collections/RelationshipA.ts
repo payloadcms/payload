@@ -29,7 +29,7 @@ const RelationshipA: CollectionConfig = {
       name: 'postLocalizedMultiple',
       label: 'Localized Post Multiple',
       type: 'relationship',
-      relationTo: ['localized-posts', 'all-fields'],
+      relationTo: ['localized-posts', 'all-fields', 'custom-id'],
       hasMany: true,
       localized: true,
     },
