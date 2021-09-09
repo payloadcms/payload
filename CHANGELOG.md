@@ -1,3 +1,31 @@
+# [0.10.0](https://github.com/payloadcms/payload/compare/v0.9.5...v0.10.0) (2021-09-09)
+
+
+### Bug Fixes
+
+* admin UI collection id is required ([dc96b90](https://github.com/payloadcms/payload/commit/dc96b90cba01756374dde5b91f7702e0a0c661aa))
+* allow save of collection with an undefined point ([f80646c](https://github.com/payloadcms/payload/commit/f80646c5987db4c228b00beda9549259021c2a40))
+* config validation correctly prevents empty strings for option values ([41e7feb](https://github.com/payloadcms/payload/commit/41e7febf6a21d2fff39a335c033d9e9582294147))
+* ensures hooks run before access ([96629f1](https://github.com/payloadcms/payload/commit/96629f1f0100efdb9c5ad57c1a46add3c15ea65d))
+* ensures proper order while transforming incoming and outgoing data ([c187da0](https://github.com/payloadcms/payload/commit/c187da00b1f18c66d9252a5a3e2029455d75b371))
+* improve id type semantic and restrict possible types to text and number ([29529b2](https://github.com/payloadcms/payload/commit/29529b2c56d4af7c6abce113da2f7ce84f1dcc02))
+* remove media directory to improve test run consistency ([d42d8f7](https://github.com/payloadcms/payload/commit/d42d8f76efcda7a24f2f50d60caf47b1027d81f6))
+* sanitize custom id number types ([c7558d8](https://github.com/payloadcms/payload/commit/c7558d8652780e24479b39e5f2a08a49ffff3358))
+* sort id columns ([114dc1b](https://github.com/payloadcms/payload/commit/114dc1b3fb9a1895e09671aca7a57fd5c7d84911))
+
+
+### Features
+
+* add config validation for collections with custom id ([fe1dc0b](https://github.com/payloadcms/payload/commit/fe1dc0b191e73f350b77a90887d8172bf76d46fd))
+* add config validation for collections with custom id ([d0aaf4a](https://github.com/payloadcms/payload/commit/d0aaf4a4128ad585013c392bb608f586985b71ad))
+* add point field type ([7504155](https://github.com/payloadcms/payload/commit/7504155e17a2881b7a60f49e610c062665b46d21))
+* allows user to pass req through local findByID ([8675481](https://github.com/payloadcms/payload/commit/8675481343ef45fefc2eaaea939eda8ed0a2577f))
+* frontend polish to point field ([64ad6a3](https://github.com/payloadcms/payload/commit/64ad6a30a56969127dfb592a7e0c8807e9f3d8f7))
+* graphql support for custom id types ([bc2a6e1](https://github.com/payloadcms/payload/commit/bc2a6e15753c62d2041e9afded3f1ca040dbffa3))
+* point field localization and graphql ([30f1750](https://github.com/payloadcms/payload/commit/30f17509ea9927d923ffd42c703adefc902b66ea))
+* replace the collection idType option with an explicit id field ([4b70a12](https://github.com/payloadcms/payload/commit/4b70a1225f834ecd0aab50c6e92ad50572389962))
+* support custom ids ([3cc921a](https://github.com/payloadcms/payload/commit/3cc921acc92e1b4a372468b644b7e676400d9c26))
+
 ## [0.9.5](https://github.com/payloadcms/payload/compare/v0.9.4...v0.9.5) (2021-08-23)
 
 
