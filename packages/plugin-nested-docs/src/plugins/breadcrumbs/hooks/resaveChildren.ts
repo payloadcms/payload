@@ -1,5 +1,4 @@
 import { CollectionConfig, CollectionAfterChangeHook } from 'payload/types';
-import { generateFullTitle } from '../../../utilities/generateFullTitle';
 import populateBreadcrumbs from '../populateBreadcrumbs';
 import { Options } from '../types';
 
@@ -16,18 +15,14 @@ const resaveChildren = (options: Options, collection: CollectionConfig): Collect
     });
 
     children.docs.forEach((child) => {
-      const newFullTitle = generateFullTitle(child);
-
-      if (child.fullTitle !== newFullTitle) {
-        payload.update({
-          id: child.id,
-          collection: collection.slug,
-          data: {
-            breadcrumbs: populateBreadcrumbs(req, options, collection, child),
-          },
-          depth: 0,
-        });
-      }
+      payload.update({
+        id: child.id,
+        collection: collection.slug,
+        data: {
+          breadcrumbs: populateBreadcrumbs(req, options, collection, child),
+        },
+        depth: 0,
+      });
     });
   };
 
