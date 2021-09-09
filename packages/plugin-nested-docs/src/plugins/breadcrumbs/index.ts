@@ -30,6 +30,7 @@ const breadcrumbs = (options: Options) => (config: Config): Config => ({
           ],
           afterChange: [
             resaveChildren(options, collection),
+            ...collection?.hooks?.afterChange || [],
           ],
         },
         fields,
