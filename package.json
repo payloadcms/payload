@@ -12,9 +12,7 @@
   },
   "files": [
     "package.json",
-    "bin",
-    "utils",
-    "templates"
+    "dist"
   ],
   "dependencies": {
     "@sentry/node": "^6.3.3",
