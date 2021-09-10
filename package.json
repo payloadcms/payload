@@ -2,7 +2,7 @@
   "name": "create-payload-app",
   "license": "MIT",
   "bin": {
-    "create-payload-app": "dist/index.js"
+    "create-payload-app": "bin/cli.js"
   },
   "scripts": {
     "build": "tsc && yarn copyfiles",
@@ -12,7 +12,8 @@
   },
   "files": [
     "package.json",
-    "dist"
+    "dist",
+    "bin"
   ],
   "dependencies": {
     "@sentry/node": "^6.3.3",
