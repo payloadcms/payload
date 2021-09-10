@@ -1,8 +1,8 @@
-import express from 'express'
-import payload from 'payload'
+const express = require('express');
+const payload = require('payload');
 
-require('dotenv').config()
-const app = express()
+require('dotenv').config();
+const app = express();
 
 // Initialize Payload
 payload.init({
@@ -10,10 +10,10 @@ payload.init({
   mongoURL: process.env.MONGODB_URI,
   express: app,
   onInit: () => {
-    payload.logger.info(`Payload Admin URL: ${payload.getAdminURL()}`)
+    payload.logger.info(`Payload Admin URL: ${payload.getAdminURL()}`);
   },
-})
+});
 
 // Add your own express routes here
 
-app.listen(3000)
+app.listen(3000);
