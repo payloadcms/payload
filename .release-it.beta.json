@@ -1,5 +1,5 @@
 {
-  "preReleaseId": "rc",
+  "preReleaseId": "beta",
   "git": {
     "requireCleanWorkingDir": false,
     "commit": false,
@@ -11,7 +11,7 @@
   },
   "npm": {
     "skipChecks": true,
-    "tag": "rc"
+    "tag": "beta"
   },
   "hooks": {
     "before:init": ["yarn", "yarn clean", "yarn test"]

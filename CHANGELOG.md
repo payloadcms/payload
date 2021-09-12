@@ -1,3 +1,5 @@
+## [0.10.1-beta.0](https://github.com/payloadcms/payload/compare/v0.10.0...v0.10.1-beta.0) (2021-09-12)
+
 # [0.10.0](https://github.com/payloadcms/payload/compare/v0.9.5...v0.10.0) (2021-09-09)
 
 

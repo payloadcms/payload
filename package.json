@@ -41,7 +41,8 @@
     "test:client": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=test jest --config=jest.react.config.js",
     "clean": "rimraf dist",
     "release": "release-it",
-    "release:rc": "release-it prepatch --config .release-it.rc"
+    "release:beta": "release-it prepatch --config .release-it.beta.json",
+    "lint": "eslint \"src/**/*.ts\""
   },
   "bugs": {
     "url": "https://github.com/payloadcms/payload"
