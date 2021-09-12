@@ -115,6 +115,7 @@ const AllFields: CollectionConfig = {
       name: 'dayOnlyDateFieldExample',
       label: 'Day Only',
       type: 'date',
+      required: true,
       admin: {
         date: {
           pickerAppearance: 'dayOnly',

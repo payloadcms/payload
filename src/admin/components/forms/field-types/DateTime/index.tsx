@@ -64,10 +64,12 @@ const DateTime: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <Error
-        showError={showError}
-        message={errorMessage}
-      />
+      <div className={`${baseClass}__error-wrap`}>
+        <Error
+          showError={showError}
+          message={errorMessage}
+        />
+      </div>
       <Label
         htmlFor={path}
         label={label}
