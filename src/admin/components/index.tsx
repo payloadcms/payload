@@ -9,3 +9,4 @@ export { default as Chevron } from './icons/Chevron';
 export { default as Check } from './icons/Check';
 export { default as Search } from './icons/Search';
 export { default as Menu } from './icons/Menu';
+export { default as Pill } from './elements/Pill';
