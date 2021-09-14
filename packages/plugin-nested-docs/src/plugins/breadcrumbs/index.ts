@@ -25,7 +25,7 @@ const breadcrumbs = (options: Options) => (config: Config): Config => ({
         hooks: {
           ...collection.hooks || {},
           beforeChange: [
-            async ({ req, data }) => populateBreadcrumbs(req, options, collection, data),
+            async ({ req, data, originalDoc }) => populateBreadcrumbs(req, options, collection, data, originalDoc),
             ...collection?.hooks?.beforeChange || [],
           ],
           afterChange: [

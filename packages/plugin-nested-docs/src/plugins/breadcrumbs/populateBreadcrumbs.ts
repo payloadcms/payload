@@ -3,11 +3,14 @@ import { Options } from './types';
 import getParents from './getParents';
 import formatBreadcrumb from './formatBreadcrumb';
 
-const populateBreadcrumbs = async (req: any, options: Options, collection: CollectionConfig, data: any): Promise<any> => {
+const populateBreadcrumbs = async (req: any, options: Options, collection: CollectionConfig, data: any, originalDoc: any): Promise<any> => {
   const newData = data;
   const breadcrumbDocs = [
     ...await getParents(req, options, collection, data),
-    data,
+    {
+      ...data,
+      id: originalDoc?.id,
+    },
   ];
 
   const breadcrumbs = breadcrumbDocs.map((_, i) => formatBreadcrumb(options, collection, breadcrumbDocs.slice(0, i + 1)));
