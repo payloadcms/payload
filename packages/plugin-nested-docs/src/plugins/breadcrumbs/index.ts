@@ -4,6 +4,7 @@ import createBreadcrumbsField from './fields/breadcrumbs';
 import createParentField from './fields/parent';
 import populateBreadcrumbs from './populateBreadcrumbs';
 import resaveChildren from './hooks/resaveChildren';
+import resaveSelfAfterCreate from './hooks/resaveSelfAfterCreate';
 
 
 const breadcrumbs = (options: Options) => (config: Config): Config => ({
@@ -30,6 +31,7 @@ const breadcrumbs = (options: Options) => (config: Config): Config => ({
           ],
           afterChange: [
             resaveChildren(options, collection),
+            resaveSelfAfterCreate(collection),
             ...collection?.hooks?.afterChange || [],
           ],
         },
