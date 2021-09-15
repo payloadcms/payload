@@ -241,6 +241,12 @@ const traverseFields = (args: Arguments): void => {
           }
         }
       } else {
+        // Fill groups with empty objects so fields with hooks within groups can populate
+        // themselves as necessary
+        if (typeof data[field.name] === 'undefined' && typeof originalDoc[field.name] === 'undefined') {
+          data[field.name] = {};
+        }
+
         traverseFields({
           ...args,
           fields: field.fields,

@@ -270,6 +270,7 @@ describe('Collections - REST', () => {
               width: 640,
               height: 480,
             },
+            maintainedAspectRatio: {},
           },
         },
       });
