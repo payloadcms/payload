@@ -280,6 +280,10 @@ const traverseFields = (args: Arguments): void => {
         updatedData[field.name] = field.defaultValue;
       }
 
+      if (field.type === 'group' && typeof data?.[field.name] === 'undefined') {
+        updatedData[field.name] = {};
+      }
+
       if (field.type === 'relationship' || field.type === 'upload') {
         if (Array.isArray(field.relationTo)) {
           if (Array.isArray(dataCopy[field.name])) {
