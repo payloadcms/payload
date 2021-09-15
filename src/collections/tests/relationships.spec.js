@@ -69,7 +69,7 @@ describe('Collections - REST', () => {
     });
 
     it('should create and read collections with relationships', async () => {
-      expect(documentA.post).not.toBeNull();
+      expect(documentA.post).toBeDefined();
       expect(documentB.post).toHaveLength(1);
     });
 

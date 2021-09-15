@@ -25,7 +25,7 @@ describe('Collections - Local', () => {
         filePath,
       });
 
-      expect(result.id).not.toBeNull();
+      expect(result.id).toBeDefined();
       expect(result.alt).toStrictEqual(alt);
       expect(result.filename).toStrictEqual('generic-block-image.svg');
       expect(result.filesize).toStrictEqual(size);

@@ -41,7 +41,7 @@ describe('Users REST API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.token).not.toBeNull();
+    expect(data.token).toBeDefined();
 
     ({ token } = data);
   });
@@ -56,7 +56,7 @@ describe('Users REST API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.email).not.toBeNull();
+    expect(data.user.email).toBeDefined();
   });
 
   it('should refresh a token and reset its expiration', async () => {
