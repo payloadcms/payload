@@ -73,16 +73,26 @@ const traverseFields = (args: Arguments): void => {
   fields.forEach((field) => {
     const dataCopy = data;
 
-    if (hook === 'afterRead' && field.hidden && typeof data[field.name] !== 'undefined' && !showHiddenFields) {
-      delete data[field.name];
-    }
-
-    if (hook === 'afterRead' && field.type === 'point') {
-      transformActions.push(() => {
-        if (data[field.name]?.coordinates && Array.isArray(data[field.name].coordinates) && data[field.name].coordinates.length === 2) {
-          data[field.name] = data[field.name].coordinates;
+    if (hook === 'afterRead') {
+      if (field.type === 'group') {
+        // Fill groups with empty objects so fields with hooks within groups can populate
+        // themselves virtually as necessary
+        if (typeof data[field.name] === 'undefined' && typeof originalDoc[field.name] === 'undefined') {
+          data[field.name] = {};
         }
-      });
+      }
+
+      if (field.hidden && typeof data[field.name] !== 'undefined' && !showHiddenFields) {
+        delete data[field.name];
+      }
+
+      if (field.type === 'point') {
+        transformActions.push(() => {
+          if (data[field.name]?.coordinates && Array.isArray(data[field.name].coordinates) && data[field.name].coordinates.length === 2) {
+            data[field.name] = data[field.name].coordinates;
+          }
+        });
+      }
     }
 
     if ((field.type === 'upload' || field.type === 'relationship')
@@ -150,6 +160,7 @@ const traverseFields = (args: Arguments): void => {
     if (hasLocalizedValue) {
       let localizedValue = data[field.name][locale];
       if (typeof localizedValue === 'undefined' && fallbackLocale) localizedValue = data[field.name][fallbackLocale];
+      if (typeof localizedValue === 'undefined' && field.type === 'group') localizedValue = {};
       if (typeof localizedValue === 'undefined') localizedValue = null;
       dataCopy[field.name] = localizedValue;
     }
@@ -241,12 +252,6 @@ const traverseFields = (args: Arguments): void => {
           }
         }
       } else {
-        // Fill groups with empty objects so fields with hooks within groups can populate
-        // themselves as necessary
-        if (typeof data[field.name] === 'undefined' && typeof originalDoc[field.name] === 'undefined') {
-          data[field.name] = {};
-        }
-
         traverseFields({
           ...args,
           fields: field.fields,
@@ -284,10 +289,6 @@ const traverseFields = (args: Arguments): void => {
 
       if (data?.[field.name] === undefined && originalDoc?.[field.name] === undefined && field.defaultValue) {
         updatedData[field.name] = field.defaultValue;
-      }
-
-      if (field.type === 'group' && typeof data?.[field.name] === 'undefined') {
-        updatedData[field.name] = {};
       }
 
       if (field.type === 'relationship' || field.type === 'upload') {
