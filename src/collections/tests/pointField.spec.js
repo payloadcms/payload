@@ -50,7 +50,7 @@ describe('GeoJSON', () => {
     });
 
     it('should create and read collections with points', async () => {
-      expect(doc.id).not.toBeNull();
+      expect(doc.id).toBeDefined();
       expect(doc.location).toStrictEqual(location);
       expect(doc.localizedPoint).toStrictEqual(localizedPoint);
     });
@@ -132,7 +132,7 @@ describe('GeoJSON', () => {
     });
 
     it('should create and read collections with points', async () => {
-      expect(doc.id).not.toBeNull();
+      expect(doc.id).toBeDefined();
       expect(doc.location).toStrictEqual(location);
       expect(doc.localizedPoint).toStrictEqual(localizedPoint);
     });

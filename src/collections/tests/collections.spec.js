@@ -38,8 +38,11 @@ describe('Collections - REST', () => {
   });
 
   describe('Create', () => {
-    it('should allow a localized post to be created', async () => {
-      const response = await fetch(`${url}/api/localized-posts`, {
+    let response;
+    let data;
+
+    beforeAll(async () => {
+      response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
           title: 'title',
           description: englishPostDesc,
@@ -68,12 +71,13 @@ describe('Collections - REST', () => {
         headers,
         method: 'post',
       });
+      data = await response.json();
+    });
 
-      const data = await response.json();
-
+    it('should allow a localized post to be created', async () => {
       expect(response.status).toBe(201);
-      expect(data.doc.title).not.toBeNull();
-      expect(data.doc.id).not.toBeNull();
+      expect(data.doc.title).toBeDefined();
+      expect(data.doc.id).toBeDefined();
       expect(data.doc.nonLocalizedGroup.text).toStrictEqual('english');
       expect(data.doc.localizedGroup.text).toStrictEqual('english');
       expect(data.doc.nonLocalizedArray[0].localizedEmbeddedText).toStrictEqual('english');
@@ -84,6 +88,14 @@ describe('Collections - REST', () => {
       expect(data.doc.updatedAt).toStrictEqual(expect.stringMatching(timestampRegex));
 
       localizedPostID = data.doc.id;
+    });
+
+    it('should add id to array items', async () => {
+      expect(data.doc.nonLocalizedArray[0].id).toBeDefined();
+    });
+
+    it('should add id to block items', async () => {
+      expect(data.doc.richTextBlocks[0].id).toBeDefined();
     });
   });
 
@@ -256,7 +268,7 @@ describe('Collections - REST', () => {
 
       const getData = await getResponse.json();
 
-      expect(getData.id).not.toBeNull();
+      expect(getData.id).toBeDefined();
     });
 
     it('should allow querying on a field', async () => {
@@ -365,7 +377,7 @@ describe('Collections - REST', () => {
       const data = await response.json();
       const docId = data.doc.id;
       expect(response.status).toBe(201);
-      expect(docId).not.toBeNull();
+      expect(docId).toBeDefined();
 
       const deleteResponse = await fetch(`${url}/api/localized-posts/${docId}`, {
         headers,

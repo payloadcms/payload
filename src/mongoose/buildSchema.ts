@@ -78,9 +78,7 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], options = {
   indexFields.forEach((index) => {
     schema.index(index);
   });
-  indexFields.forEach((index) => {
-    schema.index(index);
-  });
+
   setBlockDiscriminators(configFields, schema, config);
 
   return schema;
