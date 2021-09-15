@@ -47,17 +47,19 @@ const formatBaseSchema = (field: Field) => ({
   index: field.index || field.unique || false,
 });
 
-const buildSchema = (config: SanitizedConfig, configFields: Field[], options = {}): Schema => {
+const buildSchema = (config: SanitizedConfig, configFields: Field[], options = {}, allowIDField = false): Schema => {
   let fields = {};
   let schemaFields = configFields;
   const indexFields = [];
 
-  const idField = schemaFields.find(({ name }) => name === 'id');
-  if (idField) {
-    fields = {
-      _id: idField.type === 'number' ? Number : String,
-    };
-    schemaFields = schemaFields.filter(({ name }) => name !== 'id');
+  if (!allowIDField) {
+    const idField = schemaFields.find(({ name }) => name === 'id');
+    if (idField) {
+      fields = {
+        _id: idField.type === 'number' ? Number : String,
+      };
+      schemaFields = schemaFields.filter(({ name }) => name !== 'id');
+    }
   }
 
   schemaFields.forEach((field) => {
@@ -421,7 +423,7 @@ const fieldToSchemaMap = {
   array: (field: ArrayField, fields: SchemaDefinition, config: SanitizedConfig) => {
     const baseSchema = {
       ...formatBaseSchema(field),
-      type: [buildSchema(config, field.fields, { _id: false, id: false })],
+      type: [buildSchema(config, field.fields, { _id: false, id: false }, true)],
     };
 
     let schemaToReturn;
