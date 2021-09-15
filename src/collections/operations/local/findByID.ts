@@ -11,7 +11,7 @@ export type Options = {
   overrideAccess?: boolean
   showHiddenFields?: boolean
   disableErrors?: boolean
-  req: PayloadRequest
+  req?: PayloadRequest
 }
 
 export default async function findByID(options: Options): Promise<Document> {
