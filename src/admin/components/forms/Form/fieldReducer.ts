@@ -1,3 +1,4 @@
+import equal from 'deep-equal';
 import { unflatten, flatten } from 'flatley';
 import flattenFilters from './flattenFilters';
 import getSiblingData from './getSiblingData';
@@ -38,7 +39,26 @@ const unflattenRowsFromState = (state: Fields, path) => {
 function fieldReducer(state: Fields, action): Fields {
   switch (action.type) {
     case 'REPLACE_STATE': {
-      return action.state;
+      const newState = {};
+
+      // Only update fields that have changed
+      // by comparing old value / initialValue to new
+      // ..
+      // This is a performance enhancement for saving
+      // large documents with hundreds of fields
+
+      Object.entries(action.state).forEach(([path, field]) => {
+        const oldField = state[path];
+        const newField = field;
+
+        if (!equal(oldField, newField)) {
+          newState[path] = newField;
+        } else if (oldField) {
+          newState[path] = oldField;
+        }
+      });
+
+      return newState;
     }
 
     case 'REMOVE': {
