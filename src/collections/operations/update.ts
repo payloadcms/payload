@@ -27,6 +27,7 @@ export type Arguments = {
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
   showHiddenFields?: boolean
+  overwriteExistingFiles?: boolean
 }
 
 async function update(incomingArgs: Arguments): Promise<Document> {
@@ -60,6 +61,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     },
     overrideAccess,
     showHiddenFields,
+    overwriteExistingFiles = false,
   } = args;
 
   if (!id) {
@@ -135,7 +137,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     const file = ((req.files && req.files.file) ? req.files.file : req.file) as UploadedFile;
 
     if (file) {
-      const fsSafeName = await getSafeFilename(staticPath, file.name);
+      const fsSafeName = overwriteExistingFiles ? await getSafeFilename(staticPath, file.name) : file.name;
 
       try {
         if (!disableLocalStorage) {

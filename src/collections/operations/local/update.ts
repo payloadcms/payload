@@ -12,6 +12,7 @@ export type Options = {
   overrideAccess?: boolean
   showHiddenFields?: boolean
   filePath?: string
+  overwriteExistingFiles?: boolean
 }
 
 export default async function update(options: Options): Promise<Document> {
@@ -26,6 +27,7 @@ export default async function update(options: Options): Promise<Document> {
     overrideAccess = true,
     showHiddenFields,
     filePath,
+    overwriteExistingFiles = false,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -37,6 +39,7 @@ export default async function update(options: Options): Promise<Document> {
     overrideAccess,
     id,
     showHiddenFields,
+    overwriteExistingFiles,
     req: {
       user,
       payloadAPI: 'local',
