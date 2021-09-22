@@ -1,4 +1,4 @@
-## [0.10.3-beta.0](https://github.com/payloadcms/payload/compare/v0.10.0...v0.10.3-beta.0) (2021-09-21)
+## [0.10.4-beta.0](https://github.com/payloadcms/payload/compare/v0.10.0...v0.10.4-beta.0) (2021-09-22)
 
 
 ### Bug Fixes
@@ -11,9 +11,11 @@
 ### Features
 
 * adjusts empty group population to be virtual only ([8a890fd](https://github.com/payloadcms/payload/commit/8a890fdc15b646c24963a1ef7584237b1d3c5783))
+* allows local update api to replace existing files with newly uploaded ones ([dbbff4c](https://github.com/payloadcms/payload/commit/dbbff4cfa41aa20077e47c8c7b87d4d00683c571))
+* defaults empty group fields to empty object ([39a8e2c](https://github.com/payloadcms/payload/commit/39a8e2c20fa7e999c89c1ab09e886d874dbfda25))
+* defaults empty group fields to empty object ([e39ece4](https://github.com/payloadcms/payload/commit/e39ece4823c9104bd698642e42fd9d1eab67e7b3))
 * exposes Pill component for re-use ([7e8df10](https://github.com/payloadcms/payload/commit/7e8df100bbf86798de292466afd4c00c455ecb35))
 * performance improvement while saving large docs ([901ad49](https://github.com/payloadcms/payload/commit/901ad498b47bcb8ae995ade18f2fc08cd33f0645))
-
 
 # [0.10.0](https://github.com/payloadcms/payload/compare/v0.9.5...v0.10.0) (2021-09-09)
 
