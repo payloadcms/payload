@@ -39,7 +39,7 @@ export default async function resizeAndSave(
   const { imageSizes, disableLocalStorage } = config.upload;
 
   const sizes = imageSizes
-    .filter((desiredSize) => desiredSize.width < dimensions.width)
+    .filter((desiredSize) => desiredSize.width < dimensions.width || desiredSize.height < dimensions.height)
     .map(async (desiredSize) => {
       const resized = await sharp(file)
         .resize(desiredSize.width, desiredSize.height, {
