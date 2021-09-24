@@ -5,6 +5,7 @@ import { Props } from './types';
 import plus from '../../icons/Plus';
 import x from '../../icons/X';
 import chevron from '../../icons/Chevron';
+import edit from '../../icons/Edit';
 
 import './index.scss';
 
@@ -12,6 +13,7 @@ const icons = {
   plus,
   x,
   chevron,
+  edit,
 };
 
 const baseClass = 'btn';

@@ -25,7 +25,7 @@ import mergeCustomFunctions from './mergeCustomFunctions';
 
 import './index.scss';
 
-const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link', 'relationship'];
+const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link', 'relationship', 'upload'];
 const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
 const enterBreakOutTypes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
@@ -68,6 +68,7 @@ const RichText: React.FC<Props> = (props) => {
         <Element
           attributes={attributes}
           element={element}
+          path={path}
         >
           {children}
         </Element>
@@ -75,7 +76,7 @@ const RichText: React.FC<Props> = (props) => {
     }
 
     return <div {...attributes}>{children}</div>;
-  }, [enabledElements]);
+  }, [enabledElements, path]);
 
   const renderLeaf = useCallback(({ attributes, children, leaf }) => {
     const matchedLeafName = Object.keys(enabledLeaves).find((leafName) => leaf[leafName]);
@@ -87,6 +88,7 @@ const RichText: React.FC<Props> = (props) => {
         <Leaf
           attributes={attributes}
           leaf={leaf}
+          path={path}
         >
           {children}
         </Leaf>
@@ -96,7 +98,7 @@ const RichText: React.FC<Props> = (props) => {
     return (
       <span {...attributes}>{children}</span>
     );
-  }, [enabledLeaves]);
+  }, [enabledLeaves, path]);
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required });
@@ -287,6 +289,8 @@ const RichText: React.FC<Props> = (props) => {
 
                       Transforms.setNodes(editor, { type: 'p' });
                     }
+                  } else if (editor.isVoid(selectedElement)) {
+                    Transforms.removeNodes(editor);
                   }
                 }
 

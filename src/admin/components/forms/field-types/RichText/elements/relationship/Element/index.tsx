@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useFocused, useSelected } from 'slate-react';
 import { useConfig } from '@payloadcms/config-provider';
 import RelationshipIcon from '../../../../../../icons/Relationship';
 import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
@@ -11,10 +12,13 @@ const initialParams = {
   depth: 0,
 };
 
-const Element = ({ attributes, children, element }) => {
+const Element = (props) => {
+  const { attributes, children, element } = props;
   const { relationTo, value } = element;
   const { collections, serverURL, routes: { api } } = useConfig();
   const [relatedCollection] = useState(() => collections.find((coll) => coll.slug === relationTo));
+  const selected = useSelected();
+  const focused = useFocused();
 
   const [{ data }] = usePayloadAPI(
     `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
@@ -23,7 +27,10 @@ const Element = ({ attributes, children, element }) => {
 
   return (
     <div
-      className={baseClass}
+      className={[
+        baseClass,
+        (selected && focused) && `${baseClass}--selected`,
+      ].filter(Boolean).join(' ')}
       contentEditable={false}
       {...attributes}
     >

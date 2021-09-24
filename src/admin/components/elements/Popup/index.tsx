@@ -12,6 +12,7 @@ const baseClass = 'popup';
 
 const Popup: React.FC<Props> = (props) => {
   const {
+    className,
     render,
     size = 'small',
     color = 'light',
@@ -87,6 +88,7 @@ const Popup: React.FC<Props> = (props) => {
 
   const classes = [
     baseClass,
+    className,
     `${baseClass}--size-${size}`,
     `${baseClass}--color-${color}`,
     `${baseClass}--v-align-${verticalAlign}`,

@@ -139,6 +139,8 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     };
   }
 
+  console.log(data);
+
   // /////////////////////////////////////
   // beforeValidate - Fields
   // /////////////////////////////////////

@@ -1,0 +1,12 @@
+@import '../../../scss/styles';
+
+.icon--edit {
+  height: $baseline;
+  width: $baseline;
+  shape-rendering: auto;
+
+  .fill {
+    fill: $color-dark-gray;
+    stroke: none;
+  }
+}

@@ -9,7 +9,7 @@ export type Props = {
   children?: React.ReactNode,
   onClick?: (event: MouseEvent) => void,
   disabled?: boolean,
-  icon?: React.ReactNode | ['chevron' | 'x' | 'plus'],
+  icon?: React.ReactNode | ['chevron' | 'x' | 'plus' | 'edit'],
   iconStyle?: 'with-border' | 'without-border' | 'none',
   buttonStyle?: 'primary' | 'secondary' | 'transparent' | 'error' | 'none' | 'icon-label',
   round?: boolean,

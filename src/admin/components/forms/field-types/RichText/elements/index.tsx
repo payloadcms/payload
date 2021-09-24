@@ -9,6 +9,7 @@ import ol from './ol';
 import ul from './ul';
 import li from './li';
 import relationship from './relationship';
+import upload from './upload';
 
 export default {
   h1,
@@ -22,4 +23,5 @@ export default {
   ul,
   li,
   relationship,
+  upload,
 };

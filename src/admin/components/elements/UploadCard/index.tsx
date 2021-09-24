@@ -9,6 +9,7 @@ const baseClass = 'upload-card';
 
 const UploadCard: React.FC<Props> = (props) => {
   const {
+    className,
     onClick,
     doc,
     collection,
@@ -16,6 +17,7 @@ const UploadCard: React.FC<Props> = (props) => {
 
   const classes = [
     baseClass,
+    className,
     typeof onClick === 'function' && `${baseClass}--has-on-click`,
   ].filter(Boolean).join(' ');
 
