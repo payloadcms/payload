@@ -1,9 +1,9 @@
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { Field } from '../../../../../fields/config/types';
 
-const formatFields = (config: SanitizedCollectionConfig): (Field | { name: string, label: string, type: string })[] => {
+const formatFields = (config: SanitizedCollectionConfig): Field[] => {
   const hasID = config.fields.findIndex(({ name }) => name === 'id') > -1;
-  let fields = config.fields.reduce((formatted, field) => {
+  let fields: Field[] = config.fields.reduce((formatted, field) => {
     if (field.hidden === true || field?.admin?.disabled === true) {
       return formatted;
     }

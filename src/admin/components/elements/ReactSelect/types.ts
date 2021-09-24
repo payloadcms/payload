@@ -7,6 +7,7 @@ export type Value = {
 }
 
 export type Props = {
+  className?: string
   value?: Value | Value[],
   onChange?: (value: any) => void,
   disabled?: boolean,

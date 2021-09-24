@@ -10,9 +10,11 @@ import MinimalTemplate from '../../../../../../templates/Minimal';
 import UploadGallery from '../../../../../../elements/UploadGallery';
 import ListControls from '../../../../../../elements/ListControls';
 import Button from '../../../../../../elements/Button';
+import ReactSelect from '../../../../../../elements/ReactSelect';
 import Paginator from '../../../../../../elements/Paginator';
 import formatFields from '../../../../../../views/collections/List/formatFields';
-import { Field } from '../../../../../../../../fields/config/types';
+import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
+import Label from '../../../../../Label';
 
 import './index.scss';
 
@@ -26,25 +28,31 @@ const Element = ({ attributes, children, element, path }) => {
   const { relationTo, value } = element;
   const { closeAll, currentModal, open } = useModal();
   const { collections, serverURL, routes: { api } } = useConfig();
+  const [availableCollections] = useState(() => collections.filter(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
   const [renderModal, setRenderModal] = useState(false);
+  const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
+  const [modalCollectionOption, setModalCollectionOption] = useState<{ label: string, value: string}>({ label: relatedCollection.labels.singular, value: relatedCollection.slug });
+  const [modalCollection, setModalCollection] = useState<SanitizedCollectionConfig>(relatedCollection);
   const [listControls, setListControls] = useState<{where?: unknown}>({});
   const [page, setPage] = useState(null);
   const [sort, setSort] = useState(null);
-  const [relatedCollection] = useState(() => collections.find((coll) => coll.slug === relationTo));
-  const [fields, setFields] = useState(relatedCollection?.fields);
+  const [fields, setFields] = useState(formatFields(relatedCollection));
   const editor = useEditor();
   const selected = useSelected();
   const focused = useFocused();
+
   const modalSlug = `${path}-edit-upload`;
   const isOpen = currentModal === modalSlug;
+  const moreThanOneAvailableCollection = availableCollections.length > 1;
 
+  // Get the referenced document
   const [{ data: upload }] = usePayloadAPI(
     `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
     { initialParams },
   );
 
-  const apiURL = isOpen ? `${serverURL}${api}/${relatedCollection.slug}` : null;
-
+  // If modal is open, get active page of upload gallery
+  const apiURL = isOpen ? `${serverURL}${api}/${modalCollection.slug}` : null;
   const [{ data }, { setParams }] = usePayloadAPI(apiURL, {});
 
   const thumbnailSRC = useThumbnail(relatedCollection, upload);
@@ -53,7 +61,7 @@ const Element = ({ attributes, children, element, path }) => {
     const newNode = {
       type: 'upload',
       value: { id: doc.id },
-      relationTo: relatedCollection.slug,
+      relationTo: modalCollection.slug,
       children: [
         { text: ' ' },
       ],
@@ -67,10 +75,10 @@ const Element = ({ attributes, children, element, path }) => {
       { at: elementPath },
     );
     closeAll();
-  }, [closeAll, editor, element, relatedCollection]);
+  }, [closeAll, editor, element, modalCollection]);
 
   useEffect(() => {
-    setFields(formatFields(relatedCollection) as Field[]);
+    setFields(formatFields(relatedCollection));
   }, [relatedCollection]);
 
   useEffect(() => {
@@ -92,6 +100,10 @@ const Element = ({ attributes, children, element, path }) => {
 
     setParams(params);
   }, [setParams, page, listControls, sort]);
+
+  useEffect(() => {
+    setModalCollection(collections.find(({ slug }) => modalCollectionOption.value === slug));
+  }, [modalCollectionOption, collections]);
 
   return (
     <div
@@ -139,32 +151,38 @@ const Element = ({ attributes, children, element, path }) => {
           {isOpen && (
             <MinimalTemplate width="wide">
               <header className={`${baseClass}__modal-header`}>
-                <div>
-                  <h1>
-                    {' '}
-                    Select existing
-                    {' '}
-                    {relatedCollection.labels.singular}
-                  </h1>
-                  <Button
-                    icon="x"
-                    round
-                    buttonStyle="icon-label"
-                    iconStyle="with-border"
-                    onClick={() => {
-                      closeAll();
-                      setRenderModal(false);
-                    }}
+                <h1>
+                  {' '}
+                  Choose
+                  {' '}
+                  {modalCollection.labels.singular}
+                </h1>
+                <Button
+                  icon="x"
+                  round
+                  buttonStyle="icon-label"
+                  iconStyle="with-border"
+                  onClick={() => {
+                    closeAll();
+                    setRenderModal(false);
+                  }}
+                />
+              </header>
+              {moreThanOneAvailableCollection && (
+                <div className={`${baseClass}__select-collection-wrap`}>
+                  <Label label="Select a Collection to Browse" />
+                  <ReactSelect
+                    className={`${baseClass}__select-collection`}
+                    value={modalCollectionOption}
+                    onChange={setModalCollectionOption}
+                    options={availableCollections.map((coll) => ({ label: coll.labels.singular, value: coll.slug }))}
                   />
                 </div>
-                {relatedCollection?.admin?.description && (
-                  <div className={`${baseClass}__modal-sub-header`}>{relatedCollection?.admin?.description}</div>
-                )}
-              </header>
+              )}
               <ListControls
                 handleChange={setListControls}
                 collection={{
-                  ...relatedCollection,
+                  ...modalCollection,
                   fields,
                 }}
                 enableColumns={false}
@@ -173,9 +191,10 @@ const Element = ({ attributes, children, element, path }) => {
               />
               <UploadGallery
                 docs={data?.docs}
-                collection={relatedCollection}
+                collection={modalCollection}
                 onCardClick={(doc) => {
                   handleUpdateUpload(doc);
+                  setRelatedCollection(modalCollection);
                   setRenderModal(false);
                   closeAll();
                 }}
