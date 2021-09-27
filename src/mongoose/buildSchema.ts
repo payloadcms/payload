@@ -47,6 +47,20 @@ const formatBaseSchema = (field: Field) => ({
   index: field.index || field.unique || false,
 });
 
+const localizeSchema = (field: Field, schema, locales) => {
+  if (field.localized) {
+    return {
+      type: locales.reduce((localeSchema, locale) => ({
+        ...localeSchema,
+        [locale]: schema,
+      }), {}),
+      localized: true,
+      index: schema.index,
+    };
+  }
+  return schema;
+};
+
 const buildSchema = (config: SanitizedConfig, configFields: Field[], options = {}, allowIDField = false): Schema => {
   let fields = {};
   let schemaFields = configFields;
@@ -96,128 +110,50 @@ const fieldIndexMap = {
 const fieldToSchemaMap = {
   number: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: Number };
-    let schemaToReturn;
-
-    if (field.localized) {
-      schemaToReturn = {
-        type: config.localization.locales.reduce((localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: baseSchema,
-        }), {}),
-        localized: true,
-      };
-    } else {
-      schemaToReturn = baseSchema;
-    }
 
     return {
       ...fields,
-      [field.name]: schemaToReturn,
+      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
   text: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: String };
-    let schemaToReturn;
-
-    if (field.localized) {
-      schemaToReturn = {
-        type: config.localization.locales.reduce((localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: baseSchema,
-        }), {}),
-        localized: true,
-      };
-    } else {
-      schemaToReturn = baseSchema;
-    }
 
     return {
       ...fields,
-      [field.name]: schemaToReturn,
+      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
   email: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: String };
-    let schemaToReturn;
-
-    if (field.localized) {
-      schemaToReturn = {
-        type: config.localization.locales.reduce((localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: baseSchema,
-        }), {}),
-        localized: true,
-      };
-    } else {
-      schemaToReturn = baseSchema;
-    }
 
     return {
       ...fields,
-      [field.name]: schemaToReturn,
+      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
   textarea: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: String };
-    let schemaToReturn;
-
-    if (field.localized) {
-      schemaToReturn = {
-        type: config.localization.locales.reduce((localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: baseSchema,
-        }), {}),
-        localized: true,
-      };
-    } else {
-      schemaToReturn = baseSchema;
-    }
 
     return {
       ...fields,
-      [field.name]: schemaToReturn,
+      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
   richText: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: Schema.Types.Mixed };
-    let schemaToReturn;
-
-    if (field.localized) {
-      schemaToReturn = {
-        type: config.localization.locales.reduce((localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: baseSchema,
-        }), {}),
-        localized: true,
-      };
-    } else {
-      schemaToReturn = baseSchema;
-    }
 
     return {
       ...fields,
-      [field.name]: schemaToReturn,
+      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
   code: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: String };
-    let schemaToReturn;
-
-    if (field.localized) {
-      schemaToReturn = {
-        type: config.localization.locales.reduce((localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: baseSchema,
-        }), {}),
-        localized: true,
-      };
-    } else {
-      schemaToReturn = baseSchema;
-    }
 
     return {
       ...fields,
-      [field.name]: schemaToReturn,
+      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
   point: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
@@ -234,23 +170,10 @@ const fieldToSchemaMap = {
         default: field.defaultValue || undefined,
       },
     };
-    let schemaToReturn;
-
-    if (field.localized) {
-      schemaToReturn = {
-        type: config.localization.locales.reduce((localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: baseSchema,
-        }), {}),
-        localized: true,
-      };
-    } else {
-      schemaToReturn = baseSchema;
-    }
 
     return {
       ...fields,
-      [field.name]: schemaToReturn,
+      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
   radio: (field: RadioField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
@@ -262,65 +185,26 @@ const fieldToSchemaMap = {
         return option;
       }),
     };
-    let schemaToReturn;
-
-    if (field.localized) {
-      schemaToReturn = {
-        type: config.localization.locales.reduce((localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: baseSchema,
-        }), {}),
-        localized: true,
-      };
-    } else {
-      schemaToReturn = baseSchema;
-    }
 
     return {
       ...fields,
-      [field.name]: schemaToReturn,
+      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
   checkbox: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: Boolean };
-    let schemaToReturn;
-
-    if (field.localized) {
-      schemaToReturn = {
-        type: config.localization.locales.reduce((localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: baseSchema,
-        }), {}),
-        localized: true,
-      };
-    } else {
-      schemaToReturn = baseSchema;
-    }
 
     return {
       ...fields,
-      [field.name]: schemaToReturn,
+      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
   date: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field), type: Date };
-    let schemaToReturn;
-
-    if (field.localized) {
-      schemaToReturn = {
-        type: config.localization.locales.reduce((localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: baseSchema,
-        }), {}),
-        localized: true,
-      };
-    } else {
-      schemaToReturn = baseSchema;
-    }
 
     return {
       ...fields,
-      [field.name]: schemaToReturn,
+      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
   upload: (field: UploadField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
@@ -330,23 +214,9 @@ const fieldToSchemaMap = {
       ref: field.relationTo,
     };
 
-    let schemaToReturn;
-
-    if (field.localized) {
-      schemaToReturn = {
-        type: config.localization.locales.reduce((localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: baseSchema,
-        }), {}),
-        localized: true,
-      };
-    } else {
-      schemaToReturn = baseSchema;
-    }
-
     return {
       ...fields,
-      [field.name]: schemaToReturn,
+      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
   relationship: (field: RelationshipField, fields: SchemaDefinition, config: SanitizedConfig) => {
@@ -424,23 +294,9 @@ const fieldToSchemaMap = {
       type: [buildSchema(config, field.fields, { _id: false, id: false }, true)],
     };
 
-    let schemaToReturn;
-
-    if (field.localized) {
-      schemaToReturn = {
-        type: config.localization.locales.reduce((localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: baseSchema,
-        }), {}),
-        localized: true,
-      };
-    } else {
-      schemaToReturn = baseSchema;
-    }
-
     return {
       ...fields,
-      [field.name]: schemaToReturn,
+      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
   group: (field: GroupField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
@@ -453,23 +309,9 @@ const fieldToSchemaMap = {
       type: buildSchema(config, field.fields, { _id: false, id: false }),
     };
 
-    let schemaToReturn;
-
-    if (field.localized) {
-      schemaToReturn = {
-        type: config.localization.locales.reduce((localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: baseSchema,
-        }), {}),
-        localized: true,
-      };
-    } else {
-      schemaToReturn = baseSchema;
-    }
-
     return {
       ...fields,
-      [field.name]: schemaToReturn,
+      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
   select: (field: SelectField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
@@ -481,26 +323,11 @@ const fieldToSchemaMap = {
         return option;
       }),
     };
-
-    let schemaToReturn;
-
-    if (field.localized) {
-      schemaToReturn = {
-        type: config.localization.locales.reduce((localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: baseSchema,
-        }), {}),
-        localized: true,
-      };
-    } else {
-      schemaToReturn = baseSchema;
-    }
-
-    if (field.hasMany) schemaToReturn = [schemaToReturn];
+    const schemaToReturn = localizeSchema(field, baseSchema, config.localization.locales);
 
     return {
       ...fields,
-      [field.name]: schemaToReturn,
+      [field.name]: field.hasMany ? [schemaToReturn] : schemaToReturn,
     };
   },
   blocks: (field: BlockField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
