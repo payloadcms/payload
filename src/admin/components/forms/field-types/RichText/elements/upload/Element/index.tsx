@@ -17,8 +17,10 @@ import { SanitizedCollectionConfig } from '../../../../../../../../collections/c
 import Label from '../../../../../Label';
 
 import './index.scss';
+import '../modal.scss';
 
 const baseClass = 'rich-text-upload';
+const baseModalClass = 'rich-text-upload-modal';
 
 const initialParams = {
   depth: 0,
@@ -145,14 +147,13 @@ const Element = ({ attributes, children, element, path }) => {
       {children}
       {renderModal && (
         <Modal
-          className={`${baseClass}__modal`}
+          className={baseModalClass}
           slug={modalSlug}
         >
           {isOpen && (
             <MinimalTemplate width="wide">
-              <header className={`${baseClass}__modal-header`}>
+              <header className={`${baseModalClass}__header`}>
                 <h1>
-                  {' '}
                   Choose
                   {' '}
                   {modalCollection.labels.singular}
@@ -169,7 +170,7 @@ const Element = ({ attributes, children, element, path }) => {
                 />
               </header>
               {moreThanOneAvailableCollection && (
-                <div className={`${baseClass}__select-collection-wrap`}>
+                <div className={`${baseModalClass}__select-collection-wrap`}>
                   <Label label="Select a Collection to Browse" />
                   <ReactSelect
                     className={`${baseClass}__select-collection`}

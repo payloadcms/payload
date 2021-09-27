@@ -40,36 +40,4 @@
     box-shadow: $focus-box-shadow;
     outline: none;
   }
-
-  &__modal {
-    @include blur-bg;
-    display: flex;
-    align-items: center;
-
-    .template-minimal {
-      padding-top: base(4);
-      align-items: flex-start;
-    }
-  }
-
-  &__modal-header {
-    margin-bottom: $baseline;
-    display: flex;
-
-    h1 {
-      margin: 0 auto 0 0;
-    }
-
-    .btn {
-      margin: 0 0 0 $baseline;
-    }
-  }
-
-  &__modal-sub-header {
-    margin-top: base(.25);
-  }
-
-  &__select-collection-wrap {
-    margin-bottom: base(1);
-  }
 }
