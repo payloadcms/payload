@@ -9,7 +9,9 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
   const schema = buildSchema(
     config,
     collection.fields,
-    { timestamps: collection.timestamps !== false, ...schemaOptions },
+    {
+      options: { timestamps: collection.timestamps !== false, ...schemaOptions },
+    },
   );
 
   schema.plugin(paginate, { useEstimatedCount: true })

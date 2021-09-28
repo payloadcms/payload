@@ -1,11 +1,17 @@
 /* eslint-disable no-use-before-define */
-import { Schema, SchemaDefinition } from 'mongoose';
+import { Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
 import { ArrayField, Block, BlockField, Field, GroupField, RadioField, RelationshipField, RowField, SelectField, UploadField } from '../fields/config/types';
 
-type FieldSchemaGenerator = (field: Field, fields: SchemaDefinition, config: SanitizedConfig) => SchemaDefinition;
+type BuildSchemaOptions = {
+  options?: SchemaOptions
+  allowIDField?: boolean
+  disableRequired?: boolean
+}
 
-const setBlockDiscriminators = (fields: Field[], schema: Schema, config: SanitizedConfig) => {
+type FieldSchemaGenerator = (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => SchemaDefinition;
+
+const setBlockDiscriminators = (fields: Field[], schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
   fields.forEach((field) => {
     const blockFieldType = field as BlockField;
     if (blockFieldType.type === 'blocks' && blockFieldType.blocks && blockFieldType.blocks.length > 0) {
@@ -15,7 +21,7 @@ const setBlockDiscriminators = (fields: Field[], schema: Schema, config: Sanitiz
         blockItem.fields.forEach((blockField) => {
           const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[blockField.type];
           if (fieldSchema) {
-            blockSchemaFields = fieldSchema(blockField, blockSchemaFields, config);
+            blockSchemaFields = fieldSchema(blockField, blockSchemaFields, config, buildSchemaOptions);
           }
         });
 
@@ -26,28 +32,29 @@ const setBlockDiscriminators = (fields: Field[], schema: Schema, config: Sanitiz
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore Possible incorrect typing in mongoose types, this works
             schema.path(`${field.name}.${locale}`).discriminator(blockItem.slug, blockSchema);
-            setBlockDiscriminators(blockItem.fields, blockSchema, config);
+            setBlockDiscriminators(blockItem.fields, blockSchema, config, buildSchemaOptions);
           });
         } else {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore Possible incorrect typing in mongoose types, this works
           schema.path(field.name).discriminator(blockItem.slug, blockSchema);
-          setBlockDiscriminators(blockItem.fields, blockSchema, config);
+          setBlockDiscriminators(blockItem.fields, blockSchema, config, buildSchemaOptions);
         }
       });
     }
   });
 };
 
-const formatBaseSchema = (field: Field) => ({
+const formatBaseSchema = (field: Field, buildSchemaOptions: BuildSchemaOptions) => ({
   sparse: field.unique && field.localized,
   unique: field.unique || false,
-  required: (field.required && !field.localized && !field?.admin?.condition && !field?.access?.create) || false,
+  required: (!buildSchemaOptions.disableRequired && field.required && !field.localized && !field?.admin?.condition && !field?.access?.create) || false,
   default: field.defaultValue || undefined,
   index: field.index || field.unique || false,
 });
 
-const buildSchema = (config: SanitizedConfig, configFields: Field[], options = {}, allowIDField = false): Schema => {
+const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchemaOptions: BuildSchemaOptions = {}): Schema => {
+  const { allowIDField, options } = buildSchemaOptions;
   let fields = {};
   let schemaFields = configFields;
   const indexFields = [];
@@ -66,7 +73,7 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], options = {
     const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[field.type];
 
     if (fieldSchema) {
-      fields = fieldSchema(field, fields, config);
+      fields = fieldSchema(field, fields, config, buildSchemaOptions);
     }
     // geospatial field index must be created after the schema is created
     if (fieldIndexMap[field.type]) {
@@ -79,7 +86,7 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], options = {
     schema.index(index);
   });
 
-  setBlockDiscriminators(configFields, schema, config);
+  setBlockDiscriminators(configFields, schema, config, buildSchemaOptions);
 
   return schema;
 };
@@ -94,8 +101,8 @@ const fieldIndexMap = {
 };
 
 const fieldToSchemaMap = {
-  number: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
-    const baseSchema = { ...formatBaseSchema(field), type: Number };
+  number: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Number };
     let schemaToReturn;
 
     if (field.localized) {
@@ -115,8 +122,8 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  text: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
-    const baseSchema = { ...formatBaseSchema(field), type: String };
+  text: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
     let schemaToReturn;
 
     if (field.localized) {
@@ -136,8 +143,8 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  email: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
-    const baseSchema = { ...formatBaseSchema(field), type: String };
+  email: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
     let schemaToReturn;
 
     if (field.localized) {
@@ -157,8 +164,8 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  textarea: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
-    const baseSchema = { ...formatBaseSchema(field), type: String };
+  textarea: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
     let schemaToReturn;
 
     if (field.localized) {
@@ -178,8 +185,8 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  richText: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
-    const baseSchema = { ...formatBaseSchema(field), type: Schema.Types.Mixed };
+  richText: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Schema.Types.Mixed };
     let schemaToReturn;
 
     if (field.localized) {
@@ -199,8 +206,8 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  code: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
-    const baseSchema = { ...formatBaseSchema(field), type: String };
+  code: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
     let schemaToReturn;
 
     if (field.localized) {
@@ -253,9 +260,9 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  radio: (field: RadioField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
+  radio: (field: RadioField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     const baseSchema = {
-      ...formatBaseSchema(field),
+      ...formatBaseSchema(field, buildSchemaOptions),
       type: String,
       enum: field.options.map((option) => {
         if (typeof option === 'object') return option.value;
@@ -281,8 +288,8 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  checkbox: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
-    const baseSchema = { ...formatBaseSchema(field), type: Boolean };
+  checkbox: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Boolean };
     let schemaToReturn;
 
     if (field.localized) {
@@ -302,8 +309,8 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  date: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
-    const baseSchema = { ...formatBaseSchema(field), type: Date };
+  date: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Date };
     let schemaToReturn;
 
     if (field.localized) {
@@ -323,9 +330,9 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  upload: (field: UploadField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
+  upload: (field: UploadField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     const baseSchema = {
-      ...formatBaseSchema(field),
+      ...formatBaseSchema(field, buildSchemaOptions),
       type: Schema.Types.Mixed,
       ref: field.relationTo,
     };
@@ -349,7 +356,7 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  relationship: (field: RelationshipField, fields: SchemaDefinition, config: SanitizedConfig) => {
+  relationship: (field: RelationshipField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
     const hasManyRelations = Array.isArray(field.relationTo);
     let schemaToReturn: { [key: string]: any } = {};
 
@@ -367,7 +374,7 @@ const fieldToSchemaMap = {
             localeSchema.relationTo = { type: String, enum: field.relationTo };
           } else {
             localeSchema = {
-              ...formatBaseSchema(field),
+              ...formatBaseSchema(field, buildSchemaOptions),
               type: Schema.Types.Mixed,
               ref: field.relationTo,
             };
@@ -391,7 +398,7 @@ const fieldToSchemaMap = {
       if (field.hasMany) schemaToReturn = [schemaToReturn];
     } else {
       schemaToReturn = {
-        ...formatBaseSchema(field),
+        ...formatBaseSchema(field, buildSchemaOptions),
         type: Schema.Types.Mixed,
         ref: field.relationTo,
       };
@@ -404,24 +411,27 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  row: (field: RowField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
+  row: (field: RowField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     const newFields = { ...fields };
 
     field.fields.forEach((rowField: Field) => {
       const fieldSchemaMap: FieldSchemaGenerator = fieldToSchemaMap[rowField.type];
 
       if (fieldSchemaMap) {
-        const fieldSchema = fieldSchemaMap(rowField, fields, config);
+        const fieldSchema = fieldSchemaMap(rowField, fields, config, buildSchemaOptions);
         newFields[rowField.name] = fieldSchema[rowField.name];
       }
     });
 
     return newFields;
   },
-  array: (field: ArrayField, fields: SchemaDefinition, config: SanitizedConfig) => {
+  array: (field: ArrayField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
     const baseSchema = {
-      ...formatBaseSchema(field),
-      type: [buildSchema(config, field.fields, { _id: false, id: false }, true)],
+      ...formatBaseSchema(field, buildSchemaOptions),
+      type: [buildSchema(config, field.fields, {
+        options: { _id: false, id: false },
+        allowIDField: true,
+      })],
     };
 
     let schemaToReturn;
@@ -443,14 +453,22 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  group: (field: GroupField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
+  group: (field: GroupField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     let { required } = field;
     if (field?.admin?.condition || field?.localized || field?.access?.create) required = false;
 
+    const formattedBaseSchema = formatBaseSchema(field, buildSchemaOptions);
+
     const baseSchema = {
-      ...formatBaseSchema(field),
+      ...formattedBaseSchema,
       required: required && field.fields.some((subField) => (subField.required && !subField.localized && !subField?.admin?.condition && !subField?.access?.create)),
-      type: buildSchema(config, field.fields, { _id: false, id: false }),
+      type: buildSchema(config, field.fields, {
+        options: {
+          _id: false,
+          id: false,
+        },
+        disableRequired: !formattedBaseSchema.required,
+      }),
     };
 
     let schemaToReturn;
@@ -472,9 +490,9 @@ const fieldToSchemaMap = {
       [field.name]: schemaToReturn,
     };
   },
-  select: (field: SelectField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
+  select: (field: SelectField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     const baseSchema = {
-      ...formatBaseSchema(field),
+      ...formatBaseSchema(field, buildSchemaOptions),
       type: String,
       enum: field.options.map((option) => {
         if (typeof option === 'object') return option.value;
