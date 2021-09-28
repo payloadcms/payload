@@ -4,6 +4,7 @@ import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection, PaginatedDocs } from '../config/types';
 import { hasWhereAccessResult } from '../../auth/types';
+import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 
 export type Arguments = {
   collection: Collection
@@ -55,6 +56,7 @@ async function find(incomingArgs: Arguments): Promise<PaginatedDocs> {
   // /////////////////////////////////////
 
   const queryToBuild: { where?: Where} = {};
+  let useEstimatedCount = false;
 
   if (where) {
     let and = [];
@@ -68,6 +70,10 @@ async function find(incomingArgs: Arguments): Promise<PaginatedDocs> {
         ...and,
       ],
     };
+
+    const constraints = flattenWhereConstraints(queryToBuild);
+
+    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 
   if (!overrideAccess) {
@@ -110,7 +116,7 @@ async function find(incomingArgs: Arguments): Promise<PaginatedDocs> {
     sort,
     lean: true,
     leanWithId: true,
-    useEstimatedCount: true,
+    useEstimatedCount,
   };
 
   const paginatedDocs = await Model.paginate(query, optionsToExecute);
