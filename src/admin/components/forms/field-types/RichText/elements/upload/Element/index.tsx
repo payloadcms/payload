@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
-import { ReactEditor, useEditor, useFocused, useSelected } from 'slate-react';
+import { ReactEditor, useSlateStatic, useFocused, useSelected } from 'slate-react';
 import { useConfig } from '@payloadcms/config-provider';
 import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
 import FileGraphic from '../../../../../../graphics/File';
@@ -39,7 +39,7 @@ const Element = ({ attributes, children, element, path }) => {
   const [page, setPage] = useState(null);
   const [sort, setSort] = useState(null);
   const [fields, setFields] = useState(formatFields(relatedCollection));
-  const editor = useEditor();
+  const editor = useSlateStatic();
   const selected = useSelected();
   const focused = useFocused();
 

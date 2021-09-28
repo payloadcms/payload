@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import isHotkey from 'is-hotkey';
-import { Editable, withReact, Slate } from 'slate-react';
-import { createEditor, Transforms, Node } from 'slate';
-import { withHistory } from 'slate-history';
+import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor } from 'slate';
+import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
+import { HistoryEditor, withHistory } from 'slate-history';
 import { richText } from '../../../../../fields/validations';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
@@ -30,6 +30,17 @@ const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethr
 const enterBreakOutTypes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
 const baseClass = 'rich-text';
+type CustomText = { text: string; [x: string]: unknown }
+
+type CustomElement = { type: string; children: CustomText[] }
+
+declare module 'slate' {
+  interface CustomTypes {
+    Editor: BaseEditor & ReactEditor & HistoryEditor
+    Element: CustomElement
+    Text: CustomText
+  }
+}
 
 const RichText: React.FC<Props> = (props) => {
   const {
@@ -258,19 +269,21 @@ const RichText: React.FC<Props> = (props) => {
                   } else {
                     const selectedElement = Node.descendant(editor, editor.selection.anchor.path.slice(0, -1));
 
-                    // Allow hard enter to "break out" of certain elements
-                    if (enterBreakOutTypes.includes(String(selectedElement.type))) {
-                      event.preventDefault();
-                      const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
+                    if (SlateElement.isElement(selectedElement)) {
+                      // Allow hard enter to "break out" of certain elements
+                      if (enterBreakOutTypes.includes(String(selectedElement.type))) {
+                        event.preventDefault();
+                        const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
 
-                      if (String(selectedLeaf.text).length === editor.selection.anchor.offset) {
-                        Transforms.insertNodes(editor, {
-                          type: 'p',
-                          children: [{ text: '', marks: [] }],
-                        });
-                      } else {
-                        Transforms.splitNodes(editor);
-                        Transforms.setNodes(editor, { type: 'p' });
+                        if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === editor.selection.anchor.offset) {
+                          Transforms.insertNodes(editor, {
+                            type: 'p',
+                            children: [{ text: '' }],
+                          });
+                        } else {
+                          Transforms.splitNodes(editor);
+                          Transforms.setNodes(editor, { type: 'p' });
+                        }
                       }
                     }
                   }
@@ -279,11 +292,11 @@ const RichText: React.FC<Props> = (props) => {
                 if (event.key === 'Backspace') {
                   const selectedElement = Node.descendant(editor, editor.selection.anchor.path.slice(0, -1));
 
-                  if (selectedElement.type === 'li') {
+                  if (SlateElement.isElement(selectedElement) && selectedElement.type === 'li') {
                     const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
-                    if (String(selectedLeaf.text).length === 1) {
+                    if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === 1) {
                       Transforms.unwrapNodes(editor, {
-                        match: (n) => listTypes.includes(n.type as string),
+                        match: (n) => SlateElement.isElement(n) && listTypes.includes(n.type),
                         split: true,
                       });
 

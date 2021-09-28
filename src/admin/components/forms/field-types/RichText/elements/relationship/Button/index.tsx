@@ -31,7 +31,7 @@ const insertRelationship = (editor, { value, relationTo }) => {
     ],
   };
 
-  const nodes = [relationship, { children: [{ text: '' }] }];
+  const nodes = [relationship, { type: 'p', children: [{ text: '' }] }];
 
   if (editor.blurSelection) {
     Transforms.select(editor, editor.blurSelection);

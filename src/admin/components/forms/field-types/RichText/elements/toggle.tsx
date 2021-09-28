@@ -1,4 +1,4 @@
-import { Transforms } from 'slate';
+import { Element, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import isElementActive from './isActive';
 import listTypes from './listTypes';
@@ -20,7 +20,7 @@ const toggleElement = (editor, format) => {
   }
 
   Transforms.unwrapNodes(editor, {
-    match: (n) => listTypes.includes(n.type as string),
+    match: (n) => Element.isElement(n) && listTypes.includes(n.type as string),
     split: true,
   });
 
