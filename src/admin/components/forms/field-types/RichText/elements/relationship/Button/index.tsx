@@ -38,11 +38,6 @@ const insertRelationship = (editor, { value, relationTo }) => {
   }
 
   Transforms.insertNodes(editor, nodes);
-
-  const currentPath = editor.selection.anchor.path[0];
-  const newSelection = { anchor: { path: [currentPath + 1, 0], offset: 0 }, focus: { path: [currentPath + 1, 0], offset: 0 } };
-
-  Transforms.select(editor, newSelection);
   ReactEditor.focus(editor);
 };
 
