@@ -9,7 +9,7 @@ const buildModel = (config: SanitizedConfig): mongoose.PaginateModel<any> | null
     const Globals = mongoose.model('globals', globalsSchema);
 
     Object.values(config.globals).forEach((globalConfig) => {
-      const globalSchema = buildSchema(config, globalConfig.fields, {});
+      const globalSchema = buildSchema(config, globalConfig.fields, { global: true });
       Globals.discriminator(globalConfig.slug, globalSchema);
     });
 

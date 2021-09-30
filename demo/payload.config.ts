@@ -130,6 +130,7 @@ export default buildConfig({
     defaultLocale: 'en',
     fallback: true,
   },
+  // indexSortableFields: true,
   hooks: {
     afterError: (err) => {
       console.error('global error config handler', err);

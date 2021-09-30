@@ -80,6 +80,7 @@ export default joi.object({
     }),
   local: joi.boolean(),
   upload: joi.object(),
+  indexSortableFields: joi.boolean(),
   rateLimit: joi.object()
     .keys({
       window: joi.number(),
