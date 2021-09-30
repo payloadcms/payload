@@ -11,8 +11,6 @@
 ### Features
 
 * adds rich text editor upload element ([aa76950](https://github.com/payloadcms/payload/commit/aa769500c934f4dee51a24c0cfc0297c12b5ae47))
-* adds UploadGallery to rich text upload ([6f3edf9](https://github.com/payloadcms/payload/commit/6f3edf9fbb1c57a54e3aab30ea6378e7771f0b7d))
-* progress to rich text upload ([85c6c30](https://github.com/payloadcms/payload/commit/85c6c303d5f872295351fc9452a1eab9fb4ad514))
 * updates slate, finishes rte upload ([08db431](https://github.com/payloadcms/payload/commit/08db431c0c4626a0d10f4e1c7bca29fa075eedc6))
 
 ## [0.10.4](https://github.com/payloadcms/payload/compare/v0.10.0...v0.10.4) (2021-09-22)

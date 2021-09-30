@@ -110,4 +110,5 @@ export default joi.object({
   plugins: joi.array().items(
     joi.func(),
   ),
+  debug: joi.boolean(),
 });
