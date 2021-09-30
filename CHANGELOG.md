@@ -1,3 +1,11 @@
+## [0.10.6](https://github.com/payloadcms/payload/compare/v0.10.5...v0.10.6) (2021-09-30)
+
+
+### Bug Fixes
+
+* allow debug in payload config ([65bf13d](https://github.com/payloadcms/payload/commit/65bf13d7c137eafdbbeadc1d36d26b7b8389088f))
+* relationship + new slate incompatibility ([f422053](https://github.com/payloadcms/payload/commit/f42205307e33916fc3b139f6ee97eb66d5d0816a))
+
 ## [0.10.5](https://github.com/payloadcms/payload/compare/v0.10.4...v0.10.5) (2021-09-28)
 
 
