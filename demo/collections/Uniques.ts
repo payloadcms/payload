@@ -1,6 +1,6 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 
-const Uniques: PayloadCollectionConfig = {
+const Uniques: CollectionConfig = {
   slug: 'uniques',
   labels: {
     singular: 'Unique',

@@ -1,10 +1,10 @@
-import { MongoClient } from 'mongodb';
+import MongoClient from 'mongodb';
 import getConfig from '../config/load';
-import { email, password, mongo } from '../../tests/api/credentials';
+import { email, password, connection } from '../mongoose/testCredentials';
 
 require('isomorphic-fetch');
 
-const { url: mongoURL, port: mongoPort, name: mongoDBName } = mongo;
+const { url: mongoURL, port: mongoPort, name: mongoDBName } = connection;
 
 const { serverURL: url } = getConfig();
 
@@ -41,7 +41,7 @@ describe('Users REST API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.token).not.toBeNull();
+    expect(data.token).toBeDefined();
 
     ({ token } = data);
   });
@@ -56,7 +56,7 @@ describe('Users REST API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.email).not.toBeNull();
+    expect(data.user.email).toBeDefined();
   });
 
   it('should refresh a token and reset its expiration', async () => {
@@ -137,7 +137,10 @@ describe('Users REST API', () => {
     });
 
     expect(response.status).toBe(201);
-    const client = await MongoClient.connect(`${mongoURL}:${mongoPort}`);
+    const client = await MongoClient.connect(`${mongoURL}:${mongoPort}`, {
+      useUnifiedTopology: true,
+    });
+
     const db = client.db(mongoDBName);
     const userResult = await db.collection('public-users').findOne({ email: emailToVerify });
     const { _verified, _verificationToken } = userResult;

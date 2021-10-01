@@ -1,11 +1,12 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 import checkRole from '../access/checkRole';
 import Email from '../blocks/Email';
 import Quote from '../blocks/Quote';
 import NumberBlock from '../blocks/Number';
 import CallToAction from '../blocks/CallToAction';
+import CollectionDescription from '../customComponents/CollectionDescription';
 
-const AllFields: PayloadCollectionConfig = {
+const AllFields: CollectionConfig = {
   slug: 'all-fields',
   labels: {
     singular: 'All Fields',
@@ -22,6 +23,7 @@ const AllFields: PayloadCollectionConfig = {
 
       return null;
     },
+    description: CollectionDescription,
   },
   access: {
     read: () => true,
@@ -41,10 +43,32 @@ const AllFields: PayloadCollectionConfig = {
       },
     },
     {
+      name: 'descriptionText',
+      type: 'text',
+      label: 'Text with text description',
+      defaultValue: 'Default Value',
+      admin: {
+        description: 'This text describes the field',
+      },
+    },
+    {
+      name: 'descriptionFunction',
+      type: 'text',
+      label: 'Text with function description',
+      defaultValue: 'Default Value',
+      maxLength: 20,
+      admin: {
+        description: ({ value }) => (typeof value === 'string' ? `${20 - value.length} characters left` : ''),
+      },
+    },
+    {
       name: 'image',
       type: 'upload',
       label: 'Image',
       relationTo: 'media',
+      admin: {
+        description: 'No selfies',
+      },
     },
     {
       name: 'select',
@@ -91,6 +115,7 @@ const AllFields: PayloadCollectionConfig = {
       name: 'dayOnlyDateFieldExample',
       label: 'Day Only',
       type: 'date',
+      required: true,
       admin: {
         date: {
           pickerAppearance: 'dayOnly',
@@ -226,6 +251,9 @@ const AllFields: PayloadCollectionConfig = {
       label: 'Relationship to One Collection',
       name: 'relationship',
       relationTo: 'conditions',
+      admin: {
+        description: 'Relates to description',
+      },
     },
     {
       type: 'relationship',
@@ -244,6 +272,9 @@ const AllFields: PayloadCollectionConfig = {
       type: 'textarea',
       label: 'Textarea',
       name: 'textarea',
+      admin: {
+        description: 'Hello textarea description',
+      },
     },
     {
       name: 'richText',

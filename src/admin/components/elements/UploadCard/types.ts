@@ -1,7 +1,8 @@
-import { CollectionConfig } from '../../../../collections/config/types';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 
 export type Props = {
-  collection: CollectionConfig,
+  className?: string
+  collection: SanitizedCollectionConfig,
   doc: Record<string, unknown>
   onClick?: () => void,
 }

@@ -13,6 +13,7 @@ import SelectExistingModal from './SelectExisting';
 import { Props } from './types';
 
 import './index.scss';
+import FieldDescription from '../../FieldDescription';
 
 const baseClass = 'upload';
 
@@ -30,6 +31,7 @@ const Upload: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
+      description,
       condition,
     } = {},
     label,
@@ -160,6 +162,10 @@ const Upload: React.FC<Props> = (props) => {
             },
             addModalSlug,
           }}
+          />
+          <FieldDescription
+            value={value}
+            description={description}
           />
         </React.Fragment>
       )}

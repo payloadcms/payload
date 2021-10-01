@@ -1,3 +1,4 @@
+import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 
 export type Options = {
@@ -10,6 +11,7 @@ export type Options = {
   overrideAccess?: boolean
   showHiddenFields?: boolean
   disableErrors?: boolean
+  req?: PayloadRequest
 }
 
 export default async function findByID(options: Options): Promise<Document> {
@@ -23,6 +25,7 @@ export default async function findByID(options: Options): Promise<Document> {
     overrideAccess = true,
     disableErrors = false,
     showHiddenFields,
+    req,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -35,6 +38,7 @@ export default async function findByID(options: Options): Promise<Document> {
     disableErrors,
     showHiddenFields,
     req: {
+      ...req,
       user,
       payloadAPI: 'local',
       locale,

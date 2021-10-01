@@ -5,6 +5,7 @@ import Label from '../../Label';
 import Error from '../../Error';
 import { text } from '../../../../../fields/validations';
 import { Props } from './types';
+import FieldDescription from '../../FieldDescription';
 
 import './index.scss';
 
@@ -20,6 +21,7 @@ const Text: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
+      description,
       condition,
     } = {},
   } = props;
@@ -29,8 +31,8 @@ const Text: React.FC<Props> = (props) => {
   const fieldType = useFieldType<string>({
     path,
     validate,
-    condition,
     enableDebouncedValue: true,
+    condition,
   });
 
   const {
@@ -72,6 +74,10 @@ const Text: React.FC<Props> = (props) => {
         type="text"
         id={path}
         name={path}
+      />
+      <FieldDescription
+        value={value}
+        description={description}
       />
     </div>
   );

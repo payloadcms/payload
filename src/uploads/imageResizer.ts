@@ -1,10 +1,11 @@
 import fs from 'fs';
 import sharp from 'sharp';
 import sanitize from 'sanitize-filename';
-import getImageSize from './getImageSize';
+import { ProbedImageSize } from './getImageSize';
 import fileExists from './fileExists';
-import { CollectionConfig } from '../collections/config/types';
+import { SanitizedCollectionConfig } from '../collections/config/types';
 import { FileSizes, ImageSize } from './types';
+import { PayloadRequest } from '../express/types';
 
 function getOutputImage(sourceImage: string, size: ImageSize) {
   const extension = sourceImage.split('.').pop();
@@ -27,22 +28,32 @@ function getOutputImage(sourceImage: string, size: ImageSize) {
  * @returns image sizes keyed to strings
  */
 export default async function resizeAndSave(
+  req: PayloadRequest,
+  file: Buffer,
+  dimensions: ProbedImageSize,
   staticPath: string,
-  config: CollectionConfig,
+  config: SanitizedCollectionConfig,
   savedFilename: string,
   mimeType: string,
 ): Promise<FileSizes> {
-  const { imageSizes } = config.upload;
-
-  const sourceImage = `${staticPath}/${savedFilename}`;
-
-  const dimensions = await getImageSize(sourceImage);
+  const { imageSizes, disableLocalStorage } = config.upload;
 
   const sizes = imageSizes
-    .filter((desiredSize) => desiredSize.width < dimensions.width)
+    .filter((desiredSize) => desiredSize.width < dimensions.width || desiredSize.height < dimensions.height)
     .map(async (desiredSize) => {
+      const resized = await sharp(file)
+        .resize(desiredSize.width, desiredSize.height, {
+          position: desiredSize.crop || 'centre',
+        });
+
+      const bufferObject = await resized.toBuffer({
+        resolveWithObject: true,
+      });
+
+      req.payloadUploadSizes[desiredSize.name] = bufferObject.data;
+
       const outputImage = getOutputImage(savedFilename, desiredSize);
-      const imageNameWithDimensions = `${outputImage.name}-${outputImage.width}x${outputImage.height}.${outputImage.extension}`;
+      const imageNameWithDimensions = `${outputImage.name}-${bufferObject.info.width}x${bufferObject.info.height}.${outputImage.extension}`;
       const imagePath = `${staticPath}/${imageNameWithDimensions}`;
       const fileAlreadyExists = await fileExists(imagePath);
 
@@ -50,16 +61,16 @@ export default async function resizeAndSave(
         fs.unlinkSync(imagePath);
       }
 
-      const output = await sharp(sourceImage)
-        .resize(desiredSize.width, desiredSize.height, {
-          position: desiredSize.crop || 'centre',
-        })
-        .toFile(imagePath);
+      if (!disableLocalStorage) {
+        await resized.toFile(imagePath);
+      }
 
       return {
-        ...desiredSize,
+        name: desiredSize.name,
+        width: bufferObject.info.width,
+        height: bufferObject.info.height,
         filename: imageNameWithDimensions,
-        filesize: output.size,
+        filesize: bufferObject.info.size,
         mimeType,
       };
     });

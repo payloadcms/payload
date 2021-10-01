@@ -1,5 +1,5 @@
 import { Data } from '../../Form/types';
-import { ArrayField, Labels, Field } from '../../../../../fields/config/types';
+import { ArrayField, Labels, Field, Description } from '../../../../../fields/config/types';
 import { FieldTypes } from '..';
 import { FieldPermissions } from '../../../../../auth/types';
 
@@ -30,4 +30,5 @@ export type RenderArrayProps = {
   showError: boolean
   errorMessage: string
   rows: Data[]
+  description?: Description
 }

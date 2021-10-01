@@ -17,6 +17,11 @@ const baseClass = 'add-upload-modal';
 const AddUploadModal: React.FC<Props> = (props) => {
   const {
     collection,
+    collection: {
+      admin: {
+        description,
+      } = {},
+    } = {},
     slug,
     fieldTypes,
     setValue,
@@ -50,19 +55,24 @@ const AddUploadModal: React.FC<Props> = (props) => {
           disableSuccessStatus
         >
           <header className={`${baseClass}__header`}>
-            <h1>
-              New
-              {' '}
-              {collection.labels.singular}
-            </h1>
-            <FormSubmit>Save</FormSubmit>
-            <Button
-              icon="x"
-              round
-              buttonStyle="icon-label"
-              iconStyle="with-border"
-              onClick={closeAll}
-            />
+            <div>
+              <h1>
+                New
+                {' '}
+                {collection.labels.singular}
+              </h1>
+              <FormSubmit>Save</FormSubmit>
+              <Button
+                icon="x"
+                round
+                buttonStyle="icon-label"
+                iconStyle="with-border"
+                onClick={closeAll}
+              />
+            </div>
+            {description && (
+              <div className={`${baseClass}__sub-header`}>{description}</div>
+            )}
           </header>
           <Upload
             collection={collection}

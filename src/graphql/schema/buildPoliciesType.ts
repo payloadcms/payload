@@ -2,8 +2,8 @@
 import { GraphQLJSONObject } from 'graphql-type-json';
 import { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import formatName from '../utilities/formatName';
-import { CollectionConfig } from '../../collections/config/types';
-import { GlobalConfig } from '../../globals/config/types';
+import { SanitizedCollectionConfig } from '../../collections/config/types';
+import { SanitizedGlobalConfig } from '../../globals/config/types';
 import { Field } from '../../fields/config/types';
 
 type OperationType = 'create' | 'read' | 'update' | 'delete';
@@ -103,7 +103,7 @@ export default function buildPoliciesType(): GraphQLObjectType {
     },
   };
 
-  Object.values(this.config.collections).forEach((collection: CollectionConfig) => {
+  Object.values(this.config.collections).forEach((collection: SanitizedCollectionConfig) => {
     fields[formatName(collection.slug)] = {
       type: new GraphQLObjectType({
         name: formatName(`${collection.labels.singular}Access`),
@@ -112,7 +112,7 @@ export default function buildPoliciesType(): GraphQLObjectType {
     };
   });
 
-  Object.values(this.config.globals).forEach((global: GlobalConfig) => {
+  Object.values(this.config.globals).forEach((global: SanitizedGlobalConfig) => {
     fields[formatName(global.slug)] = {
       type: new GraphQLObjectType({
         name: formatName(`${global.label}Access`),

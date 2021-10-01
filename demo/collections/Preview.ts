@@ -1,6 +1,6 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 
-const Preview: PayloadCollectionConfig = {
+const Preview: CollectionConfig = {
   slug: 'previewable-post',
   labels: {
     singular: 'Previewable Post',

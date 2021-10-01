@@ -25,49 +25,49 @@ export type HookOperationType =
   | 'login'
   | 'forgotPassword';
 
-export type BeforeOperationHook = (args?: {
+export type BeforeOperationHook = (args: {
   args?: any;
   operation: HookOperationType;
 }) => any;
 
-export type BeforeValidateHook = (args?: {
+export type BeforeValidateHook = (args: {
   data?: any;
   req?: PayloadRequest;
   operation: 'create' | 'update';
   originalDoc?: any; // undefined on 'create' operation
 }) => any;
 
-export type BeforeChangeHook = (args?: {
+export type BeforeChangeHook = (args: {
   data: any;
   req: PayloadRequest;
   operation: 'create' | 'update'
   originalDoc?: any; // undefined on 'create' operation
 }) => any;
 
-export type AfterChangeHook = (args?: {
+export type AfterChangeHook = (args: {
   doc: any;
   req: PayloadRequest;
   operation: 'create' | 'update';
 }) => any;
 
-export type BeforeReadHook = (args?: {
+export type BeforeReadHook = (args: {
   doc: any;
   req: PayloadRequest;
   query: { [key: string]: any };
 }) => any;
 
-export type AfterReadHook = (args?: {
+export type AfterReadHook = (args: {
   doc: any;
   req: PayloadRequest;
   query?: { [key: string]: any };
 }) => any;
 
-export type BeforeDeleteHook = (args?: {
+export type BeforeDeleteHook = (args: {
   req: PayloadRequest;
   id: string;
 }) => any;
 
-export type AfterDeleteHook = (args?: {
+export type AfterDeleteHook = (args: {
   req: PayloadRequest;
   id: string;
   doc: any;
@@ -75,21 +75,21 @@ export type AfterDeleteHook = (args?: {
 
 export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
 
-export type BeforeLoginHook = (args?: {
+export type BeforeLoginHook = (args: {
   req: PayloadRequest;
 }) => any;
 
-export type AfterLoginHook = (args?: {
+export type AfterLoginHook = (args: {
   req: PayloadRequest;
   doc: any;
   token: string;
 }) => any;
 
-export type AfterForgotPasswordHook = (args?: {
+export type AfterForgotPasswordHook = (args: {
   args?: any;
 }) => any;
 
-export type PayloadCollectionConfig = {
+export type CollectionConfig = {
   slug: string;
   labels?: {
     singular?: string;
@@ -99,7 +99,8 @@ export type PayloadCollectionConfig = {
   admin?: {
     useAsTitle?: string;
     defaultColumns?: string[];
-    disableDuplicate?: boolean
+    description?: string | (() => string);
+    disableDuplicate?: boolean;
     components?: {
       views?: {
         Edit?: React.ComponentType
@@ -136,7 +137,7 @@ export type PayloadCollectionConfig = {
   timestamps?: boolean
 };
 
-export interface CollectionConfig extends Omit<DeepRequired<PayloadCollectionConfig>, 'auth' | 'upload' | 'fields'> {
+export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields'> {
   auth: Auth;
   upload: Upload;
   fields: Field[];
@@ -144,12 +145,12 @@ export interface CollectionConfig extends Omit<DeepRequired<PayloadCollectionCon
 
 export type Collection = {
   Model: CollectionModel;
-  config: CollectionConfig;
+  config: SanitizedCollectionConfig;
 };
 
 export type AuthCollection = {
   Model: AuthCollectionModel;
-  config: CollectionConfig;
+  config: SanitizedCollectionConfig;
 }
 
 export type PaginatedDocs = {

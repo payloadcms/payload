@@ -1,11 +1,11 @@
 import joi from 'joi';
-
-const component = joi.alternatives().try(
-  joi.object().unknown(),
-  joi.func(),
-);
+import { componentSchema } from '../../utilities/componentSchema';
 
 export const baseAdminFields = joi.object().keys({
+  description: joi.alternatives().try(
+    joi.string(),
+    componentSchema,
+  ),
   position: joi.string().valid('sidebar'),
   width: joi.string(),
   style: joi.object().unknown(),
@@ -14,9 +14,9 @@ export const baseAdminFields = joi.object().keys({
   disabled: joi.boolean().default(false),
   condition: joi.func(),
   components: joi.object().keys({
-    Cell: component,
-    Field: component,
-    Filter: component,
+    Cell: componentSchema,
+    Field: componentSchema,
+    Filter: componentSchema,
   }).default({}),
 });
 
@@ -46,6 +46,13 @@ export const baseField = joi.object().keys({
     }).default(),
   admin: baseAdminFields.default(),
 }).default();
+
+export const idField = baseField.keys({
+  name: joi.string().valid('id'),
+  type: joi.string().valid('text', 'number'),
+  required: joi.not(false, 0).default(true),
+  localized: joi.invalid(true),
+});
 
 export const text = baseField.keys({
   type: joi.string().valid('text').required(),
@@ -111,7 +118,7 @@ export const select = baseField.keys({
   options: joi.array().items(joi.alternatives().try(
     joi.string(),
     joi.object({
-      value: joi.string().allow('').required(),
+      value: joi.string().required(),
       label: joi.string().required(),
     }),
   )).required(),
@@ -128,7 +135,7 @@ export const radio = baseField.keys({
   options: joi.array().items(joi.alternatives().try(
     joi.string(),
     joi.object({
-      value: joi.string().allow('').required(),
+      value: joi.string().required(),
       label: joi.string().required(),
     }),
   )).required(),
@@ -141,16 +148,21 @@ export const radio = baseField.keys({
 export const row = baseField.keys({
   type: joi.string().valid('row').required(),
   fields: joi.array().items(joi.link('#field')),
+  admin: baseAdminFields.keys({
+    description: joi.forbidden(),
+    readOnly: joi.forbidden(),
+    hidden: joi.forbidden(),
+  }),
 });
 
 export const group = baseField.keys({
   type: joi.string().valid('group').required(),
   name: joi.string().required(),
-  label: joi.string(),
   fields: joi.array().items(joi.link('#field')),
   defaultValue: joi.object(),
   admin: baseAdminFields.keys({
     hideGutter: joi.boolean().default(false),
+    description: joi.string(),
   }),
 });
 
@@ -178,6 +190,12 @@ export const checkbox = baseField.keys({
   type: joi.string().valid('checkbox').required(),
   name: joi.string().required(),
   defaultValue: joi.boolean(),
+});
+
+export const point = baseField.keys({
+  type: joi.string().valid('point').required(),
+  name: joi.string().required(),
+  defaultValue: joi.array().items(joi.number()).max(2).min(2),
 });
 
 export const relationship = baseField.keys({
@@ -226,9 +244,9 @@ export const richText = baseField.keys({
         joi.string(),
         joi.object({
           name: joi.string().required(),
-          Button: component,
-          Element: component,
-          plugins: joi.array().items(component),
+          Button: componentSchema,
+          Element: componentSchema,
+          plugins: joi.array().items(componentSchema),
         }),
       ),
     ),
@@ -237,9 +255,9 @@ export const richText = baseField.keys({
         joi.string(),
         joi.object({
           name: joi.string().required(),
-          Button: component,
-          Leaf: component,
-          plugins: joi.array().items(component),
+          Button: componentSchema,
+          Leaf: componentSchema,
+          plugins: joi.array().items(componentSchema),
         }),
       ),
     ),
@@ -285,6 +303,7 @@ const fieldSchema = joi.alternatives()
     richText,
     blocks,
     date,
+    point,
   )
   .id('field');
 

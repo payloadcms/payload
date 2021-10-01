@@ -22,7 +22,7 @@ export type FieldAccess = (args: {
   siblingData: Record<string, unknown>
 }) => Promise<boolean> | boolean;
 
-export type Condition = (data: Record<string, unknown>, siblingData: Record<string, unknown>) => boolean
+export type Condition = (data: Record<string, unknown>, siblingData: Record<string, unknown>) => boolean;
 
 type Admin = {
   position?: string;
@@ -31,9 +31,16 @@ type Admin = {
   readOnly?: boolean;
   disabled?: boolean;
   condition?: Condition;
-  components?: { [key: string]: React.ComponentType };
+  description?: Description;
+  components?: {
+    Filter?: React.ComponentType;
+    Cell?: React.ComponentType;
+    Field?: React.ComponentType;
+  }
   hidden?: boolean
 }
+
+export type Description = string | ((value: Record<string, unknown>) => string);
 
 export type Labels = {
   singular: string;
@@ -133,7 +140,13 @@ export type GroupField = FieldBase & {
   }
 }
 
-export type RowField = FieldBase & {
+export type RowAdmin = Omit<Admin, 'description'> & {
+  readOnly?: false;
+  hidden?: false;
+};
+
+export type RowField = Omit<FieldBase, 'admin'> & {
+  admin?: RowAdmin;
   type: 'row';
   fields: Field[];
 }
@@ -184,7 +197,7 @@ export type RichTextCustomLeaf = {
   plugins?: RichTextPlugin[]
 }
 
-export type RichTextElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link' | 'relationship' | RichTextCustomElement;
+export type RichTextElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link' | 'relationship' | 'upload' | RichTextCustomElement;
 export type RichTextLeaf = 'bold' | 'italic' | 'underline' | 'strikethrough' | 'code' | RichTextCustomLeaf;
 
 export type RichTextField = FieldBase & {
@@ -214,11 +227,11 @@ export type RadioField = FieldBase & {
 }
 
 export type Block = {
-  slug: string,
-  labels?: Labels
-  fields: Field[],
-  imageURL?: string
-  imageAltText?: string
+  slug: string;
+  labels?: Labels;
+  fields: Field[];
+  imageURL?: string;
+  imageAltText?: string;
 }
 
 export type BlockField = FieldBase & {
@@ -228,6 +241,10 @@ export type BlockField = FieldBase & {
   blocks?: Block[];
   defaultValue?: unknown
   labels?: Labels
+}
+
+export type PointField = FieldBase & {
+  type: 'point',
 }
 
 export type Field =
@@ -246,6 +263,7 @@ export type Field =
   | SelectField
   | UploadField
   | CodeField
+  | PointField
   | RowField;
 
 export type FieldWithPath = Field & {

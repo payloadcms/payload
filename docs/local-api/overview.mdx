@@ -162,6 +162,11 @@ const result = await payload.update({
   // a file directly through the Local API by providing
   // its full, absolute file path.
   filePath: path.resolve(__dirname, './path-to-image.jpg'),
+
+  // If you are uploading a file and would like to replace
+  // the existing file instead of generating a new filename,
+  // you can set the following property to `true`
+  overwriteExistingFiles: true,
 })
 ```
 

@@ -1,9 +1,16 @@
 import { DateTimeResolver } from 'graphql-scalars';
-import { GraphQLString, GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLInt } from 'graphql';
+import {
+  GraphQLString,
+  GraphQLObjectType,
+  GraphQLBoolean,
+  GraphQLNonNull,
+  GraphQLInt,
+} from 'graphql';
 
 import formatName from '../../graphql/utilities/formatName';
 import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
 import { BaseFields } from './types';
+import { getCollectionIDType } from '../../graphql/schema/buildMutationInputType';
 
 function registerCollections(): void {
   const {
@@ -22,12 +29,10 @@ function registerCollections(): void {
           singular,
           plural,
         },
-        fields: initialFields,
+        fields,
         timestamps,
       },
     } = collection;
-
-    const fields = [...initialFields];
 
     const singularLabel = formatName(singular);
     let pluralLabel = formatName(plural);
@@ -43,15 +48,22 @@ function registerCollections(): void {
 
     collection.graphQL = {};
 
-    const baseFields: BaseFields = {
-      id: {
-        type: new GraphQLNonNull(GraphQLString),
-      },
-    };
+    const idField = fields.find(({ name }) => name === 'id');
+    const idType = getCollectionIDType(collection.config);
+
+    const baseFields: BaseFields = {};
 
     const whereInputFields = [
       ...fields,
     ];
+
+    if (!idField) {
+      baseFields.id = { type: idType };
+      whereInputFields.push({
+        name: 'id',
+        type: 'text',
+      });
+    }
 
     if (timestamps) {
       baseFields.createdAt = {
@@ -105,7 +117,7 @@ function registerCollections(): void {
 
     collection.graphQL.updateMutationInputType = new GraphQLNonNull(this.buildMutationInputType(
       `${singularLabel}Update`,
-      fields,
+      fields.filter((field) => field.name !== 'id'),
       `${singularLabel}Update`,
       true,
     ));
@@ -113,7 +125,7 @@ function registerCollections(): void {
     this.Query.fields[singularLabel] = {
       type: collection.graphQL.type,
       args: {
-        id: { type: GraphQLString },
+        id: { type: idType },
         ...(this.config.localization ? {
           locale: { type: this.types.localeInputType },
           fallbackLocale: { type: this.types.fallbackLocaleInputType },
@@ -148,7 +160,7 @@ function registerCollections(): void {
     this.Mutation.fields[`update${singularLabel}`] = {
       type: collection.graphQL.type,
       args: {
-        id: { type: new GraphQLNonNull(GraphQLString) },
+        id: { type: new GraphQLNonNull(idType) },
         data: { type: collection.graphQL.updateMutationInputType },
       },
       resolve: update(collection),
@@ -157,7 +169,7 @@ function registerCollections(): void {
     this.Mutation.fields[`delete${singularLabel}`] = {
       type: collection.graphQL.type,
       args: {
-        id: { type: new GraphQLNonNull(GraphQLString) },
+        id: { type: new GraphQLNonNull(idType) },
       },
       resolve: deleteResolver(collection),
     };

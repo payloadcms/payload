@@ -1,4 +1,4 @@
-import { Validate, Condition } from '../../../../fields/config/types';
+import { Condition, Validate } from '../../../../fields/config/types';
 
 export type Options = {
   path: string

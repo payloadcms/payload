@@ -4,6 +4,7 @@ import {
   GraphQLEnumType,
   GraphQLFloat,
   GraphQLInputObjectType,
+  GraphQLInt,
   GraphQLList,
   GraphQLNonNull,
   GraphQLScalarType,
@@ -16,10 +17,26 @@ import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import { ArrayField, Field, FieldWithSubFields, GroupField, RelationshipField, RowField, SelectField } from '../../fields/config/types';
 import { toWords } from '../../utilities/formatLabels';
+import payload from '../../index';
+import { SanitizedCollectionConfig } from '../../collections/config/types';
+
+export const getCollectionIDType = (config: SanitizedCollectionConfig): GraphQLScalarType => {
+  const idField = config.fields.find(({ name }) => name === 'id');
+  if (!idField) return GraphQLString;
+  switch (idField.type) {
+    case 'number':
+      return GraphQLInt;
+    default:
+      return GraphQLString;
+  }
+};
 
 function buildMutationInputType(name: string, fields: Field[], parentName: string, forceNullable = false): GraphQLInputObjectType {
   const fieldToSchemaMap = {
-    number: (field: Field) => ({ type: withNullableType(field, GraphQLFloat, forceNullable) }),
+    number: (field: Field) => {
+      const type = field.name === 'id' ? GraphQLInt : GraphQLFloat;
+      return { type: withNullableType(field, type, forceNullable) };
+    },
     text: (field: Field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
     email: (field: Field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
     textarea: (field: Field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
@@ -30,6 +47,7 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
     'rich-text': (field: Field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
     html: (field: Field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
     radio: (field: Field) => ({ type: withNullableType(field, GraphQLString, forceNullable) }),
+    point: (field: Field) => ({ type: withNullableType(field, GraphQLList(GraphQLFloat), forceNullable) }),
     checkbox: () => ({ type: GraphQLBoolean }),
     select: (field: SelectField) => {
       const formattedName = `${combineParentName(parentName, field.name)}_MutationInput`;
@@ -66,7 +84,7 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
     relationship: (field: RelationshipField) => {
       const { relationTo } = field;
       type PayloadGraphQLRelationshipType = GraphQLScalarType | GraphQLList<GraphQLScalarType> | GraphQLInputObjectType;
-      let type: PayloadGraphQLRelationshipType = GraphQLString;
+      let type: PayloadGraphQLRelationshipType;
 
       if (Array.isArray(relationTo)) {
         const fullName = `${combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label)}RelationshipInput`;
@@ -84,9 +102,11 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
                 }), {}),
               }),
             },
-            value: { type: GraphQLString },
+            value: { type: GraphQLJSON },
           },
         });
+      } else {
+        type = getCollectionIDType(payload.collections[relationTo].config);
       }
 
       return { type: field.hasMany ? new GraphQLList(type) : type };

@@ -15,7 +15,7 @@ type Arguments = {
   flattenLocales: boolean
   locale: string
   fallbackLocale: string
-  accessPromises: Promise<void>[]
+  accessPromises: (() => Promise<void>)[]
   operation: Operation
   overrideAccess: boolean
   req: PayloadRequest
@@ -24,7 +24,7 @@ type Arguments = {
   depth: number
   currentDepth: number
   hook: HookName
-  hookPromises: Promise<void>[]
+  hookPromises: (() => Promise<void>)[]
   fullOriginalDoc: Record<string, any>
   fullData: Record<string, any>
   validationPromises: (() => Promise<string | boolean>)[]
@@ -33,7 +33,9 @@ type Arguments = {
   showHiddenFields: boolean
   unflattenLocales: boolean
   unflattenLocaleActions: (() => void)[]
+  transformActions: (() => void)[]
   docWithLocales?: Record<string, any>
+  skipValidation?: boolean
 }
 
 const traverseFields = (args: Arguments): void => {
@@ -63,27 +65,60 @@ const traverseFields = (args: Arguments): void => {
     showHiddenFields,
     unflattenLocaleActions,
     unflattenLocales,
+    transformActions,
     docWithLocales = {},
+    skipValidation,
   } = args;
 
   fields.forEach((field) => {
     const dataCopy = data;
 
-    if (hook === 'afterRead' && field.hidden && typeof data[field.name] !== 'undefined' && !showHiddenFields) {
-      delete data[field.name];
+    if (hook === 'afterRead') {
+      if (field.type === 'group') {
+        // Fill groups with empty objects so fields with hooks within groups can populate
+        // themselves virtually as necessary
+        if (typeof data[field.name] === 'undefined' && typeof originalDoc[field.name] === 'undefined') {
+          data[field.name] = {};
+        }
+      }
+
+      if (field.hidden && typeof data[field.name] !== 'undefined' && !showHiddenFields) {
+        delete data[field.name];
+      }
+
+      if (field.type === 'point') {
+        transformActions.push(() => {
+          if (data[field.name]?.coordinates && Array.isArray(data[field.name].coordinates) && data[field.name].coordinates.length === 2) {
+            data[field.name] = data[field.name].coordinates;
+          }
+        });
+      }
     }
 
     if ((field.type === 'upload' || field.type === 'relationship')
     && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null')) {
-      dataCopy[field.name] = null;
+      if (field.type === 'relationship' && field.hasMany === true) {
+        dataCopy[field.name] = [];
+      } else {
+        dataCopy[field.name] = null;
+      }
     }
 
-    if (field.type === 'relationship' && field.hasMany && (data[field.name]?.[0] === '' || data[field.name]?.[0] === 'none' || data[field.name]?.[0] === 'null')) {
+    if (field.type === 'relationship' && field.hasMany && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null')) {
       dataCopy[field.name] = [];
     }
 
     if (field.type === 'number' && typeof data[field.name] === 'string') {
       dataCopy[field.name] = parseFloat(data[field.name]);
+    }
+
+    if (field.name === 'id') {
+      if (field.type === 'number' && typeof data[field.name] === 'string') {
+        dataCopy[field.name] = parseFloat(data[field.name]);
+      }
+      if (field.type === 'text' && typeof data[field.name]?.toString === 'function' && typeof data[field.name] !== 'string') {
+        dataCopy[field.name] = dataCopy[field.name].toString();
+      }
     }
 
     if (field.type === 'checkbox') {
@@ -125,6 +160,7 @@ const traverseFields = (args: Arguments): void => {
     if (hasLocalizedValue) {
       let localizedValue = data[field.name][locale];
       if (typeof localizedValue === 'undefined' && fallbackLocale) localizedValue = data[field.name][fallbackLocale];
+      if (typeof localizedValue === 'undefined' && field.type === 'group') localizedValue = {};
       if (typeof localizedValue === 'undefined') localizedValue = null;
       dataCopy[field.name] = localizedValue;
     }
@@ -161,7 +197,7 @@ const traverseFields = (args: Arguments): void => {
       });
     }
 
-    accessPromises.push(accessPromise({
+    accessPromises.push(() => accessPromise({
       data,
       fullData,
       originalDoc,
@@ -177,7 +213,7 @@ const traverseFields = (args: Arguments): void => {
       payload,
     }));
 
-    hookPromises.push(hookPromise({
+    hookPromises.push(() => hookPromise({
       data,
       field,
       hook,
@@ -187,11 +223,15 @@ const traverseFields = (args: Arguments): void => {
       fullData,
     }));
 
+    const passesCondition = (field.admin?.condition && hook === 'beforeChange') ? field.admin.condition(fullData, data) : true;
+    const skipValidationFromHere = skipValidation || !passesCondition;
+
     if (fieldHasSubFields(field)) {
       if (field.name === undefined) {
         traverseFields({
           ...args,
           fields: field.fields,
+          skipValidation: skipValidationFromHere,
         });
       } else if (fieldIsArrayType(field)) {
         if (Array.isArray(data[field.name])) {
@@ -207,6 +247,7 @@ const traverseFields = (args: Arguments): void => {
               originalDoc: originalDoc?.[field.name]?.[i],
               docWithLocales: docWithLocales?.[field.name]?.[i],
               path: `${path}${field.name}.${i}.`,
+              skipValidation: skipValidationFromHere,
             });
           }
         }
@@ -218,6 +259,7 @@ const traverseFields = (args: Arguments): void => {
           originalDoc: originalDoc[field.name],
           docWithLocales: docWithLocales?.[field.name],
           path: `${path}${field.name}.`,
+          skipValidation: skipValidationFromHere,
         });
       }
     }
@@ -235,6 +277,7 @@ const traverseFields = (args: Arguments): void => {
               originalDoc: originalDoc?.[field.name]?.[i],
               docWithLocales: docWithLocales?.[field.name]?.[i],
               path: `${path}${field.name}.${i}.`,
+              skipValidation: skipValidationFromHere,
             });
           }
         });
@@ -246,6 +289,58 @@ const traverseFields = (args: Arguments): void => {
 
       if (data?.[field.name] === undefined && originalDoc?.[field.name] === undefined && field.defaultValue) {
         updatedData[field.name] = field.defaultValue;
+      }
+
+      if (field.type === 'relationship' || field.type === 'upload') {
+        if (Array.isArray(field.relationTo)) {
+          if (Array.isArray(dataCopy[field.name])) {
+            dataCopy[field.name].forEach((relatedDoc: {value: unknown, relationTo: string}, i) => {
+              const relatedCollection = payload.config.collections.find((collection) => collection.slug === relatedDoc.relationTo);
+              const relationshipIDField = relatedCollection.fields.find((collectionField) => collectionField.name === 'id');
+              if (relationshipIDField?.type === 'number') {
+                dataCopy[field.name][i] = { ...relatedDoc, value: parseFloat(relatedDoc.value as string) };
+              }
+            });
+          }
+          if (field.type === 'relationship' && field.hasMany !== true && dataCopy[field.name]?.relationTo) {
+            const relatedCollection = payload.config.collections.find((collection) => collection.slug === dataCopy[field.name].relationTo);
+            const relationshipIDField = relatedCollection.fields.find((collectionField) => collectionField.name === 'id');
+            if (relationshipIDField?.type === 'number') {
+              dataCopy[field.name] = { ...dataCopy[field.name], value: parseFloat(dataCopy[field.name].value as string) };
+            }
+          }
+        } else {
+          if (Array.isArray(dataCopy[field.name])) {
+            dataCopy[field.name].forEach((relatedDoc: unknown, i) => {
+              const relatedCollection = payload.config.collections.find((collection) => collection.slug === field.relationTo);
+              const relationshipIDField = relatedCollection.fields.find((collectionField) => collectionField.name === 'id');
+              if (relationshipIDField?.type === 'number') {
+                dataCopy[field.name][i] = parseFloat(relatedDoc as string);
+              }
+            });
+          }
+          if (field.type === 'relationship' && field.hasMany !== true && dataCopy[field.name]) {
+            const relatedCollection = payload.config.collections.find((collection) => collection.slug === field.relationTo);
+            const relationshipIDField = relatedCollection.fields.find((collectionField) => collectionField.name === 'id');
+            if (relationshipIDField?.type === 'number') {
+              dataCopy[field.name] = parseFloat(dataCopy[field.name]);
+            }
+          }
+        }
+      }
+
+      if (field.type === 'point' && data[field.name]) {
+        transformActions.push(() => {
+          if (Array.isArray(data[field.name]) && data[field.name][0] !== null && data[field.name][1] !== null) {
+            data[field.name] = {
+              type: 'Point',
+              coordinates: [
+                parseFloat(data[field.name][0]),
+                parseFloat(data[field.name][1]),
+              ],
+            };
+          }
+        });
       }
 
       if (field.type === 'array' || field.type === 'blocks') {
@@ -267,6 +362,7 @@ const traverseFields = (args: Arguments): void => {
           existingData: { [field.name]: existingRowCount },
           field,
           path,
+          skipValidation: skipValidationFromHere,
         }));
       } else {
         validationPromises.push(() => validationPromise({
@@ -276,6 +372,7 @@ const traverseFields = (args: Arguments): void => {
           existingData: originalDoc,
           field,
           path,
+          skipValidation: skipValidationFromHere,
         }));
       }
     }

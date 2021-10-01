@@ -37,13 +37,14 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
 
 #### Collection Upload Options
 
-| Option                 | Description  |
-| ---------------------- | -------------|
-| **`staticURL`** *      | The base URL path to use to access you uploads. Example: `/media` |
-| **`staticDir`** *      | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. |
-| **`imageSizes`**       | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes) |
-| **`adminThumbnail`**   | Set the way that the Admin panel will display thumbnails for this Collection. [More](#admin-thumbnails) |
-| **`mimeTypes`**   | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes) |
+| Option                    | Description  |
+| ------------------------- | -------------|
+| **`staticURL`** *         | The base URL path to use to access you uploads. Example: `/media` |
+| **`staticDir`** *         | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. |
+| **`imageSizes`**          | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes) |
+| **`adminThumbnail`**      | Set the way that the Admin panel will display thumbnails for this Collection. [More](#admin-thumbnails) |
+| **`mimeTypes`**           | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes) |
+| **`disableLocalStorage`** | Completely disable uploading files to disk locally. [More](#disabling-local-upload-storage) |
 
 *An asterisk denotes that a property above is required.*
 
@@ -65,6 +66,16 @@ const Media = {
         name: 'card',
         width: 768,
         height: 1024,
+        crop: 'centre',
+      },
+      {
+        name: 'tablet',
+        width: 1024,
+        // By specifying `null` or leaving a height undefined,
+        // the image will be sized to a certain width,
+        // but it will retain its original aspect ratio
+        // and calculate a height automatically.
+        height: null,
         crop: 'centre',
       }
     ],
@@ -112,6 +123,21 @@ If you specify an array of `imageSizes` to your `upload` config, Payload will au
 The Payload Admin panel will also automatically display all available files, including width, height, and filesize, for each of your uploaded files.
 
 Behind the scenes, Payload relies on [`sharp`](https://sharp.pixelplumbing.com/api-resize#resize) to perform its image resizing. You can specify additional options for `sharp` to use while resizing your images.
+
+##### Accessing the resized images in hooks
+
+All auto-resized images are exposed to be re-used in hooks and similar via an object that is bound to `req.payloadUploadSizes`.
+
+The object will have keys for each size generated, and each key will be set equal to a buffer containing the file data.
+
+### Disabling Local Upload Storage
+
+If you are using a plugin to send your files off to a third-party file storage host or CDN, like Amazon S3 or similar, you may not want to store your files locally at all. You can prevent Payload from writing files to disk by specifying `disableLocalStorage: true` on your collection's upload config.
+
+<Banner type="warning">
+  <strong>Note:</strong><br/>
+  This is a fairly advanced feature. If you do disable local file storage, by default, your admin panel's thumbnails will be broken as you will not have stored a file. It will be totally up to you to use either a plugin or your own hooks to store your files in a permanent manner, as well as provide your own admin thumbnail using <strong>upload.adminThumbnail</strong>.
+</Banner>
 
 ### Admin thumbnails
 

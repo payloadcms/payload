@@ -10,6 +10,7 @@ export type Field = {
   ignoreWhileFlattening?: boolean
   stringify?: boolean
   condition?: Condition
+  passesCondition?: boolean
 }
 
 export type Fields = {

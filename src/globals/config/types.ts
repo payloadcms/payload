@@ -5,30 +5,30 @@ import { PayloadRequest } from '../../express/types';
 import { Access, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 
-export type BeforeValidateHook = (args?: {
+export type BeforeValidateHook = (args: {
   data?: any;
   req?: PayloadRequest;
   originalDoc?: any;
 }) => any;
 
-export type BeforeChangeHook = (args?: {
+export type BeforeChangeHook = (args: {
   data: any;
   req: PayloadRequest;
   originalDoc?: any;
 }) => any;
 
-export type AfterChangeHook = (args?: {
+export type AfterChangeHook = (args: {
   doc: any;
   req: PayloadRequest;
 }) => any;
 
-export type BeforeReadHook = (args?: {
+export type BeforeReadHook = (args: {
   doc: any;
   req: PayloadRequest;
   query: { [key: string]: any };
 }) => any;
 
-export type AfterReadHook = (args?: {
+export type AfterReadHook = (args: {
   doc: any;
   req: PayloadRequest;
   query?: { [key: string]: any };
@@ -36,7 +36,7 @@ export type AfterReadHook = (args?: {
 
 export type GlobalModel = Model<Document>
 
-export type PayloadGlobalConfig = {
+export type GlobalConfig = {
   slug: string
   label?: string
   preview?: GeneratePreviewURL
@@ -54,6 +54,7 @@ export type PayloadGlobalConfig = {
   }
   fields: Field[];
   admin?: {
+    description?: string | (() => string);
     components?: {
       views?: {
         Edit?: React.ComponentType
@@ -62,11 +63,11 @@ export type PayloadGlobalConfig = {
   }
 }
 
-export interface GlobalConfig extends Omit<DeepRequired<PayloadGlobalConfig>, 'fields'> {
+export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields'> {
   fields: Field[]
 }
 
 export type Globals = {
   Model: GlobalModel
-  config: GlobalConfig[]
+  config: SanitizedGlobalConfig[]
 }

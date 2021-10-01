@@ -9,6 +9,7 @@ import Conditions from './collections/Conditions';
 import CustomComponents from './collections/CustomComponents';
 import File from './collections/File';
 import Blocks from './collections/Blocks';
+import CustomID from './collections/CustomID';
 import DefaultValues from './collections/DefaultValues';
 import HiddenFields from './collections/HiddenFields';
 import Hooks from './collections/Hooks';
@@ -26,10 +27,12 @@ import Select from './collections/Select';
 import StrictPolicies from './collections/StrictPolicies';
 import Validations from './collections/Validations';
 import Uniques from './collections/Uniques';
+import Geolocation from './collections/Geolocation';
 
 import BlocksGlobal from './globals/BlocksGlobal';
 import NavigationArray from './globals/NavigationArray';
 import GlobalWithStrictAccess from './globals/GlobalWithStrictAccess';
+import UnstoredMedia from './collections/UnstoredMedia';
 
 export default buildConfig({
   cookiePrefix: 'payload',
@@ -62,6 +65,7 @@ export default buildConfig({
     Code,
     Conditions,
     CustomComponents,
+    CustomID,
     File,
     DefaultValues,
     Blocks,
@@ -81,6 +85,8 @@ export default buildConfig({
     StrictPolicies,
     Validations,
     Uniques,
+    UnstoredMedia,
+    Geolocation,
   ],
   globals: [
     NavigationArray,
@@ -106,7 +112,7 @@ export default buildConfig({
   defaultDepth: 2,
   graphQL: {
     maxComplexity: 1000,
-    disablePlaygroundInProduction: true,
+    disablePlaygroundInProduction: false,
     disable: false,
   },
   // rateLimit: {

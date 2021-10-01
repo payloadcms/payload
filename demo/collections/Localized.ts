@@ -1,5 +1,14 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
+import { PayloadRequest } from '../../src/express/types';
 import { Block } from '../../src/fields/config/types';
+
+const validateLocalizationTransform = (hook: string, value, req: PayloadRequest) => {
+  if (req.locale !== 'all' && value !== undefined && typeof value !== 'string') {
+    console.error(hook, value);
+    throw new Error('Locale transformation should happen before hook is called');
+  }
+  return value;
+};
 
 const RichTextBlock: Block = {
   slug: 'richTextBlock',
@@ -19,7 +28,7 @@ const RichTextBlock: Block = {
   ],
 };
 
-const LocalizedPosts: PayloadCollectionConfig = {
+const LocalizedPosts: CollectionConfig = {
   slug: 'localized-posts',
   labels: {
     singular: 'Localized Post',
@@ -46,6 +55,12 @@ const LocalizedPosts: PayloadCollectionConfig = {
       required: true,
       unique: true,
       localized: true,
+      hooks: {
+        beforeValidate: [({ value, req }) => validateLocalizationTransform('beforeValidate', value, req)],
+        beforeChange: [({ value, req }) => validateLocalizationTransform('beforeChange', value, req)],
+        afterChange: [({ value, req }) => validateLocalizationTransform('afterChange', value, req)],
+        afterRead: [({ value, req }) => validateLocalizationTransform('afterRead', value, req)],
+      },
     },
     {
       name: 'summary',

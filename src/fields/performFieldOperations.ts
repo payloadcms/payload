@@ -2,8 +2,8 @@ import { Payload } from '..';
 import { ValidationError } from '../errors';
 import sanitizeFallbackLocale from '../localization/sanitizeFallbackLocale';
 import traverseFields from './traverseFields';
-import { CollectionConfig } from '../collections/config/types';
-import { GlobalConfig } from '../globals/config/types';
+import { SanitizedCollectionConfig } from '../collections/config/types';
+import { SanitizedGlobalConfig } from '../globals/config/types';
 import { Operation } from '../types';
 import { PayloadRequest } from '../express/types';
 import { HookName } from './config/types';
@@ -25,7 +25,7 @@ type Arguments = {
   currentDepth?: number
 }
 
-export default async function performFieldOperations(this: Payload, entityConfig: CollectionConfig | GlobalConfig, args: Arguments): Promise<{ [key: string]: unknown }> {
+export default async function performFieldOperations(this: Payload, entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig, args: Arguments): Promise<{ [key: string]: unknown }> {
   const {
     data,
     originalDoc: fullOriginalDoc,
@@ -66,6 +66,7 @@ export default async function performFieldOperations(this: Payload, entityConfig
   const relationshipPopulations = [];
   const hookPromises = [];
   const unflattenLocaleActions = [];
+  const transformActions = [];
   const errors: { message: string, field: string }[] = [];
 
   // //////////////////////////////////////////
@@ -98,26 +99,35 @@ export default async function performFieldOperations(this: Payload, entityConfig
     showHiddenFields,
     unflattenLocales,
     unflattenLocaleActions,
+    transformActions,
     docWithLocales,
   });
 
-  await Promise.all(hookPromises);
+  if (hook === 'afterRead') {
+    transformActions.forEach((action) => action());
+  }
+
+  const hookResults = hookPromises.map((promise) => promise());
+  await Promise.all(hookResults);
 
   validationPromises.forEach((promise) => promise());
-
   await Promise.all(validationPromises);
 
   if (errors.length > 0) {
     throw new ValidationError(errors);
   }
 
+  if (hook === 'beforeChange') {
+    transformActions.forEach((action) => action());
+  }
+
   unflattenLocaleActions.forEach((action) => action());
 
-  await Promise.all(accessPromises);
+  const accessResults = accessPromises.map((promise) => promise());
+  await Promise.all(accessResults);
 
-  const relationshipPopulationPromises = relationshipPopulations.map((population) => population());
-
-  await Promise.all(relationshipPopulationPromises);
+  const relationshipPopulationResults = relationshipPopulations.map((population) => population());
+  await Promise.all(relationshipPopulationResults);
 
   return fullData;
 }

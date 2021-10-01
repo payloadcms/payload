@@ -73,7 +73,7 @@ const recurseRichText = ({
     (children as any[]).forEach((element) => {
       const collection = payload.collections[element?.relationTo];
 
-      if (element.type === 'relationship'
+      if ((element.type === 'relationship' || element.type === 'upload')
         && element?.value?.id
         && collection
         && (depth && currentDepth <= depth)) {

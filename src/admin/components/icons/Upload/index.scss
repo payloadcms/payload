@@ -1,0 +1,11 @@
+@import '../../../scss/styles';
+
+.icon--upload {
+  height: $baseline;
+  width: $baseline;
+
+  .fill {
+    fill: $color-dark-gray;
+    stroke: none;
+  }
+}

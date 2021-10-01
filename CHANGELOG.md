@@ -1,3 +1,257 @@
+## [0.10.6](https://github.com/payloadcms/payload/compare/v0.10.5...v0.10.6) (2021-09-30)
+
+
+### Bug Fixes
+
+* allow debug in payload config ([65bf13d](https://github.com/payloadcms/payload/commit/65bf13d7c137eafdbbeadc1d36d26b7b8389088f))
+* relationship + new slate incompatibility ([f422053](https://github.com/payloadcms/payload/commit/f42205307e33916fc3b139f6ee97eb66d5d0816a))
+
+## [0.10.5](https://github.com/payloadcms/payload/compare/v0.10.4...v0.10.5) (2021-09-28)
+
+
+### Bug Fixes
+
+* ensures that fields within non-required groups are correctly not required ([1597055](https://github.com/payloadcms/payload/commit/15970550f7b00ce0527027c362a9550ff8ad5d2a))
+* index creation on localized field parent ([23e8197](https://github.com/payloadcms/payload/commit/23e81971eb94fd5b991aedb02aab84931937ae37))
+* pagination estimatedCount limited to near query ([73bd698](https://github.com/payloadcms/payload/commit/73bd69870c4ff8ae92053e77ef95cfae18c142b5))
+
+
+### Features
+
+* adds rich text editor upload element ([aa76950](https://github.com/payloadcms/payload/commit/aa769500c934f4dee51a24c0cfc0297c12b5ae47))
+* updates slate, finishes rte upload ([08db431](https://github.com/payloadcms/payload/commit/08db431c0c4626a0d10f4e1c7bca29fa075eedc6))
+
+## [0.10.4](https://github.com/payloadcms/payload/compare/v0.10.0...v0.10.4) (2021-09-22)
+
+
+### Bug Fixes
+
+* allows image resizing if either width or height is larger ([8661115](https://github.com/payloadcms/payload/commit/866111528377808009fa71595691e6a08ec77dc5))
+* array objects now properly save IDs ([2b8f925](https://github.com/payloadcms/payload/commit/2b8f925e81c58f6aa010bf13a318236f211ea091))
+* date field error message position ([03c0435](https://github.com/payloadcms/payload/commit/03c0435e3b3ecdfa0713e3e5026b80f8985ca290))
+* properly types optional req in local findByID ([02e7fe3](https://github.com/payloadcms/payload/commit/02e7fe3f1f3763f32f100cf2e5a8596aa16f3bd9))
+
+
+### Features
+
+* defaults empty group fields to empty object ([8a890fd](https://github.com/payloadcms/payload/commit/8a890fdc15b646c24963a1ef7584237b1d3c5783))
+* allows local update api to replace existing files with newly uploaded ones ([dbbff4c](https://github.com/payloadcms/payload/commit/dbbff4cfa41aa20077e47c8c7b87d4d00683c571))
+* exposes Pill component for re-use ([7e8df10](https://github.com/payloadcms/payload/commit/7e8df100bbf86798de292466afd4c00c455ecb35))
+* performance improvement while saving large docs ([901ad49](https://github.com/payloadcms/payload/commit/901ad498b47bcb8ae995ade18f2fc08cd33f0645))
+
+# [0.10.0](https://github.com/payloadcms/payload/compare/v0.9.5...v0.10.0) (2021-09-09)
+
+
+### Bug Fixes
+
+* admin UI collection id is required ([dc96b90](https://github.com/payloadcms/payload/commit/dc96b90cba01756374dde5b91f7702e0a0c661aa))
+* allow save of collection with an undefined point ([f80646c](https://github.com/payloadcms/payload/commit/f80646c5987db4c228b00beda9549259021c2a40))
+* config validation correctly prevents empty strings for option values ([41e7feb](https://github.com/payloadcms/payload/commit/41e7febf6a21d2fff39a335c033d9e9582294147))
+* ensures hooks run before access ([96629f1](https://github.com/payloadcms/payload/commit/96629f1f0100efdb9c5ad57c1a46add3c15ea65d))
+* ensures proper order while transforming incoming and outgoing data ([c187da0](https://github.com/payloadcms/payload/commit/c187da00b1f18c66d9252a5a3e2029455d75b371))
+* improve id type semantic and restrict possible types to text and number ([29529b2](https://github.com/payloadcms/payload/commit/29529b2c56d4af7c6abce113da2f7ce84f1dcc02))
+* remove media directory to improve test run consistency ([d42d8f7](https://github.com/payloadcms/payload/commit/d42d8f76efcda7a24f2f50d60caf47b1027d81f6))
+* sanitize custom id number types ([c7558d8](https://github.com/payloadcms/payload/commit/c7558d8652780e24479b39e5f2a08a49ffff3358))
+* sort id columns ([114dc1b](https://github.com/payloadcms/payload/commit/114dc1b3fb9a1895e09671aca7a57fd5c7d84911))
+
+
+### Features
+
+* add config validation for collections with custom id ([fe1dc0b](https://github.com/payloadcms/payload/commit/fe1dc0b191e73f350b77a90887d8172bf76d46fd))
+* add config validation for collections with custom id ([d0aaf4a](https://github.com/payloadcms/payload/commit/d0aaf4a4128ad585013c392bb608f586985b71ad))
+* add point field type ([7504155](https://github.com/payloadcms/payload/commit/7504155e17a2881b7a60f49e610c062665b46d21))
+* allows user to pass req through local findByID ([8675481](https://github.com/payloadcms/payload/commit/8675481343ef45fefc2eaaea939eda8ed0a2577f))
+* frontend polish to point field ([64ad6a3](https://github.com/payloadcms/payload/commit/64ad6a30a56969127dfb592a7e0c8807e9f3d8f7))
+* graphql support for custom id types ([bc2a6e1](https://github.com/payloadcms/payload/commit/bc2a6e15753c62d2041e9afded3f1ca040dbffa3))
+* point field localization and graphql ([30f1750](https://github.com/payloadcms/payload/commit/30f17509ea9927d923ffd42c703adefc902b66ea))
+* replace the collection idType option with an explicit id field ([4b70a12](https://github.com/payloadcms/payload/commit/4b70a1225f834ecd0aab50c6e92ad50572389962))
+* support custom ids ([3cc921a](https://github.com/payloadcms/payload/commit/3cc921acc92e1b4a372468b644b7e676400d9c26))
+
+## [0.9.5](https://github.com/payloadcms/payload/compare/v0.9.4...v0.9.5) (2021-08-23)
+
+
+### Bug Fixes
+
+* obscure conditional logic bug ([b0dc125](https://github.com/payloadcms/payload/commit/b0dc12560423af5083d36cfd16f464f08ab66d9d))
+* windows compatible absolute paths for staticDir ([b21316b](https://github.com/payloadcms/payload/commit/b21316b6cc392c793614024648c5301c7e03c326))
+
+## [0.9.4](https://github.com/payloadcms/payload/compare/v0.9.3...v0.9.4) (2021-08-06)
+
+## [0.9.3](https://github.com/payloadcms/payload/compare/v0.9.2...v0.9.3) (2021-08-06)
+
+
+### Bug Fixes
+
+* args no longer optional in collection and global hooks ([a5ea0ff](https://github.com/payloadcms/payload/commit/a5ea0ff61945f3da106f0d9dbb6a90fb1d884061))
+
+## [0.9.2](https://github.com/payloadcms/payload/compare/v0.9.1...v0.9.2) (2021-08-06)
+
+
+### Bug Fixes
+
+* row admin type ([deef520](https://github.com/payloadcms/payload/commit/deef5202c15301b685fe5efc8a6ff59b012ea1d4))
+
+
+### Features
+
+* allow completely disabling local file storage ([9661c6d](https://github.com/payloadcms/payload/commit/9661c6d40acc41d21eebc42b0cc1871f28d35a73))
+* allows upload resizing to maintain aspect ratio ([dea54a4](https://github.com/payloadcms/payload/commit/dea54a4cccead86e6ffc9f20457f295e1c08405b))
+* exposes auto-sized uploads on payload req ([9c8935f](https://github.com/payloadcms/payload/commit/9c8935fd51439627cccf3f6625236375f5909445))
+* reduces group heading from h2 to h3 ([907f8fd](https://github.com/payloadcms/payload/commit/907f8fd94d7e6cfa7eac0040c134cc714f29800d))
+
+## [0.9.1](https://github.com/payloadcms/payload/compare/v0.9.0...v0.9.1) (2021-08-03)
+
+
+### Bug Fixes
+
+* groups with failing conditions being incorrectly required on backend ([4cc0ea1](https://github.com/payloadcms/payload/commit/4cc0ea1d81cd7579cb330091eb111a27262ff031))
+* relationship field access control in admin UI ([65db8d9](https://github.com/payloadcms/payload/commit/65db8d9fc2c8b556cc284966b9b69f5d6512aca5))
+
+
+### Features
+
+* exposes collection after read hook type ([01a191a](https://github.com/payloadcms/payload/commit/01a191a13967d98ebf57891efd21b2607804e4e3))
+
+# [0.9.0](https://github.com/payloadcms/payload/compare/v0.8.2...v0.9.0) (2021-08-02)
+
+### BREAKING CHANGES
+
+* Due to greater plugin possibilities and performance enhancements, plugins themselves no longer accept a completely sanitized config. Instead, they accept a _validated_ config as-provided, but sanitization is now only performed after all plugins have been initialized. By config santitization, we refer to merging in default values and ensuring that the config has its full, required shape. What this now means for plugins is that within plugin code, deeply nested properties like `config.graphQL.mutations` will need to be accessed safely (optional chaining is great for this), because a user's config may not have defined `config.graphQL`. So, the only real breaking change here is are that plugins now need to safely access properties from an incoming config.
+
+### Features
+
+* removes sanitization of configs before plugins are instantiated ([8af3947](https://github.com/payloadcms/payload/commit/8af39472e19a26453647d1c1ab0bbce15db2c642))
+
+## [0.8.2](https://github.com/payloadcms/payload/compare/v0.8.1...v0.8.2) (2021-08-02)
+
+
+### Bug Fixes
+
+* more advanced conditional logic edge cases ([33983de](https://github.com/payloadcms/payload/commit/33983deb3761813506348f8ff804a2117d1324ef))
+
+
+### Features
+
+* export error types ([12cba62](https://github.com/payloadcms/payload/commit/12cba62930b8d35b22e3a7a99cf06df29bd4964a))
+
+## [0.8.1](https://github.com/payloadcms/payload/compare/v0.8.0...v0.8.1) (2021-07-29)
+
+
+### BREAKING CHANGES
+
+* If you have any plugins that are written in TypeScript, we have changed plugin types to make them more flexible. Whereas before you needed to take in a fully sanitized config, and return a fully sanitized config, we now have simplified that requirement so that you can write configs in your own plugins just as an end user of Payload can write their own configs.
+
+Now, configs will be sanitized **_before_** plugins are executed **_as well as_** after plugins are executed.
+
+So, where your plugin may have been typed like this before:
+
+```ts
+ import { SanitizedConfig } from 'payload/config';
+
+ const plugin = (config: SanitizedConfig): SanitizedConfig => {
+  return {
+    ...config,
+  }
+ }
+```
+
+It can now be written like this:
+
+```ts
+ import { Config } from 'payload/config';
+
+ const plugin = (config: Config): Config => {
+  return {
+    ...config,
+  }
+ }
+```
+
+### Features
+
+* improves plugin writability ([a002b71](https://github.com/payloadcms/payload/commit/a002b7105f5c312e846c80032a350046db10236c))
+
+# [0.8.0](https://github.com/payloadcms/payload/compare/v0.7.10...v0.8.0) (2021-07-28)
+
+### BREAKING CHANGES
+
+* There have been a few very minor, yet breaking TypeScript changes in this release. If you are accessing Payload config types from directly within the `dist` folder, like any of the following:
+
+- `import { PayloadCollectionConfig, CollectionConfig } from 'payload/dist/collections/config/types';`
+- `import { PayloadGlobalConfig, GlobalConfig } from 'payload/dist/globals/config/types';`
+- `import { Config, PayloadConfig } from 'payload/config';`
+
+You may need to modify your code to work with this release. The TL;DR of the change is that we have improved our naming conventions of internally used types, which will become more important over time. Now, we have landed on a naming convention as follows:
+
+- Incoming configs, typed correctly for optional / required config properties, are named `Config`, `CollectionConfig`, and `GlobalConfig`.
+- Fully defaulted, sanitized, and validated configs are now named `SanitizedConfig`, `SanitizedCollectionConfig`, and `SanitizedGlobalConfig`.
+
+They can be imported safely outside of the `dist` folder now as well. For more information on how to properly import which types you need, see the following Docs pages which have now been updated with examples on how to properly access the new types:
+
+- [Base Payload config docs](https://payloadcms.com/docs/configuration/overview)
+- [Collection config docs](https://payloadcms.com/docs/configuration/collections)
+- [Global config docs](https://payloadcms.com/docs/configuration/globals)
+
+### Bug Fixes
+
+* ensures text component is always controlled ([c649362](https://github.com/payloadcms/payload/commit/c649362b95f1ddaeb47cb121b814ca30712dea86))
+
+
+### Features
+
+* revises naming conventions of config types ([5a7e5b9](https://github.com/payloadcms/payload/commit/5a7e5b921d7803ec2da8cc3dc8162c1dd6828ca0))
+
+## [0.7.10](https://github.com/payloadcms/payload/compare/v0.7.9...v0.7.10) (2021-07-27)
+
+
+### Bug Fixes
+
+* jest debug testing ([a2fa30f](https://github.com/payloadcms/payload/commit/a2fa30fad2cd9b8ab6ac4f3905706b97d5663954))
+* skipValidation logic ([fedeaea](https://github.com/payloadcms/payload/commit/fedeaeafc9607f7c21e40c2df44923056e5d460c))
+
+
+### Features
+
+* improves conditional logic performance and edge cases ([d43390f](https://github.com/payloadcms/payload/commit/d43390f2a4c5ebeb7b9b0f07e003816005efc761))
+
+## [0.7.9](https://github.com/payloadcms/payload/compare/v0.7.8...v0.7.9) (2021-07-27)
+
+
+### Bug Fixes
+
+* missing richtext gutter ([4d1249d](https://github.com/payloadcms/payload/commit/4d1249dd03f441ee872e66437118c3e8703aaefc))
+
+
+### Features
+
+* add admin description to collections and globals ([4544711](https://github.com/payloadcms/payload/commit/4544711f0e4ea0e78570b93717a4bf213946d9b3))
+* add collection slug to schema validation errors ([ebfb72c](https://github.com/payloadcms/payload/commit/ebfb72c8fa0723ec75922c6fa4739b48ee82b29f))
+* add component support to collection and global description ([fe0098c](https://github.com/payloadcms/payload/commit/fe0098ccd9b3477b47985222659a0e3fc2e7bb3b))
+* add component support to field description ([e0933f6](https://github.com/payloadcms/payload/commit/e0933f612a70af0a18c88ef96e7af0878e20cf01))
+* add customizable admin field descriptions ([dac60a0](https://github.com/payloadcms/payload/commit/dac60a024b0eb7197d5a501daea342827ee7c751))
+* add descriptions to every allowed field type, globals and collections ([29a1108](https://github.com/payloadcms/payload/commit/29a1108518c7942f8ae06a990393a6e0ad4b6b16))
+* add global slug and field names to schema validation errors ([bb63b4a](https://github.com/payloadcms/payload/commit/bb63b4aad153d125f68bf1fe1e9a3e4a5358ded9))
+* improves group styling when there is no label ([ea358a6](https://github.com/payloadcms/payload/commit/ea358a66e8b8d2e54dd162eae0cf7066128cfabf))
+
+## [0.7.8](https://github.com/payloadcms/payload/compare/v0.7.7...v0.7.8) (2021-07-23)
+
+
+### Features
+
+* fixes group label schema validation ([cbac888](https://github.com/payloadcms/payload/commit/cbac8887ddb7a4446f5502c577d4600905b13380))
+
+## [0.7.7](https://github.com/payloadcms/payload/compare/v0.7.6...v0.7.7) (2021-07-23)
+
+
+### Bug Fixes
+
+* accurately documents the props for the datepicker field ([dcd8052](https://github.com/payloadcms/payload/commit/dcd8052498dd2900f228eaffcf6142b63e8e5a9b))
+
+
+### Features
+
+* only attempts to find config when payload is initialized ([266ccb3](https://github.com/payloadcms/payload/commit/266ccb374449b0a131a574d9b12275b6bb7e5c60))
+
 ## [0.7.6](https://github.com/payloadcms/payload/compare/v0.7.5...v0.7.6) (2021-07-07)
 
 ## [0.7.5](https://github.com/payloadcms/payload/compare/v0.7.4...v0.7.5) (2021-07-07)

@@ -1,0 +1,45 @@
+@import '../../../../../../../scss/styles.scss';
+
+.rich-text-upload {
+  max-width: base(15);
+  display: flex;
+  align-items: center;
+  background: $color-background-gray;
+  position: relative;
+
+  &__button {
+    margin: 0;
+    position: absolute;
+    top: base(.5);
+    right: base(.5);
+  }
+
+  h5 {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  &__thumbnail {
+    width: base(4);
+    max-height: base(4);
+
+    img, svg {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__wrap {
+    padding: base(.5) base(.5) base(.5) base(1);
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &--selected {
+    box-shadow: $focus-box-shadow;
+    outline: none;
+  }
+}

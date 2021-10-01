@@ -1,4 +1,4 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 import checkRole from '../access/checkRole';
 
 const access = ({ req: { user } }) => {
@@ -19,7 +19,7 @@ const access = ({ req: { user } }) => {
   return false;
 };
 
-const Files: PayloadCollectionConfig = {
+const Files: CollectionConfig = {
   slug: 'files',
   labels: {
     singular: 'File',

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { Config } from '../../config/types';
+import { SanitizedConfig } from '../../config/types';
 
-export default (config: Config) => (
+export default (config: SanitizedConfig) => (
   (req: Request, res: Response, next: NextFunction) => {
     if (config.cors) {
       res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');

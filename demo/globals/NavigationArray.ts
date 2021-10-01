@@ -1,4 +1,4 @@
-import { PayloadGlobalConfig } from '../../src/globals/config/types';
+import { GlobalConfig } from '../../src/globals/config/types';
 import checkRole from '../access/checkRole';
 
 export default {
@@ -6,6 +6,9 @@ export default {
   access: {
     update: ({ req: { user } }) => checkRole(['admin', 'user'], user),
     read: () => true,
+  },
+  admin: {
+    description: 'A description for the editor',
   },
   fields: [
     {
@@ -24,4 +27,4 @@ export default {
       }],
     },
   ],
-} as PayloadGlobalConfig;
+} as GlobalConfig;

@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import isHotkey from 'is-hotkey';
-import { Editable, withReact, Slate } from 'slate-react';
-import { createEditor, Transforms, Node } from 'slate';
-import { withHistory } from 'slate-history';
+import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor } from 'slate';
+import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
+import { HistoryEditor, withHistory } from 'slate-history';
 import { richText } from '../../../../../fields/validations';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
@@ -15,6 +15,7 @@ import hotkeys from './hotkeys';
 import enablePlugins from './enablePlugins';
 import defaultValue from '../../../../../fields/richText/defaultValue';
 import FieldTypeGutter from '../../FieldTypeGutter';
+import FieldDescription from '../../FieldDescription';
 import withHTML from './plugins/withHTML';
 import { Props } from './types';
 import { RichTextElement, RichTextLeaf } from '../../../../../fields/config/types';
@@ -24,11 +25,22 @@ import mergeCustomFunctions from './mergeCustomFunctions';
 
 import './index.scss';
 
-const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link', 'relationship'];
+const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link', 'relationship', 'upload'];
 const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
 const enterBreakOutTypes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
 const baseClass = 'rich-text';
+type CustomText = { text: string; [x: string]: unknown }
+
+type CustomElement = { type: string; children: CustomText[] }
+
+declare module 'slate' {
+  interface CustomTypes {
+    Editor: BaseEditor & ReactEditor & HistoryEditor
+    Element: CustomElement
+    Text: CustomText
+  }
+}
 
 const RichText: React.FC<Props> = (props) => {
   const {
@@ -43,8 +55,9 @@ const RichText: React.FC<Props> = (props) => {
       style,
       width,
       placeholder,
-      condition,
+      description,
       hideGutter,
+      condition,
     } = {},
   } = props;
 
@@ -66,6 +79,7 @@ const RichText: React.FC<Props> = (props) => {
         <Element
           attributes={attributes}
           element={element}
+          path={path}
         >
           {children}
         </Element>
@@ -73,7 +87,7 @@ const RichText: React.FC<Props> = (props) => {
     }
 
     return <div {...attributes}>{children}</div>;
-  }, [enabledElements]);
+  }, [enabledElements, path]);
 
   const renderLeaf = useCallback(({ attributes, children, leaf }) => {
     const matchedLeafName = Object.keys(enabledLeaves).find((leafName) => leaf[leafName]);
@@ -85,6 +99,7 @@ const RichText: React.FC<Props> = (props) => {
         <Leaf
           attributes={attributes}
           leaf={leaf}
+          path={path}
         >
           {children}
         </Leaf>
@@ -94,7 +109,7 @@ const RichText: React.FC<Props> = (props) => {
     return (
       <span {...attributes}>{children}</span>
     );
-  }, [enabledLeaves]);
+  }, [enabledLeaves, path]);
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required });
@@ -177,8 +192,8 @@ const RichText: React.FC<Props> = (props) => {
         width,
       }}
     >
-      { !hideGutter && (<FieldTypeGutter />) }
       <div className={`${baseClass}__wrap`}>
+        { !hideGutter && (<FieldTypeGutter />) }
         <Error
           showError={showError}
           message={errorMessage}
@@ -254,19 +269,21 @@ const RichText: React.FC<Props> = (props) => {
                   } else {
                     const selectedElement = Node.descendant(editor, editor.selection.anchor.path.slice(0, -1));
 
-                    // Allow hard enter to "break out" of certain elements
-                    if (enterBreakOutTypes.includes(String(selectedElement.type))) {
-                      event.preventDefault();
-                      const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
+                    if (SlateElement.isElement(selectedElement)) {
+                      // Allow hard enter to "break out" of certain elements
+                      if (enterBreakOutTypes.includes(String(selectedElement.type))) {
+                        event.preventDefault();
+                        const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
 
-                      if (String(selectedLeaf.text).length === editor.selection.anchor.offset) {
-                        Transforms.insertNodes(editor, {
-                          type: 'p',
-                          children: [{ text: '', marks: [] }],
-                        });
-                      } else {
-                        Transforms.splitNodes(editor);
-                        Transforms.setNodes(editor, { type: 'p' });
+                        if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === editor.selection.anchor.offset) {
+                          Transforms.insertNodes(editor, {
+                            type: 'p',
+                            children: [{ text: '' }],
+                          });
+                        } else {
+                          Transforms.splitNodes(editor);
+                          Transforms.setNodes(editor, { type: 'p' });
+                        }
                       }
                     }
                   }
@@ -275,16 +292,18 @@ const RichText: React.FC<Props> = (props) => {
                 if (event.key === 'Backspace') {
                   const selectedElement = Node.descendant(editor, editor.selection.anchor.path.slice(0, -1));
 
-                  if (selectedElement.type === 'li') {
+                  if (SlateElement.isElement(selectedElement) && selectedElement.type === 'li') {
                     const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
-                    if (String(selectedLeaf.text).length === 1) {
+                    if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === 1) {
                       Transforms.unwrapNodes(editor, {
-                        match: (n) => listTypes.includes(n.type as string),
+                        match: (n) => SlateElement.isElement(n) && listTypes.includes(n.type),
                         split: true,
                       });
 
                       Transforms.setNodes(editor, { type: 'p' });
                     }
+                  } else if (editor.isVoid(selectedElement)) {
+                    Transforms.removeNodes(editor);
                   }
                 }
 
@@ -299,6 +318,10 @@ const RichText: React.FC<Props> = (props) => {
             />
           </div>
         </Slate>
+        <FieldDescription
+          value={value}
+          description={description}
+        />
       </div>
     </div>
   );

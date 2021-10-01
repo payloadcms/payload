@@ -64,13 +64,13 @@
     cursor: default;
 
     &__label {
-      color: $color-gray;
+      color: $color-dark-gray;
     }
 
     &--is-selected {
       .radio-input__styled-radio {
         &:before {
-          background-color: $color-gray;
+          background-color: $color-dark-gray;
         }
       }
     }

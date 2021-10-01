@@ -3,7 +3,7 @@ import path from 'path';
 import FormData from 'form-data';
 import getConfig from '../../config/load';
 import fileExists from '../../../tests/api/utils/fileExists';
-import { email, password } from '../../../tests/api/credentials';
+import { email, password } from '../../mongoose/testCredentials';
 
 require('isomorphic-fetch');
 
@@ -93,6 +93,49 @@ describe('Collections - REST', () => {
                 width: 320,
                 height: 240,
               },
+              tablet: {
+                filename: 'image-640x480.png',
+                width: 640,
+                height: 480,
+              },
+            },
+
+            // We have a hook to check if upload sizes
+            // are properly bound to the Payload `req`.
+            // This field should be automatically set
+            // if they are found.
+            foundUploadSizes: true,
+          },
+        });
+      });
+
+      it('creates media without storing a file', async () => {
+        const formData = new FormData();
+        formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/image.png')));
+        formData.append('alt', 'test media');
+        formData.append('locale', 'en');
+
+        const response = await fetch(`${url}/api/unstored-media`, {
+          body: formData,
+          headers,
+          method: 'post',
+        });
+
+        const data = await response.json();
+
+        expect(response.status).toBe(201);
+
+        // Check for files
+        expect(await !fileExists(path.join(mediaDir, 'image.png'))).toBe(false);
+        expect(await !fileExists(path.join(mediaDir, 'image-640x480.png'))).toBe(false);
+
+        // Check api response
+        expect(data).toMatchObject({
+          doc: {
+            alt: 'test media',
+            filename: 'image.png',
+            mimeType: 'image/png',
+            sizes: {
               tablet: {
                 filename: 'image-640x480.png',
                 width: 640,
@@ -227,6 +270,7 @@ describe('Collections - REST', () => {
               width: 640,
               height: 480,
             },
+            maintainedAspectRatio: {},
           },
         },
       });

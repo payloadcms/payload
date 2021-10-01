@@ -8,6 +8,7 @@ import usePayloadAPI from '../../../../../hooks/usePayloadAPI';
 import ListControls from '../../../../elements/ListControls';
 import Paginator from '../../../../elements/Paginator';
 import UploadGallery from '../../../../elements/UploadGallery';
+import { Field } from '../../../../../../fields/config/types';
 import { Props } from './types';
 
 import './index.scss';
@@ -20,6 +21,9 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
     collection,
     collection: {
       slug: collectionSlug,
+      admin: {
+        description,
+      } = {},
     } = {},
     slug: modalSlug,
   } = props;
@@ -42,7 +46,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
   const [{ data }, { setParams }] = usePayloadAPI(apiURL, {});
 
   useEffect(() => {
-    setFields(formatFields(collection));
+    setFields(formatFields(collection) as Field[]);
   }, [collection]);
 
   useEffect(() => {
@@ -68,19 +72,24 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
       {isOpen && (
         <MinimalTemplate width="wide">
           <header className={`${baseClass}__header`}>
-            <h1>
-              {' '}
-              Select existing
-              {' '}
-              {collection.labels.singular}
-            </h1>
-            <Button
-              icon="x"
-              round
-              buttonStyle="icon-label"
-              iconStyle="with-border"
-              onClick={closeAll}
-            />
+            <div>
+              <h1>
+                {' '}
+                Select existing
+                {' '}
+                {collection.labels.singular}
+              </h1>
+              <Button
+                icon="x"
+                round
+                buttonStyle="icon-label"
+                iconStyle="with-border"
+                onClick={closeAll}
+              />
+            </div>
+            {description && (
+              <div className={`${baseClass}__sub-header`}>{description}</div>
+            )}
           </header>
           <ListControls
             handleChange={setListControls}

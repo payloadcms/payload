@@ -71,13 +71,25 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   }
 
   // /////////////////////////////////////
+  // Custom id
+  // /////////////////////////////////////
+
+  const hasIdField = collectionConfig.fields.findIndex(({ name }) => name === 'id') > -1;
+  if (hasIdField) {
+    data = {
+      _id: data.id,
+      ...data,
+    };
+  }
+
+  // /////////////////////////////////////
   // Upload and resize potential files
   // /////////////////////////////////////
 
   if (collectionConfig.upload) {
     const fileData: Partial<FileData> = {};
 
-    const { staticDir, imageSizes } = collectionConfig.upload;
+    const { staticDir, imageSizes, disableLocalStorage } = collectionConfig.upload;
 
     const file = ((req.files && req.files.file) ? req.files.file : req.file) as UploadedFile;
 
@@ -88,30 +100,34 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     let staticPath = staticDir;
 
     if (staticDir.indexOf('/') !== 0) {
-      staticPath = path.join(config.paths.configDir, staticDir);
+      staticPath = path.resolve(config.paths.configDir, staticDir);
     }
 
-    mkdirp.sync(staticPath);
+    if (!disableLocalStorage) {
+      mkdirp.sync(staticPath);
+    }
 
     const fsSafeName = await getSafeFilename(staticPath, file.name);
 
     try {
-      await saveBufferToFile(file.data, `${staticPath}/${fsSafeName}`);
+      if (!disableLocalStorage) {
+        await saveBufferToFile(file.data, `${staticPath}/${fsSafeName}`);
+      }
 
       if (isImage(file.mimetype)) {
-        const dimensions = await getImageSize(`${staticPath}/${fsSafeName}`);
+        const dimensions = await getImageSize(file);
         fileData.width = dimensions.width;
         fileData.height = dimensions.height;
 
         if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
-          fileData.sizes = await resizeAndSave(staticPath, collectionConfig, fsSafeName, fileData.mimeType);
+          req.payloadUploadSizes = {};
+          fileData.sizes = await resizeAndSave(req, file.data, dimensions, staticPath, collectionConfig, fsSafeName, fileData.mimeType);
         }
       }
     } catch (err) {
       console.error(err);
       throw new FileUploadError();
     }
-
 
     fileData.filename = fsSafeName;
     fileData.filesize = file.size;
@@ -214,37 +230,11 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   let result: Document = doc.toJSON({ virtuals: true });
   const verificationToken = result._verificationToken;
 
+  // custom id type reset
+  result.id = result._id;
   result = JSON.stringify(result);
   result = JSON.parse(result);
   result = sanitizeInternalFields(result);
-
-  // /////////////////////////////////////
-  // afterChange - Fields
-  // /////////////////////////////////////
-
-  result = await this.performFieldOperations(collectionConfig, {
-    data: result,
-    hook: 'afterChange',
-    operation: 'create',
-    req,
-    depth,
-    overrideAccess,
-    showHiddenFields,
-  });
-
-  // /////////////////////////////////////
-  // afterChange - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterChange.reduce(async (priorHook: AfterChangeHook | Promise<void>, hook: AfterChangeHook) => {
-    await priorHook;
-
-    result = await hook({
-      doc: result,
-      req: args.req,
-      operation: 'create',
-    }) || result;
-  }, Promise.resolve());
 
   // /////////////////////////////////////
   // Send verification email if applicable
@@ -288,6 +278,34 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     result = await hook({
       req,
       doc: result,
+    }) || result;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterChange - Fields
+  // /////////////////////////////////////
+
+  result = await this.performFieldOperations(collectionConfig, {
+    data: result,
+    hook: 'afterChange',
+    operation: 'create',
+    req,
+    depth,
+    overrideAccess,
+    showHiddenFields,
+  });
+
+  // /////////////////////////////////////
+  // afterChange - Collection
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.afterChange.reduce(async (priorHook: AfterChangeHook | Promise<void>, hook: AfterChangeHook) => {
+    await priorHook;
+
+    result = await hook({
+      doc: result,
+      req: args.req,
+      operation: 'create',
     }) || result;
   }, Promise.resolve());
 

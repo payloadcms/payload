@@ -19,7 +19,13 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      margin: 0;
     }
+    margin-bottom: base(1);
+  }
+
+  &__sub-header {
+    margin-top: base(.25);
   }
 
   &__collection-actions {

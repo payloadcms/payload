@@ -130,7 +130,7 @@
     backdrop-filter: saturate(180%) blur(5px);
     width: 100%;
     height: base(3);
-    z-index: $z-nav;
+    z-index: $z-modal;
 
     &__scroll {
       padding: 0;

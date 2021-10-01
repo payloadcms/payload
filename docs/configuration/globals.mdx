@@ -17,6 +17,7 @@ As with Collection configs, it's often best practice to write your Globals in se
 | **`slug`** *     | Unique, URL-friendly string that will act as an identifier for this Global. |
 | **`fields`** *   | Array of field types that will determine the structure and functionality of the data stored within this Global. [Click here](/docs/fields/overview) for a full list of field types as well as how to configure them. |
 | **`label`**      | Singular label for use in identifying this Global throughout Payload. Auto-generated from slug if not defined. |
+| **`description`**| Text or React component to display below the Global header to give editors more information.  |
 | **`admin`**      | Admin-specific configuration. See below for [more detail](/docs/configuration/globals#admin-options). |
 | **`hooks`**      | Entry points to "tie in" to collection actions at specific points. [More](/docs/hooks/overview#global-hooks) |
 | **`access`**     | Provide access control functions to define exactly who should be able to do what with this Global. [More](/docs/access-control/overview/#globals) |
@@ -70,3 +71,21 @@ Globals also fully support a smaller subset of Hooks. To learn more, go to the [
 ### Field types
 
 Globals support all field types that Payload has to offer—including simple fields like text and checkboxes all the way to more complicated layout-building field groups like Blocks. [Click here](/docs/fields/overview) to learn more about field types.
+
+### TypeScript
+
+You can import global types as follows:
+
+```js
+import { GlobalConfig } from 'payload/types';
+
+// This is the type used for incoming global configs.
+// Only the bare minimum properties are marked as required.
+```
+
+```js
+import { SanitizedGlobalConfig } from 'payload/types';
+
+// This is the type used after an incoming global config is fully sanitized.
+// Generally, this is only used internally by Payload.
+```

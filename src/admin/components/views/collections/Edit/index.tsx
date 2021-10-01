@@ -7,6 +7,7 @@ import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import { DocumentInfoProvider } from '../../../utilities/DocumentInfo';
 import DefaultEdit from './Default';
+import formatFields from './formatFields';
 import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema';
 import { NegativeFieldGutterProvider } from '../../../forms/FieldTypeGutter/context';
 import { useLocale } from '../../../utilities/Locale';
@@ -29,8 +30,8 @@ const EditView: React.FC<IndexProps> = (props) => {
         } = {},
       } = {},
     } = {},
-    fields,
   } = collection;
+  const [fields] = useState(() => formatFields(collection, isEditing));
 
   const locale = useLocale();
   const { serverURL, routes: { admin, api } } = useConfig();
@@ -110,7 +111,7 @@ const EditView: React.FC<IndexProps> = (props) => {
           componentProps={{
             isLoading,
             data: dataToRender,
-            collection,
+            collection: { ...collection, fields },
             permissions: collectionPermissions,
             isEditing,
             onSave,

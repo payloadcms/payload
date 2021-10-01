@@ -3,6 +3,7 @@ import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
+import FieldDescription from '../../FieldDescription';
 import { textarea } from '../../../../../fields/validations';
 import { Props } from './types';
 
@@ -20,6 +21,7 @@ const Textarea: React.FC<Props> = (props) => {
       width,
       placeholder,
       rows,
+      description,
       condition,
     } = {},
     label,
@@ -78,6 +80,10 @@ const Textarea: React.FC<Props> = (props) => {
         id={path}
         name={path}
         rows={rows}
+      />
+      <FieldDescription
+        value={value}
+        description={description}
       />
     </div>
   );

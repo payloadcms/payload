@@ -5,6 +5,7 @@ import withCondition from '../../withCondition';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
+import FieldDescription from '../../FieldDescription';
 import { date as dateValidation } from '../../../../../fields/validations';
 import { Props } from './types';
 
@@ -25,6 +26,7 @@ const DateTime: React.FC<Props> = (props) => {
       style,
       width,
       date,
+      description,
       condition,
     } = {},
   } = props;
@@ -62,10 +64,12 @@ const DateTime: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <Error
-        showError={showError}
-        message={errorMessage}
-      />
+      <div className={`${baseClass}__error-wrap`}>
+        <Error
+          showError={showError}
+          message={errorMessage}
+        />
+      </div>
       <Label
         htmlFor={path}
         label={label}
@@ -80,6 +84,10 @@ const DateTime: React.FC<Props> = (props) => {
           value={value as Date}
         />
       </div>
+      <FieldDescription
+        value={value}
+        description={description}
+      />
     </div>
   );
 };

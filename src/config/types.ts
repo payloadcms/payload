@@ -7,8 +7,8 @@ import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
 import { ConnectionOptions } from 'mongoose';
 import { Payload } from '..';
-import { AfterErrorHook, PayloadCollectionConfig, CollectionConfig } from '../collections/config/types';
-import { PayloadGlobalConfig, GlobalConfig } from '../globals/config/types';
+import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types';
+import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
 import { PayloadRequest } from '../express/types';
 import { Where } from '../types';
 
@@ -70,7 +70,7 @@ export type InitOptions = {
 export type AccessResult = boolean | Where;
 export type Access = (args?: any) => AccessResult;
 
-export type PayloadConfig = {
+export type Config = {
   admin?: {
     user?: string;
     meta?: {
@@ -96,8 +96,8 @@ export type PayloadConfig = {
     }
     webpack?: (config: Configuration) => Configuration;
   };
-  collections?: PayloadCollectionConfig[];
-  globals?: PayloadGlobalConfig[];
+  collections?: CollectionConfig[];
+  globals?: GlobalConfig[];
   serverURL: string;
   cookiePrefix?: string;
   csrf?: string[];
@@ -146,8 +146,8 @@ export type PayloadConfig = {
   plugins?: Plugin[]
 };
 
-export type Config = Omit<DeepRequired<PayloadConfig>, 'collections' | 'globals'> & {
-  collections: CollectionConfig[]
-  globals: GlobalConfig[]
+export type SanitizedConfig = Omit<DeepRequired<Config>, 'collections' | 'globals'> & {
+  collections: SanitizedCollectionConfig[]
+  globals: SanitizedGlobalConfig[]
   paths: { [key: string]: string };
 }

@@ -27,6 +27,7 @@ export type Arguments = {
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
   showHiddenFields?: boolean
+  overwriteExistingFiles?: boolean
 }
 
 async function update(incomingArgs: Arguments): Promise<Document> {
@@ -60,6 +61,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     },
     overrideAccess,
     showHiddenFields,
+    overwriteExistingFiles = false,
   } = args;
 
   if (!id) {
@@ -124,36 +126,40 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   if (collectionConfig.upload) {
     const fileData: Partial<FileData> = {};
 
-    const { staticDir, imageSizes } = collectionConfig.upload;
+    const { staticDir, imageSizes, disableLocalStorage } = collectionConfig.upload;
 
     let staticPath = staticDir;
 
     if (staticDir.indexOf('/') !== 0) {
-      staticPath = path.join(config.paths.configDir, staticDir);
+      staticPath = path.resolve(config.paths.configDir, staticDir);
     }
 
     const file = ((req.files && req.files.file) ? req.files.file : req.file) as UploadedFile;
 
     if (file) {
-      const fsSafeName = await getSafeFilename(staticPath, file.name);
+      const fsSafeName = !overwriteExistingFiles ? await getSafeFilename(staticPath, file.name) : file.name;
 
       try {
-        await saveBufferToFile(file.data, `${staticPath}/${fsSafeName}`);
+        if (!disableLocalStorage) {
+          await saveBufferToFile(file.data, `${staticPath}/${fsSafeName}`);
+        }
 
         fileData.filename = fsSafeName;
         fileData.filesize = file.size;
         fileData.mimeType = file.mimetype;
 
         if (isImage(file.mimetype)) {
-          const dimensions = await getImageSize(`${staticPath}/${fsSafeName}`);
+          const dimensions = await getImageSize(file);
           fileData.width = dimensions.width;
           fileData.height = dimensions.height;
 
           if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
-            fileData.sizes = await resizeAndSave(staticPath, collectionConfig, fsSafeName, fileData.mimeType);
+            req.payloadUploadSizes = {};
+            fileData.sizes = await resizeAndSave(req, file.data, dimensions, staticPath, collectionConfig, fsSafeName, fileData.mimeType);
           }
         }
       } catch (err) {
+        console.error(err);
         throw new FileUploadError();
       }
 
@@ -261,6 +267,9 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   }
 
   result = result.toJSON({ virtuals: true });
+
+  // custom id type reset
+  result.id = result._id;
   result = JSON.stringify(result);
   result = JSON.parse(result);
   result = sanitizeInternalFields(result);

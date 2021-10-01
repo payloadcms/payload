@@ -2,7 +2,7 @@ import express, { Express, Router } from 'express';
 import crypto from 'crypto';
 import { Document, Model } from 'mongoose';
 import {
-  Config,
+  SanitizedConfig,
   EmailOptions,
   InitOptions,
 } from './config/types';
@@ -50,7 +50,7 @@ require('isomorphic-fetch');
  * @description Payload
  */
 export class Payload {
-  config: Config;
+  config: SanitizedConfig;
 
   collections: Collection[] = [];
 
@@ -148,7 +148,7 @@ export class Payload {
     initPreferences(this);
 
     // Connect to database
-    connectMongoose(this.mongoURL, options.mongoOptions);
+    connectMongoose(this.mongoURL, options.mongoOptions, options.local);
 
     // If not initializing locally, set up HTTP routing
     if (!this.local) {

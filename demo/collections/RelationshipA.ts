@@ -1,6 +1,6 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 
-const RelationshipA: PayloadCollectionConfig = {
+const RelationshipA: CollectionConfig = {
   slug: 'relationship-a',
   access: {
     read: () => true,
@@ -29,7 +29,7 @@ const RelationshipA: PayloadCollectionConfig = {
       name: 'postLocalizedMultiple',
       label: 'Localized Post Multiple',
       type: 'relationship',
-      relationTo: ['localized-posts', 'all-fields'],
+      relationTo: ['localized-posts', 'all-fields', 'custom-id'],
       hasMany: true,
       localized: true,
     },
@@ -48,6 +48,14 @@ const RelationshipA: PayloadCollectionConfig = {
       type: 'relationship',
       relationTo: 'relationship-b',
       hasMany: false,
+    },
+    {
+      name: 'customID',
+      label: 'CustomID Relation',
+      type: 'relationship',
+      relationTo: 'custom-id',
+      hasMany: true,
+      localized: true,
     },
   ],
   timestamps: true,

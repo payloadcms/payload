@@ -11,6 +11,7 @@ import useFieldType from '../../useFieldType';
 import Error from '../../Error';
 import { array } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
+import FieldDescription from '../../FieldDescription';
 import { Props, RenderArrayProps } from './types';
 
 import './index.scss';
@@ -30,6 +31,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     permissions,
     admin: {
       readOnly,
+      description,
       condition,
     },
   } = props;
@@ -132,6 +134,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       minRows={minRows}
       maxRows={maxRows}
       required={required}
+      description={description}
     />
   );
 };
@@ -156,6 +159,7 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
     minRows,
     maxRows,
     required,
+    description,
   } = props;
 
   const hasMaxRows = maxRows && rows.length >= maxRows;
@@ -173,6 +177,10 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
         </div>
         <header className={`${baseClass}__header`}>
           <h3>{label}</h3>
+          <FieldDescription
+            value={value}
+            description={description}
+          />
         </header>
         <Droppable droppableId="array-drop">
           {(provided) => (

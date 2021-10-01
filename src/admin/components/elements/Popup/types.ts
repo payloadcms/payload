@@ -1,4 +1,5 @@
 export type Props = {
+    className?: string
     render?: (any) => void,
     children?: React.ReactNode,
     horizontalAlign?: 'left' | 'center' | 'right',

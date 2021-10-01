@@ -7,6 +7,7 @@ type Arguments = {
   errors: {message: string, field: string}[]
   newData: Record<string, unknown>
   existingData: Record<string, unknown>
+  skipValidation?: boolean
 }
 
 const validationPromise = async ({
@@ -16,8 +17,9 @@ const validationPromise = async ({
   existingData,
   field,
   path,
+  skipValidation,
 }: Arguments): Promise<string | boolean> => {
-  if (hook !== 'beforeChange') return true;
+  if (hook !== 'beforeChange' || skipValidation) return true;
 
   const hasCondition = field.admin && field.admin.condition;
   const shouldValidate = field.validate && !hasCondition;

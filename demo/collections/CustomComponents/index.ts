@@ -1,4 +1,4 @@
-import { PayloadCollectionConfig } from '../../../src/collections/config/types';
+import { CollectionConfig } from '../../../src/collections/config/types';
 import DescriptionField from './components/fields/Description/Field';
 import DescriptionCell from './components/fields/Description/Cell';
 import DescriptionFilter from './components/fields/Description/Filter';
@@ -7,8 +7,9 @@ import GroupField from './components/fields/Group/Field';
 import NestedGroupField from './components/fields/NestedGroupCustomField/Field';
 import NestedText1Field from './components/fields/NestedText1/Field';
 import ListView from './components/views/List';
+import CustomDescriptionComponent from '../../customComponents/Description';
 
-const CustomComponents: PayloadCollectionConfig = {
+const CustomComponents: CollectionConfig = {
   slug: 'custom-components',
   labels: {
     singular: 'Custom Component',
@@ -36,6 +37,14 @@ const CustomComponents: PayloadCollectionConfig = {
           Cell: DescriptionCell,
           Filter: DescriptionFilter,
         },
+      },
+    },
+    {
+      name: 'componentDescription',
+      label: 'Component ViewDescription',
+      type: 'text',
+      admin: {
+        description: CustomDescriptionComponent,
       },
     },
     {

@@ -4,6 +4,15 @@
   margin-top: base(2);
   margin-bottom: base(2);
   display: flex;
+  position: relative;
+
+  &__header {
+    margin-bottom: base(1);
+  }
+
+  &__title {
+    margin-bottom: 0;
+  }
 
   &:hover {
     .field-type-gutter__content-container {
@@ -27,6 +36,10 @@
         margin-bottom: 0;
       }
     }
+  }
+
+  &--no-label {
+    margin-top: 0,
   }
 
   @include mid-break {

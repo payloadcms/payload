@@ -1,6 +1,6 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 
-const LocalOperations: PayloadCollectionConfig = {
+const LocalOperations: CollectionConfig = {
   slug: 'local-operations',
   labels: {
     singular: 'Local Operation',

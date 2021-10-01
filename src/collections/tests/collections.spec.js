@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import getConfig from '../../config/load';
-import { email, password } from '../../../tests/api/credentials';
+import { email, password } from '../../mongoose/testCredentials';
 
 require('isomorphic-fetch');
 
@@ -38,8 +38,11 @@ describe('Collections - REST', () => {
   });
 
   describe('Create', () => {
-    it('should allow a localized post to be created', async () => {
-      const response = await fetch(`${url}/api/localized-posts`, {
+    let response;
+    let data;
+
+    beforeAll(async () => {
+      response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
           title: 'title',
           description: englishPostDesc,
@@ -68,12 +71,13 @@ describe('Collections - REST', () => {
         headers,
         method: 'post',
       });
+      data = await response.json();
+    });
 
-      const data = await response.json();
-
+    it('should allow a localized post to be created', async () => {
       expect(response.status).toBe(201);
-      expect(data.doc.title).not.toBeNull();
-      expect(data.doc.id).not.toBeNull();
+      expect(data.doc.title).toBeDefined();
+      expect(data.doc.id).toBeDefined();
       expect(data.doc.nonLocalizedGroup.text).toStrictEqual('english');
       expect(data.doc.localizedGroup.text).toStrictEqual('english');
       expect(data.doc.nonLocalizedArray[0].localizedEmbeddedText).toStrictEqual('english');
@@ -84,6 +88,14 @@ describe('Collections - REST', () => {
       expect(data.doc.updatedAt).toStrictEqual(expect.stringMatching(timestampRegex));
 
       localizedPostID = data.doc.id;
+    });
+
+    it('should add id to array items', async () => {
+      expect(data.doc.nonLocalizedArray[0].id).toBeDefined();
+    });
+
+    it('should add id to block items', async () => {
+      expect(data.doc.richTextBlocks[0].id).toBeDefined();
     });
   });
 
@@ -256,7 +268,7 @@ describe('Collections - REST', () => {
 
       const getData = await getResponse.json();
 
-      expect(getData.id).not.toBeNull();
+      expect(getData.id).toBeDefined();
     });
 
     it('should allow querying on a field', async () => {
@@ -365,7 +377,7 @@ describe('Collections - REST', () => {
       const data = await response.json();
       const docId = data.doc.id;
       expect(response.status).toBe(201);
-      expect(docId).not.toBeNull();
+      expect(docId).toBeDefined();
 
       const deleteResponse = await fetch(`${url}/api/localized-posts/${docId}`, {
         headers,
@@ -406,7 +418,6 @@ describe('Collections - REST', () => {
       expect(data.docs.length).toBeGreaterThan(0);
       expect(data.totalDocs).toBeGreaterThan(0);
       expect(data.limit).toBe(10);
-      expect(data.totalPages).toBe(2);
       expect(data.page).toBe(1);
       expect(data.pagingCounter).toBe(1);
       expect(data.hasPrevPage).toBe(false);
@@ -547,6 +558,94 @@ describe('Collections - REST', () => {
       });
 
       expect(failedResponse.status).toStrictEqual(500);
+    });
+  });
+
+  describe('Custom ID', () => {
+    const document = {
+      id: 1,
+      name: 'name',
+    };
+    let data;
+    beforeAll(async (done) => {
+      // create document
+      const create = await fetch(`${url}/api/custom-id`, {
+        body: JSON.stringify(document),
+        headers,
+        method: 'post',
+      });
+      data = await create.json();
+      done();
+    });
+
+
+    it('should create collections with custom ID', async () => {
+      expect(data.doc.id).toBe(document.id);
+    });
+
+    it('should read collections by custom ID', async () => {
+      const response = await fetch(`${url}/api/custom-id/${document.id}`, {
+        headers,
+        method: 'get',
+      });
+
+      const result = await response.json();
+
+      expect(result.id).toStrictEqual(document.id);
+      expect(result.name).toStrictEqual(document.name);
+    });
+
+    it('should update collection by custom ID', async () => {
+      const updatedDoc = { id: 'cannot-update-id', name: 'updated' };
+      const response = await fetch(`${url}/api/custom-id/${document.id}`, {
+        headers,
+        body: JSON.stringify(updatedDoc),
+        method: 'put',
+      });
+
+      const result = await response.json();
+
+      expect(result.doc.id).not.toStrictEqual(updatedDoc.id);
+      expect(result.doc.name).not.toStrictEqual(document.name);
+      expect(result.doc.name).toStrictEqual(updatedDoc.name);
+    });
+
+    it('should delete collection by custom ID', async () => {
+      const doc = {
+        id: 2,
+        name: 'delete me',
+      };
+      const createResponse = await fetch(`${url}/api/custom-id`, {
+        body: JSON.stringify(doc),
+        headers,
+        method: 'post',
+      });
+      const result = await createResponse.json();
+      const response = await fetch(`${url}/api/custom-id/${result.doc.id}`, {
+        headers,
+        method: 'delete',
+      });
+
+      expect(response.status).toBe(200);
+      const deleteData = await response.json();
+      expect(deleteData.id).toBe(doc.id);
+    });
+
+    it('should allow querying by custom ID', async () => {
+      const response = await fetch(`${url}/api/custom-id?where[id][equals]=${document.id}`, {
+        headers,
+        method: 'get',
+      });
+      const emptyResponse = await fetch(`${url}/api/custom-id?where[id][equals]=900`, {
+        headers,
+        method: 'get',
+      });
+
+      const result = await response.json();
+      const emptyResult = await emptyResponse.json();
+
+      expect(result.docs).toHaveLength(1);
+      expect(emptyResult.docs).toHaveLength(0);
     });
   });
 });

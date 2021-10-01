@@ -1,4 +1,4 @@
-import { PayloadCollectionConfig } from '../../src/collections/config/types';
+import { CollectionConfig } from '../../src/collections/config/types';
 import { FieldAccess } from '../../src/fields/config/types';
 import checkRole from '../access/checkRole';
 
@@ -12,7 +12,7 @@ const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) =>
   return false;
 };
 
-const LocalizedArrays: PayloadCollectionConfig = {
+const LocalizedArrays: CollectionConfig = {
   slug: 'localized-arrays',
   labels: {
     singular: 'Localized Array',

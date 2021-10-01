@@ -145,3 +145,21 @@ If for any reason you need to re-use the built-in Payload `babel.config.js`, you
 ```
 import { config } from 'payload/babel';
 ```
+
+### TypeScript
+
+You can import config types as follows:
+
+```js
+import { Config } from 'payload/config';
+
+// This is the type used for an incoming Payload config.
+// Only the bare minimum properties are marked as required.
+```
+
+```js
+import { SanitizedConfig } from 'payload/config';
+
+// This is the type used after an incoming Payload config is fully sanitized.
+// Generally, this is only used internally by Payload.
+```

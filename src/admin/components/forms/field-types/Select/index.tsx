@@ -4,6 +4,7 @@ import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
 import Label from '../../Label';
 import Error from '../../Error';
+import FieldDescription from '../../FieldDescription';
 import { select } from '../../../../../fields/validations';
 import { Option } from '../../../../../fields/config/types';
 import { Props, Option as ReactSelectOption } from './types';
@@ -36,6 +37,7 @@ const Select: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
+      description,
       condition,
     } = {},
   } = props;
@@ -109,6 +111,10 @@ const Select: React.FC<Props> = (props) => {
         isDisabled={readOnly}
         options={options}
         isMulti={hasMany}
+      />
+      <FieldDescription
+        value={value}
+        description={description}
       />
     </div>
   );

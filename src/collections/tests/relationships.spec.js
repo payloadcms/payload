@@ -1,5 +1,5 @@
 import getConfig from '../../config/load';
-import { email, password } from '../../../tests/api/credentials';
+import { email, password } from '../../mongoose/testCredentials';
 
 require('isomorphic-fetch');
 
@@ -69,7 +69,7 @@ describe('Collections - REST', () => {
     });
 
     it('should create and read collections with relationships', async () => {
-      expect(documentA.post).not.toBeNull();
+      expect(documentA.post).toBeDefined();
       expect(documentB.post).toHaveLength(1);
     });
 
@@ -102,6 +102,60 @@ describe('Collections - REST', () => {
       // asserts postMaxDepth is not populated
       expect(doc.postMaxDepth).toBe(documentB.id);
       expect(doc.postMaxDepth).not.toHaveProperty('post');
+    });
+
+    it('should allow a custom id relation', async () => {
+      const customID = {
+        id: 30,
+        name: 'custom',
+      };
+
+      const newCustomID = await fetch(`${url}/api/custom-id`, {
+        headers,
+        body: JSON.stringify(customID),
+        method: 'post',
+      });
+
+      const custom = await newCustomID.json();
+      const response = await fetch(`${url}/api/relationship-a/${documentA.id}`, {
+        headers,
+        body: JSON.stringify({
+          ...documentA,
+          post: documentB.id,
+          customID: [custom.doc.id],
+        }),
+        method: 'put',
+      });
+      const { doc } = await response.json();
+      expect(doc.customID[0].id).toBe(customID.id);
+    });
+
+    it('should allow a custom id relation and parse the id type', async () => {
+      const customID = {
+        id: '40',
+        name: 'custom',
+      };
+
+      const newCustomID = await fetch(`${url}/api/custom-id`, {
+        headers,
+        body: JSON.stringify(customID),
+        method: 'post',
+      });
+
+      const custom = await newCustomID.json();
+      const response = await fetch(`${url}/api/relationship-a/${documentA.id}`, {
+        headers,
+        body: JSON.stringify({
+          ...documentA,
+          post: documentB.id,
+          customID: [custom.doc.id],
+        }),
+        method: 'put',
+      });
+      const { doc } = await response.json();
+
+      expect(custom.doc.id).toBe(parseFloat(customID.id));
+      expect(doc.customID[0].id).toBe(parseFloat(customID.id));
     });
   });
 });

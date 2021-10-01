@@ -1,10 +1,10 @@
 import { useConfig } from '@payloadcms/config-provider';
-import { CollectionConfig } from '../../collections/config/types';
+import { SanitizedCollectionConfig } from '../../collections/config/types';
 import isImage from '../../uploads/isImage';
 
 const absoluteURLPattern = new RegExp('^(?:[a-z]+:)?//', 'i');
 
-const useThumbnail = (collection: CollectionConfig, doc: Record<string, unknown>): string | false => {
+const useThumbnail = (collection: SanitizedCollectionConfig, doc: Record<string, unknown>): string | false => {
   const {
     upload: {
       staticURL,

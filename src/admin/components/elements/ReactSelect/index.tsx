@@ -7,6 +7,7 @@ import './index.scss';
 
 const ReactSelect: React.FC<Props> = (props) => {
   const {
+    className,
     showError = false,
     options,
     onChange,
@@ -15,6 +16,7 @@ const ReactSelect: React.FC<Props> = (props) => {
   } = props;
 
   const classes = [
+    className,
     'react-select',
     showError && 'react-select--error',
   ].filter(Boolean).join(' ');

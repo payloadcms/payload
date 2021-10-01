@@ -1,7 +1,7 @@
 import { GraphQLEnumType } from 'graphql';
-import { Config } from '../../config/types';
+import { SanitizedConfig } from '../../config/types';
 
-const buildFallbackLocaleInputType = (localization: Config['localization']): GraphQLEnumType => new GraphQLEnumType({
+const buildFallbackLocaleInputType = (localization: SanitizedConfig['localization']): GraphQLEnumType => new GraphQLEnumType({
   name: 'FallbackLocaleInputType',
   values: [...localization.locales, 'none'].reduce((values, locale) => ({
     ...values,

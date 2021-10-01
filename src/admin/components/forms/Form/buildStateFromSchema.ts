@@ -2,18 +2,12 @@ import ObjectID from 'bson-objectid';
 import { Field as FieldSchema } from '../../../../fields/config/types';
 import { Fields, Field, Data } from './types';
 
-const buildValidationPromise = async (fieldState: Field, field: FieldSchema, fullData: Data = {}, data: Data = {}) => {
+const buildValidationPromise = async (fieldState: Field, field: FieldSchema) => {
   const validatedFieldState = fieldState;
-
-  let passesConditionalLogic = true;
-
-  if (field?.admin?.condition) {
-    passesConditionalLogic = await field.admin.condition(fullData, data);
-  }
 
   let validationResult: boolean | string = true;
 
-  if (passesConditionalLogic && typeof field.validate === 'function') {
+  if (typeof field.validate === 'function') {
     validationResult = await field.validate(fieldState.value, field);
   }
 
@@ -29,7 +23,7 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
   if (fieldSchema) {
     const validationPromises = [];
 
-    const structureFieldState = (field, data = {}) => {
+    const structureFieldState = (field, passesCondition, data = {}) => {
       const value = typeof data?.[field.name] !== 'undefined' ? data[field.name] : field.defaultValue;
 
       const fieldState = {
@@ -37,21 +31,24 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
         initialValue: value,
         valid: true,
         validate: field.validate,
-        condition: field?.admin?.condition,
+        condition: field.admin?.condition,
+        passesCondition,
       };
 
-      validationPromises.push(buildValidationPromise(fieldState, field, fullData, data));
+      validationPromises.push(buildValidationPromise(fieldState, field));
 
       return fieldState;
     };
 
-    const iterateFields = (fields: FieldSchema[], data: Data, path = '') => fields.reduce((state, field) => {
+    const iterateFields = (fields: FieldSchema[], data: Data, parentPassesCondition: boolean, path = '') => fields.reduce((state, field) => {
       let initialData = data;
 
       if (!field?.admin?.disabled) {
         if (field.name && field.defaultValue && typeof initialData?.[field.name] === 'undefined') {
           initialData = { [field.name]: field.defaultValue };
         }
+
+        const passesCondition = Boolean((field?.admin?.condition ? field.admin.condition(fullData || {}, initialData || {}) : true) && parentPassesCondition);
 
         if (field.name) {
           if (field.type === 'relationship' && initialData?.[field.name] === null) {
@@ -75,7 +72,7 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
                         initialValue: row.id || new ObjectID().toHexString(),
                         valid: true,
                       },
-                      ...iterateFields(field.fields, row, rowPath),
+                      ...iterateFields(field.fields, row, passesCondition, rowPath),
                     };
                   }, {}),
                 };
@@ -104,7 +101,7 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
                         initialValue: row.id || new ObjectID().toHexString(),
                         valid: true,
                       },
-                      ...(block?.fields ? iterateFields(block.fields, row, rowPath) : {}),
+                      ...(block?.fields ? iterateFields(block.fields, row, passesCondition, rowPath) : {}),
                     };
                   }, {}),
                 };
@@ -120,13 +117,13 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
 
             return {
               ...state,
-              ...iterateFields(field.fields, subFieldData, `${path}${field.name}.`),
+              ...iterateFields(field.fields, subFieldData, passesCondition, `${path}${field.name}.`),
             };
           }
 
           return {
             ...state,
-            [`${path}${field.name}`]: structureFieldState(field, data),
+            [`${path}${field.name}`]: structureFieldState(field, passesCondition, data),
           };
         }
 
@@ -134,21 +131,21 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
         if (field.type === 'row') {
           return {
             ...state,
-            ...iterateFields(field.fields, data, path),
+            ...iterateFields(field.fields, data, passesCondition, path),
           };
         }
 
         // Handle normal fields
         return {
           ...state,
-          [`${path}${field.name}`]: structureFieldState(field, data),
+          [`${path}${field.name}`]: structureFieldState(field, passesCondition, data),
         };
       }
 
       return state;
     }, {});
 
-    const resultingState = iterateFields(fieldSchema, fullData);
+    const resultingState = iterateFields(fieldSchema, fullData, true);
     await Promise.all(validationPromises);
     return resultingState;
   }

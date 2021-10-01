@@ -1,6 +1,6 @@
 ---
 title: Plugins
-label: Plugins
+label: Overview
 order: 10
 desc: Plugins provide a great way to modularize Payload functionalities into easy-to-use enhancements and extensions of your Payload apps.
 keywords: plugins, config, configuration, extensions, custom, documentation, Content Management System, cms, headless, javascript, node, react, express
@@ -76,7 +76,9 @@ export default config;
 
 #### When Plugins are initialized
 
-Payload Plugins are executed _after_ the incoming config is validated, sanitized, and default options are merged in.
+Payload Plugins are executed _after_ the incoming config is validated, but before it is sanitized and had default options merged in.
+
+After all plugins are executed, the full config with all plugins will be sanitized.
 
 ## Simple example
 
