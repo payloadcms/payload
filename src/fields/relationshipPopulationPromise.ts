@@ -1,5 +1,4 @@
 import { PayloadRequest } from '../express/types';
-import executeAccess from '../auth/executeAccess';
 import { Field, RelationshipField, fieldSupportsMany, fieldHasMaxDepth } from './config/types';
 import { Payload } from '..';
 
@@ -12,7 +11,6 @@ type PopulateArgs = {
   data: Record<string, unknown>
   field: Field
   index?: number
-  id?: string
   payload: Payload
 }
 
@@ -25,7 +23,6 @@ const populate = async ({
   data,
   field,
   index,
-  id,
   payload,
 }: PopulateArgs) => {
   const dataToUpdate = dataReference;
@@ -35,17 +32,15 @@ const populate = async ({
   const relatedCollection = payload.collections[relation];
 
   if (relatedCollection) {
-    const accessResult = !overrideAccess ? await executeAccess({ req, disableErrors: true, id }, relatedCollection.config.access.read) : true;
+    let idString = Array.isArray(fieldAsRelationship.relationTo) ? data.value : data;
+
+    if (typeof idString !== 'string' && typeof idString?.toString === 'function') {
+      idString = idString.toString();
+    }
 
     let populatedRelationship = null;
 
-    if (accessResult && (depth && currentDepth <= depth)) {
-      let idString = Array.isArray(fieldAsRelationship.relationTo) ? data.value : data;
-
-      if (typeof idString !== 'string' && typeof idString?.toString === 'function') {
-        idString = idString.toString();
-      }
-
+    if (depth && currentDepth <= depth) {
       populatedRelationship = await payload.operations.collections.findByID({
         req,
         collection: relatedCollection,
@@ -57,9 +52,8 @@ const populate = async ({
       });
     }
 
-    // If access control fails, update value to null
     // If populatedRelationship comes back, update value
-    if (!accessResult || populatedRelationship) {
+    if (populatedRelationship || populatedRelationship === null) {
       if (typeof index === 'number') {
         if (Array.isArray(fieldAsRelationship.relationTo)) {
           dataToUpdate[field.name][index].value = populatedRelationship;

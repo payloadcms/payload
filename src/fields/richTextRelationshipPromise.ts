@@ -74,9 +74,9 @@ const recurseRichText = ({
       const collection = payload.collections[element?.relationTo];
 
       if (element.type === 'relationship'
-      && element?.value?.id
-      && collection
-      && (depth && currentDepth <= depth)) {
+        && element?.value?.id
+        && collection
+        && (depth && currentDepth <= depth)) {
         promises.push(populate({
           req,
           id: element.value.id,
