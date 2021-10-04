@@ -8,7 +8,7 @@ const StrictAccess: CollectionConfig = {
     plural: 'Strict Access',
   },
   admin: {
-    useAsTitle: 'email',
+    useAsTitle: 'address',
   },
   access: {
     create: () => true,

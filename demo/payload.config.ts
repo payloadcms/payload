@@ -24,7 +24,7 @@ import RelationshipA from './collections/RelationshipA';
 import RelationshipB from './collections/RelationshipB';
 import RichText from './collections/RichText';
 import Select from './collections/Select';
-import StrictPolicies from './collections/StrictPolicies';
+import StrictAccess from './collections/StrictAccess';
 import Validations from './collections/Validations';
 import Uniques from './collections/Uniques';
 import Geolocation from './collections/Geolocation';
@@ -82,7 +82,7 @@ export default buildConfig({
     RelationshipB,
     RichText,
     Select,
-    StrictPolicies,
+    StrictAccess,
     Validations,
     Uniques,
     UnstoredMedia,
