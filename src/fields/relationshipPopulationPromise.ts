@@ -38,7 +38,7 @@ const populate = async ({
       idString = idString.toString();
     }
 
-    let populatedRelationship = null;
+    let populatedRelationship;
 
     if (depth && currentDepth <= depth) {
       populatedRelationship = await payload.operations.collections.findByID({
