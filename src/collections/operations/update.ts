@@ -107,6 +107,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   docWithLocales = JSON.parse(docWithLocales);
 
   const originalDoc = await performFieldOperations(collectionConfig, {
+    id,
     depth: 0,
     req,
     data: docWithLocales,
@@ -279,6 +280,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // /////////////////////////////////////
 
   result = await performFieldOperations(collectionConfig, {
+    id,
     depth,
     req,
     data: result,
