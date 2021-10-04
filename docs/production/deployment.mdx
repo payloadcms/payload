@@ -72,7 +72,10 @@ If you are using a [persistent filesystem-based cloud host](#persistent-vs-ephem
 
 Alternatively, you can rely on a third-party MongoDB host such as [MongoDB Atlas](https://www.mongodb.com/). With Atlas or a similar cloud provider, you can trust them to take care of your database's availability, security, redundancy, and backups.
 
-When using Azure Cosmos, MongoDB requires an index on any field being sorted on in a query. To make this easier, see the [indexSortableFields](/docs/configuration/overview) configuration option.
+<Banner type="warning">
+  <strong>Note regarding Azure Cosmos:</strong><br/>
+  When using Azure Cosmos, MongoDB requires an index on any field being sorted on. To make this easier, see the <a href="/docs/configuration/overview">indexSortableFields</a> configuration option.
+</Banner>
 
 ## File storage
 
