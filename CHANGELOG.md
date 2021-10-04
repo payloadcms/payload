@@ -1,3 +1,16 @@
+## [0.10.7](https://github.com/payloadcms/payload/compare/v0.10.6...v0.10.7) (2021-10-04)
+
+
+### Bug Fixes
+
+* ensures non populated relationships still retain IDs ([a201109](https://github.com/payloadcms/payload/commit/a20110974d781e972831fa8a52a0839a613121f6))
+* ensures relationship field access control receives id ([470d434](https://github.com/payloadcms/payload/commit/470d4345f9ccc7630dc55b40172937509475d534))
+
+
+### Features
+
+* add indexSortableField option to create indexes for sortable fields on all collections ([ad09782](https://github.com/payloadcms/payload/commit/ad097820bfe32b0a4ef428a37a78e5a569258ec6))
+
 ## [0.10.6](https://github.com/payloadcms/payload/compare/v0.10.5...v0.10.6) (2021-09-30)
 
 
