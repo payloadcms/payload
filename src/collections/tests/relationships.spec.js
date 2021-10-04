@@ -35,8 +35,23 @@ describe('Collections - REST', () => {
   describe('Relationships', () => {
     let documentA;
     let documentB;
+    let strictAccessDoc;
 
     beforeAll(async (done) => {
+      const strictAccessRes = await fetch(`${url}/api/strict-access`, {
+        body: JSON.stringify({
+          address: '123 Test Lane',
+          city: 'Grand Rapids',
+          state: 'MI',
+          zip: 49504,
+        }),
+        headers,
+        method: 'post',
+      });
+
+      const strictAccessJSON = await strictAccessRes.json();
+      strictAccessDoc = strictAccessJSON.doc;
+
       // create document a
       const createA = await fetch(`${url}/api/relationship-a`, {
         body: JSON.stringify({}),
@@ -48,6 +63,7 @@ describe('Collections - REST', () => {
       const createB = await fetch(`${url}/api/relationship-b`, {
         body: JSON.stringify({
           post: [createAData.doc.id],
+          strictAccess: strictAccessDoc.id,
         }),
         headers,
         method: 'post',
@@ -71,6 +87,22 @@ describe('Collections - REST', () => {
     it('should create and read collections with relationships', async () => {
       expect(documentA.post).toBeDefined();
       expect(documentB.post).toHaveLength(1);
+    });
+
+    it('should prevent an unauthorized population of strict access', async () => {
+      const response = await fetch(`${url}/api/relationship-b/${documentB.id}`);
+      const data = await response.json();
+
+      expect(data.strictAccess).toBeNull();
+    });
+
+    it('should populate strict access when authorized', async () => {
+      const response = await fetch(`${url}/api/relationship-b/${documentB.id}`, {
+        headers,
+      });
+
+      const data = await response.json();
+      expect(typeof data.strictAccess).toBe('object');
     });
 
     it('should use depth to limit the number of relationships returned', async () => {

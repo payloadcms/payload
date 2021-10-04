@@ -33,6 +33,11 @@ const RelationshipB: CollectionConfig = {
       hasMany: true,
       relationTo: ['localized-posts', 'previewable-post'],
     },
+    {
+      name: 'strictAccess',
+      type: 'relationship',
+      relationTo: 'strict-access',
+    },
   ],
   timestamps: true,
 };
