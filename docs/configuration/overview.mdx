@@ -29,6 +29,7 @@ Payload is a *config-based*, code-first CMS and application framework. The Paylo
 | `csrf`               | A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. [More](/docs/authentication/overview#csrf-protection) |
 | `defaultDepth`       | If a user does not specify `depth` while requesting a resource, this depth will be used. [More](/docs/getting-started/concepts#depth) |
 | `maxDepth`           | The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries. Defaults to `10`. |
+| `indexSortableFields`| Automatically create database an index on every sortable type of top-level field. |
 | `upload`             | Base Payload upload configuration. [More](/docs/upload/overview#payload-wide-upload-options). |
 | `routes`             | Control the routing structure that Payload binds itself to. Specify `admin`, `api`, `graphQL`, and `graphQLPlayground`. |
 | `email`              | Base email settings to allow Payload to generate email such as Forgot Password requests and other requirements. [More](/docs/email/overview#configuration) |

@@ -72,6 +72,8 @@ If you are using a [persistent filesystem-based cloud host](#persistent-vs-ephem
 
 Alternatively, you can rely on a third-party MongoDB host such as [MongoDB Atlas](https://www.mongodb.com/). With Atlas or a similar cloud provider, you can trust them to take care of your database's availability, security, redundancy, and backups.
 
+When using Azure Cosmos, MongoDB requires an index on any field being sorted on in a query. To make this easier, see the [indexSortableFields](/docs/configuration/overview) configuration option.
+
 ## File storage
 
 If you are using Payload to [manage file uploads](/docs/upload/overview), you need to consider where your uploaded files will be permanently stored. If you do not use Payload for file uploads, then this section does not impact your app whatsoever.

@@ -120,6 +120,7 @@ export type Config = {
   },
   defaultDepth?: number;
   maxDepth?: number;
+  indexSortableFields?: boolean;
   rateLimit?: {
     window?: number;
     max?: number;
@@ -143,7 +144,7 @@ export type Config = {
   hooks?: {
     afterError?: AfterErrorHook;
   };
-  plugins?: Plugin[]
+  plugins?: Plugin[];
 };
 
 export type SanitizedConfig = Omit<DeepRequired<Config>, 'collections' | 'globals'> & {

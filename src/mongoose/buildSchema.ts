@@ -2,11 +2,13 @@
 import { Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
 import { ArrayField, Block, BlockField, Field, GroupField, RadioField, RelationshipField, RowField, SelectField, UploadField } from '../fields/config/types';
+import sortableFieldTypes from '../fields/sortableFieldTypes';
 
 type BuildSchemaOptions = {
   options?: SchemaOptions
   allowIDField?: boolean
   disableRequired?: boolean
+  global?: boolean
 }
 
 type FieldSchemaGenerator = (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => SchemaDefinition;
@@ -89,9 +91,14 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
     if (fieldSchema) {
       fields = fieldSchema(field, fields, config, buildSchemaOptions);
     }
+
     // geospatial field index must be created after the schema is created
     if (fieldIndexMap[field.type]) {
       indexFields.push(...fieldIndexMap[field.type](field, config));
+    }
+
+    if (config.indexSortableFields && !buildSchemaOptions.global && !field.index && !field.hidden && sortableFieldTypes.indexOf(field.type) > -1) {
+      indexFields.push({ [field.name]: 1 });
     }
   });
 
