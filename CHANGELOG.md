@@ -1,3 +1,10 @@
+## [0.10.8](https://github.com/payloadcms/payload/compare/v0.10.7...v0.10.8) (2021-10-04)
+
+
+### Bug Fixes
+
+* ensures update field access control receives id ([ffab6c4](https://github.com/payloadcms/payload/commit/ffab6c46c1c267f46d1d4eb3fd8060a4e5fada4b))
+
 ## [0.10.7](https://github.com/payloadcms/payload/compare/v0.10.6...v0.10.7) (2021-10-04)
 
 
