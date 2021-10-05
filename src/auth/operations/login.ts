@@ -173,6 +173,7 @@ async function login(incomingArgs: Arguments): Promise<Result> {
   user = await this.performFieldOperations(collectionConfig, {
     depth,
     req,
+    id: user.id,
     data: user,
     hook: 'afterRead',
     operation: 'login',
