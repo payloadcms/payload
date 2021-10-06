@@ -8,7 +8,7 @@ const withCondition = <P extends Record<string, unknown>>(Field: React.Component
       admin: {
         condition,
       } = {},
-    } = props as FieldBase;
+    } = props as Partial<FieldBase>;
 
     if (condition) {
       return <WithCondition {...props} />;
@@ -24,7 +24,7 @@ const withCondition = <P extends Record<string, unknown>>(Field: React.Component
       admin: {
         condition,
       } = {},
-    } = props as FieldBase & {
+    } = props as Partial<FieldBase> & {
       path?: string
     };
 

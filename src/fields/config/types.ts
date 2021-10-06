@@ -145,7 +145,8 @@ export type RowAdmin = Omit<Admin, 'description'> & {
   hidden?: false;
 };
 
-export type RowField = Omit<FieldBase, 'admin' | 'name'> & {
+export type RowField = Omit<FieldBase, 'admin'> & {
+  name?: string;
   admin?: RowAdmin;
   type: 'row';
   fields: Field[];
