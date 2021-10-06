@@ -57,7 +57,7 @@ export type OptionObject = {
 export type Option = OptionObject | string
 
 export interface FieldBase {
-  name?: string;
+  name: string;
   label?: string | false;
   required?: boolean;
   unique?: boolean;
@@ -145,7 +145,7 @@ export type RowAdmin = Omit<Admin, 'description'> & {
   hidden?: false;
 };
 
-export type RowField = Omit<FieldBase, 'admin'> & {
+export type RowField = Omit<FieldBase, 'admin' | 'name'> & {
   admin?: RowAdmin;
   type: 'row';
   fields: Field[];
