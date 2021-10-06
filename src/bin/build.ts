@@ -35,7 +35,7 @@ export const build = (): void => {
     });
   } catch (err) {
     console.error(err);
-    console.error(`Error: can't find the configuration file located at ${configPath}.`);
+    throw new Error(`Error: can't find the configuration file located at ${configPath}.`);
   }
 };
 
