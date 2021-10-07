@@ -1,4 +1,6 @@
 const deepCopyObject = (inObject) => {
+  if (inObject instanceof Date) return inObject;
+
   if (typeof inObject !== 'object' || inObject === null) {
     return inObject; // Return the value if inObject is not an object
   }
