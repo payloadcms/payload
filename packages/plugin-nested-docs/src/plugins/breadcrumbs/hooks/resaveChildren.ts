@@ -15,14 +15,19 @@ const resaveChildren = (options: Options, collection: CollectionConfig): Collect
     });
 
     children.docs.forEach((child) => {
-      payload.update({
-        id: child.id,
-        collection: collection.slug,
-        data: {
-          breadcrumbs: populateBreadcrumbs(req, options, collection, child),
-        },
-        depth: 0,
-      });
+      try {
+        payload.update({
+          id: child.id,
+          collection: collection.slug,
+          data: {
+            breadcrumbs: populateBreadcrumbs(req, options, collection, child),
+          },
+          depth: 0,
+        });
+      } catch (err) {
+        console.error(`Page ${child.title} failed to update`);
+        console.error(err);
+      }
     });
   };
 
