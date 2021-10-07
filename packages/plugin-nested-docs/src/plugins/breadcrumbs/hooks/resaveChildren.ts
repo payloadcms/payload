@@ -14,8 +14,8 @@ const resaveChildren = (options: Options, collection: CollectionConfig): Collect
       depth: 0,
     });
 
-    children.docs.forEach((child) => {
-      try {
+    try {
+      children.docs.forEach((child) => {
         payload.update({
           id: child.id,
           collection: collection.slug,
@@ -24,11 +24,10 @@ const resaveChildren = (options: Options, collection: CollectionConfig): Collect
           },
           depth: 0,
         });
-      } catch (err) {
-        console.error(`Page ${child.title} failed to update`);
-        console.error(err);
-      }
-    });
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Non-blocking
