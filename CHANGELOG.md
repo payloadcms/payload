@@ -1,3 +1,10 @@
+## [0.10.9](https://github.com/payloadcms/payload/compare/v0.10.8...v0.10.9) (2021-10-05)
+
+
+### Bug Fixes
+
+* ensures field read access within login operation has id ([e3229c5](https://github.com/payloadcms/payload/commit/e3229c55f352a2f68bbea967f816badfd265dd02))
+
 ## [0.10.8](https://github.com/payloadcms/payload/compare/v0.10.7...v0.10.8) (2021-10-04)
 
 
