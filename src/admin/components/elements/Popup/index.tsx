@@ -23,6 +23,8 @@ const Popup: React.FC<Props> = (props) => {
     horizontalAlign = 'left',
     initActive = false,
     onToggleOpen,
+    backgroundColor,
+    padding,
   } = props;
 
   const buttonRef = useRef(null);
@@ -98,7 +100,9 @@ const Popup: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={classes}>
+    <div
+      className={classes}
+    >
       <div
         ref={buttonRef}
         className={`${baseClass}__wrapper`}
@@ -133,9 +137,22 @@ const Popup: React.FC<Props> = (props) => {
       <div
         className={`${baseClass}__content`}
         ref={contentRef}
+        style={{
+          backgroundColor,
+        }}
+
       >
-        <div className={`${baseClass}__wrap`}>
-          <div className={`${baseClass}__scroll`}>
+        <div
+          className={`${baseClass}__wrap`}
+          // TODO: color ::after with bg color
+        >
+
+          <div
+            className={`${baseClass}__scroll`}
+            style={{
+              padding,
+            }}
+          >
             {render && render({ close: () => setActive(false) })}
             {children && children}
           </div>

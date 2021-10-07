@@ -1,0 +1,48 @@
+@import '../../../scss/styles.scss';
+
+.per-page {
+  display: flex;
+  margin-bottom: $baseline;
+  margin-right: 0;
+  margin-left: auto;
+
+  button {
+    padding: base(.25) 0;
+    line-height: base(1);
+    background: transparent;
+    border: 0;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:active,
+    &:focus {
+      outline: none;
+    }
+  }
+
+  span {
+    color: $color-gray;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+    margin: 0;
+
+    li {
+      text-decoration: none;
+    }
+
+    a {
+      color: $color-gray;
+      &:visited, &:link, &:active  {
+        text-decoration: none;
+      }
+    }
+  }
+}

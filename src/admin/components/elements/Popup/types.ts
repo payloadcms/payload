@@ -1,3 +1,5 @@
+import { CSSProperties } from 'react';
+
 export type Props = {
     className?: string
     render?: (any) => void,
@@ -10,4 +12,6 @@ export type Props = {
     showOnHover?: boolean,
     initActive?: boolean,
     onToggleOpen?: () => void,
+    backgroundColor?: CSSProperties['backgroundColor'],
+    padding?: CSSProperties['padding'],
 }

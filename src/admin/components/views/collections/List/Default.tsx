@@ -13,6 +13,7 @@ import { Props } from './types';
 
 import './index.scss';
 import ViewDescription from '../../../elements/ViewDescription';
+import PerPage from '../../../elements/PerPage';
 
 const baseClass = 'collection-list';
 
@@ -114,6 +115,7 @@ const DefaultList: React.FC<Props> = (props) => {
           </div>
         )}
         <div className={`${baseClass}__page-controls`}>
+
           <Paginator
             limit={data.limit}
             totalPages={data.totalPages}
@@ -123,6 +125,9 @@ const DefaultList: React.FC<Props> = (props) => {
             prevPage={data.prevPage}
             nextPage={data.nextPage}
             numberOfNeighbors={1}
+          />
+          <PerPage
+            valueOptions={[10, 20, 50, 100]}
           />
           {data?.totalDocs > 0 && (
             <div className={`${baseClass}__page-info`}>
