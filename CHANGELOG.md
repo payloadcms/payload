@@ -1,3 +1,10 @@
+## [0.10.10](https://github.com/payloadcms/payload/compare/v0.10.9...v0.10.10) (2021-10-07)
+
+
+### Bug Fixes
+
+* deepObjectCopy returns Date object instead of empty object ([2711729](https://github.com/payloadcms/payload/commit/27117292f3a4e207d9705e79f82fb78f70985915))
+
 ## [0.10.9](https://github.com/payloadcms/payload/compare/v0.10.8...v0.10.9) (2021-10-05)
 
 
