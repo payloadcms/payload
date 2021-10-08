@@ -345,7 +345,7 @@ const traverseFields = (args: Arguments): void => {
 
       if (field.type === 'array' || field.type === 'blocks') {
         const hasRowsOfNewData = Array.isArray(data[field.name]);
-        const newRowCount = hasRowsOfNewData ? (data[field.name] as Record<string, unknown>[]).length : 0;
+        const newRowCount = hasRowsOfNewData ? (data[field.name] as Record<string, unknown>[]).length : undefined;
 
         // Handle cases of arrays being intentionally set to 0
         if (data[field.name] === '0' || data[field.name] === 0 || data[field.name] === null) {
