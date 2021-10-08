@@ -1,3 +1,10 @@
+## [0.10.11](https://github.com/payloadcms/payload/compare/v0.10.10...v0.10.11) (2021-10-08)
+
+
+### Bug Fixes
+
+* bug with local API and not passing array / block data ([fd4fbe8](https://github.com/payloadcms/payload/commit/fd4fbe8c8b492445ab29d26d9648cff4e98d5708))
+
 ## [0.10.10](https://github.com/payloadcms/payload/compare/v0.10.9...v0.10.10) (2021-10-07)
 
 
