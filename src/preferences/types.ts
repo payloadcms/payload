@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import { Model } from 'mongoose';
 import { User } from '../auth';
 
 export type Preference = {
@@ -9,6 +10,10 @@ export type Preference = {
   createdAt?: Date;
   updatedAt?: Date;
 };
+
+export type Preferences = {
+  Model: Model<Preference>
+}
 
 export type PreferenceRequest = {
   overrideAccess?: boolean;

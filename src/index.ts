@@ -1,6 +1,6 @@
 import express, { Express, Router } from 'express';
 import crypto from 'crypto';
-import { Document, Model } from 'mongoose';
+import { Document } from 'mongoose';
 import {
   SanitizedConfig,
   EmailOptions,
@@ -36,13 +36,13 @@ import { encrypt, decrypt } from './auth/crypto';
 import { BuildEmailResult, Message } from './email/types';
 import { PayloadRequest } from './express/types';
 import sendEmail from './email/sendEmail';
+import { Preferences } from './preferences/types';
 
 import { Options as CreateOptions } from './collections/operations/local/create';
 import { Options as FindOptions } from './collections/operations/local/find';
 import { Options as FindByIDOptions } from './collections/operations/local/findByID';
 import { Options as UpdateOptions } from './collections/operations/local/update';
 import { Options as DeleteOptions } from './collections/operations/local/delete';
-import { Preference } from './preferences/types';
 
 require('isomorphic-fetch');
 
@@ -58,7 +58,7 @@ export class Payload {
     resolvers: GraphQLResolvers
   };
 
-  preferences: { Model: Model<Document<Preference>> };
+  preferences: Preferences;
 
   globals: Globals;
 

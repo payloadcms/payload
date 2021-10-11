@@ -35,7 +35,7 @@ export default function registerCollections(ctx: Payload): void {
         };
 
         // eslint-disable-next-line func-names
-        schema.methods.incLoginAttempts = function (this: mongoose.Document<any> & LoginSchema, cb) {
+        schema.methods.incLoginAttempts = function (this: mongoose.Document & LoginSchema, cb) {
           // Expired lock, restart count at 1
           if (this.lockUntil && this.lockUntil < Date.now()) {
             return this.updateOne({
@@ -49,7 +49,7 @@ export default function registerCollections(ctx: Payload): void {
           if (this.loginAttempts + 1 >= maxLoginAttempts && !this.isLocked) {
             updates.$set = { lockUntil: Date.now() + lockTime };
           }
-          return this.updateOne(updates, cb);
+          return this.updateOne(updates as mongoose.Document, cb);
         };
 
         // eslint-disable-next-line func-names
