@@ -94,6 +94,10 @@ export type Config = {
         Dashboard?: React.ComponentType
       }
     }
+    pagination?: {
+      default?: number;
+      options?: number[];
+    }
     webpack?: (config: Configuration) => Configuration;
   };
   collections?: CollectionConfig[];

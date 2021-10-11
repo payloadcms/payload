@@ -56,6 +56,11 @@ export default joi.object({
           Logo: component,
         }),
       }),
+    pagination: joi.object()
+      .keys({
+        default: joi.number(),
+        options: joi.array().items(joi.number()),
+      }),
     webpack: joi.func(),
   }),
   defaultDepth: joi.number()
