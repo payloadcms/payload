@@ -9,6 +9,8 @@ export type Props = {
   setSort: (sort: string) => void
   columns: Column[]
   hasCreatePermission: boolean
+  setLimit: (limit: number) => void
+  limit: number
 }
 
 export type ListIndexProps = {

@@ -58,7 +58,7 @@ export default joi.object({
       }),
     pagination: joi.object()
       .keys({
-        default: joi.number(),
+        defaultLimit: joi.number(),
         options: joi.array().items(joi.number()),
       }),
     webpack: joi.func(),

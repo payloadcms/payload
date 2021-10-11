@@ -95,7 +95,7 @@ export type Config = {
       }
     }
     pagination?: {
-      default?: number;
+      defaultLimit?: number;
       options?: number[];
     }
     webpack?: (config: Configuration) => Configuration;

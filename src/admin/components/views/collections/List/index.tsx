@@ -31,7 +31,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     },
   } = props;
 
-  const { serverURL, routes: { api, admin }, admin: { pagination: { default: defaultPagination } } } = useConfig();
+  const { serverURL, routes: { api, admin }, admin: { pagination: { defaultLimit } } } = useConfig();
   const { permissions } = useAuth();
   const location = useLocation();
   const { setStepNav } = useStepNav();
@@ -41,7 +41,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const [listControls, setListControls] = useState<ListControls>({});
   const [columns, setColumns] = useState([]);
   const [sort, setSort] = useState(null);
-  const [limit, setLimit] = useState(defaultPagination);
+  const [limit, setLimit] = useState(defaultLimit);
 
   const collectionPermissions = permissions?.collections?.[slug];
   const hasCreatePermission = collectionPermissions?.create?.permission;
@@ -58,7 +58,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     const perPagePrefKey = `${collection.slug}-per-page`;
 
     (async () => {
-      const currentLimit = await getPreference<number>(perPagePrefKey) || defaultPagination;
+      const currentLimit = await getPreference<number>(perPagePrefKey) || defaultLimit;
       setLimit(currentLimit);
 
       const params = {
@@ -71,12 +71,13 @@ const ListView: React.FC<ListIndexProps> = (props) => {
 
       if (page) params.page = page;
       if (sort) params.sort = sort;
-      if (limit && limit !== defaultPagination) params.limit = limit;
+      if (limit && limit !== defaultLimit) params.limit = limit;
       if (listControls?.where) params.where = listControls.where;
 
+      console.log(params);
       setParams(params);
     })();
-  }, [setParams, page, sort, listControls, collection, defaultPagination, getPreference, limit]);
+  }, [setParams, page, sort, listControls, collection, defaultLimit, getPreference, limit]);
 
   useEffect(() => {
     setStepNav([
@@ -106,6 +107,8 @@ const ListView: React.FC<ListIndexProps> = (props) => {
         listControls,
         data,
         columns,
+        setLimit,
+        limit,
       }}
     />
   );

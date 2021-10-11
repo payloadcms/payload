@@ -35,6 +35,8 @@ const DefaultList: React.FC<Props> = (props) => {
     newDocumentURL,
     setListControls,
     setSort,
+    limit,
+    setLimit,
     columns,
     hasCreatePermission,
   } = props;
@@ -127,7 +129,8 @@ const DefaultList: React.FC<Props> = (props) => {
             numberOfNeighbors={1}
           />
           <PerPage
-            collectionSlug={slug}
+            limit={limit}
+            setLimit={setLimit}
           />
           {data?.totalDocs > 0 && (
             <div className={`${baseClass}__page-info`}>
