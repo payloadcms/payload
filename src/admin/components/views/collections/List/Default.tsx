@@ -127,7 +127,7 @@ const DefaultList: React.FC<Props> = (props) => {
             numberOfNeighbors={1}
           />
           <PerPage
-            valueOptions={[10, 20, 50, 100]}
+            collectionSlug={slug}
           />
           {data?.totalDocs > 0 && (
             <div className={`${baseClass}__page-info`}>
