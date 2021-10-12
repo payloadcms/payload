@@ -1,3 +1,19 @@
+## [0.10.12-beta.0](https://github.com/payloadcms/payload/compare/v0.10.11...v0.10.12-beta.0) (2021-10-12)
+
+
+### Bug Fixes
+
+* make name required on field types ([#337](https://github.com/payloadcms/payload/issues/337)) ([b257e01](https://github.com/payloadcms/payload/commit/b257e01c8dea5d22172ce4f71e4124aecc39bba8))
+* use proper error code on webpack build failure ([2eb8154](https://github.com/payloadcms/payload/commit/2eb81546c3b4bf1804d25ccd5307af4855c4f750))
+
+
+### Features
+
+* **admin:** initial per page component ([3715e01](https://github.com/payloadcms/payload/commit/3715e011c97c8e30174c35c502fa7db12bc84e2c))
+* **per-page:** add pagination to admin config ([c132f2f](https://github.com/payloadcms/payload/commit/c132f2ff10b3efdb3854ec2d5a895120ccf22002))
+* **per-page:** set and load from preferences ([d88ce2d](https://github.com/payloadcms/payload/commit/d88ce2d342b20c1601b1b58470c226a9826758b3))
+* saves active list filters in URL, implements per-page control ([a6fc1fd](https://github.com/payloadcms/payload/commit/a6fc1fdc5838c3d17c5a8b6cbe9a46b86c89af71))
+
 ## [0.10.11](https://github.com/payloadcms/payload/compare/v0.10.10...v0.10.11) (2021-10-08)
 
 

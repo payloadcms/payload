@@ -16,7 +16,7 @@ type Props = {
   modifySearchParams?: boolean
 }
 
-const PerPage: React.FC<Props> = ({ collection, limit, handleChange, modifySearchParams }) => {
+const PerPage: React.FC<Props> = ({ collection, limit, handleChange, modifySearchParams = true }) => {
   const {
     admin: {
       pagination: {
