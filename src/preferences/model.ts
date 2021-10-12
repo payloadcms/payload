@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
+import { Preference } from './types';
 
-const Model = mongoose.model('_preferences', new Schema({
+const Model = mongoose.model<Preference>('_preferences', new Schema({
   user: {
     type: Schema.Types.ObjectId,
     refPath: 'userCollection',

@@ -119,6 +119,7 @@ describe('Cell Types', () => {
   describe('Select', () => {
     const fieldWithOptionsObject: SelectField = {
       type: 'select',
+      name: 'selectObject',
       options: [{
         value: 'one',
         label: 'One',
@@ -129,6 +130,7 @@ describe('Cell Types', () => {
     };
     const fieldWithStringsOptions: SelectField = {
       type: 'select',
+      name: 'selectString',
       options: ['blue', 'green', 'yellow'],
     };
     it('renders options objects', () => {
