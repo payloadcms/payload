@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import queryString from 'qs';
+import { useHistory } from 'react-router-dom';
 import { Props } from './types';
 import ReactSelect from '../ReactSelect';
 import sortableFieldTypes from '../../../../fields/sortableFieldTypes';
 
 import './index.scss';
+import { useSearchParams } from '../../utilities/SearchParams';
 
 const baseClass = 'sort-complex';
 
@@ -12,8 +15,12 @@ const sortOptions = [{ label: 'Ascending', value: '' }, { label: 'Descending', v
 const SortComplex: React.FC<Props> = (props) => {
   const {
     collection,
+    modifySearchQuery = true,
     handleChange,
   } = props;
+
+  const history = useHistory();
+  const params = useSearchParams();
 
   const [sortFields] = useState(() => collection.fields.reduce((fields, field) => {
     if (field.name && sortableFieldTypes.indexOf(field.type) > -1) {
@@ -25,14 +32,25 @@ const SortComplex: React.FC<Props> = (props) => {
     return fields;
   }, []));
 
-  const [sortField, setSortField] = useState(null);
-  const [sortOrder, setSortOrder] = useState('-');
+  const [sortField, setSortField] = useState(sortFields[0]);
+  const [sortOrder, setSortOrder] = useState({ label: 'Descending', value: '-' });
 
   useEffect(() => {
-    if (sortField) {
-      handleChange(`${sortOrder}${sortField}`);
+    if (sortField?.value) {
+      const newSortValue = `${sortOrder.value}${sortField.value}`;
+
+      if (handleChange) handleChange(newSortValue);
+
+      if (params.sort !== newSortValue && modifySearchQuery) {
+        history.replace({
+          search: queryString.stringify({
+            ...params,
+            sort: newSortValue,
+          }, { addQueryPrefix: true }),
+        });
+      }
     }
-  }, [sortField, sortOrder, handleChange]);
+  }, [history, params, sortField, sortOrder, modifySearchQuery, handleChange]);
 
   return (
     <div className={baseClass}>
@@ -43,7 +61,7 @@ const SortComplex: React.FC<Props> = (props) => {
               Column to Sort
             </div>
             <ReactSelect
-              value={sortFields.find((field) => field.name === sortField)}
+              value={sortField}
               options={sortFields}
               onChange={setSortField}
             />
@@ -53,10 +71,9 @@ const SortComplex: React.FC<Props> = (props) => {
               Order
             </div>
             <ReactSelect
-              value={sortOptions.find((order) => order.value === sortOrder)}
+              value={sortOrder}
               options={sortOptions}
               onChange={setSortOrder}
-              // onChange={(val) => console.log(val)}
             />
           </div>
         </div>

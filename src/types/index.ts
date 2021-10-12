@@ -18,6 +18,8 @@ export type WhereField = {
 }
 
 export type Where = {
+  or?: Where[]
+  and?: Where[]
   [key: string]: Where[] | WhereField
 }
 

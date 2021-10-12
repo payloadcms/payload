@@ -21,7 +21,7 @@ const RelationshipCell = (props) => {
           if (collection) {
             const useAsTitle = collection.admin.useAsTitle ? collection.admin.useAsTitle : 'id';
 
-            return newData ? `${newData}, ${doc[useAsTitle]}` : doc[useAsTitle];
+            return newData ? `${newData}, ${doc?.[useAsTitle]}` : doc?.[useAsTitle];
           }
 
           return newData;

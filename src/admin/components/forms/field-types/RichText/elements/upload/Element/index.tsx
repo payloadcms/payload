@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
 import { ReactEditor, useSlateStatic, useFocused, useSelected } from 'slate-react';
@@ -14,6 +14,7 @@ import ReactSelect from '../../../../../../elements/ReactSelect';
 import Paginator from '../../../../../../elements/Paginator';
 import formatFields from '../../../../../../views/collections/List/formatFields';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
+import PerPage from '../../../../../../elements/PerPage';
 import Label from '../../../../../Label';
 
 import './index.scss';
@@ -35,10 +36,13 @@ const Element = ({ attributes, children, element, path }) => {
   const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
   const [modalCollectionOption, setModalCollectionOption] = useState<{ label: string, value: string}>({ label: relatedCollection.labels.singular, value: relatedCollection.slug });
   const [modalCollection, setModalCollection] = useState<SanitizedCollectionConfig>(relatedCollection);
-  const [listControls, setListControls] = useState<{where?: unknown}>({});
-  const [page, setPage] = useState(null);
+
+  const [fields, setFields] = useState(() => formatFields(modalCollection));
+  const [limit, setLimit] = useState<number>();
   const [sort, setSort] = useState(null);
-  const [fields, setFields] = useState(formatFields(relatedCollection));
+  const [where, setWhere] = useState(null);
+  const [page, setPage] = useState(null);
+
   const editor = useSlateStatic();
   const selected = useSelected();
   const focused = useFocused();
@@ -80,8 +84,9 @@ const Element = ({ attributes, children, element, path }) => {
   }, [closeAll, editor, element, modalCollection]);
 
   useEffect(() => {
-    setFields(formatFields(relatedCollection));
-  }, [relatedCollection]);
+    setFields(formatFields(modalCollection));
+    setLimit(modalCollection.admin.pagination.defaultLimit);
+  }, [modalCollection]);
 
   useEffect(() => {
     if (renderModal && modalSlug) {
@@ -94,14 +99,16 @@ const Element = ({ attributes, children, element, path }) => {
       page?: number
       sort?: string
       where?: unknown
+      limit?: number
     } = {};
 
     if (page) params.page = page;
-    if (listControls?.where) params.where = listControls.where;
+    if (where) params.where = where;
     if (sort) params.sort = sort;
+    if (limit) params.limit = limit;
 
     setParams(params);
-  }, [setParams, page, listControls, sort]);
+  }, [setParams, page, sort, where, limit]);
 
   useEffect(() => {
     setModalCollection(collections.find(({ slug }) => modalCollectionOption.value === slug));
@@ -181,14 +188,15 @@ const Element = ({ attributes, children, element, path }) => {
                 </div>
               )}
               <ListControls
-                handleChange={setListControls}
                 collection={{
                   ...modalCollection,
                   fields,
                 }}
                 enableColumns={false}
-                setSort={setSort}
                 enableSort
+                modifySearchQuery={false}
+                handleSortChange={setSort}
+                handleWhereChange={setWhere}
               />
               <UploadGallery
                 docs={data?.docs}
@@ -200,7 +208,7 @@ const Element = ({ attributes, children, element, path }) => {
                   closeAll();
                 }}
               />
-              <div className={`${baseClass}__page-controls`}>
+              <div className={`${baseModalClass}__page-controls`}>
                 <Paginator
                   limit={data.limit}
                   totalPages={data.totalPages}
@@ -214,15 +222,23 @@ const Element = ({ attributes, children, element, path }) => {
                   disableHistoryChange
                 />
                 {data?.totalDocs > 0 && (
-                  <div className={`${baseClass}__page-info`}>
-                    {data.page}
-                    -
-                    {data.totalPages > 1 ? data.limit : data.totalDocs}
-                    {' '}
-                    of
-                    {' '}
-                    {data.totalDocs}
-                  </div>
+                  <Fragment>
+                    <div className={`${baseModalClass}__page-info`}>
+                      {data.page}
+                      -
+                      {data.totalPages > 1 ? data.limit : data.totalDocs}
+                      {' '}
+                      of
+                      {' '}
+                      {data.totalDocs}
+                    </div>
+                    <PerPage
+                      collection={modalCollection}
+                      limit={limit}
+                      modifySearchParams={false}
+                      handleChange={setLimit}
+                    />
+                  </Fragment>
                 )}
               </div>
             </MinimalTemplate>

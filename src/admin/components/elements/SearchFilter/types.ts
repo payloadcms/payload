@@ -1,5 +1,8 @@
+import { Where } from '../../../../types';
+
 export type Props = {
   fieldName?: string,
   fieldLabel?: string,
-  handleChange: (any) => void,
+  modifySearchQuery?: boolean
+  handleChange?: (where: Where) => void
 }

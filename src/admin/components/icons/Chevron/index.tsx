@@ -2,9 +2,12 @@ import React from 'react';
 
 import './index.scss';
 
-const Chevron: React.FC = () => (
+const Chevron: React.FC<{ className?: string }> = ({ className }) => (
   <svg
-    className="icon icon--chevron"
+    className={[
+      'icon icon--chevron',
+      className,
+    ].filter(Boolean).join(' ')}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 25 25"
   >

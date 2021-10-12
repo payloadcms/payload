@@ -15,6 +15,7 @@ import Label from '../../../../../Label';
 import MinimalTemplate from '../../../../../../templates/Minimal';
 import Button from '../../../../../../elements/Button';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
+import PerPage from '../../../../../../elements/PerPage';
 
 import './index.scss';
 import '../modal.scss';
@@ -55,10 +56,13 @@ const UploadButton: React.FC<{path: string}> = ({ path }) => {
     return { label: firstAvailableCollection.labels.singular, value: firstAvailableCollection.slug };
   });
   const [modalCollection, setModalCollection] = useState<SanitizedCollectionConfig>(() => collections.find(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
-  const [listControls, setListControls] = useState<{where?: unknown}>({});
-  const [page, setPage] = useState(null);
+
+  const [fields, setFields] = useState(() => formatFields(modalCollection));
+  const [limit, setLimit] = useState<number>();
   const [sort, setSort] = useState(null);
-  const [fields, setFields] = useState(formatFields(modalCollection));
+  const [where, setWhere] = useState(null);
+  const [page, setPage] = useState(null);
+
   const [hasEnabledCollections] = useState(() => collections.find(({ upload, admin: { enableRichTextRelationship } }) => upload && enableRichTextRelationship));
 
   const modalSlug = `${path}-add-upload`;
@@ -84,14 +88,16 @@ const UploadButton: React.FC<{path: string}> = ({ path }) => {
       page?: number
       sort?: string
       where?: unknown
+      limit?: number
     } = {};
 
     if (page) params.page = page;
-    if (listControls?.where) params.where = listControls.where;
+    if (where) params.where = where;
     if (sort) params.sort = sort;
+    if (limit) params.limit = limit;
 
     setParams(params);
-  }, [setParams, page, listControls, sort]);
+  }, [setParams, page, sort, where, limit]);
 
   useEffect(() => {
     setModalCollection(collections.find(({ slug }) => modalCollectionOption.value === slug));
@@ -144,14 +150,15 @@ const UploadButton: React.FC<{path: string}> = ({ path }) => {
                 </div>
               )}
               <ListControls
-                handleChange={setListControls}
                 collection={{
                   ...modalCollection,
                   fields,
                 }}
                 enableColumns={false}
-                setSort={setSort}
                 enableSort
+                modifySearchQuery={false}
+                handleSortChange={setSort}
+                handleWhereChange={setWhere}
               />
               <UploadGallery
                 docs={data?.docs}
@@ -167,7 +174,7 @@ const UploadButton: React.FC<{path: string}> = ({ path }) => {
                   closeAll();
                 }}
               />
-              <div className={`${baseClass}__page-controls`}>
+              <div className={`${baseModalClass}__page-controls`}>
                 <Paginator
                   limit={data.limit}
                   totalPages={data.totalPages}
@@ -181,15 +188,23 @@ const UploadButton: React.FC<{path: string}> = ({ path }) => {
                   disableHistoryChange
                 />
                 {data?.totalDocs > 0 && (
-                  <div className={`${baseClass}__page-info`}>
-                    {data.page}
-                    -
-                    {data.totalPages > 1 ? data.limit : data.totalDocs}
-                    {' '}
-                    of
-                    {' '}
-                    {data.totalDocs}
-                  </div>
+                  <Fragment>
+                    <div className={`${baseModalClass}__page-info`}>
+                      {data.page}
+                      -
+                      {data.totalPages > 1 ? data.limit : data.totalDocs}
+                      {' '}
+                      of
+                      {' '}
+                      {data.totalDocs}
+                    </div>
+                    <PerPage
+                      collection={modalCollection}
+                      limit={limit}
+                      modifySearchParams={false}
+                      handleChange={setLimit}
+                    />
+                  </Fragment>
                 )}
               </div>
             </MinimalTemplate>

@@ -1,4 +1,6 @@
 import React, { useState, useReducer } from 'react';
+import queryString from 'qs';
+import { useHistory } from 'react-router-dom';
 import { Props } from './types';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import Button from '../Button';
@@ -6,18 +8,13 @@ import reducer from './reducer';
 import Condition from './Condition';
 import fieldTypes from './field-types';
 import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
+import { useSearchParams } from '../../utilities/SearchParams';
+import validateWhereQuery from './validateWhereQuery';
+import { Where } from '../../../../types';
 
 import './index.scss';
 
 const baseClass = 'where-builder';
-
-const validateWhereQuery = (query) => {
-  if (query.or.length > 0 && query.or[0].and && query.or[0].and.length > 0) {
-    return query;
-  }
-
-  return null;
-};
 
 const reduceFields = (fields) => flattenTopLevelFields(fields).reduce((reduced, field) => {
   if (typeof fieldTypes[field.type] === 'object') {
@@ -42,52 +39,51 @@ const reduceFields = (fields) => flattenTopLevelFields(fields).reduce((reduced, 
 const WhereBuilder: React.FC<Props> = (props) => {
   const {
     collection,
+    modifySearchQuery = true,
+    handleChange,
     collection: {
       labels: {
         plural,
       } = {},
     } = {},
-    handleChange,
   } = props;
 
-  const [where, dispatchWhere] = useReducer(reducer, []);
+  const history = useHistory();
+  const params = useSearchParams();
+
+  const [conditions, dispatchConditions] = useReducer(reducer, params.where, (whereFromSearch) => {
+    if (modifySearchQuery && validateWhereQuery(whereFromSearch)) {
+      return whereFromSearch.or;
+    }
+
+    return [];
+  });
+
   const [reducedFields] = useState(() => reduceFields(collection.fields));
 
   useThrottledEffect(() => {
-    let whereQuery = {
-      or: [],
+    const currentParams = queryString.parse(history.location.search, { ignoreQueryPrefix: true, depth: 10 });
+
+    const newWhereQuery = {
+      ...typeof currentParams?.where === 'object' ? currentParams.where : {},
+      or: conditions,
     };
 
-    if (where) {
-      whereQuery.or = where.map((or) => or.reduce((conditions, condition) => {
-        const { field, operator, value } = condition;
-        if (field && operator && value) {
-          return {
-            and: [
-              ...conditions.and,
-              {
-                [field]: {
-                  [operator]: value,
-                },
-              },
-            ],
-          };
-        }
+    if (handleChange) handleChange(newWhereQuery as Where);
 
-        return conditions;
-      }, {
-        and: [],
-      }));
+    if (modifySearchQuery) {
+      history.replace({
+        search: queryString.stringify({
+          ...currentParams,
+          where: newWhereQuery,
+        }, { addQueryPrefix: true }),
+      });
     }
-
-    whereQuery = validateWhereQuery(whereQuery);
-
-    if (typeof handleChange === 'function') handleChange(whereQuery);
-  }, 500, [where, handleChange]);
+  }, 500, [conditions, modifySearchQuery, handleChange]);
 
   return (
     <div className={baseClass}>
-      {where.length > 0 && (
+      {conditions.length > 0 && (
         <React.Fragment>
           <div className={`${baseClass}__label`}>
             Filter
@@ -97,7 +93,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
             where
           </div>
           <ul className={`${baseClass}__or-filters`}>
-            {where.map((or, orIndex) => (
+            {conditions.map((or, orIndex) => (
               <li key={orIndex}>
                 {orIndex !== 0 && (
                   <div className={`${baseClass}__label`}>
@@ -105,7 +101,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
                   </div>
                 )}
                 <ul className={`${baseClass}__and-filters`}>
-                  {or && or.map((_, andIndex) => (
+                  {Array.isArray(or?.and) && or.and.map((_, andIndex) => (
                     <li key={andIndex}>
                       {andIndex !== 0 && (
                         <div className={`${baseClass}__label`}>
@@ -113,12 +109,12 @@ const WhereBuilder: React.FC<Props> = (props) => {
                         </div>
                       )}
                       <Condition
-                        value={where[orIndex][andIndex]}
+                        value={conditions[orIndex].and[andIndex]}
                         orIndex={orIndex}
                         andIndex={andIndex}
                         key={andIndex}
                         fields={reducedFields}
-                        dispatch={dispatchWhere}
+                        dispatch={dispatchConditions}
                       />
                     </li>
                   ))}
@@ -132,13 +128,13 @@ const WhereBuilder: React.FC<Props> = (props) => {
             buttonStyle="icon-label"
             iconPosition="left"
             iconStyle="with-border"
-            onClick={() => dispatchWhere({ type: 'add' })}
+            onClick={() => dispatchConditions({ type: 'add', field: reducedFields[0].value })}
           >
             Or
           </Button>
         </React.Fragment>
       )}
-      {where.length === 0 && (
+      {conditions.length === 0 && (
         <div className={`${baseClass}__no-filters`}>
           <div className={`${baseClass}__label`}>No filters set</div>
           <Button
@@ -147,7 +143,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
             buttonStyle="icon-label"
             iconPosition="left"
             iconStyle="with-border"
-            onClick={() => dispatchWhere({ type: 'add' })}
+            onClick={() => dispatchConditions({ type: 'add', field: reducedFields[0].value })}
           >
             Add filter
           </Button>

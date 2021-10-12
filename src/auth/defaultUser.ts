@@ -1,4 +1,6 @@
-const defaultUser = {
+import { CollectionConfig } from '../collections/config/types';
+
+const defaultUser: CollectionConfig = {
   slug: 'users',
   labels: {
     singular: 'User',

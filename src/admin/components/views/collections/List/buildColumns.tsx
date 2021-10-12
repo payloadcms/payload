@@ -5,7 +5,7 @@ import { SanitizedCollectionConfig } from '../../../../../collections/config/typ
 import { Column } from '../../../elements/Table/types';
 import { fieldHasSubFields, Field } from '../../../../../fields/config/types';
 
-const buildColumns = (collection: SanitizedCollectionConfig, columns: string[], setSort: (sort: string) => void): Column[] => (columns || []).reduce((cols, col, colIndex) => {
+const buildColumns = (collection: SanitizedCollectionConfig, columns: string[]): Column[] => (columns || []).reduce((cols, col, colIndex) => {
   let field = null;
 
   const fields = [
@@ -53,7 +53,6 @@ const buildColumns = (collection: SanitizedCollectionConfig, columns: string[], 
             <SortColumn
               label={field.label || field.name}
               name={field.name}
-              handleChange={setSort}
               disable={field.disableSort || undefined}
             />
           ),

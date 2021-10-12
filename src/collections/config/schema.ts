@@ -30,6 +30,10 @@ const collectionSchema = joi.object().keys({
         Edit: componentSchema,
       }),
     }),
+    pagination: joi.object({
+      defaultLimit: joi.number(),
+      limits: joi.array().items(joi.number()),
+    }),
     preview: joi.func(),
     disableDuplicate: joi.bool(),
   }),

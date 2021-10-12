@@ -1138,7 +1138,7 @@
     react-animate-height "^2.0.16"
     react-transition-group "^4.3.0"
 
-"@faceless-ui/modal@^1.1.2":
+"@faceless-ui/modal@^1.1.4":
   version "1.1.4"
   resolved "https://registry.npmjs.org/@faceless-ui/modal/-/modal-1.1.4.tgz#6e5c64104072a529117f9e5c02909afdccaaccef"
   integrity sha512-ook5gJCHYhrsOxulCtgQnhMMwxzTWkGtHEdEDB2Wz7ov21M9UHHB/JeY87FNNj1630e/wjZagduOmdwEeZ7n3w==

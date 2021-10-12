@@ -52,7 +52,7 @@
   }
 
   &__page-info {
-    margin-right: 0;
+    margin-right: base(1);
     margin-left: auto;
   }
 
@@ -83,10 +83,15 @@
     }
 
     &__page-controls {
-      display: block;
+      flex-wrap: wrap;
+    }
+
+    &__page-info {
+      margin-left: 0;
     }
 
     .paginator {
+      width: 100%;
       margin-bottom: $baseline;
     }
   }

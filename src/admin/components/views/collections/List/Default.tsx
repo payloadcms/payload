@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useConfig } from '@payloadcms/config-provider';
 import UploadGallery from '../../../elements/UploadGallery';
@@ -33,11 +33,10 @@ const DefaultList: React.FC<Props> = (props) => {
     },
     data,
     newDocumentURL,
-    setListControls,
-    setSort,
     limit,
-    setLimit,
-    columns,
+    tableColumns,
+    columnNames,
+    setColumns,
     hasCreatePermission,
   } = props;
 
@@ -66,9 +65,9 @@ const DefaultList: React.FC<Props> = (props) => {
           )}
         </header>
         <ListControls
-          handleChange={setListControls}
-          setSort={setSort}
           collection={collection}
+          columns={columnNames}
+          setColumns={setColumns}
           enableColumns={Boolean(!upload)}
           enableSort={Boolean(upload)}
         />
@@ -79,7 +78,7 @@ const DefaultList: React.FC<Props> = (props) => {
             {!upload && (
               <Table
                 data={data.docs}
-                columns={columns}
+                columns={tableColumns}
               />
             )}
             {upload && (
@@ -117,7 +116,6 @@ const DefaultList: React.FC<Props> = (props) => {
           </div>
         )}
         <div className={`${baseClass}__page-controls`}>
-
           <Paginator
             limit={data.limit}
             totalPages={data.totalPages}
@@ -128,20 +126,22 @@ const DefaultList: React.FC<Props> = (props) => {
             nextPage={data.nextPage}
             numberOfNeighbors={1}
           />
-          <PerPage
-            limit={limit}
-            setLimit={setLimit}
-          />
           {data?.totalDocs > 0 && (
-            <div className={`${baseClass}__page-info`}>
-              {(data.page * data.limit) - (data.limit - 1)}
-              -
-              {data.totalPages > 1 && data.totalPages !== data.page ? (data.limit * data.page) : data.totalDocs}
-              {' '}
-              of
-              {' '}
-              {data.totalDocs}
-            </div>
+            <Fragment>
+              <div className={`${baseClass}__page-info`}>
+                {(data.page * data.limit) - (data.limit - 1)}
+                -
+                {data.totalPages > 1 && data.totalPages !== data.page ? (data.limit * data.page) : data.totalDocs}
+                {' '}
+                of
+                {' '}
+                {data.totalDocs}
+              </div>
+              <PerPage
+                collection={collection}
+                limit={limit}
+              />
+            </Fragment>
           )}
         </div>
       </div>

@@ -1,55 +1,80 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import qs from 'qs';
-
-import { Link } from 'react-router-dom';
-import { useConfig } from '@payloadcms/config-provider';
-import { usePreferences } from '../../utilities/Preferences';
+import { useHistory } from 'react-router-dom';
 import { useSearchParams } from '../../utilities/SearchParams';
 import Popup from '../Popup';
 import Chevron from '../../icons/Chevron';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 
 import './index.scss';
 
 const baseClass = 'per-page';
 type Props = {
-  setLimit: (limit: number) => void;
-  limit: number;
+  collection: SanitizedCollectionConfig
+  limit: number
+  handleChange?: (limit: number) => void
+  modifySearchParams?: boolean
 }
 
-const PerPage: React.FC<Props> = ({ setLimit }) => {
-  const { admin: { pagination: { options } } } = useConfig();
+const PerPage: React.FC<Props> = ({ collection, limit, handleChange, modifySearchParams }) => {
+  const {
+    admin: {
+      pagination: {
+        limits,
+      },
+    },
+  } = collection;
+
+  const params = useSearchParams();
+  const history = useHistory();
 
   return (
     <div className={baseClass}>
       <Popup
-        horizontalAlign="center"
+        color="dark"
+        horizontalAlign="right"
         button={(
-          <div>
+          <strong>
             Per Page:
+            {' '}
+            {limit}
             <Chevron />
-          </div>
+          </strong>
         )}
-        backgroundColor="#333333"
         render={({ close }) => (
           <div>
             <ul>
-              {options.map((limitNumber, i) => (
+              {limits.map((limitNumber, i) => (
                 <li
                   className={`${baseClass}-item`}
                   key={i}
                 >
                   <button
                     type="button"
+                    className={[
+                      `${baseClass}__button`,
+                      limitNumber === Number(limit) && `${baseClass}__button-active`,
+                    ].filter(Boolean).join(' ')}
                     onClick={() => {
                       close();
-                      setLimit(limitNumber);
+                      if (handleChange) handleChange(limitNumber);
+                      if (modifySearchParams) {
+                        history.replace({
+                          search: qs.stringify({
+                            ...params,
+                            limit: limitNumber,
+                          }, { addQueryPrefix: true }),
+                        });
+                      }
                     }}
                   >
+                    {limitNumber === Number(limit) && (
+                      <Chevron />
+                    )}
                     {limitNumber}
                   </button>
                 </li>
               ))}
-              ;
             </ul>
           </div>
         )}

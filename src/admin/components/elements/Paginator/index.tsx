@@ -1,11 +1,12 @@
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { Props, Node } from './types';
 
 import Page from './Page';
 import Separator from './Separator';
 import ClickableArrow from './ClickableArrow';
+import { useSearchParams } from '../../utilities/SearchParams';
 
 import './index.scss';
 
@@ -19,7 +20,7 @@ const baseClass = 'paginator';
 
 const Pagination: React.FC<Props> = (props) => {
   const history = useHistory();
-  const location = useLocation();
+  const params = useSearchParams();
 
   const {
     totalPages = null,
@@ -38,9 +39,12 @@ const Pagination: React.FC<Props> = (props) => {
   // uses react router to set the current page
   const updatePage = (page) => {
     if (!disableHistoryChange) {
-      const params = queryString.parse(location.search, { ignoreQueryPrefix: true });
-      params.page = page;
-      history.push({ search: queryString.stringify(params, { addQueryPrefix: true }) });
+      const newParams = {
+        ...params,
+      };
+
+      newParams.page = page;
+      history.push({ search: queryString.stringify(newParams, { addQueryPrefix: true }) });
     }
 
     if (typeof onChange === 'function') onChange(page);

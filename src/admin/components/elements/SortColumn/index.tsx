@@ -1,21 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
+import queryString from 'qs';
 import { Props } from './types';
 import Chevron from '../../icons/Chevron';
 import Button from '../Button';
 
 import './index.scss';
+import { useSearchParams } from '../../utilities/SearchParams';
 
 const baseClass = 'sort-column';
 
 const SortColumn: React.FC<Props> = (props) => {
   const {
-    label, handleChange, name, disable = false,
+    label, name, disable = false,
   } = props;
-  const [sort, setSort] = useState(null);
+  const params = useSearchParams();
+  const history = useHistory();
 
-  useEffect(() => {
-    handleChange(sort);
-  }, [sort, handleChange]);
+  const { sort } = params;
 
   const desc = `-${name}`;
   const asc = name;
@@ -25,6 +27,15 @@ const SortColumn: React.FC<Props> = (props) => {
 
   const descClasses = [`${baseClass}__desc`];
   if (sort === desc) descClasses.push(`${baseClass}--active`);
+
+  const setSort = useCallback((newSort) => {
+    history.push({
+      search: queryString.stringify({
+        ...params,
+        sort: newSort,
+      }, { addQueryPrefix: true }),
+    });
+  }, [params, history]);
 
   return (
     <div className={baseClass}>

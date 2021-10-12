@@ -1,10 +1,11 @@
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { Field } from '../../../../fields/config/types';
-import { Operator } from '../../../../types';
+import { Operator, Where } from '../../../../types';
 
 export type Props = {
-  handleChange: (controls: any) => void,
   collection: SanitizedCollectionConfig,
+  handleChange?: (where: Where) => void
+  modifySearchQuery?: boolean
 }
 
 export type FieldCondition = {
@@ -14,7 +15,7 @@ export type FieldCondition = {
     label: string
     value: Operator
   }[]
-  component: string
+  component?: string
   props: Field
 }
 
@@ -22,6 +23,7 @@ export type Relation = 'and' | 'or'
 
 export type ADD = {
   type: 'add'
+  field: string
   relation?: Relation
   andIndex?: number
   orIndex?: number
@@ -44,10 +46,6 @@ export type UPDATE = {
 
 export type Action = ADD | REMOVE | UPDATE
 
-export type AndClause = {
-  operator?: string
-  value?: unknown
-  field?: string
+export type State = {
+  or: Where[]
 }
-
-export type OrClause = AndClause[]

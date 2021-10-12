@@ -90,20 +90,20 @@ const DefaultEditView: React.FC<Props> = (props) => {
                 </h1>
               </header>
               {auth && (
-              <Auth
-                useAPIKey={auth.useAPIKey}
-                requirePassword={!isEditing}
-                verify={auth.verify}
-                collection={collection}
-                email={data?.email}
-                operation={operation}
-              />
+                <Auth
+                  useAPIKey={auth.useAPIKey}
+                  requirePassword={!isEditing}
+                  verify={auth.verify}
+                  collection={collection}
+                  email={data?.email}
+                  operation={operation}
+                />
               )}
               {upload && (
-              <Upload
-                data={data}
-                collection={collection}
-              />
+                <Upload
+                  data={data}
+                  collection={collection}
+                />
               )}
               <RenderFields
                 operation={operation}

@@ -1,7 +1,10 @@
-import { OrClause, Action } from './types';
+import { Action } from './types';
+import { Where } from '../../../../types';
 
-const reducer = (state: OrClause[], action: Action): OrClause[] => {
-  const newState = [...state];
+const reducer = (state: Where[], action: Action): Where[] => {
+  const newState = [
+    ...state,
+  ];
 
   const {
     orIndex,
@@ -10,23 +13,27 @@ const reducer = (state: OrClause[], action: Action): OrClause[] => {
 
   switch (action.type) {
     case 'add': {
-      const { relation } = action;
+      const { relation, field } = action;
 
       if (relation === 'and') {
-        newState[orIndex].splice(andIndex, 0, {});
+        newState[orIndex].and.splice(andIndex, 0, { [field]: {} });
         return newState;
       }
 
       return [
         ...newState,
-        [{}],
+        {
+          and: [{
+            [field]: {},
+          }],
+        },
       ];
     }
 
     case 'remove': {
-      newState[orIndex].splice(andIndex, 1);
+      newState[orIndex].and.splice(andIndex, 1);
 
-      if (newState[orIndex].length === 0) {
+      if (newState[orIndex].and.length === 0) {
         newState.splice(orIndex, 1);
       }
 
@@ -36,20 +43,36 @@ const reducer = (state: OrClause[], action: Action): OrClause[] => {
     case 'update': {
       const { field, operator, value } = action;
 
-      newState[orIndex][andIndex] = {
-        ...newState[orIndex][andIndex],
-      };
+      if (typeof newState[orIndex].and[andIndex] === 'object') {
+        newState[orIndex].and[andIndex] = {
+          ...newState[orIndex].and[andIndex],
+        };
 
-      if (operator) {
-        newState[orIndex][andIndex].operator = operator;
-      }
+        const [existingFieldName, existingCondition] = Object.entries(newState[orIndex].and[andIndex])[0] || [undefined, undefined];
 
-      if (field) {
-        newState[orIndex][andIndex].field = field;
-      }
+        if (operator) {
+          newState[orIndex].and[andIndex] = {
+            [existingFieldName]: {
+              [operator]: Object.values(existingCondition)[0],
+            },
+          };
+        }
 
-      if (value !== undefined) {
-        newState[orIndex][andIndex].value = value;
+        if (field) {
+          newState[orIndex].and[andIndex] = {
+            [field]: {
+              [Object.keys(existingCondition)[0]]: Object.values(existingCondition)[0],
+            },
+          };
+        }
+
+        if (value !== undefined) {
+          newState[orIndex].and[andIndex] = {
+            [existingFieldName]: {
+              [Object.keys(existingCondition)[0]]: value,
+            },
+          };
+        }
       }
 
       return newState;

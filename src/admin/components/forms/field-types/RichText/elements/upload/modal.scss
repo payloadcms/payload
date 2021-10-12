@@ -26,4 +26,30 @@
   &__select-collection-wrap {
     margin-bottom: base(1);
   }
+
+  &__page-info {
+    margin-right: base(1);
+    margin-left: auto;
+  }
+
+  &__page-controls {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  @include mid-break {
+    .paginator {
+      width: 100%;
+      margin-bottom: $baseline;
+    }
+
+    &__page-controls {
+      flex-wrap: wrap;
+    }
+
+    &__page-info {
+      margin-left: 0;
+    }
+  }
 }

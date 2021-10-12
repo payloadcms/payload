@@ -1,6 +1,8 @@
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 
 export type Props = {
-  handleChange: (controls: any) => void,
-  collection: SanitizedCollectionConfig,
+  collection: SanitizedCollectionConfig
+  sort?: string,
+  handleChange?: (sort: string) => void
+  modifySearchQuery?: boolean
 }

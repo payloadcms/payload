@@ -13,6 +13,10 @@ export const defaults = {
     useAsTitle: 'id',
     components: {},
     enableRichTextRelationship: true,
+    pagination: {
+      defaultLimit: 10,
+      limits: [5, 10, 25, 50, 100],
+    },
   },
   fields: [],
   hooks: {

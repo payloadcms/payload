@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import queryString from 'qs';
 import { Props } from './types';
 import Search from '../../icons/Search';
 import useDebounce from '../../../hooks/useDebounce';
+import { useSearchParams } from '../../utilities/SearchParams';
+import { Where } from '../../../../types';
 
 import './index.scss';
 
@@ -11,21 +15,38 @@ const SearchFilter: React.FC<Props> = (props) => {
   const {
     fieldName = 'id',
     fieldLabel = 'ID',
+    modifySearchQuery = true,
     handleChange,
   } = props;
 
-  const [search, setSearch] = useState('');
+  const params = useSearchParams();
+  const history = useHistory();
+
+  const [search, setSearch] = useState(() => params?.where?.[fieldName]?.like || '');
+
   const debouncedSearch = useDebounce(search, 300);
 
   useEffect(() => {
-    if (typeof handleChange === 'function') {
-      handleChange(debouncedSearch ? {
+    if (debouncedSearch !== params?.where?.[fieldName]?.like) {
+      const newWhere = {
+        ...(typeof params?.where === 'object' ? params.where : {}),
         [fieldName]: {
           like: debouncedSearch,
         },
-      } : null);
+      };
+
+      if (handleChange) handleChange(newWhere as Where);
+
+      if (modifySearchQuery) {
+        history.replace({
+          search: queryString.stringify({
+            ...params,
+            where: newWhere,
+          }),
+        });
+      }
     }
-  }, [debouncedSearch, handleChange, fieldName]);
+  }, [debouncedSearch, history, fieldName, params, handleChange, modifySearchQuery]);
 
   return (
     <div className={baseClass}>

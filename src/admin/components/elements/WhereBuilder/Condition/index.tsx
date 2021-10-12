@@ -27,18 +27,23 @@ const Condition: React.FC<Props> = (props) => {
     orIndex,
     andIndex,
   } = props;
+  const fieldValue = Object.keys(value)[0];
+  const operatorAndValue = value?.[fieldValue] ? Object.entries(value[fieldValue])[0] : undefined;
 
-  const [activeField, setActiveField] = useState({ operators: [] } as FieldCondition);
-  const [internalValue, setInternalValue] = useState(value.value);
+  const operatorValue = operatorAndValue?.[0];
+  const queryValue = operatorAndValue?.[1];
+
+  const [activeField, setActiveField] = useState<FieldCondition>(() => fields.find((field) => fieldValue === field.value));
+  const [internalValue, setInternalValue] = useState(queryValue);
   const debouncedValue = useDebounce(internalValue, 300);
 
   useEffect(() => {
-    const newActiveField = fields.find((field) => value.field === field.value);
+    const newActiveField = fields.find((field) => fieldValue === field.value);
 
     if (newActiveField) {
       setActiveField(newActiveField);
     }
-  }, [value, fields]);
+  }, [fieldValue, fields]);
 
   useEffect(() => {
     dispatch({
@@ -49,7 +54,7 @@ const Condition: React.FC<Props> = (props) => {
     });
   }, [debouncedValue, dispatch, orIndex, andIndex]);
 
-  const ValueComponent = valueFields[activeField.component] || valueFields.Text;
+  const ValueComponent = valueFields[activeField?.component] || valueFields.Text;
 
   return (
     <div className={baseClass}>
@@ -57,7 +62,7 @@ const Condition: React.FC<Props> = (props) => {
         <div className={`${baseClass}__inputs`}>
           <div className={`${baseClass}__field`}>
             <ReactSelect
-              value={fields.find((field) => value.field === field.value)}
+              value={fields.find((field) => fieldValue === field.value)}
               options={fields}
               onChange={(field) => dispatch({
                 type: 'update',
@@ -69,14 +74,17 @@ const Condition: React.FC<Props> = (props) => {
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              value={activeField.operators.find((operator) => value.operator === operator.value)}
+              disabled={!fieldValue}
+              value={activeField.operators.find((operator) => operatorValue === operator.value)}
               options={activeField.operators}
-              onChange={(operator) => dispatch({
-                type: 'update',
-                orIndex,
-                andIndex,
-                operator: operator.value,
-              })}
+              onChange={(operator) => {
+                dispatch({
+                  type: 'update',
+                  orIndex,
+                  andIndex,
+                  operator: operator.value,
+                });
+              }}
             />
           </div>
           <div className={`${baseClass}__value`}>
@@ -84,7 +92,7 @@ const Condition: React.FC<Props> = (props) => {
               CustomComponent={activeField?.props?.admin?.components?.Filter}
               DefaultComponent={ValueComponent}
               componentProps={{
-                ...activeField.props,
+                ...activeField?.props,
                 value: internalValue,
                 onChange: setInternalValue,
               }}
@@ -110,6 +118,7 @@ const Condition: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() => dispatch({
               type: 'add',
+              field: fields[0].value,
               relation: 'and',
               orIndex,
               andIndex: andIndex + 1,

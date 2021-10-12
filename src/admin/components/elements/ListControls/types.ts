@@ -1,11 +1,15 @@
+import { Where } from '../../../../types';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 
 export type Props = {
   enableColumns?: boolean,
   enableSort?: boolean,
-  setSort: (sort: string) => void,
+  modifySearchQuery?: boolean
+  handleSortChange?: (sort: string) => void
+  handleWhereChange?: (where: Where) => void
+  columns?: string[]
+  setColumns?: (columns: string[]) => void,
   collection: SanitizedCollectionConfig,
-  handleChange: (newState) => void,
 }
 
 export type ListControls = {

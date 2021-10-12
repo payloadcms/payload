@@ -7,7 +7,9 @@ export type Props = {
   newDocumentURL: string
   setListControls: (controls: unknown) => void
   setSort: (sort: string) => void
-  columns: Column[]
+  tableColumns: Column[]
+  columnNames: string[]
+  setColumns: (columns: string[]) => void
   hasCreatePermission: boolean
   setLimit: (limit: number) => void
   limit: number
@@ -15,4 +17,10 @@ export type Props = {
 
 export type ListIndexProps = {
   collection: SanitizedCollectionConfig
+}
+
+export type ListPreferences = {
+  columns: string[]
+  limit: number
+  sort: number
 }

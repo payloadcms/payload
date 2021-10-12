@@ -18,13 +18,13 @@
     max-width: initial;
   }
 
-  @include large-break {
+  @include mid-break {
     li {
       width: 33.33%;
     }
   }
 
-  @include mid-break {
+  @include small-break {
     li {
       width: 50%;
     }

@@ -1,48 +1,38 @@
 @import '../../../scss/styles.scss';
 
 .per-page {
-  display: flex;
-  margin-bottom: $baseline;
-  margin-right: 0;
-  margin-left: auto;
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
 
-  button {
-    padding: base(.25) 0;
-    line-height: base(1);
-    background: transparent;
-    border: 0;
-    font-weight: 600;
+  .popup-button--default {
+    @extend %btn-reset;
+    position: relative;
     cursor: pointer;
+  }
+
+  &__button {
+    @extend %btn-reset;
+    color: white;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
 
     &:hover {
       text-decoration: underline;
     }
-
-    &:active,
-    &:focus {
-      outline: none;
-    }
   }
 
-  span {
-    color: $color-gray;
-  }
+  &__button-active {
+    font-weight: bold;
 
-  ul {
-    list-style: none;
-    padding: 0;
-    text-align: left;
-    margin: 0;
-
-    li {
-      text-decoration: none;
-    }
-
-    a {
-      color: $color-gray;
-      &:visited, &:link, &:active  {
-        text-decoration: none;
-      }
+    svg {
+      @include color-svg(white);
+      margin-left: base(-.25);
+      margin-right: base(-.125);
+      transform: rotate(-90deg);
     }
   }
 }

@@ -1,12 +1,10 @@
-import { Field, fieldHasSubFields } from '../../../../fields/config/types';
+import { Field, fieldHasSubFields } from '../../../../../fields/config/types';
 
-const getInitialColumnState = (fields: Field[], useAsTitle: string, defaultColumns: string[]): { columns: string[] } => {
+const getInitialColumnState = (fields: Field[], useAsTitle: string, defaultColumns: string[]): string[] => {
   let initialColumns = [];
 
   if (Array.isArray(defaultColumns) && defaultColumns.length >= 1) {
-    return {
-      columns: defaultColumns,
-    };
+    return defaultColumns;
   }
 
 
@@ -35,9 +33,7 @@ const getInitialColumnState = (fields: Field[], useAsTitle: string, defaultColum
   initialColumns = initialColumns.concat(remainingColumns);
   initialColumns = initialColumns.slice(0, 4);
 
-  return {
-    columns: initialColumns,
-  };
+  return initialColumns;
 };
 
 

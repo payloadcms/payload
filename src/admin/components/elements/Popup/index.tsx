@@ -23,7 +23,6 @@ const Popup: React.FC<Props> = (props) => {
     horizontalAlign = 'left',
     initActive = false,
     onToggleOpen,
-    backgroundColor,
     padding,
   } = props;
 
@@ -137,10 +136,6 @@ const Popup: React.FC<Props> = (props) => {
       <div
         className={`${baseClass}__content`}
         ref={contentRef}
-        style={{
-          backgroundColor,
-        }}
-
       >
         <div
           className={`${baseClass}__wrap`}

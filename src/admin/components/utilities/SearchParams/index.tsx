@@ -9,7 +9,7 @@ export const SearchParamsProvider: React.FC = ({ children }) => {
 
   const params = qs.parse(
     location.search,
-    { ignoreQueryPrefix: true },
+    { ignoreQueryPrefix: true, depth: 10 },
   );
 
   return (

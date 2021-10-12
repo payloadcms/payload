@@ -107,6 +107,10 @@ export type CollectionConfig = {
         List?: React.ComponentType
       }
     };
+    pagination?: {
+      defaultLimit?: number
+      limits?: number[]
+    }
     enableRichTextRelationship?: boolean
     preview?: GeneratePreviewURL
   };

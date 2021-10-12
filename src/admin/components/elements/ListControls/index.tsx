@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
 import SearchFilter from '../SearchFilter';
 import ColumnSelector from '../ColumnSelector';
@@ -6,18 +6,23 @@ import WhereBuilder from '../WhereBuilder';
 import SortComplex from '../SortComplex';
 import Button from '../Button';
 import { Props } from './types';
+import { useSearchParams } from '../../utilities/SearchParams';
 
 import './index.scss';
+import validateWhereQuery from '../WhereBuilder/validateWhereQuery';
 
 const baseClass = 'list-controls';
 
 const ListControls: React.FC<Props> = (props) => {
   const {
-    handleChange,
     collection,
     enableColumns = true,
     enableSort = false,
-    setSort,
+    columns,
+    setColumns,
+    handleSortChange,
+    handleWhereChange,
+    modifySearchQuery = true,
     collection: {
       fields,
       admin: {
@@ -26,55 +31,20 @@ const ListControls: React.FC<Props> = (props) => {
     },
   } = props;
 
-  const [titleField, setTitleField] = useState(null);
-  const [search, setSearch] = useState('');
-  const [columns, setColumns] = useState([]);
-  const [where, setWhere] = useState({});
-  const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>();
+  const params = useSearchParams();
+  const shouldInitializeWhereOpened = validateWhereQuery(params?.where);
 
-  useEffect(() => {
-    if (useAsTitle) {
-      const foundTitleField = fields.find((field) => field.name === useAsTitle);
-
-      if (foundTitleField) {
-        setTitleField(foundTitleField);
-      }
-    }
-  }, [useAsTitle, fields]);
-
-  useEffect(() => {
-    const newState: any = {
-      columns,
-    };
-
-    if (search) {
-      newState.where = {
-        and: [
-          search,
-        ],
-      };
-    }
-
-    if (where) {
-      if (!search) {
-        newState.where = {
-          and: [],
-        };
-      }
-
-      newState.where.and.push(where);
-    }
-
-    handleChange(newState);
-  }, [search, columns, where, handleChange]);
+  const [titleField] = useState(() => fields.find((field) => field.name === useAsTitle));
+  const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>(shouldInitializeWhereOpened ? 'where' : undefined);
 
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <SearchFilter
-          handleChange={setSearch}
-          fieldName={titleField ? titleField.name : undefined}
-          fieldLabel={titleField ? titleField.label : undefined}
+          fieldName={titleField?.name}
+          handleChange={handleWhereChange}
+          modifySearchQuery={modifySearchQuery}
+          fieldLabel={titleField?.label ? titleField?.label : undefined}
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
@@ -119,7 +89,8 @@ const ListControls: React.FC<Props> = (props) => {
         >
           <ColumnSelector
             collection={collection}
-            handleChange={setColumns}
+            columns={columns}
+            setColumns={setColumns}
           />
         </AnimateHeight>
       )}
@@ -128,8 +99,9 @@ const ListControls: React.FC<Props> = (props) => {
         height={visibleDrawer === 'where' ? 'auto' : 0}
       >
         <WhereBuilder
-          handleChange={setWhere}
           collection={collection}
+          modifySearchQuery={modifySearchQuery}
+          handleChange={handleWhereChange}
         />
       </AnimateHeight>
       {enableSort && (
@@ -138,8 +110,9 @@ const ListControls: React.FC<Props> = (props) => {
           height={visibleDrawer === 'sort' ? 'auto' : 0}
         >
           <SortComplex
-            handleChange={setSort}
+            modifySearchQuery={modifySearchQuery}
             collection={collection}
+            handleChange={handleSortChange}
           />
         </AnimateHeight>
       )}
