@@ -31,7 +31,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     },
   } = props;
 
-  const { serverURL, routes: { api, admin } } = useConfig();
+  const { serverURL, routes: { api, admin }, admin: { pagination: { defaultLimit } } } = useConfig();
   const { permissions } = useAuth();
   const location = useLocation();
   const { setStepNav } = useStepNav();
@@ -41,6 +41,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const [listControls, setListControls] = useState<ListControls>({});
   const [columns, setColumns] = useState([]);
   const [sort, setSort] = useState(null);
+  const [limit, setLimit] = useState(defaultLimit);
 
   const collectionPermissions = permissions?.collections?.[slug];
   const hasCreatePermission = collectionPermissions?.create?.permission;
@@ -54,19 +55,29 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const { columns: listControlsColumns } = listControls;
 
   useEffect(() => {
-    const params = {
-      depth: 1,
-      page: undefined,
-      sort: undefined,
-      where: undefined,
-    };
+    const perPagePrefKey = `${collection.slug}-per-page`;
 
-    if (page) params.page = page;
-    if (sort) params.sort = sort;
-    if (listControls?.where) params.where = listControls.where;
+    (async () => {
+      const currentLimit = await getPreference<number>(perPagePrefKey) || defaultLimit;
+      setLimit(currentLimit);
 
-    setParams(params);
-  }, [setParams, page, sort, listControls]);
+      const params = {
+        depth: 1,
+        page: undefined,
+        sort: undefined,
+        where: undefined,
+        limit,
+      };
+
+      if (page) params.page = page;
+      if (sort) params.sort = sort;
+      if (limit && limit !== defaultLimit) params.limit = limit;
+      if (listControls?.where) params.where = listControls.where;
+
+      console.log(params);
+      setParams(params);
+    })();
+  }, [setParams, page, sort, listControls, collection, defaultLimit, getPreference, limit]);
 
   useEffect(() => {
     setStepNav([
@@ -96,6 +107,8 @@ const ListView: React.FC<ListIndexProps> = (props) => {
         listControls,
         data,
         columns,
+        setLimit,
+        limit,
       }}
     />
   );

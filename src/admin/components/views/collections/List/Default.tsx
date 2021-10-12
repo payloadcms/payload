@@ -13,6 +13,7 @@ import { Props } from './types';
 
 import './index.scss';
 import ViewDescription from '../../../elements/ViewDescription';
+import PerPage from '../../../elements/PerPage';
 
 const baseClass = 'collection-list';
 
@@ -34,6 +35,8 @@ const DefaultList: React.FC<Props> = (props) => {
     newDocumentURL,
     setListControls,
     setSort,
+    limit,
+    setLimit,
     columns,
     hasCreatePermission,
   } = props;
@@ -114,6 +117,7 @@ const DefaultList: React.FC<Props> = (props) => {
           </div>
         )}
         <div className={`${baseClass}__page-controls`}>
+
           <Paginator
             limit={data.limit}
             totalPages={data.totalPages}
@@ -123,6 +127,10 @@ const DefaultList: React.FC<Props> = (props) => {
             prevPage={data.prevPage}
             nextPage={data.nextPage}
             numberOfNeighbors={1}
+          />
+          <PerPage
+            limit={limit}
+            setLimit={setLimit}
           />
           {data?.totalDocs > 0 && (
             <div className={`${baseClass}__page-info`}>
