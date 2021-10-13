@@ -1,3 +1,10 @@
+## [0.10.16-beta.0](https://github.com/payloadcms/payload/compare/v0.10.11...v0.10.16-beta.0) (2021-10-13)
+
+### Features
+
+* improves richtext link ([423ca01](https://github.com/payloadcms/payload/commit/423ca01ab1d5d07e2f5369d82928d6c7dad052b0))
+
+
 ## [0.10.14-beta.0](https://github.com/payloadcms/payload/compare/v0.10.11...v0.10.14-beta.0) (2021-10-13)
 
 

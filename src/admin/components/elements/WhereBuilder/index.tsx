@@ -75,6 +75,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
       history.replace({
         search: queryString.stringify({
           ...currentParams,
+          page: 1,
           where: newWhereQuery,
         }, { addQueryPrefix: true }),
       });

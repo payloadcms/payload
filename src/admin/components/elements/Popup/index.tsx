@@ -24,6 +24,7 @@ const Popup: React.FC<Props> = (props) => {
     initActive = false,
     onToggleOpen,
     padding,
+    forceOpen,
   } = props;
 
   const buttonRef = useRef(null);
@@ -76,6 +77,8 @@ const Popup: React.FC<Props> = (props) => {
   }, 500, [setVerticalAlign, contentRef, scrollY, windowHeight]);
 
   useEffect(() => {
+    if (typeof onToggleOpen === 'function') onToggleOpen(active);
+
     if (active) {
       document.addEventListener('mousedown', handleClickOutside);
     } else {
@@ -85,7 +88,11 @@ const Popup: React.FC<Props> = (props) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [active]);
+  }, [active, onToggleOpen]);
+
+  useEffect(() => {
+    setActive(forceOpen);
+  }, [forceOpen]);
 
   const classes = [
     baseClass,
@@ -114,7 +121,6 @@ const Popup: React.FC<Props> = (props) => {
               onMouseLeave={() => setActive(false)}
             >
               <PopupButton
-                onToggleOpen={onToggleOpen}
                 buttonType={buttonType}
                 button={button}
                 setActive={setActive}
@@ -124,7 +130,6 @@ const Popup: React.FC<Props> = (props) => {
           )
           : (
             <PopupButton
-              onToggleOpen={onToggleOpen}
               buttonType={buttonType}
               button={button}
               setActive={setActive}
