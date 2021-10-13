@@ -41,6 +41,7 @@ const SearchFilter: React.FC<Props> = (props) => {
         history.replace({
           search: queryString.stringify({
             ...params,
+            page: 1,
             where: newWhere,
           }),
         });

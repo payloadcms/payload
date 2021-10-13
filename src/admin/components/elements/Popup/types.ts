@@ -7,11 +7,12 @@ export type Props = {
     horizontalAlign?: 'left' | 'center' | 'right',
     size?: 'small' | 'large' | 'wide',
     color?: 'light' | 'dark',
-    buttonType?: 'default' | 'custom',
+    buttonType?: 'default' | 'custom' | 'none',
     button?: React.ReactNode,
+    forceOpen?: boolean
     showOnHover?: boolean,
     initActive?: boolean,
-    onToggleOpen?: () => void,
+    onToggleOpen?: (active: boolean) => void,
     backgroundColor?: CSSProperties['backgroundColor'],
     padding?: CSSProperties['padding'],
 }

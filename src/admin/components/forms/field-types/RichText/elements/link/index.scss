@@ -14,8 +14,6 @@
 }
 
 .rich-text-link__popup-wrap {
-  position: absolute;
-  z-index: $z-page-content;
   cursor: pointer;
 
   .tooltip {
@@ -24,11 +22,15 @@
 }
 
 .rich-text-link__button {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  @extend %btn-reset;
+  position: relative;
+  z-index: 2;
+  text-decoration: underline;
+  cursor: text;
+
+  &--open {
+    z-index: $z-modal + 1;
+  }
 }
 
 .rich-text-link__url-wrap {

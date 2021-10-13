@@ -11,7 +11,6 @@ const PopupButton: React.FC<Props> = (props) => {
     button,
     setActive,
     active,
-    onToggleOpen,
   } = props;
 
   const classes = [
@@ -20,9 +19,12 @@ const PopupButton: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   const handleClick = () => {
-    if (typeof onToggleOpen === 'function') onToggleOpen(!active);
     setActive(!active);
   };
+
+  if (buttonType === 'none') {
+    return null;
+  }
 
   if (buttonType === 'custom') {
     return (
