@@ -4,6 +4,7 @@ import { Collection } from '../../collections/config/types';
 import { APIError } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import { UserDocument } from '../types';
+import { fieldIsNamed } from '../../fields/config/types';
 
 export type Result = {
   token: string
@@ -51,7 +52,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
   await user.authenticate(data.password);
 
   const fieldsToSign = collectionConfig.fields.reduce((signedFields, field) => {
-    if (field.saveToJWT) {
+    if (field.saveToJWT && fieldIsNamed(field)) {
       return {
         ...signedFields,
         [field.name]: user[field.name],

@@ -28,8 +28,8 @@ module.exports = {
         'plugin:@typescript-eslint/recommended',
       ],
       rules: {
-        "no-shadow": "off",
-        "@typescript-eslint/no-shadow": ["error"],
+        'no-shadow': 'off',
+        '@typescript-eslint/no-shadow': ['error'],
         'import/no-unresolved': [
           2,
           {
@@ -38,18 +38,20 @@ module.exports = {
             ],
           },
         ],
-      }
+      },
     },
   ],
   rules: {
     'no-sparse-arrays': 'off',
-    'import/no-extraneous-dependencies': ["error", { "packageDir": "./" }],
+    'import/no-extraneous-dependencies': ['error', { packageDir: './' }],
     'react/jsx-filename-extension': [2, { extensions: ['.js', '.jsx', '.ts', '.tsx'] }],
     'import/prefer-default-export': 'off',
     'react/prop-types': 'off',
     'react/require-default-props': 'off',
     'react/no-unused-prop-types': 'off',
     'no-underscore-dangle': 'off',
+    'no-use-before-define': 'off',
+    '@typescript-eslint/no-use-before-define': ['error'],
     'import/extensions': [
       'error',
       'ignorePackages',

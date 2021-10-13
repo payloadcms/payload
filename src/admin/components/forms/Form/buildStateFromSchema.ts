@@ -1,5 +1,5 @@
 import ObjectID from 'bson-objectid';
-import { Field as FieldSchema } from '../../../../fields/config/types';
+import { Field as FieldSchema, fieldIsNamed, NamedField } from '../../../../fields/config/types';
 import { Fields, Field, Data } from './types';
 
 const buildValidationPromise = async (fieldState: Field, field: FieldSchema) => {
@@ -44,13 +44,13 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
       let initialData = data;
 
       if (!field?.admin?.disabled) {
-        if (field.name && field.defaultValue && typeof initialData?.[field.name] === 'undefined') {
+        if (fieldIsNamed(field) && field.defaultValue && typeof initialData?.[field.name] === 'undefined') {
           initialData = { [field.name]: field.defaultValue };
         }
 
         const passesCondition = Boolean((field?.admin?.condition ? field.admin.condition(fullData || {}, initialData || {}) : true) && parentPassesCondition);
 
-        if (field.name) {
+        if (fieldIsNamed(field)) {
           if (field.type === 'relationship' && initialData?.[field.name] === null) {
             initialData[field.name] = 'null';
           }
@@ -135,10 +135,12 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
           };
         }
 
+        const namedField = field as NamedField;
+
         // Handle normal fields
         return {
           ...state,
-          [`${path}${field.name}`]: structureFieldState(field, passesCondition, data),
+          [`${path}${namedField.name}`]: structureFieldState(field, passesCondition, data),
         };
       }
 

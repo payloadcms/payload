@@ -1,5 +1,5 @@
 import { PayloadRequest } from '../express/types';
-import { Field, RelationshipField, fieldSupportsMany, fieldHasMaxDepth } from './config/types';
+import { RelationshipField, fieldSupportsMany, fieldHasMaxDepth, UploadField } from './config/types';
 import { Payload } from '..';
 
 type PopulateArgs = {
@@ -9,7 +9,7 @@ type PopulateArgs = {
   overrideAccess: boolean
   dataReference: Record<string, any>
   data: Record<string, unknown>
-  field: Field
+  field: RelationshipField | UploadField
   index?: number
   payload: Payload
 }
@@ -27,12 +27,11 @@ const populate = async ({
 }: PopulateArgs) => {
   const dataToUpdate = dataReference;
 
-  const fieldAsRelationship = field as RelationshipField;
-  const relation = Array.isArray(fieldAsRelationship.relationTo) ? (data.relationTo as string) : fieldAsRelationship.relationTo;
+  const relation = Array.isArray(field.relationTo) ? (data.relationTo as string) : field.relationTo;
   const relatedCollection = payload.collections[relation];
 
   if (relatedCollection) {
-    let idString = Array.isArray(fieldAsRelationship.relationTo) ? data.value : data;
+    let idString = Array.isArray(field.relationTo) ? data.value : data;
 
     if (typeof idString !== 'string' && typeof idString?.toString === 'function') {
       idString = idString.toString();
@@ -55,12 +54,12 @@ const populate = async ({
     // If populatedRelationship comes back, update value
     if (populatedRelationship || populatedRelationship === null) {
       if (typeof index === 'number') {
-        if (Array.isArray(fieldAsRelationship.relationTo)) {
+        if (Array.isArray(field.relationTo)) {
           dataToUpdate[field.name][index].value = populatedRelationship;
         } else {
           dataToUpdate[field.name][index] = populatedRelationship;
         }
-      } else if (Array.isArray(fieldAsRelationship.relationTo)) {
+      } else if (Array.isArray(field.relationTo)) {
         dataToUpdate[field.name].value = populatedRelationship;
       } else {
         dataToUpdate[field.name] = populatedRelationship;
@@ -71,7 +70,7 @@ const populate = async ({
 
 type PromiseArgs = {
   data: Record<string, any>
-  field: Field
+  field: RelationshipField | UploadField
   depth: number
   currentDepth: number
   req: PayloadRequest

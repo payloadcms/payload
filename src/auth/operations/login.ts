@@ -5,7 +5,7 @@ import { PayloadRequest } from '../../express/types';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import isLocked from '../isLocked';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Field, fieldHasSubFields } from '../../fields/config/types';
+import { Field, fieldHasSubFields, fieldIsNamed } from '../../fields/config/types';
 import { User } from '../types';
 import { Collection } from '../../collections/config/types';
 
@@ -108,15 +108,15 @@ async function login(incomingArgs: Arguments): Promise<Result> {
       ...signedFields,
     };
 
-    if (!field.name && fieldHasSubFields(field)) {
+    if (!fieldIsNamed(field) && fieldHasSubFields(field)) {
       field.fields.forEach((subField) => {
-        if (subField.saveToJWT) {
+        if (subField.saveToJWT && fieldIsNamed(subField)) {
           result[subField.name] = user[subField.name];
         }
       });
     }
 
-    if (field.saveToJWT) {
+    if (field.saveToJWT && fieldIsNamed(field)) {
       result[field.name] = user[field.name];
     }
 

@@ -32,6 +32,9 @@ import {
   TextField,
   UploadField,
   PointField,
+  NamedField,
+  fieldIsNamed,
+  fieldHasSubFields,
 } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
@@ -47,10 +50,10 @@ import withOperators from './withOperators';
 const buildWhereInputType = (name: string, fields: Field[], parentName: string): GraphQLInputObjectType => {
   // This is the function that builds nested paths for all
   // field types with nested paths.
-  const recursivelyBuildNestedPaths = (field: FieldWithSubFields) => {
+  const recursivelyBuildNestedPaths = (field: FieldWithSubFields & NamedField) => {
     const nestedPaths = field.fields.reduce((nestedFields, nestedField) => {
       const getFieldSchema = fieldToSchemaMap[nestedField.type];
-      const nestedFieldName = `${field.name}__${nestedField.name}`;
+      const nestedFieldName = fieldIsNamed(nestedField) ? `${field.name}__${nestedField.name}` : undefined;
 
       if (getFieldSchema) {
         const fieldSchema = getFieldSchema({
@@ -294,7 +297,7 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
       if (getFieldSchema) {
         const rowFieldSchema = getFieldSchema(rowField);
 
-        if (Array.isArray(rowFieldSchema)) {
+        if (fieldHasSubFields(rowField)) {
           return [
             ...rowSchema,
             ...rowFieldSchema,
@@ -321,7 +324,7 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
       if (getFieldSchema) {
         const fieldSchema = getFieldSchema(field);
 
-        if (Array.isArray(fieldSchema)) {
+        if (fieldHasSubFields(field)) {
           return {
             ...schema,
             ...(fieldSchema.reduce((subFields, subField) => ({
@@ -343,7 +346,7 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
 
   fieldTypes.id = {
     type: withOperators(
-      { name: 'id' } as Field,
+      { name: 'id' } as NamedField,
       GraphQLJSON,
       parentName,
       [...operators.equality, ...operators.contains],

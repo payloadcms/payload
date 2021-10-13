@@ -3,7 +3,7 @@ import Cell from './Cell';
 import SortColumn from '../../../elements/SortColumn';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { Column } from '../../../elements/Table/types';
-import { fieldHasSubFields, Field } from '../../../../../fields/config/types';
+import { fieldHasSubFields, Field, fieldIsNamed } from '../../../../../fields/config/types';
 
 const buildColumns = (collection: SanitizedCollectionConfig, columns: string[]): Column[] => (columns || []).reduce((cols, col, colIndex) => {
   let field = null;
@@ -28,13 +28,13 @@ const buildColumns = (collection: SanitizedCollectionConfig, columns: string[]):
   ];
 
   fields.forEach((fieldToCheck) => {
-    if (fieldToCheck.name === col) {
+    if (fieldIsNamed(fieldToCheck) && fieldToCheck.name === col) {
       field = fieldToCheck;
     }
 
-    if (!fieldToCheck.name && fieldHasSubFields(fieldToCheck)) {
+    if (!fieldIsNamed(fieldToCheck) && fieldHasSubFields(fieldToCheck)) {
       fieldToCheck.fields.forEach((subField) => {
-        if (subField.name === col) {
+        if (fieldIsNamed(subField) && subField.name === col) {
           field = subField;
         }
       });

@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useContext, useState } from 'react';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import useIntersect from '../../../hooks/useIntersect';
 import { Props, Context } from './types';
+import { fieldIsNamed } from '../../../../fields/config/types';
 
 const baseClass = 'render-fields';
 
@@ -69,14 +70,16 @@ const RenderFields: React.FC<Props> = (props) => {
                 if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
                   const FieldComponent = field?.admin?.hidden ? fieldTypes.hidden : fieldTypes[field.type];
 
-                  const fieldPermissions = field?.name ? permissions?.[field.name] : permissions;
+                  const isNamedField = fieldIsNamed(field);
+
+                  const fieldPermissions = isNamedField ? permissions?.[field.name] : permissions;
 
                   let { admin: { readOnly } = {} } = field;
 
                   if (readOnlyOverride) readOnly = true;
 
-                  if (permissions?.[field?.name]?.read?.permission !== false) {
-                    if (permissions?.[field?.name]?.[operation]?.permission === false) {
+                  if ((isNamedField && permissions?.[field?.name]?.read?.permission !== false) || !isNamedField) {
+                    if (isNamedField && permissions?.[field?.name]?.[operation]?.permission === false) {
                       readOnly = true;
                     }
 
@@ -88,7 +91,7 @@ const RenderFields: React.FC<Props> = (props) => {
                           DefaultComponent={FieldComponent}
                           componentProps={{
                             ...field,
-                            path: field.path || field.name,
+                            path: field.path || (isNamedField ? field.name : undefined),
                             fieldTypes,
                             admin: {
                               ...(field.admin || {}),

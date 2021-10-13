@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
+import { fieldIsNamed } from '../../../../fields/config/types';
 import SearchFilter from '../SearchFilter';
 import ColumnSelector from '../ColumnSelector';
 import WhereBuilder from '../WhereBuilder';
@@ -8,8 +9,9 @@ import Button from '../Button';
 import { Props } from './types';
 import { useSearchParams } from '../../utilities/SearchParams';
 
-import './index.scss';
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery';
+
+import './index.scss';
 
 const baseClass = 'list-controls';
 
@@ -34,17 +36,17 @@ const ListControls: React.FC<Props> = (props) => {
   const params = useSearchParams();
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where);
 
-  const [titleField] = useState(() => fields.find((field) => field.name === useAsTitle));
+  const [titleField] = useState(() => fields.find((field) => fieldIsNamed(field) && field.name === useAsTitle));
   const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>(shouldInitializeWhereOpened ? 'where' : undefined);
 
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <SearchFilter
-          fieldName={titleField?.name}
+          fieldName={titleField && fieldIsNamed(titleField) ? titleField.name : undefined}
           handleChange={handleWhereChange}
           modifySearchQuery={modifySearchQuery}
-          fieldLabel={titleField?.label ? titleField?.label : undefined}
+          fieldLabel={titleField && titleField.label ? titleField.label : undefined}
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>

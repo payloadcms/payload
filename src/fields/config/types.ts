@@ -146,7 +146,6 @@ export type RowAdmin = Omit<Admin, 'description'> & {
 };
 
 export type RowField = Omit<FieldBase, 'admin' | 'name'> & {
-  name?: string;
   admin?: RowAdmin;
   type: 'row';
   fields: Field[];
@@ -267,6 +266,24 @@ export type Field =
   | PointField
   | RowField;
 
+export type NamedField =
+  TextField
+  | NumberField
+  | EmailField
+  | TextareaField
+  | CheckboxField
+  | DateField
+  | BlockField
+  | GroupField
+  | RadioField
+  | RelationshipField
+  | ArrayField
+  | RichTextField
+  | SelectField
+  | UploadField
+  | CodeField
+  | PointField
+
 export type FieldWithPath = Field & {
   path?: string
 }
@@ -314,6 +331,10 @@ export function fieldSupportsMany(field: Field): field is FieldWithMany {
 
 export function fieldHasMaxDepth(field: Field): field is FieldWithMaxDepth {
   return (field.type === 'upload' || field.type === 'relationship') && typeof field.maxDepth === 'number';
+}
+
+export function fieldIsNamed(field: Field): field is NamedField {
+  return 'name' in field;
 }
 
 export type HookName = 'beforeChange' | 'beforeValidate' | 'afterChange' | 'afterRead';

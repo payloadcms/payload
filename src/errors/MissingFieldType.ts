@@ -1,9 +1,9 @@
-import { Field } from '../fields/config/types';
+import { Field, fieldIsNamed } from '../fields/config/types';
 import APIError from './APIError';
 
 class MissingFieldType extends APIError {
   constructor(field: Field) {
-    super(`Field "${field.name}" is either missing a field type or it does not match an available field type`);
+    super(`Field${fieldIsNamed(field) ? ` "${field.name}"` : ''} is either missing a field type or it does not match an available field type`);
   }
 }
 

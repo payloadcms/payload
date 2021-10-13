@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 import { Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
-import { ArrayField, Block, BlockField, Field, GroupField, RadioField, RelationshipField, RowField, SelectField, UploadField } from '../fields/config/types';
+import { ArrayField, Block, BlockField, CheckboxField, CodeField, DateField, EmailField, Field, fieldIsNamed, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField } from '../fields/config/types';
 import sortableFieldTypes from '../fields/sortableFieldTypes';
 
 type BuildSchemaOptions = {
@@ -76,12 +76,12 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
   const indexFields = [];
 
   if (!allowIDField) {
-    const idField = schemaFields.find(({ name }) => name === 'id');
+    const idField = schemaFields.find((field) => fieldIsNamed(field) && field.name === 'id');
     if (idField) {
       fields = {
         _id: idField.type === 'number' ? Number : String,
       };
-      schemaFields = schemaFields.filter(({ name }) => name !== 'id');
+      schemaFields = schemaFields.filter((field) => fieldIsNamed(field) && field.name !== 'id');
     }
   }
 
@@ -97,7 +97,7 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
       indexFields.push(...fieldIndexMap[field.type](field, config));
     }
 
-    if (config.indexSortableFields && !buildSchemaOptions.global && !field.index && !field.hidden && sortableFieldTypes.indexOf(field.type) > -1) {
+    if (config.indexSortableFields && !buildSchemaOptions.global && !field.index && !field.hidden && sortableFieldTypes.indexOf(field.type) > -1 && fieldIsNamed(field)) {
       indexFields.push({ [field.name]: 1 });
     }
   });
@@ -113,7 +113,7 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
 };
 
 const fieldIndexMap = {
-  point: (field: Field, config: SanitizedConfig) => {
+  point: (field: PointField, config: SanitizedConfig) => {
     if (field.localized) {
       return config.localization.locales.map((locale) => ({ [`${field.name}.${locale}`]: field.index === false ? undefined : field.index || '2dsphere' }));
     }
@@ -122,7 +122,7 @@ const fieldIndexMap = {
 };
 
 const fieldToSchemaMap = {
-  number: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  number: (field: NumberField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Number };
 
     return {
@@ -130,7 +130,7 @@ const fieldToSchemaMap = {
       [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
-  text: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  text: (field: TextField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
 
     return {
@@ -138,7 +138,7 @@ const fieldToSchemaMap = {
       [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
-  email: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  email: (field: EmailField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
 
     return {
@@ -146,7 +146,7 @@ const fieldToSchemaMap = {
       [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
-  textarea: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  textarea: (field: TextareaField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
 
     return {
@@ -154,7 +154,7 @@ const fieldToSchemaMap = {
       [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
-  richText: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  richText: (field: RichTextField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Schema.Types.Mixed };
 
     return {
@@ -162,7 +162,7 @@ const fieldToSchemaMap = {
       [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
-  code: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  code: (field: CodeField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
 
     return {
@@ -170,7 +170,7 @@ const fieldToSchemaMap = {
       [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
-  point: (field: Field, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
+  point: (field: PointField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
     const baseSchema = {
       type: {
         type: String,
@@ -205,7 +205,7 @@ const fieldToSchemaMap = {
       [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
-  checkbox: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  checkbox: (field: CheckboxField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Boolean };
 
     return {
@@ -213,7 +213,7 @@ const fieldToSchemaMap = {
       [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
     };
   },
-  date: (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  date: (field: DateField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Date };
 
     return {
@@ -294,7 +294,7 @@ const fieldToSchemaMap = {
     field.fields.forEach((rowField: Field) => {
       const fieldSchemaMap: FieldSchemaGenerator = fieldToSchemaMap[rowField.type];
 
-      if (fieldSchemaMap) {
+      if (fieldSchemaMap && fieldIsNamed(rowField)) {
         const fieldSchema = fieldSchemaMap(rowField, fields, config, buildSchemaOptions);
         newFields[rowField.name] = fieldSchema[rowField.name];
       }

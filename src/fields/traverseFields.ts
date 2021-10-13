@@ -1,7 +1,7 @@
 import validationPromise from './validationPromise';
 import accessPromise from './accessPromise';
 import hookPromise from './hookPromise';
-import { Field, fieldHasSubFields, fieldIsArrayType, fieldIsBlockType, HookName } from './config/types';
+import { Field, fieldHasSubFields, fieldIsArrayType, fieldIsBlockType, fieldIsNamed, HookName } from './config/types';
 import { Operation } from '../types';
 import { PayloadRequest } from '../express/types';
 import { Payload } from '..';
@@ -82,7 +82,7 @@ const traverseFields = (args: Arguments): void => {
         }
       }
 
-      if (field.hidden && typeof data[field.name] !== 'undefined' && !showHiddenFields) {
+      if (field.hidden && fieldIsNamed(field) && typeof data[field.name] !== 'undefined' && !showHiddenFields) {
         delete data[field.name];
       }
 
@@ -112,7 +112,7 @@ const traverseFields = (args: Arguments): void => {
       dataCopy[field.name] = parseFloat(data[field.name]);
     }
 
-    if (field.name === 'id') {
+    if (fieldIsNamed(field) && field.name === 'id') {
       if (field.type === 'number' && typeof data[field.name] === 'string') {
         dataCopy[field.name] = parseFloat(data[field.name]);
       }
@@ -151,7 +151,8 @@ const traverseFields = (args: Arguments): void => {
       }
     }
 
-    const hasLocalizedValue = (typeof data?.[field.name] === 'object' && data?.[field.name] !== null)
+    const hasLocalizedValue = fieldIsNamed(field)
+      && (typeof data?.[field.name] === 'object' && data?.[field.name] !== null)
       && field.name
       && field.localized
       && locale !== 'all'
@@ -165,7 +166,7 @@ const traverseFields = (args: Arguments): void => {
       dataCopy[field.name] = localizedValue;
     }
 
-    if (field.localized && unflattenLocales) {
+    if (fieldIsNamed(field) && field.localized && unflattenLocales) {
       unflattenLocaleActions.push(() => {
         const localeData = payload.config.localization.locales.reduce((locales, localeID) => {
           let valueToSet;
@@ -197,37 +198,40 @@ const traverseFields = (args: Arguments): void => {
       });
     }
 
-    accessPromises.push(() => accessPromise({
-      data,
-      fullData,
-      originalDoc,
-      field,
-      operation,
-      overrideAccess,
-      req,
-      id,
-      relationshipPopulations,
-      depth,
-      currentDepth,
-      hook,
-      payload,
-    }));
+    if (fieldIsNamed(field)) {
+      accessPromises.push(() => accessPromise({
+        data,
+        fullData,
+        originalDoc,
+        field,
+        operation,
+        overrideAccess,
+        req,
+        id,
+        relationshipPopulations,
+        depth,
+        currentDepth,
+        hook,
+        payload,
+      }));
 
-    hookPromises.push(() => hookPromise({
-      data,
-      field,
-      hook,
-      req,
-      operation,
-      fullOriginalDoc,
-      fullData,
-    }));
+      hookPromises.push(() => hookPromise({
+        data,
+        field,
+        hook,
+        req,
+        operation,
+        fullOriginalDoc,
+        fullData,
+      }));
+    }
+
 
     const passesCondition = (field.admin?.condition && hook === 'beforeChange') ? field.admin.condition(fullData, data) : true;
     const skipValidationFromHere = skipValidation || !passesCondition;
 
     if (fieldHasSubFields(field)) {
-      if (field.name === undefined) {
+      if (!fieldIsNamed(field)) {
         traverseFields({
           ...args,
           fields: field.fields,
@@ -284,7 +288,7 @@ const traverseFields = (args: Arguments): void => {
       }
     }
 
-    if (hook === 'beforeChange' && field.name) {
+    if (hook === 'beforeChange' && fieldIsNamed(field)) {
       const updatedData = data;
 
       if (data?.[field.name] === undefined && originalDoc?.[field.name] === undefined && field.defaultValue) {
@@ -296,7 +300,7 @@ const traverseFields = (args: Arguments): void => {
           if (Array.isArray(dataCopy[field.name])) {
             dataCopy[field.name].forEach((relatedDoc: {value: unknown, relationTo: string}, i) => {
               const relatedCollection = payload.config.collections.find((collection) => collection.slug === relatedDoc.relationTo);
-              const relationshipIDField = relatedCollection.fields.find((collectionField) => collectionField.name === 'id');
+              const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldIsNamed(collectionField) && collectionField.name === 'id');
               if (relationshipIDField?.type === 'number') {
                 dataCopy[field.name][i] = { ...relatedDoc, value: parseFloat(relatedDoc.value as string) };
               }
@@ -304,7 +308,7 @@ const traverseFields = (args: Arguments): void => {
           }
           if (field.type === 'relationship' && field.hasMany !== true && dataCopy[field.name]?.relationTo) {
             const relatedCollection = payload.config.collections.find((collection) => collection.slug === dataCopy[field.name].relationTo);
-            const relationshipIDField = relatedCollection.fields.find((collectionField) => collectionField.name === 'id');
+            const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldIsNamed(collectionField) && collectionField.name === 'id');
             if (relationshipIDField?.type === 'number') {
               dataCopy[field.name] = { ...dataCopy[field.name], value: parseFloat(dataCopy[field.name].value as string) };
             }
@@ -313,7 +317,7 @@ const traverseFields = (args: Arguments): void => {
           if (Array.isArray(dataCopy[field.name])) {
             dataCopy[field.name].forEach((relatedDoc: unknown, i) => {
               const relatedCollection = payload.config.collections.find((collection) => collection.slug === field.relationTo);
-              const relationshipIDField = relatedCollection.fields.find((collectionField) => collectionField.name === 'id');
+              const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldIsNamed(collectionField) && collectionField.name === 'id');
               if (relationshipIDField?.type === 'number') {
                 dataCopy[field.name][i] = parseFloat(relatedDoc as string);
               }
@@ -321,7 +325,7 @@ const traverseFields = (args: Arguments): void => {
           }
           if (field.type === 'relationship' && field.hasMany !== true && dataCopy[field.name]) {
             const relatedCollection = payload.config.collections.find((collection) => collection.slug === field.relationTo);
-            const relationshipIDField = relatedCollection.fields.find((collectionField) => collectionField.name === 'id');
+            const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldIsNamed(collectionField) && collectionField.name === 'id');
             if (relationshipIDField?.type === 'number') {
               dataCopy[field.name] = parseFloat(dataCopy[field.name]);
             }
@@ -364,7 +368,7 @@ const traverseFields = (args: Arguments): void => {
           path,
           skipValidation: skipValidationFromHere,
         }));
-      } else {
+      } else if (fieldIsNamed(field)) {
         validationPromises.push(() => validationPromise({
           errors,
           hook,

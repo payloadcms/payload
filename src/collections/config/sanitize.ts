@@ -1,4 +1,5 @@
 import merge from 'deepmerge';
+import { fieldIsNamed } from '../../fields/config/types';
 import { SanitizedCollectionConfig, CollectionConfig } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
 import toKebabCase from '../../utilities/toKebabCase';
@@ -75,7 +76,7 @@ const sanitizeCollection = (collections: CollectionConfig[], collection: Collect
     let uploadFields = baseUploadFields;
 
     if (sanitized.upload.mimeTypes) {
-      uploadFields.find((f) => f.name === 'mimeType').validate = mimeTypeValidator(sanitized.upload.mimeTypes);
+      uploadFields.find((field) => fieldIsNamed(field) && field.name === 'mimeType').validate = mimeTypeValidator(sanitized.upload.mimeTypes);
     }
 
     if (sanitized.upload.imageSizes && Array.isArray(sanitized.upload.imageSizes)) {

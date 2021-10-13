@@ -7,6 +7,7 @@ import { SanitizedCollectionConfig } from '../collections/config/types';
 import fieldSchema, { idField } from '../fields/config/schema';
 import { SanitizedGlobalConfig } from '../globals/config/types';
 import globalSchema from '../globals/config/schema';
+import { fieldIsNamed } from '../fields/config/types';
 
 const logger = Logger();
 
@@ -14,19 +15,19 @@ const validateFields = (context: string, entity: SanitizedCollectionConfig | San
   const errors: string[] = [];
   entity.fields.forEach((field) => {
     let idResult: Partial<ValidationResult> = { error: null };
-    if (field.name === 'id') {
+    if (fieldIsNamed(field) && field.name === 'id') {
       idResult = idField.validate(field, { abortEarly: false });
     }
 
     const result = fieldSchema.validate(field, { abortEarly: false });
     if (idResult.error) {
       idResult.error.details.forEach(({ message }) => {
-        errors.push(`${context} "${entity.slug}" > Field "${field.name}" > ${message}`);
+        errors.push(`${context} "${entity.slug}" > Field${fieldIsNamed(field) ? `"${field.name}" >` : ''} ${message}`);
       });
     }
     if (result.error) {
       result.error.details.forEach(({ message }) => {
-        errors.push(`${context} "${entity.slug}" > Field "${field.name}" > ${message}`);
+        errors.push(`${context} "${entity.slug}" > Field${fieldIsNamed(field) ? `"${field.name}" >` : ''} ${message}`);
       });
     }
   });

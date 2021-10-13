@@ -4,9 +4,10 @@ import { useHistory } from 'react-router-dom';
 import { Props } from './types';
 import ReactSelect from '../ReactSelect';
 import sortableFieldTypes from '../../../../fields/sortableFieldTypes';
+import { useSearchParams } from '../../utilities/SearchParams';
+import { fieldIsNamed } from '../../../../fields/config/types';
 
 import './index.scss';
-import { useSearchParams } from '../../utilities/SearchParams';
 
 const baseClass = 'sort-complex';
 
@@ -23,7 +24,7 @@ const SortComplex: React.FC<Props> = (props) => {
   const params = useSearchParams();
 
   const [sortFields] = useState(() => collection.fields.reduce((fields, field) => {
-    if (field.name && sortableFieldTypes.indexOf(field.type) > -1) {
+    if (fieldIsNamed(field) && sortableFieldTypes.indexOf(field.type) > -1) {
       return [
         ...fields,
         { label: field.label, value: field.name },

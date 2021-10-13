@@ -1,4 +1,4 @@
-import { Field, fieldHasSubFields } from '../../../../../fields/config/types';
+import { Field, fieldHasSubFields, fieldIsNamed } from '../../../../../fields/config/types';
 
 const getInitialColumnState = (fields: Field[], useAsTitle: string, defaultColumns: string[]): string[] => {
   let initialColumns = [];
@@ -13,14 +13,23 @@ const getInitialColumnState = (fields: Field[], useAsTitle: string, defaultColum
   }
 
   const remainingColumns = fields.reduce((remaining, field) => {
-    if (field.name === useAsTitle) {
+    if (fieldIsNamed(field) && field.name === useAsTitle) {
       return remaining;
     }
 
-    if (!field.name && fieldHasSubFields(field)) {
+    if (!fieldIsNamed(field) && fieldHasSubFields(field)) {
       return [
         ...remaining,
-        ...field.fields.map((subField) => subField.name),
+        ...field.fields.reduce((subFields, subField) => {
+          if (fieldIsNamed(subField)) {
+            return [
+              ...subFields,
+              subField.name
+            ];
+          }
+
+          return subFields;
+        }, []),
       ];
     }
 

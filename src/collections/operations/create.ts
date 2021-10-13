@@ -19,6 +19,7 @@ import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
 import { Payload } from '../..';
 import saveBufferToFile from '../../uploads/saveBufferToFile';
+import { fieldIsNamed } from '../../fields/config/types';
 
 export type Arguments = {
   collection: Collection
@@ -74,7 +75,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // Custom id
   // /////////////////////////////////////
 
-  const hasIdField = collectionConfig.fields.findIndex(({ name }) => name === 'id') > -1;
+  const hasIdField = collectionConfig.fields.findIndex((field) => fieldIsNamed(field) && field.name === 'id') > -1;
   if (hasIdField) {
     data = {
       _id: data.id,

@@ -5,6 +5,7 @@ import FieldDescription from '../../FieldDescription';
 import FieldTypeGutter from '../../FieldTypeGutter';
 import { NegativeFieldGutterProvider } from '../../FieldTypeGutter/context';
 import { Props } from './types';
+import { fieldIsNamed } from '../../../../../fields/config/types';
 
 import './index.scss';
 
@@ -41,7 +42,7 @@ const Group: React.FC<Props> = (props) => {
         width,
       }}
     >
-      { !hideGutter && (<FieldTypeGutter />) }
+      {!hideGutter && (<FieldTypeGutter />)}
 
       <div className={`${baseClass}__content-wrapper`}>
         {(label || description) && (
@@ -63,7 +64,7 @@ const Group: React.FC<Props> = (props) => {
               fieldTypes={fieldTypes}
               fieldSchema={fields.map((subField) => ({
                 ...subField,
-                path: `${path}${subField.name ? `.${subField.name}` : ''}`,
+                path: `${path}${fieldIsNamed(subField) ? `.${subField.name}` : ''}`,
               }))}
             />
           </NegativeFieldGutterProvider>
