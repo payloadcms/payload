@@ -1,5 +1,5 @@
 <h1 align="center">Payload</h1>
-<p align="center">A self-hosted, JavaScript headless CMS & application framework built with Express, MongoDB and React.</p>
+<p align="center">A self-hosted, TypeScript / JavaScript headless CMS & application framework built with Express, MongoDB and React.</p>
 <p align="center">
   <a href="https://github.com/payloadcms/payload/actions">
     <img src="https://github.com/payloadcms/payload/workflows/build/badge.svg">
