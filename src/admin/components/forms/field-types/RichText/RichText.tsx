@@ -20,14 +20,13 @@ import withHTML from './plugins/withHTML';
 import { Props } from './types';
 import { RichTextElement, RichTextLeaf } from '../../../../../fields/config/types';
 import listTypes from './elements/listTypes';
-
 import mergeCustomFunctions from './mergeCustomFunctions';
+import withEnterBreakOut from './plugins/withEnterBreakOut';
 
 import './index.scss';
 
 const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link', 'relationship', 'upload'];
 const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
-const enterBreakOutTypes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
 const baseClass = 'rich-text';
 type CustomText = { text: string; [x: string]: unknown }
@@ -138,10 +137,12 @@ const RichText: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   const editor = useMemo(() => {
-    let CreatedEditor = withHTML(
-      withHistory(
-        withReact(
-          createEditor(),
+    let CreatedEditor = withEnterBreakOut(
+      withHTML(
+        withHistory(
+          withReact(
+            createEditor(),
+          ),
         ),
       ),
     );
@@ -271,7 +272,7 @@ const RichText: React.FC<Props> = (props) => {
 
                     if (SlateElement.isElement(selectedElement)) {
                       // Allow hard enter to "break out" of certain elements
-                      if (enterBreakOutTypes.includes(String(selectedElement.type))) {
+                      if (editor.shouldBreakOutOnEnter(selectedElement)) {
                         event.preventDefault();
                         const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
 

@@ -274,3 +274,42 @@ const serialize = (children) => children.map((node, i) => {
   <strong>Note:</strong><br/>
    The above example is for how to render to JSX, although for plain HTML the pattern is similar. Just remove the JSX and return HTML strings instead!
 </Banner>
+
+### Built-in SlateJS Plugins
+
+Payload comes with a few built-in SlateJS plugins which can be extended to make developing your own elements and leaves a bit easier. They will be documented here over time.
+
+#### `shouldBreakOutOnEnter`
+
+Payload's built-in heading elements all allow a "hard return" to "break out" of the currently active element. For example, if you hit `enter` while typing an `h1`, the `h1` will be "broken out of" and you'll be able to continue writing as the default paragraph element.
+
+If you want to utilize this functionality within your own custom elements, you can do so by adding a custom plugin to your `element` like the following "large body" element example:
+
+`customLargeBodyElement.js`:
+
+```js
+import Button from './Button';
+import Element from './Element';
+import withLargeBody from './plugin';
+
+export default {
+  name: 'large-body',
+  Button,
+  Element,
+  plugins: [
+    (incomingEditor) => {
+      const editor = incomingEditor;
+      const { shouldBreakOutOnEnter } = editor;
+
+      editor.shouldBreakOutOnEnter = (element) => (element.type === 'large-break' ? true : shouldBreakOutOnEnter(element));
+
+      return editor;
+    }
+  ],
+};
+```
+
+Above, you can see that we are creating a custom SlateJS element with a name of `large-body`. This might render a slightly larger body copy on the frontend of your app(s). We pass it a name, button, and element&mdash;but additionally, we pass it a `plugins` array containing a single SlateJS plugin.
+
+The plugin itself extends Payload's built-in `shouldBreakOutOnEnter` Slate function to add its own element name to the list of elements that should "break out" when the `enter` key is pressed.
+
