@@ -20,6 +20,7 @@ const resaveChildren = (options: Options, collection: CollectionConfig): Collect
           id: child.id,
           collection: collection.slug,
           data: {
+            ...child,
             breadcrumbs: populateBreadcrumbs(req, options, collection, child),
           },
           depth: 0,
