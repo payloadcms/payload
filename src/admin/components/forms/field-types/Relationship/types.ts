@@ -1,11 +1,6 @@
 import { PaginatedDocs, SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { RelationshipField } from '../../../../../fields/config/types';
 
-export type OptionsPage = {
-  relation: string
-  data: PaginatedDocs
-}
-
 export type Props = Omit<RelationshipField, 'type'> & {
   path?: string
 }

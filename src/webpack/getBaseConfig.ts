@@ -45,7 +45,6 @@ export default (config: SanitizedConfig): Configuration => ({
   resolve: {
     fallback: {
       path: require.resolve('path-browserify'),
-      assert: require.resolve('assert'),
       crypto: false,
       https: false,
       http: false,

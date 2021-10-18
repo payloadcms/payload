@@ -2,7 +2,6 @@ import React, {
   useCallback, useEffect, useState, useReducer,
 } from 'react';
 import { useConfig } from '@payloadcms/config-provider';
-import some from 'async-some';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import { Value } from '../../../elements/ReactSelect/types';
@@ -14,7 +13,7 @@ import { relationship } from '../../../../../fields/validations';
 import { PaginatedDocs } from '../../../../../collections/config/types';
 import { useFormProcessing } from '../../Form/context';
 import optionsReducer from './optionsReducer';
-import { Props, OptionsPage, Option, ValueWithRelation } from './types';
+import { Props, Option, ValueWithRelation } from './types';
 import useDebounce from '../../../../hooks/useDebounce';
 
 import './index.scss';
@@ -57,9 +56,9 @@ const Relationship: React.FC<Props> = (props) => {
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [errorLoading, setErrorLoading] = useState(false);
+  const [errorLoading, setErrorLoading] = useState('');
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false);
-  const debouncedSearch = useDebounce(search, 120);
+  const debouncedSearch = useDebounce(search, 300);
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required });
@@ -82,65 +81,49 @@ const Relationship: React.FC<Props> = (props) => {
     dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection });
   }, [collections, hasMultipleRelations]);
 
-  const getResults = useCallback(({ relations: relationsArg, lastLoadedPage: lastLoadedPageArg }) => {
-    if (relationsArg.length > 0) {
-      some(relationsArg, async (relation, callback) => {
-        const collection = collections.find((coll) => coll.slug === relation);
-        const fieldToSearch = collection?.admin?.useAsTitle || 'id';
-        const searchParam = search ? `&where[${fieldToSearch}][like]=${search}` : '';
-        const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageArg}&depth=0${searchParam}`);
-        const data: PaginatedDocs = await response.json();
-
-        if (response.ok) {
-          if (data.hasNextPage) {
-            return callback(false, {
-              data,
-              relation,
-            });
-          }
-
-          return callback({ relation, data });
-        }
-
-        return setErrorLoading(true);
-      }, (lastPage: OptionsPage, nextPage: OptionsPage) => {
-        if (nextPage) {
-          const { data, relation } = nextPage;
-          addOptions(data, relation);
-          setLastLoadedPage((l) => l + 1);
-        } else {
-          const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
-          const { data, relation } = lastPage;
-          addOptions(data, relation);
-          setLastFullyLoadedRelation(relations.indexOf(relation));
-          setLastLoadedPage(1);
-        }
-      });
-    }
-  }, [addOptions, api, collections, relationTo, search, serverURL]);
-
-  const getNextOptions = useCallback((params = {} as Record<string, unknown>) => {
-    const clear = params?.clear;
+  const getResults = useCallback(async ({
+    lastFullyLoadedRelation: lastFullyLoadedRelationArg,
+    lastLoadedPage: lastLoadedPageArg,
+    search: searchArg,
+  } = {
+    lastFullyLoadedRelation: -1,
+    lastLoadedPage: 1,
+    search: '',
+  }) => {
     const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
+    const relationsToFetch = lastFullyLoadedRelationArg === -1 ? relations : relations.slice(lastFullyLoadedRelationArg);
 
-    if (clear) {
-      dispatchOptions({
-        type: 'CLEAR',
-        required,
-      });
-
-      setLastFullyLoadedRelation(-1);
-    }
+    let resultsFetched = 0;
 
     if (!errorLoading) {
-      const relationsToSearch = lastFullyLoadedRelation === -1 ? relations : relations.slice(lastFullyLoadedRelation + 1);
+      relationsToFetch.reduce(async (priorRelation, relation) => {
+        await priorRelation;
 
-      getResults({
-        relations: relationsToSearch,
-        lastLoadedPage,
-      });
+        if (resultsFetched < 10) {
+          const collection = collections.find((coll) => coll.slug === relation);
+          const fieldToSearch = collection?.admin?.useAsTitle || 'id';
+          const searchParam = searchArg ? `&where[${fieldToSearch}][like]=${searchArg}` : '';
+
+          const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageArg}&depth=0${searchParam}`);
+
+          if (response.ok) {
+            const data: PaginatedDocs = await response.json();
+            if (data.docs.length > 0) {
+              resultsFetched += data.docs.length;
+              addOptions(data, relation);
+              setLastLoadedPage(data.page);
+
+              if (!data.nextPage) {
+                setLastFullyLoadedRelation(relations.indexOf(relation));
+              }
+            }
+          } else {
+            setErrorLoading('An error has occurred.');
+          }
+        }
+      }, Promise.resolve());
     }
-  }, [errorLoading, required, lastFullyLoadedRelation, relationTo, getResults, lastLoadedPage]);
+  }, [addOptions, api, collections, serverURL, errorLoading, relationTo]);
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
@@ -218,6 +201,34 @@ const Relationship: React.FC<Props> = (props) => {
     }
   }, [addOptions, api, errorLoading, serverURL]);
 
+  // ///////////////////////////
+  // Get first results
+  // ///////////////////////////
+
+  useEffect(() => {
+    getResults();
+    setHasLoadedFirstOptions(true);
+  }, [addOptions, api, required, relationTo, serverURL, getResults]);
+
+  // ///////////////////////////
+  // Get results when search input changes
+  // ///////////////////////////
+
+  useEffect(() => {
+    dispatchOptions({
+      type: 'CLEAR',
+      required,
+    });
+
+    setLastLoadedPage(1);
+    setLastFullyLoadedRelation(-1);
+    getResults({ search: debouncedSearch });
+  }, [getResults, debouncedSearch, relationTo, required]);
+
+  // ///////////////////////////
+  // Format options once first options have been retrieved
+  // ///////////////////////////
+
   useEffect(() => {
     if (value && hasLoadedFirstOptions) {
       if (hasMany) {
@@ -246,89 +257,6 @@ const Relationship: React.FC<Props> = (props) => {
       }
     }
   }, [addOptionByID, findOptionsByValue, hasMany, hasMultipleRelations, relationTo, value, hasLoadedFirstOptions]);
-
-  useEffect(() => {
-    const getFirstResults = async () => {
-      dispatchOptions({
-        type: 'CLEAR',
-        required,
-      });
-
-      setLastLoadedPage(1);
-      setLastFullyLoadedRelation(-1);
-      setHasLoadedFirstOptions(false);
-
-      const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
-      const res = await fetch(`${serverURL}${api}/${relations[0]}?limit=${maxResultsPerRequest}&depth=0`);
-
-      if (res.ok) {
-        const data: PaginatedDocs = await res.json();
-
-        addOptions(data, relations[0]);
-
-
-        if (!data.hasNextPage) {
-          setLastFullyLoadedRelation(0);
-
-          if (relations[1]) {
-            const secondRes = await fetch(`${serverURL}${api}/${relations[1]}?limit=${maxResultsPerRequest}&depth=0`);
-
-            if (res.ok) {
-              const secondData: PaginatedDocs = await secondRes.json();
-
-              addOptions(secondData, relations[1]);
-
-              if (!secondData.hasNextPage) {
-                setLastFullyLoadedRelation(1);
-
-                if (relations[2]) {
-                  const thirdRes = await fetch(`${serverURL}${api}/${relations[2]}?limit=${maxResultsPerRequest}&depth=0`);
-
-                  if (res.ok) {
-                    const thirdData: PaginatedDocs = await thirdRes.json();
-
-                    addOptions(thirdData, relations[2]);
-
-                    if (!thirdData.hasNextPage) {
-                      setLastFullyLoadedRelation(2);
-                    } else {
-                      setLastLoadedPage(2);
-                    }
-                  }
-                }
-              } else {
-                setLastLoadedPage(2);
-              }
-            }
-          }
-        } else {
-          setLastLoadedPage(2);
-        }
-
-        setHasLoadedFirstOptions(true);
-      }
-    };
-
-    getFirstResults();
-  }, [addOptions, api, required, relationTo, serverURL]);
-
-  useEffect(() => {
-    if (debouncedSearch) {
-      dispatchOptions({
-        type: 'CLEAR',
-        required,
-      });
-
-      setLastLoadedPage(1);
-      setLastFullyLoadedRelation(-1);
-      const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
-
-      getResults({
-        relations,
-        lastLoadedPage: 1,
-      });
-    }
-  }, [getResults, debouncedSearch, relationTo, required]);
 
   const classes = [
     'field-type',
@@ -382,7 +310,9 @@ const Relationship: React.FC<Props> = (props) => {
               setValue(selected.value);
             }
           } : undefined}
-          onMenuScrollToBottom={getNextOptions}
+          onMenuScrollToBottom={() => {
+            getResults({ lastFullyLoadedRelation: lastFullyLoadedRelation + 1, lastLoadedPage });
+          }}
           value={valueToRender}
           showError={showError}
           disabled={formProcessing}
