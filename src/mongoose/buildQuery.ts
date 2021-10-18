@@ -17,7 +17,6 @@ function convertArrayFromCommaDelineated(input) {
   return [input];
 }
 
-
 type ParseType = {
   searchParams?:
   {
@@ -123,9 +122,27 @@ class ParamParser {
     let schemaObject = schema.obj[key];
     const sanitizedKey = key.replace(/__/gi, '.');
     let localizedKey = this.getLocalizedKey(sanitizedKey, schemaObject);
+
     if (key === '_id' || key === 'id') {
       localizedKey = '_id';
+      schemaObject = schema.paths._id;
+
+      if (schemaObject.instance === 'ObjectID') {
+        const isValid = mongoose.Types.ObjectId.isValid(val);
+        if (!isValid) {
+          return undefined;
+        }
+      }
+
+      if (schemaObject.instance === 'Number') {
+        const parsedNumber = parseFloat(val);
+
+        if (Number.isNaN(parsedNumber)) {
+          return undefined;
+        }
+      }
     }
+
     if (key.includes('.') || key.includes('__')) {
       const paths = key.split('.');
       schemaObject = schema.obj[paths[0]];
@@ -232,6 +249,7 @@ class ParamParser {
           break;
       }
     }
+
     return [localizedKey, formattedValue];
   }
 }
