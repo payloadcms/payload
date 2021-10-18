@@ -1,3 +1,9 @@
+## [0.10.17-beta.0](https://github.com/payloadcms/payload/compare/v0.10.11...v0.10.17-beta.0) (2021-10-18)
+
+### Features
+
+* allows richText enter key break out functionality to be extended in custom elements ([ca91f47](https://github.com/payloadcms/payload/commit/ca91f47d325de5211f24000c7d90b10a8fdfc544))
+
 ## [0.10.16-beta.0](https://github.com/payloadcms/payload/compare/v0.10.11...v0.10.16-beta.0) (2021-10-13)
 
 ### Features
