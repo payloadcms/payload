@@ -7,11 +7,10 @@ import baseAuthFields from '../../fields/baseFields/baseAuthFields';
 import baseAPIKeyFields from '../../fields/baseFields/baseAPIKeyFields';
 import baseVerificationFields from '../../fields/baseFields/baseVerificationFields';
 import baseAccountLockFields from '../../fields/baseFields/baseAccountLockFields';
-import baseUploadFields from '../../fields/baseFields/baseUploadFields';
-import baseImageUploadFields from '../../fields/baseFields/baseImageUploadFields';
+import getBaseUploadFields from '../../fields/baseFields/getBaseUploadFields';
 import { formatLabels } from '../../utilities/formatLabels';
 import { defaults, authDefaults } from './defaults';
-import { mimeTypeValidator } from '../../fields/baseFields/mimeTypeValidator';
+import { Config } from '../../config/types';
 
 const mergeBaseFields = (fields, baseFields) => {
   const mergedFields = [];
@@ -56,7 +55,7 @@ const mergeBaseFields = (fields, baseFields) => {
   return baseFields;
 };
 
-const sanitizeCollection = (collections: CollectionConfig[], collection: CollectionConfig): SanitizedCollectionConfig => {
+const sanitizeCollection = (config: Config, collection: CollectionConfig): SanitizedCollectionConfig => {
   // /////////////////////////////////
   // Make copy of collection config
   // /////////////////////////////////
@@ -73,15 +72,10 @@ const sanitizeCollection = (collections: CollectionConfig[], collection: Collect
     sanitized.upload.staticURL = sanitized.upload.staticURL || `/${sanitized.slug}`;
     sanitized.admin.useAsTitle = (sanitized.admin.useAsTitle && sanitized.admin.useAsTitle !== 'id') ? sanitized.admin.useAsTitle : 'filename';
 
-    let uploadFields = baseUploadFields;
-
-    if (sanitized.upload.mimeTypes) {
-      uploadFields.find((field) => fieldIsNamed(field) && field.name === 'mimeType').validate = mimeTypeValidator(sanitized.upload.mimeTypes);
-    }
-
-    if (sanitized.upload.imageSizes && Array.isArray(sanitized.upload.imageSizes)) {
-      uploadFields = uploadFields.concat(baseImageUploadFields(sanitized.upload.imageSizes));
-    }
+    let uploadFields = getBaseUploadFields({
+      config,
+      collection: sanitized,
+    });
 
     uploadFields = mergeBaseFields(sanitized.fields, uploadFields);
 
@@ -121,7 +115,7 @@ const sanitizeCollection = (collections: CollectionConfig[], collection: Collect
   // Sanitize fields
   // /////////////////////////////////
 
-  const validRelationships = collections.map((c) => c.slug);
+  const validRelationships = config.collections.map((c) => c.slug);
   sanitized.fields = sanitizeFields(sanitized.fields, validRelationships);
 
   return sanitized as SanitizedCollectionConfig;

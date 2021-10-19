@@ -10,12 +10,12 @@ const baseClass = 'file-meta';
 
 const Meta: React.FC<Props> = (props) => {
   const {
-    filename, filesize, width, height, mimeType, staticURL,
+    filename, filesize, width, height, mimeType, staticURL, url,
   } = props;
 
   const { serverURL } = useConfig();
 
-  const fileURL = `${serverURL}${staticURL}/${filename}`;
+  const fileURL = url || `${serverURL}${staticURL}/${filename}`;
 
   return (
     <div className={baseClass}>

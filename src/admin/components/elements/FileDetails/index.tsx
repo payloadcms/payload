@@ -31,6 +31,7 @@ const FileDetails: React.FC<Props> = (props) => {
     height,
     mimeType,
     sizes,
+    url,
   } = doc;
 
   const [moreInfoOpen, setMoreInfoOpen] = useState(false);
@@ -52,6 +53,7 @@ const FileDetails: React.FC<Props> = (props) => {
             width={width as number}
             height={height as number}
             mimeType={mimeType as string}
+            url={url as string}
           />
           {hasSizes && (
             <Button
@@ -91,18 +93,24 @@ const FileDetails: React.FC<Props> = (props) => {
           height={moreInfoOpen ? 'auto' : 0}
         >
           <ul className={`${baseClass}__sizes`}>
-            {Object.entries(sizes).map(([key, val]) => (
-              <li key={key}>
-                <div className={`${baseClass}__size-label`}>
-                  {key}
-                </div>
-                <Meta
-                  {...val}
-                  mimeType={mimeType}
-                  staticURL={staticURL}
-                />
-              </li>
-            ))}
+            {Object.entries(sizes).map(([key, val]) => {
+              if (val?.filename) {
+                return (
+                  <li key={key}>
+                    <div className={`${baseClass}__size-label`}>
+                      {key}
+                    </div>
+                    <Meta
+                      {...val}
+                      mimeType={mimeType}
+                      staticURL={staticURL}
+                    />
+                  </li>
+                );
+              }
+
+              return null;
+            })}
           </ul>
         </AnimateHeight>
       )}
