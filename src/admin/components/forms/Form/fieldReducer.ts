@@ -95,8 +95,11 @@ function fieldReducer(state: Fields, action): Fields {
         };
       }
 
-      // Add new object containing subfield names to unflattenedRows array
-      unflattenedRows.splice(rowIndex + 1, 0, subFieldState);
+      // If there are subfields
+      if (Object.keys(subFieldState).length > 0) {
+        // Add new object containing subfield names to unflattenedRows array
+        unflattenedRows.splice(rowIndex + 1, 0, subFieldState);
+      }
 
       const newState = {
         ...remainingFlattenedState,
