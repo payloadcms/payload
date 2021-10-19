@@ -31,6 +31,10 @@ const useThumbnail = (collection: SanitizedCollectionConfig, doc: Record<string,
       return `${serverURL}${thumbnailURL}`;
     }
 
+    if (sizes?.[adminThumbnail]?.url) {
+      return sizes[adminThumbnail].url;
+    }
+
     if (sizes?.[adminThumbnail]?.filename) {
       return `${serverURL}${staticURL}/${sizes[adminThumbnail].filename}`;
     }

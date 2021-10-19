@@ -12,13 +12,13 @@ const sanitizeConfig = (config: Config): SanitizedConfig => {
 
   if (!sanitizedConfig.admin.user) {
     sanitizedConfig.admin.user = 'users';
-    const sanitizedDefaultUser = sanitizeCollection(sanitizedConfig.collections, defaultUser);
+    const sanitizedDefaultUser = sanitizeCollection(sanitizedConfig, defaultUser);
     sanitizedConfig.collections.push(sanitizedDefaultUser);
   } else if (!sanitizedConfig.collections.find((c) => c.slug === sanitizedConfig.admin.user)) {
     throw new InvalidConfiguration(`${sanitizedConfig.admin.user} is not a valid admin user collection`);
   }
 
-  sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig.collections, collection));
+  sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig, collection));
   checkDuplicateCollections(sanitizedConfig.collections);
 
   if (sanitizedConfig.globals.length > 0) {
