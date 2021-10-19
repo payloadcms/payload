@@ -1,3 +1,15 @@
+## [0.10.18-beta.0](https://github.com/payloadcms/payload/compare/v0.10.11...v0.10.18-beta.0) (2021-10-19)
+
+
+### Bug Fixes
+
+* [#338](https://github.com/payloadcms/payload/issues/338), array / block fields with only nested array block fields break admin UI ([86e88d9](https://github.com/payloadcms/payload/commit/86e88d998fbc36d7ea2456dfbc685edadff107d3))
+
+### Features
+
+* adds dynamic url field to upload-enabled collections ([cc4d1fd](https://github.com/payloadcms/payload/commit/cc4d1fd045ed54c6a35c7104182e6fbeadb6dac4))
+* adds safety checks while querying on id with bad values ([900f05e](https://github.com/payloadcms/payload/commit/900f05eefdc63978809a88a2e1474be08afff6c6))
+
 ## [0.10.17-beta.0](https://github.com/payloadcms/payload/compare/v0.10.11...v0.10.17-beta.0) (2021-10-18)
 
 ### Features
