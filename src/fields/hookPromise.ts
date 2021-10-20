@@ -1,10 +1,10 @@
 import { PayloadRequest } from '../express/types';
 import { Operation } from '../types';
-import { HookName, NamedField } from './config/types';
+import { HookName, FieldAffectingData } from './config/types';
 
 type Arguments = {
   data: Record<string, unknown>
-  field: NamedField
+  field: FieldAffectingData
   hook: HookName
   req: PayloadRequest
   operation: Operation

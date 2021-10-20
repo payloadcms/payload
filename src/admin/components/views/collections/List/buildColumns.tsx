@@ -3,7 +3,7 @@ import Cell from './Cell';
 import SortColumn from '../../../elements/SortColumn';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { Column } from '../../../elements/Table/types';
-import { fieldHasSubFields, Field, fieldIsNamed } from '../../../../../fields/config/types';
+import { fieldHasSubFields, Field, fieldAffectsData, fieldIsPresentationalOnly } from '../../../../../fields/config/types';
 
 const buildColumns = (collection: SanitizedCollectionConfig, columns: string[]): Column[] => (columns || []).reduce((cols, col, colIndex) => {
   let field = null;
@@ -28,13 +28,13 @@ const buildColumns = (collection: SanitizedCollectionConfig, columns: string[]):
   ];
 
   fields.forEach((fieldToCheck) => {
-    if (fieldIsNamed(fieldToCheck) && fieldToCheck.name === col) {
+    if ((fieldAffectsData(fieldToCheck) || fieldIsPresentationalOnly(fieldToCheck)) && fieldToCheck.name === col) {
       field = fieldToCheck;
     }
 
-    if (!fieldIsNamed(fieldToCheck) && fieldHasSubFields(fieldToCheck)) {
+    if (!fieldAffectsData(fieldToCheck) && fieldHasSubFields(fieldToCheck)) {
       fieldToCheck.fields.forEach((subField) => {
-        if (fieldIsNamed(subField) && subField.name === col) {
+        if (fieldAffectsData(subField) && subField.name === col) {
           field = subField;
         }
       });
@@ -53,7 +53,7 @@ const buildColumns = (collection: SanitizedCollectionConfig, columns: string[]):
             <SortColumn
               label={field.label || field.name}
               name={field.name}
-              disable={field.disableSort || undefined}
+              disable={(field.disableSort || fieldIsPresentationalOnly(field)) || undefined}
             />
           ),
           renderCell: (rowData, cellData) => (

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
 import {
   GraphQLBoolean,
@@ -32,9 +33,10 @@ import {
   TextField,
   UploadField,
   PointField,
-  NamedField,
-  fieldIsNamed,
+  FieldAffectingData,
+  fieldAffectsData,
   fieldHasSubFields,
+  fieldIsPresentationalOnly,
 } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
@@ -50,31 +52,33 @@ import withOperators from './withOperators';
 const buildWhereInputType = (name: string, fields: Field[], parentName: string): GraphQLInputObjectType => {
   // This is the function that builds nested paths for all
   // field types with nested paths.
-  const recursivelyBuildNestedPaths = (field: FieldWithSubFields & NamedField) => {
+  const recursivelyBuildNestedPaths = (field: FieldWithSubFields & FieldAffectingData) => {
     const nestedPaths = field.fields.reduce((nestedFields, nestedField) => {
-      const getFieldSchema = fieldToSchemaMap[nestedField.type];
-      const nestedFieldName = fieldIsNamed(nestedField) ? `${field.name}__${nestedField.name}` : undefined;
+      if (!fieldIsPresentationalOnly(nestedField)) {
+        const getFieldSchema = fieldToSchemaMap[nestedField.type];
+        const nestedFieldName = fieldAffectsData(nestedField) ? `${field.name}__${nestedField.name}` : undefined;
 
-      if (getFieldSchema) {
-        const fieldSchema = getFieldSchema({
-          ...nestedField,
-          name: nestedFieldName,
-        });
+        if (getFieldSchema) {
+          const fieldSchema = getFieldSchema({
+            ...nestedField,
+            name: nestedFieldName,
+          });
 
-        if (Array.isArray(fieldSchema)) {
+          if (Array.isArray(fieldSchema)) {
+            return [
+              ...nestedFields,
+              ...fieldSchema,
+            ];
+          }
+
           return [
             ...nestedFields,
-            ...fieldSchema,
+            {
+              key: nestedFieldName,
+              type: fieldSchema,
+            },
           ];
         }
-
-        return [
-          ...nestedFields,
-          {
-            key: nestedFieldName,
-            type: fieldSchema,
-          },
-        ];
       }
 
       return nestedFields;
@@ -304,21 +308,24 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
           ];
         }
 
-        return [
-          ...rowSchema,
-          {
-            key: rowField.name,
-            type: rowFieldSchema,
-          },
-        ];
+        if (fieldAffectsData(rowField)) {
+          return [
+            ...rowSchema,
+            {
+              key: rowField.name,
+              type: rowFieldSchema,
+            },
+          ];
+        }
       }
+
 
       return rowSchema;
     }, []),
   };
 
   const fieldTypes = fields.reduce((schema, field) => {
-    if (!field.hidden) {
+    if (!fieldIsPresentationalOnly(field) && !field.hidden) {
       const getFieldSchema = fieldToSchemaMap[field.type];
 
       if (getFieldSchema) {
@@ -346,7 +353,7 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
 
   fieldTypes.id = {
     type: withOperators(
-      { name: 'id' } as NamedField,
+      { name: 'id' } as FieldAffectingData,
       GraphQLJSON,
       parentName,
       [...operators.equality, ...operators.contains],

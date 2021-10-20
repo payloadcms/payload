@@ -2,7 +2,7 @@ import React from 'react';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import { Props } from './types';
-import { fieldIsNamed } from '../../../../../fields/config/types';
+import { fieldAffectsData } from '../../../../../fields/config/types';
 
 import './index.scss';
 
@@ -25,7 +25,7 @@ const Row: React.FC<Props> = (props) => {
       fieldTypes={fieldTypes}
       fieldSchema={fields.map((field) => ({
         ...field,
-        path: `${path ? `${path}.` : ''}${fieldIsNamed(field) ? field.name : ''}`,
+        path: `${path ? `${path}.` : ''}${fieldAffectsData(field) ? field.name : ''}`,
       }))}
     />
   );

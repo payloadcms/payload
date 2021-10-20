@@ -15,13 +15,13 @@ import { GraphQLJSON } from 'graphql-type-json';
 import withNullableType from './withNullableType';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
-import { ArrayField, CodeField, DateField, EmailField, Field, fieldHasSubFields, fieldIsNamed, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField } from '../../fields/config/types';
+import { ArrayField, CodeField, DateField, EmailField, Field, fieldHasSubFields, fieldAffectsData, fieldIsPresentationalOnly, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField } from '../../fields/config/types';
 import { toWords } from '../../utilities/formatLabels';
 import payload from '../../index';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 
 export const getCollectionIDType = (config: SanitizedCollectionConfig): GraphQLScalarType => {
-  const idField = config.fields.find((field) => fieldIsNamed(field) && field.name === 'id');
+  const idField = config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
   if (!idField) return GraphQLString;
   switch (idField.type) {
     case 'number':
@@ -116,7 +116,7 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
       return { type };
     },
     group: (field: GroupField) => {
-      const requiresAtLeastOneField = field.fields.some((subField) => (subField.required && !subField.localized));
+      const requiresAtLeastOneField = field.fields.some((subField) => (!fieldIsPresentationalOnly(subField) && subField.required && !subField.localized));
       const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
       let type: GraphQLType = buildMutationInputType(fullName, field.fields, fullName);
       if (requiresAtLeastOneField) type = new GraphQLNonNull(type);
@@ -140,7 +140,7 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
   };
 
   const fieldTypes = fields.reduce((schema, field: Field) => {
-    if (!field.hidden) {
+    if (!fieldIsPresentationalOnly(field) && !field.hidden) {
       const getFieldSchema: (field: Field) => { type: GraphQLType } = fieldToSchemaMap[field.type];
 
       if (getFieldSchema) {
@@ -149,7 +149,7 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
         if (fieldHasSubFields(field) && Array.isArray(fieldSchema)) {
           return fieldSchema.reduce((acc, subField, i) => {
             const currentSubField = field.fields[i];
-            if (fieldIsNamed(currentSubField)) {
+            if (fieldAffectsData(currentSubField)) {
               return {
                 ...acc,
                 [currentSubField.name]: subField,
@@ -163,7 +163,7 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
           }, schema);
         }
 
-        if (fieldIsNamed(field)) {
+        if (fieldAffectsData(field)) {
           return {
             ...schema,
             [field.name]: fieldSchema,

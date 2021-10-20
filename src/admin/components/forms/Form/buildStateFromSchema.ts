@@ -1,8 +1,8 @@
 import ObjectID from 'bson-objectid';
-import { Field as FieldSchema, fieldIsNamed, NamedField } from '../../../../fields/config/types';
+import { Field as FieldSchema, fieldAffectsData, FieldAffectingData, fieldIsPresentationalOnly } from '../../../../fields/config/types';
 import { Fields, Field, Data } from './types';
 
-const buildValidationPromise = async (fieldState: Field, field: FieldSchema) => {
+const buildValidationPromise = async (fieldState: Field, field: FieldAffectingData) => {
   const validatedFieldState = fieldState;
 
   let validationResult: boolean | string = true;
@@ -43,14 +43,14 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
     const iterateFields = (fields: FieldSchema[], data: Data, parentPassesCondition: boolean, path = '') => fields.reduce((state, field) => {
       let initialData = data;
 
-      if (!field?.admin?.disabled) {
-        if (fieldIsNamed(field) && field.defaultValue && typeof initialData?.[field.name] === 'undefined') {
+      if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
+        if (fieldAffectsData(field) && field.defaultValue && typeof initialData?.[field.name] === 'undefined') {
           initialData = { [field.name]: field.defaultValue };
         }
 
         const passesCondition = Boolean((field?.admin?.condition ? field.admin.condition(fullData || {}, initialData || {}) : true) && parentPassesCondition);
 
-        if (fieldIsNamed(field)) {
+        if (fieldAffectsData(field)) {
           if (field.type === 'relationship' && initialData?.[field.name] === null) {
             initialData[field.name] = 'null';
           }
@@ -135,7 +135,7 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
           };
         }
 
-        const namedField = field as NamedField;
+        const namedField = field as FieldAffectingData;
 
         // Handle normal fields
         return {

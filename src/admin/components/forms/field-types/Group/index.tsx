@@ -5,7 +5,7 @@ import FieldDescription from '../../FieldDescription';
 import FieldTypeGutter from '../../FieldTypeGutter';
 import { NegativeFieldGutterProvider } from '../../FieldTypeGutter/context';
 import { Props } from './types';
-import { fieldIsNamed } from '../../../../../fields/config/types';
+import { fieldAffectsData } from '../../../../../fields/config/types';
 
 import './index.scss';
 
@@ -64,7 +64,7 @@ const Group: React.FC<Props> = (props) => {
               fieldTypes={fieldTypes}
               fieldSchema={fields.map((subField) => ({
                 ...subField,
-                path: `${path}${fieldIsNamed(subField) ? `.${subField.name}` : ''}`,
+                path: `${path}${fieldAffectsData(subField) ? `.${subField.name}` : ''}`,
               }))}
             />
           </NegativeFieldGutterProvider>

@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
 import { Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
-import { ArrayField, Block, BlockField, CheckboxField, CodeField, DateField, EmailField, Field, fieldIsNamed, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField } from '../fields/config/types';
+import { ArrayField, Block, BlockField, CheckboxField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, fieldIsPresentationalOnly, NonPresentationalField } from '../fields/config/types';
 import sortableFieldTypes from '../fields/sortableFieldTypes';
 
 type BuildSchemaOptions = {
@@ -29,7 +30,7 @@ const setBlockDiscriminators = (fields: Field[], schema: Schema, config: Sanitiz
 
         const blockSchema = new Schema(blockSchemaFields, { _id: false, id: false });
 
-        if (field.localized) {
+        if (blockFieldType.localized) {
           config.localization.locales.forEach((locale) => {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore Possible incorrect typing in mongoose types, this works
@@ -47,7 +48,7 @@ const setBlockDiscriminators = (fields: Field[], schema: Schema, config: Sanitiz
   });
 };
 
-const formatBaseSchema = (field: Field, buildSchemaOptions: BuildSchemaOptions) => ({
+const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: BuildSchemaOptions) => ({
   sparse: field.unique && field.localized,
   unique: field.unique || false,
   required: (!buildSchemaOptions.disableRequired && field.required && !field.localized && !field?.admin?.condition && !field?.access?.create) || false,
@@ -55,7 +56,7 @@ const formatBaseSchema = (field: Field, buildSchemaOptions: BuildSchemaOptions) 
   index: field.index || field.unique || false,
 });
 
-const localizeSchema = (field: Field, schema, locales) => {
+const localizeSchema = (field: NonPresentationalField, schema, locales) => {
   if (field.localized) {
     return {
       type: locales.reduce((localeSchema, locale) => ({
@@ -76,29 +77,31 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
   const indexFields = [];
 
   if (!allowIDField) {
-    const idField = schemaFields.find((field) => fieldIsNamed(field) && field.name === 'id');
+    const idField = schemaFields.find((field) => fieldAffectsData(field) && field.name === 'id');
     if (idField) {
       fields = {
         _id: idField.type === 'number' ? Number : String,
       };
-      schemaFields = schemaFields.filter((field) => fieldIsNamed(field) && field.name !== 'id');
+      schemaFields = schemaFields.filter((field) => fieldAffectsData(field) && field.name !== 'id');
     }
   }
 
   schemaFields.forEach((field) => {
-    const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[field.type];
+    if (!fieldIsPresentationalOnly(field)) {
+      const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[field.type];
 
-    if (fieldSchema) {
-      fields = fieldSchema(field, fields, config, buildSchemaOptions);
-    }
+      if (fieldSchema) {
+        fields = fieldSchema(field, fields, config, buildSchemaOptions);
+      }
 
-    // geospatial field index must be created after the schema is created
-    if (fieldIndexMap[field.type]) {
-      indexFields.push(...fieldIndexMap[field.type](field, config));
-    }
+      // geospatial field index must be created after the schema is created
+      if (fieldIndexMap[field.type]) {
+        indexFields.push(...fieldIndexMap[field.type](field, config));
+      }
 
-    if (config.indexSortableFields && !buildSchemaOptions.global && !field.index && !field.hidden && sortableFieldTypes.indexOf(field.type) > -1 && fieldIsNamed(field)) {
-      indexFields.push({ [field.name]: 1 });
+      if (config.indexSortableFields && !buildSchemaOptions.global && !field.index && !field.hidden && sortableFieldTypes.indexOf(field.type) > -1 && fieldAffectsData(field)) {
+        indexFields.push({ [field.name]: 1 });
+      }
     }
   });
 
@@ -294,7 +297,7 @@ const fieldToSchemaMap = {
     field.fields.forEach((rowField: Field) => {
       const fieldSchemaMap: FieldSchemaGenerator = fieldToSchemaMap[rowField.type];
 
-      if (fieldSchemaMap && fieldIsNamed(rowField)) {
+      if (fieldSchemaMap && fieldAffectsData(rowField)) {
         const fieldSchema = fieldSchemaMap(rowField, fields, config, buildSchemaOptions);
         newFields[rowField.name] = fieldSchema[rowField.name];
       }
@@ -324,7 +327,7 @@ const fieldToSchemaMap = {
 
     const baseSchema = {
       ...formattedBaseSchema,
-      required: required && field.fields.some((subField) => (subField.required && !subField.localized && !subField?.admin?.condition && !subField?.access?.create)),
+      required: required && field.fields.some((subField) => (!fieldIsPresentationalOnly(subField) && subField.required && !subField.localized && !subField?.admin?.condition && !subField?.access?.create)),
       type: buildSchema(config, field.fields, {
         options: {
           _id: false,

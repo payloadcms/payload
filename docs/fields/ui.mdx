@@ -1,0 +1,54 @@
+---
+title: UI Field
+label: UI
+order: 170
+desc: UI fields are purely presentational and allow developers to customize the admin panel to a very fine degree, including adding actions and other functions.
+keywords: custom field, react component, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+<Banner >
+  The UI (user interface) field gives you a ton of power to add your own React components directly into the Admin panel, nested directly within your other fields. It has absolutely no effect on the data of your documents. It is presentational-only.
+</Banner>
+
+This field is helpful if you need to build in custom functionality via React components within the Admin panel. Think of it as a way for you to "plug in" your own React components directly within your other fields, so you can provide your editors with new controls exactly where you want them to go.
+
+With this field, you can also inject custom `Cell` components that appear as additional columns within collections' List views.
+
+**Example uses:**
+
+- Add a custom message or block of text within the body of an Edit view to describe the purpose of surrounding fields
+- Add a "Refund" button to an Order's Edit view sidebar, which might make a fetch call to a custom `refund` endpoint
+- Add a "view page" button into a Pages List view to give editors a shortcut to view a page on the frontend of the site
+- Build a "clear cache" button or similar mechanism to manually clear caches of specific documents
+
+### Config
+
+| Option                       | Description |
+| ---------------------------- | ----------- |
+| **`name`** *                 | A unique identifier for this field. |
+| **`label`**                  | Human-readable label for this UI field. |
+| **`admin.components.Field`** | React component to be rendered for this field within the Edit view. |
+| **`admin.components.Cell`**  | React component to be rendered as a Cell within collection List views. |
+
+*\* An asterisk denotes that a property is required.*
+
+### Example
+
+`collections/ExampleCollection.js`
+```js
+{
+  slug: 'example-collection',
+  fields: [
+    {
+      type: 'ui', // required
+      admin: {
+        components: {
+          Field: MyCustomUIField,
+          Cell: MyCustomUICell,
+        }
+      }
+    }
+  ]
+}
+
+```

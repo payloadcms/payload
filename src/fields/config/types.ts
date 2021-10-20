@@ -151,6 +151,22 @@ export type RowField = Omit<FieldBase, 'admin' | 'name'> & {
   fields: Field[];
 }
 
+export type UIField = {
+  name: string
+  label?: string
+  admin: {
+    position?: string
+    width?: string
+    condition?: Condition
+    components?: {
+      Filter?: React.ComponentType;
+      Cell?: React.ComponentType;
+      Field: React.ComponentType;
+    }
+  }
+  type: 'ui';
+}
+
 export type UploadField = FieldBase & {
   type: 'upload';
   relationTo: string;
@@ -264,9 +280,10 @@ export type Field =
   | UploadField
   | CodeField
   | PointField
-  | RowField;
+  | RowField
+  | UIField;
 
-export type NamedField =
+export type FieldAffectingData =
   TextField
   | NumberField
   | EmailField
@@ -284,6 +301,24 @@ export type NamedField =
   | CodeField
   | PointField
 
+export type NonPresentationalField = TextField
+| NumberField
+| EmailField
+| TextareaField
+| CheckboxField
+| DateField
+| BlockField
+| GroupField
+| RadioField
+| RelationshipField
+| ArrayField
+| RichTextField
+| SelectField
+| UploadField
+| CodeField
+| PointField
+| RowField;
+
 export type FieldWithPath = Field & {
   path?: string
 }
@@ -292,6 +327,9 @@ export type FieldWithSubFields =
   GroupField
   | ArrayField
   | RowField;
+
+export type FieldPresentationalOnly =
+  UIField;
 
 export type FieldWithMany =
   SelectField
@@ -333,8 +371,12 @@ export function fieldHasMaxDepth(field: Field): field is FieldWithMaxDepth {
   return (field.type === 'upload' || field.type === 'relationship') && typeof field.maxDepth === 'number';
 }
 
-export function fieldIsNamed(field: Field): field is NamedField {
-  return 'name' in field;
+export function fieldIsPresentationalOnly(field: Field): field is UIField {
+  return field.type === 'ui';
+}
+
+export function fieldAffectsData(field: Field): field is FieldAffectingData {
+  return 'name' in field && !fieldIsPresentationalOnly(field);
 }
 
 export type HookName = 'beforeChange' | 'beforeValidate' | 'afterChange' | 'afterRead';

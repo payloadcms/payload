@@ -1,5 +1,5 @@
 import merge from 'deepmerge';
-import { fieldIsNamed } from '../../fields/config/types';
+import { fieldAffectsData } from '../../fields/config/types';
 import { SanitizedCollectionConfig, CollectionConfig } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
 import toKebabCase from '../../utilities/toKebabCase';

@@ -1,5 +1,5 @@
 import { Payload } from '..';
-import { HookName, NamedField } from './config/types';
+import { HookName, FieldAffectingData } from './config/types';
 import relationshipPopulationPromise from './relationshipPopulationPromise';
 import { Operation } from '../types';
 import { PayloadRequest } from '../express/types';
@@ -8,7 +8,7 @@ type Arguments = {
   data: Record<string, unknown>
   fullData: Record<string, unknown>
   originalDoc: Record<string, unknown>
-  field: NamedField
+  field: FieldAffectingData
   operation: Operation
   overrideAccess: boolean
   req: PayloadRequest

@@ -5,6 +5,8 @@ import Quote from '../blocks/Quote';
 import NumberBlock from '../blocks/Number';
 import CallToAction from '../blocks/CallToAction';
 import CollectionDescription from '../customComponents/CollectionDescription';
+import DemoUIField from '../client/components/DemoUIField/Field';
+import DemoUIFieldCell from '../client/components/DemoUIField/Cell';
 
 const AllFields: CollectionConfig = {
   slug: 'all-fields',
@@ -13,6 +15,7 @@ const AllFields: CollectionConfig = {
     plural: 'All Fields',
   },
   admin: {
+    defaultColumns: ['text', 'demo', 'createdAt'],
     useAsTitle: 'text',
     preview: (doc, { token }) => {
       const { text } = doc;
@@ -300,6 +303,17 @@ const AllFields: CollectionConfig = {
           'underline',
           'strikethrough',
         ],
+      },
+    },
+    {
+      type: 'ui',
+      name: 'demo',
+      admin: {
+        position: 'sidebar',
+        components: {
+          Field: DemoUIField,
+          Cell: DemoUIFieldCell,
+        },
       },
     },
     {

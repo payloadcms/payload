@@ -1,8 +1,8 @@
 import { GraphQLNonNull, GraphQLType } from 'graphql';
-import { Field } from '../../fields/config/types';
+import { NonPresentationalField } from '../../fields/config/types';
 
 
-const withNullableType = (field: Field, type: GraphQLType, forceNullable = false): GraphQLType => {
+const withNullableType = (field: NonPresentationalField, type: GraphQLType, forceNullable = false): GraphQLType => {
   const hasReadAccessControl = field.access && field.access.read;
   const condition = field.admin && field.admin.condition;
 

@@ -1,7 +1,7 @@
 import validationPromise from './validationPromise';
 import accessPromise from './accessPromise';
 import hookPromise from './hookPromise';
-import { Field, fieldHasSubFields, fieldIsArrayType, fieldIsBlockType, fieldIsNamed, HookName } from './config/types';
+import { Field, fieldHasSubFields, fieldIsArrayType, fieldIsBlockType, fieldAffectsData, HookName } from './config/types';
 import { Operation } from '../types';
 import { PayloadRequest } from '../express/types';
 import { Payload } from '..';
@@ -82,7 +82,7 @@ const traverseFields = (args: Arguments): void => {
         }
       }
 
-      if (field.hidden && fieldIsNamed(field) && typeof data[field.name] !== 'undefined' && !showHiddenFields) {
+      if (fieldAffectsData(field) && field.hidden && typeof data[field.name] !== 'undefined' && !showHiddenFields) {
         delete data[field.name];
       }
 
@@ -112,7 +112,7 @@ const traverseFields = (args: Arguments): void => {
       dataCopy[field.name] = parseFloat(data[field.name]);
     }
 
-    if (fieldIsNamed(field) && field.name === 'id') {
+    if (fieldAffectsData(field) && field.name === 'id') {
       if (field.type === 'number' && typeof data[field.name] === 'string') {
         dataCopy[field.name] = parseFloat(data[field.name]);
       }
@@ -151,7 +151,7 @@ const traverseFields = (args: Arguments): void => {
       }
     }
 
-    const hasLocalizedValue = fieldIsNamed(field)
+    const hasLocalizedValue = fieldAffectsData(field)
       && (typeof data?.[field.name] === 'object' && data?.[field.name] !== null)
       && field.name
       && field.localized
@@ -166,7 +166,7 @@ const traverseFields = (args: Arguments): void => {
       dataCopy[field.name] = localizedValue;
     }
 
-    if (fieldIsNamed(field) && field.localized && unflattenLocales) {
+    if (fieldAffectsData(field) && field.localized && unflattenLocales) {
       unflattenLocaleActions.push(() => {
         const localeData = payload.config.localization.locales.reduce((locales, localeID) => {
           let valueToSet;
@@ -198,7 +198,7 @@ const traverseFields = (args: Arguments): void => {
       });
     }
 
-    if (fieldIsNamed(field)) {
+    if (fieldAffectsData(field)) {
       accessPromises.push(() => accessPromise({
         data,
         fullData,
@@ -231,7 +231,7 @@ const traverseFields = (args: Arguments): void => {
     const skipValidationFromHere = skipValidation || !passesCondition;
 
     if (fieldHasSubFields(field)) {
-      if (!fieldIsNamed(field)) {
+      if (!fieldAffectsData(field)) {
         traverseFields({
           ...args,
           fields: field.fields,
@@ -288,7 +288,7 @@ const traverseFields = (args: Arguments): void => {
       }
     }
 
-    if (hook === 'beforeChange' && fieldIsNamed(field)) {
+    if (hook === 'beforeChange' && fieldAffectsData(field)) {
       const updatedData = data;
 
       if (data?.[field.name] === undefined && originalDoc?.[field.name] === undefined && field.defaultValue) {
@@ -300,7 +300,7 @@ const traverseFields = (args: Arguments): void => {
           if (Array.isArray(dataCopy[field.name])) {
             dataCopy[field.name].forEach((relatedDoc: {value: unknown, relationTo: string}, i) => {
               const relatedCollection = payload.config.collections.find((collection) => collection.slug === relatedDoc.relationTo);
-              const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldIsNamed(collectionField) && collectionField.name === 'id');
+              const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldAffectsData(collectionField) && collectionField.name === 'id');
               if (relationshipIDField?.type === 'number') {
                 dataCopy[field.name][i] = { ...relatedDoc, value: parseFloat(relatedDoc.value as string) };
               }
@@ -308,7 +308,7 @@ const traverseFields = (args: Arguments): void => {
           }
           if (field.type === 'relationship' && field.hasMany !== true && dataCopy[field.name]?.relationTo) {
             const relatedCollection = payload.config.collections.find((collection) => collection.slug === dataCopy[field.name].relationTo);
-            const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldIsNamed(collectionField) && collectionField.name === 'id');
+            const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldAffectsData(collectionField) && collectionField.name === 'id');
             if (relationshipIDField?.type === 'number') {
               dataCopy[field.name] = { ...dataCopy[field.name], value: parseFloat(dataCopy[field.name].value as string) };
             }
@@ -317,7 +317,7 @@ const traverseFields = (args: Arguments): void => {
           if (Array.isArray(dataCopy[field.name])) {
             dataCopy[field.name].forEach((relatedDoc: unknown, i) => {
               const relatedCollection = payload.config.collections.find((collection) => collection.slug === field.relationTo);
-              const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldIsNamed(collectionField) && collectionField.name === 'id');
+              const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldAffectsData(collectionField) && collectionField.name === 'id');
               if (relationshipIDField?.type === 'number') {
                 dataCopy[field.name][i] = parseFloat(relatedDoc as string);
               }
@@ -325,7 +325,7 @@ const traverseFields = (args: Arguments): void => {
           }
           if (field.type === 'relationship' && field.hasMany !== true && dataCopy[field.name]) {
             const relatedCollection = payload.config.collections.find((collection) => collection.slug === field.relationTo);
-            const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldIsNamed(collectionField) && collectionField.name === 'id');
+            const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldAffectsData(collectionField) && collectionField.name === 'id');
             if (relationshipIDField?.type === 'number') {
               dataCopy[field.name] = parseFloat(dataCopy[field.name]);
             }
@@ -368,7 +368,7 @@ const traverseFields = (args: Arguments): void => {
           path,
           skipValidation: skipValidationFromHere,
         }));
-      } else if (fieldIsNamed(field)) {
+      } else if (fieldAffectsData(field)) {
         validationPromises.push(() => validationPromise({
           errors,
           hook,

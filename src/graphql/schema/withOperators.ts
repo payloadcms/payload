@@ -1,8 +1,8 @@
 import { GraphQLBoolean, GraphQLInputObjectType, GraphQLList, GraphQLType } from 'graphql';
-import { NamedField } from '../../fields/config/types';
+import { FieldAffectingData } from '../../fields/config/types';
 import combineParentName from '../utilities/combineParentName';
 
-const withOperators = (field: NamedField, type: GraphQLType, parentName: string, operators: string[]): GraphQLInputObjectType => {
+const withOperators = (field: FieldAffectingData, type: GraphQLType, parentName: string, operators: string[]): GraphQLInputObjectType => {
   const name = `${combineParentName(parentName, field.name)}_operator`;
   const listOperators = ['in', 'not_in', 'all'];
 
