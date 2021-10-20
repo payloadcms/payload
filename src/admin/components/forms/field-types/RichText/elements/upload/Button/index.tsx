@@ -53,17 +53,19 @@ const UploadButton: React.FC<{path: string}> = ({ path }) => {
   const [renderModal, setRenderModal] = useState(false);
   const [modalCollectionOption, setModalCollectionOption] = useState<{ label: string, value: string}>(() => {
     const firstAvailableCollection = collections.find(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship));
-    return { label: firstAvailableCollection.labels.singular, value: firstAvailableCollection.slug };
+    if (firstAvailableCollection) {
+      return { label: firstAvailableCollection.labels.singular, value: firstAvailableCollection.slug };
+    }
+
+    return undefined;
   });
   const [modalCollection, setModalCollection] = useState<SanitizedCollectionConfig>(() => collections.find(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
 
-  const [fields, setFields] = useState(() => formatFields(modalCollection));
+  const [fields, setFields] = useState(() => (modalCollection ? formatFields(modalCollection) : undefined));
   const [limit, setLimit] = useState<number>();
   const [sort, setSort] = useState(null);
   const [where, setWhere] = useState(null);
   const [page, setPage] = useState(null);
-
-  const [hasEnabledCollections] = useState(() => collections.find(({ upload, admin: { enableRichTextRelationship } }) => upload && enableRichTextRelationship));
 
   const modalSlug = `${path}-add-upload`;
   const moreThanOneAvailableCollection = availableCollections.length > 1;
@@ -74,7 +76,9 @@ const UploadButton: React.FC<{path: string}> = ({ path }) => {
   const [{ data }, { setParams }] = usePayloadAPI(apiURL, {});
 
   useEffect(() => {
-    setFields(formatFields(modalCollection));
+    if (modalCollection) {
+      setFields(formatFields(modalCollection));
+    }
   }, [modalCollection]);
 
   useEffect(() => {
@@ -100,10 +104,14 @@ const UploadButton: React.FC<{path: string}> = ({ path }) => {
   }, [setParams, page, sort, where, limit]);
 
   useEffect(() => {
-    setModalCollection(collections.find(({ slug }) => modalCollectionOption.value === slug));
+    if (modalCollectionOption) {
+      setModalCollection(collections.find(({ slug }) => modalCollectionOption.value === slug));
+    }
   }, [modalCollectionOption, collections]);
 
-  if (!hasEnabledCollections) return null;
+  if (!modalCollection) {
+    return null;
+  }
 
   return (
     <Fragment>
