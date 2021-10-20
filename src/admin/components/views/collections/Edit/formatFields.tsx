@@ -1,8 +1,8 @@
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import { Field, fieldIsNamed } from '../../../../../fields/config/types';
+import { Field, fieldAffectsData } from '../../../../../fields/config/types';
 
 const formatFields = (collection: SanitizedCollectionConfig, isEditing: boolean): Field[] => (isEditing
-  ? collection.fields.filter((field) => fieldIsNamed(field) && field.name !== 'id')
+  ? collection.fields.filter((field) => (fieldAffectsData(field) && field.name !== 'id') || true)
   : collection.fields);
 
 export default formatFields;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
-import { fieldIsNamed } from '../../../../fields/config/types';
+import { fieldAffectsData } from '../../../../fields/config/types';
 import SearchFilter from '../SearchFilter';
 import ColumnSelector from '../ColumnSelector';
 import WhereBuilder from '../WhereBuilder';
@@ -36,14 +36,14 @@ const ListControls: React.FC<Props> = (props) => {
   const params = useSearchParams();
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where);
 
-  const [titleField] = useState(() => fields.find((field) => fieldIsNamed(field) && field.name === useAsTitle));
+  const [titleField] = useState(() => fields.find((field) => fieldAffectsData(field) && field.name === useAsTitle));
   const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>(shouldInitializeWhereOpened ? 'where' : undefined);
 
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <SearchFilter
-          fieldName={titleField && fieldIsNamed(titleField) ? titleField.name : undefined}
+          fieldName={titleField && fieldAffectsData(titleField) ? titleField.name : undefined}
           handleChange={handleWhereChange}
           modifySearchQuery={modifySearchQuery}
           fieldLabel={titleField && titleField.label ? titleField.label : undefined}

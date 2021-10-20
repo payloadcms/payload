@@ -31,6 +31,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
               } else {
                 newState.unshift(field.name);
               }
+
               setColumns(newState);
             }}
             alignIcon="left"

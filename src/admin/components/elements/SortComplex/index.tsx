@@ -5,7 +5,7 @@ import { Props } from './types';
 import ReactSelect from '../ReactSelect';
 import sortableFieldTypes from '../../../../fields/sortableFieldTypes';
 import { useSearchParams } from '../../utilities/SearchParams';
-import { fieldIsNamed } from '../../../../fields/config/types';
+import { fieldAffectsData } from '../../../../fields/config/types';
 
 import './index.scss';
 
@@ -24,7 +24,7 @@ const SortComplex: React.FC<Props> = (props) => {
   const params = useSearchParams();
 
   const [sortFields] = useState(() => collection.fields.reduce((fields, field) => {
-    if (fieldIsNamed(field) && sortableFieldTypes.indexOf(field.type) > -1) {
+    if (fieldAffectsData(field) && sortableFieldTypes.indexOf(field.type) > -1) {
       return [
         ...fields,
         { label: field.label, value: field.name },

@@ -285,6 +285,21 @@ export const date = baseField.keys({
   }),
 });
 
+export const ui = joi.object().keys({
+  name: joi.string().required(),
+  label: joi.string(),
+  type: joi.string().valid('ui').required(),
+  admin: joi.object().keys({
+    position: joi.string().valid('sidebar'),
+    width: joi.string(),
+    condition: joi.func(),
+    components: joi.object().keys({
+      Cell: componentSchema,
+      Field: componentSchema,
+    }).default({}),
+  }).default(),
+});
+
 const fieldSchema = joi.alternatives()
   .try(
     text,
@@ -304,6 +319,7 @@ const fieldSchema = joi.alternatives()
     blocks,
     date,
     point,
+    ui,
   )
   .id('field');
 

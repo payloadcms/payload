@@ -13,7 +13,7 @@ import { Props } from './types';
 import HiddenInput from '../field-types/HiddenInput';
 
 import './index.scss';
-import { fieldIsNamed } from '../../../../fields/config/types';
+import { fieldAffectsData } from '../../../../fields/config/types';
 
 const baseClass = 'draggable-section';
 
@@ -112,7 +112,7 @@ const DraggableSection: React.FC<Props> = (props) => {
                     permissions={permissions?.fields}
                     fieldSchema={fieldSchema.map((field) => ({
                       ...field,
-                      path: `${parentPath}.${rowIndex}${fieldIsNamed(field) ? `.${field.name}` : ''}`,
+                      path: `${parentPath}.${rowIndex}${fieldAffectsData(field) ? `.${field.name}` : ''}`,
                     }))}
                   />
                 </NegativeFieldGutterProvider>

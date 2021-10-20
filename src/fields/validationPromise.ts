@@ -1,8 +1,8 @@
-import { HookName, NamedField } from './config/types';
+import { HookName, FieldAffectingData } from './config/types';
 
 type Arguments = {
   hook: HookName
-  field: NamedField
+  field: FieldAffectingData
   path: string
   errors: {message: string, field: string}[]
   newData: Record<string, unknown>

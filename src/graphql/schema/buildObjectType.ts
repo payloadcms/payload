@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-use-before-define */
@@ -13,7 +14,7 @@ import {
   GraphQLUnionType,
 } from 'graphql';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { Field, RadioField, RelationshipField, SelectField, UploadField, optionIsObject, ArrayField, GroupField, RichTextField, fieldIsNamed } from '../../fields/config/types';
+import { Field, RadioField, RelationshipField, SelectField, UploadField, optionIsObject, ArrayField, GroupField, RichTextField, fieldAffectsData, NumberField, TextField, EmailField, TextareaField, CodeField, DateField, PointField, CheckboxField, BlockField, RowField, fieldIsPresentationalOnly } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import withNullableType from './withNullableType';
@@ -37,13 +38,13 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
   const recursiveBuildObjectType = buildObjectType.bind(this);
 
   const fieldToSchemaMap = {
-    number: (field: Field) => ({ type: withNullableType(field, GraphQLFloat) }),
-    text: (field: Field) => ({ type: withNullableType(field, GraphQLString) }),
-    email: (field: Field) => ({ type: withNullableType(field, EmailAddressResolver) }),
-    textarea: (field: Field) => ({ type: withNullableType(field, GraphQLString) }),
-    code: (field: Field) => ({ type: withNullableType(field, GraphQLString) }),
-    date: (field: Field) => ({ type: withNullableType(field, DateTimeResolver) }),
-    point: (field: Field) => ({ type: withNullableType(field, new GraphQLList(GraphQLFloat)) }),
+    number: (field: NumberField) => ({ type: withNullableType(field, GraphQLFloat) }),
+    text: (field: TextField) => ({ type: withNullableType(field, GraphQLString) }),
+    email: (field: EmailField) => ({ type: withNullableType(field, EmailAddressResolver) }),
+    textarea: (field: TextareaField) => ({ type: withNullableType(field, GraphQLString) }),
+    code: (field: CodeField) => ({ type: withNullableType(field, GraphQLString) }),
+    date: (field: DateField) => ({ type: withNullableType(field, DateTimeResolver) }),
+    point: (field: PointField) => ({ type: withNullableType(field, new GraphQLList(GraphQLFloat)) }),
     richText: (field: RichTextField) => ({
       type: withNullableType(field, GraphQLJSON),
       async resolve(parent, args, context) {
@@ -174,7 +175,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
         }),
       ),
     }),
-    checkbox: (field: Field) => ({ type: withNullableType(field, GraphQLBoolean) }),
+    checkbox: (field: CheckboxField) => ({ type: withNullableType(field, GraphQLBoolean) }),
     select: (field: SelectField) => {
       const fullName = combineParentName(parentName, field.name);
 
@@ -442,7 +443,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
 
       return { type };
     },
-    blocks: (field) => {
+    blocks: (field: BlockField) => {
       const blockTypes = field.blocks.map((block) => {
         this.buildBlockType(block);
         return this.types.blockTypes[block.slug];
@@ -461,7 +462,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
     row: (field) => field.fields.reduce((subFieldSchema, subField) => {
       const buildSchemaType = fieldToSchemaMap[subField.type];
 
-      if (buildSchemaType) {
+      if (!fieldIsPresentationalOnly(subField) && buildSchemaType) {
         return {
           ...subFieldSchema,
           [formatName(subField.name)]: buildSchemaType(subField),
@@ -475,10 +476,10 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
   const objectSchema = {
     name,
     fields: () => fields.reduce((schema, field) => {
-      if (!field.hidden) {
+      if (!fieldIsPresentationalOnly(field) && !field.hidden) {
         const fieldSchema = fieldToSchemaMap[field.type];
         if (fieldSchema) {
-          if (fieldIsNamed(field)) {
+          if (fieldAffectsData(field)) {
             return {
               ...schema,
               [formatName(field.name)]: fieldSchema(field),

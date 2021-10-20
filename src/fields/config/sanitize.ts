@@ -3,6 +3,7 @@ import { MissingFieldType, InvalidFieldRelationship } from '../../errors';
 import { baseBlockFields } from '../baseFields/baseBlockFields';
 import validations from '../validations';
 import { baseIDField } from '../baseFields/baseIDField';
+import { fieldAffectsData } from './types';
 
 const sanitizeFields = (fields, validRelationships: string[]) => {
   if (!fields) return [];
@@ -38,17 +39,20 @@ const sanitizeFields = (fields, validRelationships: string[]) => {
       field.labels = field.labels || formatLabels(field.name);
     }
 
-    if (typeof field.validate === 'undefined') {
-      const defaultValidate = validations[field.type];
-      if (defaultValidate) {
-        field.validate = (val) => defaultValidate(val, field);
-      } else {
-        field.validate = () => true;
+    if (fieldAffectsData(field)) {
+      if (typeof field.validate === 'undefined') {
+        const defaultValidate = validations[field.type];
+        if (defaultValidate) {
+          field.validate = (val) => defaultValidate(val, field);
+        } else {
+          field.validate = () => true;
+        }
       }
+
+      if (!field.hooks) field.hooks = {};
+      if (!field.access) field.access = {};
     }
 
-    if (!field.hooks) field.hooks = {};
-    if (!field.access) field.access = {};
     if (!field.admin) field.admin = {};
 
     if (field.fields) field.fields = sanitizeFields(field.fields, validRelationships);

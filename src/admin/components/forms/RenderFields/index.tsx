@@ -2,7 +2,7 @@ import React, { createContext, useEffect, useContext, useState } from 'react';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import useIntersect from '../../../hooks/useIntersect';
 import { Props, Context } from './types';
-import { fieldIsNamed } from '../../../../fields/config/types';
+import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../fields/config/types';
 
 const baseClass = 'render-fields';
 
@@ -66,20 +66,34 @@ const RenderFields: React.FC<Props> = (props) => {
         {hasRendered && (
           <RenderedFieldContext.Provider value={contextValue}>
             {fieldSchema.map((field, i) => {
-              if (!field?.hidden && field?.admin?.disabled !== true) {
+              const fieldIsPresentational = fieldIsPresentationalOnly(field);
+              let FieldComponent = fieldTypes[field.type];
+
+              if (fieldIsPresentational || (!field?.hidden && field?.admin?.disabled !== true)) {
                 if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
-                  const FieldComponent = field?.admin?.hidden ? fieldTypes.hidden : fieldTypes[field.type];
+                  if (fieldIsPresentational) {
+                    return (
+                      <FieldComponent
+                        {...field}
+                        key={i}
+                      />
+                    );
+                  }
 
-                  const isNamedField = fieldIsNamed(field);
+                  if (field?.admin?.hidden) {
+                    FieldComponent = fieldTypes.hidden;
+                  }
 
-                  const fieldPermissions = isNamedField ? permissions?.[field.name] : permissions;
+                  const isFieldAffectingData = fieldAffectsData(field);
+
+                  const fieldPermissions = isFieldAffectingData ? permissions?.[field.name] : permissions;
 
                   let { admin: { readOnly } = {} } = field;
 
                   if (readOnlyOverride) readOnly = true;
 
-                  if ((isNamedField && permissions?.[field?.name]?.read?.permission !== false) || !isNamedField) {
-                    if (isNamedField && permissions?.[field?.name]?.[operation]?.permission === false) {
+                  if ((isFieldAffectingData && permissions?.[field?.name]?.read?.permission !== false) || !isFieldAffectingData) {
+                    if (isFieldAffectingData && permissions?.[field?.name]?.[operation]?.permission === false) {
                       readOnly = true;
                     }
 
@@ -91,7 +105,7 @@ const RenderFields: React.FC<Props> = (props) => {
                           DefaultComponent={FieldComponent}
                           componentProps={{
                             ...field,
-                            path: field.path || (isNamedField ? field.name : undefined),
+                            path: field.path || (isFieldAffectingData ? field.name : undefined),
                             fieldTypes,
                             admin: {
                               ...(field.admin || {}),
