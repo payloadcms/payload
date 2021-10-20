@@ -1,3 +1,30 @@
+# [0.11.0](https://github.com/payloadcms/payload/compare/v0.10.11...v0.11.0) (2021-10-20)
+
+
+### Bug Fixes
+
+* [#338](https://github.com/payloadcms/payload/issues/338), array / block fields with only nested array block fields break admin UI ([86e88d9](https://github.com/payloadcms/payload/commit/86e88d998fbc36d7ea2456dfbc685edadff107d3))
+* [#341](https://github.com/payloadcms/payload/issues/341) - searching on multiple relationship collections ([3b99ded](https://github.com/payloadcms/payload/commit/3b99deda450fbbe4a9d05c28c9c485c466872097))
+* [#343](https://github.com/payloadcms/payload/issues/343) - upload rte element crashes admin when no upload collection present ([914cca6](https://github.com/payloadcms/payload/commit/914cca6b926923bd238605856a7b7125c13244e1))
+* make name required on field types ([#337](https://github.com/payloadcms/payload/issues/337)) ([b257e01](https://github.com/payloadcms/payload/commit/b257e01c8dea5d22172ce4f71e4124aecc39bba8))
+* more strict field typing ([84f6a9d](https://github.com/payloadcms/payload/commit/84f6a9d659fd443545f3ba7adf9f6adab98452ca))
+* per page now properly modifies search query ([fcd9c28](https://github.com/payloadcms/payload/commit/fcd9c2887175396bdedc051f3f30f1080d8c5953))
+* properly types row field ([7d49302](https://github.com/payloadcms/payload/commit/7d49302ffa8207498e6e70255b3be84b3ac890c1))
+* removes node 15 from CI ([a2df67e](https://github.com/payloadcms/payload/commit/a2df67eccd9ab6f8c9d4982bdade9b47186c2c82))
+* use proper error code on webpack build failure ([2eb8154](https://github.com/payloadcms/payload/commit/2eb81546c3b4bf1804d25ccd5307af4855c4f750))
+
+
+### Features
+
+* adds dynamic url field to upload-enabled collections ([cc4d1fd](https://github.com/payloadcms/payload/commit/cc4d1fd045ed54c6a35c7104182e6fbeadb6dac4))
+* adds safety checks while querying on id with bad values ([900f05e](https://github.com/payloadcms/payload/commit/900f05eefdc63978809a88a2e1474be08afff6c6))
+* **admin:** initial per page component ([3715e01](https://github.com/payloadcms/payload/commit/3715e011c97c8e30174c35c502fa7db12bc84e2c))
+* allows richText enter key break out functionality to be extended in custom elements ([ca91f47](https://github.com/payloadcms/payload/commit/ca91f47d325de5211f24000c7d90b10a8fdfc544))
+* improves richtext link ([423ca01](https://github.com/payloadcms/payload/commit/423ca01ab1d5d07e2f5369d82928d6c7dad052b0))
+* **per-page:** add pagination to admin config ([c132f2f](https://github.com/payloadcms/payload/commit/c132f2ff10b3efdb3854ec2d5a895120ccf22002))
+* **per-page:** set and load from preferences ([d88ce2d](https://github.com/payloadcms/payload/commit/d88ce2d342b20c1601b1b58470c226a9826758b3))
+* saves active list filters in URL, implements per-page control ([a6fc1fd](https://github.com/payloadcms/payload/commit/a6fc1fdc5838c3d17c5a8b6cbe9a46b86c89af71))
+
 ## [0.10.18-beta.0](https://github.com/payloadcms/payload/compare/v0.10.11...v0.10.18-beta.0) (2021-10-19)
 
 
