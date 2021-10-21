@@ -1,3 +1,10 @@
+## [0.12.2](https://github.com/payloadcms/payload/compare/v0.12.1...v0.12.2) (2021-10-21)
+
+
+### Bug Fixes
+
+* improves paste html formatting ([d443ea5](https://github.com/payloadcms/payload/commit/d443ea582cc60be367dd3edbdcb062af0786b8ee))
+
 ## [0.12.1](https://github.com/payloadcms/payload/compare/v0.12.0...v0.12.1) (2021-10-21)
 
 
