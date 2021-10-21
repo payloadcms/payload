@@ -1,3 +1,9 @@
+## [0.11.2-beta.0](https://github.com/payloadcms/payload/compare/v0.11.0...v0.11.2-beta.0) (2021-10-21)
+
+### Features
+
+* exposes withCondition for re-use ([c02e8f1](https://github.com/payloadcms/payload/commit/c02e8f14c74a2ab9a53b0d8fd81f1083bede594e))
+
 ## [0.11.1-beta.0](https://github.com/payloadcms/payload/compare/v0.11.0...v0.11.1-beta.0) (2021-10-20)
 
 
