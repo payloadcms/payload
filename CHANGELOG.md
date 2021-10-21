@@ -1,3 +1,16 @@
+# [0.12.0](https://github.com/payloadcms/payload/compare/v0.11.0...v0.12.0) (2021-10-21)
+
+
+### Bug Fixes
+
+* bug where field hooks and access control couuld potentially compete ([c35009f](https://github.com/payloadcms/payload/commit/c35009f14c9403e63727d4d77af51a449a5f7b4b))
+
+
+### Features
+
+* builds UI field ([edb723a](https://github.com/payloadcms/payload/commit/edb723a4fb8b4c353a9073cc7ec5f5cfd026cbe0))
+* exposes withCondition for re-use ([c02e8f1](https://github.com/payloadcms/payload/commit/c02e8f14c74a2ab9a53b0d8fd81f1083bede594e))
+
 ## [0.11.2-beta.0](https://github.com/payloadcms/payload/compare/v0.11.0...v0.11.2-beta.0) (2021-10-21)
 
 ### Features
