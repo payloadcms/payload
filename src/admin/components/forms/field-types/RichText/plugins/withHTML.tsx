@@ -13,7 +13,7 @@ const ELEMENT_TAGS = {
   IMG: (el) => ({ type: 'image', url: el.getAttribute('src') }),
   LI: () => ({ type: 'li' }),
   OL: () => ({ type: 'ol' }),
-  P: () => ({ type: 'paragraph' }),
+  P: () => ({ type: 'p' }),
   PRE: () => ({ type: 'code' }),
   UL: () => ({ type: 'ul' }),
 };
@@ -28,7 +28,7 @@ const TEXT_TAGS = {
   U: () => ({ underline: true }),
 };
 
-const deserialize = (el) => {
+export const deserialize = (el) => {
   if (el.nodeType === 3) {
     return el.textContent;
   } if (el.nodeType !== 1) {
@@ -36,6 +36,7 @@ const deserialize = (el) => {
   } if (el.nodeName === 'BR') {
     return '\n';
   }
+
 
   const { nodeName } = el;
   let parent = el;
@@ -47,9 +48,14 @@ const deserialize = (el) => {
   ) {
     [parent] = el.childNodes;
   }
-  const children = Array.from(parent.childNodes)
+
+  let children = Array.from(parent.childNodes)
     .map(deserialize)
     .flat();
+
+  if (children.length === 0) {
+    children = [{ text: '' }];
+  }
 
   if (el.nodeName === 'BODY') {
     return jsx('fragment', {}, children);
@@ -65,20 +71,19 @@ const deserialize = (el) => {
     return children.map((child) => jsx('text', attrs, child));
   }
 
-  return children;
+  return children.map((child) => (typeof child === 'string'
+    ? jsx('element', ELEMENT_TAGS.P(), [{ text: child }])
+    : child));
 };
 
 const withHTML = (incomingEditor) => {
-  const { insertData, isInline, isVoid } = incomingEditor;
+  const { insertData } = incomingEditor;
 
   const editor = incomingEditor;
 
-  editor.isInline = (element) => (element.type === 'link' ? true : isInline(element));
-
-  editor.isVoid = (element) => (element.type === 'image' ? true : isVoid(element));
-
   editor.insertData = (data) => {
     const html = data.getData('text/html');
+
 
     if (html) {
       const parsed = new DOMParser().parseFromString(html, 'text/html');
