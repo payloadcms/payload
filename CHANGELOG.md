@@ -1,3 +1,10 @@
+## [0.12.1](https://github.com/payloadcms/payload/compare/v0.12.0...v0.12.1) (2021-10-21)
+
+
+### Bug Fixes
+
+* rich text copy and paste now saves formatting properly ([9d7feb9](https://github.com/payloadcms/payload/commit/9d7feb9796e4b76e01f4ac2d0cb117bb091aa3d5))
+
 # [0.12.0](https://github.com/payloadcms/payload/compare/v0.11.0...v0.12.0) (2021-10-21)
 
 
