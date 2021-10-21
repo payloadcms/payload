@@ -49,9 +49,7 @@ const accessPromise = async ({
   if (field.access && field.access[accessOperation]) {
     const result = overrideAccess ? true : await field.access[accessOperation]({ req, id, siblingData: data, data: fullData });
 
-    if (!result && accessOperation === 'update' && originalDoc[field.name] !== undefined) {
-      resultingData[field.name] = originalDoc[field.name];
-    } else if (!result) {
+    if (!result) {
       delete resultingData[field.name];
     }
   }
