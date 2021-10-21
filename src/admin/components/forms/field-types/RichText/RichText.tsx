@@ -138,17 +138,17 @@ const RichText: React.FC<Props> = (props) => {
 
   const editor = useMemo(() => {
     let CreatedEditor = withEnterBreakOut(
-      withHTML(
-        withHistory(
-          withReact(
-            createEditor(),
-          ),
+      withHistory(
+        withReact(
+          createEditor(),
         ),
       ),
     );
 
     CreatedEditor = enablePlugins(CreatedEditor, elements);
     CreatedEditor = enablePlugins(CreatedEditor, leaves);
+
+    CreatedEditor = withHTML(CreatedEditor);
 
     return CreatedEditor;
   }, [elements, leaves]);

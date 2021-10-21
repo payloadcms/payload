@@ -28,7 +28,7 @@ const TEXT_TAGS = {
   U: () => ({ underline: true }),
 };
 
-export const deserialize = (el) => {
+const deserialize = (el) => {
   if (el.nodeType === 3) {
     return el.textContent;
   } if (el.nodeType !== 1) {
@@ -36,7 +36,6 @@ export const deserialize = (el) => {
   } if (el.nodeName === 'BR') {
     return '\n';
   }
-
 
   const { nodeName } = el;
   let parent = el;
@@ -48,14 +47,9 @@ export const deserialize = (el) => {
   ) {
     [parent] = el.childNodes;
   }
-
-  let children = Array.from(parent.childNodes)
+  const children = Array.from(parent.childNodes)
     .map(deserialize)
     .flat();
-
-  if (children.length === 0) {
-    children = [{ text: '' }];
-  }
 
   if (el.nodeName === 'BODY') {
     return jsx('fragment', {}, children);
@@ -71,9 +65,7 @@ export const deserialize = (el) => {
     return children.map((child) => jsx('text', attrs, child));
   }
 
-  return children.map((child) => (typeof child === 'string'
-    ? jsx('element', ELEMENT_TAGS.P(), [{ text: child }])
-    : child));
+  return children;
 };
 
 const withHTML = (incomingEditor) => {
@@ -82,14 +74,15 @@ const withHTML = (incomingEditor) => {
   const editor = incomingEditor;
 
   editor.insertData = (data) => {
-    const html = data.getData('text/html');
+    if (!data.types.includes('application/x-slate-fragment')) {
+      const html = data.getData('text/html');
 
-
-    if (html) {
-      const parsed = new DOMParser().parseFromString(html, 'text/html');
-      const fragment = deserialize(parsed.body);
-      Transforms.insertFragment(editor, fragment);
-      return;
+      if (html) {
+        const parsed = new DOMParser().parseFromString(html, 'text/html');
+        const fragment = deserialize(parsed.body);
+        Transforms.insertFragment(editor, fragment);
+        return;
+      }
     }
 
     insertData(data);

@@ -87,7 +87,6 @@
     "@payloadcms/config-provider": "^0.1.0",
     "@types/mime": "^2.0.3",
     "@types/passport-local-mongoose": "^6.1.0",
-    "@udecode/slate-plugins": "^0.71.9",
     "babel-jest": "^26.3.0",
     "babel-loader": "^8.1.0",
     "body-parser": "^1.19.0",
