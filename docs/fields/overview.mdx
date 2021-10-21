@@ -50,6 +50,7 @@ const Pages = {
 - [Text](/docs/fields/text) - simple text input
 - [Textarea](/docs/fields/textarea) - allows a bit larger of a text editor
 - [Upload](/docs/fields/upload) - allows local file and image upload
+- [UI](/docs/fields/ui) - inject your own custom components and do whatever you need
 
 ### Field-level hooks
 
@@ -117,6 +118,10 @@ In addition to each field's base configuration, you can define specific traits a
 | `disabled`    | If a field is `disabled`, it is completely omitted from the Admin panel. |
 | `hidden`      | Setting a field's `hidden` property on its `admin` config will transform it into a `hidden` input type. Its value will still submit with the Admin panel's requests, but the field itself will not be visible to editors. |
 
+### Custom components
+
+All Payload fields support the ability to swap in your own React components with ease. For more information, including examples, [click here](/docs/admin/components#fields).
+
 ### Conditional logic
 
 You can show and hide fields based on what other fields are doing by utilizing conditional logic on a field by field basis. The `condition` property on a field's admin config accepts a function which takes two arguments:
@@ -155,9 +160,34 @@ The `condition` function should return a boolean that will control if the field 
 }
 ```
 
-### Custom components
+If you are building custom components, and you'd like for your custom components to support conditional logic as well, you can utilize Payload's `withCondition` higher-order function by importing it and using it as follows:
 
-All Payload fields support the ability to swap in your own React components with ease. For more information, including examples, [click here](/docs/admin/components#fields).
+```
+import { withCondition } from 'payload/components/forms';
+
+const CustomComponent = () => {
+  return (
+    <div>
+      <p>Hello, on my own, I won't respect my field's conditional logic.<p/>
+      <p>But, I will if I'm wrapped with the withCondition HOC as shown below!</p>
+    </div>
+  )
+}
+
+const CustomComponentWithCondition = withCondition(CustomComponent);
+
+const customFieldWithCondition = {
+  name: 'myCustomField',
+  type: 'text',
+  admin: {
+    condition: (data) => Boolean(data.enableCustomField),
+    components: {
+      Field: CustomComponentWithCondition,
+    }
+  }
+}
+
+```
 
 ### Description
 

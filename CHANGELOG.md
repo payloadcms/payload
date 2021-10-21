@@ -1,3 +1,10 @@
+## [0.11.1-beta.0](https://github.com/payloadcms/payload/compare/v0.11.0...v0.11.1-beta.0) (2021-10-20)
+
+
+### Features
+
+* builds UI field ([edb723a](https://github.com/payloadcms/payload/commit/edb723a4fb8b4c353a9073cc7ec5f5cfd026cbe0))
+
 # [0.11.0](https://github.com/payloadcms/payload/compare/v0.10.11...v0.11.0) (2021-10-20)
 
 

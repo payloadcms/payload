@@ -18,3 +18,5 @@ export { default as Submit } from '../dist/admin/components/forms/Submit';
 export { default as Label } from '../dist/admin/components/forms/Label';
 
 export { default as reduceFieldsToValues } from '../dist/admin/components/forms/Form/reduceFieldsToValues';
+
+export { default as withCondition } from '../dist/admin/components/forms/withCondition';
