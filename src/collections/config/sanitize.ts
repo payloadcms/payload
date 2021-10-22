@@ -1,16 +1,16 @@
 import merge from 'deepmerge';
-import { fieldAffectsData } from '../../fields/config/types';
 import { SanitizedCollectionConfig, CollectionConfig } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
 import toKebabCase from '../../utilities/toKebabCase';
-import baseAuthFields from '../../fields/baseFields/baseAuthFields';
-import baseAPIKeyFields from '../../fields/baseFields/baseAPIKeyFields';
-import baseVerificationFields from '../../fields/baseFields/baseVerificationFields';
-import baseAccountLockFields from '../../fields/baseFields/baseAccountLockFields';
-import getBaseUploadFields from '../../fields/baseFields/getBaseUploadFields';
+import baseAuthFields from '../../auth/baseFields/auth';
+import baseAPIKeyFields from '../../auth/baseFields/apiKey';
+import baseVerificationFields from '../../auth/baseFields/verification';
+import baseAccountLockFields from '../../auth/baseFields/accountLock';
+import getBaseUploadFields from '../../uploads/getBaseFields';
 import { formatLabels } from '../../utilities/formatLabels';
 import { defaults, authDefaults } from './defaults';
 import { Config } from '../../config/types';
+import { baseRevisionFields } from '../../revisions/baseFields';
 
 const mergeBaseFields = (fields, baseFields) => {
   const mergedFields = [];
@@ -67,6 +67,15 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
 
   if (sanitized.revisions) {
     if (sanitized.revisions === true) sanitized.revisions = {};
+
+    let revisionFields = baseRevisionFields;
+
+    revisionFields = mergeBaseFields(sanitized.fields, revisionFields);
+
+    sanitized.fields = [
+      ...revisionFields,
+      ...sanitized.fields,
+    ];
   }
 
   if (sanitized.upload) {

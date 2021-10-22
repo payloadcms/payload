@@ -1,4 +1,4 @@
-import { Field } from '../config/types';
+import { Field } from '../../fields/config/types';
 
 export default [
   {

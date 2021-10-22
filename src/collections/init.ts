@@ -14,6 +14,7 @@ import bindCollectionMiddleware from './bindCollection';
 import { CollectionModel, SanitizedCollectionConfig } from './config/types';
 import { Payload } from '../index';
 import { getCollectionRevisionsName } from '../revisions/createCollectionName';
+import { fieldAffectsData } from '../fields/config/types';
 
 const LocalStrategy = Passport.Strategy;
 
@@ -71,7 +72,10 @@ export default function registerCollections(ctx: Payload): void {
 
       const revisionSchema = buildSchema(
         ctx.config,
-        buildRevisionFields(collection),
+        buildRevisionFields({
+          ...collection,
+          fields: collection.fields.filter((field) => !(fieldAffectsData(field) && field.name === '_status')),
+        }),
         {
           options: {
             timestamps: true,
