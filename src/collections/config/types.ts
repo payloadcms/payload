@@ -6,6 +6,7 @@ import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
+import { IncomingRevisionsType } from '../../revisions/types';
 
 export interface CollectionModel extends PaginateModel<any>, PassportLocalModel<any> {
   buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
@@ -138,6 +139,7 @@ export type CollectionConfig = {
   };
   auth?: IncomingAuthType | boolean;
   upload?: IncomingUploadType | boolean;
+  revisions?: IncomingRevisionsType | boolean;
   timestamps?: boolean
 };
 

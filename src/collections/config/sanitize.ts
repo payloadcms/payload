@@ -65,6 +65,10 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
   sanitized.slug = toKebabCase(sanitized.slug);
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug);
 
+  if (sanitized.revisions) {
+    if (sanitized.revisions === true) sanitized.revisions = {};
+  }
+
   if (sanitized.upload) {
     if (sanitized.upload === true) sanitized.upload = {};
 

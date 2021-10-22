@@ -1,15 +1,19 @@
 import mongoose from 'mongoose';
+import paginate from 'mongoose-paginate-v2';
 import express from 'express';
 import passport from 'passport';
 import passportLocalMongoose from 'passport-local-mongoose';
 import Passport from 'passport-local';
 import { UpdateQuery } from 'mongodb';
+import { buildRevisionFields } from '../revisions/buildFields';
+import buildQueryPlugin from '../mongoose/buildQuery';
 import apiKeyStrategy from '../auth/strategies/apiKey';
-import buildSchema from './buildSchema';
+import buildCollectionSchema from './buildSchema';
+import buildSchema from '../mongoose/buildSchema';
 import bindCollectionMiddleware from './bindCollection';
-import { SanitizedCollectionConfig } from './config/types';
-import { SanitizedConfig } from '../config/types';
+import { CollectionModel, SanitizedCollectionConfig } from './config/types';
 import { Payload } from '../index';
+import { getCollectionRevisionsName } from '../revisions/createCollectionName';
 
 const LocalStrategy = Passport.Strategy;
 
@@ -17,7 +21,7 @@ export default function registerCollections(ctx: Payload): void {
   ctx.config.collections = ctx.config.collections.map((collection: SanitizedCollectionConfig) => {
     const formattedCollection = collection;
 
-    const schema = buildSchema(formattedCollection, ctx.config as SanitizedConfig);
+    const schema = buildCollectionSchema(formattedCollection, ctx.config);
 
     if (collection.auth) {
       schema.plugin(passportLocalMongoose, {
@@ -62,8 +66,28 @@ export default function registerCollections(ctx: Payload): void {
       }
     }
 
+    if (collection.revisions) {
+      const revisionModelName = getCollectionRevisionsName(collection);
+
+      const revisionSchema = buildSchema(
+        ctx.config,
+        buildRevisionFields(collection),
+        {
+          options: {
+            timestamps: true,
+          },
+        },
+      );
+
+      revisionSchema.plugin(paginate, { useEstimatedCount: true })
+        .plugin(buildQueryPlugin);
+
+      ctx.revisions[collection.slug] = mongoose.model(revisionModelName, revisionSchema) as CollectionModel;
+    }
+
+
     ctx.collections[formattedCollection.slug] = {
-      Model: mongoose.model(formattedCollection.slug, schema),
+      Model: mongoose.model(formattedCollection.slug, schema) as CollectionModel,
       config: formattedCollection,
     };
 

@@ -77,6 +77,13 @@ const collectionSchema = joi.object().keys({
     }),
     joi.boolean(),
   ),
+  revisions: joi.alternatives().try(
+    joi.object({
+      max: joi.number(),
+      retainDeleted: joi.boolean(),
+    }),
+    joi.boolean(),
+  ),
   upload: joi.alternatives().try(
     joi.object({
       staticURL: joi.string(),

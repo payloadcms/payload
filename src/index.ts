@@ -7,7 +7,7 @@ import {
   InitOptions,
 } from './config/types';
 import {
-  Collection, PaginatedDocs,
+  Collection, CollectionModel, PaginatedDocs,
 } from './collections/config/types';
 import Logger from './utilities/logger';
 import bindOperations from './init/bindOperations';
@@ -52,7 +52,13 @@ require('isomorphic-fetch');
 export class Payload {
   config: SanitizedConfig;
 
-  collections: Collection[] = [];
+  collections: {
+    [slug: string]: Collection;
+  } = {}
+
+  revisions: {
+    [slug: string]: CollectionModel;
+  } = {}
 
   graphQL: {
     resolvers: GraphQLResolvers
