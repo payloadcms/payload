@@ -81,6 +81,10 @@ const collectionSchema = joi.object().keys({
     joi.object({
       max: joi.number(),
       retainDeleted: joi.boolean(),
+      access: joi.object({
+        read: joi.func(),
+        modifyStatus: joi.func(),
+      }),
     }),
     joi.boolean(),
   ),
