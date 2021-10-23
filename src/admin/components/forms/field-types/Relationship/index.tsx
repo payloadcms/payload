@@ -202,15 +202,6 @@ const Relationship: React.FC<Props> = (props) => {
   }, [addOptions, api, errorLoading, serverURL]);
 
   // ///////////////////////////
-  // Get first results
-  // ///////////////////////////
-
-  useEffect(() => {
-    getResults();
-    setHasLoadedFirstOptions(true);
-  }, [addOptions, api, required, relationTo, serverURL, getResults]);
-
-  // ///////////////////////////
   // Get results when search input changes
   // ///////////////////////////
 
@@ -220,6 +211,7 @@ const Relationship: React.FC<Props> = (props) => {
       required,
     });
 
+    setHasLoadedFirstOptions(true);
     setLastLoadedPage(1);
     setLastFullyLoadedRelation(-1);
     getResults({ search: debouncedSearch });
