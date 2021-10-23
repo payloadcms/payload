@@ -1,3 +1,11 @@
+## [0.12.3](https://github.com/payloadcms/payload/compare/v0.12.2...v0.12.3) (2021-10-23)
+
+
+### Bug Fixes
+
+* [#348](https://github.com/payloadcms/payload/issues/348), relationship options appearing twice in admin ui ([b4c15ed](https://github.com/payloadcms/payload/commit/b4c15ed3f3649ea6d157987571874fb8486ab3cb))
+* ensures tooltips in email fields are positioned properly ([a0b38f6](https://github.com/payloadcms/payload/commit/a0b38f68322cd7a39ca6ae08e6ffb7f57aa62171))
+
 ## [0.12.2](https://github.com/payloadcms/payload/compare/v0.12.1...v0.12.2) (2021-10-21)
 
 
