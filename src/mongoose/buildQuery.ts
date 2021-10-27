@@ -289,13 +289,7 @@ class ParamParser {
           overrideQuery = true;
 
           query = {
-            $or: [
-              {
-                [path]: {
-                  [operatorKey]: formattedValue,
-                },
-              },
-            ],
+            $or: [],
           };
 
           if (typeof formattedValue.toString === 'function') {
@@ -307,12 +301,6 @@ class ParamParser {
           }
 
           if (typeof formattedValue === 'string') {
-            query.$or.push({
-              [path]: {
-                [operatorKey]: formattedValue,
-              },
-            });
-
             const parsedNumber = parseFloat(formattedValue);
 
             if (!Number.isNaN(parsedNumber)) {

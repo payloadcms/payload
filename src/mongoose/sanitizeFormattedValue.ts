@@ -91,10 +91,6 @@ export const sanitizeQueryValue = (schemaType: SchemaType, path: string, operato
         }, []);
       }
     }
-
-    if (typeof formattedValue === 'string' && mongoose.Types.ObjectId.isValid(formattedValue)) {
-      formattedValue = new mongoose.Types.ObjectId(formattedValue);
-    }
   }
 
   if (operator === 'like' && path !== '_id') {

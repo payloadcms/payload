@@ -2,28 +2,10 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
-import mongoose, { Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
+import { Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
 import { ArrayField, Block, BlockField, CheckboxField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, fieldIsPresentationalOnly, NonPresentationalField } from '../fields/config/types';
 import sortableFieldTypes from '../fields/sortableFieldTypes';
-
-class PayloadID extends mongoose.SchemaType {
-  constructor(key, options) {
-    super(key, options, 'PayloadID');
-  }
-
-  cast(val) {
-    const number = Number(val);
-    if (!Number.isNaN(number)) return number;
-
-    if (mongoose.Types.ObjectId.isValid(val)) return new mongoose.Types.ObjectId(val);
-
-    return val;
-  }
-}
-
-// @ts-ignore
-mongoose.Schema.Types.PayloadID = PayloadID;
 
 type BuildSchemaOptions = {
   options?: SchemaOptions
@@ -247,7 +229,7 @@ const fieldToSchemaMap = {
   upload: (field: UploadField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
-      type: PayloadID,
+      type: Schema.Types.Mixed,
       ref: field.relationTo,
     };
 
@@ -268,14 +250,14 @@ const fieldToSchemaMap = {
           if (hasManyRelations) {
             localeSchema._id = false;
             localeSchema.value = {
-              type: PayloadID,
+              type: Schema.Types.Mixed,
               refPath: `${field.name}.${locale}.relationTo`,
             };
             localeSchema.relationTo = { type: String, enum: field.relationTo };
           } else {
             localeSchema = {
               ...formatBaseSchema(field, buildSchemaOptions),
-              type: PayloadID,
+              type: Schema.Types.Mixed,
               ref: field.relationTo,
             };
           }
@@ -290,7 +272,7 @@ const fieldToSchemaMap = {
     } else if (hasManyRelations) {
       schemaToReturn._id = false;
       schemaToReturn.value = {
-        type: PayloadID,
+        type: Schema.Types.Mixed,
         refPath: `${field.name}.relationTo`,
       };
       schemaToReturn.relationTo = { type: String, enum: field.relationTo };
@@ -299,7 +281,7 @@ const fieldToSchemaMap = {
     } else {
       schemaToReturn = {
         ...formatBaseSchema(field, buildSchemaOptions),
-        type: PayloadID,
+        type: Schema.Types.Mixed,
         ref: field.relationTo,
       };
 
