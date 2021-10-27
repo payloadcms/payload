@@ -148,6 +148,8 @@ export class Payload {
     initPreferences(this);
 
     // Connect to database
+
+
     connectMongoose(this.mongoURL, options.mongoOptions, options.local);
 
     // If not initializing locally, set up HTTP routing

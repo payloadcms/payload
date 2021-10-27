@@ -68,7 +68,7 @@ describe('GrahpQL Resolvers', () => {
 
   describe('Read', () => {
     it('should be able to read localized post', async () => {
-      const title = 'gql read';
+      const title = 'gql read 1';
       const description = 'description';
 
       // language=graphQL
@@ -99,7 +99,7 @@ describe('GrahpQL Resolvers', () => {
     });
 
     it('should query exists - true', async () => {
-      const title = 'gql read';
+      const title = 'gql read 2';
       const description = 'description';
       const summary = 'summary';
 
@@ -136,7 +136,7 @@ describe('GrahpQL Resolvers', () => {
     });
 
     it('should query exists - false', async () => {
-      const title = 'gql read';
+      const title = 'gql read 3';
       const description = 'description';
 
       // language=graphQL
