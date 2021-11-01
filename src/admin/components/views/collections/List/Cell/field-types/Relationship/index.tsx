@@ -31,7 +31,7 @@ const RelationshipCell = (props) => {
         const doc = hasManyRelations ? cellData.value : cellData;
         const collection = collections.find((coll) => coll.slug === relation);
 
-        if (collection) {
+        if (collection && doc) {
           const useAsTitle = collection.admin.useAsTitle ? collection.admin.useAsTitle : 'id';
 
           setData(doc[useAsTitle]);
