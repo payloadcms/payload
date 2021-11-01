@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import deepmerge from 'deepmerge';
-import mongoose, { FilterQuery } from 'mongoose';
+import mongoose, { FilterQuery, SchemaType } from 'mongoose';
 import { combineMerge } from '../utilities/combineMerge';
 import { CollectionModel } from '../collections/config/types';
 import { getSchemaTypeOptions } from './getSchemaTypeOptions';
@@ -97,12 +97,12 @@ class ParamParser {
             if (validOperators.includes(operator)) {
               const searchParam = await this.buildSearchParam(this.model.schema, relationOrPath, pathOperators[operator], operator);
 
-              if ('path' in searchParam) {
+              if (searchParam && 'path' in searchParam) {
                 result = {
                   ...result,
                   [searchParam.path]: searchParam.value,
                 };
-              } else if (typeof searchParam.value === 'object') {
+              } else if (typeof searchParam?.value === 'object') {
                 result = deepmerge(result, searchParam.value, { arrayMerge: combineMerge });
               }
 
@@ -149,9 +149,12 @@ class ParamParser {
       const { path } = lastIncompletePath;
 
       const currentPath = path ? `${path}.${segment}` : segment;
-      const currentSchemaType = schema.path(currentPath);
+      const currentSchemaType: SchemaType & { path: string } = schema.path(currentPath);
 
-      if (currentSchemaType) {
+      // If we find a schema type, and it matches the exact current path
+      // NOTE - not a sub-path. Some schema types like `mixed` will return anything
+      // nested within. Need to make sure that schema type path matches exactly
+      if (currentSchemaType && (currentSchemaType.path === currentPath || currentSchemaType.instance === 'Embedded')) {
         const currentSchemaTypeOptions = getSchemaTypeOptions(currentSchemaType);
 
         if (currentSchemaTypeOptions.localized) {
@@ -280,7 +283,6 @@ class ParamParser {
 
         let overrideQuery = false;
         let query;
-
 
         // If there is a ref, this is a relationship or upload field
         // IDs can be either string, number, or ObjectID
