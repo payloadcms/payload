@@ -326,6 +326,7 @@ class ParamParser {
         // so if there is no operator key, just return the value
         if (!operatorKey) {
           return {
+            path,
             value: formattedValue,
           };
         }
