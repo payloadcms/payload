@@ -1,21 +1,19 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
+import deepmerge from 'deepmerge';
 import mongoose, { FilterQuery } from 'mongoose';
+import { combineMerge } from '../utilities/combineMerge';
+import { CollectionModel } from '../collections/config/types';
+import { getSchemaTypeOptions } from './getSchemaTypeOptions';
+import { operatorMap } from './operatorMap';
+import { sanitizeQueryValue } from './sanitizeFormattedValue';
 
 const validOperators = ['like', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near'];
-function addSearchParam(key, value, searchParams) {
-  return {
-    ...searchParams,
-    [key]: value,
-  };
-}
-function convertArrayFromCommaDelineated(input) {
-  if (Array.isArray(input)) return input;
-  if (input.indexOf(',') > -1) {
-    return input.split(',');
-  }
-  return [input];
-}
+
+const subQueryOptions = {
+  limit: 50,
+  lean: true,
+};
 
 type ParseType = {
   searchParams?:
@@ -24,6 +22,17 @@ type ParseType = {
   };
   sort?: boolean;
 };
+
+type PathToQuery = {
+  complete: boolean
+  path: string
+  Model: CollectionModel
+}
+
+type SearchParam = {
+  path?: string,
+  value: unknown,
+}
 
 class ParamParser {
   locale: string;
@@ -48,10 +57,6 @@ class ParamParser {
       searchParams: {},
       sort: false,
     };
-  }
-
-  getLocalizedKey(key: string, schemaObject) {
-    return `${key}${(schemaObject && schemaObject.localized) ? `.${this.locale}` : ''}`;
   }
 
   // Entry point to the ParamParser class
@@ -91,10 +96,17 @@ class ParamParser {
           for (const operator of Object.keys(pathOperators)) {
             if (validOperators.includes(operator)) {
               const searchParam = await this.buildSearchParam(this.model.schema, relationOrPath, pathOperators[operator], operator);
-              if (Array.isArray(searchParam)) {
-                const [key, value] = searchParam;
-                result = addSearchParam(key, value, result);
+
+              if ('path' in searchParam) {
+                result = {
+                  ...result,
+                  [searchParam.path]: searchParam.value,
+                };
+              } else if (typeof searchParam.value === 'object') {
+                result = deepmerge(result, searchParam.value, { arrayMerge: combineMerge });
               }
+
+              return result;
             }
           }
         }
@@ -117,140 +129,212 @@ class ParamParser {
     return completedConditions;
   }
 
-  // Checks to see
-  async buildSearchParam(schema, key, val, operator) {
-    let schemaObject = schema.obj[key];
-    const sanitizedKey = key.replace(/__/gi, '.');
-    let localizedKey = this.getLocalizedKey(sanitizedKey, schemaObject);
+  // Build up an array of auto-localized paths to search on
+  // Multiple paths may be possible if searching on properties of relationship fields
 
-    if (key === '_id' || key === 'id') {
-      localizedKey = '_id';
-      schemaObject = schema.paths._id;
+  getLocalizedPaths(Model: CollectionModel, incomingPath: string, operator): PathToQuery[] {
+    const { schema } = Model;
+    const pathSegments = incomingPath.split('.');
 
-      if (schemaObject.instance === 'ObjectID') {
-        const isValid = mongoose.Types.ObjectId.isValid(val);
-        if (!isValid) {
-          return undefined;
-        }
-      }
+    let paths: PathToQuery[] = [
+      {
+        path: '',
+        complete: false,
+        Model,
+      },
+    ];
 
-      if (schemaObject.instance === 'Number') {
-        const parsedNumber = parseFloat(val);
+    pathSegments.forEach((segment, i) => {
+      const lastIncompletePath = paths.find(({ complete }) => !complete);
+      const { path } = lastIncompletePath;
 
-        if (Number.isNaN(parsedNumber)) {
-          return undefined;
-        }
-      }
-    }
+      const currentPath = path ? `${path}.${segment}` : segment;
+      const currentSchemaType = schema.path(currentPath);
 
-    if (key.includes('.') || key.includes('__')) {
-      const paths = key.split('.');
-      schemaObject = schema.obj[paths[0]];
-      const localizedPath = this.getLocalizedKey(paths[0], schemaObject);
-      const path = schema.paths[localizedPath];
-      // If the schema object has a dot, split on the dot
-      // Check the path of the first index of the newly split array
-      // If it's an array OR an ObjectID, we need to recurse
-      if (path) {
-        // If the path is an ObjectId with a direct ref,
-        // Grab it
-        let { ref } = path.options;
-        // If the path is an Array, grab the ref of the first index type
-        if (path.instance === 'Array') {
-          ref = path.options && path.options.type && path.options.type[0].ref;
-        }
-        // //////////////////////////////////////////////////////////////////////////
-        // TODO:
-        //
-        // Need to handle relationships that have more than one type.
-        // Right now, this code only handles one ref. But there could be a
-        // refPath as well, which could allow for a relation to multiple types.
-        // In that case, we would need to get the allowed referenced models
-        // and run the subModel query on each - building up a list of $in IDs.
-        // //////////////////////////////////////////////////////////////////////////
-        if (ref) {
-          const subModel = mongoose.model(ref);
-          let subQuery = {};
-          const localizedSubKey = this.getLocalizedKey(paths[1], subModel.schema.obj[paths[1]]);
-          const [searchParamKey, searchParamValue] = await this.buildSearchParam(subModel.schema, localizedSubKey, val, operator);
-          subQuery = addSearchParam(searchParamKey, searchParamValue, subQuery);
-          const matchingSubDocuments = await subModel.find(subQuery);
-          return [localizedPath, {
-            $in: matchingSubDocuments.map((subDoc) => subDoc.id),
-          }];
-        }
-      }
-    }
-    let formattedValue = val;
+      if (currentSchemaType) {
+        const currentSchemaTypeOptions = getSchemaTypeOptions(currentSchemaType);
 
-    const schemaObjectType = schemaObject?.localized ? schemaObject?.type[this.locale].type : schemaObject?.type;
+        if (currentSchemaTypeOptions.localized) {
+          const upcomingSegment = pathSegments[i + 1];
+          const upcomingPath = `${currentPath}.${upcomingSegment}`;
+          const upcomingSchemaType = schema.path(upcomingPath);
 
-    if (schemaObject && schemaObjectType === Boolean && typeof val === 'string') {
-      if (val.toLowerCase() === 'true') formattedValue = true;
-      if (val.toLowerCase() === 'false') formattedValue = false;
-    }
-
-    if (schemaObject && schemaObjectType === Number && typeof val === 'string') {
-      formattedValue = Number(val);
-    }
-
-    if (schemaObject && schemaObject.ref && val === 'null') {
-      formattedValue = null;
-    }
-
-    if (operator && validOperators.includes(operator)) {
-      switch (operator) {
-        case 'greater_than_equal':
-          formattedValue = { $gte: formattedValue };
-          break;
-        case 'less_than_equal':
-          formattedValue = { $lte: formattedValue };
-          break;
-        case 'less_than':
-          formattedValue = { $lt: formattedValue };
-          break;
-        case 'greater_than':
-          formattedValue = { $gt: formattedValue };
-          break;
-        case 'in':
-        case 'all':
-          formattedValue = { [`$${operator}`]: convertArrayFromCommaDelineated(formattedValue) };
-          break;
-        case 'not_in':
-          formattedValue = { $nin: convertArrayFromCommaDelineated(formattedValue) };
-          break;
-        case 'not_equals':
-          formattedValue = { $ne: formattedValue };
-          break;
-        case 'like':
-          if (localizedKey !== '_id') {
-            formattedValue = { $regex: formattedValue, $options: '-i' };
+          if (upcomingSchemaType) {
+            lastIncompletePath.path = currentPath;
+            return;
           }
-          break;
-        case 'exists':
-          formattedValue = { $exists: (formattedValue === 'true' || formattedValue === true) };
-          break;
-        case 'near':
-          // eslint-disable-next-line no-case-declarations
-          const [x, y, maxDistance, minDistance] = convertArrayFromCommaDelineated(formattedValue);
-          if (!x || !y || (!maxDistance && !minDistance)) {
-            formattedValue = undefined;
-            break;
+
+          const localePath = `${currentPath}.${this.locale}`;
+          const localizedSchemaType = schema.path(localePath);
+
+          if (localizedSchemaType || operator === 'near') {
+            lastIncompletePath.path = localePath;
+            return;
           }
-          formattedValue = {
-            $near: {
-              $geometry: { type: 'Point', coordinates: [parseFloat(x), parseFloat(y)] },
+        }
+
+        lastIncompletePath.path = currentPath;
+        return;
+      }
+
+      const priorSchemaType = schema.path(path);
+
+      if (priorSchemaType) {
+        const priorSchemaTypeOptions = getSchemaTypeOptions(priorSchemaType);
+        if (typeof priorSchemaTypeOptions.ref === 'string') {
+          const RefModel = mongoose.model(priorSchemaTypeOptions.ref) as any;
+
+          lastIncompletePath.complete = true;
+
+          const remainingPath = pathSegments.slice(i).join('.');
+
+          paths = [
+            ...paths,
+            ...this.getLocalizedPaths(RefModel, remainingPath, operator),
+          ];
+          return;
+        }
+      }
+
+      if (operator === 'near') {
+        lastIncompletePath.path = currentPath;
+      }
+    });
+
+    return paths;
+  }
+
+  // Convert the Payload key / value / operator into a MongoDB query
+  async buildSearchParam(schema, incomingPath, val, operator): Promise<SearchParam> {
+    // Replace GraphQL nested field double underscore formatting
+    let sanitizedPath = incomingPath.replace(/__/gi, '.');
+    if (sanitizedPath === 'id') sanitizedPath = '_id';
+
+    const collectionPaths = this.getLocalizedPaths(this.model, sanitizedPath, operator);
+    const [{ path }] = collectionPaths;
+
+    if (path) {
+      const schemaType = schema.path(path);
+      const schemaOptions = getSchemaTypeOptions(schemaType);
+      const formattedValue = sanitizeQueryValue(schemaType, path, operator, val);
+
+      // If there are multiple collections to search through,
+      // Recursively build up a list of query constraints
+      if (collectionPaths.length > 1) {
+        // Remove top collection and reverse array
+        // to work backwards from top
+        const collectionPathsToSearch = collectionPaths.slice(1).reverse();
+
+        const initialRelationshipQuery = {
+          value: {},
+        } as SearchParam;
+
+        const relationshipQuery = await collectionPathsToSearch.reduce(async (priorQuery, { Model: SubModel, path: subPath }, i) => {
+          const priorQueryResult = await priorQuery;
+
+          // On the "deepest" collection,
+          // Search on the value passed through the query
+          if (i === 0) {
+            const subQuery = await SubModel.buildQuery({
+              where: {
+                [subPath]: {
+                  [operator]: val,
+                },
+              },
+            }, this.locale);
+
+            const result = await SubModel.find(subQuery, subQueryOptions);
+
+            const $in = result.map((doc) => doc._id.toString());
+
+            if (collectionPathsToSearch.length === 1) return { path, value: { $in } };
+
+            return {
+              value: { _id: { $in } },
+            };
+          }
+
+          const subQuery = priorQueryResult.value;
+          const result = await SubModel.find(subQuery, subQueryOptions);
+
+          const $in = result.map((doc) => doc._id.toString());
+
+          // If it is the last recursion
+          // then pass through the search param
+          if (i + 1 === collectionPathsToSearch.length) {
+            return { path, value: { $in } };
+          }
+
+          return {
+            value: {
+              _id: { $in },
             },
           };
-          if (maxDistance) formattedValue.$near.$maxDistance = parseFloat(maxDistance);
-          if (minDistance) formattedValue.$near.$minDistance = parseFloat(minDistance);
-          break;
-        default:
-          break;
+        }, Promise.resolve(initialRelationshipQuery));
+
+        return relationshipQuery;
+      }
+
+      if (operator && validOperators.includes(operator)) {
+        const operatorKey = operatorMap[operator];
+
+        let overrideQuery = false;
+        let query;
+
+
+        // If there is a ref, this is a relationship or upload field
+        // IDs can be either string, number, or ObjectID
+        // So we need to build an `or` query for all these types
+        if (schemaOptions && (schemaOptions.ref || schemaOptions.refPath)) {
+          overrideQuery = true;
+
+          query = {
+            $or: [],
+          };
+
+          if (typeof formattedValue.toString === 'function') {
+            query.$or.push({
+              [path]: {
+                [operatorKey]: formattedValue.toString(),
+              },
+            });
+          }
+
+          if (typeof formattedValue === 'string') {
+            const parsedNumber = parseFloat(formattedValue);
+
+            if (!Number.isNaN(parsedNumber)) {
+              query.$or.push({
+                [path]: {
+                  [operatorKey]: parsedNumber,
+                },
+              });
+            }
+          }
+        }
+
+        // If forced query
+        if (overrideQuery) {
+          return {
+            value: query,
+          };
+        }
+
+        // Some operators like 'near' need to define a full query
+        // so if there is no operator key, just return the value
+        if (!operatorKey) {
+          return {
+            value: formattedValue,
+          };
+        }
+
+        return {
+          path,
+          value: { [operatorKey]: formattedValue },
+        };
       }
     }
-
-    return [localizedKey, formattedValue];
+    return undefined;
   }
 }
 // This plugin asynchronously builds a list of Mongoose query constraints

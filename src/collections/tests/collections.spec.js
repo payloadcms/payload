@@ -103,7 +103,7 @@ describe('Collections - REST', () => {
     it('should allow updating an existing post', async () => {
       const createResponse = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: 'title',
+          title: 'newTitle',
           description: 'original description',
           richText: [{
             children: [{ text: 'english' }],
@@ -132,7 +132,7 @@ describe('Collections - REST', () => {
       ];
       const response = await fetch(`${url}/api/localized-posts/${id}`, {
         body: JSON.stringify({
-          title: 'title',
+          title: 'newTitle',
           description: updatedDesc,
           richText: updatedRichText,
           nonLocalizedArray: updatedNonLocalizedArray,
@@ -161,7 +161,7 @@ describe('Collections - REST', () => {
     it('should allow a Spanish locale to be added to an existing post', async () => {
       const response = await fetch(`${url}/api/localized-posts/${localizedPostID}?locale=es`, {
         body: JSON.stringify({
-          title: 'title',
+          title: 'title in spanish',
           description: spanishPostDesc,
           priority: 1,
           nonLocalizedGroup: {
@@ -251,7 +251,7 @@ describe('Collections - REST', () => {
     it('should allow querying by id', async () => {
       const response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: 'title',
+          title: 'another title',
           description: 'description',
           priority: 1,
         }),
@@ -275,9 +275,12 @@ describe('Collections - REST', () => {
       const desc = 'query test';
       const response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: 'title',
+          title: 'unique title here',
           description: desc,
           priority: 1,
+          nonLocalizedGroup: {
+            text: 'sample content',
+          },
         }),
         headers,
         method: 'post',
@@ -290,6 +293,13 @@ describe('Collections - REST', () => {
       expect(getResponse.status).toBe(200);
       expect(data.docs[0].description).toBe(desc);
       expect(data.docs).toHaveLength(1);
+
+      const getResponse2 = await fetch(`${url}/api/localized-posts?where[nonLocalizedGroup.text][equals]=sample content`);
+      const data2 = await getResponse2.json();
+
+      expect(getResponse2.status).toBe(200);
+      expect(data2.docs[0].description).toBe(desc);
+      expect(data2.docs).toHaveLength(1);
     });
 
     it('should allow querying with OR', async () => {
@@ -366,7 +376,7 @@ describe('Collections - REST', () => {
     it('should allow a post to be deleted', async () => {
       const response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: 'title',
+          title: 'title to be deleted',
           description: englishPostDesc,
           priority: 1,
         }),

@@ -45,7 +45,7 @@ export default buildConfig({
     //   // ogImage: '/static/find-image-here.jpg',
     //   // favicon: '/img/whatever.png',
     // },
-    disable: false,
+    // disable: true,
     scss: path.resolve(__dirname, './client/scss/overrides.scss'),
     components: {
       // Nav: () => (

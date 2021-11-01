@@ -37,7 +37,7 @@ describe('Collections - REST', () => {
       it('beforeChange', async () => {
         const response = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
-            title: 'title',
+            title: 'title 1',
             description: 'Original',
             priority: 1,
           }),
@@ -55,7 +55,7 @@ describe('Collections - REST', () => {
       it('beforeDelete', async () => {
         const createResponse = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
-            title: 'title',
+            title: 'title 2',
             description: 'Original',
             priority: 1,
           }),
@@ -84,7 +84,7 @@ describe('Collections - REST', () => {
       it('afterRead', async () => {
         const response = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
-            title: 'title',
+            title: 'title 3',
             description: 'afterRead',
             priority: 1,
           }),
@@ -104,7 +104,7 @@ describe('Collections - REST', () => {
       it('afterChange', async () => {
         const createResponse = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
-            title: 'title',
+            title: 'title 4',
             description: 'Original',
             priority: 1,
           }),
@@ -133,7 +133,7 @@ describe('Collections - REST', () => {
       it('afterDelete', async () => {
         const createResponse = await fetch(`${url}/api/hooks`, {
           body: JSON.stringify({
-            title: 'title',
+            title: 'title 5',
             description: 'Original',
             priority: 1,
           }),

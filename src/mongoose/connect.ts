@@ -1,19 +1,16 @@
-import mongoose, { ConnectionOptions } from 'mongoose';
+import mongoose, { ConnectOptions } from 'mongoose';
 import Logger from '../utilities/logger';
 import { connection } from './testCredentials';
 
 const logger = Logger();
 
-const connectMongoose = async (url: string, options: ConnectionOptions, local: boolean): Promise<void> => {
+const connectMongoose = async (url: string, options: ConnectOptions, local: boolean): Promise<void> => {
   let urlToConnect = url;
   let successfulConnectionMessage = 'Connected to Mongo server successfully!';
   const connectionOptions = {
     ...options,
     useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
     autoIndex: true,
-    useFindAndModify: false,
   };
 
   if (process.env.NODE_ENV === 'test') {

@@ -5,11 +5,21 @@ import { PaginatedDocs } from '../config/types';
 
 export default async function find(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs> | void> {
   try {
+    let page;
+
+    if (typeof req.query.page === 'string') {
+      const parsedPage = parseInt(req.query.page, 10);
+
+      if (!Number.isNaN(parsedPage)) {
+        page = parsedPage;
+      }
+    }
+
     const options = {
       req,
       collection: req.collection,
       where: req.query.where,
-      page: req.query.page,
+      page,
       limit: req.query.limit,
       sort: req.query.sort,
       depth: req.query.depth,

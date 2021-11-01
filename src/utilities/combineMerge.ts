@@ -1,6 +1,6 @@
 import merge from 'deepmerge';
 
-const combineMerge = (target, source, options) => {
+export const combineMerge = (target, source, options) => {
   const destination = target.slice();
 
   source.forEach((item, index) => {
@@ -14,5 +14,3 @@ const combineMerge = (target, source, options) => {
   });
   return destination;
 };
-
-export default combineMerge;
