@@ -85,13 +85,12 @@ const Relationship: React.FC<Props> = (props) => {
     lastFullyLoadedRelation: lastFullyLoadedRelationArg,
     lastLoadedPage: lastLoadedPageArg,
     search: searchArg,
-  } = {
-    lastFullyLoadedRelation: -1,
-    lastLoadedPage: 1,
-    search: '',
   }) => {
+    let lastLoadedPageToUse = typeof lastLoadedPageArg !== 'undefined' ? lastLoadedPageArg : 1;
+    const lastFullyLoadedRelationToUse = typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1;
+
     const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
-    const relationsToFetch = lastFullyLoadedRelationArg === -1 ? relations : relations.slice(lastFullyLoadedRelationArg);
+    const relationsToFetch = lastFullyLoadedRelationToUse === -1 ? relations : relations.slice(lastFullyLoadedRelationToUse + 1);
 
     let resultsFetched = 0;
 
@@ -104,7 +103,7 @@ const Relationship: React.FC<Props> = (props) => {
           const fieldToSearch = collection?.admin?.useAsTitle || 'id';
           const searchParam = searchArg ? `&where[${fieldToSearch}][like]=${searchArg}` : '';
 
-          const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageArg}&depth=0${searchParam}`);
+          const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageToUse}&depth=0${searchParam}`);
 
           if (response.ok) {
             const data: PaginatedDocs = await response.json();
@@ -115,6 +114,12 @@ const Relationship: React.FC<Props> = (props) => {
 
               if (!data.nextPage) {
                 setLastFullyLoadedRelation(relations.indexOf(relation));
+
+                // If there are more relations to search, need to reset lastLoadedPage to 1
+                // both locally within function and state
+                if (relations.indexOf(relation) + 1 < relations.length) {
+                  lastLoadedPageToUse = 1;
+                }
               }
             }
           } else {
@@ -303,7 +308,7 @@ const Relationship: React.FC<Props> = (props) => {
             }
           } : undefined}
           onMenuScrollToBottom={() => {
-            getResults({ lastFullyLoadedRelation: lastFullyLoadedRelation + 1, lastLoadedPage });
+            getResults({ lastFullyLoadedRelation, lastLoadedPage: lastLoadedPage + 1 });
           }}
           value={valueToRender}
           showError={showError}
