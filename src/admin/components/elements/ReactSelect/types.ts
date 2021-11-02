@@ -17,4 +17,5 @@ export type Props = {
   isDisabled?: boolean
   onInputChange?: (val: string) => void
   onMenuScrollToBottom?: () => void
+  placeholder?: string
 }
