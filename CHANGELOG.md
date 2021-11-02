@@ -1,12 +1,13 @@
-## [0.12.5-beta.0](https://github.com/payloadcms/payload/compare/v0.12.3...v0.12.5-beta.0) (2021-11-01)
+## [0.12.6-beta.0](https://github.com/payloadcms/payload/compare/v0.12.3...v0.12.6-beta.0) (2021-11-02)
 
 
 ### Bug Fixes
 
 * [#351](https://github.com/payloadcms/payload/issues/351) ([94c2b8d](https://github.com/payloadcms/payload/commit/94c2b8d80b046c067057d4ad089ed6a2edd656cf))
 * bug with relationship cell when no doc is available ([40b33d9](https://github.com/payloadcms/payload/commit/40b33d9f5e99285cb0de148dbe059259817fcad8))
+* ensures 'like' query param remains functional in all cases ([20d4e72](https://github.com/payloadcms/payload/commit/20d4e72a951dfcbf1cc301d0938e5095932436b9))
 * ensures relationship field search can return more than 10 options ([57c0346](https://github.com/payloadcms/payload/commit/57c0346a00286a3df695ea46e5c2630494183b5b))
-* ensures querying by relationship subpaths works ([37b21b0](https://github.com/payloadcms/payload/commit/37b21b07628e892e85c2cf979d9e2c8af0d291f7))
+* ensures richtext links retain proper formatting ([abf61d0](https://github.com/payloadcms/payload/commit/abf61d0734c09fd0fc5c5b827cb0631e11701f71))
 
 
 ### Features
