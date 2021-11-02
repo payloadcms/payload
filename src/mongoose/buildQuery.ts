@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import deepmerge from 'deepmerge';
-import mongoose, { FilterQuery, SchemaType } from 'mongoose';
+import mongoose, { FilterQuery } from 'mongoose';
 import { combineMerge } from '../utilities/combineMerge';
 import { CollectionModel } from '../collections/config/types';
 import { getSchemaTypeOptions } from './getSchemaTypeOptions';
@@ -97,7 +97,7 @@ class ParamParser {
             if (validOperators.includes(operator)) {
               const searchParam = await this.buildSearchParam(this.model.schema, relationOrPath, pathOperators[operator], operator);
 
-              if (searchParam && 'path' in searchParam) {
+              if (searchParam?.value && searchParam?.path) {
                 result = {
                   ...result,
                   [searchParam.path]: searchParam.value,
@@ -149,12 +149,10 @@ class ParamParser {
       const { path } = lastIncompletePath;
 
       const currentPath = path ? `${path}.${segment}` : segment;
-      const currentSchemaType: SchemaType & { path: string } = schema.path(currentPath);
+      const currentSchemaType = schema.path(currentPath);
+      const currentSchemaPathType = schema.pathType(currentPath);
 
-      // If we find a schema type, and it matches the exact current path
-      // NOTE - not a sub-path. Some schema types like `mixed` will return anything
-      // nested within. Need to make sure that schema type path matches exactly
-      if (currentSchemaType && (currentSchemaType.path === currentPath || currentSchemaType.instance === 'Embedded')) {
+      if (currentSchemaType && currentSchemaPathType !== 'adhocOrUndefined') {
         const currentSchemaTypeOptions = getSchemaTypeOptions(currentSchemaType);
 
         if (currentSchemaTypeOptions.localized) {
@@ -291,10 +289,16 @@ class ParamParser {
           overrideQuery = true;
 
           query = {
-            $or: [],
+            $or: [
+              {
+                [path]: {
+                  [operatorKey]: formattedValue,
+                },
+              },
+            ],
           };
 
-          if (typeof formattedValue.toString === 'function') {
+          if (typeof formattedValue === 'number' || (typeof formattedValue === 'string' && mongoose.Types.ObjectId.isValid(formattedValue))) {
             query.$or.push({
               [path]: {
                 [operatorKey]: formattedValue.toString(),
