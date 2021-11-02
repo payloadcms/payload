@@ -105,8 +105,6 @@ class ParamParser {
               } else if (typeof searchParam?.value === 'object') {
                 result = deepmerge(result, searchParam.value, { arrayMerge: combineMerge });
               }
-
-              return result;
             }
           }
         }
