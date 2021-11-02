@@ -1,0 +1,11 @@
+@import '../../../../../scss/styles.scss';
+
+.condition-value-relationship {
+  &__error-loading {
+    border: 1px solid $color-red;
+    min-height: base(2);
+    padding: base(.5) base(.75);
+    background-color: $color-red;
+    color: white;
+  }
+}

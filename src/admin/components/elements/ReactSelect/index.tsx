@@ -13,6 +13,7 @@ const ReactSelect: React.FC<Props> = (props) => {
     onChange,
     value,
     disabled = false,
+    placeholder,
   } = props;
 
   const classes = [
@@ -23,6 +24,7 @@ const ReactSelect: React.FC<Props> = (props) => {
 
   return (
     <Select
+      placeholder={placeholder}
       {...props}
       value={value}
       onChange={onChange}

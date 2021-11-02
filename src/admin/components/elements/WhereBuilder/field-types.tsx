@@ -100,7 +100,7 @@ const fieldTypeConditions = {
     operators: [...base],
   },
   relationship: {
-    component: 'Text',
+    component: 'Relationship',
     operators: [...base],
   },
   select: {
