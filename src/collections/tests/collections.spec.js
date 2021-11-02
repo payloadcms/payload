@@ -10,6 +10,7 @@ let token = null;
 let headers = null;
 
 let localizedPostID;
+const localizedPostTitle = 'title';
 const englishPostDesc = 'english description';
 const spanishPostDesc = 'spanish description';
 
@@ -44,7 +45,7 @@ describe('Collections - REST', () => {
     beforeAll(async () => {
       response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: 'title',
+          title: localizedPostTitle,
           description: englishPostDesc,
           priority: 1,
           nonLocalizedGroup: {
@@ -369,6 +370,103 @@ describe('Collections - REST', () => {
       expect(queryResponse.status).toBe(200);
       expect(data.docs).toHaveLength(1);
       expect(data.docs[0].title).toBe(title1);
+    });
+
+    it('should allow querying by a non-localized nested relationship property', async () => {
+      const relationshipBTitle = 'test';
+      const relationshipBRes = await fetch(`${url}/api/relationship-b?depth=0`, {
+        body: JSON.stringify({
+          title: relationshipBTitle,
+        }),
+        headers,
+        method: 'post',
+      });
+
+      const relationshipBData = await relationshipBRes.json();
+
+      const res = await fetch(`${url}/api/relationship-a?depth=0`, {
+        body: JSON.stringify({
+          post: relationshipBData.doc.id,
+        }),
+        headers,
+        method: 'post',
+      });
+
+      const additionalRelationshipARes = await fetch(`${url}/api/relationship-a?depth=0`, {
+        body: JSON.stringify({
+          postLocalizedMultiple: [{
+            relationTo: 'localized-posts',
+            value: localizedPostID,
+          }],
+        }),
+        headers,
+        method: 'post',
+      });
+
+      const relationshipAData = await res.json();
+
+      expect(res.status).toBe(201);
+      expect(additionalRelationshipARes.status).toBe(201);
+      expect(relationshipAData.doc.post).toBe(relationshipBData.doc.id);
+
+      const queryRes = await fetch(`${url}/api/relationship-a?where[post.title][equals]=${relationshipBTitle}`);
+      const data = await queryRes.json();
+
+      expect(data.docs).toHaveLength(1);
+    });
+
+    it('should allow querying by a localized nested relationship property', async () => {
+      const res = await fetch(`${url}/api/relationship-a`, {
+        body: JSON.stringify({
+          LocalizedPost: [localizedPostID],
+        }),
+        headers,
+        method: 'post',
+      });
+
+      expect(res.status).toBe(201);
+
+      const queryRes1 = await fetch(`${url}/api/relationship-a?where[LocalizedPost.title][in]=${localizedPostTitle}`);
+      const data1 = await queryRes1.json();
+
+      expect(data1.docs).toHaveLength(1);
+
+      const queryRes2 = await fetch(`${url}/api/relationship-a?where[LocalizedPost.en.title][in]=${localizedPostTitle}`);
+      const data2 = await queryRes2.json();
+
+      expect(queryRes2.status).toBe(200);
+      expect(data2.docs).toHaveLength(1);
+    });
+
+    it('should allow querying by a field within a group', async () => {
+      const text = 'laiwjefliajwe';
+
+      await fetch(`${url}/api/localized-posts`, {
+        body: JSON.stringify({
+          title: 'super great title',
+          description: 'desc',
+          priority: 1,
+          nonLocalizedGroup: {
+            text,
+          },
+          localizedGroup: {
+            text,
+          },
+        }),
+        headers,
+        method: 'post',
+      });
+
+      const queryRes1 = await fetch(`${url}/api/localized-posts?where[nonLocalizedGroup.text][equals]=${text}`);
+      const data1 = await queryRes1.json();
+
+      expect(data1.docs).toHaveLength(1);
+
+      const queryRes2 = await fetch(`${url}/api/localized-posts?where[localizedGroup.text][equals]=${text}`);
+      const data2 = await queryRes2.json();
+
+      expect(queryRes2.status).toBe(200);
+      expect(data2.docs).toHaveLength(1);
     });
   });
 
