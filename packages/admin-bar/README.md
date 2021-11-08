@@ -1,6 +1,6 @@
 # Payload Admin Bar
 
-An React admin bar for apps using Payload CMS.
+An admin bar for React apps using Payload CMS.
 
 ### Installation
 
@@ -18,7 +18,7 @@ import { PayloadAdminBar } from 'payload-admin-bar';
 export const App = () => {
   return (
     <PayloadAdminBar
-      cmsURL="https://website.com"
+      cmsURL="https://cms.website.com"
       collection="pages"
       id="12345"
     />
@@ -26,29 +26,29 @@ export const App = () => {
 }
 ```
 
-Checks for authentication with Payload CMS by hitting the [`/me`](https://payloadcms.com/docs/authentication/operations#me) route. On success, renders an admin bar with simple controls to navigate to the following:
+Checks for authentication with Payload CMS by hitting the [`/me`](https://payloadcms.com/docs/authentication/operations#me) route. If authenticated, renders an admin bar with simple controls to do the following:
 
-- Admin dashboard
-- User account
-- Current collection
-- New collection
+- Navigate to the admin dashboard
+- Navigate to the currently logged-in user's account
+- Edit the current collection
+- Create a new collection of the same type
 - Logout
 
 The admin bar ships with very little style and is fully customizable.
 
 ### Dynamic props
 
-Client-side routing requires that we update the admin bar with fresh props on each route change. This will depend on your app's specific setup, but here are a some common examples:
+With client-side routing, we need to update the admin bar with a new collection type and document id on each route change. This will depend on your app's specific setup, but here are a some common examples:
 
 #### NextJS
 
-For NextJS apps using dynamic-routes, you may need to return the collection type from `getStaticProps`:
+For NextJS apps using dynamic-routes, use `getStaticProps`:
 
 ```
 export const getStaticProps = async ({ params: { slug } }) => {
   const props = {};
 
-  const pageReq = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/${COLLECTION_NAME}?where[slug][equals]=${pageSlug}&depth=1`);
+  const pageReq = await fetch(`https://cms.website.com/api/pages?where[slug][equals]=${slug}&depth=1`);
   const pageData = await pageReq.json();
 
   if (pageReq.ok) {
@@ -57,10 +57,10 @@ export const getStaticProps = async ({ params: { slug } }) => {
 
     props = {
       ...doc,
-      collection: 'COLLECTION_NAME',
+      collection: 'pages',
       collectionLabels: {
-        singular: 'SINGULAR_COLLECTION_LABEL',
-        plural: 'PLURAL_COLLECTION_LABEL',
+        singular: 'page',
+        plural: 'pages',
       }
     };
   }
@@ -69,7 +69,7 @@ export const getStaticProps = async ({ params: { slug } }) => {
 }
 ```
 
-Now your app can forward these props onto the admin bar:
+Now your app can forward these props onto the admin bar. Something like this:
 
 ```
 import { PayloadAdminBar } from 'payload-admin-bar';
@@ -86,7 +86,7 @@ export const App = (appProps) => {
   return (
     <PayloadAdminBar
       {...{
-        cmsURL: `${process.env.NEXT_PUBLIC_API_URL}`,
+        cmsURL: 'https://cms.website.com',
         collection,
         collectionLabels,
         id
@@ -99,7 +99,7 @@ export const App = (appProps) => {
 ### Props
 Property | Type | Required | Default | Description
 --- | --- | --- | ---  | ---
-cmsURL | `string` | true | undefined | `serverURL` as defined in your [Payload config](https://payloadcms.com/docs/configuration/overview#options)
+cmsURL | `string` | true | `http://localhost:8000` | `serverURL` as defined in your [Payload config](https://payloadcms.com/docs/configuration/overview#options)
 adminPath | `string` | false | /admin | `routes` as defined in your [Payload config](https://payloadcms.com/docs/configuration/overview#options)
 apiPath | `string` | false | /api | `routes` as defined in your [Payload config](https://payloadcms.com/docs/configuration/overview#options)
 collection | `string` | true | undefined | Slug of your [collection](https://payloadcms.com/docs/configuration/collections)

@@ -151,11 +151,12 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
             top: 0,
             left: 0,
             width: '100%',
-            backgroundColor: 'white',
-            color: 'inherit',
             padding: '0.5rem',
             zIndex: 99999,
             boxSizing: 'border-box',
+            backgroundColor: '#222',
+            color: '#fff',
+            fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif'
           } : {},
           ...style
         }}

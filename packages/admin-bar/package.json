@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": "git@github.com:jacobsfletch/payload-admin-bar.git",
-  "description": "A React admin bar for apps using Payload CMS",
+  "description": "An admin bar for React apps using Payload CMS",
   "author": "jacobsfletch@gmail.com",
   "license": "MIT",
   "keywords": [
