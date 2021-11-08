@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "allowJs": true,
+    "target": "es5",
+    "module": "commonjs",
+    "sourceMap": true,
+    "jsx": "react",
+    "esModuleInterop": true,
+    "declaration": true,
+    "declarationDir": "./dist",
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "**/*.test.js"
+  ]
+}
