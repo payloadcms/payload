@@ -1,7 +1,8 @@
 import { Data } from '../../Form/types';
-import { BlockField, Labels, Block, Description } from '../../../../../fields/config/types';
+import { BlockField, Labels, Block } from '../../../../../fields/config/types';
 import { FieldTypes } from '..';
 import { FieldPermissions } from '../../../../../auth/types';
+import { Description } from '../../FieldDescription/types';
 
 export type Props = Omit<BlockField, 'type'> & {
   path?: string

@@ -1,7 +1,8 @@
 import { Data } from '../../Form/types';
-import { ArrayField, Labels, Field, Description } from '../../../../../fields/config/types';
+import { ArrayField, Labels, Field } from '../../../../../fields/config/types';
 import { FieldTypes } from '..';
 import { FieldPermissions } from '../../../../../auth/types';
+import { Description } from '../../FieldDescription/types';
 
 export type Props = Omit<ArrayField, 'type'> & {
   path?: string
