@@ -44,7 +44,7 @@ async function update(args) {
     data: globalJSON,
     hook: 'afterRead',
     operation: 'update',
-    overrideAccess,
+    overrideAccess: true,
     flattenLocales: true,
     showHiddenFields,
   });
