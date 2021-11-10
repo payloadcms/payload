@@ -1,19 +1,17 @@
-## [0.12.6-beta.0](https://github.com/payloadcms/payload/compare/v0.12.3...v0.12.6-beta.0) (2021-11-02)
+## [0.12.8-beta.0](https://github.com/payloadcms/payload/compare/v0.12.3...v0.12.8-beta.0) (2021-11-10)
 
 
 ### Bug Fixes
 
 * [#351](https://github.com/payloadcms/payload/issues/351) ([94c2b8d](https://github.com/payloadcms/payload/commit/94c2b8d80b046c067057d4ad089ed6a2edd656cf))
 * bug with relationship cell when no doc is available ([40b33d9](https://github.com/payloadcms/payload/commit/40b33d9f5e99285cb0de148dbe059259817fcad8))
-* ensures 'like' query param remains functional in all cases ([20d4e72](https://github.com/payloadcms/payload/commit/20d4e72a951dfcbf1cc301d0938e5095932436b9))
-* ensures relationship field search can return more than 10 options ([57c0346](https://github.com/payloadcms/payload/commit/57c0346a00286a3df695ea46e5c2630494183b5b))
 * ensures richtext links retain proper formatting ([abf61d0](https://github.com/payloadcms/payload/commit/abf61d0734c09fd0fc5c5b827cb0631e11701f71))
-
 
 ### Features
 
+* adds relationship filter field ([463c4e6](https://github.com/payloadcms/payload/commit/463c4e60de8e647fca6268b826d826f9c6e45412))
+* ensures update hooks have access to full original docs even in spite of access control ([b2c5b7e](https://github.com/payloadcms/payload/commit/b2c5b7e5752e829c7a53c054decceb43ec33065e))
 * improves querying logic ([4c85747](https://github.com/payloadcms/payload/commit/4c8574784995b1cb1f939648f4d2158286089b3d))
-
 
 ## [0.12.3](https://github.com/payloadcms/payload/compare/v0.12.2...v0.12.3) (2021-10-23)
 
