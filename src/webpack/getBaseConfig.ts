@@ -56,9 +56,6 @@ export default (config: SanitizedConfig): Configuration => ({
       'payload-user-css': config.admin.css,
       'payload-scss-overrides': config.admin.scss,
       dotenv: mockDotENVPath,
-      _: [
-        `./${path.resolve(__dirname, '../config/generateTypes')}`,
-      ],
     },
     extensions: ['.ts', '.tsx', '.js', '.json'],
   },
