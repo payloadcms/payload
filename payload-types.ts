@@ -8,6 +8,7 @@ export interface Config {}
 export interface NavigationArray {
   array?: {
     text?: string;
+    textarea?: string;
     id?: string;
   }[];
 }
@@ -17,317 +18,8 @@ export interface NavigationArray {
  */
 export interface GlobalWithStrictAccess {
   title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "blocks-global".
- */
-export interface BlocksGlobal {
-  blocks?: (
-    | {
-        color: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'quote';
-      }
-    | {
-        label: string;
-        url: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'cta';
-      }
-  )[];
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "admins".
- */
-export interface Admin {
-  email?: string;
-  resetPasswordToken?: string;
-  apiKey?: string;
-  apiKeyIndex?: string;
-  loginAttempts?: number;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "all-fields".
- */
-export interface AllFields {
-  text: string;
-  descriptionText?: string;
-  descriptionFunction?: string;
-  email?: string;
-  number?: number;
-  group?: {
-    nestedText1?: string;
-    nestedText2?: string;
-  };
-  array?: {
-    arrayText1: string;
-    arrayText2: string;
-    arrayText3?: string;
-    id?: string;
-  }[];
-  blocks: (
-    | {
-        testEmail: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'email';
-      }
-    | {
-        testNumber: number;
-        id?: string;
-        blockName?: string;
-        blockType: 'number';
-      }
-    | {
-        color: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'quote';
-      }
-    | {
-        label: string;
-        url: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'cta';
-      }
-  )[];
-  slug: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "auto-label".
- */
-export interface AutoLabel {
-  autoLabelField?: string;
-  noLabel?: string;
-  labelOverride?: string;
-  specialBlock?: {
-    testNumber?: number;
-    id?: string;
-    blockName?: string;
-    blockType: 'number';
-  }[];
-  noLabelBlock?: {
-    testNumber?: number;
-    id?: string;
-    blockName?: string;
-    blockType: 'number';
-  }[];
-  items?: {
-    itemName?: string;
-    id?: string;
-  }[];
-  noLabelArray?: {
-    textField?: string;
-    id?: string;
-  }[];
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "code".
- */
-export interface Code {}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "conditions".
- */
-export interface Conditions {
-  title: string;
-  number?: number;
-  simpleCondition: string;
-  orCondition: string;
-  nestedConditions?: string;
-  blocks: (
-    | {
-        testEmail: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'email';
-      }
-    | {
-        testNumber: number;
-        id?: string;
-        blockName?: string;
-        blockType: 'number';
-      }
-    | {
-        color: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'quote';
-      }
-    | {
-        label: string;
-        url: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'cta';
-      }
-  )[];
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-components".
- */
-export interface CustomComponent {
-  title: string;
-  componentDescription?: string;
-  array?: {
-    nestedArrayCustomField?: string;
-    id?: string;
-  }[];
-  group?: {
-    nestedGroupCustomField?: string;
-  };
-  nestedText1?: string;
-  nestedText2?: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-id".
- */
-export interface CustomID {
-  id?: number;
-  name: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "files".
- */
-export interface File {
-  url?: string;
-  filename?: string;
-  mimeType?: string;
-  filesize?: number;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "default-values".
- */
-export interface DefaultValueTest {
-  text?: string;
-  email?: string;
-  number?: number;
-  group?: {
-    nestedText1?: string;
-    nestedText2?: string;
-  };
-  array?: {
-    arrayText1?: string;
-    arrayText2?: string;
-    arrayText3?: string;
-    id?: string;
-  }[];
-  blocks?: (
-    | {
-        testEmail: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'email';
-      }
-    | {
-        testNumber: number;
-        id?: string;
-        blockName?: string;
-        blockType: 'number';
-      }
-    | {
-        color: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'quote';
-      }
-    | {
-        label: string;
-        url: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'cta';
-      }
-  )[];
-  slug?: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "blocks".
- */
-export interface Blocks {
-  layout: (
-    | {
-        testEmail: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'email';
-      }
-    | {
-        testNumber: number;
-        id?: string;
-        blockName?: string;
-        blockType: 'number';
-      }
-    | {
-        color: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'quote';
-      }
-    | {
-        label: string;
-        url: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'cta';
-      }
-  )[];
-  nonLocalizedLayout: (
-    | {
-        testEmail: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'email';
-      }
-    | {
-        testNumber: number;
-        id?: string;
-        blockName?: string;
-        blockType: 'number';
-      }
-    | {
-        color: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'quote';
-      }
-    | {
-        label: string;
-        url: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'cta';
-      }
-  )[];
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hidden-fields".
- */
-export interface HiddenFields {
-  title: string;
-  hiddenAdmin: string;
-  hiddenAPI: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hooks".
- */
-export interface Hook {
-  title: string;
+  relationship: (string | LocalizedPost)[];
+  singleRelationship: string | LocalizedPost;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -336,6 +28,7 @@ export interface Hook {
 export interface LocalizedPost {
   title: string;
   summary?: string;
+  description: string;
   priority: number;
   localizedGroup?: {
     text?: string;
@@ -355,22 +48,117 @@ export interface LocalizedPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized-arrays".
+ * via the `definition` "blocks-global".
  */
-export interface LocalizedArray {
-  array: {
-    arrayText1: string;
-    arrayText2: string;
-    arrayText3?: string;
-    id?: string;
-  }[];
+export interface BlocksGlobal {
+  blocks?: (
+    | {
+        author: string | PublicUser;
+        quote: string;
+        color: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'quote';
+      }
+    | {
+        label: string;
+        url: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'cta';
+      }
+  )[];
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "local-operations".
+ * via the `definition` "public-users".
  */
-export interface LocalOperation {
-  title: string;
+export interface PublicUser {
+  email?: string;
+  resetPasswordToken?: string;
+  _verified?: boolean;
+  _verificationToken?: string;
+  loginAttempts?: number;
+  adminOnly?: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admins".
+ */
+export interface Admin {
+  email?: string;
+  resetPasswordToken?: string;
+  enableAPIKey?: boolean;
+  apiKey?: string;
+  apiKeyIndex?: string;
+  loginAttempts?: number;
+  publicUser?: (string | PublicUser)[];
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "all-fields".
+ */
+export interface AllFields {
+  text: string;
+  descriptionText?: string;
+  descriptionFunction?: string;
+  image?: string | Media;
+  email?: string;
+  number?: number;
+  group?: {
+    nestedText1?: string;
+    nestedText2?: string;
+  };
+  array?: {
+    arrayText1: string;
+    arrayText2: string;
+    arrayText3?: string;
+    checkbox?: boolean;
+    id?: string;
+  }[];
+  blocks: (
+    | {
+        testEmail: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'email';
+      }
+    | {
+        testNumber: number;
+        id?: string;
+        blockName?: string;
+        blockType: 'number';
+      }
+    | {
+        author: string | PublicUser;
+        quote: string;
+        color: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'quote';
+      }
+    | {
+        label: string;
+        url: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'cta';
+      }
+  )[];
+  relationship?: string | Conditions;
+  relationshipHasMany?: (string | LocalizedPost)[];
+  relationshipMultipleCollections?:
+    | {
+        value: string | LocalizedPost;
+        relationTo: 'localized-posts';
+      }
+    | {
+        value: string | Conditions;
+        relationTo: 'conditions';
+      };
+  textarea?: string;
+  slug: string;
+  checkbox?: boolean;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -418,6 +206,287 @@ export interface Media {
     };
   };
   alt: string;
+  foundUploadSizes?: boolean;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conditions".
+ */
+export interface Conditions {
+  title: string;
+  enableTest?: boolean;
+  number?: number;
+  simpleCondition: string;
+  orCondition: string;
+  nestedConditions?: string;
+  blocks: (
+    | {
+        testEmail: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'email';
+      }
+    | {
+        testNumber: number;
+        id?: string;
+        blockName?: string;
+        blockType: 'number';
+      }
+    | {
+        author: string | PublicUser;
+        quote: string;
+        color: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'quote';
+      }
+    | {
+        label: string;
+        url: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'cta';
+      }
+  )[];
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auto-label".
+ */
+export interface AutoLabel {
+  autoLabelField?: string;
+  noLabel?: string;
+  labelOverride?: string;
+  testRelationship?: string | AllFields;
+  specialBlock?: {
+    testNumber?: number;
+    id?: string;
+    blockName?: string;
+    blockType: 'number';
+  }[];
+  noLabelBlock?: {
+    testNumber?: number;
+    id?: string;
+    blockName?: string;
+    blockType: 'number';
+  }[];
+  items?: {
+    itemName?: string;
+    id?: string;
+  }[];
+  noLabelArray?: {
+    textField?: string;
+    id?: string;
+  }[];
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "code".
+ */
+export interface Code {
+  code: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-components".
+ */
+export interface CustomComponent {
+  title: string;
+  description: string;
+  componentDescription?: string;
+  array?: {
+    nestedArrayCustomField?: string;
+    id?: string;
+  }[];
+  group?: {
+    nestedGroupCustomField?: string;
+  };
+  nestedText1?: string;
+  nestedText2?: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id".
+ */
+export interface CustomID {
+  id?: number;
+  name: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "files".
+ */
+export interface File {
+  url?: string;
+  filename?: string;
+  mimeType?: string;
+  filesize?: number;
+  owner: string | Admin;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "default-values".
+ */
+export interface DefaultValueTest {
+  text?: string;
+  image?: string | Media;
+  email?: string;
+  number?: number;
+  group?: {
+    nestedText1?: string;
+    nestedText2?: string;
+  };
+  array?: {
+    arrayText1?: string;
+    arrayText2?: string;
+    arrayText3?: string;
+    checkbox?: boolean;
+    id?: string;
+  }[];
+  blocks?: (
+    | {
+        testEmail: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'email';
+      }
+    | {
+        testNumber: number;
+        id?: string;
+        blockName?: string;
+        blockType: 'number';
+      }
+    | {
+        author: string | PublicUser;
+        quote: string;
+        color: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'quote';
+      }
+    | {
+        label: string;
+        url: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'cta';
+      }
+  )[];
+  relationship?: string | Conditions;
+  relationshipHasMany?: (string | LocalizedPost)[];
+  relationshipMultipleCollections?:
+    | {
+        value: string | LocalizedPost;
+        relationTo: 'localized-posts';
+      }
+    | {
+        value: string | Conditions;
+        relationTo: 'conditions';
+      };
+  textarea?: string;
+  slug?: string;
+  checkbox?: boolean;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks".
+ */
+export interface Blocks {
+  layout: (
+    | {
+        testEmail: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'email';
+      }
+    | {
+        testNumber: number;
+        id?: string;
+        blockName?: string;
+        blockType: 'number';
+      }
+    | {
+        author: string | PublicUser;
+        quote: string;
+        color: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'quote';
+      }
+    | {
+        label: string;
+        url: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'cta';
+      }
+  )[];
+  nonLocalizedLayout: (
+    | {
+        testEmail: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'email';
+      }
+    | {
+        testNumber: number;
+        id?: string;
+        blockName?: string;
+        blockType: 'number';
+      }
+    | {
+        author: string | PublicUser;
+        quote: string;
+        color: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'quote';
+      }
+    | {
+        label: string;
+        url: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'cta';
+      }
+  )[];
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-fields".
+ */
+export interface HiddenFields {
+  title: string;
+  hiddenAdmin: string;
+  hiddenAPI: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hooks".
+ */
+export interface Hook {
+  title: string;
+  description: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-arrays".
+ */
+export interface LocalizedArray {
+  array: {
+    allowPublicReadability?: boolean;
+    arrayText1: string;
+    arrayText2: string;
+    arrayText3?: string;
+    id?: string;
+  }[];
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "local-operations".
+ */
+export interface LocalOperation {
+  title: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -446,26 +515,69 @@ export interface PreviewablePost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "public-users".
- */
-export interface PublicUser {
-  email?: string;
-  resetPasswordToken?: string;
-  _verificationToken?: string;
-  loginAttempts?: number;
-  adminOnly?: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relationship-a".
  */
-export interface RelationshipA {}
+export interface RelationshipA {
+  post?: string | RelationshipB;
+  LocalizedPost?: (string | LocalizedPost)[];
+  postLocalizedMultiple?: (
+    | {
+        value: string | LocalizedPost;
+        relationTo: 'localized-posts';
+      }
+    | {
+        value: string | AllFields;
+        relationTo: 'all-fields';
+      }
+    | {
+        value: number | CustomID;
+        relationTo: 'custom-id';
+      }
+  )[];
+  postManyRelationships?: {
+    value: string | RelationshipB;
+    relationTo: 'relationship-b';
+  };
+  postMaxDepth?: string | RelationshipB;
+  customID?: (number | CustomID)[];
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relationship-b".
  */
 export interface RelationshipB {
   title?: string;
+  post?: (string | RelationshipA)[];
+  postManyRelationships?:
+    | {
+        value: string | RelationshipA;
+        relationTo: 'relationship-a';
+      }
+    | {
+        value: string | Media;
+        relationTo: 'media';
+      };
+  localizedPosts?: (
+    | {
+        value: string | LocalizedPost;
+        relationTo: 'localized-posts';
+      }
+    | {
+        value: string | PreviewablePost;
+        relationTo: 'previewable-post';
+      }
+  )[];
+  strictAccess?: string | StrictAccess;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "strict-access".
+ */
+export interface StrictAccess {
+  address: string;
+  city: string;
+  state: string;
+  zip: number;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -477,16 +589,6 @@ export interface RichText {}
  * via the `definition` "select".
  */
 export interface Select {}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "strict-access".
- */
-export interface StrictAccess {
-  address: string;
-  city: string;
-  state: string;
-  zip: number;
-}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "validations".
@@ -510,6 +612,7 @@ export interface Validation {
  */
 export interface Unique {
   title: string;
+  description?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
