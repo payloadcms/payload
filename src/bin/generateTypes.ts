@@ -1,25 +1,91 @@
 /* eslint-disable no-nested-ternary */
+import fs from 'fs';
+import type { JSONSchema4 } from 'json-schema';
 import { compile } from 'json-schema-to-typescript';
-import { fieldIsPresentationalOnly, fieldAffectsData } from '../fields/config/types';
+import { fieldIsPresentationalOnly, fieldAffectsData, Field } from '../fields/config/types';
 import { SanitizedCollectionConfig } from '../collections/config/types';
+import { SanitizedConfig } from '../config/types';
 import loadConfig from '../config/load';
+import { SanitizedGlobalConfig } from '../globals/config/types';
 
-function collectionToJsonSchema(collection: SanitizedCollectionConfig): any {
+function generateFieldTypes(fields: Field[]): {
+  properties: {
+    [k: string]: JSONSchema4;
+  }
+  required: string[]
+} {
+  let topLevelProps = [];
+  let requiredTopLevelProps = [];
+
   return {
-    title: collection.labels.singular,
-    type: 'object',
     properties: Object.fromEntries(
-      collection.fields.reduce((properties, field) => {
-        let type;
+      fields.reduce((properties, field) => {
+        let fieldSchema: JSONSchema4;
 
         switch (field.type) {
-          case 'number': {
-            type = { type: 'integer ' };
+          case 'text':
+          case 'email': {
+            fieldSchema = { type: 'string' };
             break;
           }
 
-          case 'text': {
-            type = { type: 'string' };
+          case 'number': {
+            fieldSchema = { type: 'number' };
+            break;
+          }
+
+          case 'blocks': {
+            fieldSchema = {
+              type: 'array',
+              items: {
+                oneOf: field.blocks.map((block) => {
+                  const blockSchema = generateFieldTypes(block.fields);
+
+                  return {
+                    type: 'object',
+                    additionalProperties: false,
+                    properties: {
+                      ...blockSchema.properties,
+                      blockType: {
+                        const: block.slug,
+                      },
+                    },
+                    required: [
+                      'blockType',
+                      ...blockSchema.required,
+                    ],
+                  };
+                }),
+              },
+            };
+            break;
+          }
+
+          case 'array': {
+            fieldSchema = {
+              type: 'array',
+              items: {
+                type: 'object',
+                additionalProperties: false,
+                ...generateFieldTypes(field.fields),
+              },
+            };
+            break;
+          }
+
+          case 'row': {
+            const topLevelFields = generateFieldTypes(field.fields);
+            requiredTopLevelProps = requiredTopLevelProps.concat(topLevelFields.required);
+            topLevelProps = topLevelProps.concat(Object.entries(topLevelFields.properties).map((prop) => prop));
+            break;
+          }
+
+          case 'group': {
+            fieldSchema = {
+              type: 'object',
+              additionalProperties: false,
+              ...generateFieldTypes(field.fields),
+            };
             break;
           }
 
@@ -30,40 +96,62 @@ function collectionToJsonSchema(collection: SanitizedCollectionConfig): any {
 
         let default_ = {};
 
-        if (!fieldIsPresentationalOnly(field)) {
+        if (!fieldIsPresentationalOnly(field) && fieldAffectsData(field) && typeof field.defaultValue !== 'undefined') {
           default_ = { default: field.defaultValue };
         }
 
-        if (type && fieldAffectsData(field)) {
+        if (fieldSchema && fieldAffectsData(field)) {
           return [
             ...properties,
             [
               field.name,
               {
-                ...type,
+                ...fieldSchema,
                 ...default_,
               },
             ],
           ];
         }
 
-        return properties;
+        return [
+          ...properties,
+          ...topLevelProps,
+        ];
       }, []),
     ),
-    required: collection.fields
-      .filter((field) => fieldAffectsData(field) && field.required === true)
-      .map((field) => fieldAffectsData(field) && field.name),
-    additionalProperties: false,
+    required: [
+      ...fields
+        .filter((field) => fieldAffectsData(field) && field.required === true)
+        .map((field) => (fieldAffectsData(field) ? field.name : '')),
+      ...requiredTopLevelProps,
+    ],
   };
 }
 
-function configToJsonSchema(collections: SanitizedCollectionConfig[]): any {
+function entityToJsonSchema(entity: SanitizedCollectionConfig | SanitizedGlobalConfig): any {
+  const title = 'label' in entity ? entity.label : entity.labels.singular;
+
+  return {
+    title,
+    type: 'object',
+    additionalProperties: false,
+    ...generateFieldTypes(entity.fields),
+  };
+}
+
+function configToJsonSchema(config: SanitizedConfig): JSONSchema4 {
   return {
     definitions: Object.fromEntries(
-      collections.map((collection) => [
-        collection.slug,
-        collectionToJsonSchema(collection),
-      ]),
+      [
+        ...config.globals.map((global) => [
+          global.slug,
+          entityToJsonSchema(global),
+        ]),
+        ...config.collections.map((collection) => [
+          collection.slug,
+          entityToJsonSchema(collection),
+        ]),
+      ],
     ),
     additionalProperties: false,
   };
@@ -73,26 +161,17 @@ export function generateTypes(): void {
   const config = loadConfig();
 
   console.log('compiling ts types');
-  const jsonSchema = configToJsonSchema(config.collections);
+  const jsonSchema = configToJsonSchema(config);
 
   compile(jsonSchema, 'Config', {
     bannerComment: '// auto-generated by payload',
     unreachableDefinitions: true,
   }).then((compiled) => {
-    // fse.writeFileSync('generated-types.ts', compiled);
-    console.log('compiled', compiled);
+    fs.writeFileSync(config.typescript.outputFile, compiled);
   });
 }
 
-// when build.js is launched directly
+// when generateTypes.js is launched directly
 if (module.id === require.main.id) {
   generateTypes();
 }
-
-
-// const result = await compile(jsonSchema, 'Config', {
-//   bannerComment: '// auto-generated by payload',
-//   unreachableDefinitions: true,
-// });
-
-// await fse.writeFile('generated-types.ts', result);

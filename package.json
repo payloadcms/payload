@@ -205,6 +205,7 @@
     "@types/isomorphic-fetch": "^0.0.35",
     "@types/jest": "^26.0.15",
     "@types/joi": "^14.3.4",
+    "@types/json-schema": "^7.0.9",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/method-override": "^0.0.31",
     "@types/mini-css-extract-plugin": "^1.2.1",

@@ -112,6 +112,9 @@ export type Config = {
     graphQL?: string;
     graphQLPlayground?: string;
   };
+  typescript?: {
+    outputFile?: string
+  }
   debug?: boolean
   express?: {
     json?: {
