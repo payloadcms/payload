@@ -2,7 +2,7 @@
 import fs from 'fs';
 import type { JSONSchema4 } from 'json-schema';
 import { compile } from 'json-schema-to-typescript';
-import { fieldIsPresentationalOnly, fieldAffectsData, Field } from '../fields/config/types';
+import { fieldAffectsData, Field, Option } from '../fields/config/types';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { SanitizedConfig } from '../config/types';
 import loadConfig from '../config/load';
@@ -23,6 +23,16 @@ function getCollectionIDType(collections: SanitizedCollectionConfig[], slug): 's
   return undefined;
 }
 
+function returnOptionEnums(options: Option[]): string[] {
+  return options.map((option) => {
+    if (typeof option === 'object' && 'value' in option) {
+      return option.value;
+    }
+
+    return option;
+  });
+}
+
 function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
   properties: {
     [k: string]: JSONSchema4;
@@ -41,7 +51,8 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
           case 'text':
           case 'textarea':
           case 'code':
-          case 'email': {
+          case 'email':
+          case 'date': {
             fieldSchema = { type: 'string' };
             break;
           }
@@ -56,9 +67,60 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
             break;
           }
 
-          // TODO:
-          // Add enum types like Radio and Select
-          // Add point field type
+          case 'richText': {
+            fieldSchema = {
+              type: 'array',
+              items: {
+                type: 'object',
+              },
+            };
+
+            break;
+          }
+
+          case 'radio': {
+            fieldSchema = {
+              type: 'string',
+              enum: returnOptionEnums(field.options),
+            };
+
+            break;
+          }
+
+          case 'select': {
+            const selectType: JSONSchema4 = {
+              type: 'string',
+              enum: returnOptionEnums(field.options),
+            };
+
+            if (field.hasMany) {
+              fieldSchema = {
+                type: 'array',
+                items: selectType,
+              };
+            } else {
+              fieldSchema = selectType;
+            }
+
+            break;
+          }
+
+          case 'point': {
+            fieldSchema = {
+              type: 'array',
+              minItems: 2,
+              maxItems: 2,
+              items: [
+                {
+                  type: 'number',
+                },
+                {
+                  type: 'number',
+                },
+              ],
+            };
+            break;
+          }
 
           case 'relationship': {
             if (Array.isArray(field.relationTo)) {
@@ -230,12 +292,6 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
           }
         }
 
-        let default_ = {};
-
-        if (!fieldIsPresentationalOnly(field) && fieldAffectsData(field) && typeof field.defaultValue !== 'undefined') {
-          default_ = { default: field.defaultValue };
-        }
-
         if (fieldSchema && fieldAffectsData(field)) {
           return [
             ...properties,
@@ -243,7 +299,6 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
               field.name,
               {
                 ...fieldSchema,
-                ...default_,
               },
             ],
           ];

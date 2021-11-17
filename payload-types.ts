@@ -29,6 +29,9 @@ export interface LocalizedPost {
   title: string;
   summary?: string;
   description: string;
+  richText?: {
+    [k: string]: unknown;
+  }[];
   priority: number;
   localizedGroup?: {
     text?: string;
@@ -41,6 +44,9 @@ export interface LocalizedPost {
     id?: string;
   }[];
   richTextBlocks?: {
+    content?: {
+      [k: string]: unknown;
+    }[];
     id?: string;
     blockName?: string;
     blockType: 'richTextBlock';
@@ -76,9 +82,11 @@ export interface BlocksGlobal {
 export interface PublicUser {
   email?: string;
   resetPasswordToken?: string;
+  resetPasswordExpiration?: string;
   _verified?: boolean;
   _verificationToken?: string;
   loginAttempts?: number;
+  lockUntil?: string;
   adminOnly?: string;
 }
 /**
@@ -88,10 +96,13 @@ export interface PublicUser {
 export interface Admin {
   email?: string;
   resetPasswordToken?: string;
+  resetPasswordExpiration?: string;
   enableAPIKey?: boolean;
   apiKey?: string;
   apiKeyIndex?: string;
   loginAttempts?: number;
+  lockUntil?: string;
+  roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
   publicUser?: (string | PublicUser)[];
 }
 /**
@@ -103,6 +114,11 @@ export interface AllFields {
   descriptionText?: string;
   descriptionFunction?: string;
   image?: string | Media;
+  select: 'option-1' | 'option-2' | 'option-3' | 'option-4';
+  selectMany: ('option-1' | 'option-2' | 'option-3' | 'option-4')[];
+  dayOnlyDateFieldExample: string;
+  timeOnlyDateFieldExample?: string;
+  radioGroupExample: 'option-1' | 'option-2' | 'option-3';
   email?: string;
   number?: number;
   group?: {
@@ -157,8 +173,12 @@ export interface AllFields {
         relationTo: 'conditions';
       };
   textarea?: string;
+  richText: {
+    [k: string]: unknown;
+  }[];
   slug: string;
   checkbox?: boolean;
+  dateFieldExample?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -321,6 +341,7 @@ export interface File {
   filename?: string;
   mimeType?: string;
   filesize?: number;
+  type: 'Type 1' | 'Type 2' | 'Type 3';
   owner: string | Admin;
 }
 /**
@@ -330,6 +351,9 @@ export interface File {
 export interface DefaultValueTest {
   text?: string;
   image?: string | Media;
+  select?: 'option-1' | 'option-2' | 'option-3' | 'option-4';
+  selectMany?: ('option-1' | 'option-2' | 'option-3' | 'option-4')[];
+  radioGroupExample?: 'option-1' | 'option-2' | 'option-3';
   email?: string;
   number?: number;
   group?: {
@@ -386,6 +410,9 @@ export interface DefaultValueTest {
   textarea?: string;
   slug?: string;
   checkbox?: boolean;
+  richText?: {
+    [k: string]: unknown;
+  }[];
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -583,12 +610,24 @@ export interface StrictAccess {
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rich-text".
  */
-export interface RichText {}
+export interface RichText {
+  defaultRichText: {
+    [k: string]: unknown;
+  }[];
+  customRichText: {
+    [k: string]: unknown;
+  }[];
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "select".
  */
-export interface Select {}
+export interface Select {
+  Select: 'one' | 'two' | 'three';
+  SelectHasMany: ('one' | 'two' | 'three')[];
+  SelectJustStrings: ('blue' | 'green' | 'yellow')[];
+  Radio: 'one' | 'two' | 'three';
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "validations".
@@ -641,4 +680,7 @@ export interface UnstoredMedia {
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "geolocation".
  */
-export interface Geolocation {}
+export interface Geolocation {
+  location?: [number, number];
+  localizedPoint?: [number, number];
+}
