@@ -75,15 +75,11 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
       <div
         style={{
           position: 'relative',
-          // marginBottom: '10px',
         }}
       >
         <Upload
           {...props}
           label={null}
-        // style={{
-        //   marginBottom: '0px',
-        // }}
         />
       </div>
       <div

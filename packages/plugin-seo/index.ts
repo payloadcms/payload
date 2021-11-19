@@ -3,7 +3,7 @@ import { CollectionConfig } from 'payload/dist/collections/config/types';
 import { MetaDescription } from './fields/MetaDescription';
 import { Overview } from './ui/Overview';
 import { MetaTitle } from './fields/MetaTitle';
-import { Snippet } from './ui/Snippet';
+import { Preview } from './ui/Preview';
 import { MetaImage } from './fields/MetaImage';
 
 type Options = {
@@ -67,12 +67,12 @@ const seo = (options: Options) => (config: Config): Config => ({
               },
             },
             {
-              name: 'snippet',
-              label: 'Snippet',
+              name: 'preview',
+              label: 'Preview',
               type: 'ui',
               admin: {
                 components: {
-                  Field: Snippet,
+                  Field: Preview,
                 },
               },
             },
