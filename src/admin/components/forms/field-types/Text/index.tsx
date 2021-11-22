@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import useFieldType from '../../useFieldType';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
@@ -24,6 +24,8 @@ const Text: React.FC<Props> = (props) => {
       description,
       condition,
     } = {},
+    value: valueFromProps,
+    onChange: onChangeFromProps,
   } = props;
 
   const path = pathFromProps || name;
@@ -41,6 +43,23 @@ const Text: React.FC<Props> = (props) => {
     setValue,
     errorMessage,
   } = fieldType;
+
+  const onChange = useCallback((e) => {
+    const { value: incomingValue } = e.target;
+    setValue(e);
+    if (typeof onChangeFromProps === 'function') {
+      onChangeFromProps(incomingValue);
+    }
+  }, [
+    onChangeFromProps,
+    setValue,
+  ]);
+
+  useEffect(() => {
+    if (typeof valueFromProps === 'string') {
+      setValue(valueFromProps);
+    }
+  }, [valueFromProps])
 
   const classes = [
     'field-type',
@@ -68,7 +87,7 @@ const Text: React.FC<Props> = (props) => {
       />
       <input
         value={value || ''}
-        onChange={setValue}
+        onChange={onChange}
         disabled={readOnly}
         placeholder={placeholder}
         type="text"

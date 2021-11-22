@@ -100,6 +100,8 @@ export type TextField = FieldBase & {
     placeholder?: string
     autoComplete?: string
   }
+  value?: string
+  onChange?: (value: string) => void
 }
 
 export type EmailField = FieldBase & {
@@ -168,9 +170,11 @@ export type UIField = {
 }
 
 export type UploadField = FieldBase & {
-  type: 'upload';
-  relationTo: string;
-  maxDepth?: number;
+  type: 'upload'
+  relationTo: string
+  maxDepth?: number
+  value?: string
+  onChange?: (value: string) => void
 }
 
 type CodeAdmin = Admin & {
@@ -185,9 +189,11 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
 }
 
 export type SelectField = FieldBase & {
-  type: 'select';
-  options: Option[];
-  hasMany?: boolean;
+  type: 'select'
+  options: Option[]
+  hasMany?: boolean
+  value?: string
+  onChange?: (value: string) => void
 }
 
 export type RelationshipField = FieldBase & {
@@ -302,22 +308,22 @@ export type FieldAffectingData =
   | PointField
 
 export type NonPresentationalField = TextField
-| NumberField
-| EmailField
-| TextareaField
-| CheckboxField
-| DateField
-| BlockField
-| GroupField
-| RadioField
-| RelationshipField
-| ArrayField
-| RichTextField
-| SelectField
-| UploadField
-| CodeField
-| PointField
-| RowField;
+  | NumberField
+  | EmailField
+  | TextareaField
+  | CheckboxField
+  | DateField
+  | BlockField
+  | GroupField
+  | RadioField
+  | RelationshipField
+  | ArrayField
+  | RichTextField
+  | SelectField
+  | UploadField
+  | CodeField
+  | PointField
+  | RowField;
 
 export type FieldWithPath = Field & {
   path?: string

@@ -38,6 +38,8 @@ const Upload: React.FC<Props> = (props) => {
     validate = upload,
     relationTo,
     fieldTypes,
+    value: valueFromProps,
+    onChange: onChangeFromProps,
   } = props;
 
   const collection = collections.find((coll) => coll.slug === relationTo);
@@ -88,7 +90,25 @@ const Upload: React.FC<Props> = (props) => {
 
       fetchFile();
     }
-  }, [value, setInternalValue, relationTo, api, serverURL, setValue]);
+  }, [
+    value,
+    setInternalValue,
+    relationTo,
+    api,
+    serverURL,
+    setValue
+  ]);
+
+  useEffect(() => {
+    const { id: incomingID } = internalValue || {};
+    if (typeof onChangeFromProps === 'function') {
+      onChangeFromProps(incomingID)
+    } else {
+      setValue(incomingID);
+    }
+  }, [internalValue]);
+
+  const valueToUse = valueFromProps || value || '';
 
   return (
     <div
@@ -119,7 +139,7 @@ const Upload: React.FC<Props> = (props) => {
               }}
             />
           )}
-          {(!value || missingFile) && (
+          {(!valueToUse || missingFile) && (
             <div className={`${baseClass}__wrap`}>
               <Button
                 buttonStyle="secondary"
@@ -147,7 +167,6 @@ const Upload: React.FC<Props> = (props) => {
             fieldTypes,
             setValue: (val) => {
               setMissingFile(false);
-              setValue(val.id);
               setInternalValue(val);
             },
           }}
@@ -157,14 +176,13 @@ const Upload: React.FC<Props> = (props) => {
             slug: selectExistingModalSlug,
             setValue: (val) => {
               setMissingFile(false);
-              setValue(val.id);
               setInternalValue(val);
             },
             addModalSlug,
           }}
           />
           <FieldDescription
-            value={value}
+            value={valueToUse}
             description={description}
           />
         </React.Fragment>

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import useFieldType from '../../useFieldType';
@@ -40,6 +40,8 @@ const Select: React.FC<Props> = (props) => {
       description,
       condition,
     } = {},
+    value: valueFromProps,
+    onChange: onChangeFromProps
   } = props;
 
   const path = pathFromProps || name;
@@ -61,6 +63,38 @@ const Select: React.FC<Props> = (props) => {
     validate: memoizedValidate,
     condition,
   });
+
+  const onChange = useCallback((selectedOption) => {
+    if (!readOnly) {
+      let newValue;
+      if (hasMany) {
+        if (Array.isArray(selectedOption)) {
+          newValue = selectedOption.map((option) => option.value);
+        } else {
+          newValue = [];
+        }
+      } else {
+        newValue = selectedOption.value;
+      }
+
+      if (typeof onChangeFromProps === 'function') {
+        onChangeFromProps(newValue);
+      } else {
+        setValue(newValue);
+      }
+    }
+  }, [
+    readOnly,
+    hasMany,
+    onChangeFromProps,
+    setValue
+  ])
+
+  useEffect(() => {
+    if (typeof valueFromProps === 'string') {
+      setValue(valueFromProps);
+    }
+  }, [valueFromProps])
 
   const classes = [
     'field-type',
@@ -95,17 +129,7 @@ const Select: React.FC<Props> = (props) => {
         required={required}
       />
       <ReactSelect
-        onChange={!readOnly ? (selectedOption) => {
-          if (hasMany) {
-            if (Array.isArray(selectedOption)) {
-              setValue(selectedOption.map((option) => option.value));
-            } else {
-              setValue([]);
-            }
-          } else {
-            setValue(selectedOption.value);
-          }
-        } : undefined}
+        onChange={onChange}
         value={valueToRender}
         showError={showError}
         isDisabled={readOnly}

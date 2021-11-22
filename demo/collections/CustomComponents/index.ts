@@ -1,5 +1,8 @@
 import { CollectionConfig } from '../../../src/collections/config/types';
 import DescriptionField from './components/fields/Description/Field';
+import TextField from './components/fields/Text/Field';
+import SelectField from './components/fields/Select/Field';
+import UploadField from './components/fields/Upload/Field';
 import DescriptionCell from './components/fields/Description/Cell';
 import DescriptionFilter from './components/fields/Description/Filter';
 import NestedArrayField from './components/fields/NestedArrayCustomField/Field';
@@ -26,10 +29,58 @@ const CustomComponents: CollectionConfig = {
       localized: true,
     },
     {
+      name: 'text',
+      label: 'Text',
+      type: 'text',
+      required: true,
+      localized: true,
+      admin: {
+        components: {
+          Field: TextField,
+        },
+      },
+    },
+    {
+      name: 'select',
+      label: 'Select',
+      type: 'select',
+      localized: true,
+      options: [
+        {
+          label: 'Option 1',
+          value: '1',
+        },
+        {
+          label: 'Option 2',
+          value: '2',
+        },
+        {
+          label: 'Option 3',
+          value: '3',
+        },
+      ],
+      admin: {
+        components: {
+          Field: SelectField,
+        },
+      },
+    },
+    {
+      name: 'upload',
+      label: 'Upload',
+      type: 'upload',
+      relationTo: 'media',
+      localized: true,
+      admin: {
+        components: {
+          Field: UploadField,
+        },
+      },
+    },
+    {
       name: 'description',
       label: 'Description',
       type: 'textarea',
-      required: true,
       localized: true,
       admin: {
         components: {

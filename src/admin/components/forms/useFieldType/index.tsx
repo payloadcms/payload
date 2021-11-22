@@ -72,6 +72,7 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
   // as fast as they arrive. NOTE - this method is NOT debounced
   const setValue = useCallback((e, modifyForm = true) => {
     const val = (e && e.target) ? e.target.value : e;
+    console.log(val);
 
     if ((!ignoreWhileFlattening && !modified) && modifyForm) {
       setModified(true);
