@@ -2,25 +2,22 @@
 import fs from 'fs';
 import type { JSONSchema4 } from 'json-schema';
 import { compile } from 'json-schema-to-typescript';
-import { fieldAffectsData, Field, Option } from '../fields/config/types';
+import payload from '..';
+import { fieldAffectsData, Field, Option, FieldAffectingData } from '../fields/config/types';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { SanitizedConfig } from '../config/types';
 import loadConfig from '../config/load';
 import { SanitizedGlobalConfig } from '../globals/config/types';
 
-function getCollectionIDType(collections: SanitizedCollectionConfig[], slug): 'string' | 'number' {
+function getCollectionIDType(collections: SanitizedCollectionConfig[], slug: string): 'string' | 'number' {
   const matchedCollection = collections.find((collection) => collection.slug === slug);
-  if (matchedCollection) {
-    const idField = matchedCollection.fields.find((field) => 'name' in field && field.name === 'id');
+  const customIdField = matchedCollection.fields.find((field) => 'name' in field && field.name === 'id');
 
-    if (idField && idField.type === 'number') {
-      return 'number';
-    }
-
-    return 'string';
+  if (customIdField && customIdField.type === 'number') {
+    return 'number';
   }
 
-  return undefined;
+  return 'string';
 }
 
 function returnOptionEnums(options: Option[]): string[] {
@@ -319,8 +316,17 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
   };
 }
 
-function entityToJsonSchema(config: SanitizedConfig, entity: SanitizedCollectionConfig | SanitizedGlobalConfig): any {
+function entityToJsonSchema(config: SanitizedConfig, entity: SanitizedCollectionConfig | SanitizedGlobalConfig): JSONSchema4 {
   const title = 'label' in entity ? entity.label : entity.labels.singular;
+
+  const idField: FieldAffectingData = { type: 'text', name: 'id', required: true };
+  const customIdField = entity.fields.find((field) => fieldAffectsData(field) && field.name === 'id') as FieldAffectingData;
+
+  if (customIdField) {
+    customIdField.required = true;
+  } else {
+    entity.fields.unshift(idField);
+  }
 
   return {
     title,
@@ -351,7 +357,7 @@ function configToJsonSchema(config: SanitizedConfig): JSONSchema4 {
 export function generateTypes(): void {
   const config = loadConfig();
 
-  console.log('compiling ts types');
+  payload.logger.info('Compiling TS types for Collections and Globals...');
   const jsonSchema = configToJsonSchema(config);
 
   compile(jsonSchema, 'Config', {
@@ -359,6 +365,7 @@ export function generateTypes(): void {
     unreachableDefinitions: true,
   }).then((compiled) => {
     fs.writeFileSync(config.typescript.outputFile, compiled);
+    payload.logger.info(`Types written to ${config.typescript.outputFile}`);
   });
 }
 

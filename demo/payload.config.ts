@@ -37,6 +37,9 @@ import UnstoredMedia from './collections/UnstoredMedia';
 export default buildConfig({
   cookiePrefix: 'payload',
   serverURL: 'http://localhost:3000',
+  typescript: {
+    outputFile: './generated-types.ts',
+  },
   admin: {
     user: 'admins',
     indexHTML: path.resolve(__dirname, './client/index.html'),
