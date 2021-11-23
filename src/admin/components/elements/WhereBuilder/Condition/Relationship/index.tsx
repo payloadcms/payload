@@ -1,44 +1,20 @@
-import React, {
-  useCallback, useEffect, useState, useReducer,
-} from 'react';
+import React, { useReducer, useState, useCallback, useEffect } from 'react';
 import { useConfig } from '@payloadcms/config-provider';
-import withCondition from '../../withCondition';
-import ReactSelect from '../../../elements/ReactSelect';
-import { Value } from '../../../elements/ReactSelect/types';
-import useFieldType from '../../useFieldType';
-import Label from '../../Label';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import { relationship } from '../../../../../fields/validations';
-import { PaginatedDocs } from '../../../../../collections/config/types';
-import { useFormProcessing } from '../../Form/context';
-import optionsReducer from './optionsReducer';
 import { Props, Option, ValueWithRelation } from './types';
-import useDebounce from '../../../../hooks/useDebounce';
+import optionsReducer from './optionsReducer';
+import useDebounce from '../../../../../hooks/useDebounce';
+import ReactSelect from '../../../ReactSelect';
+import { Value } from '../../../ReactSelect/types';
+import { PaginatedDocs } from '../../../../../../collections/config/types';
 
 import './index.scss';
 
+const baseClass = 'condition-value-relationship';
+
 const maxResultsPerRequest = 10;
 
-const baseClass = 'relationship';
-
-const Relationship: React.FC<Props> = (props) => {
-  const {
-    relationTo,
-    validate = relationship,
-    path,
-    name,
-    required,
-    label,
-    hasMany,
-    admin: {
-      readOnly,
-      style,
-      width,
-      description,
-      condition,
-    } = {},
-  } = props;
+const RelationshipField: React.FC<Props> = (props) => {
+  const { onChange, value, relationTo, hasMany } = props;
 
   const {
     serverURL,
@@ -48,33 +24,14 @@ const Relationship: React.FC<Props> = (props) => {
     collections,
   } = useConfig();
 
-
-  const formProcessing = useFormProcessing();
-
   const hasMultipleRelations = Array.isArray(relationTo);
-  const [options, dispatchOptions] = useReducer(optionsReducer, required ? [] : [{ value: 'null', label: 'None' }]);
+  const [options, dispatchOptions] = useReducer(optionsReducer, []);
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [search, setSearch] = useState('');
   const [errorLoading, setErrorLoading] = useState('');
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false);
   const debouncedSearch = useDebounce(search, 300);
-
-  const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { required });
-    return validationResult;
-  }, [validate, required]);
-
-  const {
-    value,
-    showError,
-    errorMessage,
-    setValue,
-  } = useFieldType({
-    path: path || name,
-    validate: memoizedValidate,
-    condition,
-  });
 
   const addOptions = useCallback((data, relation) => {
     const collection = collections.find((coll) => coll.slug === relation);
@@ -213,14 +170,14 @@ const Relationship: React.FC<Props> = (props) => {
   useEffect(() => {
     dispatchOptions({
       type: 'CLEAR',
-      required,
+      required: true,
     });
 
     setHasLoadedFirstOptions(true);
     setLastLoadedPage(1);
     setLastFullyLoadedRelation(-1);
     getResults({ search: debouncedSearch });
-  }, [getResults, debouncedSearch, relationTo, required]);
+  }, [getResults, debouncedSearch, relationTo]);
 
   // ///////////////////////////
   // Format options once first options have been retrieved
@@ -258,37 +215,20 @@ const Relationship: React.FC<Props> = (props) => {
   const classes = [
     'field-type',
     baseClass,
-    showError && 'error',
     errorLoading && 'error-loading',
-    readOnly && `${baseClass}--read-only`,
   ].filter(Boolean).join(' ');
 
   const valueToRender = (findOptionsByValue() || value) as Value;
 
   return (
-    <div
-      className={classes}
-      style={{
-        ...style,
-        width,
-      }}
-    >
-      <Error
-        showError={showError}
-        message={errorMessage}
-      />
-      <Label
-        htmlFor={path}
-        label={label}
-        required={required}
-      />
+    <div className={classes}>
       {!errorLoading && (
         <ReactSelect
-          isDisabled={readOnly}
+          placeholder="Select a value"
           onInputChange={handleInputChange}
-          onChange={!readOnly ? (selected) => {
+          onChange={(selected) => {
             if (hasMany) {
-              setValue(selected ? selected.map((option) => {
+              onChange(selected ? selected.map((option) => {
                 if (hasMultipleRelations) {
                   return {
                     relationTo: option.relationTo,
@@ -299,20 +239,18 @@ const Relationship: React.FC<Props> = (props) => {
                 return option.value;
               }) : null);
             } else if (hasMultipleRelations) {
-              setValue({
+              onChange({
                 relationTo: selected.relationTo,
                 value: selected.value,
               });
             } else {
-              setValue(selected.value);
+              onChange(selected.value);
             }
-          } : undefined}
+          }}
           onMenuScrollToBottom={() => {
             getResults({ lastFullyLoadedRelation, lastLoadedPage: lastLoadedPage + 1 });
           }}
           value={valueToRender}
-          showError={showError}
-          disabled={formProcessing}
           options={options}
           isMulti={hasMany}
         />
@@ -322,12 +260,8 @@ const Relationship: React.FC<Props> = (props) => {
           {errorLoading}
         </div>
       )}
-      <FieldDescription
-        value={value}
-        description={description}
-      />
     </div>
   );
 };
 
-export default withCondition(Relationship);
+export default RelationshipField;

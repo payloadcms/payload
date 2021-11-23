@@ -23,6 +23,11 @@
 
 .rich-text-link__button {
   @extend %btn-reset;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
   position: relative;
   z-index: 2;
   text-decoration: underline;

@@ -113,7 +113,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     data: docWithLocales,
     hook: 'afterRead',
     operation: 'update',
-    overrideAccess,
+    overrideAccess: true,
     flattenLocales: true,
     showHiddenFields,
   });

@@ -15,7 +15,6 @@ const RelationshipA: CollectionConfig = {
       label: 'Post',
       type: 'relationship',
       relationTo: 'relationship-b',
-      localized: true,
     },
     {
       name: 'LocalizedPost',

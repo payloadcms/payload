@@ -2,6 +2,7 @@
 
 .field-type.email {
   margin-bottom: $baseline;
+  position: relative;
 
 	input {
 		@include formInput;

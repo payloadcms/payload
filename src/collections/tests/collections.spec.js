@@ -10,6 +10,7 @@ let token = null;
 let headers = null;
 
 let localizedPostID;
+const localizedPostTitle = 'title';
 const englishPostDesc = 'english description';
 const spanishPostDesc = 'spanish description';
 
@@ -44,7 +45,7 @@ describe('Collections - REST', () => {
     beforeAll(async () => {
       response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: 'title',
+          title: localizedPostTitle,
           description: englishPostDesc,
           priority: 1,
           nonLocalizedGroup: {
@@ -103,7 +104,7 @@ describe('Collections - REST', () => {
     it('should allow updating an existing post', async () => {
       const createResponse = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: 'title',
+          title: 'newTitle',
           description: 'original description',
           richText: [{
             children: [{ text: 'english' }],
@@ -132,7 +133,7 @@ describe('Collections - REST', () => {
       ];
       const response = await fetch(`${url}/api/localized-posts/${id}`, {
         body: JSON.stringify({
-          title: 'title',
+          title: 'newTitle',
           description: updatedDesc,
           richText: updatedRichText,
           nonLocalizedArray: updatedNonLocalizedArray,
@@ -161,7 +162,7 @@ describe('Collections - REST', () => {
     it('should allow a Spanish locale to be added to an existing post', async () => {
       const response = await fetch(`${url}/api/localized-posts/${localizedPostID}?locale=es`, {
         body: JSON.stringify({
-          title: 'title',
+          title: 'title in spanish',
           description: spanishPostDesc,
           priority: 1,
           nonLocalizedGroup: {
@@ -251,7 +252,7 @@ describe('Collections - REST', () => {
     it('should allow querying by id', async () => {
       const response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: 'title',
+          title: 'another title',
           description: 'description',
           priority: 1,
         }),
@@ -275,9 +276,12 @@ describe('Collections - REST', () => {
       const desc = 'query test';
       const response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: 'title',
+          title: 'unique title here',
           description: desc,
           priority: 1,
+          nonLocalizedGroup: {
+            text: 'sample content',
+          },
         }),
         headers,
         method: 'post',
@@ -290,6 +294,13 @@ describe('Collections - REST', () => {
       expect(getResponse.status).toBe(200);
       expect(data.docs[0].description).toBe(desc);
       expect(data.docs).toHaveLength(1);
+
+      const getResponse2 = await fetch(`${url}/api/localized-posts?where[nonLocalizedGroup.text][equals]=sample content`);
+      const data2 = await getResponse2.json();
+
+      expect(getResponse2.status).toBe(200);
+      expect(data2.docs[0].description).toBe(desc);
+      expect(data2.docs).toHaveLength(1);
     });
 
     it('should allow querying with OR', async () => {
@@ -360,13 +371,110 @@ describe('Collections - REST', () => {
       expect(data.docs).toHaveLength(1);
       expect(data.docs[0].title).toBe(title1);
     });
+
+    it('should allow querying by a non-localized nested relationship property', async () => {
+      const relationshipBTitle = 'test';
+      const relationshipBRes = await fetch(`${url}/api/relationship-b?depth=0`, {
+        body: JSON.stringify({
+          title: relationshipBTitle,
+        }),
+        headers,
+        method: 'post',
+      });
+
+      const relationshipBData = await relationshipBRes.json();
+
+      const res = await fetch(`${url}/api/relationship-a?depth=0`, {
+        body: JSON.stringify({
+          post: relationshipBData.doc.id,
+        }),
+        headers,
+        method: 'post',
+      });
+
+      const additionalRelationshipARes = await fetch(`${url}/api/relationship-a?depth=0`, {
+        body: JSON.stringify({
+          postLocalizedMultiple: [{
+            relationTo: 'localized-posts',
+            value: localizedPostID,
+          }],
+        }),
+        headers,
+        method: 'post',
+      });
+
+      const relationshipAData = await res.json();
+
+      expect(res.status).toBe(201);
+      expect(additionalRelationshipARes.status).toBe(201);
+      expect(relationshipAData.doc.post).toBe(relationshipBData.doc.id);
+
+      const queryRes = await fetch(`${url}/api/relationship-a?where[post.title][equals]=${relationshipBTitle}`);
+      const data = await queryRes.json();
+
+      expect(data.docs).toHaveLength(1);
+    });
+
+    it('should allow querying by a localized nested relationship property', async () => {
+      const res = await fetch(`${url}/api/relationship-a`, {
+        body: JSON.stringify({
+          LocalizedPost: [localizedPostID],
+        }),
+        headers,
+        method: 'post',
+      });
+
+      expect(res.status).toBe(201);
+
+      const queryRes1 = await fetch(`${url}/api/relationship-a?where[LocalizedPost.title][in]=${localizedPostTitle}`);
+      const data1 = await queryRes1.json();
+
+      expect(data1.docs).toHaveLength(1);
+
+      const queryRes2 = await fetch(`${url}/api/relationship-a?where[LocalizedPost.en.title][in]=${localizedPostTitle}`);
+      const data2 = await queryRes2.json();
+
+      expect(queryRes2.status).toBe(200);
+      expect(data2.docs).toHaveLength(1);
+    });
+
+    it('should allow querying by a field within a group', async () => {
+      const text = 'laiwjefliajwe';
+
+      await fetch(`${url}/api/localized-posts`, {
+        body: JSON.stringify({
+          title: 'super great title',
+          description: 'desc',
+          priority: 1,
+          nonLocalizedGroup: {
+            text,
+          },
+          localizedGroup: {
+            text,
+          },
+        }),
+        headers,
+        method: 'post',
+      });
+
+      const queryRes1 = await fetch(`${url}/api/localized-posts?where[nonLocalizedGroup.text][equals]=${text}`);
+      const data1 = await queryRes1.json();
+
+      expect(data1.docs).toHaveLength(1);
+
+      const queryRes2 = await fetch(`${url}/api/localized-posts?where[localizedGroup.text][equals]=${text}`);
+      const data2 = await queryRes2.json();
+
+      expect(queryRes2.status).toBe(200);
+      expect(data2.docs).toHaveLength(1);
+    });
   });
 
   describe('Delete', () => {
     it('should allow a post to be deleted', async () => {
       const response = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          title: 'title',
+          title: 'title to be deleted',
           description: englishPostDesc,
           priority: 1,
         }),

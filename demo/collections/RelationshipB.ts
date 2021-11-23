@@ -5,11 +5,18 @@ const RelationshipB: CollectionConfig = {
   access: {
     read: () => true,
   },
+  admin: {
+    useAsTitle: 'title',
+  },
   labels: {
     singular: 'Relationship B',
     plural: 'Relationship B',
   },
   fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
     {
       name: 'post',
       label: 'Post',

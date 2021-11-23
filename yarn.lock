@@ -8603,6 +8603,17 @@ mongodb@4.1.2:
   optionalDependencies:
     saslprep "^1.0.3"
 
+mongodb@4.1.3:
+  version "4.1.3"
+  resolved "https://registry.npmjs.org/mongodb/-/mongodb-4.1.3.tgz#8bf24d782ba3f3833201f4e60b0307d87980ba71"
+  integrity sha512-lHvTqODBiSpuqjpCj48DOyYWS6Iq6ElJNUiH9HWdQtONyOfjgsKzJULipWduMGsSzaNO4nFi/kmlMFCLvjox/Q==
+  dependencies:
+    bson "^4.5.2"
+    denque "^2.0.1"
+    mongodb-connection-string-url "^2.0.0"
+  optionalDependencies:
+    saslprep "^1.0.3"
+
 mongoose-legacy-pluralize@1.0.2:
   version "1.0.2"
   resolved "https://registry.npmjs.org/mongoose-legacy-pluralize/-/mongoose-legacy-pluralize-1.0.2.tgz#3ba9f91fa507b5186d399fb40854bff18fb563e4"
@@ -8613,7 +8624,7 @@ mongoose-paginate-v2@^1.3.6:
   resolved "https://registry.npmjs.org/mongoose-paginate-v2/-/mongoose-paginate-v2-1.4.2.tgz#482cea73f4a0bd49131ef9004694c73cae93b73e"
   integrity sha512-b7FBe7fasJazhlTIfMSPyIST04yvobASXKmUt3ducnvYThulCyGSPhPcSYOzXcPmqBR4tpMnafIJxv+8GjM+UA==
 
-mongoose@5.*, mongoose@^5.8.9:
+mongoose@5.*:
   version "5.13.11"
   resolved "https://registry.npmjs.org/mongoose/-/mongoose-5.13.11.tgz#4f6fc4959310d0c31606fdec19b6f25f8ebbb50a"
   integrity sha512-hVHm864eBpaCr0W6CF7qTmC62dmepnT+A6ZnqKPU9asw7jjYHBcBxPgCnrGBMUACbZtzidO6HmB4J3F1YU2rdg==
@@ -8630,6 +8641,21 @@ mongoose@5.*, mongoose@^5.8.9:
     optional-require "1.0.x"
     regexp-clone "1.0.0"
     safe-buffer "5.2.1"
+    sift "13.5.2"
+    sliced "1.0.1"
+
+mongoose@^6.0.12:
+  version "6.0.12"
+  resolved "https://registry.npmjs.org/mongoose/-/mongoose-6.0.12.tgz#a22727d52ca9e9ce3996330b895afe5cde75af3c"
+  integrity sha512-BvsZk7zEEhb1AgQFLtxN9C+7qgy5edRuA3ZDDwHU+kHG/HM44vI6FdKV5m6HVdAUeCHHQTiVv+YQh8BRsToSHw==
+  dependencies:
+    bson "^4.2.2"
+    kareem "2.3.2"
+    mongodb "4.1.3"
+    mpath "0.8.4"
+    mquery "4.0.0"
+    ms "2.1.2"
+    regexp-clone "1.0.0"
     sift "13.5.2"
     sliced "1.0.1"
 

@@ -6,6 +6,7 @@ import Button from '../../Button';
 import Date from './Date';
 import Number from './Number';
 import Text from './Text';
+import Relationship from './Relationship';
 import useDebounce from '../../../../hooks/useDebounce';
 import { FieldCondition } from '../types';
 
@@ -15,6 +16,7 @@ const valueFields = {
   Date,
   Number,
   Text,
+  Relationship,
 };
 
 const baseClass = 'condition';
@@ -93,6 +95,7 @@ const Condition: React.FC<Props> = (props) => {
               DefaultComponent={ValueComponent}
               componentProps={{
                 ...activeField?.props,
+                operator: operatorValue,
                 value: internalValue,
                 onChange: setInternalValue,
               }}

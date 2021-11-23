@@ -28,7 +28,10 @@ async function logout(args: Arguments): Promise<string> {
     httpOnly: true,
     secure: collectionConfig.auth.cookies.secure,
     sameSite: collectionConfig.auth.cookies.sameSite,
+    domain: undefined,
   };
+
+  if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
 
   res.clearCookie(`${config.cookiePrefix}-token`, cookieOptions);
 
