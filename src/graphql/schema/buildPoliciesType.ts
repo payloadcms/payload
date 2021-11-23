@@ -6,7 +6,7 @@ import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
 import { Field } from '../../fields/config/types';
 
-type OperationType = 'create' | 'read' | 'update' | 'delete';
+type OperationType = 'create' | 'read' | 'update' | 'delete' | 'unlock' | 'readRevisions';
 
 type ObjectTypeFields = {
   [key in OperationType | 'fields']?: { type: GraphQLObjectType };
@@ -104,10 +104,20 @@ export default function buildPoliciesType(): GraphQLObjectType {
   };
 
   Object.values(this.config.collections).forEach((collection: SanitizedCollectionConfig) => {
+    const collectionOperations: OperationType[] = ['create', 'read', 'update', 'delete'];
+
+    if (collection.auth && (typeof collection.auth.maxLoginAttempts !== 'undefined' && collection.auth.maxLoginAttempts !== 0)) {
+      collectionOperations.push('unlock');
+    }
+
+    if (collection.revisions) {
+      collectionOperations.push('readRevisions');
+    }
+
     fields[formatName(collection.slug)] = {
       type: new GraphQLObjectType({
         name: formatName(`${collection.labels.singular}Access`),
-        fields: buildEntity(collection.labels.singular, collection.fields, ['create', 'read', 'update', 'delete']),
+        fields: buildEntity(collection.labels.singular, collection.fields, collectionOperations),
       }),
     };
   });

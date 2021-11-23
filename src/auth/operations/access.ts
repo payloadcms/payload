@@ -1,3 +1,4 @@
+import { Payload } from '../..';
 import { PayloadRequest } from '../../express/types';
 import { Permissions } from '../types';
 
@@ -7,7 +8,7 @@ type Arguments = {
   req: PayloadRequest
 }
 
-async function accessOperation(args: Arguments): Promise<Permissions> {
+async function accessOperation(this: Payload, args: Arguments): Promise<Permissions> {
   const { config } = this;
 
   const {
@@ -102,7 +103,17 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
   }
 
   config.collections.forEach((collection) => {
-    executeEntityPolicies(collection, allOperations, 'collections');
+    const collectionOperations = [...allOperations];
+
+    if (collection.auth && (typeof collection.auth.maxLoginAttempts !== 'undefined' && collection.auth.maxLoginAttempts !== 0)) {
+      collectionOperations.push('unlock');
+    }
+
+    if (collection.revisions) {
+      collectionOperations.push('readRevisions');
+    }
+
+    executeEntityPolicies(collection, collectionOperations, 'collections');
   });
 
   config.globals.forEach((global) => {

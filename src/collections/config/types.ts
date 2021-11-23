@@ -134,8 +134,9 @@ export type CollectionConfig = {
     read?: Access;
     update?: Access;
     delete?: Access;
-    admin?: Access;
+    admin?: (args?: any) => boolean;
     unlock?: Access;
+    readRevisions?: Access;
   };
   auth?: IncomingAuthType | boolean;
   upload?: IncomingUploadType | boolean;

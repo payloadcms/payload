@@ -10,7 +10,6 @@ import getBaseUploadFields from '../../uploads/getBaseFields';
 import { formatLabels } from '../../utilities/formatLabels';
 import { defaults, authDefaults } from './defaults';
 import { Config } from '../../config/types';
-import { baseRevisionFields } from '../../revisions/baseFields';
 
 const mergeBaseFields = (fields, baseFields) => {
   const mergedFields = [];
@@ -67,15 +66,6 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
 
   if (sanitized.revisions) {
     if (sanitized.revisions === true) sanitized.revisions = {};
-
-    let revisionFields = baseRevisionFields;
-
-    revisionFields = mergeBaseFields(sanitized.fields, revisionFields);
-
-    sanitized.fields = [
-      ...revisionFields,
-      ...sanitized.fields,
-    ];
   }
 
   if (sanitized.upload) {
