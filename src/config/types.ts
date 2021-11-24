@@ -25,7 +25,7 @@ type GeneratePreviewURLOptions = {
   token: string
 }
 
-export type GeneratePreviewURL = (doc: Record<string, unknown>, options: GeneratePreviewURLOptions) => Promise<string>
+export type GeneratePreviewURL = (doc: Record<string, unknown>, options: GeneratePreviewURLOptions) => Promise<string> | string
 
 export type EmailTransport = Email & {
   transport: Transporter;
