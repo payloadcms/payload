@@ -4,6 +4,7 @@ import { Editor } from 'slate';
 import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
+import { Description } from '../../admin/components/forms/FieldDescription/types';
 
 export type FieldHook = (args: {
   value?: unknown,
@@ -39,8 +40,6 @@ type Admin = {
   }
   hidden?: boolean
 }
-
-export type Description = string | ((value: Record<string, unknown>) => string);
 
 export type Labels = {
   singular: string;

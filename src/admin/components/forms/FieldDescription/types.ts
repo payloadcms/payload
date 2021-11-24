@@ -2,9 +2,9 @@ import React from 'react';
 
 export type DescriptionFunction = (value: unknown) => string
 
-export type DescriptionComponent = React.ComponentType<{value: unknown}>
+export type DescriptionComponent = React.ComponentType<{ value: unknown }>
 
-type Description = string | DescriptionFunction | DescriptionComponent
+export type Description = string | DescriptionFunction | DescriptionComponent
 
 export type Props = {
   description?: Description

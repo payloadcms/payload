@@ -430,12 +430,74 @@ describe('Collections - REST', () => {
       const data1 = await queryRes1.json();
 
       expect(data1.docs).toHaveLength(1);
+    });
 
-      const queryRes2 = await fetch(`${url}/api/relationship-a?where[LocalizedPost.en.title][in]=${localizedPostTitle}`);
-      const data2 = await queryRes2.json();
+    it('should allow querying by a localized nested relationship property with many relationTos', async () => {
+      const relationshipBTitle = 'lawleifjawelifjew';
+      const relationshipB = await fetch(`${url}/api/relationship-b?depth=0`, {
+        body: JSON.stringify({
+          title: relationshipBTitle,
+        }),
+        headers,
+        method: 'post',
+      }).then((res) => res.json());
 
-      expect(queryRes2.status).toBe(200);
-      expect(data2.docs).toHaveLength(1);
+      expect(relationshipB.doc.id).toBeDefined();
+
+      const res = await fetch(`${url}/api/relationship-a`, {
+        body: JSON.stringify({
+          postManyRelationships: {
+            value: relationshipB.doc.id,
+            relationTo: 'relationship-b',
+          },
+        }),
+        headers,
+        method: 'post',
+      });
+
+      expect(res.status).toBe(201);
+
+      const queryRes = await fetch(`${url}/api/relationship-a?where[postManyRelationships.value][equals]=${relationshipB.doc.id}`);
+      const data = await queryRes.json();
+      expect(data.docs).toHaveLength(1);
+    });
+
+    it('should allow querying by a numeric custom ID', async () => {
+      const customID = 1988;
+
+      const customIDResult = await fetch(`${url}/api/custom-id?depth=0`, {
+        body: JSON.stringify({
+          id: customID,
+          name: 'woohoo',
+        }),
+        headers,
+        method: 'post',
+      }).then((res) => res.json());
+
+      expect(customIDResult.doc.id).toStrictEqual(customID);
+
+      await fetch(`${url}/api/custom-id?depth=0`, {
+        body: JSON.stringify({
+          id: 2343452,
+          name: 'another post',
+        }),
+        headers,
+        method: 'post',
+      }).then((res) => res.json());
+
+      const queryRes1 = await fetch(`${url}/api/custom-id?where[id][equals]=${customID}`, {
+        headers,
+      });
+
+      const data1 = await queryRes1.json();
+
+      expect(data1.docs).toHaveLength(1);
+
+      const queryByIDRes = await fetch(`${url}/api/custom-id/${customID}`, {
+        headers,
+      });
+      const queryByIDData = await queryByIDRes.json();
+      expect(queryByIDData.id).toStrictEqual(customID);
     });
 
     it('should allow querying by a field within a group', async () => {

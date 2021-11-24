@@ -29,6 +29,9 @@ export default joi.object({
     graphQL: joi.string(),
     graphQLPlayground: joi.string(),
   }),
+  typescript: joi.object({
+    outputFile: joi.string(),
+  }),
   collections: joi.array(),
   globals: joi.array(),
   admin: joi.object({

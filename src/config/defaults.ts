@@ -19,6 +19,9 @@ export const defaults = {
     scss: path.resolve(__dirname, '../admin/scss/overrides.scss'),
     dateFormat: 'MMMM do yyyy, h:mm a',
   },
+  typescript: {
+    outputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/payload-types.ts`,
+  },
   upload: {},
   graphQL: {
     maxComplexity: 1000,
