@@ -215,7 +215,7 @@ export class Payload {
    * @param options
    * @returns documents satisfying query
    */
-  find = async <T extends TypeWithID>(options: FindOptions): Promise<PaginatedDocs<T>> => {
+  find = async <T extends TypeWithID = any>(options: FindOptions): Promise<PaginatedDocs<T>> => {
     let { find } = localOperations;
     find = find.bind(this);
     return find(options);
@@ -238,7 +238,7 @@ export class Payload {
    * @param options
    * @returns document with specified ID
    */
-  findByID = async <T extends TypeWithID>(options: FindByIDOptions): Promise<T> => {
+  findByID = async <T extends TypeWithID = any>(options: FindByIDOptions): Promise<T> => {
     let { findByID } = localOperations;
     findByID = findByID.bind(this);
     return findByID<T>(options);
@@ -249,13 +249,13 @@ export class Payload {
    * @param options
    * @returns Updated document
    */
-  update = async <T extends TypeWithID>(options: UpdateOptions): Promise<T> => {
+  update = async <T extends TypeWithID = any>(options: UpdateOptions): Promise<T> => {
     let { update } = localOperations;
     update = update.bind(this);
     return update<T>(options);
   }
 
-  delete = async <T extends TypeWithID>(options: DeleteOptions): Promise<T> => {
+  delete = async <T extends TypeWithID = any>(options: DeleteOptions): Promise<T> => {
     let { localDelete: deleteOperation } = localOperations;
     deleteOperation = deleteOperation.bind(this);
     return deleteOperation<T>(options);

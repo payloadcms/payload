@@ -15,7 +15,7 @@ export type Options = {
   req?: PayloadRequest
 }
 
-export default async function findByID<T extends TypeWithID>(options: Options): Promise<T> {
+export default async function findByID<T extends TypeWithID = any>(options: Options): Promise<T> {
   const {
     collection: collectionSlug,
     depth,

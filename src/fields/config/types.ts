@@ -1,20 +1,24 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
+import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
-import { Document } from '../../types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 
-export type FieldHook = (args: {
-  value?: unknown,
-  originalDoc?: Document,
+export type FieldHookArgs<T extends TypeWithID = any, P extends keyof T = any> = {
+  value?: T[P],
+  originalDoc?: T,
   data?: {
     [key: string]: unknown
   },
   operation?: 'create' | 'read' | 'update' | 'delete',
   req: PayloadRequest
-}) => Promise<unknown> | unknown;
+}
+
+export type FieldHookReturnType = Promise<unknown> | unknown;
+
+export type FieldHook<T extends TypeWithID = any, P extends keyof T = any> = (args: FieldHookArgs<T, P>) => FieldHookReturnType;
 
 export type FieldAccess = (args: {
   req: PayloadRequest
@@ -378,4 +382,4 @@ export function fieldAffectsData(field: Field): field is FieldAffectingData {
   return 'name' in field && !fieldIsPresentationalOnly(field);
 }
 
-export type HookName = 'beforeChange' | 'beforeValidate' | 'afterChange' | 'afterRead';
+export type HookName = 'beforeRead' | 'beforeChange' | 'beforeValidate' | 'afterChange' | 'afterRead';
