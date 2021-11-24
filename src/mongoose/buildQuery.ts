@@ -150,6 +150,8 @@ class ParamParser {
       const currentSchemaType = schema.path(currentPath);
       const currentSchemaPathType = schema.pathType(currentPath);
 
+      const upcomingSegment = pathSegments[i + 1];
+
       if (currentSchemaType && currentSchemaPathType !== 'adhocOrUndefined') {
         const currentSchemaTypeOptions = getSchemaTypeOptions(currentSchemaType);
 
@@ -162,7 +164,6 @@ class ParamParser {
             return;
           }
 
-          const upcomingSegment = pathSegments[i + 1];
           const upcomingPathWithLocale = `${currentPath}.${this.locale}.${upcomingSegment}`;
           const upcomingSchemaTypeWithLocale = schema.path(upcomingPathWithLocale);
 
@@ -193,6 +194,17 @@ class ParamParser {
           ];
           return;
         }
+      }
+
+      const upcomingPath = `${currentPath}.${upcomingSegment}`;
+      const upcomingSchemaType = schema.path(upcomingPath);
+
+      if (upcomingSchemaType) {
+        lastIncompletePath.path = upcomingPath;
+        lastIncompletePath.complete = true;
+        // Remove the next segment as it has been used here
+        pathSegments.splice(i + 1, 1);
+        return;
       }
 
       if (operator === 'near') {

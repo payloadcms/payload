@@ -432,7 +432,7 @@ describe('Collections - REST', () => {
       expect(data1.docs).toHaveLength(1);
     });
 
-    it('should allow querying by a localized nested relationship property with many relationTos', async () => {
+    it('should allow querying by a localized nested relationship with many relationTos', async () => {
       const relationshipBTitle = 'lawleifjawelifjew';
       const relationshipB = await fetch(`${url}/api/relationship-b?depth=0`, {
         body: JSON.stringify({
@@ -458,6 +458,26 @@ describe('Collections - REST', () => {
       expect(res.status).toBe(201);
 
       const queryRes = await fetch(`${url}/api/relationship-a?where[postManyRelationships.value][equals]=${relationshipB.doc.id}`);
+      const data = await queryRes.json();
+      expect(data.docs).toHaveLength(1);
+    });
+
+    it('should allow querying by a non-localized relationship with many relationTos', async () => {
+      const relationshipB = await fetch(`${url}/api/relationship-b?depth=0`, {
+        body: JSON.stringify({
+          title: 'awefjlaiwejfalweiijfaew',
+          nonLocalizedRelationToMany: {
+            relationTo: 'localized-posts',
+            value: localizedPostID,
+          },
+        }),
+        headers,
+        method: 'post',
+      }).then((res) => res.json());
+
+      expect(relationshipB.doc.id).toBeDefined();
+
+      const queryRes = await fetch(`${url}/api/relationship-b?where[nonLocalizedRelationToMany.value][equals]=${localizedPostID}`);
       const data = await queryRes.json();
       expect(data.docs).toHaveLength(1);
     });

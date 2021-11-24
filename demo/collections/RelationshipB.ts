@@ -41,6 +41,11 @@ const RelationshipB: CollectionConfig = {
       relationTo: ['localized-posts', 'previewable-post'],
     },
     {
+      name: 'nonLocalizedRelationToMany',
+      type: 'relationship',
+      relationTo: ['localized-posts', 'relationship-a'],
+    },
+    {
       name: 'strictAccess',
       type: 'relationship',
       relationTo: 'strict-access',
