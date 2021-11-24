@@ -5,6 +5,10 @@ import { Forbidden } from '../errors';
 import { PayloadRequest } from '../express/types';
 
 const getExecuteStaticAccess = ({ config, Model }) => async (req: PayloadRequest, res: Response, next: NextFunction) => {
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+
   try {
     if (req.path) {
       const accessResult = await executeAccess({ req, isReadingStaticFile: true }, config.access.read);
