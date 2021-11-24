@@ -101,7 +101,10 @@ export type CollectionConfig = {
   admin?: {
     useAsTitle?: string;
     defaultColumns?: string[];
-    description?: string | (() => string);
+    /**
+     * Custom description for collection
+     */
+    description?: string | (() => string) | React.FC;
     disableDuplicate?: boolean;
     components?: {
       views?: {
