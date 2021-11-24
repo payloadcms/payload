@@ -22,8 +22,10 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
   const modified = useFormModified();
 
   const {
-    dispatchFields, getField, setModified,
-  } = formContext;
+    dispatchFields,
+    getField,
+    setModified,
+  } = formContext || {};
 
   const [internalValue, setInternalValue] = useState(undefined);
 
@@ -64,22 +66,38 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
       fieldToDispatch.valid = validationResult;
     }
 
-    dispatchFields(fieldToDispatch);
-  }, [path, dispatchFields, validate, disableFormData, ignoreWhileFlattening, initialValue, stringify, condition]);
+    if (typeof dispatchFields === 'function') {
+      dispatchFields(fieldToDispatch);
+    }
+  }, [
+    path,
+    dispatchFields,
+    validate,
+    disableFormData,
+    ignoreWhileFlattening,
+    initialValue,
+    stringify,
+    condition
+  ]);
 
   // Method to return from `useFieldType`, used to
   // update internal field values from field component(s)
   // as fast as they arrive. NOTE - this method is NOT debounced
   const setValue = useCallback((e, modifyForm = true) => {
     const val = (e && e.target) ? e.target.value : e;
-    console.log(val);
 
     if ((!ignoreWhileFlattening && !modified) && modifyForm) {
-      setModified(true);
+      if (typeof setModified === 'function') {
+        setModified(true);
+      }
     }
 
     setInternalValue(val);
-  }, [setModified, modified, ignoreWhileFlattening]);
+  }, [
+    setModified,
+    modified,
+    ignoreWhileFlattening
+  ]);
 
   useEffect(() => {
     setInternalValue(initialValue);
@@ -95,7 +113,11 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
     if (field?.value !== valueToSend && valueToSend !== undefined) {
       sendField(valueToSend);
     }
-  }, [valueToSend, sendField, field]);
+  }, [
+    valueToSend,
+    sendField,
+    field
+  ]);
 
   return {
     ...options,

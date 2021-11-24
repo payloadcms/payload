@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import Upload from '../../../../../../../src/admin/components/forms/field-types/Upload';
 import { Props as UploadFieldType } from '../../../../../../../src/admin/components/forms/field-types/Upload/types';
+import useFieldType from '../../../../../../../src/admin/components/forms/useFieldType';
 
 const Text: React.FC<UploadFieldType> = (props) => {
   const {
@@ -11,17 +12,25 @@ const Text: React.FC<UploadFieldType> = (props) => {
     fieldTypes
   } = props;
 
-  const [internalValue, setInternalValue] = useState('');
+  const {
+    value,
+    setValue
+  } = useFieldType({
+    path
+  });
+
+  const onChange = useCallback((incomingValue) => {
+    setValue(incomingValue)
+  }, [])
 
   return (
     <Upload
       relationTo={relationTo}
       fieldTypes={fieldTypes}
-      path={path}
       name={name}
       label={label}
-      value={internalValue}
-      onChange={setInternalValue}
+      value={value as string}
+      onChange={onChange}
     />
   )
 };

@@ -60,11 +60,13 @@ const Upload: React.FC<Props> = (props) => {
   });
 
   const {
-    value,
+    value: valueFromContext,
     showError,
     setValue,
     errorMessage,
   } = fieldType;
+
+  const value = valueFromProps || valueFromContext || '';
 
   const classes = [
     'field-type',
@@ -83,7 +85,6 @@ const Upload: React.FC<Props> = (props) => {
           setInternalValue(json);
         } else {
           setInternalValue(undefined);
-          setValue(null);
           setMissingFile(true);
         }
       };
@@ -92,7 +93,6 @@ const Upload: React.FC<Props> = (props) => {
     }
   }, [
     value,
-    setInternalValue,
     relationTo,
     api,
     serverURL,
@@ -107,8 +107,6 @@ const Upload: React.FC<Props> = (props) => {
       setValue(incomingID);
     }
   }, [internalValue]);
-
-  const valueToUse = valueFromProps || value || '';
 
   return (
     <div
@@ -139,7 +137,7 @@ const Upload: React.FC<Props> = (props) => {
               }}
             />
           )}
-          {(!valueToUse || missingFile) && (
+          {(!value || missingFile) && (
             <div className={`${baseClass}__wrap`}>
               <Button
                 buttonStyle="secondary"
@@ -182,7 +180,7 @@ const Upload: React.FC<Props> = (props) => {
           }}
           />
           <FieldDescription
-            value={valueToUse}
+            value={value}
             description={description}
           />
         </React.Fragment>

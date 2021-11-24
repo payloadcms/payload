@@ -54,7 +54,7 @@ const Select: React.FC<Props> = (props) => {
   }, [validate, required, options]);
 
   const {
-    value,
+    value: valueFromContext,
     showError,
     setValue,
     errorMessage,
@@ -90,12 +90,6 @@ const Select: React.FC<Props> = (props) => {
     setValue
   ])
 
-  useEffect(() => {
-    if (typeof valueFromProps === 'string') {
-      setValue(valueFromProps);
-    }
-  }, [valueFromProps])
-
   const classes = [
     'field-type',
     baseClass,
@@ -104,6 +98,8 @@ const Select: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   let valueToRender;
+
+  const value = valueFromProps || valueFromContext || '';
 
   if (hasMany && Array.isArray(value)) {
     valueToRender = value.map((val) => options.find((option) => option.value === val));

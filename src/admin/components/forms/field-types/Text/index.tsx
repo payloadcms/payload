@@ -38,7 +38,7 @@ const Text: React.FC<Props> = (props) => {
   });
 
   const {
-    value,
+    value: valueFromContext,
     showError,
     setValue,
     errorMessage,
@@ -46,20 +46,15 @@ const Text: React.FC<Props> = (props) => {
 
   const onChange = useCallback((e) => {
     const { value: incomingValue } = e.target;
-    setValue(e);
     if (typeof onChangeFromProps === 'function') {
       onChangeFromProps(incomingValue);
+    } else {
+      setValue(e);
     }
   }, [
     onChangeFromProps,
     setValue,
   ]);
-
-  useEffect(() => {
-    if (typeof valueFromProps === 'string') {
-      setValue(valueFromProps);
-    }
-  }, [valueFromProps])
 
   const classes = [
     'field-type',
@@ -67,6 +62,8 @@ const Text: React.FC<Props> = (props) => {
     showError && 'error',
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');
+
+  const value = valueFromProps || valueFromContext || '';
 
   return (
     <div
@@ -86,7 +83,7 @@ const Text: React.FC<Props> = (props) => {
         required={required}
       />
       <input
-        value={value || ''}
+        value={value}
         onChange={onChange}
         disabled={readOnly}
         placeholder={placeholder}

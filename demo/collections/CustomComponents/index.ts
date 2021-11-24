@@ -9,6 +9,7 @@ import NestedArrayField from './components/fields/NestedArrayCustomField/Field';
 import GroupField from './components/fields/Group/Field';
 import NestedGroupField from './components/fields/NestedGroupCustomField/Field';
 import NestedText1Field from './components/fields/NestedText1/Field';
+import UIField from './components/fields/UI/Field';
 import ListView from './components/views/List';
 import CustomDescriptionComponent from '../../customComponents/Description';
 
@@ -30,7 +31,7 @@ const CustomComponents: CollectionConfig = {
     },
     {
       name: 'text',
-      label: 'Text',
+      label: 'Custom text field (removes whitespace)',
       type: 'text',
       required: true,
       localized: true,
@@ -42,7 +43,7 @@ const CustomComponents: CollectionConfig = {
     },
     {
       name: 'select',
-      label: 'Select',
+      label: 'Custom select field (sends value to crm)',
       type: 'select',
       localized: true,
       options: [
@@ -62,6 +63,16 @@ const CustomComponents: CollectionConfig = {
       admin: {
         components: {
           Field: SelectField,
+        },
+      },
+    },
+    {
+      name: 'ui',
+      label: 'UI',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: UIField,
         },
       },
     },
