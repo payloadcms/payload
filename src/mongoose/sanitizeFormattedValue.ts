@@ -91,7 +91,7 @@ export const sanitizeQueryValue = (schemaType: SchemaType, path: string, operato
   }
 
   if (operator === 'like' && path !== '_id') {
-    formattedValue = { $regex: formattedValue, $options: '-i' };
+    formattedValue = { $regex: formattedValue, $options: 'i' };
   }
 
   if (operator === 'exists') {

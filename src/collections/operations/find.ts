@@ -98,22 +98,28 @@ async function find(incomingArgs: Arguments): Promise<PaginatedDocs> {
   // Find
   // /////////////////////////////////////
 
-  let { sort } = args;
+  let sortParam: Record<string, string>;
 
-  if (!sort) {
+  if (!args.sort) {
     if (collectionConfig.timestamps) {
-      sort = '-createdAt';
+      sortParam = { createdAt: 'desc' };
     } else {
-      sort = '-_id';
+      sortParam = { _id: 'desc' };
     }
-  } else if (sort === 'id' || sort === '-id') {
-    sort = sort.replace('id', '_id');
+  } else if (args.sort.indexOf('-') === 0) {
+    sortParam = {
+      [args.sort.substring(1)]: 'desc',
+    };
+  } else {
+    sortParam = {
+      [args.sort]: 'asc',
+    };
   }
 
   const optionsToExecute = {
     page: page || 1,
     limit: limit || 10,
-    sort,
+    sort: sortParam,
     lean: true,
     leanWithId: true,
     useEstimatedCount,

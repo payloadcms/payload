@@ -107,6 +107,11 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
     }
   });
 
+  if (buildSchemaOptions?.options?.timestamps) {
+    indexFields.push({ createdAt: 1 });
+    indexFields.push({ updatedAt: 1 });
+  }
+
   const schema = new Schema(fields, options);
   indexFields.forEach((index) => {
     schema.index(index);
