@@ -150,6 +150,13 @@ class ParamParser {
       const currentSchemaType = schema.path(currentPath);
       const currentSchemaPathType = schema.pathType(currentPath);
 
+      if (currentSchemaPathType === 'nested') {
+        lastIncompletePath.path = currentPath;
+        return;
+      }
+
+      const upcomingSegment = pathSegments[i + 1];
+
       if (currentSchemaType && currentSchemaPathType !== 'adhocOrUndefined') {
         const currentSchemaTypeOptions = getSchemaTypeOptions(currentSchemaType);
 
@@ -162,7 +169,6 @@ class ParamParser {
             return;
           }
 
-          const upcomingSegment = pathSegments[i + 1];
           const upcomingPathWithLocale = `${currentPath}.${this.locale}.${upcomingSegment}`;
           const upcomingSchemaTypeWithLocale = schema.path(upcomingPathWithLocale);
 
