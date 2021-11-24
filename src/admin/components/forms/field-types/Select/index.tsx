@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
@@ -58,7 +58,7 @@ const Select: React.FC<Props> = (props) => {
     showError,
     setValue,
     errorMessage,
-  } = useFieldType({
+  } = useField({
     path,
     validate: memoizedValidate,
     condition,

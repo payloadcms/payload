@@ -5,7 +5,7 @@ import { useFormProcessing, useFormSubmitted, useFormModified, useForm } from '.
 import useDebounce from '../../../hooks/useDebounce';
 import { Options, FieldType } from './types';
 
-const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
+const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const {
     path,
     validate,
@@ -80,7 +80,7 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
     condition
   ]);
 
-  // Method to return from `useFieldType`, used to
+  // Method to return from `useField`, used to
   // update internal field values from field component(s)
   // as fast as they arrive. NOTE - this method is NOT debounced
   const setValue = useCallback((e, modifyForm = true) => {
@@ -130,4 +130,4 @@ const useFieldType = <T extends unknown>(options: Options): FieldType<T> => {
   };
 };
 
-export default useFieldType;
+export default useField;

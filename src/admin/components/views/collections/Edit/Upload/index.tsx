@@ -1,7 +1,7 @@
 import React, {
   useState, useRef, useEffect, useCallback,
 } from 'react';
-import useFieldType from '../../../../forms/useFieldType';
+import useField from '../../../../forms/useField';
 import Button from '../../../../elements/Button';
 import FileDetails from '../../../../elements/FileDetails';
 import Error from '../../../../forms/Error';
@@ -45,7 +45,7 @@ const Upload: React.FC<Props> = (props) => {
     setValue,
     showError,
     errorMessage,
-  } = useFieldType<{name: string}>({
+  } = useField<{ name: string }>({
     path: 'file',
     validate,
   });

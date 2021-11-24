@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
@@ -30,7 +30,7 @@ const Text: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const fieldType = useFieldType<string>({
+  const fieldType = useField<string>({
     path,
     validate,
     enableDebouncedValue: true,

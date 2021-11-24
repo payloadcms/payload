@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import TextInput from '../../../../../../../src/admin/components/forms/field-types/Text';
 import { Props as TextFieldType } from '../../../../../../../src/admin/components/forms/field-types/Text/types';
-import useFieldType from '../../../../../../../src/admin/components/forms/useFieldType';
+import useField from '../../../../../../../src/admin/components/forms/useField';
 
 const Text: React.FC<TextFieldType> = (props) => {
   const {
@@ -13,7 +13,7 @@ const Text: React.FC<TextFieldType> = (props) => {
   const {
     value,
     setValue
-  } = useFieldType({
+  } = useField({
     path
   });
 

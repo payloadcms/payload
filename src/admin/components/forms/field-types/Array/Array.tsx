@@ -7,7 +7,7 @@ import DraggableSection from '../../DraggableSection';
 import reducer from '../rowReducer';
 import { useForm } from '../../Form/context';
 import buildStateFromSchema from '../../Form/buildStateFromSchema';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import Error from '../../Error';
 import { array } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
@@ -66,7 +66,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     errorMessage,
     value,
     setValue,
-  } = useFieldType({
+  } = useField({
     path,
     validate: memoizedValidate,
     disableFormData,

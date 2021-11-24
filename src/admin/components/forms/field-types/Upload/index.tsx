@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useConfig } from '@payloadcms/config-provider';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import Label from '../../Label';
@@ -53,7 +53,7 @@ const Upload: React.FC<Props> = (props) => {
     return validationResult;
   }, [validate, required]);
 
-  const fieldType = useFieldType({
+  const fieldType = useField({
     path,
     validate: memoizedValidate,
     condition,

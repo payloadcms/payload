@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import Upload from '../../../../../../../src/admin/components/forms/field-types/Upload';
 import { Props as UploadFieldType } from '../../../../../../../src/admin/components/forms/field-types/Upload/types';
-import useFieldType from '../../../../../../../src/admin/components/forms/useFieldType';
+import useField from '../../../../../../../src/admin/components/forms/useField';
 
 const Text: React.FC<UploadFieldType> = (props) => {
   const {
@@ -15,7 +15,7 @@ const Text: React.FC<UploadFieldType> = (props) => {
   const {
     value,
     setValue
-  } = useFieldType({
+  } = useField({
     path
   });
 

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import SelectInput from '../../../../../../../src/admin/components/forms/field-types/Select';
 import { Props as SelectFieldType } from '../../../../../../../src/admin/components/forms/field-types/Select/types';
-import useFieldType from '../../../../../../../src/admin/components/forms/useFieldType';
+import useField from '../../../../../../../src/admin/components/forms/useField';
 
 const Select: React.FC<SelectFieldType> = (props) => {
   const {
@@ -14,7 +14,7 @@ const Select: React.FC<SelectFieldType> = (props) => {
   const {
     value,
     setValue
-  } = useFieldType({
+  } = useField({
     path
   });
 
