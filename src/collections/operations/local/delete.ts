@@ -12,7 +12,7 @@ export type Options = {
   showHiddenFields?: boolean
 }
 
-export default async function localDelete<T extends TypeWithID>(options: Options): Promise<T> {
+export default async function localDelete<T extends TypeWithID = any>(options: Options): Promise<T> {
   const {
     collection: collectionSlug,
     depth,

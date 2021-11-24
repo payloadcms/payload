@@ -18,7 +18,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function find<T extends TypeWithID>(incomingArgs: Arguments): Promise<PaginatedDocs<T>> {
+async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promise<PaginatedDocs<T>> {
   let args = incomingArgs;
 
   // /////////////////////////////////////

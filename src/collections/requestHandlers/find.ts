@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { PaginatedDocs, TypeWithID } from '../config/types';
 
-export default async function find<T extends TypeWithID>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
+export default async function find<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
   try {
     let page;
 

@@ -19,7 +19,7 @@ export type Arguments = {
   depth?: number
 }
 
-async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<T> {
+async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Promise<T> {
   let args = incomingArgs;
 
   // /////////////////////////////////////

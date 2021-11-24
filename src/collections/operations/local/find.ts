@@ -15,7 +15,7 @@ export type Options = {
   where?: Where
 }
 
-export default async function find<T extends TypeWithID>(options: Options): Promise<PaginatedDocs<T>> {
+export default async function find<T extends TypeWithID = any>(options: Options): Promise<PaginatedDocs<T>> {
   const {
     collection: collectionSlug,
     depth,

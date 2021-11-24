@@ -16,6 +16,8 @@ export interface AuthCollectionModel extends CollectionModel {
   resetPasswordExpiration: Date;
 }
 
+type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>;
+
 export type HookOperationType =
   | 'create'
   | 'read'
@@ -33,31 +35,31 @@ export type BeforeOperationHook = (args: {
 export type BeforeValidateHook = (args: {
   data?: any;
   req?: PayloadRequest;
-  operation: 'create' | 'update';
+  operation: CreateOrUpdateOperation;
   originalDoc?: any; // undefined on 'create' operation
 }) => any;
 
-export type BeforeChangeHook = (args: {
-  data: any;
+export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
+  data: T;
   req: PayloadRequest;
-  operation: 'create' | 'update'
+  operation: CreateOrUpdateOperation;
   originalDoc?: any; // undefined on 'create' operation
 }) => any;
 
-export type AfterChangeHook = (args: {
-  doc: any;
+export type AfterChangeHook<T extends TypeWithID = any> = (args: {
+  doc: T;
   req: PayloadRequest;
-  operation: 'create' | 'update';
+  operation: CreateOrUpdateOperation;
 }) => any;
 
-export type BeforeReadHook = (args: {
-  doc: any;
+export type BeforeReadHook<T extends TypeWithID = any> = (args: {
+  doc: T;
   req: PayloadRequest;
   query: { [key: string]: any };
 }) => any;
 
-export type AfterReadHook = (args: {
-  doc: any;
+export type AfterReadHook<T extends TypeWithID = any> = (args: {
+  doc: T;
   req: PayloadRequest;
   query?: { [key: string]: any };
 }) => any;
@@ -67,10 +69,10 @@ export type BeforeDeleteHook = (args: {
   id: string;
 }) => any;
 
-export type AfterDeleteHook = (args: {
+export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
+  doc: T;
   req: PayloadRequest;
   id: string;
-  doc: any;
 }) => any;
 
 export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
@@ -79,9 +81,9 @@ export type BeforeLoginHook = (args: {
   req: PayloadRequest;
 }) => any;
 
-export type AfterLoginHook = (args: {
+export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
-  doc: any;
+  doc: T;
   token: string;
 }) => any;
 
@@ -157,7 +159,7 @@ export type AuthCollection = {
   config: SanitizedCollectionConfig;
 }
 
-export type PaginatedDocs<T extends TypeWithID> = {
+export type PaginatedDocs<T extends TypeWithID = any> = {
   docs: T[]
   totalDocs: number
   limit: number
