@@ -3,7 +3,7 @@ import { Column } from '../../../elements/Table/types';
 
 export type Props = {
   collection: SanitizedCollectionConfig
-  data: PaginatedDocs
+  data: PaginatedDocs<any>
   newDocumentURL: string
   setListControls: (controls: unknown) => void
   setSort: (sort: string) => void

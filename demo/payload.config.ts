@@ -38,7 +38,7 @@ export default buildConfig({
   cookiePrefix: 'payload',
   serverURL: 'http://localhost:3000',
   typescript: {
-    outputFile: path.resolve(__dirname, './generated-types.ts'),
+    outputFile: path.resolve(__dirname, './payload-types.ts'),
   },
   admin: {
     user: 'admins',

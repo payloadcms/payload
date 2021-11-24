@@ -1,3 +1,4 @@
+import { TypeWithID } from '../../config/types';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 
@@ -15,7 +16,7 @@ export type Options = {
   overwriteExistingFiles?: boolean
 }
 
-export default async function update(options: Options): Promise<Document> {
+export default async function update<T extends TypeWithID>(options: Options): Promise<T> {
   const {
     collection: collectionSlug,
     depth,

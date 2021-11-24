@@ -1,11 +1,11 @@
 /* eslint-disable no-underscore-dangle */
 import memoize from 'micro-memoize';
 import { PayloadRequest } from '../../express/types';
-import { Collection } from '../config/types';
+import { Collection, TypeWithID } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
-import { Document, Where } from '../../types';
+import { Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
 
 export type Arguments = {
@@ -19,7 +19,7 @@ export type Arguments = {
   depth?: number
 }
 
-async function findByID(incomingArgs: Arguments): Promise<Document> {
+async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<T> {
   let args = incomingArgs;
 
   // /////////////////////////////////////

@@ -63,7 +63,7 @@ const RelationshipField: React.FC<Props> = (props) => {
           const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageToUse}&depth=0${searchParam}`);
 
           if (response.ok) {
-            const data: PaginatedDocs = await response.json();
+            const data: PaginatedDocs<any> = await response.json();
             if (data.docs.length > 0) {
               resultsFetched += data.docs.length;
               addOptions(data, relation);
