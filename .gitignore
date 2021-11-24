@@ -229,5 +229,5 @@ build
 components/index.js
 components/styles.css
 
-# Ignore generated types
-./payload-types.ts
+# Ignore generated
+demo/generated-types.ts
