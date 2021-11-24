@@ -1,4 +1,4 @@
-## [0.12.9-beta.0](https://github.com/payloadcms/payload/compare/v0.12.3...v0.12.9-beta.0) (2021-11-24)
+## [0.12.12-beta.0](https://github.com/payloadcms/payload/compare/v0.12.3...v0.12.12-beta.0) (2021-11-24)
 
 
 ### Bug Fixes
@@ -21,6 +21,8 @@
 * azure cosmos compatibility ([6fd5ac2](https://github.com/payloadcms/payload/commit/6fd5ac2c082a5a5e6f510d781b2a2e12b7b62cb9))
 * ensures update hooks have access to full original docs even in spite of access control ([b2c5b7e](https://github.com/payloadcms/payload/commit/b2c5b7e5752e829c7a53c054decceb43ec33065e))
 * improves querying logic ([4c85747](https://github.com/payloadcms/payload/commit/4c8574784995b1cb1f939648f4d2158286089b3d))
+* indexes filenames ([5d43262](https://github.com/payloadcms/payload/commit/5d43262f42e0529a44572f398aa1ec5fd7858286))
+* migrates admin preview to async ([40ca3da](https://github.com/payloadcms/payload/commit/40ca3dae61f8ddf05363b6cad426deba4cde1e30))
 
 ## [0.12.3](https://github.com/payloadcms/payload/compare/v0.12.2...v0.12.3) (2021-10-23)
 
