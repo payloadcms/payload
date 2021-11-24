@@ -1,4 +1,5 @@
 import { Response, NextFunction } from 'express';
+import { Where } from '../types';
 import executeAccess from './executeAccess';
 import { Forbidden } from '../errors';
 import { PayloadRequest } from '../express/types';
@@ -11,18 +12,32 @@ const getExecuteStaticAccess = ({ config, Model }) => async (req: PayloadRequest
       if (typeof accessResult === 'object') {
         const filename = decodeURI(req.path).replace(/^\/|\/$/g, '');
 
-        const queryToBuild = {
+        const queryToBuild: { where: Where } = {
           where: {
             and: [
               {
-                filename: {
-                  equals: filename,
-                },
+                or: [
+                  {
+                    filename: {
+                      equals: filename,
+                    },
+                  },
+                ],
               },
               accessResult,
             ],
           },
         };
+
+        if (config.upload.imageSizes) {
+          config.upload.imageSizes.forEach(({ name }) => {
+            queryToBuild.where.and[0].or.push({
+              [`sizes.${name}.filename`]: {
+                equals: filename,
+              },
+            });
+          });
+        }
 
         const query = await Model.buildQuery(queryToBuild, req.locale);
         const doc = await Model.findOne(query);
