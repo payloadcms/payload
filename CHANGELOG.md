@@ -1,17 +1,28 @@
-## [0.12.8-beta.0](https://github.com/payloadcms/payload/compare/v0.12.3...v0.12.8-beta.0) (2021-11-10)
+## [0.12.12-beta.0](https://github.com/payloadcms/payload/compare/v0.12.3...v0.12.12-beta.0) (2021-11-24)
 
 
 ### Bug Fixes
 
 * [#351](https://github.com/payloadcms/payload/issues/351) ([94c2b8d](https://github.com/payloadcms/payload/commit/94c2b8d80b046c067057d4ad089ed6a2edd656cf))
 * bug with relationship cell when no doc is available ([40b33d9](https://github.com/payloadcms/payload/commit/40b33d9f5e99285cb0de148dbe059259817fcad8))
+* ensures 'like' query param remains functional in all cases ([20d4e72](https://github.com/payloadcms/payload/commit/20d4e72a951dfcbf1cc301d0938e5095932436b9))
+* ensures buildQuery works with fields as well as simultaneous or / and ([72fc413](https://github.com/payloadcms/payload/commit/72fc413764c6c42ba64a45f01d99b68ad3bd46c4))
+* ensures relationship field search can return more than 10 options ([57c0346](https://github.com/payloadcms/payload/commit/57c0346a00286a3df695ea46e5c2630494183b5b))
 * ensures richtext links retain proper formatting ([abf61d0](https://github.com/payloadcms/payload/commit/abf61d0734c09fd0fc5c5b827cb0631e11701f71))
+* ensures querying by relationship subpaths works ([37b21b0](https://github.com/payloadcms/payload/commit/37b21b07628e892e85c2cf979d9e2c8af0d291f7))
+* issue with querying by id and using comma-separated values ([d9e1b5e](https://github.com/payloadcms/payload/commit/d9e1b5ede33616893f9ba6990eeccf5410b75ae1))
+* updates field description type to include react nodes ([291c193](https://github.com/payloadcms/payload/commit/291c193ad4a9ec8ce9310cc63c714eba10eca102))
+
 
 ### Features
 
+* :tada: builds a way to automatically generate types for collections and globals! docs coming soon.
 * adds relationship filter field ([463c4e6](https://github.com/payloadcms/payload/commit/463c4e60de8e647fca6268b826d826f9c6e45412))
+* azure cosmos compatibility ([6fd5ac2](https://github.com/payloadcms/payload/commit/6fd5ac2c082a5a5e6f510d781b2a2e12b7b62cb9))
 * ensures update hooks have access to full original docs even in spite of access control ([b2c5b7e](https://github.com/payloadcms/payload/commit/b2c5b7e5752e829c7a53c054decceb43ec33065e))
 * improves querying logic ([4c85747](https://github.com/payloadcms/payload/commit/4c8574784995b1cb1f939648f4d2158286089b3d))
+* indexes filenames ([5d43262](https://github.com/payloadcms/payload/commit/5d43262f42e0529a44572f398aa1ec5fd7858286))
+* migrates admin preview to async ([40ca3da](https://github.com/payloadcms/payload/commit/40ca3dae61f8ddf05363b6cad426deba4cde1e30))
 
 ## [0.12.3](https://github.com/payloadcms/payload/compare/v0.12.2...v0.12.3) (2021-10-23)
 

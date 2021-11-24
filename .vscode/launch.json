@@ -65,6 +65,19 @@
       "name": "Launch Chrome against Localhost",
       "url": "http://localhost:3000/admin",
       "webRoot": "${workspaceFolder}"
-    }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Payload Generate Types",
+      "program": "${workspaceFolder}/src/bin/generateTypes.ts",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "demo/payload.config.ts",
+      },
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js",
+        "!**/node_modules/**"
+      ]
+    },
   ]
 }

@@ -154,20 +154,20 @@ class ParamParser {
         const currentSchemaTypeOptions = getSchemaTypeOptions(currentSchemaType);
 
         if (currentSchemaTypeOptions.localized) {
-          const upcomingSegment = pathSegments[i + 1];
-          const upcomingPath = `${currentPath}.${upcomingSegment}`;
-          const upcomingSchemaType = schema.path(upcomingPath);
-
-          if (upcomingSchemaType) {
-            lastIncompletePath.path = currentPath;
-            return;
-          }
-
           const localePath = `${currentPath}.${this.locale}`;
           const localizedSchemaType = schema.path(localePath);
 
           if (localizedSchemaType || operator === 'near') {
             lastIncompletePath.path = localePath;
+            return;
+          }
+
+          const upcomingSegment = pathSegments[i + 1];
+          const upcomingPathWithLocale = `${currentPath}.${this.locale}.${upcomingSegment}`;
+          const upcomingSchemaTypeWithLocale = schema.path(upcomingPathWithLocale);
+
+          if (upcomingSchemaTypeWithLocale) {
+            lastIncompletePath.path = upcomingPathWithLocale;
             return;
           }
         }
@@ -305,12 +305,10 @@ class ParamParser {
           }
 
           if (typeof formattedValue === 'string') {
-            const parsedNumber = parseFloat(formattedValue);
-
-            if (!Number.isNaN(parsedNumber)) {
+            if (!Number.isNaN(formattedValue)) {
               query.$or.push({
                 [path]: {
-                  [operatorKey]: parsedNumber,
+                  [operatorKey]: parseFloat(formattedValue),
                 },
               });
             }

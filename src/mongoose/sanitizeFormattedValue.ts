@@ -8,7 +8,7 @@ export const sanitizeQueryValue = (schemaType: SchemaType, path: string, operato
 
   // Disregard invalid _ids
 
-  if (path === '_id' && typeof val === 'string') {
+  if (path === '_id' && typeof val === 'string' && val.split(',').length === 1) {
     if (schemaType?.instance === 'ObjectID') {
       const isValid = mongoose.Types.ObjectId.isValid(val);
 
@@ -69,32 +69,29 @@ export const sanitizeQueryValue = (schemaType: SchemaType, path: string, operato
     }
   }
 
-  if (['all', 'not_in'].includes(operator) && typeof formattedValue === 'string') {
+  if (['all', 'not_in', 'in'].includes(operator) && typeof formattedValue === 'string') {
     formattedValue = createArrayFromCommaDelineated(formattedValue);
   }
 
-  if (schemaOptions && (schemaOptions.ref || schemaOptions.refPath)) {
-    if (operator === 'in') {
-      if (typeof formattedValue === 'string') formattedValue = createArrayFromCommaDelineated(formattedValue);
-      if (Array.isArray(formattedValue)) {
-        formattedValue = formattedValue.reduce((formattedValues, inVal) => {
-          const newValues = [inVal];
-          if (mongoose.Types.ObjectId.isValid(inVal)) newValues.push(new mongoose.Types.ObjectId(inVal));
+  if (schemaOptions && (schemaOptions.ref || schemaOptions.refPath) && operator === 'in') {
+    if (Array.isArray(formattedValue)) {
+      formattedValue = formattedValue.reduce((formattedValues, inVal) => {
+        const newValues = [inVal];
+        if (mongoose.Types.ObjectId.isValid(inVal)) newValues.push(new mongoose.Types.ObjectId(inVal));
 
-          const parsedNumber = parseFloat(inVal);
-          if (!Number.isNaN(parsedNumber)) newValues.push(parsedNumber);
+        const parsedNumber = parseFloat(inVal);
+        if (!Number.isNaN(parsedNumber)) newValues.push(parsedNumber);
 
-          return [
-            ...formattedValues,
-            ...newValues,
-          ];
-        }, []);
-      }
+        return [
+          ...formattedValues,
+          ...newValues,
+        ];
+      }, []);
     }
   }
 
   if (operator === 'like' && path !== '_id') {
-    formattedValue = { $regex: formattedValue, $options: '-i' };
+    formattedValue = { $regex: formattedValue, $options: 'i' };
   }
 
   if (operator === 'exists') {

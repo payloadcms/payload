@@ -228,3 +228,6 @@ build
 # Ignore built components
 components/index.js
 components/styles.css
+
+# Ignore generated
+demo/generated-types.ts

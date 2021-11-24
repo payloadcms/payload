@@ -13,11 +13,11 @@ function initStatic(ctx: Payload) {
     if (config.upload) {
       const router = express.Router();
 
+      router.use(corsHeaders(ctx.config));
       router.use(passport.initialize());
       router.use(authenticate(ctx.config));
 
       router.use(getExecuteStaticAccess(collection));
-      router.use(corsHeaders(ctx.config));
 
       const staticPath = path.resolve(ctx.config.paths.configDir, config.upload.staticDir);
 
