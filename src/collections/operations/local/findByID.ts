@@ -1,3 +1,4 @@
+import { TypeWithID } from '../../config/types';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 
@@ -14,7 +15,7 @@ export type Options = {
   req?: PayloadRequest
 }
 
-export default async function findByID(options: Options): Promise<Document> {
+export default async function findByID<T extends TypeWithID>(options: Options): Promise<T> {
   const {
     collection: collectionSlug,
     depth,

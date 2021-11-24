@@ -157,8 +157,8 @@ export type AuthCollection = {
   config: SanitizedCollectionConfig;
 }
 
-export type PaginatedDocs = {
-  docs: any[]
+export type PaginatedDocs<T extends TypeWithID> = {
+  docs: T[]
   totalDocs: number
   limit: number
   totalPages: number
@@ -168,4 +168,8 @@ export type PaginatedDocs = {
   hasNextPage: boolean
   prevPage: number | null
   nextPage: number | null
+}
+
+export type TypeWithID = {
+  id: string | number
 }

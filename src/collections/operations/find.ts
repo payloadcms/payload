@@ -2,7 +2,7 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Collection, PaginatedDocs } from '../config/types';
+import { Collection, TypeWithID, PaginatedDocs } from '../config/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 
@@ -18,7 +18,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function find(incomingArgs: Arguments): Promise<PaginatedDocs> {
+async function find<T extends TypeWithID>(incomingArgs: Arguments): Promise<PaginatedDocs<T>> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -145,7 +145,7 @@ async function find(incomingArgs: Arguments): Promise<PaginatedDocs> {
 
       return docRef;
     })),
-  } as PaginatedDocs;
+  } as PaginatedDocs<T>;
 
   // /////////////////////////////////////
   // afterRead - Fields
@@ -195,7 +195,7 @@ async function find(incomingArgs: Arguments): Promise<PaginatedDocs> {
 
   result = {
     ...result,
-    docs: result.docs.map((doc) => sanitizeInternalFields(doc)),
+    docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
   };
 
   return result;
