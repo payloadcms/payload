@@ -6,28 +6,26 @@ import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 
-export type FieldHookArgs<T extends TypeWithID = any, P extends keyof T = any> = {
-  value?: T[P],
+export type FieldHookArgs<T extends TypeWithID = any, P = any> = {
+  value?: P,
   originalDoc?: T,
-  data?: {
-    [key: string]: unknown
-  },
+  data?: Partial<T>,
   operation?: 'create' | 'read' | 'update' | 'delete',
   req: PayloadRequest
 }
 
 export type FieldHookReturnType = Promise<unknown> | unknown;
 
-export type FieldHook<T extends TypeWithID = any, P extends keyof T = any> = (args: FieldHookArgs<T, P>) => FieldHookReturnType;
+export type FieldHook<T extends TypeWithID = any, P = any> = (args: FieldHookArgs<T, P>) => FieldHookReturnType;
 
-export type FieldAccess = (args: {
+export type FieldAccess<T extends TypeWithID = any, P = any> = (args: {
   req: PayloadRequest
   id?: string
-  data: Record<string, unknown>
-  siblingData: Record<string, unknown>
+  data: Partial<T>
+  siblingData: Partial<P>
 }) => Promise<boolean> | boolean;
 
-export type Condition = (data: Record<string, unknown>, siblingData: Record<string, unknown>) => boolean;
+export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>) => boolean;
 
 type Admin = {
   position?: 'sidebar';
@@ -50,7 +48,7 @@ export type Labels = {
   plural: string;
 };
 
-export type Validate = (value: unknown, options?: any) => string | true | Promise<string | true>;
+export type Validate<T = any> = (value?: T, options?: any) => string | true | Promise<string | true>;
 
 export type OptionObject = {
   label: string

@@ -36,7 +36,7 @@ export type BeforeOperationHook = (args: {
 }) => any;
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
-  data?: any;
+  data?: Partial<T>;
   req?: PayloadRequest;
   /**
    * Hook operation being performed
@@ -51,7 +51,7 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
 }) => any;
 
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
-  data: T;
+  data: Partial<T>;
   req: PayloadRequest;
   /**
    * Hook operation being performed
