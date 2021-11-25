@@ -5,7 +5,7 @@ import { useConfig } from '@payloadcms/config-provider';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import { Value } from '../../../elements/ReactSelect/types';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
@@ -70,7 +70,7 @@ const Relationship: React.FC<Props> = (props) => {
     showError,
     errorMessage,
     setValue,
-  } = useFieldType({
+  } = useField({
     path: path || name,
     validate: memoizedValidate,
     condition,

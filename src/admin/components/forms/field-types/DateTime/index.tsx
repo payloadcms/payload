@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 
 import DatePicker from '../../../elements/DatePicker';
 import withCondition from '../../withCondition';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
@@ -43,7 +43,7 @@ const DateTime: React.FC<Props> = (props) => {
     showError,
     errorMessage,
     setValue,
-  } = useFieldType({
+  } = useField({
     path,
     validate: memoizedValidate,
     condition,

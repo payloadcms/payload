@@ -6,7 +6,8 @@ export {
   useFormModified,
 } from '../dist/admin/components/forms/Form/context';
 
-export { default as useFieldType } from '../dist/admin/components/forms/useFieldType';
+export { default as useField } from '../dist/admin/components/forms/useField';
+export { default as useFieldType } from '../dist/admin/components/forms/useField';
 
 export { default as Form } from '../dist/admin/components/forms/Form';
 

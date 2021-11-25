@@ -3,7 +3,7 @@ import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
@@ -52,7 +52,7 @@ const Code: React.FC<Props> = (props) => {
     showError,
     setValue,
     errorMessage,
-  } = useFieldType({
+  } = useField({
     path,
     validate: memoizedValidate,
     enableDebouncedValue: true,

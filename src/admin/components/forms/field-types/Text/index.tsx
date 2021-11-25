@@ -1,5 +1,5 @@
-import React from 'react';
-import useFieldType from '../../useFieldType';
+import React, { useCallback, useEffect } from 'react';
+import useField from '../../useField';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
@@ -24,11 +24,13 @@ const Text: React.FC<Props> = (props) => {
       description,
       condition,
     } = {},
+    value: valueFromProps,
+    onChange: onChangeFromProps,
   } = props;
 
   const path = pathFromProps || name;
 
-  const fieldType = useFieldType<string>({
+  const fieldType = useField<string>({
     path,
     validate,
     enableDebouncedValue: true,
@@ -36,11 +38,23 @@ const Text: React.FC<Props> = (props) => {
   });
 
   const {
-    value,
+    value: valueFromContext,
     showError,
     setValue,
     errorMessage,
   } = fieldType;
+
+  const onChange = useCallback((e) => {
+    const { value: incomingValue } = e.target;
+    if (typeof onChangeFromProps === 'function') {
+      onChangeFromProps(incomingValue);
+    } else {
+      setValue(e);
+    }
+  }, [
+    onChangeFromProps,
+    setValue,
+  ]);
 
   const classes = [
     'field-type',
@@ -48,6 +62,8 @@ const Text: React.FC<Props> = (props) => {
     showError && 'error',
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');
+
+  const value = valueFromProps || valueFromContext || '';
 
   return (
     <div
@@ -67,8 +83,8 @@ const Text: React.FC<Props> = (props) => {
         required={required}
       />
       <input
-        value={value || ''}
-        onChange={setValue}
+        value={value}
+        onChange={onChange}
         disabled={readOnly}
         placeholder={placeholder}
         type="text"

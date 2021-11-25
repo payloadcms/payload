@@ -4,7 +4,7 @@ import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEdit
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { richText } from '../../../../../fields/validations';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
@@ -29,7 +29,7 @@ const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 
 const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
 
 const baseClass = 'rich-text';
-type CustomText = { text: string; [x: string]: unknown }
+type CustomText = { text: string;[x: string]: unknown }
 
 type CustomElement = { type: string; children: CustomText[] }
 
@@ -115,7 +115,7 @@ const RichText: React.FC<Props> = (props) => {
     return validationResult;
   }, [validate, required]);
 
-  const fieldType = useFieldType({
+  const fieldType = useField({
     path,
     validate: memoizedValidate,
     stringify: true,
@@ -194,7 +194,7 @@ const RichText: React.FC<Props> = (props) => {
       }}
     >
       <div className={`${baseClass}__wrap`}>
-        { !hideGutter && (<FieldTypeGutter />) }
+        {!hideGutter && (<FieldTypeGutter />)}
         <Error
           showError={showError}
           message={errorMessage}
