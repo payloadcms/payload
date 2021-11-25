@@ -68,6 +68,10 @@ export type InitOptions = {
 };
 
 export type AccessResult = boolean | Where;
+
+/**
+ * Access function
+ */
 export type Access = (args?: any) => AccessResult;
 
 export type Config = {
