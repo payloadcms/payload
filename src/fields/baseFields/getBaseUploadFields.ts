@@ -67,6 +67,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     label: 'File Name',
     type: 'text',
     index: true,
+    unique: true,
     admin: {
       readOnly: true,
       disabled: true,

@@ -7,6 +7,16 @@ import { SanitizedCollectionConfig } from '../collections/config/types';
 import { FileSizes, ImageSize } from './types';
 import { PayloadRequest } from '../express/types';
 
+type Args = {
+  req: PayloadRequest,
+  file: Buffer,
+  dimensions: ProbedImageSize,
+  staticPath: string,
+  config: SanitizedCollectionConfig,
+  savedFilename: string,
+  mimeType: string,
+}
+
 function getOutputImage(sourceImage: string, size: ImageSize) {
   const extension = sourceImage.split('.').pop();
   const name = sanitize(sourceImage.substr(0, sourceImage.lastIndexOf('.')) || sourceImage);
@@ -27,15 +37,15 @@ function getOutputImage(sourceImage: string, size: ImageSize) {
  * @param mimeType
  * @returns image sizes keyed to strings
  */
-export default async function resizeAndSave(
-  req: PayloadRequest,
-  file: Buffer,
-  dimensions: ProbedImageSize,
-  staticPath: string,
-  config: SanitizedCollectionConfig,
-  savedFilename: string,
-  mimeType: string,
-): Promise<FileSizes> {
+export default async function resizeAndSave({
+  req,
+  file,
+  dimensions,
+  staticPath,
+  config,
+  savedFilename,
+  mimeType,
+}: Args): Promise<FileSizes> {
   const { imageSizes, disableLocalStorage } = config.upload;
 
   const sizes = imageSizes

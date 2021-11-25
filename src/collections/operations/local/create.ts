@@ -12,6 +12,7 @@ export type Options = {
   disableVerificationEmail?: boolean
   showHiddenFields?: boolean
   filePath?: string
+  overwriteExistingFiles?: boolean
 }
 export default async function create(options: Options): Promise<Document> {
   const {
@@ -25,6 +26,7 @@ export default async function create(options: Options): Promise<Document> {
     disableVerificationEmail,
     showHiddenFields,
     filePath,
+    overwriteExistingFiles = false,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -36,6 +38,7 @@ export default async function create(options: Options): Promise<Document> {
     overrideAccess,
     disableVerificationEmail,
     showHiddenFields,
+    overwriteExistingFiles,
     req: {
       user,
       payloadAPI: 'local',
