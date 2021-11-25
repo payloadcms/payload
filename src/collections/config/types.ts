@@ -16,39 +16,61 @@ export interface AuthCollectionModel extends CollectionModel {
   resetPasswordExpiration: Date;
 }
 
-type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>;
-
 export type HookOperationType =
-  | 'create'
-  | 'read'
-  | 'update'
-  | 'delete'
-  | 'refresh'
-  | 'login'
-  | 'forgotPassword';
+| 'create'
+| 'read'
+| 'update'
+| 'delete'
+| 'refresh'
+| 'login'
+| 'forgotPassword';
+
+type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>;
 
 export type BeforeOperationHook = (args: {
   args?: any;
+  /**
+   * Hook operation being performed
+   */
   operation: HookOperationType;
 }) => any;
 
-export type BeforeValidateHook = (args: {
+export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
   data?: any;
   req?: PayloadRequest;
+  /**
+   * Hook operation being performed
+   */
   operation: CreateOrUpdateOperation;
-  originalDoc?: any; // undefined on 'create' operation
+  /**
+   * Original document before change
+   *
+   * `undefined` on 'create' operation
+   */
+  originalDoc?: T;
 }) => any;
 
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
   data: T;
   req: PayloadRequest;
+  /**
+   * Hook operation being performed
+   */
   operation: CreateOrUpdateOperation;
-  originalDoc?: any; // undefined on 'create' operation
+  /**
+   * Original document before change
+   *
+   * `undefined` on 'create' operation
+   */
+  originalDoc?: T;
 }) => any;
 
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
+  /**
+   * Hook operation being performed
+   */
   operation: CreateOrUpdateOperation;
 }) => any;
 
@@ -91,34 +113,57 @@ export type AfterForgotPasswordHook = (args: {
   args?: any;
 }) => any;
 
+export type CollectionAdminOptions = {
+  /**
+   * Field to use as title in Edit view and first column in List view
+   */
+  useAsTitle?: string;
+  /**
+   * Default columns to show in list view
+   */
+  defaultColumns?: string[];
+  /**
+   * Custom description for collection
+   */
+  description?: string | (() => string) | React.FC;
+  disableDuplicate?: boolean;
+  /**
+   * Custom admin components
+   */
+  components?: {
+    views?: {
+      Edit?: React.ComponentType
+      List?: React.ComponentType
+    }
+  };
+  pagination?: {
+    defaultLimit?: number
+    limits?: number[]
+  }
+  enableRichTextRelationship?: boolean
+  /**
+   * Function to generate custom preview URL
+   */
+  preview?: GeneratePreviewURL
+}
+
 export type CollectionConfig = {
   slug: string;
+  /**
+   * Label configuration
+   */
   labels?: {
     singular?: string;
     plural?: string;
   };
   fields: Field[];
-  admin?: {
-    useAsTitle?: string;
-    defaultColumns?: string[];
-    /**
-     * Custom description for collection
-     */
-    description?: string | (() => string) | React.FC;
-    disableDuplicate?: boolean;
-    components?: {
-      views?: {
-        Edit?: React.ComponentType
-        List?: React.ComponentType
-      }
-    };
-    pagination?: {
-      defaultLimit?: number
-      limits?: number[]
-    }
-    enableRichTextRelationship?: boolean
-    preview?: GeneratePreviewURL
-  };
+  /**
+   * Collection admin options
+   */
+  admin?: CollectionAdminOptions;
+  /**
+   * Hooks to modify Payload functionality
+   */
   hooks?: {
     beforeOperation?: BeforeOperationHook[];
     beforeValidate?: BeforeValidateHook[];
@@ -133,6 +178,9 @@ export type CollectionConfig = {
     afterLogin?: AfterLoginHook[];
     afterForgotPassword?: AfterForgotPasswordHook[];
   };
+  /**
+   * Access control
+   */
   access?: {
     create?: Access;
     read?: Access;
@@ -141,7 +189,15 @@ export type CollectionConfig = {
     admin?: Access;
     unlock?: Access;
   };
+  /**
+   * Collection login options
+   *
+   * Use `true` to enable with default options
+   */
   auth?: IncomingAuthType | boolean;
+  /**
+   * Upload options
+   */
   upload?: IncomingUploadType | boolean;
   timestamps?: boolean
 };

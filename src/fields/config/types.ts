@@ -30,7 +30,7 @@ export type FieldAccess = (args: {
 export type Condition = (data: Record<string, unknown>, siblingData: Record<string, unknown>) => boolean;
 
 type Admin = {
-  position?: string;
+  position?: 'sidebar';
   width?: string;
   style?: CSSProperties;
   readOnly?: boolean;
