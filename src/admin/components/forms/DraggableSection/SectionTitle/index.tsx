@@ -1,5 +1,5 @@
 import React from 'react';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import Pill from '../../../elements/Pill';
 import { Props } from './types';
 
@@ -10,7 +10,7 @@ const baseClass = 'section-title';
 const SectionTitle: React.FC<Props> = (props) => {
   const { label, path, readOnly } = props;
 
-  const { value, setValue } = useFieldType({ path });
+  const { value, setValue } = useField({ path });
 
   const classes = [
     baseClass,

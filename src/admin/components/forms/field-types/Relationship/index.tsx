@@ -5,7 +5,7 @@ import { useConfig } from '@payloadcms/config-provider';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import { Value } from '../../../elements/ReactSelect/types';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
@@ -70,7 +70,7 @@ const Relationship: React.FC<Props> = (props) => {
     showError,
     errorMessage,
     setValue,
-  } = useFieldType({
+  } = useField({
     path: path || name,
     validate: memoizedValidate,
     condition,
@@ -106,7 +106,7 @@ const Relationship: React.FC<Props> = (props) => {
           const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageToUse}&depth=0${searchParam}`);
 
           if (response.ok) {
-            const data: PaginatedDocs = await response.json();
+            const data: PaginatedDocs<any> = await response.json();
             if (data.docs.length > 0) {
               resultsFetched += data.docs.length;
               addOptions(data, relation);

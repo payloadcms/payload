@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
@@ -41,7 +41,7 @@ const PointField: React.FC<Props> = (props) => {
     showError,
     setValue,
     errorMessage,
-  } = useFieldType<[number, number]>({
+  } = useField<[number, number]>({
     path,
     validate: memoizedValidate,
     enableDebouncedValue: true,

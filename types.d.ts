@@ -16,5 +16,21 @@ export {
   AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
 } from './dist/collections/config/types';
 
-export { GlobalConfig, SanitizedGlobalConfig } from './dist/globals/config/types';
-export { Field, FieldHook, FieldAccess, RichTextCustomElement, RichTextCustomLeaf, Block } from './dist/fields/config/types';
+export {
+  GlobalConfig,
+  SanitizedGlobalConfig,
+  BeforeValidateHook as GlobalBeforeValidateHook,
+  BeforeChangeHook as GlobalBeforeChangeHook,
+  AfterChangeHook as GlobalAfterChangeHook,
+  BeforeReadHook as GlobalBeforeReadHook,
+  AfterReadHook as GlobalAfterReadHook,
+} from './dist/globals/config/types';
+
+export {
+  Field,
+  FieldHook,
+  FieldAccess,
+  RichTextCustomElement,
+  RichTextCustomLeaf,
+  Block,
+} from './dist/fields/config/types';

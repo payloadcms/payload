@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import useFieldType from '../../../../forms/useFieldType';
+import useField from '../../../../forms/useField';
 import Label from '../../../../forms/Label';
 import CopyToClipboard from '../../../../elements/CopyToClipboard';
 import { text } from '../../../../../../fields/validations';
@@ -31,7 +31,7 @@ const APIKey: React.FC = () => {
     </div>
   ), [apiKeyValue]);
 
-  const fieldType = useFieldType({
+  const fieldType = useField({
     path: 'apiKey',
     validate,
   });

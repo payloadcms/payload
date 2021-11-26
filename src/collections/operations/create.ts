@@ -29,6 +29,7 @@ export type Arguments = {
   overrideAccess?: boolean
   showHiddenFields?: boolean
   data: Record<string, unknown>
+  overwriteExistingFiles?: boolean
 }
 
 async function create(this: Payload, incomingArgs: Arguments): Promise<Document> {
@@ -59,6 +60,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     depth,
     overrideAccess,
     showHiddenFields,
+    overwriteExistingFiles = false,
   } = args;
 
   let { data } = args;
@@ -108,7 +110,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
       mkdirp.sync(staticPath);
     }
 
-    const fsSafeName = await getSafeFilename(staticPath, file.name);
+    const fsSafeName = !overwriteExistingFiles ? await getSafeFilename(Model, staticPath, file.name) : file.name;
 
     try {
       if (!disableLocalStorage) {
@@ -122,7 +124,15 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
 
         if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
           req.payloadUploadSizes = {};
-          fileData.sizes = await resizeAndSave(req, file.data, dimensions, staticPath, collectionConfig, fsSafeName, fileData.mimeType);
+          fileData.sizes = await resizeAndSave({
+            req,
+            file: file.data,
+            dimensions,
+            staticPath,
+            config: collectionConfig,
+            savedFilename: fsSafeName,
+            mimeType: fileData.mimeType,
+          });
         }
       }
     } catch (err) {

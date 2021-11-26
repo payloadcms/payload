@@ -49,7 +49,6 @@ describe('Revisions - REST', () => {
       }).then((res) => res.json());
 
       expect(typeof revision.doc.id).toBe('string');
-      expect(revision.doc._status).toBe('draft');
     });
   });
 });

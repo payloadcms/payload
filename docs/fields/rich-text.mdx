@@ -313,3 +313,14 @@ Above, you can see that we are creating a custom SlateJS element with a name of 
 
 The plugin itself extends Payload's built-in `shouldBreakOutOnEnter` Slate function to add its own element name to the list of elements that should "break out" when the `enter` key is pressed.
 
+### TypeScript
+
+If you are building your own custom Rich Text elements or leaves, you may benefit from importing the following types:
+
+```js
+import type {
+  RichTextCustomElement,
+  RichTextCustomLeaf,
+} from 'payload/types';
+
+```

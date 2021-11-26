@@ -98,3 +98,20 @@ const afterReadHook = async ({
   req, // full express request
 }) => {...}
 ```
+
+## TypeScript
+
+Payload exports a type for each Global hook which can be accessed as follows:
+
+```js
+import type {
+  GlobalBeforeValidateHook,
+  GlobalBeforeChangeHook,
+  GlobalAfterChangeHook,
+  GlobalBeforeReadHook,
+  GlobalAfterReadHook,
+} from 'payload/types';
+
+// Use hook types here...
+}
+```

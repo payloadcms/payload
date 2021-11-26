@@ -1,14 +1,15 @@
 import express, { Express, Router } from 'express';
 import crypto from 'crypto';
-import { Document } from 'mongoose';
+import {
+  TypeWithID,
+  Collection, CollectionModel, PaginatedDocs,
+} from './collections/config/types';
 import {
   SanitizedConfig,
   EmailOptions,
   InitOptions,
 } from './config/types';
-import {
-  Collection, CollectionModel, PaginatedDocs,
-} from './collections/config/types';
+
 import Logger from './utilities/logger';
 import bindOperations from './init/bindOperations';
 import bindRequestHandlers, { RequestHandlers } from './init/bindRequestHandlers';
@@ -210,7 +211,7 @@ export class Payload {
    * @param options
    * @returns created document
    */
-  create = async (options: CreateOptions): Promise<Document> => {
+  create = async <T>(options: CreateOptions): Promise<T> => {
     let { create } = localOperations;
     create = create.bind(this);
     return create(options);
@@ -221,19 +222,19 @@ export class Payload {
    * @param options
    * @returns documents satisfying query
    */
-  find = async (options: FindOptions): Promise<PaginatedDocs> => {
+  find = async <T extends TypeWithID = any>(options: FindOptions): Promise<PaginatedDocs<T>> => {
     let { find } = localOperations;
     find = find.bind(this);
     return find(options);
   }
 
-  findGlobal = async (options): Promise<any> => {
+  findGlobal = async <T>(options): Promise<T> => {
     let { findOne } = localGlobalOperations;
     findOne = findOne.bind(this);
     return findOne(options);
   }
 
-  updateGlobal = async (options): Promise<any> => {
+  updateGlobal = async <T>(options): Promise<T> => {
     let { update } = localGlobalOperations;
     update = update.bind(this);
     return update(options);
@@ -244,10 +245,10 @@ export class Payload {
    * @param options
    * @returns document with specified ID
    */
-  findByID = async (options: FindByIDOptions): Promise<Document> => {
+  findByID = async <T extends TypeWithID = any>(options: FindByIDOptions): Promise<T> => {
     let { findByID } = localOperations;
     findByID = findByID.bind(this);
-    return findByID(options);
+    return findByID<T>(options);
   }
 
   /**
@@ -255,16 +256,16 @@ export class Payload {
    * @param options
    * @returns Updated document
    */
-  update = async (options: UpdateOptions): Promise<Document> => {
+  update = async <T extends TypeWithID = any>(options: UpdateOptions): Promise<T> => {
     let { update } = localOperations;
     update = update.bind(this);
-    return update(options);
+    return update<T>(options);
   }
 
-  delete = async (options: DeleteOptions): Promise<Document> => {
+  delete = async <T extends TypeWithID = any>(options: DeleteOptions): Promise<T> => {
     let { localDelete: deleteOperation } = localOperations;
     deleteOperation = deleteOperation.bind(this);
-    return deleteOperation(options);
+    return deleteOperation<T>(options);
   }
 
   login = async (options): Promise<any> => {

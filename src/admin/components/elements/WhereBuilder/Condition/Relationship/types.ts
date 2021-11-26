@@ -20,7 +20,7 @@ type CLEAR = {
 
 type ADD = {
   type: 'ADD'
-  data: PaginatedDocs
+  data: PaginatedDocs<any>
   relation: string
   hasMultipleRelations: boolean
   collection: SanitizedCollectionConfig

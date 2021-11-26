@@ -3,11 +3,14 @@ import { promisify } from 'util';
 
 const stat = promisify(fs.stat);
 
-export default async (fileName: string): Promise<boolean> => {
+const fileExists = async (filename: string): Promise<boolean> => {
   try {
-    await stat(fileName);
+    await stat(filename);
+
     return true;
   } catch (err) {
     return false;
   }
 };
+
+export default fileExists;

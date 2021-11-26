@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useConfig } from '@payloadcms/config-provider';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import Label from '../../Label';
@@ -38,6 +38,8 @@ const Upload: React.FC<Props> = (props) => {
     validate = upload,
     relationTo,
     fieldTypes,
+    value: valueFromProps,
+    onChange: onChangeFromProps,
   } = props;
 
   const collection = collections.find((coll) => coll.slug === relationTo);
@@ -51,18 +53,20 @@ const Upload: React.FC<Props> = (props) => {
     return validationResult;
   }, [validate, required]);
 
-  const fieldType = useFieldType({
+  const fieldType = useField({
     path,
     validate: memoizedValidate,
     condition,
   });
 
   const {
-    value,
+    value: valueFromContext,
     showError,
     setValue,
     errorMessage,
   } = fieldType;
+
+  const value = valueFromProps || valueFromContext || '';
 
   const classes = [
     'field-type',
@@ -81,14 +85,28 @@ const Upload: React.FC<Props> = (props) => {
           setInternalValue(json);
         } else {
           setInternalValue(undefined);
-          setValue(null);
           setMissingFile(true);
         }
       };
 
       fetchFile();
     }
-  }, [value, setInternalValue, relationTo, api, serverURL, setValue]);
+  }, [
+    value,
+    relationTo,
+    api,
+    serverURL,
+    setValue
+  ]);
+
+  useEffect(() => {
+    const { id: incomingID } = internalValue || {};
+    if (typeof onChangeFromProps === 'function') {
+      onChangeFromProps(incomingID)
+    } else {
+      setValue(incomingID);
+    }
+  }, [internalValue]);
 
   return (
     <div
@@ -147,7 +165,6 @@ const Upload: React.FC<Props> = (props) => {
             fieldTypes,
             setValue: (val) => {
               setMissingFile(false);
-              setValue(val.id);
               setInternalValue(val);
             },
           }}
@@ -157,7 +174,6 @@ const Upload: React.FC<Props> = (props) => {
             slug: selectExistingModalSlug,
             setValue: (val) => {
               setMissingFile(false);
-              setValue(val.id);
               setInternalValue(val);
             },
             addModalSlug,

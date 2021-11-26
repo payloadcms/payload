@@ -12,7 +12,7 @@ import { useForm } from '../../Form/context';
 import buildStateFromSchema from '../../Form/buildStateFromSchema';
 import DraggableSection from '../../DraggableSection';
 import Error from '../../Error';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import Popup from '../../../elements/Popup';
 import BlockSelector from './BlockSelector';
 import { blocks as blocksValidator } from '../../../../../fields/validations';
@@ -76,7 +76,7 @@ const Blocks: React.FC<Props> = (props) => {
     errorMessage,
     value,
     setValue,
-  } = useFieldType({
+  } = useField({
     path,
     validate: memoizedValidate,
     disableFormData,
@@ -110,7 +110,7 @@ const Blocks: React.FC<Props> = (props) => {
 
     if (preferencesKey) {
       const preferences: DocumentPreferences = await getPreference(preferencesKey);
-      const preferencesToSet = preferences || { fields: { } };
+      const preferencesToSet = preferences || { fields: {} };
       let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed
         .filter((filterID) => (rows.find((row) => row.id === filterID)))
         || [];

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
 import { useWatchForm } from '../../Form/context';
@@ -23,7 +23,7 @@ const ConfirmPassword: React.FC = () => {
     showError,
     setValue,
     errorMessage,
-  } = useFieldType({
+  } = useField({
     path: 'confirm-password',
     disableFormData: true,
     validate,

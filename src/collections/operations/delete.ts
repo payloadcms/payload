@@ -5,7 +5,7 @@ import { PayloadRequest } from '../../express/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { NotFound, Forbidden, ErrorDeletingFile } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
-import fileExists from '../../uploads/fileExists';
+import fileOrDocExists from '../../uploads/fileOrDocExists';
 import { BeforeOperationHook, Collection } from '../config/types';
 import { Document, Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
@@ -46,7 +46,6 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
     req,
     req: {
       locale,
-      fallbackLocale,
     },
     overrideAccess,
     showHiddenFields,
@@ -106,7 +105,8 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
     const staticPath = path.resolve(this.config.paths.configDir, staticDir);
 
     const fileToDelete = `${staticPath}/${resultToDelete.filename}`;
-    if (await fileExists(fileToDelete)) {
+
+    if (await fileOrDocExists(Model, staticPath, resultToDelete.filename)) {
       fs.unlink(fileToDelete, (err) => {
         if (err) {
           throw new ErrorDeletingFile();
@@ -116,7 +116,7 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
 
     if (resultToDelete.sizes) {
       Object.values(resultToDelete.sizes).forEach(async (size: FileData) => {
-        if (await fileExists(`${staticPath}/${size.filename}`)) {
+        if (await fileOrDocExists(Model, staticPath, size.filename)) {
           fs.unlink(`${staticPath}/${size.filename}`, (err) => {
             if (err) {
               throw new ErrorDeletingFile();

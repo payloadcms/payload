@@ -1,6 +1,8 @@
-/* eslint-disable no-param-reassign */
-
-import { CollectionConfig } from '../../src/collections/config/types';
+/* eslint-disable no-param-reassign, no-console */
+// If importing outside of demo project, should import CollectionAfterReadHook, CollectionBeforeChangeHook, etc
+import { AfterChangeHook, AfterDeleteHook, AfterReadHook, BeforeChangeHook, BeforeDeleteHook, BeforeReadHook, CollectionConfig } from '../../src/collections/config/types';
+import { FieldHook } from '../../src/fields/config/types';
+import { Hook } from '../payload-types';
 
 const Hooks: CollectionConfig = {
   slug: 'hooks',
@@ -19,51 +21,51 @@ const Hooks: CollectionConfig = {
   },
   hooks: {
     beforeRead: [
-      (operation) => {
+      ((operation) => {
         if (operation.req.headers.hook === 'beforeRead') {
           console.log('before reading Hooks document');
         }
-      },
+      }) as BeforeReadHook<Hook>,
     ],
     beforeChange: [
-      (operation) => {
+      ((operation) => {
         if (operation.req.headers.hook === 'beforeChange') {
           operation.data.description += '-beforeChangeSuffix';
         }
         return operation.data;
-      },
+      }) as BeforeChangeHook<Hook>,
     ],
     beforeDelete: [
-      (operation) => {
+      ((operation) => {
         if (operation.req.headers.hook === 'beforeDelete') {
           // TODO: Find a better hook operation to assert against in tests
           operation.req.headers.hook = 'afterDelete';
         }
-      },
+      }) as BeforeDeleteHook,
     ],
     afterRead: [
-      (operation) => {
+      ((operation) => {
         const { doc } = operation;
         doc.afterReadHook = true;
 
         return doc;
-      },
+      }) as AfterReadHook<Hook & { afterReadHook: boolean }>,
     ],
     afterChange: [
-      (operation) => {
+      ((operation) => {
         if (operation.req.headers.hook === 'afterChange') {
           operation.doc.afterChangeHook = true;
         }
         return operation.doc;
-      },
+      }) as AfterChangeHook<Hook & { afterChangeHook: boolean }>,
     ],
     afterDelete: [
-      (operation) => {
+      ((operation) => {
         if (operation.req.headers.hook === 'afterDelete') {
           operation.doc.afterDeleteHook = true;
         }
         return operation.doc;
-      },
+      }) as AfterDeleteHook,
     ],
   },
   fields: [
@@ -77,7 +79,7 @@ const Hooks: CollectionConfig = {
       localized: true,
       hooks: {
         afterRead: [
-          ({ value }) => (value ? value.toUpperCase() : null),
+          ({ value }) => (value ? value.toUpperCase() : null) as FieldHook<Hook, 'title'>,
         ],
       },
     },

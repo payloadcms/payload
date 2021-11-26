@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import withCondition from '../../withCondition';
 import Error from '../../Error';
 import { checkbox } from '../../../../../fields/validations';
@@ -41,7 +41,7 @@ const Checkbox: React.FC<Props> = (props) => {
     showError,
     errorMessage,
     setValue,
-  } = useFieldType({
+  } = useField({
     path,
     validate: memoizedValidate,
     disableFormData,

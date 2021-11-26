@@ -1,3 +1,4 @@
+import { TypeWithID } from '../../config/types';
 import { Document } from '../../../types';
 
 export type Options = {
@@ -11,7 +12,7 @@ export type Options = {
   showHiddenFields?: boolean
 }
 
-export default async function localDelete(options: Options): Promise<Document> {
+export default async function localDelete<T extends TypeWithID = any>(options: Options): Promise<T> {
   const {
     collection: collectionSlug,
     depth,

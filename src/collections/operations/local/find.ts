@@ -1,4 +1,4 @@
-import { PaginatedDocs } from '../../config/types';
+import { PaginatedDocs, TypeWithID } from '../../config/types';
 import { Document, Where } from '../../../types';
 
 export type Options = {
@@ -15,7 +15,7 @@ export type Options = {
   where?: Where
 }
 
-export default async function find(options: Options): Promise<PaginatedDocs> {
+export default async function find<T extends TypeWithID = any>(options: Options): Promise<PaginatedDocs<T>> {
   const {
     collection: collectionSlug,
     depth,

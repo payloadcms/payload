@@ -18,47 +18,71 @@ export interface AuthCollectionModel extends CollectionModel {
 }
 
 export type HookOperationType =
-  | 'create'
-  | 'read'
-  | 'update'
-  | 'delete'
-  | 'refresh'
-  | 'login'
-  | 'forgotPassword';
+| 'create'
+| 'read'
+| 'update'
+| 'delete'
+| 'refresh'
+| 'login'
+| 'forgotPassword';
+
+type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>;
 
 export type BeforeOperationHook = (args: {
   args?: any;
+  /**
+   * Hook operation being performed
+   */
   operation: HookOperationType;
 }) => any;
 
-export type BeforeValidateHook = (args: {
-  data?: any;
+export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
+  data?: Partial<T>;
   req?: PayloadRequest;
-  operation: 'create' | 'update';
-  originalDoc?: any; // undefined on 'create' operation
+  /**
+   * Hook operation being performed
+   */
+  operation: CreateOrUpdateOperation;
+  /**
+   * Original document before change
+   *
+   * `undefined` on 'create' operation
+   */
+  originalDoc?: T;
 }) => any;
 
-export type BeforeChangeHook = (args: {
-  data: any;
+export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
+  data: Partial<T>;
   req: PayloadRequest;
-  operation: 'create' | 'update'
-  originalDoc?: any; // undefined on 'create' operation
+  /**
+   * Hook operation being performed
+   */
+  operation: CreateOrUpdateOperation;
+  /**
+   * Original document before change
+   *
+   * `undefined` on 'create' operation
+   */
+  originalDoc?: T;
 }) => any;
 
-export type AfterChangeHook = (args: {
-  doc: any;
+export type AfterChangeHook<T extends TypeWithID = any> = (args: {
+  doc: T;
   req: PayloadRequest;
-  operation: 'create' | 'update';
+  /**
+   * Hook operation being performed
+   */
+  operation: CreateOrUpdateOperation;
 }) => any;
 
-export type BeforeReadHook = (args: {
-  doc: any;
+export type BeforeReadHook<T extends TypeWithID = any> = (args: {
+  doc: T;
   req: PayloadRequest;
   query: { [key: string]: any };
 }) => any;
 
-export type AfterReadHook = (args: {
-  doc: any;
+export type AfterReadHook<T extends TypeWithID = any> = (args: {
+  doc: T;
   req: PayloadRequest;
   query?: { [key: string]: any };
 }) => any;
@@ -68,10 +92,10 @@ export type BeforeDeleteHook = (args: {
   id: string;
 }) => any;
 
-export type AfterDeleteHook = (args: {
+export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
+  doc: T;
   req: PayloadRequest;
   id: string;
-  doc: any;
 }) => any;
 
 export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
@@ -80,9 +104,9 @@ export type BeforeLoginHook = (args: {
   req: PayloadRequest;
 }) => any;
 
-export type AfterLoginHook = (args: {
+export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
-  doc: any;
+  doc: T;
   token: string;
 }) => any;
 
@@ -90,31 +114,57 @@ export type AfterForgotPasswordHook = (args: {
   args?: any;
 }) => any;
 
+export type CollectionAdminOptions = {
+  /**
+   * Field to use as title in Edit view and first column in List view
+   */
+  useAsTitle?: string;
+  /**
+   * Default columns to show in list view
+   */
+  defaultColumns?: string[];
+  /**
+   * Custom description for collection
+   */
+  description?: string | (() => string) | React.FC;
+  disableDuplicate?: boolean;
+  /**
+   * Custom admin components
+   */
+  components?: {
+    views?: {
+      Edit?: React.ComponentType
+      List?: React.ComponentType
+    }
+  };
+  pagination?: {
+    defaultLimit?: number
+    limits?: number[]
+  }
+  enableRichTextRelationship?: boolean
+  /**
+   * Function to generate custom preview URL
+   */
+  preview?: GeneratePreviewURL
+}
+
 export type CollectionConfig = {
   slug: string;
+  /**
+   * Label configuration
+   */
   labels?: {
     singular?: string;
     plural?: string;
   };
   fields: Field[];
-  admin?: {
-    useAsTitle?: string;
-    defaultColumns?: string[];
-    description?: string | (() => string);
-    disableDuplicate?: boolean;
-    components?: {
-      views?: {
-        Edit?: React.ComponentType
-        List?: React.ComponentType
-      }
-    };
-    pagination?: {
-      defaultLimit?: number
-      limits?: number[]
-    }
-    enableRichTextRelationship?: boolean
-    preview?: GeneratePreviewURL
-  };
+  /**
+   * Collection admin options
+   */
+  admin?: CollectionAdminOptions;
+  /**
+   * Hooks to modify Payload functionality
+   */
   hooks?: {
     beforeOperation?: BeforeOperationHook[];
     beforeValidate?: BeforeValidateHook[];
@@ -129,6 +179,9 @@ export type CollectionConfig = {
     afterLogin?: AfterLoginHook[];
     afterForgotPassword?: AfterForgotPasswordHook[];
   };
+  /**
+   * Access control
+   */
   access?: {
     create?: Access;
     read?: Access;
@@ -138,7 +191,15 @@ export type CollectionConfig = {
     unlock?: Access;
     readRevisions?: Access;
   };
+  /**
+   * Collection login options
+   *
+   * Use `true` to enable with default options
+   */
   auth?: IncomingAuthType | boolean;
+  /**
+   * Upload options
+   */
   upload?: IncomingUploadType | boolean;
   revisions?: IncomingRevisionsType | boolean;
   timestamps?: boolean
@@ -160,8 +221,8 @@ export type AuthCollection = {
   config: SanitizedCollectionConfig;
 }
 
-export type PaginatedDocs = {
-  docs: any[]
+export type PaginatedDocs<T extends TypeWithID = any> = {
+  docs: T[]
   totalDocs: number
   limit: number
   totalPages: number
@@ -171,4 +232,8 @@ export type PaginatedDocs = {
   hasNextPage: boolean
   prevPage: number | null
   nextPage: number | null
+}
+
+export type TypeWithID = {
+  id: string | number
 }

@@ -1,32 +1,32 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
+import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
-import { Document } from '../../types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 
-export type FieldHook = (args: {
-  value?: unknown,
-  originalDoc?: Document,
-  data?: {
-    [key: string]: unknown
-  },
+export type FieldHookArgs<T extends TypeWithID = any, P = any> = {
+  value?: P,
+  originalDoc?: T,
+  data?: Partial<T>,
   operation?: 'create' | 'read' | 'update' | 'delete',
   req: PayloadRequest
-}) => Promise<unknown> | unknown;
+}
 
-export type FieldAccess = (args: {
+export type FieldHook<T extends TypeWithID = any, P = any> = (args: FieldHookArgs<T, P>) => Promise<P> | P;
+
+export type FieldAccess<T extends TypeWithID = any, P = any> = (args: {
   req: PayloadRequest
   id?: string
-  data: Record<string, unknown>
-  siblingData: Record<string, unknown>
+  data: Partial<T>
+  siblingData: Partial<P>
 }) => Promise<boolean> | boolean;
 
-export type Condition = (data: Record<string, unknown>, siblingData: Record<string, unknown>) => boolean;
+export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>) => boolean;
 
 type Admin = {
-  position?: string;
+  position?: 'sidebar';
   width?: string;
   style?: CSSProperties;
   readOnly?: boolean;
@@ -46,7 +46,7 @@ export type Labels = {
   plural: string;
 };
 
-export type Validate = (value: unknown, options?: any) => string | true | Promise<string | true>;
+export type Validate<T = any> = (value?: T, options?: any) => string | true | Promise<string | true>;
 
 export type OptionObject = {
   label: string
@@ -99,6 +99,8 @@ export type TextField = FieldBase & {
     placeholder?: string
     autoComplete?: string
   }
+  value?: string
+  onChange?: (value: string) => void
 }
 
 export type EmailField = FieldBase & {
@@ -167,9 +169,11 @@ export type UIField = {
 }
 
 export type UploadField = FieldBase & {
-  type: 'upload';
-  relationTo: string;
-  maxDepth?: number;
+  type: 'upload'
+  relationTo: string
+  maxDepth?: number
+  value?: string
+  onChange?: (value: string) => void
 }
 
 type CodeAdmin = Admin & {
@@ -184,9 +188,11 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
 }
 
 export type SelectField = FieldBase & {
-  type: 'select';
-  options: Option[];
-  hasMany?: boolean;
+  type: 'select'
+  options: Option[]
+  hasMany?: boolean
+  value?: string
+  onChange?: (value: string) => void
 }
 
 export type RelationshipField = FieldBase & {
@@ -378,4 +384,4 @@ export function fieldAffectsData(field: Field): field is FieldAffectingData {
   return 'name' in field && !fieldIsPresentationalOnly(field);
 }
 
-export type HookName = 'beforeChange' | 'beforeValidate' | 'afterChange' | 'afterRead';
+export type HookName = 'beforeRead' | 'beforeChange' | 'beforeValidate' | 'afterChange' | 'afterRead';
