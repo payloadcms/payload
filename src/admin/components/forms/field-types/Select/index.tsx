@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
@@ -40,6 +40,8 @@ const Select: React.FC<Props> = (props) => {
       description,
       condition,
     } = {},
+    value: valueFromProps,
+    onChange: onChangeFromProps
   } = props;
 
   const path = pathFromProps || name;
@@ -52,15 +54,41 @@ const Select: React.FC<Props> = (props) => {
   }, [validate, required, options]);
 
   const {
-    value,
+    value: valueFromContext,
     showError,
     setValue,
     errorMessage,
-  } = useFieldType({
+  } = useField({
     path,
     validate: memoizedValidate,
     condition,
   });
+
+  const onChange = useCallback((selectedOption) => {
+    if (!readOnly) {
+      let newValue;
+      if (hasMany) {
+        if (Array.isArray(selectedOption)) {
+          newValue = selectedOption.map((option) => option.value);
+        } else {
+          newValue = [];
+        }
+      } else {
+        newValue = selectedOption.value;
+      }
+
+      if (typeof onChangeFromProps === 'function') {
+        onChangeFromProps(newValue);
+      } else {
+        setValue(newValue);
+      }
+    }
+  }, [
+    readOnly,
+    hasMany,
+    onChangeFromProps,
+    setValue
+  ])
 
   const classes = [
     'field-type',
@@ -70,6 +98,8 @@ const Select: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   let valueToRender;
+
+  const value = valueFromProps || valueFromContext || '';
 
   if (hasMany && Array.isArray(value)) {
     valueToRender = value.map((val) => options.find((option) => option.value === val));
@@ -95,17 +125,7 @@ const Select: React.FC<Props> = (props) => {
         required={required}
       />
       <ReactSelect
-        onChange={!readOnly ? (selectedOption) => {
-          if (hasMany) {
-            if (Array.isArray(selectedOption)) {
-              setValue(selectedOption.map((option) => option.value));
-            } else {
-              setValue([]);
-            }
-          } else {
-            setValue(selectedOption.value);
-          }
-        } : undefined}
+        onChange={onChange}
         value={valueToRender}
         showError={showError}
         isDisabled={readOnly}

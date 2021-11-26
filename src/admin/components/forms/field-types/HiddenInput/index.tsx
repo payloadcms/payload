@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import withCondition from '../../withCondition';
 import { Props } from './types';
 
@@ -13,7 +13,7 @@ const HiddenInput: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const { value, setValue } = useFieldType({
+  const { value, setValue } = useField({
     path,
   });
 

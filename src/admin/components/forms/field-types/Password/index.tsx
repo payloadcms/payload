@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
 import withCondition from '../../withCondition';
@@ -33,7 +33,7 @@ const Password: React.FC<Props> = (props) => {
     formProcessing,
     setValue,
     errorMessage,
-  } = useFieldType({
+  } = useField({
     path,
     validate: memoizedValidate,
     enableDebouncedValue: true,

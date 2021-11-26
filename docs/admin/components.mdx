@@ -90,13 +90,13 @@ All Payload fields support the ability to swap in your own React components. So,
 
 #### Sending and receiving values from the form
 
-When swapping out the `Field` component, you'll be responsible for sending and receiving the field's `value` from the form itself. To do so, import the `useFieldType` hook as follows:
+When swapping out the `Field` component, you'll be responsible for sending and receiving the field's `value` from the form itself. To do so, import the `useField` hook as follows:
 
 ```js
-import { useFieldType } from 'payload/components/forms';
+import { useField } from 'payload/components/forms';
 
 const CustomTextField = ({ path }) => {
-  const { value, setValue } = useFieldType({ path });
+  const { value, setValue } = useField({ path });
 
   return (
     <input

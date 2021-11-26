@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import withCondition from '../../withCondition';
-import useFieldType from '../../useFieldType';
+import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
@@ -34,7 +34,7 @@ const Email: React.FC<Props> = (props) => {
     return validationResult;
   }, [validate, required]);
 
-  const fieldType = useFieldType({
+  const fieldType = useField({
     path,
     validate: memoizedValidate,
     enableDebouncedValue: true,
