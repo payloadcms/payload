@@ -14,9 +14,7 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any> = {
   req: PayloadRequest
 }
 
-export type FieldHookReturnType = Promise<unknown> | unknown;
-
-export type FieldHook<T extends TypeWithID = any, P = any> = (args: FieldHookArgs<T, P>) => FieldHookReturnType;
+export type FieldHook<T extends TypeWithID = any, P = any> = (args: FieldHookArgs<T, P>) => Promise<P> | P;
 
 export type FieldAccess<T extends TypeWithID = any, P = any> = (args: {
   req: PayloadRequest

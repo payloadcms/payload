@@ -188,3 +188,26 @@ const afterLoginHook = async ({
   return user;
 }
 ```
+
+## TypeScript
+
+Payload exports a type for each Collection hook which can be accessed as follows:
+
+```js
+import type {
+  CollectionBeforeOperationHook,
+  CollectionBeforeValidateHook,
+  CollectionBeforeChangeHook,
+  CollectionAfterChangeHook,
+  CollectionAfterReadHook,
+  CollectionBeforeReadHook,
+  CollectionBeforeDeleteHook,
+  CollectionAfterDeleteHook,
+  CollectionBeforeLoginHook,
+  CollectionAfterLoginHook,
+  CollectionAfterForgotPasswordHook,
+} from 'payload/types';
+
+// Use hook types here...
+}
+```

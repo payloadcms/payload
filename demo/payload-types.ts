@@ -57,7 +57,7 @@ export interface LocalizedPost {
     }[];
     id?: string;
     blockName?: string;
-    blockType: "richTextBlock";
+    blockType: 'richTextBlock';
   }[];
 }
 /**
@@ -73,14 +73,14 @@ export interface BlocksGlobal {
         color: string;
         id?: string;
         blockName?: string;
-        blockType: "quote";
+        blockType: 'quote';
       }
     | {
         label: string;
         url: string;
         id?: string;
         blockName?: string;
-        blockType: "cta";
+        blockType: 'cta';
       }
   )[];
 }
@@ -113,7 +113,7 @@ export interface Admin {
   apiKeyIndex?: string;
   loginAttempts?: number;
   lockUntil?: string;
-  roles: ("admin" | "editor" | "moderator" | "user" | "viewer")[];
+  roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
   publicUser?: (string | PublicUser)[];
 }
 /**
@@ -126,11 +126,11 @@ export interface AllFields {
   descriptionText?: string;
   descriptionFunction?: string;
   image?: string | Media;
-  select: "option-1" | "option-2" | "option-3" | "option-4";
-  selectMany: ("option-1" | "option-2" | "option-3" | "option-4")[];
+  select: 'option-1' | 'option-2' | 'option-3' | 'option-4';
+  selectMany: ('option-1' | 'option-2' | 'option-3' | 'option-4')[];
   dayOnlyDateFieldExample: string;
   timeOnlyDateFieldExample?: string;
-  radioGroupExample: "option-1" | "option-2" | "option-3";
+  radioGroupExample: 'option-1' | 'option-2' | 'option-3';
   email?: string;
   number?: number;
   group?: {
@@ -149,13 +149,13 @@ export interface AllFields {
         testEmail: string;
         id?: string;
         blockName?: string;
-        blockType: "email";
+        blockType: 'email';
       }
     | {
         testNumber: number;
         id?: string;
         blockName?: string;
-        blockType: "number";
+        blockType: 'number';
       }
     | {
         author: string | PublicUser;
@@ -163,14 +163,14 @@ export interface AllFields {
         color: string;
         id?: string;
         blockName?: string;
-        blockType: "quote";
+        blockType: 'quote';
       }
     | {
         label: string;
         url: string;
         id?: string;
         blockName?: string;
-        blockType: "cta";
+        blockType: 'cta';
       }
   )[];
   relationship?: string | Conditions;
@@ -178,11 +178,11 @@ export interface AllFields {
   relationshipMultipleCollections?:
     | {
         value: string | LocalizedPost;
-        relationTo: "localized-posts";
+        relationTo: 'localized-posts';
       }
     | {
         value: string | Conditions;
-        relationTo: "conditions";
+        relationTo: 'conditions';
       };
   textarea?: string;
   richText: {
@@ -258,13 +258,13 @@ export interface Conditions {
         testEmail: string;
         id?: string;
         blockName?: string;
-        blockType: "email";
+        blockType: 'email';
       }
     | {
         testNumber: number;
         id?: string;
         blockName?: string;
-        blockType: "number";
+        blockType: 'number';
       }
     | {
         author: string | PublicUser;
@@ -272,14 +272,14 @@ export interface Conditions {
         color: string;
         id?: string;
         blockName?: string;
-        blockType: "quote";
+        blockType: 'quote';
       }
     | {
         label: string;
         url: string;
         id?: string;
         blockName?: string;
-        blockType: "cta";
+        blockType: 'cta';
       }
   )[];
 }
@@ -297,13 +297,13 @@ export interface AutoLabel {
     testNumber?: number;
     id?: string;
     blockName?: string;
-    blockType: "number";
+    blockType: 'number';
   }[];
   noLabelBlock?: {
     testNumber?: number;
     id?: string;
     blockName?: string;
-    blockType: "number";
+    blockType: 'number';
   }[];
   items?: {
     itemName?: string;
@@ -359,7 +359,7 @@ export interface File {
   filename?: string;
   mimeType?: string;
   filesize?: number;
-  type: "Type 1" | "Type 2" | "Type 3";
+  type: 'Type 1' | 'Type 2' | 'Type 3';
   owner: string | Admin;
 }
 /**
@@ -370,9 +370,9 @@ export interface DefaultValueTest {
   id: string;
   text?: string;
   image?: string | Media;
-  select?: "option-1" | "option-2" | "option-3" | "option-4";
-  selectMany?: ("option-1" | "option-2" | "option-3" | "option-4")[];
-  radioGroupExample?: "option-1" | "option-2" | "option-3";
+  select?: 'option-1' | 'option-2' | 'option-3' | 'option-4';
+  selectMany?: ('option-1' | 'option-2' | 'option-3' | 'option-4')[];
+  radioGroupExample?: 'option-1' | 'option-2' | 'option-3';
   email?: string;
   number?: number;
   group?: {
@@ -391,13 +391,13 @@ export interface DefaultValueTest {
         testEmail: string;
         id?: string;
         blockName?: string;
-        blockType: "email";
+        blockType: 'email';
       }
     | {
         testNumber: number;
         id?: string;
         blockName?: string;
-        blockType: "number";
+        blockType: 'number';
       }
     | {
         author: string | PublicUser;
@@ -405,14 +405,14 @@ export interface DefaultValueTest {
         color: string;
         id?: string;
         blockName?: string;
-        blockType: "quote";
+        blockType: 'quote';
       }
     | {
         label: string;
         url: string;
         id?: string;
         blockName?: string;
-        blockType: "cta";
+        blockType: 'cta';
       }
   )[];
   relationship?: string | Conditions;
@@ -420,11 +420,11 @@ export interface DefaultValueTest {
   relationshipMultipleCollections?:
     | {
         value: string | LocalizedPost;
-        relationTo: "localized-posts";
+        relationTo: 'localized-posts';
       }
     | {
         value: string | Conditions;
-        relationTo: "conditions";
+        relationTo: 'conditions';
       };
   textarea?: string;
   slug?: string;
@@ -444,13 +444,13 @@ export interface Blocks {
         testEmail: string;
         id?: string;
         blockName?: string;
-        blockType: "email";
+        blockType: 'email';
       }
     | {
         testNumber: number;
         id?: string;
         blockName?: string;
-        blockType: "number";
+        blockType: 'number';
       }
     | {
         author: string | PublicUser;
@@ -458,14 +458,14 @@ export interface Blocks {
         color: string;
         id?: string;
         blockName?: string;
-        blockType: "quote";
+        blockType: 'quote';
       }
     | {
         label: string;
         url: string;
         id?: string;
         blockName?: string;
-        blockType: "cta";
+        blockType: 'cta';
       }
   )[];
   nonLocalizedLayout: (
@@ -473,13 +473,13 @@ export interface Blocks {
         testEmail: string;
         id?: string;
         blockName?: string;
-        blockType: "email";
+        blockType: 'email';
       }
     | {
         testNumber: number;
         id?: string;
         blockName?: string;
-        blockType: "number";
+        blockType: 'number';
       }
     | {
         author: string | PublicUser;
@@ -487,14 +487,14 @@ export interface Blocks {
         color: string;
         id?: string;
         blockName?: string;
-        blockType: "quote";
+        blockType: 'quote';
       }
     | {
         label: string;
         url: string;
         id?: string;
         blockName?: string;
-        blockType: "cta";
+        blockType: 'cta';
       }
   )[];
 }
@@ -577,20 +577,20 @@ export interface RelationshipA {
   postLocalizedMultiple?: (
     | {
         value: string | LocalizedPost;
-        relationTo: "localized-posts";
+        relationTo: 'localized-posts';
       }
     | {
         value: string | AllFields;
-        relationTo: "all-fields";
+        relationTo: 'all-fields';
       }
     | {
         value: number | CustomID;
-        relationTo: "custom-id";
+        relationTo: 'custom-id';
       }
   )[];
   postManyRelationships?: {
     value: string | RelationshipB;
-    relationTo: "relationship-b";
+    relationTo: 'relationship-b';
   };
   postMaxDepth?: string | RelationshipB;
   customID?: (number | CustomID)[];
@@ -606,20 +606,20 @@ export interface RelationshipB {
   postManyRelationships?:
     | {
         value: string | RelationshipA;
-        relationTo: "relationship-a";
+        relationTo: 'relationship-a';
       }
     | {
         value: string | Media;
-        relationTo: "media";
+        relationTo: 'media';
       };
   localizedPosts?: (
     | {
         value: string | LocalizedPost;
-        relationTo: "localized-posts";
+        relationTo: 'localized-posts';
       }
     | {
         value: string | PreviewablePost;
-        relationTo: "previewable-post";
+        relationTo: 'previewable-post';
       }
   )[];
   strictAccess?: string | StrictAccess;
@@ -654,10 +654,10 @@ export interface RichText {
  */
 export interface Select {
   id: string;
-  Select: "one" | "two" | "three";
-  SelectHasMany: ("one" | "two" | "three")[];
-  SelectJustStrings: ("blue" | "green" | "yellow")[];
-  Radio: "one" | "two" | "three";
+  Select: 'one' | 'two' | 'three';
+  SelectHasMany: ('one' | 'two' | 'three')[];
+  SelectJustStrings: ('blue' | 'green' | 'yellow')[];
+  Radio: 'one' | 'two' | 'three';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

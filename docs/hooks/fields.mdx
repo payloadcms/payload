@@ -70,3 +70,31 @@ All field hooks can optionally modify the return value of the field before the o
   <strong>Important</strong><br/>
   Due to GraphQL's typed nature, you should never change the type of data that you return from a field, otherwise GraphQL will produce errors. If you need to change the shape or type of data, reconsider Field Hooks and instead evaluate if Collection / Global hooks might suit you better.
 </Banner>
+
+## TypeScript
+
+Payload exports a type for field hooks which can be accessed and used as follows:
+
+```js
+import type { FieldHook } from 'payload/types';
+
+// Field hook type is a generic that takes two arguments:
+// 1: The document type
+// 2: the value type
+
+type ExampleFieldHook = FieldHook<ExampleDocumentType, string>;
+
+const exampleFieldHook: ExampleFieldHook = (args) => {
+  const {
+    value, // Typed as `string` as shown above
+    data, // Typed as a Partial of your ExampleDocumentType
+    originalDoc, // Typed as ExampleDocumentType
+    operation,
+    req,
+  }
+
+  // Do something here...
+
+  return value; // should return a string as typed above, undefined, or null
+}
+```
