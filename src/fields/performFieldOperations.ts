@@ -19,7 +19,7 @@ type Arguments = {
   unflattenLocales?: boolean
   originalDoc?: Record<string, unknown>
   docWithLocales?: Record<string, unknown>
-  id?: string
+  id?: string | number
   showHiddenFields?: boolean
   depth?: number
   currentDepth?: number

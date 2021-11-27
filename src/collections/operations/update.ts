@@ -1,7 +1,6 @@
 import httpStatus from 'http-status';
 import path from 'path';
 import { UploadedFile } from 'express-fileupload';
-import { enforceMaxRevisions } from '../../revisions/enforceMaxRevisions';
 import { Payload } from '../..';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
@@ -19,6 +18,7 @@ import { FileData } from '../../uploads/types';
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult, UserDocument } from '../../auth/types';
 import saveBufferToFile from '../../uploads/saveBufferToFile';
+import { saveCollectionRevision } from '../../revisions/saveCollectionRevision';
 
 export type Arguments = {
   collection: Collection
@@ -290,32 +290,13 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // /////////////////////////////////////
 
   if (collectionConfig.revisions) {
-    const RevisionsModel = this.revisions[collectionConfig.slug];
-
-    const newRevisionData = { ...originalDoc };
-    delete newRevisionData.id;
-
-    let revisionCreationPromise;
-
-    try {
-      revisionCreationPromise = RevisionsModel.create({
-        parent: originalDoc.id,
-        revision: originalDoc,
-      });
-    } catch (err) {
-      this.logger.error(`There was an error while saving a revision for the ${collectionConfig.labels.singular} with ID ${originalDoc.id}.`);
-    }
-
-    if (collectionConfig.revisions.maxPerDoc) {
-      enforceMaxRevisions({
-        payload: this,
-        Model: RevisionsModel,
-        label: collectionConfig.labels.plural,
-        entityType: 'collection',
-        maxPerDoc: collectionConfig.revisions.maxPerDoc,
-        revisionCreationPromise,
-      });
-    }
+    saveCollectionRevision({
+      payload: this,
+      config: collectionConfig,
+      req,
+      docWithLocales,
+      id,
+    });
   }
 
   // /////////////////////////////////////

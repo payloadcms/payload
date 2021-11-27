@@ -12,7 +12,7 @@ type Arguments = {
   operation: Operation
   overrideAccess: boolean
   req: PayloadRequest
-  id: string
+  id: string | number
   relationshipPopulations: (() => Promise<void>)[]
   depth: number
   currentDepth: number

@@ -5,22 +5,18 @@ type Args = {
   payload: Payload
   Model: CollectionModel
   maxPerDoc: number
-  label: string
+  entityLabel: string
   entityType: 'global' | 'collection'
-  revisionCreationPromise: Promise<any>
 }
 
 export const enforceMaxRevisions = async ({
   payload,
   Model,
   maxPerDoc,
-  label,
+  entityLabel,
   entityType,
-  revisionCreationPromise,
 }: Args): Promise<void> => {
   try {
-    if (revisionCreationPromise) await revisionCreationPromise;
-
     const oldestAllowedDoc = await Model.find().limit(1).skip(maxPerDoc).sort({ createdAt: -1 });
 
     if (oldestAllowedDoc?.[0]?.createdAt) {
@@ -33,6 +29,6 @@ export const enforceMaxRevisions = async ({
       });
     }
   } catch (err) {
-    payload.logger.error(`There was an error cleaning up old revisions for the ${entityType} ${label}`);
+    payload.logger.error(`There was an error cleaning up old revisions for the ${entityType} ${entityLabel}`);
   }
 };
