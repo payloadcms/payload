@@ -1,15 +1,15 @@
 /* eslint-disable no-underscore-dangle */
 import { PayloadRequest } from '../../express/types';
-import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { TypeWithRevision } from '../../revisions/types';
+import { SanitizedGlobalConfig } from '../config/types';
 
 export type Arguments = {
-  collection: Collection
+  globalConfig: SanitizedGlobalConfig
   id: string
   req: PayloadRequest
   disableErrors?: boolean
@@ -22,9 +22,7 @@ export type Arguments = {
 async function findRevisionByID<T extends TypeWithRevision<T> = any>(args: Arguments): Promise<T> {
   const {
     depth,
-    collection: {
-      config: collectionConfig,
-    },
+    globalConfig,
     id,
     req,
     req: {
@@ -36,13 +34,13 @@ async function findRevisionByID<T extends TypeWithRevision<T> = any>(args: Argum
     showHiddenFields,
   } = args;
 
-  const RevisionsModel = this.revisions[collectionConfig.slug];
+  const RevisionsModel = this.revisions[globalConfig.slug];
 
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////
 
-  const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors, id }, collectionConfig.access.readRevisions) : true;
+  const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors, id }, globalConfig.access.readRevisions) : true;
 
   // If errors are disabled, and access returns false, return null
   if (accessResults === false) return null;
@@ -93,7 +91,7 @@ async function findRevisionByID<T extends TypeWithRevision<T> = any>(args: Argum
   // beforeRead - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
+  await globalConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
     await priorHook;
 
     result.revision = await hook({
@@ -107,7 +105,7 @@ async function findRevisionByID<T extends TypeWithRevision<T> = any>(args: Argum
   // afterRead - Fields
   // /////////////////////////////////////
 
-  result.revision = await this.performFieldOperations(collectionConfig, {
+  result.revision = await this.performFieldOperations(globalConfig, {
     depth,
     req,
     id,
@@ -124,7 +122,7 @@ async function findRevisionByID<T extends TypeWithRevision<T> = any>(args: Argum
   // afterRead - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+  await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
     await priorHook;
 
     result.revision = await hook({

@@ -10,7 +10,7 @@ import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { relationship } from '../../../../../fields/validations';
-import { PaginatedDocs } from '../../../../../collections/config/types';
+import { PaginatedDocs } from '../../../../../mongoose/types';
 import { useFormProcessing } from '../../Form/context';
 import optionsReducer from './optionsReducer';
 import { Props, Option, ValueWithRelation } from './types';

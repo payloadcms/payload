@@ -1,8 +1,10 @@
+import { Payload } from '../..';
+import { TypeWithID } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { saveGlobalRevision } from '../../revisions/saveGlobalRevision';
 
-async function update(args) {
+async function update<T extends TypeWithID = any>(this: Payload, args): Promise<T> {
   const { globals: { Model } } = this;
 
   const {
@@ -26,10 +28,12 @@ async function update(args) {
   // 2. Retrieve document
   // /////////////////////////////////////
 
-  let global = await Model.findOne({ globalType: slug });
+  let hasExistingGlobal = false;
+  let global: any = await Model.findOne({ globalType: slug });
   let globalJSON;
 
   if (global) {
+    hasExistingGlobal = true;
     globalJSON = global.toJSON({ virtuals: true });
     globalJSON = JSON.stringify(globalJSON);
     globalJSON = JSON.parse(globalJSON);
@@ -105,6 +109,7 @@ async function update(args) {
     unflattenLocales: true,
     originalDoc,
     docWithLocales: globalJSON,
+    overrideAccess,
   });
 
   // /////////////////////////////////////
@@ -131,7 +136,7 @@ async function update(args) {
   // Create revision from existing doc
   // /////////////////////////////////////
 
-  if (globalConfig.revisions) {
+  if (globalConfig.revisions && hasExistingGlobal) {
     saveGlobalRevision({
       payload: this,
       config: globalConfig,
@@ -152,6 +157,7 @@ async function update(args) {
     depth,
     showHiddenFields,
     flattenLocales: true,
+    overrideAccess,
   });
 
   // /////////////////////////////////////

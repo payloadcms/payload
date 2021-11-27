@@ -1,5 +1,6 @@
 import { RelationshipField } from '../../../../../../fields/config/types';
-import { PaginatedDocs, SanitizedCollectionConfig } from '../../../../../../collections/config/types';
+import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
+import { PaginatedDocs } from '../../../../../../mongoose/types';
 
 export type Props = {
   onChange: (val: unknown) => void,

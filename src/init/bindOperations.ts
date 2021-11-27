@@ -14,10 +14,14 @@ import unlock from '../auth/operations/unlock';
 import create from '../collections/operations/create';
 import find from '../collections/operations/find';
 import findByID from '../collections/operations/findByID';
+import findRevisions from '../collections/operations/findRevisions';
+import findRevisionByID from '../collections/operations/findRevisionByID';
 import update from '../collections/operations/update';
 import deleteHandler from '../collections/operations/delete';
 
 import findOne from '../globals/operations/findOne';
+import findGlobalRevisions from '../globals/operations/findRevisions';
+import findGlobalRevisionByID from '../globals/operations/findRevisionByID';
 import globalUpdate from '../globals/operations/update';
 
 import preferenceUpdate from '../preferences/operations/update';
@@ -30,6 +34,8 @@ function bindOperations(ctx: Payload): void {
       create: create.bind(ctx),
       find: find.bind(ctx),
       findByID: findByID.bind(ctx),
+      findRevisions: findRevisions.bind(ctx),
+      findRevisionByID: findRevisionByID.bind(ctx),
       update: update.bind(ctx),
       delete: deleteHandler.bind(ctx),
       auth: {
@@ -48,6 +54,8 @@ function bindOperations(ctx: Payload): void {
     },
     globals: {
       findOne: findOne.bind(ctx),
+      findRevisions: findGlobalRevisions.bind(ctx),
+      findRevisionByID: findGlobalRevisionByID.bind(ctx),
       update: globalUpdate.bind(ctx),
     },
     preferences: {

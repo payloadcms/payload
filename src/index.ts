@@ -2,13 +2,14 @@ import express, { Express, Router } from 'express';
 import crypto from 'crypto';
 import {
   TypeWithID,
-  Collection, CollectionModel, PaginatedDocs,
+  Collection, CollectionModel,
 } from './collections/config/types';
 import {
   SanitizedConfig,
   EmailOptions,
   InitOptions,
 } from './config/types';
+import { PaginatedDocs } from './mongoose/types';
 
 import Logger from './utilities/logger';
 import bindOperations from './init/bindOperations';

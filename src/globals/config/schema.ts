@@ -19,6 +19,7 @@ const globalSchema = joi.object().keys({
   }),
   access: joi.object({
     read: joi.func(),
+    readRevisions: joi.func(),
     update: joi.func(),
   }),
   fields: joi.array(),

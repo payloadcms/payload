@@ -4,7 +4,7 @@ import { PayloadRequest } from '../../express/types';
 import { TypeWithID } from '../config/types';
 import { PaginatedDocs } from '../../mongoose/types';
 
-export default async function find<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
+export default async function findRevisions<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
   try {
     let page;
 
@@ -26,7 +26,7 @@ export default async function find<T extends TypeWithID = any>(req: PayloadReque
       depth: req.query.depth,
     };
 
-    const result = await this.operations.collections.find(options);
+    const result = await this.operations.collections.findRevisions(options);
 
     return res.status(httpStatus.OK).json(result);
   } catch (error) {

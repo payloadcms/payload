@@ -104,6 +104,8 @@ export default function registerCollections(ctx: Payload): void {
         find,
         update,
         findByID,
+        findRevisions,
+        findRevisionByID,
         delete: deleteHandler,
       } = ctx.requestHandlers.collections;
 
@@ -171,6 +173,14 @@ export default function registerCollections(ctx: Payload): void {
         router
           .route(`/${slug}/reset-password`)
           .post(resetPassword);
+      }
+
+      if (collection.revisions) {
+        router.route(`/${slug}/revisions`)
+          .get(findRevisions);
+
+        router.route(`/${slug}/revisions/:id`)
+          .get(findRevisionByID);
       }
 
       router.route(`/${slug}`)

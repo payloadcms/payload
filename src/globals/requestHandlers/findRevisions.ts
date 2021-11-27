@@ -1,10 +1,11 @@
 import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
-import { TypeWithID } from '../config/types';
+import { TypeWithID } from '../../collections/config/types';
 import { PaginatedDocs } from '../../mongoose/types';
+import { SanitizedGlobalConfig } from '../config/types';
 
-export default async function find<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
+export default (global: SanitizedGlobalConfig) => async function findRevisions<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
   try {
     let page;
 
@@ -18,7 +19,7 @@ export default async function find<T extends TypeWithID = any>(req: PayloadReque
 
     const options = {
       req,
-      collection: req.collection,
+      globalConfig: global,
       where: req.query.where,
       page,
       limit: req.query.limit,
@@ -26,10 +27,10 @@ export default async function find<T extends TypeWithID = any>(req: PayloadReque
       depth: req.query.depth,
     };
 
-    const result = await this.operations.collections.find(options);
+    const result = await this.operations.globals.findRevisions(options);
 
     return res.status(httpStatus.OK).json(result);
   } catch (error) {
     return next(error);
   }
-}
+};

@@ -1,4 +1,5 @@
-import { PaginatedDocs, TypeWithID } from '../../config/types';
+import { TypeWithID } from '../../config/types';
+import { PaginatedDocs } from '../../../mongoose/types';
 import { Document, Where } from '../../../types';
 
 export type Options = {

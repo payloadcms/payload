@@ -5,7 +5,7 @@ import optionsReducer from './optionsReducer';
 import useDebounce from '../../../../../hooks/useDebounce';
 import ReactSelect from '../../../ReactSelect';
 import { Value } from '../../../ReactSelect/types';
-import { PaginatedDocs } from '../../../../../../collections/config/types';
+import { PaginatedDocs } from '../../../../../../mongoose/types';
 
 import './index.scss';
 

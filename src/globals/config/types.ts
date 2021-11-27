@@ -1,10 +1,13 @@
 import React from 'react';
 import { Model, Document } from 'mongoose';
 import { DeepRequired } from 'ts-essentials';
-import { IncomingRevisionsType } from '../../revisions/types';
 import { PayloadRequest } from '../../express/types';
 import { Access, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
+
+export type TypeWithID = {
+  id: string
+}
 
 export type BeforeValidateHook = (args: {
   data?: any;
@@ -53,8 +56,8 @@ export type GlobalConfig = {
   }
   access?: {
     read?: Access;
+    readRevisions?: Access;
     update?: Access;
-    admin?: Access;
   }
   fields: Field[];
   admin?: {

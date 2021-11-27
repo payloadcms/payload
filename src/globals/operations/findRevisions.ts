@@ -2,14 +2,15 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Collection, TypeWithID } from '../config/types';
 import { PaginatedDocs } from '../../mongoose/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
+import { TypeWithRevision } from '../../revisions/types';
+import { SanitizedGlobalConfig } from '../config/types';
 
 export type Arguments = {
-  collection: Collection
+  globalConfig: SanitizedGlobalConfig
   where?: Where
   page?: number
   limit?: number
@@ -20,31 +21,13 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promise<PaginatedDocs<T>> {
-  let args = incomingArgs;
-
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    args = (await hook({
-      args,
-      operation: 'read',
-    })) || args;
-  }, Promise.resolve());
-
+async function findRevisions<T extends TypeWithRevision<T> = any>(args: Arguments): Promise<PaginatedDocs<T>> {
   const {
     where,
     page,
     limit,
     depth,
-    collection: {
-      Model,
-      config: collectionConfig,
-    },
+    globalConfig,
     req,
     req: {
       locale,
@@ -52,6 +35,8 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     overrideAccess,
     showHiddenFields,
   } = args;
+
+  const RevisionsModel = this.revisions[globalConfig.slug];
 
   // /////////////////////////////////////
   // Access
@@ -79,7 +64,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   }
 
   if (!overrideAccess) {
-    const accessResults = await executeAccess({ req }, collectionConfig.access.read);
+    const accessResults = await executeAccess({ req }, globalConfig.access.readRevisions);
 
     if (hasWhereAccessResult(accessResults)) {
       if (!where) {
@@ -94,7 +79,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     }
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await RevisionsModel.buildQuery(queryToBuild, locale);
 
   // /////////////////////////////////////
   // Find
@@ -103,54 +88,38 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   const optionsToExecute = {
     page: page || 1,
     limit: limit || 10,
-    sort: buildSortParam(args.sort, collectionConfig.timestamps),
+    sort: buildSortParam(args.sort, true),
     lean: true,
     leanWithId: true,
     useEstimatedCount,
   };
 
-  const paginatedDocs = await Model.paginate(query, optionsToExecute);
-
-  // /////////////////////////////////////
-  // beforeRead - Collection
-  // /////////////////////////////////////
-
-  let result = {
-    ...paginatedDocs,
-    docs: await Promise.all(paginatedDocs.docs.map(async (doc) => {
-      const docString = JSON.stringify(doc);
-      let docRef = JSON.parse(docString);
-
-      await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-        await priorHook;
-
-        docRef = await hook({ req, query, doc: docRef }) || docRef;
-      }, Promise.resolve());
-
-      return docRef;
-    })),
-  } as PaginatedDocs<T>;
+  const paginatedDocs = await RevisionsModel.paginate(query, optionsToExecute);
 
   // /////////////////////////////////////
   // afterRead - Fields
   // /////////////////////////////////////
 
-  result = {
-    ...result,
-    docs: await Promise.all(result.docs.map(async (data) => this.performFieldOperations(
-      collectionConfig,
-      {
-        depth,
-        data,
-        req,
-        id: data.id,
-        hook: 'afterRead',
-        operation: 'read',
-        overrideAccess,
-        flattenLocales: true,
-        showHiddenFields,
-      },
-    ))),
+  let result = {
+    ...paginatedDocs,
+    docs: await Promise.all(paginatedDocs.docs.map(async (data) => ({
+      ...data,
+      revision: this.performFieldOperations(
+        globalConfig,
+        {
+          depth,
+          data: data.revision,
+          req,
+          id: data.revision.id,
+          hook: 'afterRead',
+          operation: 'read',
+          overrideAccess,
+          flattenLocales: true,
+          showHiddenFields,
+          isRevision: true,
+        },
+      ),
+    }))),
   };
 
   // /////////////////////////////////////
@@ -160,12 +129,12 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   result = {
     ...result,
     docs: await Promise.all(result.docs.map(async (doc) => {
-      let docRef = doc;
+      const docRef = doc;
 
-      await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef = await hook({ req, query, doc }) || doc;
+        docRef.revision = await hook({ req, query, doc: doc.revision }) || doc.revision;
       }, Promise.resolve());
 
       return docRef;
@@ -184,4 +153,4 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   return result;
 }
 
-export default find;
+export default findRevisions;
