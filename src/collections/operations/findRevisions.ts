@@ -126,7 +126,7 @@ async function findRevisions<T extends TypeWithRevision<T> = any>(args: Argument
     ...result,
     docs: await Promise.all(result.docs.map(async (data) => ({
       ...data,
-      revision: this.performFieldOperations(
+      revision: await this.performFieldOperations(
         collectionConfig,
         {
           depth,
