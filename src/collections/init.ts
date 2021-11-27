@@ -73,6 +73,7 @@ export default function registerCollections(ctx: Payload): void {
         ctx.config,
         buildRevisionFields(collection),
         {
+          disableUnique: true,
           options: {
             timestamps: true,
           },

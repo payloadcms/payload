@@ -11,6 +11,7 @@ export type BuildSchemaOptions = {
   options?: SchemaOptions
   allowIDField?: boolean
   disableRequired?: boolean
+  disableUnique?: boolean
   global?: boolean
 }
 
@@ -52,7 +53,7 @@ const setBlockDiscriminators = (fields: Field[], schema: Schema, config: Sanitiz
 
 const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: BuildSchemaOptions) => ({
   sparse: field.unique && field.localized,
-  unique: field.unique || false,
+  unique: (!buildSchemaOptions.disableUnique && field.unique) || false,
   required: (!buildSchemaOptions.disableRequired && field.required && !field.localized && !field?.admin?.condition && !field?.access?.create) || false,
   default: field.defaultValue || undefined,
   index: field.index || field.unique || false,
@@ -64,7 +65,9 @@ const localizeSchema = (field: NonPresentationalField, schema, locales) => {
       type: locales.reduce((localeSchema, locale) => ({
         ...localeSchema,
         [locale]: schema,
-      }), {}),
+      }), {
+        _id: false,
+      }),
       localized: true,
       index: schema.index,
     };
@@ -73,7 +76,7 @@ const localizeSchema = (field: NonPresentationalField, schema, locales) => {
 };
 
 const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchemaOptions: BuildSchemaOptions = {}): Schema => {
-  const { allowIDField, options } = buildSchemaOptions;
+  const { allowIDField, disableUnique, options } = buildSchemaOptions;
   let fields = {};
   let schemaFields = configFields;
   const indexFields = [];
