@@ -3,7 +3,7 @@ import { PayloadRequest } from '../../src/express/types';
 import { Block } from '../../src/fields/config/types';
 
 const validateLocalizationTransform = (hook: string, value, req: PayloadRequest) => {
-  if (req.locale !== 'all' && value !== undefined && typeof value !== 'string') {
+  if (req.locale !== 'all' && value !== undefined && typeof value !== 'string' && value !== null) {
     console.error(hook, value);
     throw new Error('Locale transformation should happen before hook is called');
   }
