@@ -35,9 +35,13 @@ const SearchFilter: React.FC<Props> = (props) => {
         },
       };
 
+      if (!debouncedSearch) {
+        delete newWhere[fieldName];
+      }
+
       if (handleChange) handleChange(newWhere as Where);
 
-      if (modifySearchQuery) {
+      if (modifySearchQuery && params?.where?.[fieldName]?.like !== newWhere?.[fieldName]?.like) {
         history.replace({
           search: queryString.stringify({
             ...params,
@@ -55,7 +59,7 @@ const SearchFilter: React.FC<Props> = (props) => {
         className={`${baseClass}__input`}
         placeholder={`Search by ${fieldLabel}`}
         type="text"
-        value={search}
+        value={search || ''}
         onChange={(e) => setSearch(e.target.value)}
       />
       <Search />
