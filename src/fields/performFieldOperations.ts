@@ -25,7 +25,7 @@ type Arguments = {
   currentDepth?: number
 }
 
-export default async function performFieldOperations(this: Payload, entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig, args: Arguments): Promise<{ [key: string]: unknown }> {
+export default async function performFieldOperations(this: Payload, entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig, args: Arguments): Promise<any> {
   const {
     data,
     originalDoc: fullOriginalDoc,

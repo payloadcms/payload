@@ -43,6 +43,10 @@ const LocalizedPosts: CollectionConfig = {
     ],
     enableRichTextRelationship: true,
   },
+  revisions: {
+    maxPerDoc: 5,
+    retainDeleted: false,
+  },
   access: {
     read: () => true,
   },

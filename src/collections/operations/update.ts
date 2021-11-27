@@ -1,6 +1,8 @@
 import httpStatus from 'http-status';
 import path from 'path';
 import { UploadedFile } from 'express-fileupload';
+import { enforceMaxRevisions } from '../../revisions/enforceMaxRevisions';
+import { Payload } from '../..';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 
@@ -30,8 +32,8 @@ export type Arguments = {
   overwriteExistingFiles?: boolean
 }
 
-async function update(incomingArgs: Arguments): Promise<Document> {
-  const { performFieldOperations, config } = this;
+async function update(this: Payload, incomingArgs: Arguments): Promise<Document> {
+  const { config } = this;
 
   let args = incomingArgs;
 
@@ -106,7 +108,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   docWithLocales = JSON.stringify(docWithLocales);
   docWithLocales = JSON.parse(docWithLocales);
 
-  const originalDoc = await performFieldOperations(collectionConfig, {
+  const originalDoc = await this.performFieldOperations(collectionConfig, {
     id,
     depth: 0,
     req,
@@ -189,7 +191,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // beforeValidate - Fields
   // /////////////////////////////////////
 
-  data = await performFieldOperations(collectionConfig, {
+  data = await this.performFieldOperations(collectionConfig, {
     data,
     req,
     id,
@@ -233,7 +235,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  let result = await performFieldOperations(collectionConfig, {
+  let result = await this.performFieldOperations(collectionConfig, {
     data,
     req,
     id,
@@ -284,10 +286,43 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
+  // Create revision from existing doc
+  // /////////////////////////////////////
+
+  if (collectionConfig.revisions) {
+    const RevisionsModel = this.revisions[collectionConfig.slug];
+
+    const newRevisionData = { ...originalDoc };
+    delete newRevisionData.id;
+
+    let revisionCreationPromise;
+
+    try {
+      revisionCreationPromise = RevisionsModel.create({
+        parent: originalDoc.id,
+        revision: originalDoc,
+      });
+    } catch (err) {
+      this.logger.error(`There was an error while saving a revision for the ${collectionConfig.labels.singular} with ID ${originalDoc.id}.`);
+    }
+
+    if (collectionConfig.revisions.maxPerDoc) {
+      enforceMaxRevisions({
+        payload: this,
+        Model: RevisionsModel,
+        label: collectionConfig.labels.plural,
+        entityType: 'collection',
+        maxPerDoc: collectionConfig.revisions.maxPerDoc,
+        revisionCreationPromise,
+      });
+    }
+  }
+
+  // /////////////////////////////////////
   // afterRead - Fields
   // /////////////////////////////////////
 
-  result = await performFieldOperations(collectionConfig, {
+  result = await this.performFieldOperations(collectionConfig, {
     id,
     depth,
     req,
@@ -316,7 +351,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // afterChange - Fields
   // /////////////////////////////////////
 
-  result = await performFieldOperations(collectionConfig, {
+  result = await this.performFieldOperations(collectionConfig, {
     data: result,
     hook: 'afterChange',
     operation: 'update',

@@ -7,7 +7,7 @@ import { SanitizedConfig } from '../config/types';
 import { ArrayField, Block, BlockField, CheckboxField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, fieldIsPresentationalOnly, NonPresentationalField } from '../fields/config/types';
 import sortableFieldTypes from '../fields/sortableFieldTypes';
 
-type BuildSchemaOptions = {
+export type BuildSchemaOptions = {
   options?: SchemaOptions
   allowIDField?: boolean
   disableRequired?: boolean

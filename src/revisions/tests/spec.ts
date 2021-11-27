@@ -35,14 +35,9 @@ describe('Revisions - REST', () => {
 
   describe('Create', () => {
     it('should allow a new revision to be created', async () => {
-      const revision = await fetch(`${url}/api/rich-text`, {
+      const revision = await fetch(`${url}/api/localized-posts`, {
         body: JSON.stringify({
-          defaultRichText: [{
-            children: [{ text: 'Here is some default rich text content' }],
-          }],
-          customRichText: [{
-            children: [{ text: 'Here is some custom rich text content' }],
-          }],
+          title: 'Here is a localized post in EN',
         }),
         headers,
         method: 'post',

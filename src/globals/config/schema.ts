@@ -22,6 +22,12 @@ const globalSchema = joi.object().keys({
     update: joi.func(),
   }),
   fields: joi.array(),
+  revisions: joi.alternatives().try(
+    joi.object({
+      max: joi.number(),
+    }),
+    joi.boolean(),
+  ),
 }).unknown();
 
 export default globalSchema;

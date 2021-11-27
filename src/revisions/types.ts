@@ -1,4 +1,4 @@
 export type IncomingRevisionsType = {
-  max?: number
+  maxPerDoc?: number
   retainDeleted?: boolean
 }

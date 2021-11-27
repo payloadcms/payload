@@ -1,6 +1,7 @@
 import React from 'react';
 import { Model, Document } from 'mongoose';
 import { DeepRequired } from 'ts-essentials';
+import { IncomingRevisionsType } from '../../revisions/types';
 import { PayloadRequest } from '../../express/types';
 import { Access, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
@@ -40,6 +41,9 @@ export type GlobalConfig = {
   slug: string
   label?: string
   preview?: GeneratePreviewURL
+  revisions?: {
+    max?: number
+  } | true
   hooks?: {
     beforeValidate?: BeforeValidateHook[]
     beforeChange?: BeforeChangeHook[]

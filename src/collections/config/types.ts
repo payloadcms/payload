@@ -205,10 +205,11 @@ export type CollectionConfig = {
   timestamps?: boolean
 };
 
-export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields'> {
+export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'revisions'> {
   auth: Auth;
   upload: Upload;
   fields: Field[];
+  revisions: IncomingRevisionsType
 }
 
 export type Collection = {

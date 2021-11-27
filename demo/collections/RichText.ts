@@ -11,10 +11,6 @@ const RichText: CollectionConfig = {
   access: {
     read: () => true,
   },
-  revisions: {
-    max: 5,
-    retainDeleted: false,
-  },
   fields: [
     {
       name: 'defaultRichText',
