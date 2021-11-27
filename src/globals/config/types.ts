@@ -67,8 +67,11 @@ export type GlobalConfig = {
   }
 }
 
-export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields'> {
+export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'revisions'> {
   fields: Field[]
+  revisions?: {
+    max?: number
+  }
 }
 
 export type Globals = {

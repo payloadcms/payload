@@ -5,7 +5,7 @@ import passport from 'passport';
 import passportLocalMongoose from 'passport-local-mongoose';
 import Passport from 'passport-local';
 import { UpdateQuery } from 'mongodb';
-import { buildRevisionFields } from '../revisions/buildFields';
+import { buildRevisionCollectionFields } from '../revisions/buildCollectionFields';
 import buildQueryPlugin from '../mongoose/buildQuery';
 import apiKeyStrategy from '../auth/strategies/apiKey';
 import buildCollectionSchema from './buildSchema';
@@ -13,7 +13,7 @@ import buildSchema from '../mongoose/buildSchema';
 import bindCollectionMiddleware from './bindCollection';
 import { CollectionModel, SanitizedCollectionConfig } from './config/types';
 import { Payload } from '../index';
-import { getCollectionRevisionsName } from '../revisions/createCollectionName';
+import { getRevisionsModelName } from '../revisions/getRevisionsModelName';
 
 const LocalStrategy = Passport.Strategy;
 
@@ -67,11 +67,11 @@ export default function registerCollections(ctx: Payload): void {
     }
 
     if (collection.revisions) {
-      const revisionModelName = getCollectionRevisionsName(collection);
+      const revisionModelName = getRevisionsModelName(collection);
 
       const revisionSchema = buildSchema(
         ctx.config,
-        buildRevisionFields(collection),
+        buildRevisionCollectionFields(collection),
         {
           disableUnique: true,
           options: {

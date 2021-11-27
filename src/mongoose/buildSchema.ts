@@ -76,7 +76,7 @@ const localizeSchema = (field: NonPresentationalField, schema, locales) => {
 };
 
 const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchemaOptions: BuildSchemaOptions = {}): Schema => {
-  const { allowIDField, disableUnique, options } = buildSchemaOptions;
+  const { allowIDField, options } = buildSchemaOptions;
   let fields = {};
   let schemaFields = configFields;
   const indexFields = [];
@@ -321,6 +321,7 @@ const fieldToSchemaMap = {
       type: [buildSchema(config, field.fields, {
         options: { _id: false, id: false },
         allowIDField: true,
+        disableUnique: buildSchemaOptions.disableUnique,
       })],
     };
 
@@ -343,6 +344,7 @@ const fieldToSchemaMap = {
           _id: false,
           id: false,
         },
+        disableUnique: buildSchemaOptions.disableUnique,
         disableRequired: !formattedBaseSchema.required,
       }),
     };

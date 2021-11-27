@@ -6,6 +6,9 @@ import { GlobalConfig } from '../../src/globals/config/types';
 export default {
   slug: 'blocks-global',
   label: 'Blocks Global',
+  revisions: {
+    max: 20,
+  },
   access: {
     update: ({ req: { user } }) => checkRole(['admin'], user),
     read: () => true,

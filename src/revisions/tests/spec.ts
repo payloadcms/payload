@@ -7,6 +7,7 @@ const { serverURL: url } = getConfig();
 
 let token = null;
 let headers = null;
+let postID;
 
 describe('Revisions - REST', () => {
   beforeAll(async (done) => {
@@ -30,28 +31,26 @@ describe('Revisions - REST', () => {
       'Content-Type': 'application/json',
     };
 
+    const post = await fetch(`${url}/api/localized-posts`, {
+      body: JSON.stringify({
+        title: 'Here is a localized post in EN',
+        description: '345j23o4ifj34jf54g',
+        priority: 10,
+      }),
+      headers,
+      method: 'post',
+    }).then((res) => res.json());
+
+    postID = post.doc.id;
+
     done();
   });
 
   describe('Create', () => {
     it('should allow a new revision to be created', async () => {
-      const title1 = 'Here is a localized post in EN';
-
-      const post = await fetch(`${url}/api/localized-posts`, {
-        body: JSON.stringify({
-          title: title1,
-          description: '345j23o4ifj34jf54g',
-          priority: 10,
-        }),
-        headers,
-        method: 'post',
-      }).then((res) => res.json());
-
-      expect(typeof post.doc.id).toBe('string');
-
       const title2 = 'Here is an updated post title in EN';
 
-      const updatedPost = await fetch(`${url}/api/localized-posts/${post.doc.id}`, {
+      const updatedPost = await fetch(`${url}/api/localized-posts/${postID}`, {
         body: JSON.stringify({
           title: title2,
         }),

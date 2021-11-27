@@ -1,5 +1,6 @@
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
+import { saveGlobalRevision } from '../../revisions/saveGlobalRevision';
 
 async function update(args) {
   const { globals: { Model } } = this;
@@ -125,6 +126,19 @@ async function update(args) {
   global = JSON.stringify(global);
   global = JSON.parse(global);
   global = sanitizeInternalFields(global);
+
+  // /////////////////////////////////////
+  // Create revision from existing doc
+  // /////////////////////////////////////
+
+  if (globalConfig.revisions) {
+    saveGlobalRevision({
+      payload: this,
+      config: globalConfig,
+      req,
+      docWithLocales: global,
+    });
+  }
 
   // /////////////////////////////////////
   // afterRead - Fields

@@ -1,7 +1,7 @@
 import { Field } from '../fields/config/types';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 
-export const buildRevisionFields = (collection: SanitizedCollectionConfig): Field[] => [
+export const buildRevisionCollectionFields = (collection: SanitizedCollectionConfig): Field[] => [
   {
     name: 'parent',
     type: 'relationship',
