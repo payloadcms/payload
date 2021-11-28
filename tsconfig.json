@@ -15,13 +15,13 @@
     "moduleResolution": "node", /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
     "paths": {
       "payload/config": [
-        "src/config/types.ts"
+        "./src/config/types.ts"
       ],
       "payload/auth": [
-        "src/auth/types.ts"
+        "./src/auth/types.ts"
       ],
       "payload/types": [
-        "src/types/index.ts"
+        "./src/types/index.ts"
       ]
     },
     "esModuleInterop": true, /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */

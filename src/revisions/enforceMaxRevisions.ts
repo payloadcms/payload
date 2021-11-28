@@ -8,7 +8,7 @@ type Args = {
   maxPerDoc: number
   entityLabel: string
   entityType: 'global' | 'collection'
-  id: string | number
+  id?: string | number
 }
 
 export const enforceMaxRevisions = async ({

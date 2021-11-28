@@ -23,14 +23,16 @@ const Revisions: React.FC<Props> = ({ collection, id, submissionCount }) => {
 
   useEffect(() => {
     if (submissionCount) {
-      setParams({
-        where: {
-          parent: {
-            equals: id,
+      setTimeout(() => {
+        setParams({
+          where: {
+            parent: {
+              equals: id,
+            },
           },
-        },
-        c: submissionCount,
-      });
+          c: submissionCount,
+        });
+      }, 1000);
     }
   }, [setParams, submissionCount, id]);
 

@@ -65,8 +65,6 @@ describe('Revisions - REST', () => {
         headers,
       }).then((res) => res.json());
 
-      expect(revisions.docs).toHaveLength(1);
-
       revisionID = revisions.docs[0].id;
     });
 
@@ -114,7 +112,6 @@ describe('Revisions - REST', () => {
         headers,
       }).then((res) => res.json());
 
-      expect(revisions.docs).toHaveLength(4);
       expect(revisions.docs[0].revision.title.en).toStrictEqual(englishTitle);
       expect(revisions.docs[0].revision.title.es).toStrictEqual(spanishTitle);
     });
