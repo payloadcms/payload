@@ -32,6 +32,7 @@ const EditView: React.FC<IndexProps> = (props) => {
     } = {},
   } = collection;
   const [fields] = useState(() => formatFields(collection, isEditing));
+  const [submissionCount, setSubmissionCount] = useState(0);
 
   const locale = useLocale();
   const { serverURL, routes: { admin, api } } = useConfig();
@@ -48,6 +49,7 @@ const EditView: React.FC<IndexProps> = (props) => {
     } else {
       const state = await buildStateFromSchema(fields, json.doc);
       setInitialState(state);
+      setSubmissionCount((count) => count + 1);
     }
   };
 
@@ -109,6 +111,7 @@ const EditView: React.FC<IndexProps> = (props) => {
           DefaultComponent={DefaultEdit}
           CustomComponent={CustomEdit}
           componentProps={{
+            submissionCount,
             isLoading,
             data: dataToRender,
             collection: { ...collection, fields },

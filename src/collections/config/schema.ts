@@ -36,6 +36,7 @@ const collectionSchema = joi.object().keys({
     }),
     preview: joi.func(),
     disableDuplicate: joi.bool(),
+    hideAPIURL: joi.bool(),
   }),
   fields: joi.array(),
   hooks: joi.object({

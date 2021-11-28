@@ -16,6 +16,7 @@ import fieldTypes from '../../../forms/field-types';
 import RenderTitle from '../../../elements/RenderTitle';
 import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving';
 import Auth from './Auth';
+import Revisions from './Revisions';
 import Upload from './Upload';
 import { Props } from './types';
 
@@ -38,6 +39,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
     apiURL,
     action,
     hasSavePermission,
+    submissionCount,
   } = props;
 
   const {
@@ -47,7 +49,9 @@ const DefaultEditView: React.FC<Props> = (props) => {
       useAsTitle,
       disableDuplicate,
       preview,
+      hideAPIURL,
     },
+    revisions,
     timestamps,
     auth,
     upload,
@@ -165,24 +169,36 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   </div>
                   {isEditing && (
                     <ul className={`${baseClass}__meta`}>
-                      <li className={`${baseClass}__api-url`}>
-                        <span className={`${baseClass}__label`}>
-                          API URL
-                          {' '}
-                          <CopyToClipboard value={apiURL} />
-                        </span>
-                        <a
-                          href={apiURL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {apiURL}
-                        </a>
-                      </li>
+                      {!hideAPIURL && (
+                        <li className={`${baseClass}__api-url`}>
+                          <span className={`${baseClass}__label`}>
+                            API URL
+                            {' '}
+                            <CopyToClipboard value={apiURL} />
+                          </span>
+                          <a
+                            href={apiURL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {apiURL}
+                          </a>
+                        </li>
+                      )}
                       <li>
                         <div className={`${baseClass}__label`}>ID</div>
                         <div>{id}</div>
                       </li>
+                      {revisions && (
+                        <li>
+                          <div className={`${baseClass}__label`}>Revisions</div>
+                          <Revisions
+                            submissionCount={submissionCount}
+                            collection={collection}
+                            id={id}
+                          />
+                        </li>
+                      )}
                       {timestamps && (
                         <React.Fragment>
                           {data.updatedAt && (

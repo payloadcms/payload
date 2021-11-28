@@ -8,6 +8,7 @@ type Args = {
   maxPerDoc: number
   entityLabel: string
   entityType: 'global' | 'collection'
+  id: string | number
 }
 
 export const enforceMaxRevisions = async ({
@@ -16,9 +17,14 @@ export const enforceMaxRevisions = async ({
   maxPerDoc,
   entityLabel,
   entityType,
+  id,
 }: Args): Promise<void> => {
   try {
-    const oldestAllowedDoc = await Model.find().limit(1).skip(maxPerDoc).sort({ createdAt: -1 });
+    const query: { parent?: string | number } = {};
+
+    if (id) query.parent = id;
+
+    const oldestAllowedDoc = await Model.find(query).limit(1).skip(maxPerDoc).sort({ createdAt: -1 });
 
     if (oldestAllowedDoc?.[0]?.createdAt) {
       const deleteLessThan = oldestAllowedDoc[0].createdAt;

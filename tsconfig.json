@@ -13,7 +13,6 @@
     "noEmit": false, /* Do not emit outputs. */
     "strict": false, /* Enable all strict type-checking options. */
     "moduleResolution": "node", /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
-    "baseUrl": "",
     "paths": {
       "payload/config": [
         "src/config/types.ts"

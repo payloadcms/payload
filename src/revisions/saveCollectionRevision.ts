@@ -46,6 +46,7 @@ export const saveCollectionRevision = async ({
 
   if (config.revisions.maxPerDoc) {
     enforceMaxRevisions({
+      id,
       payload: this,
       Model: RevisionsModel,
       entityLabel: config.labels.plural,

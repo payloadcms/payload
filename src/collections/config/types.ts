@@ -129,6 +129,10 @@ export type CollectionAdminOptions = {
   description?: string | (() => string) | React.FC;
   disableDuplicate?: boolean;
   /**
+   * Hide the API URL within the Edit view
+   */
+  hideAPIURL?: boolean
+  /**
    * Custom admin components
    */
   components?: {

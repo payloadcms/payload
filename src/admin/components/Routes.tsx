@@ -9,6 +9,7 @@ import { requests } from '../api';
 import Loading from './elements/Loading';
 import StayLoggedIn from './modals/StayLoggedIn';
 import Unlicensed from './views/Unlicensed';
+import Revisions from './views/collections/Revisions';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -176,6 +177,32 @@ const Routes = () => {
                                   }}
                                 />
                               ))}
+
+                              {collections.map((collection) => {
+                                if (collection.revisions) {
+                                  return (
+                                    <Route
+                                      key={`${collection.slug}-revisions`}
+                                      path={`${match.url}/collections/${collection.slug}/:id/revisions`}
+                                      exact
+                                      render={(routeProps) => {
+                                        if (permissions?.collections?.[collection.slug]?.readRevisions?.permission) {
+                                          return (
+                                            <Revisions
+                                              {...routeProps}
+                                              collection={collection}
+                                            />
+                                          );
+                                        }
+
+                                        return <Unauthorized />;
+                                      }}
+                                    />
+                                  );
+                                }
+
+                                return null;
+                              })}
 
                               {globals && globals.map((global) => (
                                 <Route

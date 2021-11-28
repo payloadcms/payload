@@ -8,6 +8,9 @@ const RichText: CollectionConfig = {
     singular: 'Rich Text',
     plural: 'Rich Texts',
   },
+  admin: {
+    hideAPIURL: true,
+  },
   access: {
     read: () => true,
   },
