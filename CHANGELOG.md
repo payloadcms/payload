@@ -1,3 +1,10 @@
+## [0.13.2](https://github.com/payloadcms/payload/compare/v0.13.1...v0.13.2) (2021-11-29)
+
+
+### Bug Fixes
+
+* [#373](https://github.com/payloadcms/payload/issues/373) ([727fbec](https://github.com/payloadcms/payload/commit/727fbeceb4b93936ca08d0ca48ac0d2beb1ce96e))
+
 ## [0.13.1](https://github.com/payloadcms/payload/compare/v0.13.0...v0.13.1) (2021-11-29)
 
 
