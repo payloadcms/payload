@@ -1,13 +1,11 @@
 import React, { useCallback } from 'react';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
-import Label from '../../Label';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
 import { textarea } from '../../../../../fields/validations';
 import { Props } from './types';
 
 import './index.scss';
+import TextareaInput from './Input';
 
 const Textarea: React.FC<Props> = (props) => {
   const {
@@ -48,46 +46,24 @@ const Textarea: React.FC<Props> = (props) => {
     condition,
   });
 
-  const classes = [
-    'field-type',
-    'textarea',
-    showError && 'error',
-    readOnly && 'read-only',
-  ].filter(Boolean).join(' ');
-
   return (
-    <div
-      className={classes}
-      style={{
-        ...style,
-        width,
+    <TextareaInput
+      name={name}
+      onChange={(e) => {
+        setValue(e.target.value);
       }}
-    >
-      <Error
-        showError={showError}
-        message={errorMessage}
-      />
-      <Label
-        htmlFor={path}
-        label={label}
-        required={required}
-      />
-      <textarea
-        value={value as string || ''}
-        onChange={(e) => {
-          setValue(e.target.value);
-        }}
-        disabled={readOnly}
-        placeholder={placeholder}
-        id={path}
-        name={path}
-        rows={rows}
-      />
-      <FieldDescription
-        value={value}
-        description={description}
-      />
-    </div>
+      showError={showError}
+      errorMessage={errorMessage}
+      required={required}
+      label={label}
+      value={value as string}
+      placeholder={placeholder}
+      readOnly={readOnly}
+      style={style}
+      width={width}
+      description={description}
+      rows={rows}
+    />
   );
 };
 export default withCondition(Textarea);

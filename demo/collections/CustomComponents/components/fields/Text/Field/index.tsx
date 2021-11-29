@@ -12,6 +12,7 @@ const Text: React.FC<TextFieldType> = (props) => {
 
   const field = useField({
     path,
+    enableDebouncedValue: true,
   });
 
   const {
@@ -20,7 +21,8 @@ const Text: React.FC<TextFieldType> = (props) => {
     setValue,
   } = field;
 
-  const onChange = useCallback((incomingValue) => {
+  const onChange = useCallback((e) => {
+    const { value: incomingValue } = e.target;
     const valueWithoutSpaces = incomingValue.replace(/\s/g, '');
     setValue(valueWithoutSpaces);
   }, [
