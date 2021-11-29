@@ -2,19 +2,19 @@ import React, { useCallback, useState } from 'react';
 import withCondition from '../../withCondition';
 import useField from '../../useField';
 import { select } from '../../../../../fields/validations';
-import { Option } from '../../../../../fields/config/types';
-import { Props, ReactSelectOption } from './types';
+import { Option, OptionObject } from '../../../../../fields/config/types';
+import { Props } from './types';
 import SelectInput from './Input';
 
-const formatOptions = (options: Option[]): ReactSelectOption[] => options.map((option) => {
+const formatOptions = (options: Option[]): OptionObject[] => options.map((option) => {
   if (typeof option === 'object' && option.value) {
     return option;
   }
 
   return {
-    label: option as string,
+    label: option,
     value: option,
-  };
+  } as OptionObject;
 });
 
 const Select: React.FC<Props> = (props) => {

@@ -2,15 +2,15 @@ import React from 'react';
 import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
-import { SelectField } from '../../../../../fields/config/types';
+import { OptionObject, SelectField } from '../../../../../fields/config/types';
 import { Description } from '../../FieldDescription/types';
 import ReactSelect from '../../../elements/ReactSelect';
-import { Value as ReactSelectValue, Options as ReactSelectOptions } from '../../../elements/ReactSelect/types';
+import { Value as ReactSelectValue } from '../../../elements/ReactSelect/types';
 // import { FieldType } from '../../useField/types';
 
 import './index.scss';
 
-export type SelectInputProps = Omit<SelectField, 'type' | 'value'> & {
+export type SelectInputProps = Omit<SelectField, 'type' | 'value' | 'options'> & {
   showError: boolean
   errorMessage?: string
   readOnly?: boolean
@@ -22,7 +22,7 @@ export type SelectInputProps = Omit<SelectField, 'type' | 'value'> & {
   style?: React.CSSProperties
   width?: string
   hasMany?: boolean
-  options?: ReactSelectOptions
+  options?: OptionObject[]
 }
 
 const SelectInput: React.FC<SelectInputProps> = (props) => {
@@ -70,7 +70,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
       />
       <ReactSelect
         onChange={onChange}
-        value={selectedOption}
+        value={selectedOption as ReactSelectValue}
         showError={showError}
         isDisabled={readOnly}
         options={options}

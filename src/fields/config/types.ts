@@ -48,10 +48,13 @@ export type Labels = {
 
 export type Validate<T = any> = (value?: T, options?: any) => string | true | Promise<string | true>;
 
-export type Option = {
+export type OptionObject = {
   label: string
   value: string
 }
+
+export type Option = OptionObject | string
+
 export interface FieldBase {
   name: string;
   label?: string | false;

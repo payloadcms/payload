@@ -11,7 +11,7 @@ export type Value = {
 export type Props = {
   className?: string
   value?: Value | Value[],
-  onChange?: (value: Value) => void,
+  onChange?: (value: any) => void, // eslint-disable-line @typescript-eslint/no-explicit-any
   disabled?: boolean,
   showError?: boolean,
   options: Options
