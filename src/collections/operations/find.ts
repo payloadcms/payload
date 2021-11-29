@@ -98,28 +98,30 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   // Find
   // /////////////////////////////////////
 
-  let sortParam: Record<string, string>;
+  let sortProperty: string;
+  let sortOrder = 'desc';
 
   if (!args.sort) {
     if (collectionConfig.timestamps) {
-      sortParam = { createdAt: 'desc' };
+      sortProperty = 'createdAt';
     } else {
-      sortParam = { _id: 'desc' };
+      sortProperty = '_id';
     }
   } else if (args.sort.indexOf('-') === 0) {
-    sortParam = {
-      [args.sort.substring(1)]: 'desc',
-    };
+    sortProperty = args.sort.substring(1);
   } else {
-    sortParam = {
-      [args.sort]: 'asc',
-    };
+    sortProperty = args.sort;
+    sortOrder = 'asc';
   }
+
+  if (sortProperty === 'id') sortProperty = '_id';
 
   const optionsToExecute = {
     page: page || 1,
     limit: limit || 10,
-    sort: sortParam,
+    sort: {
+      [sortProperty]: sortOrder,
+    },
     lean: true,
     leanWithId: true,
     useEstimatedCount,
