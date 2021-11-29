@@ -1,3 +1,10 @@
+## [0.13.3](https://github.com/payloadcms/payload/compare/v0.13.2...v0.13.3) (2021-11-29)
+
+
+### Bug Fixes
+
+* upgrade sharp for prebuilt M1 binaries ([34f416a](https://github.com/payloadcms/payload/commit/34f416aace112013359351e17c4371c30303156f))
+
 ## [0.13.2](https://github.com/payloadcms/payload/compare/v0.13.1...v0.13.2) (2021-11-29)
 
 
