@@ -2,13 +2,12 @@ import React, { ChangeEvent } from 'react';
 import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
-import { TextField } from '../../../../../fields/config/types';
+import { TextareaField } from '../../../../../fields/config/types';
 import { Description } from '../../FieldDescription/types';
-// import { FieldType } from '../../useField/types';
 
 import './index.scss';
 
-export type TextInputProps = Omit<TextField, 'type'> & {
+export type TextAreaInputProps = Omit<TextareaField, 'type'> & {
   showError: boolean
   errorMessage?: string
   readOnly?: boolean
@@ -16,31 +15,33 @@ export type TextInputProps = Omit<TextField, 'type'> & {
   required?: boolean
   value?: string
   description?: Description
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+  onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void
   placeholder?: string
   style?: React.CSSProperties
   width?: string
+  rows?: number
 }
 
-const TextInput: React.FC<TextInputProps> = (props) => {
+const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
   const {
-    showError,
-    errorMessage,
-    placeholder,
-    readOnly,
     path,
-    label,
     required,
-    value,
-    onChange,
-    description,
+    readOnly,
     style,
     width,
+    placeholder,
+    description,
+    label,
+    showError,
+    value,
+    errorMessage,
+    onChange,
+    rows,
   } = props;
 
   const classes = [
     'field-type',
-    'text',
+    'textarea',
     showError && 'error',
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');
@@ -62,14 +63,14 @@ const TextInput: React.FC<TextInputProps> = (props) => {
         label={label}
         required={required}
       />
-      <input
-        value={value}
+      <textarea
+        value={value as string || ''}
         onChange={onChange}
         disabled={readOnly}
         placeholder={placeholder}
-        type="text"
         id={path}
         name={path}
+        rows={rows}
       />
       <FieldDescription
         value={value}
@@ -79,4 +80,4 @@ const TextInput: React.FC<TextInputProps> = (props) => {
   );
 };
 
-export default TextInput;
+export default TextareaInput;

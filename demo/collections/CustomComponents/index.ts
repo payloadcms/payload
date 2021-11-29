@@ -2,6 +2,7 @@ import { CollectionConfig } from '../../../src/collections/config/types';
 import DescriptionField from './components/fields/Description/Field';
 import TextField from './components/fields/Text/Field';
 import SelectField from './components/fields/Select/Field';
+import TextAreaField from './components/fields/TextArea/Field';
 import UploadField from './components/fields/Upload/Field';
 import DescriptionCell from './components/fields/Description/Cell';
 import DescriptionFilter from './components/fields/Description/Filter';
@@ -63,6 +64,17 @@ const CustomComponents: CollectionConfig = {
       admin: {
         components: {
           Field: SelectField,
+        },
+      },
+    },
+    {
+      name: 'textarea',
+      label: 'Custom textarea field',
+      type: 'textarea',
+      localized: true,
+      admin: {
+        components: {
+          Field: TextAreaField,
         },
       },
     },

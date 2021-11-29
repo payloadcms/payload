@@ -74,7 +74,9 @@ const Textarea: React.FC<Props> = (props) => {
       />
       <textarea
         value={value as string || ''}
-        onChange={setValue}
+        onChange={(e) => {
+          setValue(e.target.value);
+        }}
         disabled={readOnly}
         placeholder={placeholder}
         id={path}

@@ -41,7 +41,9 @@ const Text: React.FC<Props> = (props) => {
   return (
     <TextInput
       name={name}
-      onChange={setValue}
+      onChange={(e) => {
+        setValue(e.target.value);
+      }}
       showError={showError}
       errorMessage={errorMessage}
       required={required}
