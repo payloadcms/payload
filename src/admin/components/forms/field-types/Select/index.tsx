@@ -105,6 +105,7 @@ const Select: React.FC<Props> = (props) => {
       description={description}
       style={style}
       width={width}
+      hasMany={hasMany}
     />
   );
 };
