@@ -1,3 +1,15 @@
+## [0.13.1](https://github.com/payloadcms/payload/compare/v0.13.0...v0.13.1) (2021-11-29)
+
+
+### Bug Fixes
+
+* ensures sorting by _id instead of improper id ([ded891e](https://github.com/payloadcms/payload/commit/ded891e390a93f71963762c0200c97a0beec5cad))
+
+
+### Features
+
+* only adds list search query param if value is present ([d6d76d4](https://github.com/payloadcms/payload/commit/d6d76d4088a23ed43122333873ada6846c808d37))
+
 # [0.13.0](https://github.com/payloadcms/payload/compare/v0.12.3...v0.13.0) (2021-11-26)
 
 
