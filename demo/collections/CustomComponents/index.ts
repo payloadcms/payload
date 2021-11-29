@@ -43,7 +43,7 @@ const CustomComponents: CollectionConfig = {
     },
     {
       name: 'select',
-      label: 'Custom select field (sends value to crm)',
+      label: 'Custom select field (syncs value with crm)',
       type: 'select',
       localized: true,
       options: [

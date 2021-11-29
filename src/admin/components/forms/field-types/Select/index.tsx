@@ -1,17 +1,10 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import withCondition from '../../withCondition';
-import ReactSelect from '../../../elements/ReactSelect';
 import useField from '../../useField';
-import Label from '../../Label';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
 import { select } from '../../../../../fields/validations';
 import { Option } from '../../../../../fields/config/types';
-import { Props, Option as ReactSelectOption } from './types';
-
-import './index.scss';
-
-const baseClass = 'select';
+import { Props, ReactSelectOption } from './types';
+import SelectInput from './Input';
 
 const formatOptions = (options: Option[]): ReactSelectOption[] => options.map((option) => {
   if (typeof option === 'object' && option.value) {
@@ -41,7 +34,7 @@ const Select: React.FC<Props> = (props) => {
       condition,
     } = {},
     value: valueFromProps,
-    onChange: onChangeFromProps
+    onChange: onChangeFromProps,
   } = props;
 
   const path = pathFromProps || name;
@@ -87,15 +80,8 @@ const Select: React.FC<Props> = (props) => {
     readOnly,
     hasMany,
     onChangeFromProps,
-    setValue
-  ])
-
-  const classes = [
-    'field-type',
-    baseClass,
-    showError && 'error',
-    readOnly && `${baseClass}--read-only`,
-  ].filter(Boolean).join(' ');
+    setValue,
+  ]);
 
   let valueToRender;
 
@@ -108,35 +94,18 @@ const Select: React.FC<Props> = (props) => {
   }
 
   return (
-    <div
-      className={classes}
-      style={{
-        ...style,
-        width,
-      }}
-    >
-      <Error
-        showError={showError}
-        message={errorMessage}
-      />
-      <Label
-        htmlFor={path}
-        label={label}
-        required={required}
-      />
-      <ReactSelect
-        onChange={onChange}
-        value={valueToRender}
-        showError={showError}
-        isDisabled={readOnly}
-        options={options}
-        isMulti={hasMany}
-      />
-      <FieldDescription
-        value={value}
-        description={description}
-      />
-    </div>
+    <SelectInput
+      onChange={onChange}
+      value={valueToRender}
+      name={name}
+      options={options}
+      label={label}
+      showError={showError}
+      errorMessage={errorMessage}
+      description={description}
+      style={style}
+      width={width}
+    />
   );
 };
 

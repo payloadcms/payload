@@ -5,8 +5,6 @@ import { text } from '../../../../../fields/validations';
 import { Props } from './types';
 import TextInput from './Input';
 
-import './index.scss';
-
 const Text: React.FC<Props> = (props) => {
   const {
     path: pathFromProps,

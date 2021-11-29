@@ -30,7 +30,7 @@ const Text: React.FC<TextFieldType> = (props) => {
   return (
     <TextInput
       name={name}
-      value={value as string}
+      value={value as string || ''}
       label={label}
       onChange={onChange}
       showError={showError}
