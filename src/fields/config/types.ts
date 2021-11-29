@@ -99,8 +99,6 @@ export type TextField = FieldBase & {
     placeholder?: string
     autoComplete?: string
   }
-  value?: string
-  onChange?: (value: string) => void
 }
 
 export type EmailField = FieldBase & {

@@ -1,11 +1,9 @@
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
-import Label from '../../Label';
-import Error from '../../Error';
 import { text } from '../../../../../fields/validations';
 import { Props } from './types';
-import FieldDescription from '../../FieldDescription';
+import TextInput from './Input';
 
 import './index.scss';
 
@@ -24,13 +22,11 @@ const Text: React.FC<Props> = (props) => {
       description,
       condition,
     } = {},
-    value: valueFromProps,
-    onChange: onChangeFromProps,
   } = props;
 
   const path = pathFromProps || name;
 
-  const fieldType = useField<string>({
+  const field = useField<string>({
     path,
     validate,
     enableDebouncedValue: true,
@@ -38,64 +34,27 @@ const Text: React.FC<Props> = (props) => {
   });
 
   const {
-    value: valueFromContext,
+    value,
     showError,
     setValue,
     errorMessage,
-  } = fieldType;
-
-  const onChange = useCallback((e) => {
-    const { value: incomingValue } = e.target;
-    if (typeof onChangeFromProps === 'function') {
-      onChangeFromProps(incomingValue);
-    } else {
-      setValue(e);
-    }
-  }, [
-    onChangeFromProps,
-    setValue,
-  ]);
-
-  const classes = [
-    'field-type',
-    'text',
-    showError && 'error',
-    readOnly && 'read-only',
-  ].filter(Boolean).join(' ');
-
-  const value = valueFromProps || valueFromContext || '';
+  } = field;
 
   return (
-    <div
-      className={classes}
-      style={{
-        ...style,
-        width,
-      }}
-    >
-      <Error
-        showError={showError}
-        message={errorMessage}
-      />
-      <Label
-        htmlFor={path}
-        label={label}
-        required={required}
-      />
-      <input
-        value={value}
-        onChange={onChange}
-        disabled={readOnly}
-        placeholder={placeholder}
-        type="text"
-        id={path}
-        name={path}
-      />
-      <FieldDescription
-        value={value}
-        description={description}
-      />
-    </div>
+    <TextInput
+      name={name}
+      onChange={setValue}
+      showError={showError}
+      errorMessage={errorMessage}
+      required={required}
+      label={label}
+      value={value}
+      placeholder={placeholder}
+      readOnly={readOnly}
+      style={style}
+      width={width}
+      description={description}
+    />
   );
 };
 
