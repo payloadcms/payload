@@ -113,6 +113,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       sendField(valueToSend);
     }
   }, [
+    path,
     valueToSend,
     sendField,
     field,

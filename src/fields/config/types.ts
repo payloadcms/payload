@@ -167,8 +167,6 @@ export type UploadField = FieldBase & {
   type: 'upload'
   relationTo: string
   maxDepth?: number
-  value?: string
-  onChange?: (value: string) => void
 }
 
 type CodeAdmin = Admin & {
