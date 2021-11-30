@@ -17,10 +17,10 @@ import './index.scss';
 const baseClass = 'upload';
 
 export type UploadInputProps = Omit<UploadField, 'type'> & {
-  showError: boolean
+  showError?: boolean
   errorMessage?: string
   readOnly?: boolean
-  path?: string
+  path: string
   required?: boolean
   value?: string
   description?: Description
@@ -73,7 +73,6 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     if (typeof value === 'string' && value !== '') {
       const fetchFile = async () => {
         const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`);
-
         if (response.ok) {
           const json = await response.json();
           setFile(json);

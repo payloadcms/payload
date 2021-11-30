@@ -9,10 +9,10 @@ import { Description } from '../../FieldDescription/types';
 import './index.scss';
 
 export type TextInputProps = Omit<TextField, 'type'> & {
-  showError: boolean
+  showError?: boolean
   errorMessage?: string
   readOnly?: boolean
-  path?: string
+  path: string
   required?: boolean
   value?: string
   description?: Description
