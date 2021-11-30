@@ -2,7 +2,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import React, { useCallback } from 'react';
 import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types';
-import TextField from 'payload/dist/admin/components/forms/field-types/Text';
+import TextInputField from 'payload/dist/admin/components/forms/field-types/Text/Input';
 import { useField, useWatchForm } from 'payload/components/forms';
 import { FieldType as FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { LengthIndicator } from '../ui/LengthIndicator';
@@ -17,6 +17,7 @@ const {
 export const MetaTitle: React.FC<TextFieldType> = (props) => {
   const {
     label,
+    name
   } = props;
 
   const field: FieldType<string> = useField(props as Options);
@@ -26,6 +27,7 @@ export const MetaTitle: React.FC<TextFieldType> = (props) => {
   const {
     value,
     setValue,
+    showError
   } = field;
 
   const regenerateTitle = useCallback(() => {
@@ -94,10 +96,11 @@ export const MetaTitle: React.FC<TextFieldType> = (props) => {
           marginBottom: '10px',
         }}
       >
-        <TextField
-          name=""
+        <TextInputField
+          name={name}
           onChange={setValue}
           value={value}
+          showError={showError}
         />
       </div>
       <div
