@@ -45,7 +45,6 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
       api,
     } = {},
   } = config
-  console.log(config)
 
   const collection = collections?.find((coll) => coll.slug === relationTo) || undefined;
 
