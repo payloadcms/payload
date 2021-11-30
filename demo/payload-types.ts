@@ -716,6 +716,6 @@ export interface UnstoredMedia {
  */
 export interface Geolocation {
   id: string;
-  location?: [number, number];
-  localizedPoint?: [number, number];
+  location?: [longitude: number, latitude: number];
+  localizedPoint?: [longitude: number, latitude: number];
 }

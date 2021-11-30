@@ -56,15 +56,15 @@ describe('GeoJSON', () => {
     });
 
     it('should query where near point', async () => {
-      const [x, y] = location;
-      const hitResponse = await fetch(`${serverURL}/api/geolocation?where[location][near]=${x + 0.01},${y + 0.01},10000`, {
+      const [lng, lat] = location;
+      const hitResponse = await fetch(`${serverURL}/api/geolocation?where[location][near]=${lng + 0.01},${lat + 0.01},10000`, {
         headers,
         method: 'get',
       });
       const hitData = await hitResponse.json();
       const hitDocs = hitData.docs;
 
-      const missResponse = await fetch(`${serverURL}/api/geolocation?where[location][near]=-${x},-${y},5000`, {
+      const missResponse = await fetch(`${serverURL}/api/geolocation?where[location][near]=-${lng},-${lat},5000`, {
         headers,
         method: 'get',
       });
@@ -76,15 +76,15 @@ describe('GeoJSON', () => {
     });
 
     it('should query where near localized point', async () => {
-      const [x, y] = localizedPoint;
-      const hitResponse = await fetch(`${serverURL}/api/geolocation?where[localizedPoint][near]=${x + 0.01},${y + 0.01},10000`, {
+      const [lng, lat] = localizedPoint;
+      const hitResponse = await fetch(`${serverURL}/api/geolocation?where[localizedPoint][near]=${lng + 0.01},${lat + 0.01},10000`, {
         headers,
         method: 'get',
       });
       const hitData = await hitResponse.json();
       const hitDocs = hitData.docs;
 
-      const missResponse = await fetch(`${serverURL}/api/geolocation?where[localizedPoint][near]=-${x},-${y},5000`, {
+      const missResponse = await fetch(`${serverURL}/api/geolocation?where[localizedPoint][near]=-${lng},-${lat},5000`, {
         headers,
         method: 'get',
       });
@@ -138,10 +138,10 @@ describe('GeoJSON', () => {
     });
 
     it('should query where near point', async () => {
-      const [x, y] = location;
+      const [lng, lat] = location;
       // language=graphQL
       const hitQuery = `query getGeos {
-        Geolocations(where: { location: { near: [${x + 0.01},${y + 0.01},10000]}}) {
+        Geolocations(where: { location: { near: [${lng + 0.01},${lat + 0.01},10000]}}) {
           docs {
             id
             location
@@ -153,7 +153,7 @@ describe('GeoJSON', () => {
       const hitDocs = hitResponse.Geolocations.docs;
 
       const missQuery = `query getGeos {
-        Geolocations(where: { location: { near: [${-x},${-y},10000]}}) {
+        Geolocations(where: { location: { near: [${-lng},${-lat},10000]}}) {
           docs {
             id
             location
