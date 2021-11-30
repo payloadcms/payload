@@ -18,7 +18,7 @@ const Upload: React.FC<Props> = (props) => {
   } = useConfig();
 
   const {
-    path: pathFromProps,
+    path,
     name,
     required,
     admin: {
@@ -36,14 +36,12 @@ const Upload: React.FC<Props> = (props) => {
 
   const collection = collections.find((coll) => coll.slug === relationTo);
 
-  const path = pathFromProps || name;
-
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required });
     return validationResult;
   }, [validate, required]);
 
-  const fieldType = useField({
+  const field = useField({
     path,
     validate: memoizedValidate,
     condition,
@@ -54,7 +52,7 @@ const Upload: React.FC<Props> = (props) => {
     showError,
     setValue,
     errorMessage,
-  } = fieldType;
+  } = field;
 
   const onChange = useCallback((incomingValue) => {
     const incomingID = incomingValue?.id || incomingValue;
@@ -66,6 +64,7 @@ const Upload: React.FC<Props> = (props) => {
   if (collection.upload) {
     return (
       <UploadInput
+        path={path}
         value={value as string}
         onChange={onChange}
         description={description}

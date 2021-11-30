@@ -11,10 +11,10 @@ import { Value as ReactSelectValue } from '../../../elements/ReactSelect/types';
 import './index.scss';
 
 export type SelectInputProps = Omit<SelectField, 'type' | 'value' | 'options'> & {
-  showError: boolean
+  showError?: boolean
   errorMessage?: string
   readOnly?: boolean
-  path?: string
+  path: string
   required?: boolean
   value?: string | string[]
   description?: Description

@@ -40,6 +40,7 @@ const Text: React.FC<Props> = (props) => {
 
   return (
     <TextInput
+      path={path}
       name={name}
       onChange={(e) => {
         setValue(e.target.value);

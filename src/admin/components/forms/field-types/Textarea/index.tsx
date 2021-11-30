@@ -48,6 +48,7 @@ const Textarea: React.FC<Props> = (props) => {
 
   return (
     <TextareaInput
+      path={path}
       name={name}
       onChange={(e) => {
         setValue(e.target.value);

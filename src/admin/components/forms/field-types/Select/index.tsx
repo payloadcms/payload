@@ -78,6 +78,7 @@ const Select: React.FC<Props> = (props) => {
 
   return (
     <SelectInput
+      path={path}
       onChange={onChange}
       value={value as string | string[]}
       name={name}
