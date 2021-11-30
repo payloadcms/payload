@@ -77,7 +77,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     ignoreWhileFlattening,
     initialValue,
     stringify,
-    condition
+    condition,
   ]);
 
   // Method to return from `useField`, used to
@@ -91,12 +91,11 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
         setModified(true);
       }
     }
-
     setInternalValue(val);
   }, [
     setModified,
     modified,
-    ignoreWhileFlattening
+    ignoreWhileFlattening,
   ]);
 
   useEffect(() => {
@@ -114,9 +113,10 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       sendField(valueToSend);
     }
   }, [
+    path,
     valueToSend,
     sendField,
-    field
+    field,
   ]);
 
   return {

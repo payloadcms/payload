@@ -99,8 +99,6 @@ export type TextField = FieldBase & {
     placeholder?: string
     autoComplete?: string
   }
-  value?: string
-  onChange?: (value: string) => void
 }
 
 export type EmailField = FieldBase & {
@@ -172,8 +170,6 @@ export type UploadField = FieldBase & {
   type: 'upload'
   relationTo: string
   maxDepth?: number
-  value?: string
-  onChange?: (value: string) => void
 }
 
 type CodeAdmin = Admin & {

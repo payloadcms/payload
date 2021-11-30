@@ -1,7 +1,7 @@
 import React from 'react';
 import { OptionObject, optionsAreObjects, SelectField } from '../../../../../../../../fields/config/types';
 
-const SelectCell = ({ data, field }: {data: any, field: SelectField}) => {
+const SelectCell = ({ data, field }: { data: any, field: SelectField }) => {
   const findLabel = (items: string[]) => items.map((i) => {
     const found = (field.options as OptionObject[])
       .filter((f: OptionObject) => f.value === i)?.[0]?.label;

@@ -2,6 +2,7 @@ import { CollectionConfig } from '../../../src/collections/config/types';
 import DescriptionField from './components/fields/Description/Field';
 import TextField from './components/fields/Text/Field';
 import SelectField from './components/fields/Select/Field';
+import TextAreaField from './components/fields/TextArea/Field';
 import UploadField from './components/fields/Upload/Field';
 import DescriptionCell from './components/fields/Description/Cell';
 import DescriptionFilter from './components/fields/Description/Filter';
@@ -27,14 +28,18 @@ const CustomComponents: CollectionConfig = {
       maxLength: 100,
       required: true,
       unique: true,
-      localized: true,
     },
     {
-      name: 'text',
+      name: 'normalText',
+      label: 'Normal text field',
+      type: 'text',
+      // required: true,
+    },
+    {
+      name: 'customText',
       label: 'Custom text field (removes whitespace)',
       type: 'text',
-      required: true,
-      localized: true,
+      // required: true,
       admin: {
         components: {
           Field: TextField,
@@ -42,10 +47,28 @@ const CustomComponents: CollectionConfig = {
       },
     },
     {
-      name: 'select',
-      label: 'Custom select field (sends value to crm)',
+      name: 'normalSelect',
+      label: 'Normal select field',
       type: 'select',
-      localized: true,
+      options: [
+        {
+          label: 'Option 1',
+          value: '1',
+        },
+        {
+          label: 'Option 2',
+          value: '2',
+        },
+        {
+          label: 'Option 3',
+          value: '3',
+        },
+      ],
+    },
+    {
+      name: 'customSelect',
+      label: 'Custom select field (syncs value with crm)',
+      type: 'select',
       options: [
         {
           label: 'Option 1',
@@ -67,6 +90,21 @@ const CustomComponents: CollectionConfig = {
       },
     },
     {
+      name: 'normalTextarea',
+      label: 'Normal textarea field',
+      type: 'textarea',
+    },
+    {
+      name: 'customTextarea',
+      label: 'Custom textarea field',
+      type: 'textarea',
+      admin: {
+        components: {
+          Field: TextAreaField,
+        },
+      },
+    },
+    {
       name: 'ui',
       label: 'UI',
       type: 'ui',
@@ -77,11 +115,16 @@ const CustomComponents: CollectionConfig = {
       },
     },
     {
-      name: 'upload',
-      label: 'Upload',
+      name: 'normalUpload',
+      label: 'Normal upload field',
       type: 'upload',
       relationTo: 'media',
-      localized: true,
+    },
+    {
+      name: 'customUpload',
+      label: 'Custom upload field',
+      type: 'upload',
+      relationTo: 'media',
       admin: {
         components: {
           Field: UploadField,
@@ -92,7 +135,6 @@ const CustomComponents: CollectionConfig = {
       name: 'description',
       label: 'Description',
       type: 'textarea',
-      localized: true,
       admin: {
         components: {
           Field: DescriptionField,
