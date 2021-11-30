@@ -1,3 +1,10 @@
+## [0.13.5](https://github.com/payloadcms/payload/compare/v0.13.4...v0.13.5) (2021-11-30)
+
+
+### Bug Fixes
+
+* select component rendered value ([ecabf13](https://github.com/payloadcms/payload/commit/ecabf130fd1b4b87c45196d4bdf675e76b20c9e3))
+
 ## [0.13.4](https://github.com/payloadcms/payload/compare/v0.13.3...v0.13.4) (2021-11-30)
 
 
