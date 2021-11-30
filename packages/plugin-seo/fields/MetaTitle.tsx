@@ -97,6 +97,7 @@ export const MetaTitle: React.FC<TextFieldType> = (props) => {
         }}
       >
         <TextInputField
+          path={name}
           name={name}
           onChange={setValue}
           value={value}

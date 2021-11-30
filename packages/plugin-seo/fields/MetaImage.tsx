@@ -94,6 +94,7 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
         }}
       >
         <UploadInput
+          path={name}
           fieldTypes={fieldTypes}
           name={name}
           relationTo={relationTo}

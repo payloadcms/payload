@@ -96,6 +96,7 @@ export const MetaDescription: React.FC<TextFieldType> = (props) => {
         }}
       >
         <TextareaInput
+          path={name}
           name={name}
           onChange={setValue}
           value={value}
