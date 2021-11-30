@@ -2,27 +2,32 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import React, { useCallback } from 'react';
 import { Props as UploadFieldType } from 'payload/dist/admin/components/forms/field-types/Upload/types';
-import { useFieldType, useWatchForm } from 'payload/components/forms';
-import { FieldType as UseFieldType, Options } from 'payload/dist/admin/components/forms/useFieldType/types';
-import Upload from 'payload/dist/admin/components/forms/field-types/Upload';
+import UploadInput from 'payload/dist/admin/components/forms/field-types/Upload/Input';
+import { useField, useWatchForm } from 'payload/components/forms';
+import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { generateMetaImage } from '../utilities/generateMetaImage';
 import { Pill } from '../ui/Pill';
+import { useConfig } from '@payloadcms/config-provider';
 
 export const MetaImage: React.FC<UploadFieldType> = (props) => {
   const {
     label,
+    relationTo,
+    fieldTypes,
+    name
   } = props;
 
-  const field: UseFieldType<string> = useFieldType(props as Options);
+  const field: FieldType<string> = useField(props as Options);
 
   const { fields } = useWatchForm();
 
   const {
     value,
     setValue,
+    showError
   } = field;
 
-  const generate = useCallback(() => {
+  const regenerateImage = useCallback(() => {
     const generatedImage = generateMetaImage(fields);
     setValue(generatedImage);
   }, [
@@ -31,6 +36,18 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
   ]);
 
   const hasImage = Boolean(value);
+
+  const config = useConfig();
+  const {
+    collections,
+    serverURL,
+    routes: {
+      api,
+    } = {},
+  } = config
+  console.log(config)
+
+  const collection = collections?.find((coll) => coll.slug === relationTo) || undefined;
 
   return (
     <div
@@ -50,7 +67,7 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
           &mdash;
           &nbsp;
           <button
-            onClick={generate}
+            onClick={regenerateImage}
             type="button"
             style={{
               padding: 0,
@@ -77,9 +94,17 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
           position: 'relative',
         }}
       >
-        <Upload
-          {...props}
+        <UploadInput
+          fieldTypes={fieldTypes}
+          name={name}
+          relationTo={relationTo}
+          value={value}
+          onChange={setValue}
           label={null}
+          showError={showError}
+          api={api}
+          collection={collection}
+          serverURL={serverURL}
         />
       </div>
       <div

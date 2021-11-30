@@ -2,8 +2,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import React, { useCallback } from 'react';
 import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types';
-import { useFieldType, useWatchForm } from 'payload/components/forms';
-import { FieldType as UseFieldType, Options } from 'payload/dist/admin/components/forms/useFieldType/types';
+import TextField from 'payload/dist/admin/components/forms/field-types/Text';
+import { useField, useWatchForm } from 'payload/components/forms';
+import { FieldType as FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { LengthIndicator } from '../ui/LengthIndicator';
 import { defaults } from '../defaults';
 import { generateMetaTitle } from '../utilities/generateMetaTitle';
@@ -18,7 +19,7 @@ export const MetaTitle: React.FC<TextFieldType> = (props) => {
     label,
   } = props;
 
-  const field: UseFieldType<string> = useFieldType(props as Options);
+  const field: FieldType<string> = useField(props as Options);
 
   const { fields } = useWatchForm();
 
@@ -27,7 +28,7 @@ export const MetaTitle: React.FC<TextFieldType> = (props) => {
     setValue,
   } = field;
 
-  const generate = useCallback(() => {
+  const regenerateTitle = useCallback(() => {
     const generatedTitle = generateMetaTitle(fields);
     setValue(generatedTitle);
   }, [
@@ -53,7 +54,7 @@ export const MetaTitle: React.FC<TextFieldType> = (props) => {
           &mdash;
           &nbsp;
           <button
-            onClick={generate}
+            onClick={regenerateTitle}
             type="button"
             style={{
               padding: 0,
@@ -93,14 +94,10 @@ export const MetaTitle: React.FC<TextFieldType> = (props) => {
           marginBottom: '10px',
         }}
       >
-        <input
-          onChange={(e) => setValue(e.target.value)}
+        <TextField
+          name=""
+          onChange={setValue}
           value={value}
-          style={{
-            width: '100%',
-            padding: '10px',
-            display: 'flex',
-          }}
         />
       </div>
       <div

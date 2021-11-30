@@ -2,11 +2,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import React, { useCallback } from 'react';
 import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types';
-import { useFieldType, useWatchForm } from 'payload/components/forms';
-import { FieldType as UseFieldType, Options } from 'payload/dist/admin/components/forms/useFieldType/types';
+import { useField, useWatchForm } from 'payload/components/forms';
+import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { LengthIndicator } from '../ui/LengthIndicator';
 import { defaults } from '../defaults';
 import { generateMetaDescription } from '../utilities/generateMetaDescription';
+import TextareaInput from 'payload/dist/admin/components/forms/field-types/Textarea/Input';
 
 const {
   minLength,
@@ -16,18 +17,20 @@ const {
 export const MetaDescription: React.FC<TextFieldType> = (props) => {
   const {
     label,
+    name
   } = props;
 
   const { fields } = useWatchForm();
 
-  const field: UseFieldType<string> = useFieldType(props as Options);
+  const field: FieldType<string> = useField(props as Options);
 
   const {
     value,
     setValue,
+    showError
   } = field;
 
-  const generate = useCallback(() => {
+  const regenerateDescription = useCallback(() => {
     const generatedDesc = generateMetaDescription(fields);
     setValue(generatedDesc);
   }, [
@@ -53,7 +56,7 @@ export const MetaDescription: React.FC<TextFieldType> = (props) => {
           &mdash;
           &nbsp;
           <button
-            onClick={generate}
+            onClick={regenerateDescription}
             type="button"
             style={{
               padding: 0,
@@ -92,16 +95,11 @@ export const MetaDescription: React.FC<TextFieldType> = (props) => {
           position: 'relative',
         }}
       >
-        <textarea
-          onChange={(e) => setValue(e.target.value)}
+        <TextareaInput
+          name={name}
+          onChange={setValue}
           value={value}
-          style={{
-            width: '100%',
-            padding: '10px',
-            fontFamily: 'inherit',
-            fontStyle: 'normal',
-            display: 'flex',
-          }}
+          showError={showError}
         />
       </div>
       <div
