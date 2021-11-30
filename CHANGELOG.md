@@ -1,3 +1,10 @@
+## [0.13.6](https://github.com/payloadcms/payload/compare/v0.13.5...v0.13.6) (2021-11-30)
+
+
+### Bug Fixes
+
+* requires path in select, text, textarea, and upload components ([925a33e](https://github.com/payloadcms/payload/commit/925a33e5602336f6128188aaf73001dbd23bd411))
+
 ## [0.13.5](https://github.com/payloadcms/payload/compare/v0.13.4...v0.13.5) (2021-11-30)
 
 
