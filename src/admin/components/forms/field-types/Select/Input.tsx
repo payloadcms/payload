@@ -16,7 +16,7 @@ export type SelectInputProps = Omit<SelectField, 'type' | 'value' | 'options'> &
   readOnly?: boolean
   path?: string
   required?: boolean
-  value?: string
+  value?: string | string[]
   description?: Description
   onChange?: (value: ReactSelectValue) => void
   style?: React.CSSProperties
@@ -49,7 +49,13 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
-  const selectedOption = options.find((option) => option.value === value);
+  let valueToRender;
+
+  if (hasMany && Array.isArray(value)) {
+    valueToRender = value.map((val) => options.find((option) => option.value === val));
+  } else {
+    valueToRender = options.find((option) => option.value === value);
+  }
 
   return (
     <div
@@ -70,7 +76,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
       />
       <ReactSelect
         onChange={onChange}
-        value={selectedOption as ReactSelectValue}
+        value={valueToRender as ReactSelectValue}
         showError={showError}
         isDisabled={readOnly}
         options={options}

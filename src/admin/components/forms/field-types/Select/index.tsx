@@ -33,8 +33,6 @@ const Select: React.FC<Props> = (props) => {
       description,
       condition,
     } = {},
-    value: valueFromProps,
-    onChange: onChangeFromProps,
   } = props;
 
   const path = pathFromProps || name;
@@ -47,7 +45,7 @@ const Select: React.FC<Props> = (props) => {
   }, [validate, required, options]);
 
   const {
-    value: valueFromContext,
+    value,
     showError,
     setValue,
     errorMessage,
@@ -70,33 +68,18 @@ const Select: React.FC<Props> = (props) => {
         newValue = selectedOption.value;
       }
 
-      if (typeof onChangeFromProps === 'function') {
-        onChangeFromProps(newValue);
-      } else {
-        setValue(newValue);
-      }
+      setValue(newValue);
     }
   }, [
     readOnly,
     hasMany,
-    onChangeFromProps,
     setValue,
   ]);
-
-  let valueToRender;
-
-  const value = valueFromProps || valueFromContext || '';
-
-  if (hasMany && Array.isArray(value)) {
-    valueToRender = value.map((val) => options.find((option) => option.value === val));
-  } else {
-    valueToRender = options.find((option) => option.value === value);
-  }
 
   return (
     <SelectInput
       onChange={onChange}
-      value={valueToRender}
+      value={value as string | string[]}
       name={name}
       options={options}
       label={label}

@@ -187,8 +187,6 @@ export type SelectField = FieldBase & {
   type: 'select'
   options: Option[]
   hasMany?: boolean
-  value?: string
-  onChange?: (value: string) => void
 }
 
 export type RelationshipField = FieldBase & {
