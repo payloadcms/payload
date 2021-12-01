@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "0.13.0",
+  "version": "0.13.6",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "SEE LICENSE IN license.md",
   "author": {
@@ -164,7 +164,7 @@
     "sanitize-filename": "^1.6.3",
     "sass": "^1.42.0",
     "sass-loader": "^10.1.0",
-    "sharp": "^0.28.1",
+    "sharp": "^0.29.3",
     "slate": "^0.66.2",
     "slate-history": "^0.66.0",
     "slate-hyperscript": "^0.66.0",

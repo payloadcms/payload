@@ -1,3 +1,61 @@
+## [0.13.6](https://github.com/payloadcms/payload/compare/v0.13.5...v0.13.6) (2021-11-30)
+
+
+### Bug Fixes
+
+* requires path in select, text, textarea, and upload components ([925a33e](https://github.com/payloadcms/payload/commit/925a33e5602336f6128188aaf73001dbd23bd411))
+
+## [0.13.5](https://github.com/payloadcms/payload/compare/v0.13.4...v0.13.5) (2021-11-30)
+
+
+### Bug Fixes
+
+* select component rendered value ([ecabf13](https://github.com/payloadcms/payload/commit/ecabf130fd1b4b87c45196d4bdf675e76b20c9e3))
+
+## [0.13.4](https://github.com/payloadcms/payload/compare/v0.13.3...v0.13.4) (2021-11-30)
+
+
+### Bug Fixes
+
+* passes hasMany through select component ([c77bf3a](https://github.com/payloadcms/payload/commit/c77bf3aa42d76b7a0649b28fee3fe5d4bd06dcf6))
+* prevents uncontrolled text field component ([f0fd859](https://github.com/payloadcms/payload/commit/f0fd859347804fdf0d79bbe566412abaeec6ff6a))
+* select component types ([7e2b259](https://github.com/payloadcms/payload/commit/7e2b2598167dc59b8982f635cb95eacf247abb43))
+* threads props through textarea component ([0b13eda](https://github.com/payloadcms/payload/commit/0b13eda1e55299f7d6dfac2854acc04cff459396))
+
+
+### Features
+
+* abstracts input from text component ([615e369](https://github.com/payloadcms/payload/commit/615e3695f2e62ce5d8a43ccb84192aca57770af8))
+* abstracts select component ([fa67137](https://github.com/payloadcms/payload/commit/fa671378c7282cda1ed6f46340a53622e3bc96dc))
+* abstracts textarea component and improves event typing ([86480b7](https://github.com/payloadcms/payload/commit/86480b7482b2b9413272ab0f9d0a82cd5e2920b8))
+* abstracts upload component ([f234f68](https://github.com/payloadcms/payload/commit/f234f68019f122bd46cb2af2e8f62cf07cd53c1b))
+
+## [0.13.3](https://github.com/payloadcms/payload/compare/v0.13.2...v0.13.3) (2021-11-29)
+
+
+### Bug Fixes
+
+* upgrade sharp for prebuilt M1 binaries ([34f416a](https://github.com/payloadcms/payload/commit/34f416aace112013359351e17c4371c30303156f))
+
+## [0.13.2](https://github.com/payloadcms/payload/compare/v0.13.1...v0.13.2) (2021-11-29)
+
+
+### Bug Fixes
+
+* [#373](https://github.com/payloadcms/payload/issues/373) ([727fbec](https://github.com/payloadcms/payload/commit/727fbeceb4b93936ca08d0ca48ac0d2beb1ce96e))
+
+## [0.13.1](https://github.com/payloadcms/payload/compare/v0.13.0...v0.13.1) (2021-11-29)
+
+
+### Bug Fixes
+
+* ensures sorting by _id instead of improper id ([ded891e](https://github.com/payloadcms/payload/commit/ded891e390a93f71963762c0200c97a0beec5cad))
+
+
+### Features
+
+* only adds list search query param if value is present ([d6d76d4](https://github.com/payloadcms/payload/commit/d6d76d4088a23ed43122333873ada6846c808d37))
+
 # [0.13.0](https://github.com/payloadcms/payload/compare/v0.12.3...v0.13.0) (2021-11-26)
 
 

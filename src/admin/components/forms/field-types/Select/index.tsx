@@ -1,27 +1,20 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import withCondition from '../../withCondition';
-import ReactSelect from '../../../elements/ReactSelect';
 import useField from '../../useField';
-import Label from '../../Label';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
 import { select } from '../../../../../fields/validations';
-import { Option } from '../../../../../fields/config/types';
-import { Props, Option as ReactSelectOption } from './types';
+import { Option, OptionObject } from '../../../../../fields/config/types';
+import { Props } from './types';
+import SelectInput from './Input';
 
-import './index.scss';
-
-const baseClass = 'select';
-
-const formatOptions = (options: Option[]): ReactSelectOption[] => options.map((option) => {
+const formatOptions = (options: Option[]): OptionObject[] => options.map((option) => {
   if (typeof option === 'object' && option.value) {
     return option;
   }
 
   return {
-    label: option as string,
+    label: option,
     value: option,
-  };
+  } as OptionObject;
 });
 
 const Select: React.FC<Props> = (props) => {
@@ -40,8 +33,6 @@ const Select: React.FC<Props> = (props) => {
       description,
       condition,
     } = {},
-    value: valueFromProps,
-    onChange: onChangeFromProps
   } = props;
 
   const path = pathFromProps || name;
@@ -54,7 +45,7 @@ const Select: React.FC<Props> = (props) => {
   }, [validate, required, options]);
 
   const {
-    value: valueFromContext,
+    value,
     showError,
     setValue,
     errorMessage,
@@ -77,66 +68,29 @@ const Select: React.FC<Props> = (props) => {
         newValue = selectedOption.value;
       }
 
-      if (typeof onChangeFromProps === 'function') {
-        onChangeFromProps(newValue);
-      } else {
-        setValue(newValue);
-      }
+      setValue(newValue);
     }
   }, [
     readOnly,
     hasMany,
-    onChangeFromProps,
-    setValue
-  ])
-
-  const classes = [
-    'field-type',
-    baseClass,
-    showError && 'error',
-    readOnly && `${baseClass}--read-only`,
-  ].filter(Boolean).join(' ');
-
-  let valueToRender;
-
-  const value = valueFromProps || valueFromContext || '';
-
-  if (hasMany && Array.isArray(value)) {
-    valueToRender = value.map((val) => options.find((option) => option.value === val));
-  } else {
-    valueToRender = options.find((option) => option.value === value);
-  }
+    setValue,
+  ]);
 
   return (
-    <div
-      className={classes}
-      style={{
-        ...style,
-        width,
-      }}
-    >
-      <Error
-        showError={showError}
-        message={errorMessage}
-      />
-      <Label
-        htmlFor={path}
-        label={label}
-        required={required}
-      />
-      <ReactSelect
-        onChange={onChange}
-        value={valueToRender}
-        showError={showError}
-        isDisabled={readOnly}
-        options={options}
-        isMulti={hasMany}
-      />
-      <FieldDescription
-        value={value}
-        description={description}
-      />
-    </div>
+    <SelectInput
+      path={path}
+      onChange={onChange}
+      value={value as string | string[]}
+      name={name}
+      options={options}
+      label={label}
+      showError={showError}
+      errorMessage={errorMessage}
+      description={description}
+      style={style}
+      width={width}
+      hasMany={hasMany}
+    />
   );
 };
 

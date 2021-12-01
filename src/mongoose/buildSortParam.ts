@@ -1,21 +1,21 @@
 export const buildSortParam = (sort: string, timestamps: boolean) => {
-  let sortParam: Record<string, string>;
+  let sortProperty: string;
+  let sortOrder = 'desc';
 
   if (!sort) {
     if (timestamps) {
-      sortParam = { createdAt: 'desc' };
+      sortProperty = 'createdAt';
     } else {
-      sortParam = { _id: 'desc' };
+      sortProperty = '_id';
     }
   } else if (sort.indexOf('-') === 0) {
-    sortParam = {
-      [sort.substring(1)]: 'desc',
-    };
+    sortProperty = sort.substring(1);
   } else {
-    sortParam = {
-      [sort]: 'asc',
-    };
+    sortProperty = sort;
+    sortOrder = 'asc';
   }
 
-  return sortParam;
+  if (sortProperty === 'id') sortProperty = '_id';
+
+  return [sortProperty, sortOrder];
 };

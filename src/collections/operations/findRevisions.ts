@@ -87,10 +87,14 @@ async function findRevisions<T extends TypeWithRevision<T> = any>(args: Argument
   // Find
   // /////////////////////////////////////
 
+  const [sortProperty, sortOrder] = buildSortParam(args.sort, collectionConfig.timestamps);
+
   const optionsToExecute = {
     page: page || 1,
     limit: limit || 10,
-    sort: buildSortParam(args.sort, true),
+    sort: {
+      [sortProperty]: sortOrder,
+    },
     lean: true,
     leanWithId: true,
     useEstimatedCount,
