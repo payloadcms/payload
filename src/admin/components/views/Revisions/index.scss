@@ -1,6 +1,6 @@
-@import '../../../../scss/styles';
+@import '../../../scss/styles.scss';
 
-.collection-revisions {
+.revisions {
   width: 100%;
   margin-bottom: base(2);
 
@@ -12,6 +12,10 @@
 
   &__header {
     margin-bottom: $baseline;
+  }
+
+  &__intro {
+    margin-bottom: base(.5);
   }
 
   .table {

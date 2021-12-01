@@ -55,6 +55,7 @@
         "<node_internals>/**"
       ],
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/babel-node",
+      "outputCapture": "std",
       "runtimeArgs": [
         "--nolazy"
       ],

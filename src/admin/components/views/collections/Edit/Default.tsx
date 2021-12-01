@@ -16,7 +16,7 @@ import fieldTypes from '../../../forms/field-types';
 import RenderTitle from '../../../elements/RenderTitle';
 import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving';
 import Auth from './Auth';
-import Revisions from './Revisions';
+import RevisionsCount from '../../../elements/RevisionsCount';
 import Upload from './Upload';
 import { Props } from './types';
 
@@ -192,7 +192,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       {revisions && (
                         <li>
                           <div className={`${baseClass}__label`}>Revisions</div>
-                          <Revisions
+                          <RevisionsCount
                             submissionCount={submissionCount}
                             collection={collection}
                             id={id}

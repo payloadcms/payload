@@ -123,10 +123,16 @@ export default function buildPoliciesType(): GraphQLObjectType {
   });
 
   Object.values(this.config.globals).forEach((global: SanitizedGlobalConfig) => {
+    const globalOperations: OperationType[] = ['read', 'update'];
+
+    if (global.revisions) {
+      globalOperations.push('readRevisions');
+    }
+
     fields[formatName(global.slug)] = {
       type: new GraphQLObjectType({
         name: formatName(`${global.label}Access`),
-        fields: buildEntity(global.label, global.fields, ['read', 'update']),
+        fields: buildEntity(global.label, global.fields, globalOperations),
       }),
     };
   });

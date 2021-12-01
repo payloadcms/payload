@@ -1,5 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import paginate from 'mongoose-paginate-v2';
+import buildQueryPlugin from '../mongoose/buildQuery';
 import buildModel from './buildModel';
 import { Payload } from '../index';
 import { getRevisionsModelName } from '../revisions/getRevisionsModelName';
@@ -29,6 +31,9 @@ export default function initGlobals(ctx: Payload): void {
           },
         );
 
+        revisionSchema.plugin(paginate, { useEstimatedCount: true })
+          .plugin(buildQueryPlugin);
+
         ctx.revisions[global.slug] = mongoose.model(revisionModelName, revisionSchema) as GlobalModel;
       }
     });
@@ -42,6 +47,14 @@ export default function initGlobals(ctx: Payload): void {
           .route(`/globals/${global.slug}`)
           .get(ctx.requestHandlers.globals.findOne(global))
           .post(ctx.requestHandlers.globals.update(global));
+
+        if (global.revisions) {
+          router.route(`/globals/${global.slug}/revisions`)
+            .get(ctx.requestHandlers.globals.findRevisions(global));
+
+          router.route(`/globals/${global.slug}/revisions/:id`)
+            .get(ctx.requestHandlers.globals.findRevisionByID(global));
+        }
       });
 
       ctx.router.use(router);

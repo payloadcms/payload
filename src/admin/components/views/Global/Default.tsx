@@ -10,6 +10,7 @@ import CopyToClipboard from '../../elements/CopyToClipboard';
 import Meta from '../../utilities/Meta';
 import fieldTypes from '../../forms/field-types';
 import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
+import RevisionsCount from '../../elements/RevisionsCount';
 import { Props } from './types';
 
 import './index.scss';
@@ -20,12 +21,13 @@ const baseClass = 'global-edit';
 const DefaultGlobalView: React.FC<Props> = (props) => {
   const { admin: { dateFormat } } = useConfig();
   const {
-    global, data, onSave, permissions, action, apiURL, initialState,
+    global, data, onSave, permissions, action, apiURL, initialState, submissionCount,
   } = props;
 
   const {
     fields,
     preview,
+    revisions,
     label,
     admin: {
       description,
@@ -99,6 +101,15 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
               </div>
               {data && (
                 <ul className={`${baseClass}__meta`}>
+                  {revisions && (
+                    <li>
+                      <div className={`${baseClass}__label`}>Revisions</div>
+                      <RevisionsCount
+                        submissionCount={submissionCount}
+                        global={global}
+                      />
+                    </li>
+                  )}
                   {data && (
                     <li className={`${baseClass}__api-url`}>
                       <span className={`${baseClass}__label`}>

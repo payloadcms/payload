@@ -117,7 +117,12 @@ async function accessOperation(this: Payload, args: Arguments): Promise<Permissi
   });
 
   config.globals.forEach((global) => {
-    executeEntityPolicies(global, ['read', 'update'], 'globals');
+    const globalOperations = ['read', 'update'];
+
+    if (global.revisions) {
+      globalOperations.push('readRevisions');
+    }
+    executeEntityPolicies(global, globalOperations, 'globals');
   });
 
   await Promise.all(promises);

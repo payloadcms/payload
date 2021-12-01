@@ -85,10 +85,14 @@ async function findRevisions<T extends TypeWithRevision<T> = any>(args: Argument
   // Find
   // /////////////////////////////////////
 
+  const [sortProperty, sortOrder] = buildSortParam(args.sort, true);
+
   const optionsToExecute = {
     page: page || 1,
     limit: limit || 10,
-    sort: buildSortParam(args.sort, true),
+    sort: {
+      [sortProperty]: sortOrder,
+    },
     lean: true,
     leanWithId: true,
     useEstimatedCount,
@@ -104,7 +108,7 @@ async function findRevisions<T extends TypeWithRevision<T> = any>(args: Argument
     ...paginatedDocs,
     docs: await Promise.all(paginatedDocs.docs.map(async (data) => ({
       ...data,
-      revision: this.performFieldOperations(
+      revision: await this.performFieldOperations(
         globalConfig,
         {
           depth,

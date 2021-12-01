@@ -9,7 +9,7 @@ import { requests } from '../api';
 import Loading from './elements/Loading';
 import StayLoggedIn from './modals/StayLoggedIn';
 import Unlicensed from './views/Unlicensed';
-import Revisions from './views/collections/Revisions';
+import Revisions from './views/Revisions';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -117,70 +117,65 @@ const Routes = () => {
                                 <Account />
                               </Route>
 
-                              {collections.map((collection) => (
-                                <Route
-                                  key={`${collection.slug}-list`}
-                                  path={`${match.url}/collections/${collection.slug}`}
-                                  exact
-                                  render={(routeProps) => {
-                                    if (permissions?.collections?.[collection.slug]?.read?.permission) {
-                                      return (
-                                        <List
-                                          {...routeProps}
-                                          collection={collection}
-                                        />
-                                      );
-                                    }
+                              {collections.reduce((collectionRoutes, collection) => {
+                                const routesToReturn = [
+                                  ...collectionRoutes,
+                                  <Route
+                                    key={`${collection.slug}-list`}
+                                    path={`${match.url}/collections/${collection.slug}`}
+                                    exact
+                                    render={(routeProps) => {
+                                      if (permissions?.collections?.[collection.slug]?.read?.permission) {
+                                        return (
+                                          <List
+                                            {...routeProps}
+                                            collection={collection}
+                                          />
+                                        );
+                                      }
 
-                                    return <Unauthorized />;
-                                  }}
-                                />
-                              ))}
+                                      return <Unauthorized />;
+                                    }}
+                                  />,
+                                  <Route
+                                    key={`${collection.slug}-create`}
+                                    path={`${match.url}/collections/${collection.slug}/create`}
+                                    exact
+                                    render={(routeProps) => {
+                                      if (permissions?.collections?.[collection.slug]?.create?.permission) {
+                                        return (
+                                          <Edit
+                                            {...routeProps}
+                                            collection={collection}
+                                          />
+                                        );
+                                      }
 
-                              {collections.map((collection) => (
-                                <Route
-                                  key={`${collection.slug}-create`}
-                                  path={`${match.url}/collections/${collection.slug}/create`}
-                                  exact
-                                  render={(routeProps) => {
-                                    if (permissions?.collections?.[collection.slug]?.create?.permission) {
-                                      return (
-                                        <Edit
-                                          {...routeProps}
-                                          collection={collection}
-                                        />
-                                      );
-                                    }
+                                      return <Unauthorized />;
+                                    }}
+                                  />,
+                                  <Route
+                                    key={`${collection.slug}-edit`}
+                                    path={`${match.url}/collections/${collection.slug}/:id`}
+                                    exact
+                                    render={(routeProps) => {
+                                      if (permissions?.collections?.[collection.slug]?.read?.permission) {
+                                        return (
+                                          <Edit
+                                            isEditing
+                                            {...routeProps}
+                                            collection={collection}
+                                          />
+                                        );
+                                      }
 
-                                    return <Unauthorized />;
-                                  }}
-                                />
-                              ))}
+                                      return <Unauthorized />;
+                                    }}
+                                  />,
+                                ];
 
-                              {collections.map((collection) => (
-                                <Route
-                                  key={`${collection.slug}-edit`}
-                                  path={`${match.url}/collections/${collection.slug}/:id`}
-                                  exact
-                                  render={(routeProps) => {
-                                    if (permissions?.collections?.[collection.slug]?.read?.permission) {
-                                      return (
-                                        <Edit
-                                          isEditing
-                                          {...routeProps}
-                                          collection={collection}
-                                        />
-                                      );
-                                    }
-
-                                    return <Unauthorized />;
-                                  }}
-                                />
-                              ))}
-
-                              {collections.map((collection) => {
                                 if (collection.revisions) {
-                                  return (
+                                  routesToReturn.push(
                                     <Route
                                       key={`${collection.slug}-revisions`}
                                       path={`${match.url}/collections/${collection.slug}/:id/revisions`}
@@ -197,16 +192,10 @@ const Routes = () => {
 
                                         return <Unauthorized />;
                                       }}
-                                    />
+                                    />,
                                   );
-                                }
 
-                                return null;
-                              })}
-
-                              {collections.map((collection) => {
-                                if (collection.revisions) {
-                                  return (
+                                  routesToReturn.push(
                                     <Route
                                       key={`${collection.slug}-view-revision`}
                                       path={`${match.url}/collections/${collection.slug}/:id/revisions/:revisionID`}
@@ -218,32 +207,72 @@ const Routes = () => {
 
                                         return <Unauthorized />;
                                       }}
-                                    />
+                                    />,
                                   );
                                 }
 
-                                return null;
-                              })}
+                                return routesToReturn;
+                              }, [])}
 
-                              {globals && globals.map((global) => (
-                                <Route
-                                  key={`${global.slug}`}
-                                  path={`${match.url}/globals/${global.slug}`}
-                                  exact
-                                  render={(routeProps) => {
-                                    if (permissions?.globals?.[global.slug]?.read?.permission) {
-                                      return (
-                                        <EditGlobal
-                                          {...routeProps}
-                                          global={global}
-                                        />
-                                      );
-                                    }
+                              {globals && globals.reduce((globalRoutes, global) => {
+                                const routesToReturn = [
+                                  ...globalRoutes,
+                                  <Route
+                                    key={`${global.slug}`}
+                                    path={`${match.url}/globals/${global.slug}`}
+                                    exact
+                                    render={(routeProps) => {
+                                      if (permissions?.globals?.[global.slug]?.read?.permission) {
+                                        return (
+                                          <EditGlobal
+                                            {...routeProps}
+                                            global={global}
+                                          />
+                                        );
+                                      }
 
-                                    return <Unauthorized />;
-                                  }}
-                                />
-                              ))}
+                                      return <Unauthorized />;
+                                    }}
+                                  />,
+                                ];
+
+                                if (global.revisions) {
+                                  routesToReturn.push(
+                                    <Route
+                                      key={`${global.slug}-revisions`}
+                                      path={`${match.url}/globals/${global.slug}/revisions`}
+                                      exact
+                                      render={(routeProps) => {
+                                        if (permissions?.globals?.[global.slug]?.readRevisions?.permission) {
+                                          return (
+                                            <Revisions
+                                              {...routeProps}
+                                              global={global}
+                                            />
+                                          );
+                                        }
+
+                                        return <Unauthorized />;
+                                      }}
+                                    />,
+                                  );
+                                  routesToReturn.push(
+                                    <Route
+                                      key={`${global.slug}-view-revision`}
+                                      path={`${match.url}/globals/${global.slug}/revisions/:revisionID`}
+                                      exact
+                                      render={(routeProps) => {
+                                        if (permissions?.globals?.[global.slug]?.readRevisions?.permission) {
+                                          return null;
+                                        }
+
+                                        return <Unauthorized />;
+                                      }}
+                                    />,
+                                  );
+                                }
+                                return routesToReturn;
+                              }, [])}
 
                               <Route path={`${match.url}*`}>
                                 <NotFound />

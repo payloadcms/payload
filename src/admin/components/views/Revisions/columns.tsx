@@ -2,22 +2,29 @@ import React from 'react';
 import { Link, useRouteMatch } from 'react-router-dom';
 import { useConfig } from '@payloadcms/config-provider';
 import format from 'date-fns/format';
-import { Column } from '../../../elements/Table/types';
-import SortColumn from '../../../elements/SortColumn';
-import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
+import { Column } from '../../elements/Table/types';
+import SortColumn from '../../elements/SortColumn';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 
 type CreatedAtCellProps = {
   id: string
   date: string
-  collection: SanitizedCollectionConfig
+  collection?: SanitizedCollectionConfig
+  global?: SanitizedGlobalConfig
 }
 
-const CreatedAtCell: React.FC<CreatedAtCellProps> = ({ collection, id, date }) => {
+const CreatedAtCell: React.FC<CreatedAtCellProps> = ({ collection, global, id, date }) => {
   const { routes: { admin }, admin: { dateFormat } } = useConfig();
   const { params: { id: docID } } = useRouteMatch<{ id: string }>();
 
+  let to: string;
+
+  if (collection) to = `${admin}/collections/${collection.slug}/${docID}/revisions/${id}`;
+  if (global) to = `${admin}/globals/${global.slug}/revisions/${id}`;
+
   return (
-    <Link to={`${admin}/collections/${collection.slug}/${docID}/revisions/${id}`}>
+    <Link to={to}>
       {date && format(new Date(date), dateFormat)}
     </Link>
   );
@@ -29,7 +36,7 @@ const IDCell: React.FC = ({ children }) => (
   </span>
 );
 
-export const getColumns = (collection: SanitizedCollectionConfig): Column[] => [
+export const getColumns = (collection: SanitizedCollectionConfig, global: SanitizedGlobalConfig): Column[] => [
   {
     accessor: 'createdAt',
     components: {
@@ -42,6 +49,7 @@ export const getColumns = (collection: SanitizedCollectionConfig): Column[] => [
       renderCell: (row, data) => (
         <CreatedAtCell
           collection={collection}
+          global={global}
           id={row?.id}
           date={data}
         />
@@ -53,7 +61,7 @@ export const getColumns = (collection: SanitizedCollectionConfig): Column[] => [
     components: {
       Heading: (
         <SortColumn
-          label="ID"
+          label="Revision ID"
           disable
           name="id"
         />
