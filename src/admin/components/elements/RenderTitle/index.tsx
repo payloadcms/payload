@@ -1,8 +1,7 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Props } from './types';
 import useTitle from '../../../hooks/useTitle';
-
-import './index.scss';
+import IDLabel from '../IDLabel';
 
 const baseClass = 'render-title';
 
@@ -25,18 +24,14 @@ const RenderTitle : React.FC<Props> = (props) => {
 
   const idAsTitle = title === data?.id;
 
-  const classes = [
-    baseClass,
-    idAsTitle && `${baseClass}--id-as-title`,
-  ].filter(Boolean).join(' ');
+  if (idAsTitle) {
+    return (
+      <IDLabel id={data?.id} />
+    );
+  }
 
   return (
-    <span className={classes}>
-      {idAsTitle && (
-        <Fragment>
-          ID:&nbsp;&nbsp;
-        </Fragment>
-      )}
+    <span className={baseClass}>
       {title}
     </span>
   );

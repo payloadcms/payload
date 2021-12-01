@@ -204,6 +204,27 @@ const Routes = () => {
                                 return null;
                               })}
 
+                              {collections.map((collection) => {
+                                if (collection.revisions) {
+                                  return (
+                                    <Route
+                                      key={`${collection.slug}-view-revision`}
+                                      path={`${match.url}/collections/${collection.slug}/:id/revisions/:revisionID`}
+                                      exact
+                                      render={(routeProps) => {
+                                        if (permissions?.collections?.[collection.slug]?.readRevisions?.permission) {
+                                          return null;
+                                        }
+
+                                        return <Unauthorized />;
+                                      }}
+                                    />
+                                  );
+                                }
+
+                                return null;
+                              })}
+
                               {globals && globals.map((global) => (
                                 <Route
                                   key={`${global.slug}`}
