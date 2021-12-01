@@ -25,44 +25,54 @@ export const LengthIndicator: React.FC<{
 
   useEffect(() => {
     const textLength = text?.length || 0;
-    const progress = (textLength - minLength) / (maxLength - minLength);
 
-    if (progress < 0) {
-      const ratioUntilMin = textLength / minLength;
-
-      if (ratioUntilMin > 0.9) {
-        setLabel('Almost there');
-        setLabelStyle({
-          backgroundColor: 'yellow',
-          color: 'black',
-        });
-      } else {
-        setLabel('Too short');
-        setLabelStyle({
-          backgroundColor: 'red',
-          color: 'white',
-        });
-      }
-
-      setBarWidth(ratioUntilMin);
-    }
-
-    if (progress >= 0 && progress <= 1) {
-      setLabel('Good');
-      setLabelStyle({
-        backgroundColor: 'green',
-        color: 'white',
-      });
-      setBarWidth(progress);
-    }
-
-    if (progress > 1) {
-      setLabel('Too long');
+    if (textLength === 0) {
+      setLabel('Missing');
       setLabelStyle({
         backgroundColor: 'red',
         color: 'white',
       });
-      setBarWidth(1);
+      setBarWidth(0);
+    } else {
+      const progress = (textLength - minLength) / (maxLength - minLength);
+
+      if (progress < 0) {
+        const ratioUntilMin = textLength / minLength;
+
+        if (ratioUntilMin > 0.9) {
+          setLabel('Almost there');
+          setLabelStyle({
+            backgroundColor: 'orange',
+            color: 'white',
+          });
+        } else {
+          setLabel('Too short');
+          setLabelStyle({
+            backgroundColor: 'orangered',
+            color: 'white',
+          });
+        }
+
+        setBarWidth(ratioUntilMin);
+      }
+
+      if (progress >= 0 && progress <= 1) {
+        setLabel('Good');
+        setLabelStyle({
+          backgroundColor: 'green',
+          color: 'white',
+        });
+        setBarWidth(progress);
+      }
+
+      if (progress > 1) {
+        setLabel('Too long');
+        setLabelStyle({
+          backgroundColor: 'red',
+          color: 'white',
+        });
+        setBarWidth(1);
+      }
     }
   }, [
     minLength,
@@ -70,8 +80,10 @@ export const LengthIndicator: React.FC<{
     text,
   ]);
 
-  const charsUntilMax = maxLength - text?.length || 0;
-  const charsUntilMin = minLength - text?.length || 0;
+  const textLength = text?.length || 0;
+
+  const charsUntilMax = maxLength - textLength;
+  const charsUntilMin = minLength - textLength;
 
   return (
     <div
@@ -91,11 +103,12 @@ export const LengthIndicator: React.FC<{
           marginRight: '10px',
           whiteSpace: 'nowrap',
           flexShrink: 0,
+          lineHeight: 1
         }}
       >
         <small>
           {`${text?.length || 0}/${minLength}-${maxLength} chars, `}
-          {charsUntilMin > 0 && (
+          {(textLength === 0 || charsUntilMin > 0) && (
             <Fragment>
               {`${charsUntilMin} to go`}
             </Fragment>

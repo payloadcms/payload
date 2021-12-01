@@ -101,6 +101,9 @@ export const MetaDescription: React.FC<TextFieldType> = (props) => {
           onChange={setValue}
           value={value}
           showError={showError}
+          style={{
+            marginBottom: 0
+          }}
         />
       </div>
       <div
