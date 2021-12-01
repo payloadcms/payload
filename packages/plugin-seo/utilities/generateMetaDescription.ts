@@ -3,7 +3,13 @@ import { Fields } from 'payload/dist/admin/components/forms/Form/types';
 import { stringifyRichText } from './stringifyRichText';
 
 export const generateMetaDescription = (fields: Fields): string => {
-  let description = '';
+  const {
+    excerpt: {
+      value: excerpt,
+    },
+  } = fields;
+
+  let description = excerpt as string || '';
 
   const firstBlock = getDataByPath(fields, 'layout.0');
 
@@ -23,14 +29,14 @@ export const generateMetaDescription = (fields: Fields): string => {
       const field = firstBlock?.[keyToUse];
 
       if (field) {
-        let newDescription = '';
-
         if (keyToUse === 'introContent') {
-          newDescription = stringifyRichText(field);
+          const introContent = stringifyRichText(field);
+          if (!description && introContent) description = introContent;
         }
 
         if (keyToUse === 'richText') {
-          newDescription = stringifyRichText(field);
+          const richText = stringifyRichText(field);
+          if (!description && richText) description = richText;
         }
 
         if (keyToUse === 'columns') {
@@ -45,11 +51,10 @@ export const generateMetaDescription = (fields: Fields): string => {
               richTextToUse = JSON.parse(richText);
             }
 
-            newDescription = stringifyRichText(richTextToUse);
+            const columnText = stringifyRichText(richTextToUse);
+            if (!description && columnText) description = columnText;
           }
         }
-
-        description = newDescription;
       }
     }
   }
