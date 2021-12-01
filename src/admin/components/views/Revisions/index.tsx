@@ -33,13 +33,13 @@ const Revisions: React.FC<Props> = ({ collection, global }) => {
 
   if (collection) {
     ({ slug } = collection);
-    docURL = `${serverURL}/api/${slug}/${id}`;
+    docURL = `${serverURL}${api}/${slug}/${id}`;
     entityLabel = collection.labels.singular;
   }
 
   if (global) {
     ({ slug } = global);
-    docURL = `${serverURL}/api/globals/${slug}`;
+    docURL = `${serverURL}${api}/globals/${slug}`;
     entityLabel = global.label;
   }
 
@@ -110,12 +110,16 @@ const Revisions: React.FC<Props> = ({ collection, global }) => {
 
   let heading: string;
   let metaDesc: string;
+  let metaTitle: string;
+
   if (collection) {
+    metaTitle = `Revisions - ${doc[useAsTitle]} - ${entityLabel}`;
     metaDesc = `Viewing revisions for the ${entityLabel} ${doc[useAsTitle]}`;
     heading = doc?.[useAsTitle];
   }
 
   if (global) {
+    metaTitle = `Revisions - ${entityLabel}`;
     metaDesc = `Viewing revisions for the global ${entityLabel}`;
     heading = entityLabel;
   }
@@ -123,9 +127,8 @@ const Revisions: React.FC<Props> = ({ collection, global }) => {
   return (
     <div className={baseClass}>
       <Meta
-        title={`Revisions - ${doc[useAsTitle]} - ${entityLabel}`}
+        title={metaTitle}
         description={metaDesc}
-        keywords={`Revisions, ${entityLabel}, Payload, CMS`}
       />
       <Eyebrow />
       <div className={`${baseClass}__wrap`}>

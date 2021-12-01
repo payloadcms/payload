@@ -4,9 +4,10 @@ import './index.scss';
 
 const baseClass = 'id-label';
 
-const IDLabel: React.FC<{ id: string }> = ({ id }) => (
+const IDLabel: React.FC<{ id: string, prefix?: string }> = ({ id, prefix = 'ID:' }) => (
   <div className={baseClass}>
-    ID:&nbsp;&nbsp;
+    {prefix}
+    &nbsp;&nbsp;
     {id}
   </div>
 );

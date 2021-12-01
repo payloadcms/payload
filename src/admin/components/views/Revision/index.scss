@@ -1,0 +1,32 @@
+@import '../../../scss/styles.scss';
+
+.view-revision {
+  width: 100%;
+  margin-bottom: base(2);
+
+  &__wrap {
+    padding: base(3);
+    margin-right: base(2);
+    background: white;
+  }
+
+  &__header {
+    margin-bottom: $baseline;
+  }
+
+  &__intro {
+    margin-bottom: base(.5);
+  }
+
+  @include mid-break {
+    &__wrap {
+      padding: $baseline 0;
+      margin-right: 0;
+    }
+
+    &__header {
+      padding-left: $baseline;
+      padding-right: $baseline;
+    }
+  }
+}

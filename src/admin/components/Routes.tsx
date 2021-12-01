@@ -10,6 +10,7 @@ import Loading from './elements/Loading';
 import StayLoggedIn from './modals/StayLoggedIn';
 import Unlicensed from './views/Unlicensed';
 import Revisions from './views/Revisions';
+import Revision from './views/Revision';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -202,7 +203,12 @@ const Routes = () => {
                                       exact
                                       render={(routeProps) => {
                                         if (permissions?.collections?.[collection.slug]?.readRevisions?.permission) {
-                                          return null;
+                                          return (
+                                            <Revision
+                                              {...routeProps}
+                                              collection={collection}
+                                            />
+                                          );
                                         }
 
                                         return <Unauthorized />;
@@ -263,7 +269,12 @@ const Routes = () => {
                                       exact
                                       render={(routeProps) => {
                                         if (permissions?.globals?.[global.slug]?.readRevisions?.permission) {
-                                          return null;
+                                          return (
+                                            <Revision
+                                              {...routeProps}
+                                              global={global}
+                                            />
+                                          );
                                         }
 
                                         return <Unauthorized />;

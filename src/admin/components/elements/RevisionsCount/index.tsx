@@ -9,7 +9,7 @@ import './index.scss';
 const baseClass = 'revisions-count';
 
 const Revisions: React.FC<Props> = ({ collection, global, id, submissionCount }) => {
-  const { serverURL, routes: { admin } } = useConfig();
+  const { serverURL, routes: { admin, api } } = useConfig();
 
   let initialParams;
   let fetchURL: string;
@@ -24,12 +24,12 @@ const Revisions: React.FC<Props> = ({ collection, global, id, submissionCount })
       },
     };
 
-    fetchURL = `${serverURL}/api/${collection.slug}/revisions`;
+    fetchURL = `${serverURL}${api}/${collection.slug}/revisions`;
     revisionsURL = `${admin}/collections/${collection.slug}/${id}/revisions`;
   }
 
   if (global) {
-    fetchURL = `${serverURL}/api/globals/${global.slug}/revisions`;
+    fetchURL = `${serverURL}${api}/globals/${global.slug}/revisions`;
     revisionsURL = `${admin}/globals/${global.slug}/revisions`;
   }
 
