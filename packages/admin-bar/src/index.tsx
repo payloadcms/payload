@@ -228,7 +228,7 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
             </span>
           </a>
         )}
-        {(collection || id) && (
+        {(collection || id || preview) && (
           <div
             className={classNames?.controls}
             {...divProps}
@@ -350,28 +350,30 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
                 Logout
               </span>
             </a>
+            {preview && (
+              <button
+                className={classNames?.preview}
+                onClick={onPreviewExit}
+                {...previewProps}
+                style={{
+                  ...unstyled !== true ? {
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    cursor: 'pointer',
+                    color: 'inherit',
+                    fontFamily: 'inherit',
+                    fontSize: 'inherit',
+                    ...previewProps?.style ? {
+                      ...previewProps.style
+                    } : {}
+                  } : {}
+                }}
+              >
+                Exit preview mode
+              </button>
+            )}
           </div>
-        )}
-        {preview && (
-          <button
-            className={classNames?.preview}
-            {...previewProps}
-            onClick={onPreviewExit}
-            style={{
-              ...unstyled !== true ? {
-                marginLeft: '10px',
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer',
-                color: 'inherit',
-              } : {}
-            }}
-          >
-            <span>
-              Exit preview mode
-            </span>
-          </button>
         )}
       </div>
     )
