@@ -34,6 +34,7 @@ export type PayloadAdminBarProps = {
     logout?: string,
     controls?: string,
     edit?: string,
+    preview?: string
   }
   logoProps?: {
     style?: CSSProperties
@@ -59,10 +60,16 @@ export type PayloadAdminBarProps = {
     style?: CSSProperties
     [key: string]: unknown
   }
+  previewProps?: {
+    style?: CSSProperties
+    [key: string]: unknown
+  }
   style?: CSSProperties
   unstyled?: boolean
   onAuthChange?: (user: PayloadMeUser) => void
   devMode?: boolean
+  preview?: boolean
+  onPreviewExit?: () => void
 }
 
 export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
@@ -85,7 +92,10 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
     unstyled,
     onAuthChange,
     classNames,
-    devMode
+    devMode,
+    preview,
+    onPreviewExit,
+    previewProps
   } = props;
 
   const [user, setUser] = useState<PayloadMeUser>();
@@ -341,6 +351,27 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
               </span>
             </a>
           </div>
+        )}
+        {preview && (
+          <button
+            className={classNames?.preview}
+            {...previewProps}
+            onClick={onPreviewExit}
+            style={{
+              ...unstyled !== true ? {
+                marginLeft: '10px',
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                color: 'inherit',
+              } : {}
+            }}
+          >
+            <span>
+              Exit preview mode
+            </span>
+          </button>
         )}
       </div>
     )
