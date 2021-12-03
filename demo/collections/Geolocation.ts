@@ -24,7 +24,6 @@ const Geolocation: CollectionConfig = {
     ],
     beforeChange: [
       (operation) => {
-        // eslint-disable-next-line no-param-reassign,operator-assignment
         operation.data.beforeChange = !operation.data.location?.coordinates;
         return operation.data;
       },
@@ -74,6 +73,16 @@ const Geolocation: CollectionConfig = {
         afterChange: [({ value }) => validateFieldTransformAction('afterChange', value)],
         afterRead: [({ value }) => validateFieldTransformAction('afterRead', value)],
       },
+    },
+    {
+      type: 'group',
+      name: 'group',
+      fields: [
+        {
+          name: 'point',
+          type: 'point',
+        },
+      ],
     },
   ],
 };
