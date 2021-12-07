@@ -14,6 +14,7 @@ const ReactSelect: React.FC<Props> = (props) => {
     value,
     disabled = false,
     placeholder,
+    isSearchable = true,
   } = props;
 
   const classes = [
@@ -33,6 +34,7 @@ const ReactSelect: React.FC<Props> = (props) => {
       className={classes}
       classNamePrefix="rs"
       options={options}
+      isSearchable={isSearchable}
     />
   );
 };

@@ -138,7 +138,7 @@ const DefaultList: React.FC<Props> = (props) => {
                 {data.totalDocs}
               </div>
               <PerPage
-                collection={collection}
+                limits={collection?.admin?.pagination?.limits}
                 limit={limit}
               />
             </Fragment>

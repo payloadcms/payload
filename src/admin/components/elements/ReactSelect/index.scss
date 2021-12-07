@@ -9,7 +9,7 @@ div.react-select {
   }
 
   .rs__value-container {
-    padding: 0;
+    padding: base(.25) 0;
 
     > * {
       margin-top: 0;
@@ -40,9 +40,6 @@ div.react-select {
   }
 
   .rs__input {
-    margin-top: base(.25);
-    margin-bottom: base(.25);
-
     input {
       font-family: $font-body;
       width: 100% !important;

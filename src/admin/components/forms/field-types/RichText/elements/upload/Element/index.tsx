@@ -233,7 +233,7 @@ const Element = ({ attributes, children, element, path }) => {
                       {data.totalDocs}
                     </div>
                     <PerPage
-                      collection={modalCollection}
+                      limits={modalCollection?.admin?.pagination?.limits}
                       limit={limit}
                       modifySearchParams={false}
                       handleChange={setLimit}

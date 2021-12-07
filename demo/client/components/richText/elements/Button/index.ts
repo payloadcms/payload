@@ -1,4 +1,4 @@
-import { RichTextCustomElement } from '../../../../../../dist/fields/config/types';
+import { RichTextCustomElement } from '../../../../../../src/fields/config/types';
 import Button from './Button';
 import Element from './Element';
 import plugin from './plugin';

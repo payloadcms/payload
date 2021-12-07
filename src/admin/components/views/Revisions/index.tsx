@@ -86,28 +86,38 @@ const Revisions: React.FC<Props> = ({ collection, global }) => {
       depth: 1,
       page: undefined,
       sort: undefined,
-      where: {
-        parent: {
-          equals: id,
-        },
-      },
       limit,
+      where: {},
     };
 
     if (page) params.page = page;
     if (sort) params.sort = sort;
 
+    let fetchURLToSet: string;
+
+    if (collection) {
+      fetchURLToSet = `${serverURL}${api}/${collection.slug}/revisions`;
+      params.where = {
+        parent: {
+          equals: id,
+        },
+      };
+    }
+
+    if (global) {
+      fetchURLToSet = `${serverURL}${api}/globals/${global.slug}/revisions`;
+    }
+
     // Performance enhancement
     // Setting the Fetch URL this way
     // prevents a double-fetch
 
-    setFetchURL(`${serverURL}${api}/${slug}/revisions`);
+    setFetchURL(fetchURLToSet);
 
     setParams(params);
-  }, [setParams, page, sort, slug, limit, serverURL, api, id]);
+  }, [setParams, page, sort, limit, serverURL, api, id, global, collection]);
 
-  const useIDLabel = doc[useAsTitle] === doc?.id;
-
+  let useIDLabel = doc[useAsTitle] === doc?.id;
   let heading: string;
   let metaDesc: string;
   let metaTitle: string;
@@ -122,6 +132,7 @@ const Revisions: React.FC<Props> = ({ collection, global }) => {
     metaTitle = `Revisions - ${entityLabel}`;
     metaDesc = `Viewing revisions for the global ${entityLabel}`;
     heading = entityLabel;
+    useIDLabel = false;
   }
 
   return (
@@ -175,7 +186,7 @@ const Revisions: React.FC<Props> = ({ collection, global }) => {
                   {revisionsData.totalDocs}
                 </div>
                 <PerPage
-                  collection={collection}
+                  limits={collection?.admin?.pagination?.limits}
                   limit={limit ? Number(limit) : 10}
                 />
               </React.Fragment>
