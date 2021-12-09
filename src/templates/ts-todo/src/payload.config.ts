@@ -1,4 +1,5 @@
 import { buildConfig } from 'payload/config';
+import path from 'path';
 import TodoLists from './collections/TodoLists';
 import Users from './collections/Users';
 
@@ -11,4 +12,7 @@ export default buildConfig({
     TodoLists,
     Users,
   ],
+  typescript: {
+    outputFile: path.resolve(__dirname, 'payload-types.ts')
+  },
 });
