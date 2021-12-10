@@ -35,6 +35,8 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
     setValue,
   ]);
 
+  console.log(value);
+
   const hasImage = Boolean(value);
 
   const config = useConfig();
@@ -100,7 +102,14 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
           name={name}
           relationTo={relationTo}
           value={value}
-          onChange={setValue}
+          onChange={(incomingImage) => {
+            if (incomingImage !== null) {
+              const { id: incomingID } = incomingImage;
+              setValue(incomingID);
+            } else {
+              setValue(null)
+            }
+          }}
           label={null}
           showError={showError}
           api={api}
