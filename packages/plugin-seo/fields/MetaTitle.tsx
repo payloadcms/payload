@@ -31,8 +31,11 @@ export const MetaTitle: React.FC<TextFieldType> = (props) => {
   } = field;
 
   const regenerateTitle = useCallback(() => {
-    const generatedTitle = generateMetaTitle(fields);
-    setValue(generatedTitle);
+    const getTitle = async () => {
+      const generatedTitle = await generateMetaTitle(fields);
+      setValue(generatedTitle);
+    }
+    getTitle();
   }, [
     fields,
     setValue,
