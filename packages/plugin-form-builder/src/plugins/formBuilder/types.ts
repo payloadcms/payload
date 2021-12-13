@@ -1,3 +1,4 @@
+import { RichText } from '@trbl/hope-types';
 import { Block, CollectionConfig } from 'payload/types';
 
 type BlockConfig = {
@@ -99,13 +100,32 @@ export type MessageField = {
 
 export type FormFieldBlock = TextField | SelectField | EmailField | StateField | CountryField | CheckboxField | MessageField | unknown
 
+
+export type Email = {
+  emailTo: string
+  emailFrom: string
+  bcc?: string
+  replyTo?: string
+  subject: string
+  message?: RichText
+}
+export type Redirect = {
+  type: 'reference' | 'custom'
+  reference?: {
+    relationTo: 'people' | 'posts' | 'pages' | 'housing'
+    value: string | unknown
+  }
+  url: string
+}
+
 export type Form = {
   title: string
-  emailTo?: string
-  successMessage?: unknown
-  redirect?: string
-  submitButtonLabel?: string
   fields: FormFieldBlock[]
+  submitButtonLabel?: string
+  confirmationType: 'message' | 'redirect'
+  confirmationMessage?: RichText
+  redirect?: Redirect
+  emails: Email[]
 }
 
 export type SubmissionValue = {
