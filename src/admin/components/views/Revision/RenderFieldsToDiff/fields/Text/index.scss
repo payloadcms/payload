@@ -1,0 +1,10 @@
+@import '../../../../../../scss/styles.scss';
+
+.text-diff {
+  &__locale-label {
+    margin-right: base(.25);
+    background: $color-background-gray;
+    padding: base(.25);
+    border-radius: $style-radius-m;
+  }
+}

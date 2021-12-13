@@ -1,4 +1,4 @@
-import { useConfig } from '@payloadcms/config-provider';
+import { useAuth, useConfig } from '@payloadcms/config-provider';
 import React, { useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import format from 'date-fns/format';
@@ -12,9 +12,12 @@ import { LocaleOption, CompareOption, Props } from './types';
 import CompareRevision from './Compare';
 import { publishedVersionOption } from './shared';
 import Restore from './Restore';
+import SelectLocales from './SelectLocales';
+import RenderFieldsToDiff from './RenderFieldsToDiff';
 
 import './index.scss';
-import SelectLocales from './SelectLocales';
+import { Field } from '../../../../fields/config/types';
+import { FieldPermissions } from '../../../../auth';
 
 const baseClass = 'view-revision';
 
@@ -25,10 +28,13 @@ const ViewRevision: React.FC<Props> = ({ collection, global }) => {
   const [compareValue, setCompareValue] = useState<CompareOption>(publishedVersionOption);
   const [localeOptions] = useState<LocaleOption[]>(() => (localization?.locales ? localization.locales.map((locale) => ({ label: locale, value: locale })) : []));
   const [locales, setLocales] = useState<LocaleOption[]>(localeOptions);
+  const { permissions } = useAuth();
 
   let originalDocFetchURL: string;
   let revisionFetchURL: string;
   let entityLabel: string;
+  let fields: Field[];
+  let fieldPermissions: Record<string, FieldPermissions>;
   let compareBaseURL: string;
   let slug: string;
   let parentID: string;
@@ -40,6 +46,8 @@ const ViewRevision: React.FC<Props> = ({ collection, global }) => {
     compareBaseURL = `${serverURL}${api}/${slug}/revisions`;
     entityLabel = collection.labels.singular;
     parentID = id;
+    fields = collection.fields;
+    fieldPermissions = permissions.collections[collection.slug].fields;
   }
 
   if (global) {
@@ -48,14 +56,16 @@ const ViewRevision: React.FC<Props> = ({ collection, global }) => {
     revisionFetchURL = `${serverURL}${api}/globals/${slug}/revisions/${revisionID}`;
     compareBaseURL = `${serverURL}${api}/globals/${slug}/revisions`;
     entityLabel = global.label;
+    fields = global.fields;
+    fieldPermissions = permissions.globals[global.slug].fields;
   }
 
   const useAsTitle = collection?.admin?.useAsTitle || 'id';
-  const compareFetchURL = compareValue?.value && compareValue?.value !== 'published' ? `${compareBaseURL}/${compareValue.value}` : '';
+  const compareFetchURL = compareValue?.value === 'published' ? originalDocFetchURL : `${compareBaseURL}/${compareValue.value}`;
 
-  const [{ data: doc, isLoading }] = usePayloadAPI(revisionFetchURL);
+  const [{ data: doc, isLoading }] = usePayloadAPI(revisionFetchURL, { initialParams: { locale: '*' } });
   const [{ data: originalDoc }] = usePayloadAPI(originalDocFetchURL);
-  const [{ data: compareDoc }] = usePayloadAPI(compareFetchURL);
+  const [{ data: compareDoc }] = usePayloadAPI(compareFetchURL, { initialParams: { locale: '*' } });
 
   useEffect(() => {
     let nav: StepNavItem[] = [];
@@ -133,25 +143,31 @@ const ViewRevision: React.FC<Props> = ({ collection, global }) => {
           />
         </header>
         <div className={`${baseClass}__controls`}>
+          {localization && (
+            <SelectLocales
+              onChange={setLocales}
+              options={localeOptions}
+              value={locales}
+            />
+          )}
           <CompareRevision
             baseURL={compareBaseURL}
             parentID={parentID}
             value={compareValue}
             onChange={setCompareValue}
           />
-          <SelectLocales
-            onChange={setLocales}
-            options={localeOptions}
-            value={locales}
-          />
         </div>
         {isLoading && (
           <Loading />
         )}
         {doc?.revision && (
-          <React.Fragment>
-            hello
-          </React.Fragment>
+          <RenderFieldsToDiff
+            locales={locales.map((locale) => locale.value)}
+            fields={fields}
+            fieldPermissions={fieldPermissions}
+            revision={doc?.revision}
+            comparison={compareValue?.value === 'published' ? compareDoc : compareDoc?.revision}
+          />
         )}
       </div>
     </div>
