@@ -1,9 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import qs from 'qs';
 import { useConfig } from '@payloadcms/config-provider';
 import format from 'date-fns/format';
 import { Props } from './types';
 import ReactSelect from '../../../elements/ReactSelect';
 import { PaginatedDocs } from '../../../../../mongoose/types';
+import { publishedVersionOption } from '../shared';
 
 import './index.scss';
 
@@ -11,8 +13,12 @@ const baseClass = 'compare-revision';
 
 const maxResultsPerRequest = 10;
 
+const baseOptions = [
+  publishedVersionOption,
+];
+
 const CompareRevision: React.FC<Props> = (props) => {
-  const { onChange, value, baseURL } = props;
+  const { onChange, value, baseURL, parentID } = props;
 
   const {
     admin: {
@@ -20,14 +26,30 @@ const CompareRevision: React.FC<Props> = (props) => {
     },
   } = useConfig();
 
-  const [options, setOptions] = useState([]);
+  const [options, setOptions] = useState(baseOptions);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [errorLoading, setErrorLoading] = useState('');
 
   const getResults = useCallback(async ({
     lastLoadedPage: lastLoadedPageArg,
   } = {}) => {
-    const response = await fetch(`${baseURL}?limit=${maxResultsPerRequest}&page=${lastLoadedPageArg}&depth=0`);
+    const query = {
+      limit: maxResultsPerRequest,
+      page: lastLoadedPageArg,
+      depth: 0,
+      where: undefined,
+    };
+
+    if (parentID) {
+      query.where = {
+        parent: {
+          equals: parentID,
+        },
+      };
+    }
+
+    const search = qs.stringify(query);
+    const response = await fetch(`${baseURL}?${search}`);
 
     if (response.ok) {
       const data: PaginatedDocs<any> = await response.json();
@@ -44,7 +66,7 @@ const CompareRevision: React.FC<Props> = (props) => {
     } else {
       setErrorLoading('An error has occurred.');
     }
-  }, [dateFormat, baseURL]);
+  }, [dateFormat, baseURL, parentID]);
 
   const classes = [
     'field-type',
@@ -58,6 +80,9 @@ const CompareRevision: React.FC<Props> = (props) => {
 
   return (
     <div className={classes}>
+      <div className={`${baseClass}__label`}>
+        Compare revision against:
+      </div>
       {!errorLoading && (
         <ReactSelect
           isSearchable={false}

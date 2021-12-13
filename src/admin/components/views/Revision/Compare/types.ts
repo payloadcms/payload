@@ -1,18 +1,14 @@
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { PaginatedDocs } from '../../../../../mongoose/types';
+import { CompareOption } from '../types';
 
 export type Props = {
   onChange: (val: unknown) => void,
-  value: Option,
+  value: CompareOption,
   baseURL: string
+  parentID?: string
 }
 
-export type Option = {
-  label: string
-  value: string
-  relationTo?: string
-  options?: Option[]
-}
 
 type CLEAR = {
   type: 'CLEAR'

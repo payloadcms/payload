@@ -8,25 +8,30 @@ import Loading from '../../elements/Loading';
 import { useStepNav } from '../../elements/StepNav';
 import { StepNavItem } from '../../elements/StepNav/types';
 import Meta from '../../utilities/Meta';
-import { Props } from './types';
+import { LocaleOption, CompareOption, Props } from './types';
 import CompareRevision from './Compare';
-import { Option } from './Compare/types';
+import { publishedVersionOption } from './shared';
+import Restore from './Restore';
 
 import './index.scss';
+import SelectLocales from './SelectLocales';
 
 const baseClass = 'view-revision';
 
 const ViewRevision: React.FC<Props> = ({ collection, global }) => {
-  const { serverURL, routes: { admin, api }, admin: { dateFormat } } = useConfig();
+  const { serverURL, routes: { admin, api }, admin: { dateFormat }, localization } = useConfig();
   const { setStepNav } = useStepNav();
   const { params: { id, revisionID } } = useRouteMatch<{ id?: string, revisionID: string }>();
-  const [compareValue, setCompareValue] = useState<Option>();
+  const [compareValue, setCompareValue] = useState<CompareOption>(publishedVersionOption);
+  const [localeOptions] = useState<LocaleOption[]>(() => (localization?.locales ? localization.locales.map((locale) => ({ label: locale, value: locale })) : []));
+  const [locales, setLocales] = useState<LocaleOption[]>(localeOptions);
 
   let originalDocFetchURL: string;
   let revisionFetchURL: string;
   let entityLabel: string;
   let compareBaseURL: string;
   let slug: string;
+  let parentID: string;
 
   if (collection) {
     ({ slug } = collection);
@@ -34,6 +39,7 @@ const ViewRevision: React.FC<Props> = ({ collection, global }) => {
     revisionFetchURL = `${serverURL}${api}/${slug}/revisions/${revisionID}`;
     compareBaseURL = `${serverURL}${api}/${slug}/revisions`;
     entityLabel = collection.labels.singular;
+    parentID = id;
   }
 
   if (global) {
@@ -45,7 +51,7 @@ const ViewRevision: React.FC<Props> = ({ collection, global }) => {
   }
 
   const useAsTitle = collection?.admin?.useAsTitle || 'id';
-  const compareFetchURL = compareValue?.value ? `${compareBaseURL}/${compareValue.value}/${compareValue?.value}` : '';
+  const compareFetchURL = compareValue?.value && compareValue?.value !== 'published' ? `${compareBaseURL}/${compareValue.value}` : '';
 
   const [{ data: doc, isLoading }] = usePayloadAPI(revisionFetchURL);
   const [{ data: originalDoc }] = usePayloadAPI(originalDocFetchURL);
@@ -115,17 +121,28 @@ const ViewRevision: React.FC<Props> = ({ collection, global }) => {
       />
       <Eyebrow />
       <div className={`${baseClass}__wrap`}>
+        <div className={`${baseClass}__intro`}>Revision created on:</div>
         <header className={`${baseClass}__header`}>
-          <div className={`${baseClass}__intro`}>Revision created on:</div>
           <h2>
             {formattedCreatedAt}
           </h2>
+          <Restore
+            className={`${baseClass}__restore`}
+            collection={collection}
+            global={global}
+          />
         </header>
         <div className={`${baseClass}__controls`}>
           <CompareRevision
             baseURL={compareBaseURL}
+            parentID={parentID}
             value={compareValue}
             onChange={setCompareValue}
+          />
+          <SelectLocales
+            onChange={setLocales}
+            options={localeOptions}
+            value={locales}
           />
         </div>
         {isLoading && (

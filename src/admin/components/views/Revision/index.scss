@@ -12,10 +12,30 @@
 
   &__header {
     margin-bottom: $baseline;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    h2 {
+      margin: 0;
+    }
   }
 
-  &__intro {
-    margin-bottom: base(.5);
+  &__controls {
+    display: flex;
+    margin-bottom: $baseline;
+    margin-left: base(-.5);
+    margin-right: base(-.5);
+
+    > * {
+      margin-left: base(.5);
+      margin-right: base(.5);
+      width: 50%;
+    }
+  }
+
+  &__restore {
+    margin: 0 0 0 $baseline;
   }
 
   @include mid-break {
@@ -24,9 +44,20 @@
       margin-right: 0;
     }
 
+    &__intro,
     &__header {
       padding-left: $baseline;
       padding-right: $baseline;
+      display: block;
+    }
+
+    &__controls {
+      display: block;
+      margin: 0 $baseline;
+    }
+
+    &__restore {
+      margin: base(.5) 0 0 0;
     }
   }
 }

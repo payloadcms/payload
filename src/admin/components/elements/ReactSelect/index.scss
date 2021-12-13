@@ -10,6 +10,7 @@ div.react-select {
 
   .rs__value-container {
     padding: base(.25) 0;
+    min-height: base(1.5);
 
     > * {
       margin-top: 0;
@@ -20,6 +21,8 @@ div.react-select {
 
     &--is-multi {
       margin-left: - base(.25);
+      padding-top: 0;
+      padding-bottom: 0;
     }
   }
 
