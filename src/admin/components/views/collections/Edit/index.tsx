@@ -48,6 +48,12 @@ const EditView: React.FC<IndexProps> = (props) => {
     } else {
       const state = await buildStateFromSchema(fields, json.doc);
       setInitialState(state);
+
+      history.push({
+        state: {
+          data: json.doc,
+        },
+      });
     }
   };
 
