@@ -35,8 +35,6 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
     setValue,
   ]);
 
-  console.log(value);
-
   const hasImage = Boolean(value);
 
   const config = useConfig();
