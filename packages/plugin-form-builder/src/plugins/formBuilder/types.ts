@@ -18,12 +18,14 @@ export type IncomingOptions = {
   fields?: FieldType[]
   formSubmissionsOverrides?: CollectionConfig
   formsOverrides?: CollectionConfig
+  sendEmail?: (form: Form) => void
 }
 
 export type SanitizedOptions = {
   fields: (FieldType | BlockConfig)[]
   formSubmissionsOverrides?: CollectionConfig
   formsOverrides?: CollectionConfig
+  sendEmail?: (form: Form) => void
 }
 
 export type TextField = {
@@ -99,7 +101,6 @@ export type MessageField = {
 }
 
 export type FormFieldBlock = TextField | SelectField | EmailField | StateField | CountryField | CheckboxField | MessageField | unknown
-
 
 export type Email = {
   emailTo: string
