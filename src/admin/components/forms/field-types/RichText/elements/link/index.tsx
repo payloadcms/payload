@@ -69,6 +69,7 @@ const Link = ({ attributes, children, element }) => {
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
+                      e.preventDefault();
                       close();
                     }
                   }}
