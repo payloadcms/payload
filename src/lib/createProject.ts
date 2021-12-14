@@ -10,12 +10,12 @@ import { setTags } from '../utils/usage'
 import type { CliArgs, ProjectTemplate } from '../types'
 
 async function createProjectDir(projectDir: string): Promise<void> {
-  await fse.mkdir(projectDir)
-  const readDir = await fse.readdir(projectDir)
-  if (readDir && readDir.length > 0) {
-    error(`The project directory '${projectDir}' is not empty`)
+  const pathExists = await fse.pathExists(projectDir)
+  if (pathExists) {
+    error(`The project directory '${projectDir}' already exists`)
     process.exit(1)
   }
+  await fse.mkdir(projectDir)
 }
 
 async function installDeps(
@@ -75,7 +75,7 @@ export async function createProject(
   template: ProjectTemplate,
   packageManager: string,
 ): Promise<void> {
-  createProjectDir(projectDir)
+  await createProjectDir(projectDir)
   const templateDir = path.resolve(__dirname, `../templates/${template.name}`)
 
   console.log(
