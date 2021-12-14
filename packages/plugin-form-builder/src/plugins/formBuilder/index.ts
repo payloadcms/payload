@@ -1,19 +1,20 @@
 import { Config } from 'payload/config';
 import getFormsCollection from './getFormsCollection';
 import getFormSubmissionsCollection from './getFormSubmissionsCollection';
-import { IncomingOptions } from './types';
+import { IncomingOptions, SanitizedOptions } from './types';
 
 const FormBuilder = (incomingOptions?: IncomingOptions) => (config: Config): Config => {
-  const options = {
+  const sanitizedOptions: SanitizedOptions = {
     fields: incomingOptions?.fields || ['text', 'select', 'email', 'state', 'country', 'checkbox', 'message'],
+    beforeEmail: incomingOptions?.beforeEmail,
   };
 
   return {
     ...config,
     collections: [
       ...config?.collections || [],
-      getFormsCollection(options),
-      getFormSubmissionsCollection(options),
+      getFormsCollection(sanitizedOptions),
+      getFormSubmissionsCollection(sanitizedOptions),
     ],
   };
 };

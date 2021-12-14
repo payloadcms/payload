@@ -11,7 +11,7 @@ const getFormSubmissionsCollection = (options: SanitizedOptions): CollectionConf
   },
   hooks: {
     beforeChange: [
-      sendEmail(options),
+      (data) => sendEmail(data, options),
     ],
   },
   fields: [

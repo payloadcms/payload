@@ -1,22 +1,25 @@
-import { CollectionBeforeChangeHook } from 'payload/types';
 import { serialize } from './utilities/serializeRichText';
-import { SanitizedOptions } from './types';
+import { Email, SanitizedOptions } from './types';
 import { replaceDoubleCurlys } from './utilities/replaceDoubleCurlys';
 
-const sendEmail = (options: SanitizedOptions): CollectionBeforeChangeHook => async (args) => {
+const sendEmail = async (beforeChangeData, options: SanitizedOptions) => {
   const {
     data,
     data: {
-      form: formID,
-      submissionData
-    } = {},
+      id: formSubmissionID
+    },
     req: {
       payload
     }
-  } = args;
+  } = beforeChangeData;
 
   const {
-    sendEmail: sendEmailFromOptions,
+    form: formID,
+    submissionData
+  } = data || {};
+
+  const {
+    beforeEmail,
     formsOverrides
   } = options || {};
 
@@ -31,7 +34,7 @@ const sendEmail = (options: SanitizedOptions): CollectionBeforeChangeHook => asy
         emails,
       } = form;
 
-      const formattedEmails = emails.map((email) => {
+      const formattedEmails = emails.map((email: Email) => {
         const {
           message,
           subject,
@@ -39,25 +42,43 @@ const sendEmail = (options: SanitizedOptions): CollectionBeforeChangeHook => asy
           emailFrom
         } = email;
 
-        return ({
-          to: replaceDoubleCurlys(emailTo, submissionData),
-          from: replaceDoubleCurlys(emailFrom, submissionData),
-          subject: replaceDoubleCurlys(subject, submissionData),
-          html: `<div>${serialize(message, submissionData)}`
-        });
-      });
+        const to = replaceDoubleCurlys(emailTo, submissionData);
+        const from = replaceDoubleCurlys(emailFrom, submissionData);
 
-      if (typeof sendEmailFromOptions === 'function') {
-        return sendEmailFromOptions(formattedEmails);
-      } else {
-        await Promise.all(
-          formattedEmails.map((email) => payload.sendEmail(email))
-        );
+        if (to && from) {
+          return ({
+            to,
+            from,
+            subject: replaceDoubleCurlys(subject, submissionData),
+            html: `<div>${serialize(message, submissionData)}`
+          });
+        }
+        return null
+      }).filter(Boolean);
 
-        return;
+      let emailsToSend = formattedEmails
+
+      if (typeof beforeEmail === 'function') {
+        emailsToSend = await beforeEmail(formattedEmails);
       }
+
+      const log = emailsToSend.map(({ html, ...rest }) => ({ ...rest }))
+
+      await Promise.all(
+        emailsToSend.map(async (email) => {
+          const { to } = email;
+          try {
+            const emailPromise = await payload.sendEmail(email);
+            return emailPromise;
+          } catch (err) {
+            console.error(`Error while sending email to address: ${to}. Email not sent.`);
+            console.error(err);
+          }
+        })
+      );
     }
   } catch (err) {
+    console.error(`Error while sending one or more emails in form submission id: ${formSubmissionID}.`);
     console.error(err);
   }
 

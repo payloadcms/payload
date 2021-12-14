@@ -18,14 +18,14 @@ export type IncomingOptions = {
   fields?: FieldType[]
   formSubmissionsOverrides?: CollectionConfig
   formsOverrides?: CollectionConfig
-  sendEmail?: (form: Form) => void
+  beforeEmail?: (emails: FormattedEmail[]) => void
 }
 
 export type SanitizedOptions = {
   fields: (FieldType | BlockConfig)[]
   formSubmissionsOverrides?: CollectionConfig
   formsOverrides?: CollectionConfig
-  sendEmail?: (form: Form) => void
+  beforeEmail?: (emails: FormattedEmail[]) => void
 }
 
 export type TextField = {
@@ -110,6 +110,14 @@ export type Email = {
   subject: string
   message?: RichText
 }
+
+export type FormattedEmail = {
+  to: string
+  from: string
+  subject: string
+  html: string
+}
+
 export type Redirect = {
   type: 'reference' | 'custom'
   reference?: {
