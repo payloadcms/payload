@@ -97,4 +97,4 @@ export const serialize = (children, submissionData) => children.map((node: Node,
         </p>
      `);
   }
-});
+}).filter(Boolean).join('');
