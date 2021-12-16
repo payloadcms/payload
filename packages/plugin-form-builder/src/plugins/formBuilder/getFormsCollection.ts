@@ -7,6 +7,7 @@ const getFormsCollection = (options: SanitizedOptions): CollectionConfig => deep
   slug: options?.formsOverrides?.slug || 'forms',
   admin: {
     useAsTitle: 'title',
+    enableRichTextRelationship: false
   },
   access: {
     read: () => true,

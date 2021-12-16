@@ -9,6 +9,9 @@ const getFormSubmissionsCollection = (options: SanitizedOptions): CollectionConf
     create: () => true,
     update: () => false,
   },
+  admin: {
+    enableRichTextRelationship: false
+  },
   hooks: {
     beforeChange: [
       (data) => sendEmail(data, options),
