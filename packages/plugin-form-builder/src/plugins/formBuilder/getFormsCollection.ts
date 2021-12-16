@@ -121,7 +121,7 @@ const getFormsCollection = (options: SanitizedOptions): CollectionConfig => deep
       name: 'emails',
       type: 'array',
       admin: {
-        description: 'Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field\'s name with double curly brackets, i.e. {{firstName}} or {{allFields}}.',
+        description: 'Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field\'s name with double curly brackets, i.e. {{firstName}}.',
       },
       fields: [
         {
