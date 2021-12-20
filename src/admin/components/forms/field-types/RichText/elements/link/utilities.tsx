@@ -9,13 +9,21 @@ export const unwrapLink = (editor: Editor): void => {
   Transforms.unwrapNodes(editor, { match: (n) => Element.isElement(n) && n.type === 'link' });
 };
 
-export const wrapLink = (editor: Editor, url?: string, newTab?: boolean): void => {
+export const wrapLink = (editor, url?: string, newTab?: boolean): void => {
   if (isLinkActive(editor)) {
     unwrapLink(editor);
   }
 
-  const { selection } = editor;
-  const isCollapsed = selection && Range.isCollapsed(selection);
+  const { selection, blurSelection } = editor;
+
+  if (blurSelection) {
+    Transforms.select(editor, blurSelection);
+  }
+
+  const selectionToUse = selection || blurSelection;
+
+  const isCollapsed = selectionToUse && Range.isCollapsed(selectionToUse);
+
   const link = {
     type: 'link',
     url,

@@ -253,7 +253,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
 
   const { password } = data;
 
-  if (password) {
+  if (password && collectionConfig.auth) {
     await doc.setPassword(password as string);
     await doc.save();
     delete data.password;

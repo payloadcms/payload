@@ -50,6 +50,12 @@ const EditView: React.FC<IndexProps> = (props) => {
       const state = await buildStateFromSchema(fields, json.doc);
       setInitialState(state);
       setSubmissionCount((count) => count + 1);
+
+      history.push({
+        state: {
+          data: json.doc,
+        },
+      });
     }
   };
 

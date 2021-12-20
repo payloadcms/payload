@@ -58,6 +58,7 @@
 
 .rich-text-link__url {
   @include formInput;
+  padding-right: base(1.75);
   min-width: base(12);
   width: 100%;
   background: rgba($color-background-gray, .1);
