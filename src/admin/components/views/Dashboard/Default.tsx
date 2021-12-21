@@ -26,8 +26,8 @@ const Dashboard: React.FC<Props> = (props) => {
     },
     admin: {
       components: {
-        AfterDashboard,
-        BeforeDashboard,
+        afterDashboard,
+        beforeDashboard,
       },
     },
   } = useConfig();
@@ -36,9 +36,7 @@ const Dashboard: React.FC<Props> = (props) => {
     <div className={baseClass}>
       <Eyebrow />
       <div className={`${baseClass}__wrap`}>
-        {BeforeDashboard && (
-          <BeforeDashboard />
-        )}
+        {Array.isArray(beforeDashboard) && beforeDashboard.map((Component, i) => <Component key={i} />)}
         <h3 className={`${baseClass}__label`}>Collections</h3>
         <ul className={`${baseClass}__card-list`}>
           {collections.map((collection) => {
@@ -79,9 +77,7 @@ const Dashboard: React.FC<Props> = (props) => {
             </ul>
           </React.Fragment>
         )}
-        {AfterDashboard && (
-          <AfterDashboard />
-        )}
+        {Array.isArray(afterDashboard) && afterDashboard.map((Component, i) => <Component key={i} />)}
       </div>
     </div>
   );

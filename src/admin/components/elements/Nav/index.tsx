@@ -27,8 +27,8 @@ const DefaultNav = () => {
     },
     admin: {
       components: {
-        BeforeNavLinks,
-        AfterNavLinks,
+        beforeNavLinks,
+        afterNavLinks,
       },
     },
   } = useConfig();
@@ -66,7 +66,7 @@ const DefaultNav = () => {
           </button>
         </header>
         <div className={`${baseClass}__wrap`}>
-          {BeforeNavLinks && <BeforeNavLinks />}
+          {Array.isArray(beforeNavLinks) && beforeNavLinks.map((Component, i) => <Component key={i} />)}
           <span className={`${baseClass}__label`}>Collections</span>
           <nav>
             {collections && collections.map((collection, i) => {
@@ -113,7 +113,7 @@ const DefaultNav = () => {
               </nav>
             </React.Fragment>
           )}
-          {AfterNavLinks && <AfterNavLinks />}
+          {Array.isArray(afterNavLinks) && afterNavLinks.map((Component, i) => <Component key={i} />)}
           <div className={`${baseClass}__controls`}>
             <Localizer />
             <Link

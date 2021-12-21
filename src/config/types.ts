@@ -101,10 +101,10 @@ export type Config = {
     dateFormat?: string
     components?: {
       routes?: AdminRoute[]
-      BeforeDashboard?: React.ComponentType
-      AfterDashboard?: React.ComponentType
-      BeforeNavLinks?: React.ComponentType
-      AfterNavLinks?: React.ComponentType
+      beforeDashboard?: React.ComponentType[]
+      afterDashboard?: React.ComponentType[]
+      beforeNavLinks?: React.ComponentType[]
+      afterNavLinks?: React.ComponentType[]
       Nav?: React.ComponentType
       graphics?: {
         Icon?: React.ComponentType

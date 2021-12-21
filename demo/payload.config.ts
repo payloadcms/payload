@@ -65,8 +65,12 @@ export default buildConfig({
           Component: CustomRouteWithDefaultTemplate,
         },
       ],
-      AfterDashboard,
-      AfterNavLinks,
+      afterDashboard: [
+        AfterDashboard,
+      ],
+      afterNavLinks: [
+        AfterNavLinks,
+      ],
       // Nav: () => (
       //   <div>Hello</div>
       // ),

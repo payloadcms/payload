@@ -69,7 +69,7 @@ const Routes = () => {
           }
 
           if (initialized === true) {
-            if (user === undefined || canAccessAdmin === undefined) {
+            if (typeof user === 'undefined' || (user && typeof canAccessAdmin === 'undefined')) {
               return <Loading />;
             }
 
