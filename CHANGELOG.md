@@ -1,4 +1,4 @@
-## [0.13.9-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.9-beta.0) (2021-12-21)
+## [0.13.10-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.10-beta.0) (2021-12-21)
 
 
 ### Bug Fixes
@@ -12,29 +12,6 @@
 
 * builds custom routes API, Before/After Dashboard and Nav custom components ([e337c62](https://github.com/payloadcms/payload/commit/e337c62ba179821c994404a2b693871b2401861b))
 * exports custom text and select inputs ([52edb5b](https://github.com/payloadcms/payload/commit/52edb5b77f45e267c43a284c5591044ac4d726e7))
-
-## [0.13.8-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.8-beta.0) (2021-12-20)
-
-
-### Bug Fixes
-
-* [#370](https://github.com/payloadcms/payload/issues/370), only performs password functions when auth enabled ([9738873](https://github.com/payloadcms/payload/commit/97388738def687f3b26eaf8de6b067f4d3758418))
-* [#390](https://github.com/payloadcms/payload/issues/390), safari rich text link bug ([a16b99b](https://github.com/payloadcms/payload/commit/a16b99b0c87d55f768ed74ab35708a291fc7bbb0))
-* [#393](https://github.com/payloadcms/payload/issues/393), ensures preview button gets up to date data ([2f47e39](https://github.com/payloadcms/payload/commit/2f47e39a9f765bd8ce437d4b7500a5b314a192a5))
-
-
-### Features
-
-* exports custom text and select inputs ([52edb5b](https://github.com/payloadcms/payload/commit/52edb5b77f45e267c43a284c5591044ac4d726e7))
-
-## [0.13.7-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.7-beta.0) (2021-12-14)
-
-
-### Bug Fixes
-
-* [#370](https://github.com/payloadcms/payload/issues/370), only performs password functions when auth enabled ([9738873](https://github.com/payloadcms/payload/commit/97388738def687f3b26eaf8de6b067f4d3758418))
-* [#390](https://github.com/payloadcms/payload/issues/390), safari rich text link bug ([a16b99b](https://github.com/payloadcms/payload/commit/a16b99b0c87d55f768ed74ab35708a291fc7bbb0))
-* [#393](https://github.com/payloadcms/payload/issues/393), ensures preview button gets up to date data ([2f47e39](https://github.com/payloadcms/payload/commit/2f47e39a9f765bd8ce437d4b7500a5b314a192a5))
 
 ## [0.13.6](https://github.com/payloadcms/payload/compare/v0.13.5...v0.13.6) (2021-11-30)
 
