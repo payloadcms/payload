@@ -26,10 +26,20 @@ const Account = lazy(() => import('./views/Account'));
 
 const Routes = () => {
   const [initialized, setInitialized] = useState(null);
-  const { user, permissions, permissions: { canAccessAdmin }, refreshCookie } = useAuth();
+  const { user, permissions, refreshCookie } = useAuth();
+
+  const canAccessAdmin = permissions?.canAccessAdmin;
 
   const {
-    admin: { user: userSlug }, routes, collections, globals,
+    admin: {
+      user: userSlug,
+      components: {
+        routes: customRoutes,
+      } = {},
+    },
+    routes,
+    collections,
+    globals,
   } = useConfig();
 
   useEffect(() => {
@@ -59,8 +69,27 @@ const Routes = () => {
           }
 
           if (initialized === true) {
+            if (user === undefined || canAccessAdmin === undefined) {
+              return <Loading />;
+            }
+
             return (
               <Switch>
+                {Array.isArray(customRoutes) && customRoutes.map(({ path, Component, strict, exact, sensitive }) => (
+                  <Route
+                    key={`${match.url}${path}`}
+                    path={`${match.url}${path}`}
+                    strict={strict}
+                    exact={exact}
+                    sensitive={sensitive}
+                  >
+                    <Component
+                      user={user}
+                      canAccessAdmin={canAccessAdmin}
+                    />
+                  </Route>
+                ))}
+
                 <Route path={`${match.url}/login`}>
                   <Login />
                 </Route>
@@ -212,9 +241,6 @@ const Routes = () => {
                       return <Loading />;
                     }
 
-                    if (user === undefined) {
-                      return <Loading />;
-                    }
                     return <Redirect to={`${match.url}/login`} />;
                   }}
                 />

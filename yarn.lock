@@ -1561,10 +1561,10 @@
   dependencies:
     "@octokit/openapi-types" "^11.2.0"
 
-"@payloadcms/config-provider@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.npmjs.org/@payloadcms/config-provider/-/config-provider-0.1.0.tgz#69d030090862841639cb465529de31337eaa65ba"
-  integrity sha512-s+X0jOlMC8ZT1GoApxMoLGbdd96rhONMm4TQLU9b2RiqoWnpRvn7cA8a97wQAOa7+B3mfQ64/LgOiIHKYLffDw==
+"@payloadcms/config-provider@0.1.1":
+  version "0.1.1"
+  resolved "https://registry.npmjs.org/@payloadcms/config-provider/-/config-provider-0.1.1.tgz#5c48a0e7704cea01fb60c330cfda57f02f61a013"
+  integrity sha512-ThcfBCDEvGJT/GQ8M2jGbU5RNNzr3voQD71QsJPkm2Y8yrEdJiSJuSYFDYJjDaYp4b5Z95iYp8C+qH7T3iQdkQ==
   dependencies:
     jwt-decode "^3.1.2"
 

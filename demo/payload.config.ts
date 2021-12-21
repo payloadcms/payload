@@ -33,6 +33,10 @@ import BlocksGlobal from './globals/BlocksGlobal';
 import NavigationArray from './globals/NavigationArray';
 import GlobalWithStrictAccess from './globals/GlobalWithStrictAccess';
 import UnstoredMedia from './collections/UnstoredMedia';
+import CustomRouteWithMinimalTemplate from './client/components/views/CustomMinimal';
+import CustomRouteWithDefaultTemplate from './client/components/views/CustomDefault';
+import AfterDashboard from './client/components/AfterDashboard';
+import AfterNavLinks from './client/components/AfterNavLinks';
 
 export default buildConfig({
   cookiePrefix: 'payload',
@@ -51,6 +55,18 @@ export default buildConfig({
     // disable: true,
     scss: path.resolve(__dirname, './client/scss/overrides.scss'),
     components: {
+      routes: [
+        {
+          path: '/custom-minimal-route',
+          Component: CustomRouteWithMinimalTemplate,
+        },
+        {
+          path: '/custom-default-route',
+          Component: CustomRouteWithDefaultTemplate,
+        },
+      ],
+      AfterDashboard,
+      AfterNavLinks,
       // Nav: () => (
       //   <div>Hello</div>
       // ),

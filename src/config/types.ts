@@ -6,11 +6,13 @@ import { Configuration } from 'webpack';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
 import { ConnectionOptions } from 'mongoose';
+import React from 'react';
 import { Payload } from '..';
 import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types';
 import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
 import { PayloadRequest } from '../express/types';
 import { Where } from '../types';
+import { User } from '../auth/types';
 
 type Email = {
   fromName: string;
@@ -74,6 +76,16 @@ export type AccessResult = boolean | Where;
  */
 export type Access = (args?: any) => AccessResult;
 
+export type AdminView = React.ComponentType<{ user: User, canAccessAdmin: boolean }>
+
+export type AdminRoute = {
+  Component: AdminView
+  path: string
+  exact?: boolean
+  strict?: boolean
+  sensitive?: boolean
+}
+
 export type Config = {
   admin?: {
     user?: string;
@@ -88,6 +100,11 @@ export type Config = {
     scss?: string
     dateFormat?: string
     components?: {
+      routes?: AdminRoute[]
+      BeforeDashboard?: React.ComponentType
+      AfterDashboard?: React.ComponentType
+      BeforeNavLinks?: React.ComponentType
+      AfterNavLinks?: React.ComponentType
       Nav?: React.ComponentType
       graphics?: {
         Icon?: React.ComponentType
