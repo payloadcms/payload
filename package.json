@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "0.13.7-beta.0",
+  "version": "0.13.10-beta.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "SEE LICENSE IN license.md",
   "author": {
@@ -85,7 +85,7 @@
     "@faceless-ui/modal": "^1.1.4",
     "@faceless-ui/scroll-info": "^1.2.3",
     "@faceless-ui/window-info": "^1.2.4",
-    "@payloadcms/config-provider": "^0.1.0",
+    "@payloadcms/config-provider": "^1.0.0",
     "@types/mime": "^2.0.3",
     "@types/passport-local-mongoose": "^6.1.0",
     "babel-jest": "^26.3.0",

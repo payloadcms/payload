@@ -13,6 +13,7 @@ import { PreferencesProvider } from './components/utilities/Preferences';
 import { SearchParamsProvider } from './components/utilities/SearchParams';
 import { LocaleProvider } from './components/utilities/Locale';
 import Routes from './components/Routes';
+import { StepNavProvider } from './components/elements/StepNav';
 
 import './scss/app.scss';
 
@@ -36,7 +37,9 @@ const Index = () => (
                 <PreferencesProvider>
                   <SearchParamsProvider>
                     <LocaleProvider>
-                      <Routes />
+                      <StepNavProvider>
+                        <Routes />
+                      </StepNavProvider>
                     </LocaleProvider>
                   </SearchParamsProvider>
                   <ModalContainer />

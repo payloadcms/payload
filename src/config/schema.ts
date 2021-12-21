@@ -49,6 +49,20 @@ export default joi.object({
     dateFormat: joi.string(),
     components: joi.object()
       .keys({
+        routes: joi.array()
+          .items(
+            joi.object().keys({
+              Component: component.required(),
+              path: joi.string().required(),
+              exact: joi.bool(),
+              strict: joi.bool(),
+              sensitive: joi.bool(),
+            }),
+          ),
+        beforeDashboard: joi.array().items(component),
+        afterDashboard: joi.array().items(component),
+        beforeNavLinks: joi.array().items(component),
+        afterNavLinks: joi.array().items(component),
         Nav: component,
         views: joi.object({
           Dashboard: component,

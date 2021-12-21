@@ -22,10 +22,15 @@ You can override a set of admin panel-wide components by providing a component t
 | Path                  | Description  |
 | --------------------- | -------------|
 | **`Nav`**             | Contains the sidebar and mobile Nav in its entirety. |
+| **`BeforeNavLinks`**  | Array of components to inject into the built-in Nav, _before_ the links themselves. |
+| **`AfterNavLinks`**   | Array of components to inject into the built-in Nav, _after_ the links themselves. [Demo](https://github.com/payloadcms/payload/tree/master/demo/client/components/AfterNavLinks) |
+| **`BeforeDashboard`** | Array of components to inject into the built-in Dashboard, _before_ the default dashboard contents. |
+| **`AfterNavLinks`**   | Array of components to inject into the built-in Nav, _after_ the default dashboard contents. [Demo](https://github.com/payloadcms/payload/tree/master/demo/client/components/AfterDashboard) |
 | **`views.Account`**   | The Account view is used to show the currently logged in user's Account page. |
 | **`views.Dashboard`** | The main landing page of the Admin panel. |
 | **`graphics.Icon`**   | Used as a graphic within the `Nav` component. Often represents a condensed version of a full logo. |
 | **`graphics.Logo`**   | The full logo to be used in contexts like the `Login` view. |
+| **`routes`**          | Define your own routes to add to the Payload Admin UI. [More](#custom-routes) |
 
 #### Full example:
 
@@ -106,6 +111,45 @@ const CustomTextField = ({ path }) => {
   )
 }
 ```
+
+## Custom routes
+
+You can easily add your own custom routes to the Payload Admin panel using the `admin.components.routes` property. Payload currently uses the extremely powerful React Router v5.x and custom routes support all the properties of the React Router `<Route />` component.
+
+**Custom routes support the following properties:**
+
+| Property          | Description  |
+| ----------------- | -------------|
+| **`Component`** * | Pass in the component that should be rendered when a user navigates to this route. |
+| **`path`** *      | React Router `path`. [See the React Router docs](https://v5.reactrouter.com/web/api/Route/path-string-string) for more info.  |
+| **`exact`**       | React Router `exact` property. [More](https://v5.reactrouter.com/web/api/Route/exact-bool) |
+| **`strict`**      | React Router `strict` property. [More](https://v5.reactrouter.com/web/api/Route/strict-bool) |
+| **`sensitive`**   | React Router `sensitive` property. [More](https://v5.reactrouter.com/web/api/Route/sensitive-bool) |
+
+*\* An asterisk denotes that a property is required.*
+
+#### Custom route components
+
+Your custom route components will be given all the props that a React Router `<Route />` typically would receive, as well as two props from Payload:
+
+| Prop                   | Description  |
+| ---------------------- | -------------|
+| **`user`**             | The currently logged in user. Will be `null` if no user is logged in. |
+| **`canAccessAdmin`** * | If the currently logged in user is allowed to access the admin panel or not. |
+
+<Banner type="warning">
+  <strong>Note:</strong><br/>
+  It's up to you to secure your custom routes. If your route requires a user to be logged in or to have certain access rights, you should handle that within your route component yourself.
+</Banner>
+
+#### Example
+
+You can find examples of custom route views in the [Payload source code `/demo/client/components/views` folder](https://github.com/payloadcms/payload/tree/master/demo/client/components/views). There, you'll find two custom routes:
+
+1. A custom view that uses the `DefaultTemplate`, which is the built-in Payload template that displays the sidebar and "eyebrow nav"
+1. A custom view that uses the `MinimalTemplate` - which is just a centered template used for things like logging in or out
+
+To see how to pass in your custom views to create custom routes of your own, take a look at the `admin.components.routes` property of the [Payload demo config](https://github.com/payloadcms/payload/blob/master/demo/payload.config.ts).
 
 ### Styling Custom Components
 
