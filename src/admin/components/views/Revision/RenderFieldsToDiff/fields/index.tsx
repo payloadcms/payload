@@ -1,9 +1,7 @@
 import Text from './Text';
 import Nested from './Nested';
 import Iterable from './Iterable';
-// import Point from './Point';
-// import Relationship from './Relationship';
-// import Date from './Date';
+import Relationship from './Relationship';
 
 export default {
   text: Text,
@@ -17,9 +15,10 @@ export default {
   group: Nested,
   array: Iterable,
   blocks: Iterable,
-  // date: Text,
-  // select: Text,
-  // relationship: Relationship,
-  // upload: Relationship,
-  // point: Point,
+  date: Text,
+  select: Text,
+  richText: Text,
+  relationship: Relationship,
+  upload: Relationship,
+  point: Text,
 };

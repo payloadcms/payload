@@ -11,4 +11,5 @@ export type Props = {
   locale?: string
   locales?: string[]
   disableGutter?: boolean
+  format?: boolean
 }

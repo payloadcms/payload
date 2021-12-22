@@ -141,6 +141,11 @@ const AllFields: CollectionConfig = {
       },
     },
     {
+      name: 'point',
+      label: 'Point Field (GeoJSON)',
+      type: 'point',
+    },
+    {
       name: 'radioGroupExample',
       label: 'Radio Group Example',
       type: 'radio',

@@ -69,10 +69,10 @@ const Revisions: React.FC<Props> = ({ collection, global, id, submissionCount })
                 el="link"
                 to={revisionsURL}
               >
-                {data.docs.length}
+                {data.totalDocs}
                 {' '}
                 revision
-                {data.docs.length > 1 && 's'}
+                {data.totalDocs > 1 && 's'}
                 {' '}
                 found
               </Button>
