@@ -19,18 +19,18 @@ const Restore: React.FC<Props> = ({ collection, global, className, revisionID, o
   const [processing, setProcessing] = useState(false);
 
   let fetchURL = `${serverURL}${api}`;
-  let redirectURL = `${serverURL}${admin}`;
+  let redirectURL: string;
   let restoreMessage: string;
 
   if (collection) {
-    fetchURL += `/${collection.slug}/revisions/${revisionID}`;
-    redirectURL += `/collections/${collection.slug}/${originalDocID}`;
+    fetchURL = `${fetchURL}/${collection.slug}/revisions/${revisionID}`;
+    redirectURL = `${admin}/collections/${collection.slug}/${originalDocID}`;
     restoreMessage = `You are about to restore this ${collection.labels.singular} document to the state that it was in on ${revisionDate}.`;
   }
 
   if (global) {
-    fetchURL += `/globals/${global.slug}/revisions/${revisionID}`;
-    redirectURL += `/globals/${global.slug}`;
+    fetchURL = `${fetchURL}/globals/${global.slug}/revisions/${revisionID}`;
+    redirectURL = `${admin}/globals/${global.slug}`;
     restoreMessage = `You are about to restore the global ${global.label} to the state that it was in on ${revisionDate}.`;
   }
 
