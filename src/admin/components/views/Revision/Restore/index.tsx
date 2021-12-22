@@ -1,7 +1,9 @@
 import React, { Fragment, useCallback, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
+import { useConfig } from '@payloadcms/config-provider';
 import { Button, MinimalTemplate, Pill } from '../../..';
 import { Props } from './types';
+import { requests } from '../../../../api';
 
 import './index.scss';
 
@@ -9,11 +11,15 @@ const baseClass = 'restore-revision';
 const modalSlug = 'restore-revision';
 
 const Restore: React.FC<Props> = ({ collection, global, className }) => {
+  const { serverURL, routes: { api } } = useConfig();
   const { toggle } = useModal();
   const [processing, setProcessing] = useState(false);
 
-  const handleRestore = useCallback(() => {
+  const handleRestore = useCallback(async () => {
     console.log(collection, global);
+    setProcessing(true);
+
+    // await requests.post(``)
   }, [collection, global]);
 
   return (

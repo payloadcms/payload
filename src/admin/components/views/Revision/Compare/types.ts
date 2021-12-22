@@ -3,7 +3,7 @@ import { PaginatedDocs } from '../../../../../mongoose/types';
 import { CompareOption } from '../types';
 
 export type Props = {
-  onChange: (val: unknown) => void,
+  onChange: (val: CompareOption) => void,
   value: CompareOption,
   baseURL: string
   parentID?: string

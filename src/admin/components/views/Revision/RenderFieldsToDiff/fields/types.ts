@@ -1,12 +1,13 @@
 import React from 'react';
-import { Field } from '../../../../../../fields/config/types';
 import { FieldPermissions } from '../../../../../../auth';
 
+export type FieldComponents = Record<string, React.FC<Props>>
+
 export type Props = {
-  fieldComponents: Record<string, React.FC<Props>>
+  fieldComponents: FieldComponents
   revision: any
   comparison: any
-  field: Field
+  field: any
   permissions?: Record<string, FieldPermissions>
   locale?: string
   locales?: string[]
