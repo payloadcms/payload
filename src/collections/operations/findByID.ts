@@ -7,6 +7,7 @@ import { Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
+import { Payload } from '../..';
 
 export type Arguments = {
   collection: Collection
@@ -19,7 +20,7 @@ export type Arguments = {
   depth?: number
 }
 
-async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Promise<T> {
+async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs: Arguments): Promise<T> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -48,7 +49,7 @@ async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Pr
     },
     disableErrors,
     currentDepth,
-    overrideAccess,
+    overrideAccess = false,
     showHiddenFields,
   } = args;
 

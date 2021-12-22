@@ -4,7 +4,7 @@ import getFileByPath from '../../../uploads/getFileByPath';
 
 export type Options = {
   collection: string
-  id: string
+  id: string | number
   data: Record<string, unknown>
   depth?: number
   locale?: string

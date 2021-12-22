@@ -8,6 +8,7 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Field, fieldHasSubFields, fieldAffectsData } from '../../fields/config/types';
 import { User } from '../types';
 import { Collection } from '../../collections/config/types';
+import { Payload } from '../..';
 
 export type Result = {
   user?: User,
@@ -28,7 +29,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function login(incomingArgs: Arguments): Promise<Result> {
+async function login(this: Payload, incomingArgs: Arguments): Promise<Result> {
   const { config, operations, secret } = this;
 
   let args = incomingArgs;
@@ -176,7 +177,7 @@ async function login(incomingArgs: Arguments): Promise<Result> {
     id: user.id,
     data: user,
     hook: 'afterRead',
-    operation: 'login',
+    operation: 'read',
     overrideAccess,
     flattenLocales: true,
     showHiddenFields,

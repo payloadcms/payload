@@ -1,3 +1,4 @@
+import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 
@@ -13,6 +14,7 @@ export type Options = {
   showHiddenFields?: boolean
   filePath?: string
   overwriteExistingFiles?: boolean
+  req: PayloadRequest
 }
 export default async function create(options: Options): Promise<Document> {
   const {
@@ -27,6 +29,7 @@ export default async function create(options: Options): Promise<Document> {
     showHiddenFields,
     filePath,
     overwriteExistingFiles = false,
+    req,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -40,6 +43,7 @@ export default async function create(options: Options): Promise<Document> {
     showHiddenFields,
     overwriteExistingFiles,
     req: {
+      ...req,
       user,
       payloadAPI: 'local',
       locale,

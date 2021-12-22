@@ -49,6 +49,7 @@ import { Options as DeleteOptions } from './collections/operations/local/delete'
 import { Options as FindRevisionsOptions } from './collections/operations/local/findRevisions';
 import { Options as FindRevisionByIDOptions } from './collections/operations/local/findRevisionByID';
 import { Options as RestoreRevisionOptions } from './collections/operations/local/restoreRevision';
+import { Result } from './auth/operations/login';
 
 require('isomorphic-fetch');
 
@@ -314,7 +315,7 @@ export class Payload {
   // graphql operations & request handlers, where
   // tests
 
-  login = async (options): Promise<any> => {
+  login = async <T extends TypeWithID = any>(options): Promise<Result & { user: T}> => {
     let { login } = localOperations.auth;
     login = login.bind(this);
     return login(options);

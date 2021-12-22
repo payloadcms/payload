@@ -40,14 +40,14 @@ const populate = async ({
     let populatedRelationship;
 
     if (depth && currentDepth <= depth) {
-      populatedRelationship = await payload.operations.collections.findByID({
+      populatedRelationship = await payload.findByID({
         req,
-        collection: relatedCollection,
-        id: idString,
+        collection: relatedCollection.config.slug,
+        id: idString as string,
+        depth,
         currentDepth: currentDepth + 1,
         overrideAccess,
         disableErrors: true,
-        depth,
       });
     }
 

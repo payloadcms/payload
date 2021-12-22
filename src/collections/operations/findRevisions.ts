@@ -2,7 +2,7 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Collection } from '../config/types';
+import { Collection, CollectionModel } from '../config/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
@@ -39,7 +39,7 @@ async function findRevisions<T extends TypeWithRevision<T> = any>(this: Payload,
     showHiddenFields,
   } = args;
 
-  const RevisionsModel = this.revisions[collectionConfig.slug];
+  const RevisionsModel = this.revisions[collectionConfig.slug] as CollectionModel;
 
   // /////////////////////////////////////
   // Access

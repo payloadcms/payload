@@ -39,12 +39,11 @@ const populate = async ({
 }) => {
   const dataRef = data as Record<string, unknown>;
 
-  const doc = await payload.operations.collections.findByID({
-    req: {
-      ...req,
-      payloadAPI: 'local',
-    },
-    collection,
+  const newReq = { ...req, payloadAPI: 'local' } as PayloadRequest;
+
+  const doc = await payload.findByID({
+    req: newReq,
+    collection: collection.config.slug,
     id,
     currentDepth: currentDepth + 1,
     overrideAccess,

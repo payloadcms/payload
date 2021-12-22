@@ -23,7 +23,7 @@ import { saveCollectionRevision } from '../../revisions/saveCollectionRevision';
 export type Arguments = {
   collection: Collection
   req: PayloadRequest
-  id: string
+  id: string | number
   data: Record<string, unknown>
   depth?: number
   disableVerificationEmail?: boolean

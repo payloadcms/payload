@@ -6,6 +6,7 @@ export type Options = {
   collection: string
   id: string
   depth?: number
+  currentDepth?: number
   locale?: string
   fallbackLocale?: string
   user?: Document
@@ -19,6 +20,7 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
   const {
     collection: collectionSlug,
     depth,
+    currentDepth,
     id,
     locale = this?.config?.localization?.defaultLocale,
     fallbackLocale = null,
@@ -33,6 +35,7 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
 
   return this.operations.collections.findByID({
     depth,
+    currentDepth,
     id,
     collection,
     overrideAccess,
