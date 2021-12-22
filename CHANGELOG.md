@@ -1,4 +1,4 @@
-## [0.13.10-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.10-beta.0) (2021-12-21)
+## [0.13.11-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.11-beta.0) (2021-12-22)
 
 
 ### Bug Fixes
@@ -6,6 +6,7 @@
 * [#370](https://github.com/payloadcms/payload/issues/370), only performs password functions when auth enabled ([9738873](https://github.com/payloadcms/payload/commit/97388738def687f3b26eaf8de6b067f4d3758418))
 * [#390](https://github.com/payloadcms/payload/issues/390), safari rich text link bug ([a16b99b](https://github.com/payloadcms/payload/commit/a16b99b0c87d55f768ed74ab35708a291fc7bbb0))
 * [#393](https://github.com/payloadcms/payload/issues/393), ensures preview button gets up to date data ([2f47e39](https://github.com/payloadcms/payload/commit/2f47e39a9f765bd8ce437d4b7500a5b314a192a5))
+* ensures getDataByPath works ([140a3aa](https://github.com/payloadcms/payload/commit/140a3aa9eafa29b2a43bdfd8883c79c6ee4a93e4))
 
 
 ### Features
