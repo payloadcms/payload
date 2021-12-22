@@ -2,16 +2,15 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Collection } from '../config/types';
+import { PaginatedDocs } from '../../mongoose/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
-import { PaginatedDocs } from '../../mongoose/types';
 import { TypeWithRevision } from '../../revisions/types';
-import { Payload } from '../../index';
+import { SanitizedGlobalConfig } from '../config/types';
 
 export type Arguments = {
-  collection: Collection
+  globalConfig: SanitizedGlobalConfig
   where?: Where
   page?: number
   limit?: number
@@ -22,15 +21,15 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function findRevisions<T extends TypeWithRevision<T> = any>(this: Payload, args: Arguments): Promise<PaginatedDocs<T>> {
+// TODO: finish
+
+async function restoreRevision<T extends TypeWithRevision<T> = any>(args: Arguments): Promise<PaginatedDocs<T>> {
   const {
     where,
     page,
     limit,
     depth,
-    collection: {
-      config: collectionConfig,
-    },
+    globalConfig,
     req,
     req: {
       locale,
@@ -39,7 +38,7 @@ async function findRevisions<T extends TypeWithRevision<T> = any>(this: Payload,
     showHiddenFields,
   } = args;
 
-  const RevisionsModel = this.revisions[collectionConfig.slug];
+  const RevisionsModel = this.revisions[globalConfig.slug];
 
   // /////////////////////////////////////
   // Access
@@ -67,7 +66,7 @@ async function findRevisions<T extends TypeWithRevision<T> = any>(this: Payload,
   }
 
   if (!overrideAccess) {
-    const accessResults = await executeAccess({ req }, collectionConfig.access.readRevisions);
+    const accessResults = await executeAccess({ req }, globalConfig.access.readRevisions);
 
     if (hasWhereAccessResult(accessResults)) {
       if (!where) {
@@ -88,7 +87,7 @@ async function findRevisions<T extends TypeWithRevision<T> = any>(this: Payload,
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam(args.sort, collectionConfig.timestamps);
+  const [sortProperty, sortOrder] = buildSortParam(args.sort, true);
 
   const optionsToExecute = {
     page: page || 1,
@@ -104,35 +103,15 @@ async function findRevisions<T extends TypeWithRevision<T> = any>(this: Payload,
   const paginatedDocs = await RevisionsModel.paginate(query, optionsToExecute);
 
   // /////////////////////////////////////
-  // beforeRead - Collection
+  // afterRead - Fields
   // /////////////////////////////////////
 
   let result = {
     ...paginatedDocs,
-    docs: await Promise.all(paginatedDocs.docs.map(async (doc) => {
-      const docString = JSON.stringify(doc);
-      const docRef = JSON.parse(docString);
-
-      await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-        await priorHook;
-
-        docRef.revision = await hook({ req, query, doc: docRef.revision }) || docRef.revision;
-      }, Promise.resolve());
-
-      return docRef;
-    })),
-  } as PaginatedDocs<T>;
-
-  // /////////////////////////////////////
-  // afterRead - Fields
-  // /////////////////////////////////////
-
-  result = {
-    ...result,
-    docs: await Promise.all(result.docs.map(async (data) => ({
+    docs: await Promise.all(paginatedDocs.docs.map(async (data) => ({
       ...data,
       revision: await this.performFieldOperations(
-        collectionConfig,
+        globalConfig,
         {
           depth,
           data: data.revision,
@@ -158,7 +137,7 @@ async function findRevisions<T extends TypeWithRevision<T> = any>(this: Payload,
     docs: await Promise.all(result.docs.map(async (doc) => {
       const docRef = doc;
 
-      await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
         docRef.revision = await hook({ req, query, doc: doc.revision }) || doc.revision;
@@ -180,4 +159,4 @@ async function findRevisions<T extends TypeWithRevision<T> = any>(this: Payload,
   return result;
 }
 
-export default findRevisions;
+export default restoreRevision;

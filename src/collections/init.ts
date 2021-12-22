@@ -106,6 +106,7 @@ export default function registerCollections(ctx: Payload): void {
         findByID,
         findRevisions,
         findRevisionByID,
+        restoreRevision,
         delete: deleteHandler,
       } = ctx.requestHandlers.collections;
 
@@ -180,7 +181,8 @@ export default function registerCollections(ctx: Payload): void {
           .get(findRevisions);
 
         router.route(`/${slug}/revisions/:id`)
-          .get(findRevisionByID);
+          .get(findRevisionByID)
+          .post(restoreRevision);
       }
 
       router.route(`/${slug}`)

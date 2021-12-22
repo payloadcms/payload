@@ -1,8 +1,10 @@
 /* eslint-disable no-underscore-dangle */
+import httpStatus from 'http-status';
+import { Payload } from '../../index';
 import { PayloadRequest } from '../../express/types';
-import { Collection } from '../config/types';
+import { Collection, CollectionModel } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Forbidden, NotFound } from '../../errors';
+import { APIError, Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
@@ -19,7 +21,7 @@ export type Arguments = {
   depth?: number
 }
 
-async function findRevisionByID<T extends TypeWithRevision<T> = any>(args: Arguments): Promise<T> {
+async function findRevisionByID<T extends TypeWithRevision<T> = any>(this: Payload, args: Arguments): Promise<T> {
   const {
     depth,
     collection: {
@@ -36,7 +38,11 @@ async function findRevisionByID<T extends TypeWithRevision<T> = any>(args: Argum
     showHiddenFields,
   } = args;
 
-  const RevisionsModel = this.revisions[collectionConfig.slug];
+  if (!id) {
+    throw new APIError('Missing ID of revision.', httpStatus.BAD_REQUEST);
+  }
+
+  const RevisionsModel = (this.revisions[collectionConfig.slug]) as CollectionModel;
 
   // /////////////////////////////////////
   // Access

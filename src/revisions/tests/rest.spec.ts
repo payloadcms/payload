@@ -116,4 +116,40 @@ describe('Revisions - REST', () => {
       expect(revisions.docs[0].revision.title.es).toStrictEqual(spanishTitle);
     });
   });
+
+  describe('Restore', () => {
+    it('should allow a revision to be restored', async () => {
+      const title2 = 'Here is an updated post title in EN';
+
+      const updatedPost = await fetch(`${url}/api/localized-posts/${postID}`, {
+        body: JSON.stringify({
+          title: title2,
+        }),
+        headers,
+        method: 'put',
+      }).then((res) => res.json());
+
+      expect(updatedPost.doc.title).toBe(title2);
+
+      const revisions = await fetch(`${url}/api/localized-posts/revisions`, {
+        headers,
+      }).then((res) => res.json());
+
+      revisionID = revisions.docs[0].id;
+
+      const restore = await fetch(`${url}/api/localized-posts/revisions/${revisionID}`, {
+        headers,
+        method: 'post',
+      }).then((res) => res.json());
+
+      expect(restore.message).toBeDefined();
+      expect(restore.doc.title).toBeDefined();
+
+      const restoredPost = await fetch(`${url}/api/localized-posts/${postID}`, {
+        headers,
+      }).then((res) => res.json());
+
+      expect(restoredPost.title).toBe(restore.doc.title);
+    });
+  });
 });
