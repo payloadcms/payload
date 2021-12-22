@@ -1,6 +1,9 @@
 import Text from './Text';
-import Iterable from './Iterable';
 import Nested from './Nested';
+import Iterable from './Iterable';
+// import Point from './Point';
+// import Relationship from './Relationship';
+// import Date from './Date';
 
 export default {
   text: Text,
@@ -8,15 +11,15 @@ export default {
   number: Text,
   email: Text,
   code: Text,
-  // group: Nested,
-  // row: Nested,
-  // array: Iterable,
-  blocks: Iterable,
   checkbox: Text,
-  date: Text,
   radio: Text,
-  select: Text,
-  relationship: Text,
-  upload: Text,
-  point: Text,
+  row: Nested,
+  group: Nested,
+  array: Iterable,
+  blocks: Iterable,
+  // date: Text,
+  // select: Text,
+  // relationship: Relationship,
+  // upload: Relationship,
+  // point: Point,
 };

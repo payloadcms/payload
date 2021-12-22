@@ -1,13 +1,17 @@
 import React from 'react';
 import ReactDiffViewer from 'react-diff-viewer';
-import { Props } from '../types';
 import Label from '../../Label';
+import { Props } from '../types';
 
 import './index.scss';
 
 const baseClass = 'text-diff';
 
 const Text: React.FC<Props> = ({ field, locale, revision, comparison }) => {
+  let placeholder = '';
+
+  if (revision === comparison) placeholder = '[no value]';
+
   return (
     <div className={baseClass}>
       <Label>
@@ -17,8 +21,8 @@ const Text: React.FC<Props> = ({ field, locale, revision, comparison }) => {
         {field.label}
       </Label>
       <ReactDiffViewer
-        oldValue={String(revision)}
-        newValue={String(comparison)}
+        oldValue={typeof revision !== 'undefined' ? String(revision) : placeholder}
+        newValue={typeof comparison !== 'undefined' ? String(comparison) : placeholder}
         splitView
         hideLineNumbers
         showDiffOnly={false}

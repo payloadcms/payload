@@ -1,24 +1,32 @@
 import React from 'react';
 import { Props } from './types';
-import fieldComponents from './fields';
-import { fieldAffectsData } from '../../../../../fields/config/types';
-import Label from './Label';
+import { fieldAffectsData, fieldHasSubFields } from '../../../../../fields/config/types';
+import Nested from './fields/Nested';
 
 import './index.scss';
 
 const baseClass = 'render-field-diffs';
 
-const RenderFieldsToDiff: React.FC<Props> = ({ fields, fieldPermissions, revision, comparison, locales }) => (
+const RenderFieldsToDiff: React.FC<Props> = ({
+  fields,
+  fieldComponents,
+  fieldPermissions,
+  revision,
+  comparison,
+  locales,
+}) => (
   <div className={baseClass}>
     {fields.map((field, i) => {
       const Component = fieldComponents[field.type];
+
       if (Component) {
         if (fieldAffectsData(field)) {
           const revisionValue = revision[field.name];
           const comparisonValue = comparison?.[field.name];
           const hasPermission = fieldPermissions?.[field.name]?.read?.permission;
+          const subFieldPermissions = fieldPermissions?.[field.name]?.fields;
 
-          if (!hasPermission) return null;
+          if (hasPermission === false) return null;
 
           if (field.localized) {
             return (
@@ -37,9 +45,12 @@ const RenderFieldsToDiff: React.FC<Props> = ({ fields, fieldPermissions, revisio
                       <div className={`${baseClass}__locale-value`}>
                         <Component
                           locale={locale}
+                          locales={locales}
                           field={field}
+                          fieldComponents={fieldComponents}
                           revision={revisionLocaleValue}
                           comparison={comparisonLocaleValue}
+                          permissions={subFieldPermissions}
                         />
                       </div>
                     </div>
@@ -55,11 +66,30 @@ const RenderFieldsToDiff: React.FC<Props> = ({ fields, fieldPermissions, revisio
               key={i}
             >
               <Component
+                locales={locales}
                 field={field}
+                fieldComponents={fieldComponents}
                 revision={revisionValue}
                 comparison={comparisonValue}
+                permissions={subFieldPermissions}
               />
             </div>
+          );
+        }
+
+        // At this point, we are dealing with a `row` or similar
+        if (fieldHasSubFields(field)) {
+          return (
+            <Nested
+              key={i}
+              locales={locales}
+              disableGutter
+              field={field}
+              fieldComponents={fieldComponents}
+              revision={revision}
+              comparison={comparison}
+              permissions={fieldPermissions}
+            />
           );
         }
       }

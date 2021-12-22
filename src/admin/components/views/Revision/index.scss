@@ -40,20 +40,18 @@
 
   @include mid-break {
     &__wrap {
-      padding: $baseline 0;
+      padding: $baseline;
       margin-right: 0;
     }
 
     &__intro,
     &__header {
-      padding-left: $baseline;
-      padding-right: $baseline;
       display: block;
     }
 
     &__controls {
       display: block;
-      margin: 0 base(.5);
+      margin: 0 base(-.5) base(2);
 
       > * {
         margin-bottom: base(.5);

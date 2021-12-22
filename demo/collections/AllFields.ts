@@ -28,6 +28,10 @@ const AllFields: CollectionConfig = {
     },
     description: CollectionDescription,
   },
+  revisions: {
+    maxPerDoc: 20,
+    retainDeleted: true,
+  },
   access: {
     read: () => true,
   },
