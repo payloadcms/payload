@@ -15,12 +15,14 @@ import find from '../collections/requestHandlers/find';
 import findByID from '../collections/requestHandlers/findByID';
 import findRevisions from '../collections/requestHandlers/findRevisions';
 import findRevisionByID from '../collections/requestHandlers/findRevisionByID';
+import restoreRevision from '../collections/requestHandlers/restoreRevision';
 import update from '../collections/requestHandlers/update';
 import deleteHandler from '../collections/requestHandlers/delete';
 
 import findOne from '../globals/requestHandlers/findOne';
 import findGlobalRevisions from '../globals/requestHandlers/findRevisions';
 import findGlobalRevisionByID from '../globals/requestHandlers/findRevisionByID';
+import restoreGlobalRevision from '../globals/requestHandlers/restoreRevision';
 import globalUpdate from '../globals/requestHandlers/update';
 import { Payload } from '../index';
 import preferenceUpdate from '../preferences/requestHandlers/update';
@@ -34,6 +36,7 @@ export type RequestHandlers = {
     findByID: typeof findByID,
     findRevisions: typeof findRevisions,
     findRevisionByID: typeof findRevisionByID,
+    restoreRevision: typeof restoreRevision,
     update: typeof update,
     delete: typeof deleteHandler,
     auth: {
@@ -55,6 +58,7 @@ export type RequestHandlers = {
     update: typeof globalUpdate,
     findRevisions: typeof findGlobalRevisions
     findRevisionByID: typeof findGlobalRevisionByID
+    restoreRevision: typeof restoreGlobalRevision
   },
   preferences: {
     update: typeof preferenceUpdate,
@@ -71,6 +75,7 @@ function bindRequestHandlers(ctx: Payload): void {
       findByID: findByID.bind(ctx),
       findRevisions: findRevisions.bind(ctx),
       findRevisionByID: findRevisionByID.bind(ctx),
+      restoreRevision: restoreRevision.bind(ctx),
       update: update.bind(ctx),
       delete: deleteHandler.bind(ctx),
       auth: {
@@ -92,6 +97,7 @@ function bindRequestHandlers(ctx: Payload): void {
       update: globalUpdate.bind(ctx),
       findRevisions: findGlobalRevisions.bind(ctx),
       findRevisionByID: findGlobalRevisionByID.bind(ctx),
+      restoreRevision: restoreGlobalRevision.bind(ctx),
     },
     preferences: {
       update: preferenceUpdate.bind(ctx),

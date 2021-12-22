@@ -9,10 +9,11 @@ import {
   EmailOptions,
   InitOptions,
 } from './config/types';
+import { TypeWithRevision } from './revisions/types';
 import { PaginatedDocs } from './mongoose/types';
 
 import Logger from './utilities/logger';
-import bindOperations from './init/bindOperations';
+import bindOperations, { Operations } from './init/bindOperations';
 import bindRequestHandlers, { RequestHandlers } from './init/bindRequestHandlers';
 import loadConfig from './config/load';
 import authenticate, { PayloadAuthenticate } from './express/middleware/authenticate';
@@ -45,6 +46,9 @@ import { Options as FindOptions } from './collections/operations/local/find';
 import { Options as FindByIDOptions } from './collections/operations/local/findByID';
 import { Options as UpdateOptions } from './collections/operations/local/update';
 import { Options as DeleteOptions } from './collections/operations/local/delete';
+import { Options as FindRevisionsOptions } from './collections/operations/local/findRevisions';
+import { Options as FindRevisionByIDOptions } from './collections/operations/local/findRevisionByID';
+import { Options as RestoreRevisionOptions } from './collections/operations/local/restoreRevision';
 
 require('isomorphic-fetch');
 
@@ -94,7 +98,7 @@ export class Payload {
 
   decrypt = decrypt;
 
-  operations: { [key: string]: any };
+  operations: Operations;
 
   errorHandler: ErrorHandler;
 
@@ -268,6 +272,47 @@ export class Payload {
     deleteOperation = deleteOperation.bind(this);
     return deleteOperation<T>(options);
   }
+
+  /**
+   * @description Find revisions with criteria
+   * @param options
+   * @returns revisions satisfying query
+   */
+  findRevisions = async <T extends TypeWithRevision<T> = any>(options: FindRevisionsOptions): Promise<PaginatedDocs<T>> => {
+    let { findRevisions } = localOperations;
+    findRevisions = findRevisions.bind(this);
+    return findRevisions<T>(options);
+  }
+
+  /**
+   * @description Find revision by ID
+   * @param options
+   * @returns revision with specified ID
+   */
+  findRevisionByID = async <T extends TypeWithRevision<T> = any>(options: FindRevisionByIDOptions): Promise<T> => {
+    let { findRevisionByID } = localOperations;
+    findRevisionByID = findRevisionByID.bind(this);
+    return findRevisionByID(options);
+  }
+
+  /**
+   * @description Restore revision by ID
+   * @param options
+   * @returns revision with specified ID
+   */
+  restoreRevision = async <T extends TypeWithRevision<T> = any>(options: RestoreRevisionOptions): Promise<T> => {
+    let { restoreRevision } = localOperations;
+    restoreRevision = restoreRevision.bind(this);
+    return restoreRevision(options);
+  }
+
+  // TODO: globals
+  // findRevisionGlobal
+  // findRevisionByIDGlobal
+  // restoreRevisionGlobal
+  // TODO:
+  // graphql operations & request handlers, where
+  // tests
 
   login = async (options): Promise<any> => {
     let { login } = localOperations.auth;

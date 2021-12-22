@@ -16,17 +16,57 @@ import find from '../collections/operations/find';
 import findByID from '../collections/operations/findByID';
 import findRevisions from '../collections/operations/findRevisions';
 import findRevisionByID from '../collections/operations/findRevisionByID';
+import restoreRevision from '../collections/operations/restoreRevision';
 import update from '../collections/operations/update';
 import deleteHandler from '../collections/operations/delete';
 
 import findOne from '../globals/operations/findOne';
 import findGlobalRevisions from '../globals/operations/findRevisions';
 import findGlobalRevisionByID from '../globals/operations/findRevisionByID';
+import restoreGlobalRevision from '../globals/operations/restoreRevision';
 import globalUpdate from '../globals/operations/update';
 
 import preferenceUpdate from '../preferences/operations/update';
 import preferenceFindOne from '../preferences/operations/findOne';
 import preferenceDelete from '../preferences/operations/delete';
+
+export type Operations = {
+  collections: {
+    create: typeof create
+    find: typeof find
+    findByID: typeof findByID
+    findRevisions: typeof findRevisions
+    findRevisionByID: typeof findRevisionByID
+    restoreRevision: typeof restoreRevision
+    update: typeof update
+    delete: typeof deleteHandler
+    auth: {
+      access: typeof access
+      forgotPassword: typeof forgotPassword
+      init: typeof init
+      login: typeof login
+      logout: typeof logout
+      me: typeof me
+      refresh: typeof refresh
+      registerFirstUser: typeof registerFirstUser
+      resetPassword: typeof resetPassword
+      verifyEmail: typeof verifyEmail
+      unlock: typeof unlock
+    }
+  }
+  globals: {
+    findOne: typeof findOne
+    findRevisions: typeof findGlobalRevisions
+    findRevisionByID: typeof findGlobalRevisionByID
+    restoreRevision: typeof restoreGlobalRevision
+    update: typeof globalUpdate
+  }
+  preferences: {
+    update: typeof preferenceUpdate
+    findOne: typeof preferenceFindOne
+    delete: typeof preferenceDelete
+  }
+}
 
 function bindOperations(ctx: Payload): void {
   ctx.operations = {
@@ -36,6 +76,7 @@ function bindOperations(ctx: Payload): void {
       findByID: findByID.bind(ctx),
       findRevisions: findRevisions.bind(ctx),
       findRevisionByID: findRevisionByID.bind(ctx),
+      restoreRevision: restoreRevision.bind(ctx),
       update: update.bind(ctx),
       delete: deleteHandler.bind(ctx),
       auth: {
@@ -56,6 +97,7 @@ function bindOperations(ctx: Payload): void {
       findOne: findOne.bind(ctx),
       findRevisions: findGlobalRevisions.bind(ctx),
       findRevisionByID: findGlobalRevisionByID.bind(ctx),
+      restoreRevision: restoreGlobalRevision.bind(ctx),
       update: globalUpdate.bind(ctx),
     },
     preferences: {

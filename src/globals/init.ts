@@ -53,7 +53,8 @@ export default function initGlobals(ctx: Payload): void {
             .get(ctx.requestHandlers.globals.findRevisions(global));
 
           router.route(`/globals/${global.slug}/revisions/:id`)
-            .get(ctx.requestHandlers.globals.findRevisionByID(global));
+            .get(ctx.requestHandlers.globals.findRevisionByID(global))
+            .post(ctx.requestHandlers.globals.restoreRevision(global));
         }
       });
 
