@@ -7,7 +7,7 @@ const getDataByPath = (fields: Fields, path: string): unknown => {
   const name = path.split('.').pop();
 
   const data = Object.keys(fields).reduce((matchedData, key) => {
-    if (key.indexOf(`${path}.`) === 0) {
+    if (key.indexOf(`${path}.`) === 0 || key === path) {
       return {
         ...matchedData,
         [key.replace(pathPrefixToRemove, '')]: fields[key],

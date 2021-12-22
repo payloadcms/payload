@@ -31,6 +31,7 @@ const Text: React.FC<TextFieldType> = (props) => {
 
   return (
     <TextInput
+      path={path}
       name={name}
       value={value as string || ''}
       label={label}
