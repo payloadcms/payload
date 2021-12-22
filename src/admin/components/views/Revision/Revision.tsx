@@ -142,6 +142,9 @@ const RevisionView: React.FC<Props> = ({ collection, global }) => {
             className={`${baseClass}__restore`}
             collection={collection}
             global={global}
+            originalDocID={id}
+            revisionID={revisionID}
+            revisionDate={formattedCreatedAt}
           />
         </header>
         <div className={`${baseClass}__controls`}>

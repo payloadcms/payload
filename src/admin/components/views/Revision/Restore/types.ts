@@ -5,4 +5,7 @@ export type Props = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
   className?: string
+  revisionID: string
+  originalDocID: string
+  revisionDate: string
 }
