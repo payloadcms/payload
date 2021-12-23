@@ -55,14 +55,8 @@ const DeleteDocument: React.FC<Props> = (props) => {
         const json = await res.json();
         if (res.status < 400) {
           closeAll();
-          return history.push({
-            pathname: `${admin}/collections/${slug}`,
-            state: {
-              status: {
-                message: `${singular} "${title}" successfully deleted.`,
-              },
-            },
-          });
+          toast.success(`${singular} "${title}" successfully deleted.`);
+          return history.push(`${admin}/collections/${slug}`);
         }
 
         closeAll();

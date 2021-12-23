@@ -41,14 +41,8 @@ const Restore: React.FC<Props> = ({ collection, global, className, revisionID, o
 
     if (res.status === 200) {
       const json = await res.json();
-      history.push({
-        pathname: redirectURL,
-        state: {
-          status: {
-            message: json.message,
-          },
-        },
-      });
+      toast.success(json.message);
+      history.push(redirectURL);
     } else {
       toast.error('There was a problem while restoring this revision.');
     }
