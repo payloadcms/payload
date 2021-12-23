@@ -28,7 +28,7 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
     overrideAccess = true,
     disableErrors = false,
     showHiddenFields,
-    req,
+    req = {},
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -42,12 +42,12 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
     disableErrors,
     showHiddenFields,
     req: {
-      ...req,
       user,
       payloadAPI: 'local',
       locale,
       fallbackLocale,
       payload: this,
+      ...req,
     },
   });
 }

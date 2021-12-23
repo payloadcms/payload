@@ -19,7 +19,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
     {fields.map((field, i) => {
       const Component = fieldComponents[field.type];
 
-      const format = field.type === 'richText';
+      const isRichText = field.type === 'richText';
 
       if (Component) {
         if (fieldAffectsData(field)) {
@@ -53,7 +53,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                           revision={revisionLocaleValue}
                           comparison={comparisonLocaleValue}
                           permissions={subFieldPermissions}
-                          format={format}
+                          isRichText={isRichText}
                         />
                       </div>
                     </div>
@@ -75,7 +75,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                 revision={revisionValue}
                 comparison={comparisonValue}
                 permissions={subFieldPermissions}
-                format={format}
+                isRichText={isRichText}
               />
             </div>
           );

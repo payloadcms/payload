@@ -1,13 +1,15 @@
 import React from 'react';
-import ReactDiffViewer from 'react-diff-viewer';
+import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer';
 import Label from '../../Label';
 import { Props } from '../types';
+import { richTextToHTML } from './richTextToHTML';
+import { stringifyRichText } from './stringifyRichText';
 
 import './index.scss';
 
 const baseClass = 'text-diff';
 
-const Text: React.FC<Props> = ({ field, locale, revision, comparison, format = false }) => {
+const Text: React.FC<Props> = ({ field, locale, revision, comparison, isRichText = false }) => {
   let placeholder = '';
 
   if (revision === comparison) placeholder = '[no value]';
@@ -15,10 +17,13 @@ const Text: React.FC<Props> = ({ field, locale, revision, comparison, format = f
   let revisionToRender = revision;
   let comparisonToRender = comparison;
 
-  if (format) {
-    if (typeof revision === 'object') revisionToRender = JSON.stringify(revision, null, 2);
-    if (typeof comparison === 'object') comparisonToRender = JSON.stringify(comparison, null, 2);
+  if (isRichText) {
+    // if (typeof revision === 'object') revisionToRender = stringifyRichText(revision);
+    // if (typeof comparison === 'object') comparisonToRender = stringifyRichText(comparison);
+    if (typeof revision === 'object') revisionToRender = richTextToHTML(revision);
+    if (typeof comparison === 'object') comparisonToRender = richTextToHTML(comparison);
   }
+
 
   return (
     <div className={baseClass}>
@@ -34,6 +39,19 @@ const Text: React.FC<Props> = ({ field, locale, revision, comparison, format = f
         splitView
         hideLineNumbers
         showDiffOnly={false}
+        // renderContent={(str) => {
+        //   if (isRichText) {
+        //     // console.log(str);
+        //     return (
+        //       <div
+        //         className={`${baseClass}__rich-text`}
+        //         dangerouslySetInnerHTML={{ __html: str }}
+        //       />
+        //     );
+        //   }
+
+        //   return <pre>{str}</pre>;
+        // }}
       />
     </div>
   );
