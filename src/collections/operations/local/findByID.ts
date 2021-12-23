@@ -31,6 +31,16 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
 
   const collection = this.collections[collectionSlug];
 
+  const reqToUse = {
+    ...req || {},
+    payloadAPI: 'local',
+    locale,
+    fallbackLocale,
+    payload: this,
+  };
+
+  if (typeof user !== 'undefined') reqToUse.user = user;
+
   return this.operations.collections.findByID({
     depth,
     id,
@@ -38,13 +48,6 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
     overrideAccess,
     disableErrors,
     showHiddenFields,
-    req: {
-      ...req,
-      user,
-      payloadAPI: 'local',
-      locale,
-      fallbackLocale,
-      payload: this,
-    },
+    req: reqToUse,
   });
 }
