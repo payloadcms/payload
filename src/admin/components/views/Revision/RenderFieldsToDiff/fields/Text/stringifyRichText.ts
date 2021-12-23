@@ -42,11 +42,11 @@ export const stringifyRichText = (content: unknown): string => {
             break;
 
           case 'relationship':
-            nodeHTML = `Relationship to ${node.relationTo}: ${node.value}\n\n`;
+            nodeHTML = `Relationship to ${node.relationTo}: ${node?.value?.id}\n\n`;
             break;
 
           case 'upload':
-            nodeHTML = `${node.relationTo} Upload: ${node.value}\n\n`;
+            nodeHTML = `${node.relationTo} Upload: ${node?.value?.id}\n\n`;
             break;
 
           default:
