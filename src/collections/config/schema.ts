@@ -82,6 +82,17 @@ const collectionSchema = joi.object().keys({
     joi.object({
       maxPerDoc: joi.number(),
       retainDeleted: joi.boolean(),
+      drafts: joi.alternatives().try(
+        joi.object({
+          autosave: joi.alternatives().try(
+            joi.boolean(),
+            joi.object({
+              time: joi.number(),
+            }),
+          ),
+        }),
+        joi.boolean(),
+      ),
     }),
     joi.boolean(),
   ),
