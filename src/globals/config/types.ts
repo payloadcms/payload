@@ -4,6 +4,7 @@ import { DeepRequired } from 'ts-essentials';
 import { PayloadRequest } from '../../express/types';
 import { Access, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
+import { IncomingGlobalRevisionsType } from '../../revisions/types';
 
 export type TypeWithID = {
   id: string
@@ -44,9 +45,7 @@ export type GlobalConfig = {
   slug: string
   label?: string
   preview?: GeneratePreviewURL
-  revisions?: {
-    max?: number
-  } | true
+  revisions?: IncomingGlobalRevisionsType | boolean
   hooks?: {
     beforeValidate?: BeforeValidateHook[]
     beforeChange?: BeforeChangeHook[]

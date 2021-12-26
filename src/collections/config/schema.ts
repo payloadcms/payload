@@ -87,7 +87,7 @@ const collectionSchema = joi.object().keys({
           autosave: joi.alternatives().try(
             joi.boolean(),
             joi.object({
-              time: joi.number(),
+              interval: joi.number(),
             }),
           ),
         }),

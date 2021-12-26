@@ -1,11 +1,20 @@
-import { IncomingRevisionsType } from './types';
+import { IncomingCollectionRevisionsType, IncomingGlobalRevisionsType } from './types';
 
-export const revisionDefaults: IncomingRevisionsType = {
+export const revisionCollectionDefaults: IncomingCollectionRevisionsType = {
   drafts: {
     autosave: {
-      time: 5, // in seconds
+      interval: 5, // in seconds
     },
   },
   maxPerDoc: 50,
   retainDeleted: true,
+};
+
+export const revisionGlobalDefaults: IncomingGlobalRevisionsType = {
+  drafts: {
+    autosave: {
+      interval: 5, // in seconds
+    },
+  },
+  max: 50,
 };

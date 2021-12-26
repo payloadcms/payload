@@ -31,6 +31,7 @@ const AllFields: CollectionConfig = {
   revisions: {
     maxPerDoc: 20,
     retainDeleted: true,
+    drafts: false,
   },
   access: {
     read: () => true,

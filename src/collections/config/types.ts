@@ -6,7 +6,7 @@ import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
-import { IncomingRevisionsType } from '../../revisions/types';
+import { IncomingCollectionRevisionsType } from '../../revisions/types';
 
 export interface CollectionModel extends PaginateModel<any>, PassportLocalModel<any> {
   buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
@@ -205,7 +205,7 @@ export type CollectionConfig = {
    * Upload options
    */
   upload?: IncomingUploadType | boolean;
-  revisions?: IncomingRevisionsType | boolean;
+  revisions?: IncomingCollectionRevisionsType | boolean;
   timestamps?: boolean
 };
 
@@ -213,7 +213,7 @@ export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionC
   auth: Auth;
   upload: Upload;
   fields: Field[];
-  revisions: IncomingRevisionsType
+  revisions: IncomingCollectionRevisionsType
 }
 
 export type Collection = {

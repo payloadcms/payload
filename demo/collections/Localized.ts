@@ -46,6 +46,11 @@ const LocalizedPosts: CollectionConfig = {
   revisions: {
     maxPerDoc: 5,
     retainDeleted: false,
+    drafts: {
+      autosave: {
+        interval: 5,
+      },
+    },
   },
   access: {
     read: () => true,

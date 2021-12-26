@@ -26,6 +26,17 @@ const globalSchema = joi.object().keys({
   revisions: joi.alternatives().try(
     joi.object({
       max: joi.number(),
+      drafts: joi.alternatives().try(
+        joi.object({
+          autosave: joi.alternatives().try(
+            joi.boolean(),
+            joi.object({
+              interval: joi.number(),
+            }),
+          ),
+        }),
+        joi.boolean(),
+      ),
     }),
     joi.boolean(),
   ),
