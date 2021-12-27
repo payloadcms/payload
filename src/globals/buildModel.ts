@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import buildSchema from '../mongoose/buildSchema';
 import { SanitizedConfig } from '../config/types';
 
-const buildModel = (config: SanitizedConfig): mongoose.PaginateModel<any> | null => {
+const buildModel = (config: SanitizedConfig): mongoose.Model<any> | null => {
   if (config.globals && config.globals.length > 0) {
     const globalsSchema = new mongoose.Schema({}, { discriminatorKey: 'globalType', timestamps: true });
 
