@@ -23,8 +23,8 @@ export type FileData = {
 
 export type ImageSize = {
   name: string,
-  width: number,
-  height: number,
+  width: number | null,
+  height: number | null,
   crop?: string, // comes from sharp package
 };
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => string
