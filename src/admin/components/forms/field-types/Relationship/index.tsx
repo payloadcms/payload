@@ -48,7 +48,6 @@ const Relationship: React.FC<Props> = (props) => {
     collections,
   } = useConfig();
 
-
   const formProcessing = useFormProcessing();
 
   const hasMultipleRelations = Array.isArray(relationTo);
@@ -308,7 +307,7 @@ const Relationship: React.FC<Props> = (props) => {
             }
           } : undefined}
           onMenuScrollToBottom={() => {
-            getResults({ lastFullyLoadedRelation, lastLoadedPage: lastLoadedPage + 1 });
+            getResults({ lastFullyLoadedRelation, lastLoadedPage: lastLoadedPage + 1, search });
           }}
           value={valueToRender}
           showError={showError}
