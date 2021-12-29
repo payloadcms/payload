@@ -7,7 +7,7 @@ const getFormsCollection = (options: SanitizedOptions): CollectionConfig => deep
   slug: options?.formsOverrides?.slug || 'forms',
   admin: {
     useAsTitle: 'title',
-    enableRichTextRelationship: false
+    enableRichTextRelationship: false,
   },
   access: {
     read: () => true,
@@ -135,7 +135,7 @@ const getFormsCollection = (options: SanitizedOptions): CollectionConfig => deep
               required: true,
               admin: {
                 width: '50%',
-              }
+              },
             },
             {
               type: 'text',
@@ -144,9 +144,9 @@ const getFormsCollection = (options: SanitizedOptions): CollectionConfig => deep
               admin: {
                 width: '50%',
                 placeholder: '{{email}}',
-              }
+              },
             },
-          ]
+          ],
         },
         {
           type: 'row',
@@ -156,18 +156,18 @@ const getFormsCollection = (options: SanitizedOptions): CollectionConfig => deep
               name: 'replyTo',
               label: 'Reply To',
               admin: {
-                width: '50%'
-              }
+                width: '50%',
+              },
             },
             {
               type: 'text',
               name: 'bcc',
               label: 'BCC',
               admin: {
-                width: '50%'
-              }
+                width: '50%',
+              },
             },
-          ]
+          ],
         },
         {
           type: 'text',
@@ -182,9 +182,9 @@ const getFormsCollection = (options: SanitizedOptions): CollectionConfig => deep
           label: 'Message',
           admin: {
             description: 'Enter the email message that should be sent in this email.',
-          }
-        }
-      ]
+          },
+        },
+      ],
     },
   ],
 }, options.formsOverrides || {});
