@@ -1,4 +1,4 @@
-## [0.13.20-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.20-beta.0) (2021-12-29)
+## [0.13.21-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.21-beta.0) (2021-12-29)
 
 
 ### Bug Fixes
