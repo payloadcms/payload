@@ -11,7 +11,7 @@ type Arguments = {
   fullOriginalDoc: Record<string, unknown>
   fullData: Record<string, unknown>
   flattenLocales: boolean
-  isRevision: boolean
+  isVersion: boolean
 }
 
 type ExecuteHookArguments = {

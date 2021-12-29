@@ -109,8 +109,8 @@ async function accessOperation(this: Payload, args: Arguments): Promise<Permissi
       collectionOperations.push('unlock');
     }
 
-    if (collection.revisions) {
-      collectionOperations.push('readRevisions');
+    if (collection.versions) {
+      collectionOperations.push('readVersions');
     }
 
     executeEntityPolicies(collection, collectionOperations, 'collections');
@@ -119,8 +119,8 @@ async function accessOperation(this: Payload, args: Arguments): Promise<Permissi
   config.globals.forEach((global) => {
     const globalOperations = ['read', 'update'];
 
-    if (global.revisions) {
-      globalOperations.push('readRevisions');
+    if (global.versions) {
+      globalOperations.push('readVersions');
     }
     executeEntityPolicies(global, globalOperations, 'globals');
   });

@@ -10,7 +10,7 @@ import CopyToClipboard from '../../elements/CopyToClipboard';
 import Meta from '../../utilities/Meta';
 import fieldTypes from '../../forms/field-types';
 import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
-import RevisionsCount from '../../elements/RevisionsCount';
+import VersionsCount from '../../elements/VersionsCount';
 import { Props } from './types';
 
 import './index.scss';
@@ -27,7 +27,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
   const {
     fields,
     preview,
-    revisions,
+    versions,
     label,
     admin: {
       description,
@@ -101,10 +101,10 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
               </div>
               {data && (
                 <ul className={`${baseClass}__meta`}>
-                  {revisions && (
+                  {versions && (
                     <li>
-                      <div className={`${baseClass}__label`}>Revisions</div>
-                      <RevisionsCount
+                      <div className={`${baseClass}__label`}>Versions</div>
+                      <VersionsCount
                         submissionCount={submissionCount}
                         global={global}
                       />

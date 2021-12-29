@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Redirect, useRouteMatch, useHistory, useLocation } from 'react-router-dom';
 import { useConfig, useAuth } from '@payloadcms/config-provider';
 import { useStepNav } from '../../../elements/StepNav';
@@ -43,7 +43,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const [initialState, setInitialState] = useState({});
   const { permissions } = useAuth();
 
-  const onSave = async (json) => {
+  const onSave = useCallback(async (json: any, version = false) => {
     if (!isEditing) {
       history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
     } else {
@@ -57,7 +57,7 @@ const EditView: React.FC<IndexProps> = (props) => {
         },
       });
     }
-  };
+  }, [admin, collection, fields, history, isEditing]);
 
   const [{ data, isLoading, isError }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),

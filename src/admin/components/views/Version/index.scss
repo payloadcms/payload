@@ -1,0 +1,65 @@
+@import '../../../scss/styles.scss';
+
+.view-version {
+  width: 100%;
+  margin-bottom: base(2);
+
+  &__wrap {
+    padding: base(3);
+    margin-right: base(2);
+    background: white;
+  }
+
+  &__header {
+    margin-bottom: $baseline;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    h2 {
+      margin: 0;
+    }
+  }
+
+  &__controls {
+    display: flex;
+    margin-bottom: $baseline;
+    margin-left: base(-.5);
+    margin-right: base(-.5);
+
+    > * {
+      margin-left: base(.5);
+      margin-right: base(.5);
+      flex-basis: 100%;
+    }
+  }
+
+  &__restore {
+    margin: 0 0 0 $baseline;
+  }
+
+  @include mid-break {
+    &__wrap {
+      padding: $baseline;
+      margin-right: 0;
+    }
+
+    &__intro,
+    &__header {
+      display: block;
+    }
+
+    &__controls {
+      display: block;
+      margin: 0 base(-.5) base(2);
+
+      > * {
+        margin-bottom: base(.5);
+      }
+    }
+
+    &__restore {
+      margin: base(.5) 0 0 0;
+    }
+  }
+}

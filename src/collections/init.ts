@@ -5,7 +5,7 @@ import passport from 'passport';
 import passportLocalMongoose from 'passport-local-mongoose';
 import Passport from 'passport-local';
 import { UpdateQuery } from 'mongodb';
-import { buildRevisionCollectionFields } from '../revisions/buildCollectionFields';
+import { buildVersionCollectionFields } from '../versions/buildCollectionFields';
 import buildQueryPlugin from '../mongoose/buildQuery';
 import apiKeyStrategy from '../auth/strategies/apiKey';
 import buildCollectionSchema from './buildSchema';
@@ -13,7 +13,7 @@ import buildSchema from '../mongoose/buildSchema';
 import bindCollectionMiddleware from './bindCollection';
 import { CollectionModel, SanitizedCollectionConfig } from './config/types';
 import { Payload } from '../index';
-import { getRevisionsModelName } from '../revisions/getRevisionsModelName';
+import { getVersionsModelName } from '../versions/getVersionsModelName';
 
 const LocalStrategy = Passport.Strategy;
 
@@ -66,12 +66,12 @@ export default function registerCollections(ctx: Payload): void {
       }
     }
 
-    if (collection.revisions) {
-      const revisionModelName = getRevisionsModelName(collection);
+    if (collection.versions) {
+      const versionModelName = getVersionsModelName(collection);
 
-      const revisionSchema = buildSchema(
+      const versionSchema = buildSchema(
         ctx.config,
-        buildRevisionCollectionFields(collection),
+        buildVersionCollectionFields(collection),
         {
           disableUnique: true,
           options: {
@@ -80,10 +80,10 @@ export default function registerCollections(ctx: Payload): void {
         },
       );
 
-      revisionSchema.plugin(paginate, { useEstimatedCount: true })
+      versionSchema.plugin(paginate, { useEstimatedCount: true })
         .plugin(buildQueryPlugin);
 
-      ctx.revisions[collection.slug] = mongoose.model(revisionModelName, revisionSchema) as CollectionModel;
+      ctx.versions[collection.slug] = mongoose.model(versionModelName, versionSchema) as CollectionModel;
     }
 
 
@@ -104,9 +104,9 @@ export default function registerCollections(ctx: Payload): void {
         find,
         update,
         findByID,
-        findRevisions,
-        findRevisionByID,
-        restoreRevision,
+        findVersions,
+        findVersionByID,
+        restoreVersion,
         delete: deleteHandler,
       } = ctx.requestHandlers.collections;
 
@@ -176,13 +176,13 @@ export default function registerCollections(ctx: Payload): void {
           .post(resetPassword);
       }
 
-      if (collection.revisions) {
-        router.route(`/${slug}/revisions`)
-          .get(findRevisions);
+      if (collection.versions) {
+        router.route(`/${slug}/versions`)
+          .get(findVersions);
 
-        router.route(`/${slug}/revisions/:id`)
-          .get(findRevisionByID)
-          .post(restoreRevision);
+        router.route(`/${slug}/versions/:id`)
+          .get(findVersionByID)
+          .post(restoreVersion);
       }
 
       router.route(`/${slug}`)

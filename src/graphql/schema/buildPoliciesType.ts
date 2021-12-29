@@ -6,7 +6,7 @@ import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
 import { Field } from '../../fields/config/types';
 
-type OperationType = 'create' | 'read' | 'update' | 'delete' | 'unlock' | 'readRevisions';
+type OperationType = 'create' | 'read' | 'update' | 'delete' | 'unlock' | 'readVersions';
 
 type ObjectTypeFields = {
   [key in OperationType | 'fields']?: { type: GraphQLObjectType };
@@ -110,8 +110,8 @@ export default function buildPoliciesType(): GraphQLObjectType {
       collectionOperations.push('unlock');
     }
 
-    if (collection.revisions) {
-      collectionOperations.push('readRevisions');
+    if (collection.versions) {
+      collectionOperations.push('readVersions');
     }
 
     fields[formatName(collection.slug)] = {
@@ -125,8 +125,8 @@ export default function buildPoliciesType(): GraphQLObjectType {
   Object.values(this.config.globals).forEach((global: SanitizedGlobalConfig) => {
     const globalOperations: OperationType[] = ['read', 'update'];
 
-    if (global.revisions) {
-      globalOperations.push('readRevisions');
+    if (global.versions) {
+      globalOperations.push('readVersions');
     }
 
     fields[formatName(global.slug)] = {

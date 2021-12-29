@@ -78,7 +78,7 @@ const collectionSchema = joi.object().keys({
     }),
     joi.boolean(),
   ),
-  revisions: joi.alternatives().try(
+  versions: joi.alternatives().try(
     joi.object({
       maxPerDoc: joi.number(),
       retainDeleted: joi.boolean(),

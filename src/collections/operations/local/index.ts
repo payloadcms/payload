@@ -4,9 +4,9 @@ import create from './create';
 import update from './update';
 import localDelete from './delete';
 import auth from '../../../auth/operations/local';
-import findRevisionByID from './findRevisionByID';
-import findRevisions from './findRevisions';
-import restoreRevision from './restoreRevision';
+import findVersionByID from './findVersionByID';
+import findVersions from './findVersions';
+import restoreVersion from './restoreVersion';
 
 export default {
   find,
@@ -15,7 +15,7 @@ export default {
   update,
   localDelete,
   auth,
-  findRevisionByID,
-  findRevisions,
-  restoreRevision,
+  findVersionByID,
+  findVersions,
+  restoreVersion,
 };

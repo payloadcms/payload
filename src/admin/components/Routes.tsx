@@ -9,8 +9,8 @@ import { requests } from '../api';
 import Loading from './elements/Loading';
 import StayLoggedIn from './modals/StayLoggedIn';
 import Unlicensed from './views/Unlicensed';
-import Revisions from './views/Revisions';
-import Revision from './views/Revision';
+import Versions from './views/Versions';
+import Version from './views/Version';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -204,16 +204,16 @@ const Routes = () => {
                                   />,
                                 ];
 
-                                if (collection.revisions) {
+                                if (collection.versions) {
                                   routesToReturn.push(
                                     <Route
-                                      key={`${collection.slug}-revisions`}
-                                      path={`${match.url}/collections/${collection.slug}/:id/revisions`}
+                                      key={`${collection.slug}-versions`}
+                                      path={`${match.url}/collections/${collection.slug}/:id/versions`}
                                       exact
                                       render={(routeProps) => {
-                                        if (permissions?.collections?.[collection.slug]?.readRevisions?.permission) {
+                                        if (permissions?.collections?.[collection.slug]?.readVersions?.permission) {
                                           return (
-                                            <Revisions
+                                            <Versions
                                               {...routeProps}
                                               collection={collection}
                                             />
@@ -227,13 +227,13 @@ const Routes = () => {
 
                                   routesToReturn.push(
                                     <Route
-                                      key={`${collection.slug}-view-revision`}
-                                      path={`${match.url}/collections/${collection.slug}/:id/revisions/:revisionID`}
+                                      key={`${collection.slug}-view-version`}
+                                      path={`${match.url}/collections/${collection.slug}/:id/versions/:versionID`}
                                       exact
                                       render={(routeProps) => {
-                                        if (permissions?.collections?.[collection.slug]?.readRevisions?.permission) {
+                                        if (permissions?.collections?.[collection.slug]?.readVersions?.permission) {
                                           return (
-                                            <Revision
+                                            <Version
                                               {...routeProps}
                                               collection={collection}
                                             />
@@ -271,16 +271,16 @@ const Routes = () => {
                                   />,
                                 ];
 
-                                if (global.revisions) {
+                                if (global.versions) {
                                   routesToReturn.push(
                                     <Route
-                                      key={`${global.slug}-revisions`}
-                                      path={`${match.url}/globals/${global.slug}/revisions`}
+                                      key={`${global.slug}-versions`}
+                                      path={`${match.url}/globals/${global.slug}/versions`}
                                       exact
                                       render={(routeProps) => {
-                                        if (permissions?.globals?.[global.slug]?.readRevisions?.permission) {
+                                        if (permissions?.globals?.[global.slug]?.readVersions?.permission) {
                                           return (
-                                            <Revisions
+                                            <Versions
                                               {...routeProps}
                                               global={global}
                                             />
@@ -293,13 +293,13 @@ const Routes = () => {
                                   );
                                   routesToReturn.push(
                                     <Route
-                                      key={`${global.slug}-view-revision`}
-                                      path={`${match.url}/globals/${global.slug}/revisions/:revisionID`}
+                                      key={`${global.slug}-view-version`}
+                                      path={`${match.url}/globals/${global.slug}/versions/:versionID`}
                                       exact
                                       render={(routeProps) => {
-                                        if (permissions?.globals?.[global.slug]?.readRevisions?.permission) {
+                                        if (permissions?.globals?.[global.slug]?.readVersions?.permission) {
                                           return (
-                                            <Revision
+                                            <Version
                                               {...routeProps}
                                               global={global}
                                             />

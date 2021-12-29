@@ -10,6 +10,8 @@ import getBaseUploadFields from '../../uploads/getBaseFields';
 import { formatLabels } from '../../utilities/formatLabels';
 import { defaults, authDefaults } from './defaults';
 import { Config } from '../../config/types';
+import { versionCollectionDefaults } from '../../versions/defaults';
+import baseVersionFields from '../../versions/baseFields';
 
 const mergeBaseFields = (fields, baseFields) => {
   const mergedFields = [];
@@ -64,8 +66,21 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
   sanitized.slug = toKebabCase(sanitized.slug);
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug);
 
-  if (sanitized.revisions) {
-    if (sanitized.revisions === true) sanitized.revisions = {};
+  if (sanitized.versions) {
+    if (sanitized.versions === true) sanitized.versions = {};
+
+    // const defaultsToMerge = { ... };
+
+    // if (sanitized.versions.drafts === false) {
+    //   defaultsToMerge.drafts = false;
+    // } else {
+    //   sanitized.fields = [
+    //     ...sanitized.fields,
+    //     ...baseVersionFields,
+    //   ];
+    // }
+
+    sanitized.versions = merge(versionCollectionDefaults, sanitized.versions);
   }
 
   if (sanitized.upload) {

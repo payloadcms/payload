@@ -23,7 +23,7 @@ type Arguments = {
   showHiddenFields?: boolean
   depth?: number
   currentDepth?: number
-  isRevision?: boolean
+  isVersion?: boolean
 }
 
 export default async function performFieldOperations(this: Payload, entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig, args: Arguments): Promise<any> {
@@ -43,7 +43,7 @@ export default async function performFieldOperations(this: Payload, entityConfig
     flattenLocales,
     unflattenLocales = false,
     showHiddenFields = false,
-    isRevision = false,
+    isVersion = false,
   } = args;
 
   const fullData = deepCopyObject(data);
@@ -103,7 +103,7 @@ export default async function performFieldOperations(this: Payload, entityConfig
     unflattenLocaleActions,
     transformActions,
     docWithLocales,
-    isRevision,
+    isVersion,
   });
 
   if (hook === 'afterRead') {

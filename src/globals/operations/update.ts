@@ -2,7 +2,7 @@ import { Payload } from '../..';
 import { TypeWithID } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { saveGlobalRevision } from '../../revisions/saveGlobalRevision';
+import { saveGlobalVersion } from '../../versions/saveGlobalVersion';
 
 async function update<T extends TypeWithID = any>(this: Payload, args): Promise<T> {
   const { globals: { Model } } = this;
@@ -133,11 +133,11 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   global = sanitizeInternalFields(global);
 
   // /////////////////////////////////////
-  // Create revision from existing doc
+  // Create version from existing doc
   // /////////////////////////////////////
 
-  if (globalConfig.revisions && hasExistingGlobal) {
-    saveGlobalRevision({
+  if (globalConfig.versions && hasExistingGlobal) {
+    saveGlobalVersion({
       payload: this,
       config: globalConfig,
       req,

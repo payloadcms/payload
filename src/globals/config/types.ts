@@ -4,7 +4,7 @@ import { DeepRequired } from 'ts-essentials';
 import { PayloadRequest } from '../../express/types';
 import { Access, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
-import { IncomingGlobalRevisionsType } from '../../revisions/types';
+import { IncomingGlobalVersions } from '../../versions/types';
 
 export type TypeWithID = {
   id: string
@@ -45,7 +45,7 @@ export type GlobalConfig = {
   slug: string
   label?: string
   preview?: GeneratePreviewURL
-  revisions?: IncomingGlobalRevisionsType | boolean
+  versions?: IncomingGlobalVersions | boolean
   hooks?: {
     beforeValidate?: BeforeValidateHook[]
     beforeChange?: BeforeChangeHook[]
@@ -55,7 +55,7 @@ export type GlobalConfig = {
   }
   access?: {
     read?: Access;
-    readRevisions?: Access;
+    readVersions?: Access;
     update?: Access;
   }
   fields: Field[];
@@ -69,9 +69,9 @@ export type GlobalConfig = {
   }
 }
 
-export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'revisions'> {
+export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'versions'> {
   fields: Field[]
-  revisions?: {
+  versions?: {
     max?: number
   }
 }

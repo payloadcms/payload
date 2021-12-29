@@ -4,8 +4,8 @@ import paginate from 'mongoose-paginate-v2';
 import buildQueryPlugin from '../mongoose/buildQuery';
 import buildModel from './buildModel';
 import { Payload } from '../index';
-import { getRevisionsModelName } from '../revisions/getRevisionsModelName';
-import { buildRevisionGlobalFields } from '../revisions/buildGlobalFields';
+import { getVersionsModelName } from '../versions/getVersionsModelName';
+import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
 import buildSchema from '../mongoose/buildSchema';
 import { GlobalModel } from './config/types';
 
@@ -17,12 +17,12 @@ export default function initGlobals(ctx: Payload): void {
     };
 
     ctx.config.globals.forEach((global) => {
-      if (global.revisions) {
-        const revisionModelName = getRevisionsModelName(global);
+      if (global.versions) {
+        const versionModelName = getVersionsModelName(global);
 
-        const revisionSchema = buildSchema(
+        const versionSchema = buildSchema(
           ctx.config,
-          buildRevisionGlobalFields(global),
+          buildVersionGlobalFields(global),
           {
             disableUnique: true,
             options: {
@@ -31,10 +31,10 @@ export default function initGlobals(ctx: Payload): void {
           },
         );
 
-        revisionSchema.plugin(paginate, { useEstimatedCount: true })
+        versionSchema.plugin(paginate, { useEstimatedCount: true })
           .plugin(buildQueryPlugin);
 
-        ctx.revisions[global.slug] = mongoose.model(revisionModelName, revisionSchema) as GlobalModel;
+        ctx.versions[global.slug] = mongoose.model(versionModelName, versionSchema) as GlobalModel;
       }
     });
 
@@ -48,13 +48,13 @@ export default function initGlobals(ctx: Payload): void {
           .get(ctx.requestHandlers.globals.findOne(global))
           .post(ctx.requestHandlers.globals.update(global));
 
-        if (global.revisions) {
-          router.route(`/globals/${global.slug}/revisions`)
-            .get(ctx.requestHandlers.globals.findRevisions(global));
+        if (global.versions) {
+          router.route(`/globals/${global.slug}/versions`)
+            .get(ctx.requestHandlers.globals.findVersions(global));
 
-          router.route(`/globals/${global.slug}/revisions/:id`)
-            .get(ctx.requestHandlers.globals.findRevisionByID(global))
-            .post(ctx.requestHandlers.globals.restoreRevision(global));
+          router.route(`/globals/${global.slug}/versions/:id`)
+            .get(ctx.requestHandlers.globals.findVersionByID(global))
+            .post(ctx.requestHandlers.globals.restoreVersion(global));
         }
       });
 

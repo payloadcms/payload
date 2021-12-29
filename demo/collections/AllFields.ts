@@ -28,7 +28,7 @@ const AllFields: CollectionConfig = {
     },
     description: CollectionDescription,
   },
-  revisions: {
+  versions: {
     maxPerDoc: 20,
     retainDeleted: true,
     drafts: false,

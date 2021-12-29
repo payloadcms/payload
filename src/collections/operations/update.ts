@@ -18,7 +18,7 @@ import { FileData } from '../../uploads/types';
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult, UserDocument } from '../../auth/types';
 import saveBufferToFile from '../../uploads/saveBufferToFile';
-import { saveCollectionRevision } from '../../revisions/saveCollectionRevision';
+import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
 
 export type Arguments = {
   collection: Collection
@@ -286,11 +286,11 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
-  // Create revision from existing doc
+  // Create version from existing doc
   // /////////////////////////////////////
 
-  if (collectionConfig.revisions) {
-    saveCollectionRevision({
+  if (collectionConfig.versions) {
+    saveCollectionVersion({
       payload: this,
       config: collectionConfig,
       req,

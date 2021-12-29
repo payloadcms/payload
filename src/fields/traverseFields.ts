@@ -36,7 +36,7 @@ type Arguments = {
   transformActions: (() => void)[]
   docWithLocales?: Record<string, any>
   skipValidation?: boolean
-  isRevision: boolean
+  isVersion: boolean
 }
 
 const traverseFields = (args: Arguments): void => {
@@ -69,7 +69,7 @@ const traverseFields = (args: Arguments): void => {
     transformActions,
     docWithLocales = {},
     skipValidation,
-    isRevision,
+    isVersion,
   } = args;
 
   fields.forEach((field) => {
@@ -226,7 +226,7 @@ const traverseFields = (args: Arguments): void => {
         fullOriginalDoc,
         fullData,
         flattenLocales,
-        isRevision,
+        isVersion,
       }));
     }
 

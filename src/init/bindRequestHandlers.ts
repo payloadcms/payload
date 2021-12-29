@@ -13,16 +13,16 @@ import unlock from '../auth/requestHandlers/unlock';
 import create from '../collections/requestHandlers/create';
 import find from '../collections/requestHandlers/find';
 import findByID from '../collections/requestHandlers/findByID';
-import findRevisions from '../collections/requestHandlers/findRevisions';
-import findRevisionByID from '../collections/requestHandlers/findRevisionByID';
-import restoreRevision from '../collections/requestHandlers/restoreRevision';
+import findVersions from '../collections/requestHandlers/findVersions';
+import findVersionByID from '../collections/requestHandlers/findVersionByID';
+import restoreVersion from '../collections/requestHandlers/restoreVersion';
 import update from '../collections/requestHandlers/update';
 import deleteHandler from '../collections/requestHandlers/delete';
 
 import findOne from '../globals/requestHandlers/findOne';
-import findGlobalRevisions from '../globals/requestHandlers/findRevisions';
-import findGlobalRevisionByID from '../globals/requestHandlers/findRevisionByID';
-import restoreGlobalRevision from '../globals/requestHandlers/restoreRevision';
+import findGlobalVersions from '../globals/requestHandlers/findVersions';
+import findGlobalVersionByID from '../globals/requestHandlers/findVersionByID';
+import restoreGlobalVersion from '../globals/requestHandlers/restoreVersion';
 import globalUpdate from '../globals/requestHandlers/update';
 import { Payload } from '../index';
 import preferenceUpdate from '../preferences/requestHandlers/update';
@@ -34,9 +34,9 @@ export type RequestHandlers = {
     create: typeof create,
     find: typeof find,
     findByID: typeof findByID,
-    findRevisions: typeof findRevisions,
-    findRevisionByID: typeof findRevisionByID,
-    restoreRevision: typeof restoreRevision,
+    findVersions: typeof findVersions
+    findVersionByID: typeof findVersionByID,
+    restoreVersion: typeof restoreVersion,
     update: typeof update,
     delete: typeof deleteHandler,
     auth: {
@@ -56,9 +56,9 @@ export type RequestHandlers = {
   globals: {
     findOne: typeof findOne,
     update: typeof globalUpdate,
-    findRevisions: typeof findGlobalRevisions
-    findRevisionByID: typeof findGlobalRevisionByID
-    restoreRevision: typeof restoreGlobalRevision
+    findVersions: typeof findGlobalVersions
+    findVersionByID: typeof findGlobalVersionByID
+    restoreVersion: typeof restoreGlobalVersion
   },
   preferences: {
     update: typeof preferenceUpdate,
@@ -73,9 +73,9 @@ function bindRequestHandlers(ctx: Payload): void {
       create: create.bind(ctx),
       find: find.bind(ctx),
       findByID: findByID.bind(ctx),
-      findRevisions: findRevisions.bind(ctx),
-      findRevisionByID: findRevisionByID.bind(ctx),
-      restoreRevision: restoreRevision.bind(ctx),
+      findVersions: findVersions.bind(ctx),
+      findVersionByID: findVersionByID.bind(ctx),
+      restoreVersion: restoreVersion.bind(ctx),
       update: update.bind(ctx),
       delete: deleteHandler.bind(ctx),
       auth: {
@@ -95,9 +95,9 @@ function bindRequestHandlers(ctx: Payload): void {
     globals: {
       findOne: findOne.bind(ctx),
       update: globalUpdate.bind(ctx),
-      findRevisions: findGlobalRevisions.bind(ctx),
-      findRevisionByID: findGlobalRevisionByID.bind(ctx),
-      restoreRevision: restoreGlobalRevision.bind(ctx),
+      findVersions: findGlobalVersions.bind(ctx),
+      findVersionByID: findGlobalVersionByID.bind(ctx),
+      restoreVersion: restoreGlobalVersion.bind(ctx),
     },
     preferences: {
       update: preferenceUpdate.bind(ctx),

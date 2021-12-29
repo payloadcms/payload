@@ -6,7 +6,7 @@ import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
-import { IncomingCollectionRevisionsType } from '../../revisions/types';
+import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
 
 export interface CollectionModel extends PaginateModel<any>, PassportLocalModel<any> {
   buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
@@ -193,7 +193,7 @@ export type CollectionConfig = {
     delete?: Access;
     admin?: (args?: any) => boolean;
     unlock?: Access;
-    readRevisions?: Access;
+    readVersions?: Access;
   };
   /**
    * Collection login options
@@ -205,15 +205,15 @@ export type CollectionConfig = {
    * Upload options
    */
   upload?: IncomingUploadType | boolean;
-  revisions?: IncomingCollectionRevisionsType | boolean;
+  versions?: IncomingCollectionVersions | boolean;
   timestamps?: boolean
 };
 
-export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'revisions'> {
+export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions'> {
   auth: Auth;
   upload: Upload;
   fields: Field[];
-  revisions: IncomingCollectionRevisionsType
+  versions: SanitizedCollectionVersions
 }
 
 export type Collection = {

@@ -1,0 +1,9 @@
+@import '../../../../scss/styles.scss';
+
+.select-version-locales {
+  flex-grow: 1;
+
+  &__label {
+    margin-bottom: base(.25);
+  }
+}

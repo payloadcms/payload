@@ -14,16 +14,16 @@ import unlock from '../auth/operations/unlock';
 import create from '../collections/operations/create';
 import find from '../collections/operations/find';
 import findByID from '../collections/operations/findByID';
-import findRevisions from '../collections/operations/findRevisions';
-import findRevisionByID from '../collections/operations/findRevisionByID';
-import restoreRevision from '../collections/operations/restoreRevision';
+import findVersions from '../collections/operations/findVersions';
+import findVersionByID from '../collections/operations/findVersionByID';
+import restoreVersion from '../collections/operations/restoreVersion';
 import update from '../collections/operations/update';
 import deleteHandler from '../collections/operations/delete';
 
 import findOne from '../globals/operations/findOne';
-import findGlobalRevisions from '../globals/operations/findRevisions';
-import findGlobalRevisionByID from '../globals/operations/findRevisionByID';
-import restoreGlobalRevision from '../globals/operations/restoreRevision';
+import findGlobalVersions from '../globals/operations/findVersions';
+import findGlobalVersionByID from '../globals/operations/findVersionByID';
+import restoreGlobalVersion from '../globals/operations/restoreVersion';
 import globalUpdate from '../globals/operations/update';
 
 import preferenceUpdate from '../preferences/operations/update';
@@ -35,9 +35,9 @@ export type Operations = {
     create: typeof create
     find: typeof find
     findByID: typeof findByID
-    findRevisions: typeof findRevisions
-    findRevisionByID: typeof findRevisionByID
-    restoreRevision: typeof restoreRevision
+    findVersions: typeof findVersions
+    findVersionByID: typeof findVersionByID
+    restoreVersion: typeof restoreVersion
     update: typeof update
     delete: typeof deleteHandler
     auth: {
@@ -56,9 +56,9 @@ export type Operations = {
   }
   globals: {
     findOne: typeof findOne
-    findRevisions: typeof findGlobalRevisions
-    findRevisionByID: typeof findGlobalRevisionByID
-    restoreRevision: typeof restoreGlobalRevision
+    findVersions: typeof findGlobalVersions
+    findVersionByID: typeof findGlobalVersionByID
+    restoreVersion: typeof restoreGlobalVersion
     update: typeof globalUpdate
   }
   preferences: {
@@ -74,9 +74,9 @@ function bindOperations(ctx: Payload): void {
       create: create.bind(ctx),
       find: find.bind(ctx),
       findByID: findByID.bind(ctx),
-      findRevisions: findRevisions.bind(ctx),
-      findRevisionByID: findRevisionByID.bind(ctx),
-      restoreRevision: restoreRevision.bind(ctx),
+      findVersions: findVersions.bind(ctx),
+      findVersionByID: findVersionByID.bind(ctx),
+      restoreVersion: restoreVersion.bind(ctx),
       update: update.bind(ctx),
       delete: deleteHandler.bind(ctx),
       auth: {
@@ -95,9 +95,9 @@ function bindOperations(ctx: Payload): void {
     },
     globals: {
       findOne: findOne.bind(ctx),
-      findRevisions: findGlobalRevisions.bind(ctx),
-      findRevisionByID: findGlobalRevisionByID.bind(ctx),
-      restoreRevision: restoreGlobalRevision.bind(ctx),
+      findVersions: findGlobalVersions.bind(ctx),
+      findVersionByID: findGlobalVersionByID.bind(ctx),
+      restoreVersion: restoreGlobalVersion.bind(ctx),
       update: globalUpdate.bind(ctx),
     },
     preferences: {

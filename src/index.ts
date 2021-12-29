@@ -9,7 +9,7 @@ import {
   EmailOptions,
   InitOptions,
 } from './config/types';
-import { TypeWithRevision } from './revisions/types';
+import { TypeWithVersion } from './versions/types';
 import { PaginatedDocs } from './mongoose/types';
 
 import Logger from './utilities/logger';
@@ -46,9 +46,9 @@ import { Options as FindOptions } from './collections/operations/local/find';
 import { Options as FindByIDOptions } from './collections/operations/local/findByID';
 import { Options as UpdateOptions } from './collections/operations/local/update';
 import { Options as DeleteOptions } from './collections/operations/local/delete';
-import { Options as FindRevisionsOptions } from './collections/operations/local/findRevisions';
-import { Options as FindRevisionByIDOptions } from './collections/operations/local/findRevisionByID';
-import { Options as RestoreRevisionOptions } from './collections/operations/local/restoreRevision';
+import { Options as FindVersionsOptions } from './collections/operations/local/findVersions';
+import { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID';
+import { Options as RestoreVersionOptions } from './collections/operations/local/restoreVersion';
 import { Result } from './auth/operations/login';
 
 require('isomorphic-fetch');
@@ -63,7 +63,7 @@ export class Payload {
     [slug: string]: Collection;
   } = {}
 
-  revisions: {
+  versions: {
     [slug: string]: CollectionModel | GlobalModel;
   } = {}
 
@@ -275,42 +275,42 @@ export class Payload {
   }
 
   /**
-   * @description Find revisions with criteria
+   * @description Find versions with criteria
    * @param options
-   * @returns revisions satisfying query
+   * @returns versions satisfying query
    */
-  findRevisions = async <T extends TypeWithRevision<T> = any>(options: FindRevisionsOptions): Promise<PaginatedDocs<T>> => {
-    let { findRevisions } = localOperations;
-    findRevisions = findRevisions.bind(this);
-    return findRevisions<T>(options);
+  findVersions = async <T extends TypeWithVersion<T> = any>(options: FindVersionsOptions): Promise<PaginatedDocs<T>> => {
+    let { findVersions } = localOperations;
+    findVersions = findVersions.bind(this);
+    return findVersions<T>(options);
   }
 
   /**
-   * @description Find revision by ID
+   * @description Find version by ID
    * @param options
-   * @returns revision with specified ID
+   * @returns version with specified ID
    */
-  findRevisionByID = async <T extends TypeWithRevision<T> = any>(options: FindRevisionByIDOptions): Promise<T> => {
-    let { findRevisionByID } = localOperations;
-    findRevisionByID = findRevisionByID.bind(this);
-    return findRevisionByID(options);
+  findVersionByID = async <T extends TypeWithVersion<T> = any>(options: FindVersionByIDOptions): Promise<T> => {
+    let { findVersionByID } = localOperations;
+    findVersionByID = findVersionByID.bind(this);
+    return findVersionByID(options);
   }
 
   /**
-   * @description Restore revision by ID
+   * @description Restore version by ID
    * @param options
-   * @returns revision with specified ID
+   * @returns version with specified ID
    */
-  restoreRevision = async <T extends TypeWithRevision<T> = any>(options: RestoreRevisionOptions): Promise<T> => {
-    let { restoreRevision } = localOperations;
-    restoreRevision = restoreRevision.bind(this);
-    return restoreRevision(options);
+  restoreVersion = async <T extends TypeWithVersion<T> = any>(options: RestoreVersionOptions): Promise<T> => {
+    let { restoreVersion } = localOperations;
+    restoreVersion = restoreVersion.bind(this);
+    return restoreVersion(options);
   }
 
   // TODO: globals
-  // findRevisionGlobal
-  // findRevisionByIDGlobal
-  // restoreRevisionGlobal
+  // findVersionGlobal
+  // findVersionByIDGlobal
+  // restoreVersionGlobal
   // TODO:
   // graphql operations & request handlers, where
   // tests
