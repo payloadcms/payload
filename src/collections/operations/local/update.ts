@@ -47,7 +47,9 @@ export default async function update<T extends TypeWithID = any>(options: Option
       locale,
       fallbackLocale,
       payload: this,
-      file: getFileByPath(filePath),
+      files: {
+        file: getFileByPath(filePath),
+      },
     },
   };
 

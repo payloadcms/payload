@@ -45,7 +45,9 @@ export default async function create(options: Options): Promise<Document> {
       locale,
       fallbackLocale,
       payload: this,
-      file: getFileByPath(filePath),
+      files: {
+        file: getFileByPath(filePath),
+      },
     },
   });
 }

@@ -94,7 +94,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
 
     const { staticDir, imageSizes, disableLocalStorage } = collectionConfig.upload;
 
-    const file = ((req.files && req.files.file) ? req.files.file : req.file) as UploadedFile;
+    const { file } = req.files;
 
     if (!file) {
       throw new MissingFile();
