@@ -27,7 +27,6 @@ const validate = (value) => {
 const Upload: React.FC<Props> = (props) => {
   const inputRef = useRef(null);
   const dropRef = useRef(null);
-  const [fileList, setFileList] = useState(undefined);
   const [selectingFile, setSelectingFile] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
@@ -53,16 +52,16 @@ const Upload: React.FC<Props> = (props) => {
   const handleDragIn = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragCounter(dragCounter + 1);
+    setDragCounter((count) => count + 1);
     if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
       setDragging(true);
     }
-  }, [dragCounter]);
+  }, []);
 
   const handleDragOut = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragCounter(dragCounter - 1);
+    setDragCounter((count) => count - 1);
     if (dragCounter > 1) return;
     setDragging(false);
   }, [dragCounter]);
@@ -73,7 +72,7 @@ const Upload: React.FC<Props> = (props) => {
     setDragging(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      setFileList(e.dataTransfer.files);
+      setValue(e.dataTransfer.files[0]);
       setDragging(false);
 
       e.dataTransfer.clearData();
@@ -81,11 +80,13 @@ const Upload: React.FC<Props> = (props) => {
     } else {
       setDragging(false);
     }
-  }, []);
+  }, [setValue]);
 
+  // Only called when input is interacted with directly
+  // Not called when drag + drop is used
+  // Or when input is cleared
   const handleInputChange = useCallback(() => {
     setSelectingFile(false);
-    setFileList(inputRef?.current?.files || null);
     setValue(inputRef?.current?.files?.[0] || null);
   }, [inputRef, setValue]);
 
@@ -113,13 +114,7 @@ const Upload: React.FC<Props> = (props) => {
     }
 
     return () => null;
-  }, [handleDragIn, handleDragOut, handleDrop, dropRef]);
-
-  useEffect(() => {
-    if (inputRef.current && fileList !== undefined) {
-      inputRef.current.files = fileList;
-    }
-  }, [fileList]);
+  }, [handleDragIn, handleDragOut, handleDrop, value]);
 
   useEffect(() => {
     setReplacingFile(false);
@@ -143,7 +138,6 @@ const Upload: React.FC<Props> = (props) => {
           collection={collection}
           handleRemove={() => {
             setReplacingFile(true);
-            setFileList(null);
             setValue(null);
           }}
         />
@@ -163,7 +157,6 @@ const Upload: React.FC<Props> = (props) => {
                 buttonStyle="icon-label"
                 iconStyle="with-border"
                 onClick={() => {
-                  setFileList(null);
                   setValue(null);
                 }}
               />
