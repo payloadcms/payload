@@ -2,7 +2,7 @@ import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 
-export type Options = {
+export type Options<T> = {
   collection: string
   data: Record<string, unknown>
   depth?: number
@@ -16,7 +16,8 @@ export type Options = {
   overwriteExistingFiles?: boolean
   req: PayloadRequest
 }
-export default async function create(options: Options): Promise<Document> {
+
+export default async function create<T = any>(options: Options<T>): Promise<T> {
   const {
     collection: collectionSlug,
     depth,

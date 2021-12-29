@@ -11,6 +11,7 @@ export default function update(collection) {
       id: args.id,
       depth: 0,
       req: context.req,
+      autosave: args.autosave,
     };
 
     const result = await this.operations.collections.update(options);

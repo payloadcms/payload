@@ -1,4 +1,4 @@
-import { GraphQLNonNull } from 'graphql';
+import { GraphQLNonNull, GraphQLBoolean } from 'graphql';
 import formatName from '../../graphql/utilities/formatName';
 
 function registerGlobals() {
@@ -45,6 +45,7 @@ function registerGlobals() {
         type: global.graphQL.type,
         args: {
           data: { type: global.graphQL.mutationInputType },
+          autosave: { type: GraphQLBoolean },
         },
         resolve: update(global),
       };

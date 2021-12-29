@@ -3,7 +3,7 @@ import { SanitizedCollectionConfig } from '../../../../../../collections/config/
 import { useWatchForm, useFormModified } from '../../../../forms/Form/context';
 
 const Autosave: React.FC<{ collection: SanitizedCollectionConfig}> = ({ collection }) => {
-  const { submit, fields } = useWatchForm();
+  const { fields } = useWatchForm();
   const modified = useFormModified();
   const [lastSaved, setLastSaved] = useState(() => {
     const date = new Date();

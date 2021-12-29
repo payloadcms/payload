@@ -22,6 +22,7 @@ export type Arguments = {
   overrideAccess?: boolean
   showHiddenFields?: boolean
   overwriteExistingFiles?: boolean
+  autosave?: boolean
 }
 
 async function update(this: Payload, incomingArgs: Arguments): Promise<Document> {
@@ -57,6 +58,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
     overrideAccess,
     showHiddenFields,
     overwriteExistingFiles = false,
+    autosave = false,
   } = args;
 
   if (!id) {
@@ -194,7 +196,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
 
   const { password } = data;
 
-  if (password && collectionConfig.auth) {
+  if (password && collectionConfig.auth && !autosave) {
     await doc.setPassword(password as string);
     await doc.save();
     delete data.password;
@@ -205,26 +207,28 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // Update
   // /////////////////////////////////////
 
-  try {
-    result = await Model.findByIdAndUpdate(
-      { _id: id },
-      result,
-      { new: true },
-    );
-  } catch (error) {
-    // Handle uniqueness error from MongoDB
-    throw error.code === 11000
-      ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }])
-      : error;
+  if (!autosave) {
+    try {
+      result = await Model.findByIdAndUpdate(
+        { _id: id },
+        result,
+        { new: true },
+      );
+    } catch (error) {
+      // Handle uniqueness error from MongoDB
+      throw error.code === 11000
+        ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }])
+        : error;
+    }
+
+    result = result.toJSON({ virtuals: true });
+
+    // custom id type reset
+    result.id = result._id;
+    result = JSON.stringify(result);
+    result = JSON.parse(result);
+    result = sanitizeInternalFields(result);
   }
-
-  result = result.toJSON({ virtuals: true });
-
-  // custom id type reset
-  result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
-  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // Create version from existing doc
@@ -237,6 +241,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
       req,
       docWithLocales,
       id,
+      autosave,
     });
   }
 

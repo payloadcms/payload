@@ -217,7 +217,7 @@ export class Payload {
    * @param options
    * @returns created document
    */
-  create = async <T>(options: CreateOptions): Promise<T> => {
+  create = async <T = any>(options: CreateOptions<T>): Promise<T> => {
     let { create } = localOperations;
     create = create.bind(this);
     return create(options);
@@ -262,7 +262,7 @@ export class Payload {
    * @param options
    * @returns Updated document
    */
-  update = async <T extends TypeWithID = any>(options: UpdateOptions): Promise<T> => {
+  update = async <T = any>(options: UpdateOptions<T>): Promise<T> => {
     let { update } = localOperations;
     update = update.bind(this);
     return update<T>(options);

@@ -18,6 +18,7 @@ function update(globalConfig: SanitizedGlobalConfig): UpdateGlobalResponse {
         slug,
         depth: req.query.depth,
         data: req.body,
+        autosave: req.query.autosave,
       });
 
       return res.status(httpStatus.OK).json({ message: 'Global saved successfully.', result });

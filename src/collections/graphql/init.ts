@@ -162,6 +162,7 @@ function registerCollections(): void {
       args: {
         id: { type: new GraphQLNonNull(idType) },
         data: { type: collection.graphQL.updateMutationInputType },
+        autosave: { type: GraphQLBoolean },
       },
       resolve: update(collection),
     };

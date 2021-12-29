@@ -8,6 +8,7 @@ async function update(options) {
     user,
     overrideAccess = true,
     showHiddenFields,
+    autosave,
   } = options;
 
   const globalConfig = this.globals.config.find((config) => config.slug === globalSlug);
@@ -19,6 +20,7 @@ async function update(options) {
     globalConfig,
     overrideAccess,
     showHiddenFields,
+    autosave,
     req: {
       user,
       payloadAPI: 'local',

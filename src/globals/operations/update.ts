@@ -14,6 +14,7 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
     depth,
     overrideAccess,
     showHiddenFields,
+    autosave,
   } = args;
 
   // /////////////////////////////////////
@@ -116,15 +117,17 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   // Update
   // /////////////////////////////////////
 
-  if (global) {
-    global = await Model.findOneAndUpdate(
-      { globalType: slug },
-      result,
-      { new: true },
-    );
-  } else {
-    result.globalType = slug;
-    global = await Model.create(result);
+  if (!autosave) {
+    if (global) {
+      global = await Model.findOneAndUpdate(
+        { globalType: slug },
+        result,
+        { new: true },
+      );
+    } else {
+      result.globalType = slug;
+      global = await Model.create(result);
+    }
   }
 
   global = global.toJSON({ virtuals: true });
@@ -142,6 +145,7 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
       config: globalConfig,
       req,
       docWithLocales: global,
+      autosave,
     });
   }
 
