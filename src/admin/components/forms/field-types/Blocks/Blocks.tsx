@@ -141,6 +141,8 @@ const Blocks: React.FC<Props> = (props) => {
     moveRow(sourceIndex, destinationIndex);
   }, [moveRow]);
 
+  // Get preferences, and once retrieved,
+  // Reset rows with preferences included
   useEffect(() => {
     const fetchPreferences = async () => {
       const preferences = preferencesKey ? await getPreference<DocumentPreferences>(preferencesKey) : undefined;
@@ -150,6 +152,12 @@ const Blocks: React.FC<Props> = (props) => {
 
     fetchPreferences();
   }, [formContext, path, preferencesKey, getPreference]);
+
+  // Set row count on mount and when form context is reset
+  useEffect(() => {
+    const data = formContext.getDataByPath(path);
+    dispatchRows({ type: 'SET_ALL', data: data || [] });
+  }, [formContext, path]);
 
   useEffect(() => {
     setValue(rows?.length || 0);
