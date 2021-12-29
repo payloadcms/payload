@@ -11,7 +11,9 @@ export type PayloadRequest = Request & {
   fallbackLocale?: string;
   collection?: Collection;
   payloadAPI: 'REST' | 'local' | 'graphQL'
-  file?: UploadedFile
+  files?: {
+    file: UploadedFile
+  }
   user: User | null
   payloadUploadSizes?: Record<string, Buffer>
   findByID?: {

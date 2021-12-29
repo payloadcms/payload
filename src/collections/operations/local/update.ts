@@ -49,7 +49,9 @@ export default async function update<T = any>(options: Options<T>): Promise<T> {
       locale,
       fallbackLocale,
       payload: this,
-      file: getFileByPath(filePath),
+      files: {
+        file: getFileByPath(filePath),
+      },
     },
   };
 

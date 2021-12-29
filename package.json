@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "0.13.13-beta.0",
+  "version": "0.13.20-beta.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "SEE LICENSE IN license.md",
   "author": {
@@ -35,6 +35,7 @@
     "demo:build:analyze": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts PAYLOAD_ANALYZE_BUNDLE=true node dist/bin/build",
     "demo:build": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts node dist/bin/build",
     "demo:generate:types": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts node dist/bin/generateTypes",
+    "demo:serve": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=production nodemon",
     "dev": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts nodemon",
     "test": "yarn test:int && yarn test:client",
     "pretest": "yarn build",

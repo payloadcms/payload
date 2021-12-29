@@ -11,6 +11,7 @@ type Arguments = {
   payload: Payload
   field: RichTextField
   req: PayloadRequest
+  showHiddenFields: boolean
 }
 
 type RecurseRichTextArgs = {
@@ -22,6 +23,7 @@ type RecurseRichTextArgs = {
   field: RichTextField
   req: PayloadRequest
   promises: Promise<void>[]
+  showHiddenFields: boolean
 }
 
 const populate = async ({
@@ -33,6 +35,7 @@ const populate = async ({
   currentDepth,
   payload,
   req,
+  showHiddenFields,
 }: Arguments & {
   id: string,
   collection: Collection
@@ -49,6 +52,7 @@ const populate = async ({
     overrideAccess,
     disableErrors: true,
     depth,
+    showHiddenFields,
   });
 
   if (doc) {
@@ -67,6 +71,7 @@ const recurseRichText = ({
   currentDepth = 0,
   field,
   promises,
+  showHiddenFields,
 }: RecurseRichTextArgs) => {
   if (Array.isArray(children)) {
     (children as any[]).forEach((element) => {
@@ -86,6 +91,7 @@ const recurseRichText = ({
           payload,
           field,
           collection,
+          showHiddenFields,
         }));
       }
 
@@ -99,6 +105,7 @@ const recurseRichText = ({
           currentDepth,
           field,
           promises,
+          showHiddenFields,
         });
       }
     });
@@ -113,6 +120,7 @@ const richTextRelationshipPromise = ({
   depth,
   currentDepth,
   field,
+  showHiddenFields,
 }: Arguments) => async (): Promise<void> => {
   const promises = [];
 
@@ -125,6 +133,7 @@ const richTextRelationshipPromise = ({
     currentDepth,
     field,
     promises,
+    showHiddenFields,
   });
 
   await Promise.all(promises);

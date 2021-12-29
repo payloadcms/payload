@@ -55,6 +55,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
             payload: context.req.payload,
             depth: args.depth,
             field,
+            showHiddenFields: false,
           });
 
           await richTextRelationshipPromise();

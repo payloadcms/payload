@@ -1,4 +1,3 @@
-import { UploadedFile } from 'express-fileupload';
 import mkdirp from 'mkdirp';
 import path from 'path';
 import { SanitizedConfig } from '../config/types';
@@ -39,7 +38,7 @@ const uploadFile = async ({
 
     const { staticDir, imageSizes, disableLocalStorage } = collectionConfig.upload;
 
-    const file = ((req.files && req.files.file) ? req.files.file : req.file) as UploadedFile;
+    const { file } = req.files || {};
 
     if (throwOnMissingFile && !file) {
       throw new MissingFile();

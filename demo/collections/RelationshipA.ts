@@ -56,6 +56,11 @@ const RelationshipA: CollectionConfig = {
       hasMany: true,
       localized: true,
     },
+    {
+      name: 'demoHiddenField',
+      type: 'text',
+      hidden: true,
+    },
   ],
   timestamps: true,
 };

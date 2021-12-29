@@ -50,7 +50,9 @@ export default async function create<T = any>(options: Options<T>): Promise<T> {
       locale,
       fallbackLocale,
       payload: this,
-      file: getFileByPath(filePath),
+      files: {
+        file: getFileByPath(filePath),
+      },
     },
   });
 }

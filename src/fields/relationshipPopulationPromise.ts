@@ -12,6 +12,7 @@ type PopulateArgs = {
   field: RelationshipField | UploadField
   index?: number
   payload: Payload
+  showHiddenFields: boolean
 }
 
 const populate = async ({
@@ -24,6 +25,7 @@ const populate = async ({
   field,
   index,
   payload,
+  showHiddenFields,
 }: PopulateArgs) => {
   const dataToUpdate = dataReference;
 
@@ -44,10 +46,11 @@ const populate = async ({
         req,
         collection: relatedCollection.config.slug,
         id: idString as string,
-        depth,
         currentDepth: currentDepth + 1,
         overrideAccess,
         disableErrors: true,
+        depth,
+        showHiddenFields,
       });
     }
 
@@ -76,6 +79,7 @@ type PromiseArgs = {
   req: PayloadRequest
   overrideAccess: boolean
   payload: Payload
+  showHiddenFields: boolean
 }
 
 const relationshipPopulationPromise = ({
@@ -86,6 +90,7 @@ const relationshipPopulationPromise = ({
   req,
   overrideAccess,
   payload,
+  showHiddenFields,
 }: PromiseArgs) => async (): Promise<void> => {
   const resultingData = data;
   const populateDepth = fieldHasMaxDepth(field) && field.maxDepth < depth ? field.maxDepth : depth;
@@ -106,6 +111,7 @@ const relationshipPopulationPromise = ({
             field,
             index,
             payload,
+            showHiddenFields,
           });
         }
       };
@@ -124,6 +130,7 @@ const relationshipPopulationPromise = ({
       data: data[field.name],
       field,
       payload,
+      showHiddenFields,
     });
   }
 };
