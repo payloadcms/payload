@@ -6,6 +6,7 @@ import { Column } from '../../elements/Table/types';
 import SortColumn from '../../elements/SortColumn';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../../globals/config/types';
+import { Pill } from '../..';
 
 type CreatedAtCellProps = {
   id: string
@@ -30,7 +31,7 @@ const CreatedAtCell: React.FC<CreatedAtCellProps> = ({ collection, global, id, d
   );
 };
 
-const IDCell: React.FC = ({ children }) => (
+const TextCell: React.FC = ({ children }) => (
   <span>
     {children}
   </span>
@@ -66,7 +67,28 @@ export const getColumns = (collection: SanitizedCollectionConfig, global: Saniti
           name="id"
         />
       ),
-      renderCell: (row, data) => <IDCell>{data}</IDCell>,
+      renderCell: (row, data) => <TextCell>{data}</TextCell>,
+    },
+  },
+  {
+    accessor: 'autosave',
+    components: {
+      Heading: (
+        <SortColumn
+          label="Type"
+          name="autosave"
+          disable
+        />
+      ),
+      renderCell: (row, data) => (
+        <TextCell>
+          {row?.autosave && (
+          <Pill>
+            Autosave
+          </Pill>
+            )}
+        </TextCell>
+      ),
     },
   },
 ];
