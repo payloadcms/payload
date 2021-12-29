@@ -252,6 +252,7 @@ const traverseFields = (args: Arguments): void => {
               docWithLocales: docWithLocales?.[field.name]?.[i],
               path: `${path}${field.name}.${i}.`,
               skipValidation: skipValidationFromHere,
+              showHiddenFields,
             });
           }
         }
@@ -264,6 +265,7 @@ const traverseFields = (args: Arguments): void => {
           docWithLocales: docWithLocales?.[field.name],
           path: `${path}${field.name}.`,
           skipValidation: skipValidationFromHere,
+          showHiddenFields,
         });
       }
     }
@@ -282,6 +284,7 @@ const traverseFields = (args: Arguments): void => {
               docWithLocales: docWithLocales?.[field.name]?.[i],
               path: `${path}${field.name}.${i}.`,
               skipValidation: skipValidationFromHere,
+              showHiddenFields,
             });
           }
         });

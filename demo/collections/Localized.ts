@@ -98,6 +98,11 @@ const LocalizedPosts: CollectionConfig = {
           name: 'text',
           label: 'Text',
         },
+        {
+          type: 'text',
+          name: 'demoHiddenField',
+          hidden: true,
+        },
       ],
     },
     {

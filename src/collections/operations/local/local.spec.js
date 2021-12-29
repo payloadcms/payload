@@ -51,4 +51,39 @@ describe('Collections - Local', () => {
       expect(result.width).toStrictEqual(640);
     });
   });
+
+  describe('Read with Hidden Fields', () => {
+    it('should allow a document with nested hidden fields to be retrieved with hidden fields shown.', async () => {
+      const demoHiddenField = 'this is going to be hidden';
+
+      const result = await payload.create({
+        collection: 'localized-posts',
+        data: {
+          title: 'this post has a hidden field present',
+          description: 'desc',
+          priority: 1,
+          nonLocalizedGroup: {
+            text: '40w5g534gw34j',
+          },
+          localizedGroup: {
+            text: '34lijgw45ligjw4li5j',
+            demoHiddenField,
+          },
+        },
+      });
+
+      expect(result.id).toBeDefined();
+      expect(result.localizedGroup).toBeDefined();
+      expect(result.localizedGroup.demoHiddenField).toBeUndefined();
+
+      const withHiddenFields = await payload.findByID({
+        collection: 'localized-posts',
+        id: result.id,
+        showHiddenFields: true,
+      });
+
+      expect(withHiddenFields.localizedGroup.demoHiddenField).toStrictEqual(demoHiddenField);
+      expect(withHiddenFields.id).toStrictEqual(result.id);
+    });
+  });
 });
