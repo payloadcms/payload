@@ -1,24 +1,16 @@
 import httpStatus from 'http-status';
-import path from 'path';
-import { UploadedFile } from 'express-fileupload';
 import { Payload } from '../..';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
-import { NotFound, Forbidden, APIError, FileUploadError, ValidationError } from '../../errors';
-import isImage from '../../uploads/isImage';
-import getImageSize from '../../uploads/getImageSize';
-import getSafeFilename from '../../uploads/getSafeFilename';
-
-import resizeAndSave from '../../uploads/imageResizer';
-import { FileData } from '../../uploads/types';
+import { NotFound, Forbidden, APIError, ValidationError } from '../../errors';
 
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult, UserDocument } from '../../auth/types';
-import saveBufferToFile from '../../uploads/saveBufferToFile';
 import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
+import uploadFile from '../../uploads/uploadFile';
 
 export type Arguments = {
   collection: Collection
@@ -52,6 +44,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
 
   const {
     depth,
+    collection,
     collection: {
       Model,
       config: collectionConfig,
@@ -126,66 +119,14 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // Upload and resize potential files
   // /////////////////////////////////////
 
-  if (collectionConfig.upload) {
-    const fileData: Partial<FileData> = {};
-
-    const { staticDir, imageSizes, disableLocalStorage } = collectionConfig.upload;
-
-    let staticPath = staticDir;
-
-    if (staticDir.indexOf('/') !== 0) {
-      staticPath = path.resolve(config.paths.configDir, staticDir);
-    }
-
-    const file = ((req.files && req.files.file) ? req.files.file : req.file) as UploadedFile;
-
-    if (file) {
-      const fsSafeName = !overwriteExistingFiles ? await getSafeFilename(Model, staticPath, file.name) : file.name;
-
-      try {
-        if (!disableLocalStorage) {
-          await saveBufferToFile(file.data, `${staticPath}/${fsSafeName}`);
-        }
-
-        fileData.filename = fsSafeName;
-        fileData.filesize = file.size;
-        fileData.mimeType = file.mimetype;
-
-        if (isImage(file.mimetype)) {
-          const dimensions = await getImageSize(file);
-          fileData.width = dimensions.width;
-          fileData.height = dimensions.height;
-
-          if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
-            req.payloadUploadSizes = {};
-            fileData.sizes = await resizeAndSave({
-              req,
-              file: file.data,
-              dimensions,
-              staticPath,
-              config: collectionConfig,
-              savedFilename: fsSafeName,
-              mimeType: fileData.mimeType,
-            });
-          }
-        }
-      } catch (err) {
-        console.error(err);
-        throw new FileUploadError();
-      }
-
-      data = {
-        ...data,
-        ...fileData,
-      };
-    } else if (data.file === null) {
-      data = {
-        ...data,
-        filename: null,
-        sizes: null,
-      };
-    }
-  }
+  data = await uploadFile({
+    config,
+    collection,
+    req,
+    data,
+    throwOnMissingFile: false,
+    overwriteExistingFiles,
+  });
 
   // /////////////////////////////////////
   // beforeValidate - Fields

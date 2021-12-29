@@ -1,13 +1,12 @@
 /* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
-import { Collection } from '../config/types';
+import { Collection, TypeWithID } from '../config/types';
 import { APIError, Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { Payload } from '../../index';
 import { hasWhereAccessResult } from '../../auth/types';
 import { Where } from '../../types';
-import { TypeWithID } from '../../globals/config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
 export type Arguments = {

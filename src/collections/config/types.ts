@@ -19,6 +19,7 @@ export interface AuthCollectionModel extends CollectionModel {
 
 export type HookOperationType =
 | 'create'
+| 'autosave'
 | 'read'
 | 'update'
 | 'delete'

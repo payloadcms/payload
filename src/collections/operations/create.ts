@@ -1,25 +1,17 @@
-import mkdirp from 'mkdirp';
-import path from 'path';
 import crypto from 'crypto';
 
-import { UploadedFile } from 'express-fileupload';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
-import { MissingFile, FileUploadError, ValidationError } from '../../errors';
-import resizeAndSave from '../../uploads/imageResizer';
-import getSafeFilename from '../../uploads/getSafeFilename';
-import getImageSize from '../../uploads/getImageSize';
-import isImage from '../../uploads/isImage';
-import { FileData } from '../../uploads/types';
+import { ValidationError } from '../../errors';
 
 import sendVerificationEmail from '../../auth/sendVerificationEmail';
 import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection } from '../config/types';
 import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
 import { Payload } from '../..';
-import saveBufferToFile from '../../uploads/saveBufferToFile';
 import { fieldAffectsData } from '../../fields/config/types';
+import uploadFile from '../../uploads/uploadFile';
 
 export type Arguments = {
   collection: Collection
@@ -51,6 +43,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   }, Promise.resolve());
 
   const {
+    collection,
     collection: {
       Model,
       config: collectionConfig,
@@ -89,66 +82,14 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // Upload and resize potential files
   // /////////////////////////////////////
 
-  if (collectionConfig.upload) {
-    const fileData: Partial<FileData> = {};
-
-    const { staticDir, imageSizes, disableLocalStorage } = collectionConfig.upload;
-
-    const file = ((req.files && req.files.file) ? req.files.file : req.file) as UploadedFile;
-
-    if (!file) {
-      throw new MissingFile();
-    }
-
-    let staticPath = staticDir;
-
-    if (staticDir.indexOf('/') !== 0) {
-      staticPath = path.resolve(config.paths.configDir, staticDir);
-    }
-
-    if (!disableLocalStorage) {
-      mkdirp.sync(staticPath);
-    }
-
-    const fsSafeName = !overwriteExistingFiles ? await getSafeFilename(Model, staticPath, file.name) : file.name;
-
-    try {
-      if (!disableLocalStorage) {
-        await saveBufferToFile(file.data, `${staticPath}/${fsSafeName}`);
-      }
-
-      if (isImage(file.mimetype)) {
-        const dimensions = await getImageSize(file);
-        fileData.width = dimensions.width;
-        fileData.height = dimensions.height;
-
-        if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
-          req.payloadUploadSizes = {};
-          fileData.sizes = await resizeAndSave({
-            req,
-            file: file.data,
-            dimensions,
-            staticPath,
-            config: collectionConfig,
-            savedFilename: fsSafeName,
-            mimeType: fileData.mimeType,
-          });
-        }
-      }
-    } catch (err) {
-      console.error(err);
-      throw new FileUploadError();
-    }
-
-    fileData.filename = fsSafeName;
-    fileData.filesize = file.size;
-    fileData.mimeType = file.mimetype;
-
-    data = {
-      ...data,
-      ...fileData,
-    };
-  }
+  data = await uploadFile({
+    config,
+    collection,
+    req,
+    data,
+    throwOnMissingFile: false,
+    overwriteExistingFiles,
+  });
 
   // /////////////////////////////////////
   // beforeValidate - Fields

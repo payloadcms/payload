@@ -24,6 +24,7 @@ type Arguments = {
   depth?: number
   currentDepth?: number
   isVersion?: boolean
+  skipValidation?: boolean
 }
 
 export default async function performFieldOperations(this: Payload, entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig, args: Arguments): Promise<any> {
@@ -44,6 +45,7 @@ export default async function performFieldOperations(this: Payload, entityConfig
     unflattenLocales = false,
     showHiddenFields = false,
     isVersion = false,
+    skipValidation = false,
   } = args;
 
   const fullData = deepCopyObject(data);
@@ -104,6 +106,7 @@ export default async function performFieldOperations(this: Payload, entityConfig
     transformActions,
     docWithLocales,
     isVersion,
+    skipValidation,
   });
 
   if (hook === 'afterRead') {
