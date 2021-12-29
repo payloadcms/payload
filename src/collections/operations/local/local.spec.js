@@ -85,5 +85,37 @@ describe('Collections - Local', () => {
       expect(withHiddenFields.localizedGroup.demoHiddenField).toStrictEqual(demoHiddenField);
       expect(withHiddenFields.id).toStrictEqual(result.id);
     });
+
+    it('should allow a document with a relationship to a document with hidden fields to read the related document hidden fields', async () => {
+      const demoHiddenField = 'this is going to be hidden';
+
+      const relationshipA = await payload.create({
+        collection: 'relationship-a',
+        data: {
+          demoHiddenField,
+        },
+      });
+
+      expect(relationshipA.id).toBeDefined();
+      expect(relationshipA.demoHiddenField).toBeUndefined();
+
+      const relationshipB = await payload.create({
+        collection: 'relationship-b',
+        data: {
+          title: 'pretty clever name here',
+          post: [relationshipA.id],
+        },
+      });
+
+      expect(relationshipB.id).toBeDefined();
+
+      const relationshipBWithHiddenNestedField = await payload.findByID({
+        collection: 'relationship-b',
+        id: relationshipB.id,
+        showHiddenFields: true,
+      });
+
+      expect(relationshipBWithHiddenNestedField.post[0].demoHiddenField).toStrictEqual(demoHiddenField);
+    });
   });
 });

@@ -18,12 +18,12 @@ type Arguments = {
   currentDepth: number
   hook: HookName
   payload: Payload
+  showHiddenFields: boolean
 }
 
 const accessPromise = async ({
   data,
   fullData,
-  originalDoc,
   field,
   operation,
   overrideAccess,
@@ -34,6 +34,7 @@ const accessPromise = async ({
   currentDepth,
   hook,
   payload,
+  showHiddenFields,
 }: Arguments): Promise<void> => {
   const resultingData = data;
 
@@ -56,6 +57,7 @@ const accessPromise = async ({
 
   if ((field.type === 'relationship' || field.type === 'upload') && hook === 'afterRead') {
     relationshipPopulations.push(relationshipPopulationPromise({
+      showHiddenFields,
       data,
       field,
       depth,

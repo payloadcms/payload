@@ -147,6 +147,7 @@ const traverseFields = (args: Arguments): void => {
           depth,
           field,
           currentDepth,
+          showHiddenFields,
         }));
       }
     }
@@ -213,6 +214,7 @@ const traverseFields = (args: Arguments): void => {
         currentDepth,
         hook,
         payload,
+        showHiddenFields,
       }));
 
       hookPromises.push(() => hookPromise({
