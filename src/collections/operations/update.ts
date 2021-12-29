@@ -135,7 +135,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
       staticPath = path.resolve(config.paths.configDir, staticDir);
     }
 
-    const { file } = req.files;
+    const { file } = req.files || {};
 
     if (file) {
       const fsSafeName = !overwriteExistingFiles ? await getSafeFilename(Model, staticPath, file.name) : file.name;
