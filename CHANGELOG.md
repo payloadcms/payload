@@ -1,4 +1,4 @@
-## [0.13.18-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.18-beta.0) (2021-12-29)
+## [0.13.19-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.19-beta.0) (2021-12-29)
 
 
 ### Bug Fixes
@@ -6,6 +6,7 @@
 * [#370](https://github.com/payloadcms/payload/issues/370), only performs password functions when auth enabled ([9738873](https://github.com/payloadcms/payload/commit/97388738def687f3b26eaf8de6b067f4d3758418))
 * [#390](https://github.com/payloadcms/payload/issues/390), safari rich text link bug ([a16b99b](https://github.com/payloadcms/payload/commit/a16b99b0c87d55f768ed74ab35708a291fc7bbb0))
 * [#393](https://github.com/payloadcms/payload/issues/393), ensures preview button gets up to date data ([2f47e39](https://github.com/payloadcms/payload/commit/2f47e39a9f765bd8ce437d4b7500a5b314a192a5))
+* [#408](https://github.com/payloadcms/payload/issues/408) ([e2c5d93](https://github.com/payloadcms/payload/commit/e2c5d93751cb1902d6dce2147953b97c2dc17939))
 * 407 ([a09570c](https://github.com/payloadcms/payload/commit/a09570c78dc923f3553f36d726e5cfac925290a0))
 * allows null in ImageSize width and height types ([ba79fd4](https://github.com/payloadcms/payload/commit/ba79fd42dbf20ba712a0632da9193fcc516c0257))
 * cross-browser upload drag and drop ([4119eec](https://github.com/payloadcms/payload/commit/4119eec796794d6a026f34f8b097b379eb9895a0))
@@ -13,118 +14,6 @@
 * ensures local findByID retains user ([05288ee](https://github.com/payloadcms/payload/commit/05288ee08c077019e4432bf385aeacc23a0643f3))
 * ensures row count is set properly in block fields ([9e091af](https://github.com/payloadcms/payload/commit/9e091af67e944e6a15d1d1174a18cde6deda40d7))
 * ensures searching relationships works with many pages of results ([961787d](https://github.com/payloadcms/payload/commit/961787d681882e5ab48bb676490555c93f5d4a2e))
-* globals model typing ([da7c0c9](https://github.com/payloadcms/payload/commit/da7c0c984c1fb57038d620fc59bcd27972919ade))
-
-
-### Features
-
-* builds custom routes API, Before/After Dashboard and Nav custom components ([e337c62](https://github.com/payloadcms/payload/commit/e337c62ba179821c994404a2b693871b2401861b))
-* exports custom text and select inputs ([52edb5b](https://github.com/payloadcms/payload/commit/52edb5b77f45e267c43a284c5591044ac4d726e7))
-* exposes default Dashboard and Nav components for re-import ([ffe8e17](https://github.com/payloadcms/payload/commit/ffe8e17ac06c2fc89c3c51cab545df9756d3910b))
-
-## [0.13.17-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.17-beta.0) (2021-12-29)
-
-
-### Bug Fixes
-
-* [#370](https://github.com/payloadcms/payload/issues/370), only performs password functions when auth enabled ([9738873](https://github.com/payloadcms/payload/commit/97388738def687f3b26eaf8de6b067f4d3758418))
-* [#390](https://github.com/payloadcms/payload/issues/390), safari rich text link bug ([a16b99b](https://github.com/payloadcms/payload/commit/a16b99b0c87d55f768ed74ab35708a291fc7bbb0))
-* [#393](https://github.com/payloadcms/payload/issues/393), ensures preview button gets up to date data ([2f47e39](https://github.com/payloadcms/payload/commit/2f47e39a9f765bd8ce437d4b7500a5b314a192a5))
-* 407 ([a09570c](https://github.com/payloadcms/payload/commit/a09570c78dc923f3553f36d726e5cfac925290a0))
-* allows null in ImageSize width and height types ([ba79fd4](https://github.com/payloadcms/payload/commit/ba79fd42dbf20ba712a0632da9193fcc516c0257))
-* cross-browser upload drag and drop ([4119eec](https://github.com/payloadcms/payload/commit/4119eec796794d6a026f34f8b097b379eb9895a0))
-* ensures getDataByPath works ([140a3aa](https://github.com/payloadcms/payload/commit/140a3aa9eafa29b2a43bdfd8883c79c6ee4a93e4))
-* ensures local findByID retains user ([05288ee](https://github.com/payloadcms/payload/commit/05288ee08c077019e4432bf385aeacc23a0643f3))
-* ensures row count is set properly in block fields ([9e091af](https://github.com/payloadcms/payload/commit/9e091af67e944e6a15d1d1174a18cde6deda40d7))
-* ensures searching relationships works with many pages of results ([961787d](https://github.com/payloadcms/payload/commit/961787d681882e5ab48bb676490555c93f5d4a2e))
-* globals model typing ([da7c0c9](https://github.com/payloadcms/payload/commit/da7c0c984c1fb57038d620fc59bcd27972919ade))
-
-
-### Features
-
-* builds custom routes API, Before/After Dashboard and Nav custom components ([e337c62](https://github.com/payloadcms/payload/commit/e337c62ba179821c994404a2b693871b2401861b))
-* exports custom text and select inputs ([52edb5b](https://github.com/payloadcms/payload/commit/52edb5b77f45e267c43a284c5591044ac4d726e7))
-* exposes default Dashboard and Nav components for re-import ([ffe8e17](https://github.com/payloadcms/payload/commit/ffe8e17ac06c2fc89c3c51cab545df9756d3910b))
-
-## [0.13.16-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.16-beta.0) (2021-12-29)
-
-
-### Bug Fixes
-
-* [#370](https://github.com/payloadcms/payload/issues/370), only performs password functions when auth enabled ([9738873](https://github.com/payloadcms/payload/commit/97388738def687f3b26eaf8de6b067f4d3758418))
-* [#390](https://github.com/payloadcms/payload/issues/390), safari rich text link bug ([a16b99b](https://github.com/payloadcms/payload/commit/a16b99b0c87d55f768ed74ab35708a291fc7bbb0))
-* [#393](https://github.com/payloadcms/payload/issues/393), ensures preview button gets up to date data ([2f47e39](https://github.com/payloadcms/payload/commit/2f47e39a9f765bd8ce437d4b7500a5b314a192a5))
-* allows null in ImageSize width and height types ([ba79fd4](https://github.com/payloadcms/payload/commit/ba79fd42dbf20ba712a0632da9193fcc516c0257))
-* cross-browser upload drag and drop ([4119eec](https://github.com/payloadcms/payload/commit/4119eec796794d6a026f34f8b097b379eb9895a0))
-* ensures getDataByPath works ([140a3aa](https://github.com/payloadcms/payload/commit/140a3aa9eafa29b2a43bdfd8883c79c6ee4a93e4))
-* ensures local findByID retains user ([05288ee](https://github.com/payloadcms/payload/commit/05288ee08c077019e4432bf385aeacc23a0643f3))
-* ensures row count is set properly in block fields ([9e091af](https://github.com/payloadcms/payload/commit/9e091af67e944e6a15d1d1174a18cde6deda40d7))
-* ensures searching relationships works with many pages of results ([961787d](https://github.com/payloadcms/payload/commit/961787d681882e5ab48bb676490555c93f5d4a2e))
-* globals model typing ([da7c0c9](https://github.com/payloadcms/payload/commit/da7c0c984c1fb57038d620fc59bcd27972919ade))
-
-
-### Features
-
-* builds custom routes API, Before/After Dashboard and Nav custom components ([e337c62](https://github.com/payloadcms/payload/commit/e337c62ba179821c994404a2b693871b2401861b))
-* exports custom text and select inputs ([52edb5b](https://github.com/payloadcms/payload/commit/52edb5b77f45e267c43a284c5591044ac4d726e7))
-* exposes default Dashboard and Nav components for re-import ([ffe8e17](https://github.com/payloadcms/payload/commit/ffe8e17ac06c2fc89c3c51cab545df9756d3910b))
-
-## [0.13.15-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.15-beta.0) (2021-12-29)
-
-
-### Bug Fixes
-
-* [#370](https://github.com/payloadcms/payload/issues/370), only performs password functions when auth enabled ([9738873](https://github.com/payloadcms/payload/commit/97388738def687f3b26eaf8de6b067f4d3758418))
-* [#390](https://github.com/payloadcms/payload/issues/390), safari rich text link bug ([a16b99b](https://github.com/payloadcms/payload/commit/a16b99b0c87d55f768ed74ab35708a291fc7bbb0))
-* [#393](https://github.com/payloadcms/payload/issues/393), ensures preview button gets up to date data ([2f47e39](https://github.com/payloadcms/payload/commit/2f47e39a9f765bd8ce437d4b7500a5b314a192a5))
-* allows null in ImageSize width and height types ([ba79fd4](https://github.com/payloadcms/payload/commit/ba79fd42dbf20ba712a0632da9193fcc516c0257))
-* cross-browser upload drag and drop ([4119eec](https://github.com/payloadcms/payload/commit/4119eec796794d6a026f34f8b097b379eb9895a0))
-* ensures getDataByPath works ([140a3aa](https://github.com/payloadcms/payload/commit/140a3aa9eafa29b2a43bdfd8883c79c6ee4a93e4))
-* ensures local findByID retains user ([05288ee](https://github.com/payloadcms/payload/commit/05288ee08c077019e4432bf385aeacc23a0643f3))
-* ensures row count is set properly in block fields ([9e091af](https://github.com/payloadcms/payload/commit/9e091af67e944e6a15d1d1174a18cde6deda40d7))
-* ensures searching relationships works with many pages of results ([961787d](https://github.com/payloadcms/payload/commit/961787d681882e5ab48bb676490555c93f5d4a2e))
-* globals model typing ([da7c0c9](https://github.com/payloadcms/payload/commit/da7c0c984c1fb57038d620fc59bcd27972919ade))
-
-
-### Features
-
-* builds custom routes API, Before/After Dashboard and Nav custom components ([e337c62](https://github.com/payloadcms/payload/commit/e337c62ba179821c994404a2b693871b2401861b))
-* exports custom text and select inputs ([52edb5b](https://github.com/payloadcms/payload/commit/52edb5b77f45e267c43a284c5591044ac4d726e7))
-* exposes default Dashboard and Nav components for re-import ([ffe8e17](https://github.com/payloadcms/payload/commit/ffe8e17ac06c2fc89c3c51cab545df9756d3910b))
-
-## [0.13.14-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.14-beta.0) (2021-12-29)
-
-
-### Bug Fixes
-
-* [#370](https://github.com/payloadcms/payload/issues/370), only performs password functions when auth enabled ([9738873](https://github.com/payloadcms/payload/commit/97388738def687f3b26eaf8de6b067f4d3758418))
-* [#390](https://github.com/payloadcms/payload/issues/390), safari rich text link bug ([a16b99b](https://github.com/payloadcms/payload/commit/a16b99b0c87d55f768ed74ab35708a291fc7bbb0))
-* [#393](https://github.com/payloadcms/payload/issues/393), ensures preview button gets up to date data ([2f47e39](https://github.com/payloadcms/payload/commit/2f47e39a9f765bd8ce437d4b7500a5b314a192a5))
-* allows null in ImageSize width and height types ([ba79fd4](https://github.com/payloadcms/payload/commit/ba79fd42dbf20ba712a0632da9193fcc516c0257))
-* cross-browser upload drag and drop ([4119eec](https://github.com/payloadcms/payload/commit/4119eec796794d6a026f34f8b097b379eb9895a0))
-* ensures getDataByPath works ([140a3aa](https://github.com/payloadcms/payload/commit/140a3aa9eafa29b2a43bdfd8883c79c6ee4a93e4))
-* ensures local findByID retains user ([05288ee](https://github.com/payloadcms/payload/commit/05288ee08c077019e4432bf385aeacc23a0643f3))
-* ensures row count is set properly in block fields ([9e091af](https://github.com/payloadcms/payload/commit/9e091af67e944e6a15d1d1174a18cde6deda40d7))
-* globals model typing ([da7c0c9](https://github.com/payloadcms/payload/commit/da7c0c984c1fb57038d620fc59bcd27972919ade))
-
-
-### Features
-
-* builds custom routes API, Before/After Dashboard and Nav custom components ([e337c62](https://github.com/payloadcms/payload/commit/e337c62ba179821c994404a2b693871b2401861b))
-* exports custom text and select inputs ([52edb5b](https://github.com/payloadcms/payload/commit/52edb5b77f45e267c43a284c5591044ac4d726e7))
-* exposes default Dashboard and Nav components for re-import ([ffe8e17](https://github.com/payloadcms/payload/commit/ffe8e17ac06c2fc89c3c51cab545df9756d3910b))
-
-## [0.13.13-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.13-beta.0) (2021-12-28)
-
-
-### Bug Fixes
-
-* [#370](https://github.com/payloadcms/payload/issues/370), only performs password functions when auth enabled ([9738873](https://github.com/payloadcms/payload/commit/97388738def687f3b26eaf8de6b067f4d3758418))
-* [#390](https://github.com/payloadcms/payload/issues/390), safari rich text link bug ([a16b99b](https://github.com/payloadcms/payload/commit/a16b99b0c87d55f768ed74ab35708a291fc7bbb0))
-* [#393](https://github.com/payloadcms/payload/issues/393), ensures preview button gets up to date data ([2f47e39](https://github.com/payloadcms/payload/commit/2f47e39a9f765bd8ce437d4b7500a5b314a192a5))
-* allows null in ImageSize width and height types ([ba79fd4](https://github.com/payloadcms/payload/commit/ba79fd42dbf20ba712a0632da9193fcc516c0257))
-* ensures getDataByPath works ([140a3aa](https://github.com/payloadcms/payload/commit/140a3aa9eafa29b2a43bdfd8883c79c6ee4a93e4))
-* ensures local findByID retains user ([05288ee](https://github.com/payloadcms/payload/commit/05288ee08c077019e4432bf385aeacc23a0643f3))
 * globals model typing ([da7c0c9](https://github.com/payloadcms/payload/commit/da7c0c984c1fb57038d620fc59bcd27972919ade))
 
 
