@@ -10,7 +10,6 @@ import sortableFieldTypes from '../fields/sortableFieldTypes';
 export type BuildSchemaOptions = {
   options?: SchemaOptions
   allowIDField?: boolean
-  disableRequired?: boolean
   disableUnique?: boolean
   global?: boolean
 }
@@ -54,7 +53,7 @@ const setBlockDiscriminators = (fields: Field[], schema: Schema, config: Sanitiz
 const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: BuildSchemaOptions) => ({
   sparse: field.unique && field.localized,
   unique: (!buildSchemaOptions.disableUnique && field.unique) || false,
-  required: (!buildSchemaOptions.disableRequired && field.required && !field.localized && !field?.admin?.condition && !field?.access?.create) || false,
+  required: false,
   default: field.defaultValue || undefined,
   index: field.index || field.unique || false,
 });
@@ -345,7 +344,6 @@ const fieldToSchemaMap = {
           id: false,
         },
         disableUnique: buildSchemaOptions.disableUnique,
-        disableRequired: !formattedBaseSchema.required,
       }),
     };
 

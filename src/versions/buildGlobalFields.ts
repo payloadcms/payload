@@ -7,4 +7,9 @@ export const buildVersionGlobalFields = (global: SanitizedGlobalConfig): Field[]
     type: 'group',
     fields: global.fields,
   },
+  {
+    name: 'autosave',
+    type: 'checkbox',
+    index: true,
+  },
 ];
