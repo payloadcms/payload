@@ -1,4 +1,4 @@
-## [0.13.19-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.19-beta.0) (2021-12-29)
+## [0.13.20-beta.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.13.20-beta.0) (2021-12-29)
 
 
 ### Bug Fixes
@@ -6,6 +6,7 @@
 * [#370](https://github.com/payloadcms/payload/issues/370), only performs password functions when auth enabled ([9738873](https://github.com/payloadcms/payload/commit/97388738def687f3b26eaf8de6b067f4d3758418))
 * [#390](https://github.com/payloadcms/payload/issues/390), safari rich text link bug ([a16b99b](https://github.com/payloadcms/payload/commit/a16b99b0c87d55f768ed74ab35708a291fc7bbb0))
 * [#393](https://github.com/payloadcms/payload/issues/393), ensures preview button gets up to date data ([2f47e39](https://github.com/payloadcms/payload/commit/2f47e39a9f765bd8ce437d4b7500a5b314a192a5))
+* [#408](https://github.com/payloadcms/payload/issues/408) ([5c3cfa4](https://github.com/payloadcms/payload/commit/5c3cfa4c93767a5ead9e816bf11a000ebdac9761))
 * [#408](https://github.com/payloadcms/payload/issues/408) ([e2c5d93](https://github.com/payloadcms/payload/commit/e2c5d93751cb1902d6dce2147953b97c2dc17939))
 * 407 ([a09570c](https://github.com/payloadcms/payload/commit/a09570c78dc923f3553f36d726e5cfac925290a0))
 * allows null in ImageSize width and height types ([ba79fd4](https://github.com/payloadcms/payload/commit/ba79fd42dbf20ba712a0632da9193fcc516c0257))
