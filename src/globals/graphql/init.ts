@@ -33,6 +33,7 @@ function registerGlobals() {
       this.Query.fields[formattedLabel] = {
         type: global.graphQL.type,
         args: {
+          draft: { type: GraphQLBoolean },
           ...(this.config.localization ? {
             locale: { type: this.types.localeInputType },
             fallbackLocale: { type: this.types.fallbackLocaleInputType },

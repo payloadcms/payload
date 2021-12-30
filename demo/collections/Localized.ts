@@ -53,7 +53,18 @@ const LocalizedPosts: CollectionConfig = {
     },
   },
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => {
+      if (user) {
+        return true;
+      }
+
+      return {
+        _status: {
+          equals: 'published',
+        },
+      };
+    },
+    readVersions: ({ req: { user } }) => Boolean(user),
   },
   fields: [
     {

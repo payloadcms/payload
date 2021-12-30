@@ -190,11 +190,12 @@ export type CollectionConfig = {
   access?: {
     create?: Access;
     read?: Access;
+    readDrafts?: Access;
+    readVersions?: Access;
     update?: Access;
     delete?: Access;
     admin?: (args?: any) => boolean;
     unlock?: Access;
-    readVersions?: Access;
   };
   /**
    * Collection login options
@@ -229,4 +230,10 @@ export type AuthCollection = {
 
 export type TypeWithID = {
   id: string | number
+}
+
+export type TypeWithTimestamps = {
+  id: string | number
+  createdAt: string
+  updatedAt: string
 }

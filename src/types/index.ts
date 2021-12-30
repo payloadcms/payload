@@ -1,4 +1,5 @@
 import { Document as MongooseDocument } from 'mongoose';
+import { TypeWithID, TypeWithTimestamps } from '../collections/config/types';
 import { FileData } from '../uploads/types';
 
 export type Operator = 'equals'
@@ -33,3 +34,7 @@ export interface PayloadMongooseDocument extends MongooseDocument {
 }
 
 export type Operation = 'create' | 'read' | 'update' | 'delete'
+
+export function docHasTimestamps(doc: any): doc is TypeWithTimestamps {
+  return doc?.createdAt && doc?.updatedAt;
+}

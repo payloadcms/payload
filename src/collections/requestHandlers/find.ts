@@ -24,6 +24,7 @@ export default async function find<T extends TypeWithID = any>(req: PayloadReque
       limit: req.query.limit,
       sort: req.query.sort,
       depth: req.query.depth,
+      draft: req.query.draft === 'true',
     };
 
     const result = await this.operations.collections.find(options);

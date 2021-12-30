@@ -14,6 +14,7 @@ export type Options = {
   showHiddenFields?: boolean
   disableErrors?: boolean
   req?: PayloadRequest
+  draft?: boolean
 }
 
 export default async function findByID<T extends TypeWithID = any>(options: Options): Promise<T> {
@@ -29,6 +30,7 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
     disableErrors = false,
     showHiddenFields,
     req = {},
+    draft = false,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -53,5 +55,6 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
     disableErrors,
     showHiddenFields,
     req: reqToUse,
+    draft,
   });
 }

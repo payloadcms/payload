@@ -55,6 +55,7 @@ export type GlobalConfig = {
   }
   access?: {
     read?: Access;
+    readDrafts?: Access;
     readVersions?: Access;
     update?: Access;
   }

@@ -10,6 +10,7 @@ async function findOne(args) {
     slug,
     depth,
     showHiddenFields,
+    draft = false,
   } = args;
 
   // /////////////////////////////////////

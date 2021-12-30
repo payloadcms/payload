@@ -2,7 +2,7 @@ import { useConfig } from '@payloadcms/config-provider';
 import { formatDistance } from 'date-fns';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useWatchForm, useFormModified } from '../../forms/Form/context';
 import { useLocale } from '../../utilities/Locale';
 import { Props } from './types';
@@ -18,10 +18,17 @@ const Autosave: React.FC<Props> = ({ collection, global, id, updatedAt }) => {
   const { serverURL, routes: { api, admin } } = useConfig();
   const { fields, dispatchFields } = useWatchForm();
   const modified = useFormModified();
-  const [saving, setSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState<number>();
   const locale = useLocale();
   const { push } = useHistory();
+
+  const fieldRef = useRef(fields);
+  const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<number>();
+
+  // Store fields in ref so the autosave func
+  // can always retrieve the most to date copies
+  // after the timeout has executed
+  fieldRef.current = fields;
 
   const interval = collection.versions.drafts && collection.versions.drafts.autosave ? collection.versions.drafts.autosave.interval : 5;
 
@@ -113,14 +120,9 @@ const Autosave: React.FC<Props> = ({ collection, global, id, updatedAt }) => {
             }, 1000);
 
             const body = {
-              ...reduceFieldsToValues(fields),
+              ...reduceFieldsToValues(fieldRef.current),
               _status: 'draft',
             };
-
-            // TODO:
-            // Determine why field values are not present
-            // even though we are using useWatchForm
-            console.log(body);
 
             const res = await fetch(url, {
               method,

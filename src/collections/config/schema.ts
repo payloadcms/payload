@@ -10,6 +10,8 @@ const collectionSchema = joi.object().keys({
   access: joi.object({
     create: joi.func(),
     read: joi.func(),
+    readVersions: joi.func(),
+    readDrafts: joi.func(),
     update: joi.func(),
     delete: joi.func(),
     unlock: joi.func(),

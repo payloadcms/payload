@@ -15,6 +15,7 @@ function findOne(globalConfig: SanitizedGlobalConfig): Document {
       slug,
       depth: 0,
       req: context.req,
+      draft: args.draft,
     };
 
     const result = await this.operations.globals.findOne(options);

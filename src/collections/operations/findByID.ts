@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import memoize from 'micro-memoize';
+import { Payload } from '../..';
 import { PayloadRequest } from '../../express/types';
 import { Collection, TypeWithID } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -7,7 +8,7 @@ import { Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
-import { Payload } from '../..';
+import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 
 export type Arguments = {
   collection: Collection
@@ -18,6 +19,7 @@ export type Arguments = {
   overrideAccess?: boolean
   showHiddenFields?: boolean
   depth?: number
+  draft?: boolean
 }
 
 async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs: Arguments): Promise<T> {
@@ -51,18 +53,19 @@ async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs:
     currentDepth,
     overrideAccess = false,
     showHiddenFields,
+    draft: draftEnabled = false,
   } = args;
 
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////
 
-  const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors, id }, collectionConfig.access.read) : true;
+  const accessResult = !overrideAccess ? await executeAccess({ req, disableErrors, id }, collectionConfig.access.read) : true;
 
   // If errors are disabled, and access returns false, return null
-  if (accessResults === false) return null;
+  if (accessResult === false) return null;
 
-  const hasWhereAccess = typeof accessResults === 'object';
+  const hasWhereAccess = typeof accessResult === 'object';
 
   const queryToBuild: { where: Where } = {
     where: {
@@ -76,8 +79,16 @@ async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs:
     },
   };
 
-  if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
+  if (hasWhereAccessResult(accessResult)) {
+    queryToBuild.where.and.push(accessResult);
+  }
+
+  if (collectionConfig.versions?.drafts && !draftEnabled) {
+    queryToBuild.where.and.push({
+      _status: {
+        equals: 'published',
+      },
+    });
   }
 
   const query = await Model.buildQuery(queryToBuild, locale);
@@ -116,6 +127,20 @@ async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs:
   result = JSON.parse(JSON.stringify(result));
 
   result = sanitizeInternalFields(result);
+
+  // /////////////////////////////////////
+  // Replace document with draft if available
+  // /////////////////////////////////////
+
+  if (collectionConfig.versions?.drafts && draftEnabled) {
+    result = await replaceWithDraftIfAvailable({
+      payload: this,
+      collection: collectionConfig,
+      doc: result,
+      accessResult,
+      locale,
+    });
+  }
 
   // /////////////////////////////////////
   // beforeRead - Collection
