@@ -46,7 +46,7 @@ function registerGlobals() {
         type: global.graphQL.type,
         args: {
           data: { type: global.graphQL.mutationInputType },
-          autosave: { type: GraphQLBoolean },
+          draft: { type: GraphQLBoolean },
         },
         resolve: update(global),
       };

@@ -33,8 +33,11 @@ const Autosave: React.FC<Props> = ({ collection, global, id, updatedAt }) => {
   const interval = collection.versions.drafts && collection.versions.drafts.autosave ? collection.versions.drafts.autosave.interval : 5;
 
   const createDoc = useCallback(async () => {
-    const res = await fetch(`${serverURL}${api}/${collection.slug}?locale=${locale}&fallback-locale=null&depth=0&autosave=true`, {
+    const res = await fetch(`${serverURL}${api}/${collection.slug}?locale=${locale}&fallback-locale=null&depth=0&draft=true`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({}),
     });
 
@@ -103,13 +106,13 @@ const Autosave: React.FC<Props> = ({ collection, global, id, updatedAt }) => {
           let entityFields: Field[] = [];
 
           if (collection && id) {
-            url = `${serverURL}${api}/${collection.slug}/${id}?autosave=true`;
+            url = `${serverURL}${api}/${collection.slug}/${id}?draft=true`;
             method = 'PUT';
             entityFields = collection.fields;
           }
 
           if (global) {
-            url = `${serverURL}${api}/globals/${global.slug}?autosave=true`;
+            url = `${serverURL}${api}/globals/${global.slug}?draft=true`;
             method = 'POST';
             entityFields = global.fields;
           }
@@ -126,6 +129,9 @@ const Autosave: React.FC<Props> = ({ collection, global, id, updatedAt }) => {
 
             const res = await fetch(url, {
               method,
+              headers: {
+                'Content-Type': 'application/json',
+              },
               body: JSON.stringify(body),
             });
 

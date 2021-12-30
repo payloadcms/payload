@@ -16,7 +16,7 @@ export default async function create(req: PayloadRequest, res: Response, next: N
       collection: req.collection,
       data: req.body,
       depth: req.query.depth,
-      autosave: req.query.autosave === 'true',
+      draft: req.query.draft === 'true',
     });
 
     return res.status(httpStatus.CREATED).json({

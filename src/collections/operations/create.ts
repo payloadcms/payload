@@ -22,7 +22,7 @@ export type Arguments = {
   showHiddenFields?: boolean
   data: Record<string, unknown>
   overwriteExistingFiles?: boolean
-  autosave?: boolean
+  draft?: boolean
 }
 
 async function create(this: Payload, incomingArgs: Arguments): Promise<Document> {
@@ -55,10 +55,12 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     overrideAccess,
     showHiddenFields,
     overwriteExistingFiles = false,
-    autosave = false,
+    draft = false,
   } = args;
 
   let { data } = args;
+
+  const shouldSaveDraft = Boolean(draft && collectionConfig.versions.drafts);
 
   // /////////////////////////////////////
   // Access
@@ -144,7 +146,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     req,
     overrideAccess,
     unflattenLocales: true,
-    skipValidation: autosave,
+    skipValidation: shouldSaveDraft,
   });
 
   // /////////////////////////////////////

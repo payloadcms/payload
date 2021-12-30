@@ -59,9 +59,18 @@ const LocalizedPosts: CollectionConfig = {
       }
 
       return {
-        _status: {
-          equals: 'published',
-        },
+        or: [
+          {
+            _status: {
+              equals: 'published',
+            },
+          },
+          {
+            _status: {
+              exists: false,
+            },
+          },
+        ],
       };
     },
     readVersions: ({ req: { user } }) => Boolean(user),

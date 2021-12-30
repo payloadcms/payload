@@ -61,21 +61,28 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where} = {};
+  const queryToBuild: { where?: Where} = {
+    where: {
+      and: [],
+    },
+  };
+
   let useEstimatedCount = false;
 
   if (where) {
-    let and = [];
+    if (Array.isArray(where.and)) {
+      queryToBuild.where.and = [
+        ...queryToBuild.where.and,
+        ...where.and,
+      ];
+    }
 
-    if (Array.isArray(where.and)) and = where.and;
-    if (Array.isArray(where.AND)) and = where.AND;
-
-    queryToBuild.where = {
-      ...where,
-      and: [
-        ...and,
-      ],
-    };
+    if (Array.isArray(where.AND)) {
+      queryToBuild.where.and = [
+        ...queryToBuild.where.and,
+        ...where.AND,
+      ];
+    }
 
     const constraints = flattenWhereConstraints(queryToBuild);
 
@@ -88,23 +95,24 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     accessResult = await executeAccess({ req }, collectionConfig.access.read);
 
     if (hasWhereAccessResult(accessResult)) {
-      if (!where) {
-        queryToBuild.where = {
-          and: [
-            accessResult,
-          ],
-        };
-      } else {
-        (queryToBuild.where.and as Where[]).push(accessResult);
-      }
+      queryToBuild.where.and.push(accessResult);
     }
   }
 
   if (collectionConfig.versions?.drafts && !draftsEnabled) {
     queryToBuild.where.and.push({
-      _status: {
-        equals: 'published',
-      },
+      or: [
+        {
+          _status: {
+            equals: 'published',
+          },
+        },
+        {
+          _status: {
+            exists: false,
+          },
+        },
+      ],
     });
   }
 

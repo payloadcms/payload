@@ -45,7 +45,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const [initialState, setInitialState] = useState({});
   const { permissions } = useAuth();
 
-  const onSave = useCallback(async (json: any, version = false) => {
+  const onSave = useCallback(async (json: any) => {
     if (!isEditing) {
       history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
     } else {
@@ -63,7 +63,7 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const [{ data, isLoading, isError }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
-    { initialParams: { 'fallback-locale': 'null', depth: 0 } },
+    { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
   );
 
   const dataToRender = (locationState as Record<string, unknown>)?.data || data;
@@ -118,8 +118,8 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const collectionPermissions = permissions?.collections?.[slug];
 
-  const apiURL = `${serverURL}${api}/${slug}/${id}`;
-  const action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
+  const apiURL = `${serverURL}${api}/${slug}/${id}${collection.versions.drafts ? '?draft=true' : ''}`;
+  const action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null&draft=true`;
   const hasSavePermission = (isEditing && collectionPermissions?.update?.permission) || (!isEditing && collectionPermissions?.create?.permission);
 
   return (

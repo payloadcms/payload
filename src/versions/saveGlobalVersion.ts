@@ -8,7 +8,6 @@ type Args = {
   config?: SanitizedGlobalConfig
   req: PayloadRequest
   docWithLocales: any
-  autosave?: boolean
 }
 
 export const saveGlobalVersion = async ({
@@ -16,7 +15,6 @@ export const saveGlobalVersion = async ({
   config,
   req,
   docWithLocales,
-  autosave,
 }: Args): Promise<void> => {
   const VersionsModel = payload.versions[config.slug];
 
@@ -31,29 +29,11 @@ export const saveGlobalVersion = async ({
     showHiddenFields: true,
   });
 
-  let existingAutosaveVersion;
-
-  if (autosave) existingAutosaveVersion = await VersionsModel.findOne();
-
   try {
-    // If there is an existing autosave document,
-    // Update it
-    if (existingAutosaveVersion?.autosave === true) {
-      await VersionsModel.findByIdAndUpdate(
-        { _id: existingAutosaveVersion._id },
-        {
-          version,
-          autosave: Boolean(autosave),
-        },
-        { new: true },
-      );
-    // Otherwise, create a new one
-    } else {
-      await VersionsModel.create({
-        version,
-        autosave: Boolean(autosave),
-      });
-    }
+    await VersionsModel.create({
+      version,
+      autosave: false,
+    });
   } catch (err) {
     payload.logger.error(`There was an error while saving a version for the Global ${config.label}.`);
     payload.logger.error(err);

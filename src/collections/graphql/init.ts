@@ -155,7 +155,7 @@ function registerCollections(): void {
       type: collection.graphQL.type,
       args: {
         data: { type: collection.graphQL.mutationInputType },
-        autosave: { type: GraphQLBoolean },
+        draft: { type: GraphQLBoolean },
       },
       resolve: create(collection),
     };
@@ -165,7 +165,7 @@ function registerCollections(): void {
       args: {
         id: { type: new GraphQLNonNull(idType) },
         data: { type: collection.graphQL.updateMutationInputType },
-        autosave: { type: GraphQLBoolean },
+        draft: { type: GraphQLBoolean },
       },
       resolve: update(collection),
     };

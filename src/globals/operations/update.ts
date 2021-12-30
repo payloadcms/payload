@@ -3,6 +3,7 @@ import { TypeWithID } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { saveGlobalVersion } from '../../versions/saveGlobalVersion';
+import { saveGlobalDraft } from '../../versions/drafts/saveGlobalDraft';
 
 async function update<T extends TypeWithID = any>(this: Payload, args): Promise<T> {
   const { globals: { Model } } = this;
@@ -14,8 +15,10 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
     depth,
     overrideAccess,
     showHiddenFields,
-    autosave,
+    draft: draftArg,
   } = args;
+
+  const shouldSaveDraft = Boolean(draftArg && globalConfig.versions.drafts);
 
   // /////////////////////////////////////
   // 1. Retrieve and execute access
@@ -111,23 +114,28 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
     originalDoc,
     docWithLocales: globalJSON,
     overrideAccess,
+    skipValidation: shouldSaveDraft,
   });
 
   // /////////////////////////////////////
   // Update
   // /////////////////////////////////////
 
-  if (!autosave) {
-    if (global) {
-      global = await Model.findOneAndUpdate(
-        { globalType: slug },
-        result,
-        { new: true },
-      );
-    } else {
-      result.globalType = slug;
-      global = await Model.create(result);
-    }
+  if (shouldSaveDraft) {
+    global = await saveGlobalDraft({
+      payload: this,
+      config: globalConfig,
+      data: result,
+    });
+  } else if (global) {
+    global = await Model.findOneAndUpdate(
+      { globalType: slug },
+      result,
+      { new: true },
+    );
+  } else {
+    result.globalType = slug;
+    global = await Model.create(result);
   }
 
   global = global.toJSON({ virtuals: true });
@@ -139,13 +147,12 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   // Create version from existing doc
   // /////////////////////////////////////
 
-  if (globalConfig.versions && hasExistingGlobal) {
+  if (globalConfig.versions && hasExistingGlobal && !shouldSaveDraft) {
     saveGlobalVersion({
       payload: this,
       config: globalConfig,
       req,
       docWithLocales: global,
-      autosave,
     });
   }
 

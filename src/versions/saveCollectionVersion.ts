@@ -2,6 +2,7 @@ import { Payload } from '..';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
+import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
 type Args = {
   payload: Payload
@@ -9,7 +10,6 @@ type Args = {
   req: PayloadRequest
   docWithLocales: any
   id: string | number
-  autosave: boolean
 }
 
 export const saveCollectionVersion = async ({
@@ -18,7 +18,6 @@ export const saveCollectionVersion = async ({
   req,
   id,
   docWithLocales,
-  autosave,
 }: Args): Promise<void> => {
   const VersionsModel = payload.versions[config.slug];
 
@@ -35,37 +34,14 @@ export const saveCollectionVersion = async ({
   });
 
   delete version._id;
-
-  let existingAutosaveVersion;
-
-  if (autosave) {
-    existingAutosaveVersion = await VersionsModel.findOne({
-      parent: id,
-    });
-  }
+  let result;
 
   try {
-    // If there is an existing autosave document,
-    // Update it
-    if (existingAutosaveVersion?.autosave === true) {
-      await VersionsModel.findByIdAndUpdate(
-        {
-          _id: existingAutosaveVersion._id,
-        },
-        {
-          version,
-          autosave: Boolean(autosave),
-        },
-        { new: true },
-      );
-    // Otherwise, create a new one
-    } else {
-      await VersionsModel.create({
-        parent: id,
-        version,
-        autosave: Boolean(autosave),
-      });
-    }
+    result = await VersionsModel.create({
+      parent: id,
+      version,
+      autosave: false,
+    });
   } catch (err) {
     payload.logger.error(`There was an error while saving a version for the ${config.labels.singular} with ID ${id}.`);
     payload.logger.error(err);
@@ -81,4 +57,10 @@ export const saveCollectionVersion = async ({
       maxPerDoc: config.versions.maxPerDoc,
     });
   }
+
+  result = JSON.stringify(result);
+  result = JSON.parse(result);
+  result = sanitizeInternalFields(result);
+
+  return result;
 };

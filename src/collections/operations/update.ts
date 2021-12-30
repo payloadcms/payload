@@ -2,13 +2,12 @@ import httpStatus from 'http-status';
 import { Payload } from '../..';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
-
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { NotFound, Forbidden, APIError, ValidationError } from '../../errors';
-
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult, UserDocument } from '../../auth/types';
+import { saveCollectionDraft } from '../../versions/drafts/saveCollectionDraft';
 import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
 import uploadFile from '../../uploads/uploadFile';
 
@@ -22,7 +21,7 @@ export type Arguments = {
   overrideAccess?: boolean
   showHiddenFields?: boolean
   overwriteExistingFiles?: boolean
-  autosave?: boolean
+  draft?: boolean
 }
 
 async function update(this: Payload, incomingArgs: Arguments): Promise<Document> {
@@ -58,12 +57,14 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
     overrideAccess,
     showHiddenFields,
     overwriteExistingFiles = false,
-    autosave = false,
+    draft: draftArg = false,
   } = args;
 
   if (!id) {
     throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST);
   }
+
+  const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
 
   // /////////////////////////////////////
   // Access
@@ -188,7 +189,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
     overrideAccess,
     unflattenLocales: true,
     docWithLocales,
-    skipValidation: autosave,
+    skipValidation: shouldSaveDraft,
   });
 
   // /////////////////////////////////////
@@ -197,7 +198,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
 
   const { password } = data;
 
-  if (password && collectionConfig.auth && !autosave) {
+  if (password && collectionConfig.auth && !shouldSaveDraft) {
     await doc.setPassword(password as string);
     await doc.save();
     delete data.password;
@@ -208,7 +209,15 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // Update
   // /////////////////////////////////////
 
-  if (!autosave) {
+  if (shouldSaveDraft) {
+    result = await saveCollectionDraft({
+      payload: this,
+      config: collectionConfig,
+      req,
+      data: result,
+      id,
+    });
+  } else {
     try {
       result = await Model.findByIdAndUpdate(
         { _id: id },
@@ -235,14 +244,13 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // Create version from existing doc
   // /////////////////////////////////////
 
-  if (collectionConfig.versions) {
-    saveCollectionVersion({
+  if (collectionConfig.versions && !shouldSaveDraft) {
+    result = saveCollectionVersion({
       payload: this,
       config: collectionConfig,
       req,
       docWithLocales,
       id,
-      autosave,
     });
   }
 

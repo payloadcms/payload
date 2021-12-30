@@ -15,7 +15,7 @@ export type Options<T> = {
   filePath?: string
   overwriteExistingFiles?: boolean
   req: PayloadRequest
-  autosave?: boolean
+  draft?: boolean
 }
 
 export default async function create<T = any>(options: Options<T>): Promise<T> {
@@ -32,7 +32,7 @@ export default async function create<T = any>(options: Options<T>): Promise<T> {
     filePath,
     overwriteExistingFiles = false,
     req,
-    autosave,
+    draft,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -45,7 +45,7 @@ export default async function create<T = any>(options: Options<T>): Promise<T> {
     disableVerificationEmail,
     showHiddenFields,
     overwriteExistingFiles,
-    autosave,
+    draft,
     req: {
       ...req,
       user,

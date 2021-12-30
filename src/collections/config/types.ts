@@ -190,7 +190,6 @@ export type CollectionConfig = {
   access?: {
     create?: Access;
     read?: Access;
-    readDrafts?: Access;
     readVersions?: Access;
     update?: Access;
     delete?: Access;
