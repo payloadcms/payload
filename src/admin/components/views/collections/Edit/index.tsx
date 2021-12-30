@@ -15,7 +15,7 @@ import { IndexProps } from './types';
 import { StepNavItem } from '../../../elements/StepNav/types';
 
 const EditView: React.FC<IndexProps> = (props) => {
-  const { collection, isEditing } = props;
+  const { collection: incomingCollection, isEditing } = props;
 
   const {
     slug,
@@ -30,8 +30,10 @@ const EditView: React.FC<IndexProps> = (props) => {
         } = {},
       } = {},
     } = {},
-  } = collection;
-  const [fields] = useState(() => formatFields(collection, isEditing));
+  } = incomingCollection;
+
+  const [fields] = useState(() => formatFields(incomingCollection, isEditing));
+  const [collection] = useState(() => ({ ...incomingCollection, fields }));
   const [submissionCount, setSubmissionCount] = useState(0);
 
   const locale = useLocale();
@@ -73,8 +75,22 @@ const EditView: React.FC<IndexProps> = (props) => {
     }];
 
     if (isEditing) {
+      let label = '';
+
+      if (dataToRender) {
+        if (useAsTitle) {
+          if (dataToRender[useAsTitle]) {
+            label = dataToRender[useAsTitle];
+          } else {
+            label = '[Untitled]';
+          }
+        } else {
+          label = dataToRender.id;
+        }
+      }
+
       nav.push({
-        label: dataToRender ? dataToRender[useAsTitle || 'id'] : '',
+        label,
       });
     } else {
       nav.push({
@@ -120,7 +136,7 @@ const EditView: React.FC<IndexProps> = (props) => {
             submissionCount,
             isLoading,
             data: dataToRender,
-            collection: { ...collection, fields },
+            collection,
             permissions: collectionPermissions,
             isEditing,
             onSave,

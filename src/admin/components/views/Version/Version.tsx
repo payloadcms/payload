@@ -73,13 +73,27 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     let nav: StepNavItem[] = [];
 
     if (collection) {
+      let docLabel = '';
+
+      if (originalDoc) {
+        if (useAsTitle) {
+          if (originalDoc[useAsTitle]) {
+            docLabel = originalDoc[useAsTitle];
+          } else {
+            docLabel = '[Untitled]';
+          }
+        } else {
+          docLabel = originalDoc.id;
+        }
+      }
+
       nav = [
         {
           url: `${admin}/collections/${collection.slug}`,
           label: collection.labels.plural,
         },
         {
-          label: originalDoc ? originalDoc[useAsTitle] : '',
+          label: docLabel,
           url: `${admin}/collections/${collection.slug}/${id}`,
         },
         {

@@ -22,6 +22,7 @@ export type Arguments = {
   showHiddenFields?: boolean
   data: Record<string, unknown>
   overwriteExistingFiles?: boolean
+  autosave?: boolean
 }
 
 async function create(this: Payload, incomingArgs: Arguments): Promise<Document> {
@@ -54,6 +55,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     overrideAccess,
     showHiddenFields,
     overwriteExistingFiles = false,
+    autosave = false,
   } = args;
 
   let { data } = args;
@@ -142,6 +144,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     req,
     overrideAccess,
     unflattenLocales: true,
+    skipValidation: autosave,
   });
 
   // /////////////////////////////////////

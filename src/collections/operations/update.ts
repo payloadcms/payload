@@ -188,6 +188,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
     overrideAccess,
     unflattenLocales: true,
     docWithLocales,
+    skipValidation: autosave,
   });
 
   // /////////////////////////////////////

@@ -12,6 +12,7 @@ import { defaults, authDefaults } from './defaults';
 import { Config } from '../../config/types';
 import { versionCollectionDefaults } from '../../versions/defaults';
 import baseVersionFields from '../../versions/baseFields';
+import TimestampsRequired from '../../errors/TimestampsRequired';
 
 const mergeBaseFields = (fields, baseFields) => {
   const mergedFields = [];
@@ -69,16 +70,18 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
   if (sanitized.versions) {
     if (sanitized.versions === true) sanitized.versions = {};
 
-    // const defaultsToMerge = { ... };
+    if (sanitized.timestamps === false) {
+      throw new TimestampsRequired(collection);
+    }
 
-    // if (sanitized.versions.drafts === false) {
-    //   defaultsToMerge.drafts = false;
-    // } else {
-    //   sanitized.fields = [
-    //     ...sanitized.fields,
-    //     ...baseVersionFields,
-    //   ];
-    // }
+    if (sanitized.versions.drafts) {
+      const versionFields = mergeBaseFields(sanitized.fields, baseVersionFields);
+
+      sanitized.fields = [
+        ...versionFields,
+        ...sanitized.fields,
+      ];
+    }
 
     sanitized.versions = merge(versionCollectionDefaults, sanitized.versions);
   }

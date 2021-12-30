@@ -153,6 +153,7 @@ function registerCollections(): void {
       type: collection.graphQL.type,
       args: {
         data: { type: collection.graphQL.mutationInputType },
+        autosave: { type: GraphQLBoolean },
       },
       resolve: create(collection),
     };

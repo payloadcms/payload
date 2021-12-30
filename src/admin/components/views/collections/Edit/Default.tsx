@@ -19,7 +19,7 @@ import Auth from './Auth';
 import VersionsCount from '../../../elements/VersionsCount';
 import Upload from './Upload';
 import { Props } from './types';
-import Autosave from './Autosave';
+import Autosave from '../../../elements/Autosave';
 
 import './index.scss';
 
@@ -159,14 +159,13 @@ const DefaultEditView: React.FC<Props> = (props) => {
               {!isLoading && (
                 <React.Fragment>
                   <div className={`${baseClass}__sidebar-fields`}>
-                    {/* {collection.versions?.drafts && (
-                      <Select
-                        label="Status"
-                        path="_status"
-                        name="_status"
-                        options={statuses}
+                    {(collection.versions?.drafts && collection.versions.drafts.autosave && hasSavePermission) && (
+                      <Autosave
+                        updatedAt={data.updatedAt}
+                        collection={collection}
+                        id={id}
                       />
-                    )} */}
+                    )}
                     <RenderFields
                       operation={isEditing ? 'update' : 'create'}
                       readOnly={!hasSavePermission}
@@ -232,9 +231,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
             </div>
           </div>
         </div>
-        {(collection.versions?.drafts && collection.versions.drafts.autosave && hasSavePermission) && (
-          <Autosave collection={collection} />
-        )}
       </Form>
     </div>
   );

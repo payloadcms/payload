@@ -51,13 +51,27 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
     let nav: StepNavItem[] = [];
 
     if (collection) {
+      let docLabel = '';
+
+      if (doc) {
+        if (useAsTitle) {
+          if (doc[useAsTitle]) {
+            docLabel = doc[useAsTitle];
+          } else {
+            docLabel = '[Untitled]';
+          }
+        } else {
+          docLabel = doc.id;
+        }
+      }
+
       nav = [
         {
           url: `${admin}/collections/${collection.slug}`,
           label: collection.labels.plural,
         },
         {
-          label: doc ? doc[useAsTitle] : '',
+          label: docLabel,
           url: `${admin}/collections/${collection.slug}/${id}`,
         },
         {
