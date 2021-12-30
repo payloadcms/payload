@@ -20,6 +20,8 @@ import VersionsCount from '../../../elements/VersionsCount';
 import Upload from './Upload';
 import { Props } from './types';
 import Autosave from '../../../elements/Autosave';
+import Select from '../../../forms/field-types/Select';
+import { statuses } from '../../../../../versions/baseFields';
 
 import './index.scss';
 
@@ -159,6 +161,14 @@ const DefaultEditView: React.FC<Props> = (props) => {
               {!isLoading && (
                 <React.Fragment>
                   <div className={`${baseClass}__sidebar-fields`}>
+                    {collection.versions?.drafts && (
+                      <Select
+                        label="Status"
+                        path="_status"
+                        name="_status"
+                        options={statuses}
+                      />
+                    )}
                     {(collection.versions?.drafts && collection.versions.drafts.autosave && hasSavePermission) && (
                       <Autosave
                         updatedAt={data.updatedAt}

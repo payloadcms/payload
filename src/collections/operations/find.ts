@@ -70,12 +70,9 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   let useEstimatedCount = false;
 
   if (where) {
-    if (Array.isArray(where.and)) {
-      queryToBuild.where.and = [
-        ...queryToBuild.where.and,
-        ...where.and,
-      ];
-    }
+    queryToBuild.where = {
+      ...where,
+    };
 
     if (Array.isArray(where.AND)) {
       queryToBuild.where.and = [

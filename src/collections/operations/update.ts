@@ -235,17 +235,18 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
 
     // custom id type reset
     result.id = result._id;
-    result = JSON.stringify(result);
-    result = JSON.parse(result);
-    result = sanitizeInternalFields(result);
   }
+
+  result = JSON.stringify(result);
+  result = JSON.parse(result);
+  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // Create version from existing doc
   // /////////////////////////////////////
 
   if (collectionConfig.versions && !shouldSaveDraft) {
-    result = saveCollectionVersion({
+    saveCollectionVersion({
       payload: this,
       config: collectionConfig,
       req,

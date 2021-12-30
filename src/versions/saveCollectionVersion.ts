@@ -2,7 +2,6 @@ import { Payload } from '..';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
-import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
 type Args = {
   payload: Payload
@@ -34,10 +33,9 @@ export const saveCollectionVersion = async ({
   });
 
   delete version._id;
-  let result;
 
   try {
-    result = await VersionsModel.create({
+    await VersionsModel.create({
       parent: id,
       version,
       autosave: false,
@@ -57,10 +55,4 @@ export const saveCollectionVersion = async ({
       maxPerDoc: config.versions.maxPerDoc,
     });
   }
-
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
-  result = sanitizeInternalFields(result);
-
-  return result;
 };

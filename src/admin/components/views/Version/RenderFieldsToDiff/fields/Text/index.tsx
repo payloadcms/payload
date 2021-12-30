@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDiffViewer from 'react-diff-viewer';
+import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer';
 import Label from '../../Label';
 import { Props } from '../types';
 
@@ -7,7 +7,7 @@ import './index.scss';
 
 const baseClass = 'text-diff';
 
-const Text: React.FC<Props> = ({ field, locale, version, comparison, isRichText = false }) => {
+const Text: React.FC<Props> = ({ field, locale, version, comparison, isRichText = false, diffMethod }) => {
   let placeholder = '';
 
   if (version === comparison) placeholder = '[no value]';
@@ -20,7 +20,6 @@ const Text: React.FC<Props> = ({ field, locale, version, comparison, isRichText 
     if (typeof comparison === 'object') comparisonToRender = JSON.stringify(comparison, null, 2);
   }
 
-
   return (
     <div className={baseClass}>
       <Label>
@@ -30,6 +29,7 @@ const Text: React.FC<Props> = ({ field, locale, version, comparison, isRichText 
         {field.label}
       </Label>
       <ReactDiffViewer
+        compareMethod={DiffMethod[diffMethod]}
         oldValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
         newValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}
         splitView

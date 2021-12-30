@@ -39,12 +39,12 @@ const TextCell: React.FC = ({ children }) => (
 
 export const getColumns = (collection: SanitizedCollectionConfig, global: SanitizedGlobalConfig): Column[] => [
   {
-    accessor: 'createdAt',
+    accessor: 'updatedAt',
     components: {
       Heading: (
         <SortColumn
-          label="Created At"
-          name="createdAt"
+          label="Updated At"
+          name="updatedAt"
         />
       ),
       renderCell: (row, data) => (
@@ -83,10 +83,10 @@ export const getColumns = (collection: SanitizedCollectionConfig, global: Saniti
       renderCell: (row, data) => (
         <TextCell>
           {row?.autosave && (
-          <Pill>
-            Autosave
-          </Pill>
-            )}
+            <Pill>
+              Autosave
+            </Pill>
+          )}
         </TextCell>
       ),
     },

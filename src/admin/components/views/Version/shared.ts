@@ -1,4 +1,4 @@
-export const publishedVersionOption = {
-  label: 'Most recently published',
-  value: 'published',
+export const mostRecentVersionOption = {
+  label: 'Most recent',
+  value: 'mostRecent',
 };

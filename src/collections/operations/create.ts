@@ -91,7 +91,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
     collection,
     req,
     data,
-    throwOnMissingFile: false,
+    throwOnMissingFile: !shouldSaveDraft,
     overwriteExistingFiles,
   });
 

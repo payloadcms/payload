@@ -43,37 +43,8 @@ const LocalizedPosts: CollectionConfig = {
     ],
     enableRichTextRelationship: true,
   },
-  versions: {
-    maxPerDoc: 5,
-    retainDeleted: false,
-    drafts: {
-      autosave: {
-        interval: 5,
-      },
-    },
-  },
   access: {
-    read: ({ req: { user } }) => {
-      if (user) {
-        return true;
-      }
-
-      return {
-        or: [
-          {
-            _status: {
-              equals: 'published',
-            },
-          },
-          {
-            _status: {
-              exists: false,
-            },
-          },
-        ],
-      };
-    },
-    readVersions: ({ req: { user } }) => Boolean(user),
+    read: () => true,
   },
   fields: [
     {

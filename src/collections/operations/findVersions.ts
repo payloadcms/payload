@@ -88,7 +88,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(this: Payload, a
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam(args.sort, collectionConfig.timestamps);
+  const [sortProperty, sortOrder] = buildSortParam(args.sort || '-updatedAt', true);
 
   const optionsToExecute = {
     page: page || 1,

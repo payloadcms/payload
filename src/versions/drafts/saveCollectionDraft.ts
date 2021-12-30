@@ -21,7 +21,7 @@ export const saveCollectionDraft = async ({
 
   const existingAutosaveVersion = await VersionsModel.findOne({
     parent: id,
-  });
+  }, {}, { sort: { updatedAt: 'desc' } });
 
   let result;
 

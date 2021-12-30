@@ -10,7 +10,7 @@ import { StepNavItem } from '../../elements/StepNav/types';
 import Meta from '../../utilities/Meta';
 import { LocaleOption, CompareOption, Props } from './types';
 import CompareVersion from './Compare';
-import { publishedVersionOption } from './shared';
+import { mostRecentVersionOption } from './shared';
 import Restore from './Restore';
 import SelectLocales from './SelectLocales';
 import RenderFieldsToDiff from './RenderFieldsToDiff';
@@ -27,7 +27,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const { serverURL, routes: { admin, api }, admin: { dateFormat }, localization } = useConfig();
   const { setStepNav } = useStepNav();
   const { params: { id, versionID } } = useRouteMatch<{ id?: string, versionID: string }>();
-  const [compareValue, setCompareValue] = useState<CompareOption>(publishedVersionOption);
+  const [compareValue, setCompareValue] = useState<CompareOption>(mostRecentVersionOption);
   const [localeOptions] = useState<LocaleOption[]>(() => (localization?.locales ? localization.locales.map((locale) => ({ label: locale, value: locale })) : []));
   const [locales, setLocales] = useState<LocaleOption[]>(localeOptions);
   const { permissions } = useAuth();
@@ -63,11 +63,12 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   }
 
   const useAsTitle = collection?.admin?.useAsTitle || 'id';
-  const compareFetchURL = compareValue?.value === 'published' ? originalDocFetchURL : `${compareBaseURL}/${compareValue.value}`;
+
+  const compareFetchURL = compareValue?.value === 'mostRecent' ? originalDocFetchURL : `${compareBaseURL}/${compareValue.value}`;
 
   const [{ data: doc, isLoading }] = usePayloadAPI(versionFetchURL, { initialParams: { locale: '*', depth: 1 } });
-  const [{ data: originalDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { depth: 1 } });
-  const [{ data: compareDoc }] = usePayloadAPI(compareFetchURL, { initialParams: { locale: '*', depth: 1 } });
+  const [{ data: originalDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { depth: 1, draft: 'true' } });
+  const [{ data: compareDoc }] = usePayloadAPI(compareFetchURL, { initialParams: { locale: '*', depth: 1, draft: 'true' } });
 
   useEffect(() => {
     let nav: StepNavItem[] = [];
@@ -186,7 +187,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
             fieldComponents={fieldComponents}
             fieldPermissions={fieldPermissions}
             version={doc?.version}
-            comparison={compareValue?.value === 'published' ? compareDoc : compareDoc?.version}
+            comparison={compareValue?.value === 'mostRecent' ? compareDoc : compareDoc?.version}
           />
         )}
       </div>

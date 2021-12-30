@@ -44,7 +44,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   }
 
   const useAsTitle = collection?.admin?.useAsTitle || 'id';
-  const [{ data: doc }] = usePayloadAPI(docURL);
+  const [{ data: doc }] = usePayloadAPI(docURL, { initialParams: { draft: 'true' } });
   const [{ data: versionsData, isLoading: isLoadingVersions }, { setParams }] = usePayloadAPI(fetchURL);
 
   useEffect(() => {

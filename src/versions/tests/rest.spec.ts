@@ -32,11 +32,10 @@ describe('Versions - REST', () => {
       'Content-Type': 'application/json',
     };
 
-    const post = await fetch(`${url}/api/localized-posts`, {
+    const post = await fetch(`${url}/api/autosave-posts`, {
       body: JSON.stringify({
-        title: 'Here is a localized post in EN',
+        title: 'Here is an autosave post in EN',
         description: '345j23o4ifj34jf54g',
-        priority: 10,
       }),
       headers,
       method: 'post',
@@ -51,7 +50,7 @@ describe('Versions - REST', () => {
     it('should allow a new version to be created', async () => {
       const title2 = 'Here is an updated post title in EN';
 
-      const updatedPost = await fetch(`${url}/api/localized-posts/${postID}`, {
+      const updatedPost = await fetch(`${url}/api/autosave-posts/${postID}`, {
         body: JSON.stringify({
           title: title2,
         }),
@@ -60,8 +59,9 @@ describe('Versions - REST', () => {
       }).then((res) => res.json());
 
       expect(updatedPost.doc.title).toBe(title2);
+      expect(updatedPost.doc._status).toStrictEqual('draft');
 
-      const versions = await fetch(`${url}/api/localized-posts/versions`, {
+      const versions = await fetch(`${url}/api/autosave-posts/versions`, {
         headers,
       }).then((res) => res.json());
 
@@ -69,7 +69,7 @@ describe('Versions - REST', () => {
     });
 
     it('should allow a version to be retrieved by ID', async () => {
-      const version = await fetch(`${url}/api/localized-posts/versions/${versionID}`, {
+      const version = await fetch(`${url}/api/autosave-posts/versions/${versionID}`, {
         headers,
       }).then((res) => res.json());
 
@@ -80,7 +80,7 @@ describe('Versions - REST', () => {
       const englishTitle = 'Title in ES';
       const spanishTitle = 'Title in ES';
 
-      await fetch(`${url}/api/localized-posts/${postID}`, {
+      await fetch(`${url}/api/autosave-posts/${postID}`, {
         body: JSON.stringify({
           title: englishTitle,
         }),
@@ -88,7 +88,7 @@ describe('Versions - REST', () => {
         method: 'put',
       }).then((res) => res.json());
 
-      const updatedPostES = await fetch(`${url}/api/localized-posts/${postID}?locale=es`, {
+      const updatedPostES = await fetch(`${url}/api/autosave-posts/${postID}?locale=es`, {
         body: JSON.stringify({
           title: spanishTitle,
         }),
@@ -100,7 +100,7 @@ describe('Versions - REST', () => {
 
       const newEnglishTitle = 'New title in EN';
 
-      await fetch(`${url}/api/localized-posts/${postID}`, {
+      await fetch(`${url}/api/autosave-posts/${postID}`, {
         body: JSON.stringify({
           title: newEnglishTitle,
         }),
@@ -108,7 +108,7 @@ describe('Versions - REST', () => {
         method: 'put',
       }).then((res) => res.json());
 
-      const versions = await fetch(`${url}/api/localized-posts/versions?locale=all`, {
+      const versions = await fetch(`${url}/api/autosave-posts/versions?locale=all`, {
         headers,
       }).then((res) => res.json());
 
@@ -121,7 +121,7 @@ describe('Versions - REST', () => {
     it('should allow a version to be restored', async () => {
       const title2 = 'Here is an updated post title in EN';
 
-      const updatedPost = await fetch(`${url}/api/localized-posts/${postID}`, {
+      const updatedPost = await fetch(`${url}/api/autosave-posts/${postID}`, {
         body: JSON.stringify({
           title: title2,
         }),
@@ -131,13 +131,13 @@ describe('Versions - REST', () => {
 
       expect(updatedPost.doc.title).toBe(title2);
 
-      const versions = await fetch(`${url}/api/localized-posts/versions`, {
+      const versions = await fetch(`${url}/api/autosave-posts/versions`, {
         headers,
       }).then((res) => res.json());
 
       versionID = versions.docs[0].id;
 
-      const restore = await fetch(`${url}/api/localized-posts/versions/${versionID}`, {
+      const restore = await fetch(`${url}/api/autosave-posts/versions/${versionID}`, {
         headers,
         method: 'post',
       }).then((res) => res.json());
@@ -145,7 +145,7 @@ describe('Versions - REST', () => {
       expect(restore.message).toBeDefined();
       expect(restore.doc.title).toBeDefined();
 
-      const restoredPost = await fetch(`${url}/api/localized-posts/${postID}`, {
+      const restoredPost = await fetch(`${url}/api/autosave-posts/${postID}`, {
         headers,
       }).then((res) => res.json());
 
