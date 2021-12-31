@@ -12,8 +12,8 @@ const Publish: React.FC<Props> = () => {
   const hasNewerVersions = unpublishedVersions?.totalDocs > 0;
   const canPublish = modified || hasNewerVersions || !publishedDoc;
 
-  const publish = useCallback(() => {
-    submit({
+  const publish = useCallback(async () => {
+    await submit({
       overrides: {
         _status: 'published',
       },

@@ -18,7 +18,7 @@ const SaveDraft: React.FC = () => {
 
   const canSaveDraft = modified;
 
-  const saveDraft = useCallback(() => {
+  const saveDraft = useCallback(async () => {
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`;
     let action;
     let method = 'POST';
@@ -32,7 +32,7 @@ const SaveDraft: React.FC = () => {
       action = `${serverURL}${api}/globals/${global.slug}${search}`;
     }
 
-    submit({
+    await submit({
       action,
       method,
       overrides: {
