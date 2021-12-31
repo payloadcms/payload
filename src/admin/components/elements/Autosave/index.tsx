@@ -19,7 +19,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
   const { fields, dispatchFields } = useWatchForm();
   const modified = useFormModified();
   const locale = useLocale();
-  const { push } = useHistory();
+  const { replace } = useHistory();
 
   const fieldRef = useRef(fields);
   const [saving, setSaving] = useState(false);
@@ -43,11 +43,11 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
 
     if (res.status === 201) {
       const json = await res.json();
-      push(`${admin}/collections/${collection.slug}/${json.doc.id}`);
+      replace(`${admin}/collections/${collection.slug}/${json.doc.id}`);
     } else {
       toast.error('There was a problem while autosaving this document.');
     }
-  }, [collection, serverURL, api, admin, locale, push]);
+  }, [collection, serverURL, api, admin, locale, replace]);
 
   useEffect(() => {
     // If no ID, but this is used for a collection doc,
