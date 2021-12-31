@@ -21,11 +21,38 @@ export const saveCollectionVersion = async ({
 }: Args): Promise<void> => {
   const VersionModel = payload.versions[config.slug];
 
-  const version = await payload.performFieldOperations(config, {
+  let version = docWithLocales;
+
+  if (config.versions?.drafts) {
+    const latestVersion = await VersionModel.findOne({
+      parent: {
+        $eq: docWithLocales.id,
+      },
+      updatedAt: {
+        $gt: docWithLocales.updatedAt,
+      },
+    },
+    {},
+    {
+      lean: true,
+      leanWithId: true,
+      sort: {
+        updatedAt: 'desc',
+      },
+    });
+
+    if (latestVersion) {
+      version = latestVersion;
+      version = JSON.parse(JSON.stringify(version));
+      version = sanitizeInternalFields(version);
+    }
+  }
+
+  version = await payload.performFieldOperations(config, {
     id,
     depth: 0,
     req,
-    data: docWithLocales,
+    data: version,
     hook: 'afterRead',
     operation: 'update',
     overrideAccess: true,

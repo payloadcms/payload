@@ -215,7 +215,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
 
   let createdVersion;
 
-  if (collectionConfig.versions && !collectionConfig.versions.drafts) {
+  if (collectionConfig.versions && !shouldSaveDraft) {
     createdVersion = await saveCollectionVersion({
       payload: this,
       config: collectionConfig,
