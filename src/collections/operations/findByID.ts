@@ -125,8 +125,7 @@ async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs:
 
   if (!result) {
     if (!disableErrors) {
-      if (!hasWhereAccess) throw new NotFound();
-      if (hasWhereAccess) throw new Forbidden();
+      throw new NotFound();
     }
 
     return null;
