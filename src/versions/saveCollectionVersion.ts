@@ -42,7 +42,7 @@ export const saveCollectionVersion = async ({
     });
 
     if (latestVersion) {
-      version = latestVersion;
+      version = latestVersion.version;
       version = JSON.parse(JSON.stringify(version));
       version = sanitizeInternalFields(version);
     }
