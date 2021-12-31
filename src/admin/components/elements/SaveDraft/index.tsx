@@ -12,13 +12,13 @@ const baseClass = 'save-draft';
 const SaveDraft: React.FC = () => {
   const { serverURL, routes: { api } } = useConfig();
   const { submit } = useForm();
-  const { collection, global, id, getVersions } = useDocumentInfo();
+  const { collection, global, id } = useDocumentInfo();
   const modified = useFormModified();
   const locale = useLocale();
 
   const canSaveDraft = modified;
 
-  const saveDraft = useCallback(async () => {
+  const saveDraft = useCallback(() => {
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`;
     let action;
     let method = 'POST';
@@ -32,16 +32,14 @@ const SaveDraft: React.FC = () => {
       action = `${serverURL}${api}/globals/${global.slug}${search}`;
     }
 
-    await submit({
+    submit({
       action,
       method,
       overrides: {
         _status: 'draft',
       },
     });
-
-    getVersions();
-  }, [submit, collection, global, serverURL, api, locale, id, getVersions]);
+  }, [submit, collection, global, serverURL, api, locale, id]);
 
   return (
     <FormSubmit

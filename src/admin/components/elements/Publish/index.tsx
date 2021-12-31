@@ -5,21 +5,20 @@ import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useForm, useFormModified } from '../../forms/Form/context';
 
 const Publish: React.FC<Props> = () => {
-  const { unpublishedVersions, publishedDoc, getVersions } = useDocumentInfo();
+  const { unpublishedVersions, publishedDoc } = useDocumentInfo();
   const { submit } = useForm();
   const modified = useFormModified();
 
   const hasNewerVersions = unpublishedVersions?.totalDocs > 0;
   const canPublish = modified || hasNewerVersions || !publishedDoc;
 
-  const publish = useCallback(async () => {
-    await submit({
+  const publish = useCallback(() => {
+    submit({
       overrides: {
         _status: 'published',
       },
     });
-    getVersions();
-  }, [submit, getVersions]);
+  }, [submit]);
 
   return (
     <FormSubmit

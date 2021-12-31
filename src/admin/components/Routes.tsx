@@ -11,6 +11,7 @@ import StayLoggedIn from './modals/StayLoggedIn';
 import Unlicensed from './views/Unlicensed';
 import Versions from './views/Versions';
 import Version from './views/Version';
+import { DocumentInfoProvider } from './utilities/DocumentInfo';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -144,7 +145,12 @@ const Routes = () => {
                               </Route>
 
                               <Route path={`${match.url}/account`}>
-                                <Account />
+                                <DocumentInfoProvider
+                                  collection={collections.find(({ slug }) => slug === userSlug)}
+                                  id={user.id}
+                                >
+                                  <Account />
+                                </DocumentInfoProvider>
                               </Route>
 
                               {collections.reduce((collectionRoutes, collection) => {
@@ -174,10 +180,12 @@ const Routes = () => {
                                     render={(routeProps) => {
                                       if (permissions?.collections?.[collection.slug]?.create?.permission) {
                                         return (
-                                          <Edit
-                                            {...routeProps}
-                                            collection={collection}
-                                          />
+                                          <DocumentInfoProvider collection={collection}>
+                                            <Edit
+                                              {...routeProps}
+                                              collection={collection}
+                                            />
+                                          </DocumentInfoProvider>
                                         );
                                       }
 
@@ -189,13 +197,19 @@ const Routes = () => {
                                     path={`${match.url}/collections/${collection.slug}/:id`}
                                     exact
                                     render={(routeProps) => {
+                                      const { match: { params: { id } } } = routeProps;
                                       if (permissions?.collections?.[collection.slug]?.read?.permission) {
                                         return (
-                                          <Edit
-                                            isEditing
-                                            {...routeProps}
+                                          <DocumentInfoProvider
                                             collection={collection}
-                                          />
+                                            id={id}
+                                          >
+                                            <Edit
+                                              isEditing
+                                              {...routeProps}
+                                              collection={collection}
+                                            />
+                                          </DocumentInfoProvider>
                                         );
                                       }
 
@@ -259,10 +273,12 @@ const Routes = () => {
                                     render={(routeProps) => {
                                       if (permissions?.globals?.[global.slug]?.read?.permission) {
                                         return (
-                                          <EditGlobal
-                                            {...routeProps}
-                                            global={global}
-                                          />
+                                          <DocumentInfoProvider global={global}>
+                                            <EditGlobal
+                                              {...routeProps}
+                                              global={global}
+                                            />
+                                          </DocumentInfoProvider>
                                         );
                                       }
 

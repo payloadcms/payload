@@ -5,7 +5,6 @@ import { useStepNav } from '../../../elements/StepNav';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
-import { DocumentInfoProvider } from '../../../utilities/DocumentInfo';
 import DefaultEdit from './Default';
 import formatFields from './formatFields';
 import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema';
@@ -13,6 +12,7 @@ import { NegativeFieldGutterProvider } from '../../../forms/FieldTypeGutter/cont
 import { useLocale } from '../../../utilities/Locale';
 import { IndexProps } from './types';
 import { StepNavItem } from '../../../elements/StepNav/types';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection: incomingCollection, isEditing } = props;
@@ -43,6 +43,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { setStepNav } = useStepNav();
   const [initialState, setInitialState] = useState({});
   const { permissions } = useAuth();
+  const { getVersions } = useDocumentInfo();
 
   const onSave = useCallback(async (json: any) => {
     if (!isEditing) {
@@ -50,6 +51,7 @@ const EditView: React.FC<IndexProps> = (props) => {
     } else {
       const state = await buildStateFromSchema(fields, json.doc);
       setInitialState(state);
+      getVersions();
 
       history.push({
         state: {
@@ -57,7 +59,7 @@ const EditView: React.FC<IndexProps> = (props) => {
         },
       });
     }
-  }, [admin, collection, fields, history, isEditing]);
+  }, [admin, collection, fields, history, isEditing, getVersions]);
 
   const [{ data, isLoading, isError }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
@@ -121,30 +123,25 @@ const EditView: React.FC<IndexProps> = (props) => {
   const autosaveEnabled = collection.versions?.drafts && !collection.versions.drafts.autosave;
 
   return (
-    <DocumentInfoProvider
-      id={id}
-      collection={collection}
-    >
-      <NegativeFieldGutterProvider allow>
-        <RenderCustomComponent
-          DefaultComponent={DefaultEdit}
-          CustomComponent={CustomEdit}
-          componentProps={{
-            isLoading,
-            data: dataToRender,
-            collection,
-            permissions: collectionPermissions,
-            isEditing,
-            onSave,
-            initialState,
-            hasSavePermission,
-            apiURL,
-            action,
-            autosaveEnabled,
-          }}
-        />
-      </NegativeFieldGutterProvider>
-    </DocumentInfoProvider>
+    <NegativeFieldGutterProvider allow>
+      <RenderCustomComponent
+        DefaultComponent={DefaultEdit}
+        CustomComponent={CustomEdit}
+        componentProps={{
+          isLoading,
+          data: dataToRender,
+          collection,
+          permissions: collectionPermissions,
+          isEditing,
+          onSave,
+          initialState,
+          hasSavePermission,
+          apiURL,
+          action,
+          autosaveEnabled,
+        }}
+      />
+    </NegativeFieldGutterProvider>
   );
 };
 export default EditView;
