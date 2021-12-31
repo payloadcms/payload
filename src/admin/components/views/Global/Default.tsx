@@ -53,7 +53,9 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
             keywords={`${label}, Payload, CMS`}
           />
           <Eyebrow />
-          <LeaveWithoutSaving />
+          {!(global.versions?.drafts && global.versions?.drafts?.autosave) && (
+            <LeaveWithoutSaving />
+          )}
           <div className={`${baseClass}__edit`}>
             <header className={`${baseClass}__header`}>
               <h1>

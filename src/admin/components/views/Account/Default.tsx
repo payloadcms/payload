@@ -65,7 +65,9 @@ const DefaultAccount: React.FC<Props> = (props) => {
             keywords="Account, Dashboard, Payload, CMS"
           />
           <Eyebrow />
-          <LeaveWithoutSaving />
+          {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) && (
+            <LeaveWithoutSaving />
+          )}
           <div className={`${baseClass}__edit`}>
             {isLoading && (
               <Loading />

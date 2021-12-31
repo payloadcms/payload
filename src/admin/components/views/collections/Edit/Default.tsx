@@ -87,7 +87,9 @@ const DefaultEditView: React.FC<Props> = (props) => {
             keywords={`${collection.labels.singular}, Payload, CMS`}
           />
           <Eyebrow />
-          <LeaveWithoutSaving />
+          {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) && (
+            <LeaveWithoutSaving />
+          )}
           <div className={`${baseClass}__edit`}>
             {isLoading && (
             <Loading />
