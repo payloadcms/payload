@@ -23,7 +23,7 @@ import Autosave from '../../../elements/Autosave';
 
 import './index.scss';
 import Status from '../../../elements/Status';
-import Publish from './Publish';
+import Publish from '../../../elements/Publish';
 
 const baseClass = 'collection-edit';
 
@@ -157,11 +157,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                 {hasSavePermission && (
                   <React.Fragment>
                     {collection.versions.drafts && (
-                      <Publish
-                        id={id}
-                        collection={collection}
-                        updatedAt={data?.updatedAt}
-                      />
+                      <Publish />
                     )}
                     {!collection.versions.drafts && (
                       <FormSubmit>Save</FormSubmit>

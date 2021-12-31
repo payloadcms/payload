@@ -42,6 +42,7 @@ const initialContextState: Context = {
   initialState: {},
   fields: {},
   disabled: false,
+  formRef: null,
 };
 
 export default initialContextState;

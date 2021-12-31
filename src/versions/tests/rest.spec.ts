@@ -145,7 +145,7 @@ describe('Versions - REST', () => {
       expect(restore.message).toBeDefined();
       expect(restore.doc.title).toBeDefined();
 
-      const restoredPost = await fetch(`${url}/api/autosave-posts/${postID}`, {
+      const restoredPost = await fetch(`${url}/api/autosave-posts/${postID}?draft=true`, {
         headers,
       }).then((res) => res.json());
 

@@ -50,6 +50,7 @@ const Form: React.FC<Props> = (props) => {
   const [submitted, setSubmitted] = useState(false);
   const [formattedInitialData, setFormattedInitialData] = useState(buildInitialState(initialData));
 
+  const formRef = useRef<HTMLFormElement>(null);
   const contextRef = useRef({} as FormContextType);
 
   let initialFieldState = {};
@@ -98,14 +99,22 @@ const Form: React.FC<Props> = (props) => {
     return isValid;
   }, [contextRef]);
 
-  const submit = useCallback(async (e): Promise<void> => {
+  const submit = useCallback(async (options = {}, e): Promise<void> => {
+    const {
+      overrides = {},
+    } = options;
+
     if (disabled) {
-      e.preventDefault();
+      if (e) {
+        e.preventDefault();
+      }
       return;
     }
 
-    e.stopPropagation();
-    e.preventDefault();
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
 
     setProcessing(true);
 
@@ -125,11 +134,16 @@ const Form: React.FC<Props> = (props) => {
 
     // If submit handler comes through via props, run that
     if (onSubmit) {
-      onSubmit(fields, reduceFieldsToValues(fields));
+      const data = {
+        ...reduceFieldsToValues(fields),
+        ...overrides,
+      };
+
+      onSubmit(fields, data);
       return;
     }
 
-    const formData = contextRef.current.createFormData();
+    const formData = contextRef.current.createFormData(overrides);
 
     try {
       const res = await requests[method.toLowerCase()](action, {
@@ -269,11 +283,16 @@ const Form: React.FC<Props> = (props) => {
   const getDataByPath = useCallback((path: string) => getDataByPathFunc(contextRef.current.fields, path), [contextRef]);
   const getUnflattenedValues = useCallback(() => reduceFieldsToValues(contextRef.current.fields), [contextRef]);
 
-  const createFormData = useCallback(() => {
+  const createFormData = useCallback((overrides: any = {}) => {
     const data = reduceFieldsToValues(contextRef.current.fields);
 
+    const dataWithOverrides = {
+      ...data,
+      ...overrides,
+    };
+
     // nullAsUndefineds is important to allow uploads and relationship fields to clear themselves
-    const formData = serialize(data, { indices: true, nullsAsUndefineds: false });
+    const formData = serialize(dataWithOverrides, { indices: true, nullsAsUndefineds: false });
     return formData;
   }, [contextRef]);
 
@@ -291,6 +310,7 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.setProcessing = setProcessing;
   contextRef.current.setSubmitted = setSubmitted;
   contextRef.current.disabled = disabled;
+  contextRef.current.formRef = formRef;
 
   useEffect(() => {
     if (initialState) {
@@ -330,10 +350,11 @@ const Form: React.FC<Props> = (props) => {
   return (
     <form
       noValidate
-      onSubmit={contextRef.current.submit}
+      onSubmit={(e) => contextRef.current.submit({}, e)}
       method={method}
       action={action}
       className={classes}
+      ref={formRef}
     >
       <FormContext.Provider value={contextRef.current}>
         <FormWatchContext.Provider value={{
