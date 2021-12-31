@@ -15,7 +15,7 @@ import './index.scss';
 
 const baseClass = 'autosave';
 
-const Autosave: React.FC<Props> = ({ collection, global, id, updatedAt }) => {
+const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdatedAt }) => {
   const { serverURL, routes: { api, admin } } = useConfig();
   const { versions, getVersions } = useDocumentInfo();
   const { fields, dispatchFields } = useWatchForm();
@@ -121,10 +121,10 @@ const Autosave: React.FC<Props> = ({ collection, global, id, updatedAt }) => {
   useEffect(() => {
     if (versions?.docs?.[0]) {
       setLastSaved(new Date(versions.docs[0].updatedAt).getTime());
-    } else if (updatedAt) {
-      setLastSaved(new Date(updatedAt).getTime());
+    } else if (publishedDocUpdatedAt) {
+      setLastSaved(new Date(publishedDocUpdatedAt).getTime());
     }
-  }, [updatedAt, versions]);
+  }, [publishedDocUpdatedAt, versions]);
 
   return (
     <div className={baseClass}>

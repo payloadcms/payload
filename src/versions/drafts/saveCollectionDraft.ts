@@ -69,6 +69,8 @@ export const saveCollectionDraft = async ({
   }
 
   result = result.version;
+  result = JSON.stringify(result);
+  result = JSON.parse(result);
   result.id = id;
 
   return result;

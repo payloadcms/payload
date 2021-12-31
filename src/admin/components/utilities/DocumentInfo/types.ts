@@ -1,4 +1,4 @@
-import { SanitizedCollectionConfig, TypeWithID } from '../../../../collections/config/types';
+import { SanitizedCollectionConfig, TypeWithID, TypeWithTimestamps } from '../../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 import { PaginatedDocs } from '../../../../mongoose/types';
 import { TypeWithVersion } from '../../../../versions/types';
@@ -13,7 +13,7 @@ export type ContextType = {
   preferencesKey?: string
   versions?: PaginatedDocs<Version>
   unpublishedVersions?: PaginatedDocs<Version>
-  publishedDoc?: TypeWithID
+  publishedDoc?: TypeWithID & TypeWithTimestamps
   getVersions: () => void
 }
 

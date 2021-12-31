@@ -5,5 +5,5 @@ export type Props = {
   collection?: SanitizedCollectionConfig,
   global?: SanitizedGlobalConfig,
   id?: string | number
-  updatedAt: string
+  publishedDocUpdatedAt: string
 }

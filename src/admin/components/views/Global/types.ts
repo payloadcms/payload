@@ -14,5 +14,4 @@ export type Props = {
   action: string
   apiURL: string
   initialState: Fields
-  submissionCount: number
 }

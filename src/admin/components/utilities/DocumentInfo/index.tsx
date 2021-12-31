@@ -6,6 +6,7 @@ import qs from 'qs';
 import { PaginatedDocs } from '../../../../mongoose/types';
 import { ContextType, Props, Version } from './types';
 import { TypeWithID } from '../../../../globals/config/types';
+import { TypeWithTimestamps } from '../../../../collections/config/types';
 
 const Context = createContext({} as ContextType);
 
@@ -16,10 +17,11 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   id,
 }) => {
   const { serverURL, routes: { api } } = useConfig();
-  const [publishedDoc, setPublishedDoc] = useState<TypeWithID>(null);
+  const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null);
   const [versions, setVersions] = useState<PaginatedDocs<Version>>(null);
   const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version>>(null);
 
+  const baseURL = `${serverURL}${api}`;
   let slug;
   let type;
   let preferencesKey;
@@ -40,11 +42,11 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   }
 
   const getVersions = useCallback(async () => {
-    const baseURL = `${serverURL}${api}`;
     let versionFetchURL;
     let publishedFetchURL;
-    let shouldFetch = false;
-    let hasDrafts = false;
+    let shouldFetchVersions = false;
+    let unpublishedVersionJSON = null;
+    let versionJSON = null;
 
     const params = {
       where: {
@@ -54,15 +56,13 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     };
 
     if (global) {
-      shouldFetch = Boolean(global?.versions);
-      hasDrafts = Boolean(global?.versions?.drafts);
+      shouldFetchVersions = Boolean(global?.versions);
       versionFetchURL = `${baseURL}/globals/${global.slug}/versions`;
       publishedFetchURL = `${baseURL}/globals/${global.slug}`;
     }
 
     if (collection) {
-      shouldFetch = Boolean(collection?.versions);
-      hasDrafts = Boolean(collection?.versions?.drafts);
+      shouldFetchVersions = Boolean(collection?.versions);
       versionFetchURL = `${baseURL}/${collection.slug}/versions`;
       publishedFetchURL = `${baseURL}/${collection.slug}/${id}`;
 
@@ -73,31 +73,10 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       });
     }
 
-    if (shouldFetch) {
-      let versionJSON = null;
-      let unpublishedVersionJSON = null;
-      let publishedJSON = null;
+    const publishedJSON = await fetch(publishedFetchURL).then((res) => res.json());
 
-      const promises = [
-        fetch(versionFetchURL).then(async (res) => {
-          if (res.status === 200) {
-            versionJSON = await res.json();
-          }
-        }),
-      ];
-
-      if (hasDrafts) {
-        // Get the published version of the doc
-        promises.push(
-          fetch(`${publishedFetchURL}`).then(async (res) => {
-            if (res.status === 200) {
-              publishedJSON = await res.json();
-            }
-          }),
-        );
-      }
-
-      await Promise.all(promises);
+    if (shouldFetchVersions) {
+      versionJSON = await fetch(versionFetchURL).then((res) => res.json());
 
       if (publishedJSON?.updatedAt) {
         const newerVersionParams = {
@@ -122,12 +101,12 @@ export const DocumentInfoProvider: React.FC<Props> = ({
           unpublishedVersionJSON = await newerVersionRes.json();
         }
       }
-
-      setVersions(versionJSON);
-      setUnpublishedVersions(unpublishedVersionJSON);
-      setPublishedDoc(publishedJSON);
     }
-  }, [api, global, collection, serverURL, id]);
+
+    setPublishedDoc(publishedJSON);
+    setVersions(versionJSON);
+    setUnpublishedVersions(unpublishedVersionJSON);
+  }, [global, collection, id, baseURL]);
 
   useEffect(() => {
     getVersions();

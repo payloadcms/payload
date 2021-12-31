@@ -25,12 +25,14 @@ import './index.scss';
 import Status from '../../../elements/Status';
 import Publish from '../../../elements/Publish';
 import SaveDraft from '../../../elements/SaveDraft';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 
 const baseClass = 'collection-edit';
 
 const DefaultEditView: React.FC<Props> = (props) => {
   const { params: { id } = {} } = useRouteMatch<Record<string, string>>();
   const { admin: { dateFormat }, routes: { admin } } = useConfig();
+  const { publishedDoc } = useDocumentInfo();
 
   const {
     collection,
@@ -185,7 +187,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         <Status />
                         {(collection.versions.drafts.autosave && hasSavePermission) && (
                           <Autosave
-                            updatedAt={data.updatedAt}
+                            publishedDocUpdatedAt={publishedDoc?.updatedAt}
                             collection={collection}
                             id={id}
                           />
@@ -240,10 +242,10 @@ const DefaultEditView: React.FC<Props> = (props) => {
                               <div>{format(new Date(data.updatedAt), dateFormat)}</div>
                             </li>
                           )}
-                          {data.createdAt && (
+                          {publishedDoc?.createdAt && (
                             <li>
                               <div className={`${baseClass}__label`}>Created</div>
-                              <div>{format(new Date(data.createdAt), dateFormat)}</div>
+                              <div>{format(new Date(publishedDoc?.createdAt), dateFormat)}</div>
                             </li>
                           )}
                         </React.Fragment>

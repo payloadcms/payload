@@ -19,7 +19,6 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { setStepNav } = useStepNav();
   const { permissions } = useAuth();
   const [initialState, setInitialState] = useState({});
-  const [submissionCount, setSubmissionCount] = useState(0);
 
   const {
     serverURL,
@@ -46,7 +45,6 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const onSave = async (json) => {
     const state = await buildStateFromSchema(fields, json.doc);
     setInitialState(state);
-    setSubmissionCount((count) => count + 1);
   };
 
   const [{ data }] = usePayloadAPI(
@@ -91,7 +89,6 @@ const GlobalView: React.FC<IndexProps> = (props) => {
             onSave,
             apiURL: `${serverURL}${api}/globals/${slug}?depth=0`,
             action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
-            submissionCount,
           }}
         />
       </NegativeFieldGutterProvider>

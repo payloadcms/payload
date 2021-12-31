@@ -21,7 +21,7 @@ const baseClass = 'global-edit';
 const DefaultGlobalView: React.FC<Props> = (props) => {
   const { admin: { dateFormat } } = useConfig();
   const {
-    global, data, onSave, permissions, action, apiURL, initialState, submissionCount,
+    global, data, onSave, permissions, action, apiURL, initialState,
   } = props;
 
   const {
@@ -104,10 +104,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                   {versions && (
                     <li>
                       <div className={`${baseClass}__label`}>Versions</div>
-                      <VersionsCount
-                        submissionCount={submissionCount}
-                        global={global}
-                      />
+                      <VersionsCount global={global} />
                     </li>
                   )}
                   {data && (
