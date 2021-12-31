@@ -68,8 +68,9 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
         const timeToSaveAgain = lastSavedDate.getTime();
 
         if (Date.now() >= timeToSaveAgain) {
+          setSaving(true);
+
           setTimeout(async () => {
-            setSaving(true);
             let url: string;
             let method: string;
             let entityFields: Field[] = [];
