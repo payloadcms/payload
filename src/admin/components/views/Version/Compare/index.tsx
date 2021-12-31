@@ -5,7 +5,7 @@ import format from 'date-fns/format';
 import { Props } from './types';
 import ReactSelect from '../../../elements/ReactSelect';
 import { PaginatedDocs } from '../../../../../mongoose/types';
-import { mostRecentVersionOption } from '../shared';
+import { mostRecentVersionOption, publishedVersionOption } from '../shared';
 
 import './index.scss';
 
@@ -14,6 +14,7 @@ const baseClass = 'compare-version';
 const maxResultsPerRequest = 10;
 
 const baseOptions = [
+  publishedVersionOption,
   mostRecentVersionOption,
 ];
 

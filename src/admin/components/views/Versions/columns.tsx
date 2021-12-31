@@ -80,20 +80,24 @@ export const getColumns = (collection: SanitizedCollectionConfig, global: Saniti
           disable
         />
       ),
-      renderCell: (row, data) => (
+      renderCell: (row) => (
         <TextCell>
           {row?.autosave && (
-            <Pill>
-              Autosave
-            </Pill>
+            <React.Fragment>
+              <Pill>
+                Autosave
+              </Pill>
+              &nbsp;&nbsp;
+            </React.Fragment>
           )}
-          &nbsp;
           {row?.version._status === 'published' && (
-            <Pill pillStyle="success">
-              Published
-            </Pill>
+            <React.Fragment>
+              <Pill pillStyle="success">
+                Published
+              </Pill>
+              &nbsp;&nbsp;
+            </React.Fragment>
           )}
-          &nbsp;
           {row?.version._status === 'draft' && (
             <Pill>
               Draft

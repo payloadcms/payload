@@ -10,7 +10,7 @@ import { StepNavItem } from '../../elements/StepNav/types';
 import Meta from '../../utilities/Meta';
 import { LocaleOption, CompareOption, Props } from './types';
 import CompareVersion from './Compare';
-import { mostRecentVersionOption } from './shared';
+import { publishedVersionOption } from './shared';
 import Restore from './Restore';
 import SelectLocales from './SelectLocales';
 import RenderFieldsToDiff from './RenderFieldsToDiff';
@@ -27,7 +27,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const { serverURL, routes: { admin, api }, admin: { dateFormat }, localization } = useConfig();
   const { setStepNav } = useStepNav();
   const { params: { id, versionID } } = useRouteMatch<{ id?: string, versionID: string }>();
-  const [compareValue, setCompareValue] = useState<CompareOption>(mostRecentVersionOption);
+  const [compareValue, setCompareValue] = useState<CompareOption>(publishedVersionOption);
   const [localeOptions] = useState<LocaleOption[]>(() => (localization?.locales ? localization.locales.map((locale) => ({ label: locale, value: locale })) : []));
   const [locales, setLocales] = useState<LocaleOption[]>(localeOptions);
   const { permissions } = useAuth();
@@ -64,10 +64,11 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
   const useAsTitle = collection?.admin?.useAsTitle || 'id';
 
-  const compareFetchURL = compareValue?.value === 'mostRecent' ? originalDocFetchURL : `${compareBaseURL}/${compareValue.value}`;
+  const compareFetchURL = compareValue?.value === 'mostRecent' || compareValue?.value === 'published' ? originalDocFetchURL : `${compareBaseURL}/${compareValue.value}`;
 
   const [{ data: doc, isLoading }] = usePayloadAPI(versionFetchURL, { initialParams: { locale: '*', depth: 1 } });
-  const [{ data: originalDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { depth: 1, draft: 'true' } });
+  const [{ data: publishedDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { depth: 1 } });
+  const [{ data: mostRecentDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { depth: 1, draft: true } });
   const [{ data: compareDoc }] = usePayloadAPI(compareFetchURL, { initialParams: { locale: '*', depth: 1, draft: 'true' } });
 
   useEffect(() => {
@@ -76,15 +77,15 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     if (collection) {
       let docLabel = '';
 
-      if (originalDoc) {
+      if (publishedDoc) {
         if (useAsTitle) {
-          if (originalDoc[useAsTitle]) {
-            docLabel = originalDoc[useAsTitle];
+          if (publishedDoc[useAsTitle]) {
+            docLabel = publishedDoc[useAsTitle];
           } else {
             docLabel = '[Untitled]';
           }
         } else {
-          docLabel = originalDoc.id;
+          docLabel = publishedDoc.id;
         }
       }
 
@@ -124,7 +125,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     }
 
     setStepNav(nav);
-  }, [setStepNav, collection, global, useAsTitle, dateFormat, doc, originalDoc, admin, id]);
+  }, [setStepNav, collection, global, useAsTitle, dateFormat, doc, publishedDoc, admin, id]);
 
   let metaTitle: string;
   let metaDesc: string;
@@ -138,6 +139,16 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   if (global) {
     metaTitle = `Version - ${formattedCreatedAt} - ${entityLabel}`;
     metaDesc = `Viewing version for the global ${entityLabel}`;
+  }
+
+  let comparison = compareDoc?.version;
+
+  if (compareValue?.value === 'mostRecent') {
+    comparison = mostRecentDoc;
+  }
+
+  if (compareValue?.value === 'published') {
+    comparison = publishedDoc;
   }
 
   return (
@@ -191,7 +202,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
             fieldComponents={fieldComponents}
             fieldPermissions={fieldPermissions}
             version={doc?.version}
-            comparison={compareValue?.value === 'mostRecent' ? compareDoc : compareDoc?.version}
+            comparison={comparison}
           />
         )}
       </div>
