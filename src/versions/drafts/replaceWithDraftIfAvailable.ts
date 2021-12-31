@@ -66,7 +66,12 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     // Disregard all other draft content at this point,
     // Only interested in the version itself.
     // Operations will handle firing hooks, etc.
-    return draft.version;
+    return {
+      id: doc.id,
+      ...draft.version,
+      createdAt: draft.createdAt,
+      updatedAt: draft.updatedAt,
+    };
   }
 
   return doc;

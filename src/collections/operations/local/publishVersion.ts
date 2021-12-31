@@ -13,7 +13,7 @@ export type Options = {
   showHiddenFields?: boolean
 }
 
-export default async function restoreVersion<T extends TypeWithVersion<T> = any>(options: Options): Promise<T> {
+export default async function publishVersion<T extends TypeWithVersion<T> = any>(options: Options): Promise<T> {
   const {
     collection: collectionSlug,
     depth,
@@ -44,5 +44,5 @@ export default async function restoreVersion<T extends TypeWithVersion<T> = any>
     },
   };
 
-  return this.operations.collections.restoreVersion(args);
+  return this.operations.collections.publishVersion(args);
 }

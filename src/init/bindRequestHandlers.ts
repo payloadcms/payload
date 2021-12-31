@@ -15,14 +15,14 @@ import find from '../collections/requestHandlers/find';
 import findByID from '../collections/requestHandlers/findByID';
 import findVersions from '../collections/requestHandlers/findVersions';
 import findVersionByID from '../collections/requestHandlers/findVersionByID';
-import restoreVersion from '../collections/requestHandlers/restoreVersion';
+import publishVersion from '../collections/requestHandlers/publishVersion';
 import update from '../collections/requestHandlers/update';
 import deleteHandler from '../collections/requestHandlers/delete';
 
 import findOne from '../globals/requestHandlers/findOne';
 import findGlobalVersions from '../globals/requestHandlers/findVersions';
 import findGlobalVersionByID from '../globals/requestHandlers/findVersionByID';
-import restoreGlobalVersion from '../globals/requestHandlers/restoreVersion';
+import publishGlobalVersion from '../globals/requestHandlers/publishVersion';
 import globalUpdate from '../globals/requestHandlers/update';
 import { Payload } from '../index';
 import preferenceUpdate from '../preferences/requestHandlers/update';
@@ -36,7 +36,7 @@ export type RequestHandlers = {
     findByID: typeof findByID,
     findVersions: typeof findVersions
     findVersionByID: typeof findVersionByID,
-    restoreVersion: typeof restoreVersion,
+    publishVersion: typeof publishVersion,
     update: typeof update,
     delete: typeof deleteHandler,
     auth: {
@@ -58,7 +58,7 @@ export type RequestHandlers = {
     update: typeof globalUpdate,
     findVersions: typeof findGlobalVersions
     findVersionByID: typeof findGlobalVersionByID
-    restoreVersion: typeof restoreGlobalVersion
+    publishVersion: typeof publishGlobalVersion
   },
   preferences: {
     update: typeof preferenceUpdate,
@@ -75,7 +75,7 @@ function bindRequestHandlers(ctx: Payload): void {
       findByID: findByID.bind(ctx),
       findVersions: findVersions.bind(ctx),
       findVersionByID: findVersionByID.bind(ctx),
-      restoreVersion: restoreVersion.bind(ctx),
+      publishVersion: publishVersion.bind(ctx),
       update: update.bind(ctx),
       delete: deleteHandler.bind(ctx),
       auth: {
@@ -97,7 +97,7 @@ function bindRequestHandlers(ctx: Payload): void {
       update: globalUpdate.bind(ctx),
       findVersions: findGlobalVersions.bind(ctx),
       findVersionByID: findGlobalVersionByID.bind(ctx),
-      restoreVersion: restoreGlobalVersion.bind(ctx),
+      publishVersion: publishGlobalVersion.bind(ctx),
     },
     preferences: {
       update: preferenceUpdate.bind(ctx),

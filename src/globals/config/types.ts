@@ -4,7 +4,7 @@ import { DeepRequired } from 'ts-essentials';
 import { PayloadRequest } from '../../express/types';
 import { Access, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
-import { IncomingGlobalVersions } from '../../versions/types';
+import { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types';
 
 export type TypeWithID = {
   id: string
@@ -72,9 +72,7 @@ export type GlobalConfig = {
 
 export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'versions'> {
   fields: Field[]
-  versions?: {
-    max?: number
-  }
+  versions: SanitizedGlobalVersions
 }
 
 export type Globals = {

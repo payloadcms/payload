@@ -13,13 +13,13 @@ export default function (globalConfig: SanitizedGlobalConfig) {
     };
 
     try {
-      const doc = await this.operations.globals.restoreVersion(options);
+      const doc = await this.operations.globals.publishVersion(options);
       return res.json(doc);
     } catch (error) {
       return next(error);
     }
   }
 
-  const restoreVersionHandler = handler.bind(this);
-  return restoreVersionHandler;
+  const publishVersionHandler = handler.bind(this);
+  return publishVersionHandler;
 }

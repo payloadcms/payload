@@ -9,13 +9,15 @@ import { Props } from './types';
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import { Field } from '../../../../fields/config/types';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
 
 import './index.scss';
 
 const baseClass = 'autosave';
 
-const Autosave: React.FC<Props> = ({ collection, global, id, updatedAt }) => {
+const Autosave: React.FC<Props> = ({ collection, global, id }) => {
   const { serverURL, routes: { api, admin } } = useConfig();
+  const { versions, data } = useDocumentInfo();
   const { fields, dispatchFields } = useWatchForm();
   const modified = useFormModified();
   const locale = useLocale();
@@ -49,40 +51,6 @@ const Autosave: React.FC<Props> = ({ collection, global, id, updatedAt }) => {
     }
   }, [collection, serverURL, api, admin, locale, push]);
 
-  const getLastSaved = useCallback(async () => {
-    let url: string;
-
-    if (collection && id) {
-      url = `${serverURL}${api}/${collection.slug}/versions?where[parent][equals]=${id}&depth=0`;
-    }
-
-    if (global) {
-      url = `${serverURL}${api}/globals/${global.slug}/versions?depth=0`;
-    }
-
-    if (url) {
-      const res = await fetch(url);
-
-      if (res.status === 200) {
-        const json = await res.json();
-
-        if (json.docs[0]) {
-          return setLastSaved(new Date(json.docs[0].updatedAt).getTime());
-        }
-      }
-    }
-
-    if (updatedAt) return setLastSaved(new Date(updatedAt).getTime());
-
-    return null;
-  }, [collection, global, id, api, serverURL, updatedAt]);
-
-  // On mount, check for a recent autosave
-  // Need it to store the lastSaved date
-  useEffect(() => {
-    getLastSaved();
-  }, [getLastSaved]);
-
   useEffect(() => {
     // If no ID, but this is used for a collection doc,
     // Immediately save it and set lastSaved
@@ -106,21 +74,19 @@ const Autosave: React.FC<Props> = ({ collection, global, id, updatedAt }) => {
           let entityFields: Field[] = [];
 
           if (collection && id) {
-            url = `${serverURL}${api}/${collection.slug}/${id}?draft=true`;
+            url = `${serverURL}${api}/${collection.slug}/${id}?draft=true&autosave=true`;
             method = 'PUT';
             entityFields = collection.fields;
           }
 
           if (global) {
-            url = `${serverURL}${api}/globals/${global.slug}?draft=true`;
+            url = `${serverURL}${api}/globals/${global.slug}?draft=true&autosave=true`;
             method = 'POST';
             entityFields = global.fields;
           }
 
           if (url) {
-            setTimeout(() => {
-              setSaving(false);
-            }, 1000);
+            setSaving(false);
 
             const body = {
               ...reduceFieldsToValues(fieldRef.current),
@@ -146,6 +112,11 @@ const Autosave: React.FC<Props> = ({ collection, global, id, updatedAt }) => {
       }
     }
   }, [fields, modified, interval, lastSaved, serverURL, api, collection, global, id, saving, dispatchFields]);
+
+  useEffect(() => {
+    if (versions?.docs?.[0]) setLastSaved(new Date(versions.docs[0].updatedAt).getTime());
+    if (data?.updatedAt) setLastSaved(new Date(data?.updatedAt).getTime());
+  }, [data, versions]);
 
   return (
     <div className={baseClass}>

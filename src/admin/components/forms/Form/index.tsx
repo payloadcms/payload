@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React, {
   useReducer, useEffect, useRef, useState, useCallback,
 } from 'react';

@@ -124,9 +124,8 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   return (
     <DocumentInfoProvider
-      id={id}
-      slug={collection.slug}
-      type="collection"
+      data={!isLoading ? dataToRender : undefined}
+      collection={collection}
     >
       <NegativeFieldGutterProvider allow>
         <RenderCustomComponent

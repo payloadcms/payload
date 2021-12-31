@@ -17,6 +17,7 @@ export default async function update(req: PayloadRequest, res: Response, next: N
       data: req.body,
       depth: req.query.depth,
       draft: req.query.draft === 'true',
+      autosave: req.query.autosave === 'true',
     });
 
     return res.status(httpStatus.OK).json({

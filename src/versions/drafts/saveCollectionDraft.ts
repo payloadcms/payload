@@ -9,6 +9,7 @@ type Args = {
   req: PayloadRequest
   data: any
   id: string | number
+  autosave: boolean
 }
 
 export const saveCollectionDraft = async ({
@@ -16,26 +17,30 @@ export const saveCollectionDraft = async ({
   config,
   id,
   data,
+  autosave,
 }: Args): Promise<void> => {
   const VersionsModel = payload.versions[config.slug] as CollectionModel;
 
-  const existingAutosaveVersion = await VersionsModel.findOne({
-    parent: id,
-  }, {}, { sort: { updatedAt: 'desc' } });
+  let existingAutosaveVersion;
+
+  if (autosave) {
+    existingAutosaveVersion = await VersionsModel.findOne({
+      parent: id,
+    }, {}, { sort: { updatedAt: 'desc' } });
+  }
 
   let result;
 
   try {
     // If there is an existing autosave document,
     // Update it
-    if (existingAutosaveVersion?.autosave === true) {
+    if (autosave && existingAutosaveVersion?.autosave === true) {
       result = await VersionsModel.findByIdAndUpdate(
         {
           _id: existingAutosaveVersion._id,
         },
         {
           version: data,
-          autosave: true,
         },
         { new: true, lean: true },
       );
@@ -44,11 +49,11 @@ export const saveCollectionDraft = async ({
       result = await VersionsModel.create({
         parent: id,
         version: data,
-        autosave: true,
+        autosave: Boolean(autosave),
       });
     }
   } catch (err) {
-    payload.logger.error(`There was an error while autosaving the ${config.labels.singular} with ID ${id}.`);
+    payload.logger.error(`There was an error while creating a draft ${config.labels.singular} with ID ${id}.`);
     payload.logger.error(err);
   }
 

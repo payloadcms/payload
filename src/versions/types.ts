@@ -36,4 +36,6 @@ export type TypeWithVersion<T> = {
   id: string
   parent: string | number
   version: T
+  createdAt: string
+  updatedAt: string
 }

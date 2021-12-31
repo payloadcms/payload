@@ -16,14 +16,14 @@ import find from '../collections/operations/find';
 import findByID from '../collections/operations/findByID';
 import findVersions from '../collections/operations/findVersions';
 import findVersionByID from '../collections/operations/findVersionByID';
-import restoreVersion from '../collections/operations/restoreVersion';
+import publishVersion from '../collections/operations/publishVersion';
 import update from '../collections/operations/update';
 import deleteHandler from '../collections/operations/delete';
 
 import findOne from '../globals/operations/findOne';
 import findGlobalVersions from '../globals/operations/findVersions';
 import findGlobalVersionByID from '../globals/operations/findVersionByID';
-import restoreGlobalVersion from '../globals/operations/restoreVersion';
+import publishGlobalVersion from '../globals/operations/publishVersion';
 import globalUpdate from '../globals/operations/update';
 
 import preferenceUpdate from '../preferences/operations/update';
@@ -37,7 +37,7 @@ export type Operations = {
     findByID: typeof findByID
     findVersions: typeof findVersions
     findVersionByID: typeof findVersionByID
-    restoreVersion: typeof restoreVersion
+    publishVersion: typeof publishVersion
     update: typeof update
     delete: typeof deleteHandler
     auth: {
@@ -58,7 +58,7 @@ export type Operations = {
     findOne: typeof findOne
     findVersions: typeof findGlobalVersions
     findVersionByID: typeof findGlobalVersionByID
-    restoreVersion: typeof restoreGlobalVersion
+    publishVersion: typeof publishGlobalVersion
     update: typeof globalUpdate
   }
   preferences: {
@@ -76,7 +76,7 @@ function bindOperations(ctx: Payload): void {
       findByID: findByID.bind(ctx),
       findVersions: findVersions.bind(ctx),
       findVersionByID: findVersionByID.bind(ctx),
-      restoreVersion: restoreVersion.bind(ctx),
+      publishVersion: publishVersion.bind(ctx),
       update: update.bind(ctx),
       delete: deleteHandler.bind(ctx),
       auth: {
@@ -97,7 +97,7 @@ function bindOperations(ctx: Payload): void {
       findOne: findOne.bind(ctx),
       findVersions: findGlobalVersions.bind(ctx),
       findVersionByID: findGlobalVersionByID.bind(ctx),
-      restoreVersion: restoreGlobalVersion.bind(ctx),
+      publishVersion: publishGlobalVersion.bind(ctx),
       update: globalUpdate.bind(ctx),
     },
     preferences: {

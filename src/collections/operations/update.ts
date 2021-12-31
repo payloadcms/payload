@@ -22,6 +22,7 @@ export type Arguments = {
   showHiddenFields?: boolean
   overwriteExistingFiles?: boolean
   draft?: boolean
+  autosave?: boolean
 }
 
 async function update(this: Payload, incomingArgs: Arguments): Promise<Document> {
@@ -58,6 +59,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
     showHiddenFields,
     overwriteExistingFiles = false,
     draft: draftArg = false,
+    autosave = false,
   } = args;
 
   if (!id) {
@@ -216,6 +218,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
       req,
       data: result,
       id,
+      autosave,
     });
   } else {
     try {

@@ -16,6 +16,7 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
     overrideAccess,
     showHiddenFields,
     draft: draftArg,
+    autosave,
   } = args;
 
   const shouldSaveDraft = Boolean(draftArg && globalConfig.versions.drafts);
@@ -126,6 +127,7 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
       payload: this,
       config: globalConfig,
       data: result,
+      autosave,
     });
   } else if (global) {
     global = await Model.findOneAndUpdate(

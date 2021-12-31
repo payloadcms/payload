@@ -166,6 +166,7 @@ function registerCollections(): void {
         id: { type: new GraphQLNonNull(idType) },
         data: { type: collection.graphQL.updateMutationInputType },
         draft: { type: GraphQLBoolean },
+        autosave: { type: GraphQLBoolean },
       },
       resolve: update(collection),
     };

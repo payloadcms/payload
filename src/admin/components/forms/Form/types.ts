@@ -50,7 +50,7 @@ export type GetField = (path: string) => Field;
 export type GetData = () => Data;
 export type GetSiblingData = (path: string) => Data;
 export type GetUnflattenedValues = () => Data;
-export type GetDataByPath = (path: string) => unknown;
+export type GetDataByPath = <T = unknown>(path: string) => T;
 export type SetModified = (modified: boolean) => void;
 export type SetSubmitted = (submitted: boolean) => void;
 export type SetProcessing = (processing: boolean) => void;

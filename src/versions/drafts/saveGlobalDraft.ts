@@ -6,30 +6,35 @@ type Args = {
   payload: Payload
   config?: SanitizedGlobalConfig
   data: any
+  autosave: boolean
 }
 
 export const saveGlobalDraft = async ({
   payload,
   config,
   data,
+  autosave,
 }: Args): Promise<void> => {
   const VersionsModel = payload.versions[config.slug];
 
-  const existingAutosaveVersion = await VersionsModel.findOne();
+  let existingAutosaveVersion;
+
+  if (autosave) {
+    existingAutosaveVersion = await VersionsModel.findOne();
+  }
 
   let result;
 
   try {
     // If there is an existing autosave document,
     // Update it
-    if (existingAutosaveVersion?.autosave === true) {
+    if (autosave && existingAutosaveVersion?.autosave === true) {
       result = await VersionsModel.findByIdAndUpdate(
         {
           _id: existingAutosaveVersion._id,
         },
         {
           version: data,
-          autosave: true,
         },
         { new: true, lean: true },
       );
@@ -37,11 +42,11 @@ export const saveGlobalDraft = async ({
     } else {
       result = await VersionsModel.create({
         version: data,
-        autosave: true,
+        autosave: Boolean(autosave),
       });
     }
   } catch (err) {
-    payload.logger.error(`There was an error while saving a version for the Global ${config.label}.`);
+    payload.logger.error(`There was an error while saving a draft for the Global ${config.label}.`);
     payload.logger.error(err);
   }
 

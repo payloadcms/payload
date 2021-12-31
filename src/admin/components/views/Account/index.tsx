@@ -71,9 +71,8 @@ const AccountView: React.FC = () => {
 
   return (
     <DocumentInfoProvider
-      type="collection"
-      slug={collection?.slug}
-      id={user?.id}
+      data={!isLoading ? dataToRender : undefined}
+      collection={collection}
     >
       <NegativeFieldGutterProvider allow>
         <RenderCustomComponent

@@ -23,7 +23,7 @@ export type Arguments = {
 
 // TODO: finish
 
-async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<PaginatedDocs<T>> {
+async function publishVersion<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<PaginatedDocs<T>> {
   const {
     where,
     page,
@@ -159,4 +159,4 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
   return result;
 }
 
-export default restoreVersion;
+export default publishVersion;

@@ -49,7 +49,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     setSubmissionCount((count) => count + 1);
   };
 
-  const [{ data }] = usePayloadAPI(
+  const [{ data, isLoading }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
     { initialParams: { 'fallback-locale': 'null', depth: 0 } },
   );
@@ -77,8 +77,8 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   return (
     <DocumentInfoProvider
-      slug={slug}
-      type="global"
+      global={global}
+      data={!isLoading ? dataToRender : undefined}
     >
       <NegativeFieldGutterProvider allow>
         <RenderCustomComponent
