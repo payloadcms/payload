@@ -13,6 +13,7 @@ const Autosave: CollectionConfig = {
       'description',
       'createdAt',
     ],
+    preview: () => 'https://payloadcms.com',
   },
   versions: {
     maxPerDoc: 35,

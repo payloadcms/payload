@@ -34,7 +34,6 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const [fields] = useState(() => formatFields(incomingCollection, isEditing));
   const [collection] = useState(() => ({ ...incomingCollection, fields }));
-  const [submissionCount, setSubmissionCount] = useState(0);
 
   const locale = useLocale();
   const { serverURL, routes: { admin, api } } = useConfig();
@@ -51,7 +50,6 @@ const EditView: React.FC<IndexProps> = (props) => {
     } else {
       const state = await buildStateFromSchema(fields, json.doc);
       setInitialState(state);
-      setSubmissionCount((count) => count + 1);
 
       history.push({
         state: {
@@ -117,10 +115,10 @@ const EditView: React.FC<IndexProps> = (props) => {
   }
 
   const collectionPermissions = permissions?.collections?.[slug];
-
   const apiURL = `${serverURL}${api}/${slug}/${id}${collection.versions.drafts ? '?draft=true' : ''}`;
   const action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
   const hasSavePermission = (isEditing && collectionPermissions?.update?.permission) || (!isEditing && collectionPermissions?.create?.permission);
+  const autosaveEnabled = collection.versions?.drafts && !collection.versions.drafts.autosave;
 
   return (
     <DocumentInfoProvider
@@ -132,7 +130,6 @@ const EditView: React.FC<IndexProps> = (props) => {
           DefaultComponent={DefaultEdit}
           CustomComponent={CustomEdit}
           componentProps={{
-            submissionCount,
             isLoading,
             data: dataToRender,
             collection,
@@ -143,6 +140,7 @@ const EditView: React.FC<IndexProps> = (props) => {
             hasSavePermission,
             apiURL,
             action,
+            autosaveEnabled,
           }}
         />
       </NegativeFieldGutterProvider>

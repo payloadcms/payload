@@ -16,6 +16,9 @@ const RichText: CollectionConfig = {
       autosave: false,
     },
   },
+  admin: {
+    preview: () => 'https://payloadcms.com',
+  },
   fields: [
     {
       name: 'defaultRichText',

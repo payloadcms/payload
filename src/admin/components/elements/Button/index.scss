@@ -93,7 +93,7 @@
     &.btn--disabled {
       color: rgba($color-dark-gray, .6);
       background: none;
-      $base-box-shadow: inset 0 0 0 $style-stroke-width rgba($color-dark-gray, .6);
+      box-shadow: inset 0 0 0 $style-stroke-width rgba($color-dark-gray, .4);
     }
 
     &:focus {

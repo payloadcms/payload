@@ -43,7 +43,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
     apiURL,
     action,
     hasSavePermission,
-    submissionCount,
+    autosaveEnabled,
   } = props;
 
   const {
@@ -148,8 +148,8 @@ const DefaultEditView: React.FC<Props> = (props) => {
               )}
                 </ul>
               ) : undefined}
-              <div className={`${baseClass}__document-actions${(preview && isEditing) ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
-                {isEditing && (
+              <div className={`${baseClass}__document-actions${(autosaveEnabled || (isEditing && preview)) ? ` ${baseClass}__document-actions--has-2` : ''}`}>
+                {(isEditing && preview && !autosaveEnabled) && (
                   <PreviewButton
                     generatePreviewURL={preview}
                     data={data}
@@ -158,7 +158,12 @@ const DefaultEditView: React.FC<Props> = (props) => {
                 {hasSavePermission && (
                   <React.Fragment>
                     {collection.versions.drafts && (
-                      <Publish />
+                      <React.Fragment>
+                        {!collection.versions.drafts.autosave && (
+                          <SaveDraft />
+                        )}
+                        <Publish />
+                      </React.Fragment>
                     )}
                     {!collection.versions.drafts && (
                       <FormSubmit>Save</FormSubmit>
@@ -169,11 +174,14 @@ const DefaultEditView: React.FC<Props> = (props) => {
               {!isLoading && (
                 <React.Fragment>
                   <div className={`${baseClass}__sidebar-fields`}>
+                    {(isEditing && preview && autosaveEnabled) && (
+                      <PreviewButton
+                        generatePreviewURL={preview}
+                        data={data}
+                      />
+                    )}
                     {collection.versions?.drafts && (
                       <React.Fragment>
-                        {!collection.versions.drafts.autosave && hasSavePermission && (
-                          <SaveDraft />
-                        )}
                         <Status />
                         {(collection.versions.drafts.autosave && hasSavePermission) && (
                           <Autosave
@@ -219,7 +227,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         <li>
                           <div className={`${baseClass}__label`}>Versions</div>
                           <VersionsCount
-                            submissionCount={submissionCount}
                             collection={collection}
                             id={id}
                           />

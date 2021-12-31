@@ -4,12 +4,14 @@ import Button from '../Button';
 import { Props } from './types';
 import { useLocale } from '../../utilities/Locale';
 
+import './index.scss';
+
 const baseClass = 'preview-btn';
 
 const PreviewButton: React.FC<Props> = (props) => {
   const {
     generatePreviewURL,
-    data
+    data,
   } = props;
 
   const [url, setUrl] = useState<string | undefined>(undefined);
@@ -22,7 +24,7 @@ const PreviewButton: React.FC<Props> = (props) => {
       const makeRequest = async () => {
         const previewURL = await generatePreviewURL(data, { locale, token });
         setUrl(previewURL);
-      }
+      };
 
       makeRequest();
     }
@@ -30,7 +32,7 @@ const PreviewButton: React.FC<Props> = (props) => {
     generatePreviewURL,
     locale,
     token,
-    data
+    data,
   ]);
 
   if (url) {

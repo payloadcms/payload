@@ -78,7 +78,7 @@
     z-index: $z-nav;
   }
 
-  &__document-actions--with-preview {
+  &__document-actions--has-2 {
     display: flex;
 
     > * {
@@ -96,8 +96,8 @@
     .form-submit {
       .btn {
         width: 100%;
-        padding-left: base(2);
-        padding-right: base(2);
+        padding-left: base(.5);
+        padding-right: base(.5);
       }
     }
   }
@@ -115,6 +115,12 @@
 
   &__sidebar-fields {
     padding-right: $baseline;
+
+    .preview-btn {
+      display: inline-block;
+      margin-top: 0;
+      width: calc(50% - #{base(.5)});
+    }
   }
 
   &__meta {
@@ -190,6 +196,12 @@
     &__meta,
     &__sidebar-fields {
       padding-left: $baseline;
+    }
+
+    &__sidebar-fields {
+      .preview-btn {
+        width: 100%;
+      }
     }
 
     &__collection-actions {
