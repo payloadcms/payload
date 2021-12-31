@@ -24,6 +24,7 @@ import Autosave from '../../../elements/Autosave';
 import './index.scss';
 import Status from '../../../elements/Status';
 import Publish from '../../../elements/Publish';
+import SaveDraft from '../../../elements/SaveDraft';
 
 const baseClass = 'collection-edit';
 
@@ -170,6 +171,9 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   <div className={`${baseClass}__sidebar-fields`}>
                     {collection.versions?.drafts && (
                       <React.Fragment>
+                        {!collection.versions.drafts.autosave && hasSavePermission && (
+                          <SaveDraft />
+                        )}
                         <Status />
                         {(collection.versions.drafts.autosave && hasSavePermission) && (
                           <Autosave

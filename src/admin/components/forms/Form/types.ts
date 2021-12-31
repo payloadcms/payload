@@ -41,7 +41,11 @@ export type Props = {
   log?: boolean
 }
 
-export type SubmitOptions = { overrides?: Record<string, unknown> }
+export type SubmitOptions = {
+  action?: string
+  method?: string
+  overrides?: Record<string, unknown>
+}
 
 export type DispatchFields = React.Dispatch<any>
 export type Submit = (options?: SubmitOptions, e?: React.FormEvent<HTMLFormElement>) => void;

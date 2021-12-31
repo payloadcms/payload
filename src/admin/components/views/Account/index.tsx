@@ -71,7 +71,7 @@ const AccountView: React.FC = () => {
 
   return (
     <DocumentInfoProvider
-      data={!isLoading ? dataToRender : undefined}
+      id={data?.id}
       collection={collection}
     >
       <NegativeFieldGutterProvider allow>

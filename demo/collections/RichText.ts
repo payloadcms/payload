@@ -14,6 +14,11 @@ const RichText: CollectionConfig = {
   access: {
     read: () => true,
   },
+  versions: {
+    drafts: {
+      autosave: false,
+    },
+  },
   fields: [
     {
       name: 'defaultRichText',

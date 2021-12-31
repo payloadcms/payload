@@ -17,7 +17,7 @@ import getDataByPathFunc from './getDataByPath';
 import wait from '../../../../utilities/wait';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
-import { Context as FormContextType, Props } from './types';
+import { Context as FormContextType, Props, SubmitOptions } from './types';
 
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormWatchContext } from './context';
 
@@ -99,9 +99,11 @@ const Form: React.FC<Props> = (props) => {
     return isValid;
   }, [contextRef]);
 
-  const submit = useCallback(async (options = {}, e): Promise<void> => {
+  const submit = useCallback(async (options: SubmitOptions = {}, e): Promise<void> => {
     const {
       overrides = {},
+      action: actionToUse = action,
+      method: methodToUse = method,
     } = options;
 
     if (disabled) {
@@ -146,7 +148,7 @@ const Form: React.FC<Props> = (props) => {
     const formData = contextRef.current.createFormData(overrides);
 
     try {
-      const res = await requests[method.toLowerCase()](action, {
+      const res = await requests[methodToUse.toLowerCase()](actionToUse, {
         body: formData,
       });
 

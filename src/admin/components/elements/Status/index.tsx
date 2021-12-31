@@ -11,11 +11,11 @@ const Status: React.FC<Props> = () => {
 
   let statusToRender;
 
-  if (unpublishedVersions?.docs?.length > 0 && publishedDoc) {
+  if (unpublishedVersions?.docs?.length > 1 && publishedDoc) {
     statusToRender = 'Changed';
   } else if (!publishedDoc) {
     statusToRender = 'Draft';
-  } else if (publishedDoc && unpublishedVersions?.docs?.length === 0) {
+  } else if (publishedDoc && unpublishedVersions?.docs?.length <= 1) {
     statusToRender = 'Published';
   }
 

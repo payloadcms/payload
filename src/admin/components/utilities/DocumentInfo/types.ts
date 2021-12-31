@@ -14,12 +14,11 @@ export type ContextType = {
   versions?: PaginatedDocs<Version>
   unpublishedVersions?: PaginatedDocs<Version>
   publishedDoc?: TypeWithID
-  data: any
   getVersions: () => void
 }
 
 export type Props = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
-  data: any
+  id?: string | number
 }

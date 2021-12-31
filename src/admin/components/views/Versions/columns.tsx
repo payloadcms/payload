@@ -87,6 +87,18 @@ export const getColumns = (collection: SanitizedCollectionConfig, global: Saniti
               Autosave
             </Pill>
           )}
+          &nbsp;
+          {row?.version._status === 'published' && (
+            <Pill pillStyle="success">
+              Published
+            </Pill>
+          )}
+          &nbsp;
+          {row?.version._status === 'draft' && (
+            <Pill>
+              Draft
+            </Pill>
+          )}
         </TextCell>
       ),
     },

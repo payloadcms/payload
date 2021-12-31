@@ -8,7 +8,7 @@ const Publish: React.FC<Props> = () => {
   const { unpublishedVersions, publishedDoc } = useDocumentInfo();
   const { submit } = useForm();
 
-  const hasNewerVersions = unpublishedVersions?.totalDocs > 0;
+  const hasNewerVersions = unpublishedVersions?.totalDocs > 1;
 
   const canPublish = hasNewerVersions || !publishedDoc;
 

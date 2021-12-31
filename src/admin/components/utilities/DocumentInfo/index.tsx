@@ -13,7 +13,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   children,
   global,
   collection,
-  data,
+  id,
 }) => {
   const { serverURL, routes: { api } } = useConfig();
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID>(null);
@@ -23,7 +23,6 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   let slug;
   let type;
   let preferencesKey;
-  let id;
 
   if (global) {
     slug = global.slug;
@@ -35,8 +34,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     slug = collection.slug;
     type = 'collection';
 
-    if (data?.id) {
-      id = data.id;
+    if (id) {
       preferencesKey = `collection-${slug}-${id}`;
     }
   }
@@ -56,14 +54,14 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     };
 
     if (global) {
-      shouldFetch = Boolean(global?.versions && data);
+      shouldFetch = Boolean(global?.versions);
       hasDrafts = Boolean(global?.versions?.drafts);
       versionFetchURL = `${baseURL}/globals/${global.slug}/versions`;
       publishedFetchURL = `${baseURL}/globals/${global.slug}`;
     }
 
     if (collection) {
-      shouldFetch = Boolean(collection?.versions && data);
+      shouldFetch = Boolean(collection?.versions);
       hasDrafts = Boolean(collection?.versions?.drafts);
       versionFetchURL = `${baseURL}/${collection.slug}/versions`;
       publishedFetchURL = `${baseURL}/${collection.slug}/${id}`;
@@ -88,31 +86,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
         }),
       ];
 
-      if (hasDrafts && data?.updatedAt) {
-        const newerVersionParams = {
-          ...params,
-          where: {
-            ...params.where,
-            and: [
-              ...params.where.and,
-              {
-                updatedAt: {
-                  greater_than: data?.updatedAt,
-                },
-              },
-            ],
-          },
-        };
-
-        // Get any newer versions available
-        promises.push(
-          fetch(`${versionFetchURL}?${qs.stringify(newerVersionParams)}`).then(async (res) => {
-            if (res.status === 200) {
-              unpublishedVersionJSON = await res.json();
-            }
-          }),
-        );
-
+      if (hasDrafts) {
         // Get the published version of the doc
         promises.push(
           fetch(`${publishedFetchURL}`).then(async (res) => {
@@ -125,11 +99,35 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 
       await Promise.all(promises);
 
+      if (publishedJSON?.updatedAt) {
+        const newerVersionParams = {
+          ...params,
+          where: {
+            ...params.where,
+            and: [
+              ...params.where.and,
+              {
+                updatedAt: {
+                  greater_than: publishedJSON?.updatedAt,
+                },
+              },
+            ],
+          },
+        };
+
+        // Get any newer versions available
+        const newerVersionRes = await fetch(`${versionFetchURL}?${qs.stringify(newerVersionParams)}`);
+
+        if (newerVersionRes.status === 200) {
+          unpublishedVersionJSON = await newerVersionRes.json();
+        }
+      }
+
       setVersions(versionJSON);
       setUnpublishedVersions(unpublishedVersionJSON);
       setPublishedDoc(publishedJSON);
     }
-  }, [api, global, collection, data, serverURL, id]);
+  }, [api, global, collection, serverURL, id]);
 
   useEffect(() => {
     getVersions();
@@ -139,13 +137,13 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     slug,
     type,
     preferencesKey,
-    data,
     global,
     collection,
     versions,
     unpublishedVersions,
     getVersions,
     publishedDoc,
+    id,
   };
 
   return (

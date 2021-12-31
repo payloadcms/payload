@@ -148,7 +148,11 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
       />
       <Eyebrow />
       <div className={`${baseClass}__wrap`}>
-        <div className={`${baseClass}__intro`}>Version created on:</div>
+        <div className={`${baseClass}__intro`}>
+          {doc?.autosave ? 'Autosaved version ' : 'Version'}
+          {' '}
+          created on:
+        </div>
         <header className={`${baseClass}__header`}>
           <h2>
             {formattedCreatedAt}
