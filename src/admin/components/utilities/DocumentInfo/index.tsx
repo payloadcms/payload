@@ -47,6 +47,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     let shouldFetchVersions = false;
     let unpublishedVersionJSON = null;
     let versionJSON = null;
+    let shouldFetch = true;
 
     const params = {
       where: {
@@ -57,14 +58,18 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 
     if (global) {
       shouldFetchVersions = Boolean(global?.versions);
-      versionFetchURL = `${baseURL}/globals/${global.slug}/versions`;
-      publishedFetchURL = `${baseURL}/globals/${global.slug}`;
+      versionFetchURL = `${baseURL}/globals/${global.slug}/versions?depth=0`;
+      publishedFetchURL = `${baseURL}/globals/${global.slug}?depth=0`;
     }
 
     if (collection) {
       shouldFetchVersions = Boolean(collection?.versions);
-      versionFetchURL = `${baseURL}/${collection.slug}/versions`;
-      publishedFetchURL = `${baseURL}/${collection.slug}/${id}`;
+      versionFetchURL = `${baseURL}/${collection.slug}/versions?depth=0`;
+      publishedFetchURL = `${baseURL}/${collection.slug}?where[id][equals]=${id}&depth=0`;
+
+      if (!id) {
+        shouldFetch = false;
+      }
 
       params.where.and.push({
         parent: {
@@ -73,39 +78,45 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       });
     }
 
-    const publishedJSON = await fetch(publishedFetchURL).then((res) => res.json());
+    if (shouldFetch) {
+      let publishedJSON = await fetch(publishedFetchURL).then((res) => res.json());
 
-    if (shouldFetchVersions) {
-      versionJSON = await fetch(versionFetchURL).then((res) => res.json());
+      if (collection) {
+        publishedJSON = publishedJSON?.docs?.[0];
+      }
 
-      if (publishedJSON?.updatedAt) {
-        const newerVersionParams = {
-          ...params,
-          where: {
-            ...params.where,
-            and: [
-              ...params.where.and,
-              {
-                updatedAt: {
-                  greater_than: publishedJSON?.updatedAt,
+      if (shouldFetchVersions) {
+        versionJSON = await fetch(versionFetchURL).then((res) => res.json());
+
+        if (publishedJSON?.updatedAt) {
+          const newerVersionParams = {
+            ...params,
+            where: {
+              ...params.where,
+              and: [
+                ...params.where.and,
+                {
+                  updatedAt: {
+                    greater_than: publishedJSON?.updatedAt,
+                  },
                 },
-              },
-            ],
-          },
-        };
+              ],
+            },
+          };
 
-        // Get any newer versions available
-        const newerVersionRes = await fetch(`${versionFetchURL}?${qs.stringify(newerVersionParams)}`);
+          // Get any newer versions available
+          const newerVersionRes = await fetch(`${versionFetchURL}?${qs.stringify(newerVersionParams)}`);
 
-        if (newerVersionRes.status === 200) {
-          unpublishedVersionJSON = await newerVersionRes.json();
+          if (newerVersionRes.status === 200) {
+            unpublishedVersionJSON = await newerVersionRes.json();
+          }
         }
       }
-    }
 
-    setPublishedDoc(publishedJSON);
-    setVersions(versionJSON);
-    setUnpublishedVersions(unpublishedVersionJSON);
+      setPublishedDoc(publishedJSON);
+      setVersions(versionJSON);
+      setUnpublishedVersions(unpublishedVersionJSON);
+    }
   }, [global, collection, id, baseURL]);
 
   useEffect(() => {

@@ -71,6 +71,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
 
   if (where) {
     queryToBuild.where = {
+      and: [],
       ...where,
     };
 
