@@ -46,12 +46,12 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { getVersions } = useDocumentInfo();
 
   const onSave = useCallback(async (json: any) => {
+    getVersions();
     if (!isEditing) {
       history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
     } else {
       const state = await buildStateFromSchema(fields, json.doc);
       setInitialState(state);
-      getVersions();
 
       history.push({
         state: {

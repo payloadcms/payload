@@ -7,8 +7,6 @@ import { useWatchForm, useFormModified } from '../../forms/Form/context';
 import { useLocale } from '../../utilities/Locale';
 import { Props } from './types';
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues';
-import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
-import { Field } from '../../../../fields/config/types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 
 import './index.scss';
@@ -73,18 +71,15 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
           setTimeout(async () => {
             let url: string;
             let method: string;
-            let entityFields: Field[] = [];
 
             if (collection && id) {
               url = `${serverURL}${api}/${collection.slug}/${id}?draft=true&autosave=true`;
               method = 'PUT';
-              entityFields = collection.fields;
             }
 
             if (global) {
               url = `${serverURL}${api}/globals/${global.slug}?draft=true&autosave=true`;
               method = 'POST';
-              entityFields = global.fields;
             }
 
             if (url) {
@@ -102,16 +97,13 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
               });
 
               if (res.status === 200) {
-                const json = await res.json();
-                const state = await buildStateFromSchema(entityFields, json.doc);
-                dispatchFields({ type: 'REPLACE_STATE', state });
                 setLastSaved(new Date().getTime());
                 getVersions();
               }
 
               setSaving(false);
             }
-          }, 1000);
+          }, 2000);
         }
       }
     };

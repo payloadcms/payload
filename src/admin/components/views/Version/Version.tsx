@@ -16,8 +16,9 @@ import SelectLocales from './SelectLocales';
 import RenderFieldsToDiff from './RenderFieldsToDiff';
 import fieldComponents from './RenderFieldsToDiff/fields';
 
-import { Field } from '../../../../fields/config/types';
+import { Field, FieldAffectingData, fieldAffectsData } from '../../../../fields/config/types';
 import { FieldPermissions } from '../../../../auth';
+import { useLocale } from '../../utilities/Locale';
 
 import './index.scss';
 
@@ -31,6 +32,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const [localeOptions] = useState<LocaleOption[]>(() => (localization?.locales ? localization.locales.map((locale) => ({ label: locale, value: locale })) : []));
   const [locales, setLocales] = useState<LocaleOption[]>(localeOptions);
   const { permissions } = useAuth();
+  const locale = useLocale();
 
   let originalDocFetchURL: string;
   let versionFetchURL: string;
@@ -62,13 +64,11 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     fieldPermissions = permissions.globals[global.slug].fields;
   }
 
-  const useAsTitle = collection?.admin?.useAsTitle || 'id';
-
   const compareFetchURL = compareValue?.value === 'mostRecent' || compareValue?.value === 'published' ? originalDocFetchURL : `${compareBaseURL}/${compareValue.value}`;
 
   const [{ data: doc, isLoading }] = usePayloadAPI(versionFetchURL, { initialParams: { locale: '*', depth: 1 } });
-  const [{ data: publishedDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { depth: 1 } });
-  const [{ data: mostRecentDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { depth: 1, draft: true } });
+  const [{ data: publishedDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { locale: '*', depth: 1 } });
+  const [{ data: mostRecentDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { locale: '*', depth: 1, draft: true } });
   const [{ data: compareDoc }] = usePayloadAPI(compareFetchURL, { initialParams: { locale: '*', depth: 1, draft: 'true' } });
 
   useEffect(() => {
@@ -78,9 +78,17 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
       let docLabel = '';
 
       if (publishedDoc) {
-        if (useAsTitle) {
-          if (publishedDoc[useAsTitle]) {
-            docLabel = publishedDoc[useAsTitle];
+        const { useAsTitle } = collection.admin;
+
+        if (useAsTitle !== 'id') {
+          const titleField = collection.fields.find((field) => fieldAffectsData(field) && field.name === useAsTitle) as FieldAffectingData;
+
+          if (titleField && publishedDoc[useAsTitle]) {
+            if (titleField.localized) {
+              docLabel = publishedDoc[useAsTitle]?.[locale];
+            } else {
+              docLabel = publishedDoc[useAsTitle];
+            }
           } else {
             docLabel = '[Untitled]';
           }
@@ -125,13 +133,14 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     }
 
     setStepNav(nav);
-  }, [setStepNav, collection, global, useAsTitle, dateFormat, doc, publishedDoc, admin, id]);
+  }, [setStepNav, collection, global, dateFormat, doc, publishedDoc, admin, id, locale]);
 
   let metaTitle: string;
   let metaDesc: string;
   const formattedCreatedAt = doc?.createdAt ? format(new Date(doc.createdAt), dateFormat) : '';
 
   if (collection) {
+    const useAsTitle = collection?.admin?.useAsTitle || 'id';
     metaTitle = `Version - ${formattedCreatedAt} - ${doc[useAsTitle]} - ${entityLabel}`;
     metaDesc = `Viewing version for the ${entityLabel} ${doc[useAsTitle]}`;
   }

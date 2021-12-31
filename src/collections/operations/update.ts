@@ -11,6 +11,7 @@ import { saveCollectionDraft } from '../../versions/drafts/saveCollectionDraft';
 import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
 import uploadFile from '../../uploads/uploadFile';
 import cleanUpFailedCollectionVersion from '../../versions/cleanUpFailedCollectionVersion';
+import { ensurePublishedCollectionVersion } from '../../versions/ensurePublishedCollectionVersion';
 
 export type Arguments = {
   collection: Collection
@@ -214,7 +215,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
 
   let createdVersion;
 
-  if (collectionConfig.versions && !shouldSaveDraft) {
+  if (collectionConfig.versions && !collectionConfig.versions.drafts) {
     createdVersion = await saveCollectionVersion({
       payload: this,
       config: collectionConfig,
@@ -229,6 +230,14 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // /////////////////////////////////////
 
   if (shouldSaveDraft) {
+    await ensurePublishedCollectionVersion({
+      payload: this,
+      config: collectionConfig,
+      req,
+      docWithLocales,
+      id,
+    });
+
     result = await saveCollectionDraft({
       payload: this,
       config: collectionConfig,
