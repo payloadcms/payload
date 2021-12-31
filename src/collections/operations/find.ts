@@ -161,7 +161,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
 
   result = {
     ...result,
-    docs: await Promise.all(paginatedDocs.docs.map(async (doc) => {
+    docs: await Promise.all(result.docs.map(async (doc) => {
       const docString = JSON.stringify(doc);
       let docRef = JSON.parse(docString);
 
