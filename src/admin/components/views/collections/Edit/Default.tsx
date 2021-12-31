@@ -189,7 +189,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         <Status />
                         {(collection.versions.drafts.autosave && hasSavePermission) && (
                           <Autosave
-                            publishedDocUpdatedAt={publishedDoc?.updatedAt}
+                            publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
                             collection={collection}
                             id={id}
                           />
@@ -244,10 +244,10 @@ const DefaultEditView: React.FC<Props> = (props) => {
                               <div>{format(new Date(data.updatedAt), dateFormat)}</div>
                             </li>
                           )}
-                          {publishedDoc?.createdAt && (
+                          {(publishedDoc?.createdAt || data?.createdAt) && (
                             <li>
                               <div className={`${baseClass}__label`}>Created</div>
-                              <div>{format(new Date(publishedDoc?.createdAt), dateFormat)}</div>
+                              <div>{format(new Date(publishedDoc?.createdAt || data?.createdAt), dateFormat)}</div>
                             </li>
                           )}
                         </React.Fragment>
