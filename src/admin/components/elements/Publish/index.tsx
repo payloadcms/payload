@@ -2,15 +2,15 @@ import React, { useCallback } from 'react';
 import FormSubmit from '../../forms/Submit';
 import { Props } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import { useForm } from '../../forms/Form/context';
+import { useForm, useFormModified } from '../../forms/Form/context';
 
 const Publish: React.FC<Props> = () => {
-  const { unpublishedVersions, publishedDoc } = useDocumentInfo();
+  const { unpublishedVersions, publishedDoc, getVersions } = useDocumentInfo();
   const { submit } = useForm();
+  const modified = useFormModified();
 
-  const hasNewerVersions = unpublishedVersions?.totalDocs > 1;
-
-  const canPublish = hasNewerVersions || !publishedDoc;
+  const hasNewerVersions = unpublishedVersions?.totalDocs > 0;
+  const canPublish = modified || hasNewerVersions || !publishedDoc;
 
   const publish = useCallback(() => {
     submit({
@@ -18,7 +18,8 @@ const Publish: React.FC<Props> = () => {
         _status: 'published',
       },
     });
-  }, [submit]);
+    getVersions();
+  }, [submit, getVersions]);
 
   return (
     <FormSubmit

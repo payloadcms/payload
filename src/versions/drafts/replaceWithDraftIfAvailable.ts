@@ -54,6 +54,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
       lean: true,
       leanWithId: true,
       useEstimatedCount,
+      sort: { updatedAt: 'desc' },
     });
 
     if (!draft) {

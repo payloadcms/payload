@@ -2,6 +2,7 @@ import { Payload } from '..';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
+import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
 type Args = {
   payload: Payload
@@ -18,13 +19,40 @@ export const saveCollectionVersion = async ({
   id,
   docWithLocales,
 }: Args): Promise<void> => {
-  const VersionsModel = payload.versions[config.slug];
+  const VersionModel = payload.versions[config.slug];
 
-  const version = await payload.performFieldOperations(config, {
+  let version = docWithLocales;
+
+  if (config.versions?.drafts) {
+    const latestVersion = await VersionModel.findOne({
+      parent: {
+        $eq: docWithLocales.id,
+      },
+      updatedAt: {
+        $gt: docWithLocales.updatedAt,
+      },
+    },
+    {},
+    {
+      lean: true,
+      leanWithId: true,
+      sort: {
+        updatedAt: 'desc',
+      },
+    });
+
+    if (latestVersion) {
+      version = latestVersion;
+      version = JSON.parse(JSON.stringify(version));
+      version = sanitizeInternalFields(version);
+    }
+  }
+
+  version = await payload.performFieldOperations(config, {
     id,
     depth: 0,
     req,
-    data: docWithLocales,
+    data: version,
     hook: 'afterRead',
     operation: 'update',
     overrideAccess: true,
@@ -32,10 +60,12 @@ export const saveCollectionVersion = async ({
     showHiddenFields: true,
   });
 
-  delete version._id;
+  if (version._id) delete version._id;
+
+  let createdVersion;
 
   try {
-    await VersionsModel.create({
+    createdVersion = await VersionModel.create({
       parent: id,
       version,
       autosave: false,
@@ -49,10 +79,17 @@ export const saveCollectionVersion = async ({
     enforceMaxVersions({
       id,
       payload: this,
-      Model: VersionsModel,
+      Model: VersionModel,
       entityLabel: config.labels.plural,
       entityType: 'collection',
       maxPerDoc: config.versions.maxPerDoc,
     });
   }
+
+  if (createdVersion) {
+    createdVersion = JSON.parse(JSON.stringify(createdVersion));
+    createdVersion = sanitizeInternalFields(createdVersion);
+  }
+
+  return createdVersion;
 };

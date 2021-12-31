@@ -5,17 +5,20 @@ import { useForm, useFormModified } from '../../forms/Form/context';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useLocale } from '../../utilities/Locale';
 
+import './index.scss';
+
+const baseClass = 'save-draft';
+
 const SaveDraft: React.FC = () => {
   const { serverURL, routes: { api } } = useConfig();
   const { submit } = useForm();
-  const { collection, global, id } = useDocumentInfo();
+  const { collection, global, id, getVersions } = useDocumentInfo();
   const modified = useFormModified();
   const locale = useLocale();
 
   const canSaveDraft = modified;
 
-  console.log(id);
-
+  console.log({ modified });
 
   const saveDraft = useCallback(() => {
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`;
@@ -38,10 +41,13 @@ const SaveDraft: React.FC = () => {
         _status: 'draft',
       },
     });
-  }, [submit, collection, global, serverURL, api, locale, id]);
+
+    getVersions();
+  }, [submit, collection, global, serverURL, api, locale, id, getVersions]);
 
   return (
     <FormSubmit
+      className={baseClass}
       type="button"
       buttonStyle="secondary"
       onClick={saveDraft}

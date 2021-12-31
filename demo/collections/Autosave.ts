@@ -15,7 +15,7 @@ const Autosave: CollectionConfig = {
     ],
   },
   versions: {
-    maxPerDoc: 5,
+    maxPerDoc: 35,
     retainDeleted: false,
     drafts: {
       autosave: {

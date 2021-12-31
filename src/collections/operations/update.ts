@@ -10,6 +10,7 @@ import { hasWhereAccessResult, UserDocument } from '../../auth/types';
 import { saveCollectionDraft } from '../../versions/drafts/saveCollectionDraft';
 import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
 import uploadFile from '../../uploads/uploadFile';
+import cleanUpFailedCollectionVersion from '../../versions/cleanUpFailedCollectionVersion';
 
 export type Arguments = {
   collection: Collection
@@ -208,6 +209,22 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   }
 
   // /////////////////////////////////////
+  // Create version from existing doc
+  // /////////////////////////////////////
+
+  let createdVersion;
+
+  if (collectionConfig.versions && !shouldSaveDraft) {
+    createdVersion = await saveCollectionVersion({
+      payload: this,
+      config: collectionConfig,
+      req,
+      docWithLocales,
+      id,
+    });
+  }
+
+  // /////////////////////////////////////
   // Update
   // /////////////////////////////////////
 
@@ -228,6 +245,12 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
         { new: true },
       );
     } catch (error) {
+      cleanUpFailedCollectionVersion({
+        payload: this,
+        collection: collectionConfig,
+        version: createdVersion,
+      });
+
       // Handle uniqueness error from MongoDB
       throw error.code === 11000
         ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }])
@@ -243,20 +266,6 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   result = JSON.stringify(result);
   result = JSON.parse(result);
   result = sanitizeInternalFields(result);
-
-  // /////////////////////////////////////
-  // Create version from existing doc
-  // /////////////////////////////////////
-
-  if (collectionConfig.versions && !shouldSaveDraft) {
-    saveCollectionVersion({
-      payload: this,
-      config: collectionConfig,
-      req,
-      docWithLocales,
-      id,
-    });
-  }
 
   // /////////////////////////////////////
   // afterRead - Fields

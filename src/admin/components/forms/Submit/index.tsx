@@ -8,7 +8,7 @@ import './index.scss';
 const baseClass = 'form-submit';
 
 const FormSubmit: React.FC<Props> = (props) => {
-  const { children, disabled: disabledFromProps } = props;
+  const { children, disabled: disabledFromProps, type = 'submit' } = props;
   const processing = useFormProcessing();
   const { disabled } = useForm();
 
@@ -16,6 +16,7 @@ const FormSubmit: React.FC<Props> = (props) => {
     <div className={baseClass}>
       <Button
         {...props}
+        type={type}
         disabled={disabledFromProps || processing || disabled ? true : undefined}
       >
         {children}

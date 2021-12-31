@@ -15,9 +15,9 @@ import './index.scss';
 
 const baseClass = 'autosave';
 
-const Autosave: React.FC<Props> = ({ collection, global, id }) => {
+const Autosave: React.FC<Props> = ({ collection, global, id, updatedAt }) => {
   const { serverURL, routes: { api, admin } } = useConfig();
-  const { versions, data } = useDocumentInfo();
+  const { versions, getVersions } = useDocumentInfo();
   const { fields, dispatchFields } = useWatchForm();
   const modified = useFormModified();
   const locale = useLocale();
@@ -61,62 +61,70 @@ const Autosave: React.FC<Props> = ({ collection, global, id }) => {
 
   // When fields change, autosave
   useEffect(() => {
-    if (lastSaved && modified && !saving) {
-      const lastSavedDate = new Date(lastSaved);
-      lastSavedDate.setSeconds(lastSavedDate.getSeconds() + interval);
-      const timeToSaveAgain = lastSavedDate.getTime();
+    const autosave = async () => {
+      if (lastSaved && modified && !saving) {
+        const lastSavedDate = new Date(lastSaved);
+        lastSavedDate.setSeconds(lastSavedDate.getSeconds() + interval);
+        const timeToSaveAgain = lastSavedDate.getTime();
 
-      if (Date.now() >= timeToSaveAgain) {
-        setSaving(true);
-        setTimeout(async () => {
-          let url: string;
-          let method: string;
-          let entityFields: Field[] = [];
+        if (Date.now() >= timeToSaveAgain) {
+          setTimeout(async () => {
+            setSaving(true);
+            let url: string;
+            let method: string;
+            let entityFields: Field[] = [];
 
-          if (collection && id) {
-            url = `${serverURL}${api}/${collection.slug}/${id}?draft=true&autosave=true`;
-            method = 'PUT';
-            entityFields = collection.fields;
-          }
-
-          if (global) {
-            url = `${serverURL}${api}/globals/${global.slug}?draft=true&autosave=true`;
-            method = 'POST';
-            entityFields = global.fields;
-          }
-
-          if (url) {
-            setSaving(false);
-
-            const body = {
-              ...reduceFieldsToValues(fieldRef.current),
-              _status: 'draft',
-            };
-
-            const res = await fetch(url, {
-              method,
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(body),
-            });
-
-            if (res.status === 200) {
-              const json = await res.json();
-              const state = await buildStateFromSchema(entityFields, json.doc);
-              dispatchFields({ type: 'REPLACE_STATE', state });
-              setLastSaved(new Date().getTime());
+            if (collection && id) {
+              url = `${serverURL}${api}/${collection.slug}/${id}?draft=true&autosave=true`;
+              method = 'PUT';
+              entityFields = collection.fields;
             }
-          }
-        }, 1000);
+
+            if (global) {
+              url = `${serverURL}${api}/globals/${global.slug}?draft=true&autosave=true`;
+              method = 'POST';
+              entityFields = global.fields;
+            }
+
+            if (url) {
+              const body = {
+                ...reduceFieldsToValues(fieldRef.current),
+                _status: 'draft',
+              };
+
+              const res = await fetch(url, {
+                method,
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body),
+              });
+
+              if (res.status === 200) {
+                const json = await res.json();
+                const state = await buildStateFromSchema(entityFields, json.doc);
+                dispatchFields({ type: 'REPLACE_STATE', state });
+                setLastSaved(new Date().getTime());
+                getVersions();
+              }
+
+              setSaving(false);
+            }
+          }, 1000);
+        }
       }
-    }
-  }, [fields, modified, interval, lastSaved, serverURL, api, collection, global, id, saving, dispatchFields]);
+    };
+
+    autosave();
+  }, [fields, modified, interval, lastSaved, serverURL, api, collection, global, id, saving, dispatchFields, getVersions]);
 
   useEffect(() => {
-    if (versions?.docs?.[0]) setLastSaved(new Date(versions.docs[0].updatedAt).getTime());
-    if (data?.updatedAt) setLastSaved(new Date(data?.updatedAt).getTime());
-  }, [data, versions]);
+    if (versions?.docs?.[0]) {
+      setLastSaved(new Date(versions.docs[0].updatedAt).getTime());
+    } else if (updatedAt) {
+      setLastSaved(new Date(updatedAt).getTime());
+    }
+  }, [updatedAt, versions]);
 
   return (
     <div className={baseClass}>
