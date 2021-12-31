@@ -18,8 +18,6 @@ const SaveDraft: React.FC = () => {
 
   const canSaveDraft = modified;
 
-  console.log({ modified });
-
   const saveDraft = useCallback(() => {
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`;
     let action;

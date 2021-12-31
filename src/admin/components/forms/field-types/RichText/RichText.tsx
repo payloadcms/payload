@@ -185,10 +185,6 @@ const RichText: React.FC<Props> = (props) => {
 
   if (!valueToRender) valueToRender = defaultValue;
 
-  if (path === 'defaultRichText') {
-    console.log(valueToRender);
-  }
-
   return (
     <div
       className={classes}
