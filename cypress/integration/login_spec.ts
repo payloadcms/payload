@@ -1,6 +1,8 @@
 import credentials from './common/credentials';
 
+const adminURL = 'http://localhost:3000/admin'
 const viewportSizes: Cypress.ViewportPreset[] = ['macbook-15', 'iphone-x', 'ipad-2'];
+
 describe('Payload Login', () => {
 
   viewportSizes.forEach((viewportSize) => {
@@ -8,7 +10,7 @@ describe('Payload Login', () => {
     describe(`Login (${viewportSize})`, () => {
 
       beforeEach(() => {
-        cy.visit('http://localhost:3000/admin');
+        cy.visit(adminURL);
       })
 
       it('Success', () => {
@@ -23,13 +25,13 @@ describe('Payload Login', () => {
         cy.get('.template-default')
           .find('h3.dashboard__label')
           .should('have.length', 2); // TODO: Should assert label content
-        cy.url().should('eq', 'http://localhost:3000/admin');
+        cy.url().should('eq', adminURL);
       });
 
       it('Bad Password', () => {
         cy.viewport(viewportSize);
 
-        cy.visit('http://localhost:3000/admin');
+        cy.visit(adminURL);
         cy.get('#email').type(credentials.email);
         cy.get('#password').type('badpassword');
         cy.get('form')
@@ -45,7 +47,7 @@ describe('Payload Login', () => {
       it('Bad Password - Retry Success', () => {
         cy.viewport(viewportSize);
 
-        cy.visit('http://localhost:3000/admin');
+        cy.visit(adminURL);
         cy.get('#email').type(credentials.email);
         cy.get('#password').type('badpassword');
         cy.get('form')
@@ -62,7 +64,7 @@ describe('Payload Login', () => {
         cy.get('.Toastify__toast-body').click();
         cy.wait(200);
         cy.get('.Toastify__toast-body').should('not.be.visible');
-        cy.url().should('eq', 'http://localhost:3000/admin/login');
+        cy.url().should('eq', `${adminURL}/login`);
 
         cy.get('#password').clear().type(credentials.password);
         cy.get('form')
@@ -74,7 +76,7 @@ describe('Payload Login', () => {
           .find('h3.dashboard__label')
           .should('have.length', 2); // TODO: Should assert label content
 
-        cy.url().should('eq', 'http://localhost:3000/admin');
+        cy.url().should('eq', adminURL);
       });
     });
   });
