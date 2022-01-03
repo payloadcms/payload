@@ -12,6 +12,7 @@ import identifyAPI from './identifyAPI';
 import { Payload } from '../..';
 import { PayloadRequest } from '../types';
 import corsHeaders from './corsHeaders';
+import convertPayload from './convertPayload';
 
 const middleware = (payload: Payload): any => {
   const rateLimitOptions: {
@@ -39,6 +40,7 @@ const middleware = (payload: Payload): any => {
       parseNested: true,
       ...payload.config.upload,
     }),
+    convertPayload,
     corsHeaders(payload.config),
     authenticate(payload.config),
     ...(payload.config.express.middleware || []),

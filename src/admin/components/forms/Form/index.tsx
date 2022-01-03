@@ -271,8 +271,19 @@ const Form: React.FC<Props> = (props) => {
   const createFormData = useCallback(() => {
     const data = reduceFieldsToValues(contextRef.current.fields);
 
+    const file = data?.file;
+
+    if (file) {
+      delete data.file;
+    }
+
+    const dataToSerialize = {
+      _payload: JSON.stringify(data),
+      file,
+    };
+
     // nullAsUndefineds is important to allow uploads and relationship fields to clear themselves
-    const formData = serialize(data, { indices: true, nullsAsUndefineds: false });
+    const formData = serialize(dataToSerialize, { indices: true, nullsAsUndefineds: false });
     return formData;
   }, [contextRef]);
 
