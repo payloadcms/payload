@@ -1,3 +1,10 @@
+## [0.14.1-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.1-beta.0) (2022-01-03)
+
+
+### Features
+
+* builds a way for multipart/form-data reqs to retain non-string values ([65b0ad7](https://github.com/payloadcms/payload/commit/65b0ad7f084a9c279a1e4fb799542f97c645653d))
+
 # [0.14.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.14.0) (2022-01-03)
 
 
