@@ -269,7 +269,7 @@ const Form: React.FC<Props> = (props) => {
   const getUnflattenedValues = useCallback(() => reduceFieldsToValues(contextRef.current.fields), [contextRef]);
 
   const createFormData = useCallback(() => {
-    const data = reduceFieldsToValues(contextRef.current.fields);
+    const data = reduceFieldsToValues(contextRef.current.fields, true);
 
     const file = data?.file;
 
