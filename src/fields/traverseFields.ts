@@ -109,7 +109,8 @@ const traverseFields = (args: Arguments): void => {
     }
 
     if (field.type === 'number' && typeof data[field.name] === 'string') {
-      dataCopy[field.name] = parseFloat(data[field.name]);
+      const trimmed = data[field.name].trim();
+      dataCopy[field.name] = (trimmed.length === 0) ? null : parseFloat(trimmed);
     }
 
     if (fieldAffectsData(field) && field.name === 'id') {
