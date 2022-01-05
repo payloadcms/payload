@@ -1,4 +1,9 @@
-## [0.14.1-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.1-beta.0) (2022-01-03)
+## [0.14.2-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.2-beta.0) (2022-01-04)
+
+
+### Bug Fixes
+
+* ensures multipart/form-data using _payload flattens field data before sending ([ae44727](https://github.com/payloadcms/payload/commit/ae44727fb9734fc3801f7249fa9e78668311c09e))
 
 
 ### Features
