@@ -52,6 +52,7 @@ const RichText: React.FC<Props> = (props) => {
     admin: {
       readOnly,
       style,
+      className,
       width,
       placeholder,
       description,
@@ -132,6 +133,7 @@ const RichText: React.FC<Props> = (props) => {
   const classes = [
     baseClass,
     'field-type',
+    className,
     showError && 'error',
     readOnly && `${baseClass}--read-only`,
   ].filter(Boolean).join(' ');

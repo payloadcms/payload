@@ -29,6 +29,7 @@ type Admin = {
   position?: 'sidebar';
   width?: string;
   style?: CSSProperties;
+  className?: string;
   readOnly?: boolean;
   disabled?: boolean;
   condition?: Condition;

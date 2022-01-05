@@ -19,6 +19,7 @@ export type TextInputProps = Omit<TextField, 'type'> & {
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void
   placeholder?: string
   style?: React.CSSProperties
+  className?: string
   width?: string
 }
 
@@ -35,12 +36,14 @@ const TextInput: React.FC<TextInputProps> = (props) => {
     onChange,
     description,
     style,
+    className,
     width,
   } = props;
 
   const classes = [
     'field-type',
     'text',
+    className,
     showError && 'error',
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');

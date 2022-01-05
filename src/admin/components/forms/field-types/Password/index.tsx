@@ -15,6 +15,7 @@ const Password: React.FC<Props> = (props) => {
     required,
     validate = password,
     style,
+    className,
     width,
     autoComplete,
     label,
@@ -42,6 +43,7 @@ const Password: React.FC<Props> = (props) => {
   const classes = [
     'field-type',
     'password',
+    className,
     showError && 'error',
   ].filter(Boolean).join(' ');
 

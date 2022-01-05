@@ -22,6 +22,7 @@ const Code: React.FC<Props> = (props) => {
     admin: {
       readOnly,
       style,
+      className,
       width,
       language,
       description,
@@ -62,6 +63,7 @@ const Code: React.FC<Props> = (props) => {
   const classes = [
     'field-type',
     'code',
+    className,
     showError && 'error',
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');

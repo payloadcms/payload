@@ -25,6 +25,7 @@ const RadioGroup: React.FC<Props> = (props) => {
       readOnly,
       layout = 'horizontal',
       style,
+      className,
       width,
       description,
       condition,
@@ -53,6 +54,7 @@ const RadioGroup: React.FC<Props> = (props) => {
   const classes = [
     'field-type',
     baseClass,
+    className,
     `${baseClass}--layout-${layout}`,
     showError && 'error',
     readOnly && `${baseClass}--read-only`,

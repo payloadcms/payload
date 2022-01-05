@@ -23,6 +23,7 @@ const Checkbox: React.FC<Props> = (props) => {
     admin: {
       readOnly,
       style,
+      className,
       width,
       description,
       condition,
@@ -54,6 +55,7 @@ const Checkbox: React.FC<Props> = (props) => {
         'field-type',
         baseClass,
         showError && 'error',
+        className,
         value && `${baseClass}--checked`,
         readOnly && `${baseClass}--read-only`,
       ].filter(Boolean).join(' ')}

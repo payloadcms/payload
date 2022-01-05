@@ -24,6 +24,7 @@ const DateTime: React.FC<Props> = (props) => {
       placeholder,
       readOnly,
       style,
+      className,
       width,
       date,
       description,
@@ -52,6 +53,7 @@ const DateTime: React.FC<Props> = (props) => {
   const classes = [
     'field-type',
     baseClass,
+    className,
     showError && `${baseClass}--has-error`,
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');

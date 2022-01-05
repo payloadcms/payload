@@ -20,6 +20,7 @@ export type SelectInputProps = Omit<SelectField, 'type' | 'value' | 'options'> &
   description?: Description
   onChange?: (value: ReactSelectValue) => void
   style?: React.CSSProperties
+  className?: string
   width?: string
   hasMany?: boolean
   options?: OptionObject[]
@@ -37,6 +38,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
     onChange,
     description,
     style,
+    className,
     width,
     options,
     hasMany,
@@ -45,6 +47,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
   const classes = [
     'field-type',
     'select',
+    className,
     showError && 'error',
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');

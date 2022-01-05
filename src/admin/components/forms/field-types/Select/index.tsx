@@ -29,6 +29,7 @@ const Select: React.FC<Props> = (props) => {
     admin: {
       readOnly,
       style,
+      className,
       width,
       description,
       condition,
@@ -88,6 +89,7 @@ const Select: React.FC<Props> = (props) => {
       errorMessage={errorMessage}
       description={description}
       style={style}
+      className={className}
       width={width}
       hasMany={hasMany}
     />

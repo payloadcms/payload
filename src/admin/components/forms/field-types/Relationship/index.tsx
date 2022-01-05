@@ -34,6 +34,7 @@ const Relationship: React.FC<Props> = (props) => {
     admin: {
       readOnly,
       style,
+      className,
       width,
       description,
       condition,
@@ -257,6 +258,7 @@ const Relationship: React.FC<Props> = (props) => {
   const classes = [
     'field-type',
     baseClass,
+    className,
     showError && 'error',
     errorLoading && 'error-loading',
     readOnly && `${baseClass}--read-only`,

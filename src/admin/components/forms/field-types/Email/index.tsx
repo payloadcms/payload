@@ -18,6 +18,7 @@ const Email: React.FC<Props> = (props) => {
     admin: {
       readOnly,
       style,
+      className,
       width,
       placeholder,
       autoComplete,
@@ -51,6 +52,7 @@ const Email: React.FC<Props> = (props) => {
   const classes = [
     'field-type',
     'email',
+    className,
     showError && 'error',
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');

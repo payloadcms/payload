@@ -27,6 +27,7 @@ export type UploadInputProps = Omit<UploadField, 'type'> & {
   onChange?: (e) => void
   placeholder?: string
   style?: React.CSSProperties
+  className?: string
   width?: string
   fieldTypes?: FieldTypes
   collection?: SanitizedCollectionConfig
@@ -40,6 +41,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     required,
     readOnly,
     style,
+    className,
     width,
     description,
     label,
@@ -65,6 +67,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
   const classes = [
     'field-type',
     baseClass,
+    className,
     showError && 'error',
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');
