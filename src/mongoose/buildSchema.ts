@@ -124,10 +124,14 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
 
 const fieldIndexMap = {
   point: (field: PointField, config: SanitizedConfig) => {
-    if (field.localized) {
-      return config.localization.locales.map((locale) => ({ [`${field.name}.${locale}`]: field.index === false ? undefined : field.index || '2dsphere' }));
+    let index: boolean | '2dsphere';
+    if (field.index === true || field.index === undefined) {
+      index = '2dsphere';
     }
-    return [{ [field.name]: field.index === false ? undefined : field.index || '2dsphere' }];
+    if (field.localized) {
+      return config.localization.locales.map((locale) => ({ [`${field.name}.${locale}`]: index }));
+    }
+    return [{ [field.name]: index }];
   },
 };
 

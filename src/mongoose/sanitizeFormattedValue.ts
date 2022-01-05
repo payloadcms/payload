@@ -44,24 +44,24 @@ export const sanitizeQueryValue = (schemaType: SchemaType, path: string, operato
   // Set up specific formatting necessary by operators
 
   if (operator === 'near') {
-    let x;
-    let y;
+    let lng;
+    let lat;
     let maxDistance;
     let minDistance;
 
     if (Array.isArray(formattedValue)) {
-      [x, y, maxDistance, minDistance] = formattedValue;
+      [lng, lat, maxDistance, minDistance] = formattedValue;
     }
 
     if (typeof formattedValue === 'string') {
-      [x, y, maxDistance, minDistance] = createArrayFromCommaDelineated(formattedValue);
+      [lng, lat, maxDistance, minDistance] = createArrayFromCommaDelineated(formattedValue);
     }
 
-    if (!x || !y || (!maxDistance && !minDistance)) {
+    if (!lng || !lat || (!maxDistance && !minDistance)) {
       formattedValue = undefined;
     } else {
       formattedValue = {
-        $geometry: { type: 'Point', coordinates: [parseFloat(x), parseFloat(y)] },
+        $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
       };
 
       if (maxDistance) formattedValue.$maxDistance = parseFloat(maxDistance);
