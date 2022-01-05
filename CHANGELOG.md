@@ -1,8 +1,8 @@
-## [0.14.2-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.2-beta.0) (2022-01-04)
+## [0.14.3-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.3-beta.0) (2022-01-05)
 
 
 ### Bug Fixes
-
+* clearing saved number for a localized field ([443a070](https://github.com/payloadcms/payload/commit/5549926d2c51995baf40a06b5de74ebd3443a070)
 * ensures multipart/form-data using _payload flattens field data before sending ([ae44727](https://github.com/payloadcms/payload/commit/ae44727fb9734fc3801f7249fa9e78668311c09e))
 
 
