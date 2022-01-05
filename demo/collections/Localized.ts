@@ -84,7 +84,6 @@ const LocalizedPosts: CollectionConfig = {
       name: 'priority',
       label: 'Priority',
       type: 'number',
-      required: true,
       localized: true,
     },
     {

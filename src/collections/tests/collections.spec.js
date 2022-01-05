@@ -137,7 +137,7 @@ describe('Collections - REST', () => {
           description: updatedDesc,
           richText: updatedRichText,
           nonLocalizedArray: updatedNonLocalizedArray,
-          priority: 1,
+          priority: '',
         }),
         headers,
         method: 'put',
@@ -147,6 +147,7 @@ describe('Collections - REST', () => {
 
       expect(response.status).toBe(200);
       expect(data.doc.description).toBe(updatedDesc);
+      expect(data.doc.priority).not.toStrictEqual(1);
       expect(data.doc.nonLocalizedArray).toHaveLength(2);
       expect(data.doc.richText[0].children[0].text).toBe('english update');
 
