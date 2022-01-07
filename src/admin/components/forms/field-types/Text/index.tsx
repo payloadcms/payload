@@ -16,6 +16,7 @@ const Text: React.FC<Props> = (props) => {
       placeholder,
       readOnly,
       style,
+      className,
       width,
       description,
       condition,
@@ -53,6 +54,7 @@ const Text: React.FC<Props> = (props) => {
       placeholder={placeholder}
       readOnly={readOnly}
       style={style}
+      className={className}
       width={width}
       description={description}
     />

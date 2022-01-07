@@ -24,6 +24,7 @@ const Upload: React.FC<Props> = (props) => {
     admin: {
       readOnly,
       style,
+      className,
       width,
       description,
       condition,
@@ -76,6 +77,7 @@ const Upload: React.FC<Props> = (props) => {
         errorMessage={errorMessage}
         readOnly={readOnly}
         style={style}
+        className={className}
         width={width}
         collection={collection}
         fieldTypes={fieldTypes}

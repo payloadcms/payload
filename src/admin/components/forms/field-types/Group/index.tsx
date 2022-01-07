@@ -21,6 +21,7 @@ const Group: React.FC<Props> = (props) => {
     admin: {
       readOnly,
       style,
+      className,
       width,
       hideGutter,
       description,
@@ -35,6 +36,7 @@ const Group: React.FC<Props> = (props) => {
       className={[
         'field-type',
         baseClass,
+        className,
         !label && `${baseClass}--no-label`,
       ].filter(Boolean).join(' ')}
       style={{

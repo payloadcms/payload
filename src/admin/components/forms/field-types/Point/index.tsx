@@ -21,6 +21,7 @@ const PointField: React.FC<Props> = (props) => {
     admin: {
       readOnly,
       style,
+      className,
       width,
       step,
       placeholder,
@@ -61,6 +62,7 @@ const PointField: React.FC<Props> = (props) => {
   const classes = [
     'field-type',
     baseClass,
+    className,
     showError && 'error',
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');

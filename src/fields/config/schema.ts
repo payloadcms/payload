@@ -9,6 +9,7 @@ export const baseAdminFields = joi.object().keys({
   position: joi.string().valid('sidebar'),
   width: joi.string(),
   style: joi.object().unknown(),
+  className: joi.string(),
   readOnly: joi.boolean().default(false),
   hidden: joi.boolean().default(false),
   disabled: joi.boolean().default(false),

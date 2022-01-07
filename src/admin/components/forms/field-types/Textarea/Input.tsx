@@ -18,6 +18,7 @@ export type TextAreaInputProps = Omit<TextareaField, 'type'> & {
   onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void
   placeholder?: string
   style?: React.CSSProperties
+  className?: string
   width?: string
   rows?: number
 }
@@ -28,6 +29,7 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
     required,
     readOnly,
     style,
+    className,
     width,
     placeholder,
     description,
@@ -42,6 +44,7 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
   const classes = [
     'field-type',
     'textarea',
+    className,
     showError && 'error',
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');

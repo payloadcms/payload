@@ -16,6 +16,7 @@ const Textarea: React.FC<Props> = (props) => {
     admin: {
       readOnly,
       style,
+      className,
       width,
       placeholder,
       rows,
@@ -61,6 +62,7 @@ const Textarea: React.FC<Props> = (props) => {
       placeholder={placeholder}
       readOnly={readOnly}
       style={style}
+      className={className}
       width={width}
       description={description}
       rows={rows}

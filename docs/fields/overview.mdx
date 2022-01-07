@@ -114,6 +114,8 @@ In addition to each field's base configuration, you can define specific traits a
 | `description` | Helper text to display with the field to provide more information for the editor user. [Click here](#description) for more info. |
 | `position`    | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`. |
 | `width`       | Restrict the width of a field. you can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
+| `style`       | Attach raw CSS style properties to the root DOM element of a field. |
+| `className`   | Attach a CSS class name to the root DOM element of a field. |
 | `readOnly`    | Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value. |
 | `disabled`    | If a field is `disabled`, it is completely omitted from the Admin panel. |
 | `hidden`      | Setting a field's `hidden` property on its `admin` config will transform it into a `hidden` input type. Its value will still submit with the Admin panel's requests, but the field itself will not be visible to editors. |
