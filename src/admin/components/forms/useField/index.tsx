@@ -127,6 +127,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     formSubmitted: submitted,
     formProcessing: processing,
     setValue,
+    initialValue,
   };
 };
 

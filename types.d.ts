@@ -29,6 +29,7 @@ export {
 export {
   Field,
   FieldHook,
+  FieldWithPath,
   FieldAccess,
   RichTextCustomElement,
   RichTextCustomLeaf,
