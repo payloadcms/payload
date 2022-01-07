@@ -1,14 +1,16 @@
-## [0.14.3-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.3-beta.0) (2022-01-05)
+## [0.14.5-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.5-beta.0) (2022-01-07)
 
 
 ### Bug Fixes
-* clearing saved number for a localized field ([443a070](https://github.com/payloadcms/payload/commit/5549926d2c51995baf40a06b5de74ebd3443a070)
+
 * ensures multipart/form-data using _payload flattens field data before sending ([ae44727](https://github.com/payloadcms/payload/commit/ae44727fb9734fc3801f7249fa9e78668311c09e))
+* type error in useField ([ef4e6d3](https://github.com/payloadcms/payload/commit/ef4e6d32a90215c07aa2c1e7217cf53558bfae97))
 
 
 ### Features
 
 * builds a way for multipart/form-data reqs to retain non-string values ([65b0ad7](https://github.com/payloadcms/payload/commit/65b0ad7f084a9c279a1e4fb799542f97c645653d))
+* exposes FieldWithPath type for reuse ([df3a836](https://github.com/payloadcms/payload/commit/df3a83634fcb64724ef239600e3af4fc295fee4f))
 
 # [0.14.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.14.0) (2022-01-03)
 
