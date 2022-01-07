@@ -35,7 +35,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   // Get field by path
   const field = getField(path);
 
-  const initialValue = field?.initialValue;
+  const initialValue = field?.initialValue as T;
 
   // Valid could be a string equal to an error message
   const valid = (field && typeof field.valid === 'boolean') ? field.valid : true;
