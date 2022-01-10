@@ -1,20 +1,20 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable import/no-extraneous-dependencies */
 import React, { useCallback } from 'react';
+import { useConfig } from '@payloadcms/config-provider';
 import { Props as UploadFieldType } from 'payload/dist/admin/components/forms/field-types/Upload/types';
 import UploadInput from 'payload/dist/admin/components/forms/field-types/Upload/Input';
 import { useField, useWatchForm } from 'payload/components/forms';
 import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { generateMetaImage } from '../utilities/generateMetaImage';
 import { Pill } from '../ui/Pill';
-import { useConfig } from '@payloadcms/config-provider';
 
 export const MetaImage: React.FC<UploadFieldType> = (props) => {
   const {
     label,
     relationTo,
     fieldTypes,
-    name
+    name,
   } = props;
 
   const field: FieldType<string> = useField(props as Options);
@@ -24,7 +24,7 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
   const {
     value,
     setValue,
-    showError
+    showError,
   } = field;
 
   const regenerateImage = useCallback(() => {
@@ -38,13 +38,14 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
   const hasImage = Boolean(value);
 
   const config = useConfig();
+
   const {
     collections,
     serverURL,
     routes: {
       api,
     } = {},
-  } = config
+  } = config;
 
   const collection = collections?.find((coll) => coll.slug === relationTo) || undefined;
 
@@ -105,7 +106,7 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
               const { id: incomingID } = incomingImage;
               setValue(incomingID);
             } else {
-              setValue(null)
+              setValue(null);
             }
           }}
           label={null}
@@ -114,7 +115,7 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
           collection={collection}
           serverURL={serverURL}
           style={{
-            marginBottom: 0
+            marginBottom: 0,
           }}
         />
       </div>
