@@ -61,6 +61,7 @@ const seo = (options: Options) => (config: Config): Config => ({
               type: 'upload',
               relationTo: 'media',
               admin: {
+                description: 'Maximum upload file size: 12MB. Recommended file size for images is <500KB.',
                 components: {
                   Field: MetaImage,
                 },
