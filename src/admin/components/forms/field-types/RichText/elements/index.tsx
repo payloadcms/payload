@@ -12,7 +12,7 @@ import indent from './indent';
 import relationship from './relationship';
 import upload from './upload';
 
-export default {
+const elements = {
   h1,
   h2,
   h3,
@@ -27,3 +27,5 @@ export default {
   relationship,
   upload,
 };
+
+export default elements;

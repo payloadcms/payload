@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import isHotkey from 'is-hotkey';
-import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor, Selection } from 'slate';
+import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor } from 'slate';
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { richText } from '../../../../../fields/validations';
@@ -17,7 +17,7 @@ import defaultValue from '../../../../../fields/richText/defaultValue';
 import FieldTypeGutter from '../../FieldTypeGutter';
 import FieldDescription from '../../FieldDescription';
 import withHTML from './plugins/withHTML';
-import { Props } from './types';
+import { Props, BlurSelectionEditor } from './types';
 import { RichTextElement, RichTextLeaf } from '../../../../../fields/config/types';
 import listTypes from './elements/listTypes';
 import mergeCustomFunctions from './mergeCustomFunctions';
@@ -32,10 +32,6 @@ const baseClass = 'rich-text';
 type CustomText = { text: string;[x: string]: unknown }
 
 type CustomElement = { type: string; children: CustomText[] }
-
-interface BlurSelectionEditor extends BaseEditor {
-  blurSelection?: Selection
-}
 
 declare module 'slate' {
   interface CustomTypes {
