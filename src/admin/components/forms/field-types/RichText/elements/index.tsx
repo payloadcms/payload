@@ -8,6 +8,7 @@ import link from './link';
 import ol from './ol';
 import ul from './ul';
 import li from './li';
+import indent from './indent';
 import relationship from './relationship';
 import upload from './upload';
 
@@ -22,6 +23,7 @@ export default {
   ol,
   ul,
   li,
+  indent,
   relationship,
   upload,
 };

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import isHotkey from 'is-hotkey';
-import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor } from 'slate';
+import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor, Selection } from 'slate';
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { richText } from '../../../../../fields/validations';
@@ -25,7 +25,7 @@ import withEnterBreakOut from './plugins/withEnterBreakOut';
 
 import './index.scss';
 
-const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link', 'relationship', 'upload'];
+const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'indent', 'link', 'relationship', 'upload'];
 const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
 
 const baseClass = 'rich-text';
@@ -33,9 +33,13 @@ type CustomText = { text: string;[x: string]: unknown }
 
 type CustomElement = { type: string; children: CustomText[] }
 
+interface BlurSelectionEditor extends BaseEditor {
+  blurSelection?: Selection
+}
+
 declare module 'slate' {
   interface CustomTypes {
-    Editor: BaseEditor & ReactEditor & HistoryEditor
+    Editor: BaseEditor & ReactEditor & HistoryEditor & BlurSelectionEditor
     Element: CustomElement
     Text: CustomText
   }
@@ -280,12 +284,11 @@ const RichText: React.FC<Props> = (props) => {
 
                         if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === editor.selection.anchor.offset) {
                           Transforms.insertNodes(editor, {
-                            type: 'p',
-                            children: [{ text: '' }],
+                            text: '',
                           });
                         } else {
                           Transforms.splitNodes(editor);
-                          Transforms.setNodes(editor, { type: 'p' });
+                          Transforms.setNodes(editor, {});
                         }
                       }
                     }
@@ -303,7 +306,7 @@ const RichText: React.FC<Props> = (props) => {
                         split: true,
                       });
 
-                      Transforms.setNodes(editor, { type: 'p' });
+                      Transforms.setNodes(editor, {});
                     }
                   } else if (editor.isVoid(selectedElement)) {
                     Transforms.removeNodes(editor);

@@ -6,7 +6,7 @@ import { ButtonProps } from './types';
 
 import '../buttons.scss';
 
-const baseClass = 'rich-text__button';
+export const baseClass = 'rich-text__button';
 
 const ElementButton: React.FC<ButtonProps> = ({ format, children, onClick, className }) => {
   const editor = useSlate();

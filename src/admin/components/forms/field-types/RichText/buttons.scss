@@ -5,4 +5,8 @@
     width: base(.75);
     height: base(.75);
   }
+
+  &--disabled {
+    opacity: .5;
+  }
 }
