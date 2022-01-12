@@ -5,7 +5,9 @@ const isListActive = (editor: Editor, format: string): boolean => {
     // If focus or anchor is at root of editor,
     // Return false - as Editor.parent will fail
     || editor.selection.focus.path[1] === 0
+    // || editor.selection.focus.path.length === 0
     || editor.selection.anchor.path[1] === 0
+    // || editor.selection.anchor.path.length === 0
   ) return false;
 
   const parentLI = Editor.parent(editor, editor.selection);

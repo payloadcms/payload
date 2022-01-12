@@ -3,7 +3,7 @@ import listTypes from '../listTypes';
 
 const LI = (props) => {
   const { attributes, element, children } = props;
-  const disableListStyle = element.children.length === 1 && listTypes.includes(element.children?.[0]?.type);
+  const disableListStyle = element.children.length >= 1 && listTypes.includes(element.children?.[0]?.type);
 
   return (
     <li
