@@ -39,7 +39,7 @@ export const serialize = (children, submissionData) => children.map((node: Node,
       `);
     }
 
-    return text
+    return text;
   }
 
   if (!node) {
@@ -83,6 +83,12 @@ export const serialize = (children, submissionData) => children.map((node: Node,
           ${serialize(node.children, submissionData)}
         </li>
       `);
+    case 'indent':
+      return (`
+          <p>
+            ${serialize(node.children, submissionData)}
+          </p>
+        `);
     case 'link':
       return (`
         <a href={${escapeHTML(node.url)}}>
