@@ -1,6 +1,8 @@
 import React, { useCallback } from 'react';
 import { useSlate, ReactEditor } from 'slate-react';
 import { Editor, Element, Transforms } from 'slate';
+import IndentLeft from '../../../../../icons/IndentLeft';
+import IndentRight from '../../../../../icons/IndentRight';
 import { baseClass } from '../Button';
 import isElementActive from '../isActive';
 import listTypes from '../listTypes';
@@ -80,14 +82,14 @@ const indent = {
           ].filter(Boolean).join(' ')}
           onClick={canDeIndent ? (e) => handleIndent(e, 'left') : undefined}
         >
-          Indent left
+          <IndentLeft />
         </button>
         <button
           type="button"
           className={baseClass}
           onClick={(e) => handleIndent(e, 'right')}
         >
-          Indent right
+          <IndentRight />
         </button>
       </React.Fragment>
     );
