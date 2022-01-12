@@ -11794,10 +11794,10 @@ slate-hyperscript@^0.66.0:
   dependencies:
     is-plain-object "^5.0.0"
 
-slate-react@^0.66.4:
-  version "0.66.7"
-  resolved "https://registry.npmjs.org/slate-react/-/slate-react-0.66.7.tgz#033823dac8612e040094e7b8d942de6639b2e7de"
-  integrity sha512-M0MGCnANdjRZCKGY9cvqHBR/WJ+/4SMIvBvEx4UJ5ycx9uNkDVPdpsyvwDKOpmsJuzZ1DH+34YrpxT7RnQyp1Q==
+slate-react@^0.72.1:
+  version "0.72.1"
+  resolved "https://registry.npmjs.org/slate-react/-/slate-react-0.72.1.tgz#a18917625fa9ec87ae137b6f78bb36d04cdb732b"
+  integrity sha512-H7bCem0xE0PHfaoWOcz18cQ0SZ/oTljAiEH4ygqaeYUjPOid6kAEJ8n28Psbp5g4njIgHTnHfVJGuPiTcKtKeA==
   dependencies:
     "@types/is-hotkey" "^0.1.1"
     "@types/lodash" "^4.14.149"
@@ -11808,10 +11808,10 @@ slate-react@^0.66.4:
     scroll-into-view-if-needed "^2.2.20"
     tiny-invariant "1.0.6"
 
-slate@^0.66.2:
-  version "0.66.5"
-  resolved "https://registry.npmjs.org/slate/-/slate-0.66.5.tgz#bdd93a4422891341dd18a31ff7810f5cae60e40a"
-  integrity sha512-bG03uEKIm/gS6jQarKSNbHn2anemOON2vnSI3VGRd7MJJU5Yiwmutze0yHNO9uZwDLTB+LeDQYZeGu1ACWT0VA==
+slate@0.72.3:
+  version "0.72.3"
+  resolved "https://registry.npmjs.org/slate/-/slate-0.72.3.tgz#c74eb85133b975b2d44d219462c127cdb992e76b"
+  integrity sha512-ALsYQHKTN4rC+iHnOJzV+aC4AHdhoPkBWrfEK3W/LbXOzPrR+wL80a66OZiYg9Xb0QeGzlLSGdOOFQd2ix9Wmg==
   dependencies:
     immer "^9.0.6"
     is-plain-object "^5.0.0"

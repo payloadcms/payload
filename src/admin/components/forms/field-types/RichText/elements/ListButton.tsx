@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useSlate } from 'slate-react';
-import isElementActive from './isActive';
+import isListActive from './isListActive';
 import toggleElement from './toggle';
 import { ButtonProps } from './types';
 
@@ -8,7 +8,7 @@ import '../buttons.scss';
 
 export const baseClass = 'rich-text__button';
 
-const ElementButton: React.FC<ButtonProps> = ({ format, children, onClick, className }) => {
+const ListButton: React.FC<ButtonProps> = ({ format, children, onClick, className }) => {
   const editor = useSlate();
 
   const defaultOnClick = useCallback((event) => {
@@ -22,7 +22,7 @@ const ElementButton: React.FC<ButtonProps> = ({ format, children, onClick, class
       className={[
         baseClass,
         className,
-        isElementActive(editor, format) && `${baseClass}__button--active`,
+        isListActive(editor, format) && `${baseClass}__button--active`,
       ].filter(Boolean).join(' ')}
       onClick={onClick || defaultOnClick}
     >
@@ -31,4 +31,4 @@ const ElementButton: React.FC<ButtonProps> = ({ format, children, onClick, class
   );
 };
 
-export default ElementButton;
+export default ListButton;

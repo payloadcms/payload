@@ -17,7 +17,7 @@ import defaultValue from '../../../../../fields/richText/defaultValue';
 import FieldTypeGutter from '../../FieldTypeGutter';
 import FieldDescription from '../../FieldDescription';
 import withHTML from './plugins/withHTML';
-import { Props } from './types';
+import { Props, BlurSelectionEditor } from './types';
 import { RichTextElement, RichTextLeaf } from '../../../../../fields/config/types';
 import listTypes from './elements/listTypes';
 import mergeCustomFunctions from './mergeCustomFunctions';
@@ -25,7 +25,7 @@ import withEnterBreakOut from './plugins/withEnterBreakOut';
 
 import './index.scss';
 
-const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'link', 'relationship', 'upload'];
+const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'indent', 'link', 'relationship', 'upload'];
 const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
 
 const baseClass = 'rich-text';
@@ -35,7 +35,7 @@ type CustomElement = { type: string; children: CustomText[] }
 
 declare module 'slate' {
   interface CustomTypes {
-    Editor: BaseEditor & ReactEditor & HistoryEditor
+    Editor: BaseEditor & ReactEditor & HistoryEditor & BlurSelectionEditor
     Element: CustomElement
     Text: CustomText
   }
@@ -280,12 +280,11 @@ const RichText: React.FC<Props> = (props) => {
 
                         if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === editor.selection.anchor.offset) {
                           Transforms.insertNodes(editor, {
-                            type: 'p',
-                            children: [{ text: '' }],
+                            text: '',
                           });
                         } else {
                           Transforms.splitNodes(editor);
-                          Transforms.setNodes(editor, { type: 'p' });
+                          Transforms.setNodes(editor, {});
                         }
                       }
                     }
@@ -303,7 +302,7 @@ const RichText: React.FC<Props> = (props) => {
                         split: true,
                       });
 
-                      Transforms.setNodes(editor, { type: 'p' });
+                      Transforms.setNodes(editor, {});
                     }
                   } else if (editor.isVoid(selectedElement)) {
                     Transforms.removeNodes(editor);

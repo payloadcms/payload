@@ -1,6 +1,6 @@
 import React from 'react';
-import ElementButton from '../Button';
 import ULIcon from '../../../../../icons/UnorderedList';
+import ListButton from '../ListButton';
 
 const UL = ({ attributes, children }) => (
   <ul {...attributes}>{children}</ul>
@@ -8,9 +8,9 @@ const UL = ({ attributes, children }) => (
 
 const ul = {
   Button: () => (
-    <ElementButton format="ul">
+    <ListButton format="ul">
       <ULIcon />
-    </ElementButton>
+    </ListButton>
   ),
   Element: UL,
 };

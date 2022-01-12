@@ -10,7 +10,7 @@ const toggleElement = (editor, format) => {
   let type = format;
 
   if (isActive) {
-    type = 'p';
+    type = undefined;
   } else if (isList) {
     type = 'li';
   }
@@ -22,6 +22,7 @@ const toggleElement = (editor, format) => {
   Transforms.unwrapNodes(editor, {
     match: (n) => Element.isElement(n) && listTypes.includes(n.type as string),
     split: true,
+    mode: 'lowest',
   });
 
   Transforms.setNodes(editor, { type });
