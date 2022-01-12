@@ -1,0 +1,12 @@
+@import '../../../scss/styles';
+
+.icon--swap {
+  height: $baseline;
+  width: $baseline;
+
+  .stroke {
+    fill: none;
+    stroke: $color-dark-gray;
+    stroke-width: $style-stroke-width-m;
+  }
+}
