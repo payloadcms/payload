@@ -1,5 +1,5 @@
 import React from 'react';
-import ElementButton from '../Button';
+import ListButton from '../ListButton';
 import OLIcon from '../../../../../icons/OrderedList';
 
 const OL = ({ attributes, children }) => (
@@ -8,9 +8,9 @@ const OL = ({ attributes, children }) => (
 
 const ol = {
   Button: () => (
-    <ElementButton format="ol">
+    <ListButton format="ol">
       <OLIcon />
-    </ElementButton>
+    </ListButton>
   ),
   Element: OL,
 };
