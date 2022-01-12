@@ -85,7 +85,7 @@ export const serialize = (children, submissionData) => children.map((node: Node,
       `);
     case 'indent':
       return (`
-          <p style="padding-left: 45px">
+          <p style="padding-left: 20px">
             ${serialize(node.children, submissionData)}
           </p>
         `);
