@@ -1,8 +1,9 @@
-## [0.14.7-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.7-beta.0) (2022-01-12)
+## [0.14.8-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.8-beta.0) (2022-01-14)
 
 
 ### Bug Fixes
 
+* awaits beforeDelete hooks ([609b871](https://github.com/payloadcms/payload/commit/609b871fa274e8b6d9eaf301e52ab42179aad9b7))
 * ensures multipart/form-data using _payload flattens field data before sending ([ae44727](https://github.com/payloadcms/payload/commit/ae44727fb9734fc3801f7249fa9e78668311c09e))
 * ensures nested lists always render properly ([20e5dfb](https://github.com/payloadcms/payload/commit/20e5dfbb4ab8dab320d60772f5195c5faffe38d3))
 * new slate version types ([c5de01b](https://github.com/payloadcms/payload/commit/c5de01bfc48ca6793c1526499fe934d9ad8f0cc9))
@@ -15,6 +16,7 @@
 * builds a way for multipart/form-data reqs to retain non-string values ([65b0ad7](https://github.com/payloadcms/payload/commit/65b0ad7f084a9c279a1e4fb799542f97c645653d))
 * exposes FieldWithPath type for reuse ([df3a836](https://github.com/payloadcms/payload/commit/df3a83634fcb64724ef239600e3af4fc295fee4f))
 * rich text indent PoC ([2deed8b](https://github.com/payloadcms/payload/commit/2deed8b1464931c4bc76a288923b307cf04b6a4a))
+
 
 # [0.14.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.14.0) (2022-01-03)
 
