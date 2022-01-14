@@ -62,7 +62,14 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
   // beforeDelete - Collection
   // /////////////////////////////////////
 
-  collectionConfig.hooks.beforeDelete.forEach((hook) => hook({ req, id }));
+  await collectionConfig.hooks.beforeDelete.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    return hook({
+      req,
+      id,
+    });
+  }, Promise.resolve());
 
   // /////////////////////////////////////
   // Retrieve document
