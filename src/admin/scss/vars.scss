@@ -107,6 +107,10 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m $color-green;
   }
 }
 
+@mixin soft-shadow-bottom {
+  box-shadow: 0 7px 14px 0px rgb(0 0 0 / 5%);
+}
+
 //////////////////////////////
 // STYLE MIXINS
 //////////////////////////////

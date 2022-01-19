@@ -17,6 +17,56 @@ const RichText: CollectionConfig = {
       type: 'richText',
       label: 'Default Rich Text',
       required: true,
+      admin: {
+        upload: {
+          collections: {
+            media: {
+              fields: [
+                {
+                  type: 'text',
+                  name: 'altText',
+                  label: 'Alt Text',
+                },
+                {
+                  type: 'textarea',
+                  name: 'caption',
+                  label: 'Caption',
+                },
+                {
+                  type: 'group',
+                  name: 'meta',
+                  fields: [
+                    {
+                      type: 'select',
+                      name: 'alignment',
+                      label: 'Alignment',
+                      options: [
+                        {
+                          label: 'Left',
+                          value: 'left',
+                        },
+                        {
+                          label: 'Center',
+                          value: 'center',
+                        },
+                        {
+                          label: 'Right',
+                          value: 'right',
+                        },
+                      ],
+                    },
+                    {
+                      type: 'relationship',
+                      relationTo: 'admins',
+                      name: 'author',
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      },
     },
     {
       name: 'customRichText',

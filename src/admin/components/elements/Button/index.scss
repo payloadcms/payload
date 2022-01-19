@@ -20,6 +20,26 @@
     @include color-svg(currentColor);
   }
 
+  &--has-tooltip {
+    position: relative;
+
+  }
+
+  .btn__tooltip {
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -10px);
+  }
+
+  .btn__content {
+    &:hover {
+      .btn__tooltip {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+  }
+
   &--icon-style-without-border {
     .btn__icon {
       border: none;

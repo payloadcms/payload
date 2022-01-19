@@ -80,6 +80,7 @@ const RichText: React.FC<Props> = (props) => {
           attributes={attributes}
           element={element}
           path={path}
+          fieldProps={props}
         >
           {children}
         </Element>
@@ -87,7 +88,7 @@ const RichText: React.FC<Props> = (props) => {
     }
 
     return <div {...attributes}>{children}</div>;
-  }, [enabledElements, path]);
+  }, [enabledElements, path, props]);
 
   const renderLeaf = useCallback(({ attributes, children, leaf }) => {
     const matchedLeafName = Object.keys(enabledLeaves).find((leafName) => leaf[leafName]);
@@ -100,6 +101,7 @@ const RichText: React.FC<Props> = (props) => {
           attributes={attributes}
           leaf={leaf}
           path={path}
+          fieldProps={props}
         >
           {children}
         </Leaf>
@@ -109,7 +111,7 @@ const RichText: React.FC<Props> = (props) => {
     return (
       <span {...attributes}>{children}</span>
     );
-  }, [enabledLeaves, path]);
+  }, [enabledLeaves, path, props]);
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required });

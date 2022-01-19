@@ -223,6 +223,13 @@ export type RichTextField = FieldBase & {
     elements?: RichTextElement[];
     leaves?: RichTextLeaf[];
     hideGutter?: boolean;
+    upload?: {
+      collections: {
+        [collection: string]: {
+          fields: Field[];
+        }
+      }
+    }
   }
 }
 
