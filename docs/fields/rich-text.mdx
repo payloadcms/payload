@@ -81,6 +81,12 @@ Set this property to `true` to hide this field's gutter within the admin panel. 
 
 This allows [fields](/docs/fields/overview) to be saved as meta data on an upload field inside the Rich Text Editor. When this is present, the fields will render inside a modal that can be opened by clicking the "edit" button on the upload element.
 
+![RichText upload element](https://payloadcms.com/images/fields/richText/rte-upload-element.jpg)
+*RichText field using the upload element*
+
+![RichText upload element modal](https://payloadcms.com/images/fields/richText/rte-upload-fields-modal.jpg)
+*RichText upload element modal displaying fields from the config*
+
 ### Relationship element
 
 The built-in `relationship` element is a powerful way to reference other Documents directly within your Rich Text editor.
@@ -147,7 +153,7 @@ Custom `Leaf` objects follow a similar pattern but require you to define the `Le
             ]
           }
         ],
-        elements: [
+        leaves: [
           'bold',
           'italic',
           {
@@ -158,7 +164,17 @@ Custom `Leaf` objects follow a similar pattern but require you to define the `Le
               // any plugins that are required by this leaf go here
             ]
           }
-        ]
+        ],
+        upload: {
+          collections: {
+            media: {
+              fields: [
+                // any fields that you would like to save
+                // on an upload element in the `media` collection
+              ],
+            },
+          },
+        },
       }
     }
   ]

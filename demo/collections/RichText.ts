@@ -23,23 +23,23 @@ const RichText: CollectionConfig = {
             media: {
               fields: [
                 {
-                  type: 'text',
-                  name: 'altText',
-                  label: 'Alt Text',
-                },
-                {
                   type: 'textarea',
                   name: 'caption',
                   label: 'Caption',
                 },
                 {
-                  type: 'group',
-                  name: 'meta',
+                  type: 'row',
                   fields: [
                     {
+                      type: 'relationship',
+                      relationTo: 'admins',
+                      name: 'linkToAdmin',
+                      label: 'Link to Admin',
+                    },
+                    {
                       type: 'select',
-                      name: 'alignment',
-                      label: 'Alignment',
+                      name: 'imageAlignment',
+                      label: 'Image Alignment',
                       options: [
                         {
                           label: 'Left',
@@ -55,12 +55,12 @@ const RichText: CollectionConfig = {
                         },
                       ],
                     },
-                    {
-                      type: 'relationship',
-                      relationTo: 'admins',
-                      name: 'author',
-                    },
                   ],
+                },
+                {
+                  type: 'checkbox',
+                  name: 'wrapText',
+                  label: 'Wrap Text',
                 },
               ],
             },

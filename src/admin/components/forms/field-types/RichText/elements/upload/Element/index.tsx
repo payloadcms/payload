@@ -98,7 +98,7 @@ const Element = ({ attributes, children, element, path, fieldProps }) => {
                     e.preventDefault();
                     setModalToRender('edit');
                   }}
-                  tooltip="Edit Upload"
+                  tooltip="Upload Fields"
                 />
               )}
               <Button
