@@ -51,6 +51,7 @@ module.exports = {
     'react/no-unused-prop-types': 'off',
     'no-underscore-dangle': 'off',
     'no-use-before-define': 'off',
+    'arrow-body-style': 0,
     '@typescript-eslint/no-use-before-define': ['error'],
     'import/extensions': [
       'error',

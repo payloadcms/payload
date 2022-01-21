@@ -1,55 +1,36 @@
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
-import { Modal, useModal } from '@faceless-ui/modal';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
 import { ReactEditor, useSlateStatic, useFocused, useSelected } from 'slate-react';
 import { useConfig } from '@payloadcms/config-provider';
 import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
 import FileGraphic from '../../../../../../graphics/File';
 import useThumbnail from '../../../../../../../hooks/useThumbnail';
-import MinimalTemplate from '../../../../../../templates/Minimal';
-import UploadGallery from '../../../../../../elements/UploadGallery';
-import ListControls from '../../../../../../elements/ListControls';
 import Button from '../../../../../../elements/Button';
-import ReactSelect from '../../../../../../elements/ReactSelect';
-import Paginator from '../../../../../../elements/Paginator';
-import formatFields from '../../../../../../views/collections/List/formatFields';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
-import PerPage from '../../../../../../elements/PerPage';
-import Label from '../../../../../Label';
+import { SwapUploadModal } from './SwapUploadModal';
 
 import './index.scss';
-import '../modal.scss';
+import { EditModal } from './EditModal';
 
 const baseClass = 'rich-text-upload';
-const baseModalClass = 'rich-text-upload-modal';
 
 const initialParams = {
   depth: 0,
 };
 
-const Element = ({ attributes, children, element, path }) => {
+const Element = ({ attributes, children, element, path, fieldProps }) => {
   const { relationTo, value } = element;
-  const { closeAll, currentModal, open } = useModal();
+  const { closeAll, open } = useModal();
   const { collections, serverURL, routes: { api } } = useConfig();
-  const [availableCollections] = useState(() => collections.filter(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
-  const [renderModal, setRenderModal] = useState(false);
+  const [modalToRender, setModalToRender] = useState(undefined);
   const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
-  const [modalCollectionOption, setModalCollectionOption] = useState<{ label: string, value: string}>({ label: relatedCollection.labels.singular, value: relatedCollection.slug });
-  const [modalCollection, setModalCollection] = useState<SanitizedCollectionConfig>(relatedCollection);
-
-  const [fields, setFields] = useState(() => formatFields(modalCollection));
-  const [limit, setLimit] = useState<number>();
-  const [sort, setSort] = useState(null);
-  const [where, setWhere] = useState(null);
-  const [page, setPage] = useState(null);
 
   const editor = useSlateStatic();
   const selected = useSelected();
   const focused = useFocused();
 
-  const modalSlug = `${path}-edit-upload`;
-  const isOpen = currentModal === modalSlug;
-  const moreThanOneAvailableCollection = availableCollections.length > 1;
+  const modalSlug = `${path}-edit-upload-${modalToRender}`;
 
   // Get the referenced document
   const [{ data: upload }] = usePayloadAPI(
@@ -57,62 +38,29 @@ const Element = ({ attributes, children, element, path }) => {
     { initialParams },
   );
 
-  // If modal is open, get active page of upload gallery
-  const apiURL = isOpen ? `${serverURL}${api}/${modalCollection.slug}` : null;
-  const [{ data }, { setParams }] = usePayloadAPI(apiURL, {});
-
   const thumbnailSRC = useThumbnail(relatedCollection, upload);
 
-  const handleUpdateUpload = useCallback((doc) => {
-    const newNode = {
-      type: 'upload',
-      value: { id: doc.id },
-      relationTo: modalCollection.slug,
-      children: [
-        { text: ' ' },
-      ],
-    };
-
+  const removeUpload = useCallback(() => {
     const elementPath = ReactEditor.findPath(editor, element);
 
-    Transforms.setNodes(
+    Transforms.removeNodes(
       editor,
-      newNode,
       { at: elementPath },
     );
+  }, [editor, element]);
+
+  const closeModal = useCallback(() => {
     closeAll();
-  }, [closeAll, editor, element, modalCollection]);
+    setModalToRender(null);
+  }, [closeAll]);
 
   useEffect(() => {
-    setFields(formatFields(modalCollection));
-    setLimit(modalCollection.admin.pagination.defaultLimit);
-  }, [modalCollection]);
-
-  useEffect(() => {
-    if (renderModal && modalSlug) {
-      open(modalSlug);
+    if (modalToRender && modalSlug) {
+      open(`${modalSlug}`);
     }
-  }, [renderModal, open, modalSlug]);
+  }, [modalToRender, open, modalSlug]);
 
-  useEffect(() => {
-    const params: {
-      page?: number
-      sort?: string
-      where?: unknown
-      limit?: number
-    } = {};
-
-    if (page) params.page = page;
-    if (where) params.where = where;
-    if (sort) params.sort = sort;
-    if (limit) params.limit = limit;
-
-    setParams(params);
-  }, [setParams, page, sort, where, limit]);
-
-  useEffect(() => {
-    setModalCollection(collections.find(({ slug }) => modalCollectionOption.value === slug));
-  }, [modalCollectionOption, collections]);
+  const fieldSchema = fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields;
 
   return (
     <div
@@ -123,127 +71,86 @@ const Element = ({ attributes, children, element, path }) => {
       contentEditable={false}
       {...attributes}
     >
-      <div className={`${baseClass}__thumbnail`}>
-        {thumbnailSRC && (
-          <img
-            src={thumbnailSRC}
-            alt={upload?.filename}
-          />
-        )}
-        {!thumbnailSRC && (
-          <FileGraphic />
-        )}
-      </div>
-      <div className={`${baseClass}__wrap`}>
-        <div className={`${baseClass}__label`}>
-          {relatedCollection.labels.singular}
-        </div>
-        <h5>{upload?.filename}</h5>
-      </div>
-      <Button
-        icon="edit"
-        round
-        buttonStyle="icon-label"
-        iconStyle="with-border"
-        className={`${baseClass}__button`}
-        onClick={(e) => {
-          e.preventDefault();
-          setRenderModal(true);
-        }}
-      />
-      {children}
-      {renderModal && (
-        <Modal
-          className={baseModalClass}
-          slug={modalSlug}
-        >
-          {isOpen && (
-            <MinimalTemplate width="wide">
-              <header className={`${baseModalClass}__header`}>
-                <h1>
-                  Choose
-                  {' '}
-                  {modalCollection.labels.singular}
-                </h1>
+      <div className={`${baseClass}__card`}>
+        <div className={`${baseClass}__topRow`}>
+          <div className={`${baseClass}__thumbnail`}>
+            {thumbnailSRC ? (
+              <img
+                src={thumbnailSRC}
+                alt={upload?.filename}
+              />
+            ) : (
+              <FileGraphic />
+            )}
+          </div>
+          <div className={`${baseClass}__topRowRightPanel`}>
+            <div className={`${baseClass}__collectionLabel`}>
+              {relatedCollection.labels.singular}
+            </div>
+            <div className={`${baseClass}__actions`}>
+              {fieldSchema && (
                 <Button
-                  icon="x"
+                  icon="edit"
                   round
                   buttonStyle="icon-label"
-                  iconStyle="with-border"
-                  onClick={() => {
-                    closeAll();
-                    setRenderModal(false);
+                  className={`${baseClass}__actionButton`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setModalToRender('edit');
                   }}
+                  tooltip="Upload Fields"
                 />
-              </header>
-              {moreThanOneAvailableCollection && (
-                <div className={`${baseModalClass}__select-collection-wrap`}>
-                  <Label label="Select a Collection to Browse" />
-                  <ReactSelect
-                    className={`${baseClass}__select-collection`}
-                    value={modalCollectionOption}
-                    onChange={setModalCollectionOption}
-                    options={availableCollections.map((coll) => ({ label: coll.labels.singular, value: coll.slug }))}
-                  />
-                </div>
               )}
-              <ListControls
-                collection={{
-                  ...modalCollection,
-                  fields,
+              <Button
+                icon="swap"
+                round
+                buttonStyle="icon-label"
+                className={`${baseClass}__actionButton`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setModalToRender('swap');
                 }}
-                enableColumns={false}
-                enableSort
-                modifySearchQuery={false}
-                handleSortChange={setSort}
-                handleWhereChange={setWhere}
+                tooltip="Swap Upload"
               />
-              <UploadGallery
-                docs={data?.docs}
-                collection={modalCollection}
-                onCardClick={(doc) => {
-                  handleUpdateUpload(doc);
-                  setRelatedCollection(modalCollection);
-                  setRenderModal(false);
-                  closeAll();
+              <Button
+                icon="x"
+                round
+                buttonStyle="icon-label"
+                className={`${baseClass}__actionButton`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  removeUpload();
                 }}
+                tooltip="Remove Upload"
               />
-              <div className={`${baseModalClass}__page-controls`}>
-                <Paginator
-                  limit={data.limit}
-                  totalPages={data.totalPages}
-                  page={data.page}
-                  hasPrevPage={data.hasPrevPage}
-                  hasNextPage={data.hasNextPage}
-                  prevPage={data.prevPage}
-                  nextPage={data.nextPage}
-                  numberOfNeighbors={1}
-                  onChange={setPage}
-                  disableHistoryChange
-                />
-                {data?.totalDocs > 0 && (
-                  <Fragment>
-                    <div className={`${baseModalClass}__page-info`}>
-                      {data.page}
-                      -
-                      {data.totalPages > 1 ? data.limit : data.totalDocs}
-                      {' '}
-                      of
-                      {' '}
-                      {data.totalDocs}
-                    </div>
-                    <PerPage
-                      collection={modalCollection}
-                      limit={limit}
-                      modifySearchParams={false}
-                      handleChange={setLimit}
-                    />
-                  </Fragment>
-                )}
-              </div>
-            </MinimalTemplate>
-          )}
-        </Modal>
+            </div>
+          </div>
+        </div>
+
+        <div className={`${baseClass}__bottomRow`}>
+          <h5>{upload?.filename}</h5>
+        </div>
+      </div>
+      {children}
+
+      {modalToRender === 'swap' && (
+        <SwapUploadModal
+          slug={modalSlug}
+          element={element}
+          closeModal={closeModal}
+          setRelatedCollectionConfig={setRelatedCollection}
+          relatedCollectionConfig={relatedCollection}
+        />
+      )}
+
+      {(modalToRender === 'edit' && fieldSchema) && (
+        <EditModal
+          slug={modalSlug}
+          closeModal={closeModal}
+          relatedCollectionConfig={relatedCollection}
+          fieldSchema={fieldSchema}
+          element={element}
+        />
       )}
     </div>
   );

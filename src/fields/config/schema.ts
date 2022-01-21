@@ -263,6 +263,11 @@ export const richText = baseField.keys({
       ),
     ),
     hideGutter: joi.boolean().default(false),
+    upload: joi.object({
+      collections: joi.object().pattern(joi.string(), joi.object().keys({
+        fields: joi.array().items(joi.link('#field')),
+      })),
+    }),
   }),
 });
 

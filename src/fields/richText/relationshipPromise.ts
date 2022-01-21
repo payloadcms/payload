@@ -1,7 +1,8 @@
-import { Collection } from '../collections/config/types';
-import { Payload } from '..';
-import { RichTextField } from './config/types';
-import { PayloadRequest } from '../express/types';
+import { Payload } from '../..';
+import { RichTextField } from '../config/types';
+import { PayloadRequest } from '../../express/types';
+import { recurseNestedFields } from './recurseNestedFields';
+import { populate } from './populate';
 
 type Arguments = {
   data: unknown
@@ -26,44 +27,7 @@ type RecurseRichTextArgs = {
   showHiddenFields: boolean
 }
 
-const populate = async ({
-  id,
-  collection,
-  data,
-  overrideAccess,
-  depth,
-  currentDepth,
-  payload,
-  req,
-  showHiddenFields,
-}: Arguments & {
-  id: string,
-  collection: Collection
-}) => {
-  const dataRef = data as Record<string, unknown>;
-
-  const doc = await payload.operations.collections.findByID({
-    req: {
-      ...req,
-      payloadAPI: 'local',
-    },
-    collection,
-    id,
-    currentDepth: currentDepth + 1,
-    overrideAccess,
-    disableErrors: true,
-    depth,
-    showHiddenFields,
-  });
-
-  if (doc) {
-    dataRef.value = doc;
-  } else {
-    dataRef.value = null;
-  }
-};
-
-const recurseRichText = ({
+export const recurseRichText = ({
   req,
   children,
   payload,
@@ -73,7 +37,7 @@ const recurseRichText = ({
   field,
   promises,
   showHiddenFields,
-}: RecurseRichTextArgs) => {
+}: RecurseRichTextArgs): void => {
   if (Array.isArray(children)) {
     (children as any[]).forEach((element) => {
       const collection = payload.collections[element?.relationTo];
@@ -82,10 +46,23 @@ const recurseRichText = ({
         && element?.value?.id
         && collection
         && (depth && currentDepth <= depth)) {
+        if (element.type === 'upload' && Array.isArray(field.admin?.upload?.collections?.[element?.relationTo]?.fields)) {
+          recurseNestedFields({
+            promises,
+            data: element.fields || {},
+            fields: field.admin.upload.collections[element.relationTo].fields,
+            req,
+            payload,
+            overrideAccess,
+            depth,
+            currentDepth,
+            showHiddenFields,
+          });
+        }
         promises.push(populate({
           req,
           id: element.value.id,
-          data: element,
+          data: element.value,
           overrideAccess,
           depth,
           currentDepth,

@@ -17,6 +17,56 @@ const RichText: CollectionConfig = {
       type: 'richText',
       label: 'Default Rich Text',
       required: true,
+      admin: {
+        upload: {
+          collections: {
+            media: {
+              fields: [
+                {
+                  type: 'textarea',
+                  name: 'caption',
+                  label: 'Caption',
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      type: 'relationship',
+                      relationTo: 'admins',
+                      name: 'linkToAdmin',
+                      label: 'Link to Admin',
+                    },
+                    {
+                      type: 'select',
+                      name: 'imageAlignment',
+                      label: 'Image Alignment',
+                      options: [
+                        {
+                          label: 'Left',
+                          value: 'left',
+                        },
+                        {
+                          label: 'Center',
+                          value: 'center',
+                        },
+                        {
+                          label: 'Right',
+                          value: 'right',
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  type: 'checkbox',
+                  name: 'wrapText',
+                  label: 'Wrap Text',
+                },
+              ],
+            },
+          },
+        },
+      },
     },
     {
       name: 'customRichText',

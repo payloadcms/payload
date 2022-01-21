@@ -20,7 +20,7 @@ import combineParentName from '../utilities/combineParentName';
 import withNullableType from './withNullableType';
 import { BaseFields } from '../../collections/graphql/types';
 import { toWords } from '../../utilities/formatLabels';
-import createRichTextRelationshipPromise from '../../fields/richTextRelationshipPromise';
+import createRichTextRelationshipPromise from '../../fields/richText/relationshipPromise';
 
 type LocaleInputType = {
   locale: {

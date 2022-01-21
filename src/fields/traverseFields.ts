@@ -5,7 +5,7 @@ import { Field, fieldHasSubFields, fieldIsArrayType, fieldIsBlockType, fieldAffe
 import { Operation } from '../types';
 import { PayloadRequest } from '../express/types';
 import { Payload } from '..';
-import richTextRelationshipPromise from './richTextRelationshipPromise';
+import richTextRelationshipPromise from './richText/relationshipPromise';
 
 type Arguments = {
   fields: Field[]
@@ -28,7 +28,7 @@ type Arguments = {
   fullOriginalDoc: Record<string, any>
   fullData: Record<string, any>
   validationPromises: (() => Promise<string | boolean>)[]
-  errors: {message: string, field: string}[]
+  errors: { message: string, field: string }[]
   payload: Payload
   showHiddenFields: boolean
   unflattenLocales: boolean
@@ -96,7 +96,7 @@ const traverseFields = (args: Arguments): void => {
     }
 
     if ((field.type === 'upload' || field.type === 'relationship')
-    && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null')) {
+      && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null')) {
       if (field.type === 'relationship' && field.hasMany === true) {
         dataCopy[field.name] = [];
       } else {
@@ -304,7 +304,7 @@ const traverseFields = (args: Arguments): void => {
       if (field.type === 'relationship' || field.type === 'upload') {
         if (Array.isArray(field.relationTo)) {
           if (Array.isArray(dataCopy[field.name])) {
-            dataCopy[field.name].forEach((relatedDoc: {value: unknown, relationTo: string}, i) => {
+            dataCopy[field.name].forEach((relatedDoc: { value: unknown, relationTo: string }, i) => {
               const relatedCollection = payload.config.collections.find((collection) => collection.slug === relatedDoc.relationTo);
               const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldAffectsData(collectionField) && collectionField.name === 'id');
               if (relationshipIDField?.type === 'number') {

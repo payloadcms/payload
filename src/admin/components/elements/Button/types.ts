@@ -16,4 +16,5 @@ export type Props = {
   size?: 'small' | 'medium',
   iconPosition?: 'left' | 'right',
   newTab?: boolean
+  tooltip?: string
 }

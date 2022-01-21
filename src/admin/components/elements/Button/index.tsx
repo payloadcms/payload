@@ -6,6 +6,8 @@ import plus from '../../icons/Plus';
 import x from '../../icons/X';
 import chevron from '../../icons/Chevron';
 import edit from '../../icons/Edit';
+import swap from '../../icons/Swap';
+import Tooltip from '../Tooltip';
 
 import './index.scss';
 
@@ -14,15 +16,21 @@ const icons = {
   x,
   chevron,
   edit,
+  swap,
 };
 
 const baseClass = 'btn';
 
-const ButtonContents = ({ children, icon }) => {
+const ButtonContents = ({ children, icon, tooltip }) => {
   const BuiltInIcon = icons[icon];
 
   return (
     <span className={`${baseClass}__content`}>
+      {tooltip && (
+        <Tooltip className={`${baseClass}__tooltip`}>
+          {tooltip}
+        </Tooltip>
+      )}
       {children && (
         <span className={`${baseClass}__label`}>
           {children}
@@ -55,6 +63,7 @@ const Button: React.FC<Props> = (props) => {
     size = 'medium',
     iconPosition = 'right',
     newTab,
+    tooltip,
   } = props;
 
   const classes = [
@@ -68,6 +77,7 @@ const Button: React.FC<Props> = (props) => {
     round && `${baseClass}--round`,
     size && `${baseClass}--size-${size}`,
     iconPosition && `${baseClass}--icon-position-${iconPosition}`,
+    tooltip && `${baseClass}--has-tooltip`,
   ].filter(Boolean).join(' ');
 
   function handleClick(event) {
@@ -90,7 +100,10 @@ const Button: React.FC<Props> = (props) => {
           {...buttonProps}
           to={to || url}
         >
-          <ButtonContents icon={icon}>
+          <ButtonContents
+            icon={icon}
+            tooltip={tooltip}
+          >
             {children}
           </ButtonContents>
         </Link>
@@ -102,7 +115,10 @@ const Button: React.FC<Props> = (props) => {
           {...buttonProps}
           href={url}
         >
-          <ButtonContents icon={icon}>
+          <ButtonContents
+            icon={icon}
+            tooltip={tooltip}
+          >
             {children}
           </ButtonContents>
         </a>
@@ -114,7 +130,10 @@ const Button: React.FC<Props> = (props) => {
           type="submit"
           {...buttonProps}
         >
-          <ButtonContents icon={icon}>
+          <ButtonContents
+            icon={icon}
+            tooltip={tooltip}
+          >
             {children}
           </ButtonContents>
         </button>
