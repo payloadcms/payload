@@ -23,7 +23,7 @@ const RichText: CollectionConfig = {
             media: {
               fields: [
                 {
-                  type: 'textarea',
+                  type: 'richText',
                   name: 'caption',
                   label: 'Caption',
                 },
