@@ -22,4 +22,20 @@
       margin: 0 0 0 $baseline;
     }
   }
+
+  .rich-text__wrap {
+    .field-type-gutter {
+      display: none;
+    }
+  }
+  .rich-text__toolbar {
+    margin-bottom: 0;
+  }
+  .rich-text__editor {
+    background-color: white;
+    border: 1px solid $color-light-gray;
+    border-top: none;
+    min-height: base(5);
+    padding: base(.35) base(.5);
+  }
 }

@@ -62,7 +62,8 @@ export const recurseRichText = ({
         promises.push(populate({
           req,
           id: element.value.id,
-          data: element.value,
+          data: element,
+          key: 'value',
           overrideAccess,
           depth,
           currentDepth,

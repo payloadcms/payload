@@ -7,6 +7,7 @@ import { PayloadRequest } from '../../express/types';
 type Arguments = {
   data: unknown
   overrideAccess?: boolean
+  key: string | number
   depth: number
   currentDepth?: number
   payload: Payload
@@ -19,6 +20,7 @@ export const populate = async ({
   id,
   collection,
   data,
+  key,
   overrideAccess,
   depth,
   currentDepth,
@@ -30,7 +32,7 @@ export const populate = async ({
   field: Field
   collection: Collection
 }): Promise<void> => {
-  let dataRef = data as Record<string, unknown>;
+  const dataRef = data as Record<string, unknown>;
 
   const doc = await payload.operations.collections.findByID({
     req: {
@@ -47,8 +49,8 @@ export const populate = async ({
   });
 
   if (doc) {
-    dataRef = doc;
+    dataRef[key] = doc;
   } else {
-    dataRef = null;
+    dataRef[key] = null;
   }
 };
