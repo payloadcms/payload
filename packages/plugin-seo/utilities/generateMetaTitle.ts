@@ -25,7 +25,7 @@ export const generateMetaTitle = async (fields: Fields): Promise<string> => {
             title: subsiteTitle
           } = doc;
 
-          return `${base} | ${subsiteTitle} - ${docTitle}`;
+          return `${base} ${subsiteTitle} - ${docTitle}`;
         }
       } catch (e) {
         console.error(`error while generating meta title, cannot find subsite with id: ${subsiteID}`);
@@ -33,5 +33,5 @@ export const generateMetaTitle = async (fields: Fields): Promise<string> => {
     }
   }
 
-  return `${base} | ${docTitle}`
+  return `${base} - ${docTitle}`
 };
