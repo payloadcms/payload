@@ -1,4 +1,4 @@
-## [0.14.11-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.11-beta.0) (2022-01-24)
+## [0.14.12-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.12-beta.0) (2022-01-24)
 
 
 ### Bug Fixes
@@ -9,6 +9,7 @@
 * ensures rte upload is populated when only upload is enabled ([39438b8](https://github.com/payloadcms/payload/commit/39438b8460f853f64d84436eed49dde74cd207d2))
 * import path for createRichTextRelationshipPromise ([586cd4d](https://github.com/payloadcms/payload/commit/586cd4d6af5485116ebb299a5af3d24f5baeaa2e))
 * new slate version types ([c5de01b](https://github.com/payloadcms/payload/commit/c5de01bfc48ca6793c1526499fe934d9ad8f0cc9))
+* rte upload field population ([8327b5a](https://github.com/payloadcms/payload/commit/8327b5aae505a189a5b9617c3485d646b5f8b517))
 * type error in useField ([ef4e6d3](https://github.com/payloadcms/payload/commit/ef4e6d32a90215c07aa2c1e7217cf53558bfae97))
 
 
@@ -21,6 +22,7 @@
 * enhances rich text upload with custom field API ([0e4eb90](https://github.com/payloadcms/payload/commit/0e4eb906f2881dca518fea6b41e460bc57da9801))
 * exposes FieldWithPath type for reuse ([df3a836](https://github.com/payloadcms/payload/commit/df3a83634fcb64724ef239600e3af4fc295fee4f))
 * rich text indent PoC ([2deed8b](https://github.com/payloadcms/payload/commit/2deed8b1464931c4bc76a288923b307cf04b6a4a))
+
 
 # [0.14.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.14.0) (2022-01-03)
 
