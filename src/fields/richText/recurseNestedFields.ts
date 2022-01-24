@@ -87,7 +87,8 @@ export const recurseNestedFields = ({
             showHiddenFields,
           }));
         }
-      } else if (typeof data[field.name] !== undefined) {
+      }
+      if (typeof data[field.name] !== 'undefined' && typeof field.relationTo === 'string') {
         const collection = payload.collections[field.relationTo];
         promises.push(populate({
           id: data[field.name],
