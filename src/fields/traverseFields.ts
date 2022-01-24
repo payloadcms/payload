@@ -139,7 +139,7 @@ const traverseFields = (args: Arguments): void => {
         }
       }
 
-      if ((field.admin?.elements?.includes('relationship') || !field?.admin?.elements) && hook === 'afterRead') {
+      if (((field.admin?.elements?.includes('relationship') || field.admin?.elements?.includes('upload')) || !field?.admin?.elements) && hook === 'afterRead') {
         relationshipPopulations.push(richTextRelationshipPromise({
           req,
           data,
