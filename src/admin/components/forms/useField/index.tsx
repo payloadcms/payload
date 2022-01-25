@@ -12,7 +12,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     enableDebouncedValue,
     disableFormData,
     ignoreWhileFlattening,
-    stringify,
     condition,
   } = options;
 
@@ -46,7 +45,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const sendField = useCallback(async (valueToSend) => {
     const fieldToDispatch = {
       path,
-      stringify,
       disableFormData,
       ignoreWhileFlattening,
       initialValue,
@@ -76,7 +74,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     disableFormData,
     ignoreWhileFlattening,
     initialValue,
-    stringify,
     condition,
   ]);
 

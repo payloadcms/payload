@@ -6,7 +6,6 @@ export type Options = {
   enableDebouncedValue?: boolean
   disableFormData?: boolean
   ignoreWhileFlattening?: boolean
-  stringify?: boolean
   condition?: Condition
 }
 

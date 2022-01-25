@@ -6,11 +6,7 @@ const reduceFieldsToValues = (fields: Fields, unflatten?: boolean): Data => {
 
   Object.keys(fields).forEach((key) => {
     if (!fields[key].disableFormData) {
-      if (fields[key].stringify) {
-        data[key] = JSON.stringify(fields[key].value);
-      } else {
-        data[key] = fields[key].value;
-      }
+      data[key] = fields[key].value;
     }
   });
 

@@ -8,7 +8,6 @@ export type Field = {
   validate?: (val: unknown) => Promise<boolean | string> | boolean | string
   disableFormData?: boolean
   ignoreWhileFlattening?: boolean
-  stringify?: boolean
   condition?: Condition
   passesCondition?: boolean
 }

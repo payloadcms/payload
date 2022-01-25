@@ -121,7 +121,6 @@ const RichText: React.FC<Props> = (props) => {
   const fieldType = useField({
     path,
     validate: memoizedValidate,
-    stringify: true,
     condition,
   });
 
