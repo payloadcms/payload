@@ -1,4 +1,4 @@
-## [0.14.14-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.14-beta.0) (2022-01-25)
+## [0.14.15-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.15-beta.0) (2022-01-31)
 
 
 ### Bug Fixes
@@ -15,6 +15,7 @@
 
 ### Features
 
+* adds a way to customize express.static options ([dbb3c50](https://github.com/payloadcms/payload/commit/dbb3c502227597ef4d04c9e5c8db6d2f51a8aac4))
 * adds admin.upload.collections[collection-name].fields to the RTE to save specific data on upload elements ([3adf44a](https://github.com/payloadcms/payload/commit/3adf44a24162e5adbcebdb0ca7d0d460d23c57eb))
 * adds indentation controls to rich text ([7df50f9](https://github.com/payloadcms/payload/commit/7df50f9bf9d4867e65bdd8cebdf43e0ab1737a63))
 * adds recursion to richText field to populate relationship and upload nested fields ([42af22c](https://github.com/payloadcms/payload/commit/42af22c2a10de44555bfedf902e7b4a4c9b25d6b))
