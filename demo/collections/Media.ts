@@ -58,6 +58,9 @@ const Media: CollectionConfig = {
         height: 16,
       },
     ],
+    staticOptions: {
+      maxAge: 21600000, // 6 hours in milliseconds
+    },
   },
   fields: [
     {

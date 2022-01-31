@@ -266,6 +266,7 @@
     "passport-strategy": "^1.0.0",
     "release-it": "^14.2.2",
     "rimraf": "^3.0.2",
+    "serve-static": "^1.14.2",
     "typescript": "^4.1.2"
   },
   "files": [

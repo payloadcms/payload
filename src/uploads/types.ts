@@ -1,3 +1,7 @@
+/* eslint-disable import/no-extraneous-dependencies */
+import express from 'express';
+import serveStatic from 'serve-static';
+
 export type FileSize = {
   filename: string;
   filesize: number;
@@ -36,6 +40,7 @@ export type IncomingUploadType = {
   disableLocalStorage?: boolean
   adminThumbnail?: string | GetAdminThumbnail;
   mimeTypes?: string[];
+  staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
 }
 
 
@@ -46,6 +51,7 @@ export type Upload = {
   disableLocalStorage: boolean
   adminThumbnail?: string | GetAdminThumbnail
   mimeTypes?: string[];
+  staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
 }
 
 export type File = {

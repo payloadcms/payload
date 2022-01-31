@@ -21,7 +21,7 @@ function initStatic(ctx: Payload) {
 
       const staticPath = path.resolve(ctx.config.paths.configDir, config.upload.staticDir);
 
-      router.use(express.static(staticPath));
+      router.use(express.static(staticPath, config.upload.staticOptions || {}));
 
       ctx.express.use(`${config.upload.staticURL}`, router);
     }
