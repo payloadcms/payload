@@ -10,15 +10,25 @@ import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
 
-
-import './index.scss';
-
 const baseClass = 'login';
 
 const Login: React.FC = () => {
   const history = useHistory();
   const { user, setToken } = useAuth();
-  const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = useConfig();
+  const {
+    admin: {
+      user: userSlug,
+      components: {
+        beforeLogin,
+        afterLogin,
+      } = {},
+    },
+    serverURL,
+    routes: {
+      admin,
+      api,
+    },
+  } = useConfig();
 
   const onSuccess = (data) => {
     if (data.token) {
@@ -67,6 +77,7 @@ const Login: React.FC = () => {
       <div className={`${baseClass}__brand`}>
         <Logo />
       </div>
+      {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
       <Form
         disableSuccessStatus
         waitForAutocomplete
@@ -91,6 +102,7 @@ const Login: React.FC = () => {
         </Link>
         <FormSubmit>Login</FormSubmit>
       </Form>
+      {Array.isArray(afterLogin) && afterLogin.map((Component, i) => <Component key={i} />)}
     </MinimalTemplate>
   );
 };
