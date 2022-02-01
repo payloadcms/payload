@@ -37,6 +37,7 @@ import CustomRouteWithMinimalTemplate from './client/components/views/CustomMini
 import CustomRouteWithDefaultTemplate from './client/components/views/CustomDefault';
 import AfterDashboard from './client/components/AfterDashboard';
 import AfterNavLinks from './client/components/AfterNavLinks';
+import BeforeLogin from './client/components/BeforeLogin';
 
 export default buildConfig({
   cookiePrefix: 'payload',
@@ -67,6 +68,9 @@ export default buildConfig({
       ],
       afterDashboard: [
         AfterDashboard,
+      ],
+      beforeLogin: [
+        BeforeLogin,
       ],
       afterNavLinks: [
         AfterNavLinks,

@@ -61,6 +61,8 @@ export default joi.object({
           ),
         beforeDashboard: joi.array().items(component),
         afterDashboard: joi.array().items(component),
+        beforeLogin: joi.array().items(component),
+        afterLogin: joi.array().items(component),
         beforeNavLinks: joi.array().items(component),
         afterNavLinks: joi.array().items(component),
         Nav: component,

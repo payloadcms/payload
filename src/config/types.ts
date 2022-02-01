@@ -103,6 +103,8 @@ export type Config = {
       routes?: AdminRoute[]
       beforeDashboard?: React.ComponentType[]
       afterDashboard?: React.ComponentType[]
+      beforeLogin?: React.ComponentType[]
+      afterLogin?: React.ComponentType[]
       beforeNavLinks?: React.ComponentType[]
       afterNavLinks?: React.ComponentType[]
       Nav?: React.ComponentType
