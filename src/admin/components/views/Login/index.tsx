@@ -10,6 +10,8 @@ import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
 
+import './index.scss';
+
 const baseClass = 'login';
 
 const Login: React.FC = () => {
