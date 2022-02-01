@@ -1,4 +1,4 @@
-## [0.14.17-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.17-beta.0) (2022-02-01)
+## [0.14.18-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.18-beta.0) (2022-02-01)
 
 
 ### Bug Fixes
@@ -23,8 +23,8 @@
 * builds a way for multipart/form-data reqs to retain non-string values ([65b0ad7](https://github.com/payloadcms/payload/commit/65b0ad7f084a9c279a1e4fb799542f97c645653d))
 * enhances rich text upload with custom field API ([0e4eb90](https://github.com/payloadcms/payload/commit/0e4eb906f2881dca518fea6b41e460bc57da9801))
 * exposes FieldWithPath type for reuse ([df3a836](https://github.com/payloadcms/payload/commit/df3a83634fcb64724ef239600e3af4fc295fee4f))
+* exposes useLocale for reuse ([bef0206](https://github.com/payloadcms/payload/commit/bef02062e769d1b0279c51af748f06d41c924c8a))
 * rich text indent PoC ([2deed8b](https://github.com/payloadcms/payload/commit/2deed8b1464931c4bc76a288923b307cf04b6a4a))
-
 
 # [0.14.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.14.0) (2022-01-03)
 
