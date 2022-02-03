@@ -11,9 +11,9 @@ export const LocaleProvider: React.FC = ({ children }) => {
   const { localization } = useConfig();
   const { user } = useAuth();
   const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
-  const [locale, setLocale] = useState<string>(defaultLocale);
-  const { getPreference, setPreference } = usePreferences();
   const searchParams = useSearchParams();
+  const [locale, setLocale] = useState<string>(searchParams?.locale as string || defaultLocale);
+  const { getPreference, setPreference } = usePreferences();
   const localeFromParams = searchParams.locale;
 
   useEffect(() => {
