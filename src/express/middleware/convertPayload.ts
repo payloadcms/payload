@@ -8,6 +8,8 @@ export default (req: Request, _: Response, next: NextFunction): void => {
       ...req.body,
       ...payloadJSON,
     };
+
+    delete req.body?._payload;
   }
 
   next();
