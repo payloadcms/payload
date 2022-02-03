@@ -1,8 +1,10 @@
-## [0.14.18-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.18-beta.0) (2022-02-01)
+## [0.14.20-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.20-beta.0) (2022-02-03)
 
 
 ### Bug Fixes
 
+* [#423](https://github.com/payloadcms/payload/issues/423), [#391](https://github.com/payloadcms/payload/issues/391) - prevents loading edit views until data initializes ([2884654](https://github.com/payloadcms/payload/commit/28846547afc7e7bb8accc5dbe9f3b98593f332fa))
+* [#424](https://github.com/payloadcms/payload/issues/424), unable to clear localized property vals ([1a05fe4](https://github.com/payloadcms/payload/commit/1a05fe448c0755438dedc20c95d4a6a587912e2f))
 * awaits beforeDelete hooks ([609b871](https://github.com/payloadcms/payload/commit/609b871fa274e8b6d9eaf301e52ab42179aad9b7))
 * ensures multipart/form-data using _payload flattens field data before sending ([ae44727](https://github.com/payloadcms/payload/commit/ae44727fb9734fc3801f7249fa9e78668311c09e))
 * ensures nested lists always render properly ([20e5dfb](https://github.com/payloadcms/payload/commit/20e5dfbb4ab8dab320d60772f5195c5faffe38d3))
