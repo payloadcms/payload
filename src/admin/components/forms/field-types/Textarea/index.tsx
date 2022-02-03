@@ -3,9 +3,9 @@ import useField from '../../useField';
 import withCondition from '../../withCondition';
 import { textarea } from '../../../../../fields/validations';
 import { Props } from './types';
+import TextareaInput from './Input';
 
 import './index.scss';
-import TextareaInput from './Input';
 
 const Textarea: React.FC<Props> = (props) => {
   const {
