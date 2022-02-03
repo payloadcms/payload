@@ -194,7 +194,7 @@ const Relationship: React.FC<Props> = (props) => {
   }, [search]);
 
   const addOptionByID = useCallback(async (id, relation) => {
-    if (!errorLoading && id !== 'null') {
+    if (!errorLoading && id !== 'null' && id !== null) {
       const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`);
 
       if (response.ok) {

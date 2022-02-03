@@ -10,7 +10,7 @@ const reduceToIDs = (options) => options.reduce((ids, option) => {
 
   return [
     ...ids,
-    option.id,
+    option.value,
   ];
 }, []);
 
