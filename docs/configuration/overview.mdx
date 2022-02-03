@@ -139,13 +139,35 @@ The Payload config itself, as well as all files that it requires or imports, are
 
 Payload comes with `isomorphic-fetch` installed which means that even in Node, you can use the `fetch` API just as you would within the browser. No need to import `axios` or similar, unless you want to!
 
-#### Re-using the Payload `babel.config.js`
+#### Payload Config and Babel
+
+The entire Payload config is transpiled automatically by Payload via `babel`.
 
 If for any reason you need to re-use the built-in Payload `babel.config.js`, you can do so by importing it as follows:
 
 ```
 import { config } from 'payload/babel';
 ```
+
+<Banner type="warning">
+  <strong>Note:</strong><br/>
+  Because the Payload config is transpiled internally, if you want to import it to share or reuse any of its properties within your own Node server's code, you need to make sure that <em>you manually transpile it</em> using <strong>babel-register</strong> or similar. For example, if you try to import your config directly into your server, your Node process will likely crash because the Payload config supports React components, TypeScript, and new ES6+ features.
+</Banner>
+
+However, you can share code, like for example your config's `serverURL` property by "hoisting" your shared properties above your config and writing any "shared" code in a module that is compatible with your Node environment.
+
+For example, to share your `serverURL`, you could create a file like the following:
+
+`serverURL.js`:
+
+```js
+const serverURL = 'http://localhost:3000';
+
+module.exports = serverURL;
+```
+
+Then, you could import this file into both your Payload config and your server, in an effort to avoid importing your full Payload config directly into your server.
+
 
 ### TypeScript
 
