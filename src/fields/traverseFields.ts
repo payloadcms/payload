@@ -183,7 +183,7 @@ const traverseFields = (args: Arguments): void => {
             valueToSet = docWithLocales?.[field.name]?.[localeID];
           }
 
-          if (valueToSet) {
+          if (typeof valueToSet !== 'undefined') {
             return {
               ...locales,
               [localeID]: valueToSet,
