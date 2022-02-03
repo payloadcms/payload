@@ -54,7 +54,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     });
   };
 
-  const [{ data }] = usePayloadAPI(
+  const [{ data, isLoading }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
     { initialParams: { 'fallback-locale': 'null', depth: 0 } },
   );
@@ -90,6 +90,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
           DefaultComponent={DefaultGlobal}
           CustomComponent={CustomEdit}
           componentProps={{
+            isLoading,
             data: dataToRender,
             permissions: globalPermissions,
             initialState,

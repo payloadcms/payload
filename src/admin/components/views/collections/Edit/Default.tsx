@@ -62,34 +62,34 @@ const DefaultEditView: React.FC<Props> = (props) => {
 
   return (
     <div className={classes}>
-      <Form
-        className={`${baseClass}__form`}
-        method={id ? 'put' : 'post'}
-        action={action}
-        onSuccess={onSave}
-        disabled={!hasSavePermission}
-        initialState={initialState}
-      >
-        <div className={`${baseClass}__main`}>
-          <Meta
-            title={`${isEditing ? 'Editing' : 'Creating'} - ${collection.labels.singular}`}
-            description={`${isEditing ? 'Editing' : 'Creating'} - ${collection.labels.singular}`}
-            keywords={`${collection.labels.singular}, Payload, CMS`}
-          />
-          <Eyebrow />
-          <LeaveWithoutSaving />
-          <div className={`${baseClass}__edit`}>
-            {isLoading && (
-            <Loading />
-            )}
-            {!isLoading && (
-            <React.Fragment>
-              <header className={`${baseClass}__header`}>
-                <h1>
-                  <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
-                </h1>
-              </header>
-              {auth && (
+      {isLoading && (
+        <Loading />
+      )}
+      {!isLoading && (
+        <Form
+          className={`${baseClass}__form`}
+          method={id ? 'put' : 'post'}
+          action={action}
+          onSuccess={onSave}
+          disabled={!hasSavePermission}
+          initialState={initialState}
+        >
+          <div className={`${baseClass}__main`}>
+            <Meta
+              title={`${isEditing ? 'Editing' : 'Creating'} - ${collection.labels.singular}`}
+              description={`${isEditing ? 'Editing' : 'Creating'} - ${collection.labels.singular}`}
+              keywords={`${collection.labels.singular}, Payload, CMS`}
+            />
+            <Eyebrow />
+            <LeaveWithoutSaving />
+            <div className={`${baseClass}__edit`}>
+              <React.Fragment>
+                <header className={`${baseClass}__header`}>
+                  <h1>
+                    <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
+                  </h1>
+                </header>
+                {auth && (
                 <Auth
                   useAPIKey={auth.useAPIKey}
                   requirePassword={!isEditing}
@@ -98,39 +98,38 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   email={data?.email}
                   operation={operation}
                 />
-              )}
-              {upload && (
+                )}
+                {upload && (
                 <Upload
                   data={data}
                   collection={collection}
                 />
-              )}
-              <RenderFields
-                operation={operation}
-                readOnly={!hasSavePermission}
-                permissions={permissions.fields}
-                filter={(field) => (!field?.admin?.position || (field?.admin?.position !== 'sidebar'))}
-                fieldTypes={fieldTypes}
-                fieldSchema={fields}
-              />
-            </React.Fragment>
-            )}
+                )}
+                <RenderFields
+                  operation={operation}
+                  readOnly={!hasSavePermission}
+                  permissions={permissions.fields}
+                  filter={(field) => (!field?.admin?.position || (field?.admin?.position !== 'sidebar'))}
+                  fieldTypes={fieldTypes}
+                  fieldSchema={fields}
+                />
+              </React.Fragment>
+            </div>
           </div>
-        </div>
-        <div className={`${baseClass}__sidebar-wrap`}>
-          <div className={`${baseClass}__sidebar`}>
-            <div className={`${baseClass}__sidebar-sticky-wrap`}>
-              {isEditing ? (
-                <ul className={`${baseClass}__collection-actions`}>
-                  {(permissions?.create?.permission) && (
+          <div className={`${baseClass}__sidebar-wrap`}>
+            <div className={`${baseClass}__sidebar`}>
+              <div className={`${baseClass}__sidebar-sticky-wrap`}>
+                {isEditing ? (
+                  <ul className={`${baseClass}__collection-actions`}>
+                    {(permissions?.create?.permission) && (
                     <React.Fragment>
                       <li><Link to={`${admin}/collections/${slug}/create`}>Create New</Link></li>
                       {!disableDuplicate && (
                       <li><DuplicateDocument slug={slug} /></li>
                       )}
                     </React.Fragment>
-                  )}
-                  {permissions?.delete?.permission && (
+                    )}
+                    {permissions?.delete?.permission && (
                     <li>
                       <DeleteDocument
                         collection={collection}
@@ -138,76 +137,72 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       />
                     </li>
               )}
-                </ul>
-              ) : undefined}
-              <div className={`${baseClass}__document-actions${(preview && isEditing) ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
-                {isEditing && (
-                  <PreviewButton
-                    generatePreviewURL={preview}
-                    data={data}
+                  </ul>
+                ) : undefined}
+                <div className={`${baseClass}__document-actions${(preview && isEditing) ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
+                  {isEditing && (
+                    <PreviewButton
+                      generatePreviewURL={preview}
+                      data={data}
+                    />
+                  )}
+                  {hasSavePermission && (
+                    <FormSubmit>Save</FormSubmit>
+                  )}
+                </div>
+                <div className={`${baseClass}__sidebar-fields`}>
+                  <RenderFields
+                    operation={isEditing ? 'update' : 'create'}
+                    readOnly={!hasSavePermission}
+                    permissions={permissions.fields}
+                    filter={(field) => field?.admin?.position === 'sidebar'}
+                    fieldTypes={fieldTypes}
+                    fieldSchema={fields}
                   />
-                )}
-                {hasSavePermission && (
-                  <FormSubmit>Save</FormSubmit>
+                </div>
+                {isEditing && (
+                  <ul className={`${baseClass}__meta`}>
+                    <li className={`${baseClass}__api-url`}>
+                      <span className={`${baseClass}__label`}>
+                        API URL
+                        {' '}
+                        <CopyToClipboard value={apiURL} />
+                      </span>
+                      <a
+                        href={apiURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {apiURL}
+                      </a>
+                    </li>
+                    <li>
+                      <div className={`${baseClass}__label`}>ID</div>
+                      <div>{id}</div>
+                    </li>
+                    {timestamps && (
+                    <React.Fragment>
+                      {data.updatedAt && (
+                      <li>
+                        <div className={`${baseClass}__label`}>Last Modified</div>
+                        <div>{format(new Date(data.updatedAt), dateFormat)}</div>
+                      </li>
+                      )}
+                      {data.createdAt && (
+                      <li>
+                        <div className={`${baseClass}__label`}>Created</div>
+                        <div>{format(new Date(data.createdAt), dateFormat)}</div>
+                      </li>
+                      )}
+                    </React.Fragment>
+                    )}
+                  </ul>
                 )}
               </div>
-              {!isLoading && (
-                <React.Fragment>
-                  <div className={`${baseClass}__sidebar-fields`}>
-                    <RenderFields
-                      operation={isEditing ? 'update' : 'create'}
-                      readOnly={!hasSavePermission}
-                      permissions={permissions.fields}
-                      filter={(field) => field?.admin?.position === 'sidebar'}
-                      fieldTypes={fieldTypes}
-                      fieldSchema={fields}
-                    />
-                  </div>
-                  {isEditing && (
-                    <ul className={`${baseClass}__meta`}>
-                      <li className={`${baseClass}__api-url`}>
-                        <span className={`${baseClass}__label`}>
-                          API URL
-                          {' '}
-                          <CopyToClipboard value={apiURL} />
-                        </span>
-                        <a
-                          href={apiURL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {apiURL}
-                        </a>
-                      </li>
-                      <li>
-                        <div className={`${baseClass}__label`}>ID</div>
-                        <div>{id}</div>
-                      </li>
-                      {timestamps && (
-                        <React.Fragment>
-                          {data.updatedAt && (
-                            <li>
-                              <div className={`${baseClass}__label`}>Last Modified</div>
-                              <div>{format(new Date(data.updatedAt), dateFormat)}</div>
-                            </li>
-                          )}
-                          {data.createdAt && (
-                            <li>
-                              <div className={`${baseClass}__label`}>Created</div>
-                              <div>{format(new Date(data.createdAt), dateFormat)}</div>
-                            </li>
-                          )}
-                        </React.Fragment>
-                      )}
-
-                    </ul>
-                  )}
-                </React.Fragment>
-              )}
             </div>
           </div>
-        </div>
-      </Form>
+        </Form>
+      )}
     </div>
   );
 };

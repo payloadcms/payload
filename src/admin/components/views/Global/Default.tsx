@@ -12,15 +12,17 @@ import fieldTypes from '../../forms/field-types';
 import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
 import { Props } from './types';
 
-import './index.scss';
 import ViewDescription from '../../elements/ViewDescription';
+import Loading from '../../elements/Loading';
+
+import './index.scss';
 
 const baseClass = 'global-edit';
 
 const DefaultGlobalView: React.FC<Props> = (props) => {
   const { admin: { dateFormat } } = useConfig();
   const {
-    global, data, onSave, permissions, action, apiURL, initialState,
+    global, data, onSave, permissions, action, apiURL, initialState, isLoading,
   } = props;
 
   const {
@@ -36,6 +38,10 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
 
   return (
     <div className={baseClass}>
+      {isLoading && (
+        <Loading />
+      )}
+      {!isLoading && (
       <Form
         className={`${baseClass}__form`}
         method="post"
@@ -60,9 +66,9 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                 {label}
               </h1>
               {description && (
-                <div className={`${baseClass}__sub-header`}>
-                  <ViewDescription description={description} />
-                </div>
+              <div className={`${baseClass}__sub-header`}>
+                <ViewDescription description={description} />
+              </div>
               )}
             </header>
             <RenderFields
@@ -84,7 +90,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                   data={data}
                 />
                 {hasSavePermission && (
-                  <FormSubmit>Save</FormSubmit>
+                <FormSubmit>Save</FormSubmit>
                 )}
               </div>
               <div className={`${baseClass}__sidebar-fields`}>
@@ -98,35 +104,36 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                 />
               </div>
               {data && (
-                <ul className={`${baseClass}__meta`}>
-                  {data && (
-                    <li className={`${baseClass}__api-url`}>
-                      <span className={`${baseClass}__label`}>
-                        API URL
-                        {' '}
-                        <CopyToClipboard value={apiURL} />
-                      </span>
-                      <a
-                        href={apiURL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {apiURL}
-                      </a>
-                    </li>
-                  )}
-                  {data.updatedAt && (
-                    <li>
-                      <div className={`${baseClass}__label`}>Last Modified</div>
-                      <div>{format(new Date(data.updatedAt as string), dateFormat)}</div>
-                    </li>
-                  )}
-                </ul>
+              <ul className={`${baseClass}__meta`}>
+                {data && (
+                  <li className={`${baseClass}__api-url`}>
+                    <span className={`${baseClass}__label`}>
+                      API URL
+                      {' '}
+                      <CopyToClipboard value={apiURL} />
+                    </span>
+                    <a
+                      href={apiURL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {apiURL}
+                    </a>
+                  </li>
+                )}
+                {data.updatedAt && (
+                  <li>
+                    <div className={`${baseClass}__label`}>Last Modified</div>
+                    <div>{format(new Date(data.updatedAt as string), dateFormat)}</div>
+                  </li>
+                )}
+              </ul>
               )}
             </div>
           </div>
         </div>
       </Form>
+      )}
     </div>
   );
 };

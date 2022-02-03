@@ -14,4 +14,5 @@ export type Props = {
   action: string
   apiURL: string
   initialState: Fields
+  isLoading: boolean
 }
