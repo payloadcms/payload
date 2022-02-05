@@ -31,7 +31,7 @@
     "prompts": "^2.4.0",
     "terminal-link": "^2.1.1"
   },
-  "version": "0.3.3",
+  "version": "0.3.4",
   "devDependencies": {
     "@types/command-exists": "^1.2.0",
     "@types/degit": "^2.8.3",
