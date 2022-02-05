@@ -9,6 +9,7 @@ export type Args = {
   '--use-npm': BooleanConstructor
   '--no-deps': BooleanConstructor
   '--dry-run': BooleanConstructor
+  '--beta': BooleanConstructor
   '-h': string
   '-n': string
   '-t': string

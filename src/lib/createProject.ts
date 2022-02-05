@@ -38,17 +38,26 @@ async function installDeps(
   }
 }
 
-export async function getLatestPayloadVersion(): Promise<false | string> {
+export async function getLatestPayloadVersion(
+  betaFlag = false,
+): Promise<false | string> {
   try {
-    const { stdout } = await execa('npm info payload version', [], { shell: true })
+    let packageWithTag = 'payload'
+    if (betaFlag) packageWithTag += '@beta'
+    const { stdout } = await execa(`npm info ${packageWithTag} version`, [], {
+      shell: true,
+    })
     return `^${stdout}`
   } catch (error: unknown) {
     return false
   }
 }
 
-export async function updatePayloadVersion(projectDir: string): Promise<void> {
-  const payloadVersion = await getLatestPayloadVersion()
+export async function updatePayloadVersion(
+  projectDir: string,
+  betaFlag = false,
+): Promise<void> {
+  const payloadVersion = await getLatestPayloadVersion(betaFlag)
   if (!payloadVersion) {
     warning(
       'Error retrieving latest Payload version. Please update your package.json manually.',
@@ -98,7 +107,7 @@ export async function createProject(
   }
 
   const spinner = ora('Checking latest Payload version...').start()
-  await updatePayloadVersion(projectDir)
+  await updatePayloadVersion(projectDir, args['--beta'])
 
   spinner.text = 'Installing dependencies...'
   const result = await installDeps(args, projectDir, packageManager)

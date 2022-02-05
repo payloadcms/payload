@@ -28,6 +28,7 @@ export class Main {
         '--use-npm': Boolean,
         '--no-deps': Boolean,
         '--dry-run': Boolean,
+        '--beta': Boolean,
 
         '-h': '--help',
         '-n': '--name',
