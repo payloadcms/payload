@@ -27,10 +27,11 @@ The following options are configurable in the `email` property object as part of
 
 | Option                       | Description  |
 | ---------------------------- | -------------|
-| **`transport`**              | The NodeMailer transport object for when you want to do it yourself, not needed when transportOptions is set |
-| **`transportOptions`**       | An object that configures the transporter that Payload will create. For all the available options see the [NodeMailer documentation](https://nodemailer.com/smtp/) or see the examples below |
 | **`fromName`** *             | The name part of the From field that will be seen on the delivered email |
 | **`fromAddress`** *          | The email address part of the From field that will be used when delivering email |
+| **`transport`**              | The NodeMailer transport object for when you want to do it yourself, not needed when transportOptions is set |
+| **`transportOptions`**       | An object that configures the transporter that Payload will create. For all the available options see the [NodeMailer documentation](https://nodemailer.com/smtp/) or see the examples below |
+| **`logMockCredentials`**          | If set to true and no transport/transportOptions, ethereal credentials will be logged to console on startup |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -111,6 +112,7 @@ payload.init({
     transport
   },
   // ...
+}
 ```
 
 ### Sending Mail
@@ -119,7 +121,19 @@ With a working transport you can call it anywhere you have access to payload by 
 ### Mock transport
 By default, Payload uses a mock implementation that only sends mail to the [ethereal](https://ethereal.email) capture service that will never reach a user's inbox. While in development you may wish to make use of the captured messages which is why the payload output during server output helpfully logs this out on the server console.
 
-**Console output when starting payload with a mock email instance**
+To see ethereal credentials, add `logMockCredentials: true` to the email options. This will cause them to be logged to console on startup.
+
+```js
+payload.init({
+  email: {
+    fromName: 'Admin',
+    fromAddress: 'admin@example.com',
+    logMockCredentials: true, // Optional
+  },
+  // ...
+}
+
+**Console output when starting payload with a mock email instance and logMockCredentials: true**
 ```
 [06:37:21] INFO  (payload): Starting Payload...
 [06:37:22] INFO  (payload): Payload Demo Initialized
