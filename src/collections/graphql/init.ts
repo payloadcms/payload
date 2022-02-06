@@ -14,6 +14,7 @@ import { getCollectionIDType } from '../../graphql/schema/buildMutationInputType
 
 function registerCollections(): void {
   const {
+    // TODO: findVersions, findVersionByID, publishVersion
     create, find, findByID, deleteResolver, update,
   } = this.graphQL.resolvers.collections;
 
