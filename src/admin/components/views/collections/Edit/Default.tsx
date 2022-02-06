@@ -200,53 +200,49 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   />
                 </div>
                 {isEditing && (
-                <ul className={`${baseClass}__meta`}>
-                  {!hideAPIURL && (
-                    <li className={`${baseClass}__api-url`}>
-                      <span className={`${baseClass}__label`}>
-                        API URL
-                        {' '}
-                        <CopyToClipboard value={apiURL} />
-                      </span>
-                      <a
-                        href={apiURL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {apiURL}
-                      </a>
-                    </li>
-                  )}
-                  <li>
-                    <div className={`${baseClass}__label`}>Created</div>
-                    <div>{format(new Date(data.createdAt), dateFormat)}</div>
-                  </li>
-                  {versions && (
-                    <li>
-                      <div className={`${baseClass}__label`}>Versions</div>
-                      <VersionsCount
-                        collection={collection}
-                        id={id}
-                      />
-                    </li>
-                  )}
-                  {timestamps && (
-                    <React.Fragment>
-                      {data.updatedAt && (
-                        <li>
-                          <div className={`${baseClass}__label`}>Last Modified</div>
-                          <div>{format(new Date(data.updatedAt), dateFormat)}</div>
-                        </li>
-                      )}
-                      {(publishedDoc?.createdAt || data?.createdAt) && (
-                        <li>
-                          <div className={`${baseClass}__label`}>Created</div>
-                          <div>{format(new Date(publishedDoc?.createdAt || data?.createdAt), dateFormat)}</div>
-                        </li>
-                      )}
-                    </React.Fragment>
-                  )}
-                </ul>
+                  <ul className={`${baseClass}__meta`}>
+                    {!hideAPIURL && (
+                      <li className={`${baseClass}__api-url`}>
+                        <span className={`${baseClass}__label`}>
+                          API URL
+                          {' '}
+                          <CopyToClipboard value={apiURL} />
+                        </span>
+                        <a
+                          href={apiURL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {apiURL}
+                        </a>
+                      </li>
+                    )}
+                    {versions && (
+                      <li>
+                        <div className={`${baseClass}__label`}>Versions</div>
+                        <VersionsCount
+                          collection={collection}
+                          id={id}
+                        />
+                      </li>
+                    )}
+                    {timestamps && (
+                      <React.Fragment>
+                        {data.updatedAt && (
+                          <li>
+                            <div className={`${baseClass}__label`}>Last Modified</div>
+                            <div>{format(new Date(data.updatedAt), dateFormat)}</div>
+                          </li>
+                        )}
+                        {(publishedDoc?.createdAt || data?.createdAt) && (
+                          <li>
+                            <div className={`${baseClass}__label`}>Created</div>
+                            <div>{format(new Date(publishedDoc?.createdAt || data?.createdAt), dateFormat)}</div>
+                          </li>
+                        )}
+                      </React.Fragment>
+                    )}
+                  </ul>
                 )}
               </div>
             </div>

@@ -15,9 +15,9 @@ import Paginator from '../../../../../../../elements/Paginator';
 import PerPage from '../../../../../../../elements/PerPage';
 import formatFields from '../../../../../../../views/collections/List/formatFields';
 
-import './index.scss';
+import '../../addSwapModals.scss';
 
-const baseClass = 'swap-upload-modal';
+const baseClass = 'rich-text-upload-modal';
 
 type Props = {
   slug: string
@@ -170,7 +170,7 @@ export const SwapUploadModal: React.FC<Props> = ({ closeModal, element, setRelat
                 {data.totalDocs}
               </div>
               <PerPage
-                collection={modalCollection}
+                limits={modalCollection?.admin?.pagination?.limits}
                 limit={limit}
                 modifySearchParams={false}
                 handleChange={setLimit}

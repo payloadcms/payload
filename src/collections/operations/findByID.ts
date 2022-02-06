@@ -4,7 +4,7 @@ import { Payload } from '../..';
 import { PayloadRequest } from '../../express/types';
 import { Collection, TypeWithID } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Forbidden, NotFound } from '../../errors';
+import { NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
@@ -64,8 +64,6 @@ async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs:
 
   // If errors are disabled, and access returns false, return null
   if (accessResult === false) return null;
-
-  const hasWhereAccess = typeof accessResult === 'object';
 
   const queryToBuild: { where: Where } = {
     where: {

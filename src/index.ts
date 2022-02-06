@@ -24,7 +24,7 @@ import initAuth from './auth/init';
 import initCollections from './collections/init';
 import initPreferences from './preferences/init';
 import initGlobals from './globals/init';
-import { GlobalModel, Globals } from './globals/config/types';
+import { Globals } from './globals/config/types';
 import initGraphQLPlayground from './graphql/initPlayground';
 import initStatic from './express/static';
 import GraphQL from './graphql';
@@ -64,7 +64,7 @@ export class Payload {
   } = {}
 
   versions: {
-    [slug: string]: CollectionModel | GlobalModel;
+    [slug: string]: CollectionModel;
   } = {}
 
   graphQL: {

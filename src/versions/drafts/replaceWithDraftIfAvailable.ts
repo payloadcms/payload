@@ -5,6 +5,7 @@ import { AccessResult } from '../../config/types';
 import { CollectionModel, SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
+import { appendVersionToQueryKey } from './appendVersionToQueryKey';
 
 type Arguments<T> = {
   payload: Payload
@@ -34,6 +35,11 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
             },
           },
           {
+            'version._status': {
+              equals: 'draft',
+            },
+          },
+          {
             updatedAt: {
               greater_than: doc.updatedAt,
             },
@@ -43,7 +49,8 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     };
 
     if (hasWhereAccessResult(accessResult)) {
-      queryToBuild.where.and.push(accessResult);
+      const versionAccessResult = appendVersionToQueryKey(accessResult);
+      queryToBuild.where.and.push(versionAccessResult);
     }
 
     const constraints = flattenWhereConstraints(queryToBuild);
@@ -52,7 +59,6 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
 
     let draft = await VersionModel.findOne(query, {}, {
       lean: true,
-      leanWithId: true,
       useEstimatedCount,
       sort: { updatedAt: 'desc' },
     });

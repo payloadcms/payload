@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
@@ -18,7 +18,7 @@ import { SanitizedCollectionConfig } from '../../../../../../../../collections/c
 import PerPage from '../../../../../../elements/PerPage';
 
 import './index.scss';
-import '../modal.scss';
+import '../addSwapModals.scss';
 
 const baseClass = 'upload-rich-text-button';
 const baseModalClass = 'rich-text-upload-modal';

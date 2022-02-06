@@ -9,7 +9,15 @@ const RichText: CollectionConfig = {
     plural: 'Rich Texts',
   },
   access: {
-    read: () => true,
+    read: ({ req }) => {
+      if (req.user) return true;
+
+      return {
+        _status: {
+          equals: 'published',
+        },
+      };
+    },
   },
   versions: {
     drafts: {

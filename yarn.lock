@@ -3532,7 +3532,7 @@ bson-objectid@^2.0.1:
   resolved "https://registry.npmjs.org/bson-objectid/-/bson-objectid-2.0.1.tgz#226a9ffecd3a8d52f565d71012dd5b176560fef1"
   integrity sha512-b4D1/G4uP9Yks4rv+nDVsZ4ybT1W5nQYw4lfpfaRP2Q18azlR6Oe2BAuirG1lzrwQFtHnJ0nrK5kWKKZVEMUng==
 
-bson@*, bson@^4.2.2, bson@^4.6.0:
+bson@*, bson@^4.2.2, bson@^4.6.0, bson@^4.6.1:
   version "4.6.1"
   resolved "https://registry.npmjs.org/bson/-/bson-4.6.1.tgz#2b5da517539bb0f7f3ffb54ac70a384ca899641c"
   integrity sha512-I1LQ7Hz5zgwR4QquilLNZwbhPw0Apx7i7X9kGMBTsqPdml/03Q9NBtD9nt/19ahjlphktQImrnderxqpzeVDjw==
@@ -6985,6 +6985,11 @@ interpret@^2.2.0:
   resolved "https://registry.npmjs.org/interpret/-/interpret-2.2.0.tgz#1a78a0b5965c40a5416d007ad6f50ad27c417df9"
   integrity sha512-Ju0Bz/cEia55xDwUWEa8+olFpCiQoypjnQySseKtmjNrnps3P+xfpUmGr90T7yjlVJmOtybRvPXhKMbHr+fWnw==
 
+ip@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.npmjs.org/ip/-/ip-1.1.5.tgz#bdded70114290828c0a039e72ef25f5aaec4354a"
+  integrity sha1-vd7XARQpCCjAoDnnLvJfWq7ENUo=
+
 ipaddr.js@1.9.1:
   version "1.9.1"
   resolved "https://registry.npmjs.org/ipaddr.js/-/ipaddr.js-1.9.1.tgz#bff38543eeb8984825079ff3a2a8e6cbd46781b3"
@@ -8798,6 +8803,14 @@ mongodb-connection-string-url@^2.3.2:
     "@types/whatwg-url" "^8.2.1"
     whatwg-url "^11.0.0"
 
+mongodb-connection-string-url@^2.4.1:
+  version "2.4.2"
+  resolved "https://registry.npmjs.org/mongodb-connection-string-url/-/mongodb-connection-string-url-2.4.2.tgz#422861119764796420889f9b0416b957e1b0bde0"
+  integrity sha512-mZUXF6nUzRWk5J3h41MsPv13ukWlH4jOMSk6astVeoZ1EbdTJyF5I3wxKkvqBAOoVtzLgyEYUvDjrGdcPlKjAw==
+  dependencies:
+    "@types/whatwg-url" "^8.2.1"
+    whatwg-url "^11.0.0"
+
 mongodb-memory-server-core@7.6.3:
   version "7.6.3"
   resolved "https://registry.npmjs.org/mongodb-memory-server-core/-/mongodb-memory-server-core-7.6.3.tgz#ba3ff2f50dc1cf5105683f15de54202976931af0"
@@ -8854,15 +8867,27 @@ mongodb@4.2.2:
   optionalDependencies:
     saslprep "^1.0.3"
 
+mongodb@4.3.1:
+  version "4.3.1"
+  resolved "https://registry.npmjs.org/mongodb/-/mongodb-4.3.1.tgz#e346f76e421ec6f47ddea5c8f5140e6181aaeb94"
+  integrity sha512-sNa8APSIk+r4x31ZwctKjuPSaeKuvUeNb/fu/3B6dRM02HpEgig7hTHM8A/PJQTlxuC/KFWlDlQjhsk/S43tBg==
+  dependencies:
+    bson "^4.6.1"
+    denque "^2.0.1"
+    mongodb-connection-string-url "^2.4.1"
+    socks "^2.6.1"
+  optionalDependencies:
+    saslprep "^1.0.3"
+
 mongoose-legacy-pluralize@1.0.2:
   version "1.0.2"
   resolved "https://registry.npmjs.org/mongoose-legacy-pluralize/-/mongoose-legacy-pluralize-1.0.2.tgz#3ba9f91fa507b5186d399fb40854bff18fb563e4"
   integrity sha512-Yo/7qQU4/EyIS8YDFSeenIvXxZN+ld7YdV9LqFVQJzTLye8unujAWPZ4NWKfFA+RNjh+wvTWKY9Z3E5XM6ZZiQ==
 
-mongoose-paginate-v2@^1.3.6:
-  version "1.4.3"
-  resolved "https://registry.npmjs.org/mongoose-paginate-v2/-/mongoose-paginate-v2-1.4.3.tgz#ff5e12f7dbf71d42d4a598f4f4bb3f5dd4263b03"
-  integrity sha512-Y+MepitdrHEkrR3i32c69byiaXFEinFfoKIBC47uIli84zDhfoY58J8maRQf8ioE32+3tGHNJDA2gyuYoBk1gQ==
+mongoose-paginate-v2@^1.6.1:
+  version "1.6.1"
+  resolved "https://registry.npmjs.org/mongoose-paginate-v2/-/mongoose-paginate-v2-1.6.1.tgz#af7db6cd508a5a66a968527263c0879dcf17256f"
+  integrity sha512-h4WHJxvkv1MFL+8h/O7QJR91nU93FRff3JwBG6wLJaqTltgVl4NWxNR3wyiKsC2nOvFwPqlt6TwafIby4/1VfA==
 
 mongoose@5.*:
   version "5.13.14"
@@ -8884,7 +8909,7 @@ mongoose@5.*:
     sift "13.5.2"
     sliced "1.0.1"
 
-mongoose@^6.0.12, mongoose@^6.0.13:
+mongoose@^6.0.13:
   version "6.1.5"
   resolved "https://registry.npmjs.org/mongoose/-/mongoose-6.1.5.tgz#2d249748e358ff4f3c6107d2a922c54aacb73d0a"
   integrity sha512-0rRxTBoqMSuQF/YM3TEvbHn8Ybnd9dRjD7DItEjCXK0vwC/muLKXZ4rVCN4KAnWQAkwYzoWw2tXAy0YF6TUdEg==
@@ -8899,6 +8924,20 @@ mongoose@^6.0.12, mongoose@^6.0.13:
     regexp-clone "1.0.0"
     sift "13.5.2"
     sliced "1.0.1"
+
+mongoose@^6.2.0:
+  version "6.2.0"
+  resolved "https://registry.npmjs.org/mongoose/-/mongoose-6.2.0.tgz#07af7313779bc42701f35624c3320719afe6629f"
+  integrity sha512-kimHjks1FC4HkqM4FVNWxtGor6wYelHgl6eJ6GJmmJvMCI4FNGLwFceSL6hs7dHLZJnxIyGVqQjT/XTXCbjzpA==
+  dependencies:
+    bson "^4.2.2"
+    kareem "2.3.3"
+    mongodb "4.3.1"
+    mpath "0.8.4"
+    mquery "4.0.2"
+    ms "2.1.2"
+    regexp-clone "1.0.0"
+    sift "13.5.2"
 
 mpath@0.8.4:
   version "0.8.4"
@@ -8924,6 +8963,13 @@ mquery@4.0.0:
     debug "4.x"
     regexp-clone "^1.0.0"
     sliced "1.0.1"
+
+mquery@4.0.2:
+  version "4.0.2"
+  resolved "https://registry.npmjs.org/mquery/-/mquery-4.0.2.tgz#a13add5ecd7c2e5a67e0f814b3c7acdfb6772804"
+  integrity sha512-oAVF0Nil1mT3rxty6Zln4YiD6x6QsUWYz927jZzjMxOK2aqmhEz5JQ7xmrKK7xRFA2dwV+YaOpKU/S+vfNqKxA==
+  dependencies:
+    debug "4.x"
 
 mri@1.1.4:
   version "1.1.4"
@@ -11866,6 +11912,11 @@ sliced@1.0.1:
   resolved "https://registry.npmjs.org/sliced/-/sliced-1.0.1.tgz#0b3a662b5d04c3177b1926bea82b03f837a2ef41"
   integrity sha1-CzpmK10Ewxd7GSa+qCsD+Dei70E=
 
+smart-buffer@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.npmjs.org/smart-buffer/-/smart-buffer-4.2.0.tgz#6e1d71fa4f18c05f7d0ff216dd16a481d0e8d9ae"
+  integrity sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==
+
 snapdragon-node@^2.0.1:
   version "2.1.1"
   resolved "https://registry.npmjs.org/snapdragon-node/-/snapdragon-node-2.1.1.tgz#6c175f86ff14bdb0724563e8f3c1b021a286853b"
@@ -11895,6 +11946,14 @@ snapdragon@^0.8.1:
     source-map "^0.5.6"
     source-map-resolve "^0.5.0"
     use "^3.1.0"
+
+socks@^2.6.1:
+  version "2.6.2"
+  resolved "https://registry.npmjs.org/socks/-/socks-2.6.2.tgz#ec042d7960073d40d94268ff3bb727dc685f111a"
+  integrity sha512-zDZhHhZRY9PxRruRMR7kMhnf3I8hDs4S3f9RecfnGxvcBHQcKcIH/oUcEWffsfl1XxdYlA7nnlGbbTvPz9D8gA==
+  dependencies:
+    ip "^1.1.5"
+    smart-buffer "^4.2.0"
 
 sonic-boom@^1.0.2:
   version "1.4.1"

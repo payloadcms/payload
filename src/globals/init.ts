@@ -7,7 +7,7 @@ import { Payload } from '../index';
 import { getVersionsModelName } from '../versions/getVersionsModelName';
 import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
 import buildSchema from '../mongoose/buildSchema';
-import { GlobalModel } from './config/types';
+import { CollectionModel } from '../collections/config/types';
 
 export default function initGlobals(ctx: Payload): void {
   if (ctx.config.globals) {
@@ -34,7 +34,7 @@ export default function initGlobals(ctx: Payload): void {
         versionSchema.plugin(paginate, { useEstimatedCount: true })
           .plugin(buildQueryPlugin);
 
-        ctx.versions[global.slug] = mongoose.model(versionModelName, versionSchema) as GlobalModel;
+        ctx.versions[global.slug] = mongoose.model(versionModelName, versionSchema) as CollectionModel;
       }
     });
 

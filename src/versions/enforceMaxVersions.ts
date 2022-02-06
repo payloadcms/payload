@@ -1,10 +1,9 @@
-import { GlobalModel } from '../globals/config/types';
 import { Payload } from '..';
 import { CollectionModel } from '../collections/config/types';
 
 type Args = {
   payload: Payload
-  Model: CollectionModel | GlobalModel
+  Model: CollectionModel
   maxPerDoc: number
   entityLabel: string
   entityType: 'global' | 'collection'
