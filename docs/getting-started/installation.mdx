@@ -30,7 +30,7 @@ Then just follow the prompts! You can choose between a TypeScript project, which
 
 ## From scratch
 
-Adding Payload to either a new or existing app is super straightforward. To add to an existing Node + Express app, just run `npm install --save payload`. Or, to start a new project from scratch, run `npm init` and then `npm install --save payload express`.
+Adding Payload to either a new or existing app is super straightforward. To add to an existing Node + Express app, just run `npm install --save --legacy-peer-deps payload`. Or, to start a new project from scratch, run `npm init` and then `npm install --save --legacy-peer-deps payload express`.
 
 From there, the first step is writing a baseline config. Create a new `payload.config.js` in the root of your project. The simplest config contains the following:
 
@@ -55,7 +55,7 @@ Although this is just the bare minimum config, there are *many* more options tha
 
 Now that you've got a baseline Payload config, it's time to initialize Payload. It requires an Express server that you provide, so if you're not familiar with how to set up a baseline Express server, please read up on exactly what Express is and why to use it. Express' own [Documentation](https://expressjs.com/en/starter/hello-world.html) is a good place to start. Otherwise, follow along below for how to build your own Express server to use with Payload.
 
-1. Run `npm install --save express` if you have not done so already
+1. Run `npm install --save --legacy-peer-deps express` if you have not done so already
 1. Create a new `server.js` file in the root folder of your app
 1. Add the following code to `server.js`:
 
