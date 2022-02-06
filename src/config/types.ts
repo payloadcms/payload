@@ -17,6 +17,7 @@ import { User } from '../auth/types';
 type Email = {
   fromName: string;
   fromAddress: string;
+  logMockCredentials?: boolean;
 }
 
 // eslint-disable-next-line no-use-before-define

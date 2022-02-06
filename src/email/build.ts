@@ -3,7 +3,7 @@ import { EmailOptions, EmailTransport, hasTransport, hasTransportOptions } from 
 import { InvalidConfiguration } from '../errors';
 import mockHandler from './mockHandler';
 import Logger from '../utilities/logger';
-import { BuildEmailResult } from './types';
+import { BuildEmailResult, MockEmailHandler } from './types';
 
 const logger = Logger();
 
@@ -27,14 +27,16 @@ const ensureConfigHasFrom = (emailConfig) => {
 };
 
 const handleMockAccount = async (emailConfig: EmailOptions) => {
-  let mockAccount;
+  let mockAccount: MockEmailHandler;
   try {
     mockAccount = await mockHandler(emailConfig);
     const { account: { web, user, pass } } = mockAccount;
-    logger.info('E-mail configured with mock configuration');
-    logger.info(`Log into mock email provider at ${web}`);
-    logger.info(`Mock email account username: ${user}`);
-    logger.info(`Mock email account password: ${pass}`);
+    if (emailConfig.logMockCredentials) {
+      logger.info('E-mail configured with mock configuration');
+      logger.info(`Log into mock email provider at ${web}`);
+      logger.info(`Mock email account username: ${user}`);
+      logger.info(`Mock email account password: ${pass}`);
+    }
   } catch (err) {
     logger.error(
       'There was a problem setting up the mock email handler',
