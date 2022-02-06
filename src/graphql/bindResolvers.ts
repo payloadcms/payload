@@ -14,6 +14,8 @@ import find from '../collections/graphql/resolvers/find';
 import findByID from '../collections/graphql/resolvers/findByID';
 import update from '../collections/graphql/resolvers/update';
 import deleteResolver from '../collections/graphql/resolvers/delete';
+import findVersions from '../collections/graphql/resolvers/findVersions';
+import findVersionByID from '../collections/graphql/resolvers/findVersionByID';
 
 import findOne from '../globals/graphql/resolvers/findOne';
 import globalUpdate from '../globals/graphql/resolvers/update';
@@ -24,7 +26,9 @@ export type GraphQLResolvers = {
   collections: {
     create: typeof create,
     find: typeof find,
+    findVersions: typeof findVersions,
     findByID: typeof findByID,
+    findVersionByID: typeof findVersionByID,
     update: typeof update,
     deleteResolver: typeof deleteResolver,
     auth: {
@@ -52,7 +56,9 @@ function bindResolvers(ctx: Payload): void {
       collections: {
         create: create.bind(ctx),
         find: find.bind(ctx),
+        findVersions: findVersions.bind(ctx),
         findByID: findByID.bind(ctx),
+        findVersionByID: findVersionByID.bind(ctx),
         update: update.bind(ctx),
         deleteResolver: deleteResolver.bind(ctx),
         auth: {

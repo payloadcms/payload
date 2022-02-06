@@ -58,14 +58,16 @@ describe('Collection Versions - REST', () => {
         method: 'put',
       }).then((res) => res.json());
 
-      expect(updatedPost.doc.title).toBe(title2);
-      expect(updatedPost.doc._status).toStrictEqual('draft');
-
       const versions = await fetch(`${url}/api/autosave-posts/versions`, {
         headers,
       }).then((res) => res.json());
 
       versionID = versions.docs[0].id;
+
+      expect(updatedPost.doc.title).toBe(title2);
+      expect(updatedPost.doc._status).toStrictEqual('draft');
+
+      expect(versionID).toBeDefined();
     });
 
     it('should allow a version to be retrieved by ID', async () => {
