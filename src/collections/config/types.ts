@@ -6,6 +6,7 @@ import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
+import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
 
 export interface CollectionModel extends PaginateModel<any>, PassportLocalModel<any> {
   buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
@@ -18,6 +19,7 @@ export interface AuthCollectionModel extends CollectionModel {
 
 export type HookOperationType =
 | 'create'
+| 'autosave'
 | 'read'
 | 'update'
 | 'delete'
@@ -128,6 +130,10 @@ export type CollectionAdminOptions = {
   description?: string | (() => string) | React.FC;
   disableDuplicate?: boolean;
   /**
+   * Hide the API URL within the Edit view
+   */
+  hideAPIURL?: boolean
+  /**
    * Custom admin components
    */
   components?: {
@@ -184,9 +190,10 @@ export type CollectionConfig = {
   access?: {
     create?: Access;
     read?: Access;
+    readVersions?: Access;
     update?: Access;
     delete?: Access;
-    admin?: Access;
+    admin?: (args?: any) => boolean;
     unlock?: Access;
   };
   /**
@@ -199,13 +206,15 @@ export type CollectionConfig = {
    * Upload options
    */
   upload?: IncomingUploadType | boolean;
+  versions?: IncomingCollectionVersions | boolean;
   timestamps?: boolean
 };
 
-export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields'> {
+export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions'> {
   auth: Auth;
   upload: Upload;
   fields: Field[];
+  versions: SanitizedCollectionVersions
 }
 
 export type Collection = {
@@ -218,19 +227,12 @@ export type AuthCollection = {
   config: SanitizedCollectionConfig;
 }
 
-export type PaginatedDocs<T extends TypeWithID = any> = {
-  docs: T[]
-  totalDocs: number
-  limit: number
-  totalPages: number
-  page: number
-  pagingCounter: number
-  hasPrevPage: boolean
-  hasNextPage: boolean
-  prevPage: number | null
-  nextPage: number | null
-}
-
 export type TypeWithID = {
   id: string | number
+}
+
+export type TypeWithTimestamps = {
+  id: string | number
+  createdAt: string
+  updatedAt: string
 }

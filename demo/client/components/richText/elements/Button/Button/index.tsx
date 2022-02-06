@@ -3,10 +3,15 @@ import { Modal, useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
 import { useSlate, ReactEditor } from 'slate-react';
 import MinimalTemplate from '../../../../../../../src/admin/components/templates/Minimal';
-import { ElementButton } from '../../../../../../../components/rich-text';
+import ElementButton from '../../../../../../../src/admin/components/forms/field-types/RichText/elements/Button';
 import X from '../../../../../../../src/admin/components/icons/X';
 import Button from '../../../../../../../src/admin/components/elements/Button';
-import { Form, Text, Checkbox, Select, Submit, reduceFieldsToValues } from '../../../../../../../components/forms';
+import Form from '../../../../../../../src/admin/components/forms/Form';
+import Submit from '../../../../../../../src/admin/components/forms/Submit';
+import reduceFieldsToValues from '../../../../../../../src/admin/components/forms/Form/reduceFieldsToValues';
+import Text from '../../../../../../../src/admin/components/forms/field-types/Text';
+import Checkbox from '../../../../../../../src/admin/components/forms/field-types/Checkbox';
+import Select from '../../../../../../../src/admin/components/forms/field-types/Select';
 
 import './index.scss';
 

@@ -1,4 +1,5 @@
-import { SanitizedCollectionConfig, PaginatedDocs } from '../../../../../collections/config/types';
+import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
+import { PaginatedDocs } from '../../../../../mongoose/types';
 import { Column } from '../../../elements/Table/types';
 
 export type Props = {

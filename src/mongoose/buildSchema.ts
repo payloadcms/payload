@@ -7,10 +7,10 @@ import { SanitizedConfig } from '../config/types';
 import { ArrayField, Block, BlockField, CheckboxField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, fieldIsPresentationalOnly, NonPresentationalField } from '../fields/config/types';
 import sortableFieldTypes from '../fields/sortableFieldTypes';
 
-type BuildSchemaOptions = {
+export type BuildSchemaOptions = {
   options?: SchemaOptions
   allowIDField?: boolean
-  disableRequired?: boolean
+  disableUnique?: boolean
   global?: boolean
 }
 
@@ -52,8 +52,8 @@ const setBlockDiscriminators = (fields: Field[], schema: Schema, config: Sanitiz
 
 const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: BuildSchemaOptions) => ({
   sparse: field.unique && field.localized,
-  unique: field.unique || false,
-  required: (!buildSchemaOptions.disableRequired && field.required && !field.localized && !field?.admin?.condition && !field?.access?.create) || false,
+  unique: (!buildSchemaOptions.disableUnique && field.unique) || false,
+  required: false,
   default: field.defaultValue || undefined,
   index: field.index || field.unique || false,
 });
@@ -64,7 +64,9 @@ const localizeSchema = (field: NonPresentationalField, schema, locales) => {
       type: locales.reduce((localeSchema, locale) => ({
         ...localeSchema,
         [locale]: schema,
-      }), {}),
+      }), {
+        _id: false,
+      }),
       localized: true,
       index: schema.index,
     };
@@ -322,6 +324,7 @@ const fieldToSchemaMap = {
       type: [buildSchema(config, field.fields, {
         options: { _id: false, id: false },
         allowIDField: true,
+        disableUnique: buildSchemaOptions.disableUnique,
       })],
     };
 
@@ -344,7 +347,7 @@ const fieldToSchemaMap = {
           _id: false,
           id: false,
         },
-        disableRequired: !formattedBaseSchema.required,
+        disableUnique: buildSchemaOptions.disableUnique,
       }),
     };
 

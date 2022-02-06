@@ -1,4 +1,4 @@
-import { GraphQLNonNull } from 'graphql';
+import { GraphQLNonNull, GraphQLBoolean } from 'graphql';
 import formatName from '../../graphql/utilities/formatName';
 
 function registerGlobals() {
@@ -33,6 +33,7 @@ function registerGlobals() {
       this.Query.fields[formattedLabel] = {
         type: global.graphQL.type,
         args: {
+          draft: { type: GraphQLBoolean },
           ...(this.config.localization ? {
             locale: { type: this.types.localeInputType },
             fallbackLocale: { type: this.types.fallbackLocaleInputType },
@@ -45,6 +46,7 @@ function registerGlobals() {
         type: global.graphQL.type,
         args: {
           data: { type: global.graphQL.mutationInputType },
+          draft: { type: GraphQLBoolean },
         },
         resolve: update(global),
       };

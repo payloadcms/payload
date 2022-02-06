@@ -1,10 +1,16 @@
 import { Document } from '../../types';
 import { Forbidden } from '../../errors';
 import { Payload } from '../..';
-import { Collection } from '../../collections/config/types';
+import { PayloadRequest } from '../../express/types';
+import { Collection, TypeWithID } from '../../collections/config/types';
 
 export type Arguments = {
   collection: Collection
+  data: {
+    email: string
+    password: string
+  }
+  req: PayloadRequest
 }
 
 export type Result = {
@@ -23,6 +29,11 @@ async function registerFirstUser(this: Payload, args: Arguments): Promise<Result
         },
       },
     },
+    req: {
+      payload,
+    },
+    req,
+    data,
   } = args;
 
   const count = await Model.countDocuments({});
@@ -33,14 +44,16 @@ async function registerFirstUser(this: Payload, args: Arguments): Promise<Result
   // Register first user
   // /////////////////////////////////////
 
-  let result = await this.operations.collections.create({
-    ...args,
+  const result = await payload.create<TypeWithID>({
+    req,
+    collection: slug,
+    data,
     overrideAccess: true,
   });
 
   // auto-verify (if applicable)
   if (verify) {
-    await this.update({
+    await payload.update({
       id: result.id,
       collection: slug,
       data: {
@@ -53,18 +66,19 @@ async function registerFirstUser(this: Payload, args: Arguments): Promise<Result
   // Log in new user
   // /////////////////////////////////////
 
-  const { token } = await this.operations.collections.auth.login({
+  const { token } = await payload.login({
     ...args,
+    collection: slug,
   });
 
-  result = {
+  const resultToReturn = {
     ...result,
     token,
   };
 
   return {
     message: 'Registered and logged in successfully. Welcome!',
-    user: result,
+    user: resultToReturn,
   };
 }
 

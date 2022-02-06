@@ -4,6 +4,11 @@ import { DeepRequired } from 'ts-essentials';
 import { PayloadRequest } from '../../express/types';
 import { Access, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
+import { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types';
+
+export type TypeWithID = {
+  id: string
+}
 
 export type BeforeValidateHook = (args: {
   data?: any;
@@ -40,6 +45,7 @@ export type GlobalConfig = {
   slug: string
   label?: string
   preview?: GeneratePreviewURL
+  versions?: IncomingGlobalVersions | boolean
   hooks?: {
     beforeValidate?: BeforeValidateHook[]
     beforeChange?: BeforeChangeHook[]
@@ -49,12 +55,14 @@ export type GlobalConfig = {
   }
   access?: {
     read?: Access;
+    readDrafts?: Access;
+    readVersions?: Access;
     update?: Access;
-    admin?: Access;
   }
   fields: Field[];
   admin?: {
     description?: string | (() => string);
+    hideAPIURL?: boolean;
     components?: {
       views?: {
         Edit?: React.ComponentType
@@ -63,8 +71,9 @@ export type GlobalConfig = {
   }
 }
 
-export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields'> {
+export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'versions'> {
   fields: Field[]
+  versions: SanitizedGlobalVersions
 }
 
 export type Globals = {

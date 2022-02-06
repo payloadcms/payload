@@ -2,14 +2,17 @@ import merge from 'deepmerge';
 import { SanitizedCollectionConfig, CollectionConfig } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
 import toKebabCase from '../../utilities/toKebabCase';
-import baseAuthFields from '../../fields/baseFields/baseAuthFields';
-import baseAPIKeyFields from '../../fields/baseFields/baseAPIKeyFields';
-import baseVerificationFields from '../../fields/baseFields/baseVerificationFields';
-import baseAccountLockFields from '../../fields/baseFields/baseAccountLockFields';
-import getBaseUploadFields from '../../fields/baseFields/getBaseUploadFields';
+import baseAuthFields from '../../auth/baseFields/auth';
+import baseAPIKeyFields from '../../auth/baseFields/apiKey';
+import baseVerificationFields from '../../auth/baseFields/verification';
+import baseAccountLockFields from '../../auth/baseFields/accountLock';
+import getBaseUploadFields from '../../uploads/getBaseFields';
 import { formatLabels } from '../../utilities/formatLabels';
 import { defaults, authDefaults } from './defaults';
 import { Config } from '../../config/types';
+import { versionCollectionDefaults } from '../../versions/defaults';
+import baseVersionFields from '../../versions/baseFields';
+import TimestampsRequired from '../../errors/TimestampsRequired';
 
 const mergeBaseFields = (fields, baseFields) => {
   const mergedFields = [];
@@ -63,6 +66,25 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
 
   sanitized.slug = toKebabCase(sanitized.slug);
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug);
+
+  if (sanitized.versions) {
+    if (sanitized.versions === true) sanitized.versions = {};
+
+    if (sanitized.timestamps === false) {
+      throw new TimestampsRequired(collection);
+    }
+
+    if (sanitized.versions.drafts) {
+      const versionFields = mergeBaseFields(sanitized.fields, baseVersionFields);
+
+      sanitized.fields = [
+        ...versionFields,
+        ...sanitized.fields,
+      ];
+    }
+
+    sanitized.versions = merge(versionCollectionDefaults, sanitized.versions);
+  }
 
   if (sanitized.upload) {
     if (sanitized.upload === true) sanitized.upload = {};

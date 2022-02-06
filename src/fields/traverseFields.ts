@@ -19,7 +19,7 @@ type Arguments = {
   operation: Operation
   overrideAccess: boolean
   req: PayloadRequest
-  id?: string
+  id?: string | number
   relationshipPopulations: (() => Promise<void>)[]
   depth: number
   currentDepth: number
@@ -36,6 +36,7 @@ type Arguments = {
   transformActions: (() => void)[]
   docWithLocales?: Record<string, any>
   skipValidation?: boolean
+  isVersion: boolean
 }
 
 const traverseFields = (args: Arguments): void => {
@@ -68,6 +69,7 @@ const traverseFields = (args: Arguments): void => {
     transformActions,
     docWithLocales = {},
     skipValidation,
+    isVersion,
   } = args;
 
   fields.forEach((field) => {
@@ -226,6 +228,8 @@ const traverseFields = (args: Arguments): void => {
         operation,
         fullOriginalDoc,
         fullData,
+        flattenLocales,
+        isVersion,
       }));
     }
 

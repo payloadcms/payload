@@ -11,6 +11,14 @@ const RichText: CollectionConfig = {
   access: {
     read: () => true,
   },
+  versions: {
+    drafts: {
+      autosave: false,
+    },
+  },
+  admin: {
+    preview: () => 'https://payloadcms.com',
+  },
   fields: [
     {
       name: 'defaultRichText',

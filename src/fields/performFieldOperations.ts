@@ -19,13 +19,15 @@ type Arguments = {
   unflattenLocales?: boolean
   originalDoc?: Record<string, unknown>
   docWithLocales?: Record<string, unknown>
-  id?: string
+  id?: string | number
   showHiddenFields?: boolean
   depth?: number
   currentDepth?: number
+  isVersion?: boolean
+  skipValidation?: boolean
 }
 
-export default async function performFieldOperations(this: Payload, entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig, args: Arguments): Promise<{ [key: string]: unknown }> {
+export default async function performFieldOperations(this: Payload, entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig, args: Arguments): Promise<any> {
   const {
     data,
     originalDoc: fullOriginalDoc,
@@ -42,6 +44,8 @@ export default async function performFieldOperations(this: Payload, entityConfig
     flattenLocales,
     unflattenLocales = false,
     showHiddenFields = false,
+    isVersion = false,
+    skipValidation = false,
   } = args;
 
   const fullData = deepCopyObject(data);
@@ -101,6 +105,8 @@ export default async function performFieldOperations(this: Payload, entityConfig
     unflattenLocaleActions,
     transformActions,
     docWithLocales,
+    isVersion,
+    skipValidation,
   });
 
   if (hook === 'afterRead') {

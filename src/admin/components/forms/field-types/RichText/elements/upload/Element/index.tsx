@@ -9,9 +9,9 @@ import useThumbnail from '../../../../../../../hooks/useThumbnail';
 import Button from '../../../../../../elements/Button';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 import { SwapUploadModal } from './SwapUploadModal';
+import { EditModal } from './EditModal';
 
 import './index.scss';
-import { EditModal } from './EditModal';
 
 const baseClass = 'rich-text-upload';
 

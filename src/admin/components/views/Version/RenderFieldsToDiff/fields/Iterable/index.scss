@@ -1,0 +1,25 @@
+@import '../../../../../../scss/styles.scss';
+
+.iterable-diff {
+  margin-bottom: base(2);
+
+  &__locale-label {
+    margin-right: base(.25);
+    background: $color-background-gray;
+    padding: base(.25);
+    border-radius: $style-radius-m;
+  }
+
+  &__wrap {
+    margin: base(.5) 0;
+    padding-left: base(.5);
+    border-left: $style-stroke-width-s solid $color-light-gray;
+  }
+
+  &__no-rows {
+    font-family: monospace;
+    background-color: #fafbfc;
+    padding: base(.125) 0;
+    margin: base(.125) 0;
+  }
+}

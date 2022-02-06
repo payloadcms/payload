@@ -1,8 +1,9 @@
+import { RichTextCustomElement } from '../../../../../../src/fields/config/types';
 import Button from './Button';
 import Element from './Element';
 import plugin from './plugin';
 
-export default {
+const button: RichTextCustomElement = {
   name: 'button',
   Button,
   Element,
@@ -10,3 +11,5 @@ export default {
     plugin,
   ],
 };
+
+export default button;

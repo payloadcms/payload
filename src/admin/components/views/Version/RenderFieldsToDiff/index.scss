@@ -1,0 +1,11 @@
+@import '../../../../scss/styles.scss';
+
+.render-field-diffs {
+  &__field {
+    margin-bottom: $baseline;
+  }
+
+  &__locale {
+    margin-bottom: base(.5);
+  }
+}

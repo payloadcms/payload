@@ -1,0 +1,11 @@
+@import '../../../scss/styles';
+
+.id-label {
+  font-size: base(.75);
+  font-weight: normal;
+  color: $color-gray;
+  background: $color-background-gray;
+  padding: base(.25) base(.5);
+  border-radius: $style-radius-m;
+  display: inline-flex;
+}

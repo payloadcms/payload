@@ -1,11 +1,10 @@
-import { TypeWithID } from '../../config/types';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 
-export type Options = {
+export type Options<T> = {
   collection: string
-  id: string
-  data: Record<string, unknown>
+  id: string | number
+  data: Partial<T>
   depth?: number
   locale?: string
   fallbackLocale?: string
@@ -14,9 +13,11 @@ export type Options = {
   showHiddenFields?: boolean
   filePath?: string
   overwriteExistingFiles?: boolean
+  draft?: boolean
+  autosave?: boolean
 }
 
-export default async function update<T extends TypeWithID = any>(options: Options): Promise<T> {
+export default async function update<T = any>(options: Options<T>): Promise<T> {
   const {
     collection: collectionSlug,
     depth,
@@ -29,6 +30,8 @@ export default async function update<T extends TypeWithID = any>(options: Option
     showHiddenFields,
     filePath,
     overwriteExistingFiles = false,
+    draft,
+    autosave,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -41,6 +44,8 @@ export default async function update<T extends TypeWithID = any>(options: Option
     id,
     showHiddenFields,
     overwriteExistingFiles,
+    draft,
+    autosave,
     req: {
       user,
       payloadAPI: 'local',

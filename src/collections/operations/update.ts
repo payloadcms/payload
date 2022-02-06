@@ -1,37 +1,34 @@
 import httpStatus from 'http-status';
-import path from 'path';
-import { UploadedFile } from 'express-fileupload';
+import { Payload } from '../..';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
-
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
-import { NotFound, Forbidden, APIError, FileUploadError, ValidationError } from '../../errors';
-import isImage from '../../uploads/isImage';
-import getImageSize from '../../uploads/getImageSize';
-import getSafeFilename from '../../uploads/getSafeFilename';
-
-import resizeAndSave from '../../uploads/imageResizer';
-import { FileData } from '../../uploads/types';
-
+import { NotFound, Forbidden, APIError, ValidationError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult, UserDocument } from '../../auth/types';
-import saveBufferToFile from '../../uploads/saveBufferToFile';
+import { saveCollectionDraft } from '../../versions/drafts/saveCollectionDraft';
+import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
+import uploadFile from '../../uploads/uploadFile';
+import cleanUpFailedCollectionVersion from '../../versions/cleanUpFailedCollectionVersion';
+import { ensurePublishedCollectionVersion } from '../../versions/ensurePublishedCollectionVersion';
 
 export type Arguments = {
   collection: Collection
   req: PayloadRequest
-  id: string
+  id: string | number
   data: Record<string, unknown>
   depth?: number
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
   showHiddenFields?: boolean
   overwriteExistingFiles?: boolean
+  draft?: boolean
+  autosave?: boolean
 }
 
-async function update(incomingArgs: Arguments): Promise<Document> {
-  const { performFieldOperations, config } = this;
+async function update(this: Payload, incomingArgs: Arguments): Promise<Document> {
+  const { config } = this;
 
   let args = incomingArgs;
 
@@ -50,6 +47,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
   const {
     depth,
+    collection,
     collection: {
       Model,
       config: collectionConfig,
@@ -62,11 +60,15 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     overrideAccess,
     showHiddenFields,
     overwriteExistingFiles = false,
+    draft: draftArg = false,
+    autosave = false,
   } = args;
 
   if (!id) {
     throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST);
   }
+
+  const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
 
   // /////////////////////////////////////
   // Access
@@ -106,7 +108,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   docWithLocales = JSON.stringify(docWithLocales);
   docWithLocales = JSON.parse(docWithLocales);
 
-  const originalDoc = await performFieldOperations(collectionConfig, {
+  const originalDoc = await this.performFieldOperations(collectionConfig, {
     id,
     depth: 0,
     req,
@@ -124,72 +126,20 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // Upload and resize potential files
   // /////////////////////////////////////
 
-  if (collectionConfig.upload) {
-    const fileData: Partial<FileData> = {};
-
-    const { staticDir, imageSizes, disableLocalStorage } = collectionConfig.upload;
-
-    let staticPath = staticDir;
-
-    if (staticDir.indexOf('/') !== 0) {
-      staticPath = path.resolve(config.paths.configDir, staticDir);
-    }
-
-    const { file } = req.files || {};
-
-    if (file) {
-      const fsSafeName = !overwriteExistingFiles ? await getSafeFilename(Model, staticPath, file.name) : file.name;
-
-      try {
-        if (!disableLocalStorage) {
-          await saveBufferToFile(file.data, `${staticPath}/${fsSafeName}`);
-        }
-
-        fileData.filename = fsSafeName;
-        fileData.filesize = file.size;
-        fileData.mimeType = file.mimetype;
-
-        if (isImage(file.mimetype)) {
-          const dimensions = await getImageSize(file);
-          fileData.width = dimensions.width;
-          fileData.height = dimensions.height;
-
-          if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
-            req.payloadUploadSizes = {};
-            fileData.sizes = await resizeAndSave({
-              req,
-              file: file.data,
-              dimensions,
-              staticPath,
-              config: collectionConfig,
-              savedFilename: fsSafeName,
-              mimeType: fileData.mimeType,
-            });
-          }
-        }
-      } catch (err) {
-        console.error(err);
-        throw new FileUploadError();
-      }
-
-      data = {
-        ...data,
-        ...fileData,
-      };
-    } else if (data.file === null) {
-      data = {
-        ...data,
-        filename: null,
-        sizes: null,
-      };
-    }
-  }
+  data = await uploadFile({
+    config,
+    collection,
+    req,
+    data,
+    throwOnMissingFile: false,
+    overwriteExistingFiles,
+  });
 
   // /////////////////////////////////////
   // beforeValidate - Fields
   // /////////////////////////////////////
 
-  data = await performFieldOperations(collectionConfig, {
+  data = await this.performFieldOperations(collectionConfig, {
     data,
     req,
     id,
@@ -233,7 +183,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  let result = await performFieldOperations(collectionConfig, {
+  let result = await this.performFieldOperations(collectionConfig, {
     data,
     req,
     id,
@@ -243,6 +193,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     overrideAccess,
     unflattenLocales: true,
     docWithLocales,
+    skipValidation: shouldSaveDraft,
   });
 
   // /////////////////////////////////////
@@ -251,7 +202,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
   const { password } = data;
 
-  if (password && collectionConfig.auth) {
+  if (password && collectionConfig.auth && !shouldSaveDraft) {
     await doc.setPassword(password as string);
     await doc.save();
     delete data.password;
@@ -259,35 +210,77 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   }
 
   // /////////////////////////////////////
+  // Create version from existing doc
+  // /////////////////////////////////////
+
+  let createdVersion;
+
+  if (collectionConfig.versions && !shouldSaveDraft) {
+    createdVersion = await saveCollectionVersion({
+      payload: this,
+      config: collectionConfig,
+      req,
+      docWithLocales,
+      id,
+    });
+  }
+
+  // /////////////////////////////////////
   // Update
   // /////////////////////////////////////
 
-  try {
-    result = await Model.findByIdAndUpdate(
-      { _id: id },
-      result,
-      { new: true },
-    );
-  } catch (error) {
-    // Handle uniqueness error from MongoDB
-    throw error.code === 11000
-      ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }])
-      : error;
+  if (shouldSaveDraft) {
+    await ensurePublishedCollectionVersion({
+      payload: this,
+      config: collectionConfig,
+      req,
+      docWithLocales,
+      id,
+    });
+
+    result = await saveCollectionDraft({
+      payload: this,
+      config: collectionConfig,
+      req,
+      data: result,
+      id,
+      autosave,
+    });
+  } else {
+    try {
+      result = await Model.findByIdAndUpdate(
+        { _id: id },
+        result,
+        { new: true },
+      );
+    } catch (error) {
+      cleanUpFailedCollectionVersion({
+        payload: this,
+        collection: collectionConfig,
+        version: createdVersion,
+      });
+
+      // Handle uniqueness error from MongoDB
+      throw error.code === 11000
+        ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }])
+        : error;
+    }
+
+    result = result.toJSON({ virtuals: true });
+    result = JSON.stringify(result);
+    result = JSON.parse(result);
+
+    // custom id type reset
+    result.id = result._id;
   }
 
-  result = result.toJSON({ virtuals: true });
-
-  // custom id type reset
-  result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
   result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // afterRead - Fields
   // /////////////////////////////////////
 
-  result = await performFieldOperations(collectionConfig, {
+  result = await this.performFieldOperations(collectionConfig, {
     id,
     depth,
     req,
@@ -316,7 +309,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // afterChange - Fields
   // /////////////////////////////////////
 
-  result = await performFieldOperations(collectionConfig, {
+  result = await this.performFieldOperations(collectionConfig, {
     data: result,
     hook: 'afterChange',
     operation: 'update',

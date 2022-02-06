@@ -126,6 +126,7 @@ function registerCollections(): void {
       type: collection.graphQL.type,
       args: {
         id: { type: idType },
+        draft: { type: GraphQLBoolean },
         ...(this.config.localization ? {
           locale: { type: this.types.localeInputType },
           fallbackLocale: { type: this.types.fallbackLocaleInputType },
@@ -138,6 +139,7 @@ function registerCollections(): void {
       type: buildPaginatedListType(pluralLabel, collection.graphQL.type),
       args: {
         where: { type: collection.graphQL.whereInputType },
+        draft: { type: GraphQLBoolean },
         ...(this.config.localization ? {
           locale: { type: this.types.localeInputType },
           fallbackLocale: { type: this.types.fallbackLocaleInputType },
@@ -153,6 +155,7 @@ function registerCollections(): void {
       type: collection.graphQL.type,
       args: {
         data: { type: collection.graphQL.mutationInputType },
+        draft: { type: GraphQLBoolean },
       },
       resolve: create(collection),
     };
@@ -162,6 +165,8 @@ function registerCollections(): void {
       args: {
         id: { type: new GraphQLNonNull(idType) },
         data: { type: collection.graphQL.updateMutationInputType },
+        draft: { type: GraphQLBoolean },
+        autosave: { type: GraphQLBoolean },
       },
       resolve: update(collection),
     };

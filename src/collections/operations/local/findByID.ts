@@ -6,6 +6,7 @@ export type Options = {
   collection: string
   id: string
   depth?: number
+  currentDepth?: number
   locale?: string
   fallbackLocale?: string
   user?: Document
@@ -13,12 +14,14 @@ export type Options = {
   showHiddenFields?: boolean
   disableErrors?: boolean
   req?: PayloadRequest
+  draft?: boolean
 }
 
 export default async function findByID<T extends TypeWithID = any>(options: Options): Promise<T> {
   const {
     collection: collectionSlug,
     depth,
+    currentDepth,
     id,
     locale = this?.config?.localization?.defaultLocale,
     fallbackLocale = null,
@@ -26,12 +29,14 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
     overrideAccess = true,
     disableErrors = false,
     showHiddenFields,
-    req,
+    req = {},
+    draft = false,
   } = options;
 
   const collection = this.collections[collectionSlug];
 
   const reqToUse = {
+    user: undefined,
     ...req || {},
     payloadAPI: 'local',
     locale,
@@ -43,11 +48,13 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
 
   return this.operations.collections.findByID({
     depth,
+    currentDepth,
     id,
     collection,
     overrideAccess,
     disableErrors,
     showHiddenFields,
     req: reqToUse,
+    draft,
   });
 }

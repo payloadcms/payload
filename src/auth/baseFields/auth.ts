@@ -1,5 +1,5 @@
-import { email } from '../validations';
-import { Field } from '../config/types';
+import { email } from '../../fields/validations';
+import { Field } from '../../fields/config/types';
 
 export default [
   {

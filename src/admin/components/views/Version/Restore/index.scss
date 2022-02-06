@@ -1,0 +1,20 @@
+@import '../../../../scss/styles.scss';
+
+.restore-version {
+  cursor: pointer;
+
+  &__modal {
+    @include blur-bg;
+    display: flex;
+    align-items: center;
+    height: 100%;
+
+    &__toggle {
+      @extend %btn-reset;
+    }
+
+    .btn {
+      margin-right: $baseline;
+    }
+  }
+}

@@ -34,6 +34,7 @@ export const defaults = {
   },
   auth: false,
   upload: false,
+  versions: false,
 };
 
 export const authDefaults = {

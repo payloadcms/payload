@@ -13,6 +13,7 @@ function update(globalConfig) {
       depth: 0,
       data: args.data,
       req: context.req,
+      draft: args.draft,
     };
 
     const result = await this.operations.globals.update(options);

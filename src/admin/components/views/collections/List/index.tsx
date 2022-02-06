@@ -77,6 +77,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   useEffect(() => {
     const params = {
       depth: 1,
+      draft: 'true',
       page: undefined,
       sort: undefined,
       where: undefined,

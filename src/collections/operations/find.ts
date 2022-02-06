@@ -2,9 +2,13 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Collection, TypeWithID, PaginatedDocs } from '../config/types';
+import { Collection, TypeWithID } from '../config/types';
+import { PaginatedDocs } from '../../mongoose/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
+import { buildSortParam } from '../../mongoose/buildSortParam';
+import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
+import { AccessResult } from '../../config/types';
 
 export type Arguments = {
   collection: Collection
@@ -16,6 +20,7 @@ export type Arguments = {
   req?: PayloadRequest
   overrideAccess?: boolean
   showHiddenFields?: boolean
+  draft?: boolean
 }
 
 async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promise<PaginatedDocs<T>> {
@@ -39,6 +44,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     page,
     limit,
     depth,
+    draft: draftsEnabled,
     collection: {
       Model,
       config: collectionConfig,
@@ -55,41 +61,57 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where} = {};
+  const queryToBuild: { where?: Where} = {
+    where: {
+      and: [],
+    },
+  };
+
   let useEstimatedCount = false;
 
   if (where) {
-    let and = [];
-
-    if (Array.isArray(where.and)) and = where.and;
-    if (Array.isArray(where.AND)) and = where.AND;
-
     queryToBuild.where = {
+      and: [],
       ...where,
-      and: [
-        ...and,
-      ],
     };
+
+    if (Array.isArray(where.AND)) {
+      queryToBuild.where.and = [
+        ...queryToBuild.where.and,
+        ...where.AND,
+      ];
+    }
 
     const constraints = flattenWhereConstraints(queryToBuild);
 
     useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 
-  if (!overrideAccess) {
-    const accessResults = await executeAccess({ req }, collectionConfig.access.read);
+  let accessResult: AccessResult;
 
-    if (hasWhereAccessResult(accessResults)) {
-      if (!where) {
-        queryToBuild.where = {
-          and: [
-            accessResults,
-          ],
-        };
-      } else {
-        (queryToBuild.where.and as Where[]).push(accessResults);
-      }
+  if (!overrideAccess) {
+    accessResult = await executeAccess({ req }, collectionConfig.access.read);
+
+    if (hasWhereAccessResult(accessResult)) {
+      queryToBuild.where.and.push(accessResult);
     }
+  }
+
+  if (collectionConfig.versions?.drafts && !draftsEnabled) {
+    queryToBuild.where.and.push({
+      or: [
+        {
+          _status: {
+            equals: 'published',
+          },
+        },
+        {
+          _status: {
+            exists: false,
+          },
+        },
+      ],
+    });
   }
 
   const query = await Model.buildQuery(queryToBuild, locale);
@@ -97,24 +119,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   // /////////////////////////////////////
   // Find
   // /////////////////////////////////////
-
-  let sortProperty: string;
-  let sortOrder = 'desc';
-
-  if (!args.sort) {
-    if (collectionConfig.timestamps) {
-      sortProperty = 'createdAt';
-    } else {
-      sortProperty = '_id';
-    }
-  } else if (args.sort.indexOf('-') === 0) {
-    sortProperty = args.sort.substring(1);
-  } else {
-    sortProperty = args.sort;
-    sortOrder = 'asc';
-  }
-
-  if (sortProperty === 'id') sortProperty = '_id';
+  const [sortProperty, sortOrder] = buildSortParam(args.sort, collectionConfig.timestamps);
 
   const optionsToExecute = {
     page: page || 1,
@@ -129,13 +134,34 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
 
   const paginatedDocs = await Model.paginate(query, optionsToExecute);
 
+  let result = {
+    ...paginatedDocs,
+  } as PaginatedDocs<T>;
+
+  // /////////////////////////////////////
+  // Replace documents with drafts if available
+  // /////////////////////////////////////
+
+  if (collectionConfig.versions?.drafts && draftsEnabled) {
+    result = {
+      ...result,
+      docs: await Promise.all(result.docs.map(async (doc) => replaceWithDraftIfAvailable({
+        accessResult,
+        payload: this,
+        collection: collectionConfig,
+        doc,
+        locale,
+      }))),
+    };
+  }
+
   // /////////////////////////////////////
   // beforeRead - Collection
   // /////////////////////////////////////
 
-  let result = {
-    ...paginatedDocs,
-    docs: await Promise.all(paginatedDocs.docs.map(async (doc) => {
+  result = {
+    ...result,
+    docs: await Promise.all(result.docs.map(async (doc) => {
       const docString = JSON.stringify(doc);
       let docRef = JSON.parse(docString);
 
@@ -147,7 +173,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
 
       return docRef;
     })),
-  } as PaginatedDocs<T>;
+  };
 
   // /////////////////////////////////////
   // afterRead - Fields
@@ -168,7 +194,6 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
         flattenLocales: true,
         showHiddenFields,
       },
-      find,
     ))),
   };
 

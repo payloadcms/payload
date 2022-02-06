@@ -11,6 +11,7 @@ export default function find(collection) {
       page: args.page,
       sort: args.sort,
       req: context.req,
+      draft: args.draft,
     };
 
     const results = await this.operations.collections.find(options);

@@ -8,6 +8,7 @@ export default function findByID(collection) {
       collection,
       id: args.id,
       req: context.req,
+      draft: args.draft,
     };
 
     const result = await this.operations.collections.findByID(options);

@@ -136,7 +136,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
                   {data.totalDocs}
                 </div>
                 <PerPage
-                  collection={collection}
+                  limits={collection?.admin?.pagination?.limits}
                   limit={limit}
                   modifySearchParams={false}
                   handleChange={setLimit}

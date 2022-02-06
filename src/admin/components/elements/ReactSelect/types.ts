@@ -20,4 +20,5 @@ export type Props = {
   onInputChange?: (val: string) => void
   onMenuScrollToBottom?: () => void
   placeholder?: string
+  isSearchable?: boolean
 }

@@ -6,7 +6,7 @@ import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
 import { Field } from '../../fields/config/types';
 
-type OperationType = 'create' | 'read' | 'update' | 'delete';
+type OperationType = 'create' | 'read' | 'update' | 'delete' | 'unlock' | 'readVersions';
 
 type ObjectTypeFields = {
   [key in OperationType | 'fields']?: { type: GraphQLObjectType };
@@ -104,19 +104,35 @@ export default function buildPoliciesType(): GraphQLObjectType {
   };
 
   Object.values(this.config.collections).forEach((collection: SanitizedCollectionConfig) => {
+    const collectionOperations: OperationType[] = ['create', 'read', 'update', 'delete'];
+
+    if (collection.auth && (typeof collection.auth.maxLoginAttempts !== 'undefined' && collection.auth.maxLoginAttempts !== 0)) {
+      collectionOperations.push('unlock');
+    }
+
+    if (collection.versions) {
+      collectionOperations.push('readVersions');
+    }
+
     fields[formatName(collection.slug)] = {
       type: new GraphQLObjectType({
         name: formatName(`${collection.labels.singular}Access`),
-        fields: buildEntity(collection.labels.singular, collection.fields, ['create', 'read', 'update', 'delete']),
+        fields: buildEntity(collection.labels.singular, collection.fields, collectionOperations),
       }),
     };
   });
 
   Object.values(this.config.globals).forEach((global: SanitizedGlobalConfig) => {
+    const globalOperations: OperationType[] = ['read', 'update'];
+
+    if (global.versions) {
+      globalOperations.push('readVersions');
+    }
+
     fields[formatName(global.slug)] = {
       type: new GraphQLObjectType({
         name: formatName(`${global.label}Access`),
-        fields: buildEntity(global.label, global.fields, ['read', 'update']),
+        fields: buildEntity(global.label, global.fields, globalOperations),
       }),
     };
   });

@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { Result } from '../login';
 import { PayloadRequest } from '../../../express/types';
+import { TypeWithID } from '../../../collections/config/types';
 
 export type Options = {
   collection: string
@@ -17,7 +18,7 @@ export type Options = {
   showHiddenFields?: boolean
 }
 
-async function login(options: Options): Promise<Result> {
+async function login<T extends TypeWithID = any>(options: Options): Promise<Result & { user: T}> {
   const {
     collection: collectionSlug,
     req = {},

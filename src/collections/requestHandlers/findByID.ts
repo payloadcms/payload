@@ -13,6 +13,7 @@ export default async function findByID(req: PayloadRequest, res: Response, next:
     collection: req.collection,
     id: req.params.id,
     depth: req.query.depth,
+    draft: req.query.draft === 'true',
   };
 
   try {

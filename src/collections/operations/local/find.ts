@@ -1,4 +1,5 @@
-import { PaginatedDocs, TypeWithID } from '../../config/types';
+import { TypeWithID } from '../../config/types';
+import { PaginatedDocs } from '../../../mongoose/types';
 import { Document, Where } from '../../../types';
 
 export type Options = {
@@ -13,6 +14,7 @@ export type Options = {
   showHiddenFields?: boolean
   sort?: string
   where?: Where
+  draft?: boolean
 }
 
 export default async function find<T extends TypeWithID = any>(options: Options): Promise<PaginatedDocs<T>> {
@@ -28,6 +30,7 @@ export default async function find<T extends TypeWithID = any>(options: Options)
     overrideAccess = true,
     showHiddenFields,
     sort,
+    draft = false,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -41,6 +44,7 @@ export default async function find<T extends TypeWithID = any>(options: Options)
     collection,
     overrideAccess,
     showHiddenFields,
+    draft,
     req: {
       user,
       payloadAPI: 'local',

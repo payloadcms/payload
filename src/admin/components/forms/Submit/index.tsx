@@ -1,20 +1,23 @@
 import React from 'react';
 import { useForm, useFormProcessing } from '../Form/context';
 import Button from '../../elements/Button';
+import { Props } from '../../elements/Button/types';
 
 import './index.scss';
 
 const baseClass = 'form-submit';
 
-const FormSubmit = ({ children }) => {
+const FormSubmit: React.FC<Props> = (props) => {
+  const { children, disabled: disabledFromProps, type = 'submit' } = props;
   const processing = useFormProcessing();
   const { disabled } = useForm();
 
   return (
     <div className={baseClass}>
       <Button
-        type="submit"
-        disabled={processing || disabled ? true : undefined}
+        {...props}
+        type={type}
+        disabled={disabledFromProps || processing || disabled ? true : undefined}
       >
         {children}
       </Button>

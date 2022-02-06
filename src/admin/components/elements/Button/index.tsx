@@ -88,7 +88,8 @@ const Button: React.FC<Props> = (props) => {
   const buttonProps = {
     type,
     className: classes,
-    onClick: handleClick,
+    disabled,
+    onClick: !disabled ? handleClick : undefined,
     rel: newTab ? 'noopener noreferrer' : undefined,
     target: newTab ? '_blank' : undefined,
   };

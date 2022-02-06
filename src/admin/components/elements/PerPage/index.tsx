@@ -4,27 +4,22 @@ import { useHistory } from 'react-router-dom';
 import { useSearchParams } from '../../utilities/SearchParams';
 import Popup from '../Popup';
 import Chevron from '../../icons/Chevron';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import { defaults } from '../../../../collections/config/defaults';
 
 import './index.scss';
 
 const baseClass = 'per-page';
+
+const defaultLimits = defaults.admin.pagination.limits;
+
 type Props = {
-  collection: SanitizedCollectionConfig
+  limits: number[]
   limit: number
   handleChange?: (limit: number) => void
   modifySearchParams?: boolean
 }
 
-const PerPage: React.FC<Props> = ({ collection, limit, handleChange, modifySearchParams = true }) => {
-  const {
-    admin: {
-      pagination: {
-        limits,
-      },
-    },
-  } = collection;
-
+const PerPage: React.FC<Props> = ({ limits = defaultLimits, limit, handleChange, modifySearchParams = true }) => {
   const params = useSearchParams();
   const history = useHistory();
 

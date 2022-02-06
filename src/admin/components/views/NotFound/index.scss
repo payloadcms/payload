@@ -1,0 +1,10 @@
+@import '../../../scss/styles';
+
+.not-found {
+  &__wrap {
+    @include mid-break {
+      padding-left: $baseline;
+      padding-right: $baseline;
+    }
+  }
+}

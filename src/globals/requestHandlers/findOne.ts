@@ -17,6 +17,7 @@ export default function findOne(globalConfig: SanitizedGlobalConfig): FindOneGlo
         globalConfig,
         slug,
         depth: req.query.depth,
+        draft: req.query.draft === 'true',
       });
 
       return res.status(httpStatus.OK).json(result);

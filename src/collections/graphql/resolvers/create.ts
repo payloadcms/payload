@@ -23,6 +23,7 @@ export default function create(collection: Collection): Resolver {
       collection,
       data: args.data,
       req: context.req,
+      draft: args.draft,
     };
 
     const result = await this.operations.collections.create(options);

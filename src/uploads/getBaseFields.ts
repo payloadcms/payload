@@ -1,8 +1,8 @@
-import { Field } from '../config/types';
-import { Config } from '../../config/types';
-import { CollectionConfig } from '../../collections/config/types';
-import { mimeTypeValidator } from '../../uploads/mimeTypeValidator';
-import { IncomingUploadType } from '../../uploads/types';
+import { Field } from '../fields/config/types';
+import { Config } from '../config/types';
+import { CollectionConfig } from '../collections/config/types';
+import { mimeTypeValidator } from './mimeTypeValidator';
+import { IncomingUploadType } from './types';
 
 type Options = {
   config: Config

@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { Field, FieldHook } from '../config/types';
+import { Field, FieldHook } from '../../fields/config/types';
 
 const encryptKey: FieldHook = ({ req, value }) => (value ? req.payload.encrypt(value as string) : undefined);
 const decryptKey: FieldHook = ({ req, value }) => (value ? req.payload.decrypt(value as string) : undefined);

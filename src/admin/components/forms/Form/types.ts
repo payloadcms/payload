@@ -40,16 +40,22 @@ export type Props = {
   log?: boolean
 }
 
+export type SubmitOptions = {
+  action?: string
+  method?: string
+  overrides?: Record<string, unknown>
+}
+
 export type DispatchFields = React.Dispatch<any>
-export type Submit = (e: React.FormEvent<HTMLFormElement>) => void;
+export type Submit = (options?: SubmitOptions, e?: React.FormEvent<HTMLFormElement>) => void;
 export type ValidateForm = () => Promise<boolean>;
-export type CreateFormData = () => FormData;
+export type CreateFormData = (overrides?: any) => FormData;
 export type GetFields = () => Fields;
 export type GetField = (path: string) => Field;
 export type GetData = () => Data;
 export type GetSiblingData = (path: string) => Data;
 export type GetUnflattenedValues = () => Data;
-export type GetDataByPath = (path: string) => unknown;
+export type GetDataByPath = <T = unknown>(path: string) => T;
 export type SetModified = (modified: boolean) => void;
 export type SetSubmitted = (submitted: boolean) => void;
 export type SetProcessing = (processing: boolean) => void;
@@ -71,4 +77,5 @@ export type Context = {
   setModified: SetModified
   setProcessing: SetProcessing
   setSubmitted: SetSubmitted
+  formRef: React.MutableRefObject<HTMLFormElement>
 }

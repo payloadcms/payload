@@ -4,9 +4,10 @@ import { buildConfig } from '../src/config/build';
 import Admin from './collections/Admin';
 import AllFields from './collections/AllFields';
 import AutoLabel from './collections/AutoLabel';
+import Autosave from './collections/Autosave';
 import Code from './collections/Code';
 import Conditions from './collections/Conditions';
-import CustomComponents from './collections/CustomComponents';
+// import CustomComponents from './collections/CustomComponents';
 import File from './collections/File';
 import Blocks from './collections/Blocks';
 import CustomID from './collections/CustomID';
@@ -89,9 +90,10 @@ export default buildConfig({
     Admin,
     AllFields,
     AutoLabel,
+    Autosave,
     Code,
     Conditions,
-    CustomComponents,
+    // CustomComponents,
     CustomID,
     File,
     DefaultValues,

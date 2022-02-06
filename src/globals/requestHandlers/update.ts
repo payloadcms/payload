@@ -11,6 +11,8 @@ function update(globalConfig: SanitizedGlobalConfig): UpdateGlobalResponse {
   async function handler(req: PayloadRequest, res: Response, next: NextFunction) {
     try {
       const { slug } = globalConfig;
+      const draft = req.query.draft === 'true';
+      const autosave = req.query.autosave === 'true';
 
       const result = await this.operations.globals.update({
         req,
@@ -18,9 +20,16 @@ function update(globalConfig: SanitizedGlobalConfig): UpdateGlobalResponse {
         slug,
         depth: req.query.depth,
         data: req.body,
+        draft,
+        autosave,
       });
 
-      return res.status(httpStatus.OK).json({ message: 'Global saved successfully.', result });
+      let message = 'Saved successfully.';
+
+      if (draft) message = 'Draft saved successfully.';
+      if (autosave) message = 'Autosaved successfully.';
+
+      return res.status(httpStatus.OK).json({ message, result });
     } catch (error) {
       return next(error);
     }

@@ -17,4 +17,5 @@ export type Props = IndexProps & {
   apiURL: string
   action: string
   hasSavePermission: boolean
+  autosaveEnabled: boolean
 }

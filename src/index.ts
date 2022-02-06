@@ -2,15 +2,18 @@ import express, { Express, Router } from 'express';
 import crypto from 'crypto';
 import {
   TypeWithID,
-  Collection, PaginatedDocs,
+  Collection, CollectionModel,
 } from './collections/config/types';
 import {
   SanitizedConfig,
   EmailOptions,
   InitOptions,
 } from './config/types';
+import { TypeWithVersion } from './versions/types';
+import { PaginatedDocs } from './mongoose/types';
+
 import Logger from './utilities/logger';
-import bindOperations from './init/bindOperations';
+import bindOperations, { Operations } from './init/bindOperations';
 import bindRequestHandlers, { RequestHandlers } from './init/bindRequestHandlers';
 import loadConfig from './config/load';
 import authenticate, { PayloadAuthenticate } from './express/middleware/authenticate';
@@ -21,7 +24,7 @@ import initAuth from './auth/init';
 import initCollections from './collections/init';
 import initPreferences from './preferences/init';
 import initGlobals from './globals/init';
-import { Globals } from './globals/config/types';
+import { GlobalModel, Globals } from './globals/config/types';
 import initGraphQLPlayground from './graphql/initPlayground';
 import initStatic from './express/static';
 import GraphQL from './graphql';
@@ -43,6 +46,10 @@ import { Options as FindOptions } from './collections/operations/local/find';
 import { Options as FindByIDOptions } from './collections/operations/local/findByID';
 import { Options as UpdateOptions } from './collections/operations/local/update';
 import { Options as DeleteOptions } from './collections/operations/local/delete';
+import { Options as FindVersionsOptions } from './collections/operations/local/findVersions';
+import { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID';
+import { Options as RestoreVersionOptions } from './collections/operations/local/publishVersion';
+import { Result } from './auth/operations/login';
 
 require('isomorphic-fetch');
 
@@ -52,7 +59,13 @@ require('isomorphic-fetch');
 export class Payload {
   config: SanitizedConfig;
 
-  collections: Collection[] = [];
+  collections: {
+    [slug: string]: Collection;
+  } = {}
+
+  versions: {
+    [slug: string]: CollectionModel | GlobalModel;
+  } = {}
 
   graphQL: {
     resolvers: GraphQLResolvers
@@ -86,7 +99,7 @@ export class Payload {
 
   decrypt = decrypt;
 
-  operations: { [key: string]: any };
+  operations: Operations;
 
   errorHandler: ErrorHandler;
 
@@ -204,7 +217,7 @@ export class Payload {
    * @param options
    * @returns created document
    */
-  create = async <T>(options: CreateOptions): Promise<T> => {
+  create = async <T = any>(options: CreateOptions<T>): Promise<T> => {
     let { create } = localOperations;
     create = create.bind(this);
     return create(options);
@@ -249,7 +262,7 @@ export class Payload {
    * @param options
    * @returns Updated document
    */
-  update = async <T extends TypeWithID = any>(options: UpdateOptions): Promise<T> => {
+  update = async <T = any>(options: UpdateOptions<T>): Promise<T> => {
     let { update } = localOperations;
     update = update.bind(this);
     return update<T>(options);
@@ -261,7 +274,48 @@ export class Payload {
     return deleteOperation<T>(options);
   }
 
-  login = async (options): Promise<any> => {
+  /**
+   * @description Find versions with criteria
+   * @param options
+   * @returns versions satisfying query
+   */
+  findVersions = async <T extends TypeWithVersion<T> = any>(options: FindVersionsOptions): Promise<PaginatedDocs<T>> => {
+    let { findVersions } = localOperations;
+    findVersions = findVersions.bind(this);
+    return findVersions<T>(options);
+  }
+
+  /**
+   * @description Find version by ID
+   * @param options
+   * @returns version with specified ID
+   */
+  findVersionByID = async <T extends TypeWithVersion<T> = any>(options: FindVersionByIDOptions): Promise<T> => {
+    let { findVersionByID } = localOperations;
+    findVersionByID = findVersionByID.bind(this);
+    return findVersionByID(options);
+  }
+
+  /**
+   * @description Restore version by ID
+   * @param options
+   * @returns version with specified ID
+   */
+  publishVersion = async <T extends TypeWithVersion<T> = any>(options: RestoreVersionOptions): Promise<T> => {
+    let { publishVersion } = localOperations;
+    publishVersion = publishVersion.bind(this);
+    return publishVersion(options);
+  }
+
+  // TODO: globals
+  // findVersionGlobal
+  // findVersionByIDGlobal
+  // publishVersionGlobal
+  // TODO:
+  // graphql operations & request handlers, where
+  // tests
+
+  login = async <T extends TypeWithID = any>(options): Promise<Result & { user: T}> => {
     let { login } = localOperations.auth;
     login = login.bind(this);
     return login(options);

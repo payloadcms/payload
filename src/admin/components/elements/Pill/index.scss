@@ -11,6 +11,7 @@
   border-radius: $style-radius-s;
   padding: 0 base(.25);
   padding-left: base(.0875 + .25);
+  cursor: default;
 
   &:active,
   &:focus {
@@ -37,18 +38,28 @@
   }
 
   &--style-light {
-    &:hover {
-      background: lighten($color-light-gray, 3%);
-    }
+    &.pill--has-action {
+      &:hover {
+        background: lighten($color-light-gray, 3%);
+      }
 
-    &:active {
-      background: lighten($color-light-gray, 5%);
+      &:active {
+        background: lighten($color-light-gray, 5%);
+      }
     }
   }
 
   &--style-light-gray {
     background: $color-background-gray;
     color: $color-dark-gray;
+  }
+
+  &--style-warning {
+    background: $color-yellow;
+  }
+
+  &--style-success {
+    background: $color-green;
   }
 
   &--style-dark {
@@ -59,12 +70,14 @@
       @include color-svg(white);
     }
 
-    &:hover {
-      background: lighten($color-dark-gray, 3%);
-    }
+    &.pill--has-action {
+      &:hover {
+        background: lighten($color-dark-gray, 3%);
+      }
 
-    &:active {
-      background: lighten($color-dark-gray, 5%);
+      &:active {
+        background: lighten($color-dark-gray, 5%);
+      }
     }
   }
 }

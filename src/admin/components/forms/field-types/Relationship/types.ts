@@ -1,4 +1,5 @@
-import { PaginatedDocs, SanitizedCollectionConfig } from '../../../../../collections/config/types';
+import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
+import { PaginatedDocs } from '../../../../../mongoose/types';
 import { RelationshipField } from '../../../../../fields/config/types';
 
 export type Props = Omit<RelationshipField, 'type'> & {

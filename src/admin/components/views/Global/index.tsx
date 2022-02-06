@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useConfig, useAuth } from '@payloadcms/config-provider';
 import { useStepNav } from '../../elements/StepNav';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
-import { DocumentInfoProvider } from '../../utilities/DocumentInfo';
 
 import { useLocale } from '../../utilities/Locale';
 
@@ -12,10 +11,10 @@ import DefaultGlobal from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
 import { IndexProps } from './types';
+import { DocumentInfoProvider } from '../../utilities/DocumentInfo';
 
 const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{data?: Record<string, unknown>}>();
-  const history = useHistory();
   const locale = useLocale();
   const { setStepNav } = useStepNav();
   const { permissions } = useAuth();
@@ -24,7 +23,6 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const {
     serverURL,
     routes: {
-      admin,
       api,
     },
   } = useConfig();
@@ -44,14 +42,9 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     } = {},
   } = global;
 
-  const onSave = (json) => {
-    history.push(`${admin}/globals/${global.slug}`, {
-      status: {
-        message: json.message,
-        type: 'success',
-      },
-      data: json.doc,
-    });
+  const onSave = async (json) => {
+    const state = await buildStateFromSchema(fields, json.doc);
+    setInitialState(state);
   };
 
   const [{ data, isLoading }] = usePayloadAPI(
@@ -82,8 +75,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   return (
     <DocumentInfoProvider
-      slug={slug}
-      type="global"
+      global={global}
     >
       <NegativeFieldGutterProvider allow>
         <RenderCustomComponent

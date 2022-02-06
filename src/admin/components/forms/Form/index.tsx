@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React, {
   useReducer, useEffect, useRef, useState, useCallback,
 } from 'react';
@@ -16,7 +17,7 @@ import getDataByPathFunc from './getDataByPath';
 import wait from '../../../../utilities/wait';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
-import { Context as FormContextType, Props } from './types';
+import { Context as FormContextType, Props, SubmitOptions } from './types';
 
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormWatchContext } from './context';
 
@@ -49,6 +50,7 @@ const Form: React.FC<Props> = (props) => {
   const [submitted, setSubmitted] = useState(false);
   const [formattedInitialData, setFormattedInitialData] = useState(buildInitialState(initialData));
 
+  const formRef = useRef<HTMLFormElement>(null);
   const contextRef = useRef({} as FormContextType);
 
   let initialFieldState = {};
@@ -97,14 +99,24 @@ const Form: React.FC<Props> = (props) => {
     return isValid;
   }, [contextRef]);
 
-  const submit = useCallback(async (e): Promise<void> => {
+  const submit = useCallback(async (options: SubmitOptions = {}, e): Promise<void> => {
+    const {
+      overrides = {},
+      action: actionToUse = action,
+      method: methodToUse = method,
+    } = options;
+
     if (disabled) {
-      e.preventDefault();
+      if (e) {
+        e.preventDefault();
+      }
       return;
     }
 
-    e.stopPropagation();
-    e.preventDefault();
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
 
     setProcessing(true);
 
@@ -124,14 +136,19 @@ const Form: React.FC<Props> = (props) => {
 
     // If submit handler comes through via props, run that
     if (onSubmit) {
-      onSubmit(fields, reduceFieldsToValues(fields));
+      const data = {
+        ...reduceFieldsToValues(fields),
+        ...overrides,
+      };
+
+      onSubmit(fields, data);
       return;
     }
 
-    const formData = contextRef.current.createFormData();
+    const formData = contextRef.current.createFormData(overrides);
 
     try {
-      const res = await requests[method.toLowerCase()](action, {
+      const res = await requests[methodToUse.toLowerCase()](actionToUse, {
         body: formData,
       });
 
@@ -268,8 +285,8 @@ const Form: React.FC<Props> = (props) => {
   const getDataByPath = useCallback((path: string) => getDataByPathFunc(contextRef.current.fields, path), [contextRef]);
   const getUnflattenedValues = useCallback(() => reduceFieldsToValues(contextRef.current.fields), [contextRef]);
 
-  const createFormData = useCallback(() => {
-    const data = reduceFieldsToValues(contextRef.current.fields, true);
+  const createFormData = useCallback((overrides: any = {}) => {
+    const data = reduceFieldsToValues(contextRef.current.fields);
 
     const file = data?.file;
 
@@ -277,8 +294,13 @@ const Form: React.FC<Props> = (props) => {
       delete data.file;
     }
 
+    const dataWithOverrides = {
+      ...data,
+      ...overrides,
+    };
+
     const dataToSerialize = {
-      _payload: JSON.stringify(data),
+      _payload: JSON.stringify(dataWithOverrides),
       file,
     };
 
@@ -301,6 +323,7 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.setProcessing = setProcessing;
   contextRef.current.setSubmitted = setSubmitted;
   contextRef.current.disabled = disabled;
+  contextRef.current.formRef = formRef;
 
   useEffect(() => {
     if (initialState) {
@@ -340,10 +363,11 @@ const Form: React.FC<Props> = (props) => {
   return (
     <form
       noValidate
-      onSubmit={contextRef.current.submit}
+      onSubmit={(e) => contextRef.current.submit({}, e)}
       method={method}
       action={action}
       className={classes}
+      ref={formRef}
     >
       <FormContext.Provider value={contextRef.current}>
         <FormWatchContext.Provider value={{

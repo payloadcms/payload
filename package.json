@@ -155,6 +155,7 @@
     "react-animate-height": "^2.0.20",
     "react-beautiful-dnd": "^13.0.0",
     "react-datepicker": "^3.3.0",
+    "react-diff-viewer": "^3.1.1",
     "react-dom": "^17.0.1",
     "react-helmet": "^6.1.0",
     "react-router-dom": "^5.1.2",

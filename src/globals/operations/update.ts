@@ -1,7 +1,11 @@
+import { Payload } from '../..';
+import { TypeWithID } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
+import { saveGlobalVersion } from '../../versions/saveGlobalVersion';
+import { saveGlobalDraft } from '../../versions/drafts/saveGlobalDraft';
 
-async function update(args) {
+async function update<T extends TypeWithID = any>(this: Payload, args): Promise<T> {
   const { globals: { Model } } = this;
 
   const {
@@ -11,7 +15,11 @@ async function update(args) {
     depth,
     overrideAccess,
     showHiddenFields,
+    draft: draftArg,
+    autosave,
   } = args;
+
+  const shouldSaveDraft = Boolean(draftArg && globalConfig.versions.drafts);
 
   // /////////////////////////////////////
   // 1. Retrieve and execute access
@@ -25,10 +33,12 @@ async function update(args) {
   // 2. Retrieve document
   // /////////////////////////////////////
 
-  let global = await Model.findOne({ globalType: slug });
+  let hasExistingGlobal = false;
+  let global: any = await Model.findOne({ globalType: slug });
   let globalJSON;
 
   if (global) {
+    hasExistingGlobal = true;
     globalJSON = global.toJSON({ virtuals: true });
     globalJSON = JSON.stringify(globalJSON);
     globalJSON = JSON.parse(globalJSON);
@@ -104,13 +114,22 @@ async function update(args) {
     unflattenLocales: true,
     originalDoc,
     docWithLocales: globalJSON,
+    overrideAccess,
+    skipValidation: shouldSaveDraft,
   });
 
   // /////////////////////////////////////
   // Update
   // /////////////////////////////////////
 
-  if (global) {
+  if (shouldSaveDraft) {
+    global = await saveGlobalDraft({
+      payload: this,
+      config: globalConfig,
+      data: result,
+      autosave,
+    });
+  } else if (global) {
     global = await Model.findOneAndUpdate(
       { globalType: slug },
       result,
@@ -127,6 +146,19 @@ async function update(args) {
   global = sanitizeInternalFields(global);
 
   // /////////////////////////////////////
+  // Create version from existing doc
+  // /////////////////////////////////////
+
+  if (globalConfig.versions && hasExistingGlobal && !shouldSaveDraft) {
+    saveGlobalVersion({
+      payload: this,
+      config: globalConfig,
+      req,
+      docWithLocales: global,
+    });
+  }
+
+  // /////////////////////////////////////
   // afterRead - Fields
   // /////////////////////////////////////
 
@@ -138,6 +170,7 @@ async function update(args) {
     depth,
     showHiddenFields,
     flattenLocales: true,
+    overrideAccess,
   });
 
   // /////////////////////////////////////

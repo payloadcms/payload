@@ -1,15 +1,19 @@
 import mongoose from 'mongoose';
+import paginate from 'mongoose-paginate-v2';
 import express from 'express';
 import passport from 'passport';
 import passportLocalMongoose from 'passport-local-mongoose';
 import Passport from 'passport-local';
 import { UpdateQuery } from 'mongodb';
+import { buildVersionCollectionFields } from '../versions/buildCollectionFields';
+import buildQueryPlugin from '../mongoose/buildQuery';
 import apiKeyStrategy from '../auth/strategies/apiKey';
-import buildSchema from './buildSchema';
+import buildCollectionSchema from './buildSchema';
+import buildSchema from '../mongoose/buildSchema';
 import bindCollectionMiddleware from './bindCollection';
-import { SanitizedCollectionConfig } from './config/types';
-import { SanitizedConfig } from '../config/types';
+import { CollectionModel, SanitizedCollectionConfig } from './config/types';
 import { Payload } from '../index';
+import { getVersionsModelName } from '../versions/getVersionsModelName';
 
 const LocalStrategy = Passport.Strategy;
 
@@ -17,7 +21,7 @@ export default function registerCollections(ctx: Payload): void {
   ctx.config.collections = ctx.config.collections.map((collection: SanitizedCollectionConfig) => {
     const formattedCollection = collection;
 
-    const schema = buildSchema(formattedCollection, ctx.config as SanitizedConfig);
+    const schema = buildCollectionSchema(formattedCollection, ctx.config);
 
     if (collection.auth) {
       schema.plugin(passportLocalMongoose, {
@@ -62,8 +66,29 @@ export default function registerCollections(ctx: Payload): void {
       }
     }
 
+    if (collection.versions) {
+      const versionModelName = getVersionsModelName(collection);
+
+      const versionSchema = buildSchema(
+        ctx.config,
+        buildVersionCollectionFields(collection),
+        {
+          disableUnique: true,
+          options: {
+            timestamps: true,
+          },
+        },
+      );
+
+      versionSchema.plugin(paginate, { useEstimatedCount: true })
+        .plugin(buildQueryPlugin);
+
+      ctx.versions[collection.slug] = mongoose.model(versionModelName, versionSchema) as CollectionModel;
+    }
+
+
     ctx.collections[formattedCollection.slug] = {
-      Model: mongoose.model(formattedCollection.slug, schema),
+      Model: mongoose.model(formattedCollection.slug, schema) as CollectionModel,
       config: formattedCollection,
     };
 
@@ -79,6 +104,9 @@ export default function registerCollections(ctx: Payload): void {
         find,
         update,
         findByID,
+        findVersions,
+        findVersionByID,
+        publishVersion,
         delete: deleteHandler,
       } = ctx.requestHandlers.collections;
 
@@ -146,6 +174,15 @@ export default function registerCollections(ctx: Payload): void {
         router
           .route(`/${slug}/reset-password`)
           .post(resetPassword);
+      }
+
+      if (collection.versions) {
+        router.route(`/${slug}/versions`)
+          .get(findVersions);
+
+        router.route(`/${slug}/versions/:id`)
+          .get(findVersionByID)
+          .post(publishVersion);
       }
 
       router.route(`/${slug}`)

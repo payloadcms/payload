@@ -28,6 +28,11 @@ const AllFields: CollectionConfig = {
     },
     description: CollectionDescription,
   },
+  versions: {
+    maxPerDoc: 20,
+    retainDeleted: true,
+    drafts: false,
+  },
   access: {
     read: () => true,
   },
@@ -135,6 +140,11 @@ const AllFields: CollectionConfig = {
           pickerAppearance: 'timeOnly',
         },
       },
+    },
+    {
+      name: 'point',
+      label: 'Point Field (GeoJSON)',
+      type: 'point',
     },
     {
       name: 'radioGroupExample',
@@ -284,26 +294,6 @@ const AllFields: CollectionConfig = {
       type: 'richText',
       label: 'Rich Text',
       required: true,
-      admin: {
-        elements: [
-          'h1',
-          'h2',
-          'h3',
-          'h4',
-          'h5',
-          'h6',
-          'blockquote',
-          'ul',
-          'ol',
-          'link',
-        ],
-        leaves: [
-          'bold',
-          'italic',
-          'underline',
-          'strikethrough',
-        ],
-      },
     },
     {
       type: 'ui',

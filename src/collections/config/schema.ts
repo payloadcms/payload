@@ -10,6 +10,7 @@ const collectionSchema = joi.object().keys({
   access: joi.object({
     create: joi.func(),
     read: joi.func(),
+    readVersions: joi.func(),
     update: joi.func(),
     delete: joi.func(),
     unlock: joi.func(),
@@ -36,6 +37,7 @@ const collectionSchema = joi.object().keys({
     }),
     preview: joi.func(),
     disableDuplicate: joi.bool(),
+    hideAPIURL: joi.bool(),
   }),
   fields: joi.array(),
   hooks: joi.object({
@@ -74,6 +76,24 @@ const collectionSchema = joi.object().keys({
         generateEmailSubject: joi.func(),
       }),
       maxLoginAttempts: joi.number(),
+    }),
+    joi.boolean(),
+  ),
+  versions: joi.alternatives().try(
+    joi.object({
+      maxPerDoc: joi.number(),
+      retainDeleted: joi.boolean(),
+      drafts: joi.alternatives().try(
+        joi.object({
+          autosave: joi.alternatives().try(
+            joi.boolean(),
+            joi.object({
+              interval: joi.number(),
+            }),
+          ),
+        }),
+        joi.boolean(),
+      ),
     }),
     joi.boolean(),
   ),

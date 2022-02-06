@@ -1,0 +1,8 @@
+@import '../../../../../../scss/styles.scss';
+
+.nested-diff {
+  &__wrap--gutter {
+    padding-left: base(1);
+    border-left: $style-stroke-width-s solid $color-light-gray;
+  }
+}
