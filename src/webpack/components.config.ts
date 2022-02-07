@@ -1,7 +1,7 @@
 import path from 'path';
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
 import TerserJSPlugin from 'terser-webpack-plugin';
-import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
+import OptimizeCSSAssetsPlugin from 'css-minimizer-webpack-plugin';
 
 export default {
   entry: {

@@ -41,7 +41,7 @@ async function publishVersion<T extends TypeWithID = any>(this: Payload, args: A
   }
 
   // /////////////////////////////////////
-  // Retrieve original raw version to get parent ID
+  // Retrieve original raw version
   // /////////////////////////////////////
 
   const VersionModel = this.versions[collectionConfig.slug];

@@ -3,15 +3,15 @@ import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { PaginatedDocs } from '../../mongoose/types';
-import { hasWhereAccessResult } from '../../auth/types';
-import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
-import { buildSortParam } from '../../mongoose/buildSortParam';
 import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
+import { Payload } from '../..';
+import { NotFound } from '../../errors';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
   where?: Where
+  id: string
   page?: number
   limit?: number
   sort?: string
@@ -23,138 +23,122 @@ export type Arguments = {
 
 // TODO: finish
 
-async function publishVersion<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<PaginatedDocs<T>> {
+async function publishVersion<T extends TypeWithVersion<T> = any>(this: Payload, args: Arguments): Promise<PaginatedDocs<T>> {
+  const { globals: { Model } } = this;
+
   const {
-    where,
-    page,
-    limit,
+    id,
     depth,
     globalConfig,
     req,
-    req: {
-      locale,
-    },
     overrideAccess,
     showHiddenFields,
   } = args;
-
-  const VersionsModel = this.versions[globalConfig.slug];
 
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where} = {};
-  let useEstimatedCount = false;
-
-  if (where) {
-    let and = [];
-
-    if (Array.isArray(where.and)) and = where.and;
-    if (Array.isArray(where.AND)) and = where.AND;
-
-    queryToBuild.where = {
-      ...where,
-      and: [
-        ...and,
-      ],
-    };
-
-    const constraints = flattenWhereConstraints(queryToBuild);
-
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
-  }
-
   if (!overrideAccess) {
-    const accessResults = await executeAccess({ req }, globalConfig.access.readVersions);
-
-    if (hasWhereAccessResult(accessResults)) {
-      if (!where) {
-        queryToBuild.where = {
-          and: [
-            accessResults,
-          ],
-        };
-      } else {
-        (queryToBuild.where.and as Where[]).push(accessResults);
-      }
-    }
+    await executeAccess({ req }, globalConfig.access.update);
   }
 
-  const query = await VersionsModel.buildQuery(queryToBuild, locale);
-
   // /////////////////////////////////////
-  // Find
+  // Retrieve original raw version
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam(args.sort, true);
+  const VersionModel = this.versions[globalConfig.slug];
 
-  const optionsToExecute = {
-    page: page || 1,
-    limit: limit || 10,
-    sort: {
-      [sortProperty]: sortOrder,
-    },
-    lean: true,
-    leanWithId: true,
-    useEstimatedCount,
-  };
+  let rawVersion = await VersionModel.findOne({
+    _id: id,
+  });
 
-  const paginatedDocs = await VersionsModel.paginate(query, optionsToExecute);
+  if (!rawVersion) {
+    throw new NotFound();
+  }
+
+  rawVersion = rawVersion.toJSON({ virtuals: true });
+
+  // /////////////////////////////////////
+  // Update global
+  // /////////////////////////////////////
+
+  const global = await Model.findOne({ globalType: globalConfig.slug });
+
+  let result;
+
+  if (global) {
+    result = await Model.findOneAndUpdate(
+      { globalType: globalConfig.slug },
+      rawVersion.version,
+      { new: true },
+    );
+  } else {
+    result = await Model.create(result);
+  }
+
+  result = result.toJSON({ virtuals: true });
+
+  // custom id type reset
+  result.id = result._id;
+  result = JSON.stringify(result);
+  result = JSON.parse(result);
+  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // afterRead - Fields
   // /////////////////////////////////////
 
-  let result = {
-    ...paginatedDocs,
-    docs: await Promise.all(paginatedDocs.docs.map(async (data) => ({
-      ...data,
-      version: await this.performFieldOperations(
-        globalConfig,
-        {
-          depth,
-          data: data.version,
-          req,
-          id: data.version.id,
-          hook: 'afterRead',
-          operation: 'read',
-          overrideAccess,
-          flattenLocales: true,
-          showHiddenFields,
-          isVersion: true,
-        },
-      ),
-    }))),
-  };
+  result = await this.performFieldOperations(globalConfig, {
+    data: result,
+    hook: 'afterRead',
+    operation: 'read',
+    req,
+    depth,
+    showHiddenFields,
+    flattenLocales: true,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
-  // afterRead - Collection
+  // afterRead - Global
   // /////////////////////////////////////
 
-  result = {
-    ...result,
-    docs: await Promise.all(result.docs.map(async (doc) => {
-      const docRef = doc;
+  await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+    await priorHook;
 
-      await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-        await priorHook;
-
-        docRef.version = await hook({ req, query, doc: doc.version }) || doc.version;
-      }, Promise.resolve());
-
-      return docRef;
-    })),
-  };
+    result = await hook({
+      doc: result,
+      req,
+    }) || result;
+  }, Promise.resolve());
 
   // /////////////////////////////////////
-  // Return results
+  // afterChange - Fields
   // /////////////////////////////////////
 
-  result = {
-    ...result,
-    docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
-  };
+  result = await this.performFieldOperations(globalConfig, {
+    data: result,
+    hook: 'afterChange',
+    operation: 'update',
+    req,
+    depth,
+    overrideAccess,
+    showHiddenFields,
+  });
+
+  // /////////////////////////////////////
+  // afterChange - Global
+  // /////////////////////////////////////
+
+  await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    result = await hook({
+      doc: result,
+      req,
+    }) || result;
+  }, Promise.resolve());
 
   return result;
 }

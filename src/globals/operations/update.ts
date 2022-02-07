@@ -187,6 +187,33 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   }, Promise.resolve());
 
   // /////////////////////////////////////
+  // afterChange - Fields
+  // /////////////////////////////////////
+
+  global = await this.performFieldOperations(globalConfig, {
+    data: global,
+    hook: 'afterChange',
+    operation: 'update',
+    req,
+    depth,
+    overrideAccess,
+    showHiddenFields,
+  });
+
+  // /////////////////////////////////////
+  // afterChange - Collection
+  // /////////////////////////////////////
+
+  await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    global = await hook({
+      doc: global,
+      req,
+    }) || result;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////
 

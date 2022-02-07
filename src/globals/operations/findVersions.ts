@@ -127,7 +127,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
   };
 
   // /////////////////////////////////////
-  // afterRead - Collection
+  // afterRead - Global
   // /////////////////////////////////////
 
   result = {

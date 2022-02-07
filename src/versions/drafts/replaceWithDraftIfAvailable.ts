@@ -6,10 +6,11 @@ import { CollectionModel, SanitizedCollectionConfig, TypeWithID } from '../../co
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
+import { SanitizedGlobalConfig } from '../../globals/config/types';
 
 type Arguments<T> = {
   payload: Payload
-  collection: SanitizedCollectionConfig
+  entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   doc: T
   locale: string
   accessResult: AccessResult
@@ -17,13 +18,13 @@ type Arguments<T> = {
 
 const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   payload,
-  collection,
+  entity,
   doc,
   locale,
   accessResult,
 }: Arguments<T>): Promise<T> => {
   if (docHasTimestamps(doc)) {
-    const VersionModel = payload.versions[collection.slug] as CollectionModel;
+    const VersionModel = payload.versions[entity.slug] as CollectionModel;
 
     let useEstimatedCount = false;
     const queryToBuild: { where: Where } = {

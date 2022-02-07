@@ -141,7 +141,7 @@ async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs:
   if (collectionConfig.versions?.drafts && draftEnabled) {
     result = await replaceWithDraftIfAvailable({
       payload: this,
-      collection: collectionConfig,
+      entity: collectionConfig,
       doc: result,
       accessResult,
       locale,

@@ -1,26 +1,28 @@
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
+import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 
 async function findOne(args) {
   const { globals: { Model } } = this;
 
   const {
     globalConfig,
+    locale,
     req,
     slug,
     depth,
     showHiddenFields,
-    draft = false,
+    draft: draftEnabled = false,
   } = args;
 
   // /////////////////////////////////////
-  // 1. Retrieve and execute access
+  // Retrieve and execute access
   // /////////////////////////////////////
 
-  await executeAccess({ req }, globalConfig.access.read);
+  const accessResult = await executeAccess({ req }, globalConfig.access.read);
 
   // /////////////////////////////////////
-  // 2. Perform database operation
+  // Perform database operation
   // /////////////////////////////////////
 
   let doc = await Model.findOne({ globalType: slug }).lean();
@@ -35,6 +37,20 @@ async function findOne(args) {
   doc = JSON.stringify(doc);
   doc = JSON.parse(doc);
   doc = sanitizeInternalFields(doc);
+
+  // /////////////////////////////////////
+  // Replace document with draft if available
+  // /////////////////////////////////////
+
+  if (globalConfig.versions?.drafts && draftEnabled) {
+    doc = await replaceWithDraftIfAvailable({
+      payload: this,
+      entity: globalConfig,
+      doc,
+      locale,
+      accessResult,
+    });
+  }
 
   // /////////////////////////////////////
   // 3. Execute before collection hook

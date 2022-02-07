@@ -119,7 +119,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
   });
 
   // /////////////////////////////////////
-  // afterRead - Collection
+  // afterRead - Global
   // /////////////////////////////////////
 
   await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {

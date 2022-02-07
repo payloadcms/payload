@@ -148,7 +148,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
       docs: await Promise.all(result.docs.map(async (doc) => replaceWithDraftIfAvailable({
         accessResult,
         payload: this,
-        collection: collectionConfig,
+        entity: collectionConfig,
         doc,
         locale,
       }))),
