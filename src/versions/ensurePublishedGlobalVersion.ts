@@ -1,21 +1,19 @@
 import { Payload } from '..';
-import { SanitizedCollectionConfig } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
+import { SanitizedGlobalConfig } from '../globals/config/types';
 
 type Args = {
   payload: Payload
-  config?: SanitizedCollectionConfig
+  config?: SanitizedGlobalConfig
   req: PayloadRequest
   docWithLocales: any
-  id: string | number
 }
 
-export const ensurePublishedCollectionVersion = async ({
+export const ensurePublishedGlobalVersion = async ({
   payload,
   config,
   req,
-  id,
   docWithLocales,
 }: Args): Promise<void> => {
   // If there are no newer drafts,
@@ -26,9 +24,6 @@ export const ensurePublishedCollectionVersion = async ({
     const VersionModel = payload.versions[config.slug];
 
     const moreRecentDrafts = await VersionModel.find({
-      parent: {
-        $eq: docWithLocales.id,
-      },
       updatedAt: {
         $gt: docWithLocales.updatedAt,
       },
@@ -44,7 +39,6 @@ export const ensurePublishedCollectionVersion = async ({
 
     if (moreRecentDrafts?.length === 0) {
       const version = await payload.performFieldOperations(config, {
-        id,
         depth: 0,
         req,
         data: docWithLocales,
@@ -57,23 +51,21 @@ export const ensurePublishedCollectionVersion = async ({
 
       try {
         await VersionModel.create({
-          parent: id,
           version,
           autosave: false,
         });
       } catch (err) {
-        payload.logger.error(`There was an error while saving a version for the ${config.labels.singular} with ID ${id}.`);
+        payload.logger.error(`There was an error while saving a version for the Global ${config.label}.`);
         payload.logger.error(err);
       }
 
-      if (config.versions.maxPerDoc) {
+      if (config.versions.max) {
         enforceMaxVersions({
-          id,
           payload: this,
           Model: VersionModel,
-          entityLabel: config.labels.plural,
-          entityType: 'collection',
-          max: config.versions.maxPerDoc,
+          entityLabel: config.label,
+          entityType: 'global',
+          max: config.versions.max,
         });
       }
     }

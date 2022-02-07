@@ -1,4 +1,6 @@
 import { Response, NextFunction } from 'express';
+import httpStatus from 'http-status';
+import formatSuccessResponse from '../../express/responses/formatSuccess';
 import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
 import { SanitizedGlobalConfig } from '../config/types';
@@ -14,7 +16,10 @@ export default function (globalConfig: SanitizedGlobalConfig) {
 
     try {
       const doc = await this.operations.globals.publishVersion(options);
-      return res.json(doc);
+      return res.status(httpStatus.OK).json({
+        ...formatSuccessResponse('Restored successfully.', 'message'),
+        doc,
+      });
     } catch (error) {
       return next(error);
     }

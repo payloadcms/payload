@@ -4,7 +4,7 @@ import { CollectionModel } from '../collections/config/types';
 type Args = {
   payload: Payload
   Model: CollectionModel
-  maxPerDoc: number
+  max: number
   entityLabel: string
   entityType: 'global' | 'collection'
   id?: string | number
@@ -13,7 +13,7 @@ type Args = {
 export const enforceMaxVersions = async ({
   payload,
   Model,
-  maxPerDoc,
+  max,
   entityLabel,
   entityType,
   id,
@@ -23,7 +23,7 @@ export const enforceMaxVersions = async ({
 
     if (id) query.parent = id;
 
-    const oldestAllowedDoc = await Model.find(query).limit(1).skip(maxPerDoc).sort({ createdAt: -1 });
+    const oldestAllowedDoc = await Model.find(query).limit(1).skip(max).sort({ createdAt: -1 });
 
     if (oldestAllowedDoc?.[0]?.createdAt) {
       const deleteLessThan = oldestAllowedDoc[0].createdAt;

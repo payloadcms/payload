@@ -2,6 +2,7 @@ import { Payload } from '..';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
 import { SanitizedGlobalConfig } from '../globals/config/types';
+import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
 type Args = {
   payload: Payload
@@ -16,12 +17,36 @@ export const saveGlobalVersion = async ({
   req,
   docWithLocales,
 }: Args): Promise<void> => {
-  const VersionsModel = payload.versions[config.slug];
+  const VersionModel = payload.versions[config.slug];
 
-  const version = await payload.performFieldOperations(config, {
+  let version = docWithLocales;
+
+  if (config.versions?.drafts) {
+    const latestVersion = await VersionModel.findOne({
+      updatedAt: {
+        $gt: docWithLocales.updatedAt,
+      },
+    },
+    {},
+    {
+      lean: true,
+      leanWithId: true,
+      sort: {
+        updatedAt: 'desc',
+      },
+    });
+
+    if (latestVersion) {
+      version = latestVersion.version;
+      version = JSON.parse(JSON.stringify(version));
+      version = sanitizeInternalFields(version);
+    }
+  }
+
+  version = await payload.performFieldOperations(config, {
     depth: 0,
     req,
-    data: docWithLocales,
+    data: version,
     hook: 'afterRead',
     operation: 'update',
     overrideAccess: true,
@@ -29,8 +54,12 @@ export const saveGlobalVersion = async ({
     showHiddenFields: true,
   });
 
+  if (version._id) delete version._id;
+
+  let createdVersion;
+
   try {
-    await VersionsModel.create({
+    createdVersion = await VersionModel.create({
       version,
       autosave: false,
     });
@@ -42,10 +71,17 @@ export const saveGlobalVersion = async ({
   if (config.versions.max) {
     enforceMaxVersions({
       payload: this,
-      Model: VersionsModel,
+      Model: VersionModel,
       entityLabel: config.label,
       entityType: 'global',
-      maxPerDoc: config.versions.max,
+      max: config.versions.max,
     });
   }
+
+  if (createdVersion) {
+    createdVersion = JSON.parse(JSON.stringify(createdVersion));
+    createdVersion = sanitizeInternalFields(createdVersion);
+  }
+
+  return createdVersion;
 };

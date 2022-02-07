@@ -1,8 +1,12 @@
+import merge from 'deepmerge';
 import { toWords } from '../../utilities/formatLabels';
 import { CollectionConfig } from '../../collections/config/types';
 import sanitizeFields from '../../fields/config/sanitize';
 import { GlobalConfig, SanitizedGlobalConfig } from './types';
 import defaultAccess from '../../auth/defaultAccess';
+import baseVersionFields from '../../versions/baseFields';
+import mergeBaseFields from '../../fields/mergeBaseFields';
+import { versionGlobalDefaults } from '../../versions/defaults';
 
 const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[]): SanitizedGlobalConfig[] => {
   const sanitizedGlobals = globals.map((global) => {
@@ -27,12 +31,27 @@ const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[
     if (!sanitizedGlobal.hooks.beforeRead) sanitizedGlobal.hooks.beforeRead = [];
     if (!sanitizedGlobal.hooks.afterRead) sanitizedGlobal.hooks.afterRead = [];
 
+    if (sanitizedGlobal.versions) {
+      if (sanitizedGlobal.versions === true) sanitizedGlobal.versions = {};
+
+      if (sanitizedGlobal.versions.drafts) {
+        const versionFields = mergeBaseFields(sanitizedGlobal.fields, baseVersionFields);
+
+        sanitizedGlobal.fields = [
+          ...versionFields,
+          ...sanitizedGlobal.fields,
+        ];
+      }
+
+      sanitizedGlobal.versions = merge(versionGlobalDefaults, sanitizedGlobal.versions);
+    }
+
     // /////////////////////////////////
     // Sanitize fields
     // /////////////////////////////////
 
     const validRelationships = collections.map((c) => c.slug);
-    sanitizedGlobal.fields = sanitizeFields(global.fields, validRelationships);
+    sanitizedGlobal.fields = sanitizeFields(sanitizedGlobal.fields, validRelationships);
 
     return sanitizedGlobal as SanitizedGlobalConfig;
   });

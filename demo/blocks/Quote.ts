@@ -9,13 +9,6 @@ const Quote: Block = {
   },
   fields: [
     {
-      name: 'author',
-      label: 'Author',
-      type: 'relationship',
-      relationTo: 'public-users',
-      required: true,
-    },
-    {
       name: 'quote',
       label: 'Quote',
       type: 'textarea',

@@ -4,6 +4,8 @@ import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { saveGlobalVersion } from '../../versions/saveGlobalVersion';
 import { saveGlobalDraft } from '../../versions/drafts/saveGlobalDraft';
+import { ensurePublishedGlobalVersion } from '../../versions/ensurePublishedGlobalVersion';
+import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
 
 async function update<T extends TypeWithID = any>(this: Payload, args): Promise<T> {
   const { globals: { Model } } = this;
@@ -33,12 +35,10 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   // 2. Retrieve document
   // /////////////////////////////////////
 
-  let hasExistingGlobal = false;
   let global: any = await Model.findOne({ globalType: slug });
   let globalJSON;
 
   if (global) {
-    hasExistingGlobal = true;
     globalJSON = global.toJSON({ virtuals: true });
     globalJSON = JSON.stringify(globalJSON);
     globalJSON = JSON.parse(globalJSON);
@@ -119,44 +119,63 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   });
 
   // /////////////////////////////////////
+  // Create version from existing doc
+  // /////////////////////////////////////
+
+  let createdVersion;
+
+  if (globalConfig.versions && !shouldSaveDraft) {
+    createdVersion = await saveGlobalVersion({
+      payload: this,
+      config: globalConfig,
+      req,
+      docWithLocales: result,
+    });
+  }
+
+  // /////////////////////////////////////
   // Update
   // /////////////////////////////////////
 
   if (shouldSaveDraft) {
+    await ensurePublishedGlobalVersion({
+      payload: this,
+      config: globalConfig,
+      req,
+      docWithLocales: result,
+    });
+
     global = await saveGlobalDraft({
       payload: this,
       config: globalConfig,
       data: result,
       autosave,
     });
-  } else if (global) {
-    global = await Model.findOneAndUpdate(
-      { globalType: slug },
-      result,
-      { new: true },
-    );
   } else {
-    result.globalType = slug;
-    global = await Model.create(result);
+    try {
+      if (global) {
+        global = await Model.findOneAndUpdate(
+          { globalType: slug },
+          result,
+          { new: true },
+        );
+      } else {
+        result.globalType = slug;
+        global = await Model.create(result);
+      }
+    } catch (error) {
+      cleanUpFailedVersion({
+        payload: this,
+        entityConfig: globalConfig,
+        version: createdVersion,
+      });
+    }
   }
 
   global = global.toJSON({ virtuals: true });
   global = JSON.stringify(global);
   global = JSON.parse(global);
   global = sanitizeInternalFields(global);
-
-  // /////////////////////////////////////
-  // Create version from existing doc
-  // /////////////////////////////////////
-
-  if (globalConfig.versions && hasExistingGlobal && !shouldSaveDraft) {
-    saveGlobalVersion({
-      payload: this,
-      config: globalConfig,
-      req,
-      docWithLocales: global,
-    });
-  }
 
   // /////////////////////////////////////
   // afterRead - Fields

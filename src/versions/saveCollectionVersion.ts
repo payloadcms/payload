@@ -82,7 +82,7 @@ export const saveCollectionVersion = async ({
       Model: VersionModel,
       entityLabel: config.labels.plural,
       entityType: 'collection',
-      maxPerDoc: config.versions.maxPerDoc,
+      max: config.versions.maxPerDoc,
     });
   }
 

@@ -56,10 +56,13 @@ export const saveGlobalDraft = async ({
       Model: VersionsModel,
       entityLabel: config.label,
       entityType: 'global',
-      maxPerDoc: config.versions.max,
+      max: config.versions.max,
     });
   }
 
   result = result.version;
+  result = JSON.stringify(result);
+  result = JSON.parse(result);
+
   return result;
 };

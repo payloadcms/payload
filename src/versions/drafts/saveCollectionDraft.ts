@@ -1,5 +1,5 @@
 import { Payload } from '../..';
-import { SanitizedCollectionConfig, CollectionModel } from '../../collections/config/types';
+import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { enforceMaxVersions } from '../enforceMaxVersions';
 import { PayloadRequest } from '../../express/types';
 
@@ -19,7 +19,7 @@ export const saveCollectionDraft = async ({
   data,
   autosave,
 }: Args): Promise<void> => {
-  const VersionsModel = payload.versions[config.slug] as CollectionModel;
+  const VersionsModel = payload.versions[config.slug];
 
   let existingAutosaveVersion;
 
@@ -64,7 +64,7 @@ export const saveCollectionDraft = async ({
       Model: VersionsModel,
       entityLabel: config.labels.plural,
       entityType: 'collection',
-      maxPerDoc: config.versions.maxPerDoc,
+      max: config.versions.maxPerDoc,
     });
   }
 

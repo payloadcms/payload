@@ -10,7 +10,7 @@ import { hasWhereAccessResult, UserDocument } from '../../auth/types';
 import { saveCollectionDraft } from '../../versions/drafts/saveCollectionDraft';
 import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
 import uploadFile from '../../uploads/uploadFile';
-import cleanUpFailedCollectionVersion from '../../versions/cleanUpFailedCollectionVersion';
+import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
 import { ensurePublishedCollectionVersion } from '../../versions/ensurePublishedCollectionVersion';
 
 export type Arguments = {
@@ -254,9 +254,9 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
         { new: true },
       );
     } catch (error) {
-      cleanUpFailedCollectionVersion({
+      cleanUpFailedVersion({
         payload: this,
-        collection: collectionConfig,
+        entityConfig: collectionConfig,
         version: createdVersion,
       });
 
