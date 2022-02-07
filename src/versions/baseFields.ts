@@ -18,7 +18,6 @@ const baseVersionFields: Field[] = [
     type: 'select',
     options: statuses,
     defaultValue: 'draft',
-    required: true,
     admin: {
       components: {
         Field: () => null,
