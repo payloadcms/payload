@@ -102,6 +102,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   // /////////////////////////////////////
   // Find
   // /////////////////////////////////////
+
   const [sortProperty, sortOrder] = buildSortParam(args.sort, collectionConfig.timestamps);
 
   const optionsToExecute = {

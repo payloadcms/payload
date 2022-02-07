@@ -161,7 +161,9 @@ describe('Versions - REST', () => {
 
     it('should prevent an authenticated user from retrieving drafts without asking', async () => {
       const badAttempt = await fetch(`${url}/api/autosave-posts/${postID}`, {
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       expect(badAttempt.status).toBe(404);
