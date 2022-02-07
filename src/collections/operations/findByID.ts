@@ -81,23 +81,6 @@ async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs:
     queryToBuild.where.and.push(accessResult);
   }
 
-  if (collectionConfig.versions?.drafts && !draftEnabled) {
-    queryToBuild.where.and.push({
-      or: [
-        {
-          _status: {
-            equals: 'published',
-          },
-        },
-        {
-          _status: {
-            exists: false,
-          },
-        },
-      ],
-    });
-  }
-
   const query = await Model.buildQuery(queryToBuild, locale);
 
   // /////////////////////////////////////

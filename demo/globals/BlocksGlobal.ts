@@ -3,10 +3,10 @@ import Quote from '../blocks/Quote';
 import CallToAction from '../blocks/CallToAction';
 import { GlobalConfig } from '../../src/globals/config/types';
 
-export default {
+const BlocksGlobal: GlobalConfig = {
   slug: 'blocks-global',
   label: 'Blocks Global',
-  revisions: {
+  versions: {
     max: 20,
   },
   access: {
@@ -22,4 +22,6 @@ export default {
       localized: true,
     },
   ],
-} as GlobalConfig;
+};
+
+export default BlocksGlobal;

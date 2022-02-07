@@ -1,7 +1,7 @@
 import { GlobalConfig } from '../../src/globals/config/types';
 import checkRole from '../access/checkRole';
 
-export default {
+const GlobalWithAccess: GlobalConfig = {
   slug: 'global-with-access',
   label: 'Global with Strict Access',
   access: {
@@ -32,4 +32,6 @@ export default {
       required: true,
     },
   ],
-} as GlobalConfig;
+};
+
+export default GlobalWithAccess;

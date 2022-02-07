@@ -201,7 +201,7 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   });
 
   // /////////////////////////////////////
-  // afterChange - Collection
+  // afterChange - Global
   // /////////////////////////////////////
 
   await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {

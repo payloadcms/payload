@@ -1,7 +1,7 @@
 import { GlobalConfig } from '../../src/globals/config/types';
 import checkRole from '../access/checkRole';
 
-export default {
+const NavigationArray: GlobalConfig = {
   slug: 'navigation-array',
   access: {
     update: ({ req: { user } }) => checkRole(['admin', 'user'], user),
@@ -27,4 +27,6 @@ export default {
       }],
     },
   ],
-} as GlobalConfig;
+};
+
+export default NavigationArray;
