@@ -1,0 +1,67 @@
+---
+title: Versions
+label: Overview
+order: 10
+desc: Keep a running history or audit log of changes to collection documents and globals.
+keywords: version history, revisions, audit log, draft, publish, autosave, Content Management System, cms, headless, javascript, node, react, express
+---
+
+Payload's powerful Versions functionality allows you to keep a running history of changes over time.
+
+When enabled, Payload will automatically scaffold a new Collection in your database to store versions of your document(s) over time, and the Admin UI will be extended with additional views that allow you to browse document versions, view diffs in order to see exactly what has changed in your documents (and when they changed), and restore documents back to prior versions easily.
+
+![Versions](https://payloadcms.com/images/versions.jpg)
+*Comparing an old version to a newer version of a document*
+
+**With Versions, you can:**
+
+- Maintain a history of every change ever made to a document, including monitoring for what user made which change
+- Restore documents and globals to prior states in case you need to roll back changes
+- Build a true [/docs/versions/drafts](Draft Preview)) mode for your data
+- Manage who can see Drafts, and who can only see Published documents via [Access Control](/docs/access-control/overview)
+- Enable [Autosave](/docs/versions/autosave) on collections and globals to never lose your work again
+- Build a powerful publishing schedule mechanism to create documents and have them become publicly readable automatically at a future date
+
+<Banner type="success">
+	Versions are extremely performant and totally opt-in. They don't change the shape of your data at all. All versions are stored in a separate Collection and can be turned on and off easily at your discretion.
+</Banner>
+
+### Options
+
+Versions support a few different levels of functionality that each come with their own impacts to document workflow.
+
+##### Versions enabled, drafts disabled
+
+If you enable versions but keep draft mode disabled, Payload will simply create a new version of a document each time you update a document. This is great for use cases where you need to retain a history of all document updates over time, but always want to treat the newest document version as the version that is "published".
+
+For example, a use case for "versions enabled, drafts disabled" could be on a collection of users, where you might want to keep a version history of all changes ever made to users - but any changes to users should _always_ be treated as "published" and you have no need to maintain a "draft" version of a user.
+
+##### Versions and drafts enabled
+
+The largest changes that introduce themselves between having drafts enabled and disabled happen within the Payload admin panel. When you enable versions _and_ drafts, the Admin UI will update itself to include both "Save Draft" and "Publish Changes" buttons instead of a single "Save" button. All Payload APIs will also expose [a new argument](/docs/overview/versions/drafts#api) called `draft` which allows you to control if your document update(s) should be considered as draft or written straight to the published document. Read more about Drafts [here](/docs/versions/drafts).
+
+![Drafts Enabled](https://payloadcms.com/images/drafts-enabled.jpg)
+*Editing a document with Versions and Drafts enabled*
+
+##### Versions, drafts, and autosave enabled
+
+#### Collection Config
+
+Configuring Versions is done by adding the `versions` key to your Collection configs. Set it to `true` to enable default Versions settings, or customize versions options by setting the property equal to an object containing the following available options:
+
+| Option                       | Description  |
+| ---------------------------- | -------------|
+| `maxPerDoc`                  | Use this setting to control how many versions to keep on a document by document basis. Must be an integer. |
+| `retainDeleted`              | Boolean to determine if, when a document is deleted, you'd like to retain versions of that document, or go through and automatically delete all versions that are associated with the deleted document. |
+| `drafts `                    | Enable [Drafts](/docs/versions/drafts) mode for this collection. |
+
+
+#### Global Config
+
+Global versions work similarly to Collection versions but have a slightly different set of config properties supported.
+
+### TODO:
+
+- Screenshots
+- global docs
+- links to Drafts & Autosave
