@@ -114,7 +114,6 @@ const EditView: React.FC<IndexProps> = (props) => {
   const apiURL = `${serverURL}${api}/${slug}/${id}${collection.versions.drafts ? '?draft=true' : ''}`;
   const action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
   const hasSavePermission = (isEditing && collectionPermissions?.update?.permission) || (!isEditing && collectionPermissions?.create?.permission);
-  const autosaveEnabled = collection.versions?.drafts && collection.versions.drafts.autosave;
 
   return (
     <NegativeFieldGutterProvider allow>
@@ -132,7 +131,6 @@ const EditView: React.FC<IndexProps> = (props) => {
           hasSavePermission,
           apiURL,
           action,
-          autosaveEnabled,
         }}
       />
     </NegativeFieldGutterProvider>

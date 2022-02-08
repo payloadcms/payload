@@ -74,7 +74,6 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   }, [dataToRender, fields]);
 
   const globalPermissions = permissions?.globals?.[slug];
-  const autosaveEnabled = global.versions?.drafts && global.versions.drafts.autosave;
 
   return (
     <NegativeFieldGutterProvider allow>
@@ -90,7 +89,6 @@ const GlobalView: React.FC<IndexProps> = (props) => {
           onSave,
           apiURL: `${serverURL}${api}/globals/${slug}${global.versions?.drafts ? '?draft=true' : ''}`,
           action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
-          autosaveEnabled,
         }}
       />
     </NegativeFieldGutterProvider>

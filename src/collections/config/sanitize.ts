@@ -33,7 +33,12 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
     }
 
     if (sanitized.versions.drafts) {
-      if (sanitized.versions.drafts === true) sanitized.versions.drafts = {};
+      if (sanitized.versions.drafts === true) {
+        sanitized.versions.drafts = {
+          autosave: false,
+        };
+      }
+
       if (sanitized.versions.drafts.autosave === true) sanitized.versions.drafts.autosave = {};
 
       const versionFields = mergeBaseFields(sanitized.fields, baseVersionFields);

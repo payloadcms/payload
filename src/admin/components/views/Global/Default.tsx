@@ -29,7 +29,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
   const { publishedDoc } = useDocumentInfo();
 
   const {
-    global, data, onSave, permissions, action, apiURL, initialState, isLoading, autosaveEnabled,
+    global, data, onSave, permissions, action, apiURL, initialState, isLoading,
   } = props;
 
   const {
@@ -95,7 +95,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
           <div className={`${baseClass}__sidebar-wrap`}>
             <div className={`${baseClass}__sidebar`}>
               <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                <div className={`${baseClass}__document-actions${(!autosaveEnabled || preview) ? ` ${baseClass}__document-actions--has-2` : ''}`}>
+                <div className={`${baseClass}__document-actions${((global.versions?.drafts && !global.versions?.drafts?.autosave) || preview) ? ` ${baseClass}__document-actions--has-2` : ''}`}>
                   {(preview && (!global.versions?.drafts || global.versions?.drafts?.autosave)) && (
                     <PreviewButton
                       generatePreviewURL={preview}
