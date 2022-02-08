@@ -59,13 +59,13 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     if (global) {
       shouldFetchVersions = Boolean(global?.versions);
       versionFetchURL = `${baseURL}/globals/${global.slug}/versions?depth=0`;
-      publishedFetchURL = `${baseURL}/globals/${global.slug}?depth=0`;
+      publishedFetchURL = `${baseURL}/globals/${global.slug}?depth=0&where[_status][equals]=published`;
     }
 
     if (collection) {
       shouldFetchVersions = Boolean(collection?.versions);
       versionFetchURL = `${baseURL}/${collection.slug}/versions?where[parent][equals]=${id}&depth=0`;
-      publishedFetchURL = `${baseURL}/${collection.slug}?where[id][equals]=${id}&depth=0`;
+      publishedFetchURL = `${baseURL}/${collection.slug}?where[id][equals]=${id}&depth=0&where[_status][equals]=published`;
 
       if (!id) {
         shouldFetch = false;

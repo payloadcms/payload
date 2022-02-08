@@ -11,6 +11,8 @@ const Status: React.FC<Props> = () => {
 
   let statusToRender;
 
+  console.log(publishedDoc);
+
   if (unpublishedVersions?.docs?.length > 0 && publishedDoc) {
     statusToRender = 'Changed';
   } else if (!publishedDoc) {
