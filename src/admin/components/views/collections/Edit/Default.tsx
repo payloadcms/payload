@@ -148,48 +148,48 @@ const DefaultEditView: React.FC<Props> = (props) => {
                     </li>
                   )}
                 </ul>
-                <div className={`${baseClass}__document-actions${(autosaveEnabled || (isEditing && preview)) ? ` ${baseClass}__document-actions--has-2` : ''}`}>
-                  {(preview && !autosaveEnabled) && (
-                  <PreviewButton
-                    generatePreviewURL={preview}
-                    data={data}
-                  />
+                <div className={`${baseClass}__document-actions${(!autosaveEnabled || (isEditing && preview)) ? ` ${baseClass}__document-actions--has-2` : ''}`}>
+                  {(preview && autosaveEnabled) && (
+                    <PreviewButton
+                      generatePreviewURL={preview}
+                      data={data}
+                    />
                   )}
                   {hasSavePermission && (
-                  <React.Fragment>
-                    {collection.versions.drafts && (
-                      <React.Fragment>
-                        {!collection.versions.drafts.autosave && (
-                          <SaveDraft />
-                        )}
-                        <Publish />
-                      </React.Fragment>
-                    )}
-                    {!collection.versions.drafts && (
-                      <FormSubmit>Save</FormSubmit>
-                    )}
-                  </React.Fragment>
+                    <React.Fragment>
+                      {collection.versions?.drafts && (
+                        <React.Fragment>
+                          {!collection.versions.drafts.autosave && (
+                            <SaveDraft />
+                          )}
+                          <Publish />
+                        </React.Fragment>
+                      )}
+                      {!collection.versions?.drafts && (
+                        <FormSubmit>Save</FormSubmit>
+                      )}
+                    </React.Fragment>
                   )}
                 </div>
                 <div className={`${baseClass}__sidebar-fields`}>
-                  {(isEditing && preview && autosaveEnabled) && (
-                  <PreviewButton
-                    generatePreviewURL={preview}
-                    data={data}
-                  />
+                  {(isEditing && preview && !autosaveEnabled) && (
+                    <PreviewButton
+                      generatePreviewURL={preview}
+                      data={data}
+                    />
                   )}
                   {collection.versions?.drafts && (
-                  <React.Fragment>
-                    <Status />
-                    {(collection.versions.drafts.autosave && hasSavePermission) && (
-                      <Autosave
-                        publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
-                        collection={collection}
-                        id={id}
-                      />
-                    )}
-                  </React.Fragment>
-                )}
+                    <React.Fragment>
+                      <Status />
+                      {(collection.versions?.drafts.autosave && hasSavePermission) && (
+                        <Autosave
+                          publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
+                          collection={collection}
+                          id={id}
+                        />
+                      )}
+                    </React.Fragment>
+                  )}
                   <RenderFields
                     operation={isEditing ? 'update' : 'create'}
                     readOnly={!hasSavePermission}

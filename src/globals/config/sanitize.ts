@@ -35,6 +35,9 @@ const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[
       if (sanitizedGlobal.versions === true) sanitizedGlobal.versions = {};
 
       if (sanitizedGlobal.versions.drafts) {
+        if (sanitizedGlobal.versions.drafts === true) sanitizedGlobal.versions.drafts = {};
+        if (sanitizedGlobal.versions.drafts.autosave === true) sanitizedGlobal.versions.drafts.autosave = {};
+
         const versionFields = mergeBaseFields(sanitizedGlobal.fields, baseVersionFields);
 
         sanitizedGlobal.fields = [

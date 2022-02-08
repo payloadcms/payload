@@ -12,9 +12,13 @@ import fieldTypes from '../../forms/field-types';
 import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
 import VersionsCount from '../../elements/VersionsCount';
 import { Props } from './types';
-
 import ViewDescription from '../../elements/ViewDescription';
 import Loading from '../../elements/Loading';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import SaveDraft from '../../elements/SaveDraft';
+import Publish from '../../elements/Publish';
+import Status from '../../elements/Status';
+import Autosave from '../../elements/Autosave';
 
 import './index.scss';
 
@@ -22,8 +26,10 @@ const baseClass = 'global-edit';
 
 const DefaultGlobalView: React.FC<Props> = (props) => {
   const { admin: { dateFormat } } = useConfig();
+  const { publishedDoc } = useDocumentInfo();
+
   const {
-    global, data, onSave, permissions, action, apiURL, initialState, isLoading,
+    global, data, onSave, permissions, action, apiURL, initialState, isLoading, autosaveEnabled,
   } = props;
 
   const {
@@ -89,16 +95,47 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
           <div className={`${baseClass}__sidebar-wrap`}>
             <div className={`${baseClass}__sidebar`}>
               <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                <div className={`${baseClass}__document-actions${preview ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
-                  <PreviewButton
-                    generatePreviewURL={preview}
-                    data={data}
-                  />
+                <div className={`${baseClass}__document-actions${(!autosaveEnabled || preview) ? ` ${baseClass}__document-actions--has-2` : ''}`}>
+                  {(preview && autosaveEnabled) && (
+                    <PreviewButton
+                      generatePreviewURL={preview}
+                      data={data}
+                    />
+                  )}
                   {hasSavePermission && (
-                    <FormSubmit>Save</FormSubmit>
+                    <React.Fragment>
+                      {global.versions?.drafts && (
+                        <React.Fragment>
+                          {!global.versions.drafts.autosave && (
+                            <SaveDraft />
+                          )}
+                          <Publish />
+                        </React.Fragment>
+                      )}
+                      {!global.versions?.drafts && (
+                        <FormSubmit>Save</FormSubmit>
+                      )}
+                    </React.Fragment>
                   )}
                 </div>
                 <div className={`${baseClass}__sidebar-fields`}>
+                  {(preview && !autosaveEnabled) && (
+                    <PreviewButton
+                      generatePreviewURL={preview}
+                      data={data}
+                    />
+                  )}
+                  {global.versions?.drafts && (
+                    <React.Fragment>
+                      <Status />
+                      {(global.versions.drafts.autosave && hasSavePermission) && (
+                        <Autosave
+                          publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
+                          global={global}
+                        />
+                      )}
+                    </React.Fragment>
+                  )}
                   <RenderFields
                     operation="update"
                     readOnly={!hasSavePermission}

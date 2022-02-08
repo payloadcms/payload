@@ -172,7 +172,6 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
     }
   }
 
-  global = global.toJSON({ virtuals: true });
   global = JSON.stringify(global);
   global = JSON.parse(global);
   global = sanitizeInternalFields(global);

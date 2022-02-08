@@ -15,7 +15,7 @@ When enabled, Payload will automatically scaffold a new Collection in your datab
 
 **With Versions, you can:**
 
-- Maintain a history of every change ever made to a document, including monitoring for what user made which change
+- Maintain an audit log / history of every change ever made to a document, including monitoring for what user made which change
 - Restore documents and globals to prior states in case you need to roll back changes
 - Build a true [/docs/versions/drafts](Draft Preview)) mode for your data
 - Manage who can see Drafts, and who can only see Published documents via [Access Control](/docs/access-control/overview)
@@ -34,7 +34,7 @@ Versions support a few different levels of functionality that each come with the
 
 If you enable versions but keep draft mode disabled, Payload will simply create a new version of a document each time you update a document. This is great for use cases where you need to retain a history of all document updates over time, but always want to treat the newest document version as the version that is "published".
 
-For example, a use case for "versions enabled, drafts disabled" could be on a collection of users, where you might want to keep a version history of all changes ever made to users - but any changes to users should _always_ be treated as "published" and you have no need to maintain a "draft" version of a user.
+For example, a use case for "versions enabled, drafts disabled" could be on a collection of users, where you might want to keep a version history (or audit log) of all changes ever made to users - but any changes to users should _always_ be treated as "published" and you have no need to maintain a "draft" version of a user.
 
 ##### Versions and drafts enabled
 

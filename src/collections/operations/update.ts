@@ -266,7 +266,6 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
         : error;
     }
 
-    result = result.toJSON({ virtuals: true });
     result = JSON.stringify(result);
     result = JSON.parse(result);
 

@@ -30,9 +30,17 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
   // after the timeout has executed
   fieldRef.current = fields;
 
-  const interval = collection.versions.drafts && collection.versions.drafts.autosave ? collection.versions.drafts.autosave.interval : 5;
+  let interval = 5;
 
-  const createDoc = useCallback(async () => {
+  if (collection) {
+    interval = collection.versions.drafts && collection.versions.drafts.autosave ? collection.versions.drafts.autosave.interval : 5;
+  }
+
+  if (global) {
+    interval = global.versions.drafts && global.versions.drafts.autosave ? global.versions.drafts.autosave.interval : 5;
+  }
+
+  const createCollectionDoc = useCallback(async () => {
     const res = await fetch(`${serverURL}${api}/${collection.slug}?locale=${locale}&fallback-locale=null&depth=0&draft=true`, {
       method: 'POST',
       headers: {
@@ -53,9 +61,9 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
     // If no ID, but this is used for a collection doc,
     // Immediately save it and set lastSaved
     if (!id && collection) {
-      createDoc();
+      createCollectionDoc();
     }
-  }, [id, collection, global, createDoc]);
+  }, [id, collection, createCollectionDoc]);
 
   // When fields change, autosave
   useEffect(() => {
