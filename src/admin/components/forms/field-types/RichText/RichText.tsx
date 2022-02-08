@@ -69,6 +69,7 @@ const RichText: React.FC<Props> = (props) => {
   const [loaded, setLoaded] = useState(false);
   const [enabledElements, setEnabledElements] = useState({});
   const [enabledLeaves, setEnabledLeaves] = useState({});
+  const [initialValueKey, setInitialValueKey] = useState('');
 
   const renderElement = useCallback(({ attributes, children, element }) => {
     const matchedElement = enabledElements[element?.type];
@@ -129,6 +130,7 @@ const RichText: React.FC<Props> = (props) => {
     showError,
     setValue,
     errorMessage,
+    initialValue,
   } = fieldType;
 
   const classes = [
@@ -172,6 +174,10 @@ const RichText: React.FC<Props> = (props) => {
     }
   }, [loaded, elements, leaves]);
 
+  useEffect(() => {
+    setInitialValueKey(JSON.stringify(initialValue || ''));
+  }, [initialValue]);
+
   if (!loaded) {
     return null;
   }
@@ -190,6 +196,7 @@ const RichText: React.FC<Props> = (props) => {
 
   return (
     <div
+      key={initialValueKey}
       className={classes}
       style={{
         ...style,
