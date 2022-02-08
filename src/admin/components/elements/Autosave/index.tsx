@@ -8,6 +8,7 @@ import { useLocale } from '../../utilities/Locale';
 import { Props } from './types';
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import useDebounce from '../../../hooks/useDebounce';
 
 import './index.scss';
 
@@ -21,24 +22,19 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
   const locale = useLocale();
   const { replace } = useHistory();
 
-  const fieldRef = useRef(fields);
+  let interval = 800;
+  if (collection?.versions.drafts && collection.versions?.drafts?.autosave) interval = collection.versions.drafts.autosave.interval;
+  if (global?.versions.drafts && global.versions?.drafts?.autosave) interval = global.versions.drafts.autosave.interval;
+
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<number>();
+  const debouncedFields = useDebounce(fields, interval);
+  const fieldRef = useRef(fields);
 
   // Store fields in ref so the autosave func
   // can always retrieve the most to date copies
   // after the timeout has executed
   fieldRef.current = fields;
-
-  let interval = 5;
-
-  if (collection) {
-    interval = collection.versions.drafts && collection.versions.drafts.autosave ? collection.versions.drafts.autosave.interval : 5;
-  }
-
-  if (global) {
-    interval = global.versions.drafts && global.versions.drafts.autosave ? global.versions.drafts.autosave.interval : 5;
-  }
 
   const createCollectionDoc = useCallback(async () => {
     const res = await fetch(`${serverURL}${api}/${collection.slug}?locale=${locale}&fallback-locale=null&depth=0&draft=true`, {
@@ -65,59 +61,54 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
     }
   }, [id, collection, createCollectionDoc]);
 
-  // When fields change, autosave
+  // When debounced fields change, autosave
+
   useEffect(() => {
     const autosave = async () => {
-      if (lastSaved && modified && !saving) {
-        const lastSavedDate = new Date(lastSaved);
-        lastSavedDate.setSeconds(lastSavedDate.getSeconds() + interval);
-        const timeToSaveAgain = lastSavedDate.getTime();
+      if (modified) {
+        setSaving(true);
 
-        if (Date.now() >= timeToSaveAgain) {
-          setSaving(true);
+        let url: string;
+        let method: string;
+
+        if (collection && id) {
+          url = `${serverURL}${api}/${collection.slug}/${id}?draft=true&autosave=true`;
+          method = 'PUT';
+        }
+
+        if (global) {
+          url = `${serverURL}${api}/globals/${global.slug}?draft=true&autosave=true`;
+          method = 'POST';
+        }
+
+        if (url) {
+          const body = {
+            ...reduceFieldsToValues(fieldRef.current),
+            _status: 'draft',
+          };
 
           setTimeout(async () => {
-            let url: string;
-            let method: string;
+            const res = await fetch(url, {
+              method,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(body),
+            });
 
-            if (collection && id) {
-              url = `${serverURL}${api}/${collection.slug}/${id}?draft=true&autosave=true`;
-              method = 'PUT';
+            setSaving(false);
+
+            if (res.status === 200) {
+              setLastSaved(new Date().getTime());
+              getVersions();
             }
-
-            if (global) {
-              url = `${serverURL}${api}/globals/${global.slug}?draft=true&autosave=true`;
-              method = 'POST';
-            }
-
-            if (url) {
-              const body = {
-                ...reduceFieldsToValues(fieldRef.current),
-                _status: 'draft',
-              };
-
-              const res = await fetch(url, {
-                method,
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(body),
-              });
-
-              if (res.status === 200) {
-                setLastSaved(new Date().getTime());
-                getVersions();
-              }
-
-              setSaving(false);
-            }
-          }, 2000);
+          }, 1000);
         }
       }
     };
 
     autosave();
-  }, [fields, modified, interval, lastSaved, serverURL, api, collection, global, id, saving, dispatchFields, getVersions]);
+  }, [debouncedFields, modified, serverURL, api, collection, global, id, dispatchFields, getVersions]);
 
   useEffect(() => {
     if (versions?.docs?.[0]) {

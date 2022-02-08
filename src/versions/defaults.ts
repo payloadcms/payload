@@ -3,7 +3,7 @@ import { IncomingCollectionVersions, IncomingGlobalVersions } from './types';
 export const versionCollectionDefaults: IncomingCollectionVersions = {
   drafts: {
     autosave: {
-      interval: 5, // in seconds
+      interval: 2000, // in milliseconds
     },
   },
   maxPerDoc: 50,
@@ -13,7 +13,7 @@ export const versionCollectionDefaults: IncomingCollectionVersions = {
 export const versionGlobalDefaults: IncomingGlobalVersions = {
   drafts: {
     autosave: {
-      interval: 5, // in seconds
+      interval: 2000, // in milliseconds
     },
   },
   max: 50,

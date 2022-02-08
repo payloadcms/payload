@@ -20,7 +20,7 @@ const Autosave: CollectionConfig = {
     retainDeleted: false,
     drafts: {
       autosave: {
-        interval: 5,
+        interval: 2000,
       },
     },
   },
