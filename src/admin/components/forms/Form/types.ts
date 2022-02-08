@@ -44,6 +44,7 @@ export type SubmitOptions = {
   action?: string
   method?: string
   overrides?: Record<string, unknown>
+  skipValidation?: boolean
 }
 
 export type DispatchFields = React.Dispatch<any>

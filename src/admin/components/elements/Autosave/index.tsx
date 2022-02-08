@@ -47,7 +47,11 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
 
     if (res.status === 201) {
       const json = await res.json();
-      replace(`${admin}/collections/${collection.slug}/${json.doc.id}`);
+      replace(`${admin}/collections/${collection.slug}/${json.doc.id}`, {
+        state: {
+          data: json.doc,
+        },
+      });
     } else {
       toast.error('There was a problem while autosaving this document.');
     }

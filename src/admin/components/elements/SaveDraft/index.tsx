@@ -35,6 +35,7 @@ const SaveDraft: React.FC = () => {
     submit({
       action,
       method,
+      skipValidation: true,
       overrides: {
         _status: 'draft',
       },

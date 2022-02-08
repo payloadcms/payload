@@ -104,6 +104,7 @@ const Form: React.FC<Props> = (props) => {
       overrides = {},
       action: actionToUse = action,
       method: methodToUse = method,
+      skipValidation,
     } = options;
 
     if (disabled) {
@@ -122,7 +123,7 @@ const Form: React.FC<Props> = (props) => {
 
     if (waitForAutocomplete) await wait(100);
 
-    const isValid = await contextRef.current.validateForm();
+    const isValid = skipValidation ? true : await contextRef.current.validateForm();
 
     setSubmitted(true);
 
