@@ -14,7 +14,7 @@ export type ContextType = {
   versions?: PaginatedDocs<Version>
   unpublishedVersions?: PaginatedDocs<Version>
   publishedDoc?: TypeWithID & TypeWithTimestamps
-  getVersions: () => void
+  getVersions: () => Promise<void>
 }
 
 export type Props = {

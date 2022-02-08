@@ -26,8 +26,13 @@ const RichText: CollectionConfig = {
   },
   admin: {
     preview: () => 'https://payloadcms.com',
+    useAsTitle: 'title',
   },
   fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
     {
       name: 'defaultRichText',
       type: 'richText',

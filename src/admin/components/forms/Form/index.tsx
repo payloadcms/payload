@@ -20,6 +20,8 @@ import errorMessages from './errorMessages';
 import { Context as FormContextType, Props, SubmitOptions } from './types';
 
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormWatchContext } from './context';
+import buildStateFromSchema from './buildStateFromSchema';
+import { Field } from '../../../../fields/config/types';
 
 const baseClass = 'form';
 
@@ -310,6 +312,12 @@ const Form: React.FC<Props> = (props) => {
     return formData;
   }, [contextRef]);
 
+  const reset = useCallback(async (fieldSchema: Field[], data: unknown) => {
+    contextRef.current = { ...initContextState } as FormContextType;
+    const state = await buildStateFromSchema(fieldSchema, data);
+    dispatchFields({ type: 'REPLACE_STATE', state });
+  }, []);
+
   contextRef.current.dispatchFields = dispatchFields;
   contextRef.current.submit = submit;
   contextRef.current.getFields = getFields;
@@ -325,6 +333,7 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.setSubmitted = setSubmitted;
   contextRef.current.disabled = disabled;
   contextRef.current.formRef = formRef;
+  contextRef.current.reset = reset;
 
   useEffect(() => {
     if (initialState) {

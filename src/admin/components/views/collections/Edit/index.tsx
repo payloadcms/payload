@@ -50,16 +50,10 @@ const EditView: React.FC<IndexProps> = (props) => {
     if (!isEditing) {
       history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
     } else {
-      const state = await buildStateFromSchema(fields, json.doc);
+      const state = await buildStateFromSchema(collection.fields, json.doc);
       setInitialState(state);
-
-      history.push({
-        state: {
-          data: json.doc,
-        },
-      });
     }
-  }, [admin, collection, fields, history, isEditing, getVersions]);
+  }, [admin, collection, history, isEditing, getVersions]);
 
   const [{ data, isLoading, isError }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),

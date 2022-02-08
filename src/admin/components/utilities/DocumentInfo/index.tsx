@@ -58,13 +58,13 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 
     if (global) {
       shouldFetchVersions = Boolean(global?.versions);
-      versionFetchURL = `${baseURL}/globals/${global.slug}/versions?depth=0`;
+      versionFetchURL = `${baseURL}/globals/${global.slug}/versions`;
       publishedFetchURL = `${baseURL}/globals/${global.slug}?depth=0&where[_status][equals]=published`;
     }
 
     if (collection) {
       shouldFetchVersions = Boolean(collection?.versions);
-      versionFetchURL = `${baseURL}/${collection.slug}/versions?where[parent][equals]=${id}&depth=0`;
+      versionFetchURL = `${baseURL}/${collection.slug}/versions`;
       publishedFetchURL = `${baseURL}/${collection.slug}?where[id][equals]=${id}&depth=0&where[_status][equals]=published`;
 
       if (!id) {
@@ -86,7 +86,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       }
 
       if (shouldFetchVersions) {
-        versionJSON = await fetch(versionFetchURL).then((res) => res.json());
+        versionJSON = await fetch(`${versionFetchURL}?${qs.stringify(params)}`).then((res) => res.json());
 
         if (publishedJSON?.updatedAt) {
           const newerVersionParams = {

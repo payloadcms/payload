@@ -2,14 +2,12 @@ import React, { useCallback, useState } from 'react';
 import { useConfig } from '@payloadcms/config-provider';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
-import { useHistory } from 'react-router-dom';
 import { Props } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import Button from '../Button';
 import { MinimalTemplate } from '../..';
 import { requests } from '../../../api';
 import { useForm } from '../../forms/Form/context';
-import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import { Field } from '../../../../fields/config/types';
 import { useLocale } from '../../utilities/Locale';
 
@@ -25,9 +23,8 @@ const Status: React.FC<Props> = () => {
   const { toggle, closeAll: closeAllModals } = useModal();
   const { serverURL, routes: { api } } = useConfig();
   const [processing, setProcessing] = useState(false);
-  const { dispatchFields } = useForm();
+  const { reset: resetForm } = useForm();
   const locale = useLocale();
-  const history = useHistory();
 
   let statusToRender;
 
@@ -87,20 +84,16 @@ const Status: React.FC<Props> = () => {
         fields = collection.fields;
       }
 
-      const state = await buildStateFromSchema(fields, data);
-      dispatchFields({ type: 'REPLACE_STATE', state });
-
+      resetForm(fields, data);
       toast.success(json.message);
       getVersions();
     } else {
       toast.error('There was a problem while un-publishing this document.');
     }
 
-    history.replace(history.location.pathname, {});
-
     setProcessing(false);
     closeAllModals();
-  }, [closeAllModals, history, collection, global, serverURL, api, dispatchFields, id, locale, getVersions, publishedDoc]);
+  }, [closeAllModals, collection, global, serverURL, api, resetForm, id, locale, getVersions, publishedDoc]);
 
   if (statusToRender) {
     return (
