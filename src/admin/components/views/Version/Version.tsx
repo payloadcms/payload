@@ -187,6 +187,12 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
           />
         </header>
         <div className={`${baseClass}__controls`}>
+          <CompareVersion
+            baseURL={compareBaseURL}
+            parentID={parentID}
+            value={compareValue}
+            onChange={setCompareValue}
+          />
           {localization && (
             <SelectLocales
               onChange={setLocales}
@@ -194,19 +200,13 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
               value={locales}
             />
           )}
-          <CompareVersion
-            baseURL={compareBaseURL}
-            parentID={parentID}
-            value={compareValue}
-            onChange={setCompareValue}
-          />
         </div>
         {isLoading && (
           <Loading />
         )}
         {doc?.version && (
           <RenderFieldsToDiff
-            locales={locales.map((locale) => locale.value)}
+            locales={locales.map(({ value }) => value)}
             fields={fields}
             fieldComponents={fieldComponents}
             fieldPermissions={fieldPermissions}

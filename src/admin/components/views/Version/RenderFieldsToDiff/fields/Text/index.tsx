@@ -30,8 +30,8 @@ const Text: React.FC<Props> = ({ field, locale, version, comparison, isRichText 
       </Label>
       <ReactDiffViewer
         compareMethod={DiffMethod[diffMethod]}
-        oldValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
-        newValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}
+        oldValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}
+        newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
         splitView
         hideLineNumbers
         showDiffOnly={false}

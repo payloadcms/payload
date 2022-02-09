@@ -85,8 +85,8 @@ const Relationship: React.FC<Props & { field: RelationshipField}> = ({ field, ve
         {field.label}
       </Label>
       <ReactDiffViewer
-        oldValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
-        newValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}
+        oldValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}
+        newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
         splitView
         hideLineNumbers
         showDiffOnly={false}
