@@ -13,9 +13,9 @@ const baseClass = 'versions-count';
 
 const Versions: React.FC<Props> = ({ collection, global, id }) => {
   const { routes: { admin } } = useConfig();
-  const { versions, publishedDoc } = useDocumentInfo();
+  const { versions, publishedDoc, unpublishedVersions } = useDocumentInfo();
 
-  const docStatus = publishedDoc?._status;
+  const docStatus = unpublishedVersions?.docs?.[0]?.version?._status || publishedDoc?._status;
   let versionsURL: string;
   let entity: SanitizedCollectionConfig | SanitizedGlobalConfig;
 
