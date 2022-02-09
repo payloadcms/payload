@@ -1,8 +1,8 @@
-import { serialize } from '../utilities/serializeRichText';
-import { Email, SanitizedOptions } from '../types';
-import { replaceDoubleCurlys } from '../utilities/replaceDoubleCurlys';
+import { serialize } from '../../../utilities/serializeRichText';
+import { Email, Options } from '../../../types';
+import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys';
 
-const sendEmail = async (beforeChangeData, options: SanitizedOptions) => {
+const sendEmail = async (beforeChangeData, options: Options) => {
   const {
     data,
     data: {

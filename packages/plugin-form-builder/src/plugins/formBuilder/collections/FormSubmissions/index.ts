@@ -1,11 +1,11 @@
 import { CollectionConfig } from 'payload/types';
-import { SanitizedOptions } from './types';
-import deepMerge from './deepMerge';
+import { Options } from '../../types';
+import deepMerge from '../../utilities/deepMerge';
 import sendEmail from './hooks/sendEmail';
 import createCharge from './hooks/createCharge';
-import loggedInUsers from '../../collections/User/access/loggedInUsers';
+import loggedInUsers from '../../../../collections/User/access/loggedInUsers';
 
-const getFormSubmissionsCollection = (options: SanitizedOptions): CollectionConfig => deepMerge({
+export const generateSubmissionCollection = (options: Options): CollectionConfig => deepMerge({
   slug: options?.formsOverrides?.slug || 'formSubmissions',
   access: {
     create: () => true,
@@ -89,6 +89,10 @@ const getFormSubmissionsCollection = (options: SanitizedOptions): CollectionConf
           type: 'number'
         },
         {
+          name: 'amount',
+          type: 'number'
+        },
+        {
           name: 'paymentProcessor',
           type: 'select',
           options: [
@@ -124,5 +128,3 @@ const getFormSubmissionsCollection = (options: SanitizedOptions): CollectionConf
     }
   ],
 }, options.formSubmissionsOverrides || {});
-
-export default getFormSubmissionsCollection;

@@ -1,4 +1,5 @@
 import { Block, Field } from 'payload/types';
+import { FieldConfig, TextField } from '../../types';
 
 const name: Field = {
   name: 'name',
@@ -290,7 +291,7 @@ const Checkbox: Block = {
   ],
 };
 
-const Payment: Block = {
+const Payment = (fieldConfig: FieldConfig): Block => ({
   slug: 'payment',
   labels: {
     singular: 'Payment',
@@ -299,28 +300,24 @@ const Payment: Block = {
   fields: [
     {
       type: 'row',
-      fields: [{
-        name: 'paymentProcessor',
-        type: 'select',
-        options: [
-          {
-            label: 'Stripe',
-            value: 'stripe',
-          }
-        ],
-        defaultValue: 'stripe',
-        admin: {
-          width: '50%',
+      fields: [
+        {
+          name: 'paymentProcessor',
+          type: 'select',
+          options: [],
+          admin: {
+            width: '50%',
+          },
+          ...fieldConfig?.paymentProcessor || {}
         },
-      },
-      {
-        name: 'amount',
-        type: 'number',
-        defaultValue: 0,
-        admin: {
-          width: '50%',
+        {
+          name: 'amount',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            width: '50%',
+          },
         },
-      },
       ],
     },
     {
@@ -342,7 +339,7 @@ const Payment: Block = {
     },
     required,
   ],
-};
+});
 
 const Message: Block = {
   slug: 'message',

@@ -1,10 +1,10 @@
 import { CollectionConfig } from 'payload/types';
-import { SanitizedOptions, isValidBlockConfig } from './types';
+import { FormConfig } from '../../types';
 import fields from './fields';
-import deepMerge from './deepMerge';
+import deepMerge from '../../utilities/deepMerge';
 
-const getFormsCollection = (options: SanitizedOptions): CollectionConfig => deepMerge({
-  slug: options?.formsOverrides?.slug || 'forms',
+export const generateFormCollection = (formConfig: FormConfig): CollectionConfig => deepMerge({
+  slug: formConfig?.formsOverrides?.slug || 'forms',
   admin: {
     useAsTitle: 'title',
     enableRichTextRelationship: false,
@@ -21,23 +21,16 @@ const getFormsCollection = (options: SanitizedOptions): CollectionConfig => deep
     {
       name: 'fields',
       type: 'blocks',
-      blocks: options.fields.reduce((blocks, incomingFormField) => {
-        if (typeof incomingFormField === 'string' && fields[incomingFormField]) {
-          return [
-            ...blocks,
-            fields[incomingFormField],
-          ];
+      blocks: Object.entries(formConfig.fields).map(([fieldKey, fieldConfig]) => {
+        // let the config enable/disable fields with either boolean values or objects
+        if (fieldConfig !== false) {
+          let field = fields[fieldKey];
+          if (typeof field === 'function') field = field(fieldConfig);
+          return field;
         }
 
-        if (isValidBlockConfig(incomingFormField)) {
-          return [
-            ...blocks,
-            incomingFormField,
-          ];
-        }
-
-        return blocks;
-      }, []),
+        return null;
+      }).filter(Boolean),
     },
     {
       name: 'submitButtonLabel',
@@ -187,6 +180,4 @@ const getFormsCollection = (options: SanitizedOptions): CollectionConfig => deep
       ],
     },
   ],
-}, options.formsOverrides || {});
-
-export default getFormsCollection;
+}, formConfig.formsOverrides || {});

@@ -1,7 +1,7 @@
 import { RichText } from '@trbl/hope-types';
-import { Block, CollectionConfig } from 'payload/types';
+import { Block, CollectionConfig, Field } from 'payload/types';
 
-type BlockConfig = {
+export type BlockConfig = {
   block: Block
   validate?: (value: unknown) => boolean | string
 }
@@ -12,19 +12,26 @@ export function isValidBlockConfig(blockConfig: BlockConfig | string): blockConf
     && Array.isArray(blockConfig?.block?.fields);
 }
 
-export type FieldType = 'select' | 'text' | 'email' | 'state' | 'country' | 'checkbox' | 'message' | 'payment'
+export type FieldConfig = {
+  [key: string]: Partial<Field>
+  paymentProcessor: Partial<SelectField>
+}
+
+export type FieldsConfig = {
+  select?: boolean | FieldConfig
+  text?: boolean | FieldConfig
+  email?: boolean | FieldConfig
+  state?: boolean | FieldConfig
+  country?: boolean | FieldConfig
+  checkbox?: boolean | FieldConfig
+  message?: boolean | FieldConfig
+  payment?: boolean | FieldConfig
+}
 
 export type BeforeEmail = (emails: FormattedEmail[]) => void;
 
-export type IncomingOptions = {
-  fields?: FieldType[]
-  formSubmissionsOverrides?: CollectionConfig
-  formsOverrides?: CollectionConfig
-  beforeEmail?: BeforeEmail
-}
-
-export type SanitizedOptions = {
-  fields: (FieldType | BlockConfig)[]
+export type FormConfig = {
+  fields?: FieldsConfig
   formSubmissionsOverrides?: CollectionConfig
   formsOverrides?: CollectionConfig
   beforeEmail?: BeforeEmail
