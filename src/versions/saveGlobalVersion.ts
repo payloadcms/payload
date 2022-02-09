@@ -37,6 +37,13 @@ export const saveGlobalVersion = async ({
     });
 
     if (latestVersion) {
+      // If the latest version is a draft, no need to re-save it
+      // Example: when "promoting" a draft to published, the draft already exists.
+      // Instead, return null
+      if (latestVersion?.version?._status === 'draft') {
+        return null;
+      }
+
       version = latestVersion.version;
       version = JSON.parse(JSON.stringify(version));
       version = sanitizeInternalFields(version);
