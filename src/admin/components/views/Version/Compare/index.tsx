@@ -5,6 +5,7 @@ import format from 'date-fns/format';
 import { Props } from './types';
 import ReactSelect from '../../../elements/ReactSelect';
 import { PaginatedDocs } from '../../../../../mongoose/types';
+import { Where } from '../../../../../types';
 import { mostRecentVersionOption } from '../shared';
 
 import './index.scss';
@@ -18,7 +19,7 @@ const baseOptions = [
 ];
 
 const CompareVersion: React.FC<Props> = (props) => {
-  const { onChange, value, baseURL, parentID } = props;
+  const { onChange, value, baseURL, versionID, parentID } = props;
 
   const {
     admin: {
@@ -33,19 +34,30 @@ const CompareVersion: React.FC<Props> = (props) => {
   const getResults = useCallback(async ({
     lastLoadedPage: lastLoadedPageArg,
   } = {}) => {
-    const query = {
+    const query: {
+      [key: string]: unknown
+      where: Where
+    } = {
       limit: maxResultsPerRequest,
       page: lastLoadedPageArg,
       depth: 0,
-      where: undefined,
+      where: {
+        and: [
+          {
+            id: {
+              not_equals: versionID,
+            },
+          },
+        ],
+      },
     };
 
     if (parentID) {
-      query.where = {
+      query.where.and.push({
         parent: {
           equals: parentID,
         },
-      };
+      });
     }
 
     const search = qs.stringify(query);
@@ -66,7 +78,7 @@ const CompareVersion: React.FC<Props> = (props) => {
     } else {
       setErrorLoading('An error has occurred.');
     }
-  }, [dateFormat, baseURL, parentID]);
+  }, [dateFormat, baseURL, parentID, versionID]);
 
   const classes = [
     'field-type',

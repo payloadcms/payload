@@ -188,6 +188,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
         </header>
         <div className={`${baseClass}__controls`}>
           <CompareVersion
+            versionID={versionID}
             baseURL={compareBaseURL}
             parentID={parentID}
             value={compareValue}

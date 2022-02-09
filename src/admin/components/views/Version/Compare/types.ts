@@ -6,6 +6,7 @@ export type Props = {
   onChange: (val: CompareOption) => void,
   value: CompareOption,
   baseURL: string
+  versionID: string
   parentID?: string
 }
 
