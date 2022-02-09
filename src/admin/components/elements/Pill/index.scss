@@ -37,6 +37,19 @@
     padding-right: base(.125);
   }
 
+  &--style-white {
+    background: white;
+    &.pill--has-action {
+      &:hover {
+        background: lighten($color-light-gray, 3%);
+      }
+
+      &:active {
+        background: lighten($color-light-gray, 5%);
+      }
+    }
+  }
+
   &--style-light {
     &.pill--has-action {
       &:hover {

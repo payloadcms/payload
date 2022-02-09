@@ -10,7 +10,7 @@ import { StepNavItem } from '../../elements/StepNav/types';
 import Meta from '../../utilities/Meta';
 import { LocaleOption, CompareOption, Props } from './types';
 import CompareVersion from './Compare';
-import { publishedVersionOption } from './shared';
+import { mostRecentVersionOption } from './shared';
 import Restore from './Restore';
 import SelectLocales from './SelectLocales';
 import RenderFieldsToDiff from './RenderFieldsToDiff';
@@ -28,7 +28,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const { serverURL, routes: { admin, api }, admin: { dateFormat }, localization } = useConfig();
   const { setStepNav } = useStepNav();
   const { params: { id, versionID } } = useRouteMatch<{ id?: string, versionID: string }>();
-  const [compareValue, setCompareValue] = useState<CompareOption>(publishedVersionOption);
+  const [compareValue, setCompareValue] = useState<CompareOption>(mostRecentVersionOption);
   const [localeOptions] = useState<LocaleOption[]>(() => (localization?.locales ? localization.locales.map((locale) => ({ label: locale, value: locale })) : []));
   const [locales, setLocales] = useState<LocaleOption[]>(localeOptions);
   const { permissions } = useAuth();
@@ -77,23 +77,23 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     if (collection) {
       let docLabel = '';
 
-      if (publishedDoc) {
+      if (mostRecentDoc) {
         const { useAsTitle } = collection.admin;
 
         if (useAsTitle !== 'id') {
           const titleField = collection.fields.find((field) => fieldAffectsData(field) && field.name === useAsTitle) as FieldAffectingData;
 
-          if (titleField && publishedDoc[useAsTitle]) {
+          if (titleField && mostRecentDoc[useAsTitle]) {
             if (titleField.localized) {
-              docLabel = publishedDoc[useAsTitle]?.[locale];
+              docLabel = mostRecentDoc[useAsTitle]?.[locale];
             } else {
-              docLabel = publishedDoc[useAsTitle];
+              docLabel = mostRecentDoc[useAsTitle];
             }
           } else {
             docLabel = '[Untitled]';
           }
         } else {
-          docLabel = publishedDoc.id;
+          docLabel = mostRecentDoc.id;
         }
       }
 
@@ -133,7 +133,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     }
 
     setStepNav(nav);
-  }, [setStepNav, collection, global, dateFormat, doc, publishedDoc, admin, id, locale]);
+  }, [setStepNav, collection, global, dateFormat, doc, mostRecentDoc, admin, id, locale]);
 
   let metaTitle: string;
   let metaDesc: string;

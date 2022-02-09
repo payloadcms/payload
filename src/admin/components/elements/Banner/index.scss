@@ -55,8 +55,7 @@
   }
 
   &--type-success {
-    background: rgba($color-green, .1);
-    color: darken($color-green, 20%);
+    background: $color-green;
 
     &.button--has-action {
       &:hover {

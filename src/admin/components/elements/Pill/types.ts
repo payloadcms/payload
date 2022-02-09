@@ -4,7 +4,7 @@ export type Props = {
   icon?: React.ReactNode,
   alignIcon?: 'left' | 'right',
   onClick?: () => void,
-  pillStyle?: 'light' | 'dark' | 'light-gray' | 'warning' | 'success',
+  pillStyle?: 'white' | 'light' | 'dark' | 'light-gray' | 'warning' | 'success',
 }
 
 export type RenderedTypeProps = {

@@ -1,6 +1,7 @@
 import { useConfig } from '@payloadcms/config-provider';
 import React, { useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
+import format from 'date-fns/format';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import Eyebrow from '../../elements/Eyebrow';
 import Loading from '../../elements/Loading';
@@ -14,13 +15,17 @@ import Table from '../../elements/Table';
 import Paginator from '../../elements/Paginator';
 import PerPage from '../../elements/PerPage';
 import { useSearchParams } from '../../utilities/SearchParams';
+import { Banner, Pill } from '../..';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 
 import './index.scss';
+import { shouldIncrementVersionCount } from '../../../../versions/shouldIncrementVersionCount';
 
 const baseClass = 'versions';
 
 const Versions: React.FC<Props> = ({ collection, global }) => {
-  const { serverURL, routes: { admin, api } } = useConfig();
+  const { serverURL, routes: { admin, api }, admin: { dateFormat } } = useConfig();
   const { setStepNav } = useStepNav();
   const { params: { id } } = useRouteMatch<{ id: string }>();
   const [tableColumns] = useState(() => getColumns(collection, global));
@@ -30,17 +35,23 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   let docURL: string;
   let entityLabel: string;
   let slug: string;
+  let entity: SanitizedCollectionConfig | SanitizedGlobalConfig;
+  let editURL: string;
 
   if (collection) {
     ({ slug } = collection);
     docURL = `${serverURL}${api}/${slug}/${id}`;
     entityLabel = collection.labels.singular;
+    entity = collection;
+    editURL = `${admin}/collections/${collection.slug}/${id}`;
   }
 
   if (global) {
     ({ slug } = global);
     docURL = `${serverURL}${api}/globals/${slug}`;
     entityLabel = global.label;
+    entity = global;
+    editURL = `${admin}/globals/${global.slug}`;
   }
 
   const useAsTitle = collection?.admin?.useAsTitle || 'id';
@@ -72,7 +83,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
         },
         {
           label: docLabel,
-          url: `${admin}/collections/${collection.slug}/${id}`,
+          url: editURL,
         },
         {
           label: 'Versions',
@@ -83,7 +94,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
     if (global) {
       nav = [
         {
-          url: `${admin}/globals/${global.slug}`,
+          url: editURL,
           label: global.label,
         },
         {
@@ -93,7 +104,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
     }
 
     setStepNav(nav);
-  }, [setStepNav, collection, global, useAsTitle, doc, admin, id]);
+  }, [setStepNav, collection, global, useAsTitle, doc, admin, id, editURL]);
 
   useEffect(() => {
     const params = {
@@ -139,7 +150,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   if (collection) {
     metaTitle = `Versions - ${doc[useAsTitle]} - ${entityLabel}`;
     metaDesc = `Viewing versions for the ${entityLabel} ${doc[useAsTitle]}`;
-    heading = doc?.[useAsTitle];
+    heading = doc?.[useAsTitle] || '[Untitled]';
   }
 
   if (global) {
@@ -148,6 +159,10 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
     heading = entityLabel;
     useIDLabel = false;
   }
+
+  const docStatus = doc?._status;
+  const docUpdatedAt = doc?.updatedAt;
+  const showParentDoc = versionsData?.page === 1 && shouldIncrementVersionCount({ entity, docStatus, versions: versionsData });
 
   return (
     <div className={baseClass}>
@@ -171,7 +186,30 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
         {isLoadingVersions && (
           <Loading />
         )}
-        {versionsData?.docs && (
+        {showParentDoc && (
+          <Banner
+            type={docStatus === 'published' ? 'success' : undefined}
+            className={`${baseClass}__parent-doc`}
+          >
+            Current
+            {' '}
+            {docStatus}
+            {' '}
+            version -
+            {' '}
+            {format(new Date(docUpdatedAt), dateFormat)}
+            <div className={`${baseClass}__parent-doc-pills`}>
+              &nbsp;&nbsp;
+              <Pill
+                pillStyle="white"
+                to={editURL}
+              >
+                Edit
+              </Pill>
+            </div>
+          </Banner>
+        )}
+        {versionsData?.totalDocs > 0 && (
           <React.Fragment>
             <Table
               data={versionsData?.docs}
@@ -207,6 +245,11 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
           )}
             </div>
           </React.Fragment>
+        )}
+        {versionsData?.totalDocs === 0 && (
+          <div className={`${baseClass}__no-versions`}>
+            No further versions found
+          </div>
         )}
       </div>
     </div>

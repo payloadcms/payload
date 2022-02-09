@@ -1,5 +1,5 @@
 export const mostRecentVersionOption = {
-  label: 'Most recent draft',
+  label: 'Most recent',
   value: 'mostRecent',
 };
 

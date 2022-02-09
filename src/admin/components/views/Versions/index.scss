@@ -18,6 +18,16 @@
     margin-bottom: base(.5);
   }
 
+  &__parent-doc {
+    .banner__content {
+      display: flex;
+    }
+  }
+
+  &__parent-doc-pills {
+    margin-left: auto;
+  }
+
   .table {
     table {
       width: 100%;

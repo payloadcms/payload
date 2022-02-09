@@ -6,7 +6,6 @@ export const versionCollectionDefaults: IncomingCollectionVersions = {
       interval: 2000, // in milliseconds
     },
   },
-  maxPerDoc: 50,
   retainDeleted: true,
 };
 
@@ -16,5 +15,4 @@ export const versionGlobalDefaults: IncomingGlobalVersions = {
       interval: 2000, // in milliseconds
     },
   },
-  max: 50,
 };

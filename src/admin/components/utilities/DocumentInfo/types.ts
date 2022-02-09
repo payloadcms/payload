@@ -13,7 +13,7 @@ export type ContextType = {
   preferencesKey?: string
   versions?: PaginatedDocs<Version>
   unpublishedVersions?: PaginatedDocs<Version>
-  publishedDoc?: TypeWithID & TypeWithTimestamps
+  publishedDoc?: TypeWithID & TypeWithTimestamps & { _status: string }
   getVersions: () => Promise<void>
 }
 
