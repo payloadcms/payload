@@ -195,7 +195,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
             {' '}
             {docStatus}
             {' '}
-            version -
+            document -
             {' '}
             {format(new Date(docUpdatedAt), dateFormat)}
             <div className={`${baseClass}__parent-doc-pills`}>
