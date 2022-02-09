@@ -1,19 +1,23 @@
 import { CollectionConfig } from 'payload/types';
 import { SanitizedOptions } from './types';
 import deepMerge from './deepMerge';
-import sendEmail from './sendEmail';
+import sendEmail from './hooks/sendEmail';
+import createCharge from './hooks/createCharge';
+import loggedInUsers from '../../collections/User/access/loggedInUsers';
 
 const getFormSubmissionsCollection = (options: SanitizedOptions): CollectionConfig => deepMerge({
   slug: options?.formsOverrides?.slug || 'formSubmissions',
   access: {
     create: () => true,
     update: () => false,
+    read: loggedInUsers
   },
   admin: {
     enableRichTextRelationship: false
   },
   hooks: {
     beforeChange: [
+      createCharge,
       (data) => sendEmail(data, options),
     ],
   },
@@ -23,10 +27,16 @@ const getFormSubmissionsCollection = (options: SanitizedOptions): CollectionConf
       type: 'relationship',
       relationTo: 'forms',
       required: true,
+      admin: {
+        readOnly: true
+      },
     },
     {
       name: 'submissionData',
       type: 'array',
+      admin: {
+        readOnly: true
+      },
       fields: [
         {
           name: 'field',
@@ -57,6 +67,61 @@ const getFormSubmissionsCollection = (options: SanitizedOptions): CollectionConf
         },
       ],
     },
+    {
+      name: 'payments',
+      type: 'array',
+      admin: {
+        readOnly: true
+      },
+      fields: [
+        {
+          name: 'field',
+          label: 'Field',
+          type: 'text'
+        },
+        {
+          name: 'status',
+          label: 'Status',
+          type: 'text'
+        },
+        {
+          name: 'amount',
+          type: 'number'
+        },
+        {
+          name: 'paymentProcessor',
+          type: 'select',
+          options: [
+            {
+              label: 'Stripe',
+              value: 'stripe'
+            }
+          ]
+        },
+        {
+          name: 'creditCard',
+          label: 'Credit Card',
+          type: 'group',
+          fields: [
+            {
+              name: 'token',
+              label: 'token',
+              type: 'text'
+            },
+            {
+              name: 'brand',
+              label: 'Brand',
+              type: 'text'
+            },
+            {
+              name: 'number',
+              label: 'Number',
+              type: 'text'
+            }
+          ]
+        }
+      ]
+    }
   ],
 }, options.formSubmissionsOverrides || {});
 
