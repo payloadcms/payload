@@ -156,7 +156,6 @@ const Blocks: React.FC<Props> = (props) => {
   // Set row count on mount and when form context is reset
   useEffect(() => {
     const data = formContext.getDataByPath(path);
-    console.log(data);
     dispatchRows({ type: 'SET_ALL', data: data || [] });
   }, [formContext, path]);
 
