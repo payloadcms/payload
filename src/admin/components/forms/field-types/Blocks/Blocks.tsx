@@ -18,7 +18,7 @@ import BlockSelector from './BlockSelector';
 import { blocks as blocksValidator } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
 import FieldDescription from '../../FieldDescription';
-import { Props, RenderBlockProps } from './types';
+import { Props } from './types';
 import { DocumentPreferences } from '../../../../../preferences/types';
 
 import './index.scss';
@@ -76,7 +76,7 @@ const Blocks: React.FC<Props> = (props) => {
     errorMessage,
     value,
     setValue,
-  } = useField({
+  } = useField<number>({
     path,
     validate: memoizedValidate,
     disableFormData,
@@ -156,6 +156,7 @@ const Blocks: React.FC<Props> = (props) => {
   // Set row count on mount and when form context is reset
   useEffect(() => {
     const data = formContext.getDataByPath(path);
+    console.log(data);
     dispatchRows({ type: 'SET_ALL', data: data || [] });
   }, [formContext, path]);
 
@@ -168,57 +169,6 @@ const Blocks: React.FC<Props> = (props) => {
       setDisableFormData(true);
     }
   }, [rows, setValue]);
-
-  return (
-    <RenderBlocks
-      onDragEnd={onDragEnd}
-      label={label}
-      showError={showError}
-      errorMessage={errorMessage}
-      rows={rows}
-      labels={labels}
-      addRow={addRow}
-      removeRow={removeRow}
-      moveRow={moveRow}
-      path={path}
-      name={name}
-      fieldTypes={fieldTypes}
-      setCollapse={setCollapse}
-      permissions={permissions}
-      value={value as number}
-      blocks={blocks}
-      readOnly={readOnly}
-      minRows={minRows}
-      maxRows={maxRows}
-      required={required}
-      description={description}
-    />
-  );
-};
-
-const RenderBlocks = React.memo((props: RenderBlockProps) => {
-  const {
-    onDragEnd,
-    label,
-    showError,
-    errorMessage,
-    rows,
-    labels,
-    addRow,
-    removeRow,
-    moveRow,
-    path,
-    fieldTypes,
-    permissions,
-    value,
-    setCollapse,
-    blocks,
-    readOnly,
-    minRows,
-    maxRows,
-    required,
-    description,
-  } = props;
 
   const hasMaxRows = maxRows && rows.length >= maxRows;
 
@@ -333,6 +283,6 @@ const RenderBlocks = React.memo((props: RenderBlockProps) => {
       </div>
     </DragDropContext>
   );
-});
+};
 
 export default withCondition(Blocks);

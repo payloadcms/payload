@@ -289,7 +289,7 @@ const Form: React.FC<Props> = (props) => {
   const getUnflattenedValues = useCallback(() => reduceFieldsToValues(contextRef.current.fields), [contextRef]);
 
   const createFormData = useCallback((overrides: any = {}) => {
-    const data = reduceFieldsToValues(contextRef.current.fields);
+    const data = reduceFieldsToValues(contextRef.current.fields, true);
 
     const file = data?.file;
 
@@ -313,8 +313,8 @@ const Form: React.FC<Props> = (props) => {
   }, [contextRef]);
 
   const reset = useCallback(async (fieldSchema: Field[], data: unknown) => {
-    contextRef.current = { ...initContextState } as FormContextType;
     const state = await buildStateFromSchema(fieldSchema, data);
+    contextRef.current = { ...initContextState } as FormContextType;
     dispatchFields({ type: 'REPLACE_STATE', state });
   }, []);
 

@@ -12,7 +12,7 @@ import Error from '../../Error';
 import { array } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
 import FieldDescription from '../../FieldDescription';
-import { Props, RenderArrayProps } from './types';
+import { Props } from './types';
 
 import './index.scss';
 
@@ -113,55 +113,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     }
   }, [rows, setValue]);
 
-  return (
-    <RenderArray
-      onDragEnd={onDragEnd}
-      label={label}
-      showError={showError}
-      errorMessage={errorMessage}
-      rows={rows}
-      labels={labels}
-      addRow={addRow}
-      removeRow={removeRow}
-      moveRow={moveRow}
-      path={path}
-      name={name}
-      fieldTypes={fieldTypes}
-      fields={fields}
-      permissions={permissions}
-      value={value as number}
-      readOnly={readOnly}
-      minRows={minRows}
-      maxRows={maxRows}
-      required={required}
-      description={description}
-    />
-  );
-};
-
-const RenderArray = React.memo((props: RenderArrayProps) => {
-  const {
-    onDragEnd,
-    label,
-    showError,
-    errorMessage,
-    rows,
-    labels,
-    addRow,
-    removeRow,
-    moveRow,
-    path,
-    fieldTypes,
-    fields,
-    permissions,
-    value,
-    readOnly,
-    minRows,
-    maxRows,
-    required,
-    description,
-  } = props;
-
   const hasMaxRows = maxRows && rows.length >= maxRows;
 
   return (
@@ -244,6 +195,6 @@ const RenderArray = React.memo((props: RenderArrayProps) => {
       </div>
     </DragDropContext>
   );
-});
+};
 
 export default withCondition(ArrayFieldType);
