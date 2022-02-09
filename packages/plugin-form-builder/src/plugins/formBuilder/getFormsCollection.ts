@@ -22,7 +22,7 @@ const getFormsCollection = (options: SanitizedOptions): CollectionConfig => deep
       name: 'fields',
       type: 'blocks',
       blocks: options.fields.reduce((blocks, incomingFormField) => {
-        if (typeof incomingFormField === 'string') {
+        if (typeof incomingFormField === 'string' && fields[incomingFormField]) {
           return [
             ...blocks,
             fields[incomingFormField],

@@ -12,20 +12,22 @@ export function isValidBlockConfig(blockConfig: BlockConfig | string): blockConf
     && Array.isArray(blockConfig?.block?.fields);
 }
 
-export type FieldType = 'select' | 'text' | 'email' | 'state' | 'country' | 'checkbox' | 'message'
+export type FieldType = 'select' | 'text' | 'email' | 'state' | 'country' | 'checkbox' | 'message' | 'payment'
+
+export type BeforeEmail = (emails: FormattedEmail[]) => void;
 
 export type IncomingOptions = {
   fields?: FieldType[]
   formSubmissionsOverrides?: CollectionConfig
   formsOverrides?: CollectionConfig
-  beforeEmail?: (emails: FormattedEmail[]) => void
+  beforeEmail?: BeforeEmail
 }
 
 export type SanitizedOptions = {
   fields: (FieldType | BlockConfig)[]
   formSubmissionsOverrides?: CollectionConfig
   formsOverrides?: CollectionConfig
-  beforeEmail?: (emails: FormattedEmail[]) => void
+  beforeEmail?: BeforeEmail
 }
 
 export type TextField = {

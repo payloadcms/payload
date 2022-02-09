@@ -5,7 +5,16 @@ import { IncomingOptions, SanitizedOptions } from './types';
 
 const FormBuilder = (incomingOptions?: IncomingOptions) => (config: Config): Config => {
   const sanitizedOptions: SanitizedOptions = {
-    fields: incomingOptions?.fields || ['text', 'select', 'email', 'state', 'country', 'checkbox', 'message'],
+    fields: incomingOptions?.fields || [
+      'text',
+      'select',
+      'email',
+      'state',
+      'country',
+      'checkbox',
+      'message',
+      'payment'
+    ],
     beforeEmail: incomingOptions?.beforeEmail,
   };
 

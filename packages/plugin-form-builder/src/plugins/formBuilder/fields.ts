@@ -290,6 +290,60 @@ const Checkbox: Block = {
   ],
 };
 
+const Payment: Block = {
+  slug: 'payment',
+  labels: {
+    singular: 'Payment',
+    plural: 'Payment Fields',
+  },
+  fields: [
+    {
+      type: 'row',
+      fields: [{
+        name: 'paymentProcessor',
+        type: 'select',
+        options: [
+          {
+            label: 'Stripe',
+            value: 'stripe',
+          }
+        ],
+        defaultValue: 'stripe',
+        admin: {
+          width: '50%',
+        },
+      },
+      {
+        name: 'amount',
+        type: 'number',
+        defaultValue: 0,
+        admin: {
+          width: '50%',
+        },
+      },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          ...label,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...width,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    required,
+  ],
+};
+
 const Message: Block = {
   slug: 'message',
   labels: {
@@ -312,4 +366,5 @@ export default {
   message: Message,
   country: Country,
   state: State,
+  payment: Payment
 };
