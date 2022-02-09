@@ -8,11 +8,12 @@ keywords: version history, drafts, preview, draft, publish, autosave, Content Ma
 
 Payload's Draft functionality builds on top of the Versions functionality to allow you to make changes to your collection documents and globals, but publish only when you're ready. This functionality allows you to build powerful Preview environments for your data, where you can make sure your changes look good before publishing documents.
 
-Drafts are available in Payload v. `0.14.0-beta.0` and newer.
-
 <Banner type="warning">
 	Drafts rely on Versions being enabled in order to function.
 </Banner>
+
+All Payload APIs will also expose [a new option](/docs/overview/versions/drafts#api) called `draft` which allows you to control if your document update(s) should be considered as draft or written straight to the published document.
+When you enable versions _and_ drafts, the Admin UI will update itself to include both "Save Draft" and "Publish Changes" buttons instead of a single "Save" button.
 
 ### TODO:
 

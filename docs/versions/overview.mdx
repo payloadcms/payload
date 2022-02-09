@@ -6,18 +6,20 @@ desc: Keep a running history or audit log of changes to collection documents and
 keywords: version history, revisions, audit log, draft, publish, autosave, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Payload's powerful Versions functionality allows you to keep a running history of changes over time.
+<Banner>
+  Payload's powerful Versions functionality allows you to keep a running history of changes over time. Versions are available as of Payload <strong>0.15.0</strong>.
+</Banner>
 
 When enabled, Payload will automatically scaffold a new Collection in your database to store versions of your document(s) over time, and the Admin UI will be extended with additional views that allow you to browse document versions, view diffs in order to see exactly what has changed in your documents (and when they changed), and restore documents back to prior versions easily.
 
-![Versions](https://payloadcms.com/images/versions.jpg)
+![Versions](/images/docs/versions.png)
 *Comparing an old version to a newer version of a document*
 
 **With Versions, you can:**
 
 - Maintain an audit log / history of every change ever made to a document, including monitoring for what user made which change
 - Restore documents and globals to prior states in case you need to roll back changes
-- Build a true [/docs/versions/drafts](Draft Preview)) mode for your data
+- Build a true [Draft Preview](/docs/versions/drafts) mode for your data
 - Manage who can see Drafts, and who can only see Published documents via [Access Control](/docs/access-control/overview)
 - Enable [Autosave](/docs/versions/autosave) on collections and globals to never lose your work again
 - Build a powerful publishing schedule mechanism to create documents and have them become publicly readable automatically at a future date
@@ -38,12 +40,14 @@ For example, a use case for "versions enabled, drafts disabled" could be on a co
 
 ##### Versions and drafts enabled
 
-The largest changes that introduce themselves between having drafts enabled and disabled happen within the Payload admin panel. When you enable versions _and_ drafts, the Admin UI will update itself to include both "Save Draft" and "Publish Changes" buttons instead of a single "Save" button. All Payload APIs will also expose [a new argument](/docs/overview/versions/drafts#api) called `draft` which allows you to control if your document update(s) should be considered as draft or written straight to the published document. Read more about Drafts [here](/docs/versions/drafts).
+If you have versions _and_ drafts enabled, you are able to control which documents are published, and which are considered draft. That lets you write [access control](/docs/access-control/overview) to control who can see published documents, and who can see draft documents. It also lets you save versions (drafts) that are _newer_ than your most recently published document, which is helpful if you want to draft changes and maybe even preview them before you publish the changes. Read more about Drafts [here](/docs/versions/drafts).
 
-![Drafts Enabled](https://payloadcms.com/images/drafts-enabled.jpg)
-*Editing a document with Versions and Drafts enabled*
+![Drafts Enabled](/images/docs/drafts-enabled.png)
+*If Drafts are enabled, a new button appears while editing documents*
 
 ##### Versions, drafts, and autosave enabled
+
+When you have versions, drafts, _and_ `autosave` enabled, the Admin UI will automatically save changes that you make to a new `draft` version as you edit a document, which makes sure that you never lose your changes ever again. Autosave will not affect your published post at all—instead, it'll just save your changes and let you publish them whenever you or your editors are ready to do so. Read more about Autosave [here](/docs/versions/autosave).
 
 #### Collection Config
 
@@ -60,8 +64,53 @@ Configuring Versions is done by adding the `versions` key to your Collection con
 
 Global versions work similarly to Collection versions but have a slightly different set of config properties supported.
 
-### TODO:
+| Option    | Description  |
+| --------- | -------------|
+| `max`     | Use this setting to control how many versions to keep on a global by global basis. Must be an integer. |
+| `drafts`  | Enable [Drafts](/docs/versions/drafts) mode for this global. |
 
-- Screenshots
-- global docs
-- links to Drafts & Autosave
+### Version Operations
+
+Versions expose new operations for both collections and globals. They allow you to find and query versions, find a single version by ID, and publish (or restore) a version by ID. Both Collections and Globals support the same new operations. They are used primarily by the admin UI, but if you are writing custom logic in your app and would like to utilize them, they're available for you to use as well via REST, GraphQL, and Local APIs.
+
+**New collection REST endpoints:**
+
+| Method   | Path                                 | Description                            |
+| -------- | ------------------------------------ | -------------------------------------- |
+| `GET`    | `/api/{collectionSlug}/versions`     | Find and query paginated versions      |
+| `GET`    | `/api/{collectionSlug}/versions/:id` | Find a specific version by ID          |
+| `POST`   | `/api/{collectionSlug}/versions/:id` | Restore a version by ID                |
+
+**New collection GraphQL queries and mutations:**
+
+TODO: add GraphQL docs here
+
+**New collection Local API methods:**
+
+TODO: add Local API docs here
+
+**New global REST endpoints:**
+
+| Method   | Path                                     | Description                            |
+| -------- | ---------------------------------------- | -------------------------------------- |
+| `GET`    | `/api/globals/{globalSlug}/versions`     | Find and query paginated versions      |
+| `GET`    | `/api/globals/{globalSlug}/versions/:id` | Find a specific version by ID          |
+| `POST`   | `/api/globals/{globalSlug}/versions/:id` | Restore a version by ID                |
+
+**New global GraphQL queries and mutations:**
+
+TODO: add GraphQL docs here
+
+**New global Local API methods:**
+
+TODO: add Local API docs here
+
+### Access Control
+
+Versions expose a new access control function on both Collections and Globals that allow for you to control who can see versions of documents, and who can't.
+
+**New version access control:**
+
+| Function                 | Allows/Denies Access |
+| ------------------------ | -------------------- |
+| **`readVersions`**       | Used to control who can read versions, and who can't. Will automatically restrict the Admin UI version viewing access. |
