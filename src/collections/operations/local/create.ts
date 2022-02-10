@@ -14,7 +14,7 @@ export type Options<T> = {
   showHiddenFields?: boolean
   filePath?: string
   overwriteExistingFiles?: boolean
-  req: PayloadRequest
+  req?: PayloadRequest
   draft?: boolean
 }
 
