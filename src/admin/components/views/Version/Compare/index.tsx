@@ -6,7 +6,7 @@ import { Props } from './types';
 import ReactSelect from '../../../elements/ReactSelect';
 import { PaginatedDocs } from '../../../../../mongoose/types';
 import { Where } from '../../../../../types';
-import { mostRecentVersionOption } from '../shared';
+import { mostRecentVersionOption, publishedVersionOption } from '../shared';
 
 import './index.scss';
 
@@ -19,7 +19,7 @@ const baseOptions = [
 ];
 
 const CompareVersion: React.FC<Props> = (props) => {
-  const { onChange, value, baseURL, versionID, parentID } = props;
+  const { onChange, value, baseURL, versionID, parentID, publishedDoc } = props;
 
   const {
     admin: {
@@ -89,6 +89,10 @@ const CompareVersion: React.FC<Props> = (props) => {
   useEffect(() => {
     getResults({ lastLoadedPage: 1 });
   }, [getResults]);
+
+  useEffect(() => {
+    if (publishedDoc?._status === 'published') setOptions((currentOptions) => [publishedVersionOption, ...currentOptions]);
+  }, [publishedDoc]);
 
   return (
     <div className={classes}>
