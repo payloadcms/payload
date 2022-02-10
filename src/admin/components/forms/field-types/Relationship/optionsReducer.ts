@@ -36,7 +36,7 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
               return [
                 ...docs,
                 {
-                  label: doc[labelKey],
+                  label: doc[labelKey] || `Untitled - ID: ${doc.id}`,
                   value: doc.id,
                 },
               ];
@@ -56,7 +56,7 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
           return [
             ...docs,
             {
-              label: doc[labelKey],
+              label: doc[labelKey] || `Untitled - ID: ${doc.id}`,
               relationTo: relation,
               value: doc.id,
             },

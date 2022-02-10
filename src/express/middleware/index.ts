@@ -31,7 +31,7 @@ const middleware = (payload: Payload): any => {
     passport.initialize(),
     identifyAPI('REST'),
     methodOverride('X-HTTP-Method-Override'),
-    qsMiddleware({ depth: 10 }),
+    qsMiddleware({ depth: 10, arrayLimit: 1000 }),
     bodyParser.urlencoded({ extended: true }),
     compression(payload.config.express.compression),
     localizationMiddleware(payload.config.localization),

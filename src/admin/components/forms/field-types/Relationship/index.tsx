@@ -2,6 +2,7 @@ import React, {
   useCallback, useEffect, useState, useReducer,
 } from 'react';
 import { useConfig } from '@payloadcms/config-provider';
+import qs from 'qs';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import { Value } from '../../../elements/ReactSelect/types';
@@ -70,6 +71,7 @@ const Relationship: React.FC<Props> = (props) => {
     showError,
     errorMessage,
     setValue,
+    initialValue,
   } = useField({
     path: path || name,
     validate: memoizedValidate,
@@ -193,19 +195,6 @@ const Relationship: React.FC<Props> = (props) => {
     }
   }, [search]);
 
-  const addOptionByID = useCallback(async (id, relation) => {
-    if (!errorLoading && id !== 'null' && id !== null) {
-      const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`);
-
-      if (response.ok) {
-        const data = await response.json();
-        addOptions({ docs: [data] }, relation);
-      } else {
-        console.error(`There was a problem loading the document with ID of ${id}.`);
-      }
-    }
-  }, [addOptions, api, errorLoading, serverURL]);
-
   // ///////////////////////////
   // Get results when search input changes
   // ///////////////////////////
@@ -216,7 +205,6 @@ const Relationship: React.FC<Props> = (props) => {
       required,
     });
 
-    setHasLoadedFirstOptions(true);
     setLastLoadedPage(1);
     setLastFullyLoadedRelation(-1);
     getResults({ search: debouncedSearch });
@@ -227,16 +215,28 @@ const Relationship: React.FC<Props> = (props) => {
   // ///////////////////////////
 
   useEffect(() => {
-    if (value && hasLoadedFirstOptions) {
+    if (value && !hasLoadedFirstOptions) {
+      const optionsToLoad: {
+        [relation: string]: unknown[]
+      } = {};
+
+      const add = (relation: string, id: unknown) => {
+        if (typeof optionsToLoad[relation] === 'undefined') optionsToLoad[relation] = [];
+
+        if (id !== 'null' && id !== null) {
+          optionsToLoad[relation].push(id);
+        }
+      };
+
       if (hasMany) {
         const matchedOptions = findOptionsByValue();
 
         (matchedOptions as Value[] || []).forEach((option, i) => {
           if (!option) {
             if (hasMultipleRelations) {
-              addOptionByID(value[i].value, value[i].relationTo);
+              add(value[i].relationTo, value[i].value);
             } else {
-              addOptionByID(value[i], relationTo);
+              add(relationTo, value[i]);
             }
           }
         });
@@ -246,14 +246,50 @@ const Relationship: React.FC<Props> = (props) => {
         if (!matchedOption) {
           if (hasMultipleRelations) {
             const valueWithRelation = value as ValueWithRelation;
-            addOptionByID(valueWithRelation.value, valueWithRelation.relationTo);
+            add(valueWithRelation.relationTo, valueWithRelation.value);
           } else {
-            addOptionByID(value, relationTo);
+            add(relationTo, value);
           }
         }
       }
+
+      Object.entries(optionsToLoad).forEach(async ([relation, ids]) => {
+        if (ids.length > 0) {
+          const query = {
+            where: {
+              or: ids.reduce((idsToLoad: unknown[], id) => [
+                ...idsToLoad,
+                {
+                  id: {
+                    equals: id,
+                  },
+                },
+              ], []),
+            },
+            depth: 0,
+            limit: ids.length,
+          };
+
+          if (!errorLoading) {
+            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`);
+
+            if (response.ok) {
+              const data = await response.json();
+              addOptions({ docs: data.docs }, relation);
+            } else {
+              console.error(`There was a problem loading relationships to related collection ${relation}.`);
+            }
+          }
+        }
+      });
+
+      setHasLoadedFirstOptions(true);
     }
-  }, [addOptionByID, findOptionsByValue, hasMany, hasMultipleRelations, relationTo, value, hasLoadedFirstOptions]);
+  }, [findOptionsByValue, hasMany, hasMultipleRelations, relationTo, value, hasLoadedFirstOptions, errorLoading, addOptions, api, serverURL]);
+
+  useEffect(() => {
+    setHasLoadedFirstOptions(false);
+  }, [initialValue]);
 
   const classes = [
     'field-type',
