@@ -11,11 +11,16 @@ import './index.scss';
 
 const baseClass = 'versions-count';
 
-const Versions: React.FC<Props> = ({ collection, global, id }) => {
+const VersionsCount: React.FC<Props> = ({ collection, global, id }) => {
   const { routes: { admin } } = useConfig();
   const { versions, publishedDoc, unpublishedVersions } = useDocumentInfo();
 
-  const docStatus = unpublishedVersions?.docs?.[0]?.version?._status || publishedDoc?._status;
+  // Doc status could come from three places:
+  // 1. the newest unpublished version (a draft)
+  // 2. the published doc's status, in the event that the doc is published and there are no newer versions
+  // 3. if there is no published doc, it's a draft
+  const docStatus = unpublishedVersions?.docs?.[0]?.version?._status || publishedDoc?._status || 'draft';
+
   let versionsURL: string;
   let entity: SanitizedCollectionConfig | SanitizedGlobalConfig;
 
@@ -58,4 +63,4 @@ const Versions: React.FC<Props> = ({ collection, global, id }) => {
     </div>
   );
 };
-export default Versions;
+export default VersionsCount;
