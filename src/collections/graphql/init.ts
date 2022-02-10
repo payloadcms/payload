@@ -15,7 +15,7 @@ import buildVersionWhereInputType from '../../graphql/schema/buildVersionWhereIn
 
 function registerCollections(): void {
   const {
-    findVersions, findVersionByID, publishVersion,
+    findVersions, findVersionByID, restoreVersion,
     create, find, findByID, deleteResolver, update,
   } = this.graphQL.resolvers.collections;
 
@@ -206,7 +206,7 @@ function registerCollections(): void {
         args: {
           id: { type: GraphQLString },
         },
-        resolve: publishVersion(collection),
+        resolve: restoreVersion(collection),
       };
     }
 

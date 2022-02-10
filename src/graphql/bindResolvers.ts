@@ -16,7 +16,7 @@ import update from '../collections/graphql/resolvers/update';
 import deleteResolver from '../collections/graphql/resolvers/delete';
 import findVersions from '../collections/graphql/resolvers/findVersions';
 import findVersionByID from '../collections/graphql/resolvers/findVersionByID';
-import publishVersion from '../collections/graphql/resolvers/publishVersion';
+import restoreVersion from '../collections/graphql/resolvers/restoreVersion';
 
 import findOne from '../globals/graphql/resolvers/findOne';
 import globalUpdate from '../globals/graphql/resolvers/update';
@@ -30,7 +30,7 @@ export type GraphQLResolvers = {
     findVersions: typeof findVersions,
     findByID: typeof findByID,
     findVersionByID: typeof findVersionByID,
-    publishVersion: typeof publishVersion,
+    restoreVersion: typeof restoreVersion,
     update: typeof update,
     deleteResolver: typeof deleteResolver,
     auth: {
@@ -61,7 +61,7 @@ function bindResolvers(ctx: Payload): void {
         findVersions: findVersions.bind(ctx),
         findByID: findByID.bind(ctx),
         findVersionByID: findVersionByID.bind(ctx),
-        publishVersion: publishVersion.bind(ctx),
+        restoreVersion: restoreVersion.bind(ctx),
         update: update.bind(ctx),
         deleteResolver: deleteResolver.bind(ctx),
         auth: {
