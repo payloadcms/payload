@@ -16,7 +16,9 @@ let token;
 let postID;
 let versionID;
 
-describe('GrahpQL Resolvers', () => {
+describe('GrahpQL Version Resolvers', () => {
+  const title = 'autosave title';
+
   beforeAll(async (done) => {
     const login = `
       mutation {
@@ -39,7 +41,6 @@ describe('GrahpQL Resolvers', () => {
 
   describe('Create', () => {
     it('should allow a new autosavePost to be created with draft status', async () => {
-      const title = 'autosave title';
       const description = 'autosave description';
 
       const query = `mutation {
@@ -49,6 +50,7 @@ describe('GrahpQL Resolvers', () => {
           description
           createdAt
           updatedAt
+          _status
         }
       }`;
 
@@ -57,44 +59,68 @@ describe('GrahpQL Resolvers', () => {
       const data = response.createAutosavePost;
       postID = data.id;
 
-      expect(typeof data._status).toBe('undefined');
+      expect(data._status).toStrictEqual('draft');
     });
   });
 
   describe('Read', () => {
     it('should allow read of autosavePost versions', async () => {
+      const updatedTitle = 'updated title';
+
+      // modify the post so it will create a new version
+      // language=graphQL
+      const update = `mutation {
+        updateAutosavePost(id: "${postID}", data: {title: "${updatedTitle}"}) {
+        title
+        }
+      }`;
+
+      await client.request(update);
+
+      // query the version
       // language=graphQL
       const query = `query {
-          versionsAutosavePost(where: { parent: { equals: ${postID} } }) {
-          id
-          version {
-            title
+          versionsAutosavePosts(where: { parent: { equals: "${postID}" } }) {
+          docs {
+            id
+            parent
+            version {
+              title
+            }
           }
         }
       }`;
 
       const response = await client.request(query);
 
-      const data = response.versionsAutosavePost;
+      const data = response.versionsAutosavePosts;
+      const doc = data.docs[0];
+      versionID = doc.id;
 
-      versionID = data.docs[0].id;
-
-      expect(versionID).toBeDefined();
-      expect(data.docs[0].version.title).toBeDefined();
+      expect(doc.id).toBeDefined();
+      expect(doc.parent).toStrictEqual(postID);
+      expect(doc.version.title).toStrictEqual(title);
     });
   });
 
-  // describe('Restore', () => {
-  //   it('should allow a version to be restored', async () => {
-  //     // update a versionsPost
-  //     const query = `mutation {
-  //     restoreAutosavePost {
-  //       id
-  //       title
-  //     }`;
-  //     const response = await client.request(query);
-  //
-  //     const data = response.versionsAutosavePost;
-  //   });
-  // });
+  describe('Restore', () => {
+    it('should allow a version to be restored', async () => {
+      // update a versionsPost
+      const restore = `mutation {
+        restoreVersionAutosavePost(id: "${versionID}")
+      }`;
+
+      await client.request(restore);
+
+      const query = `query {
+        AutosavePost(id: "${postID}") {
+          title
+        }
+      }`;
+
+      const response = await client.request(query);
+      const data = response.AutosavePost;
+      expect(data.title).toStrictEqual(title);
+    });
+  });
 });

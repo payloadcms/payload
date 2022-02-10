@@ -11,10 +11,11 @@ import formatName from '../../graphql/utilities/formatName';
 import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
 import { BaseFields } from './types';
 import { getCollectionIDType } from '../../graphql/schema/buildMutationInputType';
+import buildVersionWhereInputType from '../../graphql/schema/buildVersionWhereInputType';
 
 function registerCollections(): void {
   const {
-    // TODO: findVersions, findVersionByID, publishVersion
+    findVersions, findVersionByID, publishVersion,
     create, find, findByID, deleteResolver, update,
   } = this.graphQL.resolvers.collections;
 
@@ -179,6 +180,35 @@ function registerCollections(): void {
       },
       resolve: deleteResolver(collection),
     };
+
+    if (collection.config.versions) {
+      collection.graphQL.versionType = this.buildVersionType(collection.graphQL.type);
+      this.Query.fields[`version${formatName(singularLabel)}`] = {
+        type: collection.graphQL.versionType,
+        args: {
+          id: { type: GraphQLString },
+        },
+        resolve: findVersionByID(collection),
+      };
+      this.Query.fields[`versions${pluralLabel}`] = {
+        type: buildPaginatedListType(`versions${formatName(pluralLabel)}`, collection.graphQL.versionType),
+        args: {
+          where: { type: buildVersionWhereInputType(singularLabel, collection.config) },
+          autosave: { type: GraphQLBoolean },
+          page: { type: GraphQLInt },
+          limit: { type: GraphQLInt },
+          sort: { type: GraphQLString },
+        },
+        resolve: findVersions(collection),
+      };
+      this.Mutation.fields[`restoreVersion${formatName(singularLabel)}`] = {
+        type: new GraphQLNonNull(GraphQLBoolean),
+        args: {
+          id: { type: GraphQLString },
+        },
+        resolve: publishVersion(collection),
+      };
+    }
 
     if (collection.config.auth) {
       collection.graphQL.JWT = this.buildObjectType(

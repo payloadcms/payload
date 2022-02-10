@@ -185,7 +185,6 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   }
 
   let result: Document = doc.toJSON({ virtuals: true });
-  // TODO: default status to 'draft';
   const verificationToken = result._verificationToken;
 
   // custom id type reset
