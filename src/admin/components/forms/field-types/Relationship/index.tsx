@@ -11,11 +11,13 @@ import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { relationship } from '../../../../../fields/validations';
+import { Where } from '../../../../../types';
 import { PaginatedDocs } from '../../../../../mongoose/types';
 import { useFormProcessing } from '../../Form/context';
 import optionsReducer from './optionsReducer';
-import { Props, Option, ValueWithRelation } from './types';
+import { Props, Option, ValueWithRelation, GetResults } from './types';
 import useDebounce from '../../../../hooks/useDebounce';
+import { createRelationMap } from './createRelationMap';
 
 import './index.scss';
 
@@ -59,7 +61,7 @@ const Relationship: React.FC<Props> = (props) => {
   const [search, setSearch] = useState('');
   const [errorLoading, setErrorLoading] = useState('');
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false);
-  const debouncedSearch = useDebounce(search, 300);
+  const debouncedSearch = useDebounce<string>(search, 300);
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required });
@@ -78,15 +80,18 @@ const Relationship: React.FC<Props> = (props) => {
     condition,
   });
 
-  const addOptions = useCallback((data, relation) => {
+  const addOptions = useCallback((data, relation, sort) => {
     const collection = collections.find((coll) => coll.slug === relation);
-    dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection });
+    dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, sort });
   }, [collections, hasMultipleRelations]);
 
-  const getResults = useCallback(async ({
+
+  const getResults: GetResults = useCallback(async ({
     lastFullyLoadedRelation: lastFullyLoadedRelationArg,
     lastLoadedPage: lastLoadedPageArg,
     search: searchArg,
+    value: valueArg,
+    sort,
   }) => {
     let lastLoadedPageToUse = typeof lastLoadedPageArg !== 'undefined' ? lastLoadedPageArg : 1;
     const lastFullyLoadedRelationToUse = typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1;
@@ -95,6 +100,7 @@ const Relationship: React.FC<Props> = (props) => {
     const relationsToFetch = lastFullyLoadedRelationToUse === -1 ? relations : relations.slice(lastFullyLoadedRelationToUse + 1);
 
     let resultsFetched = 0;
+    const relationMap = createRelationMap({ hasMany, relationTo, value: valueArg });
 
     if (!errorLoading) {
       relationsToFetch.reduce(async (priorRelation, relation) => {
@@ -103,15 +109,35 @@ const Relationship: React.FC<Props> = (props) => {
         if (resultsFetched < 10) {
           const collection = collections.find((coll) => coll.slug === relation);
           const fieldToSearch = collection?.admin?.useAsTitle || 'id';
-          const searchParam = searchArg ? `&where[${fieldToSearch}][like]=${searchArg}` : '';
 
-          const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageToUse}&depth=0${searchParam}`);
+          const query: {
+            [key: string]: unknown
+            where: Where
+          } = {
+            where: {},
+            limit: maxResultsPerRequest,
+            page: lastLoadedPageToUse,
+            sort: fieldToSearch,
+            depth: 0,
+          };
+
+          if (searchArg) {
+            query.where[fieldToSearch] = {
+              like: searchArg,
+            };
+          } else {
+            query.where.id = {
+              not_in: relationMap[relation],
+            };
+          }
+
+          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`);
 
           if (response.ok) {
-            const data: PaginatedDocs<any> = await response.json();
+            const data: PaginatedDocs<unknown> = await response.json();
             if (data.docs.length > 0) {
               resultsFetched += data.docs.length;
-              addOptions(data, relation);
+              addOptions(data, relation, sort);
               setLastLoadedPage(data.page);
 
               if (!data.nextPage) {
@@ -130,7 +156,7 @@ const Relationship: React.FC<Props> = (props) => {
         }
       }, Promise.resolve());
     }
-  }, [addOptions, api, collections, serverURL, errorLoading, relationTo]);
+  }, [addOptions, api, collections, serverURL, errorLoading, relationTo, hasMany]);
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
@@ -207,64 +233,30 @@ const Relationship: React.FC<Props> = (props) => {
 
     setLastLoadedPage(1);
     setLastFullyLoadedRelation(-1);
-    getResults({ search: debouncedSearch });
-  }, [getResults, debouncedSearch, relationTo, required]);
+    getResults({ search: debouncedSearch, value: initialValue, sort: true });
+  }, [getResults, debouncedSearch, relationTo, required, initialValue]);
 
   // ///////////////////////////
-  // Format options once first options have been retrieved
+  // Fetch value options when initialValue changes
   // ///////////////////////////
 
   useEffect(() => {
-    if (value && !hasLoadedFirstOptions) {
-      const optionsToLoad: {
-        [relation: string]: unknown[]
-      } = {};
+    if (initialValue && !hasLoadedFirstOptions) {
+      const relationMap = createRelationMap({
+        hasMany,
+        relationTo,
+        value: initialValue,
+      });
 
-      const add = (relation: string, id: unknown) => {
-        if (typeof optionsToLoad[relation] === 'undefined') optionsToLoad[relation] = [];
+      Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
+        await priorRelation;
 
-        if (id !== 'null' && id !== null) {
-          optionsToLoad[relation].push(id);
-        }
-      };
-
-      if (hasMany) {
-        const matchedOptions = findOptionsByValue();
-
-        (matchedOptions as Value[] || []).forEach((option, i) => {
-          if (!option) {
-            if (hasMultipleRelations) {
-              add(value[i].relationTo, value[i].value);
-            } else {
-              add(relationTo, value[i]);
-            }
-          }
-        });
-      } else {
-        const matchedOption = findOptionsByValue();
-
-        if (!matchedOption) {
-          if (hasMultipleRelations) {
-            const valueWithRelation = value as ValueWithRelation;
-            add(valueWithRelation.relationTo, valueWithRelation.value);
-          } else {
-            add(relationTo, value);
-          }
-        }
-      }
-
-      Object.entries(optionsToLoad).forEach(async ([relation, ids]) => {
         if (ids.length > 0) {
           const query = {
             where: {
-              or: ids.reduce((idsToLoad: unknown[], id) => [
-                ...idsToLoad,
-                {
-                  id: {
-                    equals: id,
-                  },
-                },
-              ], []),
+              id: {
+                in: ids,
+              },
             },
             depth: 0,
             limit: ids.length,
@@ -272,20 +264,19 @@ const Relationship: React.FC<Props> = (props) => {
 
           if (!errorLoading) {
             const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`);
-
             if (response.ok) {
               const data = await response.json();
-              addOptions({ docs: data.docs }, relation);
+              addOptions({ docs: data.docs }, relation, true);
             } else {
               console.error(`There was a problem loading relationships to related collection ${relation}.`);
             }
           }
         }
-      });
+      }, Promise.resolve());
 
       setHasLoadedFirstOptions(true);
     }
-  }, [findOptionsByValue, hasMany, hasMultipleRelations, relationTo, value, hasLoadedFirstOptions, errorLoading, addOptions, api, serverURL]);
+  }, [hasMany, hasMultipleRelations, relationTo, initialValue, hasLoadedFirstOptions, errorLoading, addOptions, api, serverURL]);
 
   useEffect(() => {
     setHasLoadedFirstOptions(false);
@@ -345,7 +336,13 @@ const Relationship: React.FC<Props> = (props) => {
             }
           } : undefined}
           onMenuScrollToBottom={() => {
-            getResults({ lastFullyLoadedRelation, lastLoadedPage: lastLoadedPage + 1, search });
+            getResults({
+              lastFullyLoadedRelation,
+              lastLoadedPage: lastLoadedPage + 1,
+              search,
+              value: initialValue,
+              sort: false,
+            });
           }}
           value={valueToRender}
           showError={showError}

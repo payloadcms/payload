@@ -14,6 +14,14 @@ const reduceToIDs = (options) => options.reduce((ids, option) => {
   ];
 }, []);
 
+const sortOptions = (options: Option[]): Option[] => options.sort((a: Option, b: Option) => {
+  if (typeof a?.label?.localeCompare === 'function' && typeof b?.label?.localeCompare === 'function') {
+    return a.label.localeCompare(b.label);
+  }
+
+  return 0;
+});
+
 const optionsReducer = (state: Option[], action: Action): Option[] => {
   switch (action.type) {
     case 'CLEAR': {
@@ -21,14 +29,14 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
     }
 
     case 'ADD': {
-      const { hasMultipleRelations, collection, relation, data } = action;
+      const { hasMultipleRelations, collection, relation, data, sort } = action;
 
       const labelKey = collection.admin.useAsTitle || 'id';
 
       const loadedIDs = reduceToIDs(state);
 
       if (!hasMultipleRelations) {
-        return [
+        const options = [
           ...state,
           ...data.docs.reduce((docs, doc) => {
             if (loadedIDs.indexOf(doc.id) === -1) {
@@ -44,6 +52,8 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
             return docs;
           }, []),
         ];
+
+        return sort ? sortOptions(options) : options;
       }
 
       const newOptions = [...state];
@@ -67,14 +77,16 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
       }, []);
 
       if (optionsToAddTo) {
-        optionsToAddTo.options = [
+        const subOptions = [
           ...optionsToAddTo.options,
           ...newSubOptions,
         ];
+
+        optionsToAddTo.options = sort ? sortOptions(subOptions) : subOptions;
       } else {
         newOptions.push({
           label: collection.labels.plural,
-          options: newSubOptions,
+          options: sort ? sortOptions(newSubOptions) : newSubOptions,
           value: undefined,
         });
       }

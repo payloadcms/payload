@@ -24,6 +24,7 @@ type ADD = {
   relation: string
   hasMultipleRelations: boolean
   collection: SanitizedCollectionConfig
+  sort?: boolean
 }
 
 export type Action = CLEAR | ADD
@@ -32,3 +33,11 @@ export type ValueWithRelation = {
   relationTo: string
   value: string
 }
+
+export type GetResults = (args: {
+  lastFullyLoadedRelation?: number
+  lastLoadedPage?: number
+  search?: string
+  value?: unknown
+  sort?: boolean
+}) => Promise<void>
