@@ -126,7 +126,7 @@ export type Config = {
   };
   collections?: CollectionConfig[];
   globals?: GlobalConfig[];
-  serverURL: string;
+  serverURL?: string;
   cookiePrefix?: string;
   csrf?: string[];
   cors?: string[] | '*';
