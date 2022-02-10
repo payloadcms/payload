@@ -106,7 +106,7 @@ export default function registerCollections(ctx: Payload): void {
         findByID,
         findVersions,
         findVersionByID,
-        publishVersion,
+        restoreVersion,
         delete: deleteHandler,
       } = ctx.requestHandlers.collections;
 
@@ -182,7 +182,7 @@ export default function registerCollections(ctx: Payload): void {
 
         router.route(`/${slug}/versions/:id`)
           .get(findVersionByID)
-          .post(publishVersion);
+          .post(restoreVersion);
       }
 
       router.route(`/${slug}`)

@@ -54,7 +54,7 @@ export default function initGlobals(ctx: Payload): void {
 
           router.route(`/globals/${global.slug}/versions/:id`)
             .get(ctx.requestHandlers.globals.findVersionByID(global))
-            .post(ctx.requestHandlers.globals.publishVersion(global));
+            .post(ctx.requestHandlers.globals.restoreVersion(global));
         }
       });
 

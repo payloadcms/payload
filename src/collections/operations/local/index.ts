@@ -6,7 +6,7 @@ import localDelete from './delete';
 import auth from '../../../auth/operations/local';
 import findVersionByID from './findVersionByID';
 import findVersions from './findVersions';
-import publishVersion from './publishVersion';
+import restoreVersion from './restoreVersion';
 
 export default {
   find,
@@ -17,5 +17,5 @@ export default {
   auth,
   findVersionByID,
   findVersions,
-  publishVersion,
+  restoreVersion,
 };

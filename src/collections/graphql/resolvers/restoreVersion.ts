@@ -15,7 +15,7 @@ export type Resolver = (
   }
 ) => Promise<Document>
 
-export default function publishVersion(collection: Collection): Resolver {
+export default function restoreVersion(collection: Collection): Resolver {
   async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
@@ -26,10 +26,10 @@ export default function publishVersion(collection: Collection): Resolver {
       req: context.req,
     };
 
-    await this.operations.collections.publishVersion(options);
+    await this.operations.collections.restoreVersion(options);
     return true;
   }
 
-  const findVersionByIDResolver = resolver.bind(this);
-  return findVersionByIDResolver;
+  const restoreVersionResolver = resolver.bind(this);
+  return restoreVersionResolver;
 }
