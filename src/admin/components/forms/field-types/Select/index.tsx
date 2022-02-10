@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import withCondition from '../../withCondition';
 import useField from '../../useField';
 import { select } from '../../../../../fields/validations';
@@ -38,7 +38,11 @@ const Select: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const [options] = useState(formatOptions(optionsFromProps));
+  const [options, setOptions] = useState(formatOptions(optionsFromProps));
+
+  useEffect(() => {
+    setOptions(formatOptions(optionsFromProps));
+  }, [optionsFromProps])
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required, options });
