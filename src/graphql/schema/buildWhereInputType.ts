@@ -15,7 +15,7 @@ import {
 import formatName from '../utilities/formatName';
 import withOperators from './withOperators';
 import operators from './operators';
-import buildInputObject from './buildInputObject';
+import withWhereAndOr from './withWhereAndOr';
 import fieldToSchemaMap from './fieldToSchemaMap';
 
 // buildWhereInputType is similar to buildObjectType and operates
@@ -67,7 +67,7 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
 
   const fieldName = formatName(name);
 
-  return buildInputObject(fieldName, fieldTypes);
+  return withWhereAndOr(fieldName, fieldTypes);
 };
 
 export default buildWhereInputType;

@@ -8,7 +8,7 @@ import { GraphQLJSON } from 'graphql-type-json';
 import formatName from '../utilities/formatName';
 import withOperators from './withOperators';
 import { FieldAffectingData } from '../../fields/config/types';
-import buildInputObject from './buildInputObject';
+import withWhereAndOr from './withWhereAndOr';
 import operators from './operators';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths';
@@ -41,7 +41,7 @@ const buildVersionWhereInputType = (singularLabel: string, parentCollection: San
     fieldTypes[versionField.key] = versionField.type;
   });
 
-  return buildInputObject(name, fieldTypes);
+  return withWhereAndOr(name, fieldTypes);
 };
 
 export default buildVersionWhereInputType;
