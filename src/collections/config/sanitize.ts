@@ -26,7 +26,7 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug);
 
   if (sanitized.versions) {
-    if (sanitized.versions === true) sanitized.versions = {};
+    if (sanitized.versions === true) sanitized.versions = { drafts: false };
 
     if (sanitized.timestamps === false) {
       throw new TimestampsRequired(collection);

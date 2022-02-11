@@ -32,7 +32,7 @@ const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[
     if (!sanitizedGlobal.hooks.afterRead) sanitizedGlobal.hooks.afterRead = [];
 
     if (sanitizedGlobal.versions) {
-      if (sanitizedGlobal.versions === true) sanitizedGlobal.versions = {};
+      if (sanitizedGlobal.versions === true) sanitizedGlobal.versions = { drafts: false };
 
       if (sanitizedGlobal.versions.drafts) {
         if (sanitizedGlobal.versions.drafts === true) {
