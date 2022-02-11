@@ -7,7 +7,7 @@ keywords: version history, revisions, audit log, draft, publish, autosave, Conte
 ---
 
 <Banner>
-  Payload's powerful Versions functionality allows you to keep a running history of changes over time. Versions are available as of Payload <strong>0.15.0</strong>.
+  Payload's powerful Versions functionality allows you to keep a running history of changes over time. Versions are available as of <strong>payload@0.14.23-beta.0</strong>.
 </Banner>
 
 When enabled, Payload will automatically scaffold a new Collection in your database to store versions of your document(s) over time, and the Admin UI will be extended with additional views that allow you to browse document versions, view diffs in order to see exactly what has changed in your documents (and when they changed), and restore documents back to prior versions easily.
@@ -42,14 +42,11 @@ For example, a use case for "versions enabled, drafts disabled" could be on a co
 
 If you have versions _and_ drafts enabled, you are able to control which documents are published, and which are considered draft. That lets you write [access control](/docs/access-control/overview) to control who can see published documents, and who can see draft documents. It also lets you save versions (drafts) that are _newer_ than your most recently published document, which is helpful if you want to draft changes and maybe even preview them before you publish the changes. Read more about Drafts [here](/docs/versions/drafts).
 
-![Drafts Enabled](/images/docs/drafts-enabled.png)
-*If Drafts are enabled, a new button appears while editing documents*
-
 ##### Versions, drafts, and autosave enabled
 
 When you have versions, drafts, _and_ `autosave` enabled, the Admin UI will automatically save changes that you make to a new `draft` version as you edit a document, which makes sure that you never lose your changes ever again. Autosave will not affect your published post at all—instead, it'll just save your changes and let you publish them whenever you or your editors are ready to do so. Read more about Autosave [here](/docs/versions/autosave).
 
-#### Collection Config
+#### Collection config
 
 Configuring Versions is done by adding the `versions` key to your Collection configs. Set it to `true` to enable default Versions settings, or customize versions options by setting the property equal to an object containing the following available options:
 
@@ -57,19 +54,46 @@ Configuring Versions is done by adding the `versions` key to your Collection con
 | ---------------------------- | -------------|
 | `maxPerDoc`                  | Use this setting to control how many versions to keep on a document by document basis. Must be an integer. |
 | `retainDeleted`              | Boolean to determine if, when a document is deleted, you'd like to retain versions of that document, or go through and automatically delete all versions that are associated with the deleted document. |
-| `drafts `                    | Enable [Drafts](/docs/versions/drafts) mode for this collection. |
+| `drafts `                    | Enable [Drafts](/docs/versions/drafts) mode for this collection. To enable, set to `true` or pass an object with `draft` [options](/docs/versions/drafts#options). |
 
 
-#### Global Config
+#### Global config
 
 Global versions work similarly to Collection versions but have a slightly different set of config properties supported.
 
 | Option    | Description  |
 | --------- | -------------|
 | `max`     | Use this setting to control how many versions to keep on a global by global basis. Must be an integer. |
-| `drafts`  | Enable [Drafts](/docs/versions/drafts) mode for this global. |
+| `drafts`  | Enable [Drafts](/docs/versions/drafts) mode for this global. To enable, set to `true` or pass an object with `draft` [options](/docs/versions/drafts#options) |
 
-### Version Operations
+
+#### Database impact
+
+By enabling `versions`, a new MongoDB collection will be made to store versions for your collection or global. The collection will be named based off the `slug` of the collection or global and will follow this pattern (where `slug` is replaced with the `slug` of your collection or global):
+
+```
+_slug_versions
+```
+
+Each document in this new `versions` collection will store a set of meta properties about the version as well as a _full_ copy of the document. For example, a version's data might look like this for a Collection document:
+
+```js
+{
+  "_id": "61cf752c19cdf1b1af7b61f1", // a unique ID of this version
+  "parent": "61ce1354091d5b3ffc20ea6e", // the ID of the parent document
+  "autosave": false, // used to denote if this version was created via autosave
+  "version": {
+    // your document's data goes here
+    // all fields are set to not required and this property can be partially complete
+  },
+  "createdAt": "2021-12-31T21:25:00.992+00:00",
+  "updatedAt": "2021-12-31T21:25:00.992+00:00"
+}
+```
+
+Global versions are stored the same as the collection version shown above, except they do not feature the `parent` property, as each Global receives its own `versions` collection. That means we know that all versions in that collection correspond to that specific global.
+
+### Version operations
 
 Versions expose new operations for both collections and globals. They allow you to find and query versions, find a single version by ID, and publish (or restore) a version by ID. Both Collections and Globals support the same new operations. They are used primarily by the admin UI, but if you are writing custom logic in your app and would like to utilize them, they're available for you to use as well via REST, GraphQL, and Local APIs.
 
