@@ -20,12 +20,12 @@ import {
   TextField, UploadField,
 } from '../../fields/config/types';
 import withOperators from './withOperators';
-import { operators } from './operators';
+import operators from './operators';
 import combineParentName from '../utilities/combineParentName';
 import formatName from '../utilities/formatName';
-import { recursivelyBuildNestedPaths } from './recursivelyBuildNestedPaths';
+import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths';
 
-export const fieldToSchemaMap = (parentName: string) => ({
+const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
   number: (field: NumberField) => {
     const type = GraphQLFloat;
     return {
@@ -254,3 +254,5 @@ export const fieldToSchemaMap = (parentName: string) => ({
     return rowSchema;
   }, []),
 });
+
+export default fieldToSchemaMap;

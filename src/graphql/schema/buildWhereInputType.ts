@@ -14,9 +14,9 @@ import {
 } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import withOperators from './withOperators';
-import { operators } from './operators';
+import operators from './operators';
 import buildInputObject from './buildInputObject';
-import { fieldToSchemaMap } from './fieldToSchemaMap';
+import fieldToSchemaMap from './fieldToSchemaMap';
 
 // buildWhereInputType is similar to buildObjectType and operates
 // on a field basis with a few distinct differences.
@@ -25,7 +25,7 @@ import { fieldToSchemaMap } from './fieldToSchemaMap';
 // 2. Relationships, groups, repeaters and flex content are not
 //    directly searchable. Instead, we need to build a chained pathname
 //    using dot notation so Mongo can properly search nested paths.
-export const buildWhereInputType = (name: string, fields: Field[], parentName: string): GraphQLInputObjectType => {
+const buildWhereInputType = (name: string, fields: Field[], parentName: string): GraphQLInputObjectType => {
   // This is the function that builds nested paths for all
   // field types with nested paths.
 
@@ -69,3 +69,5 @@ export const buildWhereInputType = (name: string, fields: Field[], parentName: s
 
   return buildInputObject(fieldName, fieldTypes);
 };
+
+export default buildWhereInputType;

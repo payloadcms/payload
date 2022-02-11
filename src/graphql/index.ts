@@ -14,7 +14,7 @@ import initGlobals from '../globals/graphql/init';
 import initPreferences from '../preferences/graphql/init';
 import { GraphQLResolvers } from './bindResolvers';
 import buildVersionType from './schema/buildVersionType';
-import { buildWhereInputType } from './schema/buildWhereInputType';
+import buildWhereInputType from './schema/buildWhereInputType';
 import { SanitizedConfig } from '../config/types';
 
 type GraphQLTypes = {

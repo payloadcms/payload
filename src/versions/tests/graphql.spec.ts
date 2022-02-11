@@ -64,23 +64,58 @@ describe('GrahpQL Version Resolvers', () => {
   });
 
   describe('Read', () => {
-    it('should allow read of autosavePost versions', async () => {
-      const updatedTitle = 'updated title';
+    const updatedTitle = 'updated title';
 
-      // modify the post so it will create a new version
+    beforeAll(async (done) => {
+      // modify the post to create a new version
       // language=graphQL
       const update = `mutation {
         updateAutosavePost(id: "${postID}", data: {title: "${updatedTitle}"}) {
-        title
+          title
         }
       }`;
-
       await client.request(update);
 
-      // query the version
       // language=graphQL
       const query = `query {
           versionsAutosavePosts(where: { parent: { equals: "${postID}" } }) {
+          docs {
+            id
+          }
+        }
+      }`;
+
+      const response = await client.request(query);
+
+      versionID = response.versionsAutosavePosts.docs[0].id;
+      done();
+    });
+
+    it('should allow read of versions by version id', async () => {
+      const query = `query {
+        versionAutosavePost(id: "${versionID}") {
+          id
+          parent
+          version {
+            title
+          }
+        }
+      }`;
+
+      const response = await client.request(query);
+
+      const data = response.versionAutosavePost;
+      versionID = data.id;
+
+      expect(data.id).toBeDefined();
+      expect(data.parent).toStrictEqual(postID);
+      expect(data.version.title).toStrictEqual(title);
+    });
+
+    it('should allow read of versions by querying version content', async () => {
+      // language=graphQL
+      const query = `query {
+          versionsAutosavePosts(where: { version__title: {equals: "${title}" } }) {
           docs {
             id
             parent

@@ -1,9 +1,7 @@
 import {
   GraphQLInputFieldConfigMap,
   GraphQLInputObjectType,
-  GraphQLInt,
   GraphQLList,
-  GraphQLString,
   Thunk,
 } from 'graphql';
 
@@ -24,9 +22,6 @@ const buildInputObject = (name: string, fieldTypes: Thunk<GraphQLInputFieldConfi
           fields: fieldTypes,
         })),
       },
-      page: { type: GraphQLInt },
-      limit: { type: GraphQLInt },
-      sort: { type: GraphQLString },
     },
   });
 };

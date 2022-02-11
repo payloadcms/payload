@@ -4,9 +4,9 @@ import {
   fieldIsPresentationalOnly,
   FieldWithSubFields,
 } from '../../fields/config/types';
-import { fieldToSchemaMap } from './fieldToSchemaMap';
+import fieldToSchemaMap from './fieldToSchemaMap';
 
-export const recursivelyBuildNestedPaths = (parentName: string, field: FieldWithSubFields & FieldAffectingData) => {
+const recursivelyBuildNestedPaths = (parentName: string, field: FieldWithSubFields & FieldAffectingData) => {
   const nestedPaths = field.fields.reduce((nestedFields, nestedField) => {
     if (!fieldIsPresentationalOnly(nestedField)) {
       const getFieldSchema = fieldToSchemaMap(parentName)[nestedField.type];
@@ -40,3 +40,5 @@ export const recursivelyBuildNestedPaths = (parentName: string, field: FieldWith
 
   return nestedPaths;
 };
+
+export default recursivelyBuildNestedPaths;

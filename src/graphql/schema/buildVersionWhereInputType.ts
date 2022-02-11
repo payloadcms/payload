@@ -9,9 +9,9 @@ import formatName from '../utilities/formatName';
 import withOperators from './withOperators';
 import { FieldAffectingData } from '../../fields/config/types';
 import buildInputObject from './buildInputObject';
-import { operators } from './operators';
+import operators from './operators';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
-import { recursivelyBuildNestedPaths } from './recursivelyBuildNestedPaths';
+import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths';
 
 const buildVersionWhereInputType = (singularLabel: string, parentCollection: SanitizedCollectionConfig): GraphQLInputObjectType => {
   const name = `version${formatName(singularLabel)}`;

@@ -182,11 +182,15 @@ function registerCollections(): void {
     };
 
     if (collection.config.versions) {
-      collection.graphQL.versionType = this.buildVersionType(collection.graphQL.type);
+      collection.graphQL.versionType = this.buildVersionType(collection.graphQL.type, collection.config.versions);
       this.Query.fields[`version${formatName(singularLabel)}`] = {
         type: collection.graphQL.versionType,
         args: {
           id: { type: GraphQLString },
+          ...(this.config.localization ? {
+            locale: { type: this.types.localeInputType },
+            fallbackLocale: { type: this.types.fallbackLocaleInputType },
+          } : {}),
         },
         resolve: findVersionByID(collection),
       };
@@ -194,7 +198,10 @@ function registerCollections(): void {
         type: buildPaginatedListType(`versions${formatName(pluralLabel)}`, collection.graphQL.versionType),
         args: {
           where: { type: buildVersionWhereInputType(singularLabel, collection.config) },
-          autosave: { type: GraphQLBoolean },
+          ...(this.config.localization ? {
+            locale: { type: this.types.localeInputType },
+            fallbackLocale: { type: this.types.fallbackLocaleInputType },
+          } : {}),
           page: { type: GraphQLInt },
           limit: { type: GraphQLInt },
           sort: { type: GraphQLString },
