@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
 import {
-  GraphQLInputObjectType,
+  GraphQLInputObjectType, GraphQLList,
 } from 'graphql';
 
 import { GraphQLJSON } from 'graphql-type-json';
@@ -15,7 +15,6 @@ import {
 import formatName from '../utilities/formatName';
 import withOperators from './withOperators';
 import operators from './operators';
-import withWhereAndOr from './withWhereAndOr';
 import fieldToSchemaMap from './fieldToSchemaMap';
 
 // buildWhereInputType is similar to buildObjectType and operates
@@ -67,7 +66,24 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
 
   const fieldName = formatName(name);
 
-  return withWhereAndOr(fieldName, fieldTypes);
+  return new GraphQLInputObjectType({
+    name: `${fieldName}_where`,
+    fields: {
+      ...fieldTypes,
+      OR: {
+        type: new GraphQLList(new GraphQLInputObjectType({
+          name: `${fieldName}_where_or`,
+          fields: fieldTypes,
+        })),
+      },
+      AND: {
+        type: new GraphQLList(new GraphQLInputObjectType({
+          name: `${fieldName}_where_and`,
+          fields: fieldTypes,
+        })),
+      },
+    },
+  });
 };
 
 export default buildWhereInputType;

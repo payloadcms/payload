@@ -197,27 +197,29 @@ function registerCollections(): void {
       this.Query.fields[`versions${pluralLabel}`] = {
         type: buildPaginatedListType(`versions${formatName(pluralLabel)}`, collection.graphQL.versionType),
         args: {
-          where: this.buildWhereInputType(
-            `versions${singularLabel}`,
-            [
-              ...buildVersionCollectionFields(collection),
-              {
-                name: 'id',
-                type: 'text',
-              },
-              {
-                name: 'createdAt',
-                label: 'Created At',
-                type: 'date',
-              },
-              {
-                name: 'updatedAt',
-                label: 'Updated At',
-                type: 'date',
-              },
-            ],
-            `versions${singularLabel}`,
-          ),
+          where: {
+            type: this.buildWhereInputType(
+              `versions${singularLabel}`,
+              [
+                ...buildVersionCollectionFields(collection.config),
+                {
+                  name: 'id',
+                  type: 'text',
+                },
+                {
+                  name: 'createdAt',
+                  label: 'Created At',
+                  type: 'date',
+                },
+                {
+                  name: 'updatedAt',
+                  label: 'Updated At',
+                  type: 'date',
+                },
+              ],
+              `versions${singularLabel}`,
+            ),
+          },
           ...(this.config.localization ? {
             locale: { type: this.types.localeInputType },
             fallbackLocale: { type: this.types.fallbackLocaleInputType },
