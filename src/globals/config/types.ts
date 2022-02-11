@@ -39,7 +39,9 @@ export type AfterReadHook = (args: {
   query?: { [key: string]: any };
 }) => any;
 
-export type GlobalModel = Model<Document>
+export interface GlobalModel extends Model<Document> {
+  buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
+}
 
 export type GlobalConfig = {
   slug: string

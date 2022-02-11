@@ -1,4 +1,7 @@
+import { hasWhereAccessResult } from '../../auth';
 import executeAccess from '../../auth/executeAccess';
+import { Where } from '../../types';
+import { AccessResult } from '../../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 
@@ -13,19 +16,42 @@ async function findOne(args) {
     depth,
     showHiddenFields,
     draft: draftEnabled = false,
+    overrideAccess = false,
   } = args;
 
   // /////////////////////////////////////
   // Retrieve and execute access
   // /////////////////////////////////////
 
-  const accessResult = await executeAccess({ req }, globalConfig.access.read);
+  const queryToBuild: { where?: Where} = {
+    where: {
+      and: [
+        {
+          globalType: {
+            equals: slug,
+          },
+        },
+      ],
+    },
+  };
+
+  let accessResult: AccessResult;
+
+  if (!overrideAccess) {
+    accessResult = await executeAccess({ req }, globalConfig.access.read);
+
+    if (hasWhereAccessResult(accessResult)) {
+      queryToBuild.where.and.push(accessResult);
+    }
+  }
+
+  const query = await Model.buildQuery(queryToBuild, locale);
 
   // /////////////////////////////////////
   // Perform database operation
   // /////////////////////////////////////
 
-  let doc = await Model.findOne({ globalType: slug }).lean();
+  let doc = await Model.findOne(query).lean();
 
   if (!doc) {
     doc = {};

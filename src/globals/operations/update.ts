@@ -1,4 +1,5 @@
 import { Payload } from '../..';
+import { Where } from '../../types';
 import { TypeWithID } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -6,6 +7,7 @@ import { saveGlobalVersion } from '../../versions/saveGlobalVersion';
 import { saveGlobalDraft } from '../../versions/drafts/saveGlobalDraft';
 import { ensurePublishedGlobalVersion } from '../../versions/ensurePublishedGlobalVersion';
 import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
+import { hasWhereAccessResult } from '../../auth';
 
 async function update<T extends TypeWithID = any>(this: Payload, args): Promise<T> {
   const { globals: { Model } } = this;
@@ -14,6 +16,9 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
     globalConfig,
     slug,
     req,
+    req: {
+      locale,
+    },
     depth,
     overrideAccess,
     showHiddenFields,
@@ -27,15 +32,35 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  if (!overrideAccess) {
-    await executeAccess({ req }, globalConfig.access.update);
+  const accessResults = !overrideAccess ? await executeAccess({ req }, globalConfig.access.update) : true;
+
+  // /////////////////////////////////////
+  // Retrieve document
+  // /////////////////////////////////////
+
+  const queryToBuild: { where: Where } = {
+    where: {
+      and: [
+        {
+          globalType: {
+            equals: slug,
+          },
+        },
+      ],
+    },
+  };
+
+  if (hasWhereAccessResult(accessResults)) {
+    (queryToBuild.where.and as Where[]).push(accessResults);
   }
+
+  const query = await Model.buildQuery(queryToBuild, locale);
 
   // /////////////////////////////////////
   // 2. Retrieve document
   // /////////////////////////////////////
 
-  let global: any = await Model.findOne({ globalType: slug });
+  let global: any = await Model.findOne(query);
   let globalJSON;
 
   if (global) {
