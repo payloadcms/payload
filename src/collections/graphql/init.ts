@@ -11,7 +11,7 @@ import formatName from '../../graphql/utilities/formatName';
 import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
 import { BaseFields } from './types';
 import { getCollectionIDType } from '../../graphql/schema/buildMutationInputType';
-import buildVersionWhereInputType from '../../graphql/schema/buildVersionWhereInputType';
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
 
 function registerCollections(): void {
   const {
@@ -84,7 +84,7 @@ function registerCollections(): void {
 
       whereInputFields.push({
         name: 'updatedAt',
-        label: 'Upated At',
+        label: 'Updated At',
         type: 'date',
       });
     }
@@ -197,7 +197,27 @@ function registerCollections(): void {
       this.Query.fields[`versions${pluralLabel}`] = {
         type: buildPaginatedListType(`versions${formatName(pluralLabel)}`, collection.graphQL.versionType),
         args: {
-          where: { type: buildVersionWhereInputType(singularLabel, collection.config) },
+          where: this.buildWhereInputType(
+            `versions${singularLabel}`,
+            [
+              ...buildVersionCollectionFields(collection),
+              {
+                name: 'id',
+                type: 'text',
+              },
+              {
+                name: 'createdAt',
+                label: 'Created At',
+                type: 'date',
+              },
+              {
+                name: 'updatedAt',
+                label: 'Updated At',
+                type: 'date',
+              },
+            ],
+            `versions${singularLabel}`,
+          ),
           ...(this.config.localization ? {
             locale: { type: this.types.localeInputType },
             fallbackLocale: { type: this.types.fallbackLocaleInputType },
