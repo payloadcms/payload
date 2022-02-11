@@ -9,7 +9,7 @@ export type RestoreResult = {
   doc: Document
 };
 
-export default async function publishVersion(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<RestoreResult> | void> {
+export default async function restoreVersion(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<RestoreResult> | void> {
   const options = {
     req,
     collection: req.collection,
@@ -18,7 +18,7 @@ export default async function publishVersion(req: PayloadRequest, res: Response,
   };
 
   try {
-    const doc = await this.operations.collections.publishVersion(options);
+    const doc = await this.operations.collections.restoreVersion(options);
     return res.status(httpStatus.OK).json({
       ...formatSuccessResponse('Restored successfully.', 'message'),
       doc,

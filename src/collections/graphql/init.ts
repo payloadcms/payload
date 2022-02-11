@@ -11,9 +11,11 @@ import formatName from '../../graphql/utilities/formatName';
 import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
 import { BaseFields } from './types';
 import { getCollectionIDType } from '../../graphql/schema/buildMutationInputType';
+import buildVersionWhereInputType from '../../graphql/schema/buildVersionWhereInputType';
 
 function registerCollections(): void {
   const {
+    findVersions, findVersionByID, restoreVersion,
     create, find, findByID, deleteResolver, update,
   } = this.graphQL.resolvers.collections;
 
@@ -178,6 +180,42 @@ function registerCollections(): void {
       },
       resolve: deleteResolver(collection),
     };
+
+    if (collection.config.versions) {
+      collection.graphQL.versionType = this.buildVersionType(collection.graphQL.type, collection.config.versions);
+      this.Query.fields[`version${formatName(singularLabel)}`] = {
+        type: collection.graphQL.versionType,
+        args: {
+          id: { type: GraphQLString },
+          ...(this.config.localization ? {
+            locale: { type: this.types.localeInputType },
+            fallbackLocale: { type: this.types.fallbackLocaleInputType },
+          } : {}),
+        },
+        resolve: findVersionByID(collection),
+      };
+      this.Query.fields[`versions${pluralLabel}`] = {
+        type: buildPaginatedListType(`versions${formatName(pluralLabel)}`, collection.graphQL.versionType),
+        args: {
+          where: { type: buildVersionWhereInputType(singularLabel, collection.config) },
+          ...(this.config.localization ? {
+            locale: { type: this.types.localeInputType },
+            fallbackLocale: { type: this.types.fallbackLocaleInputType },
+          } : {}),
+          page: { type: GraphQLInt },
+          limit: { type: GraphQLInt },
+          sort: { type: GraphQLString },
+        },
+        resolve: findVersions(collection),
+      };
+      this.Mutation.fields[`restoreVersion${formatName(singularLabel)}`] = {
+        type: new GraphQLNonNull(GraphQLBoolean),
+        args: {
+          id: { type: GraphQLString },
+        },
+        resolve: restoreVersion(collection),
+      };
+    }
 
     if (collection.config.auth) {
       collection.graphQL.JWT = this.buildObjectType(

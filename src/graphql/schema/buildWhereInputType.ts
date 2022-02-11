@@ -1,46 +1,22 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
 import {
-  GraphQLBoolean,
-  GraphQLEnumType,
-  GraphQLFloat,
   GraphQLInputObjectType,
-  GraphQLInt,
-  GraphQLList,
-  GraphQLString,
 } from 'graphql';
 
 import { GraphQLJSON } from 'graphql-type-json';
 
-import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
 import {
-  optionIsObject,
-  ArrayField,
-  CheckboxField,
-  CodeField,
-  DateField,
-  EmailField,
   Field,
-  FieldWithSubFields,
-  GroupField,
-  NumberField,
-  RadioField,
-  RelationshipField,
-  RichTextField,
-  RowField,
-  SelectField,
-  TextareaField,
-  TextField,
-  UploadField,
-  PointField,
   FieldAffectingData,
-  fieldAffectsData,
   fieldHasSubFields,
   fieldIsPresentationalOnly,
 } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
-import combineParentName from '../utilities/combineParentName';
 import withOperators from './withOperators';
+import operators from './operators';
+import withWhereAndOr from './withWhereAndOr';
+import fieldToSchemaMap from './fieldToSchemaMap';
 
 // buildWhereInputType is similar to buildObjectType and operates
 // on a field basis with a few distinct differences.
@@ -52,281 +28,10 @@ import withOperators from './withOperators';
 const buildWhereInputType = (name: string, fields: Field[], parentName: string): GraphQLInputObjectType => {
   // This is the function that builds nested paths for all
   // field types with nested paths.
-  const recursivelyBuildNestedPaths = (field: FieldWithSubFields & FieldAffectingData) => {
-    const nestedPaths = field.fields.reduce((nestedFields, nestedField) => {
-      if (!fieldIsPresentationalOnly(nestedField)) {
-        const getFieldSchema = fieldToSchemaMap[nestedField.type];
-        const nestedFieldName = fieldAffectsData(nestedField) ? `${field.name}__${nestedField.name}` : undefined;
-
-        if (getFieldSchema) {
-          const fieldSchema = getFieldSchema({
-            ...nestedField,
-            name: nestedFieldName,
-          });
-
-          if (Array.isArray(fieldSchema)) {
-            return [
-              ...nestedFields,
-              ...fieldSchema,
-            ];
-          }
-
-          return [
-            ...nestedFields,
-            {
-              key: nestedFieldName,
-              type: fieldSchema,
-            },
-          ];
-        }
-      }
-
-      return nestedFields;
-    }, []);
-
-    return nestedPaths;
-  };
-
-  const operators = {
-    equality: ['equals', 'not_equals'],
-    contains: ['in', 'not_in', 'all'],
-    comparison: ['greater_than_equal', 'greater_than', 'less_than_equal', 'less_than'],
-    geo: ['near'],
-  };
-
-  const fieldToSchemaMap = {
-    number: (field: NumberField) => {
-      const type = GraphQLFloat;
-      return {
-        type: withOperators(
-          field,
-          type,
-          parentName,
-          [...operators.equality, ...operators.comparison],
-        ),
-      };
-    },
-    text: (field: TextField) => {
-      const type = GraphQLString;
-      return {
-        type: withOperators(
-          field,
-          type,
-          parentName,
-          [...operators.equality, 'like'],
-        ),
-      };
-    },
-    email: (field: EmailField) => {
-      const type = EmailAddressResolver;
-      return {
-        type: withOperators(
-          field,
-          type,
-          parentName,
-          [...operators.equality, 'like'],
-        ),
-      };
-    },
-    textarea: (field: TextareaField) => {
-      const type = GraphQLString;
-      return {
-        type: withOperators(
-          field,
-          type,
-          parentName,
-          [...operators.equality, 'like'],
-        ),
-      };
-    },
-    richText: (field: RichTextField) => {
-      const type = GraphQLJSON;
-      return {
-        type: withOperators(
-          field,
-          type,
-          parentName,
-          [...operators.equality, 'like'],
-        ),
-      };
-    },
-    code: (field: CodeField) => {
-      const type = GraphQLString;
-      return {
-        type: withOperators(
-          field,
-          type,
-          parentName,
-          [...operators.equality, 'like'],
-        ),
-      };
-    },
-    radio: (field: RadioField) => ({
-      type: withOperators(
-        field,
-        new GraphQLEnumType({
-          name: `${combineParentName(parentName, field.name)}_Input`,
-          values: field.options.reduce((values, option) => {
-            if (optionIsObject(option)) {
-              return {
-                ...values,
-                [formatName(option.value)]: {
-                  value: option.value,
-                },
-              };
-            }
-
-            return {
-              ...values,
-              [formatName(option)]: {
-                value: option,
-              },
-            };
-          }, {}),
-        }),
-        parentName,
-        [...operators.equality, 'like'],
-      ),
-    }),
-    date: (field: DateField) => {
-      const type = DateTimeResolver;
-      return {
-        type: withOperators(
-          field,
-          type,
-          parentName,
-          [...operators.equality, ...operators.comparison, 'like'],
-        ),
-      };
-    },
-    point: (field: PointField) => {
-      const type = GraphQLList(GraphQLFloat);
-      return {
-        type: withOperators(
-          field,
-          type,
-          parentName,
-          [...operators.equality, ...operators.comparison, ...operators.geo],
-        ),
-      };
-    },
-    relationship: (field: RelationshipField) => {
-      let type = withOperators(
-        field,
-        GraphQLString,
-        parentName,
-        [...operators.equality, ...operators.contains],
-      );
-
-      if (Array.isArray(field.relationTo)) {
-        type = new GraphQLInputObjectType({
-          name: `${combineParentName(parentName, field.name)}_Relation`,
-          fields: {
-            relationTo: {
-              type: new GraphQLEnumType({
-                name: `${combineParentName(parentName, field.name)}_Relation_RelationTo`,
-                values: field.relationTo.reduce((values, relation) => ({
-                  ...values,
-                  [formatName(relation)]: {
-                    value: relation,
-                  },
-                }), {}),
-              }),
-            },
-            value: { type: GraphQLString },
-          },
-        });
-      }
-
-      if (field.hasMany) {
-        return {
-          type: new GraphQLList(type),
-        };
-      }
-
-      return { type };
-    },
-    upload: (field: UploadField) => ({
-      type: withOperators(
-        field,
-        GraphQLString,
-        parentName,
-        [...operators.equality],
-      ),
-    }),
-    checkbox: (field: CheckboxField) => ({
-      type: withOperators(
-        field,
-        GraphQLBoolean,
-        parentName,
-        [...operators.equality],
-      ),
-    }),
-    select: (field: SelectField) => ({
-      type: withOperators(
-        field,
-        new GraphQLEnumType({
-          name: `${combineParentName(parentName, field.name)}_Input`,
-          values: field.options.reduce((values, option) => {
-            if (typeof option === 'object' && option.value) {
-              return {
-                ...values,
-                [formatName(option.value)]: {
-                  value: option.value,
-                },
-              };
-            }
-
-            if (typeof option === 'string') {
-              return {
-                ...values,
-                [option]: {
-                  value: option,
-                },
-              };
-            }
-
-            return values;
-          }, {}),
-        }),
-        parentName,
-        [...operators.equality, ...operators.contains],
-      ),
-    }),
-    array: (field: ArrayField) => recursivelyBuildNestedPaths(field),
-    group: (field: GroupField) => recursivelyBuildNestedPaths(field),
-    row: (field: RowField) => field.fields.reduce((rowSchema, rowField) => {
-      const getFieldSchema = fieldToSchemaMap[rowField.type];
-
-      if (getFieldSchema) {
-        const rowFieldSchema = getFieldSchema(rowField);
-
-        if (fieldHasSubFields(rowField)) {
-          return [
-            ...rowSchema,
-            ...rowFieldSchema,
-          ];
-        }
-
-        if (fieldAffectsData(rowField)) {
-          return [
-            ...rowSchema,
-            {
-              key: rowField.name,
-              type: rowFieldSchema,
-            },
-          ];
-        }
-      }
-
-
-      return rowSchema;
-    }, []),
-  };
 
   const fieldTypes = fields.reduce((schema, field) => {
     if (!fieldIsPresentationalOnly(field) && !field.hidden) {
-      const getFieldSchema = fieldToSchemaMap[field.type];
+      const getFieldSchema = fieldToSchemaMap(parentName)[field.type];
 
       if (getFieldSchema) {
         const fieldSchema = getFieldSchema(field);
@@ -362,31 +67,7 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
 
   const fieldName = formatName(name);
 
-  return new GraphQLInputObjectType({
-    name: `${fieldName}_where`,
-    fields: {
-      ...fieldTypes,
-      OR: {
-        type: new GraphQLList(new GraphQLInputObjectType({
-          name: `${fieldName}_where_or`,
-          fields: {
-            ...fieldTypes,
-          },
-        })),
-      },
-      AND: {
-        type: new GraphQLList(new GraphQLInputObjectType({
-          name: `${fieldName}_where_and`,
-          fields: {
-            ...fieldTypes,
-          },
-        })),
-      },
-      page: { type: GraphQLInt },
-      limit: { type: GraphQLInt },
-      sort: { type: GraphQLString },
-    },
-  });
+  return withWhereAndOr(fieldName, fieldTypes);
 };
 
 export default buildWhereInputType;
