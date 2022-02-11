@@ -1,6 +1,7 @@
 import path from 'path';
 
 export const defaults = {
+  serverURL: '',
   defaultDepth: 2,
   maxDepth: 10,
   collections: [],

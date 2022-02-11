@@ -8,7 +8,6 @@ const component = joi.alternatives().try(
 export default joi.object({
   serverURL: joi.string()
     .uri()
-    .required()
     .custom((value, helper) => {
       const urlWithoutProtocol = value.split('//')[1];
 
