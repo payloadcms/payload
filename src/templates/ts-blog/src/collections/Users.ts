@@ -1,7 +1,6 @@
-import { BeforeReadHook } from 'payload/dist/collections/config/types';
-import { CollectionConfig } from 'payload/types';
+import { CollectionBeforeReadHook, CollectionConfig } from 'payload/types';
 
-const onlyNameIfPublic: BeforeReadHook = ({ req: { user }, doc }) => {
+const onlyNameIfPublic: CollectionBeforeReadHook = ({ req: { user }, doc }) => {
   // Only return name if not logged in
   if (!user) {
     return { name: doc.name };
