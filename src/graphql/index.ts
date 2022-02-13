@@ -13,7 +13,6 @@ import initCollections from '../collections/graphql/init';
 import initGlobals from '../globals/graphql/init';
 import initPreferences from '../preferences/graphql/init';
 import { GraphQLResolvers } from './bindResolvers';
-import buildVersionType from './schema/buildVersionType';
 import buildWhereInputType from './schema/buildWhereInputType';
 import { SanitizedConfig } from '../config/types';
 
@@ -46,8 +45,6 @@ class InitializeGraphQL {
   buildObjectType: typeof buildObjectType;
 
   buildPoliciesType: typeof buildPoliciesType;
-
-  buildVersionType: typeof buildVersionType;
 
   initCollections: typeof initCollections;
 
@@ -93,7 +90,6 @@ class InitializeGraphQL {
     this.buildWhereInputType = buildWhereInputType;
     this.buildObjectType = buildObjectType.bind(this);
     this.buildPoliciesType = buildPoliciesType.bind(this);
-    this.buildVersionType = buildVersionType.bind(this);
     this.initCollections = initCollections.bind(this);
     this.initGlobals = initGlobals.bind(this);
     this.initPreferences = initPreferences.bind(this);

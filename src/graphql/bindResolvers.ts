@@ -20,6 +20,9 @@ import restoreVersion from '../collections/graphql/resolvers/restoreVersion';
 
 import findOne from '../globals/graphql/resolvers/findOne';
 import globalUpdate from '../globals/graphql/resolvers/update';
+import globalFindVersionByID from '../globals/graphql/resolvers/findVersionByID';
+import globalFindVersions from '../globals/graphql/resolvers/findVersions';
+import globalRestoreVersion from '../globals/graphql/resolvers/restoreVersion';
 
 import { Payload } from '../index';
 
@@ -49,6 +52,9 @@ export type GraphQLResolvers = {
   globals: {
     findOne: typeof findOne
     update: typeof globalUpdate,
+    findVersionsByID: typeof globalFindVersionByID,
+    findVersions: typeof globalFindVersions,
+    restoreVersion: typeof globalRestoreVersion,
   }
 }
 
@@ -80,6 +86,9 @@ function bindResolvers(ctx: Payload): void {
       globals: {
         findOne: findOne.bind(ctx),
         update: globalUpdate.bind(ctx),
+        findVersionsByID: globalFindVersionByID.bind(ctx),
+        findVersions: globalFindVersions.bind(ctx),
+        restoreVersion: globalRestoreVersion.bind(ctx),
       },
     },
   };

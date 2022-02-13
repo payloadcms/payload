@@ -3,7 +3,7 @@ import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
 import { SanitizedGlobalConfig } from '../config/types';
 
-export default function (globalConfig: SanitizedGlobalConfig) {
+export default function findVersionByID(globalConfig: SanitizedGlobalConfig): Document {
   async function handler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<Document> | void> {
     const options = {
       req,

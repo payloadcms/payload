@@ -5,7 +5,7 @@ import { TypeWithID } from '../../collections/config/types';
 import { PaginatedDocs } from '../../mongoose/types';
 import { SanitizedGlobalConfig } from '../config/types';
 
-export default function (global: SanitizedGlobalConfig) {
+export default function findVersions(global: SanitizedGlobalConfig) {
   async function handler<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
     try {
       let page;

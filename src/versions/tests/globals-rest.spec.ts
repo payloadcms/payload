@@ -31,7 +31,7 @@ describe('Global Versions - REST', () => {
       'Content-Type': 'application/json',
     };
 
-    const post = await fetch(`${url}/api/globals/blocks-global`, {
+    await fetch(`${url}/api/globals/blocks-global`, {
       body: JSON.stringify({
         title: 'Test Global',
         blocks: [

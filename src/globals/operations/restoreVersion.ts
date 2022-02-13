@@ -21,8 +21,6 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-// TODO: finish
-
 async function restoreVersion<T extends TypeWithVersion<T> = any>(this: Payload, args: Arguments): Promise<PaginatedDocs<T>> {
   const { globals: { Model } } = this;
 

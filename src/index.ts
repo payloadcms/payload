@@ -307,9 +307,6 @@ export class Payload {
     return restoreVersion(options);
   }
 
-  // TODO:
-  // graphql Global Versions
-
   login = async <T extends TypeWithID = any>(options): Promise<Result & { user: T}> => {
     let { login } = localOperations.auth;
     login = login.bind(this);

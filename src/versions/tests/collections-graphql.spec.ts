@@ -16,7 +16,7 @@ let token;
 let postID;
 let versionID;
 
-describe('GrahpQL Version Resolvers', () => {
+describe('Collections GrahpQL Version Resolvers', () => {
   const title = 'autosave title';
 
   beforeAll(async (done) => {
@@ -95,7 +95,9 @@ describe('GrahpQL Version Resolvers', () => {
       const query = `query {
         versionAutosavePost(id: "${versionID}") {
           id
-          parent
+          parent {
+            id
+          }
           version {
             title
           }
@@ -108,7 +110,7 @@ describe('GrahpQL Version Resolvers', () => {
       versionID = data.id;
 
       expect(data.id).toBeDefined();
-      expect(data.parent).toStrictEqual(postID);
+      expect(data.parent.id).toStrictEqual(postID);
       expect(data.version.title).toStrictEqual(title);
     });
 
@@ -118,7 +120,9 @@ describe('GrahpQL Version Resolvers', () => {
           versionsAutosavePosts(where: { version__title: {equals: "${title}" } }) {
           docs {
             id
-            parent
+            parent {
+            id
+          }
             version {
               title
             }
@@ -133,7 +137,7 @@ describe('GrahpQL Version Resolvers', () => {
       versionID = doc.id;
 
       expect(doc.id).toBeDefined();
-      expect(doc.parent).toStrictEqual(postID);
+      expect(doc.parent.id).toStrictEqual(postID);
       expect(doc.version.title).toStrictEqual(title);
     });
   });

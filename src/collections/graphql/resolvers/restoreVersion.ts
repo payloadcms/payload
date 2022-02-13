@@ -5,10 +5,6 @@ import { PayloadRequest } from '../../../express/types';
 
 export type Resolver = (
   _: unknown,
-  args: {
-    locale?: string
-    fallbackLocale?: string
-  },
   context: {
     req: PayloadRequest,
     res: Response
@@ -17,9 +13,6 @@ export type Resolver = (
 
 export default function restoreVersion(collection: Collection): Resolver {
   async function resolver(_, args, context) {
-    if (args.locale) context.req.locale = args.locale;
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
-
     const options = {
       collection,
       id: args.id,

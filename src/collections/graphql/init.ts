@@ -182,7 +182,29 @@ function registerCollections(): void {
     };
 
     if (collection.config.versions) {
-      collection.graphQL.versionType = this.buildVersionType(collection.graphQL.type, collection.config.versions);
+      const versionCollectionFields = [
+        ...buildVersionCollectionFields(collection.config),
+        {
+          name: 'id',
+          type: 'text',
+        },
+        {
+          name: 'createdAt',
+          label: 'Created At',
+          type: 'date',
+        },
+        {
+          name: 'updatedAt',
+          label: 'Updated At',
+          type: 'date',
+        },
+      ];
+      collection.graphQL.versionType = this.buildObjectType(
+        `${singularLabel}Version`,
+        versionCollectionFields,
+        `${singularLabel}Version`,
+        {},
+      );
       this.Query.fields[`version${formatName(singularLabel)}`] = {
         type: collection.graphQL.versionType,
         args: {
@@ -200,23 +222,7 @@ function registerCollections(): void {
           where: {
             type: this.buildWhereInputType(
               `versions${singularLabel}`,
-              [
-                ...buildVersionCollectionFields(collection.config),
-                {
-                  name: 'id',
-                  type: 'text',
-                },
-                {
-                  name: 'createdAt',
-                  label: 'Created At',
-                  type: 'date',
-                },
-                {
-                  name: 'updatedAt',
-                  label: 'Updated At',
-                  type: 'date',
-                },
-              ],
+              versionCollectionFields,
               `versions${singularLabel}`,
             ),
           },
