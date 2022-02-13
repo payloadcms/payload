@@ -48,7 +48,7 @@ import { Options as UpdateOptions } from './collections/operations/local/update'
 import { Options as DeleteOptions } from './collections/operations/local/delete';
 import { Options as FindVersionsOptions } from './collections/operations/local/findVersions';
 import { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID';
-import { Options as RestoreVersionOptions } from './collections/operations/local/publishVersion';
+import { Options as RestoreVersionOptions } from './collections/operations/local/restoreVersion';
 import { Result } from './auth/operations/login';
 
 require('isomorphic-fetch');
@@ -301,19 +301,11 @@ export class Payload {
    * @param options
    * @returns version with specified ID
    */
-  publishVersion = async <T extends TypeWithVersion<T> = any>(options: RestoreVersionOptions): Promise<T> => {
-    let { publishVersion } = localOperations;
-    publishVersion = publishVersion.bind(this);
-    return publishVersion(options);
+  restoreVersion = async <T extends TypeWithVersion<T> = any>(options: RestoreVersionOptions): Promise<T> => {
+    let { restoreVersion } = localOperations;
+    restoreVersion = restoreVersion.bind(this);
+    return restoreVersion(options);
   }
-
-  // TODO: globals
-  // findVersionGlobal
-  // findVersionByIDGlobal
-  // publishVersionGlobal
-  // TODO:
-  // graphql operations & request handlers, where
-  // tests
 
   login = async <T extends TypeWithID = any>(options): Promise<Result & { user: T}> => {
     let { login } = localOperations.auth;

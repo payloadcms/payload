@@ -20,8 +20,8 @@ function update(globalConfig) {
     return result;
   }
 
-  const findOneResolver = resolver.bind(this);
-  return findOneResolver;
+  const updateResolver = resolver.bind(this);
+  return updateResolver;
 }
 
 export default update;

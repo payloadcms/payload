@@ -14,9 +14,15 @@ import find from '../collections/graphql/resolvers/find';
 import findByID from '../collections/graphql/resolvers/findByID';
 import update from '../collections/graphql/resolvers/update';
 import deleteResolver from '../collections/graphql/resolvers/delete';
+import findVersions from '../collections/graphql/resolvers/findVersions';
+import findVersionByID from '../collections/graphql/resolvers/findVersionByID';
+import restoreVersion from '../collections/graphql/resolvers/restoreVersion';
 
 import findOne from '../globals/graphql/resolvers/findOne';
 import globalUpdate from '../globals/graphql/resolvers/update';
+import globalFindVersionByID from '../globals/graphql/resolvers/findVersionByID';
+import globalFindVersions from '../globals/graphql/resolvers/findVersions';
+import globalRestoreVersion from '../globals/graphql/resolvers/restoreVersion';
 
 import { Payload } from '../index';
 
@@ -24,7 +30,10 @@ export type GraphQLResolvers = {
   collections: {
     create: typeof create,
     find: typeof find,
+    findVersions: typeof findVersions,
     findByID: typeof findByID,
+    findVersionByID: typeof findVersionByID,
+    restoreVersion: typeof restoreVersion,
     update: typeof update,
     deleteResolver: typeof deleteResolver,
     auth: {
@@ -43,6 +52,9 @@ export type GraphQLResolvers = {
   globals: {
     findOne: typeof findOne
     update: typeof globalUpdate,
+    findVersionsByID: typeof globalFindVersionByID,
+    findVersions: typeof globalFindVersions,
+    restoreVersion: typeof globalRestoreVersion,
   }
 }
 
@@ -52,7 +64,10 @@ function bindResolvers(ctx: Payload): void {
       collections: {
         create: create.bind(ctx),
         find: find.bind(ctx),
+        findVersions: findVersions.bind(ctx),
         findByID: findByID.bind(ctx),
+        findVersionByID: findVersionByID.bind(ctx),
+        restoreVersion: restoreVersion.bind(ctx),
         update: update.bind(ctx),
         deleteResolver: deleteResolver.bind(ctx),
         auth: {
@@ -71,6 +86,9 @@ function bindResolvers(ctx: Payload): void {
       globals: {
         findOne: findOne.bind(ctx),
         update: globalUpdate.bind(ctx),
+        findVersionsByID: globalFindVersionByID.bind(ctx),
+        findVersions: globalFindVersions.bind(ctx),
+        restoreVersion: globalRestoreVersion.bind(ctx),
       },
     },
   };

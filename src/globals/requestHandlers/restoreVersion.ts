@@ -5,7 +5,7 @@ import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
 import { SanitizedGlobalConfig } from '../config/types';
 
-export default function (globalConfig: SanitizedGlobalConfig) {
+export default function restoreVersion(globalConfig: SanitizedGlobalConfig) {
   async function handler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<Document> | void> {
     const options = {
       req,
@@ -15,7 +15,7 @@ export default function (globalConfig: SanitizedGlobalConfig) {
     };
 
     try {
-      const doc = await this.operations.globals.publishVersion(options);
+      const doc = await this.operations.globals.restoreVersion(options);
       return res.status(httpStatus.OK).json({
         ...formatSuccessResponse('Restored successfully.', 'message'),
         doc,
@@ -25,6 +25,6 @@ export default function (globalConfig: SanitizedGlobalConfig) {
     }
   }
 
-  const publishVersionHandler = handler.bind(this);
-  return publishVersionHandler;
+  const restoreVersionHandler = handler.bind(this);
+  return restoreVersionHandler;
 }

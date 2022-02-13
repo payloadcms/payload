@@ -20,7 +20,7 @@ export type Arguments = {
   depth?: number
 }
 
-async function publishVersion<T extends TypeWithID = any>(this: Payload, args: Arguments): Promise<T> {
+async function restoreVersion<T extends TypeWithID = any>(this: Payload, args: Arguments): Promise<T> {
   const {
     collection: {
       Model,
@@ -171,4 +171,4 @@ async function publishVersion<T extends TypeWithID = any>(this: Payload, args: A
   return result;
 }
 
-export default publishVersion;
+export default restoreVersion;

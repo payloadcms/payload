@@ -11,9 +11,11 @@ import formatName from '../../graphql/utilities/formatName';
 import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
 import { BaseFields } from './types';
 import { getCollectionIDType } from '../../graphql/schema/buildMutationInputType';
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
 
 function registerCollections(): void {
   const {
+    findVersions, findVersionByID, restoreVersion,
     create, find, findByID, deleteResolver, update,
   } = this.graphQL.resolvers.collections;
 
@@ -82,7 +84,7 @@ function registerCollections(): void {
 
       whereInputFields.push({
         name: 'updatedAt',
-        label: 'Upated At',
+        label: 'Updated At',
         type: 'date',
       });
     }
@@ -178,6 +180,70 @@ function registerCollections(): void {
       },
       resolve: deleteResolver(collection),
     };
+
+    if (collection.config.versions) {
+      const versionCollectionFields = [
+        ...buildVersionCollectionFields(collection.config),
+        {
+          name: 'id',
+          type: 'text',
+        },
+        {
+          name: 'createdAt',
+          label: 'Created At',
+          type: 'date',
+        },
+        {
+          name: 'updatedAt',
+          label: 'Updated At',
+          type: 'date',
+        },
+      ];
+      collection.graphQL.versionType = this.buildObjectType(
+        `${singularLabel}Version`,
+        versionCollectionFields,
+        `${singularLabel}Version`,
+        {},
+      );
+      this.Query.fields[`version${formatName(singularLabel)}`] = {
+        type: collection.graphQL.versionType,
+        args: {
+          id: { type: GraphQLString },
+          ...(this.config.localization ? {
+            locale: { type: this.types.localeInputType },
+            fallbackLocale: { type: this.types.fallbackLocaleInputType },
+          } : {}),
+        },
+        resolve: findVersionByID(collection),
+      };
+      this.Query.fields[`versions${pluralLabel}`] = {
+        type: buildPaginatedListType(`versions${formatName(pluralLabel)}`, collection.graphQL.versionType),
+        args: {
+          where: {
+            type: this.buildWhereInputType(
+              `versions${singularLabel}`,
+              versionCollectionFields,
+              `versions${singularLabel}`,
+            ),
+          },
+          ...(this.config.localization ? {
+            locale: { type: this.types.localeInputType },
+            fallbackLocale: { type: this.types.fallbackLocaleInputType },
+          } : {}),
+          page: { type: GraphQLInt },
+          limit: { type: GraphQLInt },
+          sort: { type: GraphQLString },
+        },
+        resolve: findVersions(collection),
+      };
+      this.Mutation.fields[`restoreVersion${formatName(singularLabel)}`] = {
+        type: new GraphQLNonNull(GraphQLBoolean),
+        args: {
+          id: { type: GraphQLString },
+        },
+        resolve: restoreVersion(collection),
+      };
+    }
 
     if (collection.config.auth) {
       collection.graphQL.JWT = this.buildObjectType(

@@ -1,5 +1,8 @@
-import { GraphQLNonNull, GraphQLBoolean } from 'graphql';
+import { GraphQLNonNull, GraphQLBoolean, GraphQLInt, GraphQLString } from 'graphql';
 import formatName from '../../graphql/utilities/formatName';
+import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
+import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
+import { findVersionByID, findVersions, restoreVersion } from './resolvers';
 
 function registerGlobals() {
   if (this.config.globals) {
@@ -50,6 +53,70 @@ function registerGlobals() {
         },
         resolve: update(global),
       };
+
+      if (global.versions) {
+        const versionGlobalFields = [
+          ...buildVersionGlobalFields(global),
+          {
+            name: 'id',
+            type: 'text',
+          },
+          {
+            name: 'createdAt',
+            label: 'Created At',
+            type: 'date',
+          },
+          {
+            name: 'updatedAt',
+            label: 'Updated At',
+            type: 'date',
+          },
+        ];
+        global.graphQL.versionType = this.buildObjectType(
+          `${formattedLabel}Version`,
+          versionGlobalFields,
+          `${formattedLabel}Version`,
+          {},
+        );
+        this.Query.fields[`version${formatName(formattedLabel)}`] = {
+          type: global.graphQL.versionType,
+          args: {
+            id: { type: GraphQLString },
+            ...(this.config.localization ? {
+              locale: { type: this.types.localeInputType },
+              fallbackLocale: { type: this.types.fallbackLocaleInputType },
+            } : {}),
+          },
+          resolve: findVersionByID(global),
+        };
+        this.Query.fields[`versions${formattedLabel}`] = {
+          type: buildPaginatedListType(`versions${formatName(formattedLabel)}`, global.graphQL.versionType),
+          args: {
+            where: {
+              type: this.buildWhereInputType(
+                `versions${formattedLabel}`,
+                versionGlobalFields,
+                `versions${formattedLabel}`,
+              ),
+            },
+            ...(this.config.localization ? {
+              locale: { type: this.types.localeInputType },
+              fallbackLocale: { type: this.types.fallbackLocaleInputType },
+            } : {}),
+            page: { type: GraphQLInt },
+            limit: { type: GraphQLInt },
+            sort: { type: GraphQLString },
+          },
+          resolve: findVersions(global),
+        };
+        this.Mutation.fields[`restoreVersion${formatName(formattedLabel)}`] = {
+          type: new GraphQLNonNull(GraphQLBoolean),
+          args: {
+            id: { type: GraphQLString },
+          },
+          resolve: restoreVersion(global),
+        };
+      }
     });
   }
 }
