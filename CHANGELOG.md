@@ -1,5 +1,4 @@
-## [0.14.23-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.23-beta.0) (2022-02-14)
-
+## [0.14.24-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.24-beta.0) (2022-02-14)
 
 ### Bug Fixes
 
@@ -41,70 +40,6 @@
 * serverURL is no longer required ([#437](https://github.com/payloadcms/payload/issues/437)) ([dca90c4](https://github.com/payloadcms/payload/commit/dca90c4aa92dd0cc2084ba16249254c9259622c3))
 * updates dependencies ([3ca3f53](https://github.com/payloadcms/payload/commit/3ca3f533d07b644fa8a3d077932860e9f12318c2))
 * uses DocumentInfo to fetch and maintain doc versions ([8f30c3b](https://github.com/payloadcms/payload/commit/8f30c3bfefaa1530ac086aba22d4b8e6bac8f97d))
-
-## [0.14.22-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.22-beta.0) (2022-02-05)
-
-
-### Bug Fixes
-
-* [#422](https://github.com/payloadcms/payload/issues/422), prevents loading duplicative relationship options ([414679d](https://github.com/payloadcms/payload/commit/414679d86aac7ed94970a6eee14ff77b65f5c1d1))
-* [#423](https://github.com/payloadcms/payload/issues/423), [#391](https://github.com/payloadcms/payload/issues/391) - prevents loading edit views until data initializes ([2884654](https://github.com/payloadcms/payload/commit/28846547afc7e7bb8accc5dbe9f3b98593f332fa))
-* [#424](https://github.com/payloadcms/payload/issues/424), unable to clear localized property vals ([1a05fe4](https://github.com/payloadcms/payload/commit/1a05fe448c0755438dedc20c95d4a6a587912e2f))
-* awaits beforeDelete hooks ([609b871](https://github.com/payloadcms/payload/commit/609b871fa274e8b6d9eaf301e52ab42179aad9b7))
-* ensures multipart/form-data using _payload flattens field data before sending ([ae44727](https://github.com/payloadcms/payload/commit/ae44727fb9734fc3801f7249fa9e78668311c09e))
-* ensures nested lists always render properly ([20e5dfb](https://github.com/payloadcms/payload/commit/20e5dfbb4ab8dab320d60772f5195c5faffe38d3))
-* ensures rte upload is populated when only upload is enabled ([39438b8](https://github.com/payloadcms/payload/commit/39438b8460f853f64d84436eed49dde74cd207d2))
-* import path for createRichTextRelationshipPromise ([586cd4d](https://github.com/payloadcms/payload/commit/586cd4d6af5485116ebb299a5af3d24f5baeaa2e))
-* new slate version types ([c5de01b](https://github.com/payloadcms/payload/commit/c5de01bfc48ca6793c1526499fe934d9ad8f0cc9))
-* rte upload field population ([8327b5a](https://github.com/payloadcms/payload/commit/8327b5aae505a189a5b9617c3485d646b5f8b517))
-* type error in useField ([ef4e6d3](https://github.com/payloadcms/payload/commit/ef4e6d32a90215c07aa2c1e7217cf53558bfae97))
-
-
-### Features
-
-* add before and after login components ([#427](https://github.com/payloadcms/payload/issues/427)) ([5591eea](https://github.com/payloadcms/payload/commit/5591eeafca1aa6e8abcc2d8276f7478e00b75ef2))
-* add logMockCredentials email option ([ff33453](https://github.com/payloadcms/payload/commit/ff3345373630ca6913165284123a62269b3fa2c6))
-* adds a way to customize express.static options ([dbb3c50](https://github.com/payloadcms/payload/commit/dbb3c502227597ef4d04c9e5c8db6d2f51a8aac4))
-* adds admin.upload.collections[collection-name].fields to the RTE to save specific data on upload elements ([3adf44a](https://github.com/payloadcms/payload/commit/3adf44a24162e5adbcebdb0ca7d0d460d23c57eb))
-* adds indentation controls to rich text ([7df50f9](https://github.com/payloadcms/payload/commit/7df50f9bf9d4867e65bdd8cebdf43e0ab1737a63))
-* adds recursion to richText field to populate relationship and upload nested fields ([42af22c](https://github.com/payloadcms/payload/commit/42af22c2a10de44555bfedf902e7b4a4c9b25d6b))
-* builds a way for multipart/form-data reqs to retain non-string values ([65b0ad7](https://github.com/payloadcms/payload/commit/65b0ad7f084a9c279a1e4fb799542f97c645653d))
-* enhances rich text upload with custom field API ([0e4eb90](https://github.com/payloadcms/payload/commit/0e4eb906f2881dca518fea6b41e460bc57da9801))
-* exposes FieldWithPath type for reuse ([df3a836](https://github.com/payloadcms/payload/commit/df3a83634fcb64724ef239600e3af4fc295fee4f))
-* exposes useLocale for reuse ([bef0206](https://github.com/payloadcms/payload/commit/bef02062e769d1b0279c51af748f06d41c924c8a))
-* rich text indent PoC ([2deed8b](https://github.com/payloadcms/payload/commit/2deed8b1464931c4bc76a288923b307cf04b6a4a))
-
-## [0.14.21-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.21-beta.0) (2022-02-03)
-
-
-### Bug Fixes
-
-* [#422](https://github.com/payloadcms/payload/issues/422), prevents loading duplicative relationship options ([414679d](https://github.com/payloadcms/payload/commit/414679d86aac7ed94970a6eee14ff77b65f5c1d1))
-* [#423](https://github.com/payloadcms/payload/issues/423), [#391](https://github.com/payloadcms/payload/issues/391) - prevents loading edit views until data initializes ([2884654](https://github.com/payloadcms/payload/commit/28846547afc7e7bb8accc5dbe9f3b98593f332fa))
-* [#424](https://github.com/payloadcms/payload/issues/424), unable to clear localized property vals ([1a05fe4](https://github.com/payloadcms/payload/commit/1a05fe448c0755438dedc20c95d4a6a587912e2f))
-* awaits beforeDelete hooks ([609b871](https://github.com/payloadcms/payload/commit/609b871fa274e8b6d9eaf301e52ab42179aad9b7))
-* ensures multipart/form-data using _payload flattens field data before sending ([ae44727](https://github.com/payloadcms/payload/commit/ae44727fb9734fc3801f7249fa9e78668311c09e))
-* ensures nested lists always render properly ([20e5dfb](https://github.com/payloadcms/payload/commit/20e5dfbb4ab8dab320d60772f5195c5faffe38d3))
-* ensures rte upload is populated when only upload is enabled ([39438b8](https://github.com/payloadcms/payload/commit/39438b8460f853f64d84436eed49dde74cd207d2))
-* import path for createRichTextRelationshipPromise ([586cd4d](https://github.com/payloadcms/payload/commit/586cd4d6af5485116ebb299a5af3d24f5baeaa2e))
-* new slate version types ([c5de01b](https://github.com/payloadcms/payload/commit/c5de01bfc48ca6793c1526499fe934d9ad8f0cc9))
-* rte upload field population ([8327b5a](https://github.com/payloadcms/payload/commit/8327b5aae505a189a5b9617c3485d646b5f8b517))
-* type error in useField ([ef4e6d3](https://github.com/payloadcms/payload/commit/ef4e6d32a90215c07aa2c1e7217cf53558bfae97))
-
-
-### Features
-
-* add before and after login components ([#427](https://github.com/payloadcms/payload/issues/427)) ([5591eea](https://github.com/payloadcms/payload/commit/5591eeafca1aa6e8abcc2d8276f7478e00b75ef2))
-* adds a way to customize express.static options ([dbb3c50](https://github.com/payloadcms/payload/commit/dbb3c502227597ef4d04c9e5c8db6d2f51a8aac4))
-* adds admin.upload.collections[collection-name].fields to the RTE to save specific data on upload elements ([3adf44a](https://github.com/payloadcms/payload/commit/3adf44a24162e5adbcebdb0ca7d0d460d23c57eb))
-* adds indentation controls to rich text ([7df50f9](https://github.com/payloadcms/payload/commit/7df50f9bf9d4867e65bdd8cebdf43e0ab1737a63))
-* adds recursion to richText field to populate relationship and upload nested fields ([42af22c](https://github.com/payloadcms/payload/commit/42af22c2a10de44555bfedf902e7b4a4c9b25d6b))
-* builds a way for multipart/form-data reqs to retain non-string values ([65b0ad7](https://github.com/payloadcms/payload/commit/65b0ad7f084a9c279a1e4fb799542f97c645653d))
-* enhances rich text upload with custom field API ([0e4eb90](https://github.com/payloadcms/payload/commit/0e4eb906f2881dca518fea6b41e460bc57da9801))
-* exposes FieldWithPath type for reuse ([df3a836](https://github.com/payloadcms/payload/commit/df3a83634fcb64724ef239600e3af4fc295fee4f))
-* exposes useLocale for reuse ([bef0206](https://github.com/payloadcms/payload/commit/bef02062e769d1b0279c51af748f06d41c924c8a))
-* rich text indent PoC ([2deed8b](https://github.com/payloadcms/payload/commit/2deed8b1464931c4bc76a288923b307cf04b6a4a))
-
 # [0.14.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.14.0) (2022-01-03)
 
 
