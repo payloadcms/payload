@@ -49,6 +49,9 @@ import { Options as DeleteOptions } from './collections/operations/local/delete'
 import { Options as FindVersionsOptions } from './collections/operations/local/findVersions';
 import { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID';
 import { Options as RestoreVersionOptions } from './collections/operations/local/restoreVersion';
+import { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions';
+import { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID';
+import { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion';
 import { Result } from './auth/operations/login';
 
 require('isomorphic-fetch');
@@ -244,6 +247,39 @@ export class Payload {
     let { update } = localGlobalOperations;
     update = update.bind(this);
     return update(options);
+  }
+
+  /**
+   * @description Find global versions with criteria
+   * @param options
+   * @returns versions satisfying query
+   */
+  findGlobalVersions = async <T extends TypeWithVersion<T> = any>(options: FindGlobalVersionsOptions): Promise<PaginatedDocs<T>> => {
+    let { findVersions } = localGlobalOperations;
+    findVersions = findVersions.bind(this);
+    return findVersions<T>(options);
+  }
+
+  /**
+   * @description Find global version by ID
+   * @param options
+   * @returns global version with specified ID
+   */
+  findGlobalVersionByID = async <T extends TypeWithVersion<T> = any>(options: FindGlobalVersionByIDOptions): Promise<T> => {
+    let { findVersionByID } = localGlobalOperations;
+    findVersionByID = findVersionByID.bind(this);
+    return findVersionByID(options);
+  }
+
+  /**
+   * @description Restore global version by ID
+   * @param options
+   * @returns version with specified ID
+   */
+  restoreGlobalVersion = async <T extends TypeWithVersion<T> = any>(options: RestoreGlobalVersionOptions): Promise<T> => {
+    let { restoreVersion } = localGlobalOperations;
+    restoreVersion = restoreVersion.bind(this);
+    return restoreVersion(options);
   }
 
   /**

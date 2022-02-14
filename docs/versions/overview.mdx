@@ -97,7 +97,7 @@ Global versions are stored the same as the collection version shown above, excep
 
 Versions expose new operations for both collections and globals. They allow you to find and query versions, find a single version by ID, and publish (or restore) a version by ID. Both Collections and Globals support the same new operations. They are used primarily by the admin UI, but if you are writing custom logic in your app and would like to utilize them, they're available for you to use as well via REST, GraphQL, and Local APIs.
 
-**New collection REST endpoints:**
+**Collection REST endpoints:**
 
 | Method   | Path                                 | Description                            |
 | -------- | ------------------------------------ | -------------------------------------- |
@@ -105,15 +105,72 @@ Versions expose new operations for both collections and globals. They allow you 
 | `GET`    | `/api/{collectionSlug}/versions/:id` | Find a specific version by ID          |
 | `POST`   | `/api/{collectionSlug}/versions/:id` | Restore a version by ID                |
 
-**New collection GraphQL queries and mutations:**
+**Collection GraphQL queries:**
 
-TODO: add GraphQL docs here
+| Query Name             | Operation    |
+| ---------------------- | -------------|
+| **`version{collection.label.singular}`**     | `findVersionByID` |
+| **`versions{collection.label.plural}`**      | `findVersions` |
 
-**New collection Local API methods:**
+**And mutation:**
 
-TODO: add Local API docs here
+| Query Name             | Operation    |
+| ---------------------- | -------------|
+| **`restoreVersion{collection.label.singular}`**   | `restoreVersion` |
 
-**New global REST endpoints:**
+**Collection Local API methods:**
+
+#### Find
+
+```js
+// Result will be a paginated set of Versions.
+// See /docs/queries/pagination for more.
+const result = await payload.findVersions({
+  collection: 'posts', // required
+  depth: 2,
+  page: 1,
+  limit: 10,
+  where: {}, // pass a `where` query here
+  sort: '-createdAt',
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+#### Find by ID
+
+```js
+// Result will be a Post document.
+const result = await payload.findVersionByID({
+  collection: 'posts', // required
+  id: '507f1f77bcf86cd799439013', // required
+  depth: 2,
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+#### Restore
+
+```js
+// Result will be the restored global document.
+const result = await payload.restoreVersion({
+  collection: 'posts', // required
+  id: '507f1f77bcf86cd799439013', // required
+  depth: 2,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+**Global REST endpoints:**
 
 | Method   | Path                                     | Description                            |
 | -------- | ---------------------------------------- | -------------------------------------- |
@@ -121,13 +178,70 @@ TODO: add Local API docs here
 | `GET`    | `/api/globals/{globalSlug}/versions/:id` | Find a specific version by ID          |
 | `POST`   | `/api/globals/{globalSlug}/versions/:id` | Restore a version by ID                |
 
-**New global GraphQL queries and mutations:**
+**Global GraphQL queries:**
 
-TODO: add GraphQL docs here
+| Query Name             | Operation    |
+| ---------------------- | -------------|
+| **`version{global.label}`**     | `findVersionByID` |
+| **`versions{global.label}`**    | `findVersions` |
 
-**New global Local API methods:**
+**Global GraphQL mutation:**
 
-TODO: add Local API docs here
+| Query Name             | Operation    |
+| ---------------------- | -------------|
+| **`restoreVersion{global.label}`**   | `restoreVersion` |
+
+**Global Local API methods:**
+
+#### Find
+
+```js
+// Result will be a paginated set of Versions.
+// See /docs/queries/pagination for more.
+const result = await payload.findGlobalVersions({
+  slug: 'header', // required
+  depth: 2,
+  page: 1,
+  limit: 10,
+  where: {}, // pass a `where` query here
+  sort: '-createdAt',
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+#### Find by ID
+
+```js
+// Result will be a Post document.
+const result = await payload.findGlobalVersionByID({
+  slug: 'header', // required
+  id: '507f1f77bcf86cd799439013', // required
+  depth: 2,
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+#### Restore
+
+```js
+// Result will be the restored global document.
+const result = await payload.restoreGlobalVersion({
+  slug: 'header', // required
+  id: '507f1f77bcf86cd799439013', // required
+  depth: 2,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
 
 ### Access Control
 
