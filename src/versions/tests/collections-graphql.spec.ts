@@ -146,7 +146,9 @@ describe('Collections GrahpQL Version Resolvers', () => {
     it('should allow a version to be restored', async () => {
       // update a versionsPost
       const restore = `mutation {
-        restoreVersionAutosavePost(id: "${versionID}")
+        restoreVersionAutosavePost(id: "${versionID}") {
+          title
+        }
       }`;
 
       await client.request(restore);

@@ -1,4 +1,3 @@
-import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -10,7 +9,6 @@ import { NotFound } from '../../errors';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
-  where?: Where
   id: string
   page?: number
   limit?: number
@@ -63,15 +61,16 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(this: Payload,
 
   const global = await Model.findOne({ globalType: globalConfig.slug });
 
-  let result;
+  let result = rawVersion.version;
 
   if (global) {
     result = await Model.findOneAndUpdate(
       { globalType: globalConfig.slug },
-      rawVersion.version,
+      result,
       { new: true },
     );
   } else {
+    result.globalType = globalConfig.slug;
     result = await Model.create(result);
   }
 

@@ -31,6 +31,7 @@ export type ImageSize = {
   height: number | null,
   crop?: string, // comes from sharp package
 };
+
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => string
 
 export type IncomingUploadType = {

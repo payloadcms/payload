@@ -19,8 +19,8 @@ export default function restoreVersion(collection: Collection): Resolver {
       req: context.req,
     };
 
-    await this.operations.collections.restoreVersion(options);
-    return true;
+    const result = await this.operations.collections.restoreVersion(options);
+    return result;
   }
 
   const restoreVersionResolver = resolver.bind(this);

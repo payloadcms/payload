@@ -2,12 +2,11 @@ import { GraphQLNonNull, GraphQLBoolean, GraphQLInt, GraphQLString } from 'graph
 import formatName from '../../graphql/utilities/formatName';
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
 import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
-import { findVersionByID, findVersions, restoreVersion } from './resolvers';
 
 function registerGlobals() {
   if (this.config.globals) {
     const {
-      findOne, update,
+      findOne, update, findVersionByID, findVersions, restoreVersion,
     } = this.graphQL.resolvers.globals;
 
     Object.keys(this.globals.config).forEach((slug) => {
@@ -110,7 +109,7 @@ function registerGlobals() {
           resolve: findVersions(global),
         };
         this.Mutation.fields[`restoreVersion${formatName(formattedLabel)}`] = {
-          type: new GraphQLNonNull(GraphQLBoolean),
+          type: global.graphQL.type,
           args: {
             id: { type: GraphQLString },
           },

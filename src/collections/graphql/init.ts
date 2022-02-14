@@ -237,7 +237,7 @@ function registerCollections(): void {
         resolve: findVersions(collection),
       };
       this.Mutation.fields[`restoreVersion${formatName(singularLabel)}`] = {
-        type: new GraphQLNonNull(GraphQLBoolean),
+        type: collection.graphQL.type,
         args: {
           id: { type: GraphQLString },
         },

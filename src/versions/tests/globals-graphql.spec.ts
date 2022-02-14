@@ -98,7 +98,7 @@ describe('Global Versions - GraphQL', () => {
 
       // language=graphQL
       const query = `query {
-        versionsBlocksGlobal(where: { version__title: "${title}" }) {
+        versionsBlocksGlobal(where: { version__title: { equals: "${title}" } }) {
           docs {
             id
             version {
@@ -117,7 +117,7 @@ describe('Global Versions - GraphQL', () => {
     it('should allow read of versions by version id', async () => {
       // language=graphql
       const query = `query {
-        versionsBlocksGlobal(id: "${versionID}") {
+        versionBlocksGlobal(id: "${versionID}") {
           id
           version {
             title
@@ -127,7 +127,7 @@ describe('Global Versions - GraphQL', () => {
 
       const response = await client.request(query);
 
-      const data = response.versionsBlocksGlobal;
+      const data = response.versionBlocksGlobal;
       versionID = data.id;
 
       expect(data.id).toBeDefined();
@@ -137,7 +137,7 @@ describe('Global Versions - GraphQL', () => {
     it('should allow read of versions by querying version content', async () => {
       // language=graphQL
       const query = `query {
-        versionsAutosavePosts(where: { version__title: {equals: "${title}" } }) {
+        versionsBlocksGlobal(where: { version__title: {equals: "${title}" } }) {
           docs {
             id
             version {
@@ -149,7 +149,7 @@ describe('Global Versions - GraphQL', () => {
 
       const response = await client.request(query);
 
-      const data = response.versionsAutosavePosts;
+      const data = response.versionsBlocksGlobal;
       const doc = data.docs[0];
       versionID = doc.id;
 
@@ -162,7 +162,9 @@ describe('Global Versions - GraphQL', () => {
     it('should allow a version to be restored', async () => {
       // language=graphql
       const restore = `mutation {
-        restoreVersionBlocksGlobal(id: "${versionID}")
+        restoreVersionBlocksGlobal(id: "${versionID}") {
+          title
+        }
       }`;
 
       await client.request(restore);
@@ -174,7 +176,7 @@ describe('Global Versions - GraphQL', () => {
       }`;
 
       const response = await client.request(query);
-      const data = response.AutosavePost;
+      const data = response.BlocksGlobal;
       expect(data.title).toStrictEqual(title);
     });
   });
