@@ -10,9 +10,6 @@ import { NotFound } from '../../errors';
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
   id: string
-  page?: number
-  limit?: number
-  sort?: string
   depth?: number
   req?: PayloadRequest
   overrideAccess?: boolean
