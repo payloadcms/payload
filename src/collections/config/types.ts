@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeepRequired } from 'ts-essentials';
 import { PaginateModel, PassportLocalModel } from 'mongoose';
+import { GraphQLType } from 'graphql';
 import { Access, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
@@ -220,6 +221,9 @@ export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionC
 export type Collection = {
   Model: CollectionModel;
   config: SanitizedCollectionConfig;
+  graphQL?: {
+    [key: string]: GraphQLType
+  }
 };
 
 export type AuthCollection = {
