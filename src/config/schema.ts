@@ -8,6 +8,7 @@ const component = joi.alternatives().try(
 export default joi.object({
   serverURL: joi.string()
     .uri()
+    .allow('')
     .custom((value, helper) => {
       const urlWithoutProtocol = value.split('//')[1];
 
@@ -83,7 +84,8 @@ export default joi.object({
     .min(0)
     .max(100),
   csrf: joi.array()
-    .items(joi.string()),
+    .items(joi.string().allow(''))
+    .sparse(),
   cors: [
     joi.string()
       .valid('*'),
