@@ -25,10 +25,9 @@ const sanitizeConfig = (config: Config): SanitizedConfig => {
     sanitizedConfig.globals = sanitizeGlobals(sanitizedConfig.collections, sanitizedConfig.globals);
   }
 
-  sanitizedConfig.csrf = [
-    ...sanitizedConfig.csrf,
-    config.serverURL,
-  ];
+  if (sanitizedConfig.serverURL !== '') {
+    sanitizedConfig.csrf.push(sanitizedConfig.serverURL);
+  }
 
   return sanitizedConfig as SanitizedConfig;
 };
