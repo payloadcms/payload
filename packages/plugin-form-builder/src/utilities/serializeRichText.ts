@@ -11,7 +11,7 @@ type Node = {
   children?: Node[]
 }
 
-export const serialize = (children, submissionData) => children.map((node: Node, i) => {
+export const serialize = (children?: Node[], submissionData?: any): string | undefined => children?.map((node: Node, i) => {
   if (Text.isText(node)) {
     let text = `<span>${escapeHTML(replaceDoubleCurlys(node.text, submissionData))}</span>`;
 

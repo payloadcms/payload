@@ -1,6 +1,6 @@
 import { FormConfig } from "../../../types";
 
-const createCharge = async (beforeChangeData, formConfig: FormConfig) => {
+const createCharge = async (beforeChangeData: any, formConfig: FormConfig) => {
   const {
     operation
   } = beforeChangeData;

@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Select, useForm } from 'payload/components/forms';
 import { TextField } from 'payload/dist/fields/config/types';
+import { SelectFieldOption } from '../../types';
 
 export const DynamicFieldSelector: React.FC<TextField> = (props) => {
-  const { fields, getDataByPath } = useForm();
-  const [options, setOptions] = useState([]);
+  const {
+    fields,
+    getDataByPath
+  } = useForm();
+
+  const [options, setOptions] = useState<SelectFieldOption[]>([]);
 
   useEffect(() => {
+    // @ts-ignore
     const fields: any[] = getDataByPath('fields')
+
     if (fields) {
-      const allNonPaymentFields = fields.map((block) => {
+      const allNonPaymentFields: SelectFieldOption[] = fields.filter((block): SelectFieldOption | null => {
         const {
           name,
           id,

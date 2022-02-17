@@ -1,5 +1,5 @@
-import { CollectionConfig } from 'payload/types';
-import { FormConfig } from '../../types';
+import { Block, CollectionConfig } from 'payload/types';
+import { FieldConfig, FormConfig } from '../../types';
 import fields from './fields';
 import deepMerge from '../../utilities/deepMerge';
 
@@ -22,18 +22,18 @@ export const generateFormCollection = (formConfig: FormConfig): CollectionConfig
     {
       name: 'fields',
       type: 'blocks',
-      blocks: Object.entries(formConfig.fields).map(([fieldKey, fieldConfig]) => {
+      blocks: Object.entries(formConfig?.fields || {}).map(([fieldKey, fieldConfig]) => {
         // let the config enable/disable fields with either boolean values or objects
         if (fieldConfig !== false) {
           let block = fields[fieldKey];
           if (typeof block === 'function') {
-            block = block(fieldConfig);
+            block = block(fieldConfig as FieldConfig);
           }
           return block;
         }
 
         return null;
-      }).filter(Boolean),
+      }).filter(Boolean) as Block[],
     },
     {
       name: 'submitButtonLabel',

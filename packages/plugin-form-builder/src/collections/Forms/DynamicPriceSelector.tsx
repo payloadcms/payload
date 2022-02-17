@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Checkbox, Text, useForm } from 'payload/components/forms';
-import RadioGroup from 'payload/dist/admin/components/forms/field-types/RadioGroup';
+import { Text, useForm } from 'payload/components/forms';
 import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types';
+import { Data } from 'payload/dist/admin/components/forms/Form/types';
+
+type FieldWithID = { id: string };
 
 export const DynamicPriceSelector: React.FC<TextFieldType> = (props) => {
   const {
@@ -31,8 +33,8 @@ export const DynamicPriceSelector: React.FC<TextFieldType> = (props) => {
 
         setValueType(valueType);
 
-        const { fields: allFields } = getData();
-        const field = allFields.find(field => field.id === fieldToUse);
+        const { fields: allFields }: Data = getData();
+        const field = allFields.find((field: FieldWithID) => field.id === fieldToUse);
 
         if (field) {
           const { blockType } = field;

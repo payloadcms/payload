@@ -4,7 +4,7 @@ import { generateSubmissionCollection } from './collections/FormSubmissions';
 import { FormConfig } from './types';
 // import path from 'path';
 
-const FormBuilder = (incomingFormConfig?: FormConfig) => (config: Config): Config => {
+const FormBuilder = (incomingFormConfig: FormConfig) => (config: Config): Config => {
   const formConfig: FormConfig = {
     ...incomingFormConfig,
     fields: {

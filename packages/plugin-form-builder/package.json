@@ -2,8 +2,10 @@
   "name": "payload-plugin-form-builder",
   "version": "1.0.1",
   "description": "Form builder plugin for Payload CMS",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -20,9 +22,19 @@
   "author": "dev@trbl.design",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "^0.14.0"
+    "payload": "^0.14.0",
+    "react": "^17.0.2"
+  },
+  "devDependencies": {
+    "@types/escape-html": "^1.0.1",
+    "payload": "^0.14.0",
+    "react": "^17.0.2",
+    "typescript": "^4.5.5"
   },
   "files": [
-    "src"
-  ]
+    "dist"
+  ],
+  "dependencies": {
+    "escape-html": "^1.0.3"
+  }
 }

@@ -1,6 +1,7 @@
 import { buildConfig } from 'payload/config';
 import path from 'path';
-import formBuilderPlugin from '../../src';
+import formBuilderPlugin from '../../dist';
+// import formBuilderPlugin from '../../src';
 import { Users } from './collections/Users';
 import { Pages } from './collections/Pages';
 

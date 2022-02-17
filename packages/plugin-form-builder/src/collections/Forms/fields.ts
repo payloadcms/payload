@@ -405,7 +405,7 @@ const Payment = (fieldConfig: FieldConfig): Block => {
             type: 'number',
             label: 'Price',
             admin: {
-              condition: (_, { priceType }) => priceType === 'static'
+              condition: (_: any, { priceType }: any) => priceType === 'static'
             },
           },
           {
@@ -417,7 +417,7 @@ const Payment = (fieldConfig: FieldConfig): Block => {
             type: 'array',
             label: 'Price',
             admin: {
-              condition: (_, { priceType }) => priceType === 'dynamic'
+              condition: (_: any, { priceType }: any) => priceType === 'dynamic'
             },
             fields: [
               {
@@ -454,7 +454,7 @@ const Payment = (fieldConfig: FieldConfig): Block => {
                 label: 'Value',
                 type: 'text',
                 admin: {
-                  condition: (_, { condition }) => condition === 'equals' || condition === 'notEquals'
+                  condition: (_: any, { condition }: any) => condition === 'equals' || condition === 'notEquals'
                 }
               },
               {
@@ -511,7 +511,7 @@ const Payment = (fieldConfig: FieldConfig): Block => {
               },
             ]
           },
-        ].filter(Boolean),
+        ].filter(Boolean) as Field[],
       },
       required,
     ]
@@ -542,4 +542,6 @@ export default {
   country: Country,
   state: State,
   payment: Payment
+} as {
+  [key: string]: Block | ((fieldConfig: FieldConfig) => Block)
 };

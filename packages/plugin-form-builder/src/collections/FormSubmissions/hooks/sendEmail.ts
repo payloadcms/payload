@@ -1,8 +1,8 @@
 import { serialize } from '../../../utilities/serializeRichText';
-import { Email, FormConfig } from '../../../types';
+import { Email, FormattedEmail, FormConfig } from '../../../types';
 import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys';
 
-const sendEmail = async (beforeChangeData, formConfig: FormConfig) => {
+const sendEmail = async (beforeChangeData: any, formConfig: FormConfig) => {
   const {
     operation
   } = beforeChangeData;
@@ -25,13 +25,13 @@ const sendEmail = async (beforeChangeData, formConfig: FormConfig) => {
 
     const {
       beforeEmail,
-      formsOverrides
+      formOverrides
     } = formConfig || {};
 
     try {
       const form = await payload.findByID({
         id: formID,
-        collection: formsOverrides?.slug || 'forms',
+        collection: formOverrides?.slug || 'forms',
       });
 
       if (form) {
@@ -40,7 +40,7 @@ const sendEmail = async (beforeChangeData, formConfig: FormConfig) => {
         } = form;
 
         if (emails) {
-          const formattedEmails = emails.map((email: Email) => {
+          const formattedEmails: FormattedEmail[] = emails.map((email: Email): FormattedEmail | null => {
             const {
               message,
               subject,
