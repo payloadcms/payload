@@ -1,7 +1,7 @@
 import * as GraphQL from 'graphql';
 import { GraphQLError, GraphQLFormattedError, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { graphqlHTTP } from 'express-graphql';
-import queryComplexity, { simpleEstimator, fieldExtensionsEstimator } from 'graphql-query-complexity';
+import queryComplexity, { fieldExtensionsEstimator, simpleEstimator } from 'graphql-query-complexity';
 import buildObjectType from './schema/buildObjectType';
 import buildMutationInputType from './schema/buildMutationInputType';
 import errorHandler from './errorHandler';
@@ -60,7 +60,9 @@ class InitializeGraphQL {
 
   validationRules: any;
 
-  errorResponse: any;
+  errorResponses: GraphQLFormattedError[] = [];
+
+  errorIndex: number;
 
   constructor(init) {
     Object.assign(this, init);
@@ -138,12 +140,20 @@ class InitializeGraphQL {
     this.extensions = async (info) => {
       const { result } = info;
       if (result.errors) {
+        this.errorIndex = 0;
         const afterErrorHook = typeof this.config.hooks.afterError === 'function' ? this.config.hooks.afterError : null;
-        [this.errorResponse] = await errorHandler(info, this.config.debug, afterErrorHook);
+        this.errorResponses = await errorHandler(info, this.config.debug, afterErrorHook);
       }
       return null;
     };
-    this.customFormatErrorFn = (error) => (this.errorResponse || error);
+    this.customFormatErrorFn = (error) => {
+      if (this.errorResponses && this.errorResponses[this.errorIndex]) {
+        const response = this.errorResponses[this.errorIndex];
+        this.errorIndex += 1;
+        return response;
+      }
+      return error;
+    };
     this.validationRules = (variables) => ([
       queryComplexity({
         estimators: [
@@ -158,7 +168,7 @@ class InitializeGraphQL {
   }
 
   init(req, res) {
-    this.errorResponse = null;
+    this.errorResponses = null;
     return graphqlHTTP(
       async (request, response, { variables }) => ({
         schema: this.schema,
