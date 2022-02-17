@@ -1,6 +1,6 @@
 {
   "name": "payload-plugin-form-builder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Form builder plugin for Payload CMS",
   "main": "src/index.ts",
   "scripts": {
