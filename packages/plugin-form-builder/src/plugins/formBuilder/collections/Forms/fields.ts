@@ -1,5 +1,7 @@
 import { Block, Field } from 'payload/types';
 import { FieldConfig, TextField } from '../../types';
+import { DynamicFieldSelector } from './DynamicFieldSelector';
+import { DynamicPriceSelector } from './DynamicPriceSelector';
 
 const name: Field = {
   name: 'name',
@@ -145,6 +147,53 @@ const Text: Block = {
           name: 'defaultValue',
           label: 'Default Value',
           type: 'text',
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    required,
+  ],
+};
+
+const Number: Block = {
+  slug: 'number',
+  labels: {
+    singular: 'Number',
+    plural: 'Number Fields',
+  },
+  fields: [
+    {
+      type: 'row',
+      fields: [
+        {
+          ...name,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...label,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          ...width,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          name: 'defaultValue',
+          label: 'Default Value',
+          type: 'number',
           admin: {
             width: '50%',
           },
@@ -302,28 +351,6 @@ const Payment = (fieldConfig: FieldConfig): Block => ({
       type: 'row',
       fields: [
         {
-          name: 'paymentProcessor',
-          type: 'select',
-          options: [],
-          admin: {
-            width: '50%',
-          },
-          ...fieldConfig?.paymentProcessor || {}
-        },
-        {
-          name: 'amount',
-          type: 'number',
-          defaultValue: 0,
-          admin: {
-            width: '50%',
-          },
-        },
-      ],
-    },
-    {
-      type: 'row',
-      fields: [
-        {
           ...label,
           admin: {
             width: '50%',
@@ -334,6 +361,150 @@ const Payment = (fieldConfig: FieldConfig): Block => ({
           admin: {
             width: '50%',
           },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'paymentProcessor',
+          type: 'select',
+          options: [],
+          admin: {
+            width: '100%',
+          },
+          ...fieldConfig?.paymentProcessor || {}
+        },
+        {
+          name: 'priceType',
+          label: 'Price Type',
+          type: 'radio',
+          admin: {
+            width: '100%',
+          },
+          defaultValue: 'static',
+          options: [
+            {
+              label: 'Static Price',
+              value: 'static'
+            },
+            {
+              label: 'Dynamic Price',
+              value: 'dynamic'
+            }
+          ]
+        },
+        {
+          name: 'staticPrice',
+          type: 'number',
+          label: 'Price',
+          admin: {
+            condition: (_, { priceType }) => priceType === 'static'
+          },
+        },
+        {
+          name: 'dynamicPrice',
+          labels: {
+            singular: 'Condition',
+            plural: 'Conditions',
+          },
+          type: 'array',
+          label: 'Price',
+          admin: {
+            condition: (_, { priceType }) => priceType === 'dynamic'
+          },
+          fields: [
+            {
+              name: 'fieldToUse',
+              type: 'text',
+              admin: {
+                components: {
+                  Field: DynamicFieldSelector,
+                },
+              },
+            },
+            {
+              name: 'condition',
+              label: 'Condition',
+              type: 'select',
+              defaultValue: 'hasValue',
+              options: [
+                {
+                  value: 'hasValue',
+                  label: 'Has Any Value'
+                },
+                {
+                  value: 'equals',
+                  label: 'Equals'
+                },
+                {
+                  value: 'notEquals',
+                  label: 'Does Not Equal'
+                }
+              ]
+            },
+            {
+              name: 'valueForCondition',
+              label: 'Value',
+              type: 'text',
+              admin: {
+                condition: (_, { condition }) => condition === 'equals' || condition === 'notEquals'
+              }
+            },
+            {
+              name: 'operator',
+              type: 'select',
+              defaultValue: 'add',
+              options: [
+                {
+                  value: 'add',
+                  label: 'Add'
+                },
+                {
+                  value: 'subtract',
+                  label: 'Subtract'
+                },
+                {
+                  value: 'multiply',
+                  label: 'Multiply'
+                },
+                {
+                  value: 'divide',
+                  label: 'Divide'
+                }
+              ]
+            },
+            {
+              name: 'valueType',
+              label: 'Value Type',
+              type: 'radio',
+              admin: {
+                width: '100%',
+              },
+              defaultValue: 'static',
+              options: [
+                {
+                  label: 'Static Value',
+                  value: 'static'
+                },
+                {
+                  label: 'Dynamic Value',
+                  value: 'dynamic'
+                }
+              ]
+            },
+            {
+              name: 'valueForOperator',
+              label: 'Value',
+              type: 'text',
+              admin: {
+                components: {
+                  Field: DynamicPriceSelector,
+                },
+              },
+            },
+          ]
         },
       ],
     },
@@ -361,6 +532,7 @@ export default {
   text: Text,
   email: Email,
   message: Message,
+  number: Number,
   country: Country,
   state: State,
   payment: Payment

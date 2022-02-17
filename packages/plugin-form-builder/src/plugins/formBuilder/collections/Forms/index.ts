@@ -24,9 +24,11 @@ export const generateFormCollection = (formConfig: FormConfig): CollectionConfig
       blocks: Object.entries(formConfig.fields).map(([fieldKey, fieldConfig]) => {
         // let the config enable/disable fields with either boolean values or objects
         if (fieldConfig !== false) {
-          let field = fields[fieldKey];
-          if (typeof field === 'function') field = field(fieldConfig);
-          return field;
+          let block = fields[fieldKey];
+          if (typeof block === 'function') {
+            block = block(fieldConfig);
+          }
+          return block;
         }
 
         return null;

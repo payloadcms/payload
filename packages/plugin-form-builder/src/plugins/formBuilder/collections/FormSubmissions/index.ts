@@ -1,12 +1,12 @@
 import { CollectionConfig } from 'payload/types';
-import { Options } from '../../types';
+import { FormConfig } from '../../types';
 import deepMerge from '../../utilities/deepMerge';
 import sendEmail from './hooks/sendEmail';
 import createCharge from './hooks/createCharge';
 import loggedInUsers from '../../../../collections/User/access/loggedInUsers';
 
-export const generateSubmissionCollection = (options: Options): CollectionConfig => deepMerge({
-  slug: options?.formsOverrides?.slug || 'formSubmissions',
+export const generateSubmissionCollection = (formConfig: FormConfig): CollectionConfig => deepMerge({
+  slug: formConfig?.formsOverrides?.slug || 'formSubmissions',
   access: {
     create: () => true,
     update: () => false,
@@ -17,8 +17,8 @@ export const generateSubmissionCollection = (options: Options): CollectionConfig
   },
   hooks: {
     beforeChange: [
-      createCharge,
-      (data) => sendEmail(data, options),
+      (data) => createCharge(data, formConfig),
+      (data) => sendEmail(data, formConfig),
     ],
   },
   fields: [
@@ -127,4 +127,4 @@ export const generateSubmissionCollection = (options: Options): CollectionConfig
       ]
     }
   ],
-}, options.formSubmissionsOverrides || {});
+}, formConfig.formSubmissionsOverrides || {});

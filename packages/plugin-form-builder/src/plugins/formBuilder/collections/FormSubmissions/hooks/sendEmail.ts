@@ -1,92 +1,100 @@
 import { serialize } from '../../../utilities/serializeRichText';
-import { Email, Options } from '../../../types';
+import { Email, FormConfig } from '../../../types';
 import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys';
 
-const sendEmail = async (beforeChangeData, options: Options) => {
+const sendEmail = async (beforeChangeData, formConfig: FormConfig) => {
   const {
-    data,
-    data: {
-      id: formSubmissionID
-    },
-    req: {
-      payload
-    }
+    operation
   } = beforeChangeData;
 
-  const {
-    form: formID,
-    submissionData
-  } = data || {};
-
-  const {
-    beforeEmail,
-    formsOverrides
-  } = options || {};
-
-  try {
-    const form = await payload.findByID({
-      id: formID,
-      collection: formsOverrides?.slug || 'forms',
-    });
-
-    if (form) {
-      const {
-        emails,
-      } = form;
-
-      if (emails) {
-        const formattedEmails = emails.map((email: Email) => {
-          const {
-            message,
-            subject,
-            emailTo,
-            emailFrom
-          } = email;
-
-          const to = replaceDoubleCurlys(emailTo, submissionData);
-          const from = replaceDoubleCurlys(emailFrom, submissionData);
-
-          if (to && from) {
-            return ({
-              to,
-              from,
-              subject: replaceDoubleCurlys(subject, submissionData),
-              html: `<div>${serialize(message, submissionData)}`
-            });
-          }
-          return null
-        }).filter(Boolean);
-
-        let emailsToSend = formattedEmails
-
-        if (typeof beforeEmail === 'function') {
-          emailsToSend = await beforeEmail(formattedEmails);
-        }
-
-        const log = emailsToSend.map(({ html, ...rest }) => ({ ...rest }))
-
-        await Promise.all(
-          emailsToSend.map(async (email) => {
-            const { to } = email;
-            try {
-              const emailPromise = await payload.sendEmail(email);
-              return emailPromise;
-            } catch (err) {
-              console.error(`Error while sending email to address: ${to}. Email not sent.`);
-              console.error(err);
-            }
-          })
-        );
+  if (operation === 'create') {
+    const {
+      data,
+      data: {
+        id: formSubmissionID
+      },
+      req: {
+        payload
       }
-    } else {
-      console.log('No emails to send.')
+    } = beforeChangeData;
+
+    const {
+      form: formID,
+      submissionData
+    } = data || {};
+
+    const {
+      beforeEmail,
+      formsOverrides
+    } = formConfig || {};
+
+    try {
+      const form = await payload.findByID({
+        id: formID,
+        collection: formsOverrides?.slug || 'forms',
+      });
+
+      if (form) {
+        const {
+          emails,
+        } = form;
+
+        if (emails) {
+          const formattedEmails = emails.map((email: Email) => {
+            const {
+              message,
+              subject,
+              emailTo,
+              emailFrom
+            } = email;
+
+            const to = replaceDoubleCurlys(emailTo, submissionData);
+            const from = replaceDoubleCurlys(emailFrom, submissionData);
+
+            if (to && from) {
+              return ({
+                to,
+                from,
+                subject: replaceDoubleCurlys(subject, submissionData),
+                html: `<div>${serialize(message, submissionData)}`
+              });
+            }
+            return null
+          }).filter(Boolean);
+
+          let emailsToSend = formattedEmails
+
+          if (typeof beforeEmail === 'function') {
+            emailsToSend = await beforeEmail(formattedEmails);
+          }
+
+          const log = emailsToSend.map(({ html, ...rest }) => ({ ...rest }))
+
+          await Promise.all(
+            emailsToSend.map(async (email) => {
+              const { to } = email;
+              try {
+                const emailPromise = await payload.sendEmail(email);
+                return emailPromise;
+              } catch (err) {
+                console.error(`Error while sending email to address: ${to}. Email not sent.`);
+                console.error(err);
+              }
+            })
+          );
+        }
+      } else {
+        console.log('No emails to send.')
+      }
+    } catch (err) {
+      console.error(`Error while sending one or more emails in form submission id: ${formSubmissionID}.`);
+      console.error(err);
     }
-  } catch (err) {
-    console.error(`Error while sending one or more emails in form submission id: ${formSubmissionID}.`);
-    console.error(err);
+
+    return data
   }
 
-  return data;
+  return beforeChangeData;
 };
 
 export default sendEmail;

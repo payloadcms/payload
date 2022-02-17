@@ -24,17 +24,20 @@ export type FieldsConfig = {
   state?: boolean | FieldConfig
   country?: boolean | FieldConfig
   checkbox?: boolean | FieldConfig
+  number?: boolean | FieldConfig
   message?: boolean | FieldConfig
   payment?: boolean | FieldConfig
 }
 
 export type BeforeEmail = (emails: FormattedEmail[]) => void;
+export type HandlePayment = (data) => void;
 
 export type FormConfig = {
   fields?: FieldsConfig
   formSubmissionsOverrides?: CollectionConfig
   formsOverrides?: CollectionConfig
   beforeEmail?: BeforeEmail
+  handlePayment?: HandlePayment
 }
 
 export type TextField = {

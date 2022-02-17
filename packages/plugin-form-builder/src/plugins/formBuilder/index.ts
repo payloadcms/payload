@@ -2,7 +2,7 @@ import { Config } from 'payload/config';
 import { generateFormCollection } from './collections/Forms';
 import { generateSubmissionCollection } from './collections/FormSubmissions';
 import { FormConfig } from './types';
-import path from 'path';
+// import path from 'path';
 
 const FormBuilder = (incomingFormConfig?: FormConfig) => (config: Config): Config => {
   const formConfig: FormConfig = {
@@ -13,6 +13,7 @@ const FormBuilder = (incomingFormConfig?: FormConfig) => (config: Config): Confi
       email: true,
       state: true,
       country: true,
+      number: true,
       checkbox: true,
       message: true,
       payment: false,
