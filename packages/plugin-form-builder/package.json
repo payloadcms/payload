@@ -19,7 +19,7 @@
   ],
   "author": "dev@trbl.design",
   "license": "MIT",
-  "dependencies": {
+  "peerDependencies": {
     "payload": "^0.14.0"
   },
   "files": [
