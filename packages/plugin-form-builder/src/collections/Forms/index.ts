@@ -3,8 +3,9 @@ import { FormConfig } from '../../types';
 import fields from './fields';
 import deepMerge from '../../utilities/deepMerge';
 
+// all settings can be overridden by the config
 export const generateFormCollection = (formConfig: FormConfig): CollectionConfig => deepMerge({
-  slug: formConfig?.formsOverrides?.slug || 'forms',
+  slug: formConfig?.formOverrides?.slug || 'forms',
   admin: {
     useAsTitle: 'title',
     enableRichTextRelationship: false,
@@ -95,7 +96,7 @@ export const generateFormCollection = (formConfig: FormConfig): CollectionConfig
           name: 'reference',
           label: 'Document to link to',
           type: 'relationship',
-          relationTo: ['pages', 'posts', 'housing'],
+          relationTo: formConfig.redirectRelationships || [],
           required: true,
           maxDepth: 2,
           admin: {
@@ -182,4 +183,4 @@ export const generateFormCollection = (formConfig: FormConfig): CollectionConfig
       ],
     },
   ],
-}, formConfig.formsOverrides || {});
+}, formConfig.formOverrides || {});

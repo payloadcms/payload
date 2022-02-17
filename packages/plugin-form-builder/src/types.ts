@@ -1,4 +1,3 @@
-import { RichText } from '@trbl/hope-types';
 import { Block, CollectionConfig, Field } from 'payload/types';
 
 export type BlockConfig = {
@@ -34,10 +33,11 @@ export type HandlePayment = (data) => void;
 
 export type FormConfig = {
   fields?: FieldsConfig
-  formSubmissionsOverrides?: CollectionConfig
-  formsOverrides?: CollectionConfig
+  formSubmissionOverrides?: Partial<CollectionConfig>
+  formOverrides?: Partial<CollectionConfig>
   beforeEmail?: BeforeEmail
   handlePayment?: HandlePayment
+  redirectRelationships?: string[]
 }
 
 export type TextField = {
@@ -120,7 +120,7 @@ export type Email = {
   bcc?: string
   replyTo?: string
   subject: string
-  message?: RichText
+  message?: any // TODO: configure rich text type
 }
 
 export type FormattedEmail = {
@@ -144,7 +144,7 @@ export type Form = {
   fields: FormFieldBlock[]
   submitButtonLabel?: string
   confirmationType: 'message' | 'redirect'
-  confirmationMessage?: RichText
+  confirmationMessage?: any // TODO: configure rich text type
   redirect?: Redirect
   emails: Email[]
 }

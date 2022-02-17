@@ -3,14 +3,14 @@ import { FormConfig } from '../../types';
 import deepMerge from '../../utilities/deepMerge';
 import sendEmail from './hooks/sendEmail';
 import createCharge from './hooks/createCharge';
-import loggedInUsers from '../../../../collections/User/access/loggedInUsers';
 
+// all settings can be overridden by the config
 export const generateSubmissionCollection = (formConfig: FormConfig): CollectionConfig => deepMerge({
-  slug: formConfig?.formsOverrides?.slug || 'formSubmissions',
+  slug: formConfig?.formSubmissionOverrides?.slug || 'formSubmissions',
   access: {
     create: () => true,
     update: () => false,
-    read: loggedInUsers
+    read: ({ req: { user } }) => !!user // logged-in users
   },
   admin: {
     enableRichTextRelationship: false
@@ -127,4 +127,4 @@ export const generateSubmissionCollection = (formConfig: FormConfig): Collection
       ]
     }
   ],
-}, formConfig.formSubmissionsOverrides || {});
+}, formConfig.formSubmissionOverrides || {});
