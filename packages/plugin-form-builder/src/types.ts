@@ -28,7 +28,7 @@ export type FieldsConfig = {
   payment?: boolean | FieldConfig
 }
 
-export type BeforeEmail = (emails: FormattedEmail[]) => FormattedEmail[];
+export type BeforeEmail = (emails: FormattedEmail[]) => FormattedEmail[] | Promise<FormattedEmail[]>;
 export type HandlePayment = (data: any) => void;
 
 export type FormConfig = {

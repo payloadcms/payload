@@ -13,9 +13,9 @@
     "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:types"
   },
   "dependencies": {
-    "payload": "^0.14.0",
     "dotenv": "^8.2.0",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "payload": "^0.14.24-beta.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",
