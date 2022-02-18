@@ -19,14 +19,14 @@ export const DynamicFieldSelector: React.FC<TextField> = (props) => {
       const allNonPaymentFields = fields.map((block): SelectFieldOption | null => {
         const {
           name,
-          id,
+          label,
           blockType
         } = block;
 
         if (blockType !== 'payment') {
           return ({
-            label: name,
-            value: id
+            label,
+            value: name
           })
         }
 
