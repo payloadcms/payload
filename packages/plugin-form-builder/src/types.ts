@@ -15,10 +15,11 @@ export type FieldValues = {
   [key: string]: string | number | boolean | null | undefined
 }
 
-export type FieldConfig = {
-  [key: string]: Partial<Field>
+export type PaymentFieldConfig = Partial<Field> & {
   paymentProcessor: Partial<SelectField>
 }
+
+export type FieldConfig = Partial<Field> | PaymentFieldConfig;
 
 export type FieldsConfig = {
   select?: boolean | FieldConfig

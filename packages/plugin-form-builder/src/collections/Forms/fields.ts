@@ -1,5 +1,5 @@
 import { Block, Field } from 'payload/types';
-import { FieldConfig, TextField } from '../../types';
+import { FieldConfig, PaymentFieldConfig, TextField } from '../../types';
 import { DynamicFieldSelector } from './DynamicFieldSelector';
 import { DynamicPriceSelector } from './DynamicPriceSelector';
 
@@ -340,7 +340,7 @@ const Checkbox: Block = {
   ],
 };
 
-const Payment = (fieldConfig: FieldConfig): Block => {
+const Payment = (fieldConfig: PaymentFieldConfig): Block => {
 
   let paymentProcessorField = null;
   if (fieldConfig?.paymentProcessor) {
@@ -364,13 +364,13 @@ const Payment = (fieldConfig: FieldConfig): Block => {
         type: 'row',
         fields: [
           {
-            ...label,
+            ...name,
             admin: {
               width: '50%',
             },
           },
           {
-            ...width,
+            ...label,
             admin: {
               width: '50%',
             },
@@ -380,116 +380,125 @@ const Payment = (fieldConfig: FieldConfig): Block => {
       {
         type: 'row',
         fields: [
-          paymentProcessorField,
+          {
+            ...width,
+            admin: {
+              width: '50%',
+            },
+          },
           {
             name: 'basePrice',
             type: 'number',
             label: 'Base Price',
+            admin: {
+              width: '50%',
+            },
+          },
+        ],
+      },
+      paymentProcessorField,
+      {
+        name: 'priceConditions',
+        labels: {
+          singular: 'Price Condition',
+          plural: 'Price Conditions',
+        },
+        type: 'array',
+        label: 'Price Conditions',
+        fields: [
+          {
+            name: 'fieldToUse',
+            type: 'text',
+            admin: {
+              components: {
+                Field: DynamicFieldSelector,
+              },
+            },
           },
           {
-            name: 'priceConditions',
-            labels: {
-              singular: 'Price Condition',
-              plural: 'Price Conditions',
-            },
-            type: 'array',
-            label: 'Price Conditions',
-            fields: [
+            name: 'condition',
+            label: 'Condition',
+            type: 'select',
+            defaultValue: 'hasValue',
+            options: [
               {
-                name: 'fieldToUse',
-                type: 'text',
-                admin: {
-                  components: {
-                    Field: DynamicFieldSelector,
-                  },
-                },
+                value: 'hasValue',
+                label: 'Has Any Value'
               },
               {
-                name: 'condition',
-                label: 'Condition',
-                type: 'select',
-                defaultValue: 'hasValue',
-                options: [
-                  {
-                    value: 'hasValue',
-                    label: 'Has Any Value'
-                  },
-                  {
-                    value: 'equals',
-                    label: 'Equals'
-                  },
-                  {
-                    value: 'notEquals',
-                    label: 'Does Not Equal'
-                  }
-                ]
+                value: 'equals',
+                label: 'Equals'
               },
               {
-                name: 'valueForCondition',
-                label: 'Value',
-                type: 'text',
-                admin: {
-                  condition: (_: any, { condition }: any) => condition === 'equals' || condition === 'notEquals'
-                }
-              },
-              {
-                name: 'operator',
-                type: 'select',
-                defaultValue: 'add',
-                options: [
-                  {
-                    value: 'add',
-                    label: 'Add'
-                  },
-                  {
-                    value: 'subtract',
-                    label: 'Subtract'
-                  },
-                  {
-                    value: 'multiply',
-                    label: 'Multiply'
-                  },
-                  {
-                    value: 'divide',
-                    label: 'Divide'
-                  }
-                ]
-              },
-              {
-                name: 'valueType',
-                label: 'Value Type',
-                type: 'radio',
-                admin: {
-                  width: '100%',
-                },
-                defaultValue: 'static',
-                options: [
-                  {
-                    label: 'Static Value',
-                    value: 'static'
-                  },
-                  {
-                    label: 'Value Of Field',
-                    value: 'valueOfField'
-                  }
-                ]
-              },
-              {
-                name: 'valueForOperator',
-                label: 'Value',
-                type: 'text',
-                admin: {
-                  components: {
-                    Field: DynamicPriceSelector,
-                  },
-                },
-              },
+                value: 'notEquals',
+                label: 'Does Not Equal'
+              }
             ]
           },
-        ].filter(Boolean) as Field[],
+          {
+            name: 'valueForCondition',
+            label: 'Value',
+            type: 'text',
+            admin: {
+              condition: (_: any, { condition }: any) => condition === 'equals' || condition === 'notEquals'
+            }
+          },
+          {
+            name: 'operator',
+            type: 'select',
+            defaultValue: 'add',
+            options: [
+              {
+                value: 'add',
+                label: 'Add'
+              },
+              {
+                value: 'subtract',
+                label: 'Subtract'
+              },
+              {
+                value: 'multiply',
+                label: 'Multiply'
+              },
+              {
+                value: 'divide',
+                label: 'Divide'
+              }
+            ]
+          },
+          {
+            name: 'valueType',
+            label: 'Value Type',
+            type: 'radio',
+            admin: {
+              width: '100%',
+            },
+            defaultValue: 'static',
+            options: [
+              {
+                label: 'Static Value',
+                value: 'static'
+              },
+              {
+                label: 'Value Of Field',
+                value: 'valueOfField'
+              }
+            ]
+          },
+          {
+            name: 'valueForOperator',
+            label: 'Value',
+            type: 'text',
+            admin: {
+              components: {
+                Field: DynamicPriceSelector,
+              },
+            },
+          },
+        ]
       },
       required,
-    ]
+    ].filter(Boolean) as Field[]
   })
 };
 

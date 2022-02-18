@@ -4,6 +4,8 @@ import { generateSubmissionCollection } from './collections/FormSubmissions';
 import { FormConfig } from './types';
 // import path from 'path';
 
+export { getPaymentTotal } from './utilities/getPaymentTotal'
+
 const FormBuilder = (incomingFormConfig: FormConfig) => (config: Config): Config => {
   const formConfig: FormConfig = {
     ...incomingFormConfig,
