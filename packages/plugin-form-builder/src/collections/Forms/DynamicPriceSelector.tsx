@@ -49,6 +49,7 @@ export const DynamicPriceSelector: React.FC<TextFieldType> = (props) => {
     getData
   ]);
 
+  // TODO: make this a number field, block by Payload
   if (valueType === 'static') {
     return (
       <Text {...props} />

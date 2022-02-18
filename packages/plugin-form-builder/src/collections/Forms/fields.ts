@@ -382,43 +382,18 @@ const Payment = (fieldConfig: FieldConfig): Block => {
         fields: [
           paymentProcessorField,
           {
-            name: 'priceType',
-            label: 'Price Type',
-            type: 'radio',
-            admin: {
-              width: '100%',
-            },
-            defaultValue: 'static',
-            options: [
-              {
-                label: 'Static Price',
-                value: 'static'
-              },
-              {
-                label: 'Dynamic Price',
-                value: 'dynamic'
-              }
-            ]
-          },
-          {
-            name: 'staticPrice',
+            name: 'basePrice',
             type: 'number',
-            label: 'Price',
-            admin: {
-              condition: (_: any, { priceType }: any) => priceType === 'static'
-            },
+            label: 'Base Price',
           },
           {
-            name: 'dynamicPrice',
+            name: 'priceConditions',
             labels: {
-              singular: 'Condition',
-              plural: 'Conditions',
+              singular: 'Price Condition',
+              plural: 'Price Conditions',
             },
             type: 'array',
-            label: 'Price',
-            admin: {
-              condition: (_: any, { priceType }: any) => priceType === 'dynamic'
-            },
+            label: 'Price Conditions',
             fields: [
               {
                 name: 'fieldToUse',
