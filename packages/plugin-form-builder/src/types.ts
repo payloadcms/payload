@@ -66,6 +66,28 @@ export type SelectField = {
   options: SelectFieldOption[]
 }
 
+export type PriceCondition = {
+  fieldToUse: string
+  condition: 'equals' | 'notEquals' | 'hasValue'
+  valueForCondition: string
+  operator: 'add' | 'subtract' | 'multiply' | 'divide'
+  valueType: 'static' | 'dynamic'
+  valueForOperator: string | number // TODO: make this a number, see ./collections/Forms/DynamicPriceSelector.tsx
+}
+
+export type PaymentField = {
+  blockType: 'payment'
+  blockName?: string
+  width?: string
+  name: string
+  label?: string
+  defaultValue?: string
+  required?: boolean
+  paymentProcessor: string,
+  basePrice: number
+  priceConditions: PriceCondition[]
+}
+
 export type EmailField = {
   blockType: 'email'
   blockName?: string
@@ -112,7 +134,7 @@ export type MessageField = {
   message: unknown
 }
 
-export type FormFieldBlock = TextField | SelectField | EmailField | StateField | CountryField | CheckboxField | MessageField | unknown
+export type FormFieldBlock = TextField | SelectField | EmailField | StateField | CountryField | CheckboxField | MessageField
 
 export type Email = {
   emailTo: string
@@ -140,6 +162,7 @@ export type Redirect = {
 }
 
 export type Form = {
+  id: string
   title: string
   fields: FormFieldBlock[]
   submitButtonLabel?: string
