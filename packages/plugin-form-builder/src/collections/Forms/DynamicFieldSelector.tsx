@@ -16,7 +16,7 @@ export const DynamicFieldSelector: React.FC<TextField> = (props) => {
     const fields: any[] = getDataByPath('fields')
 
     if (fields) {
-      const allNonPaymentFields: SelectFieldOption[] = fields.filter((block): SelectFieldOption | null => {
+      const allNonPaymentFields = fields.map((block): SelectFieldOption | null => {
         const {
           name,
           id,
@@ -31,7 +31,7 @@ export const DynamicFieldSelector: React.FC<TextField> = (props) => {
         }
 
         return null
-      }).filter(Boolean);
+      }).filter(Boolean) as SelectFieldOption[];
       setOptions(allNonPaymentFields);
     }
   }, [
