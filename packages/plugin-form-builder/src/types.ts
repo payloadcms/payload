@@ -11,6 +11,10 @@ export function isValidBlockConfig(blockConfig: BlockConfig | string): blockConf
     && Array.isArray(blockConfig?.block?.fields);
 }
 
+export type FieldValues = {
+  [key: string]: string | number | boolean | null | undefined
+}
+
 export type FieldConfig = {
   [key: string]: Partial<Field>
   paymentProcessor: Partial<SelectField>
@@ -71,7 +75,7 @@ export type PriceCondition = {
   condition: 'equals' | 'notEquals' | 'hasValue'
   valueForCondition: string
   operator: 'add' | 'subtract' | 'multiply' | 'divide'
-  valueType: 'static' | 'dynamic'
+  valueType: 'static' | 'valueOfField'
   valueForOperator: string | number // TODO: make this a number, see ./collections/Forms/DynamicPriceSelector.tsx
 }
 

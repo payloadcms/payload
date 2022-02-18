@@ -469,8 +469,8 @@ const Payment = (fieldConfig: FieldConfig): Block => {
                     value: 'static'
                   },
                   {
-                    label: 'Dynamic Value',
-                    value: 'dynamic'
+                    label: 'Value Of Field',
+                    value: 'valueOfField'
                   }
                 ]
               },

@@ -56,7 +56,7 @@ export const DynamicPriceSelector: React.FC<TextFieldType> = (props) => {
     )
   }
 
-  if (valueType === 'dynamic' && !isNumberField) {
+  if (valueType === 'valueOfField' && !isNumberField) {
     return (
       <div>
         <div>
@@ -67,7 +67,7 @@ export const DynamicPriceSelector: React.FC<TextFieldType> = (props) => {
             color: '#9A9A9A',
           }}
         >
-          The selected field must be of type number to be dynamic.
+          The selected field must be a number field.
         </div>
       </div>
     )
