@@ -1,0 +1,55 @@
+import { Config } from 'payload/config';
+import { generateSearchCollection } from './Search';
+import syncWithSearch from './Search/hooks/syncWithSearch';
+import deleteFromSearch from './Search/hooks/deleteFromSearch';
+import { SearchConfig } from './types';
+// import path from 'path';
+
+const Search = (incomingSearchConfig: SearchConfig) => (config: Config): Config => {
+  const searchConfig: SearchConfig = {
+    ...incomingSearchConfig,
+    // modify as necessary
+  };
+
+  // add a beforeChange hook to every search-enabled collection
+  const collectionsWithSearchHooks = config?.collections?.map((collection) => {
+    const {
+      hooks: existingHooks
+    } = collection;
+
+    const enabledCollections = searchConfig.collections || [];
+    const isEnabled = enabledCollections.indexOf(collection.slug) > -1;
+
+    if (isEnabled) {
+      return {
+        ...collection,
+        hooks: {
+          ...collection.hooks,
+          beforeChange: [
+            ...(existingHooks?.beforeChange || []),
+            async (args: any) => syncWithSearch({
+              ...args,
+              collection: 'pages'
+            }),
+          ],
+          afterDelete: [
+            ...(existingHooks?.afterDelete || []),
+            deleteFromSearch,
+          ],
+        },
+      };
+    }
+
+    return collection;
+  }).filter(Boolean);
+
+  return {
+    ...config,
+    collections: [
+      ...collectionsWithSearchHooks || [],
+      generateSearchCollection(searchConfig),
+    ],
+  };
+};
+
+export default Search;

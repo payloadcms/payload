@@ -1,0 +1,37 @@
+{
+  "name": "payload-plugin-search",
+  "version": "1.0.0",
+  "description": "Search plugin for Payload CMS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "payload",
+    "cms",
+    "plugin",
+    "typescript",
+    "react",
+    "search",
+    "algolia"
+  ],
+  "author": "dev@trbl.design",
+  "license": "MIT",
+  "peerDependencies": {
+    "payload": "^0.14.24-beta.0",
+    "react": "^17.0.2"
+  },
+  "devDependencies": {
+    "payload": "^0.14.24-beta.0",
+    "react": "^17.0.2",
+    "typescript": "^4.5.5"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "escape-html": "^1.0.3"
+  }
+}
