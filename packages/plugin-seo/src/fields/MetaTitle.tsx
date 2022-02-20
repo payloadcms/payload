@@ -1,5 +1,3 @@
-/* eslint-disable no-use-before-define */
-/* eslint-disable import/no-extraneous-dependencies */
 import React, { useCallback } from 'react';
 import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types';
 import TextInputField from 'payload/dist/admin/components/forms/field-types/Text/Input';
@@ -7,7 +5,6 @@ import { useField, useWatchForm } from 'payload/components/forms';
 import { FieldType as FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { LengthIndicator } from '../ui/LengthIndicator';
 import { defaults } from '../defaults';
-import { generateMetaTitle } from '../utilities/generateMetaTitle';
 
 const {
   minLength,
@@ -30,9 +27,14 @@ export const MetaTitle: React.FC<TextFieldType> = (props) => {
     showError
   } = field;
 
+  let generateTitle: string | ((doc: any) => void);
+
   const regenerateTitle = useCallback(() => {
     const getTitle = async () => {
-      const generatedTitle = await generateMetaTitle(fields);
+      let generatedTitle;
+      if (typeof generateTitle === 'function') {
+        generatedTitle = await generateTitle({ fields });
+      }
       setValue(generatedTitle);
     }
     getTitle();

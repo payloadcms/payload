@@ -1,12 +1,9 @@
-/* eslint-disable no-use-before-define */
-/* eslint-disable import/no-extraneous-dependencies */
 import React, { useCallback } from 'react';
 import { useConfig } from '@payloadcms/config-provider';
 import { Props as UploadFieldType } from 'payload/dist/admin/components/forms/field-types/Upload/types';
 import UploadInput from 'payload/dist/admin/components/forms/field-types/Upload/Input';
 import { useField, useWatchForm } from 'payload/components/forms';
 import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
-import { generateMetaImage } from '../utilities/generateMetaImage';
 import { Pill } from '../ui/Pill';
 
 export const MetaImage: React.FC<UploadFieldType> = (props) => {
@@ -27,9 +24,17 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
     showError,
   } = field;
 
+  let generateImage: string | ((doc: any) => void);
+
   const regenerateImage = useCallback(() => {
-    const generatedImage = generateMetaImage(fields);
-    setValue(generatedImage);
+    const getDescription = async () => {
+      let generatedImage;
+      if (typeof generateImage === 'function') {
+        generatedImage = await generateImage({ fields });
+      }
+      setValue(generatedImage);
+    }
+    getDescription();
   }, [
     fields,
     setValue,
@@ -37,7 +42,7 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
 
   const hasImage = Boolean(value);
 
-  const config = useConfig();
+  const config = useConfig(); // TODO: this returns an empty object
 
   const {
     collections,
@@ -109,7 +114,7 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
               setValue(null);
             }
           }}
-          label={null}
+          label={undefined}
           showError={showError}
           api={api}
           collection={collection}

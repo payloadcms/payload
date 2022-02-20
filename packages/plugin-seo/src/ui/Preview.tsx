@@ -61,7 +61,7 @@ export const Preview: React.FC = () => {
               textDecoration: 'none',
             }}
           >
-            {metaTitle}
+            {metaTitle as string}
           </a>
         </h4>
         <p
@@ -70,7 +70,7 @@ export const Preview: React.FC = () => {
             color: '#202124',
           }}
         >
-          {metaDescription}
+          {metaDescription as string}
         </p>
       </div>
     </div>

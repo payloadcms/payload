@@ -1,6 +1,6 @@
 {
   "name": "payload-plugin-seo",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "SEO plugin for Payload CMS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -31,4 +31,7 @@
   "files": [
     "dist"
   ],
+  "dependencies": {
+    "@payloadcms/config-provider": "^1.0.0"
+  }
 }

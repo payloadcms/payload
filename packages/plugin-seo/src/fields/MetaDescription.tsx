@@ -1,12 +1,9 @@
-/* eslint-disable no-use-before-define */
-/* eslint-disable import/no-extraneous-dependencies */
 import React, { useCallback } from 'react';
 import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types';
 import { useField, useWatchForm } from 'payload/components/forms';
 import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { LengthIndicator } from '../ui/LengthIndicator';
 import { defaults } from '../defaults';
-import { generateMetaDescription } from '../utilities/generateMetaDescription';
 import TextareaInput from 'payload/dist/admin/components/forms/field-types/Textarea/Input';
 
 const {
@@ -30,9 +27,17 @@ export const MetaDescription: React.FC<TextFieldType> = (props) => {
     showError
   } = field;
 
+  let generateDescription: string | ((doc: any) => void);
+
   const regenerateDescription = useCallback(() => {
-    const generatedDesc = generateMetaDescription(fields);
-    setValue(generatedDesc);
+    const getDescription = async () => {
+      let generatedDescription;
+      if (typeof generateDescription === 'function') {
+        generatedDescription = await generateDescription({ fields });
+      }
+      setValue(generatedDescription);
+    }
+    getDescription();
   }, [
     fields,
     setValue,

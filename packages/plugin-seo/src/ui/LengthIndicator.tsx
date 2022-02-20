@@ -11,8 +11,8 @@ export const LengthIndicator: React.FC<{
 }> = (props) => {
   const {
     text,
-    minLength,
-    maxLength,
+    minLength = 0,
+    maxLength = 0,
   } = props;
 
   const [labelStyle, setLabelStyle] = useState({
