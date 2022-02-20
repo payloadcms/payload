@@ -68,7 +68,7 @@ export default config;
     searchPlugin({
       ...
       defaultPriorities: {
-        pages: (doc) => doc.title.startsWith('Hello, world!') ? 1 : 10,
+        pages: ({ doc }) => doc.title.startsWith('Hello, world!') ? 1 : 10,
         posts: 20
       }
     })
@@ -95,10 +95,10 @@ export default config;
     ```js
     searchPlugin({
       ...
-      beforeSync: ({ doc }) => ({
-        ...doc,
+      beforeSync: ({ originalDoc, searchDoc }) => ({
+        ...searchDoc,
         // Modify your docs in any way here, this can be async
-        excerpt: doc?.excerpt || 'This is a fallback excerpt'
+        excerpt: originalDoc?.excerpt || 'This is a fallback excerpt'
       }),
     })
     ```

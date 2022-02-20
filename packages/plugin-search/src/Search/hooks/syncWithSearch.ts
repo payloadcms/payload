@@ -34,7 +34,8 @@ const syncWithSearch: SyncWithSearch = async (args) => {
 
   if (typeof beforeSync === 'function') {
     dataToSave = await beforeSync({
-      doc: dataToSave,
+      originalDoc: doc,
+      searchDoc: dataToSave,
       payload
     });
   }
@@ -46,7 +47,12 @@ const syncWithSearch: SyncWithSearch = async (args) => {
     } = defaultPriorities;
 
     if (typeof priority === 'function') {
-      defaultPriority = await priority(dataToSave);
+      try {
+        defaultPriority = await priority(doc);
+      } catch (err) {
+        payload.logger.error(err);
+        payload.logger.error(`Error gathering default priority for search documents related to ${collection}`);
+      }
     } else {
       defaultPriority = priority;
     }
@@ -134,7 +140,6 @@ const syncWithSearch: SyncWithSearch = async (args) => {
           }
         } else if (doSync) {
           try {
-            console.log('create');
             payload.create({
               collection: 'search',
               data: {

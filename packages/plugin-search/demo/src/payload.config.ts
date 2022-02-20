@@ -51,9 +51,9 @@ export default buildConfig({
         ]
       },
       syncOnlyPublished: false,
-      beforeSync: ({ doc }) => ({
-        ...doc,
-        excerpt: doc?.excerpt || 'This is a fallback excerpt'
+      beforeSync: ({ originalDoc, searchDoc }) => ({
+        ...searchDoc,
+        excerpt: originalDoc?.excerpt || 'This is a fallback excerpt'
       }),
       defaultPriorities: {
         pages: 10,

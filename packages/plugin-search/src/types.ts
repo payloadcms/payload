@@ -11,15 +11,18 @@ export type DocToSync = {
 }
 
 export type BeforeSync = (args: {
-  doc: DocToSync
+  originalDoc: {
+    [key: string]: any
+  }
+  searchDoc: DocToSync
   payload: Payload
-}) => DocToSync;
+}) => DocToSync | Promise<DocToSync>;
 
 export type SearchConfig = {
   searchOverrides?: Partial<CollectionConfig>
   collections?: string[]
   defaultPriorities?: {
-    [collection: string]: number | ((doc: DocToSync) => number)
+    [collection: string]: number | ((doc: any) => number | Promise<number>)
   }
   beforeSync?: BeforeSync
   syncOnlyPublished?: boolean
