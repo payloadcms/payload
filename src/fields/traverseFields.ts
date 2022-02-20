@@ -106,7 +106,8 @@ const traverseFields = (args: Arguments): void => {
       }
     }
 
-    if (field.type === 'relationship' && field.hasMany && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null')) {
+    // if (field.type === 'relationship' && field.hasMany && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null')) {
+    if (field.type === 'relationship' && field.hasMany && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null' || data[field.name] === null)) {
       dataCopy[field.name] = [];
     }
 

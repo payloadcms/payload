@@ -27,12 +27,12 @@ export const createRelationMap: CreateRelationMap = ({
     }
   };
 
-  if (hasMany) {
-    (value as Value[] || []).forEach((val, i) => {
+  if (hasMany && Array.isArray(value)) {
+    value.forEach((val) => {
       if (hasMultipleRelations) {
-        add(value[i].relationTo, value[i].value);
+        add(val.relationTo, val.value);
       } else {
-        add(relationTo, value[i]);
+        add(relationTo, val);
       }
     });
   } else if (hasMultipleRelations) {
