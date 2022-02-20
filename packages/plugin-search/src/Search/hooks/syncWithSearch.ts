@@ -32,7 +32,10 @@ const syncWithSearch: SyncWithSearch = async (args) => {
   };
 
   if (typeof beforeSync === 'function') {
-    dataToSave = await beforeSync(dataToSave);
+    dataToSave = await beforeSync({
+      doc: dataToSave,
+      payload
+    });
   }
 
   // TODO: inject default priorities here

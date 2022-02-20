@@ -36,11 +36,11 @@ export default buildConfig({
         'pages'
       ],
       syncOnlyPublished: false,
-      beforeSync: (incomingDoc) => {
+      beforeSync: ({ doc }) => {
         // Transform your docs in any way here
         const modifiedDoc = {
-          ...incomingDoc,
-          excerpt: incomingDoc?.excerpt || 'This is a fallback excerpt'
+          ...doc,
+          excerpt: doc?.excerpt || 'This is a fallback excerpt'
         }
         return modifiedDoc;
       },

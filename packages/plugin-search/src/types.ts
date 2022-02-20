@@ -1,3 +1,4 @@
+import { Payload } from 'payload';
 import { CollectionAfterChangeHook, CollectionConfig } from 'payload/types';
 
 export type DocToSync = {
@@ -9,7 +10,10 @@ export type DocToSync = {
   }
 }
 
-export type BeforeSync = (doc: DocToSync) => DocToSync;
+export type BeforeSync = (args: {
+  doc: DocToSync
+  payload: Payload
+}) => DocToSync;
 
 export type SearchConfig = {
   searchOverrides?: Partial<CollectionConfig>
