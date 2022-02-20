@@ -1,6 +1,6 @@
 {
   "name": "payload-plugin-search",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Search plugin for Payload CMS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -32,6 +32,6 @@
     "dist"
   ],
   "dependencies": {
-    "escape-html": "^1.0.3"
+    "ts-deepmerge": "^2.0.1"
   }
 }

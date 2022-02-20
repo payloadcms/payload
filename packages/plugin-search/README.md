@@ -9,6 +9,7 @@ Core features:
     - Automatically creates, syncs, and deletes search results related to your documents
     - Serves search results extremely quickly by saving only search-critical data that you define
     - Allows you to sort search results by priority
+
 ## Installation
 
 ```bash
@@ -48,6 +49,7 @@ export default config;
 ### Options
 
 - `collections`
+
     An array of collections slugs to enable sync-to-search. Enabled collections receive a `beforeChange` and `afterDelete` hook that creates, syncs, and deleted the document to its related search document as it changes over time, and also an `afterDelete` hook that deletes.
 
 - `searchOverrides`
@@ -55,10 +57,36 @@ export default config;
     Override anything on the search collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections).
 
     ```
-    searchOverrides: {
-      slug: 'search-results'
-    }
+    searchPlugin({
+      ...
+      searchOverrides: {
+        slug: 'search-results'
+      }
+    })
     ```
+
+  - `beforeSync`
+
+    An [afterChange]([afterChange](https://payloadcms.com/docs/hooks/globals#afterchange)) hook that is called before creating or syncing the document to search. This allows you to modify the data in any way before doing so.
+
+    ```
+    searchPlugin({
+      ...
+      beforeSync: (doc) => {
+        // Transform your docs in any way here, this can be async
+        return doc;
+      }
+    })
+    ```
+
+  - `syncOnlyPublished`
+
+    If true, will sync only published documents to search.
+
+  - `deleteDrafts`
+
+    If true, will delete documents from search that change to draft status.
+
   ## TypeScript
 
   All types can be directly imported:

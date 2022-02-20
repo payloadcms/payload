@@ -1,31 +1,49 @@
-import { CollectionAfterChangeHook } from 'payload/types';
+import { SearchConfig, SyncWithSearch } from '../../types';
 
-const syncWithSearch: CollectionAfterChangeHook = async ({
-  req: { payload },
-  doc,
-  operation,
-  // @ts-ignore
-  collection,
-}) => {
+const syncWithSearch: SyncWithSearch = async (args) => {
   const {
+    req: { payload },
+    doc,
+    operation,
+    // @ts-ignore
+    collection,
+    // @ts-ignore
+    searchConfig
+  } = args;
+
+  const {
+    title,
     id,
     status,
   } = doc || {};
 
-  // TODO: inject default priorities here
-  let defaultPriority = 0;
+  const {
+    beforeSync,
+    syncOnlyPublished,
+    deleteDrafts
+  } = searchConfig as SearchConfig; // todo fix SyncWithSearch type, see note in ./types.ts
 
-  // TODO: call a function from the config that returns transformed search data
-  const dataToSave = {
+  let dataToSave = {
+    title,
     doc: {
       relationTo: collection,
       value: id,
     },
   };
 
+  if (typeof beforeSync === 'function') {
+    dataToSave = await beforeSync(dataToSave);
+  }
+
+  // TODO: inject default priorities here
+  let defaultPriority = 0;
+
+  // TODO: use the new revisions API to check for published status
+  const doSync = !!syncOnlyPublished || (syncOnlyPublished && status === 'published');
+
   try {
     if (operation === 'create') {
-      if (status === 'published') {
+      if (doSync) {
         payload.create({
           collection: 'search',
           data: {
@@ -74,7 +92,7 @@ const syncWithSearch: CollectionAfterChangeHook = async ({
             id: searchDocID,
           } = foundDoc;
 
-          if (status === 'published') {
+          if (doSync) {
             // update the doc normally
             try {
               payload.update({
@@ -89,7 +107,7 @@ const syncWithSearch: CollectionAfterChangeHook = async ({
               payload.logger.error(`Error updating search document.`);
             }
           }
-          if (status === 'draft') {
+          if (deleteDrafts && status === 'draft') {
             // do not include draft docs in search results, so delete the record
             try {
               payload.delete({
@@ -100,8 +118,9 @@ const syncWithSearch: CollectionAfterChangeHook = async ({
               payload.logger.error(`Error deleting search document.`);
             }
           }
-        } else if (status === 'published') {
+        } else if (doSync) {
           try {
+            console.log('create');
             payload.create({
               collection: 'search',
               data: {

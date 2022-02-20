@@ -35,6 +35,27 @@ export default buildConfig({
       collections: [
         'pages'
       ],
+      syncOnlyPublished: false,
+      beforeSync: (incomingDoc) => {
+        // Transform your docs in any way here
+        const modifiedDoc = {
+          ...incomingDoc,
+          excerpt: incomingDoc?.excerpt || 'This is a fallback excerpt'
+        }
+        return modifiedDoc;
+      },
+      searchOverrides: {
+        fields: [
+          {
+            name: 'excerpt',
+            label: 'Excerpt',
+            type: 'text',
+            admin: {
+              readOnly: true,
+            }
+          }
+        ]
+      }
     }),
   ],
   typescript: {

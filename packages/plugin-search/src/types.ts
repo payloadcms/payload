@@ -1,4 +1,15 @@
-import { CollectionConfig } from 'payload/types';
+import { CollectionAfterChangeHook, CollectionConfig } from 'payload/types';
+
+export type DocToSync = {
+  [key: string]: any
+  title: string
+  doc: {
+    relationTo: string
+    value: string
+  }
+}
+
+export type BeforeSync = (doc: DocToSync) => DocToSync;
 
 export type SearchConfig = {
   searchOverrides?: Partial<CollectionConfig>
@@ -6,4 +17,12 @@ export type SearchConfig = {
   defaultPriorities?: {
     [collection: string]: number
   }
+  beforeSync?: BeforeSync
+  syncOnlyPublished?: boolean
+  deleteDrafts?: boolean
 }
+
+// TODO: extend this hook with additional args
+// searchConfig: SearchConfig
+// collection: string
+export type SyncWithSearch = CollectionAfterChangeHook;
