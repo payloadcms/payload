@@ -4,6 +4,7 @@ import searchPlugin from '../../dist';
 // import searchPlugin from '../../src';
 import { Users } from './collections/Users';
 import { Pages } from './collections/Pages';
+import { Posts } from './collections/Posts';
 
 export default buildConfig({
   serverURL: 'http://localhost:3000',
@@ -28,22 +29,15 @@ export default buildConfig({
   },
   collections: [
     Users,
-    Pages
+    Pages,
+    Posts
   ],
   plugins: [
     searchPlugin({
       collections: [
-        'pages'
+        'pages',
+        'posts'
       ],
-      syncOnlyPublished: false,
-      beforeSync: ({ doc }) => {
-        // Transform your docs in any way here
-        const modifiedDoc = {
-          ...doc,
-          excerpt: doc?.excerpt || 'This is a fallback excerpt'
-        }
-        return modifiedDoc;
-      },
       searchOverrides: {
         fields: [
           {
@@ -55,6 +49,15 @@ export default buildConfig({
             }
           }
         ]
+      },
+      syncOnlyPublished: false,
+      beforeSync: ({ doc }) => ({
+        ...doc,
+        excerpt: doc?.excerpt || 'This is a fallback excerpt'
+      }),
+      defaultPriorities: {
+        pages: 10,
+        posts: ({ title }) => title === 'Hello, world!' ? 30 : 20
       }
     }),
   ],

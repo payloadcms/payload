@@ -19,7 +19,7 @@ export type SearchConfig = {
   searchOverrides?: Partial<CollectionConfig>
   collections?: string[]
   defaultPriorities?: {
-    [collection: string]: number
+    [collection: string]: number | ((doc: DocToSync) => number)
   }
   beforeSync?: BeforeSync
   syncOnlyPublished?: boolean

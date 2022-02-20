@@ -20,7 +20,8 @@ const syncWithSearch: SyncWithSearch = async (args) => {
   const {
     beforeSync,
     syncOnlyPublished,
-    deleteDrafts
+    deleteDrafts,
+    defaultPriorities,
   } = searchConfig as SearchConfig; // todo fix SyncWithSearch type, see note in ./types.ts
 
   let dataToSave = {
@@ -38,8 +39,18 @@ const syncWithSearch: SyncWithSearch = async (args) => {
     });
   }
 
-  // TODO: inject default priorities here
   let defaultPriority = 0;
+  if (defaultPriorities) {
+    const {
+      [collection]: priority,
+    } = defaultPriorities;
+
+    if (typeof priority === 'function') {
+      defaultPriority = await priority(dataToSave);
+    } else {
+      defaultPriority = priority;
+    }
+  }
 
   // TODO: use the new revisions API to check for published status
   const doSync = !!syncOnlyPublished || (syncOnlyPublished && status === 'published');

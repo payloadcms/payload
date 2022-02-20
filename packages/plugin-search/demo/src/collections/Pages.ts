@@ -1,4 +1,3 @@
-// const payload = require('payload');
 import { CollectionConfig } from 'payload/types';
 
 export const Pages: CollectionConfig = {

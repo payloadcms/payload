@@ -31,13 +31,21 @@ const config = buildConfig({
     {
       slug: 'pages',
       fields: []
+    },
+    {
+      slug: 'posts',
+      fields: []
     }
   ],
   plugins: [
     search({
-      collections: ['pages'],
+      collections: [
+        'pages',
+        'posts'
+      ],
       defaultPriorities: {
-        pages: 10
+        pages: 10,
+        posts: 20
       }
     })
   ]
@@ -52,11 +60,26 @@ export default config;
 
     An array of collections slugs to enable sync-to-search. Enabled collections receive a `beforeChange` and `afterDelete` hook that creates, syncs, and deleted the document to its related search document as it changes over time, and also an `afterDelete` hook that deletes.
 
+- `defaultPriorities`
+
+    The default priorities first set on `create` operations. Send an object of collection slugs, and set them to either a number or a function.
+
+    ```js
+    searchPlugin({
+      ...
+      defaultPriorities: {
+        pages: (doc) => doc.title.startsWith('Hello, world!') ? 1 : 10,
+        posts: 20
+      }
+    })
+
+    ```
+
 - `searchOverrides`
 
     Override anything on the search collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections).
 
-    ```
+    ```js
     searchPlugin({
       ...
       searchOverrides: {
@@ -69,13 +92,14 @@ export default config;
 
     An [afterChange]([afterChange](https://payloadcms.com/docs/hooks/globals#afterchange)) hook that is called before creating or syncing the document to search. This allows you to modify the data in any way before doing so.
 
-    ```
+    ```js
     searchPlugin({
       ...
-      beforeSync: (doc) => {
-        // Transform your docs in any way here, this can be async
-        return doc;
-      }
+      beforeSync: ({ doc }) => ({
+        ...doc,
+        // Modify your docs in any way here, this can be async
+        excerpt: doc?.excerpt || 'This is a fallback excerpt'
+      }),
     })
     ```
 
@@ -90,9 +114,11 @@ export default config;
   ## TypeScript
 
   All types can be directly imported:
+
   ```js
   import {
     SearchConfig,
+    BeforeSync
    } from 'payload-plugin-search/dist/types';
   ```
 
