@@ -3,6 +3,7 @@ import { useWatchForm } from 'payload/components/forms';
 import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard';
 import { UIField } from 'payload/dist/fields/config/types';
 import { Fields } from 'payload/dist/admin/components/forms/Form/types';
+import { useConfig } from '@payloadcms/config-provider';
 
 type FieldsWithDoc = Fields & {
   doc: {
@@ -26,8 +27,16 @@ export const LinkToDoc: React.FC<UIField> = () => {
     }
   } = fields;
 
-  // TODO: prepend the serverURL to the href
-  const href = `${''}/admin/collections/${relationTo}/${docId}`
+  const config = useConfig();
+
+  const {
+    serverURL,
+    routes: {
+      admin: adminRoute, // already includes leading slash
+    } = {},
+  } = config;
+
+  const href = `${serverURL}${adminRoute}/collections/${relationTo}/${docId}`
 
   return (
     <div>

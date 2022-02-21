@@ -21,7 +21,8 @@
   "license": "MIT",
   "peerDependencies": {
     "payload": "^0.14.24-beta.0",
-    "react": "^17.0.2"
+    "react": "^17.0.2",
+    "@payloadcms/config-provider": "^1.0.0"
   },
   "devDependencies": {
     "payload": "^0.14.24-beta.0",
