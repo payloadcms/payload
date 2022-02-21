@@ -1,8 +1,6 @@
-/* eslint-disable no-use-before-define */
-/* eslint-disable import/no-extraneous-dependencies */
 // import { Button } from 'payload/components';
 import { useForm, useWatchForm } from 'payload/components/forms';
-// import { FormContext } from 'payload/dist/admin/components/forms/Form/context';
+import { Field } from 'payload/dist/admin/components/forms/Form/types';
 import React, { useCallback, useState, useEffect } from 'react';
 import { defaults } from '../defaults';
 
@@ -27,13 +25,13 @@ export const Overview: React.FC = () => {
     fields: {
       'meta.title': {
         value: metaTitle,
-      },
+      } = {} as Field,
       'meta.description': {
         value: metaDesc,
-      },
+      } = {} as Field,
       'meta.image': {
         value: metaImage,
-      },
+      } = {} as Field,
     },
   } = useWatchForm();
 

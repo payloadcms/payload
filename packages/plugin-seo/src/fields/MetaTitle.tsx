@@ -11,11 +11,12 @@ const {
   maxLength,
 } = defaults.title;
 
-export const MetaTitle: React.FC<TextFieldType> = (props) => {
+export const MetaTitle: React.FC<TextFieldType | {}> = (props) => {
+  // TODO: this temporary until payload types are updated for custom field props
   const {
     label,
     name
-  } = props;
+  } = props as TextFieldType || {};
 
   const field: FieldType<string> = useField(props as Options);
 

@@ -6,13 +6,14 @@ import { useField, useWatchForm } from 'payload/components/forms';
 import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { Pill } from '../ui/Pill';
 
-export const MetaImage: React.FC<UploadFieldType> = (props) => {
+export const MetaImage: React.FC<UploadFieldType | {}> = (props) => {
+  // TODO: this temporary until payload types are updated for custom field props
   const {
     label,
     relationTo,
     fieldTypes,
     name,
-  } = props;
+  } = props as UploadFieldType || {};
 
   const field: FieldType<string> = useField(props as Options);
 
@@ -42,7 +43,7 @@ export const MetaImage: React.FC<UploadFieldType> = (props) => {
 
   const hasImage = Boolean(value);
 
-  const config = useConfig(); // TODO: this returns an empty object
+  const config = useConfig();
 
   const {
     collections,

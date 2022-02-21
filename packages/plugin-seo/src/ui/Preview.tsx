@@ -1,7 +1,6 @@
-/* eslint-disable no-use-before-define */
-/* eslint-disable import/no-extraneous-dependencies */
 import { useWatchForm } from 'payload/components/forms';
 import React from 'react';
+import { Field } from 'payload/dist/admin/components/forms/Form/types';
 
 export const Preview: React.FC = () => {
   const { fields } = useWatchForm();
@@ -9,10 +8,10 @@ export const Preview: React.FC = () => {
   const {
     'meta.title': {
       value: metaTitle,
-    },
+    } = {} as Field,
     'meta.description': {
       value: metaDescription,
-    },
+    } = {} as Field,
   } = fields;
 
   return (

@@ -1,21 +1,22 @@
 import React, { useCallback } from 'react';
-import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types';
 import { useField, useWatchForm } from 'payload/components/forms';
 import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { LengthIndicator } from '../ui/LengthIndicator';
 import { defaults } from '../defaults';
 import TextareaInput from 'payload/dist/admin/components/forms/field-types/Textarea/Input';
+import { TextareaField } from 'payload/dist/fields/config/types';
 
 const {
   minLength,
   maxLength,
 } = defaults.description;
 
-export const MetaDescription: React.FC<TextFieldType> = (props) => {
+export const MetaDescription: React.FC<TextareaField | {}> = (props) => {
+  // TODO: this temporary until payload types are updated for custom field props
   const {
     label,
     name
-  } = props;
+  } = props as TextareaField || {};
 
   const { fields } = useWatchForm();
 
