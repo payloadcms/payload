@@ -47,7 +47,7 @@ export const MetaDescription: React.FC<(TextareaFieldWithProps | {}) & {
     const getDescription = async () => {
       let generatedDescription;
       if (typeof generateDescription === 'function') {
-        generatedDescription = await generateDescription({ doc: { fields } });
+        generatedDescription = await generateDescription({ doc: { ...fields } });
       }
       setValue(generatedDescription);
     }

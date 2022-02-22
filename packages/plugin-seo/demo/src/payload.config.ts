@@ -39,8 +39,9 @@ export default buildConfig({
         'pages',
       ],
       uploadsCollection: 'media',
-      generateTitle: ({ doc }) => `Website.com — ${doc.title}`,
-      generateDescription: ({ doc }) => doc.excerpt
+      generateTitle: ({ doc }) => `Website.com — ${doc?.title?.value}`,
+      generateDescription: ({ doc }) => doc?.excerpt?.value,
+      generateURL: ({ doc }) => `https://yoursite.com/${doc?.slug?.value || ''}`
     }),
   ],
   typescript: {

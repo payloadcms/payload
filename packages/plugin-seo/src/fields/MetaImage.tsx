@@ -36,7 +36,7 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = (props) => {
     const getDescription = async () => {
       let generatedImage;
       if (typeof generateImage === 'function') {
-        generatedImage = await generateImage({ doc: { fields } });
+        generatedImage = await generateImage({ doc: { ...fields } });
       }
       setValue(generatedImage);
     }

@@ -70,24 +70,36 @@ export default config;
 
 - `generateTitle`
 
-    Lorem
+    A function that allows you to return any meta title, including from document's content.
 
     ```js
     seo({
       ...
-      generateTitle: ({ doc }) => `Website.com — ${doc.title}`,
+      generateTitle: ({ doc }) => `Website.com — ${doc?.title?.value}`,
     })
     ```
 
   - `generateDescription`
 
-    Lorem
+    A function that allows you to return any meta description, including from document's content.
 
     ```js
     seo({
       ...
-      generateDescription: ({ doc }) => doc.excerpt
+      generateDescription: ({ doc }) => doc?.excerpt?.value
     })
+    ```
+
+  - `generateURL`
+
+    A function called by the search preview component to display the actual URL of your page.
+
+    ```js
+    seo({
+      ...
+      generateURL: ({ doc }) => `https://yoursite.com/${doc?.slug?.value}`
+    })
+    ```
 
   ## TypeScript
 
@@ -98,6 +110,7 @@ export default config;
     SEOConfig,
     GenerateTitle,
     GenerateDescription
+    GenerateURL
    } from 'payload-plugin-seo/dist/types';
   ```
 

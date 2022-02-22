@@ -1,9 +1,9 @@
 import { Config } from 'payload/config';
-import { getMetaDescriptionField, MetaDescription } from './fields/MetaDescription';
+import { getMetaDescriptionField } from './fields/MetaDescription';
 import { Overview } from './ui/Overview';
-import { getMetaTitleField, MetaTitle } from './fields/MetaTitle';
-import { Preview } from './ui/Preview';
-import { MetaImage } from './fields/MetaImage';
+import { getMetaTitleField } from './fields/MetaTitle';
+import { getPreviewField } from './ui/Preview';
+import { getMetaImageField } from './fields/MetaImage';
 import { SEOConfig } from './types';
 import { Field } from 'payload/dist/fields/config/types';
 
@@ -50,7 +50,7 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
           admin: {
             description: 'Maximum upload file size: 12MB. Recommended file size for images is <500KB.',
             components: {
-              Field: MetaImage,
+              Field: (props) => getMetaImageField({ ...props, seoConfig }),
             },
           },
         } as Field] : [],
@@ -60,7 +60,7 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
           type: 'ui',
           admin: {
             components: {
-              Field: Preview,
+              Field: (props) => getPreviewField({ ...props, seoConfig }),
             },
           },
         },

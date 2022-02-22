@@ -9,10 +9,16 @@ const Pages: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+      required: true
     },
     {
       name: 'excerpt',
       type: 'text',
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      required: true
     },
   ],
 }

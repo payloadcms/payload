@@ -1,8 +1,18 @@
 import { useWatchForm } from 'payload/components/forms';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Field } from 'payload/dist/admin/components/forms/Form/types';
+import { SEOConfig } from '../types';
 
-export const Preview: React.FC = () => {
+type PreviewFieldWithProps = Field & {
+  seoConfig: SEOConfig
+}
+export const Preview: React.FC<PreviewFieldWithProps | {}> = (props) => {
+  const {
+    seoConfig: {
+      generateURL
+    }
+  } = props as PreviewFieldWithProps || {}; // TODO: this typing is temporary until payload types are updated for custom field props;
+
   const { fields } = useWatchForm();
 
   const {
@@ -13,6 +23,21 @@ export const Preview: React.FC = () => {
       value: metaDescription,
     } = {} as Field,
   } = fields;
+
+  const [href, setHref] = useState<string>();
+
+  useEffect(() => {
+    const getHref = async () => {
+      if (typeof generateURL === 'function' && !href) {
+        const newHref = await generateURL({ doc: { fields } })
+        setHref(newHref);
+      }
+    }
+    getHref();
+  }, [
+    generateURL,
+    fields
+  ]);
 
   return (
     <div>
@@ -39,13 +64,13 @@ export const Preview: React.FC = () => {
       >
         <div>
           <a
-            href="/"
+            href={href}
             style={{
               color: '#202124', // #4d5156 light version
               textDecoration: 'none',
             }}
           >
-            https://...
+            {href || 'https://...'}
           </a>
         </div>
         <h4
@@ -75,3 +100,7 @@ export const Preview: React.FC = () => {
     </div>
   );
 };
+
+export const getPreviewField = (props: any) => (
+  <Preview {...props} />
+)

@@ -45,7 +45,7 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
     const getTitle = async () => {
       let generatedTitle;
       if (typeof generateTitle === 'function') {
-        generatedTitle = await generateTitle({ doc: { fields } });
+        generatedTitle = await generateTitle({ doc: { ...fields } });
       }
       setValue(generatedTitle);
     }
