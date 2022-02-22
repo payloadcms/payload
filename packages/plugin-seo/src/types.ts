@@ -4,7 +4,7 @@ export type SEOConfig = {
   collections?: string[]
   uploadsCollection?: string
   fields?: Partial<Field>[]
-  generateTitle?: (args: { doc: any }) => string | Promise<string>
-  generateDescription?: (args: { doc: any }) => string | Promise<string>
-  generateImage?: (args: { doc: any }) => string | Promise<string>
+  generateTitle?: (args: { doc: {} }) => string | Promise<string>
+  generateDescription?: (args: { doc: {} }) => string | Promise<string>
+  generateImage?: (args: { doc: {} }) => string | Promise<string>
 }

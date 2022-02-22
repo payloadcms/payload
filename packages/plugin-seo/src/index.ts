@@ -1,7 +1,7 @@
 import { Config } from 'payload/config';
-import { MetaDescription } from './fields/MetaDescription';
+import { getMetaDescriptionField, MetaDescription } from './fields/MetaDescription';
 import { Overview } from './ui/Overview';
-import { MetaTitle } from './fields/MetaTitle';
+import { getMetaTitleField, MetaTitle } from './fields/MetaTitle';
 import { Preview } from './ui/Preview';
 import { MetaImage } from './fields/MetaImage';
 import { SEOConfig } from './types';
@@ -29,17 +29,16 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
           type: 'text',
           admin: {
             components: {
-              Field: MetaTitle,
+              Field: (props) => getMetaTitleField({ ...props, seoConfig }),
             },
           },
         },
         {
           name: 'description',
-          label: 'Meta Description',
           type: 'textarea',
           admin: {
             components: {
-              Field: MetaDescription,
+              Field: (props) => getMetaDescriptionField({ ...props, seoConfig }),
             },
           },
         },

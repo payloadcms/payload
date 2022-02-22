@@ -5,15 +5,21 @@ import UploadInput from 'payload/dist/admin/components/forms/field-types/Upload/
 import { useField, useWatchForm } from 'payload/components/forms';
 import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { Pill } from '../ui/Pill';
+import { SEOConfig } from '../types';
 
-export const MetaImage: React.FC<UploadFieldType | {}> = (props) => {
-  // TODO: this temporary until payload types are updated for custom field props
+type UploadFieldWithProps = UploadFieldType & {
+  path: string
+  seoConfig: SEOConfig
+};
+
+export const MetaImage: React.FC<UploadFieldWithProps | {}> = (props) => {
   const {
     label,
     relationTo,
     fieldTypes,
     name,
-  } = props as UploadFieldType || {};
+    seoConfig,
+  } = props as UploadFieldWithProps || {}; // TODO: this typing is temporary until payload types are updated for custom field props
 
   const field: FieldType<string> = useField(props as Options);
 
@@ -25,13 +31,12 @@ export const MetaImage: React.FC<UploadFieldType | {}> = (props) => {
     showError,
   } = field;
 
-  let generateImage: string | ((doc: any) => void);
-
   const regenerateImage = useCallback(() => {
+    const { generateImage } = seoConfig;
     const getDescription = async () => {
       let generatedImage;
       if (typeof generateImage === 'function') {
-        generatedImage = await generateImage({ fields });
+        generatedImage = await generateImage({ doc: { fields } });
       }
       setValue(generatedImage);
     }
@@ -39,6 +44,7 @@ export const MetaImage: React.FC<UploadFieldType | {}> = (props) => {
   }, [
     fields,
     setValue,
+    seoConfig
   ]);
 
   const hasImage = Boolean(value);
@@ -141,3 +147,8 @@ export const MetaImage: React.FC<UploadFieldType | {}> = (props) => {
     </div>
   );
 };
+
+export const getMetaImageField = (props: any) => (
+  <MetaImage {...props} />
+)
+

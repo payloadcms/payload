@@ -5,20 +5,31 @@ import { useField, useWatchForm } from 'payload/components/forms';
 import { FieldType as FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { LengthIndicator } from '../ui/LengthIndicator';
 import { defaults } from '../defaults';
+import { SEOConfig } from '../types';
 
 const {
   minLength,
   maxLength,
 } = defaults.title;
 
-export const MetaTitle: React.FC<TextFieldType | {}> = (props) => {
-  // TODO: this temporary until payload types are updated for custom field props
+type TextFieldWithProps = TextFieldType & {
+  path: string
+  seoConfig: SEOConfig
+};
+
+export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
   const {
     label,
-    name
-  } = props as TextFieldType || {};
+    name,
+    path,
+    seoConfig
+  } = props as TextFieldWithProps || {}; // TODO: this typing is temporary until payload types are updated for custom field props
 
-  const field: FieldType<string> = useField(props as Options);
+  const field: FieldType<string> = useField({
+    label,
+    name,
+    path
+  } as Options);
 
   const { fields } = useWatchForm();
 
@@ -28,13 +39,13 @@ export const MetaTitle: React.FC<TextFieldType | {}> = (props) => {
     showError
   } = field;
 
-  let generateTitle: string | ((doc: any) => void);
-
   const regenerateTitle = useCallback(() => {
+    const { generateTitle } = seoConfig;
+
     const getTitle = async () => {
       let generatedTitle;
       if (typeof generateTitle === 'function') {
-        generatedTitle = await generateTitle({ fields });
+        generatedTitle = await generateTitle({ doc: { fields } });
       }
       setValue(generatedTitle);
     }
@@ -42,6 +53,7 @@ export const MetaTitle: React.FC<TextFieldType | {}> = (props) => {
   }, [
     fields,
     setValue,
+    seoConfig
   ]);
 
   return (
@@ -129,3 +141,8 @@ export const MetaTitle: React.FC<TextFieldType | {}> = (props) => {
     </div>
   );
 };
+
+export const getMetaTitleField = (props: any) => (
+  <MetaTitle {...props} />
+)
+

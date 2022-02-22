@@ -5,22 +5,35 @@ import { LengthIndicator } from '../ui/LengthIndicator';
 import { defaults } from '../defaults';
 import TextareaInput from 'payload/dist/admin/components/forms/field-types/Textarea/Input';
 import { TextareaField } from 'payload/dist/fields/config/types';
+import { SEOConfig } from '../types';
 
 const {
   minLength,
   maxLength,
 } = defaults.description;
 
-export const MetaDescription: React.FC<TextareaField | {}> = (props) => {
-  // TODO: this temporary until payload types are updated for custom field props
+type TextareaFieldWithProps = TextareaField & {
+  path: string
+  seoConfig: SEOConfig
+};
+
+export const MetaDescription: React.FC<(TextareaFieldWithProps | {}) & {
+  seoConfig: SEOConfig
+}> = (props) => {
   const {
+    path,
     label,
-    name
-  } = props as TextareaField || {};
+    name,
+    seoConfig,
+  } = props as TextareaFieldWithProps || {}; // TODO: this typing is temporary until payload types are updated for custom field props
 
   const { fields } = useWatchForm();
 
-  const field: FieldType<string> = useField(props as Options);
+  const field: FieldType<string> = useField({
+    label,
+    name,
+    path
+  } as Options);
 
   const {
     value,
@@ -28,13 +41,13 @@ export const MetaDescription: React.FC<TextareaField | {}> = (props) => {
     showError
   } = field;
 
-  let generateDescription: string | ((doc: any) => void);
-
   const regenerateDescription = useCallback(() => {
+    const { generateDescription } = seoConfig;
+
     const getDescription = async () => {
       let generatedDescription;
       if (typeof generateDescription === 'function') {
-        generatedDescription = await generateDescription({ fields });
+        generatedDescription = await generateDescription({ doc: { fields } });
       }
       setValue(generatedDescription);
     }
@@ -42,6 +55,7 @@ export const MetaDescription: React.FC<TextareaField | {}> = (props) => {
   }, [
     fields,
     setValue,
+    seoConfig
   ]);
 
   return (
@@ -128,3 +142,7 @@ export const MetaDescription: React.FC<TextareaField | {}> = (props) => {
     </div>
   );
 };
+
+export const getMetaDescriptionField = (props: any) => (
+  <MetaDescription {...props} />
+)
