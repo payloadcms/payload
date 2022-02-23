@@ -8,6 +8,7 @@ import { PayloadRequest } from '../../express/types';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
+import { AfterErrorHook } from '../../errors/types';
 
 export interface CollectionModel extends PaginateModel<any>, PassportLocalModel<any> {
   buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
@@ -100,8 +101,6 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   id: string;
 }) => any;
 
-export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
-
 export type BeforeLoginHook = (args: {
   req: PayloadRequest;
 }) => any;
@@ -180,7 +179,6 @@ export type CollectionConfig = {
     afterRead?: AfterReadHook[];
     beforeDelete?: BeforeDeleteHook[];
     afterDelete?: AfterDeleteHook[];
-    afterError?: AfterErrorHook;
     beforeLogin?: BeforeLoginHook[];
     afterLogin?: AfterLoginHook[];
     afterForgotPassword?: AfterForgotPasswordHook[];

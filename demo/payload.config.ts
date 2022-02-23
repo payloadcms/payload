@@ -161,9 +161,15 @@ export default buildConfig({
   },
   // indexSortableFields: true,
   hooks: {
-    afterError: (err) => {
-      console.error('global error config handler', err);
-    },
+    afterError: [({ status, error, response, req }) => {
+      // console.error('afterError hook', error);
+      // if (req.locale === 'en') {
+      //   response.message = 'Override with a different message';
+      // }
+      // response.extensions.extra = 'Extra data';
+      // // status is only used on REST and not GraphQL
+      // return { response, status };
+    }],
   },
   upload: {
     limits: {

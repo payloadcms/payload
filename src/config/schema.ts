@@ -126,7 +126,7 @@ export default joi.object({
       joi.boolean(),
     ),
   hooks: joi.object().keys({
-    afterError: joi.func(),
+    afterError: joi.array().items(joi.func()),
   }),
   plugins: joi.array().items(
     joi.func(),
