@@ -20,9 +20,8 @@ export const createRelationMap: CreateRelationMap = ({
   const relationMap: RelationMap = {};
 
   const add = (relation: string, id: unknown) => {
-    if (typeof relationMap[relation] === 'undefined') relationMap[relation] = [];
-
-    if (id !== 'null' && id !== null) {
+    if (((typeof id === 'string' && id !== 'null') || typeof id === 'number') && typeof relation === 'string') {
+      if (typeof relationMap[relation] === 'undefined') relationMap[relation] = [];
       relationMap[relation].push(id);
     }
   };
@@ -35,9 +34,9 @@ export const createRelationMap: CreateRelationMap = ({
         add(relationTo, val);
       }
     });
-  } else if (hasMultipleRelations && value) {
+  } else if (hasMultipleRelations) {
     const valueWithRelation = value as ValueWithRelation;
-    add(valueWithRelation.relationTo, valueWithRelation.value);
+    add(valueWithRelation?.relationTo, valueWithRelation?.value);
   } else {
     add(relationTo, value);
   }
