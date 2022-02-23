@@ -122,16 +122,16 @@ export default buildConfig({
     NavigationArray,
     GlobalWithStrictAccess,
   ],
-  cors: [
-    'http://localhost',
-    'http://localhost:3000',
-    'http://localhost:8080',
-    'http://localhost:8081',
-  ],
-  csrf: [
-    'http://localhost:3000',
-    'https://other-app-here.com',
-  ],
+  // cors: [
+  //   'http://localhost',
+  //   'http://localhost:3000',
+  //   'http://localhost:8080',
+  //   'http://localhost:8081',
+  // ],
+  // csrf: [
+  //   'http://localhost:3000',
+  //   'https://other-app-here.com',
+  // ],
   routes: {
     api: '/api',
     admin: '/admin',

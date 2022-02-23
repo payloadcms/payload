@@ -15,7 +15,7 @@ const getExtractJWT = (config: SanitizedConfig) => (req: Request): string | null
     const tokenCookieName = `${config.cookiePrefix}-token`;
 
     if (cookies && cookies[tokenCookieName]) {
-      if (!origin || (config.csrf && config.csrf.indexOf(origin) > -1)) {
+      if (!origin || config.csrf.length === 0 || config.csrf.indexOf(origin) > -1) {
         return cookies[tokenCookieName];
       }
     }
