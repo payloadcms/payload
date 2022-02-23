@@ -208,10 +208,16 @@ const Relationship: React.FC<Props> = (props) => {
     return undefined;
   }, [hasMany, hasMultipleRelations, value, options]);
 
-  const handleInputChange = useDebouncedCallback((searchArg: string, valueArg: unknown) => {
+  const updateSearch = useDebouncedCallback((searchArg: string, valueArg: unknown) => {
     getResults({ search: searchArg, value: valueArg, sort: true });
     setSearch(searchArg);
   }, [getResults]);
+
+  const handleInputChange = (searchArg: string, valueArg: unknown) => {
+    if (search !== searchArg) {
+      updateSearch(searchArg, valueArg);
+    }
+  };
 
   // ///////////////////////////
   // Fetch value options when initialValue changes
