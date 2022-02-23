@@ -35,7 +35,7 @@ export const createRelationMap: CreateRelationMap = ({
         add(relationTo, val);
       }
     });
-  } else if (hasMultipleRelations) {
+  } else if (hasMultipleRelations && value) {
     const valueWithRelation = value as ValueWithRelation;
     add(valueWithRelation.relationTo, valueWithRelation.value);
   } else {
