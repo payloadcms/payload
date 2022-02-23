@@ -16,8 +16,8 @@ import { PaginatedDocs } from '../../../../../mongoose/types';
 import { useFormProcessing } from '../../Form/context';
 import optionsReducer from './optionsReducer';
 import { Props, Option, ValueWithRelation, GetResults } from './types';
-import useDebounce from '../../../../hooks/useDebounce';
 import { createRelationMap } from './createRelationMap';
+import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
 
 import './index.scss';
 
@@ -58,10 +58,9 @@ const Relationship: React.FC<Props> = (props) => {
   const [options, dispatchOptions] = useReducer(optionsReducer, required ? [] : [{ value: 'null', label: 'None' }]);
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
-  const [search, setSearch] = useState('');
   const [errorLoading, setErrorLoading] = useState('');
-  const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false);
-  const debouncedSearch = useDebounce<string>(search, 300);
+  const [hasLoadedValueOptions, setHasLoadedValueOptions] = useState(false);
+  const [search, setSearch] = useState('');
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required });
@@ -79,12 +78,6 @@ const Relationship: React.FC<Props> = (props) => {
     validate: memoizedValidate,
     condition,
   });
-
-  const addOptions = useCallback((data, relation, sort) => {
-    const collection = collections.find((coll) => coll.slug === relation);
-    dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, sort });
-  }, [collections, hasMultipleRelations]);
-
 
   const getResults: GetResults = useCallback(async ({
     lastFullyLoadedRelation: lastFullyLoadedRelationArg,
@@ -114,7 +107,11 @@ const Relationship: React.FC<Props> = (props) => {
             [key: string]: unknown
             where: Where
           } = {
-            where: {},
+            where: {
+              id: {
+                not_in: relationMap[relation],
+              },
+            },
             limit: maxResultsPerRequest,
             page: lastLoadedPageToUse,
             sort: fieldToSearch,
@@ -125,10 +122,6 @@ const Relationship: React.FC<Props> = (props) => {
             query.where[fieldToSearch] = {
               like: searchArg,
             };
-          } else {
-            query.where.id = {
-              not_in: relationMap[relation],
-            };
           }
 
           const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`);
@@ -137,7 +130,7 @@ const Relationship: React.FC<Props> = (props) => {
             const data: PaginatedDocs<unknown> = await response.json();
             if (data.docs.length > 0) {
               resultsFetched += data.docs.length;
-              addOptions(data, relation, sort);
+              dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, sort });
               setLastLoadedPage(data.page);
 
               if (!data.nextPage) {
@@ -156,7 +149,7 @@ const Relationship: React.FC<Props> = (props) => {
         }
       }, Promise.resolve());
     }
-  }, [addOptions, api, collections, serverURL, errorLoading, relationTo, hasMany]);
+  }, [api, collections, serverURL, errorLoading, relationTo, hasMany, hasMultipleRelations]);
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
@@ -215,33 +208,17 @@ const Relationship: React.FC<Props> = (props) => {
     return undefined;
   }, [hasMany, hasMultipleRelations, value, options]);
 
-  const handleInputChange = useCallback((newSearch) => {
-    if (search !== newSearch) {
-      setSearch(newSearch);
-    }
-  }, [search]);
-
-  // ///////////////////////////
-  // Get results when search input changes
-  // ///////////////////////////
-
-  useEffect(() => {
-    dispatchOptions({
-      type: 'CLEAR',
-      required,
-    });
-
-    setLastLoadedPage(1);
-    setLastFullyLoadedRelation(-1);
-    getResults({ search: debouncedSearch, value: initialValue, sort: true });
-  }, [getResults, debouncedSearch, relationTo, required, initialValue]);
+  const handleInputChange = useDebouncedCallback((searchArg: string, valueArg: unknown) => {
+    getResults({ search: searchArg, value: valueArg, sort: true });
+    setSearch(searchArg);
+  }, [getResults]);
 
   // ///////////////////////////
   // Fetch value options when initialValue changes
   // ///////////////////////////
 
   useEffect(() => {
-    if (initialValue && !hasLoadedFirstOptions) {
+    if (initialValue && !hasLoadedValueOptions) {
       const relationMap = createRelationMap({
         hasMany,
         relationTo,
@@ -266,7 +243,8 @@ const Relationship: React.FC<Props> = (props) => {
             const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`);
             if (response.ok) {
               const data = await response.json();
-              addOptions({ docs: data.docs }, relation, true);
+              const collection = collections.find((coll) => coll.slug === relation);
+              dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, sort: true });
             } else {
               console.error(`There was a problem loading relationships to related collection ${relation}.`);
             }
@@ -274,13 +252,16 @@ const Relationship: React.FC<Props> = (props) => {
         }
       }, Promise.resolve());
 
-      setHasLoadedFirstOptions(true);
+      setHasLoadedValueOptions(true);
     }
-  }, [hasMany, hasMultipleRelations, relationTo, initialValue, hasLoadedFirstOptions, errorLoading, addOptions, api, serverURL]);
+  }, [hasMany, hasMultipleRelations, relationTo, initialValue, hasLoadedValueOptions, errorLoading, collections, api, serverURL]);
 
   useEffect(() => {
-    setHasLoadedFirstOptions(false);
-  }, [initialValue]);
+    setHasLoadedValueOptions(false);
+    getResults({
+      value: initialValue,
+    });
+  }, [initialValue, getResults]);
 
   const classes = [
     'field-type',
@@ -313,7 +294,7 @@ const Relationship: React.FC<Props> = (props) => {
       {!errorLoading && (
         <ReactSelect
           isDisabled={readOnly}
-          onInputChange={handleInputChange}
+          onInputChange={(newSearch) => handleInputChange(newSearch, value)}
           onChange={!readOnly ? (selected) => {
             if (hasMany) {
               setValue(selected ? selected.map((option) => {
