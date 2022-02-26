@@ -4,7 +4,12 @@ import { credentials } from './common/credentials';
 describe('Collections', () => {
   const collectionName = 'Admins';
 
+  before(() => {
+    cy.login();
+  })
+
   beforeEach(() => {
+    Cypress.Cookies.preserveOnce('payload-token');
     cy.visit(adminURL);
   })
   it('can view collection', () => {
@@ -21,21 +26,18 @@ describe('Collections', () => {
       .should('be.visible');
   })
 
-  describe('Document Creation', () => {
-    it('can create new', () => {
-      cy.contains(collectionName).click();
+  it('can create new', () => {
+    cy.contains(collectionName).click();
 
-      cy.contains('Create New').click();
-      cy.url().should('eq', `${adminURL}/collections/${collectionName.toLowerCase()}/create`);
-    })
-    it('can create new - plus button', () => {
-      cy.contains(collectionName)
-        .get('.card__actions')
-        .first()
-        .click();
-
-      cy.url().should('eq', `${adminURL}/collections/${collectionName.toLowerCase()}/create`);
-    })
+    cy.contains('Create New').click();
+    cy.url().should('eq', `${adminURL}/collections/${collectionName.toLowerCase()}/create`);
   })
+  it('can create new - plus button', () => {
+    cy.contains(collectionName)
+      .get('.card__actions')
+      .first()
+      .click();
 
-})
+    cy.url().should('eq', `${adminURL}/collections/${collectionName.toLowerCase()}/create`);
+  });
+});
