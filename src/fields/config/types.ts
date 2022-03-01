@@ -6,15 +6,16 @@ import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 
-export type FieldHookArgs<T extends TypeWithID = any, P = any> = {
+export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   value?: P,
   originalDoc?: T,
   data?: Partial<T>,
+  siblingData: Partial<S>
   operation?: 'create' | 'read' | 'update' | 'delete',
   req: PayloadRequest
 }
 
-export type FieldHook<T extends TypeWithID = any, P = any> = (args: FieldHookArgs<T, P>) => Promise<P> | P;
+export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => Promise<P> | P;
 
 export type FieldAccess<T extends TypeWithID = any, P = any> = (args: {
   req: PayloadRequest

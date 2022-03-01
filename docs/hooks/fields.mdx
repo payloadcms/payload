@@ -57,7 +57,8 @@ Field Hooks receive one `args` argument that contains the following properties:
 | Option            | Description  |
 | ----------------- | -------------|
 | **`value`**       | The value of the field. |
-| **`data`**        | The data passed to update the field with in `create` and `update` operations, and the full document itself in the `afterRead` hook. |
+| **`data`**        | The data passed to update the document within `create` and `update` operations, and the full document itself in the `afterRead` hook. |
+| **`siblingData`** | The sibling data passed to a field that the hook is running against. |
 | **`originalDoc`** | The full original document in `update` operations. |
 | **`operation`**   | A string relating to which operation the field type is currently executing within. Useful within `beforeValidate`, `beforeChange`, and `afterChange` hooks to differentiate between `create` and `update` operations. |
 | **`req`**         | The Express `request` object. It is mocked for Local API operations. |
@@ -78,16 +79,18 @@ Payload exports a type for field hooks which can be accessed and used as follows
 ```js
 import type { FieldHook } from 'payload/types';
 
-// Field hook type is a generic that takes two arguments:
+// Field hook type is a generic that takes three arguments:
 // 1: The document type
-// 2: the value type
+// 2: The value type
+// 3: The sibling data type
 
-type ExampleFieldHook = FieldHook<ExampleDocumentType, string>;
+type ExampleFieldHook = FieldHook<ExampleDocumentType, string, SiblingDataType>;
 
 const exampleFieldHook: ExampleFieldHook = (args) => {
   const {
     value, // Typed as `string` as shown above
     data, // Typed as a Partial of your ExampleDocumentType
+    siblingData, // Typed as a Partial of SiblingDataType
     originalDoc, // Typed as ExampleDocumentType
     operation,
     req,

@@ -23,6 +23,7 @@ const executeHook = async ({
   currentHook,
   fullOriginalDoc,
   fullData,
+  data,
   operation,
   req,
   value,
@@ -31,6 +32,7 @@ const executeHook = async ({
     value,
     originalDoc: fullOriginalDoc,
     data: fullData,
+    siblingData: data,
     operation,
     req,
   });
