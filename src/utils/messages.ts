@@ -22,7 +22,7 @@ export async function helpMessage(): Promise<string> {
       --name {underline my-payload-app}              Set project name
       --template {underline template_name}           Choose specific template
 
-        {dim Available templates: ${validTemplates.join(', ')}}
+        {dim Available templates: ${validTemplates.map(t => t.name).join(', ')}}
 
       --use-npm                          Use npm to install dependencies
       --no-deps                          Do not install any dependencies
