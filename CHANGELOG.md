@@ -1,4 +1,4 @@
-## [0.14.26-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.26-beta.0) (2022-02-23)
+## [0.14.27-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.27-beta.0) (2022-03-01)
 
 ### Bug Fixes
 
@@ -22,6 +22,7 @@
 ### Features
 
 * :tada: versions, drafts, & autosave!
+* [#458](https://github.com/payloadcms/payload/issues/458), provides field hooks with sibling data ([8e23a24](https://github.com/payloadcms/payload/commit/8e23a24f34ef7425bb4d43e96e869b255740c739))
 * add before and after login components ([#427](https://github.com/payloadcms/payload/issues/427)) ([5591eea](https://github.com/payloadcms/payload/commit/5591eeafca1aa6e8abcc2d8276f7478e00b75ef2))
 * add logMockCredentials email option ([ff33453](https://github.com/payloadcms/payload/commit/ff3345373630ca6913165284123a62269b3fa2c6))
 * adds a way to customize express.static options ([dbb3c50](https://github.com/payloadcms/payload/commit/dbb3c502227597ef4d04c9e5c8db6d2f51a8aac4))
