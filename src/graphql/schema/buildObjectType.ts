@@ -120,8 +120,9 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
                   equals: id,
                 },
               },
+              res: context.res,
               req: {
-                ...context,
+                ...context.req,
                 locale,
                 fallbackLocale,
               },
