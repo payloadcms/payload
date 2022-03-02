@@ -1,4 +1,4 @@
-## [0.14.27-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.27-beta.0) (2022-03-01)
+## [0.14.28-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.28-beta.0) (2022-03-02)
 
 ### Bug Fixes
 
@@ -18,6 +18,7 @@
 * new slate version types ([c5de01b](https://github.com/payloadcms/payload/commit/c5de01bfc48ca6793c1526499fe934d9ad8f0cc9))
 * rte upload field population ([8327b5a](https://github.com/payloadcms/payload/commit/8327b5aae505a189a5b9617c3485d646b5f8b517))
 * type error in useField ([ef4e6d3](https://github.com/payloadcms/payload/commit/ef4e6d32a90215c07aa2c1e7217cf53558bfae97))
+* [#464](https://github.com/payloadcms/payload/issues/464), graphql upload access control ([fd0629e](https://github.com/payloadcms/payload/commit/fd0629e93202dfaa399c753c59481b1cbd139bf6))
 
 ### Features
 
