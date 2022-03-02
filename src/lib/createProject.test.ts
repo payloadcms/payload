@@ -11,10 +11,17 @@ describe('createProject', () => {
   const projectDir = path.resolve(__dirname, './tmp')
   beforeAll(() => {
     console.log = jest.fn()
-    fse.rmdirSync(projectDir, { recursive: true })
+  })
+
+  beforeEach(() => {
+    if (fse.existsSync(projectDir)) {
+      fse.rmdirSync(projectDir, { recursive: true })
+    }
   })
   afterEach(() => {
-    fse.rmdirSync(projectDir, { recursive: true })
+    if (fse.existsSync(projectDir)) {
+      fse.rmdirSync(projectDir, { recursive: true })
+    }
   })
 
   describe('#createProject', () => {
