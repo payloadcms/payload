@@ -12,6 +12,7 @@ import Submit from '../../../../../Submit';
 import X from '../../../../../../icons/X';
 import Fields from './Fields';
 import { requests } from '../../../../../../../api';
+import { injectVoidElement } from '../../../injectVoid';
 
 import './index.scss';
 
@@ -31,13 +32,12 @@ const insertRelationship = (editor, { value, relationTo }) => {
     ],
   };
 
-  const nodes = [relationship, { type: 'p', children: [{ text: '' }] }];
-
   if (editor.blurSelection) {
     Transforms.select(editor, editor.blurSelection);
   }
 
-  Transforms.insertNodes(editor, nodes);
+  injectVoidElement(editor, relationship);
+
   ReactEditor.focus(editor);
 };
 

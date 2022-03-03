@@ -16,6 +16,7 @@ import MinimalTemplate from '../../../../../../templates/Minimal';
 import Button from '../../../../../../elements/Button';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 import PerPage from '../../../../../../elements/PerPage';
+import { injectVoidElement } from '../../../injectVoid';
 
 import './index.scss';
 import '../addSwapModals.scss';
@@ -35,13 +36,12 @@ const insertUpload = (editor, { value, relationTo }) => {
     ],
   };
 
-  const nodes = [upload, { type: 'p', children: [{ text: '' }] }];
-
   if (editor.blurSelection) {
     Transforms.select(editor, editor.blurSelection);
   }
 
-  Transforms.insertNodes(editor, nodes);
+  injectVoidElement(editor, upload);
+
   ReactEditor.focus(editor);
 };
 
