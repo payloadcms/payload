@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import isHotkey from 'is-hotkey';
 import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor } from 'slate';
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
@@ -70,6 +70,7 @@ const RichText: React.FC<Props> = (props) => {
   const [enabledElements, setEnabledElements] = useState({});
   const [enabledLeaves, setEnabledLeaves] = useState({});
   const [initialValueKey, setInitialValueKey] = useState('');
+  const editorRef = useRef(null);
 
   const renderElement = useCallback(({ attributes, children, element }) => {
     const matchedElement = enabledElements[element?.type];
@@ -82,6 +83,7 @@ const RichText: React.FC<Props> = (props) => {
           element={element}
           path={path}
           fieldProps={props}
+          editorRef={editorRef}
         >
           {children}
         </Element>
@@ -103,6 +105,7 @@ const RichText: React.FC<Props> = (props) => {
           leaf={leaf}
           path={path}
           fieldProps={props}
+          editorRef={editorRef}
         >
           {children}
         </Leaf>
@@ -264,66 +267,70 @@ const RichText: React.FC<Props> = (props) => {
                 return null;
               })}
             </div>
-            <Editable
+            <div
               className={`${baseClass}__editor`}
-              renderElement={renderElement}
-              renderLeaf={renderLeaf}
-              placeholder={placeholder}
-              spellCheck
-              readOnly={readOnly}
-              onBlur={onBlur}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  if (event.shiftKey) {
-                    event.preventDefault();
-                    editor.insertText('\n');
-                  } else {
-                    const selectedElement = Node.descendant(editor, editor.selection.anchor.path.slice(0, -1));
+              ref={editorRef}
+            >
+              <Editable
+                renderElement={renderElement}
+                renderLeaf={renderLeaf}
+                placeholder={placeholder}
+                spellCheck
+                readOnly={readOnly}
+                onBlur={onBlur}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    if (event.shiftKey) {
+                      event.preventDefault();
+                      editor.insertText('\n');
+                    } else {
+                      const selectedElement = Node.descendant(editor, editor.selection.anchor.path.slice(0, -1));
 
-                    if (SlateElement.isElement(selectedElement)) {
+                      if (SlateElement.isElement(selectedElement)) {
                       // Allow hard enter to "break out" of certain elements
-                      if (editor.shouldBreakOutOnEnter(selectedElement)) {
-                        event.preventDefault();
-                        const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
+                        if (editor.shouldBreakOutOnEnter(selectedElement)) {
+                          event.preventDefault();
+                          const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
 
-                        if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === editor.selection.anchor.offset) {
-                          Transforms.insertNodes(editor, { children: [{ text: '' }] });
-                        } else {
-                          Transforms.splitNodes(editor);
-                          Transforms.setNodes(editor, {});
+                          if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === editor.selection.anchor.offset) {
+                            Transforms.insertNodes(editor, { children: [{ text: '' }] });
+                          } else {
+                            Transforms.splitNodes(editor);
+                            Transforms.setNodes(editor, {});
+                          }
                         }
                       }
                     }
                   }
-                }
 
-                if (event.key === 'Backspace') {
-                  const selectedElement = Node.descendant(editor, editor.selection.anchor.path.slice(0, -1));
+                  if (event.key === 'Backspace') {
+                    const selectedElement = Node.descendant(editor, editor.selection.anchor.path.slice(0, -1));
 
-                  if (SlateElement.isElement(selectedElement) && selectedElement.type === 'li') {
-                    const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
-                    if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === 1) {
-                      Transforms.unwrapNodes(editor, {
-                        match: (n) => SlateElement.isElement(n) && listTypes.includes(n.type),
-                        split: true,
-                      });
+                    if (SlateElement.isElement(selectedElement) && selectedElement.type === 'li') {
+                      const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
+                      if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === 1) {
+                        Transforms.unwrapNodes(editor, {
+                          match: (n) => SlateElement.isElement(n) && listTypes.includes(n.type),
+                          split: true,
+                        });
 
-                      Transforms.setNodes(editor, {});
+                        Transforms.setNodes(editor, {});
+                      }
+                    } else if (editor.isVoid(selectedElement)) {
+                      Transforms.removeNodes(editor);
                     }
-                  } else if (editor.isVoid(selectedElement)) {
-                    Transforms.removeNodes(editor);
                   }
-                }
 
-                Object.keys(hotkeys).forEach((hotkey) => {
-                  if (isHotkey(hotkey, event as any)) {
-                    event.preventDefault();
-                    const mark = hotkeys[hotkey];
-                    toggleLeaf(editor, mark);
-                  }
-                });
-              }}
-            />
+                  Object.keys(hotkeys).forEach((hotkey) => {
+                    if (isHotkey(hotkey, event as any)) {
+                      event.preventDefault();
+                      const mark = hotkeys[hotkey];
+                      toggleLeaf(editor, mark);
+                    }
+                  });
+                }}
+              />
+            </div>
           </div>
         </Slate>
         <FieldDescription

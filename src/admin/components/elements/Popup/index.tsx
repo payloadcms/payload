@@ -20,21 +20,24 @@ const Popup: React.FC<Props> = (props) => {
     buttonType = 'default',
     children,
     showOnHover = false,
-    horizontalAlign = 'left',
+    horizontalAlign: horizontalAlignFromProps = 'left',
+    verticalAlign: verticalAlignFromProps = 'top',
     initActive = false,
     onToggleOpen,
     padding,
     forceOpen,
+    boundingRef,
   } = props;
 
   const buttonRef = useRef(null);
   const contentRef = useRef(null);
+  const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(initActive);
-  const [verticalAlign, setVerticalAlign] = useState('top');
-  const [forceHorizontalAlign, setForceHorizontalAlign] = useState(null);
+  const [verticalAlign, setVerticalAlign] = useState(verticalAlignFromProps);
+  const [horizontalAlign, setHorizontalAlign] = useState(horizontalAlignFromProps);
 
   const { y: scrollY } = useScrollInfo();
-  const { height: windowHeight } = useWindowInfo();
+  const { height: windowHeight, width: windowWidth } = useWindowInfo();
 
   const handleClickOutside = (e) => {
     if (contentRef.current.contains(e.target)) {
@@ -47,34 +50,41 @@ const Popup: React.FC<Props> = (props) => {
   useThrottledEffect(() => {
     if (contentRef.current && buttonRef.current) {
       const {
-        height: contentHeight,
-        width: contentWidth,
-        right: contentRightEdge,
+        left: contentLeftPos,
+        right: contentRightPos,
+        top: contentTopPos,
+        bottom: contentBottomPos,
       } = contentRef.current.getBoundingClientRect();
-      const { y: buttonYCoord } = buttonRef.current.getBoundingClientRect();
 
-      const windowWidth = window.innerWidth;
-      const distanceToRightEdge = windowWidth - contentRightEdge;
-      const distanceToLeftEdge = contentRightEdge - contentWidth;
+      let boundingTopPos = 0;
+      let boundingRightPos = windowWidth;
+      let boundingBottomPos = windowHeight;
+      let boundingLeftPos = 0;
 
-      if (horizontalAlign === 'left' && distanceToRightEdge <= 0) {
-        setForceHorizontalAlign('right');
-      } else if (horizontalAlign === 'right' && distanceToLeftEdge <= 0) {
-        setForceHorizontalAlign('left');
-      } else if (horizontalAlign === 'center' && (distanceToLeftEdge <= contentWidth / 2 || distanceToRightEdge <= contentWidth / 2)) {
-        if (distanceToRightEdge > distanceToLeftEdge) setForceHorizontalAlign('left');
-        else setForceHorizontalAlign('right');
-      } else {
-        setForceHorizontalAlign(null);
+      if (boundingRef?.current) {
+        ({
+          top: boundingTopPos,
+          right: boundingRightPos,
+          bottom: boundingBottomPos,
+          left: boundingLeftPos,
+        } = boundingRef.current.getBoundingClientRect());
       }
 
-      if (buttonYCoord > contentHeight) {
-        setVerticalAlign('top');
-      } else {
+      if (contentRightPos > boundingRightPos && contentLeftPos > boundingLeftPos) {
+        setHorizontalAlign('right');
+      } else if (contentLeftPos < boundingLeftPos && contentRightPos < boundingRightPos) {
+        setHorizontalAlign('left');
+      }
+
+      if (contentTopPos < boundingTopPos && contentBottomPos < boundingBottomPos) {
         setVerticalAlign('bottom');
+      } else if (contentBottomPos > boundingBottomPos && contentTopPos < boundingTopPos) {
+        setVerticalAlign('top');
       }
+
+      setMounted(true);
     }
-  }, 500, [setVerticalAlign, contentRef, scrollY, windowHeight]);
+  }, 500, [scrollY, windowHeight, windowWidth]);
 
   useEffect(() => {
     if (typeof onToggleOpen === 'function') onToggleOpen(active);
@@ -101,8 +111,7 @@ const Popup: React.FC<Props> = (props) => {
     `${baseClass}--color-${color}`,
     `${baseClass}--v-align-${verticalAlign}`,
     `${baseClass}--h-align-${horizontalAlign}`,
-    forceHorizontalAlign && `${baseClass}--force-h-align-${forceHorizontalAlign}`,
-    active && `${baseClass}--active`,
+    (active && mounted) && `${baseClass}--active`,
   ].filter(Boolean).join(' ');
 
   return (

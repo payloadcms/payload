@@ -1,18 +1,15 @@
-import { Editor, Element } from 'slate';
+import { Ancestor, Editor, Element, NodeEntry } from 'slate';
 
 const isListActive = (editor: Editor, format: string): boolean => {
-  if (!editor.selection
-    // If focus or anchor is at root of editor,
-    // Return false - as Editor.parent will fail
-    || editor.selection.focus.path[1] === 0
-    // || editor.selection.focus.path.length === 0
-    || editor.selection.anchor.path[1] === 0
-    // || editor.selection.anchor.path.length === 0
-  ) return false;
+  let parentLI: NodeEntry<Ancestor>;
 
-  const parentLI = Editor.parent(editor, editor.selection);
+  try {
+    parentLI = Editor.parent(editor, editor.selection);
+  } catch (e) {
+    // swallow error, Slate
+  }
 
-  if (parentLI[1].length > 0) {
+  if (parentLI?.[1]?.length > 0) {
     const ancestor = Editor.above(editor, {
       at: parentLI[1],
     });

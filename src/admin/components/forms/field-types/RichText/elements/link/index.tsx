@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import { ReactEditor, useSlate } from 'slate-react';
 import { Transforms } from 'slate';
 import ElementButton from '../Button';
@@ -13,26 +13,24 @@ import './index.scss';
 
 const baseClass = 'rich-text-link';
 
-const Link = ({ attributes, children, element }) => {
+const Link = ({ attributes, children, element, editorRef }) => {
   const editor = useSlate();
   const [error, setError] = useState(false);
-  const [open, setOpen] = useState(!element.url);
-  const [url, setURL] = useState(element.url);
-  const [newTab, setNewTab] = useState(Boolean(element.newTab));
+  const [open, setOpen] = useState(element.url === undefined);
 
-  useEffect(() => {
-    const path = ReactEditor.findPath(editor, element);
+  const handleToggleOpen = useCallback((newOpen) => {
+    setOpen(newOpen);
 
-    Transforms.setNodes(
-      editor,
-      { url, newTab },
-      { at: path },
-    );
-  }, [url, newTab, editor, element]);
+    if (element.url === undefined && !newOpen) {
+      const path = ReactEditor.findPath(editor, element);
 
-  const handleToggleOpen = useCallback((toggleResult) => {
-    setOpen(toggleResult);
-  }, []);
+      Transforms.setNodes(
+        editor,
+        { url: '' },
+        { at: path },
+      );
+    }
+  }, [editor, element]);
 
   return (
     <span
@@ -44,18 +42,19 @@ const Link = ({ attributes, children, element }) => {
         contentEditable={false}
       >
         <Popup
-          initActive={url === undefined}
+          initActive={element.url === undefined}
           buttonType="none"
           size="small"
           color="dark"
           horizontalAlign="center"
           forceOpen={open}
           onToggleOpen={handleToggleOpen}
+          boundingRef={editorRef}
           render={({ close }) => (
             <Fragment>
               <div className={`${baseClass}__url-wrap`}>
                 <input
-                  value={url || ''}
+                  value={element.url || ''}
                   className={`${baseClass}__url`}
                   placeholder="Enter a URL"
                   onChange={(e) => {
@@ -65,7 +64,13 @@ const Link = ({ attributes, children, element }) => {
                       setError(false);
                     }
 
-                    setURL(value);
+                    const path = ReactEditor.findPath(editor, element);
+
+                    Transforms.setNodes(
+                      editor,
+                      { url: value },
+                      { at: path },
+                    );
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -81,7 +86,7 @@ const Link = ({ attributes, children, element }) => {
                   onClick={(e) => {
                     e.preventDefault();
 
-                    if (url) {
+                    if (element.url) {
                       close();
                     } else {
                       setError(true);
@@ -96,9 +101,17 @@ const Link = ({ attributes, children, element }) => {
                 )}
               </div>
               <Button
-                className={[`${baseClass}__new-tab`, newTab && `${baseClass}__new-tab--checked`].filter(Boolean).join(' ')}
+                className={[`${baseClass}__new-tab`, element.newTab && `${baseClass}__new-tab--checked`].filter(Boolean).join(' ')}
                 buttonStyle="none"
-                onClick={() => setNewTab(!newTab)}
+                onClick={() => {
+                  const path = ReactEditor.findPath(editor, element);
+
+                  Transforms.setNodes(
+                    editor,
+                    { newTab: !element.newTab },
+                    { at: path },
+                  );
+                }}
               >
                 <Check />
                 Open link in new tab

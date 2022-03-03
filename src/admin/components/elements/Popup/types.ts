@@ -4,6 +4,7 @@ export type Props = {
     className?: string
     render?: (any) => void,
     children?: React.ReactNode,
+    verticalAlign?: 'top' | 'bottom'
     horizontalAlign?: 'left' | 'center' | 'right',
     size?: 'small' | 'large' | 'wide',
     color?: 'light' | 'dark',
@@ -15,4 +16,5 @@ export type Props = {
     onToggleOpen?: (active: boolean) => void,
     backgroundColor?: CSSProperties['backgroundColor'],
     padding?: CSSProperties['padding'],
+    boundingRef?: React.MutableRefObject<HTMLElement>
 }

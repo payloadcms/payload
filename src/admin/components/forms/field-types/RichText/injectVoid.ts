@@ -12,14 +12,14 @@ export const injectVoidElement = (editor: Editor, element: Element): void => {
       // so user can place cursor between void nodes
       Transforms.insertNodes(editor, { children: [{ text: '' }] });
       Transforms.setNodes(editor, element);
-    // Otherwise just set the empty node equal to new upload
+    // Otherwise just set the empty node equal to new void
     } else {
       Transforms.setNodes(editor, element);
     }
-
-    // Add an empty node after the new upload
-    Transforms.insertNodes(editor, { children: [{ text: '' }] });
   } else {
-    Transforms.insertNodes(editor, [element, { children: [{ text: '' }] }]);
+    Transforms.insertNodes(editor, element);
   }
+
+  // Add an empty node after the new void
+  Transforms.insertNodes(editor, { children: [{ text: '' }] });
 };
