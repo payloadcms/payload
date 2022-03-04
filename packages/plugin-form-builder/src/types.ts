@@ -139,7 +139,7 @@ export type MessageField = {
   message: unknown
 }
 
-export type FormFieldBlock = TextField | SelectField | EmailField | StateField | CountryField | CheckboxField | MessageField
+export type FormFieldBlock = TextField | SelectField | EmailField | StateField | CountryField | CheckboxField | MessageField | PaymentField
 
 export type Email = {
   emailTo: string
@@ -160,7 +160,7 @@ export type FormattedEmail = {
 export type Redirect = {
   type: 'reference' | 'custom'
   reference?: {
-    relationTo: 'people' | 'posts' | 'pages' | 'housing'
+    relationTo: string
     value: string | unknown
   }
   url: string

@@ -4,12 +4,12 @@ import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys';
 
 const sendEmail = async (beforeChangeData: any, formConfig: FormConfig) => {
   const {
-    operation
+    operation,
+    data
   } = beforeChangeData;
 
   if (operation === 'create') {
     const {
-      data,
       data: {
         id: formSubmissionID
       },
@@ -90,11 +90,9 @@ const sendEmail = async (beforeChangeData: any, formConfig: FormConfig) => {
       console.error(`Error while sending one or more emails in form submission id: ${formSubmissionID}.`);
       console.error(err);
     }
-
-    return data
   }
 
-  return beforeChangeData;
+  return data;
 };
 
 export default sendEmail;

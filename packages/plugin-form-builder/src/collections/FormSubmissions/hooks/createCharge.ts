@@ -2,8 +2,11 @@ import { FormConfig } from "../../../types";
 
 const createCharge = async (beforeChangeData: any, formConfig: FormConfig) => {
   const {
-    operation
+    operation,
+    data
   } = beforeChangeData;
+
+  let dataWithPaymentDetails = data;
 
   if (operation === 'create') {
     const {
@@ -11,11 +14,11 @@ const createCharge = async (beforeChangeData: any, formConfig: FormConfig) => {
     } = formConfig || {};
 
     if (typeof handlePayment === 'function') {
-      handlePayment(beforeChangeData);
+      dataWithPaymentDetails = await handlePayment(beforeChangeData);
     }
   }
 
-  return beforeChangeData;
+  return dataWithPaymentDetails;
 };
 
 export default createCharge

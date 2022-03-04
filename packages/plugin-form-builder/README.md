@@ -82,12 +82,15 @@ export default config;
     ```
     import { getPaymentTotal } from 'payload-plugin-form-builder';
     ...
-    handlePayment: async (beforeChangeData) => {
-      // asynchronously process payments here
+    handlePayment: async ({ form, submissionData }) => {
+      // first calculate the price
+      const paymentField =  form.fields?.find((field) => field.blockType === 'payment');
       const price = getPaymentTotal({
-        ...paymentField, // you can get this from somewhere in the beforeChangeData
-        fieldValues: {}, // an object of kay:value pairs for every field in the form
+        basePrice: paymentField.basePrice,
+        priceConditions: paymentField.priceConditions,
+        fieldValues: submissionData,
       });
+      // then asynchronously process the payment here
     }
     ```
 

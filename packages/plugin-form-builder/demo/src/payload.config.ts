@@ -32,6 +32,8 @@ export default buildConfig({
   ],
   plugins: [
     formBuilderPlugin({
+      // handlePayment: handleFormPayments,
+      // beforeEmail: prepareFormEmails,
       redirectRelationships: [
         'pages'
       ],
@@ -48,8 +50,6 @@ export default buildConfig({
         //       defaultValue: 'stripe',
         //     },
         // },
-        // handlePayment: handleFormPayments,
-        // beforeEmail: prepareFormEmails,
       },
     }),
   ],

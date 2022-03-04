@@ -353,7 +353,7 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
     }
   }
 
-  return ({
+  const fields = {
     slug: 'payment',
     labels: {
       singular: 'Payment',
@@ -499,7 +499,9 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
       },
       required,
     ].filter(Boolean) as Field[]
-  })
+  }
+
+  return fields
 };
 
 const Message: Block = {

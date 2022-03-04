@@ -1,10 +1,9 @@
 import { Block, CollectionConfig } from 'payload/types';
 import { FieldConfig, FormConfig } from '../../types';
 import fields from './fields';
-import deepMerge from '../../utilities/deepMerge';
 
 // all settings can be overridden by the config
-export const generateFormCollection = (formConfig: FormConfig): CollectionConfig => deepMerge({
+export const generateFormCollection = (formConfig: FormConfig): CollectionConfig => ({
   slug: formConfig?.formOverrides?.slug || 'forms',
   admin: {
     useAsTitle: 'title',
@@ -12,6 +11,7 @@ export const generateFormCollection = (formConfig: FormConfig): CollectionConfig
   },
   access: {
     read: () => true,
+    ...formConfig?.formOverrides?.access || {}
   },
   fields: [
     {
@@ -182,5 +182,6 @@ export const generateFormCollection = (formConfig: FormConfig): CollectionConfig
         },
       ],
     },
+    ...formConfig?.formOverrides?.fields || []
   ],
-}, formConfig.formOverrides || {});
+});
