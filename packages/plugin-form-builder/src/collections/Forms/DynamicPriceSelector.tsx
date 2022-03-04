@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Text, useForm } from 'payload/components/forms';
+import { Text, useWatchForm } from 'payload/components/forms';
 import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types';
 import { Data } from 'payload/dist/admin/components/forms/Form/types';
 
-type FieldWithID = { id: string };
+type FieldWithID = {
+  id: string
+  name: string
+};
 
 export const DynamicPriceSelector: React.FC<TextFieldType> = (props) => {
   const {
@@ -15,16 +18,17 @@ export const DynamicPriceSelector: React.FC<TextFieldType> = (props) => {
     fields,
     getDataByPath,
     getData
-  } = useForm();
+  } = useWatchForm();
 
   const [isNumberField, setIsNumberField] = useState<boolean>();
-  const [valueType, setValueType] = useState<string>();
+  const [valueType, setValueType] = useState<'static' | 'valueOfField'>();
 
-  // only number fields can set 'valueType' to 'valueOfField`
+  // only number fields can use 'valueOfField`
   useEffect(() => {
     if (path) {
       const parentPath = path.split('.').slice(0, -1).join('.')
       const paymentFieldData: any = getDataByPath(parentPath);
+
       if (paymentFieldData) {
         const {
           fieldToUse,
@@ -34,7 +38,7 @@ export const DynamicPriceSelector: React.FC<TextFieldType> = (props) => {
         setValueType(valueType);
 
         const { fields: allFields }: Data = getData();
-        const field = allFields.find((field: FieldWithID) => field.id === fieldToUse);
+        const field = allFields.find((field: FieldWithID) => field.name === fieldToUse);
 
         if (field) {
           const { blockType } = field;

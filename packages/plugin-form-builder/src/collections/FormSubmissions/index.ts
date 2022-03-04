@@ -96,7 +96,10 @@ export const generateSubmissionCollection = (formConfig: FormConfig): Collection
         },
         {
           name: 'amount',
-          type: 'number'
+          type: 'number',
+          admin: {
+            description: 'Amount in cents'
+          }
         },
         {
           name: 'paymentProcessor',
