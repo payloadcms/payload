@@ -13,6 +13,10 @@ app.get('/', (_, res) => {
 payload.init({
   secret: process.env.PAYLOAD_SECRET,
   mongoURL: process.env.MONGODB_URI,
+
+  // Only needed to deploy publicly. Get free Personal license at https://payloadcms.com.
+  // license: process.env.PAYLOAD_LICENSE_KEY,
+
   express: app,
   onInit: () => {
     payload.logger.info(`Payload Admin URL: ${payload.getAdminURL()}`);
