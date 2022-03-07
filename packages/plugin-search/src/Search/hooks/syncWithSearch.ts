@@ -14,12 +14,12 @@ const syncWithSearch: SyncWithSearch = async (args) => {
   const {
     title,
     id,
-    status,
+    _status: status,
   } = doc || {};
 
   const {
     beforeSync,
-    syncOnlyPublished,
+    syncDrafts,
     deleteDrafts,
     defaultPriorities,
   } = searchConfig as SearchConfig; // todo fix SyncWithSearch type, see note in ./types.ts
@@ -58,8 +58,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
     }
   }
 
-  // TODO: use the new revisions API to check for published status
-  const doSync = !!syncOnlyPublished || (syncOnlyPublished && status === 'published');
+  const doSync = syncDrafts || (!syncDrafts && status !== 'draft');
 
   try {
     if (operation === 'create') {

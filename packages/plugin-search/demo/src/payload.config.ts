@@ -1,7 +1,7 @@
 import { buildConfig } from 'payload/config';
 import path from 'path';
-import searchPlugin from '../../dist';
-// import searchPlugin from '../../src';
+// import searchPlugin from '../../dist';
+import searchPlugin from '../../src';
 import { Users } from './collections/Users';
 import { Pages } from './collections/Pages';
 import { Posts } from './collections/Posts';
@@ -51,7 +51,6 @@ export default buildConfig({
           }
         ]
       },
-      syncOnlyPublished: false,
       beforeSync: ({ originalDoc, searchDoc }) => ({
         ...searchDoc,
         excerpt: originalDoc?.excerpt || 'This is a fallback excerpt'

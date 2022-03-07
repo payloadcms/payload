@@ -9,6 +9,9 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
   },
+  versions: {
+    drafts: true
+  },
   fields: [
     {
       name: 'title',

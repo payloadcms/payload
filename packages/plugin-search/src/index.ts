@@ -12,7 +12,7 @@ const Search = (incomingSearchConfig: SearchConfig) => (config: Config): Config 
   if (collections) {
     const searchConfig: SearchConfig = {
       ...incomingSearchConfig,
-      syncOnlyPublished: true,
+      syncDrafts: false,
       deleteDrafts: true
       // write any config defaults here
     };

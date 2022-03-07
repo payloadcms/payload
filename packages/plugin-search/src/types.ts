@@ -25,7 +25,7 @@ export type SearchConfig = {
     [collection: string]: number | ((doc: any) => number | Promise<number>)
   }
   beforeSync?: BeforeSync
-  syncOnlyPublished?: boolean
+  syncDrafts?: boolean
   deleteDrafts?: boolean
 }
 
