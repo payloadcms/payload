@@ -1,7 +1,10 @@
-## [0.14.28-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.28-beta.0) (2022-03-02)
+## [0.14.29-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.29-beta.0) (2022-03-07)
 
 ### Bug Fixes
 
+* improves rich text link ([2e9a4c7](https://github.com/payloadcms/payload/commit/2e9a4c7d717e3a08b2982b8c49eb358baf23da17))
+* improves adding rich text voids to RTE ([966c3c6](https://github.com/payloadcms/payload/commit/966c3c647198569ba06013481a3b6fa9042b058d))
+* rare crash with link rte element ([f5535f6](https://github.com/payloadcms/payload/commit/f5535f613ac4d876d040be74b45e105e0f4775a8))
 * ensures empty hasMany relationships save as empty arrays ([08b3e8f](https://github.com/payloadcms/payload/commit/08b3e8f18f0aa620d537f3258b2e080600e0f43e))
 * [#422](https://github.com/payloadcms/payload/issues/422), prevents loading duplicative relationship options ([414679d](https://github.com/payloadcms/payload/commit/414679d86aac7ed94970a6eee14ff77b65f5c1d1))
 * [#423](https://github.com/payloadcms/payload/issues/423), [#391](https://github.com/payloadcms/payload/issues/391) - prevents loading edit views until data initializes ([2884654](https://github.com/payloadcms/payload/commit/28846547afc7e7bb8accc5dbe9f3b98593f332fa))
