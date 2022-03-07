@@ -12,7 +12,7 @@ import Submit from '../../../../../Submit';
 import X from '../../../../../../icons/X';
 import Fields from './Fields';
 import { requests } from '../../../../../../../api';
-import { injectVoidElement } from '../../../injectVoid';
+import { injectVoidElement } from '../../injectVoid';
 
 import './index.scss';
 

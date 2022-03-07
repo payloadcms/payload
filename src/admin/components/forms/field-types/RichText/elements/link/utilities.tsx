@@ -1,41 +1,37 @@
 import { Editor, Transforms, Range, Element } from 'slate';
-
-export const isLinkActive = (editor: Editor): boolean => {
-  const [link] = Editor.nodes(editor, { match: (n) => Element.isElement(n) && n.type === 'link' });
-  return !!link;
-};
+import isElementActive from '../isActive';
 
 export const unwrapLink = (editor: Editor): void => {
   Transforms.unwrapNodes(editor, { match: (n) => Element.isElement(n) && n.type === 'link' });
 };
 
-export const wrapLink = (editor, url?: string, newTab?: boolean): void => {
-  if (isLinkActive(editor)) {
-    unwrapLink(editor);
-  }
-
+export const wrapLink = (editor: Editor, url?: string, newTab?: boolean): void => {
   const { selection, blurSelection } = editor;
 
   if (blurSelection) {
     Transforms.select(editor, blurSelection);
   }
 
-  const selectionToUse = selection || blurSelection;
-
-  const isCollapsed = selectionToUse && Range.isCollapsed(selectionToUse);
-
-  const link = {
-    type: 'link',
-    url,
-    newTab,
-    children: isCollapsed ? [{ text: url }] : [],
-  };
-
-  if (isCollapsed) {
-    Transforms.insertNodes(editor, link);
+  if (isElementActive(editor, 'link')) {
+    unwrapLink(editor);
   } else {
-    Transforms.wrapNodes(editor, link, { split: true });
-    Transforms.collapse(editor, { edge: 'end' });
+    const selectionToUse = selection || blurSelection;
+
+    const isCollapsed = selectionToUse && Range.isCollapsed(selectionToUse);
+
+    const link = {
+      type: 'link',
+      url,
+      newTab,
+      children: isCollapsed ? [{ text: url }] : [],
+    };
+
+    if (isCollapsed) {
+      Transforms.insertNodes(editor, link);
+    } else {
+      Transforms.wrapNodes(editor, link, { split: true });
+      Transforms.collapse(editor, { edge: 'end' });
+    }
   }
 };
 
