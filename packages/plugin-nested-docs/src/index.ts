@@ -2,10 +2,9 @@ import { Config } from 'payload/config';
 import { Options } from './types';
 import createBreadcrumbsField from './fields/breadcrumbs';
 import createParentField from './fields/parent';
-import populateBreadcrumbs from './populateBreadcrumbs';
+import populateBreadcrumbs from './utilities/populateBreadcrumbs';
 import resaveChildren from './hooks/resaveChildren';
 import resaveSelfAfterCreate from './hooks/resaveSelfAfterCreate';
-
 
 const breadcrumbs = (options: Options) => (config: Config): Config => ({
   ...config,

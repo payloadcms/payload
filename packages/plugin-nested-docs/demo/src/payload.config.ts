@@ -1,7 +1,7 @@
 import { buildConfig } from 'payload/config';
 import path from 'path';
-import breadcrumbsPlugin from '../../dist';
-// import breadcrumbsPlugin from '../../src';
+// import nestedPages from '../../dist';
+import nestedPages from '../../src';
 import { Users } from './collections/Users';
 import { Pages } from './collections/Pages';
 
@@ -31,10 +31,12 @@ export default buildConfig({
     Pages
   ],
   plugins: [
-    breadcrumbsPlugin({
+    nestedPages({
       collections: [
         'pages'
       ],
+      generateLabel: (_, doc) => doc.title as string,
+      generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
     }),
   ],
   typescript: {

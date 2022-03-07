@@ -7425,10 +7425,10 @@ pause@0.0.1:
   resolved "https://registry.yarnpkg.com/pause/-/pause-0.0.1.tgz#1d408b3fdb76923b9543d96fb4c9dfd535d9cb5d"
   integrity sha1-HUCLP9t2kjuVQ9lvtMnf1TXZy10=
 
-payload@^0.14.24-beta.0:
-  version "0.14.24-beta.0"
-  resolved "https://registry.yarnpkg.com/payload/-/payload-0.14.24-beta.0.tgz#45bdbee0012bdfe97b4419637663cec3384ecdf8"
-  integrity sha512-wLKyTEUPWxZZBjYNll8cCnQApGPWQYp2R0e1ZEhsVnVE5jfxxdLPbzy9KPwHgpJC9Aol5jDFXOzdlmQg3p4NRg==
+payload@^0.14.30-beta.0:
+  version "0.14.30-beta.0"
+  resolved "https://registry.yarnpkg.com/payload/-/payload-0.14.30-beta.0.tgz#7138008cd1fa46d8c2d769d9f03564b0f0f93175"
+  integrity sha512-HGk7tMf+nBEuuu2Xqvo5CpQIM1V3onISo+V1deHiYm/Bknrsuj8KT8wED9C4kc3O3Woz53fFa+eAZPM6N4Ds1w==
   dependencies:
     "@babel/cli" "^7.12.8"
     "@babel/core" "^7.11.6"

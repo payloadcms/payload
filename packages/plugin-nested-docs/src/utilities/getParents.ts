@@ -1,5 +1,5 @@
 import { CollectionConfig } from 'payload/types';
-import { Options } from './types';
+import { Options } from '../types';
 
 const getParents = async (
   req: any,

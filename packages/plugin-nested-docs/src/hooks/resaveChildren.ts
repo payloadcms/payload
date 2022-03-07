@@ -1,5 +1,5 @@
 import { CollectionConfig, CollectionAfterChangeHook } from 'payload/types';
-import populateBreadcrumbs from '../populateBreadcrumbs';
+import populateBreadcrumbs from '../utilities/populateBreadcrumbs';
 import { Options } from '../types';
 
 const resaveChildren = (options: Options, collection: CollectionConfig): CollectionAfterChangeHook => ({ req: { payload }, req, doc }) => {

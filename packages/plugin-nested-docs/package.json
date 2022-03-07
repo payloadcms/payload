@@ -1,7 +1,7 @@
 {
-  "name": "payload-plugin-breadrumbs",
+  "name": "payload-plugin-nested-pages",
   "version": "0.0.1",
-  "description": "Breadcrumbs plugin for Payload CMS",
+  "description": "Nested pages plugin for Payload CMS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -15,17 +15,17 @@
     "typescript",
     "react",
     "breadcrumbs",
-    "parent pages",
-    "nesting"
+    "nested pages",
+    "parent pages"
   ],
   "author": "dev@trbl.design",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "^0.14.24-beta.0",
+    "payload": "^0.14.30-beta.0",
     "react": "^17.0.2"
   },
   "devDependencies": {
-    "payload": "^0.14.24-beta.0",
+    "payload": "^0.14.30-beta.0",
     "react": "^17.0.2",
     "typescript": "^4.5.5"
   },

@@ -16,6 +16,12 @@ export const Pages: CollectionConfig = {
       label: 'Title',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'slug',
+      label: 'Slug',
+      type: 'text',
+      required: true,
     }
   ],
 };

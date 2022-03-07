@@ -1,7 +1,7 @@
+import { ArrayField } from 'payload/dist/fields/config/types';
 import { Field } from 'payload/types';
-import deepMerge from '../../../utilities/deepMerge';
 
-const createBreadcrumbsField = (relationTo: string, overrides: Partial<Field> = {}): Field => deepMerge({
+const createBreadcrumbsField = (relationTo: string, overrides: Partial<ArrayField> = {}): Field => ({
   name: 'breadcrumbs',
   type: 'array',
   fields: [
@@ -34,10 +34,13 @@ const createBreadcrumbsField = (relationTo: string, overrides: Partial<Field> = 
         },
       ],
     },
+    ...overrides?.fields || []
   ],
   admin: {
     readOnly: true,
+    ...overrides?.admin || {}
   },
-}, overrides);
+  ...overrides || {}
+});
 
 export default createBreadcrumbsField;

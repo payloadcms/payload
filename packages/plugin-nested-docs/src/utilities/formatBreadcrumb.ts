@@ -1,12 +1,12 @@
 import { CollectionConfig } from 'payload/types';
-import { Options, Breadcrumb } from './types';
+import { Options, Breadcrumb } from '../types';
 
 const formatBreadcrumb = (
   options: Options,
   collection: CollectionConfig,
   docs: Record<string, unknown>[],
 ): Breadcrumb => {
-  let url: string;
+  let url: string | undefined = undefined;
   let label: string;
 
   const lastDoc = docs[docs.length - 1];

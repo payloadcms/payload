@@ -1,6 +1,13 @@
 import { CollectionConfig, CollectionAfterChangeHook } from 'payload/types';
+import { Breadcrumb } from '../types';
+
+type DocWithBreadcrumbs = {
+  breadcrumbs: Breadcrumb[]
+}
 
 const resaveSelfAfterCreate = (collection: CollectionConfig): CollectionAfterChangeHook => async ({ req: { payload }, req, doc, operation }) => {
+  const { breadcrumbs = [] } = doc as DocWithBreadcrumbs;
+
   if (operation === 'create') {
     const originalDocWithDepth0 = await payload.findByID({
       collection: collection.slug,
@@ -14,9 +21,9 @@ const resaveSelfAfterCreate = (collection: CollectionConfig): CollectionAfterCha
       depth: 0,
       data: {
         ...originalDocWithDepth0,
-        breadcrumbs: doc.breadcrumbs.map((crumb, i) => ({
+        breadcrumbs: breadcrumbs.map((crumb, i) => ({
           ...crumb,
-          doc: doc?.breadcrumbs?.length === i + 1 ? doc.id : crumb.doc,
+          doc: breadcrumbs?.length === i + 1 ? doc.id : crumb.doc,
         })),
       },
     });

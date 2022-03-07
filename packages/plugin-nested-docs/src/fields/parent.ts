@@ -1,14 +1,16 @@
+import { RelationshipField } from 'payload/dist/fields/config/types';
 import { Field } from 'payload/types';
-import deepMerge from '../../../utilities/deepMerge';
 
-const createParentField = (relationTo: string, overrides: Partial<Field> = {}): Field => deepMerge({
+const createParentField = (relationTo: string, overrides: Partial<RelationshipField>): Field => ({
   name: 'parent',
   relationTo,
   type: 'relationship',
   maxDepth: 1,
   admin: {
     position: 'sidebar',
+    ...overrides?.admin || {},
   },
-}, overrides);
+  ...overrides || {}
+});
 
 export default createParentField;
