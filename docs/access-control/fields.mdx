@@ -58,7 +58,7 @@ Returns a boolean which allows or denies the ability to read a field's value. If
 | ----------------- | ----------- |
 | **`req`**         | The Express `request` object containing the currently authenticated `user` |
 | **`id`**          | `id` of the document being read |
-| **`data`**        | The full data of the document being read. |
+| **`doc`**         | The full document data. |
 | **`siblingData`** | Immediately adjacent field data of the document being read. |
 
 ### Update
@@ -73,3 +73,4 @@ Returns a boolean which allows or denies the ability to update a field's value. 
 | **`id`**          | `id` of the document being updated |
 | **`data`**        | The full data passed to update the document. |
 | **`siblingData`** | Immediately adjacent field data passed to update the document with. |
+| **`doc`**         | The full document data, before the update is applied. |

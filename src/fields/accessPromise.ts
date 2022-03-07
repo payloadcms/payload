@@ -35,6 +35,7 @@ const accessPromise = async ({
   hook,
   payload,
   showHiddenFields,
+  originalDoc,
 }: Arguments): Promise<void> => {
   const resultingData = data;
 
@@ -48,7 +49,7 @@ const accessPromise = async ({
   }
 
   if (field.access && field.access[accessOperation]) {
-    const result = overrideAccess ? true : await field.access[accessOperation]({ req, id, siblingData: data, data: fullData });
+    const result = overrideAccess ? true : await field.access[accessOperation]({ req, id, siblingData: data, data: fullData, doc: originalDoc });
 
     if (!result) {
       delete resultingData[field.name];

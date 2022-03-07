@@ -20,8 +20,9 @@ export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: Fie
 export type FieldAccess<T extends TypeWithID = any, P = any> = (args: {
   req: PayloadRequest
   id?: string
-  data: Partial<T>
-  siblingData: Partial<P>
+  data?: Partial<T>
+  siblingData?: Partial<P>
+  doc?: T
 }) => Promise<boolean> | boolean;
 
 export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>) => boolean;
