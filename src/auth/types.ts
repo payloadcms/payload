@@ -104,5 +104,5 @@ export interface Auth extends Omit<DeepRequired<IncomingAuthType>, 'verify' | 'f
 }
 
 export function hasWhereAccessResult(result: boolean | Where): result is Where {
-  return typeof result !== 'boolean';
+  return result && typeof result === 'object';
 }
