@@ -48,9 +48,10 @@ Returns a boolean which allows/denies access to the `create` request.
 
 **Available argument properties :**
 
-| Option    | Description |
-| --------- | ----------- |
-| **`req`** | The Express `request` object containing the currently authenticated `user` |
+| Option     | Description |
+| ---------- | ----------- |
+| **`req`**  | The Express `request` object containing the currently authenticated `user` |
+| **`data`** | The data passed to create the document with. |
 
 ### Read
 
@@ -69,10 +70,11 @@ Update access functions can return a boolean result or optionally return a [quer
 
 **Available argument properties :**
 
-| Option    | Description |
-| --------- | ----------- |
-| **`req`** | The Express `request` object containing the currently authenticated `user` |
-| **`id`**  | `id` of document requested to update |
+| Option     | Description |
+| ---------- | ----------- |
+| **`req`**  | The Express `request` object containing the currently authenticated `user` |
+| **`id`**   | `id` of document requested to update |
+| **`data`** | The data passed to update the document with. |
 
 ### Delete
 

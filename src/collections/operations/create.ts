@@ -67,7 +67,7 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // /////////////////////////////////////
 
   if (!overrideAccess) {
-    await executeAccess({ req }, collectionConfig.access.create);
+    await executeAccess({ req, data }, collectionConfig.access.create);
   }
 
   // /////////////////////////////////////

@@ -26,13 +26,15 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
     autosave,
   } = args;
 
+  let { data } = args;
+
   const shouldSaveDraft = Boolean(draftArg && globalConfig.versions.drafts);
 
   // /////////////////////////////////////
   // 1. Retrieve and execute access
   // /////////////////////////////////////
 
-  const accessResults = !overrideAccess ? await executeAccess({ req }, globalConfig.access.update) : true;
+  const accessResults = !overrideAccess ? await executeAccess({ req, data }, globalConfig.access.update) : true;
 
   // /////////////////////////////////////
   // Retrieve document
@@ -83,8 +85,6 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
     flattenLocales: true,
     showHiddenFields,
   });
-
-  let { data } = args;
 
   // /////////////////////////////////////
   // beforeValidate - Fields

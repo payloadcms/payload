@@ -64,6 +64,8 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
     autosave = false,
   } = args;
 
+  let { data } = args;
+
   if (!id) {
     throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST);
   }
@@ -74,7 +76,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // Access
   // /////////////////////////////////////
 
-  const accessResults = !overrideAccess ? await executeAccess({ req, id }, collectionConfig.access.update) : true;
+  const accessResults = !overrideAccess ? await executeAccess({ req, id, data }, collectionConfig.access.update) : true;
   const hasWherePolicy = hasWhereAccessResult(accessResults);
 
   // /////////////////////////////////////
@@ -119,8 +121,6 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
     flattenLocales: true,
     showHiddenFields,
   });
-
-  let { data } = args;
 
   // /////////////////////////////////////
   // Upload and resize potential files
