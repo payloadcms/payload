@@ -2,20 +2,16 @@ import { CollectionConfig } from '../../src/collections/config/types';
 
 const Images: CollectionConfig = {
   slug: 'images',
+  admin: {
+    description: 'Used to test upload relationship queries',
+  },
   labels: {
     singular: 'Image',
     plural: 'Images',
   },
   fields: [
     {
-      name: 'upload1',
-      label: 'Upload 1',
-      type: 'upload',
-      relationTo: 'media',
-    },
-    {
-      name: 'upload2',
-      label: 'Upload 2',
+      name: 'upload',
       type: 'upload',
       relationTo: 'media',
     },
