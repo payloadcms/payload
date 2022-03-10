@@ -47,7 +47,7 @@ const populate = async ({
         collection: relatedCollection.config.slug,
         id: idString as string,
         currentDepth: currentDepth + 1,
-        overrideAccess,
+        overrideAccess: typeof overrideAccess === 'undefined' ? false : overrideAccess,
         disableErrors: true,
         depth,
         showHiddenFields,
