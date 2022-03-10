@@ -1,4 +1,5 @@
-## [0.14.30-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.30-beta.0) (2022-03-07)
+## [0.14.31-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.31-beta.0) (2022-03-10)
+
 
 ### Bug Fixes
 
@@ -22,6 +23,8 @@
 * rte upload field population ([8327b5a](https://github.com/payloadcms/payload/commit/8327b5aae505a189a5b9617c3485d646b5f8b517))
 * type error in useField ([ef4e6d3](https://github.com/payloadcms/payload/commit/ef4e6d32a90215c07aa2c1e7217cf53558bfae97))
 * [#464](https://github.com/payloadcms/payload/issues/464), graphql upload access control ([fd0629e](https://github.com/payloadcms/payload/commit/fd0629e93202dfaa399c753c59481b1cbd139bf6))
+* ensures overrideAccess is false if undefined while populating ([97f3178](https://github.com/payloadcms/payload/commit/97f31780051828a9d506eba3520a1390acb99a96))
+
 
 ### Features
 
@@ -47,6 +50,8 @@
 * serverURL is no longer required ([#437](https://github.com/payloadcms/payload/issues/437)) ([dca90c4](https://github.com/payloadcms/payload/commit/dca90c4aa92dd0cc2084ba16249254c9259622c3))
 * updates dependencies ([3ca3f53](https://github.com/payloadcms/payload/commit/3ca3f533d07b644fa8a3d077932860e9f12318c2))
 * uses DocumentInfo to fetch and maintain doc versions ([8f30c3b](https://github.com/payloadcms/payload/commit/8f30c3bfefaa1530ac086aba22d4b8e6bac8f97d))
+* exposes data arg within create and update access control ([73f418b](https://github.com/payloadcms/payload/commit/73f418bb5cadf73f683fe04ee94e4d24c8cfe96f))
+
 # [0.14.0](https://github.com/payloadcms/payload/compare/v0.13.6...v0.14.0) (2022-01-03)
 
 
