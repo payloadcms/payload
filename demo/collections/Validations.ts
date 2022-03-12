@@ -11,21 +11,6 @@ const Validations: CollectionConfig = {
   },
   fields: [
     {
-      name: 'serverValidation',
-      type: 'text',
-      label: 'Server Validation',
-      required: true,
-      validate: (value) => {
-        const result = value === 'test';
-
-        if (typeof window === 'undefined' && !result) {
-          return 'The only accepted value of this field is "test".';
-        }
-
-        return true;
-      },
-    },
-    {
       name: 'text',
       type: 'text',
       label: 'Text',

@@ -43,8 +43,6 @@ export const defaults = {
     compression: {},
     middleware: [],
   },
-  hooks: {
-    afterError: [],
-  },
+  hooks: {},
   localization: false,
 };

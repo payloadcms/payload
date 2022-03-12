@@ -1,9 +1,7 @@
 import * as GraphQL from 'graphql';
 import { GraphQLError, GraphQLFormattedError, GraphQLObjectType, GraphQLSchema } from 'graphql';
-import { graphqlHTTP, RequestInfo } from 'express-graphql';
+import { graphqlHTTP } from 'express-graphql';
 import queryComplexity, { fieldExtensionsEstimator, simpleEstimator } from 'graphql-query-complexity';
-import { Response } from 'express';
-import { FormattedExecutionResult } from 'graphql/execution/execute';
 import buildObjectType from './schema/buildObjectType';
 import buildMutationInputType from './schema/buildMutationInputType';
 import errorHandler from './errorHandler';
@@ -17,24 +15,12 @@ import initPreferences from '../preferences/graphql/init';
 import { GraphQLResolvers } from './bindResolvers';
 import buildWhereInputType from './schema/buildWhereInputType';
 import { SanitizedConfig } from '../config/types';
-import { PayloadRequest } from '../express/types';
 
 type GraphQLTypes = {
   blockTypes: any;
   blockInputTypes: any;
   localeInputType: any;
   fallbackLocaleInputType: any;
-}
-
-export type PayloadRequestInfo = Omit<RequestInfo, 'result'> & {
-  result: Omit<FormattedExecutionResult, 'errors'> & {
-    errors: ReadonlyArray<GraphQLError & {
-      originalError?: {
-        data?: {[key: string]: any}[]
-      }
-    }>
-  }
-  context?: {req: PayloadRequest, res: Response}
 }
 
 class InitializeGraphQL {
@@ -68,7 +54,7 @@ class InitializeGraphQL {
 
   schema: GraphQL.GraphQLSchema;
 
-  extensions: (info: PayloadRequestInfo) => Promise<any>;
+  extensions: (info: any) => Promise<any>;
 
   customFormatErrorFn: (error: GraphQLError) => GraphQLFormattedError;
 
@@ -155,11 +141,8 @@ class InitializeGraphQL {
       const { result } = info;
       if (result.errors) {
         this.errorIndex = 0;
-        this.errorResponses = await errorHandler({
-          info,
-          debug: this.config.debug,
-          afterError: this.config.hooks.afterError,
-        });
+        const afterErrorHook = typeof this.config.hooks.afterError === 'function' ? this.config.hooks.afterError : null;
+        this.errorResponses = await errorHandler(info, this.config.debug, afterErrorHook);
       }
       return null;
     };

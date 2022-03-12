@@ -8,12 +8,11 @@ import GraphQL from 'graphql';
 import { ConnectionOptions } from 'mongoose';
 import React from 'react';
 import { Payload } from '..';
-import { CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types';
+import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types';
 import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
 import { PayloadRequest } from '../express/types';
 import { Where } from '../types';
 import { User } from '../auth/types';
-import { AfterErrorHook } from '../errors/types';
 
 type Email = {
   fromName: string;
@@ -174,7 +173,7 @@ export type Config = {
   };
   components?: { [key: string]: JSX.Element | (() => JSX.Element) };
   hooks?: {
-    afterError?: AfterErrorHook[];
+    afterError?: AfterErrorHook;
   };
   plugins?: Plugin[];
 };
