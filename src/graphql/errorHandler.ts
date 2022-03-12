@@ -13,11 +13,15 @@ const logger = utilities();
 const errorHandler = async (info, debug: boolean, afterErrorHook): Promise<GraphQLFormattedError[]> => Promise.all(info.result.errors.map(async (err) => {
   logger.error(err.stack);
 
-  let response = {
+  let response: GraphQLFormattedError = {
     message: err.message,
-    data: (err && err.originalError && err.originalError.data) || undefined,
+    locations: err.locations,
     path: err.path,
-    stack: debug ? err.stack : undefined,
+    extensions: {
+      name: err?.originalError?.name || undefined,
+      data: (err && err.originalError && err.originalError.data) || undefined,
+      stack: debug ? err.stack : undefined,
+    },
   };
 
   if (afterErrorHook) {
