@@ -119,14 +119,14 @@ export const select = baseField.keys({
   options: joi.array().items(joi.alternatives().try(
     joi.string(),
     joi.object({
-      value: joi.string().required(),
+      value: joi.string().required().allow(''),
       label: joi.string().required(),
     }),
   )).required(),
   hasMany: joi.boolean().default(false),
   defaultValue: joi.alternatives().try(
-    joi.string(),
-    joi.array().items(joi.string()),
+    joi.string().allow(''),
+    joi.array().items(joi.string().allow('')),
   ),
 });
 
@@ -136,11 +136,11 @@ export const radio = baseField.keys({
   options: joi.array().items(joi.alternatives().try(
     joi.string(),
     joi.object({
-      value: joi.string().required(),
+      value: joi.string().required().allow(''),
       label: joi.string().required(),
     }),
   )).required(),
-  defaultValue: joi.string(),
+  defaultValue: joi.string().allow(''),
   admin: baseAdminFields.keys({
     layout: joi.string().valid('vertical', 'horizontal'),
   }),

@@ -21,6 +21,7 @@ import withNullableType from './withNullableType';
 import { BaseFields } from '../../collections/graphql/types';
 import { toWords } from '../../utilities/formatLabels';
 import createRichTextRelationshipPromise from '../../fields/richText/relationshipPromise';
+import formatOptions from '../utilities/formatOptions';
 
 type LocaleInputType = {
   locale: {
@@ -157,23 +158,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
         field,
         new GraphQLEnumType({
           name: combineParentName(parentName, field.name),
-          values: field.options.reduce((values, option) => {
-            if (optionIsObject(option)) {
-              return {
-                ...values,
-                [formatName(option.value)]: {
-                  value: option.value,
-                },
-              };
-            }
-
-            return {
-              ...values,
-              [formatName(option)]: {
-                value: option,
-              },
-            };
-          }, {}),
+          values: formatOptions(field),
         }),
       ),
     }),
@@ -183,27 +168,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
 
       let type: GraphQLType = new GraphQLEnumType({
         name: fullName,
-        values: field.options.reduce((values, option) => {
-          if (typeof option === 'object' && option.value) {
-            return {
-              ...values,
-              [formatName(option.value)]: {
-                value: option.value,
-              },
-            };
-          }
-
-          if (typeof option === 'string') {
-            return {
-              ...values,
-              [formatName(option)]: {
-                value: option,
-              },
-            };
-          }
-
-          return values;
-        }, {}),
+        values: formatOptions(field),
       });
 
       type = field.hasMany ? new GraphQLList(type) : type;

@@ -8,7 +8,7 @@ const Select: CollectionConfig = {
   },
   fields: [
     {
-      name: 'Select',
+      name: 'select',
       type: 'select',
       options: [{
         value: 'one',
@@ -24,7 +24,7 @@ const Select: CollectionConfig = {
       required: true,
     },
     {
-      name: 'SelectHasMany',
+      name: 'selectHasMany',
       type: 'select',
       options: [{
         value: 'one',
@@ -41,7 +41,7 @@ const Select: CollectionConfig = {
       hasMany: true,
     },
     {
-      name: 'SelectJustStrings',
+      name: 'selectJustStrings',
       type: 'select',
       options: ['blue', 'green', 'yellow'],
       label: 'Select Just Strings',
@@ -49,7 +49,20 @@ const Select: CollectionConfig = {
       hasMany: true,
     },
     {
-      name: 'Radio',
+      name: 'selectWithEmptyString',
+      type: 'select',
+      defaultValue: '',
+      options: [{
+        value: '',
+        label: 'None',
+      }, {
+        value: 'option',
+        label: 'Option',
+      }],
+      required: true,
+    },
+    {
+      name: 'radio',
       type: 'radio',
       options: [{
         value: 'one',
@@ -62,6 +75,22 @@ const Select: CollectionConfig = {
         label: 'Three',
       }],
       label: 'Choose From',
+      required: true,
+    },
+    {
+      name: 'radioWithEmptyString',
+      type: 'radio',
+      defaultValue: '',
+      options: [{
+        value: '',
+        label: 'None',
+      }, {
+        value: 'one',
+        label: 'One',
+      }, {
+        value: 'two',
+        label: 'Two',
+      }],
       required: true,
     },
   ],
