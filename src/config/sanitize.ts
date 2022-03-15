@@ -25,6 +25,10 @@ const sanitizeConfig = (config: Config): SanitizedConfig => {
     sanitizedConfig.globals = sanitizeGlobals(sanitizedConfig.collections, sanitizedConfig.globals);
   }
 
+  if (typeof sanitizedConfig.serverURL === 'undefined') {
+    sanitizedConfig.serverURL = '';
+  }
+
   if (sanitizedConfig.serverURL !== '') {
     sanitizedConfig.csrf.push(sanitizedConfig.serverURL);
   }
