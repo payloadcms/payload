@@ -127,6 +127,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
                 fallbackLocale,
               },
               depth: 0,
+              pagination: false,
             };
 
             const relatedDocument = await find(relatedDocumentQuery);
@@ -326,6 +327,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
                   fallbackLocale,
                 },
                 depth: 0,
+                pagination: false,
               });
 
               if (result.docs.length === 1) {
