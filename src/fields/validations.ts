@@ -35,7 +35,7 @@ export const text: Validate = (value: string, options = {}) => {
   }
 
   if (options.required) {
-    if (typeof value !== 'string' || (typeof value === 'string' && value?.length === 0)) {
+    if (typeof value !== 'string' || value?.length === 0) {
       return defaultMessage;
     }
   }
@@ -162,15 +162,17 @@ export const array: Validate = (value, options = {}) => {
 };
 
 export const select: Validate = (value, options = {}) => {
-  if (Array.isArray(value) && value.find((input) => !options.options.find((option) => (option === input || option.value === input)))) {
+  if (Array.isArray(value) && value.some((input) => !options.options.some((option) => (option === input || option.value === input)))) {
     return 'This field has an invalid selection';
   }
 
-  if (typeof value === 'string' && !options.options.find((option) => (option === value || option.value === value))) {
+  if (typeof value === 'string' && !options.options.some((option) => (option === value || option.value === value))) {
     return 'This field has an invalid selection';
   }
 
-  if (options.required && !value) {
+  if (options.required && (
+    (typeof value === 'undefined' || value === null) || (options.hasMany && Array.isArray(value) && (value as [])?.length === 0))
+  ) {
     return defaultMessage;
   }
 

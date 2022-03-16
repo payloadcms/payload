@@ -7,7 +7,7 @@ import { Props } from './types';
 import SelectInput from './Input';
 
 const formatOptions = (options: Option[]): OptionObject[] => options.map((option) => {
-  if (typeof option === 'object' && option.value) {
+  if (typeof option === 'object' && (option.value || option.value === '')) {
     return option;
   }
 
@@ -42,7 +42,7 @@ const Select: React.FC<Props> = (props) => {
 
   useEffect(() => {
     setOptions(formatOptions(optionsFromProps));
-  }, [optionsFromProps])
+  }, [optionsFromProps]);
 
   const memoizedValidate = useCallback((value) => {
     const validationResult = validate(value, { required, options });
