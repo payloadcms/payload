@@ -117,5 +117,71 @@ describe('Collections - Local', () => {
 
       expect(relationshipBWithHiddenNestedField.post[0].demoHiddenField).toStrictEqual(demoHiddenField);
     });
+    describe('Find', () => {
+      const title = 'local-find';
+      beforeAll(async (done) => {
+        const data = {
+          title,
+          description: 'a description',
+          priority: 1,
+          nonLocalizedGroup: {
+            text: 'english',
+          },
+          localizedGroup: {
+            text: 'english',
+          },
+          nonLocalizedArray: [
+            {
+              localizedEmbeddedText: 'english',
+            },
+          ],
+          richTextBlocks: [
+            {
+              blockType: 'richTextBlock',
+              blockName: 'Test Block Name',
+              content: [{
+                children: [{ text: 'english' }],
+              }],
+            },
+          ],
+        };
+        await payload.create({
+          collection: 'localized-posts',
+          data,
+        });
+        Array.from(Array(10).keys()).map(async (i) => {
+          const uniqueTitle = `${title}-${i}`;
+          await payload.create({
+            collection: 'localized-posts',
+            data: {
+              ...data,
+              title: uniqueTitle,
+            },
+          });
+        });
+        done();
+      });
+      it('should find collection with query', async () => {
+        const result = await payload.find({
+          collection: 'localized-posts',
+          where: {
+            title: {
+              equals: title,
+            },
+          },
+        });
+        const doc = result.docs[0];
+        expect(doc.id).toBeDefined();
+        expect(doc.title).toStrictEqual(title);
+      });
+      it('should allow disable pagination to return all docs', async () => {
+        const result = await payload.find({
+          collection: 'localized-posts',
+          pagination: false,
+          limit: 5, // limit will not be used
+        });
+        expect(result.docs.length).toBeGreaterThan(10);
+      });
+    });
   });
 });

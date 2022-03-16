@@ -19,6 +19,7 @@ export type Arguments = {
   depth?: number
   req?: PayloadRequest
   overrideAccess?: boolean
+  pagination?: boolean
   showHiddenFields?: boolean
   draft?: boolean
 }
@@ -55,6 +56,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     },
     overrideAccess,
     showHiddenFields,
+    pagination = true,
   } = args;
 
   // /////////////////////////////////////
@@ -114,6 +116,8 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     lean: true,
     leanWithId: true,
     useEstimatedCount,
+    pagination,
+    useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
   };
 
   const paginatedDocs = await Model.paginate(query, optionsToExecute);

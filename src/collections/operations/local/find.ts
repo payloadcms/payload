@@ -12,6 +12,7 @@ export type Options = {
   user?: Document
   overrideAccess?: boolean
   showHiddenFields?: boolean
+  pagination?: boolean
   sort?: string
   where?: Where
   draft?: boolean
@@ -31,6 +32,7 @@ export default async function find<T extends TypeWithID = any>(options: Options)
     showHiddenFields,
     sort,
     draft = false,
+    pagination = true,
   } = options;
 
   const collection = this.collections[collectionSlug];
@@ -45,6 +47,7 @@ export default async function find<T extends TypeWithID = any>(options: Options)
     overrideAccess,
     showHiddenFields,
     draft,
+    pagination,
     req: {
       user,
       payloadAPI: 'local',
