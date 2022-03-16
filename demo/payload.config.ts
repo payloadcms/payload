@@ -18,6 +18,7 @@ import Localized from './collections/Localized';
 import LocalizedArray from './collections/LocalizedArray';
 import LocalOperations from './collections/LocalOperations';
 import Media from './collections/Media';
+import Images from './collections/Images';
 import NestedArrays from './collections/NestedArrays';
 import Preview from './collections/Preview';
 import PublicUsers from './collections/PublicUsers';
@@ -105,6 +106,7 @@ export default buildConfig({
     LocalizedArray,
     LocalOperations,
     Media,
+    Images,
     NestedArrays,
     Preview,
     PublicUsers,

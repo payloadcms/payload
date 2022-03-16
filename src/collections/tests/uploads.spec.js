@@ -1,20 +1,23 @@
 import fs from 'fs';
 import path from 'path';
 import FormData from 'form-data';
+import { GraphQLClient } from 'graphql-request';
 import getConfig from '../../config/load';
 import fileExists from '../../../tests/api/utils/fileExists';
 import { email, password } from '../../mongoose/testCredentials';
 
 require('isomorphic-fetch');
 
-const { serverURL: url } = getConfig();
+const config = getConfig();
+const api = `${config.serverURL}${config.routes.api}`;
 
-let token = null;
-let headers = null;
+let client;
+let token;
+let headers;
 
-describe('Collections - REST', () => {
+describe('Collections - Uploads', () => {
   beforeAll(async (done) => {
-    const response = await fetch(`${url}/api/admins/login`, {
+    const response = await fetch(`${api}/admins/login`, {
       body: JSON.stringify({
         email,
         password,
@@ -35,7 +38,7 @@ describe('Collections - REST', () => {
     done();
   });
 
-  describe('Media', () => {
+  describe('REST', () => {
     const mediaDir = path.join(__dirname, '../../../demo', 'media');
     beforeAll(async () => {
       // Clear demo/media directory
@@ -59,8 +62,7 @@ describe('Collections - REST', () => {
         formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/image.png')));
         formData.append('alt', 'test media');
         formData.append('locale', 'en');
-
-        const response = await fetch(`${url}/api/media`, {
+        const response = await fetch(`${api}/media`, {
           body: formData,
           headers,
           method: 'post',
@@ -115,7 +117,7 @@ describe('Collections - REST', () => {
         formData.append('alt', 'test media');
         formData.append('locale', 'en');
 
-        const response = await fetch(`${url}/api/unstored-media`, {
+        const response = await fetch(`${api}/unstored-media`, {
           body: formData,
           headers,
           method: 'post',
@@ -152,7 +154,7 @@ describe('Collections - REST', () => {
         formData.append('alt', 'test media');
         formData.append('locale', 'en');
 
-        const firstResponse = await fetch(`${url}/api/media`, {
+        const firstResponse = await fetch(`${api}/media`, {
           body: formData,
           headers,
           method: 'post',
@@ -165,7 +167,7 @@ describe('Collections - REST', () => {
         sameForm.append('alt', 'test media');
         sameForm.append('locale', 'en');
 
-        const response = await fetch(`${url}/api/media`, {
+        const response = await fetch(`${api}/media`, {
           body: sameForm,
           headers,
           method: 'post',
@@ -213,7 +215,7 @@ describe('Collections - REST', () => {
       formData.append('alt', 'test media');
       formData.append('locale', 'en');
 
-      const response = await fetch(`${url}/api/media`, {
+      const response = await fetch(`${api}/media`, {
         body: formData,
         headers: {
           Authorization: `JWT ${token}`,
@@ -230,7 +232,7 @@ describe('Collections - REST', () => {
 
       updateFormData.append('filename', data.doc.filename);
       updateFormData.append('alt', newAlt);
-      const updateResponse = await fetch(`${url}/api/media/${data.doc.id}`, {
+      const updateResponse = await fetch(`${api}/media/${data.doc.id}`, {
         body: updateFormData,
         headers: {
           Authorization: `JWT ${token}`,
@@ -282,7 +284,7 @@ describe('Collections - REST', () => {
       formData.append('alt', 'test media');
       formData.append('locale', 'en');
 
-      const createResponse = await fetch(`${url}/api/media`, {
+      const createResponse = await fetch(`${api}/media`, {
         body: formData,
         headers: {
           Authorization: `JWT ${token}`,
@@ -294,7 +296,7 @@ describe('Collections - REST', () => {
       expect(createResponse.status).toBe(201);
       const docId = createData.doc.id;
 
-      const response = await fetch(`${url}/api/media/${docId}`, {
+      const response = await fetch(`${api}/media/${docId}`, {
         headers: {
           Authorization: `JWT ${token}`,
         },
@@ -307,6 +309,58 @@ describe('Collections - REST', () => {
 
       const imageExists = await fileExists(path.join(mediaDir, 'delete.png'));
       expect(imageExists).toBe(false);
+    });
+  });
+
+  describe('GraphQL', () => {
+    // graphql cannot submit formData to create files, we only need to test getting relationship data on upload fields
+    let media;
+    let image;
+    const alt = 'alt text';
+    beforeAll(async (done) => {
+      client = new GraphQLClient(`${api}${config.routes.graphQL}`, { headers: { Authorization: `JWT ${token}` } });
+
+      // create media using REST
+      const formData = new FormData();
+      formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/image.png')));
+      formData.append('alt', alt);
+      formData.append('locale', 'en');
+      const mediaResponse = await fetch(`${api}/media`, {
+        body: formData,
+        headers,
+        method: 'post',
+      });
+      const mediaData = await mediaResponse.json();
+      media = mediaData.doc;
+
+      // create image that relates to media
+      headers['Content-Type'] = 'application/json';
+      const imageResponse = await fetch(`${api}/images`, {
+        body: JSON.stringify({
+          upload: media.id,
+        }),
+        headers,
+        method: 'post',
+      });
+      const data = await imageResponse.json();
+      image = data.doc;
+
+      done();
+    });
+
+    it('should query uploads relationship fields', async () => {
+      // language=graphQL
+      const query = `query {
+          Image(id: "${image.id}") {
+            id
+            upload {
+              alt
+            }
+          }
+        }`;
+
+      const response = await client.request(query);
+      expect(response.Image.upload.alt).toStrictEqual(alt);
     });
   });
 });
