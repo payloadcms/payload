@@ -114,6 +114,18 @@ This is your Express app as shown above. Payload will tie into your existing `ap
 
 Your Payload license key. Not needed for development purposes, but when it's time to deploy to production, you need to add your license key here. More info about how Payload licensing works can be found [here](/docs/production/licensing).
 
+##### `email`
+
+An Optional object used to configure SMTP. [Read more](/docs/email/overview).
+
+##### `local`
+
+A boolean that when set to `true` tells Payload to start in local-only mode which will bypass setting up API routes. When set to `true`, `express` is not required. This is useful when running scripts that need to use Payload's [local-api](/docs/local-api/overview).
+
+##### `onInit`
+
+An optional function that is called immediately following startup that receives the Payload instance as it's only argument.
+
 ### Test it out
 
 After you've gotten this far, it's time to boot up Payload. At the command line, run `npm install` and then `node server.js` in your application's folder to start up your app and initialize Payload.
