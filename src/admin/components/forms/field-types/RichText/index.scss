@@ -17,7 +17,6 @@
   }
 
   &__editor {
-    min-height: base(10);
 
     [data-slate-node=element] {
       margin-bottom: base(0.25);
@@ -29,6 +28,10 @@
     h4 {
       margin-bottom: base(.5);
     }
+  }
+
+  &__input {
+    min-height: base(10);
   }
 
   &__wrap {
