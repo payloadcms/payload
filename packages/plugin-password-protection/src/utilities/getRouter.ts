@@ -1,10 +1,10 @@
 import express, { Router } from 'express';
-import { PayloadConfig } from 'payload/config';
+import { Config as PayloadConfig } from 'payload/config';
 import { PayloadRequest } from 'payload/dist/express/types';
-import { Options } from './types';
+import { PasswordProtectionConfig } from '../types';
 import operation from './operation';
 
-export default (config: PayloadConfig, options: Options): Router => {
+export default (config: PayloadConfig, options: PasswordProtectionConfig): Router => {
   const router = express.Router();
 
   router.post(options.routePath || '/validate-password', async (req: PayloadRequest, res) => {

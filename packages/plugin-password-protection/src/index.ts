@@ -2,19 +2,19 @@ import path from 'path';
 import { Config } from 'payload/config';
 import { CollectionConfig } from 'payload/dist/collections/config/types';
 import { CollectionBeforeReadHook } from 'payload/types';
-import { Options } from './types';
-import parseCookies from './parseCookies';
-import getRouter from './getRouter';
-import getMutation from './getMutation';
-import getCookiePrefix from './getCookiePrefix';
+import { PasswordProtectionConfig } from './types';
+import parseCookies from './utilities/parseCookies';
+import getRouter from './utilities/getRouter';
+import getMutation from './utilities/getMutation';
+import getCookiePrefix from './utilities/getCookiePrefix';
 
-const collectionPasswords = (incomingOptions: Options) => (incomingConfig: Config): Config => {
+const collectionPasswords = (incomingOptions: PasswordProtectionConfig) => (incomingConfig: Config): Config => {
   const {
-    slugs,
+    collections,
   } = incomingOptions;
 
   const options = {
-    slugs,
+    collections,
     routePath: incomingOptions.routePath || '/validate-password',
     expiration: incomingOptions.expiration || 7200,
     whitelistUsers: incomingOptions.whitelistUsers || (({ payloadAPI, user }) => Boolean(user) || payloadAPI === 'local'),
@@ -45,16 +45,16 @@ const collectionPasswords = (incomingOptions: Options) => (incomingConfig: Confi
         let newWebpackConfig = { ...webpackConfig };
         if (typeof incomingConfig?.admin?.webpack === 'function') newWebpackConfig = incomingConfig.admin.webpack(webpackConfig);
 
-        const webpackMock = path.resolve(__dirname, './webpackMock.js');
+        const webpackMock = path.resolve(__dirname, './utilities/webpackMock.js');
 
         return {
           ...newWebpackConfig,
           resolve: {
             ...newWebpackConfig.resolve,
             alias: {
-              ...newWebpackConfig.resolve.alias,
-              [path.resolve(__dirname, 'getRouter')]: webpackMock,
-              [path.resolve(__dirname, 'getMutation')]: webpackMock,
+              ...newWebpackConfig?.resolve?.alias || {},
+              [path.resolve(__dirname, 'utilities/getRouter')]: webpackMock,
+              [path.resolve(__dirname, 'utilities/getMutation')]: webpackMock,
             },
           },
         };
@@ -62,9 +62,9 @@ const collectionPasswords = (incomingOptions: Options) => (incomingConfig: Confi
     },
   };
 
-  config.collections = config.collections.map((collectionConfig) => {
-    if (slugs.includes(collectionConfig.slug)) {
-      const cookiePrefix = getCookiePrefix(config.cookiePrefix, collectionConfig.slug);
+  config.collections = config?.collections?.map((collectionConfig) => {
+    if (collections?.includes(collectionConfig.slug)) {
+      const cookiePrefix = getCookiePrefix(config.cookiePrefix || '', collectionConfig.slug);
 
       const beforeReadHook: CollectionBeforeReadHook = async ({ req, doc }) => {
         const whitelistUsersResponse = typeof options.whitelistUsers === 'function' ? await options.whitelistUsers(req) : false;
@@ -133,7 +133,7 @@ const collectionPasswords = (incomingOptions: Options) => (incomingConfig: Confi
     }
 
     return collectionConfig;
-  });
+  }) || [];
 
   return config;
 };

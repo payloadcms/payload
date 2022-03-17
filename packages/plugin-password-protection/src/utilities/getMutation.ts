@@ -5,7 +5,7 @@ import GraphQL, { GraphQLFieldConfig } from 'graphql';
 import { PayloadRequest } from 'payload/dist/express/types';
 import { Response } from 'express';
 import operation from './operation';
-import { Options } from './types';
+import { PasswordProtectionConfig } from '../types';
 
 type Args = {
   collection: string
@@ -19,7 +19,7 @@ const getMutation = (
   GraphQLArg: typeof GraphQL,
   payload: Payload,
   config: Config,
-  options: Options,
+  options: PasswordProtectionConfig,
 ): MutationType => {
   const { GraphQLBoolean, GraphQLString, GraphQLNonNull } = GraphQLArg;
 
