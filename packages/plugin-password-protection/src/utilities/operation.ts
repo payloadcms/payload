@@ -3,12 +3,12 @@ import { Payload } from 'payload';
 import { Config as PayloadConfig } from 'payload/config';
 import APIError from 'payload/dist/errors/APIError';
 import getCookiePrefix from './getCookiePrefix';
-import { PasswordProtectionConfig } from '../types';
+import { PasswordProtectionOptions } from '../types';
 
 type Args = {
   config: PayloadConfig
   payload: Payload
-  options: PasswordProtectionConfig
+  options: PasswordProtectionOptions
   collection: string
   password: string
   id: string

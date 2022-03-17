@@ -11,3 +11,13 @@ export type PasswordProtectionConfig = {
   expiration?: number
   collections?: string[]
 }
+
+export type PasswordProtectionOptions = {
+  collections?: string[]
+  routePath: string
+  expiration: number
+  whitelistUsers: AllowUsers
+  passwordFieldName: string
+  passwordProtectedFieldName: string
+  mutationName: string
+}
