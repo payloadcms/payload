@@ -1,5 +1,36 @@
 # [0.15.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.15.0) (2022-03-16)
 
+### BREAKING CHANGES
+
+The GraphQL error response data object has moved from the top level to the extensions object.
+
+Here is a previous example:
+
+```js
+{
+	"message": "The following fields are invalid: location,",
+	"data": [
+		{
+			"message": "This field requires two numbers",
+			"field": "location"
+		},
+	]
+},
+```
+
+The new shape of GraphQL errors is as follows:
+
+```js
+"extensions": {
+	"name": "ValidationError",
+	"data": [
+		{
+			"message": "This field requires two numbers",
+			"field": "location"
+		},
+	]
+}
+```
 
 ### Bug Fixes
 
@@ -14,121 +45,54 @@
 * adds key to RichText based on initialValue ([f710b8c](https://github.com/payloadcms/payload/commit/f710b8c4f3247156f64fb2b528a960bf808ef7ac))
 * adjusts lte and gte types to match docs and codebase ([#480](https://github.com/payloadcms/payload/issues/480)) ([8fc4f7f](https://github.com/payloadcms/payload/commit/8fc4f7f8068cb8fcef13b1cfd6de7b4f74b5415f))
 * allow jwt to work without csrf in config ([4048734](https://github.com/payloadcms/payload/commit/40487347e3f8bd03da440a73bec0ee491abbef85))
-* autosave ([e835cbe](https://github.com/payloadcms/payload/commit/e835cbe0b18960905d7bfb9129bf0cf3ed3970a4))
-* avoids console 404 on unpublished docs ([c7c3418](https://github.com/payloadcms/payload/commit/c7c34188e16d7e85a038ccc7f128590d0784131d))
 * awaits beforeDelete hooks ([609b871](https://github.com/payloadcms/payload/commit/609b871fa274e8b6d9eaf301e52ab42179aad9b7))
-* bug in how find merges drafts ([1fb1eaa](https://github.com/payloadcms/payload/commit/1fb1eaab50ed3796345f1f1361b839c9fe191ee0))
-* bug with version count ([6bf7d82](https://github.com/payloadcms/payload/commit/6bf7d820476f28b2f127e6e3c3e358a988b237c7))
 * config empty and sparse csrf is now allowed ([7e7b058](https://github.com/payloadcms/payload/commit/7e7b0589ef6c06941af3e7e3a24c7071d8b77a1a))
 * ensures empty hasMany relationships save as empty arrays ([08b3e8f](https://github.com/payloadcms/payload/commit/08b3e8f18f0aa620d537f3258b2e080600e0f43e))
-* ensures fetching published doc only retrieves published docs ([7841f2a](https://github.com/payloadcms/payload/commit/7841f2a86b1095e0a1b93df34f7fe9ae2371279d))
-* ensures multipart/form-data using _payload flattens field data before sending ([ae44727](https://github.com/payloadcms/payload/commit/ae44727fb9734fc3801f7249fa9e78668311c09e))
 * ensures nested lists always render properly ([20e5dfb](https://github.com/payloadcms/payload/commit/20e5dfbb4ab8dab320d60772f5195c5faffe38d3))
 * ensures overrideAccess is false if undefined while populating ([97f3178](https://github.com/payloadcms/payload/commit/97f31780051828a9d506eba3520a1390acb99a96))
-* ensures revision hooks await promises ([f56bbe8](https://github.com/payloadcms/payload/commit/f56bbe814e31b953e1b39bf44d1e00f71b0c3b60))
-* ensures revisions retain all locales ([f246252](https://github.com/payloadcms/payload/commit/f246252a422c3524c1c3f65fcf073ea42ab347c3))
 * ensures rte upload is populated when only upload is enabled ([39438b8](https://github.com/payloadcms/payload/commit/39438b8460f853f64d84436eed49dde74cd207d2))
-* ensures unique is not set within revisions collections ([b13615f](https://github.com/payloadcms/payload/commit/b13615f2bfaf25089a8189724b999bc23110a649))
-* ensures VersionCount is accurate ([7569811](https://github.com/payloadcms/payload/commit/756981172f054d23a55197cfbfbec448d4841830))
-* ensures versions have proper data ([0ba508a](https://github.com/payloadcms/payload/commit/0ba508a87efd0f88f922da894521cd3842dad103))
-* further sanitize serverURL to prevent undefined in admin routes ([#481](https://github.com/payloadcms/payload/issues/481)) ([24aa475](https://github.com/payloadcms/payload/commit/24aa4756401d36b524cd6febc5443cd9412ba344))
 * import path for createRichTextRelationshipPromise ([586cd4d](https://github.com/payloadcms/payload/commit/586cd4d6af5485116ebb299a5af3d24f5baeaa2e))
 * improperly typed local create method ([48aa27c](https://github.com/payloadcms/payload/commit/48aa27ce701e44561edf442ee6c248b007ecafcb))
-* improves version config sanitization ([fc24485](https://github.com/payloadcms/payload/commit/fc24485455157f8d370c5af9fbf5d18450549983))
 * mobile styling to not found page ([d3f88a1](https://github.com/payloadcms/payload/commit/d3f88a1bd9aeb1551d64b9ed975da5e69e5821bd))
 * new slate version types ([c5de01b](https://github.com/payloadcms/payload/commit/c5de01bfc48ca6793c1526499fe934d9ad8f0cc9))
 * optimizes relationship input search querying ([7e69fcb](https://github.com/payloadcms/payload/commit/7e69fcbc7d89012a7caff6e0e9013a9ad8a62a14))
 * prevents None from appearing in hasMany relationship select options ([cbf43fa](https://github.com/payloadcms/payload/commit/cbf43fa0d8ba50b7a9ef952f1693de6923068ffd))
 * rare crash with link rte element ([f5535f6](https://github.com/payloadcms/payload/commit/f5535f613ac4d876d040be74b45e105e0f4775a8))
-* removes required from versions status field ([03c8445](https://github.com/payloadcms/payload/commit/03c8445a6d8d6ded719de44227dbbe928200427f))
 * rte upload field population ([8327b5a](https://github.com/payloadcms/payload/commit/8327b5aae505a189a5b9617c3485d646b5f8b517))
 * type error in useField ([ef4e6d3](https://github.com/payloadcms/payload/commit/ef4e6d32a90215c07aa2c1e7217cf53558bfae97))
-* uses replace instead of push to autocreate a doc ([a7ecada](https://github.com/payloadcms/payload/commit/a7ecadaa52500af287da6b21c8df2675dbe83b43))
-* version where input type ([a5c8ea4](https://github.com/payloadcms/payload/commit/a5c8ea4e2e3e02dbbdb3429d9130eb109cec3258))
 
 
 ### Features
 
+* :tada: versions, drafts, & autosave!
 * [#458](https://github.com/payloadcms/payload/issues/458), provides field hooks with sibling data ([8e23a24](https://github.com/payloadcms/payload/commit/8e23a24f34ef7425bb4d43e96e869b255740c739))
-* abstracts revisions components for reuse in globals ([da5684d](https://github.com/payloadcms/payload/commit/da5684df27133b254eecd22fb3e0aad1910c382f))
 * add before and after login components ([#427](https://github.com/payloadcms/payload/issues/427)) ([5591eea](https://github.com/payloadcms/payload/commit/5591eeafca1aa6e8abcc2d8276f7478e00b75ef2))
-* add local api for versions on globals ([4072e7e](https://github.com/payloadcms/payload/commit/4072e7ee06bb1a4cc33d6dd2af024c8971157089))
 * add logMockCredentials email option ([ff33453](https://github.com/payloadcms/payload/commit/ff3345373630ca6913165284123a62269b3fa2c6))
 * add pagination argument to optimize graphql relationships and use in local api ([#482](https://github.com/payloadcms/payload/issues/482)) ([647db51](https://github.com/payloadcms/payload/commit/647db5122e7b7be7f032d50ccf332780d8203369))
 * adds a way to customize express.static options ([dbb3c50](https://github.com/payloadcms/payload/commit/dbb3c502227597ef4d04c9e5c8db6d2f51a8aac4))
 * adds admin.upload.collections[collection-name].fields to the RTE to save specific data on upload elements ([3adf44a](https://github.com/payloadcms/payload/commit/3adf44a24162e5adbcebdb0ca7d0d460d23c57eb))
-* adds autosave to versions table ([14e5d09](https://github.com/payloadcms/payload/commit/14e5d0977f4be61ebecf6aa67926cbc18960e9c6))
-* adds base revision fields ([6ed11a5](https://github.com/payloadcms/payload/commit/6ed11a55636df7abee4c859593c88179139c68c6))
 * adds indentation controls to rich text ([7df50f9](https://github.com/payloadcms/payload/commit/7df50f9bf9d4867e65bdd8cebdf43e0ab1737a63))
-* adds most recently published comparison doc ([1e093e1](https://github.com/payloadcms/payload/commit/1e093e1eee511bbb04c5652bc7a854df7d544258))
 * adds originalDoc to field access control ([c979513](https://github.com/payloadcms/payload/commit/c9795133b376d8159457a0a38784d0b53a549061))
 * adds path to GraphQL errors ([#457](https://github.com/payloadcms/payload/issues/457)) ([ad98b29](https://github.com/payloadcms/payload/commit/ad98b293983016db3c730112c9d2387de7bacb34))
 * adds recursion to richText field to populate relationship and upload nested fields ([42af22c](https://github.com/payloadcms/payload/commit/42af22c2a10de44555bfedf902e7b4a4c9b25d6b))
-* adds restore revisions to collections ([5eea398](https://github.com/payloadcms/payload/commit/5eea398e4340224db4792147fd3e3bcd4d44317f))
-* adds stepnav to revisions template ([a589877](https://github.com/payloadcms/payload/commit/a589877698ebe2fb2f8e7d0fd29c9dfe91237630))
 * allow empty string radio and select option values ([#479](https://github.com/payloadcms/payload/issues/479)) ([f14e187](https://github.com/payloadcms/payload/commit/f14e187545b759ac4623189d5e31f25382728cc0))
 * allows access control to prevent reading of drafts ([c38470c](https://github.com/payloadcms/payload/commit/c38470c7b2119cec6ff9a3efc89f087a5999bb66))
 * allows global access control to return query constraints ([c0150ae](https://github.com/payloadcms/payload/commit/c0150ae8465777a2be1b6bc496a5be30cf478f42))
 * allows select input to receive new options ([#435](https://github.com/payloadcms/payload/issues/435)) ([500fb1c](https://github.com/payloadcms/payload/commit/500fb1c5c41a55d35c41173d50a976388fd0bd1b))
-* allows selection of revisions in certain locales to compare ([f572230](https://github.com/payloadcms/payload/commit/f57223024adff8629f155ac719720fab38f4df64))
-* attempts to render rich text diffs more appropriately ([7bd60b5](https://github.com/payloadcms/payload/commit/7bd60b5a3d3a9be94e97264b5c507c1c781858af))
-* builds a way for multipart/form-data reqs to retain non-string values ([65b0ad7](https://github.com/payloadcms/payload/commit/65b0ad7f084a9c279a1e4fb799542f97c645653d))
 * builds a way for multipart/form-data reqs to retain non-string values ([4efc2cf](https://github.com/payloadcms/payload/commit/4efc2cf71c8ec4c452fea0febfd1156b37868739))
-* builds autosave into existing update operation ([de48f44](https://github.com/payloadcms/payload/commit/de48f4417a799ba5d971b8fb0278e48bec95d753))
-* builds global publishVersion ([7397d63](https://github.com/payloadcms/payload/commit/7397d6307345a06e6758cd1d6ac718c9bf79693c))
-* builds group and iterable diffs ([bddaefd](https://github.com/payloadcms/payload/commit/bddaefdae7ba81d0e42da85d8772e83e850c3eab))
-* builds remainder of diff field types ([a479770](https://github.com/payloadcms/payload/commit/a47977084f219b9ddc4f0e27899e9b3a56d7448a))
-* builds revert to saved, unpublish ([160ab54](https://github.com/payloadcms/payload/commit/160ab54b85d51e40b334040bd1b9089feaa9e27e))
-* builds revisions list view ([1920a93](https://github.com/payloadcms/payload/commit/1920a937b2d669019312db96c29519eb0d0a150a))
-* builds revisions models ([0686126](https://github.com/payloadcms/payload/commit/06861261fe89a58ded6db3948c70ef451195c52f))
-* creates global revisions ([ec82b92](https://github.com/payloadcms/payload/commit/ec82b923f32aa06342f83c37185b13aa4458c295))
-* disables LeaveWithoutSaving if autosave enabled ([01d07bc](https://github.com/payloadcms/payload/commit/01d07bcb9a69ecef84d5d1c7095cd890fa1359be))
 * enhances rich text upload with custom field API ([0e4eb90](https://github.com/payloadcms/payload/commit/0e4eb906f2881dca518fea6b41e460bc57da9801))
 * ensures field hooks run on all locales when locale=all ([c3f743a](https://github.com/payloadcms/payload/commit/c3f743af03bbde856dcd87114383f0b484c0b20f))
-* ensures revisions are created and deleted accordingly ([8df767e](https://github.com/payloadcms/payload/commit/8df767e9a23c660be43a83b9ed0ad1bd59f0bcd0))
 * exposes data arg within create and update access control ([73f418b](https://github.com/payloadcms/payload/commit/73f418bb5cadf73f683fe04ee94e4d24c8cfe96f))
 * exposes FieldWithPath type for reuse ([df3a836](https://github.com/payloadcms/payload/commit/df3a83634fcb64724ef239600e3af4fc295fee4f))
 * exposes useLocale for reuse ([bef0206](https://github.com/payloadcms/payload/commit/bef02062e769d1b0279c51af748f06d41c924c8a))
-* finishes revision restore ([0e093bf](https://github.com/payloadcms/payload/commit/0e093bf15edc2952a4a3db28f2a9bdb3d723d667))
-* functional autosave ([e910d89](https://github.com/payloadcms/payload/commit/e910d8938fd3ad18483c7965c71775ac8ee6a887))
-* further revisions views ([740d6b1](https://github.com/payloadcms/payload/commit/740d6b15e5487e5c8bf27d3089ffd9c3e5d3645c))
-* GraphQL version collection resolvers ([7cfb2f7](https://github.com/payloadcms/payload/commit/7cfb2f7f02a46b3883dc0f6cb914d3ef09c16ffe))
-* implements versions in global ui ([eb4f957](https://github.com/payloadcms/payload/commit/eb4f9572b834ecce245633fe6a8cd07e39c8f1d4))
-* implements versions in globals, adds tests ([a59b14b](https://github.com/payloadcms/payload/commit/a59b14bd8c3114fe5dcd7917f7020e87d3155959))
-* improve code coverage for graphql versions ([26b13a8](https://github.com/payloadcms/payload/commit/26b13a81c35be473367b01a317e10b0c84e0b5ee))
 * improves adding rich text voids to RTE ([966c3c6](https://github.com/payloadcms/payload/commit/966c3c647198569ba06013481a3b6fa9042b058d))
 * improves relationship field performance ([13318ff](https://github.com/payloadcms/payload/commit/13318ff3608a6be3dc7b86cc4e97155b26ef9df6))
 * improves rich text link ([2e9a4c7](https://github.com/payloadcms/payload/commit/2e9a4c7d717e3a08b2982b8c49eb358baf23da17))
-* improves versions UI count and list view ([e81ba84](https://github.com/payloadcms/payload/commit/e81ba84ca7d9202a439b402df0060a4c33fdefb9))
 * indexes filenames ([07c8ac0](https://github.com/payloadcms/payload/commit/07c8ac08e21689cc6a3a2a546e58cf544fb61dec))
-* merges back in logic for non draft versions and draft versions ([ed8abd9](https://github.com/payloadcms/payload/commit/ed8abd94e6ebe429190e193aafec0da08c645752))
-* optimization of unpublish, revert to saved ([4e773c7](https://github.com/payloadcms/payload/commit/4e773c71520815529c186235232d7197e0cfd214))
-* progress to Autosave ([13add58](https://github.com/payloadcms/payload/commit/13add5885db1970c22d8407aa50d18274de106ed))
-* progress to draft types ([b59bb0b](https://github.com/payloadcms/payload/commit/b59bb0bbc26577dde1fd3f8527f7554c0214badb))
-* progress to drafts ([be1da85](https://github.com/payloadcms/payload/commit/be1da8507a04737422e778b7c2406de891c0792c))
-* progress to restore revision ([2e946a0](https://github.com/payloadcms/payload/commit/2e946a0aacfb8dacb9a07906e1630d612a6e0b8e))
-* progress to revision restore ([210488b](https://github.com/payloadcms/payload/commit/210488ba4ebfc98c22a618de9db499bbf0a59a79))
-* progress to saving drafts manually ([71c49bc](https://github.com/payloadcms/payload/commit/71c49bc5f27446eedb75b715a20b86ed4a79570c))
-* removes mongoose required ([4fbddee](https://github.com/payloadcms/payload/commit/4fbddeeb462f1e10e9a56b72ae1f20e27ebc38bc))
-* renames revisions to versions ([3a71afb](https://github.com/payloadcms/payload/commit/3a71afbd373eecd52668532cb8f5847b8f94a0fa))
-* renders diffs ([245e12e](https://github.com/payloadcms/payload/commit/245e12e8b6a3aeada1080bca22380ed1e6be0242))
-* reorders version creation ([cd0e172](https://github.com/payloadcms/payload/commit/cd0e17270801e39024fc8b46340185d21702ed70))
-* revision access control config ([ac53bac](https://github.com/payloadcms/payload/commit/ac53bac2f4605e20490aef94729c8911708c3bed))
-* rich text indent PoC ([2deed8b](https://github.com/payloadcms/payload/commit/2deed8b1464931c4bc76a288923b307cf04b6a4a))
-* scaffold of individual Revision view ([40f93e9](https://github.com/payloadcms/payload/commit/40f93e9d64e89b9d48c76c3c419e5267aa695d09))
-* scaffolds admin revisions ([7253710](https://github.com/payloadcms/payload/commit/72537106a3bb2383f9fbed35e1842f9f6962d95b))
-* scaffolds drafts / autosave config ([066b593](https://github.com/payloadcms/payload/commit/066b593d8fa6ae0472a6adb7f9440d466f69c6a2))
-* scaffolds new revisions operations and rest routes ([4a445f0](https://github.com/payloadcms/payload/commit/4a445f03e808197536cc26b150f1bc25c4d1bd01))
-* scaffolds revisions tests ([fbbe590](https://github.com/payloadcms/payload/commit/fbbe590ea27b387067b03b46874e0b907bdd91cd))
+a79570c))
+* rich text indentation ([2deed8b](https://github.com/payloadcms/payload/commit/2deed8b1464931c4bc76a288923b307cf04b6a4a))
 * serverURL is no longer required ([#437](https://github.com/payloadcms/payload/issues/437)) ([dca90c4](https://github.com/payloadcms/payload/commit/dca90c4aa92dd0cc2084ba16249254c9259622c3))
-* styles multiple collection actions ([0463982](https://github.com/payloadcms/payload/commit/0463982b5bd3f80d4d9eb819524b65ed52089396))
-* tests & autosave improvements ([7220ff7](https://github.com/payloadcms/payload/commit/7220ff7a8ad284ccb421430ffa2ea97aaa1a7682))
 * updates dependencies ([3ca3f53](https://github.com/payloadcms/payload/commit/3ca3f533d07b644fa8a3d077932860e9f12318c2))
-* uses debounce in autosave ([ee9cd24](https://github.com/payloadcms/payload/commit/ee9cd24e102f391ade37c6d41a62dfb95a168e54))
-* uses DocumentInfo to fetch and maintain doc versions ([8f30c3b](https://github.com/payloadcms/payload/commit/8f30c3bfefaa1530ac086aba22d4b8e6bac8f97d))
-* wires up restore ([189bc21](https://github.com/payloadcms/payload/commit/189bc21e48b82c638c6924cf4652082898e251b3))
-* working autosave ([c62707c](https://github.com/payloadcms/payload/commit/c62707cd515c0a21da1dc2cd5a9c69f396d4baa0))
-* working drafts ([b00517e](https://github.com/payloadcms/payload/commit/b00517ec20851c7ce09cc73002f61cd808350d6c))
 
 ## [0.14.31-beta.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.14.31-beta.0) (2022-03-10)
 
