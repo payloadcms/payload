@@ -40,6 +40,7 @@ import CustomRouteWithDefaultTemplate from './client/components/views/CustomDefa
 import AfterDashboard from './client/components/AfterDashboard';
 import AfterNavLinks from './client/components/AfterNavLinks';
 import BeforeLogin from './client/components/BeforeLogin';
+// import CustomProvider from './client/components/CustomProvider';
 
 export default buildConfig({
   cookiePrefix: 'payload',
@@ -58,6 +59,7 @@ export default buildConfig({
     // disable: true,
     scss: path.resolve(__dirname, './client/scss/overrides.scss'),
     components: {
+      // providers: [CustomProvider, CustomProvider],
       routes: [
         {
           path: '/custom-minimal-route',

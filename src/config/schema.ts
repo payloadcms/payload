@@ -59,6 +59,7 @@ export default joi.object({
               sensitive: joi.bool(),
             }),
           ),
+        providers: joi.array().items(component),
         beforeDashboard: joi.array().items(component),
         afterDashboard: joi.array().items(component),
         beforeLogin: joi.array().items(component),

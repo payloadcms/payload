@@ -102,6 +102,7 @@ export type Config = {
     dateFormat?: string
     components?: {
       routes?: AdminRoute[]
+      providers?: React.ComponentType[]
       beforeDashboard?: React.ComponentType[]
       afterDashboard?: React.ComponentType[]
       beforeLogin?: React.ComponentType[]
