@@ -10,7 +10,7 @@ import { ModalProvider, ModalContainer } from '@faceless-ui/modal';
 import { ToastContainer, Slide } from 'react-toastify';
 import { ConfigProvider, AuthProvider } from '@payloadcms/config-provider';
 import { PreferencesProvider } from './components/utilities/Preferences';
-import { Provider } from './components/utilities/Provider';
+import { CustomProvider } from './components/utilities/CustomProvider';
 import { SearchParamsProvider } from './components/utilities/SearchParams';
 import { LocaleProvider } from './components/utilities/Locale';
 import Routes from './components/Routes';
@@ -29,27 +29,27 @@ const Index = () => (
       }}
       >
         <ScrollInfoProvider>
-          <Provider>
-            <Router>
-              <ModalProvider
-                classPrefix="payload"
-                zIndex={50}
-              >
-                <AuthProvider>
-                  <PreferencesProvider>
-                    <SearchParamsProvider>
-                      <LocaleProvider>
-                        <StepNavProvider>
+          <Router>
+            <ModalProvider
+              classPrefix="payload"
+              zIndex={50}
+            >
+              <AuthProvider>
+                <PreferencesProvider>
+                  <SearchParamsProvider>
+                    <LocaleProvider>
+                      <StepNavProvider>
+                        <CustomProvider>
                           <Routes />
-                        </StepNavProvider>
-                      </LocaleProvider>
-                    </SearchParamsProvider>
-                    <ModalContainer />
-                  </PreferencesProvider>
-                </AuthProvider>
-              </ModalProvider>
-            </Router>
-          </Provider>
+                        </CustomProvider>
+                      </StepNavProvider>
+                    </LocaleProvider>
+                  </SearchParamsProvider>
+                  <ModalContainer />
+                </PreferencesProvider>
+              </AuthProvider>
+            </ModalProvider>
+          </Router>
         </ScrollInfoProvider>
       </WindowInfoProvider>
     </ConfigProvider>
