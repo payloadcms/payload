@@ -8,8 +8,8 @@ import { error } from './utils/log'
     await main.init()
   } catch (e) {
     handleException(e)
-    error(`An error has occurred: ${e && e.message}`)
+    error(`An error has occurred: ${e instanceof Error ? e.message : e}`)
   } finally {
-    trx.finish()
+    trx?.finish()
   }
 })()

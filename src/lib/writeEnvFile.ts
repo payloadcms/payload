@@ -15,7 +15,9 @@ export async function writeEnvFile(
     success('.env file created')
   } catch (err) {
     error('Unable to write .env file')
-    error(err)
+    if (err instanceof Error) {
+      error(err.message)
+    }
     process.exit(1)
   }
 }
