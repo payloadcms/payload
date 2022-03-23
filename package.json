@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "jest",
-    "prepublish": "yarn test && yarn build"
+    "prepublishOnly": "yarn test && yarn build"
   },
   "files": [
     "package.json",
