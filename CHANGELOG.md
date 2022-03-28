@@ -1,3 +1,11 @@
+## [0.15.1](https://github.com/payloadcms/payload/compare/v0.15.0...v0.15.1) (2022-03-28)
+
+
+### Features
+
+* builds a way to inject custom React providers into admin UI ([5a7e8a9](https://github.com/payloadcms/payload/commit/5a7e8a980be4e93f2503d8d007019948199a4867))
+* export Plugin type from config types ([#491](https://github.com/payloadcms/payload/issues/491)) ([45f7011](https://github.com/payloadcms/payload/commit/45f70114e6664942228b46373843879c06ab8211))
+
 # [0.15.0](https://github.com/payloadcms/payload/compare/v0.14.0...v0.15.0) (2022-03-16)
 
 ### BREAKING CHANGES
