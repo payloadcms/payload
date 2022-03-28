@@ -10,6 +10,7 @@ import { ModalProvider, ModalContainer } from '@faceless-ui/modal';
 import { ToastContainer, Slide } from 'react-toastify';
 import { ConfigProvider, AuthProvider } from '@payloadcms/config-provider';
 import { PreferencesProvider } from './components/utilities/Preferences';
+import { CustomProvider } from './components/utilities/CustomProvider';
 import { SearchParamsProvider } from './components/utilities/SearchParams';
 import { LocaleProvider } from './components/utilities/Locale';
 import Routes from './components/Routes';
@@ -38,7 +39,9 @@ const Index = () => (
                   <SearchParamsProvider>
                     <LocaleProvider>
                       <StepNavProvider>
-                        <Routes />
+                        <CustomProvider>
+                          <Routes />
+                        </CustomProvider>
                       </StepNavProvider>
                     </LocaleProvider>
                   </SearchParamsProvider>

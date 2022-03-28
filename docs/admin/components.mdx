@@ -33,13 +33,14 @@ You can override a set of admin panel-wide components by providing a component t
 | **`graphics.Icon`**   | Used as a graphic within the `Nav` component. Often represents a condensed version of a full logo. |
 | **`graphics.Logo`**   | The full logo to be used in contexts like the `Login` view. |
 | **`routes`**          | Define your own routes to add to the Payload Admin UI. [More](#custom-routes) |
+| **`providers`**       | Define your own provider components that will wrap the Payload Admin UI. [More](#custom-providers) |
 
 #### Full example:
 
 `payload.config.js`
 ```js
 import { buildConfig } from 'payload/config';
-import { MyCustomNav, MyCustomLogo, MyCustomIcon, MyCustomAccount, MyCustomDashboard } from './customComponents.js';
+import { MyCustomNav, MyCustomLogo, MyCustomIcon, MyCustomAccount, MyCustomDashboard, MyProvider } from './customComponents.js';
 
 export default buildConfig({
   admin: {
@@ -52,7 +53,8 @@ export default buildConfig({
       views: {
         Account: MyCustomAccount,
         Dashboard: MyCustomDashboard,
-      }
+      },
+      providers: [MyProvider],
     }
   }
 })
@@ -151,6 +153,12 @@ You can find examples of custom route views in the [Payload source code `/demo/c
 1. A custom view that uses the `MinimalTemplate` - which is just a centered template used for things like logging in or out
 
 To see how to pass in your custom views to create custom routes of your own, take a look at the `admin.components.routes` property of the [Payload demo config](https://github.com/payloadcms/payload/blob/master/demo/payload.config.ts).
+
+## Custom providers
+
+As your admin customizations gets more complex you may want to share state between fields or other components. You can add custom providers to do add your own context to any Payload app for use in other custom components within the admin panel. Within your config add `admin.components.providers`, these can be used to share context or provide other custom functionality. Read the [React context](https://reactjs.org/docs/context.html) docs to learn more.
+
+<Banner>Remember to pass the `children` prop in to your provider component and return it within to render the admin UI</Banner>
 
 ### Styling Custom Components
 
