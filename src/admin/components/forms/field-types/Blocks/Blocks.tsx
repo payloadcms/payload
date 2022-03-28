@@ -1,6 +1,4 @@
-import React, {
-  useEffect, useReducer, useCallback, useState,
-} from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
 import { usePreferences } from '../../../utilities/Preferences';
@@ -59,15 +57,9 @@ const Blocks: React.FC<Props> = (props) => {
   const formContext = useForm();
   const { dispatchFields } = formContext;
 
-  const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(
-      value,
-      {
-        minRows, maxRows, labels, blocks, required,
-      },
-    );
-    return validationResult;
-  }, [validate, maxRows, minRows, labels, blocks, required]);
+  const memoizedValidate = useCallback((value, options) => {
+    return validate(value, options);
+  }, [validate]);
 
   const [disableFormData, setDisableFormData] = useState(false);
 
@@ -87,7 +79,7 @@ const Blocks: React.FC<Props> = (props) => {
   const addRow = useCallback(async (rowIndex, blockType) => {
     const block = blocks.find((potentialBlock) => potentialBlock.slug === blockType);
 
-    const subFieldState = await buildStateFromSchema(block.fields);
+    const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields });
 
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
     dispatchRows({ type: 'ADD', rowIndex, blockType });

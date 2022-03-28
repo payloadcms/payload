@@ -1,11 +1,12 @@
-import { Field as FieldConfig, Condition } from '../../../../fields/config/types';
+import { Field as FieldConfig, Condition, Validate } from '../../../../fields/config/types';
 
 export type Field = {
   value: unknown
+  field: Field
   initialValue: unknown
   errorMessage?: string
   valid: boolean
-  validate?: (val: unknown) => Promise<boolean | string> | boolean | string
+  validate?: Validate
   disableFormData?: boolean
   ignoreWhileFlattening?: boolean
   condition?: Condition
@@ -38,6 +39,7 @@ export type Props = {
   initialData?: Data
   waitForAutocomplete?: boolean
   log?: boolean
+  validationOperation?: 'create' | 'update'
 }
 
 export type SubmitOptions = {

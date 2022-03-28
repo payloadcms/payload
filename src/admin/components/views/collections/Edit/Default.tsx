@@ -83,6 +83,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
           onSuccess={onSave}
           disabled={!hasSavePermission}
           initialState={initialState}
+          validationOperation={isEditing ? 'update' : 'create'}
         >
           <div className={`${baseClass}__main`}>
             <Meta

@@ -1,11 +1,19 @@
 import validationPromise from './validationPromise';
 import accessPromise from './accessPromise';
 import hookPromise from './hookPromise';
-import { Field, fieldHasSubFields, fieldIsArrayType, fieldIsBlockType, fieldAffectsData, HookName } from './config/types';
+import {
+  Field,
+  fieldHasSubFields,
+  fieldIsArrayType,
+  fieldIsBlockType,
+  fieldAffectsData,
+  HookName,
+} from './config/types';
 import { Operation } from '../types';
 import { PayloadRequest } from '../express/types';
 import { Payload } from '..';
 import richTextRelationshipPromise from './richText/relationshipPromise';
+import getSiblingData from '../admin/components/forms/Form/getSiblingData';
 
 type Arguments = {
   fields: Field[]
@@ -374,9 +382,13 @@ const traverseFields = (args: Arguments): void => {
           hook,
           newData: { [field.name]: newRowCount },
           existingData: { [field.name]: existingRowCount },
+          siblingData: getSiblingData(data, field.name),
           field,
           path,
           skipValidation: skipValidationFromHere,
+          user: req.user,
+          operation,
+          id,
         }));
       } else if (fieldAffectsData(field)) {
         validationPromises.push(() => validationPromise({
@@ -384,9 +396,13 @@ const traverseFields = (args: Arguments): void => {
           hook,
           newData: data,
           existingData: originalDoc,
+          siblingData: getSiblingData(data, field.name),
           field,
           path,
           skipValidation: skipValidationFromHere,
+          user: req.user,
+          operation,
+          id,
         }));
       }
     }

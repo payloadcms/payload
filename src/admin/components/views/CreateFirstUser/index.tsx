@@ -65,6 +65,7 @@ const CreateFirstUser: React.FC<Props> = (props) => {
         method="post"
         redirect={admin}
         action={`${serverURL}${api}/${userSlug}/first-register`}
+        validationOperation="create"
       >
         <NegativeFieldGutterProvider allow>
           <RenderFields
