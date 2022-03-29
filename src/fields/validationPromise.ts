@@ -1,5 +1,6 @@
-import { User } from 'payload/auth';
-import { Operation } from 'payload/types';
+import merge from 'deepmerge';
+import { User } from '../auth';
+import { Operation } from '../types';
 import { HookName, FieldAffectingData } from './config/types';
 
 type Arguments = {
@@ -7,9 +8,10 @@ type Arguments = {
   field: FieldAffectingData
   path: string
   errors: {message: string, field: string}[]
-  newData: Record<string, unknown>
-  existingData: Record<string, unknown>
-  siblingData: Record<string, unknown>
+  data: Record<string, unknown>
+  fullData: Record<string, unknown>
+  originalDoc: Record<string, unknown>
+  fullOriginalDoc: Record<string, unknown>
   id?: string | number
   skipValidation?: boolean
   user: User
@@ -19,9 +21,10 @@ type Arguments = {
 const validationPromise = async ({
   errors,
   hook,
-  newData,
-  existingData,
-  siblingData,
+  originalDoc,
+  fullOriginalDoc,
+  data,
+  fullData,
   id,
   field,
   path,
@@ -33,16 +36,15 @@ const validationPromise = async ({
 
   const hasCondition = field.admin && field.admin.condition;
   const shouldValidate = field.validate && !hasCondition;
-  const dataToValidate = newData || existingData;
 
-  let valueToValidate = newData?.[field.name];
-  if (valueToValidate === undefined) valueToValidate = existingData?.[field.name];
+  let valueToValidate = data?.[field.name];
+  if (valueToValidate === undefined) valueToValidate = originalDoc?.[field.name];
   if (valueToValidate === undefined) valueToValidate = field.defaultValue;
 
   const result = shouldValidate ? await field.validate(valueToValidate, {
     field,
-    data: dataToValidate,
-    siblingData,
+    data: merge(fullOriginalDoc, fullData),
+    siblingData: merge(originalDoc, data),
     id,
     operation,
     user,

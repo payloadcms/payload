@@ -86,7 +86,6 @@ const Login: React.FC = () => {
         onSuccess={onSuccess}
         method="post"
         action={`${serverURL}${api}/${userSlug}/login`}
-        validationOperation="update"
       >
         <Email
           label="Email Address"

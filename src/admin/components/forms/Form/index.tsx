@@ -16,13 +16,13 @@ import reduceFieldsToValues from './reduceFieldsToValues';
 import getSiblingDataFunc from './getSiblingData';
 import getDataByPathFunc from './getDataByPath';
 import wait from '../../../../utilities/wait';
+import { Field, FieldAffectingData } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
 import { Context as FormContextType, Props, SubmitOptions } from './types';
-
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
-import { Field, FieldAffectingData } from '../../../../fields/config/types';
+import { useOperation } from '../../utilities/OperationProvider';
 
 const baseClass = 'form';
 
@@ -42,13 +42,13 @@ const Form: React.FC<Props> = (props) => {
     initialData, // values only, paths are required as key - form should build initial state as convenience
     waitForAutocomplete,
     log,
-    validationOperation,
   } = props;
 
   const history = useHistory();
   const locale = useLocale();
   const { refreshCookie, user } = useAuth();
   const { id } = useDocumentInfo();
+  const operation = useOperation();
 
   const [modified, setModified] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -91,7 +91,7 @@ const Form: React.FC<Props> = (props) => {
             siblingData: contextRef.current.getSiblingData(path),
             user,
             id,
-            operation: validationOperation,
+            operation,
           });
         }
 
@@ -110,7 +110,7 @@ const Form: React.FC<Props> = (props) => {
     dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState });
 
     return isValid;
-  }, [contextRef, id, user, validationOperation]);
+  }, [contextRef, id, user, operation]);
 
   const submit = useCallback(async (options: SubmitOptions = {}, e): Promise<void> => {
     const {
@@ -324,10 +324,10 @@ const Form: React.FC<Props> = (props) => {
   }, [contextRef]);
 
   const reset = useCallback(async (fieldSchema: Field[], data: unknown) => {
-    const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation: validationOperation });
+    const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation });
     contextRef.current = { ...initContextState } as FormContextType;
     dispatchFields({ type: 'REPLACE_STATE', state });
-  }, [id, user, validationOperation]);
+  }, [id, user, operation]);
 
   contextRef.current.dispatchFields = dispatchFields;
   contextRef.current.submit = submit;

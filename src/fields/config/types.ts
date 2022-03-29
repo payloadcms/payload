@@ -51,16 +51,16 @@ export type Labels = {
   plural: string;
 };
 
-export type ValidateOptions<F, T, S> = {
+export type ValidateOptions<T, S, F> = {
   field: F
   data: Partial<T>
   siblingData: Partial<S>
   id?: string | number
   user?: Partial<User>
-  operation: Operation
+  operation?: Operation
 }
 
-export type Validate<F = any, T = any, S = any, TT = any> = (value?: T, options?: ValidateOptions<F, S, TT>) => string | true | Promise<string | true>;
+export type Validate<T = any, S = any, F = any, TT = any> = (value?: T, options?: ValidateOptions<F, S, TT>) => string | true | Promise<string | true>;
 
 export type OptionObject = {
   label: string

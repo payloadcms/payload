@@ -13,7 +13,6 @@ import { Operation } from '../types';
 import { PayloadRequest } from '../express/types';
 import { Payload } from '..';
 import richTextRelationshipPromise from './richText/relationshipPromise';
-import getSiblingData from '../admin/components/forms/Form/getSiblingData';
 
 type Arguments = {
   fields: Field[]
@@ -380,9 +379,10 @@ const traverseFields = (args: Arguments): void => {
         validationPromises.push(() => validationPromise({
           errors,
           hook,
-          newData: { [field.name]: newRowCount },
-          existingData: { [field.name]: existingRowCount },
-          siblingData: getSiblingData(data, field.name),
+          data: { [field.name]: newRowCount },
+          fullData,
+          originalDoc: { [field.name]: existingRowCount },
+          fullOriginalDoc,
           field,
           path,
           skipValidation: skipValidationFromHere,
@@ -394,9 +394,10 @@ const traverseFields = (args: Arguments): void => {
         validationPromises.push(() => validationPromise({
           errors,
           hook,
-          newData: data,
-          existingData: originalDoc,
-          siblingData: getSiblingData(data, field.name),
+          data,
+          fullData,
+          originalDoc,
+          fullOriginalDoc,
           field,
           path,
           skipValidation: skipValidationFromHere,

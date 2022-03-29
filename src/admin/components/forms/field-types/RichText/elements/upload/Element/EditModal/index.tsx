@@ -80,7 +80,6 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
           <Form
             onSubmit={handleUpdateEditData}
             initialState={initialState}
-            validationOperation="update"
           >
             <RenderFields
               readOnly={false}

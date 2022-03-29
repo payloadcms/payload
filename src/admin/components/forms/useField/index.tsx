@@ -6,7 +6,7 @@ import { useFormProcessing, useFormSubmitted, useFormModified, useForm } from '.
 import useDebounce from '../../../hooks/useDebounce';
 import { Options, FieldType } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import { useRenderedFields } from '../RenderFields';
+import { useOperation } from '../../utilities/OperationProvider';
 
 const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const {
@@ -24,11 +24,13 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const modified = useFormModified();
   const { user } = useAuth();
   const { id } = useDocumentInfo();
-  const { operation } = useRenderedFields();
+  const operation = useOperation();
 
   const {
     dispatchFields,
     getField,
+    getData,
+    getSiblingData,
     setModified,
   } = formContext || {};
 
@@ -65,8 +67,8 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       id,
       field: field?.field,
       user,
-      data: formContext.getData(),
-      siblingData: formContext.getSiblingData(path),
+      data: getData(),
+      siblingData: getSiblingData(path),
       operation,
     };
 
@@ -87,7 +89,8 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     disableFormData,
     dispatchFields,
     field,
-    formContext,
+    getData,
+    getSiblingData,
     id,
     ignoreWhileFlattening,
     initialValue,
