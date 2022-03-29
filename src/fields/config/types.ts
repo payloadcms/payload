@@ -59,7 +59,7 @@ export type ValidateOptions<T, S, F> = {
   operation?: Operation
 } & F;
 
-export type Validate<T = any, S = any, F = any> = (value?: T, options?: ValidateOptions<F, S, F>) => string | true | Promise<string | true>;
+export type Validate<T = any, S = any, F = any> = (value?: T, options?: ValidateOptions<F, S, Partial<F>>) => string | true | Promise<string | true>;
 
 export type OptionObject = {
   label: string

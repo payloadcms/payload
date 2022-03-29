@@ -9,7 +9,7 @@ import {
 } from '../../../../fields/config/types';
 import { Fields, Field, Data } from './types';
 
-const buildValidationPromise = async (fieldState: Field, options: ValidateOptions<unknown, unknown>) => {
+const buildValidationPromise = async (fieldState: Field, options: ValidateOptions<unknown, unknown, unknown>) => {
   const validatedFieldState = fieldState;
 
   let validationResult: boolean | string = true;

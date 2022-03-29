@@ -10,7 +10,7 @@ import GenerateConfirmation from '../../../../elements/GenerateConfirmation';
 
 const path = 'apiKey';
 const baseClass = 'api-key';
-const validate = (val) => text(val, { field: { minLength: 24, maxLength: 48 }, data: {}, siblingData: {} });
+const validate = (val) => text(val, { minLength: 24, maxLength: 48, data: {}, siblingData: {} });
 
 const APIKey: React.FC = () => {
   const [initialAPIKey, setInitialAPIKey] = useState(null);
